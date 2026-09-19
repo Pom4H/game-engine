@@ -50,6 +50,7 @@ export interface EnvironmentState {
 }
 
 export function resolveEnvironment(spec:EnvironmentSpec={}):EnvironmentState{return resolveEnvironmentAt(spec,0);}
+export function environmentTimeScale(spec:EnvironmentSpec={}):number{const hoursPerSecond=Math.max(0,finite(spec.clock?.hoursPerSecond,0));return hoursPerSecond>0?hoursPerSecond*3600:1;}
 
 export function resolveEnvironmentAt(spec:EnvironmentSpec={},timeSeconds=0):EnvironmentState{
   const precipitation=spec.precipitation??'occasional',clock=spec.clock??{},startHour=wrapHour(clock.startHour??12),hoursPerSecond=Math.max(0,finite(clock.hoursPerSecond,0));
