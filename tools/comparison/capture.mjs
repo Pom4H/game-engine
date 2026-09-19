@@ -48,5 +48,5 @@ try{
   console.log('recorded',name,JSON.stringify(inspection));
  }
 }finally{
- socket?.close();for(const entry of pending.values())clearTimeout(entry.timer);child.kill();await Promise.race([once(child,'exit'),new Promise(r=>setTimeout(r,1000))]);await new Promise(r=>server.close(r));await rm(profile,{recursive:true,force:true});
+ socket?.close();for(const entry of pending.values())clearTimeout(entry.timer);child.kill();await Promise.race([once(child,'exit'),new Promise(r=>setTimeout(r,1000))]);server.closeAllConnections();await new Promise(r=>server.close(r));await rm(profile,{recursive:true,force:true});
 }
