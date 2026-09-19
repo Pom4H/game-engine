@@ -9,6 +9,11 @@ test('scene runs extension cadence and publishes committed resources',()=>{
  scene.use({id:'observer',phase:'publish',rateHz:60,reads:['counter'],writes:[],run:c=>{published=c.resources.get('counter');}});
  for(let i=0;i<60;i++)scene.step();assert.equal(calls,30);assert.equal(published,30);assert.ok(scene.lastExecution.includes('engine:physics'));assert.ok(scene.systemRuntime.actions.includes('surfaces'));
 });
+test('built-in resource graph exposes surface-state and no winter resource',()=>{
+ const scene=new Scene(empty),modules=scene.kernel.scheduler.plan(1).flatMap(batch=>batch.modules);
+ assert.ok(modules.some(module=>module.reads.includes('surface-state')||module.writes.includes('surface-state')));
+ assert.equal(modules.some(module=>module.reads.includes('winter')||module.writes.includes('winter')),false);
+});
 test('kernel commits producer before consumer independent of alphabetical IDs',()=>{
  const kernel=new EngineKernel();let seen;
  kernel.use({id:'a-reader',phase:'simulate',rateHz:60,reads:['value'],writes:[],after:['z-writer'],run:c=>{seen=c.nested.value;}});
