@@ -19,8 +19,8 @@ struct U {
   color: vec4<f32>,
   surface: vec4<f32>,     // moss, wetness, roughness, darkening
   weather: vec4<f32>,     // dirt, wear, seed, material kind
-  winter: vec4<f32>,      // snow depth m, water depth m, slush, ice depth m
-  winter2: vec4<f32>,     // puddle, track melt, body snow, rear snow
+  surfacePhase: vec4<f32>, // snow depth m, water depth m, slush, ice depth m
+  surfaceDynamics: vec4<f32>, // puddle, track melt, body deposition, rear deposition
   environment: vec4<f32>, // air C, sunlight, hour/24, surface-use code
   motion: vec4<f32>,      // dir x, dir z, road dirt, body wetness
   camera: vec4<f32>,
@@ -124,10 +124,10 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let cell=clamp(vec2<i32>(floor(fieldUV*u.fieldSize.xy)),vec2<i32>(0),vec2<i32>(u.fieldSize.xy)-vec2<i32>(1));
   let local=textureLoad(fieldTexture,cell,0);
   let hasField=u.fieldSize.z>0.5;
-  let track=select(tyreTracks(in.worldPos.z)*u.winter2.y,local.x,hasField);
-  let snowDepth=select(u.winter.x,local.y,hasField);
-  let waterDepth=select(u.winter.y,local.z,hasField);
-  let slush=select(u.winter.z,local.w,hasField);
+  let track=select(tyreTracks(in.worldPos.z)*u.surfaceDynamics.y,local.x,hasField);
+  let snowDepth=select(u.surfacePhase.x,local.y,hasField);
+  let waterDepth=select(u.surfacePhase.y,local.z,hasField);
+  let slush=select(u.surfacePhase.z,local.w,hasField);
 
   let geometricNormal=normalize(in.normal);
   var n=geometricNormal;
@@ -238,7 +238,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   // Moving bodies accumulate fresh snow on upward and rear-facing surfaces.
   let motionDir=normalize(vec3<f32>(u.motion.x,0.0,u.motion.y)+vec3<f32>(0.0001,0.0,0.0));
   let rearFacing=smoothstep(0.05,0.9,dot(n,-motionDir));
-  let bodySnow=clamp(u.winter2.z*upward+u.winter2.w*rearFacing,0.0,1.0);
+  let bodySnow=clamp(u.surfaceDynamics.z*upward+u.surfaceDynamics.w*rearFacing,0.0,1.0);
   albedo=mix(albedo,vec3<f32>(0.91,0.945,0.98),bodySnow*smoothstep(.18,.78,fbm(in.worldPos*4.4+seed)+.25));
 
   if(u.texture.w>.5){
@@ -252,7 +252,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   // Water is also state, not a material override. Procedural depressions localize
   // the scalar water volume into shallow puddles.
   let depression=1.0-fbm(in.worldPos*0.58+seed*6.0);
-  let puddleMask=u.winter2.x*smoothstep(0.7-u.winter2.x*.35,0.9-u.winter2.x*.12,depression)*upward;
+  let puddleMask=u.surfaceDynamics.x*smoothstep(0.7-u.surfaceDynamics.x*.35,0.9-u.surfaceDynamics.x*.12,depression)*upward;
   let wetness=clamp(u.surface.y+u.motion.w+waterDepth/0.006+puddleMask*.5,0.0,1.0);
   albedo*=1.0-u.surface.w-wetness*.24;
 
@@ -291,7 +291,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     let p=f.reflectionVP*vec4<f32>(in.worldPos,1);let uv=p.xy/p.w*vec2<f32>(.5,-.5)+.5;
     let ripple=vec2<f32>(noise3(in.worldPos*vec3<f32>(7,1,3))-.5,noise3(in.worldPos*vec3<f32>(3,1,9)+9.0)-.5)*.000075;let blur=vec2<f32>(.0011,.0021)*(roughness+.2);var reflection=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.28;
     for(var k=0;k<6;k++){let a=f32(k)*1.0472;reflection+=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple+vec2<f32>(cos(a),sin(a))*blur,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.12;}
-    let icePatch=smoothstep(.58,.77,noise3(in.worldPos*vec3<f32>(.35,.1,1.1)))*clamp(u.winter.w/.002,0.0,1.0);
+    let icePatch=smoothstep(.58,.77,noise3(in.worldPos*vec3<f32>(.35,.1,1.1)))*clamp(u.surfacePhase.w/.002,0.0,1.0);
     let fres=.02+.96*pow(1.0-nv,5.0);
     color=mix(color,reflection,fres*max(waterCoverage,icePatch*.45));
   }
@@ -443,11 +443,11 @@ export class WebGPURenderer implements Renderer{
   inspect():RenderStats{return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*2+this.objects.size+4,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+15,errors:[...this.errors]};}
   dispose():void{if(this.disposed)return;this.disposed=true;this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const target of [this.depth,this.hdr,this.hdrMS,this.normal,this.normalMS,this.specular,this.specularMS,this.bloomA,this.bloomB,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();}
   private prepare(entity:RuntimeEntity,vp:Mat4):void{
-    const field=this.lastScene?.winter.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url),model=this.model(entity),uniform=new Float32Array(116),surface=entity.material.surface;
+    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url),model=this.model(entity),uniform=new Float32Array(116),surface=entity.material.surface;
     this.mesh(entity.mesh!);
-    const winter=this.lastScene?.winter.surface(entity.id),body=this.lastScene?.winter.body(entity.id),environment=this.lastScene?.environment;
+    const surfaceState=this.lastScene?.surfaces.surface(entity.id),body=this.lastScene?.surfaces.body(entity.id),environment=this.lastScene?.environment;
     uniform.set(multiply4(vp,model));uniform.set(model,16);uniform.set(entity.material.color,32);uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
-    uniform.set([winter?.snowDepthM??0,winter?.waterDepthM??0,winter?.slush??0,winter?.iceDepthM??0],44);uniform.set([winter?.puddle??0,winter?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([environment?.temperatureC??18,environment?.sunlight??.65,(environment?.hour??12)/24,surfaceUseCode(entity.environmental?.surfaceUse)],52);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],56);uniform.set([...this.lastCamera,1],60);
+    uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([environment?.temperatureC??18,environment?.sunlight??.65,(environment?.hour??12)/24,surfaceUseCode(entity.environmental?.surfaceUse)],52);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],56);uniform.set([...this.lastCamera,1],60);
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],96);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],100);
     uniform.set([entity.material.roughness??-1,entity.material.metalness??(entity.material.kind==='steel'?.6:0),entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,0],104);uniform.set([...(entity.material.emissive??[0,0,0]),0],108);
     const texture=entity.material.texture;uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture&&this.surfaceTextures.get(texture.url)?1:0],112);
