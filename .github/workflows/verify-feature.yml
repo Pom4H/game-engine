@@ -26,3 +26,8 @@ jobs:
           bun-version: 1.4.2
       - run: bun install
       - run: bun run ci
+      - name: WebGPU semantic-material smoke
+        run: |
+          if not exist artifacts mkdir artifacts
+          node dist/cli.js render examples/window-gauntlet.ts --time 0.8 --width 1280 --height 720 --out artifacts/semantic-materials.png
+      - run: node tools/check-png.mjs artifacts/semantic-materials.png
