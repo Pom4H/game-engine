@@ -124,3 +124,32 @@ test('particle reuse verifies object ownership instead of trusting a generated-l
  const id=[...scene.entities.keys()].find(id=>id.includes(':spray:'));assert.ok(id);scene.remove(id);const authored=scene.add({id,position:[4,5,6],mesh:{kind:'box'}});
  assert.throws(()=>contacts.step(1/60,5/60,[],[wheel('wheel',0)]),/collides with an authored entity/);assert.deepEqual(authored.position,[4,5,6]);contacts.dispose();assert.equal(scene.entities.get(id),authored);
 });
+
+
+test('bound wheel contact work distinguishes rolling from locked slip without coarse body double-counting',()=>{
+ const radius=.35,speed=3;
+ const scene=new Scene({version:1,ground:-100,environment:{temperatureC:-2,snowfall:'none',sunlight:0,precipitation:'arid'},entities:[
+  {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[18,.2,6]},material:{kind:'asphalt'},environmental:{surfaceUse:'road',snowDepthM:.02}},
+  {id:'rolling',position:[-2,radius,-1],mesh:{kind:'sphere',radius},body:{motion:'kinematic',mass:100,velocity:[speed,0,0],angularVelocity:[0,0,-speed/radius],friction:.7}},
+  {id:'locked',position:[-2,radius,1],mesh:{kind:'sphere',radius},body:{motion:'kinematic',mass:100,velocity:[speed,0,0],angularVelocity:[0,0,0],friction:.7}},
+ ]});
+ scene.contacts.addWheelContact('rolling',{radius,lateral:[0,0,1]});
+ scene.contacts.addWheelContact('locked',{radius,lateral:[0,0,1]});
+ for(let i=0;i<60;i++)scene.step(1/60);
+ const rolling=scene.surfaces.sample('road',0,-1),locked=scene.surfaces.sample('road',0,1);
+ assert.ok(rolling&&locked);
+ assert.ok(locked.trackMelt>rolling.trackMelt*10,`locked tyre must deposit much more slip work: rolling=${rolling.trackMelt} locked=${locked.trackMelt}`);
+ assert.ok(locked.trafficHeatC>rolling.trafficHeatC*10,`locked tyre must heat its local patch more: rolling=${rolling.trafficHeatC} locked=${locked.trafficHeatC}`);
+ assert.ok(locked.dirt>=rolling.dirt);
+});
+
+test('removing a wheel binding releases the body back to generic surface work',()=>{
+ const radius=.35,scene=new Scene({version:1,ground:-100,environment:{temperatureC:-2,snowfall:'none',sunlight:0,precipitation:'arid'},entities:[
+  {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[12,.2,4]},material:{kind:'asphalt'},environmental:{surfaceUse:'road',snowDepthM:.02}},
+  {id:'wheel',position:[-2,radius,0],mesh:{kind:'sphere',radius},body:{motion:'kinematic',mass:100,velocity:[2,0,0],angularVelocity:[0,0,-2/radius],friction:.7}},
+ ]});
+ scene.contacts.addWheelContact('wheel',{radius});for(let i=0;i<30;i++)scene.step(1/60);
+ const before=scene.surfaces.surface('road').trackMelt;
+ scene.contacts.removeWheelContact('wheel');for(let i=0;i<30;i++)scene.step(1/60);
+ assert.ok(scene.surfaces.surface('road').trackMelt>before,'unclaimed moving body should re-enter the generic fallback contact path');
+});
