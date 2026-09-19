@@ -20,11 +20,11 @@ export function evaluateFracture(contact:ContactCandidate):{decision:ContactDeci
     [contact.b,contact.a,[-contact.normal[0],-contact.normal[1],-contact.normal[2]]],
   ];
   for(const [target,other,normal] of candidates){
-    if(!target.material.brittle||!target.fracturable)continue;
+    if(!target.material.mechanical.brittle||!target.fracturable)continue;
     const thickness=thicknessAlong(target,normal),impactRadius=contactRadius(other);
     const planeRadius=planarRadius(target,normal),crackRadius=Math.min(planeRadius,Math.max(.06,impactRadius*2.5,thickness*3));
     const fractureArea=Math.PI*crackRadius*crackRadius;
-    const energyDensity=.5*target.material.failureStressPa*target.material.failureStrain;
+    const energyDensity=.5*target.material.mechanical.failureStressPa*target.material.mechanical.failureStrain;
     // Mounted plates consume more than the ideal crack-surface energy because a finite volume unloads elastically.
     const requiredEnergy=Math.max(.02,energyDensity*fractureArea*thickness);
     if(contact.normalEnergy+1e-9<requiredEnergy)continue;

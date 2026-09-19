@@ -50,6 +50,12 @@ but cannot make those commands visible to later modules in that run.
 
 ## Physical and environmental state
 
+Material identity is data, not a renderer or physics switch. Each `PhysicalMaterial`
+publishes mechanical, thermal, optical, acoustic and surface properties. Fracture,
+thermal response, default PBR projection and contact acoustics consume those
+properties directly. Material names may select specialized microstructure shading,
+but they must not own physical laws.
+
 The backend has sphere/AABB contact, angular rigid-body motion with approximate
 box/sphere inertia, friction, restitution, spatial hashing and horizontal support
 manifolds. Horizontal surfaces invoke the same material failure law as other
@@ -59,8 +65,10 @@ momentum. Polygon-prism render geometry still uses approximate collision inertia
 
 `SurfaceEnvironmentSystem` owns bounded physical state grids on exposed surfaces.
 Snow, water, ice and slush are phases of one surface state rather than separate
-engine systems. The same state is the extension point for mud, dust, moss, heat,
-wear and other material/environment consequences. Supported contact work updates
+engine systems. Wetness, moss, dirt, wear, roughness, acoustic damping and darkening
+are projections of that same evolving record rather than a second renderer-owned
+surface state. The same state is the extension point for mud, dust and additional
+material/environment consequences. Supported contact work updates
 only cells under the footprint; unsupported motion contributes no work. Physics,
 rendering and audio consume the same state instead of maintaining parallel weather
 interpretations. The current work/thermal model is an approximation, not a
