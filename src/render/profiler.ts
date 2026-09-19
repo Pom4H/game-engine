@@ -31,7 +31,7 @@ export interface RenderProfileSnapshot {
 }
 
 type GPUAny=any;
-interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;work:RenderWork|null}
+interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null}
 const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,uploadBytes:0});
 const percentile=(values:readonly number[],q:number)=>{if(!values.length)return 0;const a=[...values].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor((a.length-1)*q))]!;};
 const stats=(values:readonly number[]):QuantumStats=>({meanMs:values.length?values.reduce((a,b)=>a+b,0)/values.length:0,p50Ms:percentile(values,.5),p95Ms:percentile(values,.95),maxMs:values.length?Math.max(...values):0});
@@ -43,7 +43,7 @@ const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work
  * ring, so profiling never waits for the GPU in render().
  */
 export class RenderProfiler {
-  private frame=0;private frameStart=0;private cpuQuanta:Record<string,number>={};private work=emptyWork();
+  private frame=0;private generation=0;private frameStart=0;private cpuQuanta:Record<string,number>={};private work=emptyWork();
   private readonly cpuHistory:RenderFrameTiming[]=[];private readonly gpuHistory:RenderFrameTiming[]=[];
   private readonly querySet:GPUAny|null;private readonly slots:GpuSlot[]=[];private active:GpuSlot|null=null;
   private readonly queryBytes=RENDER_GPU_QUANTA.length*2*8;
@@ -54,14 +54,14 @@ export class RenderProfiler {
     if(timestampQueries)for(let i=0;i<4;i++)this.slots.push({
       resolve:device.createBuffer({label:`render profile resolve ${i}`,size:this.queryBytes,usage:0x0200|0x0004}),
       read:device.createBuffer({label:`render profile readback ${i}`,size:this.queryBytes,usage:0x0001|0x0008}),
-      pending:false,frame:0,work:null,
+      pending:false,frame:0,generation:0,work:null,
     });
   }
 
   beginFrame():number{
     this.frame++;this.frameStart=performance.now();this.cpuQuanta={};this.work=emptyWork();
     this.active=this.timestampQueries?(this.slots.find(slot=>!slot.pending)??null):null;
-    if(this.active){this.active.frame=this.frame;this.active.work=null;}
+    if(this.active){this.active.frame=this.frame;this.active.generation=this.generation;this.active.work=null;}
     return this.frame;
   }
   measure<T>(name:RenderCpuQuantum,run:()=>T):T{const at=performance.now();try{return run();}finally{this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+(performance.now()-at);}}
@@ -91,9 +91,11 @@ export class RenderProfiler {
         const begin=raw[i*2]!,end=raw[i*2+1]!,ms=end>=begin?Number(end-begin)/1e6:0;
         quanta[RENDER_GPU_QUANTA[i]!]=ms;total+=ms;
       }
-      slot.read.unmap();this.push(this.gpuHistory,freezeFrame(slot.frame,total,quanta,slot.work??emptyWork()));slot.pending=false;slot.work=null;
+      slot.read.unmap();if(slot.generation===this.generation)this.push(this.gpuHistory,freezeFrame(slot.frame,total,quanta,slot.work??emptyWork()));slot.pending=false;slot.work=null;
     }).catch(()=>{try{slot.read.unmap();}catch{}slot.pending=false;slot.work=null;});
   }
+
+  reset():void{this.generation++;this.cpuHistory.length=0;this.gpuHistory.length=0;this.frame=0;this.cpuQuanta={};this.work=emptyWork();this.active=null;}
 
   inspect():RenderProfileSnapshot{
     const latestCpu=this.cpuHistory.at(-1),latestGpu=this.gpuHistory.at(-1);
