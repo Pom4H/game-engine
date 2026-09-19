@@ -54,7 +54,7 @@ export class Scene {
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
-    const shouldCollide=spec.body!==undefined||profile.brittle;
+    const shouldCollide=spec.body!==undefined||spec.material?.kind!==undefined||profile.brittle;
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
     const body=shouldCollide?this.physics.add(new RigidBody({
       id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),
