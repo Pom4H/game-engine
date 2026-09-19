@@ -1,0 +1,32 @@
+{
+  "name": "@rom4/game-engine",
+  "version": "0.1.0",
+  "description": "URL-native deterministic WebGPU simulation engine with zero runtime dependencies.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "game-engine": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./browser": "./dist/browser.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
+    "ci": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "bun@1.4.2"
+}
