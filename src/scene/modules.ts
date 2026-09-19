@@ -17,7 +17,7 @@ export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
     ['cleanup','commit',[],['entities'],['fracture']],
     ['clock','commit',[],['time'],['cleanup']],
   ] as const;
-  for(const [action,phase,reads,writes,after] of definitions)kernel.use({id:`engine:${action}`,phase,rateHz:60,reads,writes,after:after.map(id=>`engine:${id}`),run:()=>[{type:'system',action}]});
+  for(const [action,phase,reads,writes,after] of definitions)kernel.use({id:`engine:${action}`,phase,rateHz:60,context:'none',reads,writes,after:after.map(id=>`engine:${id}`),run:()=>[{type:'system',action}]});
   return kernel;
 }
 export type SceneModule=EngineModule<SceneModuleContext,SceneCommand>;

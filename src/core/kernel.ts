@@ -3,13 +3,15 @@ export const ENGINE_PHASES: readonly EnginePhase[] = ['input','plan','simulate',
 export type SimulationTier = 'detailed' | 'active' | 'aggregate' | 'dormant';
 export const SIMULATION_TIERS: readonly SimulationTier[] = ['detailed','active','aggregate','dormant'];
 export interface ModuleFrame {readonly tick:number;readonly deltaSeconds:number;readonly tier:SimulationTier;readonly phase:EnginePhase}
-export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly string[];readonly writes:readonly string[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[]}
+export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly string[];readonly writes:readonly string[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[];readonly context?:'none'}
 export interface EngineModule<Context,Command> extends ModuleDescription {readonly run:(context:Readonly<Context>,frame:ModuleFrame)=>readonly Command[]|void}
 export interface ModuleBatch {readonly phase:EnginePhase;readonly modules:readonly ModuleDescription[]}
 export interface KernelRunOptions<Context,Command>{
   /** Commit once per batch; the returned state is the next batch's read snapshot. */
   readonly commit?:(commands:readonly Command[],context:Readonly<Context>,phase:EnginePhase)=>Readonly<Context>;
   readonly deltaSeconds?:number;
+  /** Lazily project current state, only for batches that consume a context. */
+  readonly read?:()=>Readonly<Context>;
   readonly onModule?:(module:ModuleDescription,frame:ModuleFrame)=>void;
 }
 interface Registered {description:ModuleDescription;periodTicks:number}
@@ -89,7 +91,7 @@ export class EngineKernel<Context,Command>{
     const dt=options.deltaSeconds??1/this.scheduler.tickRate;if(!Number.isFinite(dt)||dt<=0)throw new RangeError('Kernel delta must be positive and finite');
     const commands:Command[]=[];let current=context;
     for(const batch of this.scheduler.plan(tick,tier)){
-      const view=snapshot(current),pending:Command[]=[];
+      const view=batch.modules.every(m=>m.context==='none')?Object.freeze({}) as Readonly<Context>:snapshot(options.read?.()??current),pending:Command[]=[];
       for(const description of batch.modules){const module=this.modules.get(description.id)!;if(!module)throw new TypeError(`No implementation: ${description.id}`);
         const frame=Object.freeze({tick,deltaSeconds:dt*this.scheduler.tickRate/module.rateHz,tier,phase:module.phase});options.onModule?.(description,frame);
         const result=module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);

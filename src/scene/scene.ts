@@ -1,3 +1,4 @@
+import {freezePrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
 import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
 import {WinterSystem} from '../environment/winter.js';
@@ -16,6 +17,7 @@ import {validateEntity,validateScene} from './validate.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
+  readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window';
   readonly color:Color;
   readonly profile:PhysicalMaterial;
   readonly surface:SurfaceState;
@@ -67,7 +69,7 @@ export class Scene {
   add(spec:EntitySpec):RuntimeEntity{
     spec=validateEntity(spec);
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
-    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?structuredClone(spec.mesh):undefined;
+    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?freezePrimitive(structuredClone(spec.mesh)):undefined;
     const surface=deriveSurfaceState(profile,spec.material??{},this.environment);
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
@@ -84,7 +86,7 @@ export class Scene {
     if(body){position=body.position;rotation=body.rotation;}
     const runtime:RuntimeEntity={
       id:spec.id,position,rotation,scale,
-      material:Object.freeze({kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
+      material:Object.freeze({...spec.material,kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(body?{body}:{})
@@ -99,9 +101,9 @@ export class Scene {
   step(dt=1/60):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
     const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,this.context(),'detailed',{deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+    this.kernel.run(this.tick+1,{} as SceneModuleContext,'detailed',{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,dt,at);
-      return this.context();
+      return {} as SceneModuleContext;
     }});
   }
   private commit(command:InternalCommand,dt:number,at:number):void{
@@ -147,23 +149,20 @@ export class Scene {
       if(state.use!=='curb'&&state.use!=='sidewalk')continue;
       const source=this.entities.get(surfaceId);if(!source?.mesh)continue;
       const dimensions=meshDimensions(source.mesh,source.scale),longAxis:0|2=dimensions[0]>=dimensions[2]?0:2,crossAxis:0|2=longAxis===0?2:0;
-      const longSize=dimensions[longAxis],crossSize=dimensions[crossAxis],count=state.use==='curb'?Math.max(3,Math.min(10,Math.round(longSize/8))):Math.max(2,Math.min(7,Math.round(longSize/14)));
-      const top=source.position[1]+dimensions[1]/2,rng=mulberry32((this.spec.seed??1)^hashString(surfaceId)^0x51f15e);
+      const longSize=dimensions[longAxis],crossSize=dimensions[crossAxis],count=Math.max(1,Math.min(256,Math.ceil(longSize/6)));
+      const top=source.position[1]+dimensions[1]/2;
       for(let i=0;i<count;i++){
-        const id=`__winter:drift:${surfaceId}:${i}`;keep.add(id);
-        const jitter=(rng()-.5)*(longSize/count)*.45,offset=-longSize/2+(i+.5)*longSize/count+jitter;
-        const localFactor=.68+rng()*.65,driftFactor=state.use==='curb'?7.5:4.2;
-        const height=Math.min(state.use==='curb'?.48:.28,Math.max(.002,state.snowDepthM*driftFactor*localFactor));
-        const longitudinal=Math.max(.8,longSize/count*(.9+rng()*.55)),cross=Math.max(.35,Math.min(state.use==='curb'?1.25:1.8,crossSize*(.55+rng()*.42)));
-        const position:MutableVec3=[...source.position];position[longAxis]+=offset;position[1]=top+height*.48;
-        const scale:MutableVec3=longAxis===0?[longitudinal,height,cross]:[cross,height,longitudinal];
-        let drift=this.entities.get(id);
-        if(!drift){
-          drift=this.add({id,position,scale,mesh:{kind:'sphere',radius:.5,segments:12},material:{kind:'snow'}});
-        }else{
-          drift.position[0]=position[0];drift.position[1]=position[1];drift.position[2]=position[2];
-          drift.scale[0]=scale[0];drift.scale[1]=scale[1];drift.scale[2]=scale[2];
-        }
+        const id=`__winter:drift:${surfaceId}:${i}`;
+        const height=Math.round(Math.min(1.45,state.snowDepthM*(state.use==='curb'?4.2:1.25))*50)/50;
+        if(height<.02)continue;keep.add(id);
+        const longitudinal=longSize/count,cross=state.use==='curb'?Math.max(.7,crossSize*4.8):crossSize;
+        const position:MutableVec3=[...source.position];position[longAxis]+=-longSize/2+(i+.5)*longSize/count;position[1]=state.use==='curb'?source.position[1]-dimensions[1]/2+.003:top-.015;
+        const size:MutableVec3=[longitudinal,height,cross];
+        const seed=(this.spec.seed??1)^hashString(surfaceId);
+        const previous=this.entities.get(id);
+        if(previous?.mesh?.kind==='snowdrift'&&previous.mesh.size[1]===height&&previous.mesh.size[0]===size[0]&&previous.mesh.size[2]===size[2]&&previous.mesh.offset===position[longAxis]&&previous.position.every((v,i)=>v===position[i]))continue;
+        this.entities.delete(id);
+        this.add({id,position,rotation:longAxis===0?[0,0,0]:[0,-Math.PI/2,0],mesh:{kind:'snowdrift',size,seed,continuous:true,offset:position[longAxis]},material:{kind:'snow',roughness:.88}});
       }
     }
     for(const id of [...this.entities.keys()])if(id.startsWith('__winter:drift:')&&!keep.has(id))this.entities.delete(id);
@@ -236,7 +235,7 @@ export class Scene {
       const mass=sourceMass*piece.volume/totalVolume;
       const id=`${entity.id}:shard:${this.generatedSequence++}`,shard=this.add({
         id,position:piece.position,rotation:piece.rotation,mesh:piece.mesh,
-        material:{kind:entity.material.kind,color:entity.material.color},
+        material:{kind:entity.material.kind,color:entity.material.color,...(entity.material.roughness!==undefined?{roughness:entity.material.roughness}:{}),...(entity.material.metalness!==undefined?{metalness:entity.material.metalness}:{}),...(entity.material.emissive?{emissive:entity.material.emissive}:{})},
         body:{mass,restitution:.12,friction:.42,shape:'box'},
       });
       if(shard.body){shard.body.fracturable=false;shard.body.collisionClass='debris';fragments.push(shard.body);}
@@ -270,7 +269,10 @@ function meshVolume(mesh:Primitive|undefined,scale:Vec3):number{
   const d=meshDimensions(mesh,scale);return d[0]*d[1]*d[2]*(mesh.kind==='shard'?.5:1);
 }
 function meshDimensions(mesh:Primitive,scale:Vec3):MutableVec3{
-  if(mesh.kind==='box'||mesh.kind==='shard'){const size=mesh.size??[1,1,1];return[size[0]*scale[0],size[1]*scale[1],size[2]*scale[2]];}
+  if(mesh.kind==='triangle-mesh'){const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];mesh.positions.forEach((v,i)=>{const a=i%3;lo[a]=Math.min(lo[a]!,v);hi[a]=Math.max(hi[a]!,v);});return[(hi[0]!-lo[0]!)*scale[0],(hi[1]!-lo[1]!)*scale[1],(hi[2]!-lo[2]!)*scale[2]];}
+  if(mesh.kind==='torus')return[(mesh.radius+mesh.tube)*2*scale[0],mesh.tube*2*scale[1],(mesh.radius+mesh.tube)*2*scale[2]];
+  if(mesh.kind==='cylinder'){const r=Math.max(mesh.radius,mesh.topRadius??mesh.radius);return[r*2*scale[0],mesh.height*scale[1],r*2*scale[2]];};
+  if(mesh.kind==='box'||mesh.kind==='shard'||mesh.kind==='snowdrift'){const size=mesh.size??[1,1,1];return[size[0]*scale[0],size[1]*scale[1],size[2]*scale[2]];}
   if(mesh.kind==='sphere'){const d=2*(mesh.radius??1);return[d*scale[0],d*scale[1],d*scale[2]];}
   if(mesh.kind==='polygon-prism'){
     const bounds=polygonBounds(mesh.points),axis=mesh.axis??2,axes=planeAxes(axis),d:MutableVec3=[1,1,1];
@@ -281,7 +283,7 @@ function meshDimensions(mesh:Primitive,scale:Vec3):MutableVec3{
 function bodyShape(mesh:Primitive|undefined,body:BodySpec,scale:Vec3):CollisionShape{
   const shape=body.shape??'auto';
   if(shape==='sphere'||shape==='auto'&&mesh?.kind==='sphere')return{kind:'sphere',radius:(mesh?.kind==='sphere'?mesh.radius??1:1)*Math.max(scale[0],scale[1],scale[2])};
-  if(mesh?.kind==='polygon-prism'){const d=meshDimensions(mesh,scale);return{kind:'box',half:[d[0]/2,d[1]/2,d[2]/2]};}
+  if(mesh?.kind==='polygon-prism'||mesh?.kind==='cylinder'||mesh?.kind==='snowdrift'||mesh?.kind==='torus'||mesh?.kind==='triangle-mesh'){const d=meshDimensions(mesh,scale);return{kind:'box',half:[d[0]/2,d[1]/2,d[2]/2]};}
   const size:Vec3=mesh?.kind==='box'||mesh?.kind==='shard'?mesh.size??[1,1,1]:mesh?.kind==='plane'?[mesh.size?.[0]??1,.02,mesh.size?.[1]??1]:[1,1,1];
   return{kind:'box',half:[size[0]*scale[0]/2,size[1]*scale[1]/2,size[2]*scale[2]/2]};
 }

@@ -66,7 +66,7 @@ export class WinterSystem {
       const use=entity.environmental?.surfaceUse;
       if(use&&!this.surfaces.has(entity.id)){
         this.surfaces.set(entity.id,{
-          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM:0,waterDepthM:0,iceDepthM:0,
+          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:0,iceDepthM:entity.environmental?.iceDepthM??0,
           slush:0,dirt:entity.material.surface.dirt*.25,trafficHeatC:0,trackMelt:0,puddle:0,frictionScale:1,
         });
       }
