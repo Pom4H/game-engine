@@ -2,7 +2,7 @@ import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
 import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHTS_PER_CELL} from './light-grid.js';
-import {FRAME_WGSL,SKY_SHADER,POST_SHADER,BLOOM_SHADER} from './lighting.js';
+import {FRAME_WGSL,SKY_SHADER,POST_SHADER,BLOOM_SHADER,TAA_SHADER} from './lighting.js';
 import {V3,compose,lookAt,multiply4,perspective,type Mat4,type Vec3} from '../math.js';
 import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
 import type {Primitive,CameraSpec} from '../scene/types.js';
@@ -41,6 +41,7 @@ struct U {
   pbr:vec4<f32>,
   emission:vec4<f32>,
   texture:vec4<f32>, // size metres, bump amount, albedo blend, enabled
+  prevMvp:mat4x4<f32>,
 }
 @group(0) @binding(0) var<uniform> u: U;
 @group(0) @binding(1) var fieldTexture: texture_2d<f32>;
@@ -70,6 +71,7 @@ struct VOut {
   @location(1) worldPos: vec3<f32>,
   @location(2) uv:vec2<f32>,
   @location(3) @interpolate(flat) reflected:u32,
+  @location(4) velocity:vec2<f32>,
 }
 
 fn hash3(p:vec3<f32>)->f32 {
@@ -95,7 +97,9 @@ fn tyreTracks(z:f32)->f32{
 @vertex fn vs(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VOut {
   var out: VOut;out.reflected=0u;
   let world=u.model*vec4<f32>(position,1.0);
-  out.position=u.mvp*vec4<f32>(position,1.0);
+  out.position=u.mvp*vec4<f32>(position,1.0);let previous=u.prevMvp*vec4<f32>(position,1.0);
+  let currentNdc=out.position.xy/max(abs(out.position.w),.00001),previousNdc=previous.xy/max(abs(previous.w),.00001);
+  out.velocity=vec2<f32>((currentNdc.x-previousNdc.x)*.5,(previousNdc.y-currentNdc.y)*.5);
   out.worldPos=world.xyz;out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);
   let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;
   out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);
@@ -103,7 +107,7 @@ fn tyreTracks(z:f32)->f32{
 }
 
 @vertex fn reflectionVS(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>)->VOut{
- var out:VOut;let world=u.model*vec4<f32>(position,1);out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;return out;
+ var out:VOut;let world=u.model*vec4<f32>(position,1);out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
 }
 
 fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,roughness:f32,base:vec3<f32>,f0:vec3<f32>,metal:f32)->vec3<f32>{
@@ -121,7 +125,7 @@ fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,r
 fn texelAt(p:vec3<f32>,weights:vec3<f32>)->vec3<f32>{
  return textureSample(surfaceTexture,surfaceSampler,p.zy/u.texture.x).rgb*weights.x+textureSample(surfaceTexture,surfaceSampler,p.xz/u.texture.x).rgb*weights.y+textureSample(surfaceTexture,surfaceSampler,p.xy/u.texture.x).rgb*weights.z;
 }
-struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location(2) specular:vec4<f32>}
+struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location(2) specular:vec4<f32>,@location(3) velocity:vec2<f32>}
 @fragment fn fs(in: VOut) -> GOut {
   ${reflection?'if(in.worldPos.y<.04){discard;}':''}
   let fieldUV=(in.worldPos.xz-u.fieldFrame.xy)/max(u.fieldFrame.zw,vec2<f32>(0.001))+vec2<f32>(0.5);
@@ -301,7 +305,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
   color=mix(color,f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027,clamp(fog,0.0,.96));
-  var out:GOut;out.color=vec4<f32>(color,select(u.color.a,mix(u.color.a*.25,.82,pow(1.0-nv,5.0)),materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(environmentFresnel,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));return out;
+  var out:GOut;out.color=vec4<f32>(color,select(u.color.a,mix(u.color.a*.25,.82,pow(1.0-nv,5.0)),materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(environmentFresnel,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
 const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
@@ -330,14 +334,14 @@ fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
 `;
 
 export class WebGPURenderer implements Renderer{
-  private depth:GPUAny=null;private hdr:GPUAny=null;private hdrMS:GPUAny=null;private normal:GPUAny=null;private normalMS:GPUAny=null;private specular:GPUAny=null;private specularMS:GPUAny=null;private postBind:GPUAny=null;private reflection:GPUAny=null;private reflectionDepth:GPUAny=null;private depthW=0;private depthH=0;
+  private depth:GPUAny=null;private hdr:GPUAny=null;private normal:GPUAny=null;private specular:GPUAny=null;private velocity:GPUAny=null;private taaA:GPUAny=null;private taaB:GPUAny=null;private taaBindAB:GPUAny=null;private taaBindBA:GPUAny=null;private postBindA:GPUAny=null;private postBindB:GPUAny=null;private reflection:GPUAny=null;private reflectionDepth:GPUAny=null;private depthW=0;private depthH=0;
   private fixedResolution:readonly [number,number]|undefined;
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
   private readonly meshes=new Map<string,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousModels=new Map<string,Mat4>();private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -348,6 +352,7 @@ export class WebGPURenderer implements Renderer{
       sky:analyzeWGSL('sky',SKY_SHADER,['vs','fs']),
       snow:analyzeWGSL('snow',SNOW_SHADER,['vs','fs']),
       bloom:analyzeWGSL('bloom',BLOOM_SHADER,['vs','downsample','horizontal','vertical']),
+      taa:analyzeWGSL('taa',TAA_SHADER,['vs','fs']),
       post:analyzeWGSL('post',POST_SHADER,['vs','fs']),
     }):Object.freeze({});
     device.addEventListener?.('uncapturederror',(event:any)=>{const message=event?.error?.message??String(event?.error);this.errors.push(message);console.error('Game Engine WebGPU:',message);});device.lost?.then((info:any)=>this.errors.push(`Device lost: ${info?.message??'unknown'}`));
@@ -374,7 +379,7 @@ export class WebGPURenderer implements Renderer{
     const layout=device.createPipelineLayout({bindGroupLayouts:[objectLayout,lightLayout]});
     const blend={color:{srcFactor:'src-alpha',dstFactor:'one-minus-src-alpha',operation:'add'},alpha:{srcFactor:'one',dstFactor:'one-minus-src-alpha',operation:'add'}};
     const materialClasses=[0,1,2,3,4,5,6] as const;
-    const make=(transparent:boolean,cullMode:'none'|'back',materialClass=-1)=>device.createRenderPipeline({layout,vertex,fragment:{module,entryPoint:'fs',constants:{MATERIAL_CLASS:materialClass},targets:[{format:'rgba16float',...(transparent?{blend}:{})},{format:'rgba16float',...(transparent?{writeMask:0}:{})},{format:'rgba8unorm',...(transparent?{writeMask:0}:{})}]},primitive:{topology:'triangle-list',cullMode},multisample:{count:4},depthStencil:{format:'depth32float',depthWriteEnabled:!transparent,depthCompare:'less'}});
+    const make=(transparent:boolean,cullMode:'none'|'back',materialClass=-1)=>device.createRenderPipeline({layout,vertex,fragment:{module,entryPoint:'fs',constants:{MATERIAL_CLASS:materialClass},targets:[{format:'rgba16float',...(transparent?{blend}:{})},{format:'rgba16float',...(transparent?{writeMask:0}:{})},{format:'rgba8unorm',...(transparent?{writeMask:0}:{})},{format:'rg16float',...(transparent?{writeMask:0}:{})}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:!transparent,depthCompare:'less'}});
     const opaqueCulled=new Map(materialClasses.map(code=>[code,make(false,'back',code)])),opaqueDouble=new Map(materialClasses.map(code=>[code,make(false,'none',code)]));
     const transparent=make(true,'none',-1);
     const makeReflected=(cullMode:'none'|'back',materialClass:number)=>device.createRenderPipeline({layout,vertex:{...vertex,module:reflectionModule,entryPoint:'reflectionVS'},fragment:{module:reflectionModule,entryPoint:'fs',constants:{MATERIAL_CLASS:materialClass},targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:true,depthCompare:'less'}});
@@ -382,16 +387,18 @@ export class WebGPURenderer implements Renderer{
     const shadowLayout=device.createPipelineLayout({bindGroupLayouts:[objectLayout,frameLayout]});
     const makeShadow=(cullMode:'none'|'back')=>device.createRenderPipeline({layout:shadowLayout,vertex:{...vertex,entryPoint:'shadowVS'},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:true,depthCompare:'less',depthBias:1,depthBiasSlopeScale:1.5}});
     const shadowCulled=makeShadow('back'),shadowDouble=makeShadow('none');
-    const skyModule=device.createShaderModule({code:SKY_SHADER}),sky=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[frameLayout]}),vertex:{module:skyModule,entryPoint:'vs'},fragment:{module:skyModule,entryPoint:'fs',targets:[{format:'rgba16float'},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0}]},primitive:{topology:'triangle-list'},multisample:{count:4},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'always'}});
+    const skyModule=device.createShaderModule({code:SKY_SHADER}),sky=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[frameLayout]}),vertex:{module:skyModule,entryPoint:'vs'},fragment:{module:skyModule,entryPoint:'fs',targets:[{format:'rgba16float'},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'always'}});
+    const taaModule=device.createShaderModule({code:TAA_SHADER}),taa=device.createRenderPipeline({layout:'auto',vertex:{module:taaModule,entryPoint:'vs'},fragment:{module:taaModule,entryPoint:'fs',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
+    const taaParams=device.createBuffer({size:16,usage:0x40|0x08});
     const postModule=device.createShaderModule({code:POST_SHADER}),post=device.createRenderPipeline({layout:'auto',vertex:{module:postModule,entryPoint:'vs'},fragment:{module:postModule,entryPoint:'fs',targets:[{format}]},primitive:{topology:'triangle-list'}});
     const bloomModule=device.createShaderModule({code:BLOOM_SHADER}),bloomLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:2,texture:{sampleType:'float'}},{binding:1,visibility:2,sampler:{type:'filtering'}}]}),bloomPipelineLayout=device.createPipelineLayout({bindGroupLayouts:[bloomLayout]});
     const makeBloom=(entryPoint:string)=>device.createRenderPipeline({layout:bloomPipelineLayout,vertex:{module:bloomModule,entryPoint:'vs'},fragment:{module:bloomModule,entryPoint,targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
     const bloomDown=makeBloom('downsample'),bloomHorizontal=makeBloom('horizontal'),bloomVertical=makeBloom('vertical');
     const snowModule=device.createShaderModule({code:SNOW_SHADER}),snowLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:1,buffer:{type:'uniform'}}]});
-    const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout,lightLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0}]},primitive:{topology:'triangle-list'},multisample:{count:4},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
+    const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout,lightLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
     const snowUniform=device.createBuffer({size:128,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
-    for(const shader of [module,reflectionModule,skyModule,postModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
-    return new WebGPURenderer(canvas,device,context,format,{noiseVolume,noiseSampler,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,opaqueCulled,opaqueDouble,transparent,shadowCulled,shadowDouble,sky,post,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
+    for(const shader of [module,reflectionModule,skyModule,taaModule,postModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
+    return new WebGPURenderer(canvas,device,context,format,{noiseVolume,noiseSampler,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,opaqueCulled,opaqueDouble,transparent,shadowCulled,shadowDouble,sky,taa,taaParams,post,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
   }
   setResolution(width:number,height:number):void{
     if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');
@@ -401,14 +408,17 @@ export class WebGPURenderer implements Renderer{
     const ratio=Math.max(1,Math.min(2,devicePixelRatio||1)),width=this.fixedResolution?.[0]??Math.max(1,Math.floor(this.canvas.clientWidth*ratio)),height=this.fixedResolution?.[1]??Math.max(1,Math.floor(this.canvas.clientHeight*ratio));
     if(this.depthW===width&&this.depthH===height)return;
     this.canvas.width=width;this.canvas.height=height;this.depthW=width;this.depthH=height;
-    for(const target of [this.depth,this.hdr,this.hdrMS,this.normal,this.normalMS,this.specular,this.specularMS,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
+    for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
     const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04});
-    this.depth=texture('depth32float',4);this.hdr=texture('rgba16float',1);this.hdrMS=texture('rgba16float',4);this.normal=texture('rgba16float',1);this.normalMS=texture('rgba16float',4);this.specular=texture('rgba8unorm',1);this.specularMS=texture('rgba8unorm',4);
+    this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.normal=texture('rgba16float',1);this.specular=texture('rgba8unorm',1);this.velocity=texture('rg16float',1);this.taaA=texture('rgba16float',1);this.taaB=texture('rgba16float',1);
     this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
     const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
     const bloomBind=(texture:GPUAny)=>this.device.createBindGroup({layout:this.gpu.bloomLayout,entries:[{binding:0,resource:texture.createView()},{binding:1,resource:this.gpu.sampler}]});this.bloomDownBind=bloomBind(this.hdr);this.bloomHorizontalBind=bloomBind(this.bloomA);this.bloomVerticalBind=bloomBind(this.bloomB);
     this.gpu.lightBind=this.device.createBindGroup({layout:this.gpu.lightLayout,entries:[{binding:0,resource:{buffer:this.gpu.frame}},{binding:1,resource:this.gpu.shadow.createView()},{binding:2,resource:this.gpu.comparison},{binding:3,resource:this.reflection.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.lightBuffer}},{binding:6,resource:{buffer:this.gpu.cellBuffer}},{binding:7,resource:this.gpu.noiseVolume.createView()},{binding:8,resource:this.gpu.noiseSampler}]});
-    this.postBind=this.device.createBindGroup({layout:this.gpu.post.getBindGroupLayout(0),entries:[{binding:0,resource:this.hdr.createView()},{binding:1,resource:this.normal.createView()},{binding:2,resource:this.depth.createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:{buffer:this.gpu.frame}},{binding:5,resource:this.specular.createView()},{binding:6,resource:this.bloomA.createView()}]});
+    const taaBind=(history:GPUAny)=>this.device.createBindGroup({layout:this.gpu.taa.getBindGroupLayout(0),entries:[{binding:0,resource:this.hdr.createView()},{binding:1,resource:history.createView()},{binding:2,resource:this.velocity.createView()},{binding:3,resource:this.depth.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.taaParams}}]});
+    this.taaBindAB=taaBind(this.taaA);this.taaBindBA=taaBind(this.taaB);
+    const postBind=(source:GPUAny)=>this.device.createBindGroup({layout:this.gpu.post.getBindGroupLayout(0),entries:[{binding:0,resource:source.createView()},{binding:1,resource:this.normal.createView()},{binding:2,resource:this.depth.createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:{buffer:this.gpu.frame}},{binding:5,resource:this.specular.createView()},{binding:6,resource:this.bloomA.createView()}]});
+    this.postBindA=postBind(this.taaA);this.postBindB=postBind(this.taaB);this.historyValid=false;this.taaHistoryIndex=0;this.previousVp=null;
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
@@ -424,7 +434,9 @@ export class WebGPURenderer implements Renderer{
     });
     void lightGrid;
     const frameState=this.profiler.measure('frame',()=>{
-      const vp=multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt(camera.position,camera.target));
+      const projection=perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),jitter=taaJitter(frameId);
+      projection[8]=-2*jitter[0]/this.canvas.width;projection[9]=2*jitter[1]/this.canvas.height;
+      const vp=multiply4(projection,lookAt(camera.position,camera.target));
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
       const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
       lightVP[12]=Math.round(lightVP[12]!*2048)/2048;lightVP[13]=Math.round(lightVP[13]!*2048)/2048;
@@ -441,7 +453,9 @@ export class WebGPURenderer implements Renderer{
       return{visible,opaque,transparent};
     });
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
-    this.profiler.measure('prepare',()=>{for(const e of classified.visible)this.prepare(e,vp);});
+    if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||distance2(this.lastCamera,camera.position)>100))this.historyValid=false;
+    const previousVp=this.previousVp??vp;
+    this.profiler.measure('prepare',()=>{for(const e of classified.visible)this.prepare(e,vp,previousVp);});
     const culled=this.profiler.measure('cull',()=>{
       const inView=(entity:RuntimeEntity,matrix:Mat4)=>intersectsClip(this.mesh(entity.mesh!).bounds,multiply4(matrix,this.model(entity)));
       const cameraOpaque=classified.opaque.filter(e=>inView(e,vp)).sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
@@ -467,7 +481,7 @@ export class WebGPURenderer implements Renderer{
     });
     let snowInstances=0;
     this.profiler.measure('encode.main',()=>{
-      const timing=this.profiler.timestampWrites('main'),occlusion=this.profiler.occlusionSet(),pass=encoder.beginRenderPass({label:'render.main',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.hdrMS.createView(),resolveTarget:this.hdr.createView(),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'discard'},{view:this.normalMS.createView(),resolveTarget:this.normal.createView(),clearValue:{r:.5,g:.5,b:1,a:1},loadOp:'clear',storeOp:'discard'},{view:this.specularMS.createView(),resolveTarget:this.specular.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'discard'}],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      const timing=this.profiler.timestampWrites('main'),occlusion=this.profiler.occlusionSet(),pass=encoder.beginRenderPass({label:'render.main',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.hdr.createView(),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'store'},{view:this.normal.createView(),clearValue:{r:.5,g:.5,b:1,a:1},loadOp:'clear',storeOp:'store'},{view:this.specular.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'},{view:this.velocity.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       pass.setPipeline(this.gpu.sky);pass.setBindGroup(0,this.gpu.frameBind);pass.draw(3);
       this.drawCalls=0;this.triangles=0;pass.setBindGroup(1,this.gpu.lightBind);let query=this.profiler.beginOcclusion(pass,'mainOpaque');
       for(const [key,group] of materialPipelineGroups(culled.cameraOpaque)){const [code,culled]=key;pass.setPipeline((culled?this.gpu.opaqueCulled:this.gpu.opaqueDouble).get(code)!);for(const e of group)this.draw(pass,e,true);}
@@ -481,8 +495,14 @@ export class WebGPURenderer implements Renderer{
       const stages=[['bloom.downsample',this.bloomA,this.gpu.bloomDown,this.bloomDownBind],['bloom.horizontal',this.bloomB,this.gpu.bloomHorizontal,this.bloomHorizontalBind],['bloom.vertical',this.bloomA,this.gpu.bloomVertical,this.bloomVerticalBind]] as const;
       for(const [name,target,pipeline,bind] of stages){const timing=this.profiler.timestampWrites(name),bloomPass=encoder.beginRenderPass({label:`render.${name}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:target.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});bloomPass.setPipeline(pipeline);bloomPass.setBindGroup(0,bind);bloomPass.draw(3);bloomPass.end();}
     });
+    const taaOutputIndex=this.taaHistoryIndex===0?1:0;
+    this.device.queue.writeBuffer(this.gpu.taaParams,0,new Float32Array([this.historyValid?1:0,0,0,0]));
+    this.profiler.measure('encode.taa',()=>{
+      const timing=this.profiler.timestampWrites('taa'),target=taaOutputIndex===0?this.taaA:this.taaB,taaPass=encoder.beginRenderPass({label:'render.taa',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:target.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
+      taaPass.setPipeline(this.gpu.taa);taaPass.setBindGroup(0,this.taaHistoryIndex===0?this.taaBindAB:this.taaBindBA);taaPass.draw(3);taaPass.end();
+    });
     this.profiler.measure('encode.post',()=>{
-      const timing=this.profiler.timestampWrites('post'),post=encoder.beginRenderPass({label:'render.post',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.context.getCurrentTexture().createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});post.setPipeline(this.gpu.post);post.setBindGroup(0,this.postBind);post.draw(3);post.end();
+      const timing=this.profiler.timestampWrites('post'),post=encoder.beginRenderPass({label:'render.post',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.context.getCurrentTexture().createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});post.setPipeline(this.gpu.post);post.setBindGroup(0,taaOutputIndex===0?this.postBindA:this.postBindB);post.draw(3);post.end();
     });
     this.profiler.setWork({drawCalls:this.drawCalls,triangles:this.triangles,snowInstances});
     if(this.profiler.enabled){
@@ -502,6 +522,8 @@ export class WebGPURenderer implements Renderer{
     }
     this.profiler.resolve(encoder);
     this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
+    this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
+    const liveIds=new Set<string>();for(const entity of classified.visible){this.previousModels.set(entity.id,this.model(entity));liveIds.add(entity.id);}for(const id of this.previousModels.keys())if(!liveIds.has(id))this.previousModels.delete(id);
   }
   private queueMaterialLoads(scene:Scene):void{
     if(this.disposed)return;
@@ -522,16 +544,16 @@ export class WebGPURenderer implements Renderer{
   inspect():RenderStats{return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*2+this.objects.size+4,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+15,errors:[...this.errors],profile:this.profiler.inspect()};}
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
-  dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const target of [this.depth,this.hdr,this.hdrMS,this.normal,this.normalMS,this.specular,this.specularMS,this.bloomA,this.bloomB,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();}
-  private prepare(entity:RuntimeEntity,vp:Mat4):void{
-    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url),model=this.model(entity),uniform=new Float32Array(116),surface=entity.material.surface;
+  dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();}
+  private prepare(entity:RuntimeEntity,vp:Mat4,previousVp:Mat4):void{
+    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url),model=this.model(entity),uniform=new Float32Array(132),surface=entity.material.surface;
     this.mesh(entity.mesh!);
-    const surfaceState=this.lastScene?.surfaces.surface(entity.id),body=this.lastScene?.surfaces.body(entity.id),environment=this.lastScene?.environment;
+    const surfaceState=this.lastScene?.surfaces.surface(entity.id),body=this.lastScene?.surfaces.body(entity.id),environment=this.lastScene?.environment,previousModel=this.previousModels.get(entity.id)??model;
     uniform.set(multiply4(vp,model));uniform.set(model,16);uniform.set(entity.material.color,32);uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
     uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([environment?.temperatureC??18,environment?.sunlight??.65,(environment?.hour??12)/24,surfaceUseCode(entity.environmental?.surfaceUse)],52);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],56);uniform.set([...this.lastCamera,1],60);
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],96);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],100);
     uniform.set([entity.material.roughness??-1,entity.material.metalness??(entity.material.kind==='steel'?.6:0),entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,0],104);uniform.set([...(entity.material.emissive??[0,0,0]),0],108);
-    const texture=entity.material.texture;uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture&&this.surfaceTextures.get(texture.url)?1:0],112);
+    const texture=entity.material.texture;uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture&&this.surfaceTextures.get(texture.url)?1:0],112);uniform.set(multiply4(previousVp,previousModel),116);
     if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((c,i)=>pixels.set([c.trackMelt,c.snowDepthM,c.waterDepthM,c.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);this.profiler.addUpload(pixels.byteLength,'surface');}this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean):void{const mesh=this.mesh(entity.mesh!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
@@ -547,12 +569,15 @@ export class WebGPURenderer implements Renderer{
     const materialTexture=materialUrl?this.surfaceTextures.get(materialUrl):undefined,materialKey=materialTexture?materialUrl:undefined;
     const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===label&&existing.materialKey===materialKey)return existing;
     if(existing){existing.uniform.destroy();if(existing.owned!==false)existing.texture.destroy();}
-    const uniform=this.device.createBuffer({size:464,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
+    const uniform=this.device.createBuffer({size:528,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[{binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:(materialTexture??this.gpu.emptyLabel).createView()},{binding:5,resource:this.gpu.surfaceSampler}]}),object={uniform,bind,texture,width,height,owned:width>0,label,...(materialKey?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{const mesh=entity.mesh,scale:Vec3=mesh?.kind==='box'||mesh?.kind==='shard'?mesh.size??[1,1,1]:mesh?.kind==='sphere'?[2*(mesh.radius??1),2*(mesh.radius??1),2*(mesh.radius??1)]:mesh?.kind==='plane'?[mesh.size?.[0]??1,1,mesh.size?.[1]??1]:[1,1,1];return compose(entity.position,entity.rotation,[entity.scale[0]*scale[0],entity.scale[1]*scale[1],entity.scale[2]*scale[2]]);}
 }
 function orthographic(extent:number,near:number,far:number):Mat4{return new Float32Array([1/extent,0,0,0,0,1/extent,0,0,0,0,1/(near-far),0,0,0,near/(near-far),1]);}
+
+function halton(index:number,base:number):number{let f=1,result=0,i=index;while(i>0){f/=base;result+=f*(i%base);i=Math.floor(i/base);}return result;}
+function taaJitter(frame:number):readonly[number,number]{const i=(frame%8)+1;return[halton(i,2)-.5,halton(i,3)-.5];}
 
 function distance2(a:Vec3,b:Vec3):number{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[2];return x*x+y*y+z*z;}
 
