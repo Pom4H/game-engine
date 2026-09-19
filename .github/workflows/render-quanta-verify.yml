@@ -24,8 +24,23 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
+      - name: Runner diagnostics
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          "PATH=$env:PATH" | Set-Content artifacts/runner.txt
+          "PWD=$PWD" | Add-Content artifacts/runner.txt
+          cmd /d /s /c "where bun >> artifacts\runner.txt 2>&1"
+          cmd /d /s /c "where node >> artifacts\runner.txt 2>&1"
+          cmd /d /s /c "where npm >> artifacts\runner.txt 2>&1"
+          cmd /d /s /c "bun --version >> artifacts\runner.txt 2>&1"
+          cmd /d /s /c "node --version >> artifacts\runner.txt 2>&1"
+          Get-Content artifacts/runner.txt
       - name: Install dependencies
-        run: npm install --no-package-lock --ignore-scripts
+        run: |
+          cmd /d /s /c "bun install > artifacts\install.log 2>&1"
+          $code = $LASTEXITCODE
+          Get-Content artifacts/install.log
+          if ($code -ne 0) { exit $code }
       - name: Core verification
         run: |
           New-Item -ItemType Directory -Force artifacts | Out-Null
