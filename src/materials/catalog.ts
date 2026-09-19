@@ -1,6 +1,6 @@
 import type {Color} from '../scene/types.js';
 
-export type MaterialKind='default'|'glass'|'steel'|'wood'|'concrete'|'asphalt';
+export type MaterialKind='default'|'glass'|'steel'|'wood'|'concrete'|'asphalt'|'snow';
 
 export interface AcousticMaterial {
   /** Dominant free resonance of a small reference object. Geometry scales it. */
@@ -40,6 +40,7 @@ const MATERIALS:Readonly<Record<MaterialKind,PhysicalMaterial>>=Object.freeze({
   wood:Object.freeze({kind:'wood',density:650,restitution:.18,friction:.55,failureStressPa:45e6,failureStrain:.006,brittle:false,color:[.48,.3,.16,1] as const,acoustic:{resonanceHz:430,damping:.42,brightness:.22,noise:.34},surface:{baseRoughness:.72,waterRetention:.78,bioAffinity:.7,dirtAffinity:.62,weathering:.78}}),
   concrete:Object.freeze({kind:'concrete',density:2350,restitution:.04,friction:.75,failureStressPa:4e6,failureStrain:.00015,brittle:true,color:[.48,.49,.5,1] as const,acoustic:{resonanceHz:310,damping:.55,brightness:.18,noise:.72},surface:{baseRoughness:.78,waterRetention:.86,bioAffinity:.82,dirtAffinity:.72,weathering:.68}}),
   asphalt:Object.freeze({kind:'asphalt',density:2400,restitution:.03,friction:.86,failureStressPa:3.5e6,failureStrain:.0004,brittle:false,color:[.09,.095,.105,1] as const,acoustic:{resonanceHz:190,damping:.72,brightness:.08,noise:.88},surface:{baseRoughness:.92,waterRetention:.56,bioAffinity:.08,dirtAffinity:.82,weathering:.72}}),
+  snow:Object.freeze({kind:'snow',density:180,restitution:.01,friction:.48,failureStressPa:8e3,failureStrain:.08,brittle:false,color:[.91,.945,.98,1] as const,acoustic:{resonanceHz:110,damping:.92,brightness:.03,noise:.52},surface:{baseRoughness:.96,waterRetention:.98,bioAffinity:0,dirtAffinity:.5,weathering:1}}),
 });
 
 export function material(kind:MaterialKind='default'):PhysicalMaterial{return MATERIALS[kind];}
