@@ -79,10 +79,14 @@ engine systems. Wetness, moss, dirt, wear, roughness, acoustic damping and darke
 are projections of that same evolving record rather than a second renderer-owned
 surface state. The same state is the extension point for mud, dust and additional
 material/environment consequences. Supported contact work updates
-only cells under the footprint; unsupported motion contributes no work. Physics,
-rendering and audio consume the same state instead of maintaining parallel weather
-interpretations. The current work/thermal model is an approximation, not a
-calibrated tyre or soil model.
+only cells under the footprint; unsupported motion contributes no work. Bound
+wheels claim their contact bodies and publish one localized `SurfaceContactWork`
+record derived from normal load, contact radius, rolling speed, lateral velocity
+and slip. That same work drives local heat, track melt, dirt, spray and subsequent
+friction; claimed wheels are excluded from the coarse body-footprint fallback so
+the cause is never counted twice. Physics, rendering and audio consume the same
+state instead of maintaining parallel weather interpretations. The current
+contact-work/thermal model is an approximation, not a calibrated tyre or soil model.
 
 ## Animation and surface contact ownership
 
