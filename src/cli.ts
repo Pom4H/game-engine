@@ -62,7 +62,7 @@ async function profileScene(scene:SceneSpec,options:ProfileOptions,sceneDirector
   if(!(options.duration>0&&options.duration<=15)||!(options.warmup>=0&&options.warmup<=60)||!Number.isFinite(options.from)||options.from<0||options.from>86_400)throw new RangeError('Invalid profile duration/warmup/from');
   const host=await serveScene(scene,{sceneDirectory});let browser:BrowserSession|undefined;
   try{
-    browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
+    browser=await BrowserSession.launch(`${host.url}&play=0&profile=1`,options.width,options.height);await browser.ready();
     const report=await browser.evaluate(`
       const engine=window.__GAME_ENGINE__;
       engine.seek(${JSON.stringify(options.from)});await engine.flush();
