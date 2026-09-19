@@ -18,7 +18,7 @@ export function evaluateFracture(contact:ContactCandidate):{decision:ContactDeci
     [contact.b,contact.a,[-contact.normal[0],-contact.normal[1],-contact.normal[2]]],
   ];
   for(const [target,other,normal] of candidates){
-    if(!target.material.brittle)continue;
+    if(!target.material.brittle||!target.fracturable)continue;
     const thickness=thicknessAlong(target,normal),impactRadius=contactRadius(other);
     const planeRadius=planarRadius(target,normal),crackRadius=Math.min(planeRadius,Math.max(.06,impactRadius*2.5,thickness*3));
     const fractureArea=Math.PI*crackRadius*crackRadius;
