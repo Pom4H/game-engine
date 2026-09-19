@@ -78,3 +78,25 @@ test('glass runtime uses exact polygon-prism fragments',()=>{
   const mass=shards.reduce((sum,entity)=>sum+(entity.body?.mass??0),0);
   assert.ok(Math.abs(mass-2500*.01*1.4*1.2)<.05,`fragment mass ${mass} should conserve glass mass`);
 });
+
+
+test('rotating debris settles on an explicit concrete surface',()=>{
+  const scene=new Scene({
+    version:1,
+    gravity:[0,-9.81,0],
+    ground:-100,
+    entities:[
+      {id:'floor',position:[0,-.1,0],mesh:{kind:'box',size:[10,.2,10]},material:{kind:'concrete'}},
+      {id:'shard',position:[0,1.2,0],rotation:[.7,.4,.25],mesh:{kind:'box',size:[.28,.018,.2]},material:{kind:'glass'},body:{mass:.18,velocity:[.8,-.2,.35],angularVelocity:[9,7,11]}},
+    ],
+  });
+  const shard=scene.entities.get('shard');
+  shard.body.fracturable=false;
+  shard.body.collisionClass='debris';
+  const events=[];
+  for(let i=0;i<720;i++){scene.step(1/60);events.push(...scene.drainEvents());}
+  assert.equal(shard.body.sleeping,true,'debris should eventually enter rest state on concrete');
+  assert.deepEqual(shard.body.velocity,[0,0,0]);
+  assert.deepEqual(shard.body.angularVelocity,[0,0,0]);
+  assert.ok(events.some(event=>event.type==='impact'&&event.materialA==='glass'&&event.materialB==='concrete'),'contact acoustics should see glass ↔ concrete');
+});
