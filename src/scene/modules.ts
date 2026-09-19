@@ -10,10 +10,10 @@ export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
   const kernel=new EngineKernel<SceneModuleContext,InternalCommand>();
   const definitions=[
     ['weather','input',[],['environment'],[]],
-    ['surfaces','input',['environment','entities'],['winter'],['weather']],
-    ['animation','simulate',['winter'],['entities','animation'],[]],
+    ['surfaces','input',['environment','entities'],['surface-state'],['weather']],
+    ['animation','simulate',['surface-state'],['entities','animation'],[]],
     ['physics','simulate',['winter','animation'],['entities','contacts'],['animation']],
-    ['surface-contacts','commit',['winter','animation','contacts'],['entities','surface-contacts'],[]],
+    ['surface-contacts','commit',['surface-state','animation','contacts'],['entities','surface-contacts'],[]],
     ['events','commit',['contacts'],['events'],['surface-contacts']],
     ['fracture','commit',['contacts'],['entities','events'],['events']],
     ['cleanup','commit',[],['entities'],['fracture']],
