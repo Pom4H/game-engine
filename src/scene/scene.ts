@@ -76,7 +76,11 @@ export class Scene {
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
+    // Initial environmental facts exist before the first scheduled surface tick.
+    // This preserves first-frame queries/geometry while cadence controls only evolution.
+    this.surfaces.reconcile(this.environment,this.entities);
     this.contacts=new SurfaceContactSystem(this);
+    this.syncSurfaceVisuals();
     for(const {surfaceId,...options} of this.spec.surfaceContacts?.snow??[])this.contacts.addSnowSurface(surfaceId,options);
     for(const {entityId,...options} of this.spec.surfaceContacts?.wheels??[])this.contacts.addWheelContact(entityId,options);
     for(const walker of this.spec.animation?.walkers??[])this.animation.addWalker(walker);
