@@ -10,3 +10,7 @@ export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,Primitive,MaterialSpec,
 export {primitiveMesh,primitiveKey,type MeshData} from './procedural/mesh.js';
 export {demoScene} from './demo.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
+
+export {material,materialKinds,type MaterialKind,type PhysicalMaterial,type AcousticMaterial} from './materials/catalog.js';
+export type {EngineEvent,ImpactEvent,FractureEvent} from './scene/events.js';
+export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
