@@ -31,7 +31,7 @@ export default {
  version:1,seed:20260919,gravity:[0,-9.81,0],ground:-100,
  camera:{position:[0,28,68],target:[0,7,-6],fov:55,focusDistance:70,aperture:.7},
  clearColor:[.012,.018,.028,1],
- environment:{temperatureC:-4,snowfall:'heavy',sunlight:.34,humidity:.92,precipitation:'wet',groundMoisture:.9,wind:[3.4,0,1.2],clock:{startHour:6.8,hoursPerSecond:.02}},
+ environment:{temperatureC:-4,snowfall:'heavy',sunlight:.34,humidity:.92,precipitation:'frequent',groundMoisture:.9,wind:[3.4,0,1.2],clock:{startHour:6.8,hoursPerSecond:.02}},
  rendering:{sunDirection:[-.45,.56,-.35],sunIntensity:1.5,exposure:1.02,fogDensity:.0018,shadowExtent:90},
  entities,
 };
