@@ -68,6 +68,55 @@ export default defineScene({
 
 No scene graph framework is required. `SceneSpec` is plain serializable data, so it can move between a TypeScript module, JSON, a URL, a worker or a test without adapters full of engine objects.
 
+## Engine computes consequences
+
+Application code describes objects, materials and initial state. It does not script collision outcomes.
+
+```ts
+const thickness = [.01,.015,.02,.03,.04,.06,.08,.11,.15,.20];
+
+export default defineScene({
+  version: 1,
+  entities: [
+    ...thickness.map((t, i) => ({
+      id: `window-${i + 1}`,
+      position: [i * 1.8, 1.2, 0],
+      mesh: {kind: 'box', size: [t, 2, 1.5]},
+      material: {kind: 'glass'},
+    })),
+    {
+      id: 'ball',
+      position: [-4, 1.2, 0],
+      mesh: {kind: 'sphere', radius: .11},
+      material: {kind: 'steel'},
+      body: {mass: 3.8, velocity: [50, 0, 0]},
+    },
+  ],
+});
+```
+
+There is no `onCollision`, `spawnShards` or sound callback here. The engine derives the outcome from geometry, mass, velocity and physical materials:
+
+```text
+contact energy
+   ↓
+elastic response / material failure
+   ↓
+penetration or rebound
+   ↓
+stress-directed crack field
+   ↓
+clipped Voronoi cells
+   ↓
+polygon-prism rigid fragments
+   ↓
+material/contact acoustic excitation
+   ↓
+procedural sound
+```
+
+For brittle glass plates, crack sites propagate along perturbed radial stress paths from the impact point. Their Voronoi bisectors form the crack graph, clipped against the real panel boundary. Fragment area and mass are conserved; the same deterministic seed reproduces the same crack topology. Fast bodies automatically receive additional physics substeps, so thin geometry does not require scene-specific CCD or timestep code.
+
 ## CLI
 
 Build once:
@@ -172,7 +221,7 @@ The CLI uses this same production runtime. There is no second test renderer and 
 
 **Serializable scene boundary.** GPU objects, callbacks and application classes never enter `SceneSpec`. Physics and rendering consume the same entities but remain replaceable behind their own APIs.
 
-**Procedural geometry.** Boxes, spheres and planes are generated in code. GPU mesh buffers and per-entity uniform resources are cached by the WebGPU renderer.
+**Procedural geometry and fracture.** Boxes, spheres and planes are generated in code. Brittle plate failure produces deterministic stress-directed Voronoi crack cells that are extruded into exact polygon-prism fragments. GPU mesh buffers and per-entity uniform resources are cached by the WebGPU renderer.
 
 **Zero runtime package dependencies.** The engine code does not pull an ECS, math library, renderer, physics library or browser automation framework into the application. TypeScript and Node types are development dependencies only.
 
@@ -218,7 +267,7 @@ This repository starts with the pieces that are already naturally generic in The
 - WebGPU runtime;
 - browser automation and deterministic capture.
 
-The initial physics backend intentionally implements translational rigid bodies with sphere/AABB contact, impulses, friction and restitution. It does **not** pretend to contain TheGame's full vehicle, deformable chassis, tyre or material model yet.
+The initial physics backend implements deterministic rigid-body translation, adaptive high-speed substeps, sphere/AABB contact, impulses, friction, restitution, material failure, brittle plate fracture and procedural contact acoustics. It does **not** pretend to contain TheGame's full vehicle, deformable chassis or tyre model yet.
 
 Those systems can be migrated behind the same contracts next, along with the more advanced renderer work: visibility/Hi-Z, lighting, environment, material families, streaming, physical audio and the denser vehicle physics path. Keeping that migration behind `SceneSpec` is the point — TheGame can keep evolving while the engine becomes independently reusable.
 
