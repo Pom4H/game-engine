@@ -7,6 +7,14 @@ export default defineScene({
   seed:19,
   gravity:[0,-9.81,0],
   ground:-100,
+  environment:{
+    humidity:.9,
+    temperatureC:13,
+    precipitation:'frequent',
+    sunlight:.28,
+    wind:[1.2,0,-.4],
+    groundMoisture:.82,
+  },
   clearColor:[.018,.024,.035,1],
   camera:{position:[-4.5,4.2,9],target:[8,1.2,0],fov:38},
   entities:[
@@ -14,7 +22,7 @@ export default defineScene({
       id:'floor',
       position:[8,-.1,0],
       mesh:{kind:'box',size:[32,.2,8]},
-      material:{kind:'concrete'},
+      material:{kind:'concrete',finish:'rough',ageYears:12,treatment:'none'},
     },
     ...thickness.map((value,index)=>({
       id:`window-${index+1}`,
