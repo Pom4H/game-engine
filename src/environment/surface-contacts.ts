@@ -3,11 +3,11 @@ import type {RuntimeEntity} from '../scene/scene.js';
 import type {EntitySpec,MaterialSpec} from '../scene/types.js';
 import {SnowFootprints,type FootContact,type SnowFootprint} from './footprints.js';
 import {SnowSurface,type SnowSurfaceOptions} from './snow-surface.js';
-import type {WinterSystem,WinterSurfaceState} from './winter.js';
+import type {SurfaceEnvironmentSystem,SurfaceEnvironmentState} from './surface-state.js';
 
 export interface SurfaceContactHost {
  readonly entities:Map<string,RuntimeEntity>;
- readonly winter:WinterSystem;
+ readonly surfaces:SurfaceEnvironmentSystem;
  readonly resources:Map<string,unknown>;
  add(entity:EntitySpec):RuntimeEntity;
  remove(id:string):void;
@@ -83,7 +83,7 @@ export class SurfaceContactSystem {
   if(this.surfaces.has(surfaceId))throw new TypeError(`Snow surface already registered: ${surfaceId}`);
   const entity=this.host.entities.get(surfaceId);if(!entity?.environmental?.surfaceUse)throw new TypeError(`No environmental surface: ${surfaceId}`);
   if(Math.abs(entity.rotation[0])>1e-5||Math.abs(entity.rotation[2])>1e-5)throw new TypeError('Deformable snow surface must be horizontal');
-  const depth=this.host.winter.surface(surfaceId)?.snowDepthM??entity.environmental.snowDepthM??0;
+  const depth=this.host.surfaces.surface(surfaceId)?.snowDepthM??entity.environmental.snowDepthM??0;
   const snowMaterial=options.material??entity.environmental.snowMaterial;
   const spec:SnowSurfaceOptions={...options,...(snowMaterial?{material:snowMaterial}:{}),id:`${this.id}:snow:0`,center:[entity.position[0],entity.position[2]],size:surfaceDimensions(entity),yaw:entity.rotation[1],height:surfaceElevation(entity)+depth,snowDepth:depth,capacity:this.footprints.capacity};
   let skin:SnowSurface;do{skin=new SnowSurface({...spec,id:`${this.id}:snow:${this.surfaceSequence++}`});}while(skin.ids().some(id=>this.host.entities.has(id)));
@@ -102,8 +102,8 @@ export class SurfaceContactSystem {
   this.wheels.set(entityId,{id:entityId,...options,...(options.lateral?{lateral:Object.freeze([...options.lateral]) as Vec3}:{})});
  }
  removeWheelContact(entityId:string):void{this.wheels.delete(entityId);this.wheelEmission.delete(entityId);}
- private state(entity:RuntimeEntity,x:number,z:number):Pick<WinterSurfaceState,'snowDepthM'|'waterDepthM'>{
-  return this.host.winter.sample(entity.id,x,z)??this.host.winter.surface(entity.id)??{snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0};
+ private state(entity:RuntimeEntity,x:number,z:number):Pick<SurfaceEnvironmentState,'snowDepthM'|'waterDepthM'>{
+  return this.host.surfaces.sample(entity.id,x,z)??this.host.surfaces.surface(entity.id)??{snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0};
  }
  /** Highest accessible surface. This is also the engine's foot-placement query. */
  sample(position:Vec3):SurfaceSample|undefined{
@@ -137,7 +137,7 @@ export class SurfaceContactSystem {
   const created=this.footprints.update(at,feet,p=>{const s=this.sample(p);return s?{height:s.height,snowDepth:s.snowDepth}:undefined;});
   this.time=at;
   for(const [surfaceId,binding] of this.surfaces){const entity=this.host.entities.get(surfaceId);if(!entity){this.removeSnowSurface(surfaceId);continue;}
-   const depth=this.host.winter.surface(surfaceId)?.snowDepthM??entity.environmental?.snowDepthM??0;
+   const depth=this.host.surfaces.surface(surfaceId)?.snowDepthM??entity.environmental?.snowDepthM??0;
    binding.skin.setSnow(surfaceElevation(entity)+depth,depth);
    if(depth<=.002&&binding.visible){for(const id of binding.skin.ids()){const owned=this.snowEntities.get(id);if(owned&&this.host.entities.get(id)===owned)this.host.remove(id);this.snowEntities.delete(id);}binding.visible=false;}
    else if(depth>.002){binding.visible=true;this.applyMeshes(binding.skin);}
