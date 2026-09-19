@@ -53,9 +53,14 @@ export class SurfaceEnvironmentSystem {
   readonly surfaces=new Map<string,SurfaceEnvironmentState>();
   readonly bodies=new Map<string,BodyEnvironmentState>();
 
-  step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
+  /** Reconcile authored entities into physical state without advancing time. */
+  reconcile(environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
     for(const id of [...this.surfaces.keys(),...this.bodies.keys()])if(!entities.has(id))this.remove(id);
     this.ensureStates(environment,entities);
+  }
+
+  step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
+    this.reconcile(environment,entities);
     this.applyTraffic(dt,entities);
     for(const [id,state] of this.surfaces){
       const entity=entities.get(id);if(!entity)continue;
@@ -77,11 +82,13 @@ export class SurfaceEnvironmentSystem {
     for(const entity of entities.values()){
       const use=entity.environmental?.surfaceUse;
       if(use&&!this.surfaces.has(entity.id)){
-        const authored=entity.material.surface;
+        const authored=entity.material.surface,snowDepthM=entity.environmental?.snowDepthM??0,waterDepthM=entity.environmental?.waterDepthM??0,iceDepthM=entity.environmental?.iceDepthM??0;
+        const snowFactor=Math.min(1,snowDepthM/.025),iceFactor=Math.min(1,iceDepthM/.003),waterFactor=Math.min(1,waterDepthM/.003);
+        const phaseFriction=Math.max(.16,1-snowFactor*.42-iceFactor*.72-waterFactor*.12);
         this.surfaces.set(entity.id,{
-          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0,iceDepthM:entity.environmental?.iceDepthM??0,
-          slush:0,wetness:authored.wetness,moss:authored.moss,dirt:authored.dirt,wear:authored.wear,roughness:authored.roughness,acousticDamping:authored.acousticDamping,darkening:authored.darkening,
-          trafficHeatC:0,trackMelt:0,puddle:0,frictionScale:authored.frictionScale,
+          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM,waterDepthM,iceDepthM,
+          slush:0,wetness:Math.max(authored.wetness,waterFactor),moss:authored.moss,dirt:authored.dirt,wear:authored.wear,roughness:authored.roughness,acousticDamping:authored.acousticDamping,darkening:authored.darkening,
+          trafficHeatC:0,trackMelt:0,puddle:Math.max(0,Math.min(1,waterDepthM/.006)),frictionScale:Math.max(.08,Math.min(1.18,authored.frictionScale*phaseFriction)),
         });
       }
       if(use&&!this.fields.has(entity.id)){
