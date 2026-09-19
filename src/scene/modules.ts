@@ -12,7 +12,7 @@ export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
     ['weather','input',[],['environment'],[]],
     ['surfaces','input',['environment','entities'],['surface-state'],['weather']],
     ['animation','simulate',['surface-state'],['entities','animation'],[]],
-    ['physics','simulate',['winter','animation'],['entities','contacts'],['animation']],
+    ['physics','simulate',['surface-state','animation'],['entities','contacts'],['animation']],
     ['surface-contacts','commit',['surface-state','animation','contacts'],['entities','surface-contacts'],[]],
     ['events','commit',['contacts'],['events'],['surface-contacts']],
     ['fracture','commit',['contacts'],['entities','events'],['events']],
