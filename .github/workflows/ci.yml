@@ -24,6 +24,9 @@ jobs:
     needs: core
     runs-on: self-hosted
     timeout-minutes: 15
+    defaults:
+      run:
+        shell: cmd
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -33,14 +36,12 @@ jobs:
       - run: bun run build
       - name: WebGPU render through production browser runtime
         run: |
-          mkdir -p artifacts
+          if not exist artifacts mkdir artifacts
           node dist/cli.js render examples/bounce.ts --time 2.5 --width 1280 --height 720 --out artifacts/gpu-smoke.png
       - name: Verify PNG output
-        run: |
-          node -e "const fs=require('fs');const p='artifacts/gpu-smoke.png';const b=fs.readFileSync(p);if(b.length<4096||b.toString('hex',0,8)!=='89504e470d0a1a0a')throw Error('invalid GPU smoke PNG');console.log(p,b.length,'bytes')"
+        run: node -e "const fs=require('fs');const p='artifacts/gpu-smoke.png';const b=fs.readFileSync(p);if(b.length<4096||b.toString('hex',0,8)!=='89504e470d0a1a0a')throw Error('invalid GPU smoke PNG');console.log(p,b.length,'bytes')"
       - name: Deterministic video path
-        run: |
-          node dist/cli.js record examples/bounce.ts --duration 1 --fps 12 --width 960 --height 540 --out artifacts/gpu-smoke.mp4
+        run: node dist/cli.js record examples/bounce.ts --duration 1 --fps 12 --width 960 --height 540 --out artifacts/gpu-smoke.mp4
       - uses: actions/upload-artifact@v7
         if: always()
         with:
