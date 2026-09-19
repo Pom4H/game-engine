@@ -1,6 +1,6 @@
 import {defineScene} from '@rom4/game-engine';
 
-const roadLength=140;
+const roadLength=190;
 
 function car(id:string,x:number,z:number,speed:number,color:readonly[number,number,number,number]){
   const velocity=[speed,0,0] as const;
@@ -29,19 +29,27 @@ function car(id:string,x:number,z:number,speed:number,color:readonly[number,numb
   ];
 }
 
-const lamps=Array.from({length:7},(_,i)=>({
+const lamps=Array.from({length:9},(_,i)=>({
   id:`lamp-${i}`,
-  position:[-18+i*14,2.7,6.55] as const,
+  position:[-22+i*16,2.7,7.15] as const,
   mesh:{kind:'box' as const,size:[.12,5.4,.12] as const},
   material:{kind:'steel' as const,color:[.08,.09,.11,1] as const},
 }));
 
-const buildings=Array.from({length:8},(_,i)=>({
-  id:`building-${i}`,
-  position:[-10+i*15,5.2,10.8] as const,
-  mesh:{kind:'box' as const,size:[12,10,6] as const},
-  material:{kind:'concrete' as const,finish:'rough' as const,ageYears:25},
-}));
+const buildings=[
+  ...Array.from({length:9},(_,i)=>({
+    id:`building-r-${i}`,
+    position:[-12+i*16,5.2,18.2] as const,
+    mesh:{kind:'box' as const,size:[13,10,7] as const},
+    material:{kind:'concrete' as const,finish:'rough' as const,ageYears:25},
+  })),
+  ...Array.from({length:9},(_,i)=>({
+    id:`building-l-${i}`,
+    position:[-12+i*16,5.0,-18.4] as const,
+    mesh:{kind:'box' as const,size:[13,9.6,7] as const},
+    material:{kind:'concrete' as const,finish:'rough' as const,ageYears:28},
+  })),
+];
 
 export default defineScene({
   version:1,
@@ -61,7 +69,7 @@ export default defineScene({
       {hour:13,temperatureC:4,snowfall:'none',sunlight:.88,humidity:.64,wind:[1.8,0,.1]},
     ],
   },
-  camera:{position:[-24,4.1,13.5],target:[8,.9,0],fov:46},
+  camera:{position:[-27,3.35,10.2],target:[16,.75,0],fov:48},
   entities:[
     {
       id:'road',
@@ -99,10 +107,13 @@ export default defineScene({
       environmental:{surfaceUse:'sidewalk'},
     },
 
-    ...car('car-a',-20,-1.85,8.5,[.07,.08,.1,1]),
-    ...car('car-b',-42,1.8,9.2,[.24,.26,.29,1]),
-    ...car('car-c',-63,-1.7,7.8,[.12,.16,.2,1]),
-    ...car('car-d',-82,1.65,9.8,[.34,.33,.31,1]),
+    ...car('car-a',-18,-1.85,8.5,[.07,.08,.1,1]),
+    ...car('car-b',-58,1.8,9.2,[.24,.26,.29,1]),
+    ...car('car-c',-112,-1.7,7.8,[.12,.16,.2,1]),
+    ...car('car-d',-166,1.65,9.8,[.34,.33,.31,1]),
+    ...car('car-e',-224,-1.75,8.2,[.16,.18,.22,1]),
+    ...car('car-f',-286,1.72,8.7,[.08,.11,.13,1]),
+    ...car('car-g',-340,-1.7,8.9,[.28,.29,.31,1]),
 
     ...lamps,
     ...buildings,
