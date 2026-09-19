@@ -168,10 +168,18 @@ export class PhysicsWorld {
   get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length};}
 
   private contactCandidate(a:RigidBody,b:RigidBody,hit:Hit):ContactCandidate{
-    const rv:Vec3=[b.velocity[0]-a.velocity[0],b.velocity[1]-a.velocity[1],b.velocity[2]-a.velocity[2]];
-    const approachSpeed=Math.max(0,-V3.dot(rv,hit.normal));
-    const inv=a.invMass+b.invMass,effectiveMass=inv>0?1/inv:0;
+    const ra=V3.sub(hit.point,a.position),rb=V3.sub(hit.point,b.position);
+    const va=V3.add(a.velocity,V3.cross(a.angularVelocity,ra)),vb=V3.add(b.velocity,V3.cross(b.angularVelocity,rb));
+    const rv=V3.sub(vb,va),approachSpeed=Math.max(0,-V3.dot(rv,hit.normal));
+    const denominator=this.contactDenominator(a,b,ra,rb,hit.normal),effectiveMass=denominator>1e-12?1/denominator:0;
     return{a,b,normal:hit.normal,point:hit.point,penetration:hit.penetration,approachSpeed,effectiveMass,normalEnergy:.5*effectiveMass*approachSpeed*approachSpeed};
+  }
+
+  private contactDenominator(a:RigidBody,b:RigidBody,ra:Vec3,rb:Vec3,direction:Vec3):number{
+    let value=a.invMass+b.invMass;
+    if(a.invMass){const rn=V3.cross(ra,direction);value+=V3.dot(direction,V3.cross(applyInvInertiaWorld(a,rn),ra));}
+    if(b.invMass){const rn=V3.cross(rb,direction);value+=V3.dot(direction,V3.cross(applyInvInertiaWorld(b,rn),rb));}
+    return value;
   }
 
   private rebuildIndex():void{
@@ -258,28 +266,29 @@ export class PhysicsWorld {
   }
 
   private resolvePenetration(contact:ContactCandidate,energyLoss:number):void{
-    const {a,b,normal,approachSpeed,effectiveMass,normalEnergy}=contact;
+    const {a,b,normal,point,approachSpeed,effectiveMass,normalEnergy}=contact;
     if(approachSpeed<=0||effectiveMass<=0){this.pushContact(contact,0,'penetrate');return;}
-    const remaining=Math.max(0,normalEnergy-energyLoss);
-    const after=Math.sqrt(2*remaining/effectiveMass);
-    const impulse=Math.max(0,(approachSpeed-after)/(a.invMass+b.invMass));
-    this.applyImpulse(a,b,normal,impulse);
+    const remaining=Math.max(0,normalEnergy-energyLoss),after=Math.sqrt(2*remaining/effectiveMass);
+    const impulse=Math.max(0,(approachSpeed-after)*effectiveMass);
+    this.applyPairImpulseAtPoint(a,b,normal,impulse,point);
     this.pushContact(contact,impulse,'penetrate');
   }
 
   private resolvePair(contact:ContactCandidate):void{
-    const {a,b,normal,penetration,approachSpeed}=contact,inv=a.invMass+b.invMass;if(inv<=0)return;
+    const {a,b,normal,point,penetration,approachSpeed,effectiveMass}=contact,inv=a.invMass+b.invMass;if(inv<=0)return;
     const slop=.0005,correction=Math.max(0,penetration-slop)*.8/inv;
     if(a.invMass){a.position[0]-=normal[0]*correction*a.invMass;a.position[1]-=normal[1]*correction*a.invMass;a.position[2]-=normal[2]*correction*a.invMass;}
     if(b.invMass){b.position[0]+=normal[0]*correction*b.invMass;b.position[1]+=normal[1]*correction*b.invMass;b.position[2]+=normal[2]*correction*b.invMass;}
     let impulse=0;
-    if(approachSpeed>0){
-      const restitution=Math.min(a.restitution,b.restitution),j=(1+restitution)*approachSpeed/inv;impulse=j;this.applyImpulse(a,b,normal,j);
-      const post:Vec3=[b.velocity[0]-a.velocity[0],b.velocity[1]-a.velocity[1],b.velocity[2]-a.velocity[2]],normalSpeed=V3.dot(post,normal);
+    if(approachSpeed>0&&effectiveMass>0){
+      const restitution=Math.min(a.restitution,b.restitution),j=(1+restitution)*approachSpeed*effectiveMass;impulse=j;
+      this.applyPairImpulseAtPoint(a,b,normal,j,point);
+      const ra=V3.sub(point,a.position),rb=V3.sub(point,b.position);
+      const va=V3.add(a.velocity,V3.cross(a.angularVelocity,ra)),vb=V3.add(b.velocity,V3.cross(b.angularVelocity,rb)),post=V3.sub(vb,va),normalSpeed=V3.dot(post,normal);
       const tangentRaw:Vec3=[post[0]-normal[0]*normalSpeed,post[1]-normal[1]*normalSpeed,post[2]-normal[2]*normalSpeed],length=V3.length(tangentRaw);
       if(length>1e-8){
-        const tangent=V3.scale(tangentRaw,1/length),limit=j*Math.sqrt(a.friction*b.friction),jt=Math.max(-limit,Math.min(limit,-V3.dot(post,tangent)/inv));
-        this.applyImpulse(a,b,tangent,jt);
+        const tangent=V3.scale(tangentRaw,1/length),denom=this.contactDenominator(a,b,ra,rb,tangent),limit=j*Math.sqrt(a.friction*b.friction);
+        if(denom>1e-12){const wanted=-V3.dot(post,tangent)/denom,jt=Math.max(-limit,Math.min(limit,wanted));this.applyPairImpulseAtPoint(a,b,tangent,jt,point);}
       }
     }
     this.pushContact(contact,impulse,'resolve');
@@ -291,10 +300,10 @@ export class PhysicsWorld {
     body.velocity[0]+=impulse[0]*body.invMass;body.velocity[1]+=impulse[1]*body.invMass;body.velocity[2]+=impulse[2]*body.invMass;
     const dw=applyInvInertiaWorld(body,V3.cross(r,impulse));body.angularVelocity[0]+=dw[0];body.angularVelocity[1]+=dw[1];body.angularVelocity[2]+=dw[2];
   }
-  private applyImpulse(a:RigidBody,b:RigidBody,normal:Vec3,j:number):void{
-    const ix=normal[0]*j,iy=normal[1]*j,iz=normal[2]*j;
-    if(a.invMass){a.wake();a.velocity[0]-=ix*a.invMass;a.velocity[1]-=iy*a.invMass;a.velocity[2]-=iz*a.invMass;}
-    if(b.invMass){b.wake();b.velocity[0]+=ix*b.invMass;b.velocity[1]+=iy*b.invMass;b.velocity[2]+=iz*b.invMass;}
+  private applyPairImpulseAtPoint(a:RigidBody,b:RigidBody,direction:Vec3,j:number,point:Vec3):void{
+    if(j===0)return;
+    if(a.invMass)this.applyImpulseAtPoint(a,direction,-j,V3.sub(point,a.position));
+    if(b.invMass)this.applyImpulseAtPoint(b,direction,j,V3.sub(point,b.position));
   }
   private pushContact(contact:ContactCandidate,impulse:number,mode:'resolve'|'penetrate'):void{
     this.contacts.push({a:contact.a.id,b:contact.b.id,normal:contact.normal,point:contact.point,penetration:contact.penetration,impulse,normalSpeed:contact.approachSpeed,normalEnergy:contact.normalEnergy,mode});
