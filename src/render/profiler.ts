@@ -49,7 +49,7 @@ export class RenderProfiler {
   private readonly querySet:GPUAny|null;private readonly slots:GpuSlot[]=[];private active:GpuSlot|null=null;
   private readonly queryBytes=RENDER_GPU_QUANTA.length*2*8;
 
-  constructor(private readonly device:GPUAny,readonly timestampQueries:boolean,private readonly capacity=240){
+  constructor(private readonly device:GPUAny,readonly timestampQueries:boolean,private readonly capacity=1024){
     if(!Number.isSafeInteger(capacity)||capacity<8||capacity>4096)throw new RangeError('Invalid render profiler capacity');
     this.querySet=timestampQueries?device.createQuerySet({label:'render quantum timestamps',type:'timestamp',count:RENDER_GPU_QUANTA.length*2}):null;
     if(timestampQueries)for(let i=0;i<4;i++)this.slots.push({
