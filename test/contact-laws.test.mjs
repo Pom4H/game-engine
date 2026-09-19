@@ -64,10 +64,12 @@ test('a finite horizontal slab does not teleport a body from beneath it',()=>{
 test('rotated OBB narrow phase detects contacts that axis-aligned bounds miss',()=>{
  const world=new PhysicsWorld([0,0,0],-100);
  world.add(new RigidBody({id:'rail',position:[0,0,0],rotation:[0,Math.PI/2,0],shape:{kind:'box',half:[2,.25,.25]}}));
- const mover=world.add(new RigidBody({id:'mover',position:[0,0,1.7],velocity:[0,0,-1],mass:1,shape:{kind:'box',half:[.3,.3,.3]}}));
+ // After rotation the rail is long along Z and thin along X. At z=1.7 the old
+ // axis-aligned half extents would miss it entirely; moving across X must collide.
+ const mover=world.add(new RigidBody({id:'mover',position:[.54,0,1.7],velocity:[-1,0,0],mass:1,shape:{kind:'box',half:[.3,.3,.3]}}));
  world.step(1/60);
  assert.ok(world.contacts.some(contact=>contact.a==='mover'&&contact.b==='rail'),'rotated long axis must participate in narrow phase');
- assert.ok(mover.velocity[2]>-.999,'contact impulse should oppose penetration into the rotated rail');
+ assert.ok(mover.velocity[0]>-.999,`contact impulse should oppose entry across the rotated rail: ${mover.velocity}`);
 });
 
 function offsetBoxImpact(y){
