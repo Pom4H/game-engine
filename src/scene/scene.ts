@@ -9,7 +9,7 @@ import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
 import type {EngineEvent} from './events.js';
-import type {BodySpec,CameraSpec,Color,EnvironmentalSpec,EntitySpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
+import type {BodySpec,CameraSpec,Color,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {validateScene} from './validate.js';
 
 export interface RuntimeMaterial {
@@ -28,6 +28,7 @@ export interface RuntimeEntity {
   readonly mesh?:Primitive;
   readonly material:RuntimeMaterial;
   readonly environmental?:EnvironmentalSpec;
+  readonly light?:LightSpec;
   readonly body?:RigidBody;
   /** Engine-generated transient geometry is removed after this simulation time. */
   expiresAt?:number;
@@ -77,6 +78,7 @@ export class Scene {
       id:spec.id,position,rotation,scale,
       material:Object.freeze({kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
+      ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(body?{body}:{})
     };
     this.entities.set(spec.id,runtime);
