@@ -1,6 +1,12 @@
 import type {MaterialKind} from '../materials/catalog.js';
 import type {Vec3} from '../math.js';
 
+export interface ContactSurfaceAcoustics {
+  readonly wetness:number;
+  readonly moss:number;
+  readonly damping:number;
+}
+
 export interface ImpactEvent {
   readonly type:'impact';
   readonly id:number;
@@ -11,6 +17,8 @@ export interface ImpactEvent {
   readonly b:string|'ground';
   readonly materialA:MaterialKind;
   readonly materialB:MaterialKind;
+  readonly surfaceA?:ContactSurfaceAcoustics;
+  readonly surfaceB?:ContactSurfaceAcoustics;
   readonly energy:number;
   readonly impulse:number;
   readonly speed:number;
