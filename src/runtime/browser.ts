@@ -62,6 +62,8 @@ export class BrowserRuntime {
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
   render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
   async flush():Promise<void>{await this.renderer.prepareMaterials?.(this.scene);this.render();await this.renderer.flush();}
+  profile(){return this.renderer.profile?.()??this.renderer.inspect().profile;}
+  resetProfile():void{this.renderer.resetProfile?.();}
   snapshot(){return this.scene.snapshot();}
   inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
@@ -91,7 +93,7 @@ export class BrowserRuntime {
     };
   }
 
-  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
+  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
   private frame=(now:number)=>{
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
