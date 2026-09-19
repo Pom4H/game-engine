@@ -37,16 +37,19 @@ test('local server serves exact material references, including generated snow, w
 });
 
 test('local material whitelist rejects traversal, reserved routes, missing files and escaping symlinks before listening',async t=>{
- const f=await fixture();t.after(()=>rm(f.root,{recursive:true,force:true}));await writeFile(join(f.root,'outside.png'),'outside-secret');await symlink(join(f.root,'outside.png'),join(f.directory,'assets','escape.png'));
+ const f=await fixture();t.after(()=>rm(f.root,{recursive:true,force:true}));await writeFile(join(f.root,'outside.png'),'outside-secret');
+ let symlinkAvailable=true;try{await symlink(join(f.root,'outside.png'),join(f.directory,'assets','escape.png'));}catch(error){if(error?.code==='EPERM'&&process.platform==='win32')symlinkAvailable=false;else throw error;}
  const spec=url=>({version:1,entities:[{id:'material',material:{texture:{url}}}]});
- for(const url of ['../outside.png','%2e%2e/outside.png','assets/escape.png','/scene.json','/dist/browser-entry.js','assets/bad%00.png','assets/bad%5c.png'])await assert.rejects(serveScene(spec(url),{sceneDirectory:f.directory}),undefined,url);
+ const invalid=['../outside.png','%2e%2e/outside.png','/scene.json','/dist/browser-entry.js','assets/bad%00.png','assets/bad%5c.png'];if(symlinkAvailable)invalid.push('assets/escape.png');
+ for(const url of invalid)await assert.rejects(serveScene(spec(url),{sceneDirectory:f.directory}),undefined,url);
  await assert.rejects(serveScene(spec('assets/missing.png'),{sceneDirectory:f.directory}),/ENOENT/);
  await assert.rejects(serveScene({version:2,entities:[]},{sceneDirectory:f.directory}));
 });
 
 test('a whitelisted asset cannot be redirected outside its scene directory after startup',async t=>{
  const f=await fixture();let host;t.after(async()=>{await host?.close();await rm(f.root,{recursive:true,force:true});});host=await serveScene(f.scene,{sceneDirectory:f.directory});
- await mkdir(join(f.root,'outside'));await writeFile(join(f.root,'outside','snow.jpg'),'outside-secret');await rename(join(f.directory,'assets'),join(f.directory,'old-assets'));await symlink(join(f.root,'outside'),join(f.directory,'assets'));
+ await mkdir(join(f.root,'outside'));await writeFile(join(f.root,'outside','snow.jpg'),'outside-secret');await rename(join(f.directory,'assets'),join(f.directory,'old-assets'));
+ try{await symlink(join(f.root,'outside'),join(f.directory,'assets'));}catch(error){if(error?.code==='EPERM'&&process.platform==='win32'){t.skip('Windows runner does not permit symlink creation');return;}throw error;}
  const response=await fetch(new URL('/assets/snow.jpg',host.url));assert.equal(response.status,404);assert.equal(await response.text(),'Not found');
 });
 
