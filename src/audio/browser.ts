@@ -26,12 +26,12 @@ export class ProceduralAudio {
 
   async unlock():Promise<boolean>{
     if(this.disposed)return false;
-    const context=this.ensure();
+    const context=this.ensure(),wasUnlocked=this.unlocked;
     this.ensureAmbient(context);
     // iOS/WebKit requires resume to happen directly from the user gesture.
     if(context.state!=='running')await context.resume();
     this.unlocked=context.state==='running';
-    if(this.unlocked)this.confirmUnlocked(context);
+    if(this.unlocked&&!wasUnlocked)this.confirmUnlocked(context);
     return this.unlocked;
   }
 
