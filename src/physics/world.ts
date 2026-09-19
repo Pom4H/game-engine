@@ -354,7 +354,12 @@ function sphereBox(sphere:RigidBody,box:RigidBody,invert:boolean):Hit|null{
   if(distance>=radius)return null;
   if(distance<1e-8){
     const gaps=[half[0]-Math.abs(local[0]),half[1]-Math.abs(local[1]),half[2]-Math.abs(local[2])];
-    const i=gaps[0]!<=gaps[1]!&&gaps[0]!<=gaps[2]!?0:gaps[1]!<=gaps[2]!?1:2,sign=Math.sign(local[i]!)||1;
+    const i=gaps[0]!<=gaps[1]!&&gaps[0]!<=gaps[2]!?0:gaps[1]!<=gaps[2]!?1:2;
+    // At the exact mid-plane a thin box has two equally near faces. Use the
+    // incoming relative velocity to retain the entry side instead of choosing
+    // an arbitrary face that can turn approachSpeed into zero.
+    const relativeLocal=rotateWorldToLocal(box.rotation,V3.sub(sphere.velocity,box.velocity));
+    const sign=Math.abs(local[i]!)>1e-7?(Math.sign(local[i]!)||1):(-Math.sign(relativeLocal[i]!)||1);
     const outwardLocal:MutableVec3=[0,0,0];outwardLocal[i]=sign;
     const outward=rotateLocal(box.rotation,outwardLocal);normalSphereToBox=V3.scale(outward,-1);penetration=radius+gaps[i]!;
     const faceLocal:MutableVec3=[...local];faceLocal[i]=sign*half[i]!;point=V3.add(box.position,rotateLocal(box.rotation,faceLocal));
