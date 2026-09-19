@@ -19,15 +19,15 @@ export function validateScene(value:unknown):SceneSpec{
       if(kind!==undefined&&!materialKinds().includes(kind as any))throw new TypeError(`${entity.id}.material.kind is unknown`);
       if(material.finish!==undefined&&!['raw','rough','smooth','polished','weathered'].includes(String(material.finish)))throw new TypeError(`${entity.id}.material.finish is unknown`);
       if(material.treatment!==undefined&&!['none','sealed','biocide','galvanized','painted'].includes(String(material.treatment)))throw new TypeError(`${entity.id}.material.treatment is unknown`);
-      if(material.ageYears!==undefined&&(!Number.isFinite(material.ageYears)||Number(material.ageYears)<0))throw new TypeError(`${entity.id}.material.ageYears must be non-negative`);
+      if(material.ageYears!==undefined&&(typeof material.ageYears!=='number'||!Number.isFinite(material.ageYears)||material.ageYears<0))throw new TypeError(`${entity.id}.material.ageYears must be non-negative`);
     }
   }
   if(scene.gravity!==undefined){if(!Array.isArray(scene.gravity))throw new TypeError('gravity must be a vec3');finiteVec3(scene.gravity as number[],'gravity');}
   if(scene.environment!==undefined){
     if(!scene.environment||typeof scene.environment!=='object')throw new TypeError('environment must be an object');
     const environment=scene.environment as Record<string,unknown>;
-    for(const key of ['humidity','sunlight','groundMoisture'])if(environment[key]!==undefined&&(!Number.isFinite(environment[key])||Number(environment[key])<0||Number(environment[key])>1))throw new TypeError(`environment.${key} must be within 0..1`);
-    if(environment.temperatureC!==undefined&&!Number.isFinite(environment.temperatureC))throw new TypeError('environment.temperatureC must be finite');
+    for(const key of ['humidity','sunlight','groundMoisture'])if(environment[key]!==undefined&&(typeof environment[key]!=='number'||!Number.isFinite(environment[key])||Number(environment[key])<0||Number(environment[key])>1))throw new TypeError(`environment.${key} must be within 0..1`);
+    if(environment.temperatureC!==undefined&&(typeof environment.temperatureC!=='number'||!Number.isFinite(environment.temperatureC)))throw new TypeError('environment.temperatureC must be finite');
     if(environment.precipitation!==undefined&&!['arid','rare','occasional','frequent'].includes(String(environment.precipitation)))throw new TypeError('environment.precipitation is unknown');
     if(environment.wind!==undefined){if(!Array.isArray(environment.wind))throw new TypeError('environment.wind must be a vec3');finiteVec3(environment.wind as number[],'environment.wind');}
   }
