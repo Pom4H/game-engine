@@ -285,3 +285,52 @@ Node 22+ is the CLI target. The interactive renderer requires a browser with Web
 ## Status
 
 `0.1` is the extraction foundation: the public boundary, deterministic runtime, URL/CLI workflow and a real WebGPU path are present. More of the production-grade systems from TheGame can now move here without dragging gameplay code with them.
+
+
+## Winter environment
+
+Weather is declarative. Application code describes the civil-time weather sequence and the semantic use of a physical surface; it does not script snow tracks, puddles or snow attached to moving bodies.
+
+```ts
+environment: {
+  clock: {startHour: 2, hoursPerSecond: .30},
+  weather: [
+    {hour: 2,   temperatureC: -10, snowfall: 'heavy',    sunlight: 0},
+    {hour: 7.4, temperatureC:   0, snowfall: 'moderate', sunlight: .18},
+    {hour: 13,  temperatureC:   4, snowfall: 'none',     sunlight: .88},
+  ],
+},
+
+entities: [
+  {
+    id: 'road',
+    mesh: {kind: 'box', size: [190, .24, 8]},
+    material: {kind: 'asphalt'},
+    environmental: {surfaceUse: 'road'},
+  },
+  {
+    id: 'sidewalk',
+    mesh: {kind: 'box', size: [190, .18, 3.2]},
+    material: {kind: 'concrete'},
+    environmental: {surfaceUse: 'sidewalk'},
+  },
+]
+```
+
+The engine derives a winter state for each exposed surface:
+
+```text
+weather + material + geometry + traffic
+              ↓
+       surface temperature
+              ↓
+ snow ⇄ ice → slush → water
+                    ↓
+              drainage / puddles
+```
+
+Moving bodies contribute contact work to road surfaces. That raises local traffic heat, melts wheel paths and produces dirty slush. Snowfall accumulates on moving bodies from geometry and motion; wake recirculation increases rear-facing accumulation, so rear bodywork and wings retain more snow without a `rearSnow` authoring parameter.
+
+The WebGPU renderer consumes those engine states to synthesize asphalt aggregate, square paving, tyre-cleared snow tracks, wet/slushy patches, puddles, attached body snow and instanced snowfall. Curb and sidewalk snow mass also generates engine-owned snowdrift geometry. Civil time drives night, sunrise and daylight lighting, while ordinary point lights provide street illumination.
+
+See `examples/winter-street.ts`.
