@@ -2,7 +2,8 @@
 export const FRAME_WGSL=`
 struct Frame {
  lightVP:mat4x4<f32>, sun:vec4<f32>, sunColor:vec4<f32>, sky:vec4<f32>,
- eye:vec4<f32>, forward:vec4<f32>, right:vec4<f32>, up:vec4<f32>, params:vec4<f32>, reflectionVP:mat4x4<f32>
+ eye:vec4<f32>, forward:vec4<f32>, right:vec4<f32>, up:vec4<f32>, params:vec4<f32>, reflectionVP:mat4x4<f32>,
+ viewVP:mat4x4<f32>, previousVP:mat4x4<f32>, environment:vec4<f32>
 }
 `;
 export const SKY_SHADER=FRAME_WGSL+`
