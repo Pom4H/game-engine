@@ -6,6 +6,7 @@ export function primitiveMesh(primitive:Primitive):MeshData{
   if(primitive.kind==='box')return boxMesh();
   if(primitive.kind==='plane')return planeMesh();
   if(primitive.kind==='shard')return shardMesh(primitive.axis??2,primitive.skew??0);
+  if(primitive.kind==='polygon-prism')return polygonPrismMesh(primitive.axis??2,primitive.points,primitive.thickness);
   return sphereMesh(Math.max(6,Math.min(64,Math.round(primitive.segments??20))));
 }
 function pack(positions:number[],normals:number[],indices:number[]):MeshData{
@@ -43,6 +44,19 @@ function shardMesh(axis:0|1|2,skew:number):MeshData{
     if(indices.length===3)i.push(offset,offset+1,offset+2);else i.push(offset,offset+1,offset+2,offset,offset+2,offset+3);
   };
   face([0,2,1]);face([3,4,5]);face([0,1,4,3]);face([1,2,5,4]);face([2,0,3,5]);
+  return pack(p,n,i);
+}
+function polygonPrismMesh(axis:0|1|2,points:readonly (readonly [number,number])[],thickness:number):MeshData{
+  if(points.length<3)throw new RangeError('polygon-prism requires at least 3 points');
+  const depth=Math.max(.0005,thickness)/2,map=(u:number,v:number,d:number):[number,number,number]=>axis===0?[d,u,v]:axis===1?[u,d,v]:[u,v,d];
+  const p:number[]=[],n:number[]=[],i:number[]=[];
+  const normalFor=(a:[number,number,number],b:[number,number,number],c:[number,number,number])=>{
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2],nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,l=Math.hypot(nx,ny,nz)||1;return[nx/l,ny/l,nz/l];
+  };
+  const addFace=(verts:[number,number,number][])=>{const base=p.length/3,normal=normalFor(verts[0]!,verts[1]!,verts[2]!);for(const v of verts){p.push(...v);n.push(...normal);}for(let k=1;k<verts.length-1;k++)i.push(base,base+k,base+k+1);};
+  const front=points.map(q=>map(q[0],q[1],-depth)),back=points.map(q=>map(q[0],q[1],depth));
+  addFace([...front].reverse());addFace(back);
+  for(let k=0;k<points.length;k++){const next=(k+1)%points.length;addFace([front[k]!,front[next]!,back[next]!,back[k]!]);}
   return pack(p,n,i);
 }
 function sphereMesh(segments:number):MeshData{
