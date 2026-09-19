@@ -1,5 +1,7 @@
 import {hashString,mulberry32} from '../core/random.js';
+import {resolveEnvironment,type EnvironmentState} from '../environment/types.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
+import {deriveSurfaceState,effectiveFriction,type SurfaceState} from '../materials/surface.js';
 import {evaluateFracture,type FractureDecision} from '../materials/fracture.js';
 import {fracturePlate} from '../materials/glass-fracture.js';
 import type {MutableVec3,Vec3} from '../math.js';
@@ -13,6 +15,7 @@ export interface RuntimeMaterial {
   readonly kind:MaterialKind;
   readonly color:Color;
   readonly profile:PhysicalMaterial;
+  readonly surface:SurfaceState;
 }
 interface FracturePiece{mesh:Primitive;position:MutableVec3;rotation:MutableVec3;volume:number}
 
@@ -33,6 +36,7 @@ export class Scene {
   readonly spec:SceneSpec;
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
+  readonly environment:EnvironmentState;
   time=0;
   tick=0;
   camera:CameraSpec;
@@ -43,6 +47,7 @@ export class Scene {
 
   constructor(input:SceneSpec){
     this.spec=validateScene(input);
+    this.environment=resolveEnvironment(this.spec.environment);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
@@ -51,6 +56,7 @@ export class Scene {
   add(spec:EntitySpec):RuntimeEntity{
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
     const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?structuredClone(spec.mesh):undefined;
+    const surface=deriveSurfaceState(profile,{finish:spec.material?.finish,ageYears:spec.material?.ageYears,treatment:spec.material?.treatment},this.environment);
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
@@ -61,12 +67,12 @@ export class Scene {
       ...(spec.body?.velocity?{velocity:spec.body.velocity}:{}),
       ...(spec.body?.angularVelocity?{angularVelocity:spec.body.angularVelocity}:{}),
       ...(spec.body?.restitution!==undefined?{restitution:spec.body.restitution}:{}),
-      ...(spec.body?.friction!==undefined?{friction:spec.body.friction}:{}),
+      friction:spec.body?.friction??effectiveFriction(profile,surface),
     })):undefined;
     if(body){position=body.position;rotation=body.rotation;}
     const runtime:RuntimeEntity={
       id:spec.id,position,rotation,scale,
-      material:Object.freeze({kind:profile.kind,color:spec.material?.color??profile.color,profile}),
+      material:Object.freeze({kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(mesh?{mesh}:{}),...(body?{body}:{})
     };
     this.entities.set(spec.id,runtime);
