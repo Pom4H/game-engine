@@ -22,7 +22,7 @@ test('render profiler records CPU quanta and resets benchmark window',()=>{
 test('render profiler resolves named GPU pass timestamps asynchronously',async()=>{
  const profiler=new RenderProfiler(fakeDevice,{enabled:true,timestampQueries:true,capacity:16});profiler.beginFrame();
  const shadow=profiler.timestampWrites('shadow');assert.equal(shadow.beginningOfPassWriteIndex,0);assert.equal(shadow.endOfPassWriteIndex,1);
- assert.equal(profiler.timestampWrites('post').endOfPassWriteIndex,RENDER_GPU_QUANTA.length*2-1);
+ assert.equal(profiler.timestampWrites('present').endOfPassWriteIndex,RENDER_GPU_QUANTA.length*2-1);
  const encoder={
   resolveQuerySet(query,_first,count,buffer){const raw=new BigUint64Array(buffer.data);if(query.type==='occlusion'){for(let i=0;i<count;i++)raw[i]=BigInt(i+1);}else for(let i=0;i<count/2;i++){raw[i*2]=BigInt(i)*2_000_000n;raw[i*2+1]=raw[i*2]+1_000_000n;}},
   copyBufferToBuffer(source,sourceOffset,target,targetOffset,size){new Uint8Array(target.data,targetOffset,size).set(new Uint8Array(source.data,sourceOffset,size));},
