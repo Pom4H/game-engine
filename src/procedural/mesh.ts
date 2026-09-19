@@ -95,15 +95,24 @@ export function snowDriftMesh(size:readonly[number,number,number],seed:number,se
   const ridge=.12*Math.sin(x*.93+phase)+.055*Math.sin(x*2.83-phase);
   const displaced=v + .13*Math.sin(x*.43+phase)*Math.max(0,1-4*v*v);
   const cross=Math.max(0,1-4*displaced*displaced);
-  const ends=continuous?1:Math.pow(Math.max(0,Math.sin(Math.PI*(u+.5))),.30);
-  const drift=.60+noise(x*.45+phase,z*.7)*.38+noise(x*1.6,z*2.3+phase)*.16;
-  const grain=(noise(x*13.3+phase,z*17.8)-.5)*.011+(noise(x*4.4,z*6.2+phase)-.5)*.022;
+  const ends=continuous?1:Math.pow(Math.max(0,Math.sin(Math.PI*(u+.5))),.60);
+  const drift=.48+noise(x*.63+phase,z*1.2)*.44+noise(x*2.8,z*3.3+phase)*.27;
+  const grain=(noise(x*17.3+phase,z*21.8)-.5)*.025+(noise(x*6.4,z*9.2+phase)-.5)*.09;
   return Math.max(0,size[1]*(Math.pow(cross,1.30+.24*Math.sin(x*.31+phase))*ends*drift*(1+v*ridge*2.0)+grain*cross));
  };
+ const point=(u:number,v:number):readonly[number,number,number]=>{
+  const x=u*size[0]+offset;
+  // A ploughed bank has a wandering toe, not a straight rectangular footprint.
+  // Coherent world coordinates keep adjacent generated tiles seamless.
+  const width=continuous?.78+noise(x*.87+phase,11)*.20+noise(x*2.53,17)*.10:Math.sqrt(Math.max(0,1-4*u*u))*(.94+noise(x*3.7+phase,31)*.12);
+  const shift=continuous?(noise(x*.47+phase,29)-.5)*size[2]*.25:0;
+  return[u*size[0],height(u,v),v*size[2]*width+shift];
+ };
  for(let iz=0;iz<=nz;iz++)for(let ix=0;ix<=nx;ix++){
-  const u=ix/nx-.5,v=iz/nz-.5,h=height(u,v),e=.002;
-  const dx=(height(u+e,v)-height(u-e,v))/(2*e*size[0]),dz=(height(u,v+e)-height(u,v-e))/(2*e*size[2]),l=Math.hypot(dx,1,dz);
-  p.push(u*size[0],h,v*size[2]);n.push(-dx/l,1/l,-dz/l);
+  const u=ix/nx-.5,v=iz/nz-.5,e=.0005,at=point(u,v),a=point(u+e,v),b=point(u-e,v),c=point(u,v+e),d=point(u,v-e);
+  const tx=[a[0]-b[0],a[1]-b[1],a[2]-b[2]] as const,tz=[c[0]-d[0],c[1]-d[1],c[2]-d[2]] as const;
+  const normal=[tz[1]*tx[2]-tz[2]*tx[1],tz[2]*tx[0]-tz[0]*tx[2],tz[0]*tx[1]-tz[1]*tx[0]],l=Math.hypot(...normal);
+  p.push(...at);if(l<1e-12)n.push(u<0?-.96:.96,.28,0);else n.push(normal[0]!/l,normal[1]!/l,normal[2]!/l);
   if(ix<nx&&iz<nz){const a=iz*(nx+1)+ix,b=a+nx+1;indices.push(a,b,a+1,b,b+1,a+1);}
  }
  return pack(p,n,indices);

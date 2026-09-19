@@ -8,7 +8,7 @@ test('adjacent continuous snow banks share heights and normals without floating 
  const size=[6,.85,1.2],a=snowDriftMesh(size,31,48,true,0),b=snowDriftMesh(size,31,48,true,6),row=49,rows=a.vertices.length/6/row;
  for(let z=0;z<rows;z++){
   const ai=(z*row+48)*6,bi=z*row*6;
-  for(const c of [1,3,4,5])assert.ok(Math.abs(a.vertices[ai+c]-b.vertices[bi+c])<1e-5,`seam row ${z} component ${c}`);
+  for(const c of [1,2,3,4,5])assert.ok(Math.abs(a.vertices[ai+c]-b.vertices[bi+c])<1e-5,`seam row ${z} component ${c}`);
  }
  for(const mesh of [a,b])for(let i=0;i<mesh.vertices.length;i+=6){
   assert.ok(mesh.vertices[i+1]>=0);
@@ -82,4 +82,33 @@ test('snow visual disappears after melting and longitudinal tiles use the same w
  assert.equal(drifts.length,2);assert.ok(drifts.every(d=>d.rotation[1]===-Math.PI/2));
  for(const c of scene.winter.field('curb').cells)c.snowDepthM=0;
  scene.step();assert.equal([...scene.entities.keys()].filter(id=>id.startsWith('__winter:drift:')).length,0);
+});
+
+test('winter generated geometry never claims authored IDs and releases only its exact owned entities',()=>{
+ const marker='__winter:drift:authored',collision='__winter:drift:curb:0';
+ const scene=new Scene({version:1,environment:{temperatureC:-4,snowfall:'none'},entities:[
+  {id:marker,position:[100,1,0],mesh:{kind:'box'},body:{mass:0}},
+  {id:collision,position:[110,1,0],mesh:{kind:'box'},body:{mass:0}},
+  {id:'curb',position:[0,.1,0],mesh:{kind:'box',size:[8,.2,.2]},environmental:{surfaceUse:'curb',snowDepthM:.2}},
+ ]});
+ const originals=[scene.entities.get(marker),scene.entities.get(collision)];scene.step();
+ assert.equal(scene.entities.get(marker),originals[0]);assert.equal(scene.entities.get(collision),originals[1]);assert.ok(scene.physics.bodies.has(marker));assert.ok(scene.physics.bodies.has(collision));
+ const generated=[...scene.entities.values()].filter(e=>e.mesh?.kind==='snowdrift');assert.equal(generated.length,2);assert.ok(generated.every(e=>e.id!==collision));
+ const replaced=generated[0];scene.remove(replaced.id);const replacement=scene.add({id:replaced.id,position:[120,1,0],mesh:{kind:'box'},body:{mass:0}});
+ scene.step();assert.equal(scene.entities.get(replaced.id),replacement);scene.remove('curb');assert.equal([...scene.entities.values()].filter(e=>e.mesh?.kind==='snowdrift').length,0);assert.equal(scene.entities.get(replaced.id),replacement);assert.ok(scene.physics.bodies.has(replaced.id));
+ scene.step();assert.equal(scene.entities.get(marker),originals[0]);assert.equal(scene.entities.get(collision),originals[1]);
+ const longId='snowy-'+('x'.repeat(174)),longScene=new Scene({version:1,environment:{temperatureC:-4},entities:[{id:longId,mesh:{kind:'box',size:[3,.2,.2]},environmental:{surfaceUse:'curb',snowDepthM:.1}}]});assert.doesNotThrow(()=>longScene.step());assert.ok([...longScene.entities.keys()].every(id=>id.length<=180));
+});
+
+test('winter drift IDs reserve collision suffix space at the 160-character boundary',()=>{
+ const sourceId='x'.repeat(160-'__winter:drift::0'.length),occupiedId=`__winter:drift:${sourceId}:0`;
+ assert.equal(occupiedId.length,160);
+ const scene=new Scene({version:1,environment:{temperatureC:-4,snowfall:'none'},entities:[
+  {id:occupiedId,position:[100,1,0],mesh:{kind:'box'},body:{mass:0}},
+  {id:sourceId,mesh:{kind:'box',size:[3,.2,.2]},environmental:{surfaceUse:'curb',snowDepthM:.1}},
+ ]});
+ const authored=scene.entities.get(occupiedId);assert.doesNotThrow(()=>scene.step());
+ const generated=[...scene.entities.values()].filter(e=>e.mesh?.kind==='snowdrift');assert.equal(generated.length,1);assert.ok(generated[0].id.length<=160);
+ assert.equal(scene.entities.get(occupiedId),authored);assert.ok(scene.physics.bodies.has(occupiedId));
+ scene.remove(sourceId);assert.equal(scene.entities.get(occupiedId),authored);assert.equal([...scene.entities.values()].filter(e=>e.mesh?.kind==='snowdrift').length,0);
 });

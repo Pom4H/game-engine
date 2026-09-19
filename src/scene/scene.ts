@@ -1,3 +1,5 @@
+import {AnimationSystem} from '../animation/locomotion.js';
+import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
 import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
@@ -11,7 +13,7 @@ import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
 import type {EngineEvent} from './events.js';
-import type {BodySpec,CameraSpec,Color,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
+import type {BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
 
@@ -19,6 +21,7 @@ export interface RuntimeMaterial {
   readonly kind:MaterialKind;
   readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';
   readonly color:Color;
+  readonly texture?:SurfaceTextureSpec;
   readonly profile:PhysicalMaterial;
   readonly surface:SurfaceState;
 }
@@ -44,6 +47,8 @@ export class Scene {
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
   readonly winter=new WinterSystem();
+  readonly animation=new AnimationSystem();
+  readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
   readonly resources=new Map<string,unknown>();
   lastExecution:string[]=[];
@@ -56,6 +61,8 @@ export class Scene {
   private readonly eventQueue:EngineEvent[]=[];
   private readonly impactCooldown=new Map<string,number>();
   private generatedSequence=0;
+  private winterVisualSequence=0;
+  private readonly winterVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
 
   constructor(input:SceneSpec){
     this.spec=validateScene(input);
@@ -64,6 +71,11 @@ export class Scene {
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.winter.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
+    this.contacts=new SurfaceContactSystem(this);
+    for(const {surfaceId,...options} of this.spec.surfaceContacts?.snow??[])this.contacts.addSnowSurface(surfaceId,options);
+    for(const {entityId,...options} of this.spec.surfaceContacts?.wheels??[])this.contacts.addWheelContact(entityId,options);
+    for(const walker of this.spec.animation?.walkers??[])this.animation.addWalker(walker);
+    for(const vehicle of this.spec.animation?.vehicles??[])this.animation.addVehicle(vehicle);
   }
 
   add(spec:EntitySpec):RuntimeEntity{
@@ -86,7 +98,7 @@ export class Scene {
     if(body){position=body.position;rotation=body.rotation;}
     const runtime:RuntimeEntity={
       id:spec.id,position,rotation,scale,
-      material:Object.freeze({...spec.material,kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
+      material:Object.freeze({...spec.material,...(spec.material?.texture?{texture:Object.freeze({...spec.material.texture})}:{}),kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(body?{body}:{})
@@ -96,7 +108,15 @@ export class Scene {
   }
 
   use(module:SceneModule):this{this.kernel.use(module);return this;}
-  remove(id:string):void{this.physics.remove(id);this.entities.delete(id);this.winter.remove(id);}
+  remove(id:string):void{
+    // Only exact owned objects are removed; an authored replacement under a
+    // formerly generated ID must survive source deletion and weather cleanup.
+    for(const [key,visual] of this.winterVisuals){
+      if(visual.source===id){this.winterVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
+      else if(visual.entity.id===id)this.winterVisuals.delete(key);
+    }
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.physics.remove(id);this.entities.delete(id);this.winter.remove(id);
+  }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
@@ -117,6 +137,8 @@ export class Scene {
     switch(command.action){
       case 'weather':this.environment=resolveEnvironmentAt(this.spec.environment,at);break;
       case 'surfaces':this.winter.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);this.syncWinterVisuals();break;
+      case 'animation':this.animation.step(at,this.entities,p=>this.contacts.sample(p));break;
+      case 'surface-contacts':this.contacts.step(dt,at,this.animation.feet);break;
       case 'physics':
         this.pendingFractures.clear();
         this.physics.step(dt,contact=>{
@@ -152,20 +174,26 @@ export class Scene {
       const longSize=dimensions[longAxis],crossSize=dimensions[crossAxis],count=Math.max(1,Math.min(256,Math.ceil(longSize/6)));
       const top=source.position[1]+dimensions[1]/2;
       for(let i=0;i<count;i++){
-        const id=`__winter:drift:${surfaceId}:${i}`;
-        const height=Math.round(Math.min(1.45,state.snowDepthM*(state.use==='curb'?4.2:1.25))*50)/50;
-        if(height<.02)continue;keep.add(id);
+        const key=`${surfaceId}:${i}`,height=Math.round(Math.min(1.45,state.snowDepthM*(state.use==='curb'?4.2:1.25))*50)/50;
+        if(height<.02)continue;keep.add(key);
         const longitudinal=longSize/count,cross=state.use==='curb'?Math.max(.7,crossSize*4.8):crossSize;
         const position:MutableVec3=[...source.position];position[longAxis]+=-longSize/2+(i+.5)*longSize/count;position[1]=state.use==='curb'?source.position[1]-dimensions[1]/2+.003:top-.015;
-        const size:MutableVec3=[longitudinal,height,cross];
-        const seed=(this.spec.seed??1)^hashString(surfaceId);
-        const previous=this.entities.get(id);
+        const size:MutableVec3=[longitudinal,height,cross],seed=(this.spec.seed??1)^hashString(surfaceId),owned=this.winterVisuals.get(key);
+        const previous=owned&&this.entities.get(owned.entity.id)===owned.entity?owned.entity:undefined;
         if(previous?.mesh?.kind==='snowdrift'&&previous.mesh.size[1]===height&&previous.mesh.size[0]===size[0]&&previous.mesh.size[2]===size[2]&&previous.mesh.offset===position[longAxis]&&previous.position.every((v,i)=>v===position[i]))continue;
-        this.entities.delete(id);
-        this.add({id,position,rotation:longAxis===0?[0,0,0]:[0,-Math.PI/2,0],mesh:{kind:'snowdrift',size,seed,continuous:true,offset:position[longAxis]},material:{kind:'snow',roughness:.88}});
+        let id=previous?.id;
+        if(previous)this.remove(previous.id);
+        else{
+          const preferred=`__winter:drift:${surfaceId}:${i}`,base=preferred.length<=140?preferred:`__winter:drift:${hashString(surfaceId).toString(36)}:${i}`;
+          id=base;while(this.entities.has(id))id=`${base}:${this.winterVisualSequence++}`;
+        }
+        const entity=this.add({id:id!,position,rotation:longAxis===0?[0,0,0]:[0,-Math.PI/2,0],mesh:{kind:'snowdrift',size,seed,continuous:true,offset:position[longAxis]},material:{roughness:.88,...source.environmental?.snowMaterial,kind:'snow'}});
+        this.winterVisuals.set(key,{source:surfaceId,entity});
       }
     }
-    for(const id of [...this.entities.keys()])if(id.startsWith('__winter:drift:')&&!keep.has(id))this.entities.delete(id);
+    for(const [key,visual] of this.winterVisuals)if(!keep.has(key)){
+      this.winterVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);
+    }
   }
 
   private emitContactEvents(at:number):void{
@@ -229,7 +257,7 @@ export class Scene {
     const source=fracture.body,sourceMass=source.invMass?source.mass:density*totalVolume;
     const kick:Vec3=[-fracture.normal[0],-fracture.normal[1],-fracture.normal[2]],impulse=contact?.impulse??0;
     const fragments:RigidBody[]=[],rng=mulberry32(seed^0x91e10da5);
-    this.physics.remove(entity.id);this.entities.delete(entity.id);
+    this.remove(entity.id);
 
     for(const piece of pieces){
       const mass=sourceMass*piece.volume/totalVolume;
@@ -249,7 +277,7 @@ export class Scene {
   }
 
   private cleanupGenerated(at:number):void{
-    for(const entity of [...this.entities.values()])if(entity.expiresAt!==undefined&&entity.expiresAt<=at){this.physics.remove(entity.id);this.entities.delete(entity.id);}
+    for(const entity of [...this.entities.values()])if(entity.expiresAt!==undefined&&entity.expiresAt<=at)this.remove(entity.id);
     for(const [key,time] of this.impactCooldown)if(at-time>2)this.impactCooldown.delete(key);
   }
   private pushEvent(event:EngineEvent):void{this.eventQueue.push(event);if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);}

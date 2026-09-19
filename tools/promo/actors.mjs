@@ -1,40 +1,107 @@
-// Winter pedestrian: two-bone IK, planted feet, deterministic contact events.
-export const WALK={startX:-20,z:5.02,speed:.86,period:1.30,ground:.163};
-const add=(a,b)=>a.map((v,i)=>v+b[i]),sub=(a,b)=>a.map((v,i)=>v-b[i]),mul=(a,s)=>a.map(v=>v*s),unit=a=>mul(a,1/(Math.hypot(...a)||1));
-function limb(root,end,a,b,pole){const d=sub(end,root),distance=Math.min(a+b-.0001,Math.max(Math.abs(a-b)+.0001,Math.hypot(...d))),dir=unit(d),bend=unit(sub(pole,mul(dir,pole.reduce((s,v,i)=>s+v*dir[i],0)))),along=(a*a-b*b+distance*distance)/(2*distance);return add(root,add(mul(dir,along),mul(bend,Math.sqrt(Math.max(0,a*a-along*along)))));}
-export function pedestrianPose(time){
- const {startX,z,speed,period,ground}=WALK,x=startX+speed*time,phase=time/period,bodyBob=.012*Math.cos(phase*4*Math.PI),hipY=ground+.87+bodyBob,parts={},feet=[];
- parts.coat={position:[x+.018,hipY+.21,z],scale:[.36,.72,.48],rotation:[0,0,-.035]};
+import {sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
 
- parts.head={position:[x+.034,hipY+.686,z],scale:[.198,.245,.181]};parts.hat={position:[x+.01,hipY+.786,z],scale:[.227,.13,.211]};parts.hatBand={position:[x+.014,hipY+.746,z],scale:[.230,.058,.214]};
- parts.nose={position:[x+.137,hipY+.679,z],scale:[.042,.044,.035]};parts.scarf={position:[x+.022,hipY+.556,z],scale:[.26,.115,.274]};parts.scarfTail={position:[x+.18,hipY+.38,z-.095],scale:[.027,.30,.082]};
- parts.pack={position:[x-.179,hipY+.26,z],scale:[.18,.41,.32]};
- const segment=(name,a,b,r,top)=>{const d=sub(b,a),l=Math.hypot(...d);parts[name]={position:mul(add(a,b),.5),scale:[r,l,top??r],rotation:[Math.atan2(d[2],d[1]),0,Math.asin(-d[0]/l)]};};
- for(const side of [-1,1]){
-  const offset=side===1?0:.5,cycle=phase+offset,k=Math.floor(cycle),u=cycle-k,stance=.62,anchor=startX+(k-offset+stance*.5)*period*speed;
-  const swing=Math.max(0,(u-stance)/(1-stance)),smooth=swing*swing*(3-2*swing),fx=anchor+smooth*period*speed,fy=ground+Math.sin(swing*Math.PI)*.12;
-  const foot=[fx,fy,z+side*.13],ankle=[fx,fy+.105,z+side*.13],hip=[x,hipY,z+side*.125],knee=limb(hip,ankle,.425,.42,[1,0,0]);
-  feet.push({id:'pedestrian:'+side,position:foot,grounded:u<stance,yaw:side*.035});
-  segment('thigh'+side,hip,knee,.135,.148);segment('shin'+side,knee,ankle,.105,.125);parts['knee'+side]={position:knee,scale:[.122,.135,.133]};
-  parts['boot'+side]={position:[fx+.034,fy+.07,z+side*.13],scale:[.32,.14,.139],rotation:[0,side*.035,Math.sin(swing*Math.PI)*-.10]};
-  parts['sole'+side]={position:[fx+.034,fy+.013,z+side*.13],scale:[.322,.026,.141],rotation:[0,side*.035,Math.sin(swing*Math.PI)*-.10]};
-  parts['cuff'+side]={position:[fx-.021,fy+.146,z+side*.13],scale:[.155,.13,.151]};
-  const shoulder=[x+.006,hipY+.45,z+side*.207],hand=[x-.02-side*Math.sin(phase*2*Math.PI)*.13,hipY-.07,z+side*.285],elbow=limb(shoulder,hand,.295,.27,[-1,0,0]);
-  segment('upperArm'+side,shoulder,elbow,.122,.13);segment('forearm'+side,elbow,hand,.108,.117);parts['glove'+side]={position:hand,scale:[.105,.137,.098]};
-  parts['strap'+side]={position:[x+.174,hipY+.29,z+side*.148],scale:[.026,.36,.042]};
- }
- return{parts,feet,position:[x,ground,z]};
+// Only the cast, rig binding, garment shapes and route are authored here.
+// Locomotion, IK, planted contacts and transform updates are engine systems.
+export const WALK={startX:-20,z:5.02,speed:.86,period:1.30,ground:.163};
+const garments=[];
+const part=(key,joint,offset,scale,options={})=>garments.push({key,binding:{entity:'walker-'+key,joint,offset,scale,...options}});
+part('coat','pelvis',[.012,.228,0],[.395,.745,.525]);
+part('hood','neck',[-.102,.022,0],[.266,.245,.344]);
+part('collar','neck',[-.01,.055,0],[.252,.15,.296]);
+part('hoodFold','neck',[-.13,-.069,0],[.29,.055,.342]);
+part('head','head',[0,0,0],[.185,.225,.178]);
+part('hat','head',[-.011,.098,0],[.22,.17,.214]);
+part('hatBand','head',[-.009,.044,0],[.224,.066,.217]);
+part('hatPom','head',[-.025,.187,0],[.063,.059,.064]);
+part('nose','head',[.102,-.003,0],[.045,.041,.035]);
+part('scarf','neck',[.023,.016,0],[.245,.118,.282]);
+part('scarfTail','chest',[.19,.015,-.095],[.036,.31,.084]);
+part('pack','pelvis',[-.236,.25,0],[.217,.451,.353]);
+part('packPocket','pelvis',[-.354,.157,0],[.050,.226,.287]);
+part('packPanel','pelvis',[-.354,.337,0],[.018,.169,.26]);
+part('packZip','pelvis',[-.380,.253,0],[.012,.012,.274]);
+part('packHandle','pelvis',[-.242,.485,0],[.045,.046,.10]);
+part('packBadge','pelvis',[-.386,.175,0],[.010,.039,.072]);
+part('coatPlacket','pelvis',[.211,.235,0],[.016,.62,.031]);
+part('hem','pelvis',[.009,-.129,0],[.397,.035,.523]);
+part('snowPack','pelvis',[-.249,.476,0],[.172,.025,.285]);
+part('snowHood','neck',[-.1,.140,0],[.18,.025,.26]);
+part('snowHat','head',[-.016,.177,0],[.136,.027,.139]);
+part('snowBackpack','pelvis',[-.389,.279,0],[.009,.366,.258]);
+part('snowCoat','pelvis',[-.207,.19,0],[.006,.59,.42]);
+for(const side of [-1,1]){
+ const name=side<0?'left':'right',q=String(side),joint=s=>name+s;
+ part('thigh'+q,joint('Hip'),[0,0,0],[.183,1,.190],{boneTo:joint('Knee')});
+ part('shin'+q,joint('Knee'),[0,0,0],[.151,1,.173],{boneTo:joint('Ankle')});
+ part('knee'+q,joint('Knee'),[.007,0,0],[.169,.155,.172]);
+ part('boot'+q,joint('Foot'),[.033,.097,0],[.324,.189,.149],{foot:name,rotation:[0,side*.035,0]});
+ part('sole'+q,joint('Foot'),[.031,.016,0],[.334,.032,.157],{foot:name,rotation:[0,side*.035,0]});
+ part('welt'+q,joint('Foot'),[.032,.036,0],[.332,.011,.156],{foot:name,rotation:[0,side*.035,0]});
+ part('cuff'+q,joint('Foot'),[-.039,.174,0],[.149,.106,.151]);
+ part('bootTongue'+q,joint('Foot'),[.047,.152,0],[.037,.09,.074]);
+ for(let k=0;k<4;k++)part('lace'+q+':'+k,joint('Foot'),[.035+k*.013,.190-k*.017,0],[.030,.006,.081],{rotation:[0,0,.12]});
+ part('upperArm'+q,joint('Shoulder'),[0,0,0],[.158,1,.165],{boneTo:joint('Elbow')});
+ part('shoulder'+q,joint('Shoulder'),[.002,-.008,0],[.172,.13,.173]);
+ part('forearm'+q,joint('Elbow'),[0,0,0],[.124,1,.136],{boneTo:joint('Hand')});
+ part('elbow'+q,joint('Elbow'),[0,0,0],[.141,.133,.143]);
+ part('glove'+q,joint('Hand'),[0,-.018,0],[.104,.151,.102]);
+ part('thumb'+q,joint('Hand'),[.044,.009,-side*.018],[.040,.073,.049]);
+ part('strap'+q,'chest',[.192,-.024,side*.173],[.032,.40,.046],{rotation:[0,0,-.04]});
+ part('strapBack'+q,'chest',[-.179,.119,side*.14],[.055,.17,.047],{rotation:[0,0,.45]});
+ part('packSide'+q,'pelvis',[-.225,.109,side*.164],[.15,.18,.047]);
+ part('packClip'+q,'pelvis',[-.233,.145,side*.193],[.061,.027,.013]);
+ part('coatPocket'+q,'pelvis',[.206,.087,side*.139],[.016,.127,.124],{rotation:[0,0,-.2]});
+ part('shoulderSeam'+q,joint('Shoulder'),[-.035,.038,0],[.172,.009,.105]);
+ part('snowSleeve'+q,joint('Shoulder'),[-.067,-.022,0],[.009,.10,.116]);
 }
+export function pedestrianAnimation(){return{id:'walker',root:[WALK.startX,WALK.ground,WALK.z],speed:WALK.speed,period:WALK.period,bindings:garments.map(g=>g.binding)};}
+export function pedestrianPose(time){const pose=sampleWalker(pedestrianAnimation(),time),transforms=bindHumanoid(pose,garments.map(g=>g.binding));return{...pose,parts:Object.fromEntries(transforms.map(p=>[p.entity.slice(7),{position:p.position,rotation:p.rotation,scale:p.scale}]))};}
 export function makePedestrian(){
- return Object.entries(pedestrianPose(0).parts).map(([key,pose])=>{
-  const segment=/thigh|shin|Arm|forearm/.test(key),coat=/coat|hem|Arm|forearm/.test(key),pants=/thigh|shin|knee/.test(key),skin=/head|nose/.test(key),scarf=key.startsWith('scarf'),hat=key.startsWith('hat');
-  const color=coat?[.40,.43,.32,1]:pants?[.22,.24,.27,1]:skin?[.51,.34,.25,1]:scarf?[.31,.12,.075,1]:hat?[.25,.24,.22,1]:key==='pack'?[.27,.20,.13,1]:/boot|cuff/.test(key)?[.29,.23,.18,1]:[.14,.145,.135,1];
-  return{id:'walker-'+key,...pose,mesh:clothingMesh(key,segment),material:{kind:'default',color,roughness:skin?.68:.95,...(!skin?{pattern:'fabric'}:{})}};
+ const pose=pedestrianPose(0);
+ return garments.map(({key})=>{
+  const segment=/thigh|shin|Arm|forearm/.test(key),coat=/coat|hem|hood|collar|Arm|forearm|elbow|shoulder/.test(key),pants=/thigh|shin|knee/.test(key),skin=/head|nose/.test(key),scarf=key.startsWith('scarf'),hat=key.startsWith('hat'),snow=key.startsWith('snow');
+  const trim=/Zip|Badge|Clip|lace|welt/.test(key),boot=/boot|cuff/.test(key),pack=key.startsWith('pack');
+  const color=snow?[.91,.94,.96,1]:coat?[.32,.37,.24,1]:pants?[.16,.18,.20,1]:skin?[.51,.34,.25,1]:scarf?[.24,.20,.16,1]:hat?[.12,.135,.125,1]:pack?[.29,.18,.105,1]:boot?[.235,.172,.119,1]:trim?[.21,.21,.19,1]:[.075,.08,.075,1];
+  return{id:'walker-'+key,...pose.parts[key],mesh:clothingMesh(key,segment),material:{kind:snow?'snow':'default',color,roughness:skin?.67:trim?.69:.93,...(!skin&&!snow?{pattern:'fabric'}:{})}};
  });
 }
-export function updatePedestrian(scene,time){const pose=pedestrianPose(time);for(const [key,p] of Object.entries(pose.parts)){const e=scene.entities.get('walker-'+key);e.position=[...p.position];e.scale=[...p.scale];e.rotation=[...(p.rotation??[0,0,0])];}return pose;}
-export const CAR={startX:-40,z:-1.40,speed:2.65,radius:.346};
-export function puddleAt(x,z){return Math.max(0,...[[-11,-1.4,1.1,.85],[9,-1.35,1.6,.7]].map(([px,pz,rx,rz])=>Math.exp(-(((x-px)/rx)**2)-((z-pz)/rz)**2)));}
+function loft(rings,roundness=.8,folds=0,seed=1){return clothLoftMesh({rings,roundness,folds,seed,radialSegments:48,subdivisions:4});}
+function clothingMesh(key,segment){
+ if(/snowBack|snowCoat|snowSleeve/.test(key))return snowDust(key.length*29);
+ if(/^snow/.test(key))return snowPatch(key.length*17);
+ if(/head|nose|hatPom|glove|thumb|knee|elbow|shoulder-?1$/.test(key))return{kind:'sphere',radius:.5,segments:32};
+ if(/strap|Placket|Zip|Badge|Handle|Clip|lace|Tongue|Seam/.test(key))return loft([[-.5,.36,.37],[-.43,.5,.5],[.43,.5,.5],[.5,.36,.37]],.48,.002,2);
+ if(segment)return loft([[-.5,.40,.43],[-.39,.50,.50],[-.1,.495,.48],[.25,.485,.48],[.43,.45,.45],[.5,.39,.40]],.88,/thigh|shin/.test(key)?.048:.030,key.length);
+ if(key.startsWith('boot'))return loft([[-.5,.42,.43,.02],[-.39,.50,.48,.02],[-.17,.49,.5,.02],[.04,.40,.46,-.045],[.27,.27,.42,-.185],[.5,.24,.36,-.235]],.64,.004);
+ if(key.startsWith('sole')||key.startsWith('welt'))return loft([[-.5,.43,.43],[0,.5,.5],[.5,.47,.47]],.66,.001);
+ if(key.startsWith('cuff'))return loft([[-.5,.43,.44],[-.37,.5,.5],[.36,.45,.47],[.5,.40,.43]],.82,.014);
+ if(key==='pack')return loft([[-.5,.29,.36],[-.42,.44,.49],[-.08,.495,.50],[.29,.48,.465],[.44,.34,.38],[.5,.12,.25]],.64,.010,5);
+ if(key.startsWith('pack'))return loft([[-.5,.31,.39],[-.36,.48,.48],[.28,.5,.5],[.46,.37,.41],[.5,.19,.26]],.56,.008,7);
+ if(key==='coat')return loft([[-.5,.40,.44],[-.43,.495,.49],[-.15,.455,.465],[.17,.47,.49],[.30,.445,.49],[.40,.36,.45],[.5,.20,.30]],.84,.024,3);
+ if(key==='collar')return loft([[-.5,.42,.45],[-.2,.49,.49],[.25,.46,.45],[.5,.43,.40]],.87,.016,8);
+ if(key==='hood')return loft([[-.5,.20,.38],[-.25,.46,.48],[.0,.49,.50],[.25,.41,.455],[.5,.30,.37]],.86,.023,9);
+ if(key.startsWith('hat'))return loft([[-.5,.45,.46],[-.2,.49,.49],[.20,.465,.47],[.37,.355,.365],[.5,.11,.12]],.96,.006,6);
+ if(key.startsWith('scarf'))return loft([[-.5,.36,.4],[-.28,.49,.49],[.15,.45,.5],[.5,.41,.44]],.75,.023,11);
+ return loft([[-.5,.43,.44],[-.3,.49,.49],[.3,.49,.49],[.5,.43,.44]],.8,.014,4);
+}
+function snowPatch(seed){
+ // Small disconnected grains with a low compacted centre, attached to the rig.
+ // Their transforms follow engine animation exactly like the garment itself.
+ const positions=[],normals=[],indices=[];let state=seed;const random=()=>{state=(state*1664525+1013904223)>>>0;return state/4294967296;};
+ for(let i=0;i<76;i++){const a=random()*Math.PI*2,r=Math.sqrt(random()),x=Math.cos(a)*r*.49,z=Math.sin(a)*r*.49,rx=.021+random()*.045,rz=.02+random()*.04,ry=.07+random()*.14,y=.12*(1-r*r);const start=positions.length/3,n=7;
+  positions.push(x,y+ry,z);normals.push(0,1,0);
+  for(let k=0;k<n;k++){const angle=k/n*Math.PI*2;positions.push(x+Math.cos(angle)*rx,y-random()*.04,z+Math.sin(angle)*rz);const q=[Math.cos(angle)*.55,.83,Math.sin(angle)*.55];normals.push(...q.map(v=>v/Math.hypot(...q)));}
+  for(let k=0;k<n;k++)indices.push(start,start+1+(k+1)%n,start+1+k);
+ }
+ return{kind:'triangle-mesh',positions,normals,indices};
+}
+
+function snowDust(seed){
+ const positions=[],normals=[],indices=[];let state=seed;const random=()=>{state=(state*1664525+1013904223)>>>0;return state/4294967296;};
+ for(let i=0;i<180;i++){const y=random()-.5,z=(random()-.5)*Math.sqrt(Math.max(0,1-(y*1.6)**2));if(random()>.45+y*.6)continue;const x=-.05-random()*.4,sy=.003+random()**3*.029,sz=.003+random()**3*.031,n=5,start=positions.length/3;positions.push(x-.2,y,z);normals.push(-1,0,0);for(let j=0;j<n;j++){const a=j/n*Math.PI*2;positions.push(x,y+Math.sin(a)*sy,z+Math.cos(a)*sz);normals.push(-.94,.341,0);}for(let j=0;j<n;j++)indices.push(start,start+1+(j+1)%n,start+1+j);}
+ return{kind:'triangle-mesh',positions,normals,indices};
+}
+export const CAR={startX:-21,z:-1.40,speed:2.65,radius:.346};
 export function makeM3(asset,id,x,z,color,speed=0){
  const entities=[],motions=[];
  for(const part of asset.parts){
@@ -45,31 +112,3 @@ export function makeM3(asset,id,x,z,color,speed=0){
  }
  return{entities,motions};
 }
-
-// Ring lofts give garments, soles and rucksacks a shaped silhouette instead of
-// intersecting ellipsoids. Gentle irregularities break perfect plastic surfaces.
-function clothingMesh(key,segment){
- if(/head|nose|hat|scarf|glove|knee/.test(key))return{kind:'sphere',radius:.5,segments:24};
- if(/strap/.test(key))return{kind:'box',size:[1,1,1]};
- if(segment)return loft([[ -.5,.41,.44],[-.43,.49,.49],[-.1,.50,.48],[.27,.49,.48],[.46,.46,.47],[.5,.39,.40]],1.0,1);
- if(key.startsWith('boot'))return bootMesh();
- if(key.startsWith('sole'))return loft([[-.5,.43,.44],[0,.5,.5],[.5,.47,.47]],.68,0);
- if(key.startsWith('cuff'))return loft([[-.5,.45,.46],[-.35,.5,.5],[.4,.45,.46],[.5,.43,.43]],.8,0);
- if(key==='pack')return loft([[-.5,.32,.36],[-.4,.46,.49],[.3,.49,.48],[.46,.38,.40],[.5,.2,.25]],.48,0);
- if(key==='coat')return loft([[-.5,.40,.40],[-.42,.49,.47],[-.06,.46,.45],[.23,.48,.49],[.37,.46,.49],[.46,.30,.40],[.5,.20,.22]],.8,1);
- return loft([[-.5,.44,.43],[0,.49,.49],[.5,.45,.45]],.75,1);
-}
-function loft(rings,power,wrinkle){
- const positions=[],normals=[],indices=[],steps=32;
- for(let r=0;r<rings.length;r++)for(let j=0;j<steps;j++){
-  const [y,rx,rz]=rings[r],a=j/steps*Math.PI*2,c=Math.cos(a),s=Math.sin(a),w=1+wrinkle*(.011*Math.sin(j*2.2+r*4)+.008*Math.cos(j*3.1-r));
-  positions.push(Math.sign(c)*Math.abs(c)**power*rx*w,y,Math.sign(s)*Math.abs(s)**power*rz*w);normals.push(0,0,0);
- }
- for(let r=0;r<rings.length-1;r++)for(let j=0;j<steps;j++){const a=r*steps+j,b=r*steps+(j+1)%steps;indices.push(a,a+steps,b,b,a+steps,b+steps);}
- // End caps; smooth surface normals are area-weighted from actual geometry.
- for(const r of [0,rings.length-1])for(let j=1;j<steps-1;j++)indices.push(r*steps,r*steps+j+(r===0?0:1),r*steps+j+(r===0?1:0));
- for(let k=0;k<indices.length;k+=3){const ids=indices.slice(k,k+3),v=ids.map(i=>positions.slice(i*3,i*3+3)),a=sub(v[1],v[0]),b=sub(v[2],v[0]),n=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];for(const id of ids)for(let d=0;d<3;d++)normals[id*3+d]+=n[d];}
- for(let j=0;j<normals.length;j+=3){const n=unit(normals.slice(j,j+3));normals.splice(j,3,...n);}
- return{kind:'triangle-mesh',positions,normals,indices};
-}
-function bootMesh(){return loft([[-.5,.39,.40],[-.41,.49,.48],[-.23,.5,.50],[.12,.46,.48],[.38,.31,.40],[.5,.25,.36]],.66,0);}

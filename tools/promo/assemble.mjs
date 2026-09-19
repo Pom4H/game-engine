@@ -4,15 +4,15 @@ import {join} from 'node:path';
 import {spawn} from 'node:child_process';
 import {shots} from './shots.mjs';
 import {renderAmbience,renderFootsteps,wavBytes} from '../../dist/index.js';
-const root=fileURLToPath(new URL('../../',import.meta.url)),out=join(root,'artifacts/promo-v2'),sampleRate=48000;
+const root=fileURLToPath(new URL('../../',import.meta.url)),out=join(root,'artifacts/promo-v3'),sampleRate=48000;
 const total=shots.reduce((s,c)=>s+c.duration,0),left=new Float32Array(total*sampleRate),right=new Float32Array(left.length);
 const lerp=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t),ease=t=>t*t*(3-2*t);
 let offset=0;
 for(const shot of shots){
  const raw=JSON.parse(await readFile(join(out,`${shot.id}-telemetry.json`),'utf8')),unique=[...new Map(raw.map(f=>[f.t,f])).values()];
- const frames=unique.map(f=>({time:f.t,listener:f.camera,target:f.target,vehicle:f.car,speedMps:2.65,puddle:f.puddle}));
+ const frames=unique.map(f=>({time:f.t,listener:f.camera,target:f.target,vehicle:f.car,speedMps:f.speedMps,puddle:f.puddle}));
  const a=renderAmbience(frames,shot.duration,{sampleRate,seed:2026,windSpeedMps:shot.set==='courtyard'?1.1:.7,vehicleGain:shot.id==='m3'?.34:.19});
- const contacts=JSON.parse(await readFile(join(out,`${shot.id}-footsteps.json`),'utf8')).map(e=>({...e,time:e.time-shot.offset}));
+ const contacts=JSON.parse(await readFile(join(out,`${shot.id}-footsteps.json`),'utf8')).map(e=>({...e,time:(e.time-shot.offset)/(shot.simulationRate??1)}));
  const steps=renderFootsteps(contacts,frames,shot.duration,sampleRate);for(let i=0;i<a.left.length;i++){a.left[i]+=steps.left[i];a.right[i]+=steps.right[i];}
  for(let i=0;i<a.left.length;i++){const t=i/sampleRate,fade=Math.min(1,t/.18,(shot.duration-t)/.25);left[offset+i]+=a.left[i]*fade;right[offset+i]+=a.right[i]*fade;}
  offset+=a.left.length;

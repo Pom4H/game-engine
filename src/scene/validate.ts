@@ -1,3 +1,5 @@
+import {AnimationSystem,type WalkerSpec,type VehicleMotionSpec} from '../animation/locomotion.js';
+import {SnowSurface,type SnowSurfaceOptions} from '../environment/snow-surface.js';
 import {materialKinds} from '../materials/catalog.js';
 import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
@@ -24,6 +26,7 @@ export function validateScene(value:unknown):SceneSpec{
       if(material.ageYears!==undefined&&(typeof material.ageYears!=='number'||!Number.isFinite(material.ageYears)||material.ageYears<0))throw new TypeError(`${entity.id}.material.ageYears must be non-negative`);
     }
   }
+  validateBindings(scene,scene.entities as EntitySpec[]);
   if(scene.seed!==undefined&&(!Number.isSafeInteger(scene.seed)))throw new TypeError('seed must be a safe integer');
   optionalNumber(scene,'ground','scene');
   if(scene.clearColor!==undefined)vector(scene.clearColor,4,'clearColor',0,1);
@@ -61,11 +64,91 @@ export function validateScene(value:unknown):SceneSpec{
   return structuredClone(value) as SceneSpec;
 }
 
+const HUMANOID_JOINTS=['root','pelvis','chest','neck','head','leftHip','rightHip','leftKnee','rightKnee','leftAnkle','rightAnkle','leftFoot','rightFoot','leftShoulder','rightShoulder','leftElbow','rightElbow','leftHand','rightHand'];
+function boundedArray(value:unknown,path:string,limit:number):unknown[]{if(!Array.isArray(value)||value.length>limit)throw new TypeError(`${path} must be an array of at most ${limit} entries`);return value;}
+function stableId(value:unknown,path:string,max=180):string{if(typeof value!=='string'||!value||value.length>max)throw new TypeError(`${path} requires a stable id`);return value;}
+function validateBindings(scene:Record<string,unknown>,entities:readonly EntitySpec[]):void{
+  const byId=new Map(entities.map(e=>[e.id,e])),claimed=new Set<string>();
+  const reference=(value:unknown,path:string)=>{const id=stableId(value,path),entity=byId.get(id);if(!entity)throw new TypeError(`${path} references missing entity ${id}`);return entity;};
+  if(scene.animation!==undefined){
+    const a=object(scene.animation,'animation'),walkers=a.walkers===undefined?[]:boundedArray(a.walkers,'animation.walkers',128),vehicles=a.vehicles===undefined?[]:boundedArray(a.vehicles,'animation.vehicles',128);
+    if(walkers.length+vehicles.length>128)throw new TypeError('animation supports at most 128 actors');
+    const validator=new AnimationSystem();
+    const claim=(id:string,path:string)=>{const entity=reference(id,path),body=entity.body;if(body&&body.motion!=='kinematic'&&(body.mass??(body.velocity||body.angularVelocity?1:0))>0)throw new TypeError(`${path} cannot bind a dynamic physics body`);if(claimed.has(id))throw new TypeError(`${path} binds entity ${id} more than once`);claimed.add(id);};
+    for(const [i,raw] of walkers.entries()){
+      const path=`animation.walkers[${i}]`,w=object(raw,path);stableId(w.id,`${path}.id`,160);vector(w.root,3,`${path}.root`);number(w.speed,`${path}.speed`,0,12);optionalNumber(w,'heading',path);optionalNumber(w,'period',path,.25,4);optionalNumber(w,'heightScale',path,.25,3);
+      for(const [j,value] of (w.bindings===undefined?[]:boundedArray(w.bindings,`${path}.bindings`,4096)).entries()){
+        const p=`${path}.bindings[${j}]`,b=object(value,p);claim(stableId(b.entity,`${p}.entity`),`${p}.entity`);
+        if(!HUMANOID_JOINTS.includes(String(b.joint)))throw new TypeError(`${p}.joint is unknown`);
+        choice(b.boneTo,HUMANOID_JOINTS,`${p}.boneTo`);choice(b.foot,['left','right'],`${p}.foot`);
+        for(const key of ['offset','rotation','scale'])if(b[key]!==undefined)vector(b[key],3,`${p}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
+      }
+      validator.addWalker(w as unknown as WalkerSpec);
+    }
+    for(const [i,raw] of vehicles.entries()){
+      const path=`animation.vehicles[${i}]`,v=object(raw,path);stableId(v.id,`${path}.id`,160);vector(v.velocity,3,`${path}.velocity`);optionalNumber(v,'startTime',path,0);
+      const parts=boundedArray(v.parts,`${path}.parts`,4096);if(!parts.length)throw new TypeError(`${path}.parts must not be empty`);
+      for(const [j,value] of parts.entries()){
+        const p=`${path}.parts[${j}]`,part=object(value,p);claim(stableId(part.id,`${p}.id`),`${p}.id`);vector(part.origin,3,`${p}.origin`);
+        if(part.wheel!==undefined&&typeof part.wheel!=='boolean')throw new TypeError(`${p}.wheel must be boolean`);
+        optionalNumber(part,'radius',p,Number.MIN_VALUE);if(part.rotation!==undefined)vector(part.rotation,3,`${p}.rotation`);choice(part.wheelAxis,[0,1,2],`${p}.wheelAxis`);
+      }
+      validator.addVehicle(v as unknown as VehicleMotionSpec);
+    }
+  }
+  if(scene.surfaceContacts!==undefined){
+    const config=object(scene.surfaceContacts,'surfaceContacts'),snow=config.snow===undefined?[]:boundedArray(config.snow,'surfaceContacts.snow',128),wheels=config.wheels===undefined?[]:boundedArray(config.wheels,'surfaceContacts.wheels',512),snowIds=new Set<string>(),wheelIds=new Set<string>();
+    for(const [i,raw]of snow.entries()){
+      const path=`surfaceContacts.snow[${i}]`,item=object(raw,path),entity=reference(item.surfaceId,`${path}.surfaceId`);
+      if(snowIds.has(entity.id))throw new TypeError(`${path}.surfaceId is duplicated`);snowIds.add(entity.id);
+      if(!entity.environmental?.surfaceUse)throw new TypeError(`${path}.surfaceId requires an environmental surface`);
+      if(Math.abs(entity.rotation?.[0]??0)>1e-5||Math.abs(entity.rotation?.[2]??0)>1e-5||!['box','plane'].includes(entity.mesh?.kind??''))throw new TypeError(`${path}.surfaceId requires a horizontal box or plane`);
+      for(const key of ['tileSize','coarseCellSize','detailedCellSize','maxTiles','maxDetailedTiles'])optionalNumber(item,key,path,Number.MIN_VALUE);
+      if(item.seed!==undefined&&!Number.isSafeInteger(item.seed))throw new TypeError(`${path}.seed must be a safe integer`);
+      if(item.material!==undefined)materialSpec(item.material,`${path}.material`);
+      const mesh=entity.mesh!,scale=entity.scale??[1,1,1],size:readonly[number,number]=mesh.kind==='box'?[(mesh.size?.[0]??1)*scale[0],(mesh.size?.[2]??1)*scale[2]]:mesh.kind==='plane'?[(mesh.size?.[0]??1)*scale[0],(mesh.size?.[1]??1)*scale[2]]:[1,1];
+      try{new SnowSurface({...item,id:'validate-snow',center:[0,0],height:0,size} as unknown as SnowSurfaceOptions);}catch(error){throw new TypeError(`${path}: ${error instanceof Error?error.message:String(error)}`);}
+    }
+    for(const [i,raw]of wheels.entries()){
+      const path=`surfaceContacts.wheels[${i}]`,item=object(raw,path),entity=reference(item.entityId,`${path}.entityId`);
+      if(wheelIds.has(entity.id))throw new TypeError(`${path}.entityId is duplicated`);wheelIds.add(entity.id);
+      if(!entity.body)throw new TypeError(`${path}.entityId requires a physics body`);
+      optionalNumber(item,'radius',path,Number.MIN_VALUE);if(item.lateral!==undefined)vector(item.lateral,3,`${path}.lateral`);
+    }
+  }
+}
+
 function object(value:unknown,path:string):Record<string,unknown>{if(!value||typeof value!=='object'||Array.isArray(value))throw new TypeError(`${path} must be an object`);return value as Record<string,unknown>;}
 function number(value:unknown,path:string,min=-Infinity,max=Infinity):void{if(typeof value!=='number'||!Number.isFinite(value)||value<min||value>max)throw new TypeError(`${path} must be finite within ${min}..${max}`);}
 function optionalNumber(obj:Record<string,unknown>,key:string,path:string,min=-Infinity,max=Infinity):void{if(obj[key]!==undefined)number(obj[key],`${path}.${key}`,min,max);}
 function vector(value:unknown,length:number,path:string,min=-Infinity,max=Infinity):void{if(!Array.isArray(value)||value.length!==length)throw new TypeError(`${path} must have ${length} components`);value.forEach((v,i)=>number(v,`${path}[${i}]`,min,max));}
 function choice(value:unknown,values:readonly unknown[],path:string):void{if(value!==undefined&&!values.includes(value))throw new TypeError(`${path} is unknown`);}
+
+function surfaceTexture(value:unknown,path:string):void{
+  const texture=object(value,path),url=texture.url;
+  if(typeof url!=='string'||url.length===0||url.length>8192||/[\s\u0000-\u001f\u007f\\]/u.test(url))throw new TypeError(`${path}.url must be a nonempty HTTP(S) or relative asset URL`);
+  const scheme=/^([a-z][a-z0-9+.-]*):/i.exec(url);
+  if(scheme&&!/^https?:\/\//i.test(url))throw new TypeError(`${path}.url must use HTTP(S) or a relative asset path`);
+  try{const parsed=new URL(url,'https://scene-assets.invalid/');if(!['http:','https:'].includes(parsed.protocol))throw new Error('unsupported scheme');}
+  catch{throw new TypeError(`${path}.url must be a valid HTTP(S) or relative asset URL`);}
+  optionalNumber(texture,'sizeM',path,.01,1000);
+  optionalNumber(texture,'bumpStrength',path,0,2);
+  optionalNumber(texture,'albedoStrength',path,0,1);
+}
+function materialSpec(value:unknown,path:string):void{
+  const m=object(value,path);
+  if(m.texture!==undefined)surfaceTexture(m.texture,`${path}.texture`);
+  if(m.label!==undefined&&(typeof m.label!=='string'||m.label.length>100))throw new TypeError(`${path}.label must be at most 100 characters`);
+  optionalNumber(m,'roughness',path,0,1);optionalNumber(m,'metalness',path,0,1);
+  choice(m.pattern,['plain','brick','plaster','rubber','window','fabric'],`${path}.pattern`);
+  if(m.emissive!==undefined)vector(m.emissive,3,`${path}.emissive`,0,50);
+  choice(m.kind,materialKinds(),`${path}.kind`);
+  choice(m.finish,['raw','rough','smooth','polished','weathered'],`${path}.finish`);
+  choice(m.treatment,['none','sealed','biocide','galvanized','painted'],`${path}.treatment`);
+  optionalNumber(m,'ageYears',path,0);
+  if(m.color!==undefined)vector(m.color,4,`${path}.color`,0,1);
+}
+
 export function validateEntity(value:unknown):EntitySpec{
   const e=object(value,'entity'),id=e.id;
   if(typeof id!=='string'||!id||id.length>180)throw new TypeError('entity requires a stable id');
@@ -89,8 +172,8 @@ export function validateEntity(value:unknown):EntitySpec{
     }
   }
   if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);}
-  if(e.material!==undefined){const m=object(e.material,`${id}.material`);if(m.label!==undefined&&(typeof m.label!=='string'||m.label.length>100))throw new TypeError(`${id}.material.label must be at most 100 characters`);optionalNumber(m,'roughness',`${id}.material`,0,1);optionalNumber(m,'metalness',`${id}.material`,0,1);choice(m.pattern,['plain','brick','plaster','rubber','window','fabric'],`${id}.material.pattern`);if(m.emissive!==undefined)vector(m.emissive,3,`${id}.material.emissive`,0,50);choice(m.kind,materialKinds(),`${id}.material.kind`);choice(m.finish,['raw','rough','smooth','polished','weathered'],`${id}.material.finish`);choice(m.treatment,['none','sealed','biocide','galvanized','painted'],`${id}.material.treatment`);optionalNumber(m,'ageYears',`${id}.material`,0);if(m.color!==undefined)vector(m.color,4,`${id}.material.color`,0,1);}
-  if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
+  if(e.material!==undefined)materialSpec(e.material,`${id}.material`);
+  if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);if(env.snowMaterial!==undefined)materialSpec(env.snowMaterial,`${id}.environmental.snowMaterial`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
   if(e.light!==undefined){const l=object(e.light,`${id}.light`);if(l.kind!=='point')throw new TypeError(`${id}.light.kind is unknown`);optionalNumber(l,'intensity',`${id}.light`,0);optionalNumber(l,'range',`${id}.light`,Number.MIN_VALUE);if(l.color!==undefined)vector(l.color,3,`${id}.light.color`,0,1);}
   return structuredClone(value) as EntitySpec;
 }

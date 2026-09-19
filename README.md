@@ -334,3 +334,16 @@ Supported moving bodies contribute estimated sliding work to cells under their f
 The WebGPU renderer consumes those engine states to synthesize asphalt aggregate, square paving, tyre-cleared snow tracks, wet/slushy patches, puddles, attached body snow and instanced snowfall. Curb and sidewalk snow mass also generates engine-owned snowdrift geometry. Civil time drives night, sunrise and daylight lighting, while ordinary point lights provide street illumination.
 
 See `examples/winter-street.ts`.
+
+Native animation and surface contacts are also declarative through
+`SceneSpec.animation` and `SceneSpec.surfaceContacts`. The engine owns planted-foot
+locomotion and IK, kinematic part motion, persistent snow compression, bounded
+wheel spray and synchronized contact sound. Scene authoring supplies the meshes,
+rig bindings, routes and surface IDs. URL loading and browser reset restore those
+systems without demo-specific update callbacks.
+
+The renderer includes a bounded many-light grid, material image loading and
+triplanar sampling, geometry and screen-space reflections, contact occlusion and
+HDR bloom. The complete winter-street example and its reproducible 48-second
+capture pipeline are documented in [`tools/promo/README.md`](tools/promo/README.md),
+including the visual and simulation limitations.

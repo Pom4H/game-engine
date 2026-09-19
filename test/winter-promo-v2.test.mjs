@@ -1,10 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {Scene,SnowFootprints,batchStaticScenery,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
+import {Scene,SnowSurface,SnowFootprints,batchStaticScenery,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
 import {compose} from '../dist/math.js';
 import {pedestrianPose,WALK} from '../tools/promo/actors.mjs';
-import {SnowSkin} from '../tools/promo/snow-surface.mjs';
 
 test('foot contacts create one bounded immutable stamp per planting, never in air or on bare ground',()=>{
  const invalid=new SnowFootprints();assert.throws(()=>invalid.update(10,[{id:'a',position:[0,0,0],grounded:true},{id:'a',position:[0,0,0],grounded:true}],()=>({height:0,snowDepth:.1})));assert.equal(invalid.snapshot().length,0);assert.equal(invalid.update(0,[{id:'a',position:[0,0,0],grounded:true}],()=>({height:0,snowDepth:.1})).length,1);
@@ -17,14 +16,14 @@ test('foot contacts create one bounded immutable stamp per planting, never in ai
 });
 
 test('walk holds each planted foot in world space and deforms only contacted snow',()=>{
- const tracker=new SnowFootprints(),skin=new SnowSkin(),scene=new Scene({version:1,entities:[]});let previous;
+ const tracker=new SnowFootprints(),skin=new SnowSurface({id:'test-snow',center:[10,5.25],size:[180,2.6],height:.183,snowDepth:.052}),scene=new Scene({version:1,entities:[]});let previous;
  for(let tick=0;tick<240;tick++){
   const pose=pedestrianPose(tick/60);
   for(const foot of pose.feet){const old=previous?.feet.find(f=>f.id===foot.id);if(old?.grounded&&foot.grounded)assert.deepEqual(foot.position,old.position);}
-  const created=tracker.update(tick/60,pose.feet,()=>({height:.183,snowDepth:.052}));for(const stamp of created)skin.stamp(scene,stamp);previous=pose;
+  const created=tracker.update(tick/60,pose.feet,()=>({height:.183,snowDepth:.052}));for(const stamp of created)skin.stamp(stamp);for(const e of skin.drainMeshes()){scene.remove(e.id);scene.add(e);}previous=pose;
  }
  const prints=tracker.snapshot();assert.ok(prints.length>=6);const p=prints[2];assert.ok(skin.height(p.position[0]+.034,p.position[2],prints)<.166);assert.ok(skin.height(p.position[0]+.034,p.position[2]+.4,prints)>.18);
- const count=scene.entities.size;skin.stamp(scene,{...prints[0],position:[200,.163,WALK.z]});assert.equal(scene.entities.size,count);
+ const count=scene.entities.size;skin.stamp({...prints[0],position:[200,.163,WALK.z]});assert.equal(scene.entities.size,count);
  const snapshot=JSON.stringify(prints);assert.equal(snapshot,JSON.stringify(tracker.snapshot()));assert.ok([...scene.entities.values()].every(e=>e.mesh.positions.every(Number.isFinite)));
 });
 

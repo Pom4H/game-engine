@@ -1,3 +1,5 @@
+import type {WalkerSpec,VehicleMotionSpec} from '../animation/locomotion.js';
+import type {SnowContactSurfaceOptions} from '../environment/surface-contacts.js';
 import type {Vec3} from '../math.js';
 import type {MaterialKind} from '../materials/catalog.js';
 import type {EnvironmentSpec} from '../environment/types.js';
@@ -15,9 +17,21 @@ export type Primitive =
   /** Engine-generated triangular prism used for brittle fracture debris. */
   | {kind:'shard'; size:Vec3; axis?:0|1|2; skew?:number}
   | {kind:'polygon-prism'; points:readonly (readonly [number,number])[]; thickness:number; axis?:0|1|2};
-export interface MaterialSpec { label?:string; roughness?:number; metalness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
+/** Optional image surface detail, projected in world metres by the renderer.
+ * Relative URLs resolve against the document URL. The renderer owns image/GPU
+ * loading and cache lifetime; authoring code supplies only this descriptor. */
+export interface SurfaceTextureSpec {
+  readonly url:string;
+  /** World-space repeat size in metres; defaults to 1. */
+  readonly sizeM?:number;
+  /** Height-derived bump amplitude; defaults to 0.5. */
+  readonly bumpStrength?:number;
+  /** Blend of image albedo with the base material; defaults to 1. */
+  readonly albedoStrength?:number;
+}
+export interface MaterialSpec { texture?:SurfaceTextureSpec; label?:string; roughness?:number; metalness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
 export type SurfaceUse='generic'|'road'|'sidewalk'|'curb';
-export interface EnvironmentalSpec { surfaceUse?:SurfaceUse; /** Initial settled snow, in metres. */ snowDepthM?:number; iceDepthM?:number; waterDepthM?:number }
+export interface EnvironmentalSpec { /** Appearance inherited by engine-generated snow cover; the base surface retains its own material. */ snowMaterial?:MaterialSpec; surfaceUse?:SurfaceUse; /** Initial settled snow, in metres. */ snowDepthM?:number; iceDepthM?:number; waterDepthM?:number }
 export interface BodySpec {
   /** 0 is static. Dynamic mass may be explicit; material density is available to engine-generated fragments. */
   mass?:number;
@@ -45,7 +59,19 @@ export interface RenderingSpec {
   sunDirection?:Vec3; sunColor?:Vec3; skyColor?:Vec3;
   sunIntensity?:number; fogDensity?:number; exposure?:number; shadowExtent?:number;
 }
+export interface SceneAnimationSpec {
+  readonly walkers?:readonly WalkerSpec[];
+  readonly vehicles?:readonly VehicleMotionSpec[];
+}
+export interface SceneSurfaceContactsSpec {
+  readonly snow?:readonly (SnowContactSurfaceOptions & {readonly surfaceId:string})[];
+  readonly wheels?:readonly {readonly entityId:string;readonly radius?:number;readonly lateral?:Vec3}[];
+}
 export interface SceneSpec {
+  /** Declarative rig/routes restored by Scene construction, URL loading and reset. */
+  animation?:SceneAnimationSpec;
+  /** Author contact bindings once; native systems own every subsequent update. */
+  surfaceContacts?:SceneSurfaceContactsSpec;
   rendering?:RenderingSpec;
   version:1;
   seed?:number;

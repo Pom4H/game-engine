@@ -6,8 +6,9 @@ export {Scene,type RuntimeEntity} from './scene/scene.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
 export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from './scene/url.js';
-export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,Primitive,MaterialSpec,CameraSpec,RenderingSpec,Color} from './scene/types.js';
+export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,Primitive,MaterialSpec,CameraSpec,RenderingSpec,Color} from './scene/types.js';
 export {primitiveMesh,primitiveKey,type MeshData} from './procedural/mesh.js';
+export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/cloth.js';
 export {demoScene} from './demo.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
 
@@ -27,3 +28,11 @@ export {batchStaticScenery} from './procedural/static-batch.js';
 export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/footprints.js';
 
 export {renderFootsteps,type FootstepSound} from './audio/footsteps.js';
+
+export {AnimationSystem,sampleWalker,bindHumanoid,solveTwoBone} from './animation/locomotion.js';
+export type {WalkerSpec,HumanoidJoint,HumanoidBinding,HumanoidPose,RigTransform,VehiclePart,VehicleMotionSpec,GroundSampler} from './animation/locomotion.js';
+export {SurfaceContactSystem,surfaceContains,surfaceElevation} from './environment/surface-contacts.js';
+export type {SurfaceSample,SurfaceFootprint,WheelSurfaceContact,SnowContactSurfaceOptions} from './environment/surface-contacts.js';
+export {SnowSurface,snowRelief} from './environment/snow-surface.js';
+
+export type {SurfaceTextureSpec} from './scene/types.js';
