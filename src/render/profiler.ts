@@ -25,6 +25,8 @@ export interface RenderFrameTiming {
 }
 export interface RasterSampleFrame {
   readonly frame:number;
+  /** False when the backend returns only 0/1-style occlusion visibility. */
+  readonly quantitative:boolean;
   readonly shadow:number;
   readonly reflection:number;
   readonly mainOpaque:number;
@@ -116,7 +118,7 @@ export class RenderProfiler {
     if(!this.enabled)return;const cpu=freezeFrame(this.frame,performance.now()-this.frameStart,this.cpuQuanta,this.work);
     this.push(this.cpuHistory,cpu);
     const occ=this.activeOcclusion;this.activeOcclusion=null;
-    if(occ&&this.occlusionQuerySet){occ.pending=true;void occ.read.mapAsync(0x0001).then(()=>{const raw=new BigUint64Array(occ.read.getMappedRange());const result:Object={};const raster:RasterSampleFrame={frame:occ.frame,shadow:Number(raw[0]!),reflection:Number(raw[1]!),mainOpaque:Number(raw[2]!),mainTransparent:Number(raw[3]!),snow:Number(raw[4]!)};occ.read.unmap();if(occ.generation===this.generation)this.latestRaster=Object.freeze(raster);occ.pending=false;}).catch(()=>{try{occ.read.unmap();}catch{}occ.pending=false;});}
+    if(occ&&this.occlusionQuerySet){occ.pending=true;void occ.read.mapAsync(0x0001).then(()=>{const raw=new BigUint64Array(occ.read.getMappedRange());const result:Object={};const values=[Number(raw[0]!),Number(raw[1]!),Number(raw[2]!),Number(raw[3]!),Number(raw[4]!)],quantitative=values.some(value=>value>1);const raster:RasterSampleFrame={frame:occ.frame,quantitative,shadow:values[0]!,reflection:values[1]!,mainOpaque:values[2]!,mainTransparent:values[3]!,snow:values[4]!};occ.read.unmap();if(occ.generation===this.generation)this.latestRaster=Object.freeze(raster);occ.pending=false;}).catch(()=>{try{occ.read.unmap();}catch{}occ.pending=false;});}
     const slot=this.active;this.active=null;if(!slot||!this.querySet)return;
     slot.pending=true;
     void slot.read.mapAsync(0x0001).then(()=>{
