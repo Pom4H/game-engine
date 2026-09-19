@@ -11,9 +11,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  core:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  gpu-profile:
+    runs-on: [self-hosted, gpu, windows]
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: powershell
     steps:
       - uses: actions/checkout@v7
         with:
@@ -23,36 +26,14 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - name: Core verification
-        shell: bash
         run: |
-          set -o pipefail
-          mkdir -p artifacts
-          bun run ci 2>&1 | tee artifacts/core.log
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: render-quanta-core-${{ github.sha }}
-          path: artifacts/core.log
-          retention-days: 14
-          if-no-files-found: warn
-
-  gpu-profile:
-    needs: core
-    runs-on: [self-hosted, gpu, windows]
-    timeout-minutes: 20
-    defaults:
-      run:
-        shell: cmd
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - run: bun install --frozen-lockfile
-      - run: bun run build
-      - run: if not exist artifacts mkdir artifacts
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          $old = $ErrorActionPreference
+          $ErrorActionPreference = 'Continue'
+          & bun run ci 2>&1 | Tee-Object -FilePath artifacts/core.log
+          $code = $LASTEXITCODE
+          $ErrorActionPreference = $old
+          if ($code -ne 0) { exit $code }
       - name: Profile 720p
         run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1280 --height 720 --out artifacts/render-profile-720p.json
       - name: Profile 1080p
