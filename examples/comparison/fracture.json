@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "seed": 7301,
+  "ground": -100,
+  "clearColor": [
+    0.014,
+    0.024,
+    0.04,
+    1
+  ],
+  "environment": {
+    "sunlight": 1,
+    "humidity": 0,
+    "precipitation": "arid",
+    "groundMoisture": 0
+  },
+  "entities": [
+    {
+      "id": "stage",
+      "position": [
+        0,
+        -0.2,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.25,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.045,
+          0.062,
+          0.085,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x--5",
+      "position": [
+        -5,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x--4",
+      "position": [
+        -4,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x--3",
+      "position": [
+        -3,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x--2",
+      "position": [
+        -2,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x--1",
+      "position": [
+        -1,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x-0",
+      "position": [
+        0,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x-1",
+      "position": [
+        1,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x-2",
+      "position": [
+        2,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x-3",
+      "position": [
+        3,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x-4",
+      "position": [
+        4,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-x-5",
+      "position": [
+        5,
+        -0.067,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.012,
+          0.008,
+          8
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z--4",
+      "position": [
+        0,
+        -0.066,
+        -4
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z--3",
+      "position": [
+        0,
+        -0.066,
+        -3
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z--2",
+      "position": [
+        0,
+        -0.066,
+        -2
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z--1",
+      "position": [
+        0,
+        -0.066,
+        -1
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z-0",
+      "position": [
+        0,
+        -0.066,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z-1",
+      "position": [
+        0,
+        -0.066,
+        1
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z-2",
+      "position": [
+        0,
+        -0.066,
+        2
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z-3",
+      "position": [
+        0,
+        -0.066,
+        3
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "grid-z-4",
+      "position": [
+        0,
+        -0.066,
+        4
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          10,
+          0.008,
+          0.012
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.08,
+          0.26,
+          0.34,
+          1
+        ]
+      }
+    },
+    {
+      "id": "catcher",
+      "position": [
+        0,
+        -0.05,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          8,
+          0.1,
+          6
+        ]
+      },
+      "material": {
+        "kind": "steel",
+        "color": [
+          0.12,
+          0.15,
+          0.2,
+          1
+        ]
+      },
+      "body": {
+        "mass": 0,
+        "friction": 0.75
+      }
+    },
+    {
+      "id": "glass",
+      "position": [
+        0,
+        2.3,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          3.6,
+          0.018,
+          2.6
+        ]
+      },
+      "material": {
+        "kind": "glass",
+        "color": [
+          0.16,
+          0.84,
+          0.96,
+          0.62
+        ]
+      }
+    },
+    {
+      "id": "stand--1",
+      "position": [
+        -2,
+        1.08,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.1,
+          2.25,
+          2.9
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.12,
+          0.22,
+          0.28,
+          1
+        ]
+      }
+    },
+    {
+      "id": "rim--1",
+      "position": [
+        0,
+        2.28,
+        -1.4
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          4.1,
+          0.08,
+          0.06
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.12,
+          0.4,
+          0.5,
+          1
+        ]
+      }
+    },
+    {
+      "id": "stand-1",
+      "position": [
+        2,
+        1.08,
+        0
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          0.1,
+          2.25,
+          2.9
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.12,
+          0.22,
+          0.28,
+          1
+        ]
+      }
+    },
+    {
+      "id": "rim-1",
+      "position": [
+        0,
+        2.28,
+        1.4
+      ],
+      "mesh": {
+        "kind": "box",
+        "size": [
+          4.1,
+          0.08,
+          0.06
+        ]
+      },
+      "material": {
+        "kind": "default",
+        "color": [
+          0.12,
+          0.4,
+          0.5,
+          1
+        ]
+      }
+    },
+    {
+      "id": "ball",
+      "position": [
+        0,
+        6.8,
+        0
+      ],
+      "mesh": {
+        "kind": "sphere",
+        "radius": 0.19,
+        "segments": 32
+      },
+      "material": {
+        "kind": "steel",
+        "color": [
+          0.9,
+          0.4,
+          0.07,
+          1
+        ]
+      },
+      "body": {
+        "mass": 5,
+        "velocity": [
+          0,
+          -9,
+          0
+        ]
+      }
+    }
+  ],
+  "camera": {
+    "position": [
+      7.8,
+      7.2,
+      10.8
+    ],
+    "target": [
+      0,
+      2.2,
+      0
+    ],
+    "fov": 41
+  }
+}

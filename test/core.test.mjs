@@ -1,0 +1,169 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,resolveEnvironmentAt,material} from '../dist/index.js';
+
+test('fixed clock keeps delayed time as bounded debt',()=>{
+  const clock=new FixedClock(10,100,4);let steps=0;clock.reset(0);
+  assert.equal(clock.advance(35,()=>steps++),3);assert.equal(steps,3);
+  assert.equal(clock.advance(45,()=>steps++),1);assert.equal(steps,4);
+});
+
+test('spatial hash deduplicates multi-cell members',()=>{
+  const index=new SpatialHash(10),item={x:10,z:10,w:20,l:20};index.add(item,15);
+  assert.deepEqual(index.near(10,10,20),[item]);
+});
+
+test('kernel order is stable and cadence is exact',()=>{
+  const kernel=new EngineKernel(60);const calls=[];
+  kernel.use({id:'b',phase:'simulate',rateHz:30,reads:[],writes:['b'],run:()=>{calls.push('b');}});
+  kernel.use({id:'a',phase:'simulate',rateHz:60,reads:[],writes:['a'],run:()=>{calls.push('a');}});
+  kernel.run(1,{});assert.deepEqual(calls,['a']);calls.length=0;kernel.run(2,{});assert.deepEqual(calls,['a','b']);
+});
+
+test('scene physics is deterministic across equal runs',()=>{
+  const spec={version:1,entities:[{id:'ball',position:[0,3,0],mesh:{kind:'sphere',radius:.5},body:{mass:1,restitution:.5}}]};
+  const a=new Scene(spec),b=new Scene(spec);for(let i=0;i<180;i++){a.step(1/60);b.step(1/60);}assert.deepEqual(a.snapshot(),b.snapshot());assert.ok(a.entities.get('ball').position[1]>=.5-1e-6);
+});
+
+test('scene URL codec round-trips unicode ids',()=>{
+  const scene={version:1,entities:[{id:'машина',position:[1,2,3],mesh:{kind:'box'}}]};assert.deepEqual(decodeScene(encodeScene(scene)),scene);
+});
+
+
+function fireAtGlass(thickness,speed=30){
+  const scene=new Scene({
+    version:1,gravity:[0,0,0],
+    entities:[
+      {id:'glass',position:[0,1,0],mesh:{kind:'box',size:[thickness,1.4,1.2]},material:{kind:'glass'}},
+      {id:'ball',position:[-1,1,0],mesh:{kind:'sphere',radius:.11},material:{kind:'steel'},body:{mass:3.8,velocity:[speed,0,0]}},
+    ],
+  });
+  const events=[];for(let i=0;i<30;i++){scene.step(1/60);events.push(...scene.drainEvents());}
+  return{scene,events};
+}
+
+test('material physics decides penetration vs rebound from glass thickness',()=>{
+  const thin=fireAtGlass(.01),thick=fireAtGlass(.20);
+  assert.equal(thin.scene.entities.has('glass'),false,'10 mm glass should fracture under this impact');
+  assert.ok(thin.events.some(event=>event.type==='fracture'));
+  assert.equal(thick.scene.entities.has('glass'),true,'200 mm glass should survive the same impact');
+  assert.ok(thick.scene.entities.get('ball').body.velocity[0]<0,'surviving glass should return collision impulse to the ball');
+});
+
+test('fracture creates engine-owned shards and procedural audio',()=>{
+  const {scene,events}=fireAtGlass(.01);
+  const shards=[...scene.entities.keys()].filter(id=>id.startsWith('glass:shard:'));
+  assert.ok(shards.length>=10);
+  const audio=renderAudio(events,.5);
+  let peak=0;for(const sample of audio.left)peak=Math.max(peak,Math.abs(sample));
+  assert.ok(peak>.01,'fracture events should synthesize audible output');
+});
+
+
+test('glass crack topology is deterministic and conserves plate area',()=>{
+  const input={width:1.5,height:2,thickness:.01,impact:[.12,-.18],energyRatio:4.2,seed:123456};
+  const a=fracturePlate(input),b=fracturePlate(input);
+  assert.deepEqual(a,b);
+  assert.ok(a.radialRays>=6&&a.rings>=2);
+  assert.ok(a.fragments.length>=10);
+  const area=a.fragments.reduce((sum,fragment)=>sum+fragment.area,0);
+  assert.ok(Math.abs(area-3)<1e-6,`fragment area ${area} must conserve the 3 m² source plate`);
+});
+
+test('glass runtime uses exact polygon-prism fragments',()=>{
+  const {scene}=fireAtGlass(.01);
+  const shards=[...scene.entities.values()].filter(entity=>entity.id.startsWith('glass:shard:'));
+  assert.ok(shards.length>=10);
+  assert.ok(shards.every(entity=>entity.mesh?.kind==='polygon-prism'));
+  const mass=shards.reduce((sum,entity)=>sum+(entity.body?.mass??0),0);
+  assert.ok(Math.abs(mass-2500*.01*1.4*1.2)<.05,`fragment mass ${mass} should conserve glass mass`);
+});
+
+
+test('rotating debris settles on an explicit concrete surface',()=>{
+  const scene=new Scene({
+    version:1,
+    gravity:[0,-9.81,0],
+    ground:-100,
+    entities:[
+      {id:'floor',position:[0,-.1,0],mesh:{kind:'box',size:[10,.2,10]},material:{kind:'concrete'}},
+      {id:'shard',position:[0,1.2,0],rotation:[.7,.4,.25],mesh:{kind:'box',size:[.28,.018,.2]},material:{kind:'glass'},body:{mass:.18,velocity:[.8,-.2,.35],angularVelocity:[9,7,11]}},
+    ],
+  });
+  const shard=scene.entities.get('shard');
+  shard.body.fracturable=false;
+  shard.body.collisionClass='debris';
+  const events=[],samples=[];
+  for(let i=0;i<720;i++){scene.step(1/60);events.push(...scene.drainEvents());if((i+1)%120===0)samples.push({t:(i+1)/60,pos:[...shard.position],v:Math.hypot(...shard.body.velocity),w:Math.hypot(...shard.body.angularVelocity),sleep:shard.body.sleepTimer});}
+  assert.equal(shard.body.sleeping,true,`debris should eventually enter rest state on concrete: samples=${JSON.stringify(samples)} pos=${JSON.stringify(shard.position)} v=${JSON.stringify(shard.body.velocity)} w=${JSON.stringify(shard.body.angularVelocity)} sleepTimer=${shard.body.sleepTimer}`);
+  assert.deepEqual(shard.body.velocity,[0,0,0]);
+  assert.deepEqual(shard.body.angularVelocity,[0,0,0]);
+  assert.ok(events.some(event=>event.type==='impact'&&event.materialA==='glass'&&event.materialB==='concrete'),'contact acoustics should see glass ↔ concrete');
+});
+
+
+test('environment derives concrete moss without renderer controls',()=>{
+  const concrete=material('concrete');
+  const dry=deriveSurfaceState(concrete,{finish:'rough',ageYears:12,treatment:'none'},resolveEnvironment({humidity:.28,temperatureC:24,precipitation:'rare',sunlight:.9,groundMoisture:.15}));
+  const humid=deriveSurfaceState(concrete,{finish:'rough',ageYears:12,treatment:'none'},resolveEnvironment({humidity:.9,temperatureC:13,precipitation:'frequent',sunlight:.28,groundMoisture:.82}));
+  const protectedSurface=deriveSurfaceState(concrete,{finish:'rough',ageYears:12,treatment:'biocide'},resolveEnvironment({humidity:.9,temperatureC:13,precipitation:'frequent',sunlight:.28,groundMoisture:.82}));
+  assert.ok(humid.wetness>dry.wetness);
+  assert.ok(humid.moss>.25,`humid aged concrete should grow moss, got ${humid.moss}`);
+  assert.ok(humid.moss>dry.moss*3);
+  assert.ok(protectedSurface.moss<humid.moss*.2,'biocide is a semantic cause that suppresses moss');
+  assert.ok(humid.frictionScale<dry.frictionScale,'wet/mossy concrete should alter contact friction');
+});
+
+
+test('weather timeline moves from freezing night to thawing day',()=>{
+  const environment={
+    clock:{startHour:2,hoursPerSecond:.3},
+    weather:[
+      {hour:2,temperatureC:-10,snowfall:'heavy',sunlight:0},
+      {hour:7.4,temperatureC:0,snowfall:'moderate',sunlight:.18},
+      {hour:13,temperatureC:4,snowfall:'none',sunlight:.88},
+    ],
+  };
+  const night=resolveEnvironmentAt(environment,0),morning=resolveEnvironmentAt(environment,18),day=resolveEnvironmentAt(environment,36.6666667);
+  assert.equal(night.temperatureC,-10);assert.equal(night.snowfall,'heavy');assert.equal(night.sunlight,0);
+  assert.ok(Math.abs(morning.temperatureC)<1e-6);assert.equal(morning.snowfall,'moderate');assert.ok(morning.sunlight>.1);
+  assert.ok(day.temperatureC>3.9);assert.equal(day.snowfall,'none');assert.ok(day.sunlight>.8);
+});
+
+test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{
+  const scene=new Scene({
+    version:1,ground:-100,
+    environment:{
+      humidity:.88,groundMoisture:.7,clock:{startHour:2,hoursPerSecond:.3},
+      weather:[
+        {hour:2,temperatureC:-10,snowfall:'heavy',sunlight:0,wind:[2,0,.5]},
+        {hour:7.4,temperatureC:0,snowfall:'moderate',sunlight:.18,wind:[1,0,.2]},
+        {hour:13,temperatureC:4,snowfall:'none',sunlight:.88,wind:[1,0,0]},
+      ],
+    },
+    entities:[
+      {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[80,.2,8]},material:{kind:'asphalt'},environmental:{surfaceUse:'road'}},
+      {id:'sidewalk',position:[0,.08,5.5],mesh:{kind:'box',size:[80,.16,3]},material:{kind:'concrete'},environmental:{surfaceUse:'sidewalk'}},
+      {id:'curb',position:[0,.16,4.15],mesh:{kind:'box',size:[80,.32,.35]},material:{kind:'concrete'},environmental:{surfaceUse:'curb'}},
+      {id:'traffic',position:[-18,.65,0],mesh:{kind:'box',size:[4.5,1.3,1.9]},material:{kind:'steel'},body:{motion:'kinematic',mass:1500,velocity:[8,0,0]}},
+    ],
+  });
+  for(let i=0;i<360;i++)scene.step(1/60);
+  const road=scene.surfaces.surface('road'),sidewalk=scene.surfaces.surface('sidewalk'),body=scene.surfaces.body('traffic');
+  assert.ok(road&&sidewalk&&body);
+  assert.ok(scene.surfaces.sample('road',0,0).trackMelt>0,'contacted cells retain thermal history');
+  assert.equal(scene.surfaces.sample('road',0,3.5).trackMelt,0,'off-path cells receive no traffic work');
+  assert.ok(scene.surfaces.sample('road',0,0).slush>0,'contacted cells contain local slush during subzero snowfall');
+  assert.ok(sidewalk.snowDepthM>road.snowDepthM,'untouched sidewalk should retain more fresh snow than trafficked asphalt');
+  assert.ok(body.snowCoverage>.05,'snowfall should adhere to moving bodies');
+  assert.ok(body.rearSnow>.05,'wake/spray should accumulate snow on rear-facing body surfaces');
+  assert.ok([...scene.entities.keys()].some(id=>id.startsWith('__surface:snowdrift:curb:')),'curb snow mass should generate snowdrift geometry');
+
+  const nightSnow=road.snowDepthM;
+  for(let i=0;i<2100;i++)scene.step(1/60);
+  const dayRoad=scene.surfaces.surface('road');
+  assert.ok(scene.environment.temperatureC>2.5&&scene.environment.sunlight>.7,'timeline should reach a sunny above-freezing day');
+  assert.ok(dayRoad.temperatureC>0,'asphalt surface should thaw above zero');
+  assert.ok(dayRoad.snowDepthM<nightSnow,'daytime energy balance should melt accumulated road snow');
+  assert.ok(dayRoad.waterDepthM>0||dayRoad.puddle>.02,'melted snow should create water/puddle state');
+});

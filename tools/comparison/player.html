@@ -1,0 +1,109 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>Emergent physics · comparison</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#04070b;color:#f1f4f6;font-family:Arial,Helvetica,sans-serif}body{--accent:#74ddcd;--muted:#8695a8}body.before{--accent:#f29978}header{height:146px;padding:31px 58px 0;background:#070d15} .eyebrow{font-size:17px;letter-spacing:3px;color:#90a1b6;font-weight:600;display:flex;align-items:center;gap:17px}.logo{width:13px;height:13px;background:var(--accent);display:inline-block}.number{color:var(--accent)}h1{font-size:43px;letter-spacing:-1.2px;font-weight:500;margin:15px 0 0}.pill{position:absolute;right:58px;top:58px;border:1px solid var(--accent);color:var(--accent);padding:14px 25px;border-radius:5px;font-size:24px;letter-spacing:2px;font-weight:600}#world{position:absolute;left:0;top:146px;width:100%;height:calc(100% - 354px)}#overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}footer{position:absolute;bottom:0;height:208px;left:0;right:0;padding:26px 58px 24px;background:#080f19;border-top:1px solid #263341}#caption{font-size:27px;letter-spacing:-.2px;margin-bottom:27px;line-height:1.2}.stats{display:grid;grid-template-columns:1fr 1.25fr 1.2fr;gap:50px}.label{color:#7f91a9;font-size:14px;letter-spacing:2.4px;margin-bottom:8px}.value{font-size:27px;color:#e0e8f0}.accent{color:var(--accent)}#time{position:absolute;right:58px;top:166px;font-family:Menlo,monospace;color:#718398;font-size:16px;letter-spacing:1px}#phase{position:absolute;left:58px;top:166px;font-size:16px;letter-spacing:1.9px;color:#8ea1b5}#progress{position:absolute;bottom:0;left:0;height:3px;width:0;background:var(--accent)}#stamp{position:absolute;right:58px;bottom:235px;font-size:15px;letter-spacing:1.5px;color:#566b81}#hero{display:none;position:absolute;inset:0;background:#07101b;padding:70px 100px}.hero-meta{color:#79cdbf;font-size:20px;letter-spacing:4px}.hero-title{font-size:95px;letter-spacing:-4px;line-height:1.1;margin-top:130px;max-width:1500px}.hero-sub{font-size:31px;color:#97a9bd;line-height:1.5;max-width:1400px;margin-top:45px}.hero-line{height:2px;background:#29434c;margin-top:85px;width:100%}.hero-bottom{margin-top:33px;font-size:20px;letter-spacing:1.3px;color:#8da0b7}.hero-cards{display:flex;gap:18px;margin-top:50px}.hero-card{flex:1;padding:30px 30px 36px;border:1px solid #2d414e;background:#0c1824}.hero-card .metric{font-size:50px;color:#79dfcc;margin:18px 0}.hero-card .name{font-size:24px;color:#eff3f6}.hero-card .note{font-size:19px;color:#94a7bc;line-height:1.6}.rail{position:absolute;right:100px;top:70px;font-family:Menlo,monospace;color:#68869b;font-size:18px}
+#diagnostic{display:none;position:absolute;left:58px;right:58px;top:225px;bottom:254px;pointer-events:none}.panel{background:#0b1420f5;border:1px solid #2b3d50;padding:34px}.panel h2{font-size:24px;font-weight:400;color:#a8bad0;margin:0 0 25px}.big{font-size:90px;color:var(--accent);line-height:1.2}.sub{font-size:22px;color:#849bb3;line-height:1.6}.row{display:flex;gap:22px;align-items:stretch}.row>.panel{flex:1}.flow{font-size:29px;padding:26px;background:#112333;border-left:3px solid var(--accent);margin:18px 0}.heat{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;height:104px;margin:17px 0 28px}.heat i{background:#172c3e}.code{font-family:Menlo,monospace;font-size:21px;color:#e0e8ef}.result{margin:22px 0;padding:22px;background:#132231;font-size:24px}.hero-card .metric{font-size:36px}</style>
+<header><div class="eyebrow"><span class="logo"></span>GAME ENGINE <span style="color:#31475d">/</span> EMERGENT PHYSICS <span class="number" id="case"></span></div><h1 id="title"></h1><div class="pill" id="version"></div></header>
+<canvas id="world"></canvas><svg id="overlay"></svg><div id="phase"></div><div id="time"></div><div id="stamp">ОДИНАКОВЫЕ СЦЕНА · SEED · КАМЕРА · РЕНДЕРЕР</div>
+<footer><div id="caption"></div><div class="stats"><div><div class="label" id="label1"></div><div class="value" id="value1"></div></div><div><div class="label" id="label2"></div><div class="value" id="value2"></div></div><div><div class="label" id="label3"></div><div class="value accent" id="value3"></div></div></div></footer><div id="progress"></div><div id="hero"></div>
+<div id="diagnostic"></div>
+<script type="module">
+import {WebGPURenderer} from '/after/dist/render/webgpu.js';
+import {lookAt,perspective,multiply4} from '/after/dist/math.js';
+const $=id=>document.getElementById(id),canvas=$('world');let renderer=await WebGPURenderer.create(canvas);
+const specs=await (await fetch('/scenes.json')).json();
+const definitions={
+ fracture:{number:'01 / 08',title:'Материал определяет разрушение',duration:2,
+ before:{caption:'Горизонтальный контакт обходит проверку прочности. Стекло остаётся целым.',values:['18 мм · сталь 5 кг','Проверка материала пропущена'],labels:['ТОТ ЖЕ УДАР','ЗАКОН КОНТАКТА','РЕЗУЛЬТАТ']},
+ after:{caption:'Энергия контакта разрушает стекло. Тот же процесс рождает осколки и звук.',values:['18 мм · сталь 5 кг','Энергия → трещины → осколки'],labels:['ТОТ ЖЕ УДАР','ЗАКОН КОНТАКТА','РЕЗУЛЬТАТ']}},
+ momentum:{number:'02 / 08',title:'Осколки наследуют движение тела',duration:2.2,
+ before:{caption:'Движение исходного тела теряется при создании осколков.',values:['3 м/с · гравитация выключена','462,0 кг·м/с'],labels:['НАЧАЛЬНОЕ ДВИЖЕНИЕ ПО X','ИМПУЛЬС ДО УДАРА','ИМПУЛЬС СЕЙЧАС']},
+ after:{caption:'Перенос массы и импульса сохраняет движение после разрушения.',values:['3 м/с · гравитация выключена','462,0 кг·м/с'],labels:['НАЧАЛЬНОЕ ДВИЖЕНИЕ ПО X','ИМПУЛЬС ДО УДАРА','ИМПУЛЬС СЕЙЧАС']}},
+ friction:{number:'03 / 08',title:'Свойства поверхности меняют движение',duration:3.3,
+ before:{caption:'Разные коэффициенты трения дают одинаковый путь: контакт берёт значение из каталога.',values:['μ поверхности: 0,85 / 0,015','7 м/с · одинаковые тела'],labels:['ДВЕ ПОВЕРХНОСТИ','ОДИНАКОВЫЙ СТАРТ','ПУТЬ: ШЕРОХОВАТОЕ / СКОЛЬЗКОЕ']},
+ after:{caption:'Контакт учитывает текущее трение поверхности. Скользкое покрытие увеличивает путь.',values:['μ поверхности: 0,85 / 0,015','7 м/с · одинаковые тела'],labels:['ДВЕ ПОВЕРХНОСТИ','ОДИНАКОВЫЙ СТАРТ','ПУТЬ: ШЕРОХОВАТОЕ / СКОЛЬЗКОЕ']}},
+};
+Object.assign(definitions,{
+ kernel:{title:'Ядро действительно запускает модули',duration:3,before:{caption:'Модуль зарегистрирован отдельно. Scene.step не вызывает ядро.',values:['Расширение: 30 Гц','Команда: скорость 2 м/с'],labels:['МОДУЛЬ УПРАВЛЕНИЯ','ДЕЙСТВИЕ','ВЫЗОВЫ МОДУЛЯ']},after:{caption:'Scene.step выполняет план ядра. Команда модуля изменяет движение тела.',values:['Расширение: 30 Гц','Команда: скорость 2 м/с'],labels:['МОДУЛЬ УПРАВЛЕНИЯ','ДЕЙСТВИЕ','ВЫЗОВЫ МОДУЛЯ']}},
+ phases:{title:'Изменение доходит до следующей фазы',duration:3,before:{caption:'Команда готова, но publish получает прежнее состояние.',values:['simulate → set(value, 1)','Начальное value = 0'],labels:['КОМАНДА МОДУЛЯ','ИСХОДНОЕ СОСТОЯНИЕ','PUBLISH ВИДИТ']},after:{caption:'Commit применяет команду. Publish читает новый неизменяемый снимок.',values:['simulate → set(value, 1)','Начальное value = 0'],labels:['КОМАНДА МОДУЛЯ','ИСХОДНОЕ СОСТОЯНИЕ','PUBLISH ВИДИТ']}},
+ snow:{title:'След хранится там, где был контакт',duration:3,before:{caption:'Близость к дороге нагревает весь объект, даже если тело летит над ним.',values:['Верхняя карта: контакт','Нижняя: тело в 1 м над дорогой'],labels:['ДВА ОДИНАКОВЫХ ТЕЛА','КОНТРОЛЬНЫЙ ОПЫТ','ЯЧЕЙКИ СО СЛЕДОМ']},after:{caption:'Работа скольжения локальна. В воздухе контакт отсутствует — следа нет.',values:['Верхняя карта: контакт','Нижняя: тело в 1 м над дорогой'],labels:['ДВА ОДИНАКОВЫХ ТЕЛА','КОНТРОЛЬНЫЙ ОПЫТ','ЯЧЕЙКИ СО СЛЕДОМ']}},
+ gpu:{title:'Ресурсы живут столько же, сколько геометрия',duration:3,before:{caption:'Сущности уже удалены. Буферы остаются в кэше до закрытия рендерера.',values:['20 временных объектов','Каждый живёт 0,12 с'],labels:['ОДИНАКОВАЯ НАГРУЗКА','ВРЕМЯ ЖИЗНИ','ЖИВЫЕ БУФЕРЫ ГЕОМЕТРИИ']},after:{caption:'Неиспользуемые буферы уничтожаются; общая живая геометрия сохраняется.',values:['20 временных объектов','Каждый живёт 0,12 с'],labels:['ОДИНАКОВАЯ НАГРУЗКА','ВРЕМЯ ЖИЗНИ','ЖИВЫЕ БУФЕРЫ ГЕОМЕТРИИ']}},
+ validation:{title:'Ошибка останавливается на границе сцены',duration:3,before:{caption:'Некорректные примитивы и скорости проходят validateScene.',values:['3 некорректных описания','Настоящий вызов validateScene'],labels:['ВХОДНЫЕ ДАННЫЕ','ПРОВЕРКА','ОТКЛОНЕНО ДО СИМУЛЯЦИИ']},after:{caption:'Проверка отклоняет данные и указывает поле до создания физического тела.',values:['3 некорректных описания','Настоящий вызов validateScene'],labels:['ВХОДНЫЕ ДАННЫЕ','ПРОВЕРКА','ОТКЛОНЕНО ДО СИМУЛЯЦИИ']}}
+});
+Object.values(definitions).forEach((d,i)=>d.number=String(i+1).padStart(2,'0')+' / 08');
+let calls=0,probe=null,published=0,commits=0,emitted=0,validationResults=[],api=null,gpuHistory=[];
+let scene=null,version='after',id='fracture',events=[];
+const format=(n,d=1)=>n.toFixed(d).replace('.',',');
+function project(p){const rect=canvas.getBoundingClientRect(),camera=scene.camera,mat=multiply4(perspective((camera.fov??55)*Math.PI/180,rect.width/rect.height),lookAt(camera.position,camera.target));const c=[0,1,2,3].map(row=>mat[row]*p[0]+mat[4+row]*p[1]+mat[8+row]*p[2]+mat[12+row]);return[(c[0]/c[3]*.5+.5)*rect.width,rect.top+(-c[1]/c[3]*.5+.5)*rect.height];}
+function trace(a,b,label,color){const p=project(a),q=project(b);return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${color}" stroke-width="3" stroke-dasharray="8 6"/><circle cx="${p[0]}" cy="${p[1]}" r="5" fill="none" stroke="${color}" stroke-width="2"/><circle cx="${q[0]}" cy="${q[1]}" r="5" fill="${color}"/><text x="${q[0]+16}" y="${q[1]-22}" fill="${color}" stroke="#04070b" stroke-width="5" paint-order="stroke" style="font:600 23px Arial">${label}</text>`;}
+function update(time){
+ const spec=definitions[id],settings=spec[version],target=Math.round(Math.max(0,Math.min(spec.duration,(time-2.6)*spec.duration/4.5))*60);
+ while(scene.tick<target){
+  if(id==='gpu'&&scene.tick%6===0&&emitted<20){const n=emitted++;const e=scene.add({id:'temporary-'+n,position:[(n%5-2)*1.5,1,Math.floor(n/5)-1.5],mesh:{kind:'box',size:[.6+n*.003,.6,.6]},material:{kind:'steel'}});e.expiresAt=scene.time+.12;}
+  if(id==='phases')probe.run(scene.tick+1,{value:0},'detailed',{commit:cmd=>{commits++;return{value:cmd[0].value};}});
+  if(id==='validation'&&validationResults.length<Math.min(3,Math.floor(scene.tick/45)+1)){
+   const inputs=[{mesh:{kind:'sphere',radius:-1}},{body:{velocity:[null,0,0]}},{mesh:{kind:'unknown'}}],n=validationResults.length;
+   try{api.validateScene({version:1,entities:[{id:'probe',...inputs[n]}]});validationResults.push({accepted:true,message:'Пропущено в Scene'});}catch(e){validationResults.push({accepted:false,message:e.message});}
+  }
+  scene.step();events.push(...scene.drainEvents());
+ }
+ renderer.render(scene);
+ $('phase').textContent=time<2.6?'ИСХОДНЫЕ УСЛОВИЯ':time<7.1?`ЗАМЕДЛЕНИЕ ${format(spec.duration/4.5,2)}×`:'РЕЗУЛЬТАТ СИМУЛЯЦИИ';
+ $('time').textContent=`t = ${scene.time.toFixed(3)} s`;
+ $('progress').style.width=`${Math.min(100,time/9*100)}%`;
+ let overlay='';
+ if(id==='fracture'){
+  const count=[...scene.entities.keys()].filter(key=>key.startsWith('glass:shard:')).length;
+  $('value3').textContent=count?`${count} физических осколка`:'Стекло целое';
+ }else if(id==='momentum'){
+  const p=[...scene.physics.bodies.values()].reduce((s,b)=>s+b.mass*b.velocity[0],0);
+  $('value3').textContent=`${format(p)} кг·м/с  ·  ${format(p/462*100)}%`;
+  if(!scene.entities.has('glass')){
+   const shards=[...scene.physics.bodies.values()].filter(b=>b.id.startsWith('glass:shard:')),m=shards.reduce((s,b)=>s+b.mass,0),center=[0,0,0];
+   for(const b of shards)for(let k=0;k<3;k++)center[k]+=b.position[k]*b.mass/m;
+   overlay=trace([-2.4,2,0],center,'ЦЕНТР МАСС',version==='after'?'#74ddcd':'#f29978');
+  }
+ }else if(id==='friction'){
+  const rough=scene.entities.get('rough-slider').position,slippery=scene.entities.get('slippery-slider').position;
+  $('value3').textContent=`${format(rough[0]+6,2)} м / ${format(slippery[0]+6,2)} м`;
+  overlay=trace([-6,.2,-1.65],[rough[0],.2,-1.65],`μ = 0,85  ·  ${format(rough[0]+6,2)} м`,'#f1c486')+trace([-6,.2,1.65],[slippery[0],.2,1.65],`μ = 0,015  ·  ${format(slippery[0]+6,2)} м`,'#74ddcd');
+ }
+ if(['kernel','phases','snow','gpu','validation'].includes(id))diagnostics(time);else $('diagnostic').style.display='none';
+ $('overlay').innerHTML=overlay;
+}
+function diagnostics(time){
+ const d=$('diagnostic');d.style.display='block';d.style.left='58px';d.style.right='58px';
+ if(id==='kernel'){
+  d.style.left='1100px';d.innerHTML=`<div class="panel"><h2>РАСШИРЕНИЕ · 30 ГЦ</h2><div class="big">${calls}</div><div class="sub">реальных вызовов за ${format(scene.time)} с</div><div class="flow">${scene.use?'Scene.step → kernel → drive':'Scene.step → physics'}</div><div class="code">velocity = [2, 0, 0]</div><div class="sub" style="margin-top:30px">Путь тела: ${format(scene.entities.get('signal').position[0]+4,2)} м</div></div>`;$('value3').textContent=calls+' / '+Math.floor(scene.tick/2);
+ }else if(id==='phases'){
+  d.innerHTML=`<div class="row"><div class="panel"><h2>01 · SIMULATE</h2><div class="big">${scene.tick?1:0}</div><div class="flow">command: set(value, 1)</div><div class="sub">Команда возвращена модулем</div></div><div class="panel"><h2>02 · COMMIT</h2><div class="big">${commits}</div><div class="flow">${commits?'Состояние обновлено':'Барьер отсутствует'}</div><div class="sub">Применений команд между фазами</div></div><div class="panel"><h2>03 · PUBLISH</h2><div class="big">${published}</div><div class="flow">snapshot.value = ${published}</div><div class="sub">Фактическое чтение потребителем</div></div></div>`;$('value3').textContent='value = '+published;
+ }else if(id==='snow'){
+  d.style.left='980px';const counts=[];
+  const maps=['road-contact','road-air'].map((key,i)=>{const field=(scene.surfaces??scene.winter).field?.(key),scalar=(scene.surfaces??scene.winter).surface(key)?.trackMelt??0,values=field?field.cells.map(c=>c.trackMelt):Array(168).fill(scalar);counts.push(values.filter(v=>v>0).length);
+   return `<div class="sub">${i?'В ВОЗДУХЕ · зазор 1 м':'КОНТАКТ · зазор 0 м'}</div><div class="heat">${values.map(v=>`<i style="background:rgb(${Math.round(23+220*Math.min(1,v/.002))},${Math.round(44+130*Math.min(1,v/.002))},${Math.round(62-20*Math.min(1,v/.002))})"></i>`).join('')}</div>`;}).join('');
+  d.innerHTML=`<div class="panel"><h2>КАРТА СОСТОЯНИЯ ПОВЕРХНОСТИ</h2>${maps}<div class="sub">Синий: 0 · жёлтый: trackMelt ≥ 0,002<br>${(scene.surfaces??scene.winter).field?'24 × 7 ячеек на дорожку':'Один скаляр на всю дорожку'}</div></div>`;$('value3').textContent=counts.join(' / ');
+ }else if(id==='gpu'){
+  const objects=renderer.objects.size,buffers=renderer.meshes.size*2+objects,live=scene.entities.size;gpuHistory.push({time:scene.time,buffers});
+  d.innerHTML=`<div class="row"><div class="panel"><h2>СЦЕНА · ЖИВЫЕ ОБЪЕКТЫ</h2><div class="big">${live}</div><div class="flow">Создано всего: ${emitted} / 20</div><div class="sub">Удаление по expiresAt</div></div><div class="panel"><h2>GPU · БУФЕРЫ ГЕОМЕТРИИ</h2><div class="big">${buffers}</div><div class="flow">${renderer.meshes.size} mesh × 2 + ${objects} uniform</div><div class="sub">Общие буферы рендерера исключены</div></div><div class="panel"><h2>НАКОПЛЕНИЕ В КЭШЕ</h2><svg viewBox="0 0 460 260" style="width:100%;height:260px"><path d="${gpuHistory.map((v,i)=>(i?'L':'M')+(v.time/3*460)+','+(245-v.buffers*3.6)).join(' ')}" fill="none" stroke="${version==='before'?'#f29978':'#74ddcd'}" stroke-width="4"/></svg><div class="sub">0 → 3 с · шкала 0–60 буферов</div></div></div>`;$('value3').textContent=String(buffers);
+ }else{
+  const labels=['sphere.radius = −1','velocity = [null, 0, 0]','mesh.kind = "unknown"'];d.innerHTML=`<div class="panel"><h2>ПРОВЕРКА ДО СОЗДАНИЯ SCENE</h2>${labels.map((label,i)=>`<div class="result"><span class="code">${label}</span><span style="float:right;color:var(--accent)">${validationResults[i]?(validationResults[i].accepted?'ПРИНЯТО':'ОТКЛОНЕНО'):'ожидание'}</span>${validationResults[i]?`<div class="sub" style="font-size:19px;margin-top:12px">${validationResults[i].message}</div>`:''}</div>`).join('')}</div>`;$('value3').textContent=validationResults.filter(r=>!r.accepted).length+' / 3';
+ }
+}
+window.film={
+ async load(nextId,nextVersion){id=nextId;version=nextVersion;events=[];calls=0;published=0;commits=0;emitted=0;validationResults=[];gpuHistory=[];$('hero').style.display='none';document.body.className=version;api=await import(`/${version}/dist/index.js`);scene=new api.Scene(specs[id]);
+ renderer.dispose();const Renderer=id==='gpu'&&version==='before'?(await import('/before/dist/render/webgpu.js')).WebGPURenderer:WebGPURenderer;renderer=await Renderer.create(canvas);
+ $('stamp').textContent=id==='gpu'?'СРАВНЕНИЕ ДВУХ РЕАЛЬНЫХ РЕНДЕРЕРОВ':id==='snow'?'КАРТЫ ПОКАЗЫВАЮТ SURFACE ENVIRONMENT STATE':'ОДИНАКОВЫЕ СЦЕНА · SEED · КАМЕРА';
+ if(id==='kernel'){
+  const module={id:'demo:drive',phase:'plan',rateHz:30,reads:[],writes:['entities'],run:()=>{calls++;return[{type:'velocity',id:'signal',value:[2,0,0]}];}};
+  if(scene.use)scene.use(module);else{probe=new api.EngineKernel();probe.use(module);}
+ }
+ if(id==='phases'){probe=new api.EngineKernel();probe.use({id:'producer',phase:'simulate',rateHz:60,reads:[],writes:['value'],run:()=>[{value:1}]});probe.use({id:'publisher',phase:'publish',rateHz:60,reads:['value'],writes:[],run:c=>{published=c.value;}});}
+ canvas.style.width=['snow','kernel'].includes(id)?'50%':'100%';scene.camera={...scene.camera,fov:id==='snow'?48:id==='kernel'?55:32};const config=definitions[id],settings=config[version];$('case').textContent=config.number;$('title').textContent=config.title;$('version').textContent=version==='before'?'ДО ИСПРАВЛЕНИЙ':'ПОСЛЕ ИСПРАВЛЕНИЙ';$('caption').textContent=settings.caption;for(let i=0;i<3;i++)$('label'+(i+1)).textContent=settings.labels[i];$('value1').textContent=settings.values[0];$('value2').textContent=settings.values[1];update(0);await renderer.flush();},
+ async frame(time){update(time);await renderer.flush();},
+ async card(kind,time){$('overlay').innerHTML='';$('diagnostic').style.display='none';$('hero').style.display='block';document.body.className='after';$('progress').style.width=`${Math.min(100,time/6*100)}%`;
+  $('hero').innerHTML=kind==='intro'?`<div class="hero-meta">GAME ENGINE / EMERGENT PHYSICS</div><div class="rail">ARCHITECTURE / FULL COMPARISON</div><div class="hero-title">Физика, которую<br>видно и слышно.</div><div class="hero-sub">Семь замечаний ревью. Восемь проверяемых опытов.<br>Сначала старая версия — сразу следом исправленная.<br>Одинаковые сцены, начальные условия и камера.</div><div class="hero-line"></div><div class="hero-bottom">МАТЕРИАЛ → КОНТАКТ → РАЗРУШЕНИЕ → ДВИЖЕНИЕ → ЗВУК</div>`:
+  `<div class="hero-meta">GAME ENGINE / РЕЗУЛЬТАТЫ</div><div class="rail">7 ЗАМЕЧАНИЙ / 8 ОПЫТОВ</div><div class="hero-title" style="margin-top:90px;font-size:78px">Ядро. Физика. Ресурсы.<br>Изменения, которые видны.</div><div class="hero-cards"><div class="hero-card"><div class="name">Исполнение и данные</div><div class="metric">Модули + commit</div><div class="note">Рабочий цикл сцены · зависимости<br>Снимки · валидация входа</div></div><div class="hero-card"><div class="name">Материальная физика</div><div class="metric">Контакт → эффект</div><div class="note">Стекло · импульс · трение<br>Локальные снежные следы</div></div><div class="hero-card"><div class="name">Жизненный цикл GPU</div><div class="metric">60 → 0</div><div class="note">буферов геометрии после удаления<br>20 временных объектов</div></div></div><div class="hero-bottom">РЕАЛЬНЫЙ КОД ДВУХ ВЕРСИЙ · WEBGPU · РУССКАЯ ОЗВУЧКА · 24 ТЕСТА ПРОЙДЕНО</div>`;
+ },
+ events:()=>events, inspect:()=>({...renderer.inspect(),evidence:{calls,published,commits,emitted,validationResults,objects:renderer.objects.size,buffers:renderer.meshes.size*2+renderer.objects.size,surfaceState:[...(scene?.surfaces??scene?.winter)?.surfaces.values()??[]].map(x=>({id:x.id,trackMelt:x.trackMelt}))}}),snapshot:()=>scene?.snapshot(),
+};
+window.ready=true;
+</script></html>
