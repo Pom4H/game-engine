@@ -143,7 +143,8 @@ export class Scene {
         material:{kind:entity.material.kind,color:entity.material.color},
         body:{mass,velocity,angularVelocity:[(rng()*2-1)*13,(rng()*2-1)*13,(rng()*2-1)*13],restitution:.12,friction:.42,shape:'box'},
       });
-      if(shard.body){shard.body.fracturable=false;shard.body.collisionClass='debris';}\n      shard.expiresAt=at+4.5+rng()*1.5;
+      if(shard.body){shard.body.fracturable=false;shard.body.collisionClass='debris';}
+      shard.expiresAt=at+4.5+rng()*1.5;
     }
     this.pushEvent({
       type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
