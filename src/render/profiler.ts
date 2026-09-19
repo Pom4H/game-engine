@@ -1,3 +1,4 @@
+import type {RenderAtomReport} from './atoms.js';
 export const RENDER_CPU_QUANTA = [
   'lifecycle','resize','materials','lights','frame','visibility','prepare','cull',
   'encode.shadow','encode.reflection','encode.main','encode.bloom','encode.post','submit',
@@ -29,6 +30,7 @@ export interface RenderProfileSnapshot {
   readonly cpuTotal?:QuantumStats;readonly gpuTotal?:QuantumStats;
   readonly cpu:Readonly<Record<string,QuantumStats>>;
   readonly gpu:Readonly<Record<string,QuantumStats>>;
+  readonly atoms?:RenderAtomReport;
 }
 
 type GPUAny=any;
@@ -44,7 +46,7 @@ const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work
  * ring, so profiling never waits for the GPU in render().
  */
 export class RenderProfiler {
-  private frame=0;private generation=0;private frameStart=0;private cpuQuanta:Record<string,number>={};private work=emptyWork();
+  private frame=0;private generation=0;private frameStart=0;private cpuQuanta:Record<string,number>={};private work=emptyWork();private atoms:RenderAtomReport|undefined;
   private readonly cpuHistory:RenderFrameTiming[]=[];private readonly gpuHistory:RenderFrameTiming[]=[];
   private readonly querySet:GPUAny|null;private readonly slots:GpuSlot[]=[];private active:GpuSlot|null=null;
   private readonly queryBytes=RENDER_GPU_QUANTA.length*2*8;
@@ -70,6 +72,7 @@ export class RenderProfiler {
   measure<T>(name:RenderCpuQuantum,run:()=>T):T{if(!this.enabled)return run();const at=performance.now();try{return run();}finally{this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+(performance.now()-at);}}
   add(name:RenderCpuQuantum,ms:number):void{if(this.enabled&&Number.isFinite(ms)&&ms>=0)this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+ms;}
   setWork(work:Partial<RenderWork>):void{if(this.enabled)Object.assign(this.work,work);}
+  setAtoms(atoms:RenderAtomReport):void{if(this.enabled)this.atoms=atoms;}
   addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'='uniform'):void{if(!this.enabled||!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else this.work.snowUploadBytes+=bytes;}
 
   timestampWrites(name:RenderGpuQuantum):Record<string,unknown>|undefined{
@@ -98,7 +101,7 @@ export class RenderProfiler {
     }).catch(()=>{try{slot.read.unmap();}catch{}slot.pending=false;slot.work=null;});
   }
 
-  reset():void{this.generation++;this.cpuHistory.length=0;this.gpuHistory.length=0;this.frame=0;this.cpuQuanta={};this.work=emptyWork();this.active=null;}
+  reset():void{this.generation++;this.cpuHistory.length=0;this.gpuHistory.length=0;this.frame=0;this.cpuQuanta={};this.work=emptyWork();this.atoms=undefined;this.active=null;}
 
   inspect():RenderProfileSnapshot{
     const latestCpu=this.cpuHistory.at(-1),latestGpu=this.gpuHistory.at(-1);
@@ -111,6 +114,7 @@ export class RenderProfiler {
       ...(this.gpuHistory.length?{gpuTotal:stats(this.gpuHistory.map(x=>x.totalMs))}:{}),
       cpu:Object.freeze(aggregate(this.cpuHistory,RENDER_CPU_QUANTA)),
       gpu:Object.freeze(aggregate(this.gpuHistory,RENDER_GPU_QUANTA)),
+      ...(this.atoms?{atoms:this.atoms}:{}),
     });
   }
   dispose():void{this.querySet?.destroy?.();for(const slot of this.slots){try{slot.read.unmap();}catch{}slot.resolve.destroy();slot.read.destroy();}this.slots.length=0;}
