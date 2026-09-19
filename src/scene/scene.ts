@@ -16,6 +16,7 @@ import type {EngineEvent} from './events.js';
 import type {BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
+import {SceneSystemRuntime} from './system-runtime.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
@@ -52,6 +53,7 @@ export class Scene {
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
+  readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
   lastExecution:string[]=[];
   private pendingFractures=new Map<string,FractureDecision>();
@@ -78,6 +80,7 @@ export class Scene {
     for(const {entityId,...options} of this.spec.surfaceContacts?.wheels??[])this.contacts.addWheelContact(entityId,options);
     for(const walker of this.spec.animation?.walkers??[])this.animation.addWalker(walker);
     for(const vehicle of this.spec.animation?.vehicles??[])this.animation.addVehicle(vehicle);
+    this.installSystemRuntime();
   }
 
   add(spec:EntitySpec):RuntimeEntity{
@@ -136,15 +139,18 @@ export class Scene {
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
       const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);return;
     }
-    switch(command.action){
-      case 'weather':this.environment=resolveEnvironmentAt(this.spec.environment,at);break;
-      case 'surfaces':
+    this.systemRuntime.run(command.action,dt,at);
+  }
+
+  private installSystemRuntime():void{
+    this.systemRuntime
+      .use('weather',({at})=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);})
+      .use('surfaces',({dt})=>{
         this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
         this.syncSurfaceVisuals();
-        break;
-      case 'animation':this.animation.step(at,this.entities,p=>this.contacts.sample(p));break;
-      case 'surface-contacts':this.contacts.step(dt,at,this.animation.feet);break;
-      case 'physics':
+      })
+      .use('animation',({at})=>{this.animation.step(at,this.entities,p=>this.contacts.sample(p));})
+      .use('physics',({dt})=>{
         this.pendingFractures.clear();
         this.physics.step(dt,contact=>{
           const result=evaluateFracture(contact);
@@ -153,12 +159,13 @@ export class Scene {
             this.pendingFractures.set(result.fracture.body.id,result.fracture);
           }
           return result.decision;
-        });break;
-      case 'events':this.emitContactEvents(at);break;
-      case 'fracture':for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);break;
-      case 'cleanup':this.cleanupGenerated(at);break;
-      case 'clock':this.time=at;this.tick++;break;
-    }
+        });
+      })
+      .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
+      .use('events',({at})=>{this.emitContactEvents(at);})
+      .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
+      .use('cleanup',({at})=>{this.cleanupGenerated(at);})
+      .use('clock',({at})=>{this.time=at;this.tick++;});
   }
 
   snapshot():SceneSnapshot{
