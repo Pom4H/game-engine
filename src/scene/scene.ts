@@ -2,6 +2,7 @@ import {AnimationSystem} from '../animation/locomotion.js';
 import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
+import type {SimulationTier} from '../core/kernel.js';
 import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
 import {SurfaceEnvironmentSystem} from '../environment/surface-state.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
@@ -123,15 +124,15 @@ export class Scene {
     this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.physics.remove(id);this.entities.delete(id);this.surfaces.remove(id);
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
-  step(dt=1/60):void{
+  step(dt=1/60,tier:SimulationTier='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
     const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,{} as SceneModuleContext,'detailed',{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
-      for(const command of commands)this.commit(command,dt,at);
+    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+      for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});
   }
-  private commit(command:InternalCommand,dt:number,at:number):void{
+  private commit(command:InternalCommand,at:number):void{
     if(command.type==='spawn'){this.add(command.entity);return;}
     if(command.type==='remove'){this.remove(command.id);return;}
     if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));return;}
@@ -139,7 +140,7 @@ export class Scene {
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
       const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);return;
     }
-    this.systemRuntime.run(command.action,dt,at);
+    this.systemRuntime.run(command.action,command.deltaSeconds,at);
   }
 
   private installSystemRuntime():void{
