@@ -9,6 +9,7 @@ import type {Primitive,CameraSpec} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
 import {RenderProfiler} from './profiler.js';
+import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 
 type GPUAny=any;
 export interface WebGPURendererOptions {profiling?:boolean}
@@ -337,8 +338,17 @@ export class WebGPURenderer implements Renderer{
   private pointLights=0;private lightOverflow=0;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];
   private readonly profiler:RenderProfiler;
+  private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
     this.surfaceTextures=new SurfaceTextures(device);this.profiler=new RenderProfiler(device,{enabled:profiling,timestampQueries});
+    this.shaderAtoms=profiling?Object.freeze({
+      material:analyzeWGSL('material',materialShader(),['vs','fs','shadowVS']),
+      reflection:analyzeWGSL('reflection',materialShader(true),['reflectionVS','fs']),
+      sky:analyzeWGSL('sky',SKY_SHADER,['vs','fs']),
+      snow:analyzeWGSL('snow',SNOW_SHADER,['vs','fs']),
+      bloom:analyzeWGSL('bloom',BLOOM_SHADER,['vs','downsample','horizontal','vertical']),
+      post:analyzeWGSL('post',POST_SHADER,['vs','fs']),
+    }):Object.freeze({});
     device.addEventListener?.('uncapturederror',(event:any)=>{const message=event?.error?.message??String(event?.error);this.errors.push(message);console.error('Game Engine WebGPU:',message);});device.lost?.then((info:any)=>this.errors.push(`Device lost: ${info?.message??'unknown'}`));
   }
   static async create(canvas:HTMLCanvasElement,options:WebGPURendererOptions={}):Promise<WebGPURenderer>{
@@ -434,12 +444,13 @@ export class WebGPURenderer implements Renderer{
       const reflectionVP=frame.subarray(48,64),reflectedObjects=classified.opaque.filter(e=>e.material.kind!=='snow'&&e.material.kind!=='asphalt'&&inView(e,reflectionVP));
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
-    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:culled.shadowCasters.length,reflected:culled.reflectedObjects.length});
+    const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
+    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
     this.profiler.measure('encode.shadow',()=>{
       const timing=this.profiler.timestampWrites('shadow'),shadow=encoder.beginRenderPass({label:'render.shadow',...(timing?{timestampWrites:timing}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       shadow.setPipeline(this.gpu.shadowPipeline);shadow.setBindGroup(1,this.gpu.frameBind);
-      for(const e of culled.shadowCasters){if(e.material.emissive&&Math.max(...e.material.emissive)>1)continue;this.draw(shadow,e,false);}shadow.end();
+      for(const e of shadowDrawables)this.draw(shadow,e,false);shadow.end();
     });
     this.profiler.measure('encode.reflection',()=>{
       const timing=this.profiler.timestampWrites('reflection'),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
@@ -462,7 +473,23 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('encode.post',()=>{
       const timing=this.profiler.timestampWrites('post'),post=encoder.beginRenderPass({label:'render.post',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.context.getCurrentTexture().createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});post.setPipeline(this.gpu.post);post.setBindGroup(0,this.postBind);post.draw(3);post.end();
     });
-    this.profiler.setWork({drawCalls:this.drawCalls,triangles:this.triangles,snowInstances});this.profiler.resolve(encoder);
+    this.profiler.setWork({drawCalls:this.drawCalls,triangles:this.triangles,snowInstances});
+    if(this.profiler.enabled){
+      const sumTriangles=(entities:readonly RuntimeEntity[])=>entities.reduce((sum,e)=>sum+this.mesh(e.mesh!).triangles,0);
+      const materialDraws:Record<string,number>={},materialTriangles:Record<string,number>={};
+      for(const e of [...culled.cameraOpaque,...culled.cameraTransparent]){const kind=e.material.kind,triangles=this.mesh(e.mesh!).triangles;materialDraws[kind]=(materialDraws[kind]??0)+1;materialTriangles[kind]=(materialTriangles[kind]??0)+triangles;}
+      const work=this.profiler.currentWork();
+      this.profiler.setAtoms(buildRenderAtomReport({
+        width:this.canvas.width,height:this.canvas.height,shadowDraws:shadowDrawables.length,reflectionDraws:culled.reflectedObjects.length,
+        mainOpaqueDraws:culled.cameraOpaque.length,mainTransparentDraws:culled.cameraTransparent.length,snowInstances,
+        shadowTriangles:sumTriangles(shadowDrawables),reflectionTriangles:sumTriangles(culled.reflectedObjects),
+        mainOpaqueTriangles:sumTriangles(culled.cameraOpaque),mainTransparentTriangles:sumTriangles(culled.cameraTransparent),
+        materialDraws,materialTriangles,
+        uploads:{total:work.uploadBytes,uniform:work.uniformUploadBytes,surface:work.surfaceUploadBytes,light:work.lightUploadBytes,frame:work.frameUploadBytes,snow:work.snowUploadBytes},
+        shaders:this.shaderAtoms,
+      }));
+    }
+    this.profiler.resolve(encoder);
     this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
   }
   private queueMaterialLoads(scene:Scene):void{
