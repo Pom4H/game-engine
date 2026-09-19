@@ -14,6 +14,8 @@ header{position:fixed;inset:12px 12px auto 12px;z-index:3;display:flex;gap:8px;a
 button{appearance:none;border:1px solid #ffffff26;background:#111a27d9;color:#fff;padding:8px 11px;font:inherit;cursor:pointer}
 button:hover{background:#1a2637}
 #status{position:fixed;left:12px;bottom:12px;z-index:3;background:#07101acc;border:1px solid #ffffff20;padding:7px 9px;font:12px ui-monospace,monospace}
+#start{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:#05080dc4;backdrop-filter:blur(4px)}
+#start button{font-size:18px;padding:14px 20px;background:#152235;border-color:#ffffff42}
 </style>
 </head>
 <body>
@@ -25,6 +27,7 @@ button:hover{background:#1a2637}
   </div>
 </header>
 <canvas data-game-engine></canvas>
+<div id="start"><button id="startButton">Start with sound</button></div>
 <div id="status">loading WebGPU…</div>
 <script type="module">
 import {BrowserRuntime} from './dist/browser.js';
@@ -38,32 +41,51 @@ const canvas = document.querySelector('canvas');
 const status = document.querySelector('#status');
 const toggle = document.querySelector('#toggle');
 const restart = document.querySelector('#restart');
+const start = document.querySelector('#start');
+const startButton = document.querySelector('#startButton');
 
-const runtime = await BrowserRuntime.create(canvas, scene, {autoplay:true, exposeBridge:true, audio:true});
-let running = true;
+const runtime = await BrowserRuntime.create(canvas, scene, {autoplay:false, exposeBridge:true, audio:true});
+let running = false;
+toggle.textContent = 'Play';
 
-toggle.onclick = () => {
+const startSimulation = async () => {
+  const audioReady = await runtime.activateAudio();
+  runtime.pause();
+  runtime.reset();
+  runtime.resume();
+  running = true;
+  toggle.textContent = 'Pause';
+  start.hidden = true;
+  if (!audioReady) status.textContent = 'audio blocked by browser';
+};
+
+startButton.onclick = startSimulation;
+
+toggle.onclick = async () => {
   if (running) {
     runtime.pause();
     toggle.textContent = 'Play';
   } else {
+    await runtime.activateAudio();
     runtime.resume();
     toggle.textContent = 'Pause';
   }
   running = !running;
 };
 
-restart.onclick = () => {
+restart.onclick = async () => {
+  await runtime.activateAudio();
   runtime.pause();
   runtime.reset();
   runtime.resume();
   running = true;
   toggle.textContent = 'Pause';
+  start.hidden = true;
 };
 
 const update = () => {
   const info = runtime.inspect();
-  status.textContent = `t=${info.time.toFixed(2)}s · bodies=${info.physics.bodies} · contacts=${info.physics.contacts} · WebGPU`;
+  status.textContent = `t=${info.time.toFixed(2)}s · bodies=${info.physics.bodies} · sleeping=${info.physics.sleeping} · contacts=${info.physics.contacts} · audio=${info.audio.state} · WebGPU`;
   requestAnimationFrame(update);
 };
 update();
