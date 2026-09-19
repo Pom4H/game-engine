@@ -50,7 +50,7 @@ export class BrowserRuntime {
   render():RenderStats{this.renderer.render(this.scene);return this.renderer.inspect();}
   async flush():Promise<void>{await this.renderer.flush();}
   snapshot(){return this.scene.snapshot();}
-  inspect(){return{time:this.scene.time,tick:this.scene.tick,physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
+  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,winter:{surfaces:[...this.scene.winter.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.winter.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
   dispose():void{this.pause();this.disposed=true;this.audio?.dispose();this.renderer.dispose();if((globalThis as any).__GAME_ENGINE__)delete (globalThis as any).__GAME_ENGINE__;}
 
