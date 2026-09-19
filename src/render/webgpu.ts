@@ -61,8 +61,11 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  let clip=f.lightVP*vec4<f32>(p+n*.003,1);let uv=clip.xy*.5*vec2<f32>(1,-1)+.5;
  if(any(uv<vec2<f32>(0))||any(uv>vec2<f32>(1))||clip.z>1.0||clip.z<0.0){return 1.0;}
  var value=0.0;let texel=1.0/vec2<f32>(textureDimensions(shadowMap));
- for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+vec2<f32>(f32(x),f32(y))*texel*1.25,clip.z-.000025);}}
- let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value/9.0,smoothstep(0.0,.025,edge));
+ let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233))+floor(f.up.w*60.0)*.618)*43758.5453)*6.2831853;
+ let cs=cos(phase);let sn=sin(phase);let rot=mat2x2<f32>(cs,-sn,sn,cs);
+ let taps=array<vec2<f32>,4>(vec2<f32>(-.65,-.35),vec2<f32>(.35,-.72),vec2<f32>(.72,.38),vec2<f32>(-.38,.68));
+ for(var i=0;i<4;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*1.55,clip.z-.000025);}
+ let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.25,smoothstep(0.0,.025,edge));
 }
 
 struct VOut {
@@ -265,6 +268,8 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   albedo*=1.0-u.surface.w-wetness*.24;
 
   var roughness=clamp(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0)-wetness*.28,.08,1.0);
+  let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
+  roughness=clamp(sqrt(roughness*roughness+min(.22,normalVariance*.18)),.08,1.0);
   var waterCoverage=1.0;
   if(materialKind>4.5&&materialKind<5.5){
     let hollows=noise3(in.worldPos*vec3<f32>(1.4,.1,2.3))*.78+noise3(in.worldPos*vec3<f32>(7.5,.1,9.3))*.22;
