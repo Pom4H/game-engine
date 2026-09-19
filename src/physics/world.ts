@@ -57,7 +57,7 @@ export class RigidBody {
     this.x=this.position[0];this.z=this.position[2];this.w=r*2;this.l=r*2;
   }
   syncSpatial():void{this.x=this.position[0];this.z=this.position[2];}
-  wake():void{this.sleeping=false;this.sleepTimer=0;}
+  wake():void{if(this.sleeping){this.sleeping=false;this.sleepTimer=0;}}
 }
 
 export interface ContactCandidate {
