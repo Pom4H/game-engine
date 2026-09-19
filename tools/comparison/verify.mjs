@@ -18,7 +18,7 @@ for(const id of ['kernel','phases','snow','gpu','validation']){
  const b=before.evidence,a=after.evidence;
  if(id==='kernel'){assert.equal(b.calls,0);assert.equal(a.calls,90);}
  if(id==='phases'){assert.equal(b.published,0);assert.equal(b.commits,0);assert.equal(a.published,1);assert.equal(a.commits,180);}
- if(id==='snow'){assert.ok(b.winter.find(x=>x.id==='road-air').trackMelt>0);assert.equal(a.winter.find(x=>x.id==='road-air').trackMelt,0);assert.ok(a.winter.find(x=>x.id==='road-contact').trackMelt>0);}
+ if(id==='snow'){assert.ok(b.surfaceState.find(x=>x.id==='road-air').trackMelt>0);assert.equal(a.surfaceState.find(x=>x.id==='road-air').trackMelt,0);assert.ok(a.surfaceState.find(x=>x.id==='road-contact').trackMelt>0);}
  if(id==='gpu'){assert.equal(b.buffers,60);assert.equal(a.buffers,0);assert.equal(b.emitted,20);assert.equal(a.emitted,20);}
  if(id==='validation'){assert.equal(b.validationResults.length,3);assert.ok(b.validationResults.every(r=>r.accepted));assert.equal(a.validationResults.length,3);assert.ok(a.validationResults.every(r=>!r.accepted));}
  verification.architecture[id]={before:b,after:a};
