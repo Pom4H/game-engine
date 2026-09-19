@@ -46,8 +46,9 @@ const toggle = document.querySelector('#toggle');
 const restart = document.querySelector('#restart');
 const sound = document.querySelector('#sound');
 
-const runtime = await BrowserRuntime.create(canvas, scene, {autoplay:false, exposeBridge:true, audio:true});
-let running = false;
+const runtime = await BrowserRuntime.create(canvas, scene, {autoplay:true, exposeBridge:true, audio:true});
+let running = true;
+toggle.textContent = 'Pause';
 
 const startWithSound = async event => {
   event?.preventDefault?.();
@@ -77,7 +78,6 @@ const startWithSound = async event => {
 };
 
 sound.addEventListener('pointerdown', startWithSound, {passive:false});
-sound.addEventListener('touchstart', startWithSound, {passive:false});
 
 toggle.onclick = async () => {
   if (running) {
