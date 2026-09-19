@@ -73,6 +73,7 @@ export class RenderProfiler {
   add(name:RenderCpuQuantum,ms:number):void{if(this.enabled&&Number.isFinite(ms)&&ms>=0)this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+ms;}
   setWork(work:Partial<RenderWork>):void{if(this.enabled)Object.assign(this.work,work);}
   setAtoms(atoms:RenderAtomReport):void{if(this.enabled)this.atoms=atoms;}
+  currentWork():RenderWork{return{...this.work};}
   addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'='uniform'):void{if(!this.enabled||!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else this.work.snowUploadBytes+=bytes;}
 
   timestampWrites(name:RenderGpuQuantum):Record<string,unknown>|undefined{
