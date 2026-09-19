@@ -39,6 +39,7 @@ jobs:
           cd /d "%BEFORE_ROOT%"
           bun install
           bun run build
+          copy /Y "%GITHUB_WORKSPACE%\tools\profiling\color-bleed.scene.mjs" "tools\profiling\color-bleed.scene.mjs"
       - name: Render identical A/B frames
         run: |
           if not exist artifacts mkdir artifacts
@@ -46,13 +47,17 @@ jobs:
           if not exist artifacts mkdir artifacts
           node dist/cli.js render examples/winter-street.ts --time 18 --width 1280 --height 720 --out artifacts/before-winter.png
           node dist/cli.js render tools/profiling/heavy.scene.mjs --time 1 --width 1280 --height 720 --out artifacts/before-heavy.png
+          node dist/cli.js render tools/profiling/color-bleed.scene.mjs --time .2 --width 1280 --height 720 --out artifacts/before-color-bleed.png
           copy /Y artifacts\before-winter.png "%GITHUB_WORKSPACE%\artifacts\before-winter.png"
           copy /Y artifacts\before-heavy.png "%GITHUB_WORKSPACE%\artifacts\before-heavy.png"
+          copy /Y artifacts\before-color-bleed.png "%GITHUB_WORKSPACE%\artifacts\before-color-bleed.png"
           cd /d "%GITHUB_WORKSPACE%"
           node dist/cli.js render examples/winter-street.ts --time 18 --width 1280 --height 720 --out artifacts/after-winter.png
           node dist/cli.js render tools/profiling/heavy.scene.mjs --time 1 --width 1280 --height 720 --out artifacts/after-heavy.png
+          node dist/cli.js render tools/profiling/color-bleed.scene.mjs --time .2 --width 1280 --height 720 --out artifacts/after-color-bleed.png
           node tools/check-png.mjs artifacts/after-winter.png
           node tools/check-png.mjs artifacts/after-heavy.png
+          node tools/check-png.mjs artifacts/after-color-bleed.png
       - name: Profile identical heavy scene
         run: |
           cd /d "%BEFORE_ROOT%"
