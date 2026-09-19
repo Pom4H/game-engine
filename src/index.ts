@@ -17,5 +17,6 @@ export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/s
 
 export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type PlateFragment,type Vec2} from './materials/glass-fracture.js';
 
-export {resolveEnvironment,type EnvironmentSpec,type EnvironmentState,type Precipitation} from './environment/types.js';
+export {resolveEnvironment,resolveEnvironmentAt,environmentTimeScale,type EnvironmentSpec,type EnvironmentState,type EnvironmentClockSpec,type WeatherKeyframe,type Precipitation,type Snowfall} from './environment/types.js';
 export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTreatment,type MaterialSurfaceSpec,type SurfaceState} from './materials/surface.js';
+export {WinterSystem,type WinterSurfaceState,type WinterBodyState} from './environment/winter.js';
