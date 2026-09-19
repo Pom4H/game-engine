@@ -23,7 +23,7 @@ export interface RenderFrameTiming {
   readonly work:Readonly<RenderWork>;
 }
 export interface RenderProfileSnapshot {
-  readonly cpuFrames:number;readonly gpuFrames:number;readonly timestampQueries:boolean;
+  readonly enabled:boolean;readonly cpuFrames:number;readonly gpuFrames:number;readonly timestampQueries:boolean;
   readonly gpuLagFrames:number|null;
   readonly latestCpu?:RenderFrameTiming;readonly latestGpu?:RenderFrameTiming;
   readonly cpuTotal?:QuantumStats;readonly gpuTotal?:QuantumStats;
@@ -49,10 +49,12 @@ export class RenderProfiler {
   private readonly querySet:GPUAny|null;private readonly slots:GpuSlot[]=[];private active:GpuSlot|null=null;
   private readonly queryBytes=RENDER_GPU_QUANTA.length*2*8;
 
-  constructor(private readonly device:GPUAny,readonly timestampQueries:boolean,private readonly capacity=1024){
-    if(!Number.isSafeInteger(capacity)||capacity<8||capacity>4096)throw new RangeError('Invalid render profiler capacity');
-    this.querySet=timestampQueries?device.createQuerySet({label:'render quantum timestamps',type:'timestamp',count:RENDER_GPU_QUANTA.length*2}):null;
-    if(timestampQueries)for(let i=0;i<4;i++)this.slots.push({
+  readonly enabled:boolean;readonly timestampQueries:boolean;private readonly capacity:number;
+  constructor(private readonly device:GPUAny,options:{enabled?:boolean;timestampQueries?:boolean;capacity?:number}={}){
+    this.enabled=options.enabled??true;this.timestampQueries=this.enabled&&(options.timestampQueries??false);this.capacity=options.capacity??1024;
+    if(!Number.isSafeInteger(this.capacity)||this.capacity<8||this.capacity>4096)throw new RangeError('Invalid render profiler capacity');
+    this.querySet=this.timestampQueries?device.createQuerySet({label:'render quantum timestamps',type:'timestamp',count:RENDER_GPU_QUANTA.length*2}):null;
+    if(this.timestampQueries)for(let i=0;i<4;i++)this.slots.push({
       resolve:device.createBuffer({label:`render profile resolve ${i}`,size:this.queryBytes,usage:0x0200|0x0004}),
       read:device.createBuffer({label:`render profile readback ${i}`,size:this.queryBytes,usage:0x0001|0x0008}),
       pending:false,frame:0,generation:0,work:null,
@@ -60,15 +62,15 @@ export class RenderProfiler {
   }
 
   beginFrame():number{
-    this.frame++;this.frameStart=performance.now();this.cpuQuanta={};this.work=emptyWork();
+    this.frame++;if(!this.enabled)return this.frame;this.frameStart=performance.now();this.cpuQuanta={};this.work=emptyWork();
     this.active=this.timestampQueries?(this.slots.find(slot=>!slot.pending)??null):null;
     if(this.active){this.active.frame=this.frame;this.active.generation=this.generation;this.active.work=null;}
     return this.frame;
   }
-  measure<T>(name:RenderCpuQuantum,run:()=>T):T{const at=performance.now();try{return run();}finally{this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+(performance.now()-at);}}
-  add(name:RenderCpuQuantum,ms:number):void{if(Number.isFinite(ms)&&ms>=0)this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+ms;}
-  setWork(work:Partial<RenderWork>):void{Object.assign(this.work,work);}
-  addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'='uniform'):void{if(!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else this.work.snowUploadBytes+=bytes;}
+  measure<T>(name:RenderCpuQuantum,run:()=>T):T{if(!this.enabled)return run();const at=performance.now();try{return run();}finally{this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+(performance.now()-at);}}
+  add(name:RenderCpuQuantum,ms:number):void{if(this.enabled&&Number.isFinite(ms)&&ms>=0)this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+ms;}
+  setWork(work:Partial<RenderWork>):void{if(this.enabled)Object.assign(this.work,work);}
+  addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'='uniform'):void{if(!this.enabled||!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else this.work.snowUploadBytes+=bytes;}
 
   timestampWrites(name:RenderGpuQuantum):Record<string,unknown>|undefined{
     if(!this.active||!this.querySet)return undefined;
@@ -76,13 +78,13 @@ export class RenderProfiler {
     return{querySet:this.querySet,beginningOfPassWriteIndex:i*2,endOfPassWriteIndex:i*2+1};
   }
   resolve(encoder:GPUAny):void{
-    const slot=this.active;if(!slot||!this.querySet)return;
+    if(!this.enabled)return;const slot=this.active;if(!slot||!this.querySet)return;
     encoder.resolveQuerySet(this.querySet,0,RENDER_GPU_QUANTA.length*2,slot.resolve,0);
     encoder.copyBufferToBuffer(slot.resolve,0,slot.read,0,this.queryBytes);
     slot.work={...this.work};
   }
   submitted():void{
-    const cpu=freezeFrame(this.frame,performance.now()-this.frameStart,this.cpuQuanta,this.work);
+    if(!this.enabled)return;const cpu=freezeFrame(this.frame,performance.now()-this.frameStart,this.cpuQuanta,this.work);
     this.push(this.cpuHistory,cpu);
     const slot=this.active;this.active=null;if(!slot||!this.querySet)return;
     slot.pending=true;
@@ -102,7 +104,7 @@ export class RenderProfiler {
     const latestCpu=this.cpuHistory.at(-1),latestGpu=this.gpuHistory.at(-1);
     const aggregate=(history:readonly RenderFrameTiming[],names:readonly string[])=>Object.fromEntries(names.map(name=>[name,stats(history.map(frame=>frame.quanta[name]??0))]));
     return Object.freeze({
-      cpuFrames:this.cpuHistory.length,gpuFrames:this.gpuHistory.length,timestampQueries:this.timestampQueries,
+      enabled:this.enabled,cpuFrames:this.cpuHistory.length,gpuFrames:this.gpuHistory.length,timestampQueries:this.timestampQueries,
       gpuLagFrames:latestCpu&&latestGpu?latestCpu.frame-latestGpu.frame:null,
       ...(latestCpu?{latestCpu}:{}),...(latestGpu?{latestGpu}:{}),
       ...(this.cpuHistory.length?{cpuTotal:stats(this.cpuHistory.map(x=>x.totalMs))}:{}),
