@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>Game Engine — Glass fracture</title>
+<title>Game Engine — Winter Street</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101a;color:#eef4ff;font:14px/1.4 system-ui,sans-serif}
 canvas{display:block;width:100%;height:100%}
@@ -20,14 +20,17 @@ button:hover{background:#1a2637}
 </head>
 <body>
 <header>
-  <div class="brand">GAME ENGINE · GLASS FRACTURE</div>
+  <div class="brand">GAME ENGINE · WINTER STREET</div>
   <div class="controls">
+    <button data-time="6">Night</button>
+    <button data-time="18">Sunrise</button>
+    <button data-time="36.5">Day</button>
     <button id="restart">Restart</button>
     <button id="toggle">Pause</button>
   </div>
 </header>
 <canvas data-game-engine></canvas>
-<div id="start"><button id="startButton">Start with sound</button></div>
+<div id="start"><button id="startButton">Start winter street</button></div>
 <div id="status">loading WebGPU…</div>
 <script type="module">
 import {BrowserRuntime} from './dist/browser.js';
@@ -83,9 +86,19 @@ restart.onclick = async () => {
   start.hidden = true;
 };
 
+for (const button of document.querySelectorAll('[data-time]')) button.onclick = async () => {
+  runtime.pause();
+  runtime.seek(Number(button.dataset.time));
+  running = false;
+  toggle.textContent = 'Play';
+  start.hidden = true;
+};
+
 const update = () => {
   const info = runtime.inspect();
-  status.textContent = `t=${info.time.toFixed(2)}s · bodies=${info.physics.bodies} · sleeping=${info.physics.sleeping} · contacts=${info.physics.contacts} · audio=${info.audio.state} · WebGPU`;
+  const puddles = info.winter.surfaces.filter(s => s.puddle > .03).length;
+  const snow = info.winter.surfaces.filter(s => s.snowDepthM > .005).length;
+  status.textContent = `t=${info.time.toFixed(1)}s · ${info.environment.hour.toFixed(1)}h · ${info.environment.temperatureC.toFixed(1)}°C · snow=${info.environment.snowfall} · snow surfaces=${snow} · puddles=${puddles} · audio=${info.audio.state} · WebGPU`;
   requestAnimationFrame(update);
 };
 update();
