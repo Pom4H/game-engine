@@ -63,7 +63,7 @@ export class BrowserRuntime {
   render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
   async flush():Promise<void>{await this.renderer.prepareMaterials?.(this.scene);this.render();await this.renderer.flush();}
   snapshot(){return this.scene.snapshot();}
-  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,winter:{surfaces:[...this.scene.winter.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.winter.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
+  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
   dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
 
@@ -71,12 +71,12 @@ export class BrowserRuntime {
     const windSpeed=Math.hypot(this.scene.environment.wind[0],this.scene.environment.wind[2]);
     const snowfall=Math.max(0,Math.min(1,this.scene.environment.snowfallRate/2.2e-5));
     let trafficCount=0,speedSum=0,trafficGain=0,panSum=0;const right=V3.normalize(V3.cross(V3.sub(this.scene.camera.target,this.scene.camera.position),[0,1,0]));
-    for(const state of this.scene.winter.bodies.values()){
+    for(const state of this.scene.surfaces.bodies.values()){
       const entity=this.scene.entities.get(state.id),body=entity?.body;if(!body)continue;
       const speed=Math.hypot(body.velocity[0],body.velocity[2]);if(speed>.4){trafficCount++;speedSum+=speed;const delta=V3.sub(entity.position,this.scene.camera.position),distance=V3.length(delta),gain=1/(1+(distance/7)**1.4);trafficGain+=gain;panSum+=gain*V3.dot(V3.normalize(delta),right);}
     }
     let roadWetness=0,slush=0,roads=0;
-    for(const state of this.scene.winter.surfaces.values())if(state.use==='road'){
+    for(const state of this.scene.surfaces.surfaces.values())if(state.use==='road'){
       roads++;roadWetness+=Math.max(state.puddle,Math.min(1,state.waterDepthM/.004));slush+=state.slush;
     }
     return{
