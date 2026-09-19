@@ -1,6 +1,7 @@
 import {hashString,mulberry32} from '../core/random.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
 import {evaluateFracture,type FractureDecision} from '../materials/fracture.js';
+import {fracturePlate} from '../materials/glass-fracture.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
@@ -13,6 +14,8 @@ export interface RuntimeMaterial {
   readonly color:Color;
   readonly profile:PhysicalMaterial;
 }
+interface FracturePiece{mesh:Primitive;position:MutableVec3;rotation:MutableVec3;volume:number}
+
 export interface RuntimeEntity {
   readonly id:string;
   position:MutableVec3;
@@ -117,38 +120,66 @@ export class Scene {
     const entity=this.entities.get(fracture.body.id);
     if(!entity||!entity.mesh)return;
     const contact=this.physics.contacts.find(c=>c.mode==='penetrate'&&(c.a===entity.id||c.b===entity.id));
-    const dimensions=meshDimensions(entity.mesh,entity.scale),axis=dominantAxis(fracture.normal),planar=axis===0?[dimensions[1],dimensions[2]]:axis===1?[dimensions[0],dimensions[2]]:[dimensions[0],dimensions[1]];
-    const area=Math.max(.002,planar[0]!*planar[1]!),ratio=Math.max(1,fracture.availableEnergy/fracture.requiredEnergy);
-    const count=Math.max(10,Math.min(36,Math.round(10+Math.sqrt(area)*5+Math.min(18,(ratio-1)*7))));
-    const totalMass=entity.material.profile.density*Math.max(.000001,dimensions[0]*dimensions[1]*dimensions[2]);
-    const rng=mulberry32((this.spec.seed??1)^hashString(entity.id)^this.tick),pieces:{size:MutableVec3;position:MutableVec3;skew:number;volume:number;rotation:MutableVec3}[]=[];
-    const halfU=planar[0]!/2,halfV=planar[1]!/2,baseU=planar[0]!/Math.sqrt(count),baseV=planar[1]!/Math.sqrt(count);
-    for(let i=0;i<count;i++){
-      const u=(rng()*2-1)*halfU,v=(rng()*2-1)*halfV,du=Math.max(.035,baseU*(.55+rng()*1.15)),dv=Math.max(.035,baseV*(.55+rng()*1.15)),thickness=Math.max(.001,fracture.thickness*(.62+rng()*.3));
-      const size:MutableVec3=axis===0?[thickness,du,dv]:axis===1?[du,thickness,dv]:[du,dv,thickness];
-      const position:[number,number,number]=[...entity.position];const axes=planeAxes(axis);position[axes[0]]+=u;position[axes[1]]+=v;position[axis]+=(rng()-.5)*fracture.thickness*.4;
-      pieces.push({size,position,skew:rng()*.8-.4,volume:size[0]*size[1]*size[2]*.5,rotation:[...entity.rotation]});
+    const dimensions=meshDimensions(entity.mesh,entity.scale),axis=dominantAxis(fracture.normal),axes=planeAxes(axis);
+    const planar:[number,number]=axis===0?[dimensions[1],dimensions[2]]:axis===1?[dimensions[0],dimensions[2]]:[dimensions[0],dimensions[1]];
+    const ratio=Math.max(1,fracture.availableEnergy/fracture.requiredEnergy),seed=(this.spec.seed??1)^hashString(entity.id)^this.tick;
+    const pieces:FracturePiece[]=[];
+
+    if(entity.material.kind==='glass'&&entity.mesh.kind==='box'){
+      const impact:[number,number]=[
+        fracture.point[axes[0]]-entity.position[axes[0]],
+        fracture.point[axes[1]]-entity.position[axes[1]],
+      ];
+      const pattern=fracturePlate({width:planar[0],height:planar[1],thickness:fracture.thickness,impact,energyRatio:ratio,seed});
+      for(const fragment of pattern.fragments){
+        const points=fragment.points.map(point=>[point[0]-fragment.centroid[0],point[1]-fragment.centroid[1]] as const);
+        const position:MutableVec3=[...entity.position];
+        position[axes[0]]+=fragment.centroid[0];position[axes[1]]+=fragment.centroid[1];
+        pieces.push({
+          mesh:{kind:'polygon-prism',points,thickness:fracture.thickness,axis},
+          position,rotation:[...entity.rotation],
+          volume:fragment.area*fracture.thickness,
+        });
+      }
+    }else{
+      const area=Math.max(.002,planar[0]*planar[1]),count=Math.max(10,Math.min(36,Math.round(10+Math.sqrt(area)*5+Math.min(18,(ratio-1)*7)))),rng=mulberry32(seed);
+      const halfU=planar[0]/2,halfV=planar[1]/2,baseU=planar[0]/Math.sqrt(count),baseV=planar[1]/Math.sqrt(count);
+      for(let i=0;i<count;i++){
+        const u=(rng()*2-1)*halfU,v=(rng()*2-1)*halfV,du=Math.max(.035,baseU*(.55+rng()*1.15)),dv=Math.max(.035,baseV*(.55+rng()*1.15)),thickness=Math.max(.001,fracture.thickness*(.62+rng()*.3));
+        const size:MutableVec3=axis===0?[thickness,du,dv]:axis===1?[du,thickness,dv]:[du,dv,thickness],position:MutableVec3=[...entity.position];
+        position[axes[0]]+=u;position[axes[1]]+=v;position[axis]+=(rng()-.5)*fracture.thickness*.4;
+        pieces.push({mesh:{kind:'shard',size,axis,skew:rng()*.8-.4},position,rotation:[...entity.rotation],volume:size[0]*size[1]*size[2]*.5});
+      }
     }
-    const pieceVolume=pieces.reduce((sum,p)=>sum+p.volume,0)||1,kick:Vec3=[-fracture.normal[0],-fracture.normal[1],-fracture.normal[2]],impulse=contact?.impulse??0;
+
+    if(!pieces.length)return;
+    const density=entity.material.profile.density,totalMass=pieces.reduce((sum,p)=>sum+density*p.volume,0),rng=mulberry32(seed^0x91e10da5);
+    const kick:Vec3=[-fracture.normal[0],-fracture.normal[1],-fracture.normal[2]],impulse=contact?.impulse??0;
     const centerSpeed=totalMass>0?impulse/totalMass:0,excess=Math.max(0,fracture.availableEnergy-fracture.requiredEnergy),scatterSpeed=Math.sqrt(2*Math.min(excess,fracture.requiredEnergy*.35)/Math.max(totalMass,.001));
     this.physics.remove(entity.id);this.entities.delete(entity.id);
+
     for(const piece of pieces){
-      const mass=Math.max(.002,totalMass*piece.volume/pieceVolume),lateral:Vec3=[rng()*2-1,rng()*1.3,rng()*2-1],lateralUnit=V3.normalize(lateral),velocity:Vec3=[
-        kick[0]*centerSpeed+fracture.sourceVelocity[0]*.025+lateralUnit[0]*scatterSpeed*(.3+rng()*.7),
-        kick[1]*centerSpeed+fracture.sourceVelocity[1]*.025+Math.abs(lateralUnit[1])*scatterSpeed*(.45+rng()*.8),
-        kick[2]*centerSpeed+fracture.sourceVelocity[2]*.025+lateralUnit[2]*scatterSpeed*(.3+rng()*.7),
+      const mass=Math.max(.002,density*piece.volume),radial:Vec3=[
+        piece.position[0]-fracture.point[0],piece.position[1]-fracture.point[1],piece.position[2]-fracture.point[2],
+      ];
+      let outward=V3.normalize(radial);
+      if(V3.length(outward)<1e-5)outward=V3.normalize([rng()*2-1,rng()*1.2,rng()*2-1]);
+      const velocity:Vec3=[
+        kick[0]*centerSpeed+fracture.sourceVelocity[0]*.025+outward[0]*scatterSpeed*(.25+rng()*.6),
+        kick[1]*centerSpeed+fracture.sourceVelocity[1]*.025+outward[1]*scatterSpeed*(.25+rng()*.6)+rng()*scatterSpeed*.18,
+        kick[2]*centerSpeed+fracture.sourceVelocity[2]*.025+outward[2]*scatterSpeed*(.25+rng()*.6),
       ];
       const id=`${entity.id}:shard:${this.generatedSequence++}`,shard=this.add({
-        id,position:piece.position,rotation:piece.rotation,mesh:{kind:'shard',size:piece.size,axis,skew:piece.skew},
+        id,position:piece.position,rotation:piece.rotation,mesh:piece.mesh,
         material:{kind:entity.material.kind,color:entity.material.color},
-        body:{mass,velocity,angularVelocity:[(rng()*2-1)*13,(rng()*2-1)*13,(rng()*2-1)*13],restitution:.12,friction:.42,shape:'box'},
+        body:{mass,velocity,angularVelocity:[(rng()*2-1)*11,(rng()*2-1)*11,(rng()*2-1)*11],restitution:.12,friction:.42,shape:'box'},
       });
       if(shard.body){shard.body.fracturable=false;shard.body.collisionClass='debris';}
       shard.expiresAt=at+4.5+rng()*1.5;
     }
     this.pushEvent({
       type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
-      energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:count,size:Math.max(planar[0]!,planar[1]!),
+      energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:pieces.length,size:Math.max(planar[0],planar[1]),
     });
   }
 
@@ -166,16 +197,28 @@ function inferMass(profile:PhysicalMaterial,mesh:Primitive|undefined,scale:Vec3)
 function meshVolume(mesh:Primitive|undefined,scale:Vec3):number{
   if(!mesh)return scale[0]*scale[1]*scale[2];
   if(mesh.kind==='sphere'){const r=(mesh.radius??1)*Math.max(scale[0],scale[1],scale[2]);return 4/3*Math.PI*r*r*r;}
+  if(mesh.kind==='polygon-prism'){
+    const area=Math.abs(polygonArea2(mesh.points)),axes=planeAxes(mesh.axis??2);
+    return area*scale[axes[0]]*scale[axes[1]]*mesh.thickness*scale[mesh.axis??2];
+  }
   const d=meshDimensions(mesh,scale);return d[0]*d[1]*d[2]*(mesh.kind==='shard'?.5:1);
 }
 function meshDimensions(mesh:Primitive,scale:Vec3):MutableVec3{
   if(mesh.kind==='box'||mesh.kind==='shard'){const size=mesh.size??[1,1,1];return[size[0]*scale[0],size[1]*scale[1],size[2]*scale[2]];}
   if(mesh.kind==='sphere'){const d=2*(mesh.radius??1);return[d*scale[0],d*scale[1],d*scale[2]];}
+  if(mesh.kind==='polygon-prism'){
+    const bounds=polygonBounds(mesh.points),axis=mesh.axis??2,axes=planeAxes(axis),d:MutableVec3=[1,1,1];
+    d[axis]=mesh.thickness*scale[axis];d[axes[0]]=(bounds.maxX-bounds.minX)*scale[axes[0]];d[axes[1]]=(bounds.maxY-bounds.minY)*scale[axes[1]];return d;
+  }
   return[(mesh.size?.[0]??1)*scale[0],.02*scale[1],(mesh.size?.[1]??1)*scale[2]];
 }
 function bodyShape(mesh:Primitive|undefined,body:BodySpec,scale:Vec3):CollisionShape{
   const shape=body.shape??'auto';
   if(shape==='sphere'||shape==='auto'&&mesh?.kind==='sphere')return{kind:'sphere',radius:(mesh?.kind==='sphere'?mesh.radius??1:1)*Math.max(scale[0],scale[1],scale[2])};
+  if(mesh?.kind==='polygon-prism'){const d=meshDimensions(mesh,scale);return{kind:'box',half:[d[0]/2,d[1]/2,d[2]/2]};}
   const size:Vec3=mesh?.kind==='box'||mesh?.kind==='shard'?mesh.size??[1,1,1]:mesh?.kind==='plane'?[mesh.size?.[0]??1,.02,mesh.size?.[1]??1]:[1,1,1];
   return{kind:'box',half:[size[0]*scale[0]/2,size[1]*scale[1]/2,size[2]*scale[2]/2]};
 }
+
+function polygonArea2(points:readonly (readonly[number,number])[]):number{let area=0;for(let i=0;i<points.length;i++){const a=points[i]!,b=points[(i+1)%points.length]!;area+=a[0]*b[1]-b[0]*a[1];}return area*.5;}
+function polygonBounds(points:readonly (readonly[number,number])[]){let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const p of points){minX=Math.min(minX,p[0]);maxX=Math.max(maxX,p[0]);minY=Math.min(minY,p[1]);maxY=Math.max(maxY,p[1]);}return{minX,maxX,minY,maxY};}
