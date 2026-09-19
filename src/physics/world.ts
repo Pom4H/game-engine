@@ -168,10 +168,18 @@ export class PhysicsWorld {
   get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length};}
 
   private contactCandidate(a:RigidBody,b:RigidBody,hit:Hit):ContactCandidate{
-    const rv:Vec3=[b.velocity[0]-a.velocity[0],b.velocity[1]-a.velocity[1],b.velocity[2]-a.velocity[2]];
-    const approachSpeed=Math.max(0,-V3.dot(rv,hit.normal));
-    const inv=a.invMass+b.invMass,effectiveMass=inv>0?1/inv:0;
+    const ra=V3.sub(hit.point,a.position),rb=V3.sub(hit.point,b.position);
+    const va=V3.add(a.velocity,V3.cross(a.angularVelocity,ra)),vb=V3.add(b.velocity,V3.cross(b.angularVelocity,rb));
+    const rv=V3.sub(vb,va),approachSpeed=Math.max(0,-V3.dot(rv,hit.normal));
+    const denominator=this.contactDenominator(a,b,ra,rb,hit.normal),effectiveMass=denominator>1e-12?1/denominator:0;
     return{a,b,normal:hit.normal,point:hit.point,penetration:hit.penetration,approachSpeed,effectiveMass,normalEnergy:.5*effectiveMass*approachSpeed*approachSpeed};
+  }
+
+  private contactDenominator(a:RigidBody,b:RigidBody,ra:Vec3,rb:Vec3,direction:Vec3):number{
+    let value=a.invMass+b.invMass;
+    if(a.invMass){const rn=V3.cross(ra,direction);value+=V3.dot(direction,V3.cross(applyInvInertiaWorld(a,rn),ra));}
+    if(b.invMass){const rn=V3.cross(rb,direction);value+=V3.dot(direction,V3.cross(applyInvInertiaWorld(b,rn),rb));}
+    return value;
   }
 
   private rebuildIndex():void{
@@ -258,28 +266,29 @@ export class PhysicsWorld {
   }
 
   private resolvePenetration(contact:ContactCandidate,energyLoss:number):void{
-    const {a,b,normal,approachSpeed,effectiveMass,normalEnergy}=contact;
+    const {a,b,normal,point,approachSpeed,effectiveMass,normalEnergy}=contact;
     if(approachSpeed<=0||effectiveMass<=0){this.pushContact(contact,0,'penetrate');return;}
-    const remaining=Math.max(0,normalEnergy-energyLoss);
-    const after=Math.sqrt(2*remaining/effectiveMass);
-    const impulse=Math.max(0,(approachSpeed-after)/(a.invMass+b.invMass));
-    this.applyImpulse(a,b,normal,impulse);
+    const remaining=Math.max(0,normalEnergy-energyLoss),after=Math.sqrt(2*remaining/effectiveMass);
+    const impulse=Math.max(0,(approachSpeed-after)*effectiveMass);
+    this.applyPairImpulseAtPoint(a,b,normal,impulse,point);
     this.pushContact(contact,impulse,'penetrate');
   }
 
   private resolvePair(contact:ContactCandidate):void{
-    const {a,b,normal,penetration,approachSpeed}=contact,inv=a.invMass+b.invMass;if(inv<=0)return;
+    const {a,b,normal,point,penetration,approachSpeed,effectiveMass}=contact,inv=a.invMass+b.invMass;if(inv<=0)return;
     const slop=.0005,correction=Math.max(0,penetration-slop)*.8/inv;
     if(a.invMass){a.position[0]-=normal[0]*correction*a.invMass;a.position[1]-=normal[1]*correction*a.invMass;a.position[2]-=normal[2]*correction*a.invMass;}
     if(b.invMass){b.position[0]+=normal[0]*correction*b.invMass;b.position[1]+=normal[1]*correction*b.invMass;b.position[2]+=normal[2]*correction*b.invMass;}
     let impulse=0;
-    if(approachSpeed>0){
-      const restitution=Math.min(a.restitution,b.restitution),j=(1+restitution)*approachSpeed/inv;impulse=j;this.applyImpulse(a,b,normal,j);
-      const post:Vec3=[b.velocity[0]-a.velocity[0],b.velocity[1]-a.velocity[1],b.velocity[2]-a.velocity[2]],normalSpeed=V3.dot(post,normal);
+    if(approachSpeed>0&&effectiveMass>0){
+      const restitution=Math.min(a.restitution,b.restitution),j=(1+restitution)*approachSpeed*effectiveMass;impulse=j;
+      this.applyPairImpulseAtPoint(a,b,normal,j,point);
+      const ra=V3.sub(point,a.position),rb=V3.sub(point,b.position);
+      const va=V3.add(a.velocity,V3.cross(a.angularVelocity,ra)),vb=V3.add(b.velocity,V3.cross(b.angularVelocity,rb)),post=V3.sub(vb,va),normalSpeed=V3.dot(post,normal);
       const tangentRaw:Vec3=[post[0]-normal[0]*normalSpeed,post[1]-normal[1]*normalSpeed,post[2]-normal[2]*normalSpeed],length=V3.length(tangentRaw);
       if(length>1e-8){
-        const tangent=V3.scale(tangentRaw,1/length),limit=j*Math.sqrt(a.friction*b.friction),jt=Math.max(-limit,Math.min(limit,-V3.dot(post,tangent)/inv));
-        this.applyImpulse(a,b,tangent,jt);
+        const tangent=V3.scale(tangentRaw,1/length),denom=this.contactDenominator(a,b,ra,rb,tangent),limit=j*Math.sqrt(a.friction*b.friction);
+        if(denom>1e-12){const wanted=-V3.dot(post,tangent)/denom,jt=Math.max(-limit,Math.min(limit,wanted));this.applyPairImpulseAtPoint(a,b,tangent,jt,point);}
       }
     }
     this.pushContact(contact,impulse,'resolve');
@@ -291,10 +300,10 @@ export class PhysicsWorld {
     body.velocity[0]+=impulse[0]*body.invMass;body.velocity[1]+=impulse[1]*body.invMass;body.velocity[2]+=impulse[2]*body.invMass;
     const dw=applyInvInertiaWorld(body,V3.cross(r,impulse));body.angularVelocity[0]+=dw[0];body.angularVelocity[1]+=dw[1];body.angularVelocity[2]+=dw[2];
   }
-  private applyImpulse(a:RigidBody,b:RigidBody,normal:Vec3,j:number):void{
-    const ix=normal[0]*j,iy=normal[1]*j,iz=normal[2]*j;
-    if(a.invMass){a.wake();a.velocity[0]-=ix*a.invMass;a.velocity[1]-=iy*a.invMass;a.velocity[2]-=iz*a.invMass;}
-    if(b.invMass){b.wake();b.velocity[0]+=ix*b.invMass;b.velocity[1]+=iy*b.invMass;b.velocity[2]+=iz*b.invMass;}
+  private applyPairImpulseAtPoint(a:RigidBody,b:RigidBody,direction:Vec3,j:number,point:Vec3):void{
+    if(j===0)return;
+    if(a.invMass)this.applyImpulseAtPoint(a,direction,-j,V3.sub(point,a.position));
+    if(b.invMass)this.applyImpulseAtPoint(b,direction,j,V3.sub(point,b.position));
   }
   private pushContact(contact:ContactCandidate,impulse:number,mode:'resolve'|'penetrate'):void{
     this.contacts.push({a:contact.a.id,b:contact.b.id,normal:contact.normal,point:contact.point,penetration:contact.penetration,impulse,normalSpeed:contact.approachSpeed,normalEnergy:contact.normalEnergy,mode});
@@ -319,27 +328,55 @@ function sphereSphere(a:RigidBody,b:RigidBody):Hit|null{
   return{normal,penetration:radius-distance,point:[a.position[0]+normal[0]*ar,a.position[1]+normal[1]*ar,a.position[2]+normal[2]*ar]};
 }
 function boxBox(a:RigidBody,b:RigidBody):Hit|null{
-  const ah=(a.shape as {half:Vec3}).half,bh=(b.shape as {half:Vec3}).half,dx=b.position[0]-a.position[0],dy=b.position[1]-a.position[1],dz=b.position[2]-a.position[2],px=ah[0]+bh[0]-Math.abs(dx),py=ah[1]+bh[1]-Math.abs(dy),pz=ah[2]+bh[2]-Math.abs(dz);
-  if(px<=0||py<=0||pz<=0)return null;
-  const point:Vec3=[(a.position[0]+b.position[0])/2,(a.position[1]+b.position[1])/2,(a.position[2]+b.position[2])/2];
-  if(px<=py&&px<=pz)return{normal:[Math.sign(dx)||1,0,0],penetration:px,point};
-  if(py<=pz)return{normal:[0,Math.sign(dy)||1,0],penetration:py,point};
-  return{normal:[0,0,Math.sign(dz)||1],penetration:pz,point};
+  const ah=(a.shape as {half:Vec3}).half,bh=(b.shape as {half:Vec3}).half,ab=rotationBasis(a.rotation),bb=rotationBasis(b.rotation),center=V3.sub(b.position,a.position);
+  const axes:Vec3[]=[...ab,...bb];
+  for(const aa of ab)for(const ba of bb){const cross=V3.cross(aa,ba);if(V3.length(cross)>1e-8)axes.push(V3.normalize(cross));}
+  let penetration=Infinity,normal:Vec3=[1,0,0];
+  for(const raw of axes){
+    const axis=V3.normalize(raw);if(V3.length(axis)<1e-8)continue;
+    const ra=projectedRadius(ah,ab,axis),rb=projectedRadius(bh,bb,axis),signed=V3.dot(center,axis),overlap=ra+rb-Math.abs(signed);
+    if(overlap<=0)return null;
+    if(overlap<penetration){penetration=overlap;normal=signed>=0?axis:V3.scale(axis,-1);}
+  }
+  const pa=supportPoint(a,normal),pb=supportPoint(b,V3.scale(normal,-1)),point=V3.scale(V3.add(pa,pb),.5);
+  return{normal,penetration,point};
 }
 function sphereBox(sphere:RigidBody,box:RigidBody,invert:boolean):Hit|null{
   const radius=(sphere.shape as {radius:number}).radius,half=(box.shape as {half:Vec3}).half;
-  const x=Math.max(box.position[0]-half[0],Math.min(sphere.position[0],box.position[0]+half[0])),y=Math.max(box.position[1]-half[1],Math.min(sphere.position[1],box.position[1]+half[1])),z=Math.max(box.position[2]-half[2],Math.min(sphere.position[2],box.position[2]+half[2]));
-  let d:Vec3=[x-sphere.position[0],y-sphere.position[1],z-sphere.position[2]],distance=V3.length(d);
+  const local=rotateWorldToLocal(box.rotation,V3.sub(sphere.position,box.position));
+  const closest:MutableVec3=[
+    Math.max(-half[0],Math.min(local[0],half[0])),
+    Math.max(-half[1],Math.min(local[1],half[1])),
+    Math.max(-half[2],Math.min(local[2],half[2])),
+  ];
+  const worldClosest=V3.add(box.position,rotateLocal(box.rotation,closest));
+  let delta=V3.sub(worldClosest,sphere.position),distance=V3.length(delta),normalSphereToBox:Vec3,penetration:number,point:Vec3=worldClosest;
   if(distance>=radius)return null;
   if(distance<1e-8){
-    const axis:Vec3=[sphere.position[0]-box.position[0],sphere.position[1]-box.position[1],sphere.position[2]-box.position[2]],gaps=[half[0]-Math.abs(axis[0]),half[1]-Math.abs(axis[1]),half[2]-Math.abs(axis[2])];
+    const gaps=[half[0]-Math.abs(local[0]),half[1]-Math.abs(local[1]),half[2]-Math.abs(local[2])];
     const i=gaps[0]!<=gaps[1]!&&gaps[0]!<=gaps[2]!?0:gaps[1]!<=gaps[2]!?1:2;
-    const outward:Vec3=i===0?[Math.sign(axis[0])||1,0,0]:i===1?[0,Math.sign(axis[1])||1,0]:[0,0,Math.sign(axis[2])||1];
-    d=outward;const normal=invert?V3.scale(d,-1):d;
-    return{normal,penetration:radius+gaps[i]!,point:[sphere.position[0]+d[0]*radius,sphere.position[1]+d[1]*radius,sphere.position[2]+d[2]*radius]};
+    // At the exact mid-plane a thin box has two equally near faces. Use the
+    // incoming relative velocity to retain the entry side instead of choosing
+    // an arbitrary face that can turn approachSpeed into zero.
+    const relativeLocal=rotateWorldToLocal(box.rotation,V3.sub(sphere.velocity,box.velocity));
+    const sign=Math.abs(local[i]!)>1e-7?(Math.sign(local[i]!)||1):(-Math.sign(relativeLocal[i]!)||1);
+    const outwardLocal:MutableVec3=[0,0,0];outwardLocal[i]=sign;
+    const outward=rotateLocal(box.rotation,outwardLocal);normalSphereToBox=V3.scale(outward,-1);penetration=radius+gaps[i]!;
+    const faceLocal:MutableVec3=[...local];faceLocal[i]=sign*half[i]!;point=V3.add(box.position,rotateLocal(box.rotation,faceLocal));
+  }else{
+    normalSphereToBox=V3.scale(delta,1/distance);penetration=radius-distance;
   }
-  d=V3.scale(d,1/distance);const normal=invert?V3.scale(d,-1):d;
-  return{normal,penetration:radius-distance,point:[x,y,z]};
+  return{normal:invert?V3.scale(normalSphereToBox,-1):normalSphereToBox,penetration,point};
+}
+
+function projectedRadius(half:Vec3,basis:readonly[Vec3,Vec3,Vec3],axis:Vec3):number{
+  return half[0]*Math.abs(V3.dot(basis[0],axis))+half[1]*Math.abs(V3.dot(basis[1],axis))+half[2]*Math.abs(V3.dot(basis[2],axis));
+}
+function supportPoint(body:RigidBody,direction:Vec3):MutableVec3{
+  if(body.shape.kind==='sphere')return V3.add(body.position,V3.scale(V3.normalize(direction),body.shape.radius));
+  const basis=rotationBasis(body.rotation),half=body.shape.half,point:MutableVec3=[...body.position];
+  for(let i=0;i<3;i++){const projection=V3.dot(direction,basis[i]!);if(Math.abs(projection)>1e-8){const sign=projection>0?1:-1;point[0]+=basis[i]![0]*half[i]!*sign;point[1]+=basis[i]![1]*half[i]!*sign;point[2]+=basis[i]![2]*half[i]!*sign;}}
+  return point;
 }
 
 function inverseInertiaLocal(shape:CollisionShape,mass:number):MutableVec3{

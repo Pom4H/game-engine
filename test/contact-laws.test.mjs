@@ -59,3 +59,33 @@ test('a finite horizontal slab does not teleport a body from beneath it',()=>{
  const body=world.add(new RigidBody({id:'below',position:[0,1,0],mass:1,shape:{kind:'sphere',radius:.1}}));
  world.step(1/60);assert.equal(body.position[1],1);
 });
+
+
+test('rotated OBB narrow phase detects contacts that axis-aligned bounds miss',()=>{
+ const world=new PhysicsWorld([0,0,0],-100);
+ world.add(new RigidBody({id:'rail',position:[0,0,0],rotation:[0,Math.PI/2,0],shape:{kind:'box',half:[2,.25,.25]}}));
+ // After rotation the rail is long along Z and thin along X. At z=1.7 the old
+ // axis-aligned half extents would miss it entirely; moving across X must collide.
+ const mover=world.add(new RigidBody({id:'mover',position:[.54,0,1.7],velocity:[-1,0,0],mass:1,shape:{kind:'box',half:[.3,.3,.3]}}));
+ world.step(1/60);
+ assert.ok(world.contacts.some(contact=>contact.a==='mover'&&contact.b==='rail'),'rotated long axis must participate in narrow phase');
+ assert.ok(mover.velocity[0]>-.999,`contact impulse should oppose entry across the rotated rail: ${mover.velocity}`);
+});
+
+function offsetBoxImpact(y){
+ const world=new PhysicsWorld([0,0,0],-100);
+ world.add(new RigidBody({id:'wall',position:[0,0,0],shape:{kind:'box',half:[.5,1,1]},restitution:0}));
+ const mover=world.add(new RigidBody({id:'mover',position:[-1.2,y,0],velocity:[4,0,0],mass:2,shape:{kind:'box',half:[.5,.5,.5]},restitution:0,friction:0}));
+ let hadContact=false;for(let i=0;i<8;i++){world.step(1/120);hadContact ||= world.contacts.length>0;}
+ return{world,mover,hadContact};
+}
+test('off-center body contact applies impulse at the contact point and creates torque',()=>{
+ const {mover,hadContact}=offsetBoxImpact(.55);
+ assert.ok(hadContact);
+ assert.ok(Math.abs(mover.angularVelocity[2])>.05,`expected collision torque, got ${mover.angularVelocity}`);
+});
+test('centered body contact does not invent collision torque',()=>{
+ const {mover,hadContact}=offsetBoxImpact(0);
+ assert.ok(hadContact);
+ assert.ok(Math.abs(mover.angularVelocity[0])<1e-8&&Math.abs(mover.angularVelocity[1])<1e-8&&Math.abs(mover.angularVelocity[2])<1e-8,`centered contact should remain torque-free: ${mover.angularVelocity}`);
+});
