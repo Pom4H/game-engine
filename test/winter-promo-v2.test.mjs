@@ -38,7 +38,7 @@ test('static batching preserves transformed positions/normals and leaves active 
 
 test('initial puddle water is finite and polygon road fields span the authored width',()=>{
  const spec={version:1,environment:{temperatureC:-2,snowfall:'none'},entities:[{id:'puddle',mesh:{kind:'polygon-prism',axis:1,points:[[-2,-1],[2,-1],[2,1],[-2,1]],thickness:.002},material:{kind:'asphalt'},environmental:{surfaceUse:'road',waterDepthM:.004}}]};
- const scene=new Scene(spec);scene.step();assert.ok(scene.winter.sample('puddle',1.5,.8).waterDepthM>.0039);assert.equal(scene.winter.sample('puddle',2.1,0),undefined);assert.throws(()=>validateScene({...spec,entities:[{...spec.entities[0],environmental:{surfaceUse:'road',waterDepthM:NaN}}]}));
+ const scene=new Scene(spec);scene.step();assert.ok(scene.surfaces.sample('puddle',1.5,.8).waterDepthM>.0039);assert.equal(scene.surfaces.sample('puddle',2.1,0),undefined);assert.throws(()=>validateScene({...spec,entities:[{...spec.entities[0],environmental:{surfaceUse:'road',waterDepthM:NaN}}]}));
 });
 
 test('wet tyre audio suppresses hiss and footstep audio starts at the recorded contact',()=>{
