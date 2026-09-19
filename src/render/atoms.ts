@@ -33,6 +33,8 @@ export interface RenderCommandAtoms {
   submittedTriangles:number;
   submittedVerticesNonIndexed:number;
   instances:number;
+  shadowBatchedInstances:number;
+  shadowBatchedDraws:number;
   byPass:Readonly<Record<string,{drawIndexed:number;draw:number;triangles:number}>>;
 }
 export interface RenderGeometryAtoms {
@@ -50,7 +52,7 @@ export interface AttachmentAtom {
   logicalResolveBytes:number;
 }
 export interface RenderMemoryAtoms {
-  uploads:Readonly<{total:number;uniform:number;surface:number;light:number;frame:number;snow:number;environment:number}>;
+  uploads:Readonly<{total:number;uniform:number;surface:number;light:number;frame:number;snow:number;environment:number;instance:number}>;
   attachments:Readonly<Record<string,AttachmentAtom>>;
   logicalAttachmentWriteBytes:number;
   logicalResolveBytes:number;
@@ -156,7 +158,8 @@ export interface BuildRenderAtomsInput {
   shadowDraws:number;reflectionDraws:number;mainOpaqueDraws:number;mainTransparentDraws:number;snowInstances:number;
   shadowTriangles:number;reflectionTriangles:number;mainOpaqueTriangles:number;mainTransparentTriangles:number;
   materialDraws:Readonly<Record<string,number>>;materialTriangles:Readonly<Record<string,number>>;
-  uploads:{total:number;uniform:number;surface:number;light:number;frame:number;snow:number;environment:number};
+  shadowBatchedInstances:number;shadowBatchedDraws:number;
+  uploads:{total:number;uniform:number;surface:number;light:number;frame:number;snow:number;environment:number;instance:number};
   shaders:Readonly<Record<string,ShaderProgramAtoms>>;
 }
 export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomReport{
@@ -179,11 +182,13 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     renderPasses:9,drawIndexed:indexedDraws,draw:nonIndexedDraws,
     pipelineBinds:9+(input.snowInstances?1:0),
     bindGroupBinds:input.shadowDraws+1+input.reflectionDraws+1+(input.mainOpaqueDraws+input.mainTransparentDraws)+2+(input.snowInstances?2:0)+3+1,
-    vertexBufferBinds:indexedDraws,indexBufferBinds:indexedDraws,
+    vertexBufferBinds:indexedDraws+input.shadowBatchedDraws,indexBufferBinds:indexedDraws,
     submittedIndices:indexedTriangles*3,
     submittedTriangles:indexedTriangles+snowTriangles+7,
     submittedVerticesNonIndexed:21+input.snowInstances*6,
-    instances:input.snowInstances,
+    instances:input.snowInstances+input.shadowBatchedInstances,
+    shadowBatchedInstances:input.shadowBatchedInstances,
+    shadowBatchedDraws:input.shadowBatchedDraws,
     byPass:Object.freeze(byPass),
   });
   const attachments={
