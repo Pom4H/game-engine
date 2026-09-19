@@ -19,10 +19,19 @@ publish:  application observers
 ```
 
 Modules declare ID, phase, cadence, resource reads/writes and optional `after`
-dependencies. The scheduler validates the graph, rejects same-phase ambiguous
+dependencies. Built-ins use the same mechanism: weather runs at 10 Hz, surface/environment
+evolution at 30 Hz, while local animation/rigid contacts remain 60 Hz. The kernel
+passes each due module its accumulated physical delta, so lowering cadence changes
+compute frequency without slowing physical time. The scheduler validates the graph, rejects same-phase ambiguous
 hazards, topologically orders modules and caches due-rate plans. Stable IDs only
 break ties between independent modules. Dependencies do not force a slower module
 to run on an off-cadence tick.
+
+Simulation tiers are operational rather than descriptive. `detailed` runs the full
+local stack, `active` keeps animation/physics but skips high-detail surface-contact
+geometry, `aggregate` keeps coarse environment evolution without rigid-body
+integration, and `dormant` advances only low-frequency world/cleanup state and time.
+`Scene.step(dt, tier)` selects the tier; the default remains `detailed`.
 
 Each batch consumes a detached, recursively frozen DTO snapshot. Normal Map and
 Set mutators are disabled. Command-producing batches call the reducer before the
