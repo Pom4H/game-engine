@@ -154,7 +154,7 @@ export class PhysicsWorld {
         else this.resolvePair(candidate);
       }
     }
-    for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=0;
+    for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=Math.max(0,body.sleepTimer-dt*.35);
   }
 
   get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length};}
@@ -225,7 +225,10 @@ export class PhysicsWorld {
     if(linear<.075&&angularSpeed<.16&&residualNormal<.055){
       body.sleepTimer+=dt;
       if(body.sleepTimer>.24){body.velocity=[0,0,0];body.angularVelocity=[0,0,0];body.sleeping=true;}
-    }else if(!body.sleeping)body.sleepTimer=0;
+    }else if(!body.sleeping){
+      const restingJitter=linear<.22&&angularSpeed<.7&&residualNormal<.22;
+      body.sleepTimer=restingJitter?Math.max(0,body.sleepTimer-dt*.2):0;
+    }
 
     const representative=manifold.points[0]??[0,lowest,0];
     this.contacts.push({a:body.id,b:surfaceId,normal,point:[body.position[0]+representative[0],surfaceY,body.position[2]+representative[2]],penetration,impulse:totalImpulse,normalSpeed:maxApproach,normalEnergy:totalEnergy,mode:'resolve'});
