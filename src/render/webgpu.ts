@@ -12,8 +12,12 @@ struct U {
   mvp: mat4x4<f32>,
   model: mat4x4<f32>,
   color: vec4<f32>,
-  surface: vec4<f32>, // moss, wetness, roughness, darkening
-  weather: vec4<f32>, // dirt, wear, seed, material kind
+  surface: vec4<f32>,     // moss, wetness, roughness, darkening
+  weather: vec4<f32>,     // dirt, wear, seed, material kind
+  winter: vec4<f32>,      // snow depth m, water depth m, slush, ice depth m
+  winter2: vec4<f32>,     // puddle, track melt, body snow, rear snow
+  environment: vec4<f32>, // air C, sunlight, hour/24, surface-use code
+  motion: vec4<f32>,      // dir x, dir z, road dirt, body wetness
   camera: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> u: U;
@@ -40,6 +44,15 @@ fn noise3(p:vec3<f32>)->f32 {
 fn fbm(p:vec3<f32>)->f32 {
   return noise3(p)*0.58+noise3(p*2.07+17.3)*0.28+noise3(p*4.11+41.7)*0.14;
 }
+fn tileSeam(p:vec2<f32>)->f32{
+  let cell=fract(p/0.62);
+  let edge=min(min(cell.x,1.0-cell.x),min(cell.y,1.0-cell.y));
+  return 1.0-smoothstep(0.018,0.045,edge);
+}
+fn tyreTracks(z:f32)->f32{
+  let repeated=abs(fract((z+0.34)/1.55)-0.5);
+  return 1.0-smoothstep(0.065,0.13,repeated);
+}
 
 @vertex fn vs(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VOut {
   var out: VOut;
@@ -52,22 +65,31 @@ fn fbm(p:vec3<f32>)->f32 {
 
 @fragment fn fs(in: VOut) -> @location(0) vec4<f32> {
   let n=normalize(in.normal);
-  let light=normalize(vec3<f32>(0.45,0.9,0.3));
   let viewDir=normalize(u.camera.xyz-in.worldPos);
+  let sunlight=u.environment.y;
+  let hour=u.environment.z*24.0;
+  let sunrise=exp(-pow((hour-7.4)/1.15,2.0))*sunlight;
+  let light=normalize(vec3<f32>(mix(0.18,0.46,sunlight),mix(0.68,0.92,sunlight),mix(0.22,0.34,sunlight)));
   let halfDir=normalize(light+viewDir);
   let ndl=max(dot(n,light),0.0);
 
   var albedo=u.color.rgb;
   let materialKind=u.weather.w;
+  let surfaceUse=u.environment.w;
   let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
+  let upward=smoothstep(0.05,0.82,n.y);
 
-  // Concrete is synthesized from matter + environment, not authored shader controls.
+  // Concrete / paving. Square sidewalk tiles are a semantic surface consequence.
   if(materialKind>3.5 && materialKind<4.5) {
     let coarse=fbm(in.worldPos*2.4+seed);
     let pores=fbm(in.worldPos*14.0+seed*2.3);
     albedo*=0.78+coarse*0.24+pores*0.07;
+    if(surfaceUse>1.5 && surfaceUse<2.5){
+      let seam=tileSeam(in.worldPos.xz);
+      albedo=mix(albedo,albedo*0.42,seam*.72);
+      albedo*=0.93+fbm(vec3<f32>(floor(in.worldPos.x/0.62),0.0,floor(in.worldPos.z/0.62))+seed)*0.1;
+    }
 
-    let upward=smoothstep(0.05,0.88,n.y);
     let sheltered=1.0-smoothstep(0.42,0.96,abs(n.y));
     let growthField=fbm(in.worldPos*1.35+seed*4.2)*0.72+fbm(in.worldPos*5.7+seed)*0.28;
     let moistureBias=u.surface.y*0.28+upward*0.22+sheltered*0.07;
@@ -76,20 +98,52 @@ fn fbm(p:vec3<f32>)->f32 {
     let mossVariation=fbm(in.worldPos*8.5+seed*8.0);
     let mossColor=mix(vec3<f32>(0.035,0.075,0.02),vec3<f32>(0.16,0.27,0.065),mossVariation);
     albedo=mix(albedo,mossColor,mossMask*u.surface.x);
-
-    let dirtField=smoothstep(0.6,0.9,fbm(in.worldPos*3.8+seed*5.1));
-    albedo*=1.0-dirtField*u.weather.x*0.16;
   }
 
-  // Wetness is a physical surface state: darker diffuse response and tighter highlights.
-  albedo*=1.0-u.surface.w;
-  let effectiveRoughness=clamp(u.surface.z-u.surface.y*0.22,0.06,1.0);
-  let diffuse=0.18+ndl*0.82;
-  let specPower=mix(90.0,7.0,effectiveRoughness);
-  let spec=pow(max(dot(n,halfDir),0.0),specPower)*(0.025+u.surface.y*0.34);
-  let rim=pow(1.0-max(abs(dot(n,viewDir)),0.0),2.2)*0.045;
+  // Asphalt is synthesized from aggregate and binder. Traffic only reveals tracks
+  // after the physics/environment system has accumulated trackMelt.
+  if(materialKind>4.5 && materialKind<5.5){
+    let aggregate=fbm(in.worldPos*19.0+seed)*0.14+fbm(in.worldPos*55.0+seed*2.0)*0.05;
+    albedo*=0.72+aggregate;
+    let track=tyreTracks(in.worldPos.z)*u.winter2.y;
+    albedo=mix(albedo,albedo*0.48,track*(0.35+u.winter.z*.35));
+  }
 
-  return vec4<f32>(albedo*diffuse+vec3<f32>(spec+rim),u.color.a);
+  // Snow accumulation is derived from mass balance. Road tracks expose wet/slushy
+  // asphalt only if traffic actually supplied enough contact work.
+  let snowBase=clamp(u.winter.x/0.055,0.0,1.0);
+  var snowMask=upward*smoothstep(0.12,0.82,fbm(in.worldPos*1.9+seed*3.1)+snowBase*.74);
+  if(surfaceUse>.5 && surfaceUse<1.5){
+    snowMask*=1.0-tyreTracks(in.worldPos.z)*u.winter2.y*.96;
+  }
+  if(surfaceUse>2.5 && surfaceUse<3.5){
+    snowMask=clamp(snowMask+snowBase*.38,0.0,1.0);
+  }
+  let slushColor=mix(vec3<f32>(0.48,0.5,0.5),vec3<f32>(0.22,0.19,0.16),clamp(u.weather.x+u.motion.z,0.0,1.0));
+  albedo=mix(albedo,slushColor,snowMask*u.winter.z*.52);
+  albedo=mix(albedo,vec3<f32>(0.89,0.93,0.97),snowMask*(1.0-u.winter.z*.55));
+
+  // Moving bodies accumulate fresh snow on upward and rear-facing surfaces.
+  let motionDir=normalize(vec3<f32>(u.motion.x,0.0,u.motion.y)+vec3<f32>(0.0001,0.0,0.0));
+  let rearFacing=smoothstep(0.05,0.9,dot(n,-motionDir));
+  let bodySnow=clamp(u.winter2.z*upward+u.winter2.w*rearFacing,0.0,1.0);
+  albedo=mix(albedo,vec3<f32>(0.91,0.945,0.98),bodySnow*smoothstep(.18,.78,fbm(in.worldPos*4.4+seed)+.25));
+
+  // Water is also state, not a material override. Procedural depressions localize
+  // the scalar water volume into shallow puddles.
+  let depression=1.0-fbm(in.worldPos*0.58+seed*6.0);
+  let puddleMask=smoothstep(0.7-u.winter2.x*.35,0.9-u.winter2.x*.12,depression)*upward;
+  let wetness=clamp(u.surface.y+u.motion.w+u.winter.y/0.006+puddleMask*.5,0.0,1.0);
+  albedo*=1.0-u.surface.w-wetness*.24;
+
+  let effectiveRoughness=clamp(u.surface.z-wetness*.36,0.045,1.0);
+  let diffuse=0.12+mix(.38,.88,sunlight)*ndl;
+  let specPower=mix(120.0,7.0,effectiveRoughness);
+  let spec=pow(max(dot(n,halfDir),0.0),specPower)*(0.018+wetness*.52+puddleMask*.42);
+  let rim=pow(1.0-max(abs(dot(n,viewDir)),0.0),2.2)*0.035;
+  let warm=vec3<f32>(1.0,.54,.22)*sunrise*(ndl*.18+spec*.28);
+  let nightTint=mix(vec3<f32>(.52,.62,.78),vec3<f32>(1.0,1.0,1.0),sunlight);
+  return vec4<f32>((albedo*diffuse+vec3<f32>(spec+rim))*nightTint+warm,u.color.a);
 }`;
 
 export class WebGPURenderer implements Renderer{
@@ -99,7 +153,7 @@ export class WebGPURenderer implements Renderer{
   ){device.addEventListener?.('uncapturederror',(event:any)=>{const message=event?.error?.message??String(event?.error??'WebGPU validation error');this.errors.push(message);console.error('Game Engine WebGPU:',message);});device.lost?.then((info:any)=>this.errors.push(`Device lost: ${info?.message??'unknown'}`));}
   private depth:GPUAny=null;private depthW=0;private depthH=0;
   private readonly meshes=new Map<string,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly errors:string[]=[];
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;
 
   static async create(canvas:HTMLCanvasElement):Promise<WebGPURenderer>{
     const gpu=(navigator as any).gpu;if(!gpu)throw new Error('WebGPU is not available in this browser');
@@ -120,9 +174,9 @@ export class WebGPURenderer implements Renderer{
   }
 
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
-    this.resize();this.lastCamera=camera.position;
+    this.resize();this.lastCamera=camera.position;this.lastScene=scene;
     const view=lookAt(camera.position,camera.target),projection=perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),vp=multiply4(projection,view);
-    const encoder=this.device.createCommandEncoder(),clear=scene.spec.clearColor??[.025,.035,.055,1];
+    const encoder=this.device.createCommandEncoder(),clear=scene.spec.clearColor??environmentClear(scene.environment);
     const pass=encoder.beginRenderPass({colorAttachments:[{view:this.context.getCurrentTexture().createView(),clearValue:{r:clear[0],g:clear[1],b:clear[2],a:clear[3]},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
     this.drawCalls=0;this.triangles=0;
     const visible=[...scene.entities.values()].filter(entity=>entity.mesh),opaque=visible.filter(entity=>entity.material.color[3]>=.98),transparent=visible.filter(entity=>entity.material.color[3]<.98).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
@@ -136,17 +190,22 @@ export class WebGPURenderer implements Renderer{
   dispose():void{for(const m of this.meshes.values()){m.vertex.destroy?.();m.index.destroy?.();}for(const o of this.objects.values())o.uniform.destroy?.();this.depth?.destroy?.();this.meshes.clear();this.objects.clear();}
 
   private draw(pass:GPUAny,entity:RuntimeEntity,vp:Mat4):void{
-    if(!entity.mesh)return;const mesh=this.mesh(entity.mesh),object=this.object(entity.id),model=this.model(entity),mvp=multiply4(vp,model),uniform=new Float32Array(48),surface=entity.material.surface;
+    if(!entity.mesh)return;const mesh=this.mesh(entity.mesh),object=this.object(entity.id),model=this.model(entity),mvp=multiply4(vp,model),uniform=new Float32Array(64),surface=entity.material.surface;
+    const winter=this.lastScene?.winter.surface(entity.id),bodyWeather=this.lastScene?.winter.body(entity.id),environment=this.lastScene?.environment;
     uniform.set(mvp,0);uniform.set(model,16);uniform.set(entity.material.color,32);
     uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);
     uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
-    uniform.set([this.lastCamera[0],this.lastCamera[1],this.lastCamera[2],1],44);
+    uniform.set([winter?.snowDepthM??0,winter?.waterDepthM??0,winter?.slush??0,winter?.iceDepthM??0],44);
+    uniform.set([winter?.puddle??0,winter?.trackMelt??0,bodyWeather?.snowCoverage??0,bodyWeather?.rearSnow??0],48);
+    uniform.set([environment?.temperatureC??18,environment?.sunlight??.65,(environment?.hour??12)/24,surfaceUseCode(entity.environmental?.surfaceUse)],52);
+    uniform.set([bodyWeather?.directionX??1,bodyWeather?.directionZ??0,bodyWeather?.roadDirt??0,bodyWeather?.wetness??0],56);
+    uniform.set([this.lastCamera[0],this.lastCamera[1],this.lastCamera[2],1],60);
     this.device.queue.writeBuffer(object.uniform,0,uniform);
     pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);this.drawCalls++;this.triangles+=mesh.triangles;
   }
   private mesh(primitive:Primitive):GPUMesh{const key=primitiveKey(primitive);const found=this.meshes.get(key);if(found)return found;const data=primitiveMesh(primitive),vertex=this.buffer(data.vertices,0x20|0x08),index=this.buffer(data.indices,0x10|0x08),mesh={vertex,index,count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});const target=new Uint8Array(buffer.getMappedRange());target.set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
-  private object(id:string):GPUObject{const existing=this.objects.get(id);if(existing)return existing;const uniform=this.device.createBuffer({size:192,usage:0x40|0x08}),bind=this.device.createBindGroup({layout:this.bindGroupLayout,entries:[{binding:0,resource:{buffer:uniform}}]}),object={uniform,bind};this.objects.set(id,object);return object;}
+  private object(id:string):GPUObject{const existing=this.objects.get(id);if(existing)return existing;const uniform=this.device.createBuffer({size:256,usage:0x40|0x08}),bind=this.device.createBindGroup({layout:this.bindGroupLayout,entries:[{binding:0,resource:{buffer:uniform}}]}),object={uniform,bind};this.objects.set(id,object);return object;}
   private model(entity:RuntimeEntity):Mat4{
     const meshScale:Vec3=entity.mesh?.kind==='box'||entity.mesh?.kind==='shard'?entity.mesh.size??[1,1,1]:entity.mesh?.kind==='sphere'?[2*(entity.mesh.radius??1),2*(entity.mesh.radius??1),2*(entity.mesh.radius??1)]:entity.mesh?.kind==='plane'?[entity.mesh.size?.[0]??1,1,entity.mesh.size?.[1]??1]:[1,1,1];
     return compose(entity.position,entity.rotation,[entity.scale[0]*meshScale[0],entity.scale[1]*meshScale[1],entity.scale[2]*meshScale[2]]);
@@ -154,5 +213,17 @@ export class WebGPURenderer implements Renderer{
 }
 function distance2(a:Vec3,b:Vec3):number{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[2];return x*x+y*y+z*z;}
 
-function materialCode(kind:string):number{return kind==='glass'?1:kind==='steel'?2:kind==='wood'?3:kind==='concrete'?4:0;}
+function materialCode(kind:string):number{return kind==='glass'?1:kind==='steel'?2:kind==='wood'?3:kind==='concrete'?4:kind==='asphalt'?5:0;}
 function stableSeed(value:string):number{let h=2166136261>>>0;for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0)/4294967295;}
+
+function surfaceUseCode(use:string|undefined):number{return use==='road'?1:use==='sidewalk'?2:use==='curb'?3:0;}
+function environmentClear(environment:{sunlight:number;hour:number}):readonly[number,number,number,number]{
+  const sun=Math.max(0,Math.min(1,environment.sunlight)),hour=environment.hour,sunrise=Math.exp(-Math.pow((hour-7.3)/1.4,2))*sun;
+  const night:[number,number,number]=[.006,.012,.026],day:[number,number,number]=[.34,.57,.79],warm:[number,number,number]=[.82,.38,.16];
+  return[
+    night[0]+(day[0]-night[0])*sun+warm[0]*sunrise*.18,
+    night[1]+(day[1]-night[1])*sun+warm[1]*sunrise*.12,
+    night[2]+(day[2]-night[2])*sun+warm[2]*sunrise*.05,
+    1,
+  ];
+}
