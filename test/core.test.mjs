@@ -149,19 +149,19 @@ test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{
     ],
   });
   for(let i=0;i<360;i++)scene.step(1/60);
-  const road=scene.winter.surface('road'),sidewalk=scene.winter.surface('sidewalk'),body=scene.winter.body('traffic');
+  const road=scene.surfaces.surface('road'),sidewalk=scene.surfaces.surface('sidewalk'),body=scene.surfaces.body('traffic');
   assert.ok(road&&sidewalk&&body);
-  assert.ok(scene.winter.sample('road',0,0).trackMelt>0,'contacted cells retain thermal history');
-  assert.equal(scene.winter.sample('road',0,3.5).trackMelt,0,'off-path cells receive no traffic work');
-  assert.ok(scene.winter.sample('road',0,0).slush>0,'contacted cells contain local slush during subzero snowfall');
+  assert.ok(scene.surfaces.sample('road',0,0).trackMelt>0,'contacted cells retain thermal history');
+  assert.equal(scene.surfaces.sample('road',0,3.5).trackMelt,0,'off-path cells receive no traffic work');
+  assert.ok(scene.surfaces.sample('road',0,0).slush>0,'contacted cells contain local slush during subzero snowfall');
   assert.ok(sidewalk.snowDepthM>road.snowDepthM,'untouched sidewalk should retain more fresh snow than trafficked asphalt');
   assert.ok(body.snowCoverage>.05,'snowfall should adhere to moving bodies');
   assert.ok(body.rearSnow>.05,'wake/spray should accumulate snow on rear-facing body surfaces');
-  assert.ok([...scene.entities.keys()].some(id=>id.startsWith('__winter:drift:curb:')),'curb snow mass should generate snowdrift geometry');
+  assert.ok([...scene.entities.keys()].some(id=>id.startsWith('__surface:snowdrift:curb:')),'curb snow mass should generate snowdrift geometry');
 
   const nightSnow=road.snowDepthM;
   for(let i=0;i<2100;i++)scene.step(1/60);
-  const dayRoad=scene.winter.surface('road');
+  const dayRoad=scene.surfaces.surface('road');
   assert.ok(scene.environment.temperatureC>2.5&&scene.environment.sunlight>.7,'timeline should reach a sunny above-freezing day');
   assert.ok(dayRoad.temperatureC>0,'asphalt surface should thaw above zero');
   assert.ok(dayRoad.snowDepthM<nightSnow,'daytime energy balance should melt accumulated road snow');
