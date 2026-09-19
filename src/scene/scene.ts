@@ -87,6 +87,7 @@ export class Scene {
     const at=this.time+dt;
     this.environment=resolveEnvironmentAt(this.spec.environment,at);
     this.winter.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
+    this.syncWinterVisuals();
     const pending=new Map<string,FractureDecision>();
     this.physics.step(dt,contact=>{
       const result=evaluateFracture(contact);
@@ -110,6 +111,34 @@ export class Scene {
   }
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
   setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
+
+  private syncWinterVisuals():void{
+    const keep=new Set<string>();
+    for(const [surfaceId,state] of this.winter.surfaces){
+      if(state.use!=='curb'&&state.use!=='sidewalk')continue;
+      const source=this.entities.get(surfaceId);if(!source?.mesh)continue;
+      const dimensions=meshDimensions(source.mesh,source.scale),longAxis:0|2=dimensions[0]>=dimensions[2]?0:2,crossAxis:0|2=longAxis===0?2:0;
+      const longSize=dimensions[longAxis],crossSize=dimensions[crossAxis],count=state.use==='curb'?Math.max(3,Math.min(10,Math.round(longSize/8))):Math.max(2,Math.min(7,Math.round(longSize/14)));
+      const top=source.position[1]+dimensions[1]/2,rng=mulberry32((this.spec.seed??1)^hashString(surfaceId)^0x51f15e);
+      for(let i=0;i<count;i++){
+        const id=`__winter:drift:${surfaceId}:${i}`;keep.add(id);
+        const jitter=(rng()-.5)*(longSize/count)*.45,offset=-longSize/2+(i+.5)*longSize/count+jitter;
+        const localFactor=.68+rng()*.65,driftFactor=state.use==='curb'?7.5:4.2;
+        const height=Math.min(state.use==='curb'?.48:.28,Math.max(.002,state.snowDepthM*driftFactor*localFactor));
+        const longitudinal=Math.max(.8,longSize/count*(.9+rng()*.55)),cross=Math.max(.35,Math.min(state.use==='curb'?1.25:1.8,crossSize*(.55+rng()*.42)));
+        const position:MutableVec3=[...source.position];position[longAxis]+=offset;position[1]=top+height*.48;
+        const scale:MutableVec3=longAxis===0?[longitudinal,height,cross]:[cross,height,longitudinal];
+        let drift=this.entities.get(id);
+        if(!drift){
+          drift=this.add({id,position,scale,mesh:{kind:'sphere',radius:.5,segments:12},material:{kind:'snow'}});
+        }else{
+          drift.position[0]=position[0];drift.position[1]=position[1];drift.position[2]=position[2];
+          drift.scale[0]=scale[0];drift.scale[1]=scale[1];drift.scale[2]=scale[2];
+        }
+      }
+    }
+    for(const id of [...this.entities.keys()])if(id.startsWith('__winter:drift:')&&!keep.has(id))this.entities.delete(id);
+  }
 
   private emitContactEvents(at:number):void{
     for(const contact of this.physics.contacts){
