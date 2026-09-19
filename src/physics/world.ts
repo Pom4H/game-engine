@@ -28,6 +28,7 @@ export class RigidBody {
   readonly invInertiaLocal:MutableVec3;
   sleeping=false;
   sleepTimer=0;
+  supportedThisStep=false;
   /** Engine-generated micro debris does not recursively fracture or self-collide. */
   fracturable=true;
   collisionClass:'solid'|'debris'='solid';
@@ -128,6 +129,7 @@ export class PhysicsWorld {
 
   private stepSubstep(dt:number,contactModel?:ContactModel):void{
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping){
+      body.supportedThisStep=false;
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
       const airAngular=Math.exp(-.08*dt);body.angularVelocity[0]*=airAngular;body.angularVelocity[1]*=airAngular;body.angularVelocity[2]*=airAngular;
@@ -137,7 +139,7 @@ export class PhysicsWorld {
     this.rebuildIndex();
     const seen=new Set<string>(),scratch:RigidBody[]=[];
     for(const a of this.bodies.values()){
-      if(!a.invMass)continue;
+      if(!a.invMass||a.sleeping)continue;
       const radius=shapeRadius(a.shape),candidates=this.index.near(a.position[0],a.position[2],radius*2+2,scratch);
       for(const b of candidates){
         if(a===b||a.collisionClass==='debris'&&b.collisionClass==='debris')continue;
@@ -152,6 +154,7 @@ export class PhysicsWorld {
         else this.resolvePair(candidate);
       }
     }
+    for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=0;
   }
 
   get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length};}
@@ -182,7 +185,8 @@ export class PhysicsWorld {
 
   private resolveHorizontalSurface(body:RigidBody,surfaceY:number,surfaceMaterial:PhysicalMaterial,surfaceId:string|'ground',dt:number):boolean{
     const r=groundSupportVector(body),bottom=body.position[1]+r[1],slop=.0015;
-    if(bottom>surfaceY+slop){if(!body.sleeping)body.sleepTimer=0;return false;}
+    if(bottom>surfaceY+slop)return false;
+    body.supportedThisStep=true;
     const penetration=Math.max(0,surfaceY-bottom);if(penetration>0)body.position[1]+=penetration;
     const contactVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),normal:Vec3=[0,1,0],approach=Math.max(0,-contactVelocity[1]),normalEnergy=.5*body.mass*approach*approach;
     const restitution=approach>.55?Math.min(body.restitution,surfaceMaterial.restitution):0;
