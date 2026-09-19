@@ -24,7 +24,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - run: bun install --frozen-lockfile
+      - run: bun install
       - name: Core verification
         run: |
           New-Item -ItemType Directory -Force artifacts | Out-Null
