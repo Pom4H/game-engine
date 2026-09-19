@@ -45,10 +45,35 @@ fn gaussian(uv:vec2<f32>,axis:vec2<f32>)->vec4<f32>{
 @fragment fn horizontal(in:Out)->@location(0) vec4<f32>{return gaussian(in.uv,vec2<f32>(1,0));}
 @fragment fn vertical(in:Out)->@location(0) vec4<f32>{return gaussian(in.uv,vec2<f32>(0,1));}
 `;
+export const TAA_SHADER=`
+@group(0) @binding(0) var currentColor:texture_2d<f32>;
+@group(0) @binding(1) var historyColor:texture_2d<f32>;
+@group(0) @binding(2) var velocityTex:texture_2d<f32>;
+@group(0) @binding(3) var depthTex:texture_depth_2d;
+@group(0) @binding(4) var linearSampler:sampler;
+struct TaaParams { history:vec4<f32> }
+@group(0) @binding(5) var<uniform> taa:TaaParams;
+struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
+@vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
+@fragment fn fs(in:Out)->@location(0) vec4<f32>{
+ let dims=vec2<i32>(textureDimensions(currentColor)),size=vec2<f32>(dims),pixel=clamp(vec2<i32>(in.uv*size),vec2<i32>(0),dims-1);
+ let current=textureLoad(currentColor,pixel,0).rgb,velocity=textureLoad(velocityTex,pixel,0).xy,historyUV=in.uv-velocity;
+ var lo=current;var hi=current;
+ for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){let q=clamp(pixel+vec2<i32>(x,y),vec2<i32>(0),dims-1);let v=textureLoad(currentColor,q,0).rgb;lo=min(lo,v);hi=max(hi,v);}}
+ let valid=taa.history.x>0.5&&all(historyUV>vec2<f32>(.001))&&all(historyUV<vec2<f32>(.999));
+ let previous=clamp(textureSampleLevel(historyColor,linearSampler,clamp(historyUV,vec2<f32>(.001),vec2<f32>(.999)),0).rgb,lo,hi);
+ let speed=length(velocity)*size.y,depth=textureLoad(depthTex,pixel,0);
+ var weight=select(0.0,mix(.90,.72,smoothstep(.35,10.0,speed)),valid);
+ if(depth>.99999){weight=min(weight,.55);}
+ let delta=max(max(abs(previous.r-current.r),abs(previous.g-current.g)),abs(previous.b-current.b));
+ weight*=1.0-smoothstep(.12,.55,delta);
+ return vec4<f32>(mix(current,previous,weight),1);
+}
+`;
 export const POST_SHADER=FRAME_WGSL+`
 @group(0) @binding(0) var hdr:texture_2d<f32>;
 @group(0) @binding(1) var normals:texture_2d<f32>;
-@group(0) @binding(2) var depth:texture_depth_multisampled_2d;
+@group(0) @binding(2) var depth:texture_depth_2d;
 @group(0) @binding(3) var linearSampler:sampler;
 @group(0) @binding(4) var<uniform> f:Frame;
 @group(0) @binding(5) var reflectance:texture_2d<f32>;
@@ -60,8 +85,10 @@ fn viewPos(uv:vec2<f32>,z:f32)->vec3<f32>{return vec3<f32>((uv.x*2.0-1.0)*f.righ
 fn project(p:vec3<f32>)->vec2<f32>{return vec2<f32>(p.x/(-p.z*f.forward.w*f.right.w)*.5+.5,.5-p.y/(-p.z*f.forward.w)*.5);}
 fn viewNormal(n:vec3<f32>)->vec3<f32>{return normalize(vec3<f32>(dot(n,f.right.xyz),dot(n,f.up.xyz),-dot(n,f.forward.xyz)));}
 fn depthSpan(pixel:vec2<i32>)->vec2<f32>{
- var near=linearDepth(textureLoad(depth,pixel,0));var far=near;
- for(var sampleIndex=1;sampleIndex<4;sampleIndex++){let z=linearDepth(textureLoad(depth,pixel,sampleIndex));near=min(near,z);far=max(far,z);}return vec2<f32>(near,far);
+ let dims=vec2<i32>(textureDimensions(depth)),p=clamp(pixel,vec2<i32>(0),dims-1);
+ var near=linearDepth(textureLoad(depth,p,0));var far=near;
+ let offsets=array<vec2<i32>,4>(vec2<i32>(1,0),vec2<i32>(-1,0),vec2<i32>(0,1),vec2<i32>(0,-1));
+ for(var i=0;i<4;i++){let q=clamp(p+offsets[i],vec2<i32>(0),dims-1);let z=linearDepth(textureLoad(depth,q,0));near=min(near,z);far=max(far,z);}return vec2<f32>(near,far);
 }
 fn positionAt(pixel:vec2<i32>,size:vec2<f32>)->vec3<f32>{
  let coord=clamp(pixel,vec2<i32>(0),vec2<i32>(size)-1);return viewPos((vec2<f32>(coord)+.5)/size,linearDepth(textureLoad(depth,coord,0)));
