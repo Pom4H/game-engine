@@ -6,8 +6,15 @@ export class ProceduralAudio {
   private unlocked=false;
   private disposed=false;
   constructor(){
-    const unlock=()=>{if(this.disposed)return;this.ensure();void this.context?.resume();this.unlocked=true;};
+    const unlock=()=>{void this.unlock();};
     addEventListener('pointerdown',unlock,{once:true,capture:true});addEventListener('keydown',unlock,{once:true,capture:true});
+  }
+  async unlock():Promise<boolean>{
+    if(this.disposed)return false;
+    const context=this.ensure();
+    if(context.state!=='running')await context.resume();
+    this.unlocked=context.state==='running';
+    return this.unlocked;
   }
   play(events:readonly EngineEvent[]):void{
     if(!events.length||!this.unlocked||this.disposed)return;
