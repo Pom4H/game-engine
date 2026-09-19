@@ -16,7 +16,7 @@ try{
  socket.addEventListener('message',event=>{const m=JSON.parse(String(event.data)),p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result);}});
  const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;const timer=setTimeout(()=>{pending.delete(id);reject(new Error(`CDP ${method} timed out`));},120000);pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:error=>{clearTimeout(timer);reject(error);}});socket.send(JSON.stringify({id,method,params}));});
  const evaluate=async code=>{const r=await send('Runtime.evaluate',{expression:`(async()=>{${code}})()`,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description??r.exceptionDetails.text);return r.result?.value;};
- await send('Runtime.enable');await send('Page.enable');await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:host.url+'&play=0'});
+ await send('Runtime.enable');await send('Page.enable');await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:host.url+'&play=0&profile=1'});
  for(let i=0;i<200;i++){if(await evaluate('return !!window.__GAME_ENGINE__'))break;const failure=await evaluate('return document.documentElement.dataset.engineError');if(failure)throw new Error(failure);await new Promise(r=>setTimeout(r,100));}
  // Fixed arrival camera keeps benchmark comparisons independent of promo captures.
  const shot={camera:[-21.51,1.6320200678244328,6.16],target:[-15.46,1.3620200678244327,3.795]};
