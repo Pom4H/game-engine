@@ -156,6 +156,10 @@ game-engine record examples/bounce.ts \
 
 `render` and `record` drive an installed Chrome/Chromium directly over the Chrome DevTools Protocol. There is no Puppeteer or Playwright dependency. `record` advances simulation by exact frame time and sends the PNG sequence to system `ffmpeg`, so rendering slower than realtime does **not** slow the resulting video.
 
+For `serve`, `render` and `record`, local material texture URLs resolve inside the directory containing the input scene file. For example, both `assets/stone.jpg` and `/assets/stone.jpg` in `scenes/street.mjs` serve `scenes/assets/stone.jpg`, regardless of the shell's working directory. URL-encode spaces (`stone%20tile.jpg`); cache queries and fragments do not change the file lookup. The server exposes only files explicitly referenced by `material.texture`, `environmental.snowMaterial.texture` or a `surfaceContacts.snow[].material.texture` override. Missing files fail before the browser starts. Paths and symlinks must stay within the scene directory; `/`, `/scene.json` and `/dist/` are reserved engine routes. HTTP(S) and protocol-relative image URLs remain remote and follow normal browser CORS rules. A shareable scene URL carries texture descriptors, not image bytes, so its host must serve those assets separately.
+
+`record` synthesizes physics events and native snow footsteps from the same fixed-timestep scene simulation. A `--from` cut preserves sound tails that began before the cut. The exported `renderSceneAudio(scene, duration, {startTime, sampleRate})` returns the stereo PCM buffer and its contact/event telemetry for offline callers; camera placement controls footstep stereo and distance attenuation.
+
 Set `CHROME_PATH` when Chrome is not in a standard location.
 
 ## URL API

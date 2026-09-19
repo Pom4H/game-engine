@@ -77,6 +77,19 @@ The engine executes animation before physics, then surface contacts. Footprint g
 
 Requires Bun, Node 22+, ffmpeg/ffprobe and Google Chrome with WebGPU on macOS. The optional FBX conversion requires Python 3 and numpy. The engine has no additional runtime package dependency.
 
+The same scene can also be opened directly in the production browser runtime,
+without the movie player:
+
+```sh
+bun run build
+node dist/cli.js serve tools/promo/street.scene.mjs
+```
+
+`street.scene.mjs` exports only the authored `SceneSpec`. Native playback, reset,
+snow contacts and audio are handled by `BrowserRuntime`. The standard CLI serves
+only texture files explicitly referenced by the scene, relative to its source
+directory; no separate demo asset server is required for this entry point.
+
 ```sh
 bun run ci
 node tools/promo/capture.mjs storyboard

@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 import {spawn,type ChildProcess} from 'node:child_process';
-import {createServer,type Server} from 'node:http';
-import {access,mkdir,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
+import {access,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
 import {constants as FS} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname,extname,join,resolve} from 'node:path';
-import {fileURLToPath,pathToFileURL} from 'node:url';
-import {renderAudio,wavBytes} from './audio/synth.js';
-import {Scene} from './scene/scene.js';
-import type {EngineEvent} from './scene/events.js';
+import {pathToFileURL} from 'node:url';
+import {serveScene} from './cli/server.js';
+import {wavBytes} from './audio/synth.js';
+import {renderSceneAudio} from './audio/offline.js';
 import {decodeScene,sceneURL} from './scene/url.js';
 import {validateScene} from './scene/validate.js';
 import type {SceneSpec} from './scene/types.js';
 
-const DIST=dirname(fileURLToPath(import.meta.url));
 const args=process.argv.slice(2),command=args.shift()??'help';
 
 async function main(){
@@ -21,32 +19,42 @@ async function main(){
   if(command==='validate'){const file=need(args.shift(),'scene file');const scene=await loadSceneFile(file);console.log(JSON.stringify({ok:true,entities:scene.entities.length,version:scene.version},null,2));return;}
   if(command==='url'){const file=need(args.shift(),'scene file'),base=option('--base')??'http://localhost:4173/';console.log(sceneURL(await loadSceneFile(file),base));return;}
   if(command==='decode'){const token=need(args.shift(),'scene token');console.log(JSON.stringify(decodeScene(token),null,2));return;}
-  if(command==='serve'){const file=args[0]&&!args[0]!.startsWith('--')?args.shift():undefined,port=numberOption('--port',4173);const scene=file?await loadSceneFile(file):undefined;const host=await serve(scene,port);console.log(`Game Engine: ${host.url}`);await new Promise<void>((resolve,reject)=>{host.server.on('close',resolve);host.server.on('error',reject);});return;}
-  if(command==='render'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'frame.png'),time=numberOption('--time',0),width=numberOption('--width',1280),height=numberOption('--height',720);await render(await loadSceneFile(file),{out,time,width,height});console.log(out);return;}
-  if(command==='record'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'scene.mp4'),fps=numberOption('--fps',60),duration=numberOption('--duration',3),from=numberOption('--from',0),width=numberOption('--width',1920),height=numberOption('--height',1080);await record(await loadSceneFile(file),{out,fps,duration,from,width,height});console.log(out);return;}
+  if(command==='serve'){const file=args[0]&&!args[0]!.startsWith('--')?args.shift():undefined,port=numberOption('--port',4173);const scene=file?await loadSceneFile(file):undefined;const host=await serveScene(scene,{port,...(file?{sceneDirectory:dirname(resolve(file))}:{})});console.log(`Game Engine: ${host.url}`);await new Promise<void>((resolve,reject)=>{host.server.on('close',resolve);host.server.on('error',reject);});return;}
+  if(command==='render'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'frame.png'),time=numberOption('--time',0),width=numberOption('--width',1280),height=numberOption('--height',720);await render(await loadSceneFile(file),{out,time,width,height},dirname(resolve(file)));console.log(out);return;}
+  if(command==='record'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'scene.mp4'),fps=numberOption('--fps',60),duration=numberOption('--duration',3),from=numberOption('--from',0),width=numberOption('--width',1920),height=numberOption('--height',1080);await record(await loadSceneFile(file),{out,fps,duration,from,width,height},dirname(resolve(file)));console.log(out);return;}
   throw new Error(`Unknown command: ${command}`);
 }
 
-function help(){console.log(`game-engine — deterministic scene runtime\n\nUsage:\n  game-engine serve [scene.ts|scene.json] [--port 4173]\n  game-engine url <scene> [--base https://example.com/]\n  game-engine validate <scene>\n  game-engine render <scene> --time 2.5 --out frame.png [--width 1280 --height 720]\n  game-engine record <scene> --duration 8 --fps 60 --out shot.mp4 [--from 0]\n\nScene modules export a SceneSpec as default. JSON is accepted directly.\nrender/record use an installed Chromium/Chrome and no browser automation package.`);}
+function help(){console.log(`game-engine — deterministic scene runtime\n\nUsage:\n  game-engine serve [scene.ts|scene.json] [--port 4173]\n  game-engine url <scene> [--base https://example.com/]\n  game-engine validate <scene>\n  game-engine render <scene> --time 2.5 --out frame.png [--width 1280 --height 720]\n  game-engine record <scene> --duration 8 --fps 60 --out shot.mp4 [--from 0]\n\nScene modules export a SceneSpec as default. JSON is accepted directly.\nReferenced local material images resolve inside the scene file directory.\nrender/record use an installed Chromium/Chrome and no browser automation package.`);}
 function need<T>(value:T|undefined,label:string):T{if(value===undefined)throw new Error(`Missing ${label}`);return value;}
 function option(name:string):string|undefined{const i=args.indexOf(name);if(i<0)return;const value=args[i+1];if(!value||value.startsWith('--'))throw new Error(`${name} requires a value`);return value;}
 function numberOption(name:string,fallback:number):number{const raw=option(name);if(raw===undefined)return fallback;const value=Number(raw);if(!Number.isFinite(value))throw new Error(`${name} must be numeric`);return value;}
 async function loadSceneFile(file:string):Promise<SceneSpec>{const path=resolve(file),ext=extname(path).toLowerCase();if(ext==='.json')return validateScene(JSON.parse(await readFile(path,'utf8')));if(ext==='.ts'||ext==='.mts'||ext==='.cts'){const url=pathToFileURL(path).href,script=`const m=await import(${JSON.stringify(url)});process.stdout.write(JSON.stringify(m.default??m.scene));`;return validateScene(JSON.parse(await capture(process.execPath,['--experimental-strip-types','--no-warnings','--input-type=module','-e',script])));}const module=await import(pathToFileURL(path).href);return validateScene(module.default??module.scene);}
 
-interface Hosted{server:Server;port:number;url:string;close():Promise<void>}
-async function serve(scene?:SceneSpec,requestedPort=0):Promise<Hosted>{
-  const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Game Engine</title><style>html,body,canvas{width:100%;height:100%;margin:0;display:block;background:#07101a;overflow:hidden}#badge{position:fixed;left:12px;top:12px;font:12px ui-monospace,monospace;color:#dfe8f5;background:#07101acc;padding:7px 9px;border:1px solid #ffffff20;z-index:2}</style></head><body><div id="badge">GAME ENGINE · WebGPU</div><canvas data-game-engine></canvas><script type="module" src="/dist/browser-entry.js"></script></body></html>`;
-  const server=createServer(async(req,res)=>{try{const url=new URL(req.url??'/',`http://${req.headers.host??'localhost'}`);if(url.pathname==='/'){res.setHeader('content-type','text/html; charset=utf-8');res.end(html);return;}if(url.pathname==='/scene.json'&&scene){res.setHeader('content-type','application/json');res.end(JSON.stringify(scene));return;}if(url.pathname.startsWith('/dist/')){const relative=url.pathname.slice('/dist/'.length);if(relative.includes('..'))throw new Error('Invalid path');const file=join(DIST,relative);const data=await readFile(file);res.setHeader('content-type',mime(file));res.end(data);return;}res.statusCode=404;res.end('Not found');}catch(error){res.statusCode=500;res.end(error instanceof Error?error.message:String(error));}});
-  await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(requestedPort,'127.0.0.1',()=>resolve());});const address=server.address();if(!address||typeof address==='string')throw new Error('Unable to resolve server address');const base=`http://127.0.0.1:${address.port}/`,url=scene?`${base}?src=/scene.json`:base;return{server,port:address.port,url,close:()=>new Promise((resolve,reject)=>server.close(error=>error?reject(error):resolve()))};
-}
-function mime(file:string):string{return file.endsWith('.js')?'text/javascript; charset=utf-8':file.endsWith('.map')?'application/json':'application/octet-stream';}
-
 interface RenderOptions{out:string;time:number;width:number;height:number}
-async function render(scene:SceneSpec,options:RenderOptions):Promise<void>{const host=await serve(scene,0);let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();await browser.evaluate(`window.__GAME_ENGINE__.seek(${JSON.stringify(options.time)}); await window.__GAME_ENGINE__.flush(); true`);await assertBrowserRenderer(browser);await writeFile(options.out,await browser.screenshot());}finally{await browser?.close();await host.close();}}
+async function render(scene:SceneSpec,options:RenderOptions,sceneDirectory:string):Promise<void>{const host=await serveScene(scene,{sceneDirectory});let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();await browser.evaluate(`window.__GAME_ENGINE__.seek(${JSON.stringify(options.time)}); await window.__GAME_ENGINE__.flush(); true`);await assertBrowserRenderer(browser);await writeFile(options.out,await browser.screenshot());}finally{await browser?.close();await host.close();}}
 interface RecordOptions{out:string;fps:number;duration:number;from:number;width:number;height:number}
-async function record(scene:SceneSpec,options:RecordOptions):Promise<void>{if(!(options.fps>0&&options.fps<=240)||!(options.duration>0&&options.duration<=3600))throw new RangeError('Invalid fps/duration');const frames=Math.ceil(options.fps*options.duration),directory=join(tmpdir(),`game-engine-${process.pid}-${Date.now()}`);await mkdir(directory,{recursive:true});const host=await serve(scene,0);let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();for(let frame=0;frame<frames;frame++){const time=options.from+frame/options.fps;await browser.evaluate(`window.__GAME_ENGINE__.seek(${JSON.stringify(time)}); await window.__GAME_ENGINE__.flush(); true`);await writeFile(join(directory,`frame-${String(frame).padStart(6,'0')}.png`),await browser.screenshot());}await assertBrowserRenderer(browser);const audioPath=join(directory,'audio.wav'),events=simulateEvents(scene,options.from+options.duration).filter(event=>event.time>=options.from);await writeFile(audioPath,wavBytes(renderAudio(events,options.duration,48_000,options.from)));const codec=await ffmpegCodecArgs(),audio=await ffmpegAudioArgs();await run('ffmpeg',['-y','-loglevel','error','-framerate',String(options.fps),'-i',join(directory,'frame-%06d.png'),'-i',audioPath,...codec,...audio,'-movflags','+faststart','-shortest',options.out]);}finally{await browser?.close();await host.close();await rm(directory,{recursive:true,force:true});}}
-
-function simulateEvents(spec:SceneSpec,endTime:number,tickRate=60):EngineEvent[]{const scene=new Scene(spec),events:EngineEvent[]=[],step=1/tickRate,ticks=Math.ceil(endTime*tickRate);for(let i=0;i<ticks;i++){scene.step(step);events.push(...scene.drainEvents());}return events;}
+async function record(scene:SceneSpec,options:RecordOptions,sceneDirectory:string):Promise<void>{
+  if(!(options.fps>0&&options.fps<=240)||!(options.duration>0&&options.duration<=3600)||!Number.isFinite(options.from)||options.from<0||options.from+options.duration>86_400)throw new RangeError('Invalid recording fps/duration/from');
+  const frames=Math.ceil(options.fps*options.duration),host=await serveScene(scene,{sceneDirectory});
+  let browser:BrowserSession|undefined,directory:string|undefined;
+  try{
+    directory=await mkdtemp(join(tmpdir(),'game-engine-'));
+    browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
+    for(let frame=0;frame<frames;frame++){
+      const time=options.from+frame/options.fps;
+      await browser.evaluate(`window.__GAME_ENGINE__.seek(${JSON.stringify(time)}); await window.__GAME_ENGINE__.flush(); true`);
+      await writeFile(join(directory,`frame-${String(frame).padStart(6,'0')}.png`),await browser.screenshot());
+    }
+    await assertBrowserRenderer(browser);
+    const audioPath=join(directory,'audio.wav'),sound=renderSceneAudio(scene,options.duration,{startTime:options.from,sampleRate:48_000});
+    await writeFile(audioPath,wavBytes(sound.audio));
+    const codec=await ffmpegCodecArgs(),audio=await ffmpegAudioArgs();
+    await run('ffmpeg',['-y','-loglevel','error','-framerate',String(options.fps),'-i',join(directory,'frame-%06d.png'),'-i',audioPath,...codec,...audio,'-movflags','+faststart','-shortest',options.out]);
+  }finally{
+    try{await browser?.close();}finally{try{await host.close();}finally{if(directory)await rm(directory,{recursive:true,force:true});}}
+  }
+}
 
 async function assertBrowserRenderer(browser:BrowserSession):Promise<void>{const inspect=await browser.evaluate(`return window.__GAME_ENGINE__.inspect()`),errors=inspect?.renderer?.errors;if(Array.isArray(errors)&&errors.length)throw new Error('WebGPU validation errors: '+errors.join(' | '));if(!(inspect?.renderer?.drawCalls>0)&&!(inspect?.renderer?.triangles>0))throw new Error('Renderer produced no geometry');}
 
