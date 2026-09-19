@@ -10,7 +10,7 @@ class FakeBuffer {
   destroy(){this.destroyed=true;}
 }
 const fakeDevice={
-  createQuerySet:({count})=>({count,destroyed:false,destroy(){this.destroyed=true;}}),
+  createQuerySet:({count,type})=>({count,type,destroyed:false,destroy(){this.destroyed=true;}}),
   createBuffer:({size})=>new FakeBuffer(size),
 };
 test('render profiler records CPU quanta and resets benchmark window',()=>{
@@ -24,7 +24,7 @@ test('render profiler resolves named GPU pass timestamps asynchronously',async()
  const shadow=profiler.timestampWrites('shadow');assert.equal(shadow.beginningOfPassWriteIndex,0);assert.equal(shadow.endOfPassWriteIndex,1);
  assert.equal(profiler.timestampWrites('post').endOfPassWriteIndex,RENDER_GPU_QUANTA.length*2-1);
  const encoder={
-  resolveQuerySet(_query,_first,count,buffer){const raw=new BigUint64Array(buffer.data);for(let i=0;i<count/2;i++){raw[i*2]=BigInt(i)*2_000_000n;raw[i*2+1]=raw[i*2]+1_000_000n;}},
+  resolveQuerySet(query,_first,count,buffer){const raw=new BigUint64Array(buffer.data);if(query.type==='occlusion'){for(let i=0;i<count;i++)raw[i]=BigInt(i+1);}else for(let i=0;i<count/2;i++){raw[i*2]=BigInt(i)*2_000_000n;raw[i*2+1]=raw[i*2]+1_000_000n;}},
   copyBufferToBuffer(source,sourceOffset,target,targetOffset,size){new Uint8Array(target.data,targetOffset,size).set(new Uint8Array(source.data,sourceOffset,size));},
  };
  profiler.setWork({shadowCasters:12});profiler.resolve(encoder);profiler.submitted();await Promise.resolve();await Promise.resolve();
