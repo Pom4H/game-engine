@@ -46,7 +46,8 @@ samples it at the contact location.
 
 Each 9-second segment holds its initial state for 2.6 seconds, shows 4.5 seconds
 of slowed simulation and then holds its result. GPU graphs sample actual cache
-counts each recorded frame, including the holds. Diagnostic chapters use
+counts each recorded frame and position them by simulation time (holds do not
+advance the horizontal axis). Diagnostic chapters use
 narration; impacts and fractures have sound synthesized from captured events.
 Sound event onsets follow slowed time, but individual sounds retain their pitch.
 There is no background music. Narration uses macOS Milena, a synthetic voice.
