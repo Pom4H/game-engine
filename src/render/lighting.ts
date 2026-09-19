@@ -75,7 +75,7 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
  return vec4<f32>(mix(current,previous,weight),1);
 }
 `;
-export const POST_SHADER=FRAME_WGSL+`
+export const EFFECTS_SHADER=FRAME_WGSL+`
 @group(0) @binding(0) var hdr:texture_2d<f32>;
 @group(0) @binding(1) var normals:texture_2d<f32>;
 @group(0) @binding(2) var depth:texture_depth_2d;
@@ -165,8 +165,23 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   }
  }
  color+=textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28;
- color*=f.sunColor.w;
- color=pow(aces(color),vec3<f32>(1.0/2.2));
- let vignette=1.0-.13*pow(length((uv-.5)*vec2<f32>(1.1,1.0)),1.8);color*=vignette;
  return vec4<f32>(color,1);
 }`;
+
+export const PRESENT_SHADER=FRAME_WGSL+`
+@group(0) @binding(0) var source:texture_2d<f32>;
+@group(0) @binding(1) var linearSampler:sampler;
+@group(0) @binding(2) var<uniform> f:Frame;
+struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
+@vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
+fn acesPresent(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3<f32>(0),vec3<f32>(1));}
+@fragment fn fs(in:Out)->@location(0) vec4<f32>{
+ var color=textureSampleLevel(source,linearSampler,in.uv,0).rgb*f.sunColor.w;
+ color=pow(acesPresent(color),vec3<f32>(1.0/2.2));
+ let vignette=1.0-.13*pow(length((in.uv-.5)*vec2<f32>(1.1,1.0)),1.8);
+ return vec4<f32>(color*vignette,1);
+}
+`;
+
+/** @deprecated Use EFFECTS_SHADER for HDR effects and PRESENT_SHADER for display conversion. */
+export const POST_SHADER=EFFECTS_SHADER;
