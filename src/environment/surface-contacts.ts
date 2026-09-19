@@ -120,15 +120,6 @@ export class SurfaceContactSystem {
    if(!best||height>best.height)best={surfaceId:entity.id,height,snowDepth:state.snowDepthM,waterDepth:state.waterDepthM};
   }return best;
  }
- private waterSample(position:Vec3):SurfaceSample|undefined{
-  let best:SurfaceSample|undefined;
-  for(const entity of this.host.entities.values()){
-   if(!entity.environmental?.surfaceUse||!surfaceContains(entity,position[0],position[2]))continue;
-   const height=surfaceElevation(entity);if(Math.abs(position[1]-height)>.035)continue;
-   const state=this.state(entity,position[0],position[2]);if(state.waterDepthM<.00015)continue;
-   if(!best||state.waterDepthM>best.waterDepth)best={surfaceId:entity.id,height,snowDepth:state.snowDepthM,waterDepth:state.waterDepthM};
-  }return best;
- }
  private boundWheels():WheelSurfaceContact[]{const result:WheelSurfaceContact[]=[];for(const binding of this.wheels.values()){
   const entity=this.host.entities.get(binding.id);if(!entity?.body)continue;
   const radius=binding.radius??(entity.mesh?.kind==='sphere'?(entity.mesh.radius??1)*entity.scale[1]:.3),position:Vec3=[entity.position[0],entity.position[1]-radius,entity.position[2]];
