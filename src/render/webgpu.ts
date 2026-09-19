@@ -8,6 +8,7 @@ import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
 import type {Primitive,CameraSpec} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
+import {RenderProfiler} from './profiler.js';
 
 type GPUAny=any;
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
@@ -334,14 +335,16 @@ export class WebGPURenderer implements Renderer{
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];
-  private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny){
-    this.surfaceTextures=new SurfaceTextures(device);
+  private readonly profiler:RenderProfiler;
+  private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,timestampQueries:boolean){
+    this.surfaceTextures=new SurfaceTextures(device);this.profiler=new RenderProfiler(device,timestampQueries);
     device.addEventListener?.('uncapturederror',(event:any)=>{const message=event?.error?.message??String(event?.error);this.errors.push(message);console.error('Game Engine WebGPU:',message);});device.lost?.then((info:any)=>this.errors.push(`Device lost: ${info?.message??'unknown'}`));
   }
   static async create(canvas:HTMLCanvasElement):Promise<WebGPURenderer>{
     const gpu=(navigator as any).gpu;if(!gpu)throw new Error('WebGPU unavailable');
     const adapter=await gpu.requestAdapter({powerPreference:'high-performance'});if(!adapter)throw new Error('No WebGPU adapter');
-    const device=await adapter.requestDevice(),context=canvas.getContext('webgpu') as any,format=gpu.getPreferredCanvasFormat();context.configure({device,format,alphaMode:'opaque'});
+    const timestampQueries=!!adapter.features?.has?.('timestamp-query');
+    const device=await adapter.requestDevice(timestampQueries?{requiredFeatures:['timestamp-query']}:undefined),context=canvas.getContext('webgpu') as any,format=gpu.getPreferredCanvasFormat();context.configure({device,format,alphaMode:'opaque'});
     // The reflection plane clip uses discard. Keep it out of the main material
     // pipeline so opaque geometry can use early depth rejection on tile GPUs.
     const module=device.createShaderModule({code:materialShader()}),reflectionModule=device.createShaderModule({code:materialShader(true)}),vertex={module,entryPoint:'vs',buffers:[{arrayStride:24,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'}]}]};
@@ -371,7 +374,7 @@ export class WebGPURenderer implements Renderer{
     const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout,lightLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0}]},primitive:{topology:'triangle-list'},multisample:{count:4},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
     const snowUniform=device.createBuffer({size:128,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
     for(const shader of [module,reflectionModule,skyModule,postModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
-    return new WebGPURenderer(canvas,device,context,format,{noiseVolume,noiseSampler,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,sampler,frameBind,reflectionBind,reflected,lightBind:null,opaque,transparent,shadowPipeline,sky,post,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind});
+    return new WebGPURenderer(canvas,device,context,format,{noiseVolume,noiseSampler,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,sampler,frameBind,reflectionBind,reflected,lightBind:null,opaque,transparent,shadowPipeline,sky,post,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},timestampQueries);
   }
   setResolution(width:number,height:number):void{
     if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');
@@ -391,38 +394,75 @@ export class WebGPURenderer implements Renderer{
     this.postBind=this.device.createBindGroup({layout:this.gpu.post.getBindGroupLayout(0),entries:[{binding:0,resource:this.hdr.createView()},{binding:1,resource:this.normal.createView()},{binding:2,resource:this.depth.createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:{buffer:this.gpu.frame}},{binding:5,resource:this.specular.createView()},{binding:6,resource:this.bloomA.createView()}]});
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
-    this.collect(scene);this.resize();this.lastScene=scene;this.queueMaterialLoads(scene);this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);const lightGrid=buildLightGrid(this.lastLights,camera.position);this.pointLights=lightGrid.count;this.lightOverflow=lightGrid.overflow;this.device.queue.writeBuffer(this.gpu.lightBuffer,0,lightGrid.lights);this.device.queue.writeBuffer(this.gpu.cellBuffer,0,lightGrid.cells);
-    const vp=multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt(camera.position,camera.target));
-    const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
-    const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
-    lightVP[12]=Math.round(lightVP[12]!*2048)/2048;lightVP[13]=Math.round(lightVP[13]!*2048)/2048;
-    const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(Math.abs(forward[1])>.9999?[1,0,0]:V3.cross(forward,[0,1,0])),up=V3.cross(right,forward),frame=new Float32Array(64);
-    frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
-    frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,1],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([scene.environment.sunlight,0,camera.focusDistance??20,camera.aperture??0],44);
-    frame.set(multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0])),48);this.device.queue.writeBuffer(this.gpu.frame,0,frame);
-    const visible=[...scene.entities.values()].filter(e=>e.mesh),opaque=visible.filter(e=>e.material.color[3]>=.98),transparent=visible.filter(e=>e.material.color[3]<.98).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
-    // Upload once. Shadow and color passes share exactly the same transforms.
-    for(const e of visible)this.prepare(e,vp);
-    const inView=(entity:RuntimeEntity,matrix:Mat4)=>intersectsClip(this.mesh(entity.mesh!).bounds,multiply4(matrix,this.model(entity)));
-    const cameraOpaque=opaque.filter(e=>inView(e,vp)).sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
-    const cameraTransparent=transparent.filter(e=>inView(e,vp));
-    const shadowCasters=opaque.filter(e=>inView(e,lightVP));
-    const reflectionVP=frame.subarray(48,64),reflectedObjects=opaque.filter(e=>e.material.kind!=='snow'&&e.material.kind!=='asphalt'&&inView(e,reflectionVP));
-    const encoder=this.device.createCommandEncoder(),shadow=encoder.beginRenderPass({colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
-    shadow.setPipeline(this.gpu.shadowPipeline);shadow.setBindGroup(1,this.gpu.frameBind);
-    for(const e of shadowCasters){if(e.material.emissive&&Math.max(...e.material.emissive)>1)continue;this.draw(shadow,e,false);}shadow.end();
-    const reflect=encoder.beginRenderPass({colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});reflect.setPipeline(this.gpu.reflected);reflect.setBindGroup(1,this.gpu.reflectionBind);for(const e of reflectedObjects)this.draw(reflect,e,false);reflect.end();
-    const pass=encoder.beginRenderPass({colorAttachments:[{view:this.hdrMS.createView(),resolveTarget:this.hdr.createView(),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'discard'},{view:this.normalMS.createView(),resolveTarget:this.normal.createView(),clearValue:{r:.5,g:.5,b:1,a:1},loadOp:'clear',storeOp:'discard'},{view:this.specularMS.createView(),resolveTarget:this.specular.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'discard'}],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
-    pass.setPipeline(this.gpu.sky);pass.setBindGroup(0,this.gpu.frameBind);pass.draw(3);
-    this.drawCalls=0;this.triangles=0;pass.setPipeline(this.gpu.opaque);pass.setBindGroup(1,this.gpu.lightBind);for(const e of cameraOpaque)this.draw(pass,e,true);
-    pass.setPipeline(this.gpu.transparent);for(const e of cameraTransparent)this.draw(pass,e,true);
-    const intensity=Math.min(1,scene.environment.snowfallRate/2.2e-5);
-    if(intensity>.001){const snow=new Float32Array(32);snow.set(vp);snow.set([...camera.position,1],16);snow.set([scene.time,intensity,scene.environment.wind[0],scene.environment.wind[2]],20);snow.set([...right,0],24);snow.set([...up,0],28);this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.setBindGroup(1,this.gpu.lightBind);pass.draw(6,Math.round(24000*intensity));}
-    pass.end();
-    for(const [target,pipeline,bind] of [[this.bloomA,this.gpu.bloomDown,this.bloomDownBind],[this.bloomB,this.gpu.bloomHorizontal,this.bloomHorizontalBind],[this.bloomA,this.gpu.bloomVertical,this.bloomVerticalBind]]){
-      const bloomPass=encoder.beginRenderPass({colorAttachments:[{view:target.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});bloomPass.setPipeline(pipeline);bloomPass.setBindGroup(0,bind);bloomPass.draw(3);bloomPass.end();
-    }
-    const post=encoder.beginRenderPass({colorAttachments:[{view:this.context.getCurrentTexture().createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});post.setPipeline(this.gpu.post);post.setBindGroup(0,this.postBind);post.draw(3);post.end();this.device.queue.submit([encoder.finish()]);
+    const frameId=this.profiler.beginFrame();
+    this.profiler.measure('lifecycle',()=>this.collect(scene));
+    this.profiler.measure('resize',()=>this.resize());
+    this.lastScene=scene;
+    this.profiler.measure('materials',()=>this.queueMaterialLoads(scene));
+    this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);
+    const lightGrid=this.profiler.measure('lights',()=>{
+      const grid=buildLightGrid(this.lastLights,camera.position);this.pointLights=grid.count;this.lightOverflow=grid.overflow;
+      this.device.queue.writeBuffer(this.gpu.lightBuffer,0,grid.lights);this.device.queue.writeBuffer(this.gpu.cellBuffer,0,grid.cells);
+      this.profiler.addUpload(grid.lights.byteLength+grid.cells.byteLength);return grid;
+    });
+    void lightGrid;
+    const frameState=this.profiler.measure('frame',()=>{
+      const vp=multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt(camera.position,camera.target));
+      const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
+      const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
+      lightVP[12]=Math.round(lightVP[12]!*2048)/2048;lightVP[13]=Math.round(lightVP[13]!*2048)/2048;
+      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(Math.abs(forward[1])>.9999?[1,0,0]:V3.cross(forward,[0,1,0])),up=V3.cross(right,forward),frame=new Float32Array(64);
+      frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
+      frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,1],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([scene.environment.sunlight,0,camera.focusDistance??20,camera.aperture??0],44);
+      frame.set(multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0])),48);
+      this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength);
+      return{vp,settings,lightVP,right,up,frame};
+    });
+    const {vp,lightVP,right,up,frame}=frameState;
+    const classified=this.profiler.measure('visibility',()=>{
+      const visible=[...scene.entities.values()].filter(e=>e.mesh),opaque=visible.filter(e=>e.material.color[3]>=.98),transparent=visible.filter(e=>e.material.color[3]<.98).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
+      return{visible,opaque,transparent};
+    });
+    this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
+    this.profiler.measure('prepare',()=>{for(const e of classified.visible)this.prepare(e,vp);});
+    const culled=this.profiler.measure('cull',()=>{
+      const inView=(entity:RuntimeEntity,matrix:Mat4)=>intersectsClip(this.mesh(entity.mesh!).bounds,multiply4(matrix,this.model(entity)));
+      const cameraOpaque=classified.opaque.filter(e=>inView(e,vp)).sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
+      const cameraTransparent=classified.transparent.filter(e=>inView(e,vp));
+      const shadowCasters=classified.opaque.filter(e=>inView(e,lightVP));
+      const reflectionVP=frame.subarray(48,64),reflectedObjects=classified.opaque.filter(e=>e.material.kind!=='snow'&&e.material.kind!=='asphalt'&&inView(e,reflectionVP));
+      return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
+    });
+    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:culled.shadowCasters.length,reflected:culled.reflectedObjects.length});
+    const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
+    this.profiler.measure('encode.shadow',()=>{
+      const timing=this.profiler.timestampWrites('shadow'),shadow=encoder.beginRenderPass({label:'render.shadow',...(timing?{timestampWrites:timing}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      shadow.setPipeline(this.gpu.shadowPipeline);shadow.setBindGroup(1,this.gpu.frameBind);
+      for(const e of culled.shadowCasters){if(e.material.emissive&&Math.max(...e.material.emissive)>1)continue;this.draw(shadow,e,false);}shadow.end();
+    });
+    this.profiler.measure('encode.reflection',()=>{
+      const timing=this.profiler.timestampWrites('reflection'),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
+      reflect.setPipeline(this.gpu.reflected);reflect.setBindGroup(1,this.gpu.reflectionBind);for(const e of culled.reflectedObjects)this.draw(reflect,e,false);reflect.end();
+    });
+    let snowInstances=0;
+    this.profiler.measure('encode.main',()=>{
+      const timing=this.profiler.timestampWrites('main'),pass=encoder.beginRenderPass({label:'render.main',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.hdrMS.createView(),resolveTarget:this.hdr.createView(),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'discard'},{view:this.normalMS.createView(),resolveTarget:this.normal.createView(),clearValue:{r:.5,g:.5,b:1,a:1},loadOp:'clear',storeOp:'discard'},{view:this.specularMS.createView(),resolveTarget:this.specular.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'discard'}],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      pass.setPipeline(this.gpu.sky);pass.setBindGroup(0,this.gpu.frameBind);pass.draw(3);
+      this.drawCalls=0;this.triangles=0;pass.setPipeline(this.gpu.opaque);pass.setBindGroup(1,this.gpu.lightBind);for(const e of culled.cameraOpaque)this.draw(pass,e,true);
+      pass.setPipeline(this.gpu.transparent);for(const e of culled.cameraTransparent)this.draw(pass,e,true);
+      const intensity=Math.min(1,scene.environment.snowfallRate/2.2e-5);
+      if(intensity>.001){const snow=new Float32Array(32);snow.set(vp);snow.set([...camera.position,1],16);snow.set([scene.time,intensity,scene.environment.wind[0],scene.environment.wind[2]],20);snow.set([...right,0],24);snow.set([...up,0],28);this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);this.profiler.addUpload(snow.byteLength);pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.setBindGroup(1,this.gpu.lightBind);snowInstances=Math.round(24000*intensity);pass.draw(6,snowInstances);}
+      pass.end();
+    });
+    this.profiler.measure('encode.bloom',()=>{
+      const stages=[['bloom.downsample',this.bloomA,this.gpu.bloomDown,this.bloomDownBind],['bloom.horizontal',this.bloomB,this.gpu.bloomHorizontal,this.bloomHorizontalBind],['bloom.vertical',this.bloomA,this.gpu.bloomVertical,this.bloomVerticalBind]] as const;
+      for(const [name,target,pipeline,bind] of stages){const timing=this.profiler.timestampWrites(name),bloomPass=encoder.beginRenderPass({label:`render.${name}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:target.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});bloomPass.setPipeline(pipeline);bloomPass.setBindGroup(0,bind);bloomPass.draw(3);bloomPass.end();}
+    });
+    this.profiler.measure('encode.post',()=>{
+      const timing=this.profiler.timestampWrites('post'),post=encoder.beginRenderPass({label:'render.post',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.context.getCurrentTexture().createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});post.setPipeline(this.gpu.post);post.setBindGroup(0,this.postBind);post.draw(3);post.end();
+    });
+    this.profiler.setWork({drawCalls:this.drawCalls,triangles:this.triangles,snowInstances});this.profiler.resolve(encoder);
+    this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
   }
   private queueMaterialLoads(scene:Scene):void{
     if(this.disposed)return;
@@ -440,8 +480,8 @@ export class WebGPURenderer implements Renderer{
   }
   async prepareMaterials(scene:Scene):Promise<void>{const urls=new Set([...scene.entities.values()].map(e=>e.material.texture?.url).filter((url):url is string=>!!url));await Promise.all([...urls].map(async url=>{await this.surfaceTextures.load(url);this.failedMaterials.delete(url);}));}
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();}
-  inspect():RenderStats{return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*2+this.objects.size+4,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+15,errors:[...this.errors]};}
-  dispose():void{if(this.disposed)return;this.disposed=true;this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const target of [this.depth,this.hdr,this.hdrMS,this.normal,this.normalMS,this.specular,this.specularMS,this.bloomA,this.bloomB,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();}
+  inspect():RenderStats{return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*2+this.objects.size+4,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+15,errors:[...this.errors],profile:this.profiler.inspect()};}
+  dispose():void{if(this.disposed)return;this.disposed=true;this.profiler.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const target of [this.depth,this.hdr,this.hdrMS,this.normal,this.normalMS,this.specular,this.specularMS,this.bloomA,this.bloomB,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();}
   private prepare(entity:RuntimeEntity,vp:Mat4):void{
     const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url),model=this.model(entity),uniform=new Float32Array(116),surface=entity.material.surface;
     this.mesh(entity.mesh!);
@@ -451,7 +491,7 @@ export class WebGPURenderer implements Renderer{
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],96);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],100);
     uniform.set([entity.material.roughness??-1,entity.material.metalness??(entity.material.kind==='steel'?.6:0),entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,0],104);uniform.set([...(entity.material.emissive??[0,0,0]),0],108);
     const texture=entity.material.texture;uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture&&this.surfaceTextures.get(texture.url)?1:0],112);
-    if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((c,i)=>pixels.set([c.trackMelt,c.snowDepthM,c.waterDepthM,c.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);}this.device.queue.writeBuffer(object.uniform,0,uniform);
+    if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((c,i)=>pixels.set([c.trackMelt,c.snowDepthM,c.waterDepthM,c.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);this.profiler.addUpload(pixels.byteLength);}this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength);
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean):void{const mesh=this.mesh(entity.mesh!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
   private mesh(primitive:Primitive):GPUMesh{const key=primitiveKey(primitive),found=this.meshes.get(key);if(found)return found;const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);return mesh;}
