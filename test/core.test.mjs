@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio} from '../dist/index.js';
+import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate} from '../dist/index.js';
 
 test('fixed clock keeps delayed time as bounded debt',()=>{
   const clock=new FixedClock(10,100,4);let steps=0;clock.reset(0);
@@ -57,4 +57,24 @@ test('fracture creates engine-owned shards and procedural audio',()=>{
   const audio=renderAudio(events,.5);
   let peak=0;for(const sample of audio.left)peak=Math.max(peak,Math.abs(sample));
   assert.ok(peak>.01,'fracture events should synthesize audible output');
+});
+
+
+test('glass crack topology is deterministic and conserves plate area',()=>{
+  const input={width:1.5,height:2,thickness:.01,impact:[.12,-.18],energyRatio:4.2,seed:123456};
+  const a=fracturePlate(input),b=fracturePlate(input);
+  assert.deepEqual(a,b);
+  assert.ok(a.radialRays>=6&&a.rings>=2);
+  assert.ok(a.fragments.length>=10);
+  const area=a.fragments.reduce((sum,fragment)=>sum+fragment.area,0);
+  assert.ok(Math.abs(area-3)<1e-6,`fragment area ${area} must conserve the 3 m² source plate`);
+});
+
+test('glass runtime uses exact polygon-prism fragments',()=>{
+  const {scene}=fireAtGlass(.01);
+  const shards=[...scene.entities.values()].filter(entity=>entity.id.startsWith('glass:shard:'));
+  assert.ok(shards.length>=10);
+  assert.ok(shards.every(entity=>entity.mesh?.kind==='polygon-prism'));
+  const mass=shards.reduce((sum,entity)=>sum+(entity.body?.mass??0),0);
+  assert.ok(Math.abs(mass-2500*.01*1.4*1.2)<.05,`fragment mass ${mass} should conserve glass mass`);
 });
