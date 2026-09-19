@@ -7,7 +7,7 @@ export type Primitive =
   | {kind:'sphere'; radius?:number; segments?:number}
   | {kind:'plane'; size?:readonly [number,number]}
   /** Engine-generated triangular prism used for brittle fracture debris. */
-  | {kind:'shard'; size:Vec3; skew?:number};
+  | {kind:'shard'; size:Vec3; axis?:0|1|2; skew?:number};
 export interface MaterialSpec { kind?:MaterialKind; color?:Color }
 export interface BodySpec {
   /** 0 is static. Dynamic mass may be explicit; material density is available to engine-generated fragments. */
