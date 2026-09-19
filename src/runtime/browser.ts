@@ -1,3 +1,4 @@
+import {WalkerControls} from './walker-controls.js';
 import {V3} from '../math.js';
 import type {FootstepSound} from '../audio/footsteps.js';
 import {ProceduralAudio,type AmbientAudioState} from '../audio/browser.js';
@@ -8,7 +9,7 @@ import type {CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
-export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean}
+export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string}
 
 export class BrowserRuntime {
   scene:Scene;
@@ -17,6 +18,7 @@ export class BrowserRuntime {
   readonly stepSeconds:number;
   readonly audio:ProceduralAudio|null;
   private readonly initial:SceneSpec;
+  private controls:WalkerControls|null=null;
   private readonly clock:FixedClock;
   private running=false;
   private raf=0;
@@ -31,6 +33,8 @@ export class BrowserRuntime {
     const renderer=await WebGPURenderer.create(canvas);let runtime:BrowserRuntime|undefined;
     try{
       runtime=new BrowserRuntime(canvas,scene,renderer,options);
+      if(options.resolution)renderer.setResolution(...options.resolution);
+      if(options.controlledWalker){runtime.scene.animation.driveWalker(options.controlledWalker,0,scene.animation?.walkers?.find(w=>w.id===options.controlledWalker)?.heading??0);runtime.controls=new WalkerControls(canvas,options.controlledWalker);runtime.scene.animation.step(0,runtime.scene.entities,p=>runtime!.scene.contacts.sample(p));}
       await renderer.prepareMaterials(runtime.scene);runtime.render();if(options.autoplay!==false)runtime.resume();
       // Publish only a usable runtime. Failed loading must not replace another
       // live runtime's bridge or retain its own GPU/audio/gesture resources.
@@ -44,24 +48,24 @@ export class BrowserRuntime {
   resume():void{if(this.disposed||this.running)return;this.running=true;this.clock.reset(performance.now());this.raf=requestAnimationFrame(this.frame);}
   step(count=1){
     if(!Number.isSafeInteger(count)||count<1||count>1_000_000)throw new RangeError('step count must be an integer in [1, 1000000]');
-    const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];for(let i=0;i<count;i++){this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());}
+    const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];for(let i=0;i<count;i++){this.controls?.tick(this.scene);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());}
     this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   seek(seconds:number){
     if(!Number.isFinite(seconds)||seconds<0||seconds>86_400)throw new RangeError('seek time must be within one day');
     this.pause();if(seconds+1e-9<this.scene.time)this.reset();
     const target=Math.round(seconds*this.tickRate),remaining=Math.max(0,target-this.scene.tick);
-    for(let i=0;i<remaining;i++){this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
+    for(let i=0;i<remaining;i++){this.controls?.tick(this.scene);this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   reset():void{this.scene=new Scene(this.initial);this.render();}
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
-  render():RenderStats{this.renderer.render(this.scene);return this.renderer.inspect();}
+  render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
   async flush():Promise<void>{await this.renderer.prepareMaterials?.(this.scene);this.render();await this.renderer.flush();}
   snapshot(){return this.scene.snapshot();}
   inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,winter:{surfaces:[...this.scene.winter.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.winter.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
-  dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
+  dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
 
   private ambientAudioState():AmbientAudioState{
     const windSpeed=Math.hypot(this.scene.environment.wind[0],this.scene.environment.wind[2]);
@@ -91,7 +95,7 @@ export class BrowserRuntime {
   private frame=(now:number)=>{
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
-    this.clock.advance(now,()=>{this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());});
+    this.clock.advance(now,()=>{this.controls?.tick(this.scene);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());});
     this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();this.raf=requestAnimationFrame(this.frame);
   };
 }

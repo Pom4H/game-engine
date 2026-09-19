@@ -112,3 +112,35 @@ the comparison references the current V3 movie and includes it in the manifest.
 The verifier requires all six takes and 1,440 decoded final frames. It checks 1080p/30 fps, 48-second duration, stereo 48 kHz audio, GPU errors, the native animation → physics → surface-contact order, bounded snow/spray state, distinct grounded footstep records, simulation continuity, M3 provenance and wet-wheel activity. Its regression budgets are 2,200 draws and 4 million submitted triangles per inspected frame; the report records actual values rather than claiming these limits as performance measurements.
 
 The verifier extracts the beginning, middle and end of all six takes from the final MP4 into `delivery-qa`. It writes `verification.json` and `capture-manifest.json`, which records SHA-256 hashes of the deliverables and material/model assets, the current Git revision/branch and whether the worktree was dirty when verified. `*-telemetry.json`, `*-footsteps.json` and `*-evidence.json` preserve synchronization and native-engine evidence. Prior captures remain under `artifacts/promo` and `artifacts/promo-v2`.
+
+Measure native playback separately from the offline movie:
+
+```sh
+npm run build
+node tools/promo/benchmark.mjs
+```
+
+This runs a fixed arrival camera in headless Chrome with native WebGPU, without
+screenshots, encoding or unlocked audio. After a three-second warm-up, it takes
+two ten-second 1080p samples and one 720p sample. The JSON report at
+`artifacts/performance/after.json` includes GPU-completed throughput (with queue
+drain), submission rate, frame intervals, CPU render/tick costs, and simulated
+seconds per real second. Set `CHROME_PATH` to override the Chrome executable and
+`BENCH_OUT` to select the report path. Exported movie FPS is never a substitute
+for this measurement. Draw/triangle statistics currently describe the main
+geometry pass; shadow, reflection and full-screen work add further GPU cost.
+
+Visibility bounds, pass-specific frustum tests, opaque front-to-back ordering,
+reflection shader specialization, and the shared 64-cubed procedural noise
+lattice live in `src/render`. The lattice repeats every 64 noise-coordinate units
+and changes the microtexture pattern from the previous arithmetic noise; it does
+not alter snow, water or footprint simulation state. No scene-specific visibility
+lists or material-noise calculations are implemented by this benchmark.
+
+For interactive third-person playback, run the standard scene server and append
+`&width=1280&height=720&actor=walker` to its URL. Click the canvas to capture the
+mouse; WASD or arrows move, Shift accelerates, mouse movement orbits the camera,
+and Escape releases the cursor. The render dimensions remain fixed on Retina
+and when the browser panel changes size. Input, follow-camera behavior and
+fixed-tick walker integration live in the engine. This preview controller does
+not yet implement a character collision capsule or camera obstruction handling.

@@ -8,7 +8,13 @@ async function main(){
   if(!canvas)throw new Error('Expected <canvas data-game-engine>');
   let scene:SceneSpec=demoScene; let options:{time:number;paused:boolean;camera?:import('./scene/types.js').CameraSpec}={time:0,paused:false};
   try{const loaded=await sceneFromURL(location.href);scene=loaded.scene;options=loaded.options;}catch(error){if(new URL(location.href).searchParams.has('src')||location.hash.includes('scene='))throw error;}
-  const runtime=await BrowserRuntime.create(canvas,scene,{autoplay:false,exposeBridge:true});
+  const query=new URL(location.href).searchParams,actor=query.get('actor');
+  const width=Number(query.get('width')),height=Number(query.get('height'));
+  const runtime=await BrowserRuntime.create(canvas,scene,{autoplay:false,exposeBridge:true,...(width&&height?{resolution:[width,height] as const}:{}),...(actor?{controlledWalker:actor}:{})});
+  if(actor){
+    canvas.style.objectFit='contain';canvas.style.outline='none';
+    const badge=document.querySelector('#badge');if(badge)badge.textContent='Клик по сцене · WASD / стрелки — идти · Shift — быстрее · мышь — камера · Esc — курсор';
+  }
   if(options.camera)runtime.setCamera(options.camera);
   if(options.time>0)runtime.seek(options.time);
   if(!options.paused)runtime.resume();

@@ -100,3 +100,13 @@ test('cloth loft is closed, bounded and has normalized normals derived from actu
  const pose=sampleWalker({id:'x',root:[0,0,0],speed:0},0);assert.ok(bindHumanoid(pose,[{entity:'head',joint:'head'}])[0].position.every(Number.isFinite));
  const small=sampleWalker({id:'small',root:[0,0,0],speed:0,heightScale:.5},0),rig=bindHumanoid(small,[{entity:'head',joint:'head',scale:[.2,.2,.2]},{entity:'leg',joint:'leftHip',boneTo:'leftKnee',scale:[.2,1,.2]}]);assert.deepEqual(rig[0].scale,[.1,.1,.1]);near(rig[1].scale[1],.425*.5);
 });
+
+test('controlled walkers integrate input per tick, stop without route drift and turn continuously',()=>{
+ const a=new AnimationSystem();a.addWalker({id:'player',root:[0,0,0],speed:.86});a.driveWalker('player',0,0);a.step(0,new Map());
+ a.step(1,new Map());near(a.pose('player').position[0],0);
+ a.driveWalker('player',2,0);for(let i=1;i<=60;i++)a.step(1+i/60,new Map());near(a.pose('player').position[0],2);
+ a.driveWalker('player',0,0);a.step(3,new Map());near(a.pose('player').position[0],2);
+ a.driveWalker('player',2,Math.PI/2);a.step(4,new Map());near(a.pose('player').position[0],2);near(a.pose('player').position[2],-2);
+ assert.throws(()=>a.driveWalker('missing',1,0));assert.throws(()=>a.driveWalker('player',NaN,0));
+ a.remove('player');a.addWalker({id:'player',root:[8,0,0],speed:0});a.step(5,new Map());near(a.pose('player').position[0],8);
+});

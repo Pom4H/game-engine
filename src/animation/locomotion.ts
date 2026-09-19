@@ -103,6 +103,7 @@ export function bindHumanoid(pose:HumanoidPose,bindings:readonly HumanoidBinding
 export class AnimationSystem {
  private readonly walkers=new Map<string,WalkerSpec>();private readonly vehicles=new Map<string,VehicleMotionSpec>();
  private readonly poses=new Map<string,HumanoidPose>();private time=0;
+ private readonly driven=new Map<string,{position:Vec3;heading:number;speed:number;time:number}>();
  private publishedFeet:readonly FootContact[]=Object.freeze([]);
  get feet():readonly FootContact[]{return this.publishedFeet;}
  addWalker(input:WalkerSpec):void {checkedWalker(input);if(this.walkers.has(input.id)||this.vehicles.has(input.id))throw new TypeError(`Duplicate animated actor ${input.id}`);this.walkers.set(input.id,structuredClone(input));}
@@ -112,7 +113,15 @@ export class AnimationSystem {
   const ids=new Set<string>();for(const part of input.parts){if(!part.id||ids.has(part.id))throw new TypeError('Vehicle parts require distinct ids');ids.add(part.id);finiteVec3(part.origin,'Part origin');if(part.rotation)finiteVec3(part.rotation,'Part rotation');if(part.wheel&&(!Number.isFinite(part.radius)||part.radius!<=0))throw new RangeError('Wheel radius must be positive');if(part.wheelAxis!==undefined&&![0,1,2].includes(part.wheelAxis))throw new TypeError('Invalid wheel axis');}
   this.vehicles.set(input.id,structuredClone(input));
  }
+ /** Take control of an existing rig. Integration remains in the simulation tick. */
+ driveWalker(id:string,speed:number,heading:number):void {
+  const spec=this.walkers.get(id);if(!spec)throw new TypeError(`Unknown walker ${id}`);
+  if(!Number.isFinite(speed)||speed<0||speed>12||!Number.isFinite(heading))throw new RangeError('Invalid walker input');
+  let state=this.driven.get(id);if(!state){const pose=this.poses.get(id);state={position:pose?.position??spec.root,heading:pose?.heading??spec.heading??0,speed:0,time:0};this.driven.set(id,state);}
+  if(state.speed!==speed)state.time=0;state.speed=speed;state.heading=heading;
+ }
  remove(id:string):void {
+  this.driven.delete(id);
   this.walkers.delete(id);this.vehicles.delete(id);this.poses.delete(id);
   // IDs may themselves contain colons. Rebuild from exact actor ownership,
   // rather than treating an actor ID as a namespace prefix for other actors.
@@ -138,7 +147,11 @@ export class AnimationSystem {
  step(time:number,entities:ReadonlyMap<string,RuntimeEntity>,terrain?:GroundSampler):void {
   if(!Number.isFinite(time)||time<this.time)throw new RangeError('Animation time must be monotonic');
   const dt=time-this.time,updates:RigTransform[]=[],poses=new Map<string,HumanoidPose>();
-  for(const [id,spec] of this.walkers){const pose=sampleWalker(spec,time,terrain,this.poses.get(id));poses.set(id,pose);updates.push(...bindHumanoid(pose,spec.bindings??[]));}
+  for(const [id,spec] of this.walkers){const driven=this.driven.get(id);let pose:HumanoidPose;
+   if(driven){driven.time+=dt;driven.position=V3.add(driven.position,[Math.cos(driven.heading)*driven.speed*dt,0,-Math.sin(driven.heading)*driven.speed*dt]);
+    const distance=driven.speed*driven.time,root:Vec3=[driven.position[0]-Math.cos(driven.heading)*distance,driven.position[1],driven.position[2]+Math.sin(driven.heading)*distance];
+    pose=sampleWalker({...spec,root,speed:driven.speed,heading:driven.heading},driven.time,terrain,this.poses.get(id));driven.position=pose.position;
+   }else pose=sampleWalker(spec,time,terrain,this.poses.get(id));poses.set(id,pose);updates.push(...bindHumanoid(pose,spec.bindings??[]));}
   for(const spec of this.vehicles.values())for(const part of spec.parts){const t=Math.max(0,time-(spec.startTime??0)),rotation:MutableVec3=[...(part.rotation??[0,0,0])];if(part.wheel)rotation[part.wheelAxis??2]-=V3.length(spec.velocity)*t/part.radius!;updates.push({entity:part.id,position:V3.add(part.origin,V3.scale(spec.velocity,t)),rotation,scale:entities.get(part.id)?.scale??[1,1,1]});}
   // Complete validation before changing transforms or velocities: a malformed
   // rig cannot leave half of an actor at a different simulation instant.

@@ -8,7 +8,7 @@ test('quarter-resolution bloom targets and bind groups resize together and relea
  const resources=[],resource=(descriptor={})=>{const result={descriptor,destroys:0,createView(){return{texture:this};},destroy(){this.destroys++;}};resources.push(result);return result;};
  const renderer=Object.create(WebGPURenderer.prototype);Object.assign(renderer,{
   canvas:{clientWidth:320,clientHeight:180,width:0,height:0},depthW:0,depthH:0,materialLoads:new Map(),failedMaterials:new Set(),objects:new Map(),meshes:new Map(),labels:new Map(),surfaceTextures:{dispose(){}},
-  device:{createTexture:resource,createBindGroup:descriptor=>descriptor},gpu:{lightLayout:{},bloomLayout:{},comparison:{},sampler:{},post:{getBindGroupLayout(){return{};}},shadow:resource(),frame:resource(),lightBuffer:resource(),cellBuffer:resource(),snowUniform:resource(),emptyField:resource(),emptyLabel:resource()},
+  device:{createTexture:resource,createBindGroup:descriptor=>descriptor},gpu:{lightLayout:{},bloomLayout:{},comparison:{},sampler:{},post:{getBindGroupLayout(){return{};}},noiseVolume:resource(),noiseSampler:{},shadow:resource(),frame:resource(),lightBuffer:resource(),cellBuffer:resource(),snowUniform:resource(),emptyField:resource(),emptyLabel:resource()},
  });
  const before=resources.length;renderer.resize();const first=resources.slice(before);assert.equal(first.length,11);assert.deepEqual(renderer.bloomA.descriptor.size,[80,45]);assert.deepEqual(renderer.bloomB.descriptor.size,[80,45]);
  assert.equal(renderer.postBind.entries.find(e=>e.binding===6).resource.texture,renderer.bloomA);assert.equal(renderer.bloomHorizontalBind.entries[0].resource.texture,renderer.bloomA);assert.equal(renderer.bloomVerticalBind.entries[0].resource.texture,renderer.bloomB);
