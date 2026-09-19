@@ -582,7 +582,7 @@ export class WebGPURenderer implements Renderer{
         pixels[offset++]=float16(1);
       }
       const bytesPerRow=size*8,rowsPerImage=size;
-      this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow,rowsPerImage},[size,size,6]);
+      this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow,rowsPerImage},[size,size,6]);this.profiler.addUpload(pixels.byteLength,'environment');
     }
   }
 
@@ -620,9 +620,10 @@ function cubeDirection(face:number,u:number,v:number):Vec3{
   const raw:Vec3=face===0?[1,-v,-u]:face===1?[-1,-v,u]:face===2?[u,1,v]:face===3?[u,-1,-v]:face===4?[u,-v,1]:[-u,-v,-1];
   return V3.normalize(raw);
 }
+const halfFloatScratch=new Float32Array(1),halfFloatBits=new Uint32Array(halfFloatScratch.buffer);
 function float16(value:number):number{
   if(!Number.isFinite(value))return value<0?0xfc00:0x7c00;
-  const f=new Float32Array(1),u=new Uint32Array(f.buffer);f[0]=value;const x=u[0]!,sign=(x>>>16)&0x8000,exp=((x>>>23)&0xff)-127+15,mantissa=x&0x7fffff;
+  halfFloatScratch[0]=value;const x=halfFloatBits[0]!,sign=(x>>>16)&0x8000,exp=((x>>>23)&0xff)-127+15,mantissa=x&0x7fffff;
   if(exp<=0){if(exp<-10)return sign;return sign|((mantissa|0x800000)>>(14-exp));}
   if(exp>=31)return sign|0x7c00;
   return sign|(exp<<10)|(mantissa>>13);
