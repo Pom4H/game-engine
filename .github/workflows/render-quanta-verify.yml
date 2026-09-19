@@ -29,10 +29,10 @@ jobs:
       - name: Core verification
         run: bun run ci
       - run: if not exist artifacts mkdir artifacts
-      - name: Profile 720p
-        run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1280 --height 720 --out artifacts/render-profile-720p.json
-      - name: Profile 1080p
-        run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1920 --height 1080 --out artifacts/render-profile-1080p.json
+      - name: Heavy atom profile 720p
+        run: node dist/cli.js profile tools/profiling/heavy.scene.mjs --duration 4 --warmup 1.5 --width 1280 --height 720 --out artifacts/heavy-atoms-720p.json
+      - name: Heavy atom profile 1080p
+        run: node dist/cli.js profile tools/profiling/heavy.scene.mjs --duration 4 --warmup 1.5 --width 1920 --height 1080 --out artifacts/heavy-atoms-1080p.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
