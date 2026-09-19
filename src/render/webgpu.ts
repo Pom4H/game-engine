@@ -536,7 +536,7 @@ export class WebGPURenderer implements Renderer{
         shadowTriangles:sumTriangles(shadowDrawables),reflectionTriangles:sumTriangles(culled.reflectedObjects),
         mainOpaqueTriangles:sumTriangles(culled.cameraOpaque),mainTransparentTriangles:sumTriangles(culled.cameraTransparent),
         materialDraws,materialTriangles,
-        uploads:{total:work.uploadBytes,uniform:work.uniformUploadBytes,surface:work.surfaceUploadBytes,light:work.lightUploadBytes,frame:work.frameUploadBytes,snow:work.snowUploadBytes},
+        uploads:{total:work.uploadBytes,uniform:work.uniformUploadBytes,surface:work.surfaceUploadBytes,light:work.lightUploadBytes,frame:work.frameUploadBytes,snow:work.snowUploadBytes,environment:work.environmentUploadBytes},
         shaders:this.shaderAtoms,
       }));
     }
