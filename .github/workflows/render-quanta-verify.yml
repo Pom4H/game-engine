@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 25
     defaults:
       run:
-        shell: powershell
+        shell: cmd
     steps:
       - uses: actions/checkout@v7
         with:
@@ -25,31 +25,13 @@ jobs:
         with:
           bun-version: 1.4.2
       - name: Install dependencies
-        run: |
-          New-Item -ItemType Directory -Force artifacts | Out-Null
-          cmd /d /s /c "bun install > artifacts\install.log 2>&1"
-          $code = $LASTEXITCODE
-          if ($code -ne 0) {
-            if (Test-Path bun.lock) { Remove-Item bun.lock -Force }
-            cmd /d /s /c "bun install --no-save >> artifacts\install.log 2>&1"
-            $code = $LASTEXITCODE
-          }
-          Get-Content artifacts/install.log
-          if ($code -ne 0) { exit $code }
+        run: bun install
       - name: Core verification
-        run: |
-          New-Item -ItemType Directory -Force artifacts | Out-Null
-          $old = $ErrorActionPreference
-          $ErrorActionPreference = 'Continue'
-          & bun run ci 2>&1 | Tee-Object -FilePath artifacts/core.log
-          $code = $LASTEXITCODE
-          $ErrorActionPreference = $old
-          if ($code -ne 0) { exit $code }
+        run: bun run ci
+      - run: if not exist artifacts mkdir artifacts
       - name: Profile 720p
-        if: steps.install.outcome == 'success'
         run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1280 --height 720 --out artifacts/render-profile-720p.json
       - name: Profile 1080p
-        if: steps.install.outcome == 'success'
         run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1920 --height 1080 --out artifacts/render-profile-1080p.json
       - uses: actions/upload-artifact@v4
         if: always()
