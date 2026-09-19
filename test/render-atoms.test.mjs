@@ -17,7 +17,7 @@ test('render atom report exposes command and logical memory costs',()=>{
   width:1280,height:720,shadowDraws:3,reflectionDraws:2,mainOpaqueDraws:4,mainTransparentDraws:1,snowInstances:100,
   shadowTriangles:300,reflectionTriangles:200,mainOpaqueTriangles:400,mainTransparentTriangles:50,
   materialDraws:{asphalt:3,glass:2},materialTriangles:{asphalt:300,glass:150},
-  uploads:{total:1000,uniform:600,surface:200,light:100,frame:64,snow:36},shaders:{},
+  uploads:{total:1000,uniform:600,surface:200,light:100,frame:64,snow:36,environment:0},shaders:{},
  });
  assert.equal(report.commands.renderPasses,9);assert.equal(report.commands.drawIndexed,10);assert.equal(report.commands.instances,100);
  assert.equal(report.geometry.snowTriangles,200);assert.equal(report.memory.uploads.total,1000);
