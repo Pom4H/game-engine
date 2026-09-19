@@ -11,7 +11,7 @@ part of SceneSpec.
 The default composition is in `src/scene/modules.ts`:
 
 ```
-input:    weather → winter surfaces
+input:    weather → unified surface/environment state
 plan:     application modules
 simulate: animation → physics
 commit:   surface contacts → contact events → fracture → cleanup → clock
@@ -26,8 +26,10 @@ to run on an off-cadence tick.
 
 Each batch consumes a detached, recursively frozen DTO snapshot. Normal Map and
 Set mutators are disabled. Command-producing batches call the reducer before the
-next batch receives a new snapshot. The default modules invoke Scene's internal
-services through commands; Scene remains the owner of physics and entity state.
+next batch receives a new snapshot. The default modules emit system commands. `SceneSystemRuntime` maps those commands
+to concrete built-in implementations, so scheduling/resource dependencies and
+system implementation are separate concerns. `Scene` remains the aggregate owner
+of entity state and exposes subsystem state without embedding the scheduler switch.
 There are no concurrent workers or arbitrary plugin isolation guarantees.
 
 ```ts
@@ -40,8 +42,8 @@ scene.use({
 
 Public scene commands are `spawn`, `remove`, `velocity` and `resource`. A publish
 observer can read committed resource values from `context.resources`. Built-in
-resource names are `environment`, `winter`, `entities`, `animation`, `contacts`,
-`surface-contacts`, `events`, and `time`; use an explicit
+resource names are `environment`, `surface-state`, `entities`, `animation`,
+`contacts`, `surface-contacts`, `events`, and `time`; use an explicit
 `after: ['engine:physics']` for a conflicting simulate
 module. The kernel API without a reducer still returns commands to its caller,
 but cannot make those commands visible to later modules in that run.
@@ -55,12 +57,14 @@ contacts. Dynamic fragments share the authored parent mass and inherit linear an
 angular momentum; random scatter has a bounded energy allocation and zero net
 momentum. Polygon-prism render geometry still uses approximate collision inertia.
 
-Winter fields use bounded grids on the existing horizontal, axis-aligned surfaces.
-Supported sliding work updates cells under the body footprint; unsupported motion
-does not. Each cell integrates snow, water, ice, slush and heat. The renderer and
-horizontal friction query those cells. The work/thermal model is an approximation,
-not a calibrated tire model. Aggregate surface values remain available for older
-consumers and diagnostics.
+`SurfaceEnvironmentSystem` owns bounded physical state grids on exposed surfaces.
+Snow, water, ice and slush are phases of one surface state rather than separate
+engine systems. The same state is the extension point for mud, dust, moss, heat,
+wear and other material/environment consequences. Supported contact work updates
+only cells under the footprint; unsupported motion contributes no work. Physics,
+rendering and audio consume the same state instead of maintaining parallel weather
+interpretations. The current work/thermal model is an approximation, not a
+calibrated tyre or soil model.
 
 ## Animation and surface contact ownership
 
@@ -94,7 +98,7 @@ See `tools/promo/README.md` for the full winter-scene boundary and limitations.
 ## Renderer ownership
 
 `WebGPURenderer` currently consumes concrete Scene state: entities, camera,
-environment and winter. It renders opaque/transparent procedural geometry, lights
+environment and unified surface state. It renders opaque/transparent procedural geometry, lights
 and snow. Each frame reconciles cache ownership against current entity IDs and
 primitive keys. Removed object uniforms and field textures are destroyed; meshes
 remain only while a live entity references their primitive key. `dispose` releases
@@ -119,9 +123,34 @@ Fixed-step execution and seeded fracture generation make equal runs reproducible
 within the same runtime. Cross-runtime floating-point values can differ slightly.
 `FixedClock` retains bounded timer debt for realtime use; offline capture advances
 explicit simulation ticks. Scene snapshots are diagnostic DTOs, not complete
-checkpoints for restoring the physics/winter/event state.
+checkpoints for restoring the physics/surface/event state.
 
 The browser exposes `window.__GAME_ENGINE__` with snapshot, pause, resume, step,
 seek, setCamera, render, flush and inspect. The CLI and comparison recorder use
 Chrome DevTools Protocol. The recorder calls production Scene/kernel/renderer
 code and persists event and measurement logs; see `tools/comparison/README.md`.
+
+## Target dependency direction
+
+The architectural rule is consequence-driven:
+
+```
+SceneSpec + gameplay intent
+        ↓
+EngineKernel (schedule/resource graph)
+        ↓
+SceneSystemRuntime (system implementations)
+        ↓
+material + geometry + environment + contact work
+        ↓
+SurfaceEnvironmentSystem / Physics / Animation
+        ↓
+friction + deformation + events + audio signals + render state
+        ↓
+WebGPU renderer / browser / CLI / CI
+```
+
+No renderer branch is allowed to become the authoritative owner of a physical
+fact. Snow, wetness, dirt, moss or wear may change shading, but their physical
+meaning is produced upstream. Conversely userland authors semantic materials and
+environmental intent, not WGSL branches or low-level contact response.
