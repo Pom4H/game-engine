@@ -6,6 +6,7 @@ on:
 permissions:
   contents: read
   statuses: write
+  issues: write
 
 concurrency:
   group: render-quanta-verification
@@ -39,6 +40,22 @@ jobs:
           $payload = @{ state=$state; context="render-quanta/install"; description=$last } | ConvertTo-Json -Compress
           Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}" -Headers @{ Authorization="Bearer $env:GH_TOKEN"; Accept="application/vnd.github+json"; "X-GitHub-Api-Version"="2022-11-28" } -ContentType "application/json" -Body $payload | Out-Null
           if ($code -ne 0) { exit $code }
+      - name: Publish install diagnostic
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- render-quanta-install-diagnostic -->';
+            const text = fs.existsSync('artifacts/install.log') ? fs.readFileSync('artifacts/install.log','utf8') : 'install.log missing';
+            const clipped = text.length > 7000 ? text.slice(-7000) : text;
+            const body = marker + '\n### Render quanta install diagnostic\n\n\`\`\`text\n' + clipped + '\n\`\`\`';
+            const {owner, repo} = context.repo;
+            const issue_number = 1;
+            const comments = await github.paginate(github.rest.issues.listComments,{owner,repo,issue_number,per_page:100});
+            const found = comments.find(comment => comment.body?.includes(marker));
+            if (found) await github.rest.issues.updateComment({owner,repo,comment_id:found.id,body});
+            else await github.rest.issues.createComment({owner,repo,issue_number,body});
       - name: Core verification
         run: |
           New-Item -ItemType Directory -Force artifacts | Out-Null
