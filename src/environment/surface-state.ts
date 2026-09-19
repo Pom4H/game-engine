@@ -75,9 +75,12 @@ export class SurfaceEnvironmentSystem {
     for(const entity of entities.values()){
       const use=entity.environmental?.surfaceUse;
       if(use&&!this.surfaces.has(entity.id)){
+        const snowDepthM=entity.environmental?.snowDepthM??0,waterDepthM=entity.environmental?.waterDepthM??0,iceDepthM=entity.environmental?.iceDepthM??0;
+        const snowFactor=Math.min(1,snowDepthM/.025),iceFactor=Math.min(1,iceDepthM/.003),waterFactor=Math.min(1,waterDepthM/.003);
         this.surfaces.set(entity.id,{
-          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0,iceDepthM:entity.environmental?.iceDepthM??0,
-          slush:0,dirt:entity.material.surface.dirt*.25,trafficHeatC:0,trackMelt:0,puddle:0,frictionScale:1,
+          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM,waterDepthM,iceDepthM,
+          slush:0,dirt:entity.material.surface.dirt*.25,trafficHeatC:0,trackMelt:0,puddle:0,
+          frictionScale:Math.max(.16,1-snowFactor*.42-iceFactor*.72-waterFactor*.12),
         });
       }
       if(use&&!this.fields.has(entity.id)){
