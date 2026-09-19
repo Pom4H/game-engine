@@ -172,15 +172,15 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     taa:{drawIndexed:0,draw:1,triangles:1},
     post:{drawIndexed:0,draw:1,triangles:1},
   };
-  const indexedDraws=input.shadowDraws+input.reflectionDraws+input.mainOpaqueDraws+input.mainTransparentDraws,nonIndexedDraws=6+(input.snowInstances?1:0);
+  const indexedDraws=input.shadowDraws+input.reflectionDraws+input.mainOpaqueDraws+input.mainTransparentDraws,nonIndexedDraws=7+(input.snowInstances?1:0);
   const commands:RenderCommandAtoms=Object.freeze({
-    renderPasses:8,drawIndexed:indexedDraws,draw:nonIndexedDraws,
+    renderPasses:9,drawIndexed:indexedDraws,draw:nonIndexedDraws,
     pipelineBinds:9+(input.snowInstances?1:0),
     bindGroupBinds:input.shadowDraws+1+input.reflectionDraws+1+(input.mainOpaqueDraws+input.mainTransparentDraws)+2+(input.snowInstances?2:0)+3+1,
     vertexBufferBinds:indexedDraws,indexBufferBinds:indexedDraws,
     submittedIndices:indexedTriangles*3,
-    submittedTriangles:indexedTriangles+snowTriangles+6,
-    submittedVerticesNonIndexed:18+input.snowInstances*6,
+    submittedTriangles:indexedTriangles+snowTriangles+7,
+    submittedVerticesNonIndexed:21+input.snowInstances*6,
     instances:input.snowInstances,
     byPass:Object.freeze(byPass),
   });
@@ -193,6 +193,7 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     mainSpecular:attachment(input.width,input.height,1,4),
     mainVelocity:attachment(input.width,input.height,1,4),
     mainDepth:attachment(input.width,input.height,1,4),
+    effectsHdr:attachment(input.width,input.height,1,8),
     taaHistory:attachment(input.width,input.height,1,8),
     bloomDownsample:attachment(quarterW,quarterH,1,8),
     bloomHorizontal:attachment(quarterW,quarterH,1,8),
