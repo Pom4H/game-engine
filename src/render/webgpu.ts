@@ -19,6 +19,14 @@ struct U {
   environment: vec4<f32>, // air C, sunlight, hour/24, surface-use code
   motion: vec4<f32>,      // dir x, dir z, road dirt, body wetness
   camera: vec4<f32>,
+  lightPos0: vec4<f32>,
+  lightColor0: vec4<f32>,
+  lightPos1: vec4<f32>,
+  lightColor1: vec4<f32>,
+  lightPos2: vec4<f32>,
+  lightColor2: vec4<f32>,
+  lightPos3: vec4<f32>,
+  lightColor3: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> u: U;
 
@@ -61,6 +69,15 @@ fn tyreTracks(z:f32)->f32{
   out.worldPos=world.xyz;
   out.normal=normalize((u.model*vec4<f32>(normal,0.0)).xyz);
   return out;
+}
+
+fn pointLight(pos:vec4<f32>,color:vec4<f32>,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,roughness:f32)->vec3<f32>{
+  if(pos.w<=0.0||color.w<=0.0){return vec3<f32>(0.0);}
+  let delta=pos.xyz-world;let distance=max(length(delta),0.001);let l=delta/distance;
+  let attenuation=pow(max(0.0,1.0-distance/pos.w),2.0)*color.w;
+  let diffuse=max(dot(n,l),0.0);
+  let h=normalize(l+viewDir);let specPower=mix(110.0,10.0,roughness);let spec=pow(max(dot(n,h),0.0),specPower);
+  return color.rgb*attenuation*(diffuse*.72+spec*.32);
 }
 
 @fragment fn fs(in: VOut) -> @location(0) vec4<f32> {
@@ -137,13 +154,19 @@ fn tyreTracks(z:f32)->f32{
   albedo*=1.0-u.surface.w-wetness*.24;
 
   let effectiveRoughness=clamp(u.surface.z-wetness*.36,0.045,1.0);
-  let diffuse=0.12+mix(.38,.88,sunlight)*ndl;
+  let ambient=.19+sunlight*.25;
+  let diffuse=ambient+mix(.22,.7,sunlight)*ndl;
   let specPower=mix(120.0,7.0,effectiveRoughness);
   let spec=pow(max(dot(n,halfDir),0.0),specPower)*(0.018+wetness*.52+puddleMask*.42);
   let rim=pow(1.0-max(abs(dot(n,viewDir)),0.0),2.2)*0.035;
   let warm=vec3<f32>(1.0,.54,.22)*sunrise*(ndl*.18+spec*.28);
-  let nightTint=mix(vec3<f32>(.52,.62,.78),vec3<f32>(1.0,1.0,1.0),sunlight);
-  return vec4<f32>((albedo*diffuse+vec3<f32>(spec+rim))*nightTint+warm,u.color.a);
+  let nightTint=mix(vec3<f32>(.62,.69,.82),vec3<f32>(1.0,1.0,1.0),sunlight);
+  let points=
+    pointLight(u.lightPos0,u.lightColor0,in.worldPos,n,viewDir,effectiveRoughness)+
+    pointLight(u.lightPos1,u.lightColor1,in.worldPos,n,viewDir,effectiveRoughness)+
+    pointLight(u.lightPos2,u.lightColor2,in.worldPos,n,viewDir,effectiveRoughness)+
+    pointLight(u.lightPos3,u.lightColor3,in.worldPos,n,viewDir,effectiveRoughness);
+  return vec4<f32>((albedo*diffuse+vec3<f32>(spec+rim))*nightTint+warm+points,u.color.a);
 }`;
 
 const SNOW_SHADER=`
@@ -198,7 +221,7 @@ export class WebGPURenderer implements Renderer{
   ){device.addEventListener?.('uncapturederror',(event:any)=>{const message=event?.error?.message??String(event?.error??'WebGPU validation error');this.errors.push(message);console.error('Game Engine WebGPU:',message);});device.lost?.then((info:any)=>this.errors.push(`Device lost: ${info?.message??'unknown'}`));}
   private depth:GPUAny=null;private depthW=0;private depthH=0;
   private readonly meshes=new Map<string,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly errors:string[]=[];
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];
 
   static async create(canvas:HTMLCanvasElement):Promise<WebGPURenderer>{
     const gpu=(navigator as any).gpu;if(!gpu)throw new Error('WebGPU is not available in this browser');
@@ -222,7 +245,7 @@ export class WebGPURenderer implements Renderer{
   }
 
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
-    this.resize();this.lastCamera=camera.position;this.lastScene=scene;
+    this.resize();this.lastCamera=camera.position;this.lastScene=scene;this.lastLights=[...scene.entities.values()].filter(entity=>entity.light?.kind==='point');
     const view=lookAt(camera.position,camera.target),projection=perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),vp=multiply4(projection,view);
     const encoder=this.device.createCommandEncoder(),clear=scene.spec.clearColor??environmentClear(scene.environment);
     const pass=encoder.beginRenderPass({colorAttachments:[{view:this.context.getCurrentTexture().createView(),clearValue:{r:clear[0],g:clear[1],b:clear[2],a:clear[3]},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
@@ -245,7 +268,7 @@ export class WebGPURenderer implements Renderer{
   dispose():void{for(const m of this.meshes.values()){m.vertex.destroy?.();m.index.destroy?.();}for(const o of this.objects.values())o.uniform.destroy?.();this.snowUniform.destroy?.();this.depth?.destroy?.();this.meshes.clear();this.objects.clear();}
 
   private draw(pass:GPUAny,entity:RuntimeEntity,vp:Mat4):void{
-    if(!entity.mesh)return;const mesh=this.mesh(entity.mesh),object=this.object(entity.id),model=this.model(entity),mvp=multiply4(vp,model),uniform=new Float32Array(64),surface=entity.material.surface;
+    if(!entity.mesh)return;const mesh=this.mesh(entity.mesh),object=this.object(entity.id),model=this.model(entity),mvp=multiply4(vp,model),uniform=new Float32Array(96),surface=entity.material.surface;
     const winter=this.lastScene?.winter.surface(entity.id),bodyWeather=this.lastScene?.winter.body(entity.id),environment=this.lastScene?.environment;
     uniform.set(mvp,0);uniform.set(model,16);uniform.set(entity.material.color,32);
     uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);
@@ -255,12 +278,14 @@ export class WebGPURenderer implements Renderer{
     uniform.set([environment?.temperatureC??18,environment?.sunlight??.65,(environment?.hour??12)/24,surfaceUseCode(entity.environmental?.surfaceUse)],52);
     uniform.set([bodyWeather?.directionX??1,bodyWeather?.directionZ??0,bodyWeather?.roadDirt??0,bodyWeather?.wetness??0],56);
     uniform.set([this.lastCamera[0],this.lastCamera[1],this.lastCamera[2],1],60);
+    const nearest=this.lastLights.slice().sort((a,b)=>distance2(a.position,entity.position)-distance2(b.position,entity.position)).slice(0,4);
+    for(let i=0;i<4;i++){const light=nearest[i]?.light,source=nearest[i],offset=64+i*8;if(light&&source){const color=light.color??[1,.78,.5];uniform.set([source.position[0],source.position[1],source.position[2],light.range??12],offset);uniform.set([color[0],color[1],color[2],light.intensity??1],offset+4);}}
     this.device.queue.writeBuffer(object.uniform,0,uniform);
     pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);this.drawCalls++;this.triangles+=mesh.triangles;
   }
   private mesh(primitive:Primitive):GPUMesh{const key=primitiveKey(primitive);const found=this.meshes.get(key);if(found)return found;const data=primitiveMesh(primitive),vertex=this.buffer(data.vertices,0x20|0x08),index=this.buffer(data.indices,0x10|0x08),mesh={vertex,index,count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});const target=new Uint8Array(buffer.getMappedRange());target.set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
-  private object(id:string):GPUObject{const existing=this.objects.get(id);if(existing)return existing;const uniform=this.device.createBuffer({size:256,usage:0x40|0x08}),bind=this.device.createBindGroup({layout:this.bindGroupLayout,entries:[{binding:0,resource:{buffer:uniform}}]}),object={uniform,bind};this.objects.set(id,object);return object;}
+  private object(id:string):GPUObject{const existing=this.objects.get(id);if(existing)return existing;const uniform=this.device.createBuffer({size:384,usage:0x40|0x08}),bind=this.device.createBindGroup({layout:this.bindGroupLayout,entries:[{binding:0,resource:{buffer:uniform}}]}),object={uniform,bind};this.objects.set(id,object);return object;}
   private model(entity:RuntimeEntity):Mat4{
     const meshScale:Vec3=entity.mesh?.kind==='box'||entity.mesh?.kind==='shard'?entity.mesh.size??[1,1,1]:entity.mesh?.kind==='sphere'?[2*(entity.mesh.radius??1),2*(entity.mesh.radius??1),2*(entity.mesh.radius??1)]:entity.mesh?.kind==='plane'?[entity.mesh.size?.[0]??1,1,entity.mesh.size?.[1]??1]:[1,1,1];
     return compose(entity.position,entity.rotation,[entity.scale[0]*meshScale[0],entity.scale[1]*meshScale[1],entity.scale[2]*meshScale[2]]);
