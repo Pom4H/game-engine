@@ -570,7 +570,7 @@ function materialPipelineGroups(entities:readonly RuntimeEntity[]):Array<[[numbe
 }
 function partitionByCull(entities:readonly RuntimeEntity[]):Array<[boolean,RuntimeEntity[]]>{
   const culled:RuntimeEntity[]=[],double:RuntimeEntity[]=[];for(const entity of entities)(canCullBack(entity)?culled:double).push(entity);
-  return [[true,culled],[false,double]].filter(([,items])=>items.length) as Array<[boolean,RuntimeEntity[]]>;
+  const groups:Array<[boolean,RuntimeEntity[]]>=[];if(culled.length)groups.push([true,culled]);if(double.length)groups.push([false,double]);return groups;
 }
 
 function materialCode(kind:string):number{return kind==='glass'?1:kind==='steel'?2:kind==='wood'?3:kind==='concrete'?4:kind==='asphalt'?5:kind==='snow'?6:0;}
