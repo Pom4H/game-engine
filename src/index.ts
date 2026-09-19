@@ -26,6 +26,7 @@ export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironme
 export {WinterSystem,type WinterSurfaceState,type WinterBodyState} from './environment/winter.js';
 
 export type {SceneModule,SceneModuleContext,SceneCommand} from './scene/modules.js';
+export {SceneSystemRuntime,type SystemFrame,type SystemHandler} from './scene/system-runtime.js';
 export {renderAmbience,type AmbienceFrame,type AmbienceOptions} from './audio/ambience.js';
 export {batchStaticScenery} from './procedural/static-batch.js';
 export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/footprints.js';
