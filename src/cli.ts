@@ -22,10 +22,11 @@ async function main(){
   if(command==='serve'){const file=args[0]&&!args[0]!.startsWith('--')?args.shift():undefined,port=numberOption('--port',4173);const scene=file?await loadSceneFile(file):undefined;const host=await serveScene(scene,{port,...(file?{sceneDirectory:dirname(resolve(file))}:{})});console.log(`Game Engine: ${host.url}`);await new Promise<void>((resolve,reject)=>{host.server.on('close',resolve);host.server.on('error',reject);});return;}
   if(command==='render'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'frame.png'),time=numberOption('--time',0),width=numberOption('--width',1280),height=numberOption('--height',720);await render(await loadSceneFile(file),{out,time,width,height},dirname(resolve(file)));console.log(out);return;}
   if(command==='record'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'scene.mp4'),fps=numberOption('--fps',60),duration=numberOption('--duration',3),from=numberOption('--from',0),width=numberOption('--width',1920),height=numberOption('--height',1080);await record(await loadSceneFile(file),{out,fps,duration,from,width,height},dirname(resolve(file)));console.log(out);return;}
+  if(command==='profile'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'render-profile.json'),duration=numberOption('--duration',5),warmup=numberOption('--warmup',2),from=numberOption('--from',0),width=numberOption('--width',1280),height=numberOption('--height',720);const report=await profileScene(await loadSceneFile(file),{duration,warmup,from,width,height},dirname(resolve(file)));await writeFile(out,JSON.stringify(report,null,2));console.log(out);return;}
   throw new Error(`Unknown command: ${command}`);
 }
 
-function help(){console.log(`game-engine — deterministic scene runtime\n\nUsage:\n  game-engine serve [scene.ts|scene.json] [--port 4173]\n  game-engine url <scene> [--base https://example.com/]\n  game-engine validate <scene>\n  game-engine render <scene> --time 2.5 --out frame.png [--width 1280 --height 720]\n  game-engine record <scene> --duration 8 --fps 60 --out shot.mp4 [--from 0]\n\nScene modules export a SceneSpec as default. JSON is accepted directly.\nReferenced local material images resolve inside the scene file directory.\nrender/record use an installed Chromium/Chrome and no browser automation package.`);}
+function help(){console.log(`game-engine — deterministic scene runtime\n\nUsage:\n  game-engine serve [scene.ts|scene.json] [--port 4173]\n  game-engine url <scene> [--base https://example.com/]\n  game-engine validate <scene>\n  game-engine render <scene> --time 2.5 --out frame.png [--width 1280 --height 720]\n  game-engine record <scene> --duration 8 --fps 60 --out shot.mp4 [--from 0]\n  game-engine profile <scene> --duration 5 --warmup 2 --out render-profile.json [--width 1280 --height 720]\n\nScene modules export a SceneSpec as default. JSON is accepted directly.\nReferenced local material images resolve inside the scene file directory.\nrender/record use an installed Chromium/Chrome and no browser automation package.`);}
 function need<T>(value:T|undefined,label:string):T{if(value===undefined)throw new Error(`Missing ${label}`);return value;}
 function option(name:string):string|undefined{const i=args.indexOf(name);if(i<0)return;const value=args[i+1];if(!value||value.startsWith('--'))throw new Error(`${name} requires a value`);return value;}
 function numberOption(name:string,fallback:number):number{const raw=option(name);if(raw===undefined)return fallback;const value=Number(raw);if(!Number.isFinite(value))throw new Error(`${name} must be numeric`);return value;}
@@ -54,6 +55,27 @@ async function record(scene:SceneSpec,options:RecordOptions,sceneDirectory:strin
   }finally{
     try{await browser?.close();}finally{try{await host.close();}finally{if(directory)await rm(directory,{recursive:true,force:true});}}
   }
+}
+
+interface ProfileOptions{duration:number;warmup:number;from:number;width:number;height:number}
+async function profileScene(scene:SceneSpec,options:ProfileOptions,sceneDirectory:string){
+  if(!(options.duration>0&&options.duration<=120)||!(options.warmup>=0&&options.warmup<=60)||!Number.isFinite(options.from)||options.from<0||options.from>86_400)throw new RangeError('Invalid profile duration/warmup/from');
+  const host=await serveScene(scene,{sceneDirectory});let browser:BrowserSession|undefined;
+  try{
+    browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
+    const report=await browser.evaluate(`
+      const engine=window.__GAME_ENGINE__;
+      engine.seek(${JSON.stringify(options.from)});await engine.flush();
+      engine.resume();await new Promise(r=>setTimeout(r,${Math.round(options.warmup*1000)}));engine.pause();await engine.drain();
+      engine.resetProfile();
+      const wallStart=performance.now(),simulationStart=engine.inspect().time;
+      engine.resume();await new Promise(r=>setTimeout(r,${Math.round(options.duration*1000)}));engine.pause();
+      const wallEnd=performance.now();await engine.drain();await new Promise(r=>setTimeout(r,0));
+      const inspection=engine.inspect(),profile=engine.profile();
+      return {wallSeconds:(wallEnd-wallStart)/1000,simulatedSeconds:inspection.time-simulationStart,simulationToWallRatio:(inspection.time-simulationStart)*1000/(wallEnd-wallStart),profile,renderer:inspection.renderer};
+    `);
+    await assertBrowserRenderer(browser);return{version:1,width:options.width,height:options.height,from:options.from,duration:options.duration,warmup:options.warmup,...report};
+  }finally{await browser?.close();await host.close();}
 }
 
 async function assertBrowserRenderer(browser:BrowserSession):Promise<void>{const inspect=await browser.evaluate(`return window.__GAME_ENGINE__.inspect()`),errors=inspect?.renderer?.errors;if(Array.isArray(errors)&&errors.length)throw new Error('WebGPU validation errors: '+errors.join(' | '));if(!(inspect?.renderer?.drawCalls>0)&&!(inspect?.renderer?.triangles>0))throw new Error('Renderer produced no geometry');}
