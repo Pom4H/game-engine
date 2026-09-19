@@ -59,6 +59,7 @@ export interface RenderMemoryAtoms {
     bloomDownsample:number;
     bloomHorizontal:number;
     bloomVertical:number;
+    taa:number;
     postMinimum:number;
     postOpaqueAoExtra:number;
     postDofExtra:number;
@@ -168,17 +169,18 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     'bloom.downsample':{drawIndexed:0,draw:1,triangles:1},
     'bloom.horizontal':{drawIndexed:0,draw:1,triangles:1},
     'bloom.vertical':{drawIndexed:0,draw:1,triangles:1},
+    taa:{drawIndexed:0,draw:1,triangles:1},
     post:{drawIndexed:0,draw:1,triangles:1},
   };
-  const indexedDraws=input.shadowDraws+input.reflectionDraws+input.mainOpaqueDraws+input.mainTransparentDraws,nonIndexedDraws=5+(input.snowInstances?1:0);
+  const indexedDraws=input.shadowDraws+input.reflectionDraws+input.mainOpaqueDraws+input.mainTransparentDraws,nonIndexedDraws=6+(input.snowInstances?1:0);
   const commands:RenderCommandAtoms=Object.freeze({
-    renderPasses:7,drawIndexed:indexedDraws,draw:nonIndexedDraws,
+    renderPasses:8,drawIndexed:indexedDraws,draw:nonIndexedDraws,
     pipelineBinds:9+(input.snowInstances?1:0),
     bindGroupBinds:input.shadowDraws+1+input.reflectionDraws+1+(input.mainOpaqueDraws+input.mainTransparentDraws)+2+(input.snowInstances?2:0)+3+1,
     vertexBufferBinds:indexedDraws,indexBufferBinds:indexedDraws,
     submittedIndices:indexedTriangles*3,
-    submittedTriangles:indexedTriangles+snowTriangles+5,
-    submittedVerticesNonIndexed:15+input.snowInstances*6,
+    submittedTriangles:indexedTriangles+snowTriangles+6,
+    submittedVerticesNonIndexed:18+input.snowInstances*6,
     instances:input.snowInstances,
     byPass:Object.freeze(byPass),
   });
@@ -186,10 +188,12 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     shadow:attachment(4096,4096,1,4),
     reflectionColor:attachment(halfW,halfH,1,8),
     reflectionDepth:attachment(halfW,halfH,1,4),
-    mainHdr:attachment(input.width,input.height,4,8,8),
-    mainNormal:attachment(input.width,input.height,4,8,8),
-    mainSpecular:attachment(input.width,input.height,4,4,4),
-    mainDepth:attachment(input.width,input.height,4,4),
+    mainHdr:attachment(input.width,input.height,1,8),
+    mainNormal:attachment(input.width,input.height,1,8),
+    mainSpecular:attachment(input.width,input.height,1,4),
+    mainVelocity:attachment(input.width,input.height,1,4),
+    mainDepth:attachment(input.width,input.height,1,4),
+    taaHistory:attachment(input.width,input.height,1,8),
     bloomDownsample:attachment(quarterW,quarterH,1,8),
     bloomHorizontal:attachment(quarterW,quarterH,1,8),
     bloomVertical:attachment(quarterW,quarterH,1,8),
@@ -205,7 +209,8 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
       bloomDownsample:quarter*16*8,
       bloomHorizontal:quarter*17*8,
       bloomVertical:quarter*17*8,
-      postMinimum:full*(8+8+4+4+8+16),
+      taa:full*(10*8+8+4+4),
+      postMinimum:full*(8+8+4+4+8),
       postOpaqueAoExtra:full*(4*4+24*4),
       postDofExtra:full*12*8,
       postSsrWorstExtra:full*(28*4+5*4+4+16+8+13*8),
