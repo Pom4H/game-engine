@@ -20,6 +20,10 @@ export interface WheelSurfaceContact {
  readonly position:Vec3;
  readonly velocity:Vec3;
  readonly grounded:boolean;
+ /** Contact radius in world metres when known. */
+ readonly radius?:number;
+ /** Wheel angular speed magnitude in rad/s when known. */
+ readonly angularSpeed?:number;
  /** Unit direction away from the vehicle at this wheel. */
  readonly lateral?:Vec3;
 }
@@ -100,8 +104,9 @@ export class SurfaceContactSystem {
  addWheelContact(entityId:string,options:{readonly radius?:number;readonly lateral?:Vec3}={}):void{
   if(!this.host.entities.get(entityId)?.body||this.wheels.has(entityId)||options.radius!==undefined&&(!Number.isFinite(options.radius)||options.radius<=0)||options.lateral&&!finiteVec(options.lateral))throw new TypeError('Invalid wheel contact binding');
   this.wheels.set(entityId,{id:entityId,...options,...(options.lateral?{lateral:Object.freeze([...options.lateral]) as Vec3}:{})});
+  this.host.surfaces.claimContactBody(entityId);
  }
- removeWheelContact(entityId:string):void{this.wheels.delete(entityId);this.wheelEmission.delete(entityId);}
+ removeWheelContact(entityId:string):void{this.wheels.delete(entityId);this.wheelEmission.delete(entityId);this.host.surfaces.releaseContactBody(entityId);}
  private state(entity:RuntimeEntity,x:number,z:number):Pick<SurfaceEnvironmentState,'snowDepthM'|'waterDepthM'>{
   return this.host.surfaces.sample(entity.id,x,z)??this.host.surfaces.surface(entity.id)??{snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0};
  }
@@ -127,12 +132,12 @@ export class SurfaceContactSystem {
  private boundWheels():WheelSurfaceContact[]{const result:WheelSurfaceContact[]=[];for(const binding of this.wheels.values()){
   const entity=this.host.entities.get(binding.id);if(!entity?.body)continue;
   const radius=binding.radius??(entity.mesh?.kind==='sphere'?(entity.mesh.radius??1)*entity.scale[1]:.3),position:Vec3=[entity.position[0],entity.position[1]-radius,entity.position[2]];
-  result.push({id:binding.id,position,velocity:entity.body.velocity,grounded:Math.abs(entity.body.velocity[1])<.2,...(binding.lateral?{lateral:binding.lateral}:{})});
+  result.push({id:binding.id,position,velocity:entity.body.velocity,grounded:Math.abs(entity.body.velocity[1])<.2,radius,angularSpeed:Math.hypot(...entity.body.angularVelocity),...(binding.lateral?{lateral:binding.lateral}:{})});
  }return result;}
  step(dt:number,at:number,feet:readonly FootContact[]=[],wheelContacts:readonly WheelSurfaceContact[]=[]):void{
   if(!Number.isFinite(dt)||dt<=0||dt>.25||!Number.isFinite(at)||at<this.time)throw new RangeError('Invalid surface contact time');
   const contacts=[...this.boundWheels(),...wheelContacts],ids=new Set<string>();
-  for(const wheel of contacts){if(!wheel.id||ids.has(wheel.id)||!finiteVec(wheel.position)||!finiteVec(wheel.velocity)||typeof wheel.grounded!=='boolean'||wheel.lateral&&!finiteVec(wheel.lateral))throw new TypeError('Invalid wheel surface contact');ids.add(wheel.id);}
+  for(const wheel of contacts){if(!wheel.id||ids.has(wheel.id)||!finiteVec(wheel.position)||!finiteVec(wheel.velocity)||typeof wheel.grounded!=='boolean'||wheel.radius!==undefined&&(!Number.isFinite(wheel.radius)||wheel.radius<=0)||wheel.angularSpeed!==undefined&&(!Number.isFinite(wheel.angularSpeed)||wheel.angularSpeed<0)||wheel.lateral&&!finiteVec(wheel.lateral))throw new TypeError('Invalid wheel surface contact');ids.add(wheel.id);}
   // SnowFootprints validates the entire foot batch before touching persistent state.
   const created=this.footprints.update(at,feet,p=>{const s=this.sample(p);return s?{height:s.height,snowDepth:s.snowDepth}:undefined;});
   this.time=at;
@@ -161,7 +166,17 @@ export class SurfaceContactSystem {
  }
  private stepSpray(dt:number,at:number,contacts:readonly WheelSurfaceContact[]):void{
   this.wetnessValue=0;const live=new Set<string>();
-  for(const wheel of contacts){live.add(wheel.id);const speed=Math.hypot(wheel.velocity[0],wheel.velocity[2]),surface=wheel.grounded&&Math.abs(wheel.velocity[1])<.25?this.waterSample(wheel.position):undefined;
+  for(const wheel of contacts){
+   live.add(wheel.id);
+   const speed=Math.hypot(wheel.velocity[0],wheel.velocity[2]),surface=wheel.grounded&&Math.abs(wheel.velocity[1])<.25?this.sample(wheel.position):undefined;
+   if(surface){
+    const source=this.host.entities.get(wheel.id),body=source?.body,surfaceEntity=this.host.entities.get(surface.surfaceId),radius=wheel.radius??(source?.mesh?.kind==='sphere'?(source.mesh.radius??1)*source.scale[1]:.3);
+    if(body&&surfaceEntity?.body){
+     const rollingSpeed=(wheel.angularSpeed??Math.hypot(...body.angularVelocity))*radius,lateral=wheel.lateral,lateralSpeed=lateral?Math.abs(wheel.velocity[0]*lateral[0]+wheel.velocity[2]*lateral[2]):0;
+     const slipSpeed=Math.hypot(Math.abs(speed-rollingSpeed),lateralSpeed),friction=Math.sqrt(Math.max(0,body.friction*surfaceEntity.body.friction));
+     this.host.surfaces.applyContactWork({sourceId:wheel.id,surfaceId:surface.surfaceId,x:wheel.position[0],z:wheel.position[2],radiusM:Math.max(.06,radius*.55),durationSeconds:dt,speedMps:speed,slipSpeedMps:slipSpeed,normalLoadN:Math.max(1,body.mass)*9.81,frictionCoefficient:friction});
+    }
+   }
    const wet=surface?clamp(surface.waterDepth/.004,0,1):0;
    // A stationary or airborne tyre makes neither spray nor a rolling-water sound.
    if(speed<.15||wet<.04){this.wheelEmission.delete(wheel.id);continue;}this.wetnessValue=Math.max(this.wetnessValue,wet*clamp(speed/.6,0,1));
@@ -179,5 +194,5 @@ export class SurfaceContactSystem {
   }
  }
  inspect(){return{surfaces:this.surfaces.size,wheelContacts:this.wheels.size,tiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.tileCount,0),detailedTiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.detailedTiles,0),footprints:this.footprints.snapshot().length,particles:this.particles.size,particleEntities:this.particleIds.size,sprayEmitted:this.emitted,wetness:this.wetness};}
- dispose():void{for(const id of [...this.surfaces.keys()])this.removeSnowSurface(id);for(const [id,owned] of this.particleIds)if(this.host.entities.get(id)===owned)this.host.remove(id);this.particles.clear();this.particleIds.clear();this.snowEntities.clear();this.wheels.clear();this.wheelEmission.clear();this.events.length=0;this.host.resources.delete('engine:surface-contacts');}
+ dispose():void{for(const id of [...this.surfaces.keys()])this.removeSnowSurface(id);for(const id of [...this.wheels.keys()])this.removeWheelContact(id);for(const [id,owned] of this.particleIds)if(this.host.entities.get(id)===owned)this.host.remove(id);this.particles.clear();this.particleIds.clear();this.snowEntities.clear();this.wheelEmission.clear();this.events.length=0;this.host.resources.delete('engine:surface-contacts');}
 }
