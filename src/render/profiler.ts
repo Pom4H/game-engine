@@ -13,6 +13,7 @@ export interface RenderWork {
   entities:number;visible:number;opaque:number;transparent:number;
   cameraOpaque:number;cameraTransparent:number;shadowCasters:number;reflected:number;
   drawCalls:number;triangles:number;snowInstances:number;uploadBytes:number;
+  uniformUploadBytes:number;surfaceUploadBytes:number;lightUploadBytes:number;frameUploadBytes:number;snowUploadBytes:number;
 }
 export interface QuantumStats {meanMs:number;p50Ms:number;p95Ms:number;maxMs:number}
 export interface RenderFrameTiming {
@@ -32,7 +33,7 @@ export interface RenderProfileSnapshot {
 
 type GPUAny=any;
 interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null}
-const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,uploadBytes:0});
+const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,uploadBytes:0,uniformUploadBytes:0,surfaceUploadBytes:0,lightUploadBytes:0,frameUploadBytes:0,snowUploadBytes:0});
 const percentile=(values:readonly number[],q:number)=>{if(!values.length)return 0;const a=[...values].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor((a.length-1)*q))]!;};
 const stats=(values:readonly number[]):QuantumStats=>({meanMs:values.length?values.reduce((a,b)=>a+b,0)/values.length:0,p50Ms:percentile(values,.5),p95Ms:percentile(values,.95),maxMs:values.length?Math.max(...values):0});
 const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work:RenderWork):RenderFrameTiming=>Object.freeze({frame,totalMs,quanta:Object.freeze({...quanta}),work:Object.freeze({...work})});
@@ -67,7 +68,7 @@ export class RenderProfiler {
   measure<T>(name:RenderCpuQuantum,run:()=>T):T{const at=performance.now();try{return run();}finally{this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+(performance.now()-at);}}
   add(name:RenderCpuQuantum,ms:number):void{if(Number.isFinite(ms)&&ms>=0)this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+ms;}
   setWork(work:Partial<RenderWork>):void{Object.assign(this.work,work);}
-  addUpload(bytes:number):void{if(Number.isFinite(bytes)&&bytes>0)this.work.uploadBytes+=bytes;}
+  addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'='uniform'):void{if(!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;const key=`${kind}UploadBytes` as keyof RenderWork;(this.work[key] as number)+=bytes;}
 
   timestampWrites(name:RenderGpuQuantum):Record<string,unknown>|undefined{
     if(!this.active||!this.querySet)return undefined;
