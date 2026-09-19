@@ -32,3 +32,10 @@ test('render profiler resolves named GPU pass timestamps asynchronously',async()
  for(const name of RENDER_GPU_QUANTA)assert.equal(profile.gpu[name].meanMs,1);
  profiler.dispose();
 });
+
+test('disabled profiler is transparent to production rendering',()=>{
+ const profiler=new RenderProfiler({},{enabled:false,timestampQueries:true,capacity:16});
+ profiler.beginFrame();const value=profiler.measure('prepare',()=>17);assert.equal(value,17);profiler.setWork({visible:99});profiler.submitted();
+ const profile=profiler.inspect();assert.equal(profile.enabled,false);assert.equal(profile.timestampQueries,false);assert.equal(profile.cpuFrames,0);assert.equal(profile.gpuFrames,0);assert.equal(profile.latestCpu,undefined);
+ profiler.dispose();
+});
