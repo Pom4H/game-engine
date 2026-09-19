@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   gpu-profile:
-    runs-on: [self-hosted, gpu, windows]
+    runs-on: self-hosted
     timeout-minutes: 25
     defaults:
       run:
