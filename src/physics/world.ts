@@ -80,14 +80,14 @@ export interface Contact {
   readonly normalEnergy:number;
   readonly mode:'resolve'|'penetrate';
 }
-export interface PhysicsStats {steps:number;contacts:number;bodies:number}
+export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodies:number}
 
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
   readonly index:SpatialHash<RigidBody>;
-  steps=0;
+  steps=0;substeps=0;
   constructor(
     readonly gravity:Vec3=[0,-9.81,0],
     readonly ground=0,
@@ -97,11 +97,28 @@ export class PhysicsWorld {
 
   add(body:RigidBody):RigidBody{if(this.bodies.has(body.id))throw new TypeError(`Duplicate body ${body.id}`);this.bodies.set(body.id,body);return body;}
   remove(id:string):boolean{return this.bodies.delete(id);}
-  clear():void{this.bodies.clear();this.index.clear();this.contacts.length=0;this.steps=0;}
+  clear():void{this.bodies.clear();this.index.clear();this.contacts.length=0;this.steps=0;this.substeps=0;}
 
   step(dt:number,contactModel?:ContactModel):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Physics dt must be in (0, 0.25]');
     this.contacts.length=0;
+    const substeps=this.adaptiveSubsteps(dt),subDt=dt/substeps;
+    for(let substep=0;substep<substeps;substep++)this.stepSubstep(subDt,contactModel);
+    this.steps++;this.substeps+=substeps;
+  }
+
+  private adaptiveSubsteps(dt:number):number{
+    let required=1;
+    for(const body of this.bodies.values()){
+      if(!body.invMass)continue;
+      const speed=Math.hypot(body.velocity[0],body.velocity[1],body.velocity[2]),travel=speed*dt;
+      const feature=body.shape.kind==='sphere'?body.shape.radius*1.5:Math.max(.025,Math.min(body.shape.half[0],body.shape.half[1],body.shape.half[2])*1.5);
+      required=Math.max(required,Math.ceil(travel/Math.max(.015,feature)));
+    }
+    return Math.max(1,Math.min(12,required));
+  }
+
+  private stepSubstep(dt:number,contactModel?:ContactModel):void{
     for(const body of this.bodies.values())if(body.invMass){
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
@@ -120,16 +137,14 @@ export class PhysicsWorld {
         if(!a.invMass&&!b.invMass)continue;
         const hit=intersect(a,b);
         if(!hit)continue;
-        const candidate=this.contactCandidate(a,b,hit);
-        const decision=contactModel?.(candidate)??{mode:'resolve' as const};
+        const candidate=this.contactCandidate(a,b,hit),decision=contactModel?.(candidate)??{mode:'resolve' as const};
         if(decision.mode==='penetrate')this.resolvePenetration(candidate,Math.max(0,decision.energyLoss??0));
         else this.resolvePair(candidate);
       }
     }
-    this.steps++;
   }
 
-  get stats():PhysicsStats{return{steps:this.steps,contacts:this.contacts.length,bodies:this.bodies.size};}
+  get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size};}
 
   private contactCandidate(a:RigidBody,b:RigidBody,hit:Hit):ContactCandidate{
     const rv:Vec3=[b.velocity[0]-a.velocity[0],b.velocity[1]-a.velocity[1],b.velocity[2]-a.velocity[2]];
