@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Game Engine — Glass fracture</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101a;color:#eef4ff;font:14px/1.4 system-ui,sans-serif}
+canvas{display:block;width:100%;height:100%}
+header{position:fixed;inset:12px 12px auto 12px;z-index:3;display:flex;gap:8px;align-items:center;pointer-events:none}
+.brand{background:#07101acc;border:1px solid #ffffff24;padding:8px 10px;font:12px ui-monospace,monospace;letter-spacing:.08em}
+.controls{margin-left:auto;display:flex;gap:6px;pointer-events:auto}
+button{appearance:none;border:1px solid #ffffff26;background:#111a27d9;color:#fff;padding:8px 11px;font:inherit;cursor:pointer}
+button:hover{background:#1a2637}
+#status{position:fixed;left:12px;bottom:12px;z-index:3;background:#07101acc;border:1px solid #ffffff20;padding:7px 9px;font:12px ui-monospace,monospace}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">GAME ENGINE · GLASS FRACTURE</div>
+  <div class="controls">
+    <button id="restart">Restart</button>
+    <button id="toggle">Pause</button>
+  </div>
+</header>
+<canvas data-game-engine></canvas>
+<div id="status">loading WebGPU…</div>
+<script type="module">
+import {BrowserRuntime} from './dist/browser.js';
+
+const scene = await fetch('./scene.json').then(r => {
+  if (!r.ok) throw new Error(`scene.json: ${r.status}`);
+  return r.json();
+});
+
+const canvas = document.querySelector('canvas');
+const status = document.querySelector('#status');
+const toggle = document.querySelector('#toggle');
+const restart = document.querySelector('#restart');
+
+const runtime = await BrowserRuntime.create(canvas, scene, {autoplay:true, exposeBridge:true, audio:true});
+let running = true;
+
+toggle.onclick = () => {
+  if (running) {
+    runtime.pause();
+    toggle.textContent = 'Play';
+  } else {
+    runtime.resume();
+    toggle.textContent = 'Pause';
+  }
+  running = !running;
+};
+
+restart.onclick = () => {
+  runtime.pause();
+  runtime.reset();
+  runtime.resume();
+  running = true;
+  toggle.textContent = 'Pause';
+};
+
+const update = () => {
+  const info = runtime.inspect();
+  status.textContent = `t=${info.time.toFixed(2)}s · bodies=${info.physics.bodies} · contacts=${info.physics.contacts} · WebGPU`;
+  requestAnimationFrame(update);
+};
+update();
+</script>
+</body>
+</html>
