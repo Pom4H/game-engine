@@ -93,9 +93,9 @@ test('rotating debris settles on an explicit concrete surface',()=>{
   const shard=scene.entities.get('shard');
   shard.body.fracturable=false;
   shard.body.collisionClass='debris';
-  const events=[];
-  for(let i=0;i<720;i++){scene.step(1/60);events.push(...scene.drainEvents());}
-  assert.equal(shard.body.sleeping,true,`debris should eventually enter rest state on concrete: pos=${JSON.stringify(shard.position)} v=${JSON.stringify(shard.body.velocity)} w=${JSON.stringify(shard.body.angularVelocity)} sleepTimer=${shard.body.sleepTimer}`);
+  const events=[],samples=[];
+  for(let i=0;i<720;i++){scene.step(1/60);events.push(...scene.drainEvents());if((i+1)%120===0)samples.push({t:(i+1)/60,pos:[...shard.position],v:Math.hypot(...shard.body.velocity),w:Math.hypot(...shard.body.angularVelocity),sleep:shard.body.sleepTimer});}
+  assert.equal(shard.body.sleeping,true,`debris should eventually enter rest state on concrete: samples=${JSON.stringify(samples)} pos=${JSON.stringify(shard.position)} v=${JSON.stringify(shard.body.velocity)} w=${JSON.stringify(shard.body.angularVelocity)} sleepTimer=${shard.body.sleepTimer}`);
   assert.deepEqual(shard.body.velocity,[0,0,0]);
   assert.deepEqual(shard.body.angularVelocity,[0,0,0]);
   assert.ok(events.some(event=>event.type==='impact'&&event.materialA==='glass'&&event.materialB==='concrete'),'contact acoustics should see glass ↔ concrete');
