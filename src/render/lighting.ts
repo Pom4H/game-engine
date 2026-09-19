@@ -90,7 +90,7 @@ fn viewPos(uv:vec2<f32>,z:f32)->vec3<f32>{return vec3<f32>((uv.x*2.0-1.0)*f.righ
 fn project(p:vec3<f32>)->vec2<f32>{return vec2<f32>(p.x/(-p.z*f.forward.w*f.right.w)*.5+.5,.5-p.y/(-p.z*f.forward.w)*.5);}
 fn viewNormal(n:vec3<f32>)->vec3<f32>{return normalize(vec3<f32>(dot(n,f.right.xyz),dot(n,f.up.xyz),-dot(n,f.forward.xyz)));}
 fn depthSpan(pixel:vec2<i32>)->vec2<f32>{
- let dims=vec2<i32>(textureDimensions(depth)),p=clamp(pixel,vec2<i32>(0),dims-1);
+ let dims=vec2<i32>(textureDimensions(depth));let p=clamp(pixel,vec2<i32>(0),dims-1);
  var near=linearDepth(textureLoad(depth,p,0));var far=near;
  let offsets=array<vec2<i32>,4>(vec2<i32>(1,0),vec2<i32>(-1,0),vec2<i32>(0,1),vec2<i32>(0,-1));
  for(var i=0;i<4;i++){let q=clamp(p+offsets[i],vec2<i32>(0),dims-1);let z=linearDepth(textureLoad(depth,q,0));near=min(near,z);far=max(far,z);}return vec2<f32>(near,far);
