@@ -184,35 +184,49 @@ export class PhysicsWorld {
   }
 
   private resolveHorizontalSurface(body:RigidBody,surfaceY:number,surfaceMaterial:PhysicalMaterial,surfaceId:string|'ground',dt:number):boolean{
-    const r=groundSupportVector(body),bottom=body.position[1]+r[1],slop=.0015;
-    if(bottom>surfaceY+slop)return false;
+    const manifold=groundContactManifold(body),lowest=manifold.lowest,slop=.0015;
+    if(body.position[1]+lowest>surfaceY+slop)return false;
     body.supportedThisStep=true;
-    const penetration=Math.max(0,surfaceY-bottom);if(penetration>0)body.position[1]+=penetration;
-    const contactVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),normal:Vec3=[0,1,0],approach=Math.max(0,-contactVelocity[1]),normalEnergy=.5*body.mass*approach*approach;
-    const restitution=approach>.55?Math.min(body.restitution,surfaceMaterial.restitution):0;
-    let impulse=0;
-    if(contactVelocity[1]<0){
-      const rn=V3.cross(r,normal),angular=V3.dot(normal,V3.cross(applyInvInertiaWorld(body,rn),r)),denom=body.invMass+angular;
-      if(denom>1e-10){impulse=-(1+restitution)*contactVelocity[1]/denom;this.applyImpulseAtPoint(body,normal,impulse,r);}
-    }
-    const post=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),tangentRaw:Vec3=[post[0],0,post[2]],tangentSpeed=V3.length(tangentRaw);
-    if(tangentSpeed>1e-6){
-      const tangent=V3.scale(tangentRaw,1/tangentSpeed),rt=V3.cross(r,tangent),angular=V3.dot(tangent,V3.cross(applyInvInertiaWorld(body,rt),r)),denom=body.invMass+angular;
-      if(denom>1e-10){
-        const mu=Math.sqrt(body.friction*surfaceMaterial.friction),supportImpulse=Math.max(impulse,body.mass*Math.abs(this.gravity[1])*dt),wanted=-tangentSpeed/denom,jt=Math.max(-mu*supportImpulse,Math.min(mu*supportImpulse,wanted));
-        this.applyImpulseAtPoint(body,tangent,jt,r);
+    const penetration=Math.max(0,surfaceY-(body.position[1]+lowest));if(penetration>0)body.position[1]+=penetration;
+    const normal:Vec3=[0,1,0],mu=Math.sqrt(body.friction*surfaceMaterial.friction);
+    let totalImpulse=0,maxApproach=0,totalEnergy=0;
+
+    // Sequential impulses over the whole edge/face manifold prevent a thin shard
+    // from alternating forever between single-corner supports.
+    for(let iteration=0;iteration<3;iteration++){
+      for(const r of manifold.points){
+        const contactVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),approach=Math.max(0,-contactVelocity[1]);
+        maxApproach=Math.max(maxApproach,approach);if(iteration===0)totalEnergy+=.5*body.mass*approach*approach/manifold.points.length;
+        if(contactVelocity[1]<0){
+          const restitution=iteration===0&&approach>.55?Math.min(body.restitution,surfaceMaterial.restitution):0;
+          const rn=V3.cross(r,normal),angular=V3.dot(normal,V3.cross(applyInvInertiaWorld(body,rn),r)),denom=body.invMass+angular;
+          if(denom>1e-10){const j=-(1+restitution)*contactVelocity[1]/denom;this.applyImpulseAtPoint(body,normal,j,r);totalImpulse+=Math.max(0,j);}
+        }
+        const post=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),tangentRaw:Vec3=[post[0],0,post[2]],tangentSpeed=V3.length(tangentRaw);
+        if(tangentSpeed>1e-6){
+          const tangent=V3.scale(tangentRaw,1/tangentSpeed),rt=V3.cross(r,tangent),angular=V3.dot(tangent,V3.cross(applyInvInertiaWorld(body,rt),r)),denom=body.invMass+angular;
+          if(denom>1e-10){
+            const share=body.mass*Math.abs(this.gravity[1])*dt/manifold.points.length,supportImpulse=Math.max(share,totalImpulse/Math.max(1,manifold.points.length)),wanted=-tangentSpeed/denom,jt=Math.max(-mu*supportImpulse,Math.min(mu*supportImpulse,wanted));
+            this.applyImpulseAtPoint(body,tangent,jt,r);
+          }
+        }
       }
     }
-    // Rolling/tumbling resistance converts residual angular kinetic energy to heat at sustained contact.
-    const normalLoad=Math.max(0,body.mass*Math.abs(this.gravity[1])),contactScale=Math.min(1,(normalLoad*dt+impulse)/Math.max(.001,body.mass*.12));
-    const angularDecay=Math.exp(-(1.8+5.2*Math.sqrt(body.friction*surfaceMaterial.friction))*dt*contactScale);
+
+    // Contact-patch rolling resistance dissipates the tiny residual tumbling
+    // that a finite rigid solver otherwise preserves indefinitely.
+    const contactScale=Math.min(1,(body.mass*Math.abs(this.gravity[1])*dt+totalImpulse)/Math.max(.001,body.mass*.1));
+    const angularDecay=Math.exp(-(2.4+7.5*mu)*dt*contactScale*Math.sqrt(manifold.points.length));
     body.angularVelocity[0]*=angularDecay;body.angularVelocity[1]*=angularDecay;body.angularVelocity[2]*=angularDecay;
+
     const linear=V3.length(body.velocity),angularSpeed=V3.length(body.angularVelocity);
-    if(linear<.07&&angularSpeed<.14&&approach<.10){
+    if(linear<.075&&angularSpeed<.16&&maxApproach<.12){
       body.sleepTimer+=dt;
-      if(body.sleepTimer>.28){body.velocity=[0,0,0];body.angularVelocity=[0,0,0];body.sleeping=true;}
+      if(body.sleepTimer>.24){body.velocity=[0,0,0];body.angularVelocity=[0,0,0];body.sleeping=true;}
     }else if(!body.sleeping)body.sleepTimer=0;
-    this.contacts.push({a:body.id,b:surfaceId,normal,point:[body.position[0]+r[0],surfaceY,body.position[2]+r[2]],penetration,impulse,normalSpeed:approach,normalEnergy,mode:'resolve'});
+
+    const representative=manifold.points[0]??[0,lowest,0];
+    this.contacts.push({a:body.id,b:surfaceId,normal,point:[body.position[0]+representative[0],surfaceY,body.position[2]+representative[2]],penetration,impulse:totalImpulse,normalSpeed:maxApproach,normalEnergy:totalEnergy,mode:'resolve'});
     return true;
   }
 
@@ -318,8 +332,13 @@ function rotationBasis(rotation:Vec3):readonly[Vec3,Vec3,Vec3]{
 function rotateLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[b[0][0]*v[0]+b[1][0]*v[1]+b[2][0]*v[2],b[0][1]*v[0]+b[1][1]*v[1]+b[2][1]*v[2],b[0][2]*v[0]+b[1][2]*v[1]+b[2][2]*v[2]];}
 function rotateWorldToLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[V3.dot(v,b[0]),V3.dot(v,b[1]),V3.dot(v,b[2])];}
 function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[local[0]*body.invInertiaLocal[0],local[1]*body.invInertiaLocal[1],local[2]*body.invInertiaLocal[2]];return rotateLocal(body.rotation,scaled);}
-function groundSupportVector(body:RigidBody):MutableVec3{
-  if(body.shape.kind==='sphere')return[0,-body.shape.radius,0];
-  const h=body.shape.half,b=rotationBasis(body.rotation),local:Vec3=[b[0][1]>=0?-h[0]:h[0],b[1][1]>=0?-h[1]:h[1],b[2][1]>=0?-h[2]:h[2]];
-  return rotateLocal(body.rotation,local);
+function groundSupportVector(body:RigidBody):MutableVec3{return groundContactManifold(body).points[0]??[0,groundContactManifold(body).lowest,0];}
+function groundContactManifold(body:RigidBody):{lowest:number;points:MutableVec3[]}{
+  if(body.shape.kind==='sphere')return{lowest:-body.shape.radius,points:[[0,-body.shape.radius,0]]};
+  const h=body.shape.half,corners:MutableVec3[]=[];
+  for(const x of [-h[0],h[0]])for(const y of [-h[1],h[1]])for(const z of [-h[2],h[2]])corners.push(rotateLocal(body.rotation,[x,y,z]));
+  let lowest=Infinity;for(const corner of corners)lowest=Math.min(lowest,corner[1]);
+  const minHalf=Math.min(h[0],h[1],h[2]),band=Math.max(.0018,minHalf*.42);
+  const points=corners.filter(corner=>corner[1]<=lowest+band).sort((a,b)=>a[1]-b[1]||a[0]-b[0]||a[2]-b[2]);
+  return{lowest,points};
 }
