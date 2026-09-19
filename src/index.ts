@@ -16,3 +16,6 @@ export type {EngineEvent,ImpactEvent,FractureEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 
 export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type PlateFragment,type Vec2} from './materials/glass-fracture.js';
+
+export {resolveEnvironment,type EnvironmentSpec,type EnvironmentState,type Precipitation} from './environment/types.js';
+export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTreatment,type MaterialSurfaceSpec,type SurfaceState} from './materials/surface.js';
