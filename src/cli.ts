@@ -4,7 +4,7 @@ import {access,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
 import {constants as FS} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname,extname,join,resolve} from 'node:path';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {serveScene} from './cli/server.js';
 import {wavBytes} from './audio/synth.js';
 import {renderSceneAudio} from './audio/offline.js';
@@ -13,6 +13,7 @@ import {validateScene} from './scene/validate.js';
 import type {SceneSpec} from './scene/types.js';
 
 const args=process.argv.slice(2),command=args.shift()??'help';
+const distributionDirectory=dirname(fileURLToPath(import.meta.url));
 
 async function main(){
   if(command==='help'||command==='--help'||command==='-h'){help();return;}
@@ -33,7 +34,7 @@ function numberOption(name:string,fallback:number):number{const raw=option(name)
 async function loadSceneFile(file:string):Promise<SceneSpec>{const path=resolve(file),ext=extname(path).toLowerCase();if(ext==='.json')return validateScene(JSON.parse(await readFile(path,'utf8')));if(ext==='.ts'||ext==='.mts'||ext==='.cts'){const url=pathToFileURL(path).href,script=`const m=await import(${JSON.stringify(url)});process.stdout.write(JSON.stringify(m.default??m.scene));`;return validateScene(JSON.parse(await capture(process.execPath,['--experimental-strip-types','--no-warnings','--input-type=module','-e',script])));}const module=await import(pathToFileURL(path).href);return validateScene(module.default??module.scene);}
 
 interface RenderOptions{out:string;time:number;width:number;height:number}
-async function render(scene:SceneSpec,options:RenderOptions,sceneDirectory:string):Promise<void>{const host=await serveScene(scene,{sceneDirectory});let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();await browser.evaluate(`window.__GAME_ENGINE__.seek(${JSON.stringify(options.time)}); await window.__GAME_ENGINE__.flush(); true`);await assertBrowserRenderer(browser);await writeFile(options.out,await browser.screenshot());}finally{await browser?.close();await host.close();}}
+async function render(scene:SceneSpec,options:RenderOptions,sceneDirectory:string):Promise<void>{const host=await serveScene(scene,{sceneDirectory,distributionDirectory});let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();await browser.evaluate(`window.__GAME_ENGINE__.seek(${JSON.stringify(options.time)}); await window.__GAME_ENGINE__.flush(); true`);await assertBrowserRenderer(browser);await writeFile(options.out,await browser.screenshot());}finally{await browser?.close();await host.close();}}
 interface RecordOptions{out:string;fps:number;duration:number;from:number;width:number;height:number}
 async function record(scene:SceneSpec,options:RecordOptions,sceneDirectory:string):Promise<void>{
   if(!(options.fps>0&&options.fps<=240)||!(options.duration>0&&options.duration<=3600)||!Number.isFinite(options.from)||options.from<0||options.from+options.duration>86_400)throw new RangeError('Invalid recording fps/duration/from');
