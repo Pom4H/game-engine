@@ -61,6 +61,7 @@ export class BrowserRuntime {
   reset():void{this.scene=new Scene(this.initial);this.render();}
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
   render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
+  async drain():Promise<void>{await this.renderer.flush();}
   async flush():Promise<void>{await this.renderer.prepareMaterials?.(this.scene);this.render();await this.renderer.flush();}
   profile(){return this.renderer.profile?.()??this.renderer.inspect().profile;}
   resetProfile():void{this.renderer.resetProfile?.();}
@@ -93,7 +94,7 @@ export class BrowserRuntime {
     };
   }
 
-  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
+  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
   private frame=(now:number)=>{
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
