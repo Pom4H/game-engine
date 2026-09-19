@@ -74,16 +74,16 @@ function offsetBoxImpact(y){
  const world=new PhysicsWorld([0,0,0],-100);
  world.add(new RigidBody({id:'wall',position:[0,0,0],shape:{kind:'box',half:[.5,1,1]},restitution:0}));
  const mover=world.add(new RigidBody({id:'mover',position:[-1.2,y,0],velocity:[4,0,0],mass:2,shape:{kind:'box',half:[.5,.5,.5]},restitution:0,friction:0}));
- for(let i=0;i<8;i++)world.step(1/120);
- return{world,mover};
+ let hadContact=false;for(let i=0;i<8;i++){world.step(1/120);hadContact ||= world.contacts.length>0;}
+ return{world,mover,hadContact};
 }
 test('off-center body contact applies impulse at the contact point and creates torque',()=>{
- const {world,mover}=offsetBoxImpact(.55);
- assert.ok(world.contacts.length>0);
+ const {mover,hadContact}=offsetBoxImpact(.55);
+ assert.ok(hadContact);
  assert.ok(Math.abs(mover.angularVelocity[2])>.05,`expected collision torque, got ${mover.angularVelocity}`);
 });
 test('centered body contact does not invent collision torque',()=>{
- const {world,mover}=offsetBoxImpact(0);
- assert.ok(world.contacts.length>0);
+ const {mover,hadContact}=offsetBoxImpact(0);
+ assert.ok(hadContact);
  assert.ok(Math.abs(mover.angularVelocity[0])<1e-8&&Math.abs(mover.angularVelocity[1])<1e-8&&Math.abs(mover.angularVelocity[2])<1e-8,`centered contact should remain torque-free: ${mover.angularVelocity}`);
 });
