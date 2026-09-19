@@ -184,10 +184,13 @@ export class PhysicsWorld {
   }
 
   private resolveHorizontalSurface(body:RigidBody,surfaceY:number,surfaceMaterial:PhysicalMaterial,surfaceId:string|'ground',dt:number):boolean{
-    const manifold=groundContactManifold(body),lowest=manifold.lowest,slop=.0015;
-    if(body.position[1]+lowest>surfaceY+slop)return false;
+    const manifold=groundContactManifold(body),lowest=manifold.lowest,slop=.0015,bottom=body.position[1]+lowest;
+    let minPointVelocityY=Infinity;
+    for(const r of manifold.points){const velocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r));minPointVelocityY=Math.min(minPointVelocityY,velocity[1]);}
+    const predictedBottom=bottom+Math.min(0,minPointVelocityY)*dt;
+    if(bottom>surfaceY+slop&&predictedBottom>surfaceY+slop)return false;
     body.supportedThisStep=true;
-    const penetration=Math.max(0,surfaceY-(body.position[1]+lowest));if(penetration>0)body.position[1]+=penetration;
+    const penetration=Math.max(0,surfaceY-bottom);if(penetration>0)body.position[1]+=penetration;
     const normal:Vec3=[0,1,0],mu=Math.sqrt(body.friction*surfaceMaterial.friction);
     let totalImpulse=0,maxApproach=0,totalEnergy=0;
 
