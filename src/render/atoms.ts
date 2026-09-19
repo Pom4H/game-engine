@@ -89,7 +89,7 @@ const add=(a:ShaderOperationAtoms,b:ShaderOperationAtoms,n=1):ShaderOperationAto
   discards:a.discards+b.discards*n,
 });
 const count=(text:string,re:RegExp)=>[...text.matchAll(re)].length;
-const REGEX_SPECIAL=new Set(['\\','^','
+const escapeRegExp=(value:string)=>[...value].map(ch=>'\\^$.*+?()[]{}|/-'.includes(ch)?String.fromCharCode(92)+ch:ch).join('');
 function cleanWGSL(source:string):string{return source.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/[^\n]*/g,'');}
 function functions(source:string):Map<string,string>{
   const result=new Map<string,string>(),text=cleanWGSL(source),re=/\bfn\s+([A-Za-z_]\w*)\s*\(/g;let match:RegExpExecArray|null;
