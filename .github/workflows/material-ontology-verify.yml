@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   core:
-    runs-on: [self-hosted, gpu, windows]
+    runs-on: self-hosted
     timeout-minutes: 10
     defaults:
       run:
