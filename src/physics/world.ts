@@ -237,7 +237,7 @@ function sphereBox(sphere:RigidBody,box:RigidBody,invert:boolean):Hit|null{
     const axis:Vec3=[sphere.position[0]-box.position[0],sphere.position[1]-box.position[1],sphere.position[2]-box.position[2]],gaps=[half[0]-Math.abs(axis[0]),half[1]-Math.abs(axis[1]),half[2]-Math.abs(axis[2])];
     const i=gaps[0]!<=gaps[1]!&&gaps[0]!<=gaps[2]!?0:gaps[1]!<=gaps[2]!?1:2;
     const outward:Vec3=i===0?[Math.sign(axis[0])||1,0,0]:i===1?[0,Math.sign(axis[1])||1,0]:[0,0,Math.sign(axis[2])||1];
-    d=V3.scale(outward,-1);const normal=invert?outward:d;
+    d=outward;const normal=invert?V3.scale(d,-1):d;
     return{normal,penetration:radius+gaps[i]!,point:[sphere.position[0]+d[0]*radius,sphere.position[1]+d[1]*radius,sphere.position[2]+d[2]*radius]};
   }
   d=V3.scale(d,1/distance);const normal=invert?V3.scale(d,-1):d;
