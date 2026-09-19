@@ -56,3 +56,37 @@ test('renderer releases object/unique mesh resources but retains shared geometry
  assert.deepEqual(destroyed,['dead-u','dead-t','sphere-v','sphere-i']);assert.equal(renderer.meshes.size,1);assert.equal(renderer.objects.size,1);
  renderer.collect({entities:new Map()});assert.equal(renderer.objects.size,0);assert.equal(renderer.meshes.size,0);assert.equal(destroyed.length,8);
 });
+
+
+test('built-in systems run at declared cadence without losing simulated time',()=>{
+ const scene=new Scene({version:1,entities:[]}),counts=new Map();
+ for(let i=0;i<60;i++){
+  scene.step(1/60);
+  for(const id of scene.lastExecution)counts.set(id,(counts.get(id)??0)+1);
+ }
+ assert.equal(counts.get('engine:weather'),10);
+ assert.equal(counts.get('engine:surfaces'),30);
+ assert.equal(counts.get('engine:animation'),60);
+ assert.equal(counts.get('engine:physics'),60);
+ assert.equal(counts.get('engine:cleanup'),10);
+ assert.equal(counts.get('engine:clock'),60);
+ assert.ok(Math.abs(scene.time-1)<1e-12);
+});
+
+test('aggregate and dormant tiers skip expensive local simulation but keep world time',()=>{
+ const spec={version:1,gravity:[0,0,0],ground:-100,entities:[
+  {id:'body',position:[0,1,0],mesh:{kind:'box',size:[1,1,1]},body:{mass:1,velocity:[3,0,0]}},
+  {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[10,.2,6]},material:{kind:'asphalt'},environmental:{surfaceUse:'road'}},
+ ]};
+ const aggregate=new Scene(spec),start=aggregate.entities.get('body').position[0];let surfaceRuns=0;
+ for(let i=0;i<60;i++){aggregate.step(1/60,'aggregate');if(aggregate.lastExecution.includes('engine:surfaces'))surfaceRuns++;}
+ assert.equal(aggregate.entities.get('body').position[0],start,'aggregate tier must not run rigid-body integration');
+ assert.equal(surfaceRuns,30,'aggregate tier keeps coarse environmental evolution');
+ assert.ok(Math.abs(aggregate.time-1)<1e-12);
+
+ const dormant=new Scene(spec);let expensive=0;
+ for(let i=0;i<60;i++){dormant.step(1/60,'dormant');if(dormant.lastExecution.some(id=>['engine:surfaces','engine:animation','engine:physics','engine:surface-contacts'].includes(id)))expensive++;}
+ assert.equal(expensive,0);
+ assert.equal(dormant.entities.get('body').position[0],start);
+ assert.ok(Math.abs(dormant.time-1)<1e-12);
+});
