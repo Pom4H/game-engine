@@ -341,7 +341,7 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousModels=new Map<string,Mat4>();private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -418,7 +418,7 @@ export class WebGPURenderer implements Renderer{
     const taaBind=(history:GPUAny)=>this.device.createBindGroup({layout:this.gpu.taa.getBindGroupLayout(0),entries:[{binding:0,resource:this.hdr.createView()},{binding:1,resource:history.createView()},{binding:2,resource:this.velocity.createView()},{binding:3,resource:this.depth.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.taaParams}}]});
     this.taaBindAB=taaBind(this.taaA);this.taaBindBA=taaBind(this.taaB);
     const postBind=(source:GPUAny)=>this.device.createBindGroup({layout:this.gpu.post.getBindGroupLayout(0),entries:[{binding:0,resource:source.createView()},{binding:1,resource:this.normal.createView()},{binding:2,resource:this.depth.createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:{buffer:this.gpu.frame}},{binding:5,resource:this.specular.createView()},{binding:6,resource:this.bloomA.createView()}]});
-    this.postBindA=postBind(this.taaA);this.postBindB=postBind(this.taaB);this.historyValid=false;this.taaHistoryIndex=0;this.previousVp=null;
+    this.postBindA=postBind(this.taaA);this.postBindB=postBind(this.taaB);this.historyValid=false;this.taaHistoryIndex=0;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
@@ -453,7 +453,7 @@ export class WebGPURenderer implements Renderer{
       return{visible,opaque,transparent};
     });
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
-    if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||distance2(this.lastCamera,camera.position)>100))this.historyValid=false;
+    if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     const previousVp=this.previousVp??vp;
     this.profiler.measure('prepare',()=>{for(const e of classified.visible)this.prepare(e,vp,previousVp);});
     const culled=this.profiler.measure('cull',()=>{
@@ -522,7 +522,7 @@ export class WebGPURenderer implements Renderer{
     }
     this.profiler.resolve(encoder);
     this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
-    this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
+    this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.previousCamera=[...camera.position];this.previousTarget=[...camera.target];this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
     const liveIds=new Set<string>();for(const entity of classified.visible){this.previousModels.set(entity.id,this.model(entity));liveIds.add(entity.id);}for(const id of this.previousModels.keys())if(!liveIds.has(id))this.previousModels.delete(id);
   }
   private queueMaterialLoads(scene:Scene):void{
