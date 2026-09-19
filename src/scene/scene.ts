@@ -1,5 +1,6 @@
 import {hashString,mulberry32} from '../core/random.js';
-import {resolveEnvironment,type EnvironmentState} from '../environment/types.js';
+import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
+import {WinterSystem} from '../environment/winter.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
 import {deriveSurfaceState,effectiveFriction,type SurfaceState} from '../materials/surface.js';
 import {evaluateFracture,type FractureDecision} from '../materials/fracture.js';
@@ -8,7 +9,7 @@ import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
 import type {EngineEvent} from './events.js';
-import type {BodySpec,CameraSpec,Color,EntitySpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
+import type {BodySpec,CameraSpec,Color,EnvironmentalSpec,EntitySpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {validateScene} from './validate.js';
 
 export interface RuntimeMaterial {
@@ -26,6 +27,7 @@ export interface RuntimeEntity {
   scale:MutableVec3;
   readonly mesh?:Primitive;
   readonly material:RuntimeMaterial;
+  readonly environmental?:EnvironmentalSpec;
   readonly body?:RigidBody;
   /** Engine-generated transient geometry is removed after this simulation time. */
   expiresAt?:number;
@@ -36,7 +38,8 @@ export class Scene {
   readonly spec:SceneSpec;
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
-  readonly environment:EnvironmentState;
+  readonly winter=new WinterSystem();
+  environment:EnvironmentState;
   time=0;
   tick=0;
   camera:CameraSpec;
@@ -47,7 +50,7 @@ export class Scene {
 
   constructor(input:SceneSpec){
     this.spec=validateScene(input);
-    this.environment=resolveEnvironment(this.spec.environment);
+    this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
@@ -73,6 +76,7 @@ export class Scene {
     const runtime:RuntimeEntity={
       id:spec.id,position,rotation,scale,
       material:Object.freeze({kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
+      ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(mesh?{mesh}:{}),...(body?{body}:{})
     };
     this.entities.set(spec.id,runtime);
@@ -80,6 +84,9 @@ export class Scene {
   }
 
   step(dt=1/60):void{
+    const at=this.time+dt;
+    this.environment=resolveEnvironmentAt(this.spec.environment,at);
+    this.winter.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
     const pending=new Map<string,FractureDecision>();
     this.physics.step(dt,contact=>{
       const result=evaluateFracture(contact);
@@ -89,7 +96,6 @@ export class Scene {
       }
       return result.decision;
     });
-    const at=this.time+dt;
     this.emitContactEvents(at);
     for(const fracture of pending.values())this.fracture(fracture,at);
     this.cleanupGenerated(at);
