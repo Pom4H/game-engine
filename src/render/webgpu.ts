@@ -146,10 +146,55 @@ fn tyreTracks(z:f32)->f32{
   return vec4<f32>((albedo*diffuse+vec3<f32>(spec+rim))*nightTint+warm,u.color.a);
 }`;
 
+const SNOW_SHADER=`
+struct S {
+  vp: mat4x4<f32>,
+  camera: vec4<f32>,
+  params: vec4<f32>, // time, intensity, wind x, wind z
+}
+@group(0) @binding(0) var<uniform> s:S;
+
+struct O {
+  @builtin(position) position:vec4<f32>,
+  @location(0) alpha:f32,
+}
+
+fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
+
+@vertex fn vs(@builtin(vertex_index) vertex:u32,@builtin(instance_index) instance:u32)->O{
+  let i=f32(instance)+1.0;
+  let rx=hash1(i*12.9898),rz=hash1(i*78.233),ry=hash1(i*31.731);
+  let fall=fract(ry-s.params.x*(0.22+hash1(i*5.17)*0.16));
+  let windAge=1.0-fall;
+  let world=vec3<f32>(
+    s.camera.x+(rx-.5)*30.0+s.params.z*windAge*.65,
+    s.camera.y-3.0+fall*13.0,
+    s.camera.z+(rz-.5)*26.0+s.params.w*windAge*.65
+  );
+  let center=s.vp*vec4<f32>(world,1.0);
+  var corner=vec2<f32>(0.0,0.0);
+  if(vertex==0u){corner=vec2<f32>(-1.0,-1.0);}
+  if(vertex==1u){corner=vec2<f32>( 1.0,-1.0);}
+  if(vertex==2u){corner=vec2<f32>( 1.0, 1.0);}
+  if(vertex==3u){corner=vec2<f32>(-1.0,-1.0);}
+  if(vertex==4u){corner=vec2<f32>( 1.0, 1.0);}
+  if(vertex==5u){corner=vec2<f32>(-1.0, 1.0);}
+  let size=(0.0017+hash1(i*9.13)*0.0022)*center.w;
+  var out:O;
+  out.position=center+vec4<f32>(corner.x*size,corner.y*size*1.7,0.0,0.0);
+  out.alpha=s.params.y*(0.32+hash1(i*3.77)*0.48);
+  return out;
+}
+@fragment fn fs(in:O)->@location(0) vec4<f32>{
+  return vec4<f32>(0.91,0.95,1.0,in.alpha);
+}
+`;
+
 export class WebGPURenderer implements Renderer{
   private constructor(
     private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,
     private readonly opaquePipeline:GPUAny,private readonly transparentPipeline:GPUAny,private readonly bindGroupLayout:GPUAny,
+    private readonly snowPipeline:GPUAny,private readonly snowUniform:GPUAny,private readonly snowBind:GPUAny,
   ){device.addEventListener?.('uncapturederror',(event:any)=>{const message=event?.error?.message??String(event?.error??'WebGPU validation error');this.errors.push(message);console.error('Game Engine WebGPU:',message);});device.lost?.then((info:any)=>this.errors.push(`Device lost: ${info?.message??'unknown'}`));}
   private depth:GPUAny=null;private depthW=0;private depthH=0;
   private readonly meshes=new Map<string,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly errors:string[]=[];
@@ -164,7 +209,10 @@ export class WebGPURenderer implements Renderer{
     const bindGroupLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]}),pipelineLayout=device.createPipelineLayout({bindGroupLayouts:[bindGroupLayout]});
     const opaquePipeline=device.createRenderPipeline({layout:pipelineLayout,vertex,fragment:{module:shader,entryPoint:'fs',targets:[{format}]},primitive:{topology:'triangle-list',cullMode:'none'},depthStencil:{format:'depth24plus',depthWriteEnabled:true,depthCompare:'less'}});
     const transparentPipeline=device.createRenderPipeline({layout:pipelineLayout,vertex,fragment:{module:shader,entryPoint:'fs',targets:[{format,blend:{color:{srcFactor:'src-alpha',dstFactor:'one-minus-src-alpha',operation:'add'},alpha:{srcFactor:'one',dstFactor:'one-minus-src-alpha',operation:'add'}}}]},primitive:{topology:'triangle-list',cullMode:'none'},depthStencil:{format:'depth24plus',depthWriteEnabled:false,depthCompare:'less'}});
-    return new WebGPURenderer(canvas,device,context,format,opaquePipeline,transparentPipeline,bindGroupLayout);
+    const snowShader=device.createShaderModule({code:SNOW_SHADER}),snowLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:1,buffer:{type:'uniform'}}]}),snowPipelineLayout=device.createPipelineLayout({bindGroupLayouts:[snowLayout]});
+    const snowPipeline=device.createRenderPipeline({layout:snowPipelineLayout,vertex:{module:snowShader,entryPoint:'vs'},fragment:{module:snowShader,entryPoint:'fs',targets:[{format,blend:{color:{srcFactor:'src-alpha',dstFactor:'one-minus-src-alpha',operation:'add'},alpha:{srcFactor:'one',dstFactor:'one-minus-src-alpha',operation:'add'}}}]},primitive:{topology:'triangle-list',cullMode:'none'},depthStencil:{format:'depth24plus',depthWriteEnabled:false,depthCompare:'less'}});
+    const snowUniform=device.createBuffer({size:96,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
+    return new WebGPURenderer(canvas,device,context,format,opaquePipeline,transparentPipeline,bindGroupLayout,snowPipeline,snowUniform,snowBind);
   }
 
   resize():void{
@@ -182,12 +230,19 @@ export class WebGPURenderer implements Renderer{
     const visible=[...scene.entities.values()].filter(entity=>entity.mesh),opaque=visible.filter(entity=>entity.material.color[3]>=.98),transparent=visible.filter(entity=>entity.material.color[3]<.98).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
     pass.setPipeline(this.opaquePipeline);for(const entity of opaque)this.draw(pass,entity,vp);
     pass.setPipeline(this.transparentPipeline);for(const entity of transparent)this.draw(pass,entity,vp);
+    const snowIntensity=Math.max(0,Math.min(1,scene.environment.snowfallRate/2.2e-5));
+    if(snowIntensity>.001){
+      const snowData=new Float32Array(24);snowData.set(vp,0);snowData.set([camera.position[0],camera.position[1],camera.position[2],1],16);
+      snowData.set([scene.time,snowIntensity,scene.environment.wind[0],scene.environment.wind[2]],20);
+      this.device.queue.writeBuffer(this.snowUniform,0,snowData);pass.setPipeline(this.snowPipeline);pass.setBindGroup(0,this.snowBind);
+      const flakes=Math.max(80,Math.round(900*snowIntensity));pass.draw(6,flakes);this.drawCalls++;this.triangles+=flakes*2;
+    }
     pass.end();this.device.queue.submit([encoder.finish()]);
   }
 
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();}
   inspect():RenderStats{return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,errors:[...this.errors]};}
-  dispose():void{for(const m of this.meshes.values()){m.vertex.destroy?.();m.index.destroy?.();}for(const o of this.objects.values())o.uniform.destroy?.();this.depth?.destroy?.();this.meshes.clear();this.objects.clear();}
+  dispose():void{for(const m of this.meshes.values()){m.vertex.destroy?.();m.index.destroy?.();}for(const o of this.objects.values())o.uniform.destroy?.();this.snowUniform.destroy?.();this.depth?.destroy?.();this.meshes.clear();this.objects.clear();}
 
   private draw(pass:GPUAny,entity:RuntimeEntity,vp:Mat4):void{
     if(!entity.mesh)return;const mesh=this.mesh(entity.mesh),object=this.object(entity.id),model=this.model(entity),mvp=multiply4(vp,model),uniform=new Float32Array(64),surface=entity.material.surface;
