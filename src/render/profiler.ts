@@ -13,8 +13,8 @@ export type RenderGpuQuantum=typeof RENDER_GPU_QUANTA[number];
 export interface RenderWork {
   entities:number;visible:number;opaque:number;transparent:number;
   cameraOpaque:number;cameraTransparent:number;shadowCasters:number;reflected:number;
-  drawCalls:number;triangles:number;snowInstances:number;uploadBytes:number;
-  uniformUploadBytes:number;surfaceUploadBytes:number;lightUploadBytes:number;frameUploadBytes:number;snowUploadBytes:number;environmentUploadBytes:number;
+  drawCalls:number;triangles:number;snowInstances:number;shadowBatchedInstances:number;uploadBytes:number;
+  uniformUploadBytes:number;surfaceUploadBytes:number;lightUploadBytes:number;frameUploadBytes:number;snowUploadBytes:number;environmentUploadBytes:number;instanceUploadBytes:number;
 }
 export interface QuantumStats {meanMs:number;p50Ms:number;p95Ms:number;maxMs:number}
 export interface RenderFrameTiming {
@@ -47,7 +47,7 @@ export interface RenderProfileSnapshot {
 type GPUAny=any;
 interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null}
 interface OcclusionSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number}
-const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,uploadBytes:0,uniformUploadBytes:0,surfaceUploadBytes:0,lightUploadBytes:0,frameUploadBytes:0,snowUploadBytes:0,environmentUploadBytes:0});
+const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,shadowBatchedInstances:0,uploadBytes:0,uniformUploadBytes:0,surfaceUploadBytes:0,lightUploadBytes:0,frameUploadBytes:0,snowUploadBytes:0,environmentUploadBytes:0,instanceUploadBytes:0});
 const percentile=(values:readonly number[],q:number)=>{if(!values.length)return 0;const a=[...values].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor((a.length-1)*q))]!;};
 const stats=(values:readonly number[]):QuantumStats=>({meanMs:values.length?values.reduce((a,b)=>a+b,0)/values.length:0,p50Ms:percentile(values,.5),p95Ms:percentile(values,.95),maxMs:values.length?Math.max(...values):0});
 const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work:RenderWork):RenderFrameTiming=>Object.freeze({frame,totalMs,quanta:Object.freeze({...quanta}),work:Object.freeze({...work})});
@@ -96,7 +96,7 @@ export class RenderProfiler {
   setWork(work:Partial<RenderWork>):void{if(this.enabled)Object.assign(this.work,work);}
   setAtoms(atoms:RenderAtomReport):void{if(this.enabled)this.atoms=atoms;}
   currentWork():RenderWork{return{...this.work};}
-  addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'|'environment'='uniform'):void{if(!this.enabled||!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else if(kind==='snow')this.work.snowUploadBytes+=bytes;else this.work.environmentUploadBytes+=bytes;}
+  addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'|'environment'|'instance'='uniform'):void{if(!this.enabled||!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else if(kind==='snow')this.work.snowUploadBytes+=bytes;else if(kind==='environment')this.work.environmentUploadBytes+=bytes;else this.work.instanceUploadBytes+=bytes;}
 
   occlusionSet():GPUAny|undefined{return this.activeOcclusion&&this.occlusionQuerySet?this.occlusionQuerySet:undefined;}
   beginOcclusion(pass:GPUAny,name:'shadow'|'reflection'|'mainOpaque'|'mainTransparent'|'snow'):boolean{
