@@ -32,8 +32,10 @@ export interface EntitySpec {
   mesh?:Primitive;
   material?:MaterialSpec;
   environmental?:EnvironmentalSpec;
+  light?:LightSpec;
   body?:BodySpec;
 }
+export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number }
 export interface CameraSpec { position:Vec3; target:Vec3; fov?:number }
 export interface SceneSpec {
   version:1;
