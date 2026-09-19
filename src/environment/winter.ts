@@ -39,7 +39,7 @@ export class WinterSystem {
       this.stepSurface(state,entity,dt,worldSeconds,environment);
     }
     for(const [id,state] of this.bodies){
-      const entity=entities.get(id);if(!entity?.body?.invMass){this.bodies.delete(id);continue;}
+      const entity=entities.get(id);if(!entity?.body||( !entity.body.invMass&&!entity.body.kinematic)){this.bodies.delete(id);continue;}
       this.stepBody(state,entity,dt,worldSeconds,environment);
     }
   }
@@ -56,7 +56,7 @@ export class WinterSystem {
           slush:0,dirt:entity.material.surface.dirt*.25,trafficHeatC:0,trackMelt:0,puddle:0,frictionScale:1,
         });
       }
-      if(entity.body?.invMass&&!this.bodies.has(entity.id)){
+      if((entity.body?.invMass||entity.body?.kinematic)&&!this.bodies.has(entity.id)){
         this.bodies.set(entity.id,{id:entity.id,snowCoverage:0,rearSnow:0,wetness:0,roadDirt:0,directionX:1,directionZ:0});
       }
     }
