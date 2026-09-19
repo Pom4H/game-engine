@@ -14,13 +14,13 @@ const fakeDevice={
   createBuffer:({size})=>new FakeBuffer(size),
 };
 test('render profiler records CPU quanta and resets benchmark window',()=>{
- const profiler=new RenderProfiler({},false,16);profiler.beginFrame();
+ const profiler=new RenderProfiler({},{enabled:true,timestampQueries:false,capacity:16});profiler.beginFrame();
  const value=profiler.measure('frame',()=>42);assert.equal(value,42);profiler.setWork({visible:7,drawCalls:3});profiler.submitted();
- let profile=profiler.inspect();assert.equal(profile.cpuFrames,1);assert.equal(profile.gpuFrames,0);assert.equal(profile.timestampQueries,false);assert.equal(profile.latestCpu.work.visible,7);assert.ok(profile.cpu.frame.meanMs>=0);
+ let profile=profiler.inspect();assert.equal(profile.enabled,true);assert.equal(profile.cpuFrames,1);assert.equal(profile.gpuFrames,0);assert.equal(profile.timestampQueries,false);assert.equal(profile.latestCpu.work.visible,7);assert.ok(profile.cpu.frame.meanMs>=0);
  profiler.reset();profile=profiler.inspect();assert.equal(profile.cpuFrames,0);assert.equal(profile.gpuFrames,0);
 });
 test('render profiler resolves named GPU pass timestamps asynchronously',async()=>{
- const profiler=new RenderProfiler(fakeDevice,true,16);profiler.beginFrame();
+ const profiler=new RenderProfiler(fakeDevice,{enabled:true,timestampQueries:true,capacity:16});profiler.beginFrame();
  const shadow=profiler.timestampWrites('shadow');assert.equal(shadow.beginningOfPassWriteIndex,0);assert.equal(shadow.endOfPassWriteIndex,1);
  assert.equal(profiler.timestampWrites('post').endOfPassWriteIndex,RENDER_GPU_QUANTA.length*2-1);
  const encoder={
