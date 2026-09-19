@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate} from '../dist/index.js';
+import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,material} from '../dist/index.js';
 
 test('fixed clock keeps delayed time as bounded debt',()=>{
   const clock=new FixedClock(10,100,4);let steps=0;clock.reset(0);
@@ -99,4 +99,17 @@ test('rotating debris settles on an explicit concrete surface',()=>{
   assert.deepEqual(shard.body.velocity,[0,0,0]);
   assert.deepEqual(shard.body.angularVelocity,[0,0,0]);
   assert.ok(events.some(event=>event.type==='impact'&&event.materialA==='glass'&&event.materialB==='concrete'),'contact acoustics should see glass ↔ concrete');
+});
+
+
+test('environment derives concrete moss without renderer controls',()=>{
+  const concrete=material('concrete');
+  const dry=deriveSurfaceState(concrete,{finish:'rough',ageYears:12,treatment:'none'},resolveEnvironment({humidity:.28,temperatureC:24,precipitation:'rare',sunlight:.9,groundMoisture:.15}));
+  const humid=deriveSurfaceState(concrete,{finish:'rough',ageYears:12,treatment:'none'},resolveEnvironment({humidity:.9,temperatureC:13,precipitation:'frequent',sunlight:.28,groundMoisture:.82}));
+  const protectedSurface=deriveSurfaceState(concrete,{finish:'rough',ageYears:12,treatment:'biocide'},resolveEnvironment({humidity:.9,temperatureC:13,precipitation:'frequent',sunlight:.28,groundMoisture:.82}));
+  assert.ok(humid.wetness>dry.wetness);
+  assert.ok(humid.moss>.25,`humid aged concrete should grow moss, got ${humid.moss}`);
+  assert.ok(humid.moss>dry.moss*3);
+  assert.ok(protectedSurface.moss<humid.moss*.2,'biocide is a semantic cause that suppresses moss');
+  assert.ok(humid.frictionScale<dry.frictionScale,'wet/mossy concrete should alter contact friction');
 });
