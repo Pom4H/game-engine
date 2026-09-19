@@ -1,0 +1,54 @@
+name: Render quanta verification
+on:
+  push:
+    branches: [feat/engine-foundation]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-quanta-verification
+  cancel-in-progress: true
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run ci
+
+  gpu-profile:
+    needs: core
+    runs-on: [self-hosted, gpu, windows]
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: if not exist artifacts mkdir artifacts
+      - name: Profile 720p
+        run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1280 --height 720 --out artifacts/render-profile-720p.json
+      - name: Profile 1080p
+        run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1920 --height 1080 --out artifacts/render-profile-1080p.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: render-quanta-${{ github.sha }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
