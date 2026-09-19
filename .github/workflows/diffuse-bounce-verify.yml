@@ -1,0 +1,69 @@
+name: Diffuse bounce GPU A/B
+
+on:
+  push:
+    branches: [feat/diffuse-bounce]
+  workflow_dispatch:
+
+concurrency:
+  group: diffuse-bounce-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: [self-hosted, gpu, windows]
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Candidate verification
+        run: |
+          bun install
+          bun run ci
+      - name: Baseline worktree
+        run: |
+          set "BEFORE_ROOT=%RUNNER_TEMP%\game-engine-before-%GITHUB_RUN_ID%"
+          git worktree add --detach "%BEFORE_ROOT%" 36506d9d0b03d80c76ce7049e149846bdf45e32e
+          echo BEFORE_ROOT=%BEFORE_ROOT%>>"%GITHUB_ENV%"
+          cd /d "%BEFORE_ROOT%"
+          bun install
+          bun run build
+      - name: Render identical A/B frames
+        run: |
+          if not exist artifacts mkdir artifacts
+          cd /d "%BEFORE_ROOT%"
+          if not exist artifacts mkdir artifacts
+          node dist/cli.js render examples/winter-street.ts --time 18 --width 1280 --height 720 --out artifacts/before-winter.png
+          node dist/cli.js render tools/profiling/heavy.scene.mjs --time 1 --width 1280 --height 720 --out artifacts/before-heavy.png
+          copy /Y artifacts\before-winter.png "%GITHUB_WORKSPACE%\artifacts\before-winter.png"
+          copy /Y artifacts\before-heavy.png "%GITHUB_WORKSPACE%\artifacts\before-heavy.png"
+          cd /d "%GITHUB_WORKSPACE%"
+          node dist/cli.js render examples/winter-street.ts --time 18 --width 1280 --height 720 --out artifacts/after-winter.png
+          node dist/cli.js render tools/profiling/heavy.scene.mjs --time 1 --width 1280 --height 720 --out artifacts/after-heavy.png
+          node tools/check-png.mjs artifacts/after-winter.png
+          node tools/check-png.mjs artifacts/after-heavy.png
+      - name: Profile identical heavy scene
+        run: |
+          cd /d "%BEFORE_ROOT%"
+          node dist/cli.js profile tools/profiling/heavy.scene.mjs --duration 2.5 --warmup 1 --width 1920 --height 1080 --out artifacts/before-heavy-profile.json
+          copy /Y artifacts\before-heavy-profile.json "%GITHUB_WORKSPACE%\artifacts\before-heavy-profile.json"
+          cd /d "%GITHUB_WORKSPACE%"
+          node dist/cli.js profile tools/profiling/heavy.scene.mjs --duration 2.5 --warmup 1 --width 1920 --height 1080 --out artifacts/after-heavy-profile.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: diffuse-bounce-ab-${{ github.sha }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: error
