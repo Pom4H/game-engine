@@ -163,7 +163,7 @@ fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
 
 @vertex fn vs(@builtin(vertex_index) vertex:u32,@builtin(instance_index) instance:u32)->O{
   let i=f32(instance)+1.0;
-  let rx=hash1(i*12.9898),rz=hash1(i*78.233),ry=hash1(i*31.731);
+  let rx=hash1(i*12.9898);let rz=hash1(i*78.233);let ry=hash1(i*31.731);
   let fall=fract(ry-s.params.x*(0.22+hash1(i*5.17)*0.16));
   let windAge=1.0-fall;
   let world=vec3<f32>(
