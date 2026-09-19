@@ -164,6 +164,10 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>}
     let mineral=noise3(in.worldPos*5.0+seed);let streak=noise3(in.worldPos*vec3<f32>(3.4,.19,3.4)+seed);
     albedo*=.87+mineral*.065+streak*.07;
   }
+  if(u.pbr.z>4.5){
+    let weave=noise3(in.worldPos*210.0);let folds=noise3(in.worldPos*vec3<f32>(17,31,19));
+    albedo*=.90+weave*.075+folds*.07;
+  }
   // Concrete / paving. Square sidewalk tiles are a semantic surface consequence.
   if(materialKind>3.5 && materialKind<4.5) {
     let coarse=fbm(in.worldPos*2.4+seed);
@@ -241,8 +245,8 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>}
     let p=f.reflectionVP*vec4<f32>(in.worldPos,1);let uv=p.xy/p.w*vec2<f32>(.5,-.5)+.5;
     let blur=vec2<f32>(.0015,.004)*(roughness+.2);var reflection=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.28;
     for(var k=0;k<6;k++){let a=f32(k)*1.0472;reflection+=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+vec2<f32>(cos(a),sin(a))*blur,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.12;}
-    let icePatch=smoothstep(.32,.62,noise3(in.worldPos*vec3<f32>(.35,.1,1.1)));
-    let ice=clamp(u.winter.w/.0015,0.0,1.0);let fres=.025+.40*pow(1.0-nv,5.0);
+    let icePatch=select(smoothstep(.40,.68,noise3(in.worldPos*vec3<f32>(.35,.1,1.1))),1.0,u.winter.y>.001);
+    let ice=clamp(max(u.winter.w/.0015,u.winter.y/.003),0.0,1.0);let fres=.025+.40*pow(1.0-nv,5.0);
     color=mix(color,reflection,fres*icePatch*ice);
   }
   let fog=1.0-exp(-distance(f.eye.xyz,in.worldPos)*f.sky.w);
@@ -251,47 +255,24 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>}
 }`;
 
 const SNOW_SHADER=`
-struct S {
-  vp: mat4x4<f32>,
-  camera: vec4<f32>,
-  params: vec4<f32>, // time, intensity, wind x, wind z
-}
+struct S {vp:mat4x4<f32>,camera:vec4<f32>,params:vec4<f32>,right:vec4<f32>,up:vec4<f32>}
 @group(0) @binding(0) var<uniform> s:S;
-
-struct O {
-  @builtin(position) position:vec4<f32>,
-  @location(0) alpha:f32,
-  @location(1) uv:vec2<f32>,
-}
-
+struct O {@builtin(position) position:vec4<f32>,@location(0) alpha:f32,@location(1) uv:vec2<f32>,@location(2) tone:f32}
 fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
-
 @vertex fn vs(@builtin(vertex_index) vertex:u32,@builtin(instance_index) instance:u32)->O{
-  let i=f32(instance)+1.0;
-  let rx=hash1(i*12.9898);let rz=hash1(i*78.233);let ry=hash1(i*31.731);
-  let fall=fract(ry-s.params.x*(0.22+hash1(i*5.17)*0.16));
-  let windAge=1.0-fall;
-  let world=vec3<f32>(
-    s.camera.x+(rx-.5)*30.0+s.params.z*windAge*.65,
-    s.camera.y-3.0+fall*13.0,
-    s.camera.z+(rz-.5)*26.0+s.params.w*windAge*.65
-  );
-  let center=s.vp*vec4<f32>(world,1.0);
-  var corner=vec2<f32>(0.0,0.0);
-  if(vertex==0u){corner=vec2<f32>(-1.0,-1.0);}
-  if(vertex==1u){corner=vec2<f32>( 1.0,-1.0);}
-  if(vertex==2u){corner=vec2<f32>( 1.0, 1.0);}
-  if(vertex==3u){corner=vec2<f32>(-1.0,-1.0);}
-  if(vertex==4u){corner=vec2<f32>( 1.0, 1.0);}
-  if(vertex==5u){corner=vec2<f32>(-1.0, 1.0);}
-  let size=(.009+hash1(i*9.13)*.018);
-  var out:O;
-  out.position=center+vec4<f32>(corner.x*size,corner.y*size*1.7,0.0,0.0);
-  out.uv=corner;out.alpha=s.params.y*(0.32+hash1(i*3.77)*0.48);
-  return out;
+ let i=f32(instance)+1.0;let rx=hash1(i*12.9898);let rz=hash1(i*78.233);let ry=hash1(i*31.731);let t=s.params.x;
+ // Wrapping moves only the far boundary. Inside the volume flakes stay in world
+ // space as the camera travels, with individual fall speed and lateral flutter.
+ let wx=rx*52.0+s.params.z*t*.32+sin(t*.8+i)*.17;let wz=rz*52.0+s.params.w*t*.32+cos(t*.63+i*1.7)*.15;
+ let world=vec3<f32>(s.camera.x+fract((wx-s.camera.x+26.0)/52.0)*52.0-26.0,fract(ry-t*(.024+hash1(i*5.17)*.025))*20.0,s.camera.z+fract((wz-s.camera.z+26.0)/52.0)*52.0-26.0);
+ var corners=array<vec2<f32>,6>(vec2<f32>(-1,-1),vec2<f32>(1,-1),vec2<f32>(1,1),vec2<f32>(-1,-1),vec2<f32>(1,1),vec2<f32>(-1,1));let q=corners[vertex];
+ let distance=length(world-s.camera.xyz);let size=.008+pow(hash1(i*9.13),3.0)*.022;
+ let angle=t*.45+i;let local=vec2<f32>(q.x*cos(angle)-q.y*sin(angle),q.x*sin(angle)+q.y*cos(angle));
+ var out:O;out.position=s.vp*vec4<f32>(world+(s.right.xyz*local.x+s.up.xyz*local.y)*size,1);
+ out.uv=q;out.alpha=(.38+hash1(i*3.77)*.5)*smoothstep(.3,1.4,distance)*(1.0-smoothstep(21.0,26.0,max(abs(world.x-s.camera.x),abs(world.z-s.camera.z))));out.tone=.77+hash1(i*6.8)*.23;return out;
 }
 @fragment fn fs(in:O)->@location(0) vec4<f32>{
-  let fade=1.0-smoothstep(.1,1.0,length(in.uv));return vec4<f32>(.8,.9,1.0,in.alpha*fade);
+ let r=length(in.uv);let lobes=.84+.06*cos(atan2(in.uv.y,in.uv.x)*6.0);let fade=1.0-smoothstep(.15,lobes,r);return vec4<f32>(vec3<f32>(.86,.92,1)*in.tone,in.alpha*fade);
 }
 `;
 
@@ -325,7 +306,7 @@ export class WebGPURenderer implements Renderer{
     const postModule=device.createShaderModule({code:POST_SHADER}),post=device.createRenderPipeline({layout:'auto',vertex:{module:postModule,entryPoint:'vs'},fragment:{module:postModule,entryPoint:'fs',targets:[{format}]},primitive:{topology:'triangle-list'}});
     const snowModule=device.createShaderModule({code:SNOW_SHADER}),snowLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:1,buffer:{type:'uniform'}}]});
     const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0}]},primitive:{topology:'triangle-list'},multisample:{count:4},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
-    const snowUniform=device.createBuffer({size:96,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
+    const snowUniform=device.createBuffer({size:128,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
     for(const shader of [module,skyModule,postModule,snowModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
     return new WebGPURenderer(canvas,device,context,format,{emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,sampler,frameBind,reflectionBind,reflected,lightBind:null,opaque,transparent,shadowPipeline,sky,post,snow,snowUniform,snowBind});
   }
@@ -362,7 +343,7 @@ export class WebGPURenderer implements Renderer{
     this.drawCalls=0;this.triangles=0;pass.setPipeline(this.gpu.opaque);pass.setBindGroup(1,this.gpu.lightBind);for(const e of opaque)this.draw(pass,e,true);
     pass.setPipeline(this.gpu.transparent);for(const e of transparent)this.draw(pass,e,true);
     const intensity=Math.min(1,scene.environment.snowfallRate/2.2e-5);
-    if(intensity>.001){const snow=new Float32Array(24);snow.set(vp);snow.set([...camera.position,1],16);snow.set([scene.time,intensity,scene.environment.wind[0],scene.environment.wind[2]],20);this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.draw(6,Math.round(2200*intensity));}
+    if(intensity>.001){const snow=new Float32Array(32);snow.set(vp);snow.set([...camera.position,1],16);snow.set([scene.time,intensity,scene.environment.wind[0],scene.environment.wind[2]],20);snow.set([...right,0],24);snow.set([...up,0],28);this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.draw(6,Math.round(24000*intensity));}
     pass.end();const post=encoder.beginRenderPass({colorAttachments:[{view:this.context.getCurrentTexture().createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});post.setPipeline(this.gpu.post);post.setBindGroup(0,this.postBind);post.draw(3);post.end();this.device.queue.submit([encoder.finish()]);
   }
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();}
@@ -377,7 +358,7 @@ export class WebGPURenderer implements Renderer{
     const nearest=this.lastLights.slice().sort((a,b)=>distance2(a.position,entity.position)-distance2(b.position,entity.position)).slice(0,4);
     for(let i=0;i<nearest.length;i++){const source=nearest[i]!,light=source.light!;uniform.set([...source.position,light.range??12],64+i*8);uniform.set([...(light.color??[1,.78,.5]),light.intensity??1],68+i*8);}
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],96);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],100);
-    uniform.set([entity.material.roughness??-1,entity.material.metalness??(entity.material.kind==='steel'?.6:0),entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:0,0],104);uniform.set([...(entity.material.emissive??[0,0,0]),0],108);
+    uniform.set([entity.material.roughness??-1,entity.material.metalness??(entity.material.kind==='steel'?.6:0),entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,0],104);uniform.set([...(entity.material.emissive??[0,0,0]),0],108);
     if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((c,i)=>pixels.set([c.trackMelt,c.snowDepthM,c.waterDepthM,c.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);}this.device.queue.writeBuffer(object.uniform,0,uniform);
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean):void{const mesh=this.mesh(entity.mesh!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}

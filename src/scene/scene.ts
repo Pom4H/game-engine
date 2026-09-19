@@ -17,7 +17,7 @@ import {validateEntity,validateScene} from './validate.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
-  readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window';
+  readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';
   readonly color:Color;
   readonly profile:PhysicalMaterial;
   readonly surface:SurfaceState;

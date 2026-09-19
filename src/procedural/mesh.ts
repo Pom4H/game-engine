@@ -88,14 +88,16 @@ function cylinderMesh(radius:number,height:number,top:number,segments:number):Me
 export function snowDriftMesh(size:readonly[number,number,number],seed:number,segments=56,continuous=false,offset=0):MeshData{
  const nx=Math.max(8,Math.min(128,Math.round(segments))),nz=Math.min(128,Math.max(20,Math.round(nx*size[2]/size[0]))),p:number[]=[],n:number[]=[],indices:number[]=[];
  const phase=(seed>>>0)%10000*.013;
+ const lattice=(x:number,z:number)=>{let h=Math.imul(x,374761393)^Math.imul(z,668265263)^seed;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967295;};
+ const noise=(x:number,z:number)=>{const ix=Math.floor(x),iz=Math.floor(z),u=x-ix,v=z-iz,s=u*u*(3-2*u),t=v*v*(3-2*v);return (lattice(ix,iz)*(1-s)+lattice(ix+1,iz)*s)*(1-t)+(lattice(ix,iz+1)*(1-s)+lattice(ix+1,iz+1)*s)*t;};
  const height=(u:number,v:number)=>{
   const x=u*size[0]+offset,z=v*size[2];
   const ridge=.12*Math.sin(x*.93+phase)+.055*Math.sin(x*2.83-phase);
   const displaced=v + .13*Math.sin(x*.43+phase)*Math.max(0,1-4*v*v);
   const cross=Math.max(0,1-4*displaced*displaced);
   const ends=continuous?1:Math.pow(Math.max(0,Math.sin(Math.PI*(u+.5))),.30);
-  const drift=.74+.17*Math.sin(x*.39+phase)+.11*Math.sin(x*1.12+phase)*Math.sin(x*.21+2)+.06*Math.sin(x*3.73+z*2.3+phase);
-  const grain=.019*Math.sin(x*14.3+z*11.8+phase)*Math.sin(x*7.4-z*9.1);
+  const drift=.60+noise(x*.45+phase,z*.7)*.38+noise(x*1.6,z*2.3+phase)*.16;
+  const grain=(noise(x*13.3+phase,z*17.8)-.5)*.011+(noise(x*4.4,z*6.2+phase)-.5)*.022;
   return Math.max(0,size[1]*(Math.pow(cross,1.30+.24*Math.sin(x*.31+phase))*ends*drift*(1+v*ridge*2.0)+grain*cross));
  };
  for(let iz=0;iz<=nz;iz++)for(let ix=0;ix<=nx;ix++){

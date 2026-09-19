@@ -8,9 +8,11 @@ import {fileURLToPath} from 'node:url';
 import {shots} from './shots.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),mode=process.argv[2]??'preview';
 
-const out=join(root,'artifacts/promo');await mkdir(out,{recursive:true});
+if(!['preview','storyboard','all',...shots.map(s=>s.id)].includes(mode))throw new Error(`Unknown capture mode or shot: ${mode}`);
+if(process.argv[3]&&!shots.some(s=>s.id===process.argv[3]))throw new Error(`Unknown shot filter: ${process.argv[3]}`);
+const out=join(root,'artifacts/promo-v2');await mkdir(out,{recursive:true});
 const html=await readFile(join(root,'tools/promo/player.html'));
-const server=createServer(async(req,res)=>{try{const url=new URL(req.url,'http://localhost');if(url.pathname==='/'){res.setHeader('content-type','text/html');res.end(html);return;}if(['/city.mjs','/shots.mjs','/vehicle.mjs','/laboratory.mjs'].includes(url.pathname)){res.setHeader('content-type','text/javascript');res.end(await readFile(join(root,'tools/promo',url.pathname.slice(1))));return;}const match=url.pathname.match(/^\/dist\/(.+\.js)$/);if(!match||match[1].includes('..')){res.statusCode=404;res.end();return;}res.setHeader('content-type','text/javascript');res.end(await readFile(join(root,'dist',match[1])));}catch(e){res.statusCode=500;res.end(String(e));}});
+const server=createServer(async(req,res)=>{try{const url=new URL(req.url,'http://localhost');if(url.pathname==='/'){res.setHeader('content-type','text/html');res.end(html);return;}if(['/city.mjs','/shots.mjs','/vehicle.mjs','/laboratory.mjs','/actors.mjs','/snow-surface.mjs','/wet-spray.mjs'].includes(url.pathname)){res.setHeader('content-type','text/javascript');res.end(await readFile(join(root,'tools/promo',url.pathname.slice(1))));return;}if(url.pathname==='/assets/m3.json'){res.setHeader('content-type','application/json');res.end(await readFile(join(root,'tools/promo/assets/m3.json')));return;}const match=url.pathname.match(/^\/dist\/(.+\.js)$/);if(!match||match[1].includes('..')){res.statusCode=404;res.end();return;}res.setHeader('content-type','text/javascript');res.end(await readFile(join(root,'dist',match[1])));}catch(e){res.statusCode=500;res.end(String(e));}});
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;
 const profile=await mkdtemp(join(tmpdir(),'winter-promo-'));
 const child=spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu',`--user-data-dir=${profile}`,'--remote-debugging-port=0','--window-size=1920,1080','about:blank'],{stdio:['ignore','ignore','pipe']});
@@ -34,7 +36,7 @@ try{
   if(mode==='storyboard'){for(const [label,t] of [['start',0],['mid',clip.duration*.5],['end',clip.duration-1/30]]){await evaluate(`await window.promo.frame(${t});`);await writeFile(join(out,`${name}-${label}.png`),await screenshot());}const inspection=await evaluate('return window.promo.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));console.log('storyboard',name);continue;}
   if(mode==='preview'){
    await evaluate(`await window.promo.frame(${clip.duration*.5});`);
-   await writeFile(join(out,`${name}-layout.png`),await screenshot());const inspection=await evaluate('return window.promo.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));console.log('preview',name);continue;
+   await writeFile(join(out,`${name}-layout.png`),await screenshot());const inspection=await evaluate('return window.promo.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));console.log('preview',name,JSON.stringify(inspection));continue;
   }
   const path=join(out,`${name}-silent.mp4`),encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate','30','-i','pipe:0','-an','-c:v','libx264','-preset','slow','-crf','17','-pix_fmt','yuv420p','-movflags','+faststart',path],{stdio:['pipe','inherit','inherit']});
   const completed=once(encoder,'exit');
@@ -45,7 +47,7 @@ try{
   }
   encoder.stdin.end();const [code]=await completed;if(code!==0)throw new Error(`ffmpeg exit ${code}`);
   const inspection=await evaluate('return window.promo.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));
-  {await writeFile(join(out,`${name}-telemetry.json`),JSON.stringify(await evaluate('return window.promo.telemetry()')));await writeFile(join(out,`${name}-events.json`),JSON.stringify(await evaluate('return window.promo.events()')));await writeFile(join(out,`${name}-evidence.json`),JSON.stringify(inspection,null,2));}
+  {await writeFile(join(out,`${name}-telemetry.json`),JSON.stringify(await evaluate('return window.promo.telemetry()')));await writeFile(join(out,`${name}-footsteps.json`),JSON.stringify(await evaluate('return window.promo.footsteps()')));await writeFile(join(out,`${name}-events.json`),JSON.stringify(await evaluate('return window.promo.events()')));await writeFile(join(out,`${name}-evidence.json`),JSON.stringify(inspection,null,2));}
   console.log('recorded',name,JSON.stringify(inspection));
  }
 }finally{

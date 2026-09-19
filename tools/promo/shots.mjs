@@ -1,9 +1,9 @@
+// One street, one continuous action. Camera cuts preserve world simulation time.
 export const shots=[
- {id:'arrival',set:'street',duration:10,from:[-31,1.5,5.8],to:[-26,1.6,5.6],lookFrom:[-4,2.7,-1],lookTo:[6,2.8,-1.5],fov:47,title:'ПОСЛЕ СНЕГОПАДА'},
- {id:'snowbank',set:'street',duration:8,from:[-8,.68,3.0],to:[-3,.92,2.7],lookFrom:[-1,.48,3.9],lookTo:[5,.52,4.1],fov:42,focus:7,aperture:2.0,title:'СНЕГ ОБРЕТАЕТ ОБЪЁМ'},
- {id:'passage',set:'street',duration:10,from:[-21,2.7,-6.2],to:[-16,3.2,-6.2],lookFrom:[-32,1.05,-1.6],lookTo:[16,1.05,-1.6],track:'passing',fov:57,title:'ГОРОД ПРОДОЛЖАЕТ ДВИГАТЬСЯ'},
- {id:'square',set:'square',duration:9,from:[2,1.4,13.6],to:[7,1.6,15.1],lookFrom:[15,1.4,23],lookTo:[19,1.5,24],fov:46,title:'ТИШИНА ЗИМНЕГО СКВЕРА'},
- {id:'evening',set:'courtyard',duration:9,from:[-18,1.65,4.9],to:[-14,1.8,4.9],lookFrom:[2,2.6,5.0],lookTo:[10,2.8,5.0],fov:45,title:'ТЕПЛО СВЕТА. ХОЛОД ВОЗДУХА.'},
- {id:'material',set:'laboratory',duration:7,simulationRate:.25,from:[6,4.6,8],to:[4.5,3.8,8.5],lookFrom:[0,2.5,0],lookTo:[0,1.3,0],fov:42,title:'КОНТАКТ. ЭНЕРГИЯ. РАЗРУШЕНИЕ.',note:'ФИЗИКА ДВИЖКА · ЗАМЕДЛЕНИЕ ×0.25'},
- {id:'district',set:'street',duration:11,from:[-7,6.3,1.3],to:[-19,19,1.8],lookFrom:[23,2.8,-.5],lookTo:[25,4.0,0],fov:48,title:'МИР ИЗ ВЗАИМОДЕЙСТВИЙ'},
+ {id:'arrival',set:'street',offset:0,duration:8,from:[-30,1.65,5.8],to:[-27,1.7,5.6],lookFrom:[-9,2.0,0],lookTo:[2,2.2,-.5],fov:48,title:'ОДНА УЛИЦА. ЖИВОЙ ЗИМНИЙ МИР.'},
+ {id:'m3',set:'street',offset:8,duration:8,follow:'car',from:[7,1.02,3.6],to:[6.5,1.12,3.9],lookFrom:[0,.80,0],lookTo:[0,.80,0],fov:47,title:'BMW M3 / СНЕГ, ВОДА, КОНТАКТ'},
+ {id:'walk',set:'street',offset:16,duration:8,follow:'person',from:[-4.6,1.48,1.65],to:[-4.1,1.35,1.55],lookFrom:[.35,1.05,0],lookTo:[.55,1.05,0],fov:43,title:'КАЖДЫЙ ШАГ ОСТАВЛЯЕТ СЛЕД'},
+ {id:'footsteps',set:'street',offset:24,duration:6,follow:'person',from:[-1.55,.49,1.0],to:[-1.75,.44,.95],lookFrom:[0,.24,0],lookTo:[.06,.25,0],fov:48,focus:1.9,aperture:.4,title:'ОПОРА. ОТПЕЧАТОК. ХРУСТ СНЕГА.'},
+ {id:'snowbank',set:'street',offset:30,duration:8,from:[2,.85,2.65],to:[6,1.08,2.7],lookFrom:[12,.8,4.5],lookTo:[20,1.05,4.7],fov:46,title:'СУГРОБЫ И ПАДАЮЩИЕ ХЛОПЬЯ'},
+ {id:'evening',set:'courtyard',offset:38,duration:10,from:[2,1.75,5.1],to:[-2,2.2,4.8],lookFrom:[20,2.4,3.5],lookTo:[27,3.2,2.0],fov:48,title:'GAME ENGINE / МИР ИЗ ВЗАИМОДЕЙСТВИЙ',end:true},
 ];

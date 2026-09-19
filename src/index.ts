@@ -23,3 +23,7 @@ export {WinterSystem,type WinterSurfaceState,type WinterBodyState} from './envir
 
 export type {SceneModule,SceneModuleContext,SceneCommand} from './scene/modules.js';
 export {renderAmbience,type AmbienceFrame,type AmbienceOptions} from './audio/ambience.js';
+export {batchStaticScenery} from './procedural/static-batch.js';
+export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/footprints.js';
+
+export {renderFootsteps,type FootstepSound} from './audio/footsteps.js';

@@ -39,7 +39,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  let n=normalize(vec3<f32>(dot(wn,f.right.xyz),dot(wn,f.up.xyz),-dot(wn,f.forward.xyz)));
  let offsets=array<vec2<f32>,12>(vec2<f32>(1,0),vec2<f32>(.5,.86),vec2<f32>(-.5,.86),vec2<f32>(-1,0),vec2<f32>(-.5,-.86),vec2<f32>(.5,-.86),vec2<f32>(.4,.3),vec2<f32>(-.4,.3),vec2<f32>(.4,-.3),vec2<f32>(-.4,-.3),vec2<f32>(0,.6),vec2<f32>(0,-.6));
  var occlusion=0.0;
- let radius=clamp(.65*size.y/(max(z,.1)*f.forward.w*2.0),2.0,70.0);
+ let radius=clamp(.22*size.y/(max(z,.1)*f.forward.w*2.0),2.0,28.0);
  if(d<.99999){for(var k=0;k<12;k++){
   let coord=clamp(pixel+vec2<i32>(offsets[k]*radius),vec2<i32>(0),dims-1);let other=linearDepth(textureLoad(depth,coord,0));
   let delta=viewPos((vec2<f32>(coord)+.5)/size,other)-pos;let distance=length(delta);
@@ -48,7 +48,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  let coc=min(6.0,abs(z-f.params.z)/max(z,.1)*f.params.w);
  var base=textureSampleLevel(hdr,linearSampler,uv,0).rgb;
  if(coc>.15){var sum=base;for(var k=0;k<12;k++){sum+=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*coc/size,0).rgb;}base=sum/13.0;}
- var color=base*(1.0-min(.55,occlusion*.24));
+ var color=base*(1.0-min(.22,occlusion*.095));
  var bloom=vec3<f32>(0);
  for(var k=0;k<12;k++){let c=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*vec2<f32>(9.0,9.0)/size,0).rgb;bloom+=max(c-vec3<f32>(1.0),vec3<f32>(0));}
  color+=bloom*.035;

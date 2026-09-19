@@ -1,10 +1,11 @@
 import {makeLaboratory} from './laboratory.mjs';
-import {bodyMesh,cabinMesh,quad} from './vehicle.mjs';
-// Original procedural sets. Metres throughout; no downloaded assets.
+import {makeM3,makePedestrian,CAR} from './actors.mjs';
+import {batchStaticScenery} from '../../dist/index.js';
+// Original street geometry in metres; user supplied M3 imported offline.
 const C={snow:[.93,.955,.975,1],stone:[.59,.57,.52,1],dark:[.07,.075,.078,1],metal:[.16,.18,.19,1],glass:[.16,.23,.28,1]};
 const rng=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
-export function makeCity(kind='street'){if(kind==='laboratory')return makeLaboratory();
- const bodyGeometry=bodyMesh(),cabinGeometry=cabinMesh();
+export function makeCity(kind='street',m3){if(kind==='laboratory')return makeLaboratory();
+
  const entities=[],random=rng(20260920),motions=[];let sequence=0;
  const add=(id,p,mesh,color=C.stone,extra={})=>{const e={id,position:p,mesh,material:{kind:'default',color,roughness:.8,...extra.material},...extra};if(extra.material)e.material={kind:'default',color,roughness:.8,...extra.material};entities.push(e);return e;};
  const box=(id,p,s,c=C.stone,extra={})=>add(id,p,{kind:'box',size:s},c,extra);
@@ -58,7 +59,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   const cols=Math.max(3,Math.floor(width/2.4)),floors=Math.floor((height-1)/2.9);
   for(let floor=0;floor<floors;floor++)for(let col=0;col<cols;col++){
    const wx=x+(col-(cols-1)/2)*(width/(cols+.4)),wy=2+floor*2.82,w=1.2,h=1.65,wid=id+'-w'+floor+'-'+col;
-   const lit=random()<(kind==='courtyard'?.72:.20),glass=lit?[.50,.38,.23,1]:[.11+random()*.04,.17,.21,1];
+   const lit=random()<(kind==='courtyard'?.72:.20),glass=lit?[.50,.38,.23,1]:[.13,.17,.21,1];
    box(wid+'-recess',[wx,wy,face-sign*.055],[w+.16,h+.16,.08],[.09,.10,.10,1]);
    box(wid+'-glass',[wx,wy,face-sign*.1],[w,h,.04],glass,{material:{pattern:'window',metalness:.05,roughness:.23,emissive:lit?[.44,.27,.12]:[0,0,0]}});
    // Deep reveals, sash and sill provide actual silhouette and shadow geometry.
@@ -84,39 +85,13 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   for(let floor=1;floor<floors;floor++)box(id+'-band'+floor,[x,floor*2.82+.48,front-sign*.04],[width,.11,.18],trim);
  }
  function car(id,x,z,color,speed=0){
-  const start=entities.length,steel={roughness:.40,metalness:.30};
-  add(id+'-body',[x,0,z],bodyGeometry,color,{material:steel});
-  add(id+'-cabin',[x,0,z],cabinGeometry,color,{material:steel});
-  add(id+'-windshield',[x,0,z],quad([[1.28,1.111,-.790],[1.28,1.111,.790],[.61,1.629,.712],[.61,1.629,-.712]],[1,1,0]),[.095,.17,.21,1],{material:{metalness:.5,roughness:.15}});
-  add(id+'-backlight',[x,0,z],quad([[-1.12,1.110,.792],[-1.12,1.110,-.792],[-.62,1.66,-.712],[-.62,1.66,.712]],[-1,1,0]),[.095,.17,.21,1],{material:{metalness:.5,roughness:.15}});
-  for(const [window,points] of [['front',[[1.28,1.111,-.790],[1.28,1.111,.790],[.61,1.629,.712],[.61,1.629,-.712]]],['rear',[[-1.12,1.110,.792],[-1.12,1.110,-.792],[-.62,1.66,-.712],[-.62,1.66,.712]]]])for(let i=0;i<4;i++)rod(id+'-window-frame-'+window+i,points[i].map((v,k)=>v+[x,0,z][k]),points[(i+1)%4].map((v,k)=>v+[x,0,z][k]),.027,color);
-  for(const side of [-1,1]){
-   for(const [name,points] of [['rear',[[-.98,1.12],[-.58,1.56],[-.12,1.56],[-.12,1.12]]],['front',[[.0,1.12],[.0,1.56],[.57,1.54],[1.09,1.12]]]]){
-    let vertices=points.map(([xx,yy])=>[xx,yy,side*(.798-(yy-1.045)*.16)]);if(side<0)vertices=vertices.reverse();
-    add(id+'-glass-'+side+name,[x,0,z],quad(vertices,[0,.2,side]),[.10,.17,.20,1],{material:{roughness:.18,metalness:.4}});
-   }
-   box(id+'-chrome'+side,[x,.64,z+side*.88],[4.1,.055,.035],[.52,.56,.56,1],{material:{metalness:.9,roughness:.18}});
-   for(const xx of [-1.35,1.37]){
-    add(id+'-tyre'+side+xx,[x+xx,.33,z+side*.84],{kind:'torus',radius:.247,tube:.083,segments:48},[.04,.041,.042,1],{rotation:[Math.PI/2,0,0],material:{roughness:.97,pattern:'rubber'}});
-    cylinder(id+'-rim'+side+xx,[x+xx,.33,z+side*.924],.205,.025,[.52,.55,.54,1],{rotation:[Math.PI/2,0,0],material:{metalness:.84,roughness:.24}});
-    for(let spoke=0;spoke<7;spoke++){const angle=spoke/7*Math.PI*2;rod(id+'-spoke'+side+xx+spoke,[x+xx,.33,z+side*.944],[x+xx+Math.cos(angle)*.17,.33+Math.sin(angle)*.17,z+side*.944],.017,[.72,.74,.72,1]);}
-    cylinder(id+'-hub'+side+xx,[x+xx,.33,z+side*.942],.07,.027,[.27,.29,.29,1],{rotation:[Math.PI/2,0,0],material:{metalness:.9,roughness:.2}});
-   }
-   box(id+'-mirror'+side,[x+.63,1.14,z+side*1.02],[.20,.13,.25],color,{material:steel});
-   box(id+'-handle'+side,[x+.12,1.03,z+side*.9],[.23,.035,.04],[.62,.64,.64,1],{material:{metalness:.9}});
-   box(id+'-tail'+side,[x-2.10,.79,z+side*.49],[.045,.12,.24],[.46,.03,.02,1],{material:{emissive:speed?[1,.025,.008]:[.08,.003,.001],roughness:.2}});
-   box(id+'-headlight'+side,[x+2.09,.77,z+side*.46],[.035,.14,.26],[.9,.85,.68,1],{material:{emissive:speed?[2.8,2.15,1.35]:[.25,.20,.12],roughness:.15}});
-  }
-  box(id+'-bumper',[x+2.19,.52,z],[.09,.14,1.56],[.15,.16,.16,1],{material:{metalness:.3,roughness:.4}});
-  box(id+'-grille',[x+2.19,.76,z],[.025,.20,.63],C.dark);box(id+'-plate',[x+2.247,.57,z],[.014,.09,.34],[.77,.79,.72,1]);
-  bank(id+'-roof-snow',[x-.02,1.615,z],[1.28,speed?.035:.12,1.44],79);
-  if(speed){for(const e of entities.slice(start)){const origin=[...e.position];motions.push({id:e.id,origin,speed,rotation:[...(e.rotation??[0,0,0])],wheel:e.id.includes('-spoke'),center:[x+(e.position[0]<x?-1.35:1.37),.33,e.position[2]]});}for(const side of [-1,1])for(const xx of [-1.35,1.37]){
-   add(id+'-contact'+side+xx,[x+xx,.32,z+side*.84],{kind:'sphere',radius:.32},[0,0,0,0],{body:{motion:'kinematic',mass:360,velocity:[speed,0,0],friction:.7}});
-  }}
+  const data=makeM3(m3,id,x,z,color,speed);entities.push(...data.entities);motions.push(...data.motions);
+  if(!speed){bank(id+'-roof-snow',[x-.35,1.46,z],[1.36,.07,1.28],79);bank(id+'-hood-snow',[x+1.38,1.01,z],[1.05,.055,1.38],98);}
+  if(speed)for(const side of [-1,1])for(const xx of [-1.301,1.536])add(id+'-contact'+side+xx,[x+xx,.346,z+side*.80],{kind:'sphere',radius:.346},[0,0,0,0],{body:{motion:'kinematic',mass:390,velocity:[speed,0,0],friction:.7}});
  }
  // Street dimensions remain continuous through the camera path.
  box('ground',[0,-.20,0],[210,.3,150],C.snow,{material:{kind:'snow',roughness:.94}});
- box('road',[10,-.075,0],[180,.15,7.35],[.16,.17,.18,1],{material:{kind:'asphalt',roughness:.58},environmental:{surfaceUse:'road',snowDepthM:.008,iceDepthM:.0015}});
+ box('road',[10,-.075,0],[180,.15,7.35],[.16,.17,.18,1],{material:{kind:'asphalt',roughness:.76},environmental:{surfaceUse:'road',snowDepthM:.008,iceDepthM:.00025}});
  for(const sign of [-1,1]){
   box('curb-'+sign,[10,.13,sign*3.85],[180,.26,.23],[.54,.55,.53,1],{material:{kind:'concrete'},environmental:{surfaceUse:'curb',snowDepthM:.21}});
   box('walk-'+sign,[10,.065,sign*5.25],[180,.13,2.6],[.61,.61,.58,1],{material:{kind:'concrete'},environmental:{surfaceUse:'generic',snowDepthM:.052}});
@@ -129,18 +104,22 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   for(let i=0;i<8;i++)lamp(`lamp${sign}-${i}`,-51+i*20,sign*5.95,kind==='courtyard');
   for(let i=0;i<4;i++)tree(`tree${sign}-${i}`,-38+i*35,sign*7.1,5.8+random()*1.4);
  }
- // Settled fragments at the ploughed bank's foot and old compressed shoe prints.
+ // Settled fragments at the ploughed bank foot. Footprints are contact-driven.
  // Authored initial surface dressing, separate from the simulated vehicle tracks.
  for(const side of [-1,1]){
   for(let i=0;i<70;i++){const xx=-48+i*1.7+random()*.6;bank('plough-'+side+'-'+i,[xx,.004,side*(3.24+random()*.20)],[.15+random()*.5,.025+random()*.09,.13+random()*.27],1500+i);}
-  for(let i=0;i<95;i++){const xx=-40+i*.64,zz=side*5.02+Math.sin(xx*.08)*.16+(i%2?.09:-.09);add('old-footprint-'+side+'-'+i,[xx,.133,zz],{kind:'polygon-prism',axis:1,points:[[-.13,-.04],[-.09,-.052],[.095,-.05],[.15,-.02],[.14,.04],[.03,.055],[-.10,.04]],thickness:.0015},[.57,.61,.64,1],{rotation:[0,(i%2?.11:-.11),0],material:{roughness:.99}});}
  }
  // Markings worn and partially buried in the wet carriageway.
  for(let i=0;i<28;i++)box('lane-mark'+i,[-72+i*6,.004,0],[2,.008,.10],[.60,.60,.53,1]);
  for(let i=0;i<8;i++)box('crosswalk'+i,[17+(i-3.5)*.7,.006,0],[.38,.012,6.5],[.61,.62,.59,1]);
  bench('bench',-15,6.5,1);bench('bench-west',28,-6.2,-1);
- for(const [x,z,c] of [[-17,2.8,[.23,.31,.32,1]],[12,-2.8,[.35,.22,.15,1]],[39,2.8,[.34,.35,.32,1]],[-42,-2.8,[.17,.24,.30,1]]])car('parked-'+x,x,z,c);
- car('passing',-32,-1.6,[.19,.23,.26,1],4.8);
+ for(const [x,z,c] of [[32,2.75,[.23,.25,.27,1]]])car('parked-'+x,x,z,c);
+ car('passing',CAR.startX,CAR.z,[.37,.49,.52,1],CAR.speed);
+ entities.push(...makePedestrian());
+ for(const [i,x] of [-11,9].entries()){
+  const points=Array.from({length:40},(_,j)=>{const a=j/40*Math.PI*2,r=1+.06*Math.sin(a*5+.8)+.04*Math.sin(a*9);return[Math.cos(a)*1.6*r,Math.sin(a)*1.05*r];});
+  add('puddle'+i,[x,.002,-1.4],{kind:'polygon-prism',axis:1,points,thickness:.001},[.105,.12,.13,1],{material:{kind:'asphalt',roughness:.17},environmental:{surfaceUse:'road',waterDepthM:.004}});
+ }
  // Low fencing and street furniture give nearby snow a human scale.
  for(let i=0;i<11;i++){const x=-20+i*1.6;cylinder('fence-post'+i,[x,.60,7.6],.028,1.2,C.metal);if(i<10){rod('fence-top'+i,[x,1.02,7.6],[x+1.6,1.02,7.6],.023);rod('fence-low'+i,[x,.30,7.6],[x+1.6,.30,7.6],.018);}}
  cylinder('bin',[-7,.54,6.4],.28,.8,[.20,.26,.24,1]);bank('bin-snow',[-7,.96,6.4],[.57,.10,.57],12);
@@ -153,22 +132,8 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;rod('clock-index'+i,[98.86,16.9+Math.cos(a)*.83,Math.sin(a)*.83],[98.86,16.9+Math.cos(a)*.92,Math.sin(a)*.92],.025);}
  rod('clock-minute',[98.85,16.9,0],[98.85,16.9,.74],.037);rod('clock-hour',[98.84,16.9,0],[98.84,16.56,-.42],.05);
  box('cross-street',[91,-.075,0],[9,.15,50],[.16,.17,.18,1],{material:{kind:'asphalt',roughness:.68},environmental:{surfaceUse:'road',snowDepthM:.015,iceDepthM:.0008}});
- if(kind==='square'){
-  for(let i=entities.length-1;i>=0;i--)if(['b1-3','b1-4','b1-5'].some(prefix=>entities[i].id.startsWith(prefix)))entities.splice(i,1);
-  for(let i=0;i<7;i++)building('square-back-'+i,-9+i*16,42,14,10.5+(i%3)*2.8,8,1,[[.54,.39,.30,1],[.61,.60,.54,1],[.46,.49,.48,1]][i%3],i%2?'plaster':'brick');
-  for(let i=0;i<6;i++)tree('square-back-tree'+i,-5+i*8,35+(i%2)*2,7+random());
-  for(let i=0;i<25;i++){const xx=-9+i*2;cylinder('square-fence'+i,[xx,.70,33],.026,1.2);if(i<24){rod('square-rail'+i,[xx,1.15,33],[xx+2,1.15,33],.025);rod('square-rail-low'+i,[xx,.4,33],[xx+2,.4,33],.018);}}
-  box('square-base',[14,.025,20],[46,.15,26],C.snow,{material:{kind:'snow'}});
-  box('square-walk',[14,.108,19],[40,.015,2.2],[.61,.62,.59,1],{material:{kind:'concrete',roughness:.82}});
-  cylinder('fountain-base',[13,.37,23],3.8,.6,[.42,.44,.43,1]);
-  add('fountain-rim',[13,.70,23],{kind:'torus',radius:3.65,tube:.24,segments:80},C.snow,{material:{kind:'snow'}});
-  cylinder('fountain-ice',[13,.64,23],3.43,.06,[.36,.48,.52,1],{material:{roughness:.12,metalness:.23}});
-  cylinder('fountain-core',[13,.95,23],.48,.7,[.45,.46,.43,1]);bank('fountain-cap',[13,1.30,23],[1.12,.16,1.12],56);
-  for(const [xx,zz] of [[-2,16],[27,17],[1,29],[26,29],[35,20]]){tree('square-tree'+xx,xx,zz,6.4);lamp('square-lamp'+xx,xx+2,zz-2,true);}
-  bench('square-bench',5,19.8,1);bench('square-bench2',23,19.8,1);
-  for(let i=0;i<7;i++)bank('square-bank'+i,[-6+i*6,.09,32],[7,.45+random()*.24,2.4],770+i);
- }
- const spec={version:1,seed:20260920,ground:-100,environment:{temperatureC:-6,humidity:.76,groundMoisture:.6,precipitation:'rare',snowfall:'light',sunlight:.64,wind:[.7,0,.2],clock:{startHour:8.3,hoursPerSecond:0}},rendering:{sunDirection:[-.8,.46,-.13],sunColor:[1,.76,.49],sunIntensity:5.5,skyColor:[.14,.21,.33],fogDensity:.0025,exposure:1.0,shadowExtent:65},camera:{position:[-29,1.45,5.8],target:[-2,2.6,-2.5],fov:47},entities};
+ const spec={version:1,seed:20260920,ground:-100,environment:{temperatureC:-6,humidity:.76,groundMoisture:.36,precipitation:'rare',snowfall:'moderate',sunlight:.64,wind:[.7,0,.2],clock:{startHour:8.3,hoursPerSecond:0}},rendering:{sunDirection:[-.65,.32,-.5],sunColor:[1,.83,.65],sunIntensity:4.8,skyColor:[.18,.24,.32],fogDensity:.0025,exposure:1.0,shadowExtent:65},camera:{position:[-29,1.45,5.8],target:[-2,2.6,-2.5],fov:47},entities};
  if(kind==='courtyard'){spec.environment.sunlight=.12;spec.environment.snowfall='moderate';spec.rendering={sunDirection:[-.4,.5,-.3],sunColor:[.48,.63,1],sunIntensity:.38,skyColor:[.10,.16,.28],fogDensity:.008,exposure:1.45,shadowExtent:45};}
- return{spec,motions};
+ const sourceCount=entities.length;spec.entities=batchStaticScenery(entities,e=>!e.id.startsWith('passing')&&!e.id.startsWith('walker-')&&e.material?.pattern!=='window');
+ return{spec,motions,sourceCount};
 }

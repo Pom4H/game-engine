@@ -66,7 +66,7 @@ export class WinterSystem {
       const use=entity.environmental?.surfaceUse;
       if(use&&!this.surfaces.has(entity.id)){
         this.surfaces.set(entity.id,{
-          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:0,iceDepthM:entity.environmental?.iceDepthM??0,
+          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0,iceDepthM:entity.environmental?.iceDepthM??0,
           slush:0,dirt:entity.material.surface.dirt*.25,trafficHeatC:0,trackMelt:0,puddle:0,frictionScale:1,
         });
       }
@@ -178,17 +178,26 @@ export class WinterSystem {
 }
 
 function containsXZ(entity:RuntimeEntity,x:number,z:number):boolean{
-  const half=horizontalHalf(entity);return Math.abs(x-entity.position[0])<=half[0]&&Math.abs(z-entity.position[2])<=half[1];
+  const mesh=entity.mesh,dx=x-entity.position[0],dz=z-entity.position[2];
+  if(mesh?.kind==='polygon-prism'&&(mesh.axis??2)===1){
+    const c=Math.cos(entity.rotation[1]),s=Math.sin(entity.rotation[1]),u=(c*dx-s*dz)/entity.scale[0],v=(s*dx+c*dz)/entity.scale[2];let inside=false;
+    for(let i=0,j=mesh.points.length-1;i<mesh.points.length;j=i++){
+      const a=mesh.points[i]!,b=mesh.points[j]!;if((a[1]>v)!==(b[1]>v)&&u<(b[0]-a[0])*(v-a[1])/(b[1]-a[1])+a[0])inside=!inside;
+    }return inside;
+  }
+  const half=horizontalHalf(entity);return Math.abs(dx)<=half[0]&&Math.abs(dz)<=half[1];
 }
 function horizontalHalf(entity:RuntimeEntity):readonly[number,number]{
   const mesh=entity.mesh;
   if(mesh?.kind==='box'||mesh?.kind==='shard')return[(mesh.size?.[0]??1)*entity.scale[0]/2,(mesh.size?.[2]??1)*entity.scale[2]/2];
   if(mesh?.kind==='plane')return[(mesh.size?.[0]??1)*entity.scale[0]/2,(mesh.size?.[1]??1)*entity.scale[2]/2];
+  if(mesh?.kind==='polygon-prism'&&(mesh.axis??2)===1){const c=Math.cos(entity.rotation[1]),s=Math.sin(entity.rotation[1]);let x=0,z=0;for(const p of mesh.points){const u=p[0]*entity.scale[0],v=p[1]*entity.scale[2];x=Math.max(x,Math.abs(c*u+s*v));z=Math.max(z,Math.abs(-s*u+c*v));}return[x,z];}
   if(mesh?.kind==='sphere'){const r=(mesh.radius??1)*Math.max(entity.scale[0],entity.scale[2]);return[r,r];}
   return[.5,.5];
 }
 function surfaceTop(entity:RuntimeEntity):number{
   const mesh=entity.mesh;if(mesh?.kind==='box'||mesh?.kind==='shard')return entity.position[1]+(mesh.size?.[1]??1)*entity.scale[1]/2;
+  if(mesh?.kind==='polygon-prism'&&(mesh.axis??2)===1)return entity.position[1]+mesh.thickness*entity.scale[1]/2;
   return entity.position[1];
 }
 function verticalHalf(entity:RuntimeEntity):number{
