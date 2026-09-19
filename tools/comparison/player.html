@@ -91,7 +91,7 @@ function diagnostics(time){
 window.film={
  async load(nextId,nextVersion){id=nextId;version=nextVersion;events=[];calls=0;published=0;commits=0;emitted=0;validationResults=[];gpuHistory=[];$('hero').style.display='none';document.body.className=version;api=await import(`/${version}/dist/index.js`);scene=new api.Scene(specs[id]);
  renderer.dispose();const Renderer=id==='gpu'&&version==='before'?(await import('/before/dist/render/webgpu.js')).WebGPURenderer:WebGPURenderer;renderer=await Renderer.create(canvas);
- $('stamp').textContent=id==='gpu'?'СРАВНЕНИЕ ДВУХ РЕАЛЬНЫХ РЕНДЕРЕРОВ':id==='snow'?'КАРТЫ ПОКАЗЫВАЮТ ДАННЫЕ WINTER SYSTEM':'ОДИНАКОВЫЕ СЦЕНА · SEED · КАМЕРА';
+ $('stamp').textContent=id==='gpu'?'СРАВНЕНИЕ ДВУХ РЕАЛЬНЫХ РЕНДЕРЕРОВ':id==='snow'?'КАРТЫ ПОКАЗЫВАЮТ SURFACE ENVIRONMENT STATE':'ОДИНАКОВЫЕ СЦЕНА · SEED · КАМЕРА';
  if(id==='kernel'){
   const module={id:'demo:drive',phase:'plan',rateHz:30,reads:[],writes:['entities'],run:()=>{calls++;return[{type:'velocity',id:'signal',value:[2,0,0]}];}};
   if(scene.use)scene.use(module);else{probe=new api.EngineKernel();probe.use(module);}
