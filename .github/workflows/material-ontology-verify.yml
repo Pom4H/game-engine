@@ -9,8 +9,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   core:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, gpu, windows]
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: cmd
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
