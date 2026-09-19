@@ -22,7 +22,19 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
-      - run: bun run ci
+      - name: Core verification
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts
+          bun run ci 2>&1 | tee artifacts/core.log
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: render-quanta-core-${{ github.sha }}
+          path: artifacts/core.log
+          retention-days: 14
+          if-no-files-found: warn
 
   gpu-profile:
     needs: core
