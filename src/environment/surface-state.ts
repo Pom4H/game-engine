@@ -33,9 +33,24 @@ export interface BodyEnvironmentState {
 }
 
 export interface SurfaceEnvironmentField {readonly center:readonly[number,number];readonly size:readonly[number,number];readonly nx:number;readonly nz:number;readonly cells:SurfaceEnvironmentState[]}
+export interface SurfaceContactWork {
+  readonly sourceId:string;
+  readonly surfaceId:string;
+  readonly x:number;
+  readonly z:number;
+  readonly radiusM:number;
+  readonly durationSeconds:number;
+  readonly speedMps:number;
+  readonly slipSpeedMps:number;
+  readonly normalLoadN:number;
+  readonly frictionCoefficient:number;
+}
 export class SurfaceEnvironmentSystem {
   readonly fields=new Map<string,SurfaceEnvironmentField>();
-  remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);}
+  private readonly claimedContactBodies=new Set<string>();
+  remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);this.claimedContactBodies.delete(id);}
+  claimContactBody(id:string):void{this.claimedContactBodies.add(id);}
+  releaseContactBody(id:string):void{this.claimedContactBodies.delete(id);}
   field(id:string):SurfaceEnvironmentField|undefined{return this.fields.get(id);}
   sample(id:string,x:number,z:number):SurfaceEnvironmentState|undefined{
     const field=this.fields.get(id);if(!field)return undefined;
@@ -66,6 +81,39 @@ export class SurfaceEnvironmentSystem {
   surface(id:string):SurfaceEnvironmentState|undefined{return this.surfaces.get(id);}
   body(id:string):BodyEnvironmentState|undefined{return this.bodies.get(id);}
 
+  /** Apply localized mechanical work from an authoritative contact patch.
+   * Bound wheel contacts use this path instead of the coarse body-footprint scan. */
+  applyContactWork(work:SurfaceContactWork):boolean{
+    if(!work.sourceId||!work.surfaceId||![work.x,work.z,work.radiusM,work.durationSeconds,work.speedMps,work.slipSpeedMps,work.normalLoadN,work.frictionCoefficient].every(Number.isFinite)||work.radiusM<=0||work.durationSeconds<=0||work.normalLoadN<0||work.frictionCoefficient<0)return false;
+    const field=this.fields.get(work.surfaceId);if(!field)return false;
+    const cellX=field.size[0]/field.nx,cellZ=field.size[1]/field.nz,halfDiag=Math.hypot(cellX,cellZ)*.5;
+    const localX=work.x-field.center[0]+field.size[0]/2,localZ=work.z-field.center[1]+field.size[1]/2;
+    const minX=Math.max(0,Math.floor((localX-work.radiusM-halfDiag)/cellX)),maxX=Math.min(field.nx-1,Math.floor((localX+work.radiusM+halfDiag)/cellX));
+    const minZ=Math.max(0,Math.floor((localZ-work.radiusM-halfDiag)/cellZ)),maxZ=Math.min(field.nz-1,Math.floor((localZ+work.radiusM+halfDiag)/cellZ));
+    const touched:SurfaceEnvironmentState[]=[];
+    for(let iz=minZ;iz<=maxZ;iz++)for(let ix=minX;ix<=maxX;ix++){
+      const x=field.center[0]+((ix+.5)/field.nx-.5)*field.size[0],z=field.center[1]+((iz+.5)/field.nz-.5)*field.size[1];
+      if(Math.hypot(x-work.x,z-work.z)<=work.radiusM+halfDiag)touched.push(field.cells[iz*field.nx+ix]!);
+    }
+    if(!touched.length)return false;
+    const effectiveSlip=work.slipSpeedMps+work.speedMps*.018;
+    const energy=Math.max(0,work.normalLoadN*work.frictionCoefficient*effectiveSlip*work.durationSeconds),energyPerCell=energy/touched.length;
+    for(const surface of touched){
+      surface.trafficHeatC=Math.min(12,surface.trafficHeatC+energyPerCell/1.8e6);
+      surface.trackMelt=Math.min(1,surface.trackMelt+Math.min(1,energyPerCell/85_000)*.12);
+      const wet=surface.waterDepthM>0||surface.snowDepthM>0||surface.slush>.02?1:.1;
+      surface.dirt=Math.min(1,surface.dirt+work.speedMps*work.durationSeconds*.0008*wet);
+    }
+    const bodyState=this.bodies.get(work.sourceId),sample=this.sample(work.surfaceId,work.x,work.z);
+    if(bodyState&&sample){
+      const spray=Math.min(1,(sample.slush+sample.puddle)*work.speedMps/8);
+      bodyState.rearSnow=Math.min(1,bodyState.rearSnow+spray*work.durationSeconds*.13);
+      bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*work.durationSeconds*.09);
+      bodyState.wetness=Math.min(1,bodyState.wetness+spray*work.durationSeconds*.15);
+    }
+    return true;
+  }
+
   private ensureStates(environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
     for(const entity of entities.values()){
       const use=entity.environmental?.surfaceUse;
@@ -87,6 +135,7 @@ export class SurfaceEnvironmentSystem {
 
   private applyTraffic(dt:number,entities:ReadonlyMap<string,RuntimeEntity>):void{
     for(const [bodyId,bodyState] of this.bodies){
+      if(this.claimedContactBodies.has(bodyId))continue;
       const bodyEntity=entities.get(bodyId),body=bodyEntity?.body;if(!bodyEntity||!body)continue;
       const vx=body.velocity[0],vz=body.velocity[2],speed=Math.hypot(vx,vz);
       if(speed>.1){bodyState.directionX=vx/speed;bodyState.directionZ=vz/speed;}
