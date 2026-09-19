@@ -31,6 +31,7 @@ export class BrowserRuntime {
   }
 
   pause():void{this.running=false;if(this.raf)cancelAnimationFrame(this.raf);this.raf=0;}
+  async activateAudio():Promise<boolean>{return this.audio?await this.audio.unlock():false;}
   resume():void{if(this.disposed||this.running)return;this.running=true;this.clock.reset(performance.now());this.raf=requestAnimationFrame(this.frame);}
   step(count=1){
     if(!Number.isSafeInteger(count)||count<1||count>1_000_000)throw new RangeError('step count must be an integer in [1, 1000000]');
