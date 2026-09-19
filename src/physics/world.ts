@@ -220,7 +220,9 @@ export class PhysicsWorld {
     body.angularVelocity[0]*=angularDecay;body.angularVelocity[1]*=angularDecay;body.angularVelocity[2]*=angularDecay;
 
     const linear=V3.length(body.velocity),angularSpeed=V3.length(body.angularVelocity);
-    if(linear<.075&&angularSpeed<.16&&maxApproach<.12){
+    let residualNormal=0;
+    for(const r of manifold.points){const velocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r));residualNormal=Math.max(residualNormal,Math.abs(velocity[1]));}
+    if(linear<.075&&angularSpeed<.16&&residualNormal<.055){
       body.sleepTimer+=dt;
       if(body.sleepTimer>.24){body.velocity=[0,0,0];body.angularVelocity=[0,0,0];body.sleeping=true;}
     }else if(!body.sleeping)body.sleepTimer=0;
