@@ -9,7 +9,7 @@ import type {CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
-export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string}
+export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean}
 
 export class BrowserRuntime {
   scene:Scene;
@@ -30,7 +30,7 @@ export class BrowserRuntime {
   }
 
   static async create(canvas:HTMLCanvasElement,scene:SceneSpec,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
-    const renderer=await WebGPURenderer.create(canvas);let runtime:BrowserRuntime|undefined;
+    const renderer=await WebGPURenderer.create(canvas,{profiling:options.profiling??false});let runtime:BrowserRuntime|undefined;
     try{
       runtime=new BrowserRuntime(canvas,scene,renderer,options);
       if(options.resolution)renderer.setResolution(...options.resolution);
