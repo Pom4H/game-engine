@@ -66,7 +66,7 @@ export class Scene {
     const shouldCollide=spec.body!==undefined||spec.material?.kind!==undefined||profile.brittle;
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
     const body=shouldCollide?this.physics.add(new RigidBody({
-      id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),
+      id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),kinematic:spec.body?.motion==='kinematic',
       ...(spec.body?.velocity?{velocity:spec.body.velocity}:{}),
       ...(spec.body?.angularVelocity?{angularVelocity:spec.body.angularVelocity}:{}),
       ...(spec.body?.restitution!==undefined?{restitution:spec.body.restitution}:{}),
