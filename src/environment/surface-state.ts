@@ -46,9 +46,14 @@ export class SurfaceEnvironmentSystem {
   readonly surfaces=new Map<string,SurfaceEnvironmentState>();
   readonly bodies=new Map<string,BodyEnvironmentState>();
 
-  step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
+  /** Reconcile authored entities into physical state without advancing time. */
+  reconcile(environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
     for(const id of [...this.surfaces.keys(),...this.bodies.keys()])if(!entities.has(id))this.remove(id);
     this.ensureStates(environment,entities);
+  }
+
+  step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
+    this.reconcile(environment,entities);
     this.applyTraffic(dt,entities);
     for(const [id,state] of this.surfaces){
       const entity=entities.get(id);if(!entity)continue;
