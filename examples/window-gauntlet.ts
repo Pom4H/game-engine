@@ -21,7 +21,7 @@ export default defineScene({
       position:[-4,1.2,0],
       mesh:{kind:'sphere',radius:.11,segments:28},
       material:{kind:'steel'},
-      body:{mass:3.8,velocity:[55,0,0]},
+      body:{mass:3.8,velocity:[50,0,0]},
     },
   ],
 });
