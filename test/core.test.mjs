@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,material} from '../dist/index.js';
+import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,resolveEnvironmentAt,material} from '../dist/index.js';
 
 test('fixed clock keeps delayed time as bounded debt',()=>{
   const clock=new FixedClock(10,100,4);let steps=0;clock.reset(0);
@@ -112,4 +112,57 @@ test('environment derives concrete moss without renderer controls',()=>{
   assert.ok(humid.moss>dry.moss*3);
   assert.ok(protectedSurface.moss<humid.moss*.2,'biocide is a semantic cause that suppresses moss');
   assert.ok(humid.frictionScale<dry.frictionScale,'wet/mossy concrete should alter contact friction');
+});
+
+
+test('weather timeline moves from freezing night to thawing day',()=>{
+  const environment={
+    clock:{startHour:2,hoursPerSecond:.3},
+    weather:[
+      {hour:2,temperatureC:-10,snowfall:'heavy',sunlight:0},
+      {hour:7.4,temperatureC:0,snowfall:'moderate',sunlight:.18},
+      {hour:13,temperatureC:4,snowfall:'none',sunlight:.88},
+    ],
+  };
+  const night=resolveEnvironmentAt(environment,0),morning=resolveEnvironmentAt(environment,18),day=resolveEnvironmentAt(environment,36.6666667);
+  assert.equal(night.temperatureC,-10);assert.equal(night.snowfall,'heavy');assert.equal(night.sunlight,0);
+  assert.ok(Math.abs(morning.temperatureC)<1e-6);assert.equal(morning.snowfall,'moderate');assert.ok(morning.sunlight>.1);
+  assert.ok(day.temperatureC>3.9);assert.equal(day.snowfall,'none');assert.ok(day.sunlight>.8);
+});
+
+test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{
+  const scene=new Scene({
+    version:1,ground:-100,
+    environment:{
+      humidity:.88,groundMoisture:.7,clock:{startHour:2,hoursPerSecond:.3},
+      weather:[
+        {hour:2,temperatureC:-10,snowfall:'heavy',sunlight:0,wind:[2,0,.5]},
+        {hour:7.4,temperatureC:0,snowfall:'moderate',sunlight:.18,wind:[1,0,.2]},
+        {hour:13,temperatureC:4,snowfall:'none',sunlight:.88,wind:[1,0,0]},
+      ],
+    },
+    entities:[
+      {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[80,.2,8]},material:{kind:'asphalt'},environmental:{surfaceUse:'road'}},
+      {id:'sidewalk',position:[0,.08,5.5],mesh:{kind:'box',size:[80,.16,3]},material:{kind:'concrete'},environmental:{surfaceUse:'sidewalk'}},
+      {id:'curb',position:[0,.16,4.15],mesh:{kind:'box',size:[80,.32,.35]},material:{kind:'concrete'},environmental:{surfaceUse:'curb'}},
+      {id:'traffic',position:[-18,.65,0],mesh:{kind:'box',size:[4.5,1.3,1.9]},material:{kind:'steel'},body:{motion:'kinematic',mass:1500,velocity:[8,0,0]}},
+    ],
+  });
+  for(let i=0;i<360;i++)scene.step(1/60);
+  const road=scene.winter.surface('road'),sidewalk=scene.winter.surface('sidewalk'),body=scene.winter.body('traffic');
+  assert.ok(road&&sidewalk&&body);
+  assert.ok(road.trackMelt>.05,`traffic should create a wheel-track thermal history, got ${road.trackMelt}`);
+  assert.ok(road.waterDepthM>0||road.slush>.05,'traffic-heated road should contain meltwater/slush during subzero snowfall');
+  assert.ok(sidewalk.snowDepthM>road.snowDepthM,'untouched sidewalk should retain more fresh snow than trafficked asphalt');
+  assert.ok(body.snowCoverage>.05,'snowfall should adhere to moving bodies');
+  assert.ok(body.rearSnow>.05,'wake/spray should accumulate snow on rear-facing body surfaces');
+  assert.ok([...scene.entities.keys()].some(id=>id.startsWith('__winter:drift:curb:')),'curb snow mass should generate snowdrift geometry');
+
+  const nightSnow=road.snowDepthM;
+  for(let i=0;i<2100;i++)scene.step(1/60);
+  const dayRoad=scene.winter.surface('road');
+  assert.ok(scene.environment.temperatureC>2.5&&scene.environment.sunlight>.7,'timeline should reach a sunny above-freezing day');
+  assert.ok(dayRoad.temperatureC>0,'asphalt surface should thaw above zero');
+  assert.ok(dayRoad.snowDepthM<nightSnow,'daytime energy balance should melt accumulated road snow');
+  assert.ok(dayRoad.waterDepthM>0||dayRoad.puddle>.02,'melted snow should create water/puddle state');
 });
