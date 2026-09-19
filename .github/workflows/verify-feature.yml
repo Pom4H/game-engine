@@ -1,0 +1,45 @@
+name: Verify Game Engine Feature
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/verify-feature.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: cmd
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feat/engine-foundation
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install
+      - run: bun run ci
+      - name: WebGPU winter street snapshots
+        run: |
+          if not exist artifacts mkdir artifacts
+          node dist/cli.js render examples/winter-street.ts --time 6 --width 1280 --height 720 --out artifacts/winter-night.png
+          node dist/cli.js render examples/winter-street.ts --time 18 --width 1280 --height 720 --out artifacts/winter-sunrise.png
+          node dist/cli.js render examples/winter-street.ts --time 36.5 --width 1280 --height 720 --out artifacts/winter-day.png
+      - name: Verify winter pixels
+        run: |
+          node tools/check-png.mjs artifacts/winter-night.png
+          node tools/check-png.mjs artifacts/winter-sunrise.png
+          node tools/check-png.mjs artifacts/winter-day.png
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: winter-street-reference
+          path: artifacts/
+          retention-days: 14

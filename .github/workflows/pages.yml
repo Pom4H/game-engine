@@ -40,6 +40,7 @@ jobs:
           echo C:\Program Files\Git\usr\bin>>%GITHUB_PATH%
       - uses: actions/upload-pages-artifact@v4
         with:
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
           path: _site
 
   deploy:
@@ -52,3 +53,5 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
