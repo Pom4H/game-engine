@@ -114,9 +114,12 @@ export class Scene {
       this.impactCooldown.set(key,at);
       const a=this.physics.bodies.get(contact.a),b=contact.b==='ground'?undefined:this.physics.bodies.get(contact.b);
       if(!a)continue;
+      const entityA=this.entities.get(contact.a),entityB=contact.b==='ground'?undefined:this.entities.get(contact.b);
       this.pushEvent({
         type:'impact',id:++this.eventSequence,time:at,point:contact.point,normal:contact.normal,a:contact.a,b:contact.b,
         materialA:a.material.kind,materialB:b?.material.kind??this.physics.groundMaterial.kind,
+        ...(entityA?{surfaceA:surfaceAcoustics(entityA.material.surface)}:{}),
+        ...(entityB?{surfaceB:surfaceAcoustics(entityB.material.surface)}:{}),
         energy:contact.normalEnergy,impulse:contact.impulse,speed:contact.normalSpeed,size:Math.max(.02,Math.min(characteristicSize(a),b?characteristicSize(b):characteristicSize(a))),
       });
     }
@@ -228,3 +231,5 @@ function bodyShape(mesh:Primitive|undefined,body:BodySpec,scale:Vec3):CollisionS
 
 function polygonArea2(points:readonly (readonly[number,number])[]):number{let area=0;for(let i=0;i<points.length;i++){const a=points[i]!,b=points[(i+1)%points.length]!;area+=a[0]*b[1]-b[0]*a[1];}return area*.5;}
 function polygonBounds(points:readonly (readonly[number,number])[]){let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const p of points){minX=Math.min(minX,p[0]);maxX=Math.max(maxX,p[0]);minY=Math.min(minY,p[1]);maxY=Math.max(maxY,p[1]);}return{minX,maxX,minY,maxY};}
+
+function surfaceAcoustics(surface:SurfaceState){return{wetness:surface.wetness,moss:surface.moss,damping:surface.acousticDamping};}
