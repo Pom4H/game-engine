@@ -29,12 +29,24 @@ function car(id:string,x:number,z:number,speed:number,color:readonly[number,numb
   ];
 }
 
-const lamps=Array.from({length:9},(_,i)=>({
-  id:`lamp-${i}`,
-  position:[-22+i*16,2.7,7.15] as const,
-  mesh:{kind:'box' as const,size:[.12,5.4,.12] as const},
-  material:{kind:'steel' as const,color:[.08,.09,.11,1] as const},
-}));
+const lamps=Array.from({length:9},(_,i)=> {
+  const x=-22+i*16;
+  return[
+    {
+      id:`lamp-${i}:pole`,
+      position:[x,2.7,7.15] as const,
+      mesh:{kind:'box' as const,size:[.12,5.4,.12] as const},
+      material:{kind:'steel' as const,color:[.08,.09,.11,1] as const},
+    },
+    {
+      id:`lamp-${i}:head`,
+      position:[x,5.35,7.02] as const,
+      mesh:{kind:'box' as const,size:[.62,.16,.34] as const},
+      material:{kind:'steel' as const,color:[.92,.82,.58,1] as const},
+      light:{kind:'point' as const,color:[1,.72,.42] as const,intensity:2.8,range:15},
+    },
+  ];
+}).flat();
 
 const buildings=[
   ...Array.from({length:9},(_,i)=>({
@@ -114,6 +126,7 @@ export default defineScene({
     ...car('car-e',-224,-1.75,8.2,[.16,.18,.22,1]),
     ...car('car-f',-286,1.72,8.7,[.08,.11,.13,1]),
     ...car('car-g',-340,-1.7,8.9,[.28,.29,.31,1]),
+    ...car('parked-front',-9,3.05,0,[.10,.11,.13,1]),
 
     ...lamps,
     ...buildings,
