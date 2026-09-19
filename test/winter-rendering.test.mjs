@@ -41,9 +41,9 @@ test('lazy contexts are projected only when a consumer runs and include prior co
  kernel.run(1,{},'detailed',options);assert.equal(reads,0);kernel.run(2,{},'detailed',options);assert.equal(reads,1);assert.equal(seen,2);
 });
 
-test('initial ice and snow populate local winter fields without requiring time acceleration',()=>{
+test('initial ice and snow populate local surface fields without requiring time acceleration',()=>{
  const scene=new Scene({version:1,environment:{temperatureC:-6,snowfall:'none',sunlight:0},entities:[{id:'road',mesh:{kind:'box',size:[8,.2,4]},material:{kind:'asphalt'},environmental:{surfaceUse:'road',snowDepthM:.07,iceDepthM:.002}}]});scene.step();
- const cell=scene.winter.sample('road',0,0);assert.ok(cell.snowDepthM>=.069);assert.ok(cell.iceDepthM>=.0019);assert.ok(cell.frictionScale<1);
+ const cell=scene.surfaces.sample('road',0,0);assert.ok(cell.snowDepthM>=.069);assert.ok(cell.iceDepthM>=.0019);assert.ok(cell.frictionScale<1);
 });
 
 test('render controls and malformed indexed meshes fail before GPU allocation',()=>{
@@ -78,14 +78,14 @@ test('cinematic glass study fractures from contact and preserves fragment shadin
 
 test('snow visual disappears after melting and longitudinal tiles use the same world direction',()=>{
  const scene=new Scene({version:1,environment:{temperatureC:-6,snowfall:'none'},entities:[{id:'curb',mesh:{kind:'box',size:[.2,.2,12]},material:{kind:'concrete'},environmental:{surfaceUse:'curb',snowDepthM:.2}}]});scene.step();
- const drifts=[...scene.entities.values()].filter(e=>e.id.startsWith('__winter:drift:'));
+ const drifts=[...scene.entities.values()].filter(e=>e.id.startsWith('__surface:snowdrift:'));
  assert.equal(drifts.length,2);assert.ok(drifts.every(d=>d.rotation[1]===-Math.PI/2));
- for(const c of scene.winter.field('curb').cells)c.snowDepthM=0;
- scene.step();assert.equal([...scene.entities.keys()].filter(id=>id.startsWith('__winter:drift:')).length,0);
+ for(const c of scene.surfaces.field('curb').cells)c.snowDepthM=0;
+ scene.step();assert.equal([...scene.entities.keys()].filter(id=>id.startsWith('__surface:snowdrift:')).length,0);
 });
 
-test('winter generated geometry never claims authored IDs and releases only its exact owned entities',()=>{
- const marker='__winter:drift:authored',collision='__winter:drift:curb:0';
+test('surface-generated snow geometry never claims authored IDs and releases only its exact owned entities',()=>{
+ const marker='__surface:snowdrift:authored',collision='__surface:snowdrift:curb:0';
  const scene=new Scene({version:1,environment:{temperatureC:-4,snowfall:'none'},entities:[
   {id:marker,position:[100,1,0],mesh:{kind:'box'},body:{mass:0}},
   {id:collision,position:[110,1,0],mesh:{kind:'box'},body:{mass:0}},
@@ -100,8 +100,8 @@ test('winter generated geometry never claims authored IDs and releases only its 
  const longId='snowy-'+('x'.repeat(174)),longScene=new Scene({version:1,environment:{temperatureC:-4},entities:[{id:longId,mesh:{kind:'box',size:[3,.2,.2]},environmental:{surfaceUse:'curb',snowDepthM:.1}}]});assert.doesNotThrow(()=>longScene.step());assert.ok([...longScene.entities.keys()].every(id=>id.length<=180));
 });
 
-test('winter drift IDs reserve collision suffix space at the 160-character boundary',()=>{
- const sourceId='x'.repeat(160-'__winter:drift::0'.length),occupiedId=`__winter:drift:${sourceId}:0`;
+test('surface snowdrift IDs reserve collision suffix space at the 160-character boundary',()=>{
+ const sourceId='x'.repeat(160-'__surface:snowdrift::0'.length),occupiedId=`__surface:snowdrift:${sourceId}:0`;
  assert.equal(occupiedId.length,160);
  const scene=new Scene({version:1,environment:{temperatureC:-4,snowfall:'none'},entities:[
   {id:occupiedId,position:[100,1,0],mesh:{kind:'box'},body:{mass:0}},
