@@ -7,7 +7,7 @@ await mkdir(site,{recursive:true});
 await cp(resolve(root,'pages/index.html'),resolve(site,'index.html'));
 await cp(resolve(root,'dist'),resolve(site,'dist'),{recursive:true});
 
-const scene=await loadScene(resolve(root,'examples/window-gauntlet.ts'));
+const scene=await loadScene(resolve(root,'examples/winter-street.ts'));
 await writeFile(resolve(site,'scene.json'),JSON.stringify(scene));
 await writeFile(resolve(site,'.nojekyll'),'');
 console.log(`Pages site: ${site}`);
