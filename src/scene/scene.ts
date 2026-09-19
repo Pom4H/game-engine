@@ -101,7 +101,7 @@ export class Scene {
       if(contact.normalEnergy<.005)continue;
       const key=contact.b==='ground'?`${contact.a}|ground`:contact.a<contact.b?`${contact.a}|${contact.b}`:`${contact.b}|${contact.a}`;
       const previous=this.impactCooldown.get(key)??-Infinity;
-      if(at-previous<.035&&contact.mode==='resolve')continue;
+      if(at-previous<.035)continue;
       this.impactCooldown.set(key,at);
       const a=this.physics.bodies.get(contact.a),b=contact.b==='ground'?undefined:this.physics.bodies.get(contact.b);
       if(!a)continue;
