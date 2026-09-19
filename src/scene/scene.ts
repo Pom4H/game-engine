@@ -20,7 +20,7 @@ import {SceneSystemRuntime} from './system-runtime.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
-  readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';
+  readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';readonly finish?:import('../materials/surface.js').MaterialFinish;readonly ageYears?:number;readonly treatment?:import('../materials/surface.js').MaterialTreatment;
   readonly color:Color;
   readonly texture?:SurfaceTextureSpec;
   readonly profile:PhysicalMaterial;
@@ -91,7 +91,7 @@ export class Scene {
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
-    const shouldCollide=spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.brittle;
+    const shouldCollide=spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle;
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
     const body=shouldCollide?this.physics.add(new RigidBody({
       id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),kinematic:spec.body?.motion==='kinematic',
@@ -221,8 +221,8 @@ export class Scene {
       this.pushEvent({
         type:'impact',id:++this.eventSequence,time:at,point:contact.point,normal:contact.normal,a:contact.a,b:contact.b,
         materialA:a.material.kind,materialB:b?.material.kind??this.physics.groundMaterial.kind,
-        ...(entityA?{surfaceA:surfaceAcoustics(entityA.material.surface)}:{}),
-        ...(entityB?{surfaceB:surfaceAcoustics(entityB.material.surface)}:{}),
+        ...(entityA?{surfaceA:surfaceAcoustics(this.surfaces.sample(entityA.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityA.id)??entityA.material.surface)}:{}),
+        ...(entityB?{surfaceB:surfaceAcoustics(this.surfaces.sample(entityB.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityB.id)??entityB.material.surface)}:{}),
         energy:contact.normalEnergy,impulse:contact.impulse,speed:contact.normalSpeed,size:Math.max(.02,Math.min(characteristicSize(a),b?characteristicSize(b):characteristicSize(a))),
       });
     }
@@ -331,4 +331,4 @@ function bodyShape(mesh:Primitive|undefined,body:BodySpec,scale:Vec3):CollisionS
 function polygonArea2(points:readonly (readonly[number,number])[]):number{let area=0;for(let i=0;i<points.length;i++){const a=points[i]!,b=points[(i+1)%points.length]!;area+=a[0]*b[1]-b[0]*a[1];}return area*.5;}
 function polygonBounds(points:readonly (readonly[number,number])[]){let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const p of points){minX=Math.min(minX,p[0]);maxX=Math.max(maxX,p[0]);minY=Math.min(minY,p[1]);maxY=Math.max(maxY,p[1]);}return{minX,maxX,minY,maxY};}
 
-function surfaceAcoustics(surface:SurfaceState){return{wetness:surface.wetness,moss:surface.moss,damping:surface.acousticDamping};}
+function surfaceAcoustics(surface:Pick<SurfaceState,'wetness'|'moss'|'acousticDamping'>){return{wetness:surface.wetness,moss:surface.moss,damping:surface.acousticDamping};}
