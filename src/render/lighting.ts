@@ -106,7 +106,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  let normalSample=textureLoad(normals,pixel,0);let wn=normalSample.xyz*2.0-1.0;
  let n=viewNormal(wn);
  let offsets=array<vec2<f32>,12>(vec2<f32>(1,0),vec2<f32>(.5,.86),vec2<f32>(-.5,.86),vec2<f32>(-1,0),vec2<f32>(-.5,-.86),vec2<f32>(.5,-.86),vec2<f32>(.4,.3),vec2<f32>(-.4,.3),vec2<f32>(.4,-.3),vec2<f32>(-.4,-.3),vec2<f32>(0,.6),vec2<f32>(0,-.6));
- var occlusion=0.0;var indirect=vec3<f32>(0);var indirectWeight=0.0;
+ var occlusion=0.0;var indirect=vec3<f32>(0);
  if(d<.99999){
   // Recover the geometric normal from the nearest same-surface neighbours.
   // Bump normals cause self-darkening, while a derivative across a silhouette
@@ -128,28 +128,34 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
     occlusion+=horizon*range*weights[ring]*smoothstep(.0015,.004,separation);
    }
   }
-  // One-bounce screen-space diffuse irradiance. This deliberately reuses the
-  // already-resolved HDR/depth/normal buffers instead of adding a second scene
-  // render or another persistent G-buffer target. Eight directions at a metre-
-  // scale radius are enough to expose nearby colored walls, snow and wet ground;
-  // off-screen energy remains the environment-light fallback in the material pass.
-  let giDirections=array<vec2<f32>,8>(vec2<f32>(1,0),vec2<f32>(.707,.707),vec2<f32>(0,1),vec2<f32>(-.707,.707),vec2<f32>(-1,0),vec2<f32>(-.707,-.707),vec2<f32>(0,-1),vec2<f32>(.707,-.707));
-  let giWorldRadius=1.15;let giRadius=clamp(giWorldRadius*size.y/(max(z,.1)*f.forward.w*2.0),2.0,88.0);
-  for(var k=0;k<8;k++){
-   let q=clamp(pixel+vec2<i32>(round(giDirections[k]*giRadius)),vec2<i32>(0),dims-1);
-   let samplePos=positionAt(q,size);let delta=samplePos-pos;let separation=length(delta);
-   if(separation>.06&&separation<1.8){
-    let direction=delta/separation;
-    let emitterWorldNormal=textureLoad(normals,q,0).xyz*2.0-1.0;
-    let emitterNormal=viewNormal(emitterWorldNormal);
-    // A small grazing floor keeps perpendicular wall↔ground transfer alive
-    // without letting back-facing samples dominate.
-    let receiver=max(.08,dot(geometric,direction));
-    let emitter=max(.08,dot(emitterNormal,-direction));
-    let range=1.0-smoothstep(.22,1.8,separation);
-    let weight=receiver*emitter*range;
-    let radiance=min(textureLoad(hdr,q,0).rgb,vec3<f32>(4.0));
-    indirect+=radiance*weight;indirectWeight+=weight;
+  // One-bounce screen-space diffuse irradiance. A fixed ring produced shifted
+  // copies of bright emitters; distribute samples over radius/angle instead.
+  // Pixel/time rotation turns the remaining error into bounded noise that TAA can
+  // accumulate rather than coherent ghost geometry.
+  let seed=fract(sin(dot(vec2<f32>(pixel),vec2<f32>(12.9898,78.233))+f.up.w*17.17)*43758.5453);
+  for(var k=0;k<12;k++){
+   let u=(f32(k)+.5)/12.0;
+   let radiusM=mix(.10,1.35,sqrt(u));
+   let angle=6.2831853*fract(f32(k)*.61803398875+seed);
+   let direction2=vec2<f32>(cos(angle),sin(angle));
+   let radiusPx=clamp(radiusM*size.y/(max(z,.1)*f.forward.w*2.0),1.5,96.0);
+   let q=clamp(pixel+vec2<i32>(round(direction2*radiusPx)),vec2<i32>(0),dims-1);
+   let sampleDepth=textureLoad(depth,q,0);
+   if(sampleDepth<.99999){
+    let samplePos=positionAt(q,size);let delta=samplePos-pos;let separation=length(delta);
+    if(separation>.045&&separation<1.65){
+     let ray=delta/separation;
+     let emitterWorldNormal=textureLoad(normals,q,0).xyz*2.0-1.0;
+     let emitterNormal=viewNormal(emitterWorldNormal);
+     let receiver=max(0.0,dot(geometric,ray));
+     let emitter=max(0.0,dot(emitterNormal,-ray));
+     let range=1.0-smoothstep(.12,1.65,separation);
+     let form=receiver*emitter*range/(.22+separation*separation);
+     let radiance=min(textureLoad(hdr,q,0).rgb,vec3<f32>(6.0));
+     // Divide by the fixed sample budget later; do not normalize by hit weight.
+     // A single bright sample must not become a full-strength copied silhouette.
+     indirect+=radiance*min(1.0,form);
+    }
    }
   }
  }
@@ -157,12 +163,13 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  var base=textureSampleLevel(hdr,linearSampler,uv,0).rgb;
  if(coc>.15){var sum=base;for(var k=0;k<12;k++){sum+=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*coc/size,0).rgb;}base=sum/13.0;}
  var color=base*(1.0-min(.52,occlusion*.29));
- if(indirectWeight>.0001){
+ {
   let rough=normalSample.a;
-  // Keep mirrors/glass on the existing reflection path. Rough diffuse materials
-  // receive a bounded local bounce; the cap suppresses bright-emitter fireflies.
-  let gi=indirect/indirectWeight;
-  color+=gi*(.035+.055*smoothstep(.22,.88,rough))*(1.0-min(.55,occlusion*.18));
+  // Rough diffuse surfaces receive the local one-bounce term. Energy is averaged
+  // over the complete stochastic sample budget, which prevents sparse emitters
+  // from stamping their screen-space silhouette onto neighbouring geometry.
+  let gi=indirect/12.0;
+  color+=gi*(.10+.14*smoothstep(.22,.88,rough))*(1.0-min(.55,occlusion*.18));
  }
  // Screen-space radiance for smooth materials, with explicit misses. Wet ground
  // uses its geometry reflection pass; rough/offscreen surfaces keep sky fallback.
