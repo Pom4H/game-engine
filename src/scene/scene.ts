@@ -56,7 +56,7 @@ export class Scene {
   add(spec:EntitySpec):RuntimeEntity{
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
     const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?structuredClone(spec.mesh):undefined;
-    const surface=deriveSurfaceState(profile,{finish:spec.material?.finish,ageYears:spec.material?.ageYears,treatment:spec.material?.treatment},this.environment);
+    const surface=deriveSurfaceState(profile,spec.material??{},this.environment);
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
