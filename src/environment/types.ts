@@ -26,13 +26,14 @@ export interface EnvironmentState {
 
 export function resolveEnvironment(spec:EnvironmentSpec={}):EnvironmentState{
   const precipitation=spec.precipitation??'occasional';
+  const wind:Vec3=spec.wind??[0,0,0];
   return Object.freeze({
     humidity:clamp01(spec.humidity??.55),
     temperatureC:finite(spec.temperatureC,18),
     precipitation,
     precipitationLoad:precipitation==='arid'?0:precipitation==='rare'?.18:precipitation==='occasional'?.48:.82,
     sunlight:clamp01(spec.sunlight??.65),
-    wind:spec.wind??[0,0,0],
+    wind,
     groundMoisture:clamp01(spec.groundMoisture??.35),
   });
 }
