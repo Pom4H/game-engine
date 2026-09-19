@@ -98,7 +98,7 @@ fn tyreTracks(z:f32)->f32{
   var out: VOut;out.reflected=0u;
   let world=u.model*vec4<f32>(position,1.0);
   out.position=u.mvp*vec4<f32>(position,1.0);let previous=u.prevMvp*vec4<f32>(position,1.0);
-  let currentNdc=out.position.xy/max(abs(out.position.w),.00001),previousNdc=previous.xy/max(abs(previous.w),.00001);
+  let currentNdc=out.position.xy/max(abs(out.position.w),.00001);let previousNdc=previous.xy/max(abs(previous.w),.00001);
   out.velocity=vec2<f32>((currentNdc.x-previousNdc.x)*.5,(previousNdc.y-currentNdc.y)*.5);
   out.worldPos=world.xyz;out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);
   let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;
