@@ -1,79 +1,99 @@
-# Before / after physics film
+# Full architecture comparison film
 
-A 66-second, 1920×1080, 30 fps comparison of three physical corrections. Each
-case plays the old simulation immediately followed by the corrected simulation.
-The baseline is PR #1 commit `89b232adad8c09b84d2849d7641248af0dc8832b`.
+156 seconds (2:36), 1920×1080, 30 fps, Russian synthetic narration and procedural
+simulation audio. Eight immediately adjacent before/after pairs cover the seven
+primary findings of the PR #1 review. Baseline: `89b232adad8c09b84d2849d7641248af0dc8832b`.
 
-## What changes
+## Coverage and timing
 
-1. Horizontal glass contacts call the material failure law before the manifold
-   solver. Both contact friction and restitution use current body properties.
-2. Dynamic fracture transfers authored mass, linear momentum and angular momentum
-   into the fragments. Random motion is projected to zero net momentum and uses
-   an explicit energy budget. Inertia still follows the backend's box approximation.
-3. Horizontal contact friction uses the surface's effective coefficient, so two
-   otherwise identical sliders react to their different surface coefficients.
+| Review finding / experiment | Before | After | Evidence |
+|---|---:|---:|---|
+| Horizontal contact bypasses fracture | 00:06 | 00:15 | Same impact: intact glass vs 44 shards |
+| Fragments lose parent momentum | 00:24 | 00:33 | Horizontal momentum, before/after fracture |
+| Horizontal contact ignores effective friction | 00:42 | 00:51 | Two coefficients, measured slider distances |
+| Kernel is disconnected from Scene.step | 01:00 | 01:09 | 30 Hz extension: calls and resulting body displacement |
+| Commands are invisible to later phases | 01:18 | 01:27 | Actual producer command, commit count and publish read |
+| Winter traffic state is global and proximity-based | 01:36 | 01:45 | Surface state maps, contact and airborne controls |
+| Renderer retains removed resources | 01:54 | 02:03 | Live entities and owned GPU buffer counts |
+| Scene validation accepts invalid body/mesh data | 02:12 | 02:21 | Three real validation calls and field errors |
 
-The film is a demonstration of these physical fixes, not a claim that the full
-kernel/module refactor or every item in the architecture review is complete.
+Intro 00:00–00:06; results 02:30–02:36. Contact/friction experiments jointly cover
+one review finding, so there are eight experiments for seven findings.
 
-## Comparison controls
+## What actually runs
 
-- Exactly the same serialized scene, seed, fixed 60 Hz simulation step and camera
-  for both versions of every pair.
-- The player imports `Scene` from the baseline/corrected build respectively and
-  renders both through the same corrected production `WebGPURenderer`.
-- The shared renderer removes an unrelated visual defect: procedural snow and
-  puddle masks previously appeared even with no snow/water state. Thus presentation
-  does not change between the before and after simulations.
-- Footer values and motion traces are measured from the running browser simulation.
-  The summary card reports the measured final values in `metrics.json`.
-- No collision, fracture or stopping outcomes are scripted in scene files.
-- Each nine-second case holds its initial frame for 2.6 s, shows 4.5 s of slowed
-  motion, then holds its final state. The displayed slowdown is identical per pair.
-- Procedural impact/fracture sounds come from the actual captured simulation
-  events. Onsets follow the slowed visual timeline; individual voices retain their
-  original pitch and duration. There are no recorded glass samples or added music.
-- The narrated version uses the macOS Milena synthetic Russian voice. The
-  effects-only version contains exclusively procedural simulation sounds.
+The player imports Scene/EngineKernel/validateScene from the baseline or current
+build, with matching scene specs, seed and 60 Hz time step in each pair. Commands,
+field data, resource counts and errors come from that code; they are not animated
+mock results. GPU load injects 20 uniquely sized temporary boxes, on the same tick
+schedule, and lets each Scene remove them after 0.12 seconds. For the kernel case,
+the old version can register an isolated EngineKernel module but has no Scene.use
+hook; the new version registers the same module on Scene. No explicit kernel.run
+is added to the old Scene loop, which is the disconnection being demonstrated.
 
-## Reproduce on macOS
+The phase probe starts with value=0, simulate returns set(value,1), and publish
+reads the context. The old kernel ignores the extra commit option; the new kernel
+applies it between batches. This is an observable integration/API comparison.
 
-Requires Node 22+, Bun, installed Google Chrome, ffmpeg with libx264/AAC, and the
-macOS `say` command with the Milena voice.
+Both physical simulations use the same corrected production WebGPU renderer to
+isolate physics. It removes phantom snow/puddles at zero environmental state.
+Only the GPU lifetime chapter switches to each version's own renderer, because
+that chapter measures renderer ownership. Snow state maps have one fixed color
+scale (trackMelt 0..0.002); the baseline's single scalar is repeated across cells
+for a comparable map, explicitly labeled on screen. The new map is the actual
+24×7 field. The renderer also reads that field and horizontal contact friction
+samples it at the contact location.
+
+Each 9-second segment holds its initial state for 2.6 seconds, shows 4.5 seconds
+of slowed simulation and then holds its result. GPU graphs sample actual cache
+counts each recorded frame, including the holds. Diagnostic chapters use
+narration; impacts and fractures have sound synthesized from captured events.
+Sound event onsets follow slowed time, but individual sounds retain their pitch.
+There is no background music. Narration uses macOS Milena, a synthetic voice.
+
+## Implementation boundaries
+
+- Built-in modules schedule the weather, winter, physics, events, fracture,
+  cleanup and clock services. Scene remains their state owner and command reducer;
+  this is not an ECS or worker-thread rewrite. Third-party modules return spawn,
+  remove, velocity or resource commands and consume detached read snapshots.
+- Same-phase resource hazards require an explicit `after` dependency. Commit runs
+  after command-producing batches. Nested DTOs are frozen; Maps/Sets disable their
+  normal mutators. This is a programming contract, not a hostile-plugin sandbox.
+- Winter is a bounded grid (at most 64×64 per surface) for the existing horizontal,
+  axis-aligned surfaces. Supported sliding work is estimated from load, friction
+  and speed; the contact tolerance is 2.5 cm. This is not a calibrated tire or heat
+  transfer solver. Airborne bodies at a one-metre gap contribute zero work.
+- GPU counters count renderer-owned live resource handles, not driver memory in
+  bytes. Shared geometry survives while referenced. Removal destroys buffers and
+  field textures; driver reclamation timing is outside the engine's control.
+- Snapshots are diagnostic state, not full rollback checkpoints. This change does
+  not introduce a replay protocol, event subscription bus or worker backend.
+
+## Reproduction (macOS)
+
+Requires Node 22+, Bun, Google Chrome, ffmpeg/libx264/AAC and `say -v Milena`.
+Build the baseline worktree at the exact commit above before recording.
 
 ```sh
-# Both worktrees must have dependencies installed and dist built.
 bun install
 bun run ci
 node tools/comparison/scenes.mjs
 node tools/comparison/metrics.mjs /absolute/path/to/baseline-worktree
 node tools/comparison/capture.mjs /absolute/path/to/baseline-worktree preview
 node tools/comparison/capture.mjs /absolute/path/to/baseline-worktree all
+node tools/comparison/verify.mjs
 node tools/comparison/assemble.mjs all
 ```
 
-Outputs are in `artifacts/comparison/`. `capture.mjs` also accepts a single segment
-such as `momentum-after`. Scene specs live in `examples/comparison/` and can be
-loaded by the regular engine CLI. The composition player itself has no runtime
-package dependencies and uses Chrome DevTools Protocol for frame capture.
+Outputs: `artifacts/comparison/emergent-engine-full-comparison-1080p.mp4` and
+`emergent-engine-full-effects-only-1080p.mp4`. The second has no spoken commentary,
+so the diagnostic chapters are intentionally quiet. Per-segment `*-events.json`
+and `*-evidence.json` contain captured browser evidence. `chapters.json` contains
+the narration and timecodes. The older 66-second physical-only film is retained.
 
-## Timeline
-
-| Time | Content |
-|---|---|
-| 00:00–00:06 | Introduction |
-| 00:06–00:15 | Horizontal glass, before |
-| 00:15–00:24 | Horizontal glass, after |
-| 00:24–00:33 | Moving glass, before |
-| 00:33–00:42 | Moving glass, after |
-| 00:42–00:51 | Surface friction, before |
-| 00:51–01:00 | Surface friction, after |
-| 01:00–01:06 | Measured results |
-
-## Validation
-
-`bun run ci` includes the original 13 tests and five new regressions for material
-failure on horizontal contacts, effective friction, fracture mass/momentum,
-angular/scatter budgets, and finite slab behavior. The recorder checks WebGPU
-validation errors after every segment. Event logs are saved next to the clips.
+The test suite has 24 tests, including scene extension cadence, phase visibility,
+ambiguous hazards, nested mutation, invalid authoring input, localized supported
+winter work, cache destruction, contact laws and fracture conservation. Original
+winter assertions now inspect the contacted and untouched cells rather than
+requiring an entire road to acquire one large scalar track value.

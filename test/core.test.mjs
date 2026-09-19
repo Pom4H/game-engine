@@ -151,8 +151,9 @@ test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{
   for(let i=0;i<360;i++)scene.step(1/60);
   const road=scene.winter.surface('road'),sidewalk=scene.winter.surface('sidewalk'),body=scene.winter.body('traffic');
   assert.ok(road&&sidewalk&&body);
-  assert.ok(road.trackMelt>.05,`traffic should create a wheel-track thermal history, got ${road.trackMelt}`);
-  assert.ok(road.waterDepthM>0||road.slush>.05,'traffic-heated road should contain meltwater/slush during subzero snowfall');
+  assert.ok(scene.winter.sample('road',0,0).trackMelt>0,'contacted cells retain thermal history');
+  assert.equal(scene.winter.sample('road',0,3.5).trackMelt,0,'off-path cells receive no traffic work');
+  assert.ok(scene.winter.sample('road',0,0).slush>0,'contacted cells contain local slush during subzero snowfall');
   assert.ok(sidewalk.snowDepthM>road.snowDepthM,'untouched sidewalk should retain more fresh snow than trafficked asphalt');
   assert.ok(body.snowCoverage>.05,'snowfall should adhere to moving bodies');
   assert.ok(body.rearSnow>.05,'wake/spray should accumulate snow on rear-facing body surfaces');

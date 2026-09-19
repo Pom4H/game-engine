@@ -11,7 +11,8 @@ import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
 import type {EngineEvent} from './events.js';
 import type {BodySpec,CameraSpec,Color,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
-import {validateScene} from './validate.js';
+import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
+import {validateEntity,validateScene} from './validate.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
@@ -41,6 +42,10 @@ export class Scene {
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
   readonly winter=new WinterSystem();
+  readonly kernel=sceneKernel();
+  readonly resources=new Map<string,unknown>();
+  lastExecution:string[]=[];
+  private pendingFractures=new Map<string,FractureDecision>();
   environment:EnvironmentState;
   time=0;
   tick=0;
@@ -54,11 +59,13 @@ export class Scene {
     this.spec=validateScene(input);
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
+    this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.winter.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
   }
 
   add(spec:EntitySpec):RuntimeEntity{
+    spec=validateEntity(spec);
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
     const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?structuredClone(spec.mesh):undefined;
     const surface=deriveSurfaceState(profile,spec.material??{},this.environment);
@@ -86,24 +93,43 @@ export class Scene {
     return runtime;
   }
 
+  use(module:SceneModule):this{this.kernel.use(module);return this;}
+  remove(id:string):void{this.physics.remove(id);this.entities.delete(id);this.winter.remove(id);}
+  private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60):void{
-    const at=this.time+dt;
-    this.environment=resolveEnvironmentAt(this.spec.environment,at);
-    this.winter.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
-    this.syncWinterVisuals();
-    const pending=new Map<string,FractureDecision>();
-    this.physics.step(dt,contact=>{
-      const result=evaluateFracture(contact);
-      if(result.fracture){
-        if(pending.has(result.fracture.body.id))return{mode:'penetrate',energyLoss:0};
-        pending.set(result.fracture.body.id,result.fracture);
-      }
-      return result.decision;
-    });
-    this.emitContactEvents(at);
-    for(const fracture of pending.values())this.fracture(fracture,at);
-    this.cleanupGenerated(at);
-    this.time=at;this.tick++;
+    if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
+    const at=this.time+dt;this.lastExecution=[];
+    this.kernel.run(this.tick+1,this.context(),'detailed',{deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+      for(const command of commands)this.commit(command,dt,at);
+      return this.context();
+    }});
+  }
+  private commit(command:InternalCommand,dt:number,at:number):void{
+    if(command.type==='spawn'){this.add(command.entity);return;}
+    if(command.type==='remove'){this.remove(command.id);return;}
+    if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));return;}
+    if(command.type==='velocity'){
+      if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
+      const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);return;
+    }
+    switch(command.action){
+      case 'weather':this.environment=resolveEnvironmentAt(this.spec.environment,at);break;
+      case 'surfaces':this.winter.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);this.syncWinterVisuals();break;
+      case 'physics':
+        this.pendingFractures.clear();
+        this.physics.step(dt,contact=>{
+          const result=evaluateFracture(contact);
+          if(result.fracture){
+            if(this.pendingFractures.has(result.fracture.body.id))return{mode:'penetrate',energyLoss:0};
+            this.pendingFractures.set(result.fracture.body.id,result.fracture);
+          }
+          return result.decision;
+        });break;
+      case 'events':this.emitContactEvents(at);break;
+      case 'fracture':for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);break;
+      case 'cleanup':this.cleanupGenerated(at);break;
+      case 'clock':this.time=at;this.tick++;break;
+    }
   }
 
   snapshot():SceneSnapshot{

@@ -215,7 +215,7 @@ The CLI uses this same production runtime. There is no second test renderer and 
 
 **Deterministic time.** A fixed-step simulation clock was extracted from TheGame and cleaned into a standalone primitive. Interactive mode retains bounded timer debt instead of silently losing time after a delayed frame; offline capture advances explicitly without a wall clock.
 
-**Dependency-aware simulation kernel.** Modules declare stable IDs, cadence and `reads` / `writes`. The scheduler builds deterministic phase batches and caches due-rate plans. This is the reusable part of TheGame's world-kernel approach, without importing any game concepts.
+**Dependency-aware simulation kernel.** Modules declare stable IDs, cadence and `reads` / `writes`. The scheduler builds deterministic phase batches, validates explicit `after` dependencies and caches due-rate plans. `Scene.step` runs the built-in modules through this kernel; `Scene.use` adds extensions. Command batches commit before dependent readers receive a detached state snapshot. This is the reusable part of TheGame's world-kernel approach, without importing any game concepts.
 
 **Bounded spatial broad phase.** The X/Z spatial hash keeps deterministic insertion order, bounded query caching and batched invalidation instead of letting large streamed-world queries retain unbounded object graphs.
 
@@ -317,7 +317,7 @@ entities: [
 ]
 ```
 
-The engine derives a winter state for each exposed surface:
+The engine derives a grid of local winter states for each exposed horizontal surface (up to 64×64 cells):
 
 ```text
 weather + material + geometry + traffic
@@ -329,7 +329,7 @@ weather + material + geometry + traffic
               drainage / puddles
 ```
 
-Moving bodies contribute contact work to road surfaces. That raises local traffic heat, melts wheel paths and produces dirty slush. Snowfall accumulates on moving bodies from geometry and motion; wake recirculation increases rear-facing accumulation, so rear bodywork and wings retain more snow without a `rearSnow` authoring parameter.
+Supported moving bodies contribute estimated sliding work to cells under their footprint. Airborne bodies contribute no work. That raises local traffic heat, melts wheel paths and produces dirty slush. Snowfall accumulates on moving bodies from geometry and motion; wake recirculation increases rear-facing accumulation, so rear bodywork and wings retain more snow without a `rearSnow` authoring parameter.
 
 The WebGPU renderer consumes those engine states to synthesize asphalt aggregate, square paving, tyre-cleared snow tracks, wet/slushy patches, puddles, attached body snow and instanced snowfall. Curb and sidewalk snow mass also generates engine-owned snowdrift geometry. Civil time drives night, sunrise and daylight lighting, while ordinary point lights provide street illumination.
 

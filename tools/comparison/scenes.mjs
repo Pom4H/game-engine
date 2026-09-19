@@ -31,8 +31,17 @@ const friction={...common,camera:{position:[6.8,10.5,12.5],target:[.6,0,0],fov:4
     ...[-6,-3,0,3,6,9].map((x,i)=>box(`mark-${sign}-${i}`,[x,.07,sign*1.65],[.02,.01,2.6],[.15,.4,.46,1])),
   ]),
 ]};
-export const scenes={fracture,momentum,friction};
-export const durations={fracture:2,momentum:2.2,friction:3.3};
+const kernel={...common,gravity:[0,0,0],camera:{position:[2,7,16],target:[0,1,0],fov:40},entities:[...stage(14,7),{id:'signal',position:[-4,1,0],mesh:{kind:'sphere',radius:.4},material:{kind:'steel',color:colors.metal},body:{mass:1}}]};
+const phases={...common,camera:kernel.camera,entities:[]};
+const gpu={...phases};
+const validation={...phases};
+const snow={...common,environment:{temperatureC:-6,snowfall:'heavy',sunlight:.5,clock:{startHour:12,hoursPerSecond:.1}},camera:{position:[2,12,12],target:[0,0,0],fov:43},entities:[
+ ...[-1,1].flatMap(sign=>[
+  {id:sign<0?'road-contact':'road-air',position:[0,-.1,sign*2.2],mesh:{kind:'box',size:[12,.2,3.4]},material:{kind:'asphalt'},environmental:{surfaceUse:'road'}},
+  {id:sign<0?'sled-contact':'sled-air',position:[-4,sign<0?.25:1.25,sign*2.2],mesh:{kind:'box',size:[1,.5,.8]},material:{kind:'steel',color:colors.metal},body:{motion:'kinematic',mass:1500,velocity:[2.5,0,0]}},
+ ])]};
+export const scenes={fracture,momentum,friction,kernel,phases,snow,gpu,validation};
+export const durations={fracture:2,momentum:2.2,friction:3.3,kernel:3,phases:3,snow:3,gpu:3,validation:3};
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  await mkdir(`${root}examples/comparison`,{recursive:true});
  for(const [id,spec] of Object.entries(scenes))await writeFile(`${root}examples/comparison/${id}.json`,JSON.stringify(spec,null,2)+'\n');

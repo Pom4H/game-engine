@@ -5,14 +5,24 @@ import {fileURLToPath} from 'node:url';
 import {renderAudio,wavBytes} from '../../dist/audio/synth.js';
 const root=fileURLToPath(new URL('../../',import.meta.url)),out=join(root,'artifacts/comparison');
 const clips=[
- {name:'intro',duration:6,text:'Эмерджентная физика. Сначала старая версия, затем исправленная. Сравните движение и звук.'},
+ {name:'intro',duration:6,text:'Семь замечаний. Восемь опытов. Старая версия — и сразу исправленная.'},
  {name:'fracture-before',duration:9,sim:2,text:'Раньше пол обходил закон разрушения стекла.'},
  {name:'fracture-after',duration:9,sim:2,text:'Теперь работает закон разрушения стекла.'},
  {name:'momentum-before',duration:9,sim:2.2,text:'Раньше осколки теряли движение исходного тела.'},
  {name:'momentum-after',duration:9,sim:2.2,text:'Теперь осколки сохраняют движение тела.'},
  {name:'friction-before',duration:9,sim:3.3,text:'Раньше разное трение давало одинаковый результат.'},
  {name:'friction-after',duration:9,sim:3.3,text:'Разное трение меняет пройденный путь.'},
- {name:'outro',duration:6,text:'Материал определяет разрушение. Импульс сохраняется. Трение меняет движение.'},
+ {name:'kernel-before',duration:9,sim:3,text:'Модуль зарегистрирован, но сцена его не вызывает. Тело неподвижно.'},
+ {name:'kernel-after',duration:9,sim:3,text:'Ядро вызывает модуль тридцать раз в секунду. Команда приводит тело в движение.'},
+ {name:'phases-before',duration:9,sim:3,text:'Команда меняет значение на единицу. Но следующая фаза всё ещё читает ноль.'},
+ {name:'phases-after',duration:9,sim:3,text:'Команда применяется между этапами. Следующая фаза уже видит единицу.'},
+ {name:'snow-before',duration:9,sim:3,text:'Раньше нагревалась вся дорога. Даже от тела, летящего над ней.'},
+ {name:'snow-after',duration:9,sim:3,text:'Теперь след хранится в ячейках под телом. В воздухе следа нет.'},
+ {name:'gpu-before',duration:9,sim:3,text:'Двадцать объектов исчезли. Но шестьдесят буферов остались в памяти.'},
+ {name:'gpu-after',duration:9,sim:3,text:'Теперь после удаления геометрии её буферы освобождаются. Счётчик возвращается к нулю.'},
+ {name:'validation-before',duration:9,sim:3,text:'Отрицательный радиус, пустая скорость, неизвестная форма. Проверка пропускает все три ошибки.'},
+ {name:'validation-after',duration:9,sim:3,text:'Все три ошибки отклонены до симуляции. У каждой указан источник в описании сцены.'},
+ {name:'outro' ,duration:6,text:'Модули работают. Физика учитывает материал. Ресурсы освобождаются.'},
 ];
 async function run(binary,args){await new Promise((resolve,reject)=>{const child=spawn(binary,args,{stdio:'inherit'});child.once('error',reject);child.once('exit',code=>code===0?resolve():reject(new Error(`${binary}: ${code}`)));});}
 await mkdir(out,{recursive:true});
@@ -30,9 +40,9 @@ for(const clip of clips){
  console.log('mixed',clip.name);
 }
 await writeFile(join(out,'concat.txt'),clips.map(clip=>`file '${clip.name}.mp4'`).join('\n')+'\n');
-await run('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','concat','-safe','0','-i',join(out,'concat.txt'),'-c','copy','-movflags','+faststart',join(out,'emergent-physics-before-after-1080p.mp4')]);
+await run('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','concat','-safe','0','-i',join(out,'concat.txt'),'-c','copy','-movflags','+faststart',join(out,'emergent-engine-full-comparison-1080p.mp4')]);
 let start=0;const chapters=clips.map(clip=>{const result={...clip,start,end:start+clip.duration};start=result.end;return result;});
 await writeFile(join(out,'chapters.json'),JSON.stringify(chapters,null,2));
 await writeFile(join(out,'fx-concat.txt'),clips.map(clip=>`file '${clip.name}-fx.wav'`).join('\n')+'\n');
-await run('ffmpeg',['-y','-hide_banner','-loglevel','error','-i',join(out,'emergent-physics-before-after-1080p.mp4'),'-f','concat','-safe','0','-i',join(out,'fx-concat.txt'),'-map','0:v','-map','1:a','-af','volume=0.72,alimiter=limit=0.95:level=false','-c:v','copy','-c:a','aac','-b:a','192k','-ar','48000','-ac','2','-t','66','-movflags','+faststart',join(out,'emergent-physics-effects-only-1080p.mp4')]);
-console.log(join(out,'emergent-physics-before-after-1080p.mp4'));
+await run('ffmpeg',['-y','-hide_banner','-loglevel','error','-i',join(out,'emergent-engine-full-comparison-1080p.mp4'),'-f','concat','-safe','0','-i',join(out,'fx-concat.txt'),'-map','0:v','-map','1:a','-af','volume=0.72,alimiter=limit=0.95:level=false','-c:v','copy','-c:a','aac','-b:a','192k','-ar','48000','-ac','2','-t',String(start),'-movflags','+faststart',join(out,'emergent-engine-full-effects-only-1080p.mp4')]);
+console.log(join(out,'emergent-engine-full-comparison-1080p.mp4'));

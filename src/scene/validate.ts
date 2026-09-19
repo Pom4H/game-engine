@@ -1,6 +1,6 @@
 import {materialKinds} from '../materials/catalog.js';
 import {finiteVec3} from '../math.js';
-import type {SceneSpec} from './types.js';
+import type {SceneSpec,EntitySpec} from './types.js';
 
 export function validateScene(value:unknown):SceneSpec{
   if(!value||typeof value!=='object')throw new TypeError('Scene must be an object');
@@ -12,6 +12,7 @@ export function validateScene(value:unknown):SceneSpec{
     if(!raw||typeof raw!=='object')throw new TypeError(`Entity ${index} must be an object`);const entity=raw as Record<string,unknown>;
     if(typeof entity.id!=='string'||!entity.id||entity.id.length>180||ids.has(entity.id))throw new TypeError(`Entity ${index} requires a unique stable id`);ids.add(entity.id);
     for(const key of ['position','rotation','scale'] as const)if(entity[key]!==undefined){if(!Array.isArray(entity[key]))throw new TypeError(`${entity.id}.${key} must be a vec3`);finiteVec3(entity[key] as number[],`${entity.id}.${key}`);}
+    validateEntity(entity);
     if(entity.body!==undefined&&(!entity.body||typeof entity.body!=='object'))throw new TypeError(`${entity.id}.body must be an object`);
     if(entity.environmental!==undefined){if(!entity.environmental||typeof entity.environmental!=='object')throw new TypeError(`${entity.id}.environmental must be an object`);const use=(entity.environmental as Record<string,unknown>).surfaceUse;if(use!==undefined&&!['generic','road','sidewalk','curb'].includes(String(use)))throw new TypeError(`${entity.id}.environmental.surfaceUse is unknown`);}
     if(entity.material!==undefined){
@@ -23,6 +24,9 @@ export function validateScene(value:unknown):SceneSpec{
       if(material.ageYears!==undefined&&(typeof material.ageYears!=='number'||!Number.isFinite(material.ageYears)||material.ageYears<0))throw new TypeError(`${entity.id}.material.ageYears must be non-negative`);
     }
   }
+  if(scene.seed!==undefined&&(!Number.isSafeInteger(scene.seed)))throw new TypeError('seed must be a safe integer');
+  optionalNumber(scene,'ground','scene');
+  if(scene.clearColor!==undefined)vector(scene.clearColor,4,'clearColor',0,1);
   if(scene.gravity!==undefined){if(!Array.isArray(scene.gravity))throw new TypeError('gravity must be a vec3');finiteVec3(scene.gravity as number[],'gravity');}
   if(scene.environment!==undefined){
     if(!scene.environment||typeof scene.environment!=='object')throw new TypeError('environment must be an object');
@@ -45,13 +49,43 @@ export function validateScene(value:unknown):SceneSpec{
         const frame=raw as Record<string,unknown>;
         if(typeof frame.hour!=='number'||!Number.isFinite(frame.hour)||frame.hour<0||frame.hour>24)throw new TypeError(`environment.weather[${index}].hour must be within 0..24`);
         if(frame.temperatureC!==undefined&&(typeof frame.temperatureC!=='number'||!Number.isFinite(frame.temperatureC)))throw new TypeError(`environment.weather[${index}].temperatureC must be finite`);
-        if(frame.sunlight!==undefined&&(typeof frame.sunlight!=='number'||frame.sunlight<0||frame.sunlight>1))throw new TypeError(`environment.weather[${index}].sunlight must be within 0..1`);
-        if(frame.humidity!==undefined&&(typeof frame.humidity!=='number'||frame.humidity<0||frame.humidity>1))throw new TypeError(`environment.weather[${index}].humidity must be within 0..1`);
+        if(frame.sunlight!==undefined&&(typeof frame.sunlight!=='number'||!Number.isFinite(frame.sunlight)||frame.sunlight<0||frame.sunlight>1))throw new TypeError(`environment.weather[${index}].sunlight must be within 0..1`);
+        if(frame.humidity!==undefined&&(typeof frame.humidity!=='number'||!Number.isFinite(frame.humidity)||frame.humidity<0||frame.humidity>1))throw new TypeError(`environment.weather[${index}].humidity must be within 0..1`);
         if(frame.snowfall!==undefined&&!['none','light','moderate','heavy'].includes(String(frame.snowfall)))throw new TypeError(`environment.weather[${index}].snowfall is unknown`);
         if(frame.wind!==undefined){if(!Array.isArray(frame.wind))throw new TypeError(`environment.weather[${index}].wind must be a vec3`);finiteVec3(frame.wind as number[],`environment.weather[${index}].wind`);}
       }
     }
   }
-  if(scene.camera!==undefined){const camera=scene.camera as Record<string,unknown>;if(!Array.isArray(camera.position)||!Array.isArray(camera.target))throw new TypeError('camera position/target must be vec3');finiteVec3(camera.position as number[],'camera.position');finiteVec3(camera.target as number[],'camera.target');}
+  if(scene.camera!==undefined){const camera=object(scene.camera,'camera');optionalNumber(camera,'fov','camera',1,179);if(JSON.stringify(camera.position)===JSON.stringify(camera.target))throw new TypeError('camera position and target must differ');if(!Array.isArray(camera.position)||!Array.isArray(camera.target))throw new TypeError('camera position/target must be vec3');finiteVec3(camera.position as number[],'camera.position');finiteVec3(camera.target as number[],'camera.target');}
   return structuredClone(value) as SceneSpec;
+}
+
+function object(value:unknown,path:string):Record<string,unknown>{if(!value||typeof value!=='object'||Array.isArray(value))throw new TypeError(`${path} must be an object`);return value as Record<string,unknown>;}
+function number(value:unknown,path:string,min=-Infinity,max=Infinity):void{if(typeof value!=='number'||!Number.isFinite(value)||value<min||value>max)throw new TypeError(`${path} must be finite within ${min}..${max}`);}
+function optionalNumber(obj:Record<string,unknown>,key:string,path:string,min=-Infinity,max=Infinity):void{if(obj[key]!==undefined)number(obj[key],`${path}.${key}`,min,max);}
+function vector(value:unknown,length:number,path:string,min=-Infinity,max=Infinity):void{if(!Array.isArray(value)||value.length!==length)throw new TypeError(`${path} must have ${length} components`);value.forEach((v,i)=>number(v,`${path}[${i}]`,min,max));}
+function choice(value:unknown,values:readonly unknown[],path:string):void{if(value!==undefined&&!values.includes(value))throw new TypeError(`${path} is unknown`);}
+export function validateEntity(value:unknown):EntitySpec{
+  const e=object(value,'entity'),id=e.id;
+  if(typeof id!=='string'||!id||id.length>180)throw new TypeError('entity requires a stable id');
+  for(const key of ['position','rotation','scale'])if(e[key]!==undefined)vector(e[key],3,`${id}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
+  if(e.mesh!==undefined){
+    const m=object(e.mesh,`${id}.mesh`),path=`${id}.mesh`;
+    if(!['box','sphere','plane','shard','polygon-prism'].includes(String(m.kind)))throw new TypeError(`${path}.kind is unknown`);
+    if(m.kind==='box'||m.kind==='shard'){if(m.size!==undefined||m.kind==='shard')vector(m.size,3,`${path}.size`,Number.MIN_VALUE);}
+    if(m.kind==='plane'&&m.size!==undefined)vector(m.size,2,`${path}.size`,Number.MIN_VALUE);
+    if(m.kind==='sphere'){optionalNumber(m,'radius',path,Number.MIN_VALUE);if(m.segments!==undefined){number(m.segments,`${path}.segments`,3,256);if(!Number.isInteger(m.segments))throw new TypeError(`${path}.segments must be integer`);}}
+    if(m.kind==='shard'||m.kind==='polygon-prism')choice(m.axis,[0,1,2],`${path}.axis`);
+    if(m.kind==='shard')optionalNumber(m,'skew',path,-1,1);
+    if(m.kind==='polygon-prism'){
+      number(m.thickness,`${path}.thickness`,Number.MIN_VALUE);
+      if(!Array.isArray(m.points)||m.points.length<3||m.points.length>4096)throw new TypeError(`${path}.points requires 3..4096 vertices`);
+      m.points.forEach((p,i)=>vector(p,2,`${path}.points[${i}]`));
+    }
+  }
+  if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);}
+  if(e.material!==undefined){const m=object(e.material,`${id}.material`);choice(m.kind,materialKinds(),`${id}.material.kind`);choice(m.finish,['raw','rough','smooth','polished','weathered'],`${id}.material.finish`);choice(m.treatment,['none','sealed','biocide','galvanized','painted'],`${id}.material.treatment`);optionalNumber(m,'ageYears',`${id}.material`,0);if(m.color!==undefined)vector(m.color,4,`${id}.material.color`,0,1);}
+  if(e.environmental!==undefined)choice(object(e.environmental,`${id}.environmental`).surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);
+  if(e.light!==undefined){const l=object(e.light,`${id}.light`);if(l.kind!=='point')throw new TypeError(`${id}.light.kind is unknown`);optionalNumber(l,'intensity',`${id}.light`,0);optionalNumber(l,'range',`${id}.light`,Number.MIN_VALUE);if(l.color!==undefined)vector(l.color,3,`${id}.light.color`,0,1);}
+  return structuredClone(value) as EntitySpec;
 }

@@ -96,6 +96,7 @@ export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodi
 
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
+  surfaceFrictionAt?:(body:RigidBody,point:Vec3)=>number;
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
   readonly index:SpatialHash<RigidBody>;
@@ -198,7 +199,7 @@ export class PhysicsWorld {
       this.resolvePenetration(contact,Math.max(0,decision.energyLoss??0));
       return true;
     }
-    return this.resolveHorizontalSurface(body,surfaceY,surface.material,surface.id,dt,surface.friction,surface.restitution);
+    return this.resolveHorizontalSurface(body,surfaceY,surface.material,surface.id,dt,this.surfaceFrictionAt?.(surface,[pointX,surfaceY,pointZ])??surface.friction,surface.restitution);
   }
 
   private resolveHorizontalSurface(body:RigidBody,surfaceY:number,surfaceMaterial:PhysicalMaterial,surfaceId:string|'ground',dt:number,surfaceFriction=surfaceMaterial.friction,surfaceRestitution=surfaceMaterial.restitution):boolean{

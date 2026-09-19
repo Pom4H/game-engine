@@ -27,16 +27,30 @@ export interface WinterBodyState {
   directionZ:number;
 }
 
+export interface WinterField {readonly center:readonly[number,number];readonly size:readonly[number,number];readonly nx:number;readonly nz:number;readonly cells:WinterSurfaceState[]}
 export class WinterSystem {
+  readonly fields=new Map<string,WinterField>();
+  remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);}
+  field(id:string):WinterField|undefined{return this.fields.get(id);}
+  sample(id:string,x:number,z:number):WinterSurfaceState|undefined{
+    const field=this.fields.get(id);if(!field)return undefined;
+    const u=(x-field.center[0])/field.size[0]+.5,v=(z-field.center[1])/field.size[1]+.5;
+    if(u<0||u>1||v<0||v>1)return undefined;
+    return field.cells[Math.min(field.nz-1,Math.floor(v*field.nz))*field.nx+Math.min(field.nx-1,Math.floor(u*field.nx))];
+  }
   readonly surfaces=new Map<string,WinterSurfaceState>();
   readonly bodies=new Map<string,WinterBodyState>();
 
   step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
+    for(const id of [...this.surfaces.keys(),...this.bodies.keys()])if(!entities.has(id))this.remove(id);
     this.ensureStates(environment,entities);
     this.applyTraffic(dt,entities);
     for(const [id,state] of this.surfaces){
       const entity=entities.get(id);if(!entity)continue;
-      this.stepSurface(state,entity,dt,worldSeconds,environment);
+      const field=this.fields.get(id)!;
+      for(const cell of field.cells)this.stepSurface(cell,entity,dt,worldSeconds,environment);
+      for(const key of ['temperatureC','snowDepthM','waterDepthM','iceDepthM','slush','dirt','trafficHeatC','puddle','frictionScale'] as const)state[key]=field.cells.reduce((sum,cell)=>sum+cell[key],0)/field.cells.length;
+      state.trackMelt=Math.max(...field.cells.map(cell=>cell.trackMelt));
     }
     for(const [id,state] of this.bodies){
       const entity=entities.get(id);if(!entity?.body||( !entity.body.invMass&&!entity.body.kinematic)){this.bodies.delete(id);continue;}
@@ -56,6 +70,10 @@ export class WinterSystem {
           slush:0,dirt:entity.material.surface.dirt*.25,trafficHeatC:0,trackMelt:0,puddle:0,frictionScale:1,
         });
       }
+      if(use&&!this.fields.has(entity.id)){
+        const half=horizontalHalf(entity),size=[half[0]*2,half[1]*2] as const,nx=Math.min(64,Math.max(1,Math.ceil(size[0]/.5))),nz=Math.min(64,Math.max(1,Math.ceil(size[1]/.5)));
+        this.fields.set(entity.id,{center:[entity.position[0],entity.position[2]],size,nx,nz,cells:Array.from({length:nx*nz},()=>({...this.surfaces.get(entity.id)!}))});
+      }
       if((entity.body?.invMass||entity.body?.kinematic)&&!this.bodies.has(entity.id)){
         this.bodies.set(entity.id,{id:entity.id,snowCoverage:0,rearSnow:0,wetness:0,roadDirt:0,directionX:1,directionZ:0});
       }
@@ -68,15 +86,25 @@ export class WinterSystem {
       const vx=body.velocity[0],vz=body.velocity[2],speed=Math.hypot(vx,vz);
       if(speed>.1){bodyState.directionX=vx/speed;bodyState.directionZ=vz/speed;}
       if(speed<.45)continue;
-      for(const [surfaceId,surface] of this.surfaces){
-        const surfaceEntity=entities.get(surfaceId);if(!surfaceEntity||surface.use!=='road'||!containsXZ(surfaceEntity,bodyEntity.position[0],bodyEntity.position[2]))continue;
+      for(const [surfaceId,summary] of this.surfaces){
+        const surfaceEntity=entities.get(surfaceId);if(!surfaceEntity||summary.use!=='road'||!containsXZ(surfaceEntity,bodyEntity.position[0],bodyEntity.position[2]))continue;
         const top=surfaceTop(surfaceEntity),bottom=bodyEntity.position[1]-verticalHalf(bodyEntity);
-        if(bottom>top+1.2||bottom<top-.35)continue;
-        // Friction/contact work is deliberately derived from mass and velocity.
-        const load=Math.max(1,body.mass)*9.81,contactWork=load*Math.max(.05,body.friction)*speed*dt;
-        surface.trafficHeatC=Math.min(12,surface.trafficHeatC+contactWork/1.8e6);
-        surface.trackMelt=Math.min(1,surface.trackMelt+Math.min(1,contactWork/85_000)*.12);
+        // A supported contact is required; an airborne body deposits no work.
+        if(Math.abs(bottom-top)>.025||Math.abs(body.velocity[1])>.2)continue;
+        const surface=this.sample(surfaceId,bodyEntity.position[0],bodyEntity.position[2]);if(!surface)continue;
+        // Sliding work estimate at the supported footprint (kinematic motor load uses m*g).
+        const load=Math.max(1,body.mass)*9.81,contactWork=load*Math.sqrt(Math.max(0,body.friction*surfaceEntity.body!.friction))*speed*dt;
+        const field=this.fields.get(surfaceId)!,half=horizontalHalf(bodyEntity),touched:WinterSurfaceState[]=[];
+        for(let iz=0;iz<field.nz;iz++)for(let ix=0;ix<field.nx;ix++){
+          const x=field.center[0]+((ix+.5)/field.nx-.5)*field.size[0],z=field.center[1]+((iz+.5)/field.nz-.5)*field.size[1];
+          if(Math.abs(x-body.position[0])<=half[0]+field.size[0]/field.nx/2&&Math.abs(z-body.position[2])<=half[1]+field.size[1]/field.nz/2)touched.push(field.cells[iz*field.nx+ix]!);
+        }
+        const workPerCell=contactWork/Math.max(1,touched.length);
+        for(const surface of touched){
+        surface.trafficHeatC=Math.min(12,surface.trafficHeatC+workPerCell/1.8e6);
+        surface.trackMelt=Math.min(1,surface.trackMelt+Math.min(1,workPerCell/85_000)*.12);
         surface.dirt=Math.min(1,surface.dirt+dt*speed*.0008*(surface.waterDepthM>0||surface.snowDepthM>0?1:.1));
+        }
         const spray=Math.min(1,(surface.slush+surface.puddle)*speed/8);
         bodyState.rearSnow=Math.min(1,bodyState.rearSnow+spray*dt*.13);
         bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*dt*.09);
@@ -101,8 +129,7 @@ export class WinterSystem {
     state.trafficHeatC*=Math.exp(-worldSeconds/950);
     state.trackMelt*=Math.exp(-worldSeconds/5400);
 
-    // Snow/water phase change. Traffic concentrates melt in wheel paths; the scalar
-    // is later spatialized procedurally by the renderer.
+    // Integrate phase change independently in each contacted grid cell.
     const positive=Math.max(0,state.temperatureC),trafficMelt=use==='road'?state.trackMelt*1.7e-5*worldSeconds:0;
     const thermalMelt=Math.min(state.snowDepthM,positive*1.3e-6*worldSeconds+trafficMelt);
     state.snowDepthM-=thermalMelt;state.waterDepthM+=thermalMelt;
@@ -129,7 +156,7 @@ export class WinterSystem {
 
     const snowFactor=Math.min(1,state.snowDepthM/.025),iceFactor=Math.min(1,state.iceDepthM/.003),waterFactor=Math.min(1,state.waterDepthM/.003);
     state.frictionScale=Math.max(.16,1-snowFactor*.42-iceFactor*.72-state.slush*.5-waterFactor*.12);
-    if(entity.body)entity.body.friction=entity.material.profile.friction*entity.material.surface.frictionScale*state.frictionScale;
+
   }
 
   private stepBody(state:WinterBodyState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState):void{

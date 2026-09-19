@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "seed": 7301,
+  "ground": -100,
+  "clearColor": [
+    0.014,
+    0.024,
+    0.04,
+    1
+  ],
+  "environment": {
+    "sunlight": 1,
+    "humidity": 0,
+    "precipitation": "arid",
+    "groundMoisture": 0
+  },
+  "entities": [],
+  "camera": {
+    "position": [
+      2,
+      7,
+      16
+    ],
+    "target": [
+      0,
+      1,
+      0
+    ],
+    "fov": 40
+  }
+}

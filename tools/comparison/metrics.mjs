@@ -7,7 +7,8 @@ const roots={before:resolve(oldRoot),after:resolve('.')};
 const result={};
 for(const [version,root] of Object.entries(roots)){
  const {Scene}=await import(pathToFileURL(`${root}/dist/index.js`).href);result[version]={};
- for(const [id,spec] of Object.entries(scenes)){
+ // Numerical physics audit; architecture measurements are captured in *-evidence.json.
+ for(const [id,spec] of Object.entries(scenes).filter(([id])=>['fracture','momentum','friction'].includes(id))){
   const scene=new Scene(spec),events=[],samples=[];
   const sample=()=>({time:scene.time,tick:scene.tick,entities:scene.entities.size,glassIntact:scene.entities.has('glass'),momentumX:[...scene.physics.bodies.values()].reduce((sum,b)=>sum+b.mass*b.velocity[0],0),shards:[...scene.entities.keys()].filter(id=>id.startsWith('glass:shard:')).length,roughX:scene.entities.get('rough-slider')?.position[0],slipperyX:scene.entities.get('slippery-slider')?.position[0]});
   samples.push(sample());let firstFracture;

@@ -33,7 +33,7 @@ try{
   if(clip.version)await evaluate(`await window.film.load(${JSON.stringify(clip.id)},${JSON.stringify(clip.version)});`);
   if(mode==='preview'){
    if(clip.version)await evaluate('await window.film.frame(6);');else await evaluate(`await window.film.card(${JSON.stringify(clip.id)},3);`);
-   await writeFile(join(out,`${name}-layout.png`),await screenshot());console.log('preview',name);continue;
+   await writeFile(join(out,`${name}-layout.png`),await screenshot());const inspection=await evaluate('return window.film.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));console.log('preview',name);continue;
   }
   const path=join(out,`${name}-silent.mp4`),encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate','30','-i','pipe:0','-an','-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart',path],{stdio:['pipe','inherit','inherit']});
   const completed=once(encoder,'exit');
@@ -44,7 +44,7 @@ try{
   }
   encoder.stdin.end();const [code]=await completed;if(code!==0)throw new Error(`ffmpeg exit ${code}`);
   const inspection=await evaluate('return window.film.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));
-  if(clip.version)await writeFile(join(out,`${name}-events.json`),JSON.stringify(await evaluate('return window.film.events()')));
+  if(clip.version){await writeFile(join(out,`${name}-events.json`),JSON.stringify(await evaluate('return window.film.events()')));await writeFile(join(out,`${name}-evidence.json`),JSON.stringify(inspection,null,2));}
   console.log('recorded',name,JSON.stringify(inspection));
  }
 }finally{
