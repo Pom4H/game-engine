@@ -12,6 +12,8 @@ export type Primitive =
   | {kind:'shard'; size:Vec3; axis?:0|1|2; skew?:number}
   | {kind:'polygon-prism'; points:readonly (readonly [number,number])[]; thickness:number; axis?:0|1|2};
 export interface MaterialSpec { kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
+export type SurfaceUse='generic'|'road'|'sidewalk'|'curb';
+export interface EnvironmentalSpec { surfaceUse?:SurfaceUse }
 export interface BodySpec {
   /** 0 is static. Dynamic mass may be explicit; material density is available to engine-generated fragments. */
   mass?:number;
@@ -28,6 +30,7 @@ export interface EntitySpec {
   scale?:Vec3;
   mesh?:Primitive;
   material?:MaterialSpec;
+  environmental?:EnvironmentalSpec;
   body?:BodySpec;
 }
 export interface CameraSpec { position:Vec3; target:Vec3; fov?:number }
