@@ -11,6 +11,7 @@ export interface RigidBodyOptions {
   velocity?:Vec3;
   angularVelocity?:Vec3;
   mass?:number;
+  kinematic?:boolean;
   restitution?:number;
   friction?:number;
   material?:PhysicalMaterial;
@@ -24,6 +25,7 @@ export class RigidBody {
   angularVelocity:MutableVec3;
   readonly mass:number;
   readonly invMass:number;
+  readonly kinematic:boolean;
   readonly material:PhysicalMaterial;
   readonly invInertiaLocal:MutableVec3;
   sleeping=false;
@@ -47,7 +49,8 @@ export class RigidBody {
     this.velocity=[...(options.velocity??[0,0,0])];
     this.angularVelocity=[...(options.angularVelocity??[0,0,0])];
     this.mass=mass;
-    this.invMass=mass>0?1/mass:0;
+    this.kinematic=options.kinematic??false;
+    this.invMass=mass>0&&!this.kinematic?1/mass:0;
     this.material=options.material??material();
     this.invInertiaLocal=inverseInertiaLocal(options.shape,mass);
     this.restitution=Math.max(0,Math.min(1,options.restitution??this.material.restitution));
@@ -119,7 +122,7 @@ export class PhysicsWorld {
   private adaptiveSubsteps(dt:number):number{
     let required=1;
     for(const body of this.bodies.values()){
-      if(!body.invMass)continue;
+      if(!body.invMass&&!body.kinematic)continue;
       const speed=Math.hypot(body.velocity[0],body.velocity[1],body.velocity[2]),travel=speed*dt;
       const feature=body.shape.kind==='sphere'?body.shape.radius*1.5:Math.max(.025,Math.min(body.shape.half[0],body.shape.half[1],body.shape.half[2])*1.5);
       required=Math.max(required,Math.ceil(travel/Math.max(.015,feature)));
@@ -128,6 +131,10 @@ export class PhysicsWorld {
   }
 
   private stepSubstep(dt:number,contactModel?:ContactModel):void{
+    for(const body of this.bodies.values())if(body.kinematic){
+      body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
+      body.rotation[0]+=body.angularVelocity[0]*dt;body.rotation[1]+=body.angularVelocity[1]*dt;body.rotation[2]+=body.angularVelocity[2]*dt;
+    }
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping){
       body.supportedThisStep=false;
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
