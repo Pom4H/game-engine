@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: render-quanta-verification
@@ -25,13 +26,32 @@ jobs:
         with:
           bun-version: 1.4.2
       - name: Install dependencies
+        id: install
+        continue-on-error: true
         run: |
           New-Item -ItemType Directory -Force artifacts | Out-Null
           cmd /d /s /c "bun install > artifacts\install.log 2>&1"
           $code = $LASTEXITCODE
           Get-Content artifacts/install.log
+          $code | Set-Content artifacts/install-exit.txt
           if ($code -ne 0) { exit $code }
+      - name: Report install result
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- render-quanta-install -->';
+            const log = fs.existsSync('artifacts/install.log') ? fs.readFileSync('artifacts/install.log','utf8') : 'install.log missing';
+            const exit = fs.existsSync('artifacts/install-exit.txt') ? fs.readFileSync('artifacts/install-exit.txt','utf8').trim() : '?';
+            const body = marker + '\nRender quanta install exit=' + exit + '\n\n' + log.slice(-6000);
+            const {owner,repo} = context.repo;
+            const comments = await github.paginate(github.rest.issues.listComments,{owner,repo,issue_number:1,per_page:100});
+            const old = comments.find(c => c.body && c.body.includes(marker));
+            if (old) await github.rest.issues.updateComment({owner,repo,comment_id:old.id,body});
+            else await github.rest.issues.createComment({owner,repo,issue_number:1,body});
       - name: Core verification
+        if: steps.install.outcome == 'success'
         run: |
           New-Item -ItemType Directory -Force artifacts | Out-Null
           $old = $ErrorActionPreference
@@ -41,10 +61,12 @@ jobs:
           $ErrorActionPreference = $old
           if ($code -ne 0) { exit $code }
       - name: Profile 720p
+        if: steps.install.outcome == 'success'
         run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1280 --height 720 --out artifacts/render-profile-720p.json
       - name: Profile 1080p
+        if: steps.install.outcome == 'success'
         run: node dist/cli.js profile tools/promo/street.scene.mjs --duration 5 --warmup 2 --width 1920 --height 1080 --out artifacts/render-profile-1080p.json
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: render-quanta-${{ github.sha }}
