@@ -153,7 +153,7 @@ export class PhysicsWorld {
         const key=a.id<b.id?`${a.id}\u0000${b.id}`:`${b.id}\u0000${a.id}`;
         if(seen.has(key))continue;seen.add(key);
         if(!a.invMass&&!b.invMass)continue;
-        if(!b.invMass&&isHorizontalStaticSurface(b)&&this.resolveStaticHorizontalSurface(a,b,dt))continue;
+        if(!b.invMass&&isHorizontalStaticSurface(b)&&this.resolveStaticHorizontalSurface(a,b,dt,contactModel))continue;
         const hit=intersect(a,b);
         if(!hit)continue;
         const candidate=this.contactCandidate(a,b,hit),decision=contactModel?.(candidate)??{mode:'resolve' as const};
@@ -183,14 +183,25 @@ export class PhysicsWorld {
     this.resolveHorizontalSurface(body,this.ground,this.groundMaterial,'ground',dt);
   }
 
-  private resolveStaticHorizontalSurface(body:RigidBody,surface:RigidBody,dt:number):boolean{
+  private resolveStaticHorizontalSurface(body:RigidBody,surface:RigidBody,dt:number,contactModel?:ContactModel):boolean{
     if(surface.shape.kind!=='box')return false;
     const r=groundSupportVector(body),pointX=body.position[0]+r[0],pointZ=body.position[2]+r[2],h=surface.shape.half,margin=.003;
     if(pointX<surface.position[0]-h[0]-margin||pointX>surface.position[0]+h[0]+margin||pointZ<surface.position[2]-h[2]-margin||pointZ>surface.position[2]+h[2]+margin)return false;
-    return this.resolveHorizontalSurface(body,surface.position[1]+h[1],surface.material,surface.id,dt);
+    const surfaceY=surface.position[1]+h[1],bottom=body.position[1]+r[1];
+    // A finite slab is not an infinite column: approach from below uses narrow phase.
+    if(body.position[1]<surface.position[1]-h[1])return false;
+    const pointVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r));
+    if(bottom>surfaceY+.0015&&bottom+Math.min(0,pointVelocity[1])*dt>surfaceY+.0015)return false;
+    const contact=this.contactCandidate(body,surface,{normal:[0,-1,0],point:[pointX,surfaceY,pointZ],penetration:Math.max(0,surfaceY-bottom)});
+    const decision=contactModel?.(contact)??{mode:'resolve' as const};
+    if(decision.mode==='penetrate'){
+      this.resolvePenetration(contact,Math.max(0,decision.energyLoss??0));
+      return true;
+    }
+    return this.resolveHorizontalSurface(body,surfaceY,surface.material,surface.id,dt,surface.friction,surface.restitution);
   }
 
-  private resolveHorizontalSurface(body:RigidBody,surfaceY:number,surfaceMaterial:PhysicalMaterial,surfaceId:string|'ground',dt:number):boolean{
+  private resolveHorizontalSurface(body:RigidBody,surfaceY:number,surfaceMaterial:PhysicalMaterial,surfaceId:string|'ground',dt:number,surfaceFriction=surfaceMaterial.friction,surfaceRestitution=surfaceMaterial.restitution):boolean{
     const manifold=groundContactManifold(body),lowest=manifold.lowest,slop=.0015,bottom=body.position[1]+lowest;
     let minPointVelocityY=Infinity;
     for(const r of manifold.points){const velocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r));minPointVelocityY=Math.min(minPointVelocityY,velocity[1]);}
@@ -198,7 +209,7 @@ export class PhysicsWorld {
     if(bottom>surfaceY+slop&&predictedBottom>surfaceY+slop)return false;
     body.supportedThisStep=true;
     const penetration=Math.max(0,surfaceY-bottom);if(penetration>0)body.position[1]+=penetration;
-    const normal:Vec3=[0,1,0],mu=Math.sqrt(body.friction*surfaceMaterial.friction);
+    const normal:Vec3=[0,1,0],mu=Math.sqrt(body.friction*surfaceFriction);
     let totalImpulse=0,maxApproach=0,totalEnergy=0;
 
     // Sequential impulses over the whole edge/face manifold prevent a thin shard
@@ -208,7 +219,7 @@ export class PhysicsWorld {
         const contactVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),approach=Math.max(0,-contactVelocity[1]);
         maxApproach=Math.max(maxApproach,approach);if(iteration===0)totalEnergy+=.5*body.mass*approach*approach/manifold.points.length;
         if(contactVelocity[1]<0){
-          const restitution=iteration===0&&approach>.55?Math.min(body.restitution,surfaceMaterial.restitution):0;
+          const restitution=iteration===0&&approach>.55?Math.min(body.restitution,surfaceRestitution):0;
           const rn=V3.cross(r,normal),angular=V3.dot(normal,V3.cross(applyInvInertiaWorld(body,rn),r)),denom=body.invMass+angular;
           if(denom>1e-10){const j=-(1+restitution)*contactVelocity[1]/denom;this.applyImpulseAtPoint(body,normal,j,r);totalImpulse+=Math.max(0,j);}
         }

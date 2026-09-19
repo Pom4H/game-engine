@@ -4,6 +4,7 @@ import {WinterSystem} from '../environment/winter.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
 import {deriveSurfaceState,effectiveFriction,type SurfaceState} from '../materials/surface.js';
 import {evaluateFracture,type FractureDecision} from '../materials/fracture.js';
+import {transferFragmentMotion} from '../materials/fragment-motion.js';
 import {fracturePlate} from '../materials/glass-fracture.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
@@ -199,30 +200,23 @@ export class Scene {
     }
 
     if(!pieces.length)return;
-    const density=entity.material.profile.density,totalMass=pieces.reduce((sum,p)=>sum+density*p.volume,0),rng=mulberry32(seed^0x91e10da5);
+    const density=entity.material.profile.density,totalVolume=pieces.reduce((sum,p)=>sum+p.volume,0);
+    const source=fracture.body,sourceMass=source.invMass?source.mass:density*totalVolume;
     const kick:Vec3=[-fracture.normal[0],-fracture.normal[1],-fracture.normal[2]],impulse=contact?.impulse??0;
-    const centerSpeed=totalMass>0?impulse/totalMass:0,excess=Math.max(0,fracture.availableEnergy-fracture.requiredEnergy),scatterSpeed=Math.sqrt(2*Math.min(excess,fracture.requiredEnergy*.35)/Math.max(totalMass,.001));
+    const fragments:RigidBody[]=[],rng=mulberry32(seed^0x91e10da5);
     this.physics.remove(entity.id);this.entities.delete(entity.id);
 
     for(const piece of pieces){
-      const mass=Math.max(.002,density*piece.volume),radial:Vec3=[
-        piece.position[0]-fracture.point[0],piece.position[1]-fracture.point[1],piece.position[2]-fracture.point[2],
-      ];
-      let outward=V3.normalize(radial);
-      if(V3.length(outward)<1e-5)outward=V3.normalize([rng()*2-1,rng()*1.2,rng()*2-1]);
-      const velocity:Vec3=[
-        kick[0]*centerSpeed+fracture.sourceVelocity[0]*.025+outward[0]*scatterSpeed*(.25+rng()*.6),
-        kick[1]*centerSpeed+fracture.sourceVelocity[1]*.025+outward[1]*scatterSpeed*(.25+rng()*.6)+rng()*scatterSpeed*.18,
-        kick[2]*centerSpeed+fracture.sourceVelocity[2]*.025+outward[2]*scatterSpeed*(.25+rng()*.6),
-      ];
+      const mass=sourceMass*piece.volume/totalVolume;
       const id=`${entity.id}:shard:${this.generatedSequence++}`,shard=this.add({
         id,position:piece.position,rotation:piece.rotation,mesh:piece.mesh,
         material:{kind:entity.material.kind,color:entity.material.color},
-        body:{mass,velocity,angularVelocity:[(rng()*2-1)*11,(rng()*2-1)*11,(rng()*2-1)*11],restitution:.12,friction:.42,shape:'box'},
+        body:{mass,restitution:.12,friction:.42,shape:'box'},
       });
-      if(shard.body){shard.body.fracturable=false;shard.body.collisionClass='debris';}
+      if(shard.body){shard.body.fracturable=false;shard.body.collisionClass='debris';fragments.push(shard.body);}
       shard.expiresAt=at+4.5+rng()*1.5;
     }
+    transferFragmentMotion(source,fragments,V3.scale(kick,impulse),fracture.requiredEnergy,seed^0x91e10da5);
     this.pushEvent({
       type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
       energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:pieces.length,size:Math.max(planar[0],planar[1]),

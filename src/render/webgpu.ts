@@ -129,7 +129,7 @@ fn pointLight(pos:vec4<f32>,color:vec4<f32>,world:vec3<f32>,n:vec3<f32>,viewDir:
   // Snow accumulation is derived from mass balance. Road tracks expose wet/slushy
   // asphalt only if traffic actually supplied enough contact work.
   let snowBase=clamp(u.winter.x/0.055,0.0,1.0);
-  var snowMask=upward*smoothstep(0.12,0.82,fbm(in.worldPos*1.9+seed*3.1)+snowBase*.74);
+  var snowMask=upward*snowBase*smoothstep(0.12,0.82,fbm(in.worldPos*1.9+seed*3.1)+snowBase*.74);
   if(surfaceUse>.5 && surfaceUse<1.5){
     snowMask*=1.0-tyreTracks(in.worldPos.z)*u.winter2.y*.96;
   }
@@ -149,7 +149,7 @@ fn pointLight(pos:vec4<f32>,color:vec4<f32>,world:vec3<f32>,n:vec3<f32>,viewDir:
   // Water is also state, not a material override. Procedural depressions localize
   // the scalar water volume into shallow puddles.
   let depression=1.0-fbm(in.worldPos*0.58+seed*6.0);
-  let puddleMask=smoothstep(0.7-u.winter2.x*.35,0.9-u.winter2.x*.12,depression)*upward;
+  let puddleMask=u.winter2.x*smoothstep(0.7-u.winter2.x*.35,0.9-u.winter2.x*.12,depression)*upward;
   let wetness=clamp(u.surface.y+u.motion.w+u.winter.y/0.006+puddleMask*.5,0.0,1.0);
   albedo*=1.0-u.surface.w-wetness*.24;
 

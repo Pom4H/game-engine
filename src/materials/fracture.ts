@@ -13,6 +13,8 @@ export interface FractureDecision {
 }
 
 export function evaluateFracture(contact:ContactCandidate):{decision:ContactDecision;fracture?:FractureDecision}{
+  // Micro-debris has no recursive fracture budget, including against other bodies.
+  if(contact.a.collisionClass==='debris'||contact.b.collisionClass==='debris')return{decision:{mode:'resolve'}};
   const candidates:[[RigidBody,RigidBody,Vec3],[RigidBody,RigidBody,Vec3]]=[
     [contact.a,contact.b,contact.normal],
     [contact.b,contact.a,[-contact.normal[0],-contact.normal[1],-contact.normal[2]]],
