@@ -5,7 +5,7 @@ export function primitiveKey(primitive:Primitive):string{return JSON.stringify(p
 export function primitiveMesh(primitive:Primitive):MeshData{
   if(primitive.kind==='box')return boxMesh();
   if(primitive.kind==='plane')return planeMesh();
-  if(primitive.kind==='shard')return shardMesh(primitive.skew??0);
+  if(primitive.kind==='shard')return shardMesh(primitive.axis??2,primitive.skew??0);
   return sphereMesh(Math.max(6,Math.min(64,Math.round(primitive.segments??20))));
 }
 function pack(positions:number[],normals:number[],indices:number[]):MeshData{
@@ -28,15 +28,21 @@ function boxMesh():MeshData{
   return pack(p,n,i);
 }
 function planeMesh():MeshData{return pack([-0.5,0,-0.5, 0.5,0,-0.5, 0.5,0,0.5, -0.5,0,0.5],[0,1,0, 0,1,0, 0,1,0, 0,1,0],[0,1,2,0,2,3]);}
-function shardMesh(skew:number):MeshData{
+function shardMesh(axis:0|1|2,skew:number):MeshData{
   const s=Math.max(-.45,Math.min(.45,skew));
-  const front=[-.5,-.5,-.5, .5,-.5,-.5, s,.5,-.5],back=[-.5,-.5,.5, .5,-.5,.5, s,.5,.5];
-  const p:number[]=[],n:number[]=[],i:number[]=[];
-  const face=(verts:number[],normal:number[])=>{const base=p.length/3;p.push(...verts);for(let k=0;k<verts.length/3;k++)n.push(...normal);if(verts.length===9)i.push(base,base+1,base+2);else i.push(base,base+1,base+2,base,base+2,base+3);};
-  face(front,[0,0,-1]);face(back,[0,0,1]);
-  face([-.5,-.5,-.5,.5,-.5,-.5,.5,-.5,.5,-.5,-.5,.5],[0,-1,0]);
-  face([.5,-.5,-.5,s,.5,-.5,s,.5,.5,.5,-.5,.5],[1,.4,0]);
-  face([s,.5,-.5,-.5,-.5,-.5,-.5,-.5,.5,s,.5,.5],[-1,.4,0]);
+  const base=[
+    [-.5,-.5,-.5],[.5,-.5,-.5],[s,.5,-.5],
+    [-.5,-.5,.5],[.5,-.5,.5],[s,.5,.5],
+  ] as [number,number,number][];
+  const map=(v:[number,number,number]):[number,number,number]=>axis===2?v:axis===0?[v[2],v[1],v[0]]:[v[0],v[2],v[1]];
+  const q=base.map(map),p:number[]=[],n:number[]=[],i:number[]=[];
+  const face=(indices:number[])=>{
+    const a=q[indices[0]!]!,b=q[indices[1]!]!,c=q[indices[2]!]!,ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+    const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,length=Math.hypot(nx,ny,nz)||1,normal=[nx/length,ny/length,nz/length];
+    const offset=p.length/3;for(const index of indices)p.push(...q[index]!);for(let k=0;k<indices.length;k++)n.push(...normal);
+    if(indices.length===3)i.push(offset,offset+1,offset+2);else i.push(offset,offset+1,offset+2,offset,offset+2,offset+3);
+  };
+  face([0,2,1]);face([3,4,5]);face([0,1,4,3]);face([1,2,5,4]);face([2,0,3,5]);
   return pack(p,n,i);
 }
 function sphereMesh(segments:number):MeshData{
