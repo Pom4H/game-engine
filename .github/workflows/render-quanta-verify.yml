@@ -25,14 +25,7 @@ jobs:
         with:
           bun-version: 1.4.2
       - name: Install dependencies
-        run: |
-          New-Item -ItemType Directory -Force artifacts | Out-Null
-          $old = $ErrorActionPreference
-          $ErrorActionPreference = 'Continue'
-          & bun install 2>&1 | Tee-Object -FilePath artifacts/install.log
-          $code = $LASTEXITCODE
-          $ErrorActionPreference = $old
-          if ($code -ne 0) { exit $code }
+        run: npm install --no-package-lock --ignore-scripts
       - name: Core verification
         run: |
           New-Item -ItemType Directory -Force artifacts | Out-Null
