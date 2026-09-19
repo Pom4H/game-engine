@@ -25,6 +25,9 @@ export class RigidBody {
   readonly mass:number;
   readonly invMass:number;
   readonly material:PhysicalMaterial;
+  /** Engine-generated micro debris does not recursively fracture or self-collide. */
+  fracturable=true;
+  collisionClass:'solid'|'debris'='solid';
   restitution:number;
   friction:number;
   readonly shape:CollisionShape;
@@ -131,7 +134,7 @@ export class PhysicsWorld {
       if(!a.invMass)continue;
       const radius=shapeRadius(a.shape),candidates=this.index.near(a.position[0],a.position[2],radius*2+2,scratch);
       for(const b of candidates){
-        if(a===b)continue;
+        if(a===b||a.collisionClass==='debris'&&b.collisionClass==='debris')continue;
         const key=a.id<b.id?`${a.id}\u0000${b.id}`:`${b.id}\u0000${a.id}`;
         if(seen.has(key))continue;seen.add(key);
         if(!a.invMass&&!b.invMass)continue;
