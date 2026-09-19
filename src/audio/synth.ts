@@ -30,10 +30,13 @@ export function wavBytes(audio:AudioChannels):Uint8Array{
 }
 
 function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
-  const a=material(event.materialA).acoustic,b=material(event.materialB).acoustic,brightness=(a.brightness+b.brightness)/2,damping=Math.max(.025,(a.damping+b.damping)/2);
+  const a=material(event.materialA).acoustic,b=material(event.materialB).acoustic;
+  const surfaceDamping=((event.surfaceA?.damping??a.damping)+(event.surfaceB?.damping??b.damping))/2;
+  const wetness=((event.surfaceA?.wetness??0)+(event.surfaceB?.wetness??0))/2,moss=((event.surfaceA?.moss??0)+(event.surfaceB?.moss??0))/2;
+  const damping=Math.max(.025,surfaceDamping),brightness=Math.max(.06,(a.brightness+b.brightness)/2*(1-wetness*.28-moss*.52));
   const geometryScale=Math.max(.35,Math.sqrt(Math.max(.04,event.size))),base=Math.max(70,Math.sqrt(a.resonanceHz*b.resonanceHz)/geometryScale);
-  const modes=[1,1.43,2.07,2.91],phases=modes.map(()=>rng()*Math.PI*2);
-  for(let i=0;i<left.length;i++){const t=i/sampleRate,env=Math.exp(-t*(10+34*damping)),attack=Math.min(1,t*.004*sampleRate),noise=(rng()*2-1)*Math.exp(-t*55)*(a.noise+b.noise)*.22;let sample=noise;for(let m=0;m<modes.length;m++)sample+=Math.sin(2*Math.PI*base*modes[m]!*t+phases[m]!)*env*(1/(1+m*.72))*(.55+brightness*.55);sample*=amplitude*attack*.34;left[i]=sample*gainL;right[i]=sample*gainR;}
+  const modes=[1,1.43,2.07,2.91],phases=modes.map(()=>rng()*Math.PI*2),softness=1-moss*.35;
+  for(let i=0;i<left.length;i++){const t=i/sampleRate,env=Math.exp(-t*(10+34*damping)),attack=Math.min(1,t*.004*sampleRate),noise=(rng()*2-1)*Math.exp(-t*(55+wetness*25))*(a.noise+b.noise)*.22*softness;let sample=noise;for(let m=0;m<modes.length;m++)sample+=Math.sin(2*Math.PI*base*modes[m]!*t+phases[m]!)*env*(1/(1+m*.72))*(.55+brightness*.55);sample*=amplitude*attack*.34*(1-moss*.18);left[i]=sample*gainL;right[i]=sample*gainR;}
 }
 
 function fractureVoice(event:FractureEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
