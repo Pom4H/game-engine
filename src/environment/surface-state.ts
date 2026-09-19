@@ -143,7 +143,10 @@ export class SurfaceEnvironmentSystem {
     const inertia=Math.sqrt(volumetricCapacity/referenceCapacity);
     const solarGain=10*thermal.solarAbsorptivity/Math.max(.45,inertia);
     const target=environment.temperatureC+environment.sunlight*solarGain+state.trafficHeatC;
-    const thermalTau=Math.max(180,1500*inertia/Math.sqrt(Math.max(.08,thermal.conductivityWmK)));
+    // Higher conductivity couples the exposed skin to more bulk material instead
+    // of making the surface magically absorb solar energy faster.
+    const bulkCoupling=1+Math.sqrt(Math.max(.01,thermal.conductivityWmK))*.12;
+    const thermalTau=Math.max(180,900*inertia*bulkCoupling);
     const thermalBlend=1-Math.exp(-worldSeconds/thermalTau);
     state.temperatureC+=(target-state.temperatureC)*thermalBlend;
     state.trafficHeatC*=Math.exp(-worldSeconds/950);
