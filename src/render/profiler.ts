@@ -1,12 +1,12 @@
 import type {RenderAtomReport} from './atoms.js';
 export const RENDER_CPU_QUANTA = [
   'lifecycle','resize','materials','lights','frame','visibility','prepare','cull',
-  'encode.shadow','encode.reflection','encode.main','encode.bloom','encode.taa','encode.post','submit',
+  'encode.shadow','encode.reflection','encode.main','encode.bloom','encode.effects','encode.taa','encode.present','submit',
 ] as const;
 export type RenderCpuQuantum=typeof RENDER_CPU_QUANTA[number];
 
 export const RENDER_GPU_QUANTA = [
-  'shadow','reflection','main','bloom.downsample','bloom.horizontal','bloom.vertical','taa','post',
+  'shadow','reflection','main','bloom.downsample','bloom.horizontal','bloom.vertical','effects','taa','present',
 ] as const;
 export type RenderGpuQuantum=typeof RENDER_GPU_QUANTA[number];
 
