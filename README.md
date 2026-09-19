@@ -219,7 +219,7 @@ The CLI uses this same production runtime. There is no second test renderer and 
 
 **Deterministic time.** A fixed-step simulation clock was extracted from TheGame and cleaned into a standalone primitive. Interactive mode retains bounded timer debt instead of silently losing time after a delayed frame; offline capture advances explicitly without a wall clock.
 
-**Dependency-aware simulation kernel.** Modules declare stable IDs, cadence and `reads` / `writes`. The scheduler builds deterministic phase batches, validates explicit `after` dependencies and caches due-rate plans. `Scene.step` runs the built-in modules through this kernel; `Scene.use` adds extensions. Command batches commit before dependent readers receive a detached state snapshot. This is the reusable part of TheGame's world-kernel approach, without importing any game concepts.
+**Dependency-aware simulation kernel.** Modules declare stable IDs, cadence and `reads` / `writes`. The scheduler builds deterministic phase batches, validates explicit `after` dependencies and caches due-rate plans. `EngineKernel` owns scheduling while `SceneSystemRuntime` maps system commands to concrete implementations; application modules use the same resource graph without owning engine internals. Command batches commit before dependent readers receive a detached state snapshot.
 
 **Bounded spatial broad phase.** The X/Z spatial hash keeps deterministic insertion order, bounded query caching and batched invalidation instead of letting large streamed-world queries retain unbounded object graphs.
 
@@ -291,7 +291,9 @@ Node 22+ is the CLI target. The interactive renderer requires a browser with Web
 `0.1` is the extraction foundation: the public boundary, deterministic runtime, URL/CLI workflow and a real WebGPU path are present. More of the production-grade systems from TheGame can now move here without dragging gameplay code with them.
 
 
-## Winter environment
+## Surface environment
+
+The winter street is the first stress test of a generic surface/environment state, not a separate winter-only engine path. Snow, water, ice and slush are phases managed by `SurfaceEnvironmentSystem`; the same owner is where mud, moss, dust, heat and wear evolve as additional consequences.
 
 Weather is declarative. Application code describes the civil-time weather sequence and the semantic use of a physical surface; it does not script snow tracks, puddles or snow attached to moving bodies.
 
@@ -321,7 +323,7 @@ entities: [
 ]
 ```
 
-The engine derives a grid of local winter states for each exposed horizontal surface (up to 64×64 cells):
+The engine derives a grid of local physical surface states for each exposed horizontal surface (up to 64×64 cells):
 
 ```text
 weather + material + geometry + traffic
@@ -335,7 +337,7 @@ weather + material + geometry + traffic
 
 Supported moving bodies contribute estimated sliding work to cells under their footprint. Airborne bodies contribute no work. That raises local traffic heat, melts wheel paths and produces dirty slush. Snowfall accumulates on moving bodies from geometry and motion; wake recirculation increases rear-facing accumulation, so rear bodywork and wings retain more snow without a `rearSnow` authoring parameter.
 
-The WebGPU renderer consumes those engine states to synthesize asphalt aggregate, square paving, tyre-cleared snow tracks, wet/slushy patches, puddles, attached body snow and instanced snowfall. Curb and sidewalk snow mass also generates engine-owned snowdrift geometry. Civil time drives night, sunrise and daylight lighting, while ordinary point lights provide street illumination.
+The WebGPU renderer consumes those engine states; it does not own snow/wetness/friction facts. Today it synthesizes asphalt aggregate, square paving, tyre-cleared snow tracks, wet/slushy patches, puddles, attached body snow and instanced snowfall. Curb and sidewalk snow mass also generates engine-owned snowdrift geometry. Civil time drives night, sunrise and daylight lighting, while ordinary point lights provide street illumination.
 
 See `examples/winter-street.ts`.
 
