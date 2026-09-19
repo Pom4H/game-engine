@@ -5,7 +5,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 concurrency:
   group: render-quanta-verification
@@ -35,21 +34,6 @@ jobs:
           Get-Content artifacts/install.log
           $code | Set-Content artifacts/install-exit.txt
           if ($code -ne 0) { exit $code }
-      - name: Report install result
-        if: always()
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            const marker = '<!-- render-quanta-install -->';
-            const log = fs.existsSync('artifacts/install.log') ? fs.readFileSync('artifacts/install.log','utf8') : 'install.log missing';
-            const exit = fs.existsSync('artifacts/install-exit.txt') ? fs.readFileSync('artifacts/install-exit.txt','utf8').trim() : '?';
-            const body = marker + '\nRender quanta install exit=' + exit + '\n\n' + log.slice(-6000);
-            const {owner,repo} = context.repo;
-            const comments = await github.paginate(github.rest.issues.listComments,{owner,repo,issue_number:1,per_page:100});
-            const old = comments.find(c => c.body && c.body.includes(marker));
-            if (old) await github.rest.issues.updateComment({owner,repo,comment_id:old.id,body});
-            else await github.rest.issues.createComment({owner,repo,issue_number:1,body});
       - name: Core verification
         if: steps.install.outcome == 'success'
         run: |
