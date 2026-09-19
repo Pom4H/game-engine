@@ -40,3 +40,5 @@ export type {SurfaceSample,SurfaceFootprint,WheelSurfaceContact,SnowContactSurfa
 export {SnowSurface,snowRelief} from './environment/snow-surface.js';
 
 export type {SurfaceTextureSpec} from './scene/types.js';
+
+export {RenderProfiler,RENDER_CPU_QUANTA,RENDER_GPU_QUANTA,type RenderCpuQuantum,type RenderGpuQuantum,type RenderWork,type QuantumStats,type RenderFrameTiming,type RenderProfileSnapshot} from './render/profiler.js';
