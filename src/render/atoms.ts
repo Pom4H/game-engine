@@ -50,7 +50,7 @@ export interface AttachmentAtom {
   logicalResolveBytes:number;
 }
 export interface RenderMemoryAtoms {
-  uploads:Readonly<{total:number;uniform:number;surface:number;light:number;frame:number;snow:number}>;
+  uploads:Readonly<{total:number;uniform:number;surface:number;light:number;frame:number;snow:number;environment:number}>;
   attachments:Readonly<Record<string,AttachmentAtom>>;
   logicalAttachmentWriteBytes:number;
   logicalResolveBytes:number;
@@ -59,11 +59,12 @@ export interface RenderMemoryAtoms {
     bloomDownsample:number;
     bloomHorizontal:number;
     bloomVertical:number;
+    effectsMinimum:number;
+    effectsOpaqueAoExtra:number;
+    effectsDofExtra:number;
+    effectsSsrWorstExtra:number;
     taa:number;
-    postMinimum:number;
-    postOpaqueAoExtra:number;
-    postDofExtra:number;
-    postSsrWorstExtra:number;
+    present:number;
   }>;
 }
 export interface RenderAtomReport {
@@ -155,7 +156,7 @@ export interface BuildRenderAtomsInput {
   shadowDraws:number;reflectionDraws:number;mainOpaqueDraws:number;mainTransparentDraws:number;snowInstances:number;
   shadowTriangles:number;reflectionTriangles:number;mainOpaqueTriangles:number;mainTransparentTriangles:number;
   materialDraws:Readonly<Record<string,number>>;materialTriangles:Readonly<Record<string,number>>;
-  uploads:{total:number;uniform:number;surface:number;light:number;frame:number;snow:number};
+  uploads:{total:number;uniform:number;surface:number;light:number;frame:number;snow:number;environment:number};
   shaders:Readonly<Record<string,ShaderProgramAtoms>>;
 }
 export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomReport{
@@ -169,8 +170,9 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     'bloom.downsample':{drawIndexed:0,draw:1,triangles:1},
     'bloom.horizontal':{drawIndexed:0,draw:1,triangles:1},
     'bloom.vertical':{drawIndexed:0,draw:1,triangles:1},
+    effects:{drawIndexed:0,draw:1,triangles:1},
     taa:{drawIndexed:0,draw:1,triangles:1},
-    post:{drawIndexed:0,draw:1,triangles:1},
+    present:{drawIndexed:0,draw:1,triangles:1},
   };
   const indexedDraws=input.shadowDraws+input.reflectionDraws+input.mainOpaqueDraws+input.mainTransparentDraws,nonIndexedDraws=7+(input.snowInstances?1:0);
   const commands:RenderCommandAtoms=Object.freeze({
@@ -210,11 +212,12 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
       bloomDownsample:quarter*16*8,
       bloomHorizontal:quarter*17*8,
       bloomVertical:quarter*17*8,
+      effectsMinimum:full*(8+8+4+4+8),
+      effectsOpaqueAoExtra:full*(4*4+24*4),
+      effectsDofExtra:full*12*8,
+      effectsSsrWorstExtra:full*(28*4+5*4+4+16+8+13*8),
       taa:full*(10*8+8+4+4),
-      postMinimum:full*(8+8+4+4+8),
-      postOpaqueAoExtra:full*(4*4+24*4),
-      postDofExtra:full*12*8,
-      postSsrWorstExtra:full*(28*4+5*4+4+16+8+13*8),
+      present:full*8,
     }),
   });
   return Object.freeze({
