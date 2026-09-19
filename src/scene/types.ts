@@ -17,6 +17,7 @@ export interface EnvironmentalSpec { surfaceUse?:SurfaceUse }
 export interface BodySpec {
   /** 0 is static. Dynamic mass may be explicit; material density is available to engine-generated fragments. */
   mass?:number;
+  motion?:'dynamic'|'kinematic';
   velocity?:Vec3;
   angularVelocity?:Vec3;
   restitution?:number;
