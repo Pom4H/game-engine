@@ -25,6 +25,9 @@ export class RigidBody {
   readonly mass:number;
   readonly invMass:number;
   readonly material:PhysicalMaterial;
+  readonly invInertiaLocal:MutableVec3;
+  sleeping=false;
+  sleepTimer=0;
   /** Engine-generated micro debris does not recursively fracture or self-collide. */
   fracturable=true;
   collisionClass:'solid'|'debris'='solid';
@@ -45,6 +48,7 @@ export class RigidBody {
     this.mass=mass;
     this.invMass=mass>0?1/mass:0;
     this.material=options.material??material();
+    this.invInertiaLocal=inverseInertiaLocal(options.shape,mass);
     this.restitution=Math.max(0,Math.min(1,options.restitution??this.material.restitution));
     this.friction=Math.max(0,options.friction??this.material.friction);
     this.shape=options.shape;
@@ -52,6 +56,7 @@ export class RigidBody {
     this.x=this.position[0];this.z=this.position[2];this.w=r*2;this.l=r*2;
   }
   syncSpatial():void{this.x=this.position[0];this.z=this.position[2];}
+  wake():void{this.sleeping=false;this.sleepTimer=0;}
 }
 
 export interface ContactCandidate {
@@ -83,7 +88,7 @@ export interface Contact {
   readonly normalEnergy:number;
   readonly mode:'resolve'|'penetrate';
 }
-export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodies:number}
+export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodies:number;sleeping:number}
 
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
@@ -122,11 +127,12 @@ export class PhysicsWorld {
   }
 
   private stepSubstep(dt:number,contactModel?:ContactModel):void{
-    for(const body of this.bodies.values())if(body.invMass){
+    for(const body of this.bodies.values())if(body.invMass&&!body.sleeping){
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
+      const airAngular=Math.exp(-.08*dt);body.angularVelocity[0]*=airAngular;body.angularVelocity[1]*=airAngular;body.angularVelocity[2]*=airAngular;
       body.rotation[0]+=body.angularVelocity[0]*dt;body.rotation[1]+=body.angularVelocity[1]*dt;body.rotation[2]+=body.angularVelocity[2]*dt;
-      this.resolveGround(body);
+      this.resolveGround(body,dt);
     }
     this.rebuildIndex();
     const seen=new Set<string>(),scratch:RigidBody[]=[];
@@ -147,7 +153,7 @@ export class PhysicsWorld {
     }
   }
 
-  get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size};}
+  get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length};}
 
   private contactCandidate(a:RigidBody,b:RigidBody,hit:Hit):ContactCandidate{
     const rv:Vec3=[b.velocity[0]-a.velocity[0],b.velocity[1]-a.velocity[1],b.velocity[2]-a.velocity[2]];
@@ -162,14 +168,28 @@ export class PhysicsWorld {
     this.index.endBatch();
   }
 
-  private resolveGround(body:RigidBody):void{
-    const bottom=body.position[1]-verticalExtent(body.shape);if(bottom>=this.ground)return;
-    const penetration=this.ground-bottom;body.position[1]+=penetration;
-    const speed=Math.max(0,-body.velocity[1]),normalEnergy=.5*body.mass*speed*speed;
+  private resolveGround(body:RigidBody,dt:number):void{
+    const r=groundSupportVector(body),bottom=body.position[1]+r[1],slop=.0015;
+    if(bottom>this.ground+slop){body.sleepTimer=0;return;}
+    const penetration=Math.max(0,this.ground-bottom);if(penetration>0)body.position[1]+=penetration;
+    const contactVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),normal:Vec3=[0,1,0],approach=Math.max(0,-contactVelocity[1]),normalEnergy=.5*body.mass*approach*approach;
+    const restitution=approach>.55?Math.min(body.restitution,this.groundMaterial.restitution):0;
     let impulse=0;
-    if(body.velocity[1]<0){const before=body.velocity[1],restitution=Math.min(body.restitution,this.groundMaterial.restitution);body.velocity[1]=-body.velocity[1]*restitution;impulse=Math.abs((body.velocity[1]-before)*body.mass);}
-    const damping=Math.max(0,1-Math.sqrt(body.friction*this.groundMaterial.friction)*.035);body.velocity[0]*=damping;body.velocity[2]*=damping;
-    this.contacts.push({a:body.id,b:'ground',normal:[0,1,0],point:[body.position[0],this.ground,body.position[2]],penetration,impulse,normalSpeed:speed,normalEnergy,mode:'resolve'});
+    if(contactVelocity[1]<0){
+      const rn=V3.cross(r,normal),angular=V3.dot(normal,V3.cross(applyInvInertiaWorld(body,rn),r)),denom=body.invMass+angular;
+      if(denom>1e-10){impulse=-(1+restitution)*contactVelocity[1]/denom;this.applyImpulseAtPoint(body,normal,impulse,r);}
+    }
+    const post=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),tangentRaw:Vec3=[post[0],0,post[2]],tangentSpeed=V3.length(tangentRaw);
+    if(tangentSpeed>1e-6){
+      const tangent=V3.scale(tangentRaw,1/tangentSpeed),rt=V3.cross(r,tangent),angular=V3.dot(tangent,V3.cross(applyInvInertiaWorld(body,rt),r)),denom=body.invMass+angular;
+      if(denom>1e-10){const mu=Math.sqrt(body.friction*this.groundMaterial.friction),supportImpulse=Math.max(impulse,body.mass*Math.abs(this.gravity[1])*dt),wanted=-tangentSpeed/denom,jt=Math.max(-mu*supportImpulse,Math.min(mu*supportImpulse,wanted));this.applyImpulseAtPoint(body,tangent,jt,r);}
+    }
+    const linear=V3.length(body.velocity),angularSpeed=V3.length(body.angularVelocity);
+    if(linear<.08&&angularSpeed<.16&&approach<.12){
+      body.sleepTimer+=dt;
+      if(body.sleepTimer>.32){body.velocity=[0,0,0];body.angularVelocity=[0,0,0];body.sleeping=true;}
+    }else body.sleepTimer=0;
+    this.contacts.push({a:body.id,b:'ground',normal,point:[body.position[0]+r[0],this.ground,body.position[2]+r[2]],penetration,impulse,normalSpeed:approach,normalEnergy,mode:'resolve'});
   }
 
   private resolvePenetration(contact:ContactCandidate,energyLoss:number):void{
@@ -200,17 +220,22 @@ export class PhysicsWorld {
     this.pushContact(contact,impulse,'resolve');
   }
 
+  private applyImpulseAtPoint(body:RigidBody,direction:Vec3,j:number,r:Vec3):void{
+    if(!body.invMass||j===0)return;body.wake();
+    const impulse:Vec3=[direction[0]*j,direction[1]*j,direction[2]*j];
+    body.velocity[0]+=impulse[0]*body.invMass;body.velocity[1]+=impulse[1]*body.invMass;body.velocity[2]+=impulse[2]*body.invMass;
+    const dw=applyInvInertiaWorld(body,V3.cross(r,impulse));body.angularVelocity[0]+=dw[0];body.angularVelocity[1]+=dw[1];body.angularVelocity[2]+=dw[2];
+  }
   private applyImpulse(a:RigidBody,b:RigidBody,normal:Vec3,j:number):void{
     const ix=normal[0]*j,iy=normal[1]*j,iz=normal[2]*j;
-    if(a.invMass){a.velocity[0]-=ix*a.invMass;a.velocity[1]-=iy*a.invMass;a.velocity[2]-=iz*a.invMass;}
-    if(b.invMass){b.velocity[0]+=ix*b.invMass;b.velocity[1]+=iy*b.invMass;b.velocity[2]+=iz*b.invMass;}
+    if(a.invMass){a.wake();a.velocity[0]-=ix*a.invMass;a.velocity[1]-=iy*a.invMass;a.velocity[2]-=iz*a.invMass;}
+    if(b.invMass){b.wake();b.velocity[0]+=ix*b.invMass;b.velocity[1]+=iy*b.invMass;b.velocity[2]+=iz*b.invMass;}
   }
   private pushContact(contact:ContactCandidate,impulse:number,mode:'resolve'|'penetrate'):void{
     this.contacts.push({a:contact.a.id,b:contact.b.id,normal:contact.normal,point:contact.point,penetration:contact.penetration,impulse,normalSpeed:contact.approachSpeed,normalEnergy:contact.normalEnergy,mode});
   }
 }
 
-function verticalExtent(shape:CollisionShape):number{return shape.kind==='sphere'?shape.radius:shape.half[1];}
 export function shapeRadius(shape:CollisionShape):number{return shape.kind==='sphere'?shape.radius:Math.hypot(shape.half[0],shape.half[2]);}
 interface Hit{normal:Vec3;penetration:number;point:Vec3}
 function intersect(a:RigidBody,b:RigidBody):Hit|null{
@@ -245,4 +270,27 @@ function sphereBox(sphere:RigidBody,box:RigidBody,invert:boolean):Hit|null{
   }
   d=V3.scale(d,1/distance);const normal=invert?V3.scale(d,-1):d;
   return{normal,penetration:radius-distance,point:[x,y,z]};
+}
+
+function inverseInertiaLocal(shape:CollisionShape,mass:number):MutableVec3{
+  if(!(mass>0))return[0,0,0];
+  if(shape.kind==='sphere'){const i=.4*mass*shape.radius*shape.radius,inv=i>1e-12?1/i:0;return[inv,inv,inv];}
+  const h=shape.half,ix=mass/3*(h[1]*h[1]+h[2]*h[2]),iy=mass/3*(h[0]*h[0]+h[2]*h[2]),iz=mass/3*(h[0]*h[0]+h[1]*h[1]);
+  return[ix>1e-12?1/ix:0,iy>1e-12?1/iy:0,iz>1e-12?1/iz:0];
+}
+function rotationBasis(rotation:Vec3):readonly[Vec3,Vec3,Vec3]{
+  const [rx,ry,rz]=rotation,sx=Math.sin(rx),cx=Math.cos(rx),sy=Math.sin(ry),cy=Math.cos(ry),sz=Math.sin(rz),cz=Math.cos(rz);
+  return[
+    [cy*cz,sx*sy*cz+cx*sz,-cx*sy*cz+sx*sz],
+    [-cy*sz,-sx*sy*sz+cx*cz,cx*sy*sz+sx*cz],
+    [sy,-sx*cy,cx*cy],
+  ];
+}
+function rotateLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[b[0][0]*v[0]+b[1][0]*v[1]+b[2][0]*v[2],b[0][1]*v[0]+b[1][1]*v[1]+b[2][1]*v[2],b[0][2]*v[0]+b[1][2]*v[1]+b[2][2]*v[2]];}
+function rotateWorldToLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[V3.dot(v,b[0]),V3.dot(v,b[1]),V3.dot(v,b[2])];}
+function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[local[0]*body.invInertiaLocal[0],local[1]*body.invInertiaLocal[1],local[2]*body.invInertiaLocal[2]];return rotateLocal(body.rotation,scaled);}
+function groundSupportVector(body:RigidBody):MutableVec3{
+  if(body.shape.kind==='sphere')return[0,-body.shape.radius,0];
+  const h=body.shape.half,b=rotationBasis(body.rotation),local:Vec3=[b[0][1]>=0?-h[0]:h[0],b[1][1]>=0?-h[1]:h[1],b[2][1]>=0?-h[2]:h[2]];
+  return rotateLocal(body.rotation,local);
 }
