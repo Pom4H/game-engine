@@ -34,6 +34,10 @@ jobs:
       - run: bun run ci
       - run: bun tools/build-pages.ts
       - uses: actions/configure-pages@v5
+      - name: Expose Git Bash and tar
+        run: |
+          echo C:\Program Files\Git\bin>>%GITHUB_PATH%
+          echo C:\Program Files\Git\usr\bin>>%GITHUB_PATH%
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
