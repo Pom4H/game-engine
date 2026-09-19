@@ -1,5 +1,7 @@
 import type {Vec3} from '../math.js';
 import type {MaterialKind} from '../materials/catalog.js';
+import type {EnvironmentSpec} from '../environment/types.js';
+import type {MaterialFinish,MaterialTreatment} from '../materials/surface.js';
 
 export type Color = readonly [number,number,number,number];
 export type Primitive =
@@ -9,7 +11,7 @@ export type Primitive =
   /** Engine-generated triangular prism used for brittle fracture debris. */
   | {kind:'shard'; size:Vec3; axis?:0|1|2; skew?:number}
   | {kind:'polygon-prism'; points:readonly (readonly [number,number])[]; thickness:number; axis?:0|1|2};
-export interface MaterialSpec { kind?:MaterialKind; color?:Color }
+export interface MaterialSpec { kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
 export interface BodySpec {
   /** 0 is static. Dynamic mass may be explicit; material density is available to engine-generated fragments. */
   mass?:number;
@@ -35,6 +37,7 @@ export interface SceneSpec {
   gravity?:Vec3;
   ground?:number;
   clearColor?:Color;
+  environment?:EnvironmentSpec;
   camera?:CameraSpec;
   entities:readonly EntitySpec[];
 }
