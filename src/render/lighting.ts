@@ -56,13 +56,18 @@ struct TaaParams { history:vec4<f32> }
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
- let dims=vec2<i32>(textureDimensions(currentColor)),size=vec2<f32>(dims),pixel=clamp(vec2<i32>(in.uv*size),vec2<i32>(0),dims-1);
- let current=textureLoad(currentColor,pixel,0).rgb,velocity=textureLoad(velocityTex,pixel,0).xy,historyUV=in.uv-velocity;
+ let dims=vec2<i32>(textureDimensions(currentColor));
+ let size=vec2<f32>(dims);
+ let pixel=clamp(vec2<i32>(in.uv*size),vec2<i32>(0),dims-1);
+ let current=textureLoad(currentColor,pixel,0).rgb;
+ let velocity=textureLoad(velocityTex,pixel,0).xy;
+ let historyUV=in.uv-velocity;
  var lo=current;var hi=current;
  for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){let q=clamp(pixel+vec2<i32>(x,y),vec2<i32>(0),dims-1);let v=textureLoad(currentColor,q,0).rgb;lo=min(lo,v);hi=max(hi,v);}}
  let valid=taa.history.x>0.5&&all(historyUV>vec2<f32>(.001))&&all(historyUV<vec2<f32>(.999));
  let previous=clamp(textureSampleLevel(historyColor,linearSampler,clamp(historyUV,vec2<f32>(.001),vec2<f32>(.999)),0).rgb,lo,hi);
- let speed=length(velocity)*size.y,depth=textureLoad(depthTex,pixel,0);
+ let speed=length(velocity)*size.y;
+ let depth=textureLoad(depthTex,pixel,0);
  var weight=select(0.0,mix(.90,.72,smoothstep(.35,10.0,speed)),valid);
  if(depth>.99999){weight=min(weight,.55);}
  let delta=max(max(abs(previous.r-current.r),abs(previous.g-current.g)),abs(previous.b-current.b));
