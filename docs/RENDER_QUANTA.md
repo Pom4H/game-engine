@@ -1,7 +1,8 @@
 # Render quanta
 
 The renderer is profiled as stable execution quanta rather than one opaque
-"render ms" number. The names below are part of the profiling contract and are
+"render ms" number. Profiling is opt-in: normal production rendering does not
+run CPU timers, timestamp queries or readback. The names below are part of the profiling contract and are
 intended to remain comparable across refactors.
 
 ## CPU timeline
@@ -81,6 +82,7 @@ can be separated into more CPU work versus a larger surface/uniform upload volum
 ## Browser API
 
 ```js
+// Open the runtime with ?profile=1, or create BrowserRuntime with {profiling:true}.
 const engine = window.__GAME_ENGINE__;
 
 engine.resetProfile();
