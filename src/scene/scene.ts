@@ -3,7 +3,7 @@ import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
 import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
-import {WinterSystem} from '../environment/winter.js';
+import {SurfaceEnvironmentSystem} from '../environment/surface-state.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
 import {deriveSurfaceState,effectiveFriction,type SurfaceState} from '../materials/surface.js';
 import {evaluateFracture,type FractureDecision} from '../materials/fracture.js';
@@ -46,7 +46,9 @@ export class Scene {
   readonly spec:SceneSpec;
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
-  readonly winter=new WinterSystem();
+  readonly surfaces=new SurfaceEnvironmentSystem();
+  /** @deprecated Use surfaces. Kept only while PR tooling/examples migrate. */
+  get winter(){return this.surfaces;}
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
@@ -61,14 +63,14 @@ export class Scene {
   private readonly eventQueue:EngineEvent[]=[];
   private readonly impactCooldown=new Map<string,number>();
   private generatedSequence=0;
-  private winterVisualSequence=0;
-  private readonly winterVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
+  private surfaceVisualSequence=0;
+  private readonly surfaceVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
 
   constructor(input:SceneSpec){
     this.spec=validateScene(input);
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
-    this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.winter.sample(body.id,point[0],point[2])?.frictionScale??1);
+    this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
     this.contacts=new SurfaceContactSystem(this);
@@ -111,11 +113,11 @@ export class Scene {
   remove(id:string):void{
     // Only exact owned objects are removed; an authored replacement under a
     // formerly generated ID must survive source deletion and weather cleanup.
-    for(const [key,visual] of this.winterVisuals){
-      if(visual.source===id){this.winterVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
-      else if(visual.entity.id===id)this.winterVisuals.delete(key);
+    for(const [key,visual] of this.surfaceVisuals){
+      if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
+      else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.physics.remove(id);this.entities.delete(id);this.winter.remove(id);
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.physics.remove(id);this.entities.delete(id);this.surfaces.remove(id);
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60):void{
@@ -136,7 +138,10 @@ export class Scene {
     }
     switch(command.action){
       case 'weather':this.environment=resolveEnvironmentAt(this.spec.environment,at);break;
-      case 'surfaces':this.winter.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);this.syncWinterVisuals();break;
+      case 'surfaces':
+        this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
+        this.syncSurfaceVisuals();
+        break;
       case 'animation':this.animation.step(at,this.entities,p=>this.contacts.sample(p));break;
       case 'surface-contacts':this.contacts.step(dt,at,this.animation.feet);break;
       case 'physics':
@@ -165,9 +170,9 @@ export class Scene {
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
   setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
 
-  private syncWinterVisuals():void{
+  private syncSurfaceVisuals():void{
     const keep=new Set<string>();
-    for(const [surfaceId,state] of this.winter.surfaces){
+    for(const [surfaceId,state] of this.surfaces.surfaces){
       if(state.use!=='curb'&&state.use!=='sidewalk')continue;
       const source=this.entities.get(surfaceId);if(!source?.mesh)continue;
       const dimensions=meshDimensions(source.mesh,source.scale),longAxis:0|2=dimensions[0]>=dimensions[2]?0:2,crossAxis:0|2=longAxis===0?2:0;
@@ -178,21 +183,21 @@ export class Scene {
         if(height<.02)continue;keep.add(key);
         const longitudinal=longSize/count,cross=state.use==='curb'?Math.max(.7,crossSize*4.8):crossSize;
         const position:MutableVec3=[...source.position];position[longAxis]+=-longSize/2+(i+.5)*longSize/count;position[1]=state.use==='curb'?source.position[1]-dimensions[1]/2+.003:top-.015;
-        const size:MutableVec3=[longitudinal,height,cross],seed=(this.spec.seed??1)^hashString(surfaceId),owned=this.winterVisuals.get(key);
+        const size:MutableVec3=[longitudinal,height,cross],seed=(this.spec.seed??1)^hashString(surfaceId),owned=this.surfaceVisuals.get(key);
         const previous=owned&&this.entities.get(owned.entity.id)===owned.entity?owned.entity:undefined;
         if(previous?.mesh?.kind==='snowdrift'&&previous.mesh.size[1]===height&&previous.mesh.size[0]===size[0]&&previous.mesh.size[2]===size[2]&&previous.mesh.offset===position[longAxis]&&previous.position.every((v,i)=>v===position[i]))continue;
         let id=previous?.id;
         if(previous)this.remove(previous.id);
         else{
-          const preferred=`__winter:drift:${surfaceId}:${i}`,base=preferred.length<=140?preferred:`__winter:drift:${hashString(surfaceId).toString(36)}:${i}`;
-          id=base;while(this.entities.has(id))id=`${base}:${this.winterVisualSequence++}`;
+          const preferred=`__surface:snowdrift:${surfaceId}:${i}`,base=preferred.length<=140?preferred:`__surface:snowdrift:${hashString(surfaceId).toString(36)}:${i}`;
+          id=base;while(this.entities.has(id))id=`${base}:${this.surfaceVisualSequence++}`;
         }
         const entity=this.add({id:id!,position,rotation:longAxis===0?[0,0,0]:[0,-Math.PI/2,0],mesh:{kind:'snowdrift',size,seed,continuous:true,offset:position[longAxis]},material:{roughness:.88,...source.environmental?.snowMaterial,kind:'snow'}});
-        this.winterVisuals.set(key,{source:surfaceId,entity});
+        this.surfaceVisuals.set(key,{source:surfaceId,entity});
       }
     }
-    for(const [key,visual] of this.winterVisuals)if(!keep.has(key)){
-      this.winterVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);
+    for(const [key,visual] of this.surfaceVisuals)if(!keep.has(key)){
+      this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);
     }
   }
 
