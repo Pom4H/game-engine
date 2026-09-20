@@ -2,9 +2,9 @@
 import {Scene} from '/dist/index.js';import {WebGPURenderer} from '/dist/browser.js';import {makeCity} from '/city.mjs';import {shots} from '/shots.mjs';
 window.ready=false;window.failure=null;
 try{
- const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas);const m3=await(await fetch('/assets/m3.json')).json();let scene,shot,events=[],telemetry=[],footEvents=[],sourceCount=0;
+ const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas);let scene,shot,events=[],telemetry=[],footEvents=[],sourceCount=0;
  const lerp=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t),ease=t=>t*t*(3-2*t);
- window.promo={async load(id){shot=shots.find(s=>s.id===id);const data=makeCity(shot.set,m3);sourceCount=data.sourceCount;scene=new Scene(data.spec);events=[];telemetry=[];footEvents=[];await this.frame(0);},async frame(t){
+ window.promo={async load(id){shot=shots.find(s=>s.id===id);const data=makeCity(shot.set);sourceCount=data.sourceCount;scene=new Scene(data.spec);events=[];telemetry=[];footEvents=[];await this.frame(0);},async frame(t){
    const desired=Math.round(((shot.offset??0)+t*(shot.simulationRate??1))*60);
    while(scene.tick<Math.max(1,desired)){
     scene.step();events.push(...scene.drainEvents());footEvents.push(...scene.contacts.drainFootsteps());
