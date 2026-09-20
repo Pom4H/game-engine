@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DoorHinge,ElasticPlasticPanelResponse,FourCornerSuspension,M3InteractionRig,
-  StructuralBody,material,renderAudio,thermalLinearScale,
+  M3_REFERENCE_PROVENANCE,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
+  material,renderAudio,thermalLinearScale,
 } from '../dist/index.js';
 
 test('cold steel contracts the stress-free XPBD rest geometry without creating plastic work',()=>{
@@ -105,4 +106,46 @@ test('mechanism audio is deterministic and non-silent',()=>{
   const a=renderAudio(events,1,16000),b=renderAudio(events,1,16000);
   assert.deepEqual(a.left,b.left);
   assert.ok(a.left.some(sample=>Math.abs(sample)>.001));
+});
+
+
+test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
+  const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
+  assert.equal(m3.generatedTriangles,9798,'packed render assembly should preserve all source FBX triangles');
+  assert.ok(m3.parts.every(part=>part.mesh.kind==='triangle-mesh'),'M3 render fidelity must not fall back to primitive wheel/light/trim substitutes');
+  for(const id of [
+    'body','windshield-front','windshield-rear','window-front-left','window-front-right',
+    'mirror-left','mirror-right','plastic-trim','exhaust','rim-front-left','tire-front-left',
+    'rim-rear-right','tire-rear-right','day-lights','rear-lights',
+  ])assert.ok(byId.has(id),`missing original FBX-derived M3 part: ${id}`);
+
+  assert.equal(byId.get('body').material.kind,'steel');
+  assert.equal(byId.get('windshield-front').material.kind,'glass');
+  assert.equal(byId.get('mirror-left').material.kind,'mirror');
+  assert.equal(byId.get('plastic-trim').material.kind,'plastic');
+  assert.equal(byId.get('rim-front-left').material.kind,'aluminum');
+  assert.equal(byId.get('tire-front-left').material.kind,'rubber');
+
+  const window=byId.get('window-front-right'),tire=byId.get('tire-front-right');
+  assert.equal(m3PartBody(window,false).mass,0,'parked glazing must stay mounted/static');
+  assert.equal(m3PartBody(window,true).motion,'kinematic','moving glazing must publish contact velocity for fracture');
+  assert.equal(m3PartBody(tire,true),undefined,'tyres share vehicle/wheel physics rather than adding duplicate rigid mass');
+  assert.equal(m3PartMaterial(window,[.1,.2,.3,1],false).kind,'glass');
+  assert.ok(m3PartMaterial(window,[.1,.2,.3,1],false).color[3]<.98,'automotive glazing should enter the transparent render path');
+
+  assert.ok(M3_REFERENCE_PROVENANCE.highFidelity.totalPackedPayloadBytes<M3_REFERENCE_PROVENANCE.sourceBytes);
+  assert.ok(M3_REFERENCE_PROVENANCE.highFidelity.totalPackedPayloadBytes<130_000);
+});
+
+test('split M3 glazing has local geometry around its own origin for contact and fracture',()=>{
+  const m3=generateM3Vehicle(),windows=m3.parts.filter(part=>part.role==='glass');
+  assert.equal(windows.length,8);
+  for(const part of windows){
+    const mesh=part.mesh;
+    assert.equal(mesh.kind,'triangle-mesh');
+    const xs=[],ys=[],zs=[];for(let i=0;i<mesh.positions.length;i+=3){xs.push(mesh.positions[i]);ys.push(mesh.positions[i+1]);zs.push(mesh.positions[i+2]);}
+    const center=[(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2,(Math.min(...zs)+Math.max(...zs))/2];
+    assert.ok(Math.hypot(...center)<1e-5,`${part.id} mesh should be local to part origin, got ${center}`);
+    assert.ok(Math.hypot(...part.position)>.5,`${part.id} should retain its vehicle-local mounting origin`);
+  }
 });
