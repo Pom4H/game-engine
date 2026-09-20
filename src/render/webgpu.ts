@@ -31,7 +31,7 @@ struct U {
   surfacePhase: vec4<f32>, // snow depth m, water depth m, slush, ice depth m
   surfaceDynamics: vec4<f32>, // puddle, track melt, body deposition, rear deposition
   motion: vec4<f32>,      // dir x, dir z, road dirt, body wetness
-  objectState: vec4<f32>, // surface-use code, treatment code
+  objectState: vec4<f32>, // surface-use, treatment, clearcoat, clearcoat roughness
   fieldFrame: vec4<f32>,
   fieldSize: vec4<f32>,
   pbr:vec4<f32>,
@@ -175,7 +175,9 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let materialKind=select(u.weather.w,f32(MATERIAL_CLASS),MATERIAL_CLASS>=0);
   let surfaceUse=u.objectState.x;
   let treatment=u.objectState.y;
-  let clearcoat=select(0.0,.82,treatment>3.5&&treatment<4.5);
+  let treatmentClearcoat=select(0.0,.82,treatment>3.5&&treatment<4.5);
+  let clearcoat=select(treatmentClearcoat,clamp(u.objectState.z,0.0,1.0),u.objectState.z>=0.0);
+  let clearcoatRoughness=select(.075,clamp(u.objectState.w,.02,1.0),u.objectState.w>=0.0);
   let paintMicro=select(0.0,hash3(floor(in.worldPos*420.0))-.5,treatment>3.5&&treatment<4.5);
   let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
   let upward=smoothstep(0.05,0.82,n.y);
@@ -360,7 +362,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   // The second lobe preserves sharp sky/building reflections without turning the
   // underlying paint into a polished bulk metal.
   if(clearcoat>0.0){
-    let coatRough=.075;let coatA2=pow(coatRough,4.0);
+    let coatRough=clearcoatRoughness;let coatA2=pow(coatRough,4.0);
     let coatD=coatA2/(3.14159*pow(nh*nh*(coatA2-1.0)+1.0,2.0));
     let coatK=pow(coatRough+1.0,2.0)/8.0;
     let coatG=(nv/(nv*(1.0-coatK)+coatK))*(nl/(nl*(1.0-coatK)+coatK));
@@ -764,7 +766,7 @@ export class WebGPURenderer implements Renderer{
     if(!dynamic&&object.uniformReady&&!modelChanged&&!previousChanged)return;
     const uniform=new Float32Array(84);
     uniform.set(model,0);uniform.set(previousModel,16);uniform.set(entity.material.color,32);uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
-    uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],52);uniform.set([surfaceUseCode(entity.environmental?.surfaceUse),0,0,0],56);
+    uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],52);uniform.set([surfaceUseCode(entity.environmental?.surfaceUse),treatmentCode(entity.material.treatment),entity.material.clearcoat??-1,entity.material.clearcoatRoughness??-1],56);
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],60);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],64);
     uniform.set([entity.material.roughness??-1,entity.material.metalness??entity.material.profile.optical.metalness,entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,entity.material.profile.optical.ior],68);uniform.set([...(entity.material.emissive??[0,0,0]),0],72);
     const texture=entity.material.texture,normalReady=!!(texture?.normalUrl&&this.surfaceTextures.get(texture.normalUrl)),ormReady=!!(texture?.ormUrl&&this.surfaceTextures.get(texture.ormUrl));
