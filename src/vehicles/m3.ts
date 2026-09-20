@@ -114,10 +114,10 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id==='transparent-lenses')return{...base,color:[.42,.50,.55,.22]};
   if(part.id.startsWith('mirror-'))return{...base,color:[.30,.34,.38,1]};
   if(part.id==='red-reflectors')return{...base,color:[.30,.012,.008,1]};
-  if(part.role==='paint')return{...base,color:paint};
+  if(part.role==='paint')return{...base,color:paint,roughness:.16,metalness:.08};
   if(part.role==='glass')return{...base,color:[.035,.055,.072,.34]};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
-  if(part.role==='rim')return{...base,color:[.30,.32,.35,1]};
+  if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
   if(part.role==='light')return{...base,color:[.76,.84,.94,1],emissive:lightsOn?[2.8,3.1,3.5]:[.025,.03,.035]};
   if(part.role==='tail')return{...base,color:[.34,.012,.008,1],emissive:lightsOn?[.7,.015,.006]:[.018,.001,.001]};
   if(part.role==='metal')return{...base,color:[.16,.17,.18,1]};
