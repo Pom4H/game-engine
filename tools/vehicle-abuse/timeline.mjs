@@ -17,20 +17,20 @@ export const ABUSE_PHASES=Object.freeze([
 const events=Object.freeze([
   {time:8.35,key:'tap-roof',kind:'impact',input:{point:[.05,1.43,-.18],normal:[0,1,0],energyJ:1.8,radiusM:.12,thicknessM:.00072,effectiveMassKg:1.4}},
   {time:9.18,key:'tap-glass',kind:'impact',input:{point:[.45,1.12,-.945],normal:[0,0,-1],energyJ:.7,radiusM:.075,thicknessM:.004,material:'glass',effectiveMassKg:.7}},
-  {time:10.03,key:'knock-hood',kind:'impact',input:{point:[1.42,.96,-.10],normal:[0,1,0],energyJ:4.2,radiusM:.15,thicknessM:.00078,effectiveMassKg:1.8}},
-  {time:10.48,key:'knock-hood-hard',kind:'impact',input:{point:[1.20,.95,.18],normal:[0,1,0],energyJ:11,radiusM:.17,thicknessM:.00078,effectiveMassKg:2.3}},
-  {time:17.35,key:'roof-jump-1',kind:'impact',input:{point:[-.05,1.44,0],normal:[0,1,0],energyJ:20,radiusM:.22,thicknessM:.00072,effectiveMassKg:34}},
-  {time:18.52,key:'roof-jump-2',kind:'impact',input:{point:[-.02,1.44,-.05],normal:[0,1,0],energyJ:38,radiusM:.22,thicknessM:.00072,effectiveMassKg:40}},
-  {time:19.70,key:'roof-jump-3',kind:'impact',input:{point:[.02,1.44,.04],normal:[0,1,0],energyJ:68,radiusM:.23,thicknessM:.00072,effectiveMassKg:44}},
-  {time:20.88,key:'roof-jump-4',kind:'impact',input:{point:[-.08,1.44,.06],normal:[0,1,0],energyJ:115,radiusM:.24,thicknessM:.00072,effectiveMassKg:48}},
-  {time:22.04,key:'roof-jump-5',kind:'impact',input:{point:[.06,1.44,-.04],normal:[0,1,0],energyJ:175,radiusM:.25,thicknessM:.00072,effectiveMassKg:52}},
-  {time:23.28,key:'kick-1',kind:'impact',input:{point:[-1.55,.62,-.94],normal:[0,0,-1],energyJ:5,radiusM:.105,thicknessM:.00078,effectiveMassKg:2.8}},
-  {time:24.26,key:'kick-2',kind:'impact',input:{point:[-.92,.78,-.94],normal:[0,0,-1],energyJ:10,radiusM:.11,thicknessM:.00078,effectiveMassKg:3.3}},
-  {time:25.24,key:'kick-3',kind:'impact',input:{point:[-.20,.68,-.94],normal:[0,0,-1],energyJ:18,radiusM:.115,thicknessM:.00078,effectiveMassKg:3.8}},
-  {time:26.22,key:'kick-4',kind:'impact',input:{point:[.62,.72,-.94],normal:[0,0,-1],energyJ:35,radiusM:.12,thicknessM:.00078,effectiveMassKg:4.2}},
-  {time:27.20,key:'kick-5',kind:'impact',input:{point:[1.32,.60,-.89],normal:[0,0,-1],energyJ:62,radiusM:.125,thicknessM:.00078,effectiveMassKg:4.8}},
-  {time:28.18,key:'kick-6',kind:'impact',input:{point:[2.18,.60,-.45],normal:[1,0,0],energyJ:105,radiusM:.13,thicknessM:.00082,effectiveMassKg:5.2}},
-  {time:29.18,key:'kick-7',kind:'impact',input:{point:[-2.12,.58,-.42],normal:[-1,0,0],energyJ:145,radiusM:.14,thicknessM:.00082,effectiveMassKg:5.5}},
+  {time:10.03,key:'knock-hood',kind:'impact',input:{point:[1.42,.96,-.10],normal:[0,1,0],energyJ:6.5,radiusM:.15,thicknessM:.00078,effectiveMassKg:1.8}},
+  {time:10.48,key:'knock-hood-hard',kind:'impact',input:{point:[1.20,.95,.18],normal:[0,1,0],energyJ:18,radiusM:.17,thicknessM:.00078,effectiveMassKg:2.3}},
+  {time:17.35,key:'roof-jump-1',kind:'impact',input:{point:[-.05,1.44,0],normal:[0,1,0],energyJ:28,radiusM:.22,thicknessM:.00072,effectiveMassKg:34}},
+  {time:18.52,key:'roof-jump-2',kind:'impact',input:{point:[-.02,1.44,-.05],normal:[0,1,0],energyJ:58,radiusM:.22,thicknessM:.00072,effectiveMassKg:40}},
+  {time:19.70,key:'roof-jump-3',kind:'impact',input:{point:[.02,1.44,.04],normal:[0,1,0],energyJ:108,radiusM:.23,thicknessM:.00072,effectiveMassKg:44}},
+  {time:20.88,key:'roof-jump-4',kind:'impact',input:{point:[-.08,1.44,.06],normal:[0,1,0],energyJ:178,radiusM:.24,thicknessM:.00072,effectiveMassKg:48}},
+  {time:22.04,key:'roof-jump-5',kind:'impact',input:{point:[.06,1.44,-.04],normal:[0,1,0],energyJ:260,radiusM:.25,thicknessM:.00072,effectiveMassKg:52}},
+  {time:23.28,key:'kick-1',kind:'impact',input:{point:[-1.55,.62,-.94],normal:[0,0,-1],energyJ:7,radiusM:.105,thicknessM:.00078,effectiveMassKg:2.8}},
+  {time:24.26,key:'kick-2',kind:'impact',input:{point:[-.92,.78,-.94],normal:[0,0,-1],energyJ:15,radiusM:.11,thicknessM:.00078,effectiveMassKg:3.3}},
+  {time:25.24,key:'kick-3',kind:'impact',input:{point:[-.20,.68,-.94],normal:[0,0,-1],energyJ:30,radiusM:.115,thicknessM:.00078,effectiveMassKg:3.8}},
+  {time:26.22,key:'kick-4',kind:'impact',input:{point:[.62,.72,-.94],normal:[0,0,-1],energyJ:58,radiusM:.12,thicknessM:.00078,effectiveMassKg:4.2}},
+  {time:27.20,key:'kick-5',kind:'impact',input:{point:[1.32,.60,-.89],normal:[0,0,-1],energyJ:98,radiusM:.125,thicknessM:.00078,effectiveMassKg:4.8}},
+  {time:28.18,key:'kick-6',kind:'impact',input:{point:[2.18,.60,-.45],normal:[1,0,0],energyJ:165,radiusM:.13,thicknessM:.00082,effectiveMassKg:5.2}},
+  {time:29.18,key:'kick-7',kind:'impact',input:{point:[-2.12,.58,-.42],normal:[-1,0,0],energyJ:240,radiusM:.14,thicknessM:.00082,effectiveMassKg:5.5}},
 ]);
 
 export function phaseAt(time){return ABUSE_PHASES.find(phase=>time>=phase.start&&time<phase.end)??ABUSE_PHASES.at(-1);}
@@ -62,18 +62,18 @@ export function createVehicleAbuseScript(rig){
       if(mid>=10.85&&mid<16.70){
         const u=(mid-10.85)/.72,cycle=Math.floor(u),phase=u-cycle,left=cycle%2===0;
         const z=left?-.34:.34,landing=Math.exp(-(((phase-.10)/.12)**2));
-        rig.applyBodyLoad([1.22,0,z],790+1_850*landing);
+        rig.applyBodyLoad([1.22,0,z],790+2_650*landing);
         const key='hood-land-'+cycle;
         if(phase>.08&&phase<.18&&!fired.has(key)){
           fired.add(key);
-          rig.impact({time:mid,point:[1.22,.95,z],normal:[0,1,0],energyJ:13+cycle*.7,radiusM:.16,thicknessM:.00078,effectiveMassKg:18});
+          rig.impact({time:mid,point:[1.22,.95,z],normal:[0,1,0],energyJ:18+cycle*2.4,radiusM:.16,thicknessM:.00078,effectiveMassKg:18});
         }
       }
 
       // Two-foot roof jumps. Static bodyweight while planted; strong short landing pulse.
       if(mid>=16.95&&mid<22.65){
         const u=(mid-16.95)/1.18,phase=u-Math.floor(u),landing=Math.exp(-(((phase-.34)/.105)**2));
-        rig.applyBodyLoad([-.04,0,0],760+3_250*landing);
+        rig.applyBodyLoad([-.04,0,0],760+4_250*landing);
       }
 
       rig.step(dt);time=to;
