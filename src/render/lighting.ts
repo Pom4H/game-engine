@@ -220,7 +220,7 @@ fn linearToSrgb(x:vec3<f32>)->vec3<f32>{
  // Presentation is deliberately neutral: exposure + reconstruction + display
  // transform only. Scene mood must come from radiance, materials and the camera.
  let reconstructed=max(vec3<f32>(0),center+(center-neighbourhood)*.15)*f.sunColor.w;
- let mapped=acesPresent(reconstructed);
+ var mapped=acesPresent(reconstructed);
  let luma=dot(mapped,vec3<f32>(.2126,.7152,.0722));
  mapped=mix(vec3<f32>(luma),mapped,1.015);
  return vec4<f32>(clamp(linearToSrgb(mapped),vec3<f32>(0),vec3<f32>(1)),1);
