@@ -152,7 +152,9 @@ function assetUrl(value:unknown,path:string):void{
   catch{throw new TypeError(`${path} must be a valid HTTP(S) or relative asset URL`);}
 }
 function surfaceTexture(value:unknown,path:string):void{
-  const texture=object(value,path);assetUrl(texture.url,`${path}.url`);
+  const texture=object(value,path);
+  if(texture.url===undefined&&texture.normalUrl===undefined&&texture.ormUrl===undefined)throw new TypeError(`${path} requires url, normalUrl or ormUrl`);
+  if(texture.url!==undefined)assetUrl(texture.url,`${path}.url`);
   if(texture.normalUrl!==undefined)assetUrl(texture.normalUrl,`${path}.normalUrl`);
   if(texture.ormUrl!==undefined)assetUrl(texture.ormUrl,`${path}.ormUrl`);
   optionalNumber(texture,'sizeM',path,.01,1000);
