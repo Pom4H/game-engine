@@ -38,11 +38,11 @@ spec.animation={...spec.animation,vehicles:[]};
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
-    entity.material={...entity.material,color:[.19,.205,.225,1],roughness:.105,metalness:.055};
+    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.125,metalness:.035};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:.00012,iceDepthM:.00003,waterDepthM:.00018};
-    entity.material={...entity.material,color:[.028,.031,.036,1],roughness:.86};
+    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:0};
+    entity.material={...entity.material,color:[.012,.014,.018,1],roughness:.98};
   }
 }
 
