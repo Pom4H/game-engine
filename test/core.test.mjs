@@ -30,6 +30,31 @@ test('scene URL codec round-trips unicode ids',()=>{
 });
 
 
+test('high-detail render mesh never changes physical mass or collision source',()=>{
+  const scene=new Scene({version:1,gravity:[0,0,0],entities:[{
+    id:'visual-split',
+    mesh:{kind:'box',size:[1,1,1]},
+    renderMesh:{kind:'box',size:[40,12,8]},
+    material:{kind:'steel'},
+    body:{velocity:[1,0,0]},
+  }]});
+  const entity=scene.entities.get('visual-split');
+  assert.equal(entity.mesh.kind,'box');
+  assert.equal(entity.renderMesh.kind,'box');
+  assert.deepEqual(entity.mesh.size,[1,1,1]);
+  assert.deepEqual(entity.renderMesh.size,[40,12,8]);
+  assert.ok(Math.abs(entity.body.mass-7850)<1e-6,`physics mass must come from the 1 m³ proxy, got ${entity.body.mass}`);
+});
+
+test('render mesh is validated with the same geometry rules as physical mesh',()=>{
+  assert.throws(()=>new Scene({version:1,entities:[{
+    id:'bad-visual',
+    mesh:{kind:'box',size:[1,1,1]},
+    renderMesh:{kind:'triangle-mesh',positions:[0,0,0],normals:[0,1,0],indices:[0,1,2]},
+  }]}),/bad-visual\.renderMesh/);
+});
+
+
 function fireAtGlass(thickness,speed=30){
   const scene=new Scene({
     version:1,gravity:[0,0,0],
