@@ -250,7 +250,11 @@ export class M3InteractionRig {
 
   impact(input:VehicleInteractionImpact):PanelImpactResult{
     const result=this.panels.impact(input),effectiveMass=input.effectiveMassKg??3,impulse=Math.sqrt(Math.max(0,2*effectiveMass*input.energyJ));
-    if(input.material!=='glass'&&input.energyJ>.4)this.structure.applyImpulse(input.point,V3.scale(V3.normalize(input.normal),-impulse),Math.max(.16,input.radiusM*1.25));
+    // Human-scale contacts belong to the thin skin. Activating the sparse crash cage for
+    // taps, kicks or bodyweight incorrectly turns local sheet-metal work into chassis
+    // plasticity. Reserve the expensive structural LOD for genuinely severe contacts.
+    const structuralActivationEnergyJ=Math.max(350,this.massKg*.20);
+    if(input.material!=='glass'&&input.energyJ>=structuralActivationEnergyJ)this.structure.applyImpulse(input.point,V3.scale(V3.normalize(input.normal),-impulse),Math.max(.16,input.radiusM*1.25));
     const event:ImpactEvent={type:'impact',id:++this.eventSequence,time:input.time,point:input.point,normal:input.normal,a:'m3-panel',b:'human',materialA:input.material??'steel',materialB:input.contactMaterial??'default',energy:input.energyJ,impulse,speed:effectiveMass>0?impulse/effectiveMass:0,size:input.radiusM*2};
     this.events.push(event);
     if(result.elasticEnergyJ>.2)this.events.push({type:'mechanism',id:++this.eventSequence,time:input.time,point:input.point,mechanism:'panel-flex',energy:result.elasticEnergyJ,speed:Math.sqrt(Math.max(0,2*result.elasticEnergyJ/effectiveMass)),size:input.radiusM*2});
@@ -258,10 +262,10 @@ export class M3InteractionRig {
   }
 
   applyBodyLoad(point:Vec3,downwardForceN:number):void{
+    // Standing/jumping bodyweight changes the sprung-body pose. Local hood/roof flex is
+    // represented by the panel impact modes at each landing; it must not plastically work
+    // the crash cage continuously while a person is merely standing on the car.
     this.suspension.applyLoad(point,downwardForceN);
-    // The thin skin sees local flex; the sparse structure receives only the load-bearing share.
-    const nearest=this.nearestNode(point),share=Math.max(0,downwardForceN)*.28;
-    this.structure.addForce(nearest,[0,-share,0]);
   }
 
   step(dt:number):void{
