@@ -171,9 +171,14 @@ test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{
 
 test('material ontology owns mechanical thermal optical and acoustic causes',()=>{
   const glass=material('glass'),steel=material('steel'),asphalt=material('asphalt'),concrete=material('concrete');
+  const rubber=material('rubber'),plastic=material('plastic'),aluminum=material('aluminum'),mirror=material('mirror');
   assert.equal(glass.mechanical.brittle,true);
   assert.ok(glass.optical.transmission>.8&&glass.optical.ior>1);
   assert.ok(steel.optical.metalness>.8);
+  assert.ok(rubber.friction>.9&&rubber.acoustic.damping>.7,'tyre rubber must be high-grip and strongly damped');
+  assert.ok(plastic.mechanical.plasticity>.4&&!plastic.mechanical.brittle,'automotive plastic trim must deform without glass-like fracture');
+  assert.ok(aluminum.density<steel.density&&aluminum.optical.metalness>.9,'wheel aluminum must stay light and metallic');
+  assert.ok(mirror.mechanical.brittle&&mirror.optical.metalness>.9&&mirror.optical.roughness<.08,'mirror must couple brittle failure with reflective optics');
   assert.ok(asphalt.thermal.solarAbsorptivity>concrete.thermal.solarAbsorptivity);
   assert.ok(asphalt.thermal.specificHeatJkgK>0&&concrete.thermal.conductivityWmK>0);
   assert.equal('brittle' in glass,false,'legacy mechanical fields must not live at the material root');
