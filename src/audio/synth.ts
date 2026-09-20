@@ -35,25 +35,55 @@ function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,samp
   const surfaceDamping=((event.surfaceA?.damping??a.damping)+(event.surfaceB?.damping??b.damping))/2;
   const wetness=((event.surfaceA?.wetness??0)+(event.surfaceB?.wetness??0))/2,moss=((event.surfaceA?.moss??0)+(event.surfaceB?.moss??0))/2;
   const damping=Math.max(.025,surfaceDamping),brightness=Math.max(.06,(a.brightness+b.brightness)/2*(1-wetness*.28-moss*.52));
-  const geometryScale=Math.max(.35,Math.sqrt(Math.max(.04,event.size))),base=Math.max(70,Math.sqrt(a.resonanceHz*b.resonanceHz)/geometryScale);
-  const modes=[1,1.43,2.07,2.91],phases=modes.map(()=>rng()*Math.PI*2),softness=1-moss*.35;
-  for(let i=0;i<left.length;i++){const t=i/sampleRate,env=Math.exp(-t*(10+34*damping)),attack=Math.min(1,t*.004*sampleRate),noise=(rng()*2-1)*Math.exp(-t*(55+wetness*25))*(a.noise+b.noise)*.22*softness;let sample=noise;for(let m=0;m<modes.length;m++)sample+=Math.sin(2*Math.PI*base*modes[m]!*t+phases[m]!)*env*(1/(1+m*.72))*(.55+brightness*.55);sample*=amplitude*attack*.34*(1-moss*.18);left[i]=sample*gainL;right[i]=sample*gainR;}
+  const geometryScale=Math.max(.35,Math.sqrt(Math.max(.04,event.size))),base=Math.max(85,Math.sqrt(a.resonanceHz*b.resonanceHz)/geometryScale);
+  const glass=event.materialA==='glass'||event.materialB==='glass',metal=event.materialA==='steel'||event.materialB==='steel';
+  // Real body impacts are dominated by a broadband onset and rapidly decorrelating
+  // sheet/cavity motion. Keep modal ringing subtle and deliberately inharmonic so a
+  // sequence of kicks does not turn into a tuned percussion instrument.
+  const ratios=glass?[1,1.71,2.93,4.21]:[1,1.58,2.37,3.61];
+  const frequencies=ratios.map(r=>base*r*(.94+rng()*.12)),phases=ratios.map(()=>rng()*Math.PI*2);
+  const modalStrength=glass?.105:metal?.052:.026;
+  let fast=0,slow=0,body=0;
+  for(let i=0;i<left.length;i++){
+    const t=i/sampleRate,white=rng()*2-1;
+    fast+=.22*(white-fast);slow+=.028*(white-slow);body+=.010*(white-body);
+    const band=fast-slow,edge=white-fast;
+    const onset=(edge*.72+band*.38)*Math.exp(-t*(82+wetness*24))*(.38+brightness*.34);
+    const cavity=body*Math.exp(-t*(17+10*damping))*(metal?.68:.44);
+    const buckle=metal?band*Math.exp(-t*(24+18*damping))*.28:0;
+    let modal=0;
+    for(let m=0;m<frequencies.length;m++)modal+=Math.sin(2*Math.PI*frequencies[m]!*t+phases[m]!)*Math.exp(-t*(34+10*m+40*damping))*(modalStrength/(1+m*.8));
+    const sample=(onset+cavity+buckle+modal)*amplitude*(1-moss*.18);
+    left[i]=sample*gainL;right[i]=sample*gainR;
+  }
 }
 
 function mechanismVoice(event:MechanismEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
-  const suspension=event.mechanism==='suspension',latch=event.mechanism==='door-latch',stop=event.mechanism==='door-stop';
-  const base=suspension?95:latch?180:stop?145:260;
-  const decay=suspension?12:latch?24:stop?19:28;
-  const hiss=suspension?.28:.06;
-  const knock=(latch||stop)? .72:.32;
-  let lp=0;
+  const suspension=event.mechanism==='suspension',latch=event.mechanism==='door-latch',stop=event.mechanism==='door-stop',panel=event.mechanism==='panel-flex';
+  const microBursts=panel?Array.from({length:3},(_,i)=>.010+i*.014+rng()*.007):[];
+  let fast=0,mid=0,slow=0,previous=0;
   for(let i=0;i<left.length;i++){
-    const t=i/sampleRate,env=Math.exp(-t*decay),attack=Math.min(1,t*sampleRate*.012);
-    const noise=(rng()*2-1);lp+=.08*(noise-lp);
-    const mechanical=(Math.sin(2*Math.PI*base*t)+.42*Math.sin(2*Math.PI*base*1.83*t+.8))*env*knock;
-    const air=(noise*.35+lp*.65)*Math.exp(-t*(suspension?8:32))*hiss;
-    const chatter=suspension?Math.sin(2*Math.PI*(38+event.speed*18)*t)*Math.exp(-t*18)*.08:0;
-    const sample=(mechanical+air+chatter)*amplitude*attack;
+    const t=i/sampleRate,white=rng()*2-1;
+    fast+=.25*(white-fast);mid+=.055*(white-mid);slow+=.008*(white-slow);
+    const edge=white-fast,band=fast-mid,low=mid-slow;
+    let sample=0;
+    if(latch){
+      // Latch: metal click + door-cavity thump + a very short seal/rattle tail.
+      sample=edge*Math.exp(-t*135)*.84+low*Math.exp(-t*24)*.64+band*Math.exp(-t*48)*.22;
+    }else if(stop){
+      sample=edge*Math.exp(-t*105)*.48+low*Math.exp(-t*18)*.82+band*Math.exp(-t*34)*.18;
+    }else if(suspension){
+      // Damper/chassis movement is mostly low, noisy mechanical energy, not a pitch.
+      sample=low*Math.exp(-t*13)*.72+band*Math.exp(-t*24)*.16+(white-previous)*Math.exp(-t*70)*.08;
+    }else if(panel){
+      // Oil-canning/flex: broadband buckle with several tiny stochastic releases.
+      sample=band*Math.exp(-t*30)*.62+low*Math.exp(-t*20)*.30;
+      for(const at of microBursts){const age=t-at;if(age>=0&&age<.026)sample+=edge*Math.exp(-age*115)*.20;}
+    }else{
+      sample=edge*Math.exp(-t*95)*.38+band*Math.exp(-t*31)*.34+low*Math.exp(-t*18)*.22;
+    }
+    previous=white;
+    sample*=amplitude*(.72+Math.min(1,event.speed)*.24);
     left[i]=sample*gainL;right[i]=sample*gainR;
   }
 }
