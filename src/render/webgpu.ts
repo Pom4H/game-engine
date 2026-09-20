@@ -816,6 +816,28 @@ function halton(index:number,base:number):number{let f=1,result=0,i=index;while(
 function taaJitter(frame:number):readonly[number,number]{const i=(frame%8)+1;return[halton(i,2)-.5,halton(i,3)-.5];}
 
 function distance2(a:Vec3,b:Vec3):number{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[2];return x*x+y*y+z*z;}
+interface ResolvedReflectionProbe{position:Vec3;radius:number;facesPerFrame:number;exclude:ReadonlySet<string>;key:string}
+const PROBE_FACE_DIRECTIONS:readonly Vec3[]=Object.freeze([[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]] as const);
+const PROBE_FACE_UP:readonly Vec3[]=Object.freeze([[0,-1,0],[0,-1,0],[0,0,1],[0,0,-1],[0,-1,0],[0,-1,0]] as const);
+function resolveReflectionProbe(scene:Scene):ResolvedReflectionProbe|undefined{
+  const spec=scene.spec.rendering?.reflectionProbe;if(!spec)return;
+  const offset=spec.offset??[0,0,0],anchor=spec.entity?scene.entities.get(spec.entity)?.position:spec.position;
+  if(!anchor)return;
+  const position:Vec3=[anchor[0]+offset[0],anchor[1]+offset[1],anchor[2]+offset[2]];
+  const radius=Math.max(.5,Math.min(500,spec.radius??45)),facesPerFrame=Math.max(1,Math.min(6,Math.floor(spec.facesPerFrame??1))),exclude=new Set(spec.exclude??[]);
+  const key=JSON.stringify([spec.entity??spec.position,radius,[...exclude].sort()]);
+  return{position,radius,facesPerFrame,exclude,key};
+}
+function probeVP(position:Vec3,face:number,radius:number):Mat4{
+  const direction=PROBE_FACE_DIRECTIONS[face]!,up=PROBE_FACE_UP[face]!,target=V3.add(position,direction);
+  return multiply4(perspective(Math.PI/2,1,.08,radius),lookAt(position,target,up));
+}
+function probeUniform(scene:Scene,position:Vec3,vp:Mat4):Float32Array{
+  const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),data=new Float32Array(28);
+  data.set(vp,0);data.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);
+  data.set([...(settings.sunColor??[1,.87,.72]),1],20);data.set([...(settings.skyColor??[.26,.34,.47]),1],24);return data;
+}
+
 
 const shadowPrimitiveIds=new WeakMap<object,number>();let nextShadowPrimitiveId=1;
 function shadowGeometryKey(primitive:Primitive):string{
