@@ -183,10 +183,24 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
 fn acesPresent(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3<f32>(0),vec3<f32>(1));}
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
- var color=textureSampleLevel(source,linearSampler,in.uv,0).rgb*f.sunColor.w;
+ let texel=1.0/vec2<f32>(textureDimensions(source));
+ let center=textureSampleLevel(source,linearSampler,in.uv,0).rgb;
+ let neighbourhood=(textureSampleLevel(source,linearSampler,in.uv+vec2<f32>(texel.x,0),0).rgb+
+                    textureSampleLevel(source,linearSampler,in.uv-vec2<f32>(texel.x,0),0).rgb+
+                    textureSampleLevel(source,linearSampler,in.uv+vec2<f32>(0,texel.y),0).rgb+
+                    textureSampleLevel(source,linearSampler,in.uv-vec2<f32>(0,texel.y),0).rgb)*.25;
+ // Small display-space reconstruction sharpens TAA without reintroducing shimmer.
+ var color=max(vec3<f32>(0),center+(center-neighbourhood)*.17)*f.sunColor.w;
  color=pow(acesPresent(color),vec3<f32>(1.0/2.2));
- let vignette=1.0-.045*pow(length((in.uv-.5)*vec2<f32>(1.1,1.0)),1.8);
- return vec4<f32>(color*vignette,1);
+ let luma=dot(color,vec3<f32>(.2126,.7152,.0722));
+ color=mix(vec3<f32>(luma),color,1.075);
+ color=clamp((color-.5)*1.045+.5,vec3<f32>(0),vec3<f32>(1));
+ // Cool reflected winter fill and warm sun highlights produce photographic
+ // separation while retaining the physical HDR light ratios.
+ color+=vec3<f32>(-.006,.001,.010)*(1.0-smoothstep(.22,.55,luma));
+ color+=vec3<f32>(.010,.004,-.004)*smoothstep(.58,.92,luma);
+ let vignette=1.0-.032*pow(length((in.uv-.5)*vec2<f32>(1.1,1.0)),1.8);
+ return vec4<f32>(clamp(color,vec3<f32>(0),vec3<f32>(1))*vignette,1);
 }
 `;
 
