@@ -107,7 +107,7 @@ export function makeM3(id,x,z,color,speed=0){
  const entities=[],motions=[];
  for(const part of PROCEDURAL_M3.parts){
   const position=[x+part.position[0],.006+part.position[1],z+part.position[2]],body=m3PartBody(part,!!speed);
-  const e={id:id+'-'+part.id,position,mesh:part.mesh,material:m3PartMaterial(part,color,!!speed),...(body?{body}:{}),...(part.rotation?{rotation:[...part.rotation]}:{})};
+  const e={id:id+'-'+part.id,position,mesh:part.mesh,...(part.renderMesh?{renderMesh:part.renderMesh}:{}),material:m3PartMaterial(part,color,!!speed),...(body?{body}:{}),...(part.rotation?{rotation:[...part.rotation]}:{})};
   entities.push(e);
   if(speed)motions.push({id:e.id,origin:position,wheel:!!part.wheel,radius:CAR.radius});
  }
