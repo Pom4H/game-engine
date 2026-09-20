@@ -307,7 +307,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   // The second lobe preserves sharp sky/building reflections without turning the
   // underlying paint into a polished bulk metal.
   if(clearcoat>0.0){
-    let coatRough=.075,coatA2=pow(coatRough,4.0);
+    let coatRough=.075;let coatA2=pow(coatRough,4.0);
     let coatD=coatA2/(3.14159*pow(nh*nh*(coatA2-1.0)+1.0,2.0));
     let coatK=pow(coatRough+1.0,2.0)/8.0;
     let coatG=(nv/(nv*(1.0-coatK)+coatK))*(nl/(nl*(1.0-coatK)+coatK));
