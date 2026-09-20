@@ -82,6 +82,35 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
   throw new TypeError(`Unknown M3 source material ${sourceMaterial} on ${id}`);
 }
 
+function roundedRectPoint(width:number,height:number,radius:number,t:number):readonly[number,number]{
+  const perimeter=2*(width+height-4*radius)+2*Math.PI*radius;
+  let d=((t%1)+1)%1*perimeter;
+  const straightW=width-2*radius,straightH=height-2*radius;
+  const pieces:[number,()=>readonly[number,number]][]=[
+    [straightW,()=>[-width/2+radius+d,height/2]],
+    [Math.PI*radius/2,()=>{const a=Math.PI/2-d/radius;return[width/2-radius+Math.cos(a)*radius,height/2-radius+Math.sin(a)*radius];}],
+    [straightH,()=>[width/2,height/2-radius-d]],
+    [Math.PI*radius/2,()=>{const a=0-d/radius;return[width/2-radius+Math.cos(a)*radius,-height/2+radius+Math.sin(a)*radius];}],
+    [straightW,()=>[width/2-radius-d,-height/2]],
+    [Math.PI*radius/2,()=>{const a=-Math.PI/2-d/radius;return[-width/2+radius+Math.cos(a)*radius,-height/2+radius+Math.sin(a)*radius];}],
+    [straightH,()=>[-width/2,-height/2+radius+d]],
+    [Math.PI*radius/2,()=>{const a=Math.PI-d/radius;return[-width/2+radius+Math.cos(a)*radius,height/2-radius+Math.sin(a)*radius];}],
+  ];
+  for(const [length,fn] of pieces){if(d<=length)return fn();d-=length;}
+  return[-width/2+radius,height/2];
+}
+function roundedRectFrameMesh(width:number,height:number,radius:number,border:number,segments=40):TriangleMesh{
+  const positions:number[]=[],normals:number[]=[],indices:number[]=[];
+  const innerW=width-2*border,innerH=height-2*border,innerR=Math.max(.01,radius-border);
+  for(let i=0;i<segments;i++){
+    const t=i/segments,o=roundedRectPoint(width,height,radius,t),inn=roundedRectPoint(innerW,innerH,innerR,t);
+    positions.push(0,o[1],o[0], 0,inn[1],inn[0]);
+    normals.push(1,0,0, 1,0,0);
+  }
+  for(let i=0;i<segments;i++){const n=(i+1)%segments,a=i*2,b=a+1,c0=n*2,d=c0+1;indices.push(a,c0,d,a,d,b);}
+  return{kind:'triangle-mesh',positions,normals,indices};
+}
+
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
 export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.034);}
@@ -119,6 +148,13 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     position:[2.365,.225+row*.043,0] as const,
     material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.78,metalness:.01},
   }));
+  const frontDetail:ParametricVehiclePart[]=[
+    Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(.34,.55,.105,.026),position:[2.407,.635,-.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
+    Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(.34,.55,.105,.026),position:[2.407,.635,.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
+    Object.freeze({id:'front-splitter',role:'dark' as const,mesh:{kind:'box' as const,size:[.055,.035,1.62] as const},position:[2.36,.188,0] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.32,metalness:.02}}),
+    Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
+    Object.freeze({id:'hood-seam-right',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
+  ];
   const interior:ParametricVehiclePart[]=[
     Object.freeze({id:'interior-dashboard',role:'dark' as const,mesh:{kind:'box' as const,size:[.62,.18,1.42] as const},position:[.72,.84,0] as const,material:{kind:'default' as const,finish:'smooth' as const,roughness:.62,metalness:0}}),
     Object.freeze({id:'interior-console',role:'dark' as const,mesh:{kind:'box' as const,size:[.94,.18,.19] as const},position:[.10,.67,0] as const,material:{kind:'default' as const,finish:'smooth' as const,roughness:.72,metalness:0}}),
@@ -132,6 +168,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     Object.freeze({id:'body',role:'paint',mesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...grilleSlats,
     ...lowerIntake,
+    ...frontDetail,
     ...interior,
     ...sources.map(source=>Object.freeze({
       id:source.id,
