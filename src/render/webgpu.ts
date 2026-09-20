@@ -581,7 +581,7 @@ export class WebGPURenderer implements Renderer{
     if(this.profiler.enabled){
       const sumTriangles=(entities:readonly RuntimeEntity[])=>entities.reduce((sum,e)=>sum+this.mesh(renderPrimitive(e)!).triangles,0);
       const materialDraws:Record<string,number>={},materialTriangles:Record<string,number>={};
-      for(const e of [...culled.cameraOpaque,...culled.cameraTransparent]){const kind=e.material.kind,triangles=this.mesh(e.mesh!).triangles;materialDraws[kind]=(materialDraws[kind]??0)+1;materialTriangles[kind]=(materialTriangles[kind]??0)+triangles;}
+      for(const e of [...culled.cameraOpaque,...culled.cameraTransparent]){const kind=e.material.kind,triangles=this.mesh(renderPrimitive(e)!).triangles;materialDraws[kind]=(materialDraws[kind]??0)+1;materialTriangles[kind]=(materialTriangles[kind]??0)+triangles;}
       const work=this.profiler.currentWork();
       this.profiler.setAtoms(buildRenderAtomReport({
         width:this.canvas.width,height:this.canvas.height,shadowDraws:shadowPlan.singles.length+shadowPlan.batches.length,reflectionDraws:culled.reflectedObjects.length,shadowBatchedInstances:shadowPlan.instances,shadowBatchedDraws:shadowPlan.batches.length,
