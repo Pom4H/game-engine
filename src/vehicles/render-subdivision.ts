@@ -21,7 +21,7 @@ const positionKey=(mesh:TriangleMesh,index:number)=>`${mesh.positions[index*3]},
 const dot=(a:readonly number[],b:readonly number[])=>a[0]!*b[0]!+a[1]!*b[1]!+a[2]!*b[2]!;
 const normalize=(v:readonly[number,number,number]):[number,number,number]=>{const l=Math.hypot(...v)||1;return[v[0]/l,v[1]/l,v[2]/l];};
 
-export function buildSmoothSubdivisionPlan(mesh:TriangleMesh,creaseDegrees=35,maxDisplacementM=.018):SmoothSubdivisionPlan{
+export function buildSmoothSubdivisionPlan(mesh:TriangleMesh,creaseDegrees=35,maxDisplacementM=.018,smoothBoundaries=false):SmoothSubdivisionPlan{
   if(mesh.indices.length%3)throw new RangeError('Subdivision requires triangle indices');
   if(!Number.isFinite(creaseDegrees)||creaseDegrees<=0||creaseDegrees>=90)throw new RangeError('creaseDegrees must be in (0,90)');
   if(!Number.isFinite(maxDisplacementM)||maxDisplacementM<0||maxDisplacementM>.1)throw new RangeError('Invalid subdivision displacement');
@@ -44,6 +44,7 @@ export function buildSmoothSubdivisionPlan(mesh:TriangleMesh,creaseDegrees=35,ma
   for(const edge of edges.values()){
     // Open boundaries keep the exact imported silhouette. Shared edges curve only
     // when the source normals agree on both geometric endpoints.
+    if(edge.records.length===1){edge.smooth=smoothBoundaries;continue;}
     if(edge.records.length!==2){edge.smooth=false;continue;}
     const reference=new Map<string,readonly[number,number,number]>();
     let smooth=true;
