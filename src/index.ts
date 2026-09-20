@@ -5,6 +5,7 @@ export {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type PhysicsStat
 export {PlasticDeformationSystem,type DeformableBodySpec,type SceneDeformationSpec,type PlasticDent} from './physics/deformation.js';
 export {StructuralBody,type StructuralDefinition,type StructuralNodeSpec,type StructuralConstraintSpec,type StructuralDistanceSpec,type StructuralVolumeSpec,type StructuralStats,type BakedStructuralState} from './physics/structure.js';
 export {bindStructuralSkin,applyStructuralSkin,type StructuralSkinBinding} from './physics/structural-skin.js';
+export {AdaptiveStructuralController,type ReducedRigidState,type StructuralActivationPolicy,type StructuralActivation,type AdaptiveStructuralStats} from './physics/adaptive-structure.js';
 export {Scene,type RuntimeEntity} from './scene/scene.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
