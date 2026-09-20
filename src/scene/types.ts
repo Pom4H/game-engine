@@ -22,7 +22,8 @@ export type Primitive =
  * Relative URLs resolve against the document URL. The renderer owns image/GPU
  * loading and cache lifetime; authoring code supplies only this descriptor. */
 export interface SurfaceTextureSpec {
-  readonly url:string;
+  /** Optional albedo/height image. At least one map URL must be present. */
+  readonly url?:string;
   /** World-space repeat size in metres; defaults to 1. */
   readonly sizeM?:number;
   /** Height-derived bump amplitude; defaults to 0.5. */
