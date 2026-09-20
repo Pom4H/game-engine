@@ -140,6 +140,30 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  var base=textureSampleLevel(hdr,linearSampler,uv,0).rgb;
  if(coc>.15){var sum=base;for(var k=0;k<8;k++){sum+=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*coc/size,0).rgb;}base=sum/9.0;}
  var color=base*(1.0-min(.58,occlusion*.34));
+ // One-ring screen-space diffuse bounce. Samples are projected in world metres,
+ // so the effect is stable across resolution and naturally rejects same-plane
+ // neighbours through the hemisphere term. This gives cheap local colour bleed
+ // under cars, beside warm masonry and around shop recesses without scene probes.
+ if(d<.99999){
+  let giDirs=array<vec2<f32>,6>(vec2<f32>(1,0),vec2<f32>(.5,.866),vec2<f32>(-.5,.866),vec2<f32>(-1,0),vec2<f32>(-.5,-.866),vec2<f32>(.5,-.866));
+  let giRadius=clamp(.42*size.y/(max(z,.1)*f.forward.w*2.0),3.0,42.0);
+  var indirect=vec3<f32>(0);var indirectWeight=0.0;
+  for(var gi=0;gi<6;gi++){
+   let q=clamp(pixel+vec2<i32>(round(giDirs[gi]*giRadius)),vec2<i32>(0),dims-1);
+   let qp=positionAt(q,size);let delta=qp-pos;let separation=length(delta);
+   if(separation>.035&&separation<.82){
+    let direction=delta/separation;
+    let qWorldNormal=textureLoad(normals,q,0).xyz*2.0-1.0;
+    let qn=viewNormal(qWorldNormal);
+    let receive=max(dot(n,direction)-.04,0.0);
+    let emit=max(dot(qn,-direction),0.0);
+    let range=1.0-smoothstep(.08,.82,separation);
+    let weight=receive*(.35+.65*emit)*range;
+    indirect+=textureLoad(hdr,q,0).rgb*weight;indirectWeight+=weight;
+   }
+  }
+  if(indirectWeight>.001){color+=indirect/indirectWeight*.055*(.72+.28*normalSample.a);}
+ }
  // Screen-space radiance for smooth materials, with explicit misses. Wet ground
  // uses its geometry reflection pass; rough/offscreen surfaces keep sky fallback.
  let coating=textureLoad(reflectance,pixel,0);let rough=normalSample.a;
