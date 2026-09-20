@@ -121,7 +121,7 @@ export class StructuralBody {
   private pendingBake:BakedStructuralState|undefined;
 
   constructor(readonly definition:StructuralDefinition){
-    const nodeCount=definition.nodes.length,const constraintCount=definition.constraints.length;
+    const nodeCount=definition.nodes.length, constraintCount=definition.constraints.length;
     if(nodeCount<2||nodeCount>2048)throw new RangeError('Structural body requires 2..2048 nodes');
     if(constraintCount<1||constraintCount>16384)throw new RangeError('Structural body requires 1..16384 constraints');
     this.iterations=Math.max(1,Math.min(32,Math.floor(definition.iterations??8)));
