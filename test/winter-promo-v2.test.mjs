@@ -46,7 +46,7 @@ test('wet tyre audio suppresses hiss and footstep audio starts at the recorded c
  const events=[{time:.25,position:[0,0,2],sequence:1,depth:.022}],steps=renderFootsteps(events,frames,1,16000);assert.equal(steps.left.slice(0,4000).every(x=>x===0),true);assert.ok(steps.left.slice(4001,9000).some(x=>Math.abs(x)>.001));assert.deepEqual(steps.left,renderFootsteps(events,frames,1,16000).left);
 });
 
-test('M3 is reconstructed from a compact profile and shares that shape with structural physics',()=>{
+test('M3 keeps a compact structural profile while render fidelity comes from packed original FBX parts',()=>{
  const bytes=new TextEncoder().encode(JSON.stringify(M3_PARAMETRIC_PROFILE)).length,geometry=generateM3Vehicle();
  assert.equal(M3_REFERENCE_PROVENANCE.sha256,'9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67');
  assert.equal(M3_REFERENCE_PROVENANCE.sourceBytes,241628);
@@ -59,9 +59,10 @@ test('M3 is reconstructed from a compact profile and shares that shape with stru
  assert.ok(M3_SHELL_FIDELITY.meanNormalErrorDeg<.35,M3_SHELL_FIDELITY);
  assert.ok(M3_SHELL_FIDELITY.p99NormalErrorDeg<.8,M3_SHELL_FIDELITY);
  assert.ok(M3_SHELL_FIDELITY.maxNormalErrorDeg<.9,M3_SHELL_FIDELITY);
- const modelPayload=bytes+M3_SHELL_FIDELITY.binaryPayloadBytes;
- assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/modelPayload>10,{sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,modelPayload});
- assert.ok(1_194_172/modelPayload>50,{expandedJsonBytes:1_194_172,modelPayload});
+ const modelPayload=bytes+M3_REFERENCE_PROVENANCE.highFidelity.totalPackedPayloadBytes;
+ assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/modelPayload>1.8,{sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,modelPayload});
+ assert.ok(1_194_172/modelPayload>9,{expandedJsonBytes:1_194_172,modelPayload});
+ assert.equal(geometry.generatedTriangles,M3_REFERENCE_PROVENANCE.highFidelity.sourceTriangles);
  assert.equal(geometry.parts.filter(part=>part.role==='tire').length,4);
  assert.equal(geometry.parts.filter(part=>part.role==='rim').length,4);
  assert.ok(geometry.generatedTriangles>500&&geometry.generatedTriangles<10000,geometry);
