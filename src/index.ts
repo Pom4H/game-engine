@@ -12,7 +12,7 @@ export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,generateM3Vehicle,m3PartMa
 export {M3_HIGH_FIDELITY_SHELL,M3_SHELL_FIDELITY,m3HighFidelityBody} from './vehicles/m3-shell.js';
 export {M3_FBX_PARTS_FIDELITY,M3_FBX_PART_SOURCES,m3FbxParts,type M3FbxPartSource} from './vehicles/m3-fbx-parts.js';
 export {decodePackedShell,type PackedShell} from './vehicles/packed-shell.js';
-export {decodePackedMesh,type PackedMesh} from './assets/packed-mesh.js';
+export {encodePackedMesh,decodePackedMesh,type PackedMesh} from './assets/packed-mesh.js';
 export {ElasticPlasticPanelResponse,FourCornerSuspension,DoorHinge,M3InteractionRig,type PanelImpactInput,type PanelImpactResult,type SuspensionPose,type VehicleInteractionImpact,type VehicleInteractionState} from './vehicles/interaction-physics.js';
 export {Scene,type RuntimeEntity} from './scene/scene.js';
 export {validateScene} from './scene/validate.js';
