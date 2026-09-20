@@ -257,7 +257,7 @@ export class M3InteractionRig {
     if(input.material!=='glass'&&input.energyJ>=structuralActivationEnergyJ)this.structure.applyImpulse(input.point,V3.scale(V3.normalize(input.normal),-impulse),Math.max(.16,input.radiusM*1.25));
     const event:ImpactEvent={type:'impact',id:++this.eventSequence,time:input.time,point:input.point,normal:input.normal,a:'m3-panel',b:'human',materialA:input.material??'steel',materialB:input.contactMaterial??'default',energy:input.energyJ,impulse,speed:effectiveMass>0?impulse/effectiveMass:0,size:input.radiusM*2};
     this.events.push(event);
-    if(result.elasticEnergyJ>4&&input.energyJ>12)this.events.push({type:'mechanism',id:++this.eventSequence,time:input.time,point:input.point,mechanism:'panel-flex',energy:result.elasticEnergyJ,speed:Math.sqrt(Math.max(0,2*result.elasticEnergyJ/effectiveMass)),size:input.radiusM*2});
+    if(result.elasticEnergyJ>4&&input.energyJ>80)this.events.push({type:'mechanism',id:++this.eventSequence,time:input.time,point:input.point,mechanism:'panel-flex',energy:result.elasticEnergyJ,speed:Math.sqrt(Math.max(0,2*result.elasticEnergyJ/effectiveMass)),size:input.radiusM*2});
     return result;
   }
 
