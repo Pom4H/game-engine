@@ -12,7 +12,9 @@ export function batchStaticScenery(entities:readonly EntitySpec[],eligible:(e:En
  const kept:EntitySpec[]=[],groups=new Map<string,{entity:EntitySpec;positions:number[];normals:number[];indices:number[]}>();
  for(const e of entities){
   const mesh=e.mesh,s=e.scale??[1,1,1];
-  if(!mesh||e.body||e.light||e.environmental||e.material?.label||e.material?.pattern==='window'||e.material?.kind==='glass'||(e.material?.color?.[3]??1)<.98||s.some(v=>v===0)||!eligible(e)){kept.push(e);continue;}
+  // renderMesh is an explicit visual/physics separation contract. Do not collapse
+  // it into an authored physics proxy during static batching.
+  if(!mesh||e.renderMesh||e.body||e.light||e.environmental||e.material?.label||e.material?.pattern==='window'||e.material?.kind==='glass'||(e.material?.color?.[3]??1)<.98||s.some(v=>v===0)||!eligible(e)){kept.push(e);continue;}
   const p=e.position??[0,0,0],cell=p.map(v=>Math.floor(v/cellSize)),key=JSON.stringify([cell,e.material??{}]);
   let g=groups.get(key);const data=primitiveMesh(mesh);
   if(g&&(g.positions.length+data.vertices.length/2>600000||g.indices.length+data.indices.length>1800000)){kept.push({...g.entity,mesh:{kind:'triangle-mesh',positions:g.positions,normals:g.normals,indices:g.indices}});groups.delete(key);g=undefined;}
