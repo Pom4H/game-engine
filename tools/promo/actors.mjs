@@ -1,4 +1,4 @@
-import {M3_PARAMETRIC_PROFILE,generatePassengerVehicle,sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
+import {generateM3Vehicle,sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
 
 // Only the cast, rig binding, garment shapes and route are authored here.
 // Locomotion, IK, planted contacts and transform updates are engine systems.
@@ -102,7 +102,7 @@ function snowDust(seed){
  return{kind:'triangle-mesh',positions,normals,indices};
 }
 export const CAR={startX:-21,z:-1.40,speed:2.65,radius:.346};
-const PROCEDURAL_M3=generatePassengerVehicle(M3_PARAMETRIC_PROFILE);
+const PROCEDURAL_M3=generateM3Vehicle();
 export function makeM3(id,x,z,color,speed=0){
  const entities=[],motions=[];
  for(const part of PROCEDURAL_M3.parts){
