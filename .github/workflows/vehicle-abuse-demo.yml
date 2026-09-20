@@ -5,13 +5,6 @@ on:
   push:
     branches: [physics/adaptive-xpbd-structure]
     paths:
-      - 'src/vehicles/**'
-      - 'src/physics/**'
-      - 'src/materials/**'
-      - 'src/audio/**'
-      - 'src/scene/events.ts'
-      - 'tools/vehicle-abuse/**'
-      - 'test/vehicle-interaction.test.mjs'
       - '.github/workflows/vehicle-abuse-demo.yml'
 
 permissions:
@@ -23,6 +16,7 @@ concurrency:
 
 jobs:
   record:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: self-hosted
     timeout-minutes: 45
     defaults:
