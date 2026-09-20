@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,M3_SHELL_FIDELITY,Scene,SnowSurface,SnowFootprints,StructuralBody,batchStaticScenery,generateM3Vehicle,material,passengerStructuralDefinition,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
+import {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,M3_SHELL_FIDELITY,Scene,SnowSurface,SnowFootprints,StructuralBody,batchStaticScenery,generateM3Vehicle,m3StructuralBlueprint,material,passengerStructuralDefinition,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
 import {compose} from '../dist/math.js';
 import {pedestrianPose,WALK} from '../tools/promo/actors.mjs';
 
@@ -69,4 +69,17 @@ test('M3 is reconstructed from a compact profile and shares that shape with stru
  const xs=definition.nodes.map(node=>node.position[0]),zs=definition.nodes.map(node=>node.position[2]);
  assert.ok(Math.max(...xs)-Math.min(...xs)>M3_PARAMETRIC_PROFILE.dimensions.length*.85);
  assert.ok(Math.max(...zs)-Math.min(...zs)>M3_PARAMETRIC_PROFILE.dimensions.width*.45);
+ const blueprint=m3StructuralBlueprint(1700,material('steel').mechanical);
+ assert.equal(blueprint.definition.nodes.length,28);
+ assert.equal(blueprint.skin.vertexCount,M3_SHELL_FIDELITY.uniqueVertices);
+ assert.equal(blueprint.skin.influences,4);
+ for(let vertex=0;vertex<blueprint.skin.vertexCount;vertex++){
+   let sum=0;
+   for(let slot=0;slot<blueprint.skin.influences;slot++){
+     const offset=vertex*blueprint.skin.influences+slot;
+     assert.ok(blueprint.skin.nodes[offset]<28);
+     sum+=blueprint.skin.weights[offset];
+   }
+   assert.ok(Math.abs(sum-1)<1e-12);
+ }
 });
