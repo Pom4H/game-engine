@@ -1,6 +1,6 @@
 import type {MechanicalMaterial} from '../materials/catalog.js';
 import type {Vec3} from '../math.js';
-import type {Primitive} from '../scene/types.js';
+import type {MaterialSpec,Primitive} from '../scene/types.js';
 import type {StructuralDefinition,StructuralConstraintSpec} from '../physics/structure.js';
 
 export type PassengerSideSection=readonly [station:number,halfWidth:number,beltHeight:number,topWidth:number];
@@ -43,6 +43,8 @@ export interface ParametricVehiclePart {
   readonly position:Vec3;
   readonly rotation?:Vec3;
   readonly wheel?:boolean;
+  /** Semantic material defaults. Scene authoring may override color/emission without losing physical kind. */
+  readonly material?:Omit<MaterialSpec,'color'>;
 }
 
 export interface ParametricPassengerGeometry {
@@ -189,6 +191,16 @@ function triangleMesh(positions:number[],indices:number[]):Extract<Primitive,{ki
   return{kind:'triangle-mesh',positions,normals,indices};
 }
 
+export function passengerPartMaterial(role:ParametricVehiclePartRole):Omit<MaterialSpec,'color'>{
+  if(role==='paint')return{kind:'steel',treatment:'painted',finish:'smooth',roughness:.22,metalness:.18};
+  if(role==='glass')return{kind:'glass',finish:'polished',roughness:.07,metalness:0,pattern:'window'};
+  if(role==='tire')return{kind:'rubber',finish:'rough',roughness:.94,metalness:0,pattern:'rubber'};
+  if(role==='rim')return{kind:'aluminum',finish:'polished',roughness:.19,metalness:.95};
+  if(role==='light'||role==='tail')return{kind:'plastic',finish:'smooth',roughness:.14,metalness:.02};
+  if(role==='metal')return{kind:'steel',finish:'smooth',roughness:.27,metalness:.92};
+  return{kind:'plastic',finish:'smooth',roughness:.44,metalness:0};
+}
+
 export function generatePassengerVehicle(profileInput:PassengerVehicleProfile):ParametricPassengerGeometry{
   const profile=validatePassengerVehicleProfile(profileInput),stations=stationSamples(profile),rings=stations.map(station=>bodyCrossSection(profile,station)),body=meshFromRings(rings);
   const parts:ParametricVehiclePart[]=[
@@ -213,7 +225,8 @@ export function generatePassengerVehicle(profileInput:PassengerVehicleProfile):P
   }
   for(const side of [-1,1] as const)parts.push({id:`exhaust-${side}`,role:'metal',mesh:{kind:'cylinder',radius:.035,height:.16,segments:16},position:[-d.length*.492,d.clearance+.08,side*d.width*.28],rotation:[0,0,Math.PI/2]});
   const primitiveTriangles=(mesh:Primitive)=>mesh.kind==='triangle-mesh'?mesh.indices.length/3:mesh.kind==='torus'?(mesh.segments??16)*8:mesh.kind==='cylinder'?(mesh.segments??16)*4:mesh.kind==='box'?12:0;
-  return Object.freeze({profile,parts:Object.freeze(parts),body,bodyTriangles:body.indices.length/3,generatedTriangles:parts.reduce((sum,part)=>sum+primitiveTriangles(part.mesh),0)});
+  const authoredParts=parts.map(part=>Object.freeze({...part,material:part.material??passengerPartMaterial(part.role)}));
+  return Object.freeze({profile,parts:Object.freeze(authoredParts),body,bodyTriangles:body.indices.length/3,generatedTriangles:authoredParts.reduce((sum,part)=>sum+primitiveTriangles(part.mesh),0)});
 }
 
 export function passengerStructuralDefinition(
