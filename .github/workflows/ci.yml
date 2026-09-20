@@ -30,6 +30,8 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build render path
         run: bun run build
+      - name: Fast engine invariants
+        run: node --test test/core.test.mjs test/deformation.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
       - name: Reference render
         run: |
           if not exist artifacts mkdir artifacts
