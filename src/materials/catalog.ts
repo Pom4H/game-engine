@@ -1,6 +1,6 @@
 import type {Color} from '../scene/types.js';
 
-export type MaterialKind='default'|'glass'|'steel'|'wood'|'concrete'|'asphalt'|'snow';
+export type MaterialKind='default'|'glass'|'steel'|'wood'|'concrete'|'asphalt'|'snow'|'rubber'|'plastic'|'aluminum'|'mirror';
 
 export interface MechanicalMaterial {
   /** Young's modulus, used by deformation/reduced-order structural solvers. */
@@ -131,6 +131,38 @@ const MATERIALS:Readonly<Record<MaterialKind,PhysicalMaterial>>=Object.freeze({
     optical:{ior:1.31,roughness:.96,metalness:0,transmission:.18},
     acoustic:{resonanceHz:110,damping:.92,brightness:.03,noise:.52},
     surface:{baseRoughness:.96,waterRetention:.98,bioAffinity:0,dirtAffinity:.5,weathering:1,permeability:.82},
+  }),
+  rubber:m({
+    kind:'rubber',density:1100,restitution:.08,friction:.96,color:[.035,.038,.04,1],
+    mechanical:{youngModulusPa:12e6,yieldStressPa:5e6,failureStressPa:18e6,failureStrain:2.4,plasticity:.42,brittle:false},
+    thermal:{specificHeatJkgK:1850,conductivityWmK:.16,solarAbsorptivity:.94,emissivity:.94,linearExpansionPerK:150e-6},
+    optical:{ior:1.52,roughness:.9,metalness:0,transmission:0},
+    acoustic:{resonanceHz:145,damping:.82,brightness:.05,noise:.58},
+    surface:{baseRoughness:.9,waterRetention:.12,bioAffinity:.01,dirtAffinity:.86,weathering:.72,permeability:.03},
+  }),
+  plastic:m({
+    kind:'plastic',density:1180,restitution:.12,friction:.42,color:[.15,.16,.17,1],
+    mechanical:{youngModulusPa:2.3e9,yieldStressPa:46e6,failureStressPa:64e6,failureStrain:.055,plasticity:.58,brittle:false},
+    thermal:{specificHeatJkgK:1450,conductivityWmK:.21,solarAbsorptivity:.68,emissivity:.9,linearExpansionPerK:82e-6},
+    optical:{ior:1.49,roughness:.42,metalness:0,transmission:0},
+    acoustic:{resonanceHz:510,damping:.5,brightness:.28,noise:.34},
+    surface:{baseRoughness:.42,waterRetention:.08,bioAffinity:.01,dirtAffinity:.52,weathering:.48,permeability:.02},
+  }),
+  aluminum:m({
+    kind:'aluminum',density:2700,restitution:.28,friction:.44,color:[.64,.67,.7,1],
+    mechanical:{youngModulusPa:69e9,yieldStressPa:275e6,failureStressPa:310e6,failureStrain:.12,plasticity:.68,brittle:false},
+    thermal:{specificHeatJkgK:900,conductivityWmK:167,solarAbsorptivity:.38,emissivity:.18,linearExpansionPerK:23.1e-6},
+    optical:{ior:1.44,roughness:.22,metalness:.95,transmission:0},
+    acoustic:{resonanceHz:1280,damping:.08,brightness:.84,noise:.09},
+    surface:{baseRoughness:.22,waterRetention:.04,bioAffinity:.01,dirtAffinity:.25,weathering:.38,permeability:.01},
+  }),
+  mirror:m({
+    kind:'mirror',density:2500,restitution:.06,friction:.28,color:[.36,.41,.45,1],
+    mechanical:{youngModulusPa:70e9,yieldStressPa:38e6,failureStressPa:38e6,failureStrain:.00052,plasticity:0,brittle:true},
+    thermal:{specificHeatJkgK:840,conductivityWmK:1.0,solarAbsorptivity:.14,emissivity:.84,linearExpansionPerK:9e-6},
+    optical:{ior:1.52,roughness:.035,metalness:.94,transmission:.02},
+    acoustic:{resonanceHz:3100,damping:.07,brightness:.98,noise:.44},
+    surface:{baseRoughness:.035,waterRetention:.03,bioAffinity:0,dirtAffinity:.2,weathering:.08,permeability:.005},
   }),
 });
 
