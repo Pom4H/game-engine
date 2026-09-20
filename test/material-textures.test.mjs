@@ -6,17 +6,17 @@ const entity=texture=>({id:'surface',mesh:{kind:'box',size:[1,1,1]},material:{ki
 
 test('surface texture descriptors accept relative and HTTP assets and own the nested authoring data',()=>{
  for(const url of ['/assets/snow.png','./textures/brick.webp','../shared/grain.jpg','textures/cloth.png?v=2','https://example.org/material.png','http://localhost:8080/assets/snow.png','//cdn.example.org/snow.png']){
-  const source={version:1,entities:[entity({url,sizeM:2,bumpStrength:.8,albedoStrength:.7})]},validated=validateScene(source);
+  const source={version:1,entities:[entity({url,sizeM:2,bumpStrength:.8,albedoStrength:.7,normalUrl:'./detail-normal.png',normalStrength:1.2,ormUrl:'./detail-orm.png',ormStrength:.75})]},validated=validateScene(source);
   assert.deepEqual(validated.entities[0].material.texture,source.entities[0].material.texture);
-  source.entities[0].material.texture.url='/changed.png';source.entities[0].material.texture.sizeM=99;
-  assert.equal(validated.entities[0].material.texture.url,url);assert.equal(validated.entities[0].material.texture.sizeM,2);
+  source.entities[0].material.texture.url='/changed.png';source.entities[0].material.texture.normalUrl='/changed-normal.png';source.entities[0].material.texture.ormUrl='/changed-orm.png';source.entities[0].material.texture.sizeM=99;
+  assert.equal(validated.entities[0].material.texture.url,url);assert.equal(validated.entities[0].material.texture.normalUrl,'./detail-normal.png');assert.equal(validated.entities[0].material.texture.ormUrl,'./detail-orm.png');assert.equal(validated.entities[0].material.texture.sizeM,2);
  }
  const original=entity({url:'/assets/stone.png'}),validated=validateEntity(original);original.material.texture.url='/modified.png';assert.equal(validated.material.texture.url,'/assets/stone.png');
- for(const texture of [{url:'plain.png',sizeM:.01,bumpStrength:0,albedoStrength:0},{url:'plain.png',sizeM:1000,bumpStrength:2,albedoStrength:1}])assert.doesNotThrow(()=>validateEntity(entity(texture)));
+ for(const texture of [{url:'plain.png',sizeM:.01,bumpStrength:0,albedoStrength:0,normalUrl:'normal.png',normalStrength:0,ormUrl:'orm.png',ormStrength:0},{url:'plain.png',sizeM:1000,bumpStrength:2,albedoStrength:1,normalUrl:'https://example.org/n.png',normalStrength:2,ormUrl:'https://example.org/o.png',ormStrength:1}])assert.doesNotThrow(()=>validateEntity(entity(texture)));
 });
 
 test('invalid texture data fails before Scene.add mutates the world',()=>{
- const invalid=[null,[],{}, {url:''},{url:42},{url:'javascript:alert(1)'},{url:'data:image/png;base64,a'},{url:'blob:https://example.org/123'},{url:'file:///tmp/texture.png'}, {url:'http://'},{url:'https:example.org/x.png'},{url:'https://a.example/x\ny.png'},{url:' /assets/x.png'},{url:'/assets/\0snow.png'},{url:'\\\\server\\x.png'}, {url:'/x.png',sizeM:0},{url:'/x.png',sizeM:.009},{url:'/x.png',sizeM:1001},{url:'/x.png',sizeM:Infinity},{url:'/x.png',bumpStrength:NaN},{url:'/x.png',bumpStrength:-1},{url:'/x.png',bumpStrength:2.01},{url:'/x.png',albedoStrength:-.01},{url:'/x.png',albedoStrength:1.01}];
+ const invalid=[null,[],{}, {url:''},{url:42},{url:'javascript:alert(1)'},{url:'data:image/png;base64,a'},{url:'blob:https://example.org/123'},{url:'file:///tmp/texture.png'}, {url:'http://'},{url:'https:example.org/x.png'},{url:'https://a.example/x\ny.png'},{url:' /assets/x.png'},{url:'/assets/\0snow.png'},{url:'\\\\server\\x.png'}, {url:'/x.png',sizeM:0},{url:'/x.png',sizeM:.009},{url:'/x.png',sizeM:1001},{url:'/x.png',sizeM:Infinity},{url:'/x.png',bumpStrength:NaN},{url:'/x.png',bumpStrength:-1},{url:'/x.png',bumpStrength:2.01},{url:'/x.png',albedoStrength:-.01},{url:'/x.png',albedoStrength:1.01},{url:'/x.png',normalUrl:'javascript:bad'},{url:'/x.png',ormUrl:'file:///tmp/orm.png'},{url:'/x.png',normalStrength:-.01},{url:'/x.png',normalStrength:2.01},{url:'/x.png',ormStrength:-.01},{url:'/x.png',ormStrength:1.01}];
  for(const texture of invalid){
   assert.throws(()=>validateScene({version:1,entities:[entity(texture)]}),/surface\.material\.texture/);
   const scene=new Scene({version:1,entities:[]});assert.throws(()=>scene.add(entity(texture)),/surface\.material\.texture/);assert.equal(scene.entities.size,0);
