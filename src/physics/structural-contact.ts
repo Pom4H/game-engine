@@ -98,7 +98,7 @@ function insideBox(point:Vec3,previous:Vec3,box:StructuralStaticBox):{normal:Vec
     if(prev<-half&&point[axis]-box.center[axis]>=-half){crossedAxis=axis;crossedSign=-1;break;}
   }
   let axis:0|1|2,sign:number;
-  if(crossedAxis>=0){axis=crossedAxis;sign=crossedSign;}
+  if(crossedAxis>=0){axis=crossedAxis as 0|1|2;sign=crossedSign;}
   else{
     const gaps:[number,number,number]=[
       box.half[0]-Math.abs(local[0]),
