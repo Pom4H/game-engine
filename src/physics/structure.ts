@@ -1,0 +1,433 @@
+import type {MechanicalMaterial} from '../materials/catalog.js';
+import type {MutableVec3,Vec3} from '../math.js';
+import {V3} from '../math.js';
+
+export interface StructuralNodeSpec {
+  readonly position:Vec3;
+  readonly mass:number;
+}
+
+export interface StructuralDistanceSpec {
+  readonly kind:'distance';
+  readonly a:number;
+  readonly b:number;
+  /** Effective load-bearing section. Used to derive EA/L compliance and yield force. */
+  readonly areaM2:number;
+  readonly material:MechanicalMaterial;
+}
+
+export interface StructuralVolumeSpec {
+  readonly kind:'volume';
+  readonly a:number;
+  readonly b:number;
+  readonly c:number;
+  readonly d:number;
+  /** XPBD compliance for the tetrahedral volume constraint. Zero is effectively incompressible. */
+  readonly compliance:number;
+  /** Relative volume change where permanent set begins. */
+  readonly yieldRatio:number;
+  /** Relative volume change where the element fails. */
+  readonly breakRatio:number;
+  /** Fraction of over-yield volume retained as permanent set. */
+  readonly plasticity:number;
+}
+
+export type StructuralConstraintSpec=StructuralDistanceSpec|StructuralVolumeSpec;
+
+export interface StructuralDefinition {
+  readonly nodes:readonly StructuralNodeSpec[];
+  readonly constraints:readonly StructuralConstraintSpec[];
+  readonly iterations?:number;
+  /** Speed below which an active structure may be baked back into a sleeping reduced state. */
+  readonly sleepSpeed?:number;
+  /** Continuous quiet time required before automatic bake. */
+  readonly sleepDelay?:number;
+}
+
+export interface BakedStructuralState {
+  readonly positions:Float64Array;
+  readonly broken:Uint8Array;
+  readonly plasticWorkJ:number;
+}
+
+export interface StructuralStats {
+  readonly mode:'active'|'dormant';
+  readonly nodes:number;
+  readonly constraints:number;
+  readonly broken:number;
+  readonly plasticWorkJ:number;
+  readonly steps:number;
+}
+
+type ConstraintKind=0|1;
+const DISTANCE:ConstraintKind=0;
+const VOLUME:ConstraintKind=1;
+const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
+
+/**
+ * Allocation-free XPBD structural core.
+ *
+ * It deliberately owns the nodal mass while active. A caller can transfer a rigid
+ * velocity field into the nodes with activateFromRigid(), solve structural motion,
+ * then bake the permanent rest state and return to a reduced rigid representation.
+ *
+ * Plasticity is evaluated once per physical step from the unconstrained predicted
+ * strain, never once per solver iteration. That keeps permanent set independent
+ * from the chosen convergence iteration count.
+ */
+export class StructuralBody {
+  readonly position:Float64Array;
+  readonly previous:Float64Array;
+  readonly velocity:Float64Array;
+  readonly force:Float64Array;
+  readonly mass:Float64Array;
+  readonly inverseMass:Float64Array;
+  readonly originalPosition:Float64Array;
+
+  private readonly kind:Uint8Array;
+  private readonly ia:Uint16Array;
+  private readonly ib:Uint16Array;
+  private readonly ic:Uint16Array;
+  private readonly id:Uint16Array;
+  private readonly originalRest:Float64Array;
+  private readonly rest:Float64Array;
+  private readonly compliance:Float64Array;
+  private readonly yieldLimit:Float64Array;
+  private readonly breakLimit:Float64Array;
+  private readonly plasticity:Float64Array;
+  private readonly yieldForce:Float64Array;
+  private readonly lambda:Float64Array;
+  private readonly predictedMeasure:Float64Array;
+  readonly broken:Uint8Array;
+
+  readonly totalMass:number;
+  readonly iterations:number;
+  readonly sleepSpeed:number;
+  readonly sleepDelay:number;
+
+  mode:'active'|'dormant'='dormant';
+  plasticWorkJ=0;
+  steps=0;
+  private quietTime=0;
+  private dt=0;
+
+  constructor(readonly definition:StructuralDefinition){
+    const nodeCount=definition.nodes.length,const constraintCount=definition.constraints.length;
+    if(nodeCount<2||nodeCount>2048)throw new RangeError('Structural body requires 2..2048 nodes');
+    if(constraintCount<1||constraintCount>16384)throw new RangeError('Structural body requires 1..16384 constraints');
+    this.iterations=Math.max(1,Math.min(32,Math.floor(definition.iterations??8)));
+    this.sleepSpeed=clamp(definition.sleepSpeed??.035,.001,2);
+    this.sleepDelay=clamp(definition.sleepDelay??.22,.01,10);
+
+    this.position=new Float64Array(nodeCount*3);
+    this.previous=new Float64Array(nodeCount*3);
+    this.velocity=new Float64Array(nodeCount*3);
+    this.force=new Float64Array(nodeCount*3);
+    this.mass=new Float64Array(nodeCount);
+    this.inverseMass=new Float64Array(nodeCount);
+    this.originalPosition=new Float64Array(nodeCount*3);
+
+    let total=0;
+    for(let i=0;i<nodeCount;i++){
+      const node=definition.nodes[i]!;
+      if(!node.position.every(Number.isFinite)||!Number.isFinite(node.mass)||node.mass<=0)throw new RangeError('Invalid structural node');
+      this.position.set(node.position,i*3);
+      this.previous.set(node.position,i*3);
+      this.originalPosition.set(node.position,i*3);
+      this.mass[i]=node.mass;
+      this.inverseMass[i]=1/node.mass;
+      total+=node.mass;
+    }
+    this.totalMass=total;
+
+    this.kind=new Uint8Array(constraintCount);
+    this.ia=new Uint16Array(constraintCount);
+    this.ib=new Uint16Array(constraintCount);
+    this.ic=new Uint16Array(constraintCount);
+    this.id=new Uint16Array(constraintCount);
+    this.originalRest=new Float64Array(constraintCount);
+    this.rest=new Float64Array(constraintCount);
+    this.compliance=new Float64Array(constraintCount);
+    this.yieldLimit=new Float64Array(constraintCount);
+    this.breakLimit=new Float64Array(constraintCount);
+    this.plasticity=new Float64Array(constraintCount);
+    this.yieldForce=new Float64Array(constraintCount);
+    this.lambda=new Float64Array(constraintCount);
+    this.predictedMeasure=new Float64Array(constraintCount);
+    this.broken=new Uint8Array(constraintCount);
+
+    for(let i=0;i<constraintCount;i++){
+      const constraint=definition.constraints[i]!;
+      if(constraint.kind==='distance'){
+        this.kind[i]=DISTANCE;
+        this.validateIndex(constraint.a,nodeCount);this.validateIndex(constraint.b,nodeCount);
+        if(constraint.a===constraint.b)throw new RangeError('Distance constraint endpoints must differ');
+        if(!Number.isFinite(constraint.areaM2)||constraint.areaM2<=0)throw new RangeError('Distance constraint area must be positive');
+        const a=constraint.a*3,b=constraint.b*3;
+        const length=Math.hypot(
+          this.position[b]!-this.position[a]!,
+          this.position[b+1]!-this.position[a+1]!,
+          this.position[b+2]!-this.position[a+2]!,
+        );
+        if(length<1e-6)throw new RangeError('Distance constraint cannot have zero rest length');
+        const mechanical=constraint.material;
+        if(!(mechanical.youngModulusPa>0)||!(mechanical.yieldStressPa>=0)||!(mechanical.failureStrain>0))throw new RangeError('Invalid mechanical material');
+        this.ia[i]=constraint.a;this.ib[i]=constraint.b;
+        this.originalRest[i]=this.rest[i]=length;
+        const axialStiffness=mechanical.youngModulusPa*constraint.areaM2/length;
+        this.compliance[i]=1/Math.max(1e-12,axialStiffness);
+        this.yieldLimit[i]=mechanical.yieldStressPa/mechanical.youngModulusPa;
+        this.breakLimit[i]=Math.max(this.yieldLimit[i],mechanical.failureStrain);
+        this.plasticity[i]=clamp(mechanical.plasticity,0,1);
+        this.yieldForce[i]=mechanical.yieldStressPa*constraint.areaM2;
+      }else{
+        this.kind[i]=VOLUME;
+        const ids=[constraint.a,constraint.b,constraint.c,constraint.d];
+        for(const index of ids)this.validateIndex(index,nodeCount);
+        if(new Set(ids).size!==4)throw new RangeError('Volume constraint requires four distinct nodes');
+        if(!Number.isFinite(constraint.compliance)||constraint.compliance<0)throw new RangeError('Invalid volume compliance');
+        if(!Number.isFinite(constraint.yieldRatio)||constraint.yieldRatio<0)throw new RangeError('Invalid volume yield ratio');
+        if(!Number.isFinite(constraint.breakRatio)||constraint.breakRatio<=constraint.yieldRatio)throw new RangeError('Invalid volume break ratio');
+        this.ia[i]=constraint.a;this.ib[i]=constraint.b;this.ic[i]=constraint.c;this.id[i]=constraint.d;
+        const volume=this.tetraVolume(constraint.a,constraint.b,constraint.c,constraint.d);
+        if(Math.abs(volume)<1e-9)throw new RangeError('Volume constraint cannot start degenerate');
+        this.originalRest[i]=this.rest[i]=volume;
+        this.compliance[i]=constraint.compliance;
+        this.yieldLimit[i]=constraint.yieldRatio;
+        this.breakLimit[i]=constraint.breakRatio;
+        this.plasticity[i]=clamp(constraint.plasticity,0,1);
+        this.yieldForce[i]=0;
+      }
+    }
+  }
+
+  get nodeCount():number{return this.mass.length;}
+  get constraintCount():number{return this.kind.length;}
+
+  wake():void{this.mode='active';this.quietTime=0;}
+
+  /**
+   * Transfer a reduced rigid state into the nodal mass exactly once.
+   * Every node receives v + omega x r, so no second hidden rigid mass is created.
+   */
+  activateFromRigid(origin:Vec3,linearVelocity:Vec3,angularVelocity:Vec3):void{
+    if(!origin.every(Number.isFinite)||!linearVelocity.every(Number.isFinite)||!angularVelocity.every(Number.isFinite))throw new TypeError('Rigid activation vectors must be finite');
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,r:Vec3=[this.position[j]!-origin[0],this.position[j+1]!-origin[1],this.position[j+2]!-origin[2]];
+      const spin=V3.cross(angularVelocity,r);
+      this.velocity[j]=linearVelocity[0]+spin[0];
+      this.velocity[j+1]=linearVelocity[1]+spin[1];
+      this.velocity[j+2]=linearVelocity[2]+spin[2];
+    }
+    this.wake();
+  }
+
+  addForce(node:number,force:Vec3):void{
+    this.validateIndex(node,this.nodeCount);
+    if(!force.every(Number.isFinite))throw new TypeError('Structural force must be finite');
+    const j=node*3;this.force[j]+=force[0];this.force[j+1]+=force[1];this.force[j+2]+=force[2];this.wake();
+  }
+
+  /**
+   * Distribute an impulse over nearby nodes while preserving total linear impulse.
+   * This is the bridge a contact manifold uses when an inactive region refines.
+   */
+  applyImpulse(point:Vec3,impulse:Vec3,radius=.45):void{
+    if(!point.every(Number.isFinite)||!impulse.every(Number.isFinite)||!Number.isFinite(radius)||radius<=0)throw new TypeError('Invalid structural impulse');
+    const weights=new Float64Array(this.nodeCount);let sum=0,nearest=0,nearestD=Infinity;
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,d=Math.hypot(this.position[j]!-point[0],this.position[j+1]!-point[1],this.position[j+2]!-point[2]);
+      if(d<nearestD){nearestD=d;nearest=i;}
+      const q=d/radius,w=q<1?(1-q*q)**2:0;weights[i]=w;sum+=w;
+    }
+    if(sum<=1e-12){weights[nearest]=1;sum=1;}
+    for(let i=0;i<this.nodeCount;i++){
+      const w=weights[i]!/sum;if(w<=0)continue;
+      const j=i*3,s=w*this.inverseMass[i]!;
+      this.velocity[j]+=impulse[0]*s;this.velocity[j+1]+=impulse[1]*s;this.velocity[j+2]+=impulse[2]*s;
+    }
+    this.wake();
+  }
+
+  step(dt:number,gravity:Vec3=[0,-9.81,0]):void{
+    if(this.mode==='dormant')return;
+    if(!Number.isFinite(dt)||dt<=0||dt>1/30)throw new RangeError('Structural dt must be in (0, 1/30]');
+    if(!gravity.every(Number.isFinite))throw new TypeError('Structural gravity must be finite');
+    this.dt=dt;
+    this.previous.set(this.position);
+
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,inv=this.inverseMass[i]!;
+      this.velocity[j]+=dt*(gravity[0]+this.force[j]!*inv);
+      this.velocity[j+1]+=dt*(gravity[1]+this.force[j+1]!*inv);
+      this.velocity[j+2]+=dt*(gravity[2]+this.force[j+2]!*inv);
+      this.position[j]+=dt*this.velocity[j]!;
+      this.position[j+1]+=dt*this.velocity[j+1]!;
+      this.position[j+2]+=dt*this.velocity[j+2]!;
+      this.force[j]=this.force[j+1]=this.force[j+2]=0;
+    }
+
+    this.prepareConstraints();
+    for(let iteration=0;iteration<this.iterations;iteration++)this.solveConstraints();
+    this.finishStep();
+  }
+
+  /**
+   * Freeze the current permanent shape as the new reduced rest state.
+   * Elastic energy is intentionally discarded only at this explicit LOD boundary.
+   */
+  bake():BakedStructuralState{
+    for(let i=0;i<this.constraintCount;i++){
+      if(this.broken[i])continue;
+      this.rest[i]=this.measure(i);
+      this.originalRest[i]=this.rest[i];
+      this.lambda[i]=0;
+    }
+    this.previous.set(this.position);
+    this.velocity.fill(0);this.force.fill(0);this.quietTime=0;this.mode='dormant';
+    return Object.freeze({
+      positions:new Float64Array(this.position),
+      broken:new Uint8Array(this.broken),
+      plasticWorkJ:this.plasticWorkJ,
+    });
+  }
+
+  deformationOffsets():Float64Array{
+    const out=new Float64Array(this.position.length);
+    for(let i=0;i<out.length;i++)out[i]=this.position[i]!-this.originalPosition[i]!;
+    return out;
+  }
+
+  linearMomentum():MutableVec3{
+    const out:MutableVec3=[0,0,0];
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,m=this.mass[i]!;
+      out[0]+=m*this.velocity[j]!;out[1]+=m*this.velocity[j+1]!;out[2]+=m*this.velocity[j+2]!;
+    }
+    return out;
+  }
+
+  kineticEnergy():number{
+    let value=0;
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,m=this.mass[i]!;
+      value+=.5*m*(this.velocity[j]!**2+this.velocity[j+1]!**2+this.velocity[j+2]!**2);
+    }
+    return value;
+  }
+
+  get stats():StructuralStats{
+    let broken=0;for(const value of this.broken)broken+=value?1:0;
+    return{mode:this.mode,nodes:this.nodeCount,constraints:this.constraintCount,broken,plasticWorkJ:this.plasticWorkJ,steps:this.steps};
+  }
+
+  private validateIndex(index:number,count:number):void{
+    if(!Number.isInteger(index)||index<0||index>=count)throw new RangeError('Structural node index out of range');
+  }
+
+  private prepareConstraints():void{
+    this.lambda.fill(0);
+    for(let i=0;i<this.constraintCount;i++)if(!this.broken[i])this.predictedMeasure[i]=this.measure(i);
+  }
+
+  private solveConstraints():void{
+    for(let i=0;i<this.constraintCount;i++){
+      if(this.broken[i])continue;
+      if(this.kind[i]===DISTANCE)this.solveDistance(i);else this.solveVolume(i);
+    }
+  }
+
+  private solveDistance(index:number):void{
+    const a=this.ia[index]!,b=this.ib[index]!,A=a*3,B=b*3;
+    const dx=this.position[B]!-this.position[A]!,dy=this.position[B+1]!-this.position[A+1]!,dz=this.position[B+2]!-this.position[A+2]!;
+    const length=Math.hypot(dx,dy,dz);if(length<1e-10)return;
+    const nx=dx/length,ny=dy/length,nz=dz/length,C=length-this.rest[index]!;
+    const alpha=this.compliance[index]!/(this.dt*this.dt),denom=this.inverseMass[a]!+this.inverseMass[b]!+alpha;
+    if(denom<=1e-14)return;
+    const dl=(-C-alpha*this.lambda[index]!)/denom;this.lambda[index]+=dl;
+    const wa=this.inverseMass[a]!*dl,wb=this.inverseMass[b]!*dl;
+    this.position[A]-=nx*wa;this.position[A+1]-=ny*wa;this.position[A+2]-=nz*wa;
+    this.position[B]+=nx*wb;this.position[B+1]+=ny*wb;this.position[B+2]+=nz*wb;
+  }
+
+  private solveVolume(index:number):void{
+    const a=this.ia[index]!,b=this.ib[index]!,c=this.ic[index]!,d=this.id[index]!;
+    const A=this.point(a),B=this.point(b),C=this.point(c),D=this.point(d);
+    const gb=V3.scale(V3.cross(V3.sub(C,A),V3.sub(D,A)),1/6);
+    const gc=V3.scale(V3.cross(V3.sub(D,A),V3.sub(B,A)),1/6);
+    const gd=V3.scale(V3.cross(V3.sub(B,A),V3.sub(C,A)),1/6);
+    const ga:MutableVec3=[-gb[0]-gc[0]-gd[0],-gb[1]-gc[1]-gd[1],-gb[2]-gc[2]-gd[2]];
+    const current=V3.dot(V3.sub(B,A),V3.cross(V3.sub(C,A),V3.sub(D,A)))/6,Cv=current-this.rest[index]!;
+    const alpha=this.compliance[index]!/(this.dt*this.dt);
+    const denom=this.inverseMass[a]!*V3.dot(ga,ga)+this.inverseMass[b]!*V3.dot(gb,gb)+this.inverseMass[c]!*V3.dot(gc,gc)+this.inverseMass[d]!*V3.dot(gd,gd)+alpha;
+    if(denom<=1e-14)return;
+    const dl=(-Cv-alpha*this.lambda[index]!)/denom;this.lambda[index]+=dl;
+    this.applyGradient(a,ga,dl);this.applyGradient(b,gb,dl);this.applyGradient(c,gc,dl);this.applyGradient(d,gd,dl);
+  }
+
+  private applyGradient(node:number,gradient:Vec3,lambda:number):void{
+    const j=node*3,s=this.inverseMass[node]!*lambda;
+    this.position[j]+=gradient[0]*s;this.position[j+1]+=gradient[1]*s;this.position[j+2]+=gradient[2]*s;
+  }
+
+  private finishStep():void{
+    const invDt=1/this.dt;let maxSpeed=0;
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3;
+      this.velocity[j]=(this.position[j]!-this.previous[j]!)*invDt;
+      this.velocity[j+1]=(this.position[j+1]!-this.previous[j+1]!)*invDt;
+      this.velocity[j+2]=(this.position[j+2]!-this.previous[j+2]!)*invDt;
+      maxSpeed=Math.max(maxSpeed,Math.hypot(this.velocity[j]!,this.velocity[j+1]!,this.velocity[j+2]!));
+    }
+
+    for(let i=0;i<this.constraintCount;i++){
+      if(this.broken[i])continue;
+      const original=this.originalRest[i]!,trial=this.predictedMeasure[i]!,rest=this.rest[i]!;
+      if(this.kind[i]===DISTANCE){
+        const trialStrain=(trial-rest)/Math.max(1e-9,Math.abs(original));
+        const originalStrain=(trial-original)/Math.max(1e-9,Math.abs(original));
+        if(Math.abs(originalStrain)>this.breakLimit[i]!){this.broken[i]=1;continue;}
+        const yieldStrain=this.yieldLimit[i]!;
+        if(Math.abs(trialStrain)>yieldStrain&&this.plasticity[i]!>0){
+          const elastic=Math.sign(trialStrain)*yieldStrain*Math.abs(original);
+          const target=trial-elastic,delta=(target-rest)*this.plasticity[i]!;
+          if(Math.abs(delta)>1e-12){
+            this.rest[i]=Math.max(Math.abs(original)*.04,rest+delta);
+            this.plasticWorkJ+=Math.abs(delta)*this.yieldForce[i]!;
+          }
+        }
+      }else{
+        const ratio=(trial-rest)/Math.max(1e-12,Math.abs(original));
+        const originalRatio=(trial-original)/Math.max(1e-12,Math.abs(original));
+        if(Math.abs(originalRatio)>this.breakLimit[i]!){this.broken[i]=1;continue;}
+        const yieldRatio=this.yieldLimit[i]!;
+        if(Math.abs(ratio)>yieldRatio&&this.plasticity[i]!>0){
+          const elastic=Math.sign(ratio)*yieldRatio*Math.abs(original);
+          const target=trial-elastic,delta=(target-rest)*this.plasticity[i]!;
+          if(Math.abs(delta)>1e-15)this.rest[i]=rest+delta;
+        }
+      }
+    }
+
+    this.steps++;
+    if(maxSpeed<this.sleepSpeed)this.quietTime+=this.dt;else this.quietTime=0;
+    if(this.quietTime>=this.sleepDelay)this.bake();
+  }
+
+  private measure(index:number):number{
+    if(this.kind[index]===DISTANCE){
+      const a=this.ia[index]!*3,b=this.ib[index]!*3;
+      return Math.hypot(this.position[b]!-this.position[a]!,this.position[b+1]!-this.position[a+1]!,this.position[b+2]!-this.position[a+2]!);
+    }
+    return this.tetraVolume(this.ia[index]!,this.ib[index]!,this.ic[index]!,this.id[index]!);
+  }
+
+  private tetraVolume(a:number,b:number,c:number,d:number):number{
+    const A=this.point(a),B=this.point(b),C=this.point(c),D=this.point(d);
+    return V3.dot(V3.sub(B,A),V3.cross(V3.sub(C,A),V3.sub(D,A)))/6;
+  }
+
+  private point(node:number):MutableVec3{
+    const j=node*3;return[this.position[j]!,this.position[j+1]!,this.position[j+2]!];
+  }
+}
