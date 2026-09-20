@@ -45,7 +45,7 @@ function mechanismVoice(event:MechanismEvent,left:Float32Array,right:Float32Arra
   const base=suspension?95:latch?180:stop?145:260;
   const decay=suspension?12:latch?24:stop?19:28;
   const hiss=suspension?.28:.06;
-  const knock=latch||stop?.72:.32;
+  const knock=(latch||stop)? .72:.32;
   let lp=0;
   for(let i=0;i<left.length;i++){
     const t=i/sampleRate,env=Math.exp(-t*decay),attack=Math.min(1,t*sampleRate*.012);
