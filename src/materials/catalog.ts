@@ -24,6 +24,8 @@ export interface ThermalMaterial {
   /** Fraction of incident short-wave energy absorbed by the surface. */
   readonly solarAbsorptivity:number;
   readonly emissivity:number;
+  /** Linear thermal expansion coefficient α in 1/K. Negative ΔT contracts the rest geometry. */
+  readonly linearExpansionPerK?:number;
 }
 
 export interface OpticalMaterial {
@@ -85,7 +87,7 @@ const MATERIALS:Readonly<Record<MaterialKind,PhysicalMaterial>>=Object.freeze({
   glass:m({
     kind:'glass',density:2500,restitution:.07,friction:.32,color:[.58,.82,.94,.28],
     mechanical:{youngModulusPa:70e9,yieldStressPa:45e6,failureStressPa:45e6,failureStrain:.0006,plasticity:0,brittle:true},
-    thermal:{specificHeatJkgK:840,conductivityWmK:1.0,solarAbsorptivity:.12,emissivity:.84},
+    thermal:{specificHeatJkgK:840,conductivityWmK:1.0,solarAbsorptivity:.12,emissivity:.84,linearExpansionPerK:9e-6},
     optical:{ior:1.52,roughness:.08,metalness:0,transmission:.92},
     acoustic:{resonanceHz:2850,damping:.08,brightness:.95,noise:.48},
     surface:{baseRoughness:.08,waterRetention:.04,bioAffinity:.01,dirtAffinity:.22,weathering:.1,permeability:.01},
@@ -93,7 +95,7 @@ const MATERIALS:Readonly<Record<MaterialKind,PhysicalMaterial>>=Object.freeze({
   steel:m({
     kind:'steel',density:7850,restitution:.32,friction:.42,color:[.55,.58,.62,1],
     mechanical:{youngModulusPa:200e9,yieldStressPa:350e6,failureStressPa:520e6,failureStrain:.12,plasticity:.78,brittle:false},
-    thermal:{specificHeatJkgK:490,conductivityWmK:45,solarAbsorptivity:.45,emissivity:.35},
+    thermal:{specificHeatJkgK:490,conductivityWmK:45,solarAbsorptivity:.45,emissivity:.35,linearExpansionPerK:12.1e-6},
     optical:{ior:2.5,roughness:.28,metalness:.92,transmission:0},
     acoustic:{resonanceHz:920,damping:.12,brightness:.72,noise:.12},
     surface:{baseRoughness:.28,waterRetention:.08,bioAffinity:.02,dirtAffinity:.3,weathering:.58,permeability:.01},
@@ -109,7 +111,7 @@ const MATERIALS:Readonly<Record<MaterialKind,PhysicalMaterial>>=Object.freeze({
   concrete:m({
     kind:'concrete',density:2350,restitution:.04,friction:.75,color:[.48,.49,.5,1],
     mechanical:{youngModulusPa:30e9,yieldStressPa:4e6,failureStressPa:4e6,failureStrain:.00015,plasticity:.02,brittle:true},
-    thermal:{specificHeatJkgK:880,conductivityWmK:1.7,solarAbsorptivity:.58,emissivity:.92},
+    thermal:{specificHeatJkgK:880,conductivityWmK:1.7,solarAbsorptivity:.58,emissivity:.92,linearExpansionPerK:10e-6},
     optical:{ior:1.5,roughness:.78,metalness:0,transmission:0},
     acoustic:{resonanceHz:310,damping:.55,brightness:.18,noise:.72},
     surface:{baseRoughness:.78,waterRetention:.86,bioAffinity:.82,dirtAffinity:.72,weathering:.68,permeability:.52},
@@ -134,3 +136,10 @@ const MATERIALS:Readonly<Record<MaterialKind,PhysicalMaterial>>=Object.freeze({
 
 export function material(kind:MaterialKind='default'):PhysicalMaterial{return MATERIALS[kind];}
 export function materialKinds():readonly MaterialKind[]{return Object.keys(MATERIALS) as MaterialKind[];}
+
+/** Uniform free-expansion scale relative to a stress-free reference temperature. */
+export function thermalLinearScale(kind:MaterialKind,temperatureC:number,referenceC=20):number{
+  if(!Number.isFinite(temperatureC)||!Number.isFinite(referenceC))throw new TypeError('Thermal scale temperatures must be finite');
+  const alpha=MATERIALS[kind].thermal.linearExpansionPerK??0;
+  return 1+alpha*(temperatureC-referenceC);
+}
