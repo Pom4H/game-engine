@@ -634,7 +634,7 @@ export class WebGPURenderer implements Renderer{
     for(const url of urls){
       if(this.surfaceTextures.get(url)||this.materialLoads.has(url)||this.failedMaterials.has(url))continue;
       const pending=this.surfaceTextures.load(url).catch(error=>{
-        if(!this.disposed&&!this.failedMaterials.has(url)&&[...this.lastScene?.entities.values()??[]].some(e=>e.material.texture?.url===url)){
+        if(!this.disposed&&!this.failedMaterials.has(url)&&[...this.lastScene?.entities.values()??[]].some(e=>{const t=e.material.texture;return t&&(t.url===url||t.normalUrl===url||t.ormUrl===url);})){
           this.failedMaterials.add(url);this.errors.push(error instanceof Error?error.message:String(error));
         }
       }).finally(()=>{if(this.materialLoads.get(url)===pending)this.materialLoads.delete(url);});
