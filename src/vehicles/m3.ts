@@ -174,6 +174,15 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     interior.push(Object.freeze({id:`interior-seat-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.38,.58,.43] as const},position:[.02,.78,side*.37] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.92,metalness:0}}));
     interior.push(Object.freeze({id:`interior-headrest-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.22,.22,.30] as const},position:[-.05,1.14,side*.37] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0}}));
   }
+  const glazingBackings:ParametricVehiclePart[]=sources
+    .filter(source=>source.sourceMaterial==='Window')
+    .map(source=>Object.freeze({
+      id:`interior-${source.id}`,
+      role:'dark' as const,
+      mesh:source.mesh,
+      position:source.center,
+      material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0},
+    }));
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...grilleSlats,
@@ -181,6 +190,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     ...frontDetail,
     ...badge,
     ...interior,
+    ...glazingBackings,
     ...sources.map(source=>Object.freeze({
       id:source.id,
       role:sourceRole(source.sourceMaterial,source.id),
