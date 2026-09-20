@@ -57,7 +57,7 @@ function recomputeNormals(positions:readonly number[],indices:readonly number[])
     const ia=indices[i]!*3,ib=indices[i+1]!*3,ic=indices[i+2]!*3;
     const ax=positions[ia]!,ay=positions[ia+1]!,az=positions[ia+2]!,bx=positions[ib]!,by=positions[ib+1]!,bz=positions[ib+2]!,cx=positions[ic]!,cy=positions[ic+1]!,cz=positions[ic+2]!;
     const ux=bx-ax,uy=by-ay,uz=bz-az,vx=cx-ax,vy=cy-ay,vz=cz-az,nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
-    for(const base of [ia,ib,ic]){normals[base]!+=nx;normals[base+1]!+=ny;normals[base+2]!+=nz;}
+    for(const base of [ia,ib,ic]){normals[base]=(normals[base]??0)+nx;normals[base+1]=(normals[base+1]??0)+ny;normals[base+2]=(normals[base+2]??0)+nz;}
   }
   for(let i=0;i<normals.length;i+=3){const length=Math.hypot(normals[i]!,normals[i+1]!,normals[i+2]!)||1;normals[i]!/=length;normals[i+1]!/=length;normals[i+2]!/=length;}
   return normals;
