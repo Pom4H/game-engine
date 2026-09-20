@@ -45,6 +45,18 @@ test('plastic contact creates a persistent local dent and shrinks the contacted 
  assert.ok(depth>0&&deformed.some((value,index)=>Math.abs(value-before[index])>1e-4));
 });
 
+
+
+test('plastic deformation updates renderMesh while leaving the physical proxy untouched',()=>{
+ const input=spec();
+ input.entities[1]={id:'skin',position:[-2,.55,0],mesh:{kind:'box',size:[2,.9,1.5]},renderMesh:panel,material:{kind:'steel',treatment:'painted'}};
+ const scene=new Scene(input),skin=scene.entities.get('skin'),proxy=structuredClone(skin.mesh),before=[...skin.renderMesh.positions];
+ for(let i=0;i<50;i++)scene.step(1/120);
+ assert.deepEqual(skin.mesh,proxy,'renderer detail must not rewrite the physical proxy');
+ assert.notDeepEqual(skin.renderMesh.positions,before,'contact work should deform the high-detail render surface');
+ assert.equal(skin.renderMesh.kind,'triangle-mesh');
+});
+
 test('deformation is deterministic for equal contact history',()=>{
  const a=run(),b=run();
  assert.deepEqual(a.dents,b.dents);
