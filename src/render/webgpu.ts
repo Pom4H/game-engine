@@ -614,17 +614,38 @@ export class WebGPURenderer implements Renderer{
   dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
   private updateEnvironmentMap(scene:Scene):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
-    const key=[...sun,...sunColor,...sky,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20].map(value=>Number(value).toFixed(3)).join(':');
+    // Build a low-frequency radiance proxy from the actual scene palette. This is
+    // not a painted-in cubemap: changes to building/surface materials immediately
+    // alter the specular environment while keeping the probe essentially free.
+    const urban=[0,0,0],groundPalette=[0,0,0];let urbanWeight=0,groundWeight=0;
+    for(const entity of scene.entities.values()){
+      const material=entity.material,color=material.color;
+      const pattern=material.pattern;
+      if(pattern==='brick'||pattern==='plaster'||pattern==='window'||material.label){
+        const weight=pattern==='window'?.35:1;
+        urban[0]+=color[0]*weight;urban[1]+=color[1]*weight;urban[2]+=color[2]*weight;urbanWeight+=weight;
+      }
+      if(material.kind==='snow'||material.kind==='asphalt'||material.kind==='concrete'){
+        const weight=material.kind==='snow'?1.3:1;
+        groundPalette[0]+=color[0]*weight;groundPalette[1]+=color[1]*weight;groundPalette[2]+=color[2]*weight;groundWeight+=weight;
+      }
+    }
+    const urbanColor:[number,number,number]=urbanWeight?[urban[0]!/urbanWeight,urban[1]!/urbanWeight,urban[2]!/urbanWeight]:[sky[0]*.7,sky[1]*.65,sky[2]*.6];
+    const groundColor:[number,number,number]=groundWeight?[groundPalette[0]!/groundWeight,groundPalette[1]!/groundWeight,groundPalette[2]!/groundWeight]:[sky[0]*.13,sky[1]*.12,sky[2]*.11];
+    const key=[...sun,...sunColor,...sky,...urbanColor,...groundColor,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20].map(value=>Number(value).toFixed(3)).join(':');
     if(key===this.environmentKey)return;this.environmentKey=key;this.environmentUpdates++;
     const levels=7;
     for(let mip=0;mip<levels;mip++){
       const size=Math.max(1,64>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
       for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
         const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
-        const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[sky[0]*.13,sky[1]*.12,sky[2]*.11];
-        const t=Math.sqrt(up),base:[number,number,number]=down>0?[mix(horizon[0],ground[0],down),mix(horizon[1],ground[1],down),mix(horizon[2],ground[2],down)]:[mix(horizon[0],zenith[0],t),mix(horizon[1],zenith[1],t),mix(horizon[2],zenith[2],t)];
+        const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
+        const t=Math.sqrt(up);let base:[number,number,number]=down>0?[mix(horizon[0],ground[0],down),mix(horizon[1],ground[1],down),mix(horizon[2],ground[2],down)]:[mix(horizon[0],zenith[0],t),mix(horizon[1],zenith[1],t),mix(horizon[2],zenith[2],t)];
+        const horizontal=Math.pow(Math.max(0,1-Math.abs(dir[1])),3)*(1-roughness*.72);
+        const urbanMix=horizontal*.42;
+        base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
         const sunDot=Math.max(0,dir[0]*sun[0]+dir[1]*sun[1]+dir[2]*sun[2]),exponent=mix(640,2.4,roughness*roughness),sunLobe=Math.pow(sunDot,exponent)*intensity*mix(.85,.12,roughness);
-        const average:[number,number,number]=[sky[0]*.62,sky[1]*.66,sky[2]*.72],blur=roughness*roughness*.72;
+        const average:[number,number,number]=[mix(sky[0]*.62,urbanColor[0]*.55,.22),mix(sky[1]*.66,urbanColor[1]*.55,.22),mix(sky[2]*.72,urbanColor[2]*.55,.22)],blur=roughness*roughness*.72;
         for(let channel=0;channel<3;channel++)pixels[offset++]=float16(mix(base[channel]!+sunColor[channel]!*sunLobe,average[channel]!,blur));
         pixels[offset++]=float16(1);
       }
