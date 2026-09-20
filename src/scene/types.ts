@@ -4,6 +4,7 @@ import type {Vec3} from '../math.js';
 import type {MaterialKind} from '../materials/catalog.js';
 import type {EnvironmentSpec} from '../environment/types.js';
 import type {MaterialFinish,MaterialTreatment} from '../materials/surface.js';
+import type {SceneDeformationSpec} from '../physics/deformation.js';
 
 export type Color = readonly [number,number,number,number];
 export type Primitive =
@@ -41,6 +42,8 @@ export interface BodySpec {
   restitution?:number;
   friction?:number;
   shape?:'auto'|'box'|'sphere';
+  /** Explicit collision envelope for body-only proxies. */
+  collisionSize?:Vec3;
 }
 export interface EntitySpec {
   id:string;
@@ -72,6 +75,8 @@ export interface SceneSpec {
   animation?:SceneAnimationSpec;
   /** Author contact bindings once; native systems own every subsequent update. */
   surfaceContacts?:SceneSurfaceContactsSpec;
+  /** Persistent plastic deformation groups driven by physics contacts. */
+  deformation?:SceneDeformationSpec;
   rendering?:RenderingSpec;
   version:1;
   seed?:number;
