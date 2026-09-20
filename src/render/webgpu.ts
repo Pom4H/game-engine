@@ -392,7 +392,7 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private environmentKey='';private environmentUpdates=0;
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -512,10 +512,10 @@ export class WebGPURenderer implements Renderer{
     });
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
-    const frameModels=new Map<string,Mat4>();
+    const frameModels=this.frameModels;frameModels.clear();
     const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
     const culled=this.profiler.measure('cull',()=>{
-      const inView=(entity:RuntimeEntity,matrix:Mat4)=>intersectsClip(this.mesh(entity.mesh!).bounds,multiply4(matrix,modelFor(entity)));
+      const inView=(entity:RuntimeEntity,matrix:Mat4)=>{multiply4Into(matrix,modelFor(entity),this.cullScratch);return intersectsClip(this.mesh(entity.mesh!).bounds,this.cullScratch);};
       const cameraOpaque=classified.opaque.filter(e=>inView(e,vp)).sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
       const cameraTransparent=classified.transparent.filter(e=>inView(e,vp));
       const shadowCasters=classified.opaque.filter(e=>inView(e,lightVP));
@@ -667,7 +667,7 @@ export class WebGPURenderer implements Renderer{
   }
   private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
-  private collect(scene:Scene):void{this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>e.material?.texture?[e.material.texture.url]:[])));const live=[...scene.entities.values()].filter(e=>e.mesh),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(e.mesh!)));if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.index.destroy();this.meshes.delete(key);}}
+  private collect(scene:Scene):void{this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>e.material?.texture?[e.material.texture.url]:[])));const live=[...scene.entities.values()].filter(e=>e.mesh),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(e.mesh!)));if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}for(const id of this.modelCache.keys())if(!ids.has(id))this.modelCache.delete(id);for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.index.destroy();this.meshes.delete(key);}}
   private label(text:string):GPUAny{
     if(!text)return this.gpu.emptyLabel;const cached=this.labels.get(text);if(cached)return cached;
     const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle='#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
@@ -680,7 +680,15 @@ export class WebGPURenderer implements Renderer{
     const uniform=this.device.createBuffer({size:320,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[{binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:(materialTexture??this.gpu.emptyLabel).createView()},{binding:5,resource:this.gpu.surfaceSampler}]}),object={uniform,bind,texture,width,height,owned:width>0,label,...(materialKey?{materialKey}:{})};this.objects.set(id,object);return object;
   }
-  private model(entity:RuntimeEntity):Mat4{const mesh=entity.mesh,scale:Vec3=mesh?.kind==='box'||mesh?.kind==='shard'?mesh.size??[1,1,1]:mesh?.kind==='sphere'?[2*(mesh.radius??1),2*(mesh.radius??1),2*(mesh.radius??1)]:mesh?.kind==='plane'?[mesh.size?.[0]??1,1,mesh.size?.[1]??1]:[1,1,1];return compose(entity.position,entity.rotation,[entity.scale[0]*scale[0],entity.scale[1]*scale[1],entity.scale[2]*scale[2]]);}
+  private model(entity:RuntimeEntity):Mat4{
+    const mesh=entity.mesh,base:Vec3=mesh?.kind==='box'||mesh?.kind==='shard'?mesh.size??[1,1,1]:mesh?.kind==='sphere'?[2*(mesh.radius??1),2*(mesh.radius??1),2*(mesh.radius??1)]:mesh?.kind==='plane'?[mesh.size?.[0]??1,1,mesh.size?.[1]??1]:[1,1,1];
+    const px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.modelCache.get(entity.id);
+    if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
+    const matrix=compose(entity.position,entity.rotation,[sx,sy,sz]);this.modelCache.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix});return matrix;
+  }
+}
+function multiply4Into(a:ArrayLike<number>,b:ArrayLike<number>,out:Float32Array):void{
+  for(let column=0;column<4;column++)for(let row=0;row<4;row++)out[column*4+row]=a[row]!*b[column*4]!+a[4+row]!*b[column*4+1]!+a[8+row]!*b[column*4+2]!+a[12+row]!*b[column*4+3]!;
 }
 function floatArrayEqual(a:Float32Array|undefined,b:Float32Array):boolean{if(!a||a.length!==b.length)return false;for(let i=0;i<b.length;i++)if(a[i]!==b[i])return false;return true;}
 function matrixEqual(a:Mat4|undefined,b:Mat4):boolean{if(!a)return false;for(let i=0;i<16;i++)if(a[i]!==b[i])return false;return true;}
