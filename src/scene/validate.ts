@@ -60,7 +60,23 @@ export function validateScene(value:unknown):SceneSpec{
     }
   }
   if(scene.camera!==undefined){const camera=object(scene.camera,'camera');optionalNumber(camera,'fov','camera',1,179);optionalNumber(camera,'focusDistance','camera',.05);optionalNumber(camera,'aperture','camera',0,20);if(JSON.stringify(camera.position)===JSON.stringify(camera.target))throw new TypeError('camera position and target must differ');if(!Array.isArray(camera.position)||!Array.isArray(camera.target))throw new TypeError('camera position/target must be vec3');finiteVec3(camera.position as number[],'camera.position');finiteVec3(camera.target as number[],'camera.target');}
-  if(scene.rendering!==undefined){const r=object(scene.rendering,'rendering');if(r.sunDirection!==undefined){vector(r.sunDirection,3,'rendering.sunDirection');if(Math.hypot(...r.sunDirection as number[])<1e-8)throw new TypeError('rendering.sunDirection must be nonzero');}for(const key of ['sunColor','skyColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);for(const key of ['sunIntensity','fogDensity','exposure'])optionalNumber(r,key,'rendering',0);optionalNumber(r,'shadowExtent','rendering',.1,10000);}
+  if(scene.rendering!==undefined){
+    const r=object(scene.rendering,'rendering');
+    if(r.sunDirection!==undefined){vector(r.sunDirection,3,'rendering.sunDirection');if(Math.hypot(...r.sunDirection as number[])<1e-8)throw new TypeError('rendering.sunDirection must be nonzero');}
+    for(const key of ['sunColor','skyColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);
+    for(const key of ['sunIntensity','fogDensity','exposure'])optionalNumber(r,key,'rendering',0);
+    optionalNumber(r,'shadowExtent','rendering',.1,10000);
+    if(r.reflectionProbe!==undefined){
+      const probe=object(r.reflectionProbe,'rendering.reflectionProbe'),hasPosition=probe.position!==undefined,hasEntity=probe.entity!==undefined;
+      if(hasPosition===hasEntity)throw new TypeError('rendering.reflectionProbe requires exactly one of position or entity');
+      if(hasPosition)vector(probe.position,3,'rendering.reflectionProbe.position');
+      if(hasEntity){const id=stableId(probe.entity,'rendering.reflectionProbe.entity');if(!ids.has(id))throw new TypeError(`rendering.reflectionProbe.entity references missing entity ${id}`);}
+      if(probe.offset!==undefined)vector(probe.offset,3,'rendering.reflectionProbe.offset');
+      optionalNumber(probe,'radius','rendering.reflectionProbe',.5,500);
+      if(probe.facesPerFrame!==undefined){number(probe.facesPerFrame,'rendering.reflectionProbe.facesPerFrame',1,6);if(!Number.isInteger(probe.facesPerFrame))throw new TypeError('rendering.reflectionProbe.facesPerFrame must be integer');}
+      if(probe.exclude!==undefined){const excluded=boundedArray(probe.exclude,'rendering.reflectionProbe.exclude',4096);for(const [i,value] of excluded.entries()){const id=stableId(value,`rendering.reflectionProbe.exclude[${i}]`);if(!ids.has(id))throw new TypeError(`rendering.reflectionProbe.exclude[${i}] references missing entity ${id}`);}}
+    }
+  }
   return structuredClone(value) as SceneSpec;
 }
 
