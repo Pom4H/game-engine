@@ -311,7 +311,8 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let envC0=vec4<f32>(-1.0,-.0275,-.572,.022);let envC1=vec4<f32>(1.0,.0425,1.04,-.04);
   let envR=roughness*envC0+envC1;let envA004=min(envR.x*envR.x,exp2(-9.28*nv))*envR.x+envR.y;
   let envBRDF=vec2<f32>(-1.04,1.04)*envA004+envR.zw;
-  color+=environmentRadiance*(f0*envBRDF.x+envBRDF.y);
+  let environmentWeight=select(1.0,mix(.22,1.0,waterCoverage),materialKind>4.5&&materialKind<5.5);
+  color+=environmentRadiance*(f0*envBRDF.x+envBRDF.y)*environmentWeight;
 
   // Painted metal is a layered dielectric clear coat over the colored base.
   // The second lobe preserves sharp sky/building reflections without turning the
