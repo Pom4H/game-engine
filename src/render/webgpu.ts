@@ -343,7 +343,10 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
   color=mix(color,f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027,clamp(fog,0.0,.96));
-  var out:GOut;out.color=vec4<f32>(color,select(u.color.a,mix(u.color.a*.20,.62,pow(1.0-nv,5.0)),materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(environmentFresnel,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
+  let grazing=pow(1.0-nv,5.0);
+  let clearcoatScreen=vec3<f32>(clearcoat*(.28+.42*grazing));
+  let screenReflectance=max(environmentFresnel,clearcoatScreen);
+  var out:GOut;out.color=vec4<f32>(color,select(u.color.a,mix(u.color.a*.20,.62,grazing),materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
 const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
