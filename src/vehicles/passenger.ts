@@ -195,7 +195,7 @@ function triangleMesh(positions:number[],indices:number[]):Extract<Primitive,{ki
 }
 
 export function passengerPartMaterial(role:ParametricVehiclePartRole):Omit<MaterialSpec,'color'>{
-  if(role==='paint')return{kind:'steel',treatment:'painted',finish:'smooth',roughness:.22,metalness:.18};
+  if(role==='paint')return{kind:'steel',treatment:'painted',finish:'smooth',roughness:.22,metalness:.18,clearcoat:.78,clearcoatRoughness:.095};
   if(role==='glass')return{kind:'glass',finish:'polished',roughness:.07,metalness:0,pattern:'window'};
   if(role==='tire')return{kind:'rubber',finish:'rough',roughness:.94,metalness:0,pattern:'rubber'};
   if(role==='rim')return{kind:'aluminum',finish:'polished',roughness:.19,metalness:.95};
