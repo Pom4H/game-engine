@@ -46,7 +46,13 @@ for(const s of shots){
  integerWithin(native.particleEntities,native.particles,limits.sprayParticles,`${s.id}: allocated spray`);
  assert.equal(native.footprints,e.footprints);assert.equal(native.sprayEmitted,e.sprayEmitted);
  assert.ok(Number.isFinite(native.wetness)&&native.wetness>=0&&native.wetness<=1);
- assert.equal(e.m3.sha256,sourceM3.sha256,`${s.id}: source M3 changed`);assert.equal(e.m3.triangles,9798);assert.equal(e.m3.parts,19);
+ assert.equal(e.m3.sha256,sourceM3.sha256,`${s.id}: source M3 changed`);
+ assert.equal(e.m3.sourceBytes,sourceM3.sourceBytes,`${s.id}: reference byte size changed`);
+ assert.match(e.m3.representation,/parametric control sections/i);
+ integerWithin(e.m3.profileBytes,1,4096,`${s.id}: compact M3 profile bytes`);
+ assert.ok(e.m3.sourceBytes/e.m3.profileBytes>10,`${s.id}: M3 profile no longer provides >10x source-data reduction`);
+ integerWithin(e.m3.triangles,1000,10000,`${s.id}: generated M3 triangles`);
+ integerWithin(e.m3.parts,20,64,`${s.id}: generated M3 parts`);
 
  const raw=await readJSON(`${s.id}-telemetry.json`),frames=[...new Map(raw.map(f=>[f.t,f])).values()],stamps=await readJSON(`${s.id}-footsteps.json`);
  assert.equal(frames.length,s.duration*fps,`${s.id}: incomplete frame telemetry`);
@@ -109,6 +115,8 @@ try{await access(join(out,'engine-before-after-metadata.json'));
  assert.equal(comparison.sources.v3.video.sha256,current.sha256,'Comparison must use this final V3 movie');
  for(const name of ['engine-before-after-1080p.mp4','engine-before-after-metadata.json'])manifest.outputs.push({name,...await digest(join(out,name))});
 }catch(error){if(error.code!=='ENOENT')throw error;}
-for(const [name,description] of [['m3.json','User supplied BMW M3 FBX converted to geometry; original source hash is in m3-provenance.json'],['snow-granular.png','AI-generated repeating material image sampled on real engine geometry; not a scenery frame or background'],['brick-weathered.png','AI-generated repeating masonry material sampled on real facade geometry'],['m3-provenance.json','Source-asset provenance'],['material-provenance.json','Exact generation prompts and image provenance']])manifest.assets.push({name,description,...await digest(join(root,'tools/promo/assets',name))});
+for(const [name,description] of [['snow-granular.png','AI-generated repeating material image sampled on real engine geometry; not a scenery frame or background'],['brick-weathered.png','AI-generated repeating masonry material sampled on real facade geometry'],['m3-provenance.json','Source reference provenance for the procedural M3 profile'],['material-provenance.json','Exact generation prompts and image provenance']])manifest.assets.push({name,description,...await digest(join(root,'tools/promo/assets',name))});
+manifest.assets.push({name:'src/vehicles/m3.ts',description:'Compact authored M3 control profile; no imported FBX geometry at runtime',...await digest(join(root,'src/vehicles/m3.ts'))});
+manifest.assets.push({name:'src/vehicles/passenger.ts',description:'Reusable passenger-car geometry and structural-cage generator',...await digest(join(root,'src/vehicles/passenger.ts'))});
 await writeFile(join(out,'capture-manifest.json'),JSON.stringify(manifest,null,2));
 console.log(JSON.stringify(report,null,2));
