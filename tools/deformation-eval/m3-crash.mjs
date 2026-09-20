@@ -1,8 +1,5 @@
-import {readFileSync} from 'node:fs';
+import {M3_PARAMETRIC_PROFILE} from '../../dist/index.js';
 import {makeM3} from '../promo/actors.mjs';
-
-const asset=JSON.parse(readFileSync(new URL('../promo/assets/m3.json',import.meta.url),'utf8'));
-const noPlasticMesh=new Set(['Tires','Rims','Window','Transparent','DayLights','RearLight','Mirror','Exhaust']);
 
 export function makeM3Crash({
   seed,
@@ -13,13 +10,13 @@ export function makeM3Crash({
   extra=[],
   color=[.105,.17,.28,1],
 }){
-  const car=makeM3(asset,'m3',start[0],start[1],color,0);
+  const car=makeM3('m3',start[0],start[1],color,0);
   const visualIds=[],deformVisualIds=[];
   for(let i=0;i<car.entities.length;i++){
-    const entity=car.entities[i],part=asset.parts[i];
+    const entity=car.entities[i],part=car.geometry.parts[i];
     if(entity?.mesh?.kind!=='triangle-mesh')continue;
     visualIds.push(entity.id);
-    if(!part?.wheel&&!noPlasticMesh.has(part?.material))deformVisualIds.push(entity.id);
+    if(part?.role==='paint')deformVisualIds.push(entity.id);
   }
   if(!visualIds.length||!deformVisualIds.length)throw new Error('M3 asset exposes no deformable triangle meshes');
 
@@ -34,7 +31,7 @@ export function makeM3Crash({
     camera,
     entities:[
       {id:'floor',position:[0,-.12,0],mesh:{kind:'box',size:[30,.24,18]},material:{kind:'default',color:[.24,.25,.27,1],roughness:.88}},
-      {id:'m3:crash-body',position:[start[0],.72,start[1]],material:{kind:'steel'},body:{mass:1700,velocity,collisionSize:[4.55,1.42,1.86],restitution:.025,friction:.78}},
+      {id:'m3:crash-body',position:[start[0],M3_PARAMETRIC_PROFILE.dimensions.height/2,start[1]],material:{kind:'steel'},body:{mass:1700,velocity,collisionSize:[M3_PARAMETRIC_PROFILE.dimensions.length,M3_PARAMETRIC_PROFILE.dimensions.height,M3_PARAMETRIC_PROFILE.dimensions.width],restitution:.025,friction:.78}},
       ...car.entities,
       ...obstacles,
       ...extra,
