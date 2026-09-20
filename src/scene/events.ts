@@ -40,4 +40,15 @@ export interface FractureEvent {
   readonly size:number;
 }
 
-export type EngineEvent=ImpactEvent|FractureEvent;
+export interface MechanismEvent {
+  readonly type:'mechanism';
+  readonly id:number;
+  readonly time:number;
+  readonly point:Vec3;
+  readonly mechanism:'door-latch'|'door-stop'|'suspension'|'panel-flex';
+  readonly energy:number;
+  readonly speed:number;
+  readonly size:number;
+}
+
+export type EngineEvent=ImpactEvent|FractureEvent|MechanismEvent;
