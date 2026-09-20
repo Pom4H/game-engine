@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
-import {Scene,SnowSurface,SnowFootprints,batchStaticScenery,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
+import {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,Scene,SnowSurface,SnowFootprints,StructuralBody,batchStaticScenery,generatePassengerVehicle,material,passengerStructuralDefinition,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
 import {compose} from '../dist/math.js';
 import {pedestrianPose,WALK} from '../tools/promo/actors.mjs';
 
@@ -47,7 +46,20 @@ test('wet tyre audio suppresses hiss and footstep audio starts at the recorded c
  const events=[{time:.25,position:[0,0,2],sequence:1,depth:.022}],steps=renderFootsteps(events,frames,1,16000);assert.equal(steps.left.slice(0,4000).every(x=>x===0),true);assert.ok(steps.left.slice(4001,9000).some(x=>Math.abs(x)>.001));assert.deepEqual(steps.left,renderFootsteps(events,frames,1,16000).left);
 });
 
-test('M3 asset has separate wheels, normalized corner normals and traceable local source',async()=>{
- const asset=JSON.parse(await readFile(new URL('../tools/promo/assets/m3.json',import.meta.url)));assert.equal(asset.provenance.triangles,9798);assert.equal(asset.provenance.sha256,'9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67');assert.equal(new Set(asset.parts.filter(p=>p.wheel).map(p=>p.name.split('-')[0])).size,4);
- for(const part of asset.parts){const m=part.mesh;assert.equal(m.positions.length,m.normals.length);assert.ok(m.indices.every(i=>i>=0&&i<m.positions.length/3));for(let i=0;i<m.normals.length;i+=3)assert.ok(Math.abs(Math.hypot(...m.normals.slice(i,i+3))-1)<2e-6);}
+test('M3 is reconstructed from a compact profile and shares that shape with structural physics',()=>{
+ const bytes=new TextEncoder().encode(JSON.stringify(M3_PARAMETRIC_PROFILE)).length,geometry=generatePassengerVehicle(M3_PARAMETRIC_PROFILE);
+ assert.equal(M3_REFERENCE_PROVENANCE.sha256,'9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67');
+ assert.equal(M3_REFERENCE_PROVENANCE.sourceBytes,241628);
+ assert.ok(bytes<4096,{bytes});
+ assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/bytes>10,{sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,profileBytes:bytes});
+ assert.equal(geometry.parts.filter(part=>part.role==='tire').length,4);
+ assert.equal(geometry.parts.filter(part=>part.role==='rim').length,4);
+ assert.ok(geometry.generatedTriangles>500&&geometry.generatedTriangles<10000,geometry);
+ for(let i=0;i<geometry.body.normals.length;i+=3)assert.ok(Math.abs(Math.hypot(...geometry.body.normals.slice(i,i+3))-1)<2e-6);
+ const definition=passengerStructuralDefinition(M3_PARAMETRIC_PROFILE,1700,material('steel').mechanical),structure=new StructuralBody(definition);
+ assert.equal(definition.nodes.length,28);
+ assert.ok(Math.abs(structure.totalMass-1700)<1e-9);
+ const xs=definition.nodes.map(node=>node.position[0]),zs=definition.nodes.map(node=>node.position[2]);
+ assert.ok(Math.max(...xs)-Math.min(...xs)>M3_PARAMETRIC_PROFILE.dimensions.length*.85);
+ assert.ok(Math.max(...zs)-Math.min(...zs)>M3_PARAMETRIC_PROFILE.dimensions.width*.45);
 });
