@@ -56,7 +56,9 @@ test('M3 is reconstructed from a compact profile and shares that shape with stru
  assert.equal(geometry.body.indices.length/3,M3_SHELL_FIDELITY.triangles);
  assert.ok(M3_SHELL_FIDELITY.maxPositionErrorMm<.04,M3_SHELL_FIDELITY);
  assert.ok(M3_SHELL_FIDELITY.normalizedMaxFit>=.9999,M3_SHELL_FIDELITY);
- assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/M3_SHELL_FIDELITY.binaryPayloadBytes>20,M3_SHELL_FIDELITY);
+ const modelPayload=bytes+M3_SHELL_FIDELITY.binaryPayloadBytes;
+ assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/modelPayload>10,{sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,modelPayload});
+ assert.ok(1_194_172/modelPayload>50,{expandedJsonBytes:1_194_172,modelPayload});
  assert.equal(geometry.parts.filter(part=>part.role==='tire').length,4);
  assert.equal(geometry.parts.filter(part=>part.role==='rim').length,4);
  assert.ok(geometry.generatedTriangles>500&&geometry.generatedTriangles<10000,geometry);
