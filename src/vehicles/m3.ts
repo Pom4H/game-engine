@@ -1,4 +1,7 @@
-import {generatePassengerVehicle,type ParametricPassengerGeometry,type PassengerVehicleProfile} from './passenger.js';
+import type {MechanicalMaterial} from '../materials/catalog.js';
+import {bindStructuralSkin,type StructuralSkinBinding} from '../physics/structural-skin.js';
+import type {StructuralDefinition} from '../physics/structure.js';
+import {generatePassengerVehicle,passengerStructuralDefinition,type ParametricPassengerGeometry,type PassengerVehicleProfile} from './passenger.js';
 import {M3_SHELL_FIDELITY,m3HighFidelityBody} from './m3-shell.js';
 
 /**
@@ -68,4 +71,22 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     bodyTriangles:body.indices.length/3,
     generatedTriangles:procedural.generatedTriangles-procedural.bodyTriangles+body.indices.length/3,
   });
+}
+
+
+export interface M3StructuralBlueprint {
+  readonly definition:StructuralDefinition;
+  readonly skin:StructuralSkinBinding;
+}
+
+/**
+ * The detailed physics cage and the high-fidelity render shell share one authored
+ * macro profile. The shell never becomes 700 physics masses; it is sparsely bound
+ * to the 28-node structural graph.
+ */
+export function m3StructuralBlueprint(massKg:number,material:MechanicalMaterial):M3StructuralBlueprint{
+  const definition=passengerStructuralDefinition(M3_PARAMETRIC_PROFILE,massKg,material),body=m3HighFidelityBody();
+  const nodeRest=new Float64Array(definition.nodes.length*3);
+  for(let i=0;i<definition.nodes.length;i++)nodeRest.set(definition.nodes[i]!.position,i*3);
+  return Object.freeze({definition,skin:bindStructuralSkin(body.positions,nodeRest,4)});
 }
