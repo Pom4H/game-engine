@@ -96,6 +96,24 @@ function validateBindings(scene:Record<string,unknown>,entities:readonly EntityS
       validator.addVehicle(v as unknown as VehicleMotionSpec);
     }
   }
+  if(scene.deformation!==undefined){
+    const config=object(scene.deformation,'deformation'),bodies=config.bodies===undefined?[]:boundedArray(config.bodies,'deformation.bodies',128),bodyIds=new Set<string>(),visualIds=new Set<string>();
+    for(const [i,raw] of bodies.entries()){
+      const path=`deformation.bodies[${i}]`,item=object(raw,path),bodyId=stableId(item.bodyId,`${path}.bodyId`),body=reference(bodyId,`${path}.bodyId`);
+      if(bodyIds.has(bodyId))throw new TypeError(`${path}.bodyId is duplicated`);bodyIds.add(bodyId);
+      if(!body.body)throw new TypeError(`${path}.bodyId requires a physics body`);
+      if(body.body.shape==='sphere')throw new TypeError(`${path}.bodyId must use a box collision envelope`);
+      if(!body.mesh&&!body.body.collisionSize)throw new TypeError(`${path}.bodyId requires body.collisionSize when it has no mesh`);
+      const ids=boundedArray(item.visualIds,`${path}.visualIds`,4096);if(!ids.length)throw new TypeError(`${path}.visualIds must not be empty`);
+      for(const [j,value] of ids.entries()){
+        const p=`${path}.visualIds[${j}]`,id=stableId(value,p),visual=reference(id,p);
+        if(visualIds.has(id))throw new TypeError(`${p} is already owned by another deformation body`);visualIds.add(id);
+        if(visual.mesh?.kind!=='triangle-mesh')throw new TypeError(`${p} must reference a triangle mesh`);
+        if(visual.body&&(visual.body.mass??(visual.body.velocity||visual.body.angularVelocity?1:0))>0)throw new TypeError(`${p} cannot also own a dynamic physics body`);
+      }
+      optionalNumber(item,'skinThicknessM',path,.0002,.02);optionalNumber(item,'radiusM',path,.06,2.5);optionalNumber(item,'maxDentM',path,.01,1.8);optionalNumber(item,'minEnergyJ',path,0,1e7);
+    }
+  }
   if(scene.surfaceContacts!==undefined){
     const config=object(scene.surfaceContacts,'surfaceContacts'),snow=config.snow===undefined?[]:boundedArray(config.snow,'surfaceContacts.snow',128),wheels=config.wheels===undefined?[]:boundedArray(config.wheels,'surfaceContacts.wheels',512),snowIds=new Set<string>(),wheelIds=new Set<string>();
     for(const [i,raw]of snow.entries()){
@@ -171,7 +189,7 @@ export function validateEntity(value:unknown):EntitySpec{
       m.points.forEach((p,i)=>vector(p,2,`${path}.points[${i}]`));
     }
   }
-  if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);}
+  if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);}
   if(e.material!==undefined)materialSpec(e.material,`${id}.material`);
   if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);if(env.snowMaterial!==undefined)materialSpec(env.snowMaterial,`${id}.environmental.snowMaterial`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
   if(e.light!==undefined){const l=object(e.light,`${id}.light`);if(l.kind!=='point')throw new TypeError(`${id}.light.kind is unknown`);optionalNumber(l,'intensity',`${id}.light`,0);optionalNumber(l,'range',`${id}.light`,Number.MIN_VALUE);if(l.color!==undefined)vector(l.color,3,`${id}.light.color`,0,1);}
