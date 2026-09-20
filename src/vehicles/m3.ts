@@ -119,8 +119,25 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     position:backingPosition(source),
     material:{kind:'default' as const,finish:'smooth' as const,roughness:.48,metalness:0},
   }));
+  const grilleSlats:ParametricVehiclePart[]=[];
+  for(const side of [-1,1] as const)for(let row=0;row<6;row++)grilleSlats.push(Object.freeze({
+    id:`kidney-${side<0?'left':'right'}-slat-${row}`,
+    role:'dark' as const,
+    mesh:{kind:'box' as const,size:[.034,.016,.285] as const},
+    position:[2.385,.455+row*.067,side*.235] as const,
+    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.22,metalness:.02},
+  }));
+  const lowerIntake:ParametricVehiclePart[]=Array.from({length:5},(_,row)=>Object.freeze({
+    id:`lower-intake-slat-${row}`,
+    role:'dark' as const,
+    mesh:{kind:'box' as const,size:[.032,.014,.69] as const},
+    position:[2.365,.225+row*.043,0] as const,
+    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.28,metalness:.01},
+  }));
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
+    ...grilleSlats,
+    ...lowerIntake,
     ...sources.map(source=>Object.freeze({
       id:source.id,
       role:sourceRole(source.sourceMaterial,source.id),
