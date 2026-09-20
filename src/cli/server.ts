@@ -14,7 +14,7 @@ export interface LocalSceneServerOptions {
 export interface HostedScene {server:Server;port:number;url:string;close():Promise<void>}
 interface LocalAssets {root:string;files:ReadonlyMap<string,string>}
 const ORIGIN='http://scene-assets.invalid/';
-const HTML=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Game Engine</title><style>html,body,canvas{width:100%;height:100%;margin:0;display:block;background:#07101a;overflow:hidden}#badge{position:fixed;left:12px;top:12px;font:12px ui-monospace,monospace;color:#dfe8f5;background:#07101acc;padding:7px 9px;border:1px solid #ffffff20;z-index:2}</style></head><body><div id="badge">GAME ENGINE · WebGPU</div><canvas data-game-engine></canvas><script type="module" src="/dist/browser-entry.js"></script></body></html>`;
+const HTML=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Game Engine</title><style>html,body,canvas{width:100%;height:100%;margin:0;display:block;background:#07101a;overflow:hidden}</style></head><body><canvas data-game-engine></canvas><script type="module" src="/dist/browser-entry.js"></script></body></html>`;
 
 /** Hosts only validated scene data, engine modules and explicitly referenced local
  * material images. A scene never grants directory-wide file serving permission. */
