@@ -37,6 +37,11 @@ export class RigidBody {
   restitution:number;
   friction:number;
   readonly shape:CollisionShape;
+  /** Directional permanent crush for box collision envelopes. */
+  readonly crushPositive:MutableVec3=[0,0,0];
+  readonly crushNegative:MutableVec3=[0,0,0];
+  readonly collisionOffsetLocal:MutableVec3=[0,0,0];
+  readonly collisionHalf:MutableVec3|undefined;
   x:number;z:number;w:number;l:number;
 
   constructor(options:RigidBodyOptions){
@@ -56,11 +61,20 @@ export class RigidBody {
     this.restitution=Math.max(0,Math.min(1,options.restitution??this.material.restitution));
     this.friction=Math.max(0,options.friction??this.material.friction);
     this.shape=options.shape;
+    this.collisionHalf=options.shape.kind==='box'?[...options.shape.half]:undefined;
     const r=shapeRadius(options.shape);
     this.x=this.position[0];this.z=this.position[2];this.w=r*2;this.l=r*2;
   }
   syncSpatial():void{this.x=this.position[0];this.z=this.position[2];}
   wake():void{if(this.sleeping){this.sleeping=false;this.sleepTimer=0;}}
+  applyLocalCrush(outwardNormal:Vec3,depth:number):void{
+    if(this.shape.kind!=='box'||!this.collisionHalf||!Number.isFinite(depth)||depth<=0)return;
+    const abs=[Math.abs(outwardNormal[0]),Math.abs(outwardNormal[1]),Math.abs(outwardNormal[2])],axis:0|1|2=abs[0]>=abs[1]&&abs[0]>=abs[2]?0:abs[1]>=abs[2]?1:2,sign=outwardNormal[axis]>=0?1:-1,base=this.shape.half[axis];
+    const side=sign>0?this.crushPositive:this.crushNegative,current=side[axis],capacity=Math.max(0,base*1.45-current),applied=Math.min(depth,capacity);
+    if(applied<=0)return;side[axis]+=applied;
+    this.collisionHalf[axis]=Math.max(base*.22,base-(this.crushPositive[axis]+this.crushNegative[axis])*.5);
+    this.collisionOffsetLocal[axis]=(this.crushNegative[axis]-this.crushPositive[axis])*.5;
+  }
 }
 
 export interface ContactCandidate {
@@ -125,7 +139,7 @@ export class PhysicsWorld {
     for(const body of this.bodies.values()){
       if(!body.invMass&&!body.kinematic)continue;
       const speed=Math.hypot(body.velocity[0],body.velocity[1],body.velocity[2]),travel=speed*dt;
-      const feature=body.shape.kind==='sphere'?body.shape.radius*1.5:Math.max(.025,Math.min(body.shape.half[0],body.shape.half[1],body.shape.half[2])*1.5);
+      const feature=body.shape.kind==='sphere'?body.shape.radius*1.5:Math.max(.025,Math.min(...boxHalf(body))*1.5);
       required=Math.max(required,Math.ceil(travel/Math.max(.015,feature)));
     }
     return Math.max(1,Math.min(12,required));
@@ -194,9 +208,9 @@ export class PhysicsWorld {
 
   private resolveStaticHorizontalSurface(body:RigidBody,surface:RigidBody,dt:number,contactModel?:ContactModel):boolean{
     if(surface.shape.kind!=='box')return false;
-    const r=groundSupportVector(body),pointX=body.position[0]+r[0],pointZ=body.position[2]+r[2],h=surface.shape.half,margin=.003;
-    if(pointX<surface.position[0]-h[0]-margin||pointX>surface.position[0]+h[0]+margin||pointZ<surface.position[2]-h[2]-margin||pointZ>surface.position[2]+h[2]+margin)return false;
-    const surfaceY=surface.position[1]+h[1],bottom=body.position[1]+r[1];
+    const r=groundSupportVector(body),pointX=body.position[0]+r[0],pointZ=body.position[2]+r[2],h=boxHalf(surface),surfaceCenter=boxCenter(surface),margin=.003;
+    if(pointX<surfaceCenter[0]-h[0]-margin||pointX>surfaceCenter[0]+h[0]+margin||pointZ<surfaceCenter[2]-h[2]-margin||pointZ>surfaceCenter[2]+h[2]+margin)return false;
+    const surfaceY=surfaceCenter[1]+h[1],bottom=body.position[1]+r[1];
     // A finite slab is not an infinite column: approach from below uses narrow phase.
     if(body.position[1]<surface.position[1]-h[1])return false;
     const pointVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r));
@@ -312,7 +326,7 @@ export class PhysicsWorld {
 
 function isHorizontalStaticSurface(body:RigidBody):boolean{
   if(body.invMass||body.shape.kind!=='box')return false;
-  const h=body.shape.half;
+  const h=boxHalf(body);
   return Math.abs(body.rotation[0])<1e-5&&Math.abs(body.rotation[2])<1e-5&&h[1]<=Math.max(.25,Math.min(h[0],h[2])*.2);
 }
 export function shapeRadius(shape:CollisionShape):number{return shape.kind==='sphere'?shape.radius:Math.hypot(shape.half[0],shape.half[2]);}
@@ -328,7 +342,7 @@ function sphereSphere(a:RigidBody,b:RigidBody):Hit|null{
   return{normal,penetration:radius-distance,point:[a.position[0]+normal[0]*ar,a.position[1]+normal[1]*ar,a.position[2]+normal[2]*ar]};
 }
 function boxBox(a:RigidBody,b:RigidBody):Hit|null{
-  const ah=(a.shape as {half:Vec3}).half,bh=(b.shape as {half:Vec3}).half,ab=rotationBasis(a.rotation),bb=rotationBasis(b.rotation),center=V3.sub(b.position,a.position);
+  const ah=boxHalf(a),bh=boxHalf(b),ab=rotationBasis(a.rotation),bb=rotationBasis(b.rotation),center=V3.sub(boxCenter(b),boxCenter(a));
   const axes:Vec3[]=[...ab,...bb];
   for(const aa of ab)for(const ba of bb){const cross=V3.cross(aa,ba);if(V3.length(cross)>1e-8)axes.push(V3.normalize(cross));}
   let penetration=Infinity,normal:Vec3=[1,0,0];
@@ -342,14 +356,14 @@ function boxBox(a:RigidBody,b:RigidBody):Hit|null{
   return{normal,penetration,point};
 }
 function sphereBox(sphere:RigidBody,box:RigidBody,invert:boolean):Hit|null{
-  const radius=(sphere.shape as {radius:number}).radius,half=(box.shape as {half:Vec3}).half;
-  const local=rotateWorldToLocal(box.rotation,V3.sub(sphere.position,box.position));
+  const radius=(sphere.shape as {radius:number}).radius,half=boxHalf(box),center=boxCenter(box);
+  const local=rotateWorldToLocal(box.rotation,V3.sub(sphere.position,center));
   const closest:MutableVec3=[
     Math.max(-half[0],Math.min(local[0],half[0])),
     Math.max(-half[1],Math.min(local[1],half[1])),
     Math.max(-half[2],Math.min(local[2],half[2])),
   ];
-  const worldClosest=V3.add(box.position,rotateLocal(box.rotation,closest));
+  const worldClosest=V3.add(center,rotateLocal(box.rotation,closest));
   let delta=V3.sub(worldClosest,sphere.position),distance=V3.length(delta),normalSphereToBox:Vec3,penetration:number,point:Vec3=worldClosest;
   if(distance>=radius)return null;
   if(distance<1e-8){
@@ -362,19 +376,26 @@ function sphereBox(sphere:RigidBody,box:RigidBody,invert:boolean):Hit|null{
     const sign=Math.abs(local[i]!)>1e-7?(Math.sign(local[i]!)||1):(-Math.sign(relativeLocal[i]!)||1);
     const outwardLocal:MutableVec3=[0,0,0];outwardLocal[i]=sign;
     const outward=rotateLocal(box.rotation,outwardLocal);normalSphereToBox=V3.scale(outward,-1);penetration=radius+gaps[i]!;
-    const faceLocal:MutableVec3=[...local];faceLocal[i]=sign*half[i]!;point=V3.add(box.position,rotateLocal(box.rotation,faceLocal));
+    const faceLocal:MutableVec3=[...local];faceLocal[i]=sign*half[i]!;point=V3.add(center,rotateLocal(box.rotation,faceLocal));
   }else{
     normalSphereToBox=V3.scale(delta,1/distance);penetration=radius-distance;
   }
   return{normal:invert?V3.scale(normalSphereToBox,-1):normalSphereToBox,penetration,point};
 }
 
+function boxHalf(body:RigidBody):Vec3{
+  if(body.shape.kind!=='box')throw new TypeError('boxHalf requires box body');
+  return body.collisionHalf??body.shape.half;
+}
+function boxCenter(body:RigidBody):MutableVec3{
+  return V3.add(body.position,rotateLocal(body.rotation,body.collisionOffsetLocal));
+}
 function projectedRadius(half:Vec3,basis:readonly[Vec3,Vec3,Vec3],axis:Vec3):number{
   return half[0]*Math.abs(V3.dot(basis[0],axis))+half[1]*Math.abs(V3.dot(basis[1],axis))+half[2]*Math.abs(V3.dot(basis[2],axis));
 }
 function supportPoint(body:RigidBody,direction:Vec3):MutableVec3{
   if(body.shape.kind==='sphere')return V3.add(body.position,V3.scale(V3.normalize(direction),body.shape.radius));
-  const basis=rotationBasis(body.rotation),half=body.shape.half,point:MutableVec3=[...body.position];
+  const basis=rotationBasis(body.rotation),half=boxHalf(body),point:MutableVec3=[...boxCenter(body)];
   for(let i=0;i<3;i++){const projection=V3.dot(direction,basis[i]!);if(Math.abs(projection)>1e-8){const sign=projection>0?1:-1;point[0]+=basis[i]![0]*half[i]!*sign;point[1]+=basis[i]![1]*half[i]!*sign;point[2]+=basis[i]![2]*half[i]!*sign;}}
   return point;
 }
@@ -399,8 +420,8 @@ function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rot
 function groundSupportVector(body:RigidBody):MutableVec3{return groundContactManifold(body).points[0]??[0,groundContactManifold(body).lowest,0];}
 function groundContactManifold(body:RigidBody):{lowest:number;points:MutableVec3[]}{
   if(body.shape.kind==='sphere')return{lowest:-body.shape.radius,points:[[0,-body.shape.radius,0]]};
-  const h=body.shape.half,corners:MutableVec3[]=[];
-  for(const x of [-h[0],h[0]])for(const y of [-h[1],h[1]])for(const z of [-h[2],h[2]])corners.push(rotateLocal(body.rotation,[x,y,z]));
+  const h=boxHalf(body),offset=rotateLocal(body.rotation,body.collisionOffsetLocal),corners:MutableVec3[]=[];
+  for(const x of [-h[0],h[0]])for(const y of [-h[1],h[1]])for(const z of [-h[2],h[2]])corners.push(V3.add(offset,rotateLocal(body.rotation,[x,y,z])));
   let lowest=Infinity;for(const corner of corners)lowest=Math.min(lowest,corner[1]);
   const minHalf=Math.min(h[0],h[1],h[2]),band=Math.max(.0018,minHalf*.42);
   const points=corners.filter(corner=>corner[1]<=lowest+band).sort((a,b)=>a[1]-b[1]||a[0]-b[0]||a[2]-b[2]);
