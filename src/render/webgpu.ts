@@ -329,7 +329,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec*clearcoat;
     let coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,.35).rgb;
     let coatEnvF=.04+.96*pow(1.0-nv,5.0);
-    color+=coatEnvironment*coatEnvF*clearcoat*.50;
+    color+=coatEnvironment*coatEnvF*clearcoat*.78;
   }
 
   // Automotive glass is mostly transmitted scene color from the blend pass plus
@@ -429,7 +429,7 @@ export class WebGPURenderer implements Renderer{
     const frame=device.createBuffer({size:400,usage:0x40|0x08}),shadow=device.createTexture({size:[2048,2048],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
-    const environmentMap=device.createTexture({label:'prefiltered environment',size:[64,64,6],mipLevelCount:7,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
+    const environmentMap=device.createTexture({label:'prefiltered environment',size:[128,128,6],mipLevelCount:8,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
     const surfaceSampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',maxAnisotropy:8});
     const emptyField=device.createTexture({size:[1,1],format:'rgba32float',usage:0x04|0x02}),emptyLabel=device.createTexture({size:[1,1],format:'rgba8unorm',usage:0x04|0x02});device.queue.writeTexture({texture:emptyField},new Float32Array(4),{bytesPerRow:16},[1,1]);device.queue.writeTexture({texture:emptyLabel},new Uint8Array(4),{bytesPerRow:4},[1,1]);
     const frameBind=device.createBindGroup({layout:frameLayout,entries:[{binding:0,resource:{buffer:frame}}]});
@@ -637,20 +637,42 @@ export class WebGPURenderer implements Renderer{
     }
     const urbanColor:[number,number,number]=urbanWeight?[urban[0]!/urbanWeight,urban[1]!/urbanWeight,urban[2]!/urbanWeight]:[sky[0]*.7,sky[1]*.65,sky[2]*.6];
     const groundColor:[number,number,number]=groundWeight?[groundPalette[0]!/groundWeight,groundPalette[1]!/groundWeight,groundPalette[2]!/groundWeight]:[sky[0]*.13,sky[1]*.12,sky[2]*.11];
-    const key=[...sun,...sunColor,...sky,...urbanColor,...groundColor,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20].map(value=>Number(value).toFixed(3)).join(':');
+    const probe=scene.camera.target;
+    const proxies:{dir:Vec3;color:[number,number,number];threshold:number;strength:number}[]=[];
+    for(const entity of scene.entities.values()){
+      if(entity.material.color[3]<.98||entity.id.startsWith('passing-')||entity.id.startsWith('walker-'))continue;
+      const pattern=entity.material.pattern,kind=entity.material.kind;
+      if(!(pattern==='brick'||pattern==='plaster'||pattern==='window'||entity.material.label||kind==='concrete'||kind==='snow'||kind==='wood'))continue;
+      const delta=V3.sub(entity.position,probe),distance=V3.length(delta);if(distance<2.4||distance>85)continue;
+      const radius=pattern==='brick'||pattern==='plaster'?5.5:pattern==='window'?2.4:entity.material.label?2.2:kind==='snow'?2.8:kind==='concrete'?3.2:1.4;
+      const angle=Math.min(.72,Math.atan2(radius,distance)+.035),threshold=Math.cos(angle),direction=V3.scale(delta,1/distance),color=entity.material.color;
+      const emission=entity.material.emissive??[0,0,0],strength=(pattern==='window'?.78:pattern==='brick'||pattern==='plaster'?1:kind==='snow'?.72:.58)/(1+distance*.006);
+      proxies.push({dir:direction,color:[color[0]*.72+emission[0]*.18,color[1]*.72+emission[1]*.18,color[2]*.72+emission[2]*.18],threshold,strength});
+    }
+    proxies.sort((a,b)=>b.strength-a.strength);if(proxies.length>96)proxies.length=96;
+    const key=[...sun,...sunColor,...sky,...urbanColor,...groundColor,Math.round(probe[0]*2)/2,Math.round(probe[2]*2)/2,proxies.length,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20].map(value=>Number(value).toFixed(3)).join(':');
     if(key===this.environmentKey)return;this.environmentKey=key;this.environmentUpdates++;
-    const levels=7;
+    const levels=8;
     for(let mip=0;mip<levels;mip++){
-      const size=Math.max(1,64>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
+      const size=Math.max(1,128>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
       for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
         const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
         const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
         const t=Math.sqrt(up);let base:[number,number,number]=down>0?[mix(horizon[0],ground[0],down),mix(horizon[1],ground[1],down),mix(horizon[2],ground[2],down)]:[mix(horizon[0],zenith[0],t),mix(horizon[1],zenith[1],t),mix(horizon[2],zenith[2],t)];
         const horizontal=Math.pow(Math.max(0,1-Math.abs(dir[1])),3)*(1-roughness*.72);
-        const urbanMix=horizontal*.42;
+        const urbanMix=horizontal*.28;
         base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
-        const sunDot=Math.max(0,dir[0]*sun[0]+dir[1]*sun[1]+dir[2]*sun[2]),exponent=mix(640,2.4,roughness*roughness),sunLobe=Math.pow(sunDot,exponent)*intensity*mix(.85,.12,roughness);
-        const average:[number,number,number]=[mix(sky[0]*.62,urbanColor[0]*.55,.22),mix(sky[1]*.66,urbanColor[1]*.55,.22),mix(sky[2]*.72,urbanColor[2]*.55,.22)],blur=roughness*roughness*.72;
+        if(roughness<.74){
+          let pr=0,pg=0,pb=0,total=0;
+          for(const proxy of proxies){
+            const alignment=V3.dot(dir,proxy.dir);if(alignment<=proxy.threshold)continue;
+            const q=(alignment-proxy.threshold)/Math.max(1e-5,1-proxy.threshold),sharp=mix(5.5,1.2,roughness*roughness),weight=Math.pow(q,sharp)*proxy.strength*(1-roughness*.62);
+            pr+=proxy.color[0]*weight;pg+=proxy.color[1]*weight;pb+=proxy.color[2]*weight;total+=weight;
+          }
+          if(total>.001){const amount=Math.min(.86,total/(.58+total));base=[mix(base[0],pr/total,amount),mix(base[1],pg/total,amount),mix(base[2],pb/total,amount)];}
+        }
+        const sunDot=Math.max(0,dir[0]*sun[0]+dir[1]*sun[1]+dir[2]*sun[2]),exponent=mix(900,2.4,roughness*roughness),sunLobe=Math.pow(sunDot,exponent)*intensity*mix(1.0,.12,roughness);
+        const average:[number,number,number]=[mix(sky[0]*.62,urbanColor[0]*.55,.22),mix(sky[1]*.66,urbanColor[1]*.55,.22),mix(sky[2]*.72,urbanColor[2]*.55,.22)],blur=roughness*roughness*.68;
         for(let channel=0;channel<3;channel++)pixels[offset++]=float16(mix(base[channel]!+sunColor[channel]!*sunLobe,average[channel]!,blur));
         pixels[offset++]=float16(1);
       }
