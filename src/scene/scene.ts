@@ -35,7 +35,10 @@ export interface RuntimeEntity {
   position:MutableVec3;
   rotation:MutableVec3;
   scale:MutableVec3;
+  /** Authoritative physical geometry; deformation may replace it. */
   mesh?:Primitive;
+  /** Optional renderer-only high detail geometry, independent of mass/contact shape. */
+  renderMesh?:Primitive;
   readonly material:RuntimeMaterial;
   readonly environmental?:EnvironmentalSpec;
   readonly light?:LightSpec;
