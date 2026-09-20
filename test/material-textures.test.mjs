@@ -12,6 +12,8 @@ test('surface texture descriptors accept relative and HTTP assets and own the ne
   assert.equal(validated.entities[0].material.texture.url,url);assert.equal(validated.entities[0].material.texture.normalUrl,'./detail-normal.png');assert.equal(validated.entities[0].material.texture.ormUrl,'./detail-orm.png');assert.equal(validated.entities[0].material.texture.sizeM,2);
  }
  const original=entity({url:'/assets/stone.png'}),validated=validateEntity(original);original.material.texture.url='/modified.png';assert.equal(validated.material.texture.url,'/assets/stone.png');
+ assert.doesNotThrow(()=>validateEntity(entity({normalUrl:'/n.png',normalStrength:.8})));
+ assert.doesNotThrow(()=>validateEntity(entity({ormUrl:'/orm.png',ormStrength:1})));
  for(const texture of [{url:'plain.png',sizeM:.01,bumpStrength:0,albedoStrength:0,normalUrl:'normal.png',normalStrength:0,ormUrl:'orm.png',ormStrength:0},{url:'plain.png',sizeM:1000,bumpStrength:2,albedoStrength:1,normalUrl:'https://example.org/n.png',normalStrength:2,ormUrl:'https://example.org/o.png',ormStrength:1}])assert.doesNotThrow(()=>validateEntity(entity(texture)));
 });
 
