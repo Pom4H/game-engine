@@ -35,6 +35,14 @@ spec.camera={
 // Keep the reference car exactly at its authored start pose. Headlights remain on
 // because that is material state, not a movie-only animation side effect.
 spec.animation={...spec.animation,vehicles:[]};
+const heroReflectionExclude=spec.entities.filter(entity=>entity.id.startsWith('passing-')).map(entity=>entity.id);
+spec.rendering.reflectionProbe={
+  entity:'passing-body',
+  offset:[0,.92,0],
+  radius:46,
+  exclude:heroReflectionExclude,
+  facesPerFrame:1,
+};
 // Hero daylight shot keeps the physically meaningful snow banks but drops the
 // thousands of sub-pixel dressing grains generated for the moving winter demo.
 // This is visual LOD, not a different material/lighting path.
