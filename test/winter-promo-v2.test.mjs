@@ -52,10 +52,13 @@ test('M3 is reconstructed from a compact profile and shares that shape with stru
  assert.equal(M3_REFERENCE_PROVENANCE.sourceBytes,241628);
  assert.ok(bytes<4096,{bytes});
  assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/bytes>10,{sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,profileBytes:bytes});
- assert.equal(geometry.body.positions.length/3,M3_SHELL_FIDELITY.uniqueVertices);
+ assert.equal(geometry.body.positions.length/3,M3_SHELL_FIDELITY.packedVertices);
  assert.equal(geometry.body.indices.length/3,M3_SHELL_FIDELITY.triangles);
  assert.ok(M3_SHELL_FIDELITY.maxPositionErrorMm<.04,M3_SHELL_FIDELITY);
  assert.ok(M3_SHELL_FIDELITY.normalizedMaxFit>=.9999,M3_SHELL_FIDELITY);
+ assert.ok(M3_SHELL_FIDELITY.meanNormalErrorDeg<.35,M3_SHELL_FIDELITY);
+ assert.ok(M3_SHELL_FIDELITY.p99NormalErrorDeg<.8,M3_SHELL_FIDELITY);
+ assert.ok(M3_SHELL_FIDELITY.maxNormalErrorDeg<.9,M3_SHELL_FIDELITY);
  const modelPayload=bytes+M3_SHELL_FIDELITY.binaryPayloadBytes;
  assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/modelPayload>10,{sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,modelPayload});
  assert.ok(1_194_172/modelPayload>50,{expandedJsonBytes:1_194_172,modelPayload});
@@ -71,7 +74,7 @@ test('M3 is reconstructed from a compact profile and shares that shape with stru
  assert.ok(Math.max(...zs)-Math.min(...zs)>M3_PARAMETRIC_PROFILE.dimensions.width*.45);
  const blueprint=m3StructuralBlueprint(1700,material('steel').mechanical);
  assert.equal(blueprint.definition.nodes.length,28);
- assert.equal(blueprint.skin.vertexCount,M3_SHELL_FIDELITY.uniqueVertices);
+ assert.equal(blueprint.skin.vertexCount,M3_SHELL_FIDELITY.packedVertices);
  assert.equal(blueprint.skin.influences,4);
  for(let vertex=0;vertex<blueprint.skin.vertexCount;vertex++){
    let sum=0;
