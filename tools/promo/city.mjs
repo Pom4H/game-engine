@@ -10,9 +10,9 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  const add=(id,p,mesh,color=C.stone,extra={})=>{const e={id,position:p,mesh,material:{kind:'default',color,roughness:.8,...extra.material},...extra};if(extra.material)e.material={kind:'default',color,roughness:.8,...extra.material};entities.push(e);return e;};
  const box=(id,p,s,c=C.stone,extra={})=>add(id,p,{kind:'box',size:s},c,extra);
  const cylinder=(id,p,r,h,c=C.metal,extra={})=>add(id,p,{kind:'cylinder',radius:r,height:h,segments:24},c,extra);
- const bank=(id,p,s,seed,segments=20)=>add(id,p,{kind:'snowdrift',size:s,seed,segments},C.snow,{material:{kind:'snow',roughness:.94}});
+ const bank=(id,p,s,seed,segments=16)=>add(id,p,{kind:'snowdrift',size:s,seed,segments},C.snow,{material:{kind:'snow',roughness:.94}});
  // Initial set dressing is authored here; snow dynamics and contact deformation live in the engine.
- const lump=(id,p,size,color=C.snow)=>add(id,p,{kind:'sphere',radius:.5,segments:10},color,{scale:size,material:{kind:'snow',roughness:.97}});
+ const lump=(id,p,size,color=C.snow)=>add(id,p,{kind:'sphere',radius:.5,segments:6},color,{scale:size,material:{kind:'snow',roughness:.97}});
  function snowcap(id,p,length,width,height=.09){
   bank(id+'-blanket',p,[length,height,width],Math.floor(random()*100000),12);
   const count=Math.max(2,Math.ceil(length/.30));
