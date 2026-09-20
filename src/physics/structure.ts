@@ -37,6 +37,8 @@ export type StructuralConstraintSpec=StructuralDistanceSpec|StructuralVolumeSpec
 export interface StructuralDefinition {
   readonly nodes:readonly StructuralNodeSpec[];
   readonly constraints:readonly StructuralConstraintSpec[];
+  /** Optional closed/coarse collision surface over the same mass nodes. */
+  readonly collisionTriangles?:readonly (readonly [number,number,number])[];
   readonly iterations?:number;
   /** Speed below which an active structure may be baked back into a sleeping reduced state. */
   readonly sleepSpeed?:number;
@@ -215,6 +217,31 @@ export class StructuralBody {
   get nodeCount():number{return this.mass.length;}
   get constraintCount():number{return this.kind.length;}
 
+  /** Reposition a dormant structural shape without introducing velocity. */
+  translate(offset:Vec3):void{
+    if(this.mode!=='dormant')throw new Error('Only a dormant structural body can be translated');
+    if(!offset.every(Number.isFinite))throw new TypeError('Structural translation must be finite');
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3;
+      for(let axis=0;axis<3;axis++){
+        const k=j+axis,value=offset[axis];
+        this.position[k]=this.position[k]!+value;
+        this.previous[k]=this.previous[k]!+value;
+        this.originalPosition[k]=this.originalPosition[k]!+value;
+      }
+    }
+  }
+
+  centerOfMass():MutableVec3{
+    const center:MutableVec3=[0,0,0];
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,m=this.mass[i]!;
+      center[0]+=m*this.position[j]!;center[1]+=m*this.position[j+1]!;center[2]+=m*this.position[j+2]!;
+    }
+    center[0]/=this.totalMass;center[1]/=this.totalMass;center[2]/=this.totalMass;
+    return center;
+  }
+
   wake():void{this.mode='active';this.quietTime=0;this.pendingBake=undefined;}
 
   /**
@@ -261,7 +288,7 @@ export class StructuralBody {
     this.wake();
   }
 
-  step(dt:number,gravity:Vec3=[0,-9.81,0]):void{
+  step(dt:number,gravity:Vec3=[0,-9.81,0],contactProjector?:(body:StructuralBody,iteration:number)=>void):void{
     if(this.mode==='dormant')return;
     if(!Number.isFinite(dt)||dt<=0||dt>1/30)throw new RangeError('Structural dt must be in (0, 1/30]');
     if(!gravity.every(Number.isFinite))throw new TypeError('Structural gravity must be finite');
@@ -279,8 +306,14 @@ export class StructuralBody {
       this.force[j]=this.force[j+1]=this.force[j+2]=0;
     }
 
+    // Project hard contacts once before strain sampling. This exposes the actual
+    // collision-induced trial strain to plastic return mapping exactly once per dt.
+    contactProjector?.(this,-1);
     this.prepareConstraints();
-    for(let iteration=0;iteration<this.iterations;iteration++)this.solveConstraints();
+    for(let iteration=0;iteration<this.iterations;iteration++){
+      this.solveConstraints();
+      contactProjector?.(this,iteration);
+    }
     this.finishStep();
   }
 
