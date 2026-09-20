@@ -104,40 +104,35 @@ export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
  */
 export function generateM3Vehicle():ParametricPassengerGeometry{
   const body=m3HighFidelityBody(),renderBody=m3SmoothRenderBody(body),sources=m3FbxParts();
-  const backingPosition=(source:(typeof sources)[number]):readonly[number,number,number]=>{
-    const [x,y,z]=source.center;
-    if(source.id==='windshield-front')return[x-.018,y-.004,z];
-    if(source.id==='windshield-rear')return[x+.018,y-.004,z];
-    if(source.id.includes('-left'))return[x,y,z+.012];
-    if(source.id.includes('-right'))return[x,y,z-.012];
-    return source.center;
-  };
-  const glazingBackers=sources.filter(source=>source.sourceMaterial==='Window').map(source=>Object.freeze({
-    id:'interior-'+source.id,
-    role:'dark' as const,
-    mesh:source.mesh,
-    position:backingPosition(source),
-    material:{kind:'default' as const,finish:'smooth' as const,roughness:.48,metalness:0},
-  }));
   const grilleSlats:ParametricVehiclePart[]=[];
   for(const side of [-1,1] as const)for(let row=0;row<6;row++)grilleSlats.push(Object.freeze({
     id:`kidney-${side<0?'left':'right'}-slat-${row}`,
     role:'dark' as const,
     mesh:{kind:'box' as const,size:[.034,.016,.285] as const},
     position:[2.385,.455+row*.067,side*.235] as const,
-    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.22,metalness:.02},
+    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.72,metalness:.01},
   }));
   const lowerIntake:ParametricVehiclePart[]=Array.from({length:5},(_,row)=>Object.freeze({
     id:`lower-intake-slat-${row}`,
     role:'dark' as const,
     mesh:{kind:'box' as const,size:[.032,.014,.69] as const},
     position:[2.365,.225+row*.043,0] as const,
-    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.28,metalness:.01},
+    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.78,metalness:.01},
   }));
+  const interior:ParametricVehiclePart[]=[
+    Object.freeze({id:'interior-dashboard',role:'dark' as const,mesh:{kind:'box' as const,size:[.62,.18,1.42] as const},position:[.72,.84,0] as const,material:{kind:'default' as const,finish:'smooth' as const,roughness:.62,metalness:0}}),
+    Object.freeze({id:'interior-console',role:'dark' as const,mesh:{kind:'box' as const,size:[.94,.18,.19] as const},position:[.10,.67,0] as const,material:{kind:'default' as const,finish:'smooth' as const,roughness:.72,metalness:0}}),
+    Object.freeze({id:'interior-rear-bench',role:'dark' as const,mesh:{kind:'box' as const,size:[.48,.28,1.28] as const},position:[-.88,.63,0] as const,material:{kind:'default' as const,finish:'smooth' as const,roughness:.90,metalness:0}}),
+  ];
+  for(const side of [-1,1] as const){
+    interior.push(Object.freeze({id:`interior-seat-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.38,.58,.43] as const},position:[.02,.78,side*.37] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.92,metalness:0}}));
+    interior.push(Object.freeze({id:`interior-headrest-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.22,.22,.30] as const},position:[-.05,1.14,side*.37] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0}}));
+  }
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...grilleSlats,
     ...lowerIntake,
+    ...interior,
     ...sources.map(source=>Object.freeze({
       id:source.id,
       role:sourceRole(source.sourceMaterial,source.id),
@@ -146,10 +141,6 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
       ...(source.wheel?{wheel:true}:{}),
       material:sourceMaterial(source.sourceMaterial,source.id),
     })),
-    // Exterior FBX has no cabin. Reuse each glazing mesh a few millimetres inward
-    // as a dark interior backing: no new geometry payload, no impossible sightline
-    // through the entire car, and the transparent outer pane still owns reflections.
-    ...glazingBackers,
   ];
   const generatedTriangles=body.indices.length/3+sources.reduce((sum,source)=>sum+source.mesh.indices.length/3,0);
   return Object.freeze({
@@ -168,7 +159,9 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('mirror-'))return{...base,color:[.30,.34,.38,1]};
   if(part.id==='red-reflectors')return{...base,color:[.30,.012,.008,1]};
   if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055};
-  if(part.role==='glass')return{...base,color:[.035,.055,.072,.34]};
+  if(part.role==='glass')return{...base,color:[.07,.095,.12,.27],roughness:.055};
+  if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
+  if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
   if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
   if(part.role==='light')return{...base,color:[.76,.84,.94,1],emissive:lightsOn?[1.25,1.45,1.75]:[.018,.022,.028]};
