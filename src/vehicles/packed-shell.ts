@@ -28,7 +28,7 @@ export function decodePackedShell(shell:PackedShell):Extract<Primitive,{kind:'tr
     (shell.max[2]-shell.min[2])/65535,
   ];
   const positions=Array<number>(q.length);
-  for(let i=0;i<q.length;i++){const axis=i%3;positions[i]=shell.min[axis]+q[i]!*scale[axis];}
+  for(let i=0;i<q.length;i++){const axis=(i%3) as 0|1|2;positions[i]=shell.min[axis]+q[i]!*scale[axis];}
   const normals=Array<number>(positions.length).fill(0);
   for(let i=0;i<indices.length;i+=3){
     const ia=indices[i]!*3,ib=indices[i+1]!*3,ic=indices[i+2]!*3;
