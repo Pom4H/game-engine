@@ -8,6 +8,7 @@ import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
 import {renderAudio,wavBytes} from '../../dist/index.js';
 
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const root=fileURLToPath(new URL('../../',import.meta.url)),tool=join(root,'tools/vehicle-abuse'),out=join(root,'artifacts/vehicle-abuse');
 await mkdir(out,{recursive:true});
 const html=await readFile(join(tool,'player.html'));
@@ -65,4 +66,3 @@ async function chromePath(){
   for(const candidate of candidates)if(await exists(candidate))return candidate;throw new Error('Chrome/Chromium not found. Set CHROME_PATH.');
 }
 async function exists(path){try{await access(path,FS.X_OK);return true;}catch{return false;}}
-const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
