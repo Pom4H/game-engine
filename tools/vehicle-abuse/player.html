@@ -12,7 +12,7 @@ window.addEventListener('error',event=>{window.failure=event.error?.stack??event
 window.addEventListener('unhandledrejection',event=>{window.failure=event.reason?.stack??String(event.reason);});
 </script>
 <script type="module">
-import {Scene,M3InteractionRig,generateM3Vehicle,clothLoftMesh} from '/dist/index.js';
+import {Scene,M3InteractionRig,generateM3Vehicle,m3PartBody,m3PartMaterial,clothLoftMesh} from '/dist/index.js';
 import {WebGPURenderer} from '/dist/browser.js';
 import {VEHICLE_ABUSE_DURATION,createVehicleAbuseScript,humanPose,phaseAt} from '/timeline.mjs';
 
@@ -20,12 +20,10 @@ window.ready=false;window.failure=null;
 try{
 const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas),geometry=generateM3Vehicle();
 const paint=[.17,.205,.255,1];
-const roleMaterial=role=>role==='paint'?{kind:'default',color:paint,roughness:.18,metalness:.10}:role==='glass'?{kind:'default',color:[.018,.028,.036,1],roughness:.075,metalness:.12,pattern:'window'}:role==='tire'?{kind:'default',color:[.016,.017,.018,1],roughness:.97,pattern:'rubber'}:role==='rim'||role==='metal'?{kind:'steel',color:[.12,.13,.14,1],roughness:.20,metalness:.92}:{kind:'default',color:[.028,.031,.034,1],roughness:.44};
-const carEntities=geometry.parts.filter(part=>part.role!=='light'&&part.role!=='tail'&&part.role!=='glass').map(part=>({id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:roleMaterial(part.role)}));
-for(const side of [-1,1]){
- carEntities.push({id:'m3-headlight-slim-'+side,position:[2.365,.755,side*.56],rotation:[0,0,0],mesh:{kind:'box',size:[.026,.040,.25]},material:{kind:'default',color:[.16,.19,.21,1],roughness:.16,metalness:.12,emissive:[.018,.023,.029]}});
- carEntities.push({id:'m3-tail-slim-'+side,position:[-2.365,.73,side*.57],rotation:[0,0,0],mesh:{kind:'box',size:[.026,.038,.25]},material:{kind:'default',color:[.12,.008,.006,1],roughness:.20,metalness:.04,emissive:[.018,.001,.001]}});
-} 
+const carEntities=geometry.parts.filter(part=>part.id!=='window-front-left').map(part=>{
+ const body=m3PartBody(part,false);
+ return{id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:m3PartMaterial(part,paint,false),...(body?{body}:{})};
+});
 carEntities.push(
  {id:'m3-cabin-core',position:[-.54,1.03,0],rotation:[0,0,0],mesh:{kind:'box',size:[2.82,.82,1.56]},material:{kind:'default',color:[.008,.012,.016,1],roughness:.84}},
  {id:'m3-dashboard',position:[.58,.90,0],rotation:[0,0,0],mesh:{kind:'box',size:[.34,.16,1.28]},material:{kind:'default',color:[.018,.020,.021,1],roughness:.90}}
@@ -76,8 +74,8 @@ const scene=new Scene({
   ...yardEntities,
   ...carEntities,
   {id:'door-opening',position:[.43,.77,-.947],mesh:{kind:'polygon-prism',points:[[-.76,-.41],[.72,-.41],[.66,.39],[-.62,.39]],thickness:.028,axis:2},material:{kind:'default',color:[.008,.009,.010,1],roughness:.96}},
-  {id:'door-panel',position:[.43,.77,-.962],mesh:{kind:'polygon-prism',points:[[-.73,-.38],[.70,-.38],[.63,.37],[-.59,.37]],thickness:.040,axis:2},material:{kind:'default',color:paint,roughness:.18,metalness:.10}},
-  {id:'door-window',position:[.47,1.24,-.964],mesh:{kind:'polygon-prism',points:[[-.56,-.16],[.56,-.16],[.43,.17],[-.45,.17]],thickness:.016,axis:2},material:{kind:'default',color:[.016,.026,.034,1],roughness:.07,metalness:.12,pattern:'window'}},
+  {id:'door-panel',position:[.43,.77,-.962],mesh:{kind:'polygon-prism',points:[[-.73,-.38],[.70,-.38],[.63,.37],[-.59,.37]],thickness:.040,axis:2},material:{kind:'steel',treatment:'painted',finish:'smooth',color:paint,roughness:.18,metalness:.10}},
+  {id:'door-window',position:[.47,1.24,-.964],mesh:{kind:'polygon-prism',points:[[-.56,-.16],[.56,-.16],[.43,.17],[-.45,.17]],thickness:.016,axis:2},material:{kind:'glass',finish:'polished',color:[.028,.045,.060,.34],roughness:.07,pattern:'window'},body:{mass:0}},
   ...human,
  ],
 });
