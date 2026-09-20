@@ -94,7 +94,7 @@ export class Scene {
   add(spec:EntitySpec):RuntimeEntity{
     spec=validateEntity(spec);
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
-    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?freezePrimitive(structuredClone(spec.mesh)):undefined;
+    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?freezePrimitive(structuredClone(spec.mesh)):undefined,renderMesh=spec.renderMesh?freezePrimitive(structuredClone(spec.renderMesh)):undefined;
     const surface=deriveSurfaceState(profile,spec.material??{},this.environment);
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
@@ -114,7 +114,7 @@ export class Scene {
       material:Object.freeze({...spec.material,...(spec.material?.texture?{texture:Object.freeze({...spec.material.texture})}:{}),kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
-      ...(mesh?{mesh}:{}),...(body?{body}:{})
+      ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
     this.entities.set(spec.id,runtime);
     return runtime;
