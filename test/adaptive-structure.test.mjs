@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Scene,StructuralBody,material} from '../dist/index.js';
+import {Scene,StructuralBody,applyStructuralSkin,bindStructuralSkin,material} from '../dist/index.js';
 
 const steel=material('steel').mechanical;
 
@@ -25,6 +25,44 @@ test('rigid activation transfers one mass and preserves the rigid linear momentu
   assert.deepEqual([...body.linearMomentum()].map(x=>Math.round(x*1e9)/1e9),[12,-8,4]);
   assert.equal(body.totalMass,4);
   assert.equal(body.stats.mode,'active');
+});
+
+test('moving rigid motion can sleep structurally without losing translation or rotation',()=>{
+  const mechanical={...steel,yieldStressPa:1e9,failureStrain:.9,plasticity:0};
+  const body=new StructuralBody({
+    nodes:[
+      {position:[-1,-.5,-.5],mass:1},{position:[1,-.5,-.5],mass:1},
+      {position:[0,1,-.5],mass:1},{position:[0,0,1],mass:1},
+    ],
+    constraints:[
+      {kind:'distance',a:0,b:1,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:0,b:2,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:0,b:3,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:1,b:2,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:1,b:3,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:2,b:3,areaM2:1e-3,material:mechanical},
+      {kind:'volume',a:0,b:1,c:2,d:3,compliance:0,yieldRatio:.5,breakRatio:.95,plasticity:0},
+    ],
+    sleepDelay:.02,sleepSpeed:.01,internalDamping:12,iterations:8,
+  });
+  const linear=[20,1,-3],angular=[.4,-.25,.3];
+  body.activateFromRigid([0,0,0],linear,angular);
+  for(let i=0;i<4&&body.stats.mode==='active';i++)body.step(1/120,[0,0,0]);
+  assert.equal(body.stats.mode,'dormant');
+  const baked=body.takeBakedState();
+  assert.ok(baked);
+  for(let i=0;i<3;i++){
+    assert.ok(Math.abs(baked.linearVelocity[i]-linear[i])<1e-8,{actual:baked.linearVelocity,linear});
+    assert.ok(Math.abs(baked.angularVelocity[i]-angular[i])<1e-7,{actual:baked.angularVelocity,angular});
+  }
+});
+
+test('render skin is a sparse binding over the structural cage, not a second physics mesh',()=>{
+  const nodeRest=new Float64Array([0,0,0,1,0,0]);
+  const binding=bindStructuralSkin([0,0,0,.5,0,0,1,0,0],nodeRest,2);
+  const nodes=new Float64Array([0,1,0,1,0,0]),out=new Float64Array(9);
+  applyStructuralSkin(binding,nodeRest,nodes,out);
+  assert.deepEqual([...out],[0,1,0,.5,.5,0,1,0,0]);
 });
 
 test('distributed contact impulse preserves total linear impulse',()=>{
