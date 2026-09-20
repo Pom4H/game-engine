@@ -16,20 +16,20 @@ spec.environment={
   clock:{startHour:11.8,hoursPerSecond:0},
 };
 spec.rendering={
-  sunDirection:[-.36,.79,-.49],
+  sunDirection:[.42,.80,-.42],
   sunColor:[1,.955,.88],
-  sunIntensity:4.45,
-  skyColor:[.31,.53,.82],
+  sunIntensity:3.35,
+  skyColor:[.33,.50,.72],
   fogDensity:.00038,
-  exposure:.94,
+  exposure:1.02,
   shadowExtent:30,
 };
 spec.camera={
-  position:[-13.35,1.08,-3.10],
-  target:[-20.12,.70,-1.42],
-  fov:22.5,
-  focusDistance:6.98,
-  aperture:.13,
+  position:[-11.55,1.18,-4.02],
+  target:[-20.05,.72,-1.38],
+  fov:30,
+  focusDistance:8.85,
+  aperture:.085,
 };
 
 // Keep the reference car exactly at its authored start pose. Headlights remain on
@@ -40,16 +40,24 @@ spec.animation={...spec.animation,vehicles:[]};
 // This is visual LOD, not a different material/lighting path.
 spec.entities=spec.entities.filter(entity=>{
   const id=entity.id;
-  return !id.startsWith('batch:plough-grit-')&&!id.startsWith('batch:walk-grain-')&&!id.startsWith('batch:centre-slush-');
+  if(id.startsWith('batch:plough-grit-')||id.startsWith('batch:walk-grain-')||id.startsWith('batch:centre-slush-'))return false;
+  // Replace near-road batched snow dressing with two coherent high-resolution
+  // banks; the distant roof/window snow stays untouched.
+  if(id.startsWith('batch:')&&entity.material?.kind==='snow'&&Math.abs(entity.position?.[2]??99)<8.6)return false;
+  return true;
 });
+spec.entities.push(
+  {id:'hero-bank-near',position:[-13,.18,-4.18],mesh:{kind:'snowdrift',size:[62,.48,1.08],seed:4617,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
+  {id:'hero-bank-far',position:[-13,.18,4.12],mesh:{kind:'snowdrift',size:[62,.56,1.22],seed:9121,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
+);
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
     entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.125,metalness:.035};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:0};
-    entity.material={...entity.material,color:[.012,.014,.018,1],roughness:.98};
+    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:.00003,waterDepthM:.0010};
+    entity.material={...entity.material,color:[.018,.020,.024,1],roughness:.88};
   }
 }
 
