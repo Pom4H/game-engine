@@ -26,14 +26,14 @@ export function makeM3Crash({
   return{
     version:1,
     seed,
-    gravity:[0,-9.81,0],
+    gravity:[0,0,0],
     ground:-100,
     clearColor:[.025,.03,.038,1],
     environment:{temperatureC:16,humidity:.48,precipitation:'rare',sunlight:.62,wind:[.3,0,.1],groundMoisture:.18},
     rendering:{sunDirection:[-.45,.78,-.28],sunColor:[1,.91,.79],skyColor:[.32,.40,.53],sunIntensity:2.4,exposure:1.0,shadowExtent:28},
     camera,
     entities:[
-      {id:'floor',position:[0,-.12,0],mesh:{kind:'box',size:[30,.24,18]},material:{kind:'default',color:[.24,.25,.27,1],roughness:.88},body:{mass:0,friction:.9,restitution:0}},
+      {id:'floor',position:[0,-.12,0],mesh:{kind:'box',size:[30,.24,18]},material:{kind:'default',color:[.24,.25,.27,1],roughness:.88}},
       {id:'m3:crash-body',position:[start[0],.72,start[1]],material:{kind:'steel'},body:{mass:1700,velocity,collisionSize:[4.55,1.42,1.86],restitution:.025,friction:.78}},
       ...car.entities,
       ...obstacles,
