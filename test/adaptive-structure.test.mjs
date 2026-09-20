@@ -27,7 +27,7 @@ test('rigid activation transfers one mass and preserves the rigid linear momentu
   assert.equal(body.stats.mode,'active');
 });
 
-test('moving rigid motion can sleep structurally without losing translation or rotation',()=>{
+test('moving rigid translation can sleep structurally without being mistaken for internal motion',()=>{
   const mechanical={...steel,yieldStressPa:1e9,failureStrain:.9,plasticity:0};
   const body=new StructuralBody({
     nodes:[
@@ -45,32 +45,65 @@ test('moving rigid motion can sleep structurally without losing translation or r
     ],
     sleepDelay:.02,sleepSpeed:.01,internalDamping:12,iterations:8,
   });
-  const linear=[20,1,-3],angular=[.4,-.25,.3];
-  const angularMomentum=(positions,center,linearVelocity,angularVelocity)=>{
-    const out=[0,0,0];
-    for(let i=0;i<4;i++){
-      const j=i*3,x=positions[j]-center[0],y=positions[j+1]-center[1],z=positions[j+2]-center[2];
-      const vx=linearVelocity[0]+angularVelocity[1]*z-angularVelocity[2]*y;
-      const vy=linearVelocity[1]+angularVelocity[2]*x-angularVelocity[0]*z;
-      const vz=linearVelocity[2]+angularVelocity[0]*y-angularVelocity[1]*x;
-      out[0]+=y*vz-z*vy;out[1]+=z*vx-x*vz;out[2]+=x*vy-y*vx;
-    }
-    return out;
-  };
-  const initialPositions=[...body.position],initialCenter=[
-    (initialPositions[0]+initialPositions[3]+initialPositions[6]+initialPositions[9])/4,
-    (initialPositions[1]+initialPositions[4]+initialPositions[7]+initialPositions[10])/4,
-    (initialPositions[2]+initialPositions[5]+initialPositions[8]+initialPositions[11])/4,
-  ];
-  const initialL=angularMomentum(initialPositions,initialCenter,linear,angular);
-  body.activateFromRigid(initialCenter,linear,angular);
+  const linear=[20,1,-3],center=[0,0,-.125];
+  body.activateFromRigid(center,linear,[0,0,0]);
   for(let i=0;i<4&&body.stats.mode==='active';i++)body.step(1/120,[0,0,0]);
   assert.equal(body.stats.mode,'dormant');
   const baked=body.takeBakedState();
   assert.ok(baked);
-  for(let i=0;i<3;i++)assert.ok(Math.abs(baked.linearVelocity[i]-linear[i])<1e-8,JSON.stringify({actual:baked.linearVelocity,linear}));
-  const bakedL=angularMomentum([...baked.positions],baked.centerOfMass,baked.linearVelocity,baked.angularVelocity);
-  for(let i=0;i<3;i++)assert.ok(Math.abs(bakedL[i]-initialL[i])<1e-6,JSON.stringify({bakedL,initialL,omega:baked.angularVelocity}));
+  for(let i=0;i<3;i++)assert.ok(Math.abs(baked.linearVelocity[i]-linear[i])<1e-10,JSON.stringify({actual:baked.linearVelocity,linear}));
+});
+
+test('manual structural bake preserves the current nodal linear and angular momentum exactly at the LOD boundary',()=>{
+  const mechanical={...steel,yieldStressPa:1e9,failureStrain:.9,plasticity:0};
+  const body=new StructuralBody({
+    nodes:[
+      {position:[-1,-.5,-.5],mass:1},{position:[1,-.5,-.5],mass:1},
+      {position:[0,1,-.5],mass:1},{position:[0,0,1],mass:1},
+    ],
+    constraints:[
+      {kind:'distance',a:0,b:1,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:0,b:2,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:0,b:3,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:1,b:2,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:1,b:3,areaM2:1e-3,material:mechanical},
+      {kind:'distance',a:2,b:3,areaM2:1e-3,material:mechanical},
+      {kind:'volume',a:0,b:1,c:2,d:3,compliance:0,yieldRatio:.5,breakRatio:.95,plasticity:0},
+    ],
+    sleepDelay:10,sleepSpeed:.001,internalDamping:12,iterations:8,
+  });
+  const centerOfMass=positions=>[
+    (positions[0]+positions[3]+positions[6]+positions[9])/4,
+    (positions[1]+positions[4]+positions[7]+positions[10])/4,
+    (positions[2]+positions[5]+positions[8]+positions[11])/4,
+  ];
+  const nodalMomentum=()=>{
+    const center=centerOfMass(body.position),P=[0,0,0],L=[0,0,0];
+    for(let i=0;i<4;i++){
+      const j=i*3,x=body.position[j]-center[0],y=body.position[j+1]-center[1],z=body.position[j+2]-center[2];
+      const vx=body.velocity[j],vy=body.velocity[j+1],vz=body.velocity[j+2];
+      P[0]+=vx;P[1]+=vy;P[2]+=vz;
+      L[0]+=y*vz-z*vy;L[1]+=z*vx-x*vz;L[2]+=x*vy-y*vx;
+    }
+    return{center,P,L};
+  };
+  const rigidMomentum=baked=>{
+    const {positions,centerOfMass:center,linearVelocity:v,angularVelocity:w}=baked,P=v.map(value=>value*4),L=[0,0,0];
+    for(let i=0;i<4;i++){
+      const j=i*3,x=positions[j]-center[0],y=positions[j+1]-center[1],z=positions[j+2]-center[2];
+      const vx=v[0]+w[1]*z-w[2]*y,vy=v[1]+w[2]*x-w[0]*z,vz=v[2]+w[0]*y-w[1]*x;
+      L[0]+=y*vz-z*vy;L[1]+=z*vx-x*vz;L[2]+=x*vy-y*vx;
+    }
+    return{P,L};
+  };
+  const initialCenter=centerOfMass(body.position);
+  body.activateFromRigid(initialCenter,[20,1,-3],[.4,-.25,.3]);
+  body.step(1/120,[0,0,0]);
+  const before=nodalMomentum(),baked=body.bake(),after=rigidMomentum(baked);
+  for(let i=0;i<3;i++){
+    assert.ok(Math.abs(after.P[i]-before.P[i])<1e-10,JSON.stringify({before,after}));
+    assert.ok(Math.abs(after.L[i]-before.L[i])<1e-9,JSON.stringify({before,after,omega:baked.angularVelocity}));
+  }
 });
 
 test('render skin is a sparse binding over the structural cage, not a second physics mesh',()=>{
