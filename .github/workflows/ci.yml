@@ -46,6 +46,18 @@ jobs:
         run: |
           node dist/cli.js render tools/promo/clear-day.scene.mjs --time 0 --width 1920 --height 1080 --out artifacts/m3-clear-day-front.png
           node tools/check-png.mjs artifacts/m3-clear-day-front.png
+      - name: Clear-day 1080p runtime benchmark
+        env:
+          BENCH_SCENE: clear-day.scene.mjs
+          BENCH_USE_SCENE_CAMERA: "1"
+          BENCH_TIME: "0"
+          BENCH_CASES: 1920x1080
+          BENCH_WARMUP_MS: "1500"
+          BENCH_SAMPLE_MS: "5000"
+          BENCH_OUT: artifacts/performance/clear-day.json
+        run: |
+          node tools/promo/benchmark.mjs
+          node tools/perf/assert-60fps.mjs artifacts/performance/clear-day.json
       - name: Deterministic video path
         run: node dist/cli.js record examples/window-gauntlet.ts --duration 2.5 --fps 24 --width 1280 --height 720 --out artifacts/gpu-smoke.mp4
       - uses: actions/upload-artifact@v7
