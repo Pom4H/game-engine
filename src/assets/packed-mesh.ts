@@ -103,7 +103,7 @@ export function decodePackedMesh(mesh:PackedMesh):Extract<Primitive,{kind:'trian
   const indexArray=mesh.indicesU16Base64?decodeU16(mesh.indicesU16Base64):decodeU32(mesh.indicesU32Base64!);
   const indices=[...indexArray];
   if(q.length!==mesh.vertices*3||indices.length!==mesh.triangles*3)throw new RangeError('Packed mesh count mismatch');
-  for(let axis=0;axis<3;axis++)if(!Number.isFinite(mesh.min[axis])||!Number.isFinite(mesh.max[axis])||mesh.max[axis]<mesh.min[axis])throw new RangeError('Packed mesh bounds are invalid');
+  for(let axis=0;axis<3;axis++){const min=mesh.min[axis]!,max=mesh.max[axis]!;if(!Number.isFinite(min)||!Number.isFinite(max)||max<min)throw new RangeError('Packed mesh bounds are invalid');}
   const scale:[number,number,number]=[
     (mesh.max[0]-mesh.min[0])/65535,
     (mesh.max[1]-mesh.min[1])/65535,
