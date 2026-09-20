@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,resolveEnvironmentAt,material} from '../dist/index.js';
+import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,resolveEnvironmentAt,material,validateScene} from '../dist/index.js';
 
 test('fixed clock keeps delayed time as bounded debt',()=>{
   const clock=new FixedClock(10,100,4);let steps=0;clock.reset(0);
@@ -18,6 +18,14 @@ test('kernel order is stable and cadence is exact',()=>{
   kernel.use({id:'b',phase:'simulate',rateHz:30,reads:[],writes:['b'],run:()=>{calls.push('b');}});
   kernel.use({id:'a',phase:'simulate',rateHz:60,reads:[],writes:['a'],run:()=>{calls.push('a');}});
   kernel.run(1,{});assert.deepEqual(calls,['a']);calls.length=0;kernel.run(2,{});assert.deepEqual(calls,['a','b']);
+});
+
+test('reflection probe authoring binds to scene entities without semantic renderer knowledge',()=>{
+  const spec={version:1,entities:[{id:'hero',mesh:{kind:'box'}},{id:'ground',mesh:{kind:'box'}}],rendering:{reflectionProbe:{entity:'hero',offset:[0,1,0],radius:30,exclude:['hero'],facesPerFrame:1}}};
+  const valid=validateScene(spec);assert.equal(valid.rendering.reflectionProbe.entity,'hero');
+  assert.throws(()=>validateScene({...spec,rendering:{reflectionProbe:{entity:'missing'}}}),/references missing entity/);
+  assert.throws(()=>validateScene({...spec,rendering:{reflectionProbe:{entity:'hero',position:[0,0,0]}}}),/exactly one/);
+  assert.throws(()=>validateScene({...spec,rendering:{reflectionProbe:{entity:'hero',facesPerFrame:1.5}}}),/must be integer/);
 });
 
 test('scene physics is deterministic across equal runs',()=>{
