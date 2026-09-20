@@ -97,6 +97,13 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
       ...(source.wheel?{wheel:true}:{}),
       material:sourceMaterial(source.sourceMaterial,source.id),
     })),
+    // The reference FBX is an exterior model. A tiny opaque cabin proxy prevents
+    // physically impossible sight lines through both windscreens while giving
+    // glazing real dashboard/seat silhouettes. These parts are render-only.
+    Object.freeze({id:'interior-dashboard',role:'dark',mesh:{kind:'box',size:[.72,.18,1.34]},position:[.30,.82,0] as const,material:{kind:'plastic',finish:'rough',roughness:.72}}),
+    Object.freeze({id:'interior-seat-left',role:'dark',mesh:{kind:'box',size:[.24,.64,.42]},position:[-.18,.90,-.39] as const,rotation:[0,0,-.10] as const,material:{kind:'default',finish:'rough',roughness:.86,pattern:'fabric'}}),
+    Object.freeze({id:'interior-seat-right',role:'dark',mesh:{kind:'box',size:[.24,.64,.42]},position:[-.18,.90,.39] as const,rotation:[0,0,-.10] as const,material:{kind:'default',finish:'rough',roughness:.86,pattern:'fabric'}}),
+    Object.freeze({id:'interior-rear-seat',role:'dark',mesh:{kind:'box',size:[.22,.58,1.24]},position:[-1.08,.84,0] as const,rotation:[0,0,-.08] as const,material:{kind:'default',finish:'rough',roughness:.88,pattern:'fabric'}}),
   ];
   const generatedTriangles=parts.reduce((sum,part)=>sum+(part.mesh.kind==='triangle-mesh'?part.mesh.indices.length/3:0),0);
   return Object.freeze({
