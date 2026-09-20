@@ -33,6 +33,7 @@ interface VisualBinding {
   readonly positions:readonly number[];
   readonly indices:readonly number[];
   readonly deform:boolean;
+  readonly target:'mesh'|'renderMesh';
 }
 interface DeformableState {
   readonly spec:Required<Pick<DeformableBodySpec,'skinThicknessM'|'radiusM'|'maxDentM'|'minEnergyJ'>>&DeformableBodySpec;
@@ -76,7 +77,7 @@ export class PlasticDeformationSystem {
     for(const id of deformIds)if(!input.visualIds.includes(id))throw new TypeError(`Deformable visual ${id} must also be listed in visualIds`);
     for(const id of input.visualIds){
       if(ids.has(id))throw new TypeError(`Duplicate deformable visual ${id}`);ids.add(id);
-      const entity=entities.get(id),mesh=entity?.mesh;
+      const entity=entities.get(id),mesh=entity?.renderMesh??entity?.mesh;
       if(!entity||mesh?.kind!=='triangle-mesh')throw new TypeError(`Deformable visual ${id} must be a triangle mesh`);
       const offset=worldToLocal(root,V3.sub(entity.position,root.position));
       visuals.push(Object.freeze({
@@ -91,6 +92,7 @@ export class PlasticDeformationSystem {
         positions:Object.freeze([...mesh.positions]),
         indices:Object.freeze([...mesh.indices]),
         deform:deformIds.has(id),
+        target:entity.renderMesh?'renderMesh':'mesh',
       }));
     }
     const spec=Object.freeze({
@@ -223,7 +225,8 @@ export class PlasticDeformationSystem {
         positions[i]=visualPoint[0]/visual.scale[0];positions[i+1]=visualPoint[1]/visual.scale[1];positions[i+2]=visualPoint[2]/visual.scale[2];
       }
       const normals=recomputeNormals(positions,visual.indices);
-      entity.mesh=freezePrimitive({kind:'triangle-mesh',positions,normals,indices:[...visual.indices]});
+      const deformed=freezePrimitive({kind:'triangle-mesh',positions,normals,indices:[...visual.indices]});
+      if(visual.target==='renderMesh')entity.renderMesh=deformed;else entity.mesh=deformed;
     }
   }
 }
