@@ -115,7 +115,7 @@ export class FourCornerSuspension {
   private readonly compression=new Float64Array(4);
   private readonly velocity=new Float64Array(4);
   private readonly load=new Float64Array(4);
-  private readonly lastAudible=new Float64Array(4).fill(-Infinity);
+  private lastAudible=-Infinity;
   private readonly events:MechanismEvent[]=[];
   private sequence=0;
   time=0;
@@ -144,8 +144,8 @@ export class FourCornerSuspension {
       const nv=v+a*dt,nx=clamp(x+nv*dt,-.075,.145);
       this.velocity[i]=nx===-.075||nx===.145?nv*.18:nv;this.compression[i]=nx;
       const dissipated=this.damperNsPm*nv*nv*dt;
-      if(dissipated>.12&&Math.abs(nv)>.022&&this.time-this.lastAudible[i]!.valueOf()>.11){
-        this.lastAudible[i]=this.time;
+      if(dissipated>.35&&Math.abs(nv)>.04&&this.time-this.lastAudible>.16){
+        this.lastAudible=this.time;
         this.events.push({type:'mechanism',id:++this.sequence,time:this.time,point:this.cornerPoint(i),mechanism:'suspension',energy:dissipated,speed:Math.abs(nv),size:.55});
       }
       this.load[i]=0;
@@ -257,7 +257,7 @@ export class M3InteractionRig {
     if(input.material!=='glass'&&input.energyJ>=structuralActivationEnergyJ)this.structure.applyImpulse(input.point,V3.scale(V3.normalize(input.normal),-impulse),Math.max(.16,input.radiusM*1.25));
     const event:ImpactEvent={type:'impact',id:++this.eventSequence,time:input.time,point:input.point,normal:input.normal,a:'m3-panel',b:'human',materialA:input.material??'steel',materialB:input.contactMaterial??'default',energy:input.energyJ,impulse,speed:effectiveMass>0?impulse/effectiveMass:0,size:input.radiusM*2};
     this.events.push(event);
-    if(result.elasticEnergyJ>.2)this.events.push({type:'mechanism',id:++this.eventSequence,time:input.time,point:input.point,mechanism:'panel-flex',energy:result.elasticEnergyJ,speed:Math.sqrt(Math.max(0,2*result.elasticEnergyJ/effectiveMass)),size:input.radiusM*2});
+    if(result.elasticEnergyJ>4&&input.energyJ>12)this.events.push({type:'mechanism',id:++this.eventSequence,time:input.time,point:input.point,mechanism:'panel-flex',energy:result.elasticEnergyJ,speed:Math.sqrt(Math.max(0,2*result.elasticEnergyJ/effectiveMass)),size:input.radiusM*2});
     return result;
   }
 
