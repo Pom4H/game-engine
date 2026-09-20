@@ -1,7 +1,7 @@
 import {freezePrimitive} from '../procedural/mesh.js';
 import {V3,type MutableVec3,type Vec3} from '../math.js';
 import type {RuntimeEntity} from '../scene/scene.js';
-import type {Contact} from './world.js';
+import type {ContactCandidate} from './world.js';
 
 export interface DeformableBodySpec {
   readonly bodyId:string;
@@ -39,14 +39,34 @@ interface DeformableState {
   readonly visuals:readonly VisualBinding[];
   readonly dents:PlasticDent[];
 }
+interface PlasticContact {
+  readonly state:DeformableState;
+  readonly root:RuntimeEntity;
+  readonly point:Vec3;
+  readonly outwardNormal:Vec3;
+  readonly radius:number;
+  readonly baseRadius:number;
+  readonly demandJ:number;
+  readonly workPerMetre:number;
+}
 
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
 
-/** Persistent plastic deformation driven by authoritative rigid-body contacts.
- * It is intentionally not a springy soft-body solver: once material yields,
- * the dent becomes part of world state and survives after contact separation. */
+/**
+ * Reduced persistent deformation layer.
+ *
+ * Unlike a visual post-process, absorbContact() runs inside the authoritative
+ * contact decision before the rigid impulse is applied. Plastic work therefore
+ * comes out of the same normal-energy budget that drives rebound/penetration.
+ *
+ * This remains the cheap reduced LOD. High-detail structural motion belongs to
+ * StructuralBody; once that solver settles, its permanent state can be baked
+ * back down into a reduced representation like this one.
+ */
 export class PlasticDeformationSystem {
   private readonly states=new Map<string,DeformableState>();
+  private readonly dirty=new Set<DeformableState>();
+  private plasticWorkJ=0;
 
   attach(input:DeformableBodySpec,entities:ReadonlyMap<string,RuntimeEntity>):void{
     if(!input.bodyId||this.states.has(input.bodyId)||!input.visualIds.length)throw new TypeError('Deformable body requires a distinct bodyId and visualIds');
@@ -86,54 +106,84 @@ export class PlasticDeformationSystem {
     this.syncState(this.states.get(input.bodyId)!,entities);
   }
 
-  step(contacts:readonly Contact[],entities:ReadonlyMap<string,RuntimeEntity>):void{
-    for(const state of this.states.values())this.syncPose(state,entities);
-    for(const contact of contacts){
-      const a=this.states.get(contact.a),b=contact.b==='ground'?undefined:this.states.get(contact.b);
-      if(a)this.applyContact(a,contact,entities,true);
-      if(b)this.applyContact(b,contact,entities,false);
+  /**
+   * Consume ductile plastic work from a contact before the rigid response.
+   * For two deformable bodies the shared normal-energy budget is split in
+   * proportion to each side's requested work and can never be spent twice.
+   */
+  absorbContact(contact:ContactCandidate,entities:ReadonlyMap<string,RuntimeEntity>):number{
+    if(contact.normalEnergy<=0||contact.approachSpeed<=.15)return 0;
+    const requests:PlasticContact[]=[];
+    const a=this.states.get(contact.a.id),b=this.states.get(contact.b.id);
+    if(a){const request=this.contactRequest(a,contact,entities,true);if(request)requests.push(request);}
+    if(b){const request=this.contactRequest(b,contact,entities,false);if(request)requests.push(request);}
+    if(!requests.length)return 0;
+    const totalDemand=requests.reduce((sum,request)=>sum+request.demandJ,0);
+    if(totalDemand<=0)return 0;
+    const budget=Math.min(contact.normalEnergy,totalDemand);
+    let consumed=0;
+    for(const request of requests){
+      const allocation=budget*request.demandJ/totalDemand;
+      consumed+=this.applyPlasticWork(request,allocation);
     }
+    this.plasticWorkJ+=consumed;
+    return Math.min(contact.normalEnergy,consumed);
+  }
+
+  /** Commit deferred mesh work after physics; physics state was already changed causally. */
+  step(entities:ReadonlyMap<string,RuntimeEntity>):void{
+    for(const state of this.states.values())this.syncPose(state,entities);
+    for(const state of this.dirty)this.syncState(state,entities);
+    this.dirty.clear();
   }
 
   remove(id:string):void{
+    const own=this.states.get(id);if(own)this.dirty.delete(own);
     this.states.delete(id);
-    for(const [bodyId,state] of this.states)if(state.visuals.some(visual=>visual.id===id))this.states.delete(bodyId);
+    for(const [bodyId,state] of this.states)if(state.visuals.some(visual=>visual.id===id)){this.dirty.delete(state);this.states.delete(bodyId);}
   }
 
   dents(bodyId:string):readonly PlasticDent[]{return Object.freeze((this.states.get(bodyId)?.dents??[]).map(dent=>Object.freeze({...dent,point:Object.freeze([...dent.point]) as Vec3,outwardNormal:Object.freeze([...dent.outwardNormal]) as Vec3})));}
-  inspect(){return{bodies:this.states.size,dents:[...this.states.values()].reduce((sum,state)=>sum+state.dents.length,0)};}
+  inspect(){return{bodies:this.states.size,dents:[...this.states.values()].reduce((sum,state)=>sum+state.dents.length,0),plasticWorkJ:this.plasticWorkJ};}
 
-  private applyContact(state:DeformableState,contact:Contact,entities:ReadonlyMap<string,RuntimeEntity>,isA:boolean):void{
+  private contactRequest(state:DeformableState,contact:ContactCandidate,entities:ReadonlyMap<string,RuntimeEntity>,isA:boolean):PlasticContact|undefined{
     const root=entities.get(state.spec.bodyId);if(!root?.body)return;
-    if(contact.normalEnergy<=state.spec.minEnergyJ||contact.normalSpeed<=.15)return;
+    if(contact.normalEnergy<=state.spec.minEnergyJ)return;
     const mechanical=root.body.material.mechanical;
     if(mechanical.brittle||mechanical.plasticity<=.01||!Number.isFinite(mechanical.yieldStressPa))return;
     const point=worldPointToLocal(root,contact.point);
     const outwardWorld=isA?contact.normal:V3.scale(contact.normal,-1),outwardNormal=V3.normalize(worldToLocal(root,outwardWorld));
-    const energy=contact.normalEnergy,baseRadius=state.spec.radiusM;
-    const radius=clamp(baseRadius*(.78+Math.pow(Math.max(1,energy/state.spec.minEnergyJ),.18)*.22),baseRadius*.65,baseRadius*1.75);
+    const energy=contact.normalEnergy,baseRadius=state.spec.radiusM,threshold=Math.max(1,state.spec.minEnergyJ);
+    const radius=clamp(baseRadius*(.78+Math.pow(Math.max(1,energy/threshold),.18)*.22),baseRadius*.65,baseRadius*1.75);
     const area=Math.PI*radius*radius,volume=area*state.spec.skinThicknessM;
     const elasticYieldEnergy=.5*mechanical.yieldStressPa*mechanical.yieldStressPa/Math.max(1,mechanical.youngModulusPa)*volume;
-    const plasticEnergy=Math.max(0,energy-elasticYieldEnergy)*mechanical.plasticity;
-    if(plasticEnergy<=0)return;
+    const demandJ=Math.max(0,energy-elasticYieldEnergy)*mechanical.plasticity;
+    if(demandJ<=0)return;
     const workPerMetre=Math.max(1,mechanical.yieldStressPa*area*state.spec.skinThicknessM/Math.max(.04,radius));
-    const depth=clamp(plasticEnergy/workPerMetre*.85,.001,state.spec.maxDentM);
-    if(depth<.002)return;
+    return{state,root,point:Object.freeze([...point]) as Vec3,outwardNormal:Object.freeze([...outwardNormal]) as Vec3,radius,baseRadius,demandJ,workPerMetre};
+  }
+
+  private applyPlasticWork(request:PlasticContact,energy:number):number{
+    if(energy<=0)return 0;
+    const {state,root,point,outwardNormal,radius,baseRadius,workPerMetre}=request;
+    const depth=clamp(energy/workPerMetre*.85,.001,state.spec.maxDentM);
+    if(depth<.002)return 0;
 
     let dent=state.dents.find(existing=>
       V3.length(V3.sub(existing.point,point))<Math.min(existing.radius,radius)*.48&&
       V3.dot(existing.outwardNormal,outwardNormal)>.72
     );
     if(dent){
-      dent.energy+=plasticEnergy;
+      dent.energy+=energy;
       dent.depth=clamp(Math.max(dent.depth,depth)+depth*.32,0,state.spec.maxDentM);
-      dent.radius=clamp(Math.max(dent.radius,radius)*(1+Math.min(.08,plasticEnergy/100000)),baseRadius*.65,baseRadius*1.9);
+      dent.radius=clamp(Math.max(dent.radius,radius)*(1+Math.min(.08,energy/100000)),baseRadius*.65,baseRadius*1.9);
     }else{
-      dent={point:Object.freeze([...point]) as Vec3,outwardNormal:Object.freeze([...outwardNormal]) as Vec3,radius,depth,energy:plasticEnergy};
+      dent={point,outwardNormal,radius,depth,energy};
       state.dents.push(dent);if(state.dents.length>20)state.dents.shift();
     }
-    root.body.applyLocalCrush(outwardNormal,depth*.72);
-    this.syncState(state,entities);
+    root.body!.applyLocalCrush(outwardNormal,depth*.72);
+    this.dirty.add(state);
+    return energy;
   }
 
   private syncPose(state:DeformableState,entities:ReadonlyMap<string,RuntimeEntity>):void{
