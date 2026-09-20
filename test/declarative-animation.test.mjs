@@ -31,7 +31,7 @@ test('declarative binding validation rejects missing, conflicting, excessive and
   s=>s.animation.vehicles[0].parts[0].id='coat',s=>s.animation.vehicles[0].parts[0].wheel='yes',s=>s.animation.vehicles[0].parts[0].wheel=true,s=>s.animation.vehicles[0].parts=[],s=>s.animation.vehicles[0].startTime=NaN,s=>s.animation.vehicles[0].id='person',s=>s.entities.find(e=>e.id==='car').body={mass:2},
   s=>s.animation.walkers=Array.from({length:129},(_,i)=>({id:'p'+i,root:[0,0,0],speed:0})),
   s=>s.surfaceContacts.snow[0].surfaceId='missing',s=>s.surfaceContacts.snow[0].surfaceId='coat',s=>s.surfaceContacts.snow.push({...s.surfaceContacts.snow[0]}),s=>s.surfaceContacts.snow[0].maxTiles=1,s=>s.surfaceContacts.snow[0].coarseCellSize=null,s=>s.surfaceContacts.snow[0].detailedCellSize=.001,s=>s.surfaceContacts.snow[0].material={texture:{url:'data:image/png,a'}},
-  s=>s.surfaceContacts.wheels[0].entityId='car',s=>s.surfaceContacts.wheels[0].radius=-1,s=>s.surfaceContacts.wheels[0].lateral=[NaN,0,0],s=>s.surfaceContacts.wheels.push({...s.surfaceContacts.wheels[0]}),s=>s.surfaceContacts.wheels=Array.from({length:513},()=>({entityId:'wheel'})),
+  s=>s.surfaceContacts.wheels[0].entityId='car',s=>s.surfaceContacts.wheels[0].radius=-1,s=>s.surfaceContacts.wheels[0].pressureKPa=20,s=>s.surfaceContacts.wheels[0].widthM=.01,s=>s.surfaceContacts.wheels[0].tyreMassKg=0,s=>s.surfaceContacts.wheels[0].lateral=[NaN,0,0],s=>s.surfaceContacts.wheels.push({...s.surfaceContacts.wheels[0]}),s=>s.surfaceContacts.wheels=Array.from({length:513},()=>({entityId:'wheel'})),
  ];
  for(const mutate of mutations){const spec=authored();mutate(spec);assert.throws(()=>validateScene(spec));assert.throws(()=>new Scene(spec));}
  assert.doesNotThrow(()=>new Scene({version:1,entities:[]}));
