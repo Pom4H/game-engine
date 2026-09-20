@@ -113,7 +113,7 @@ function validateBindings(scene:Record<string,unknown>,entities:readonly EntityS
       const path=`surfaceContacts.wheels[${i}]`,item=object(raw,path),entity=reference(item.entityId,`${path}.entityId`);
       if(wheelIds.has(entity.id))throw new TypeError(`${path}.entityId is duplicated`);wheelIds.add(entity.id);
       if(!entity.body)throw new TypeError(`${path}.entityId requires a physics body`);
-      optionalNumber(item,'radius',path,Number.MIN_VALUE);if(item.lateral!==undefined)vector(item.lateral,3,`${path}.lateral`);
+      optionalNumber(item,'radius',path,Number.MIN_VALUE);optionalNumber(item,'pressureKPa',path,50,600);optionalNumber(item,'widthM',path,.08,.6);optionalNumber(item,'tyreMassKg',path,1,80);if(item.lateral!==undefined)vector(item.lateral,3,`${path}.lateral`);
     }
   }
 }
