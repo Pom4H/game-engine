@@ -19,6 +19,9 @@ export interface ImpactEvent {
   readonly materialB:MaterialKind;
   readonly surfaceA?:ContactSurfaceAcoustics;
   readonly surfaceB?:ContactSurfaceAcoustics;
+  /** World-space resonator dimensions. Optional for synthetic/test events. */
+  readonly dimensionsA?:Vec3;
+  readonly dimensionsB?:Vec3;
   readonly energy:number;
   readonly impulse:number;
   readonly speed:number;
