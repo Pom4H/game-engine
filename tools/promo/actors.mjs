@@ -1,4 +1,4 @@
-import {sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
+import {M3_PARAMETRIC_PROFILE,generatePassengerVehicle,sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
 
 // Only the cast, rig binding, garment shapes and route are authored here.
 // Locomotion, IK, planted contacts and transform updates are engine systems.
@@ -102,13 +102,16 @@ function snowDust(seed){
  return{kind:'triangle-mesh',positions,normals,indices};
 }
 export const CAR={startX:-21,z:-1.40,speed:2.65,radius:.346};
-export function makeM3(asset,id,x,z,color,speed=0){
+const PROCEDURAL_M3=generatePassengerVehicle(M3_PARAMETRIC_PROFILE);
+export function makeM3(id,x,z,color,speed=0){
  const entities=[],motions=[];
- for(const part of asset.parts){
-  const type=part.material,paint=type==='CarPaint',glass=type==='Window'||type==='Transparent',rim=type==='Rims',light=type==='DayLights',tail=type==='RearLight';
-  const c=paint?color:type==='Transparent'?[.45,.53,.57,.18]:glass?[.115,.17,.21,1]:rim?[.26,.29,.31,1]:type==='Tires'?[.027,.03,.032,1]:light?[.80,.89,1,1]:tail?[.34,.012,.008,1]:type==='Mirror'?[.4,.45,.5,1]:type==='Exhaust'?[.23,.25,.26,1]:type==='RedPart'?[.27,.015,.011,1]:[.024,.028,.031,1];
-  const position=[x+part.center[0],.006+part.center[1],z+part.center[2]],e={id:id+'-'+part.name,position,mesh:part.mesh,material:{kind:type==='Transparent'?'glass':'default',color:c,roughness:paint?.23:glass?.09:rim?.30:type==='Tires'?.91:.50,metalness:paint?.24:rim?.87:type==='Exhaust'?.9:glass?.18:0,...(type==='Tires'?{pattern:'rubber'}:{}),...(light?{emissive:speed?[2.8,3.1,3.5]:[.12,.14,.17]}:tail?{emissive:speed?[.7,.015,.006]:[0,0,0]}:{})}};
-  entities.push(e);if(speed)motions.push({id:e.id,origin:position,speed,wheel:part.wheel,radius:CAR.radius});
+ for(const part of PROCEDURAL_M3.parts){
+  const paint=part.role==='paint',glass=part.role==='glass',rim=part.role==='rim',tire=part.role==='tire',light=part.role==='light',tail=part.role==='tail',metal=part.role==='metal';
+  const c=paint?color:glass?[.115,.17,.21,.72]:rim?[.26,.29,.31,1]:tire?[.027,.03,.032,1]:light?[.80,.89,1,1]:tail?[.34,.012,.008,1]:metal?[.23,.25,.26,1]:[.024,.028,.031,1];
+  const position=[x+part.position[0],.006+part.position[1],z+part.position[2]];
+  const e={id:id+'-'+part.id,position,mesh:part.mesh,material:{kind:glass?'glass':'default',color:c,roughness:paint?.23:glass?.09:rim?.30:tire?.91:metal?.34:.50,metalness:paint?.24:rim?.87:metal?.9:glass?.18:0,...(tire?{pattern:'rubber'}:{}),...(light?{emissive:speed?[2.8,3.1,3.5]:[.12,.14,.17]}:tail?{emissive:speed?[.7,.015,.006]:[0,0,0]}:{})},...(part.rotation?{rotation:[...part.rotation]}:{})};
+  entities.push(e);
+  if(speed)motions.push({id:e.id,origin:position,speed,wheel:!!part.wheel,radius:CAR.radius});
  }
- return{entities,motions};
+ return{entities,motions,geometry:PROCEDURAL_M3};
 }
