@@ -131,6 +131,7 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
   }
 
   assert.equal(byId.get('body').material.kind,'steel');
+  assert.ok(m3PartMaterial(byId.get('body'),[.2,.2,.2,1],false).clearcoat>.9,'hero paint should use the generic clearcoat layer');
   assert.equal(byId.get('windshield-front').material.kind,'glass');
   assert.equal(byId.get('mirror-left').material.kind,'mirror');
   assert.equal(byId.get('plastic-trim').material.kind,'plastic');
