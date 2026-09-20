@@ -25,11 +25,11 @@ spec.rendering={
   shadowExtent:30,
 };
 spec.camera={
-  position:[-15.65,.92,-4.18],
-  target:[-20.15,.79,-1.42],
-  fov:34,
-  focusDistance:5.25,
-  aperture:.012,
+  position:[-15.72,.80,-3.38],
+  target:[-20.05,.76,-1.42],
+  fov:30,
+  focusDistance:4.8,
+  aperture:.010,
 };
 
 // Keep the reference car exactly at its authored start pose. Headlights remain on
@@ -38,7 +38,11 @@ spec.animation={...spec.animation,vehicles:[]};
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
-    entity.material={...entity.material,color:[.28,.315,.36,1]};
+    entity.material={...entity.material,color:[.30,.31,.33,1]};
+  }
+  if(entity.id==='road'&&entity.environmental){
+    entity.environmental={...entity.environmental,snowDepthM:.00035,iceDepthM:.00008,waterDepthM:.0028};
+    entity.material={...entity.material,color:[.075,.078,.082,1],roughness:.74};
   }
 }
 
