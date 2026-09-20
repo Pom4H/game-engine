@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {AdaptiveStructuralController,Scene,StructuralBody,applyStructuralSkin,bindStructuralSkin,material} from '../dist/index.js';
+import {AdaptiveStructuralController,M3_PARAMETRIC_PROFILE,Scene,StructuralBody,StructuralStaticContactSolver,applyStructuralSkin,bindStructuralSkin,material,passengerStructuralDefinition} from '../dist/index.js';
 
 const steel=material('steel').mechanical;
 
@@ -216,6 +216,27 @@ test('adaptive structural LOD ignores small contacts, promotes severe impacts an
 test('adaptive structural controller rejects a second mass model',()=>{
   const body=bar();
   assert.throws(()=>new AdaptiveStructuralController(body,body.totalMass+1),/exactly the reduced rigid mass/);
+});
+
+test('M3 structural cage performs a real 90 km/h wall contact without a shrinking rigid box',()=>{
+  const definition=passengerStructuralDefinition(M3_PARAMETRIC_PROFILE,1700,material('steel').mechanical);
+  assert.equal(definition.nodes.length,28);
+  assert.ok(definition.collisionTriangles.length>=50);
+  const body=new StructuralBody({...definition,sleepDelay:2}),wall=new StructuralStaticContactSolver([
+    {id:'wall',center:[0,1,0],half:[.20,1.5,2.2]},
+  ],definition.collisionTriangles);
+  body.translate([-3.0,0,0]);
+  const center=body.centerOfMass(),initialFront=Math.max(...Array.from({length:body.nodeCount},(_,i)=>body.position[i*3]));
+  body.activateFromRigid(center,[25,0,0],[0,0,0]);
+  for(let tick=0;tick<28;tick++)body.step(1/120,[0,0,0],structure=>wall.project(structure));
+  const finalFront=Math.max(...Array.from({length:body.nodeCount},(_,i)=>body.position[i*3]));
+  assert.ok(wall.stats.contacts>0,wall.stats);
+  assert.ok(body.plasticWorkJ>0,{plasticWorkJ:body.plasticWorkJ,contacts:wall.stats});
+  assert.ok(body.broken.some(Boolean)||body.plasticWorkJ>100,{plasticWorkJ:body.plasticWorkJ,broken:[...body.broken]});
+  assert.ok(finalFront<=-.20+1e-6,{initialFront,finalFront,wall:wall.stats});
+  assert.ok(body.position.every(Number.isFinite));
+  const rear=Math.min(...Array.from({length:body.nodeCount},(_,i)=>body.position[i*3]));
+  assert.ok(finalFront-rear<M3_PARAMETRIC_PROFILE.dimensions.length*.98,{rear,finalFront});
 });
 
 test('reduced plastic deformation spends the authoritative contact energy instead of post-processing it twice',()=>{
