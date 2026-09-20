@@ -344,7 +344,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   // Rough dry asphalt is an absorber, not a sky-colored mirror. Keep the broad
   // dielectric lobe subdued until actual water/ice state creates local coverage.
-  if(materialKind>4.5&&materialKind<5.5)color*=mix(.34,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));
+  if(materialKind>4.5&&materialKind<5.5){color*=mix(.34,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
 
   let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal);}}
   color+=u.emission.rgb;
