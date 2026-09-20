@@ -63,9 +63,9 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  // Each linear comparison sample is already a hardware-filtered 2x2 PCF tap.
  // Two temporally rotated taps give eight effective comparisons per frame and TAA
  // integrates the changing phase, avoiding the cost of four explicit taps.
- let taps=array<vec2<f32>,2>(vec2<f32>(-.66,-.38),vec2<f32>(.66,.38));
- for(var i=0;i<2;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*2.15,clip.z-.000025);}
- let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.5,smoothstep(0.0,.025,edge));
+ let taps=array<vec2<f32>,4>(vec2<f32>(-.78,-.26),vec2<f32>(.24,-.82),vec2<f32>(.80,.30),vec2<f32>(-.20,.84));
+ for(var i=0;i<4;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*2.20,clip.z-.000025);}
+ let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.25,smoothstep(0.0,.025,edge));
 }
 
 struct VOut {
