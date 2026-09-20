@@ -327,7 +327,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec*clearcoat;
     let coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,.35).rgb;
     let coatEnvF=.04+.96*pow(1.0-nv,5.0);
-    color+=coatEnvironment*coatEnvF*clearcoat*.72;
+    color+=coatEnvironment*coatEnvF*clearcoat*.50;
   }
 
   // Automotive glass is mostly transmitted scene color from the blend pass plus
