@@ -21,11 +21,15 @@ try{
 const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas),geometry=generateM3Vehicle();
 const paint=[.040,.052,.068,1];
 const roleMaterial=role=>role==='paint'?{kind:'default',color:paint,roughness:.18,metalness:.10}:role==='glass'?{kind:'default',color:[.018,.028,.036,1],roughness:.075,metalness:.12,pattern:'window'}:role==='tire'?{kind:'default',color:[.016,.017,.018,1],roughness:.97,pattern:'rubber'}:role==='rim'||role==='metal'?{kind:'steel',color:[.12,.13,.14,1],roughness:.20,metalness:.92}:{kind:'default',color:[.028,.031,.034,1],roughness:.44};
-const carEntities=geometry.parts.filter(part=>part.role!=='light'&&part.role!=='tail').map(part=>({id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:roleMaterial(part.role)}));
+const carEntities=geometry.parts.filter(part=>part.role!=='light'&&part.role!=='tail'&&part.role!=='glass').map(part=>({id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:roleMaterial(part.role)}));
 for(const side of [-1,1]){
- carEntities.push({id:'m3-headlight-slim-'+side,position:[2.365,.755,side*.56],rotation:[0,0,0],mesh:{kind:'box',size:[.028,.052,.30]},material:{kind:'default',color:[.32,.36,.39,1],roughness:.12,metalness:.16,emissive:[.085,.105,.125]}});
- carEntities.push({id:'m3-tail-slim-'+side,position:[-2.365,.73,side*.57],rotation:[0,0,0],mesh:{kind:'box',size:[.028,.045,.29]},material:{kind:'default',color:[.22,.008,.006,1],roughness:.18,metalness:.05,emissive:[.055,.001,.001]}});
-}
+ carEntities.push({id:'m3-headlight-slim-'+side,position:[2.365,.755,side*.56],rotation:[0,0,0],mesh:{kind:'box',size:[.026,.040,.25]},material:{kind:'default',color:[.16,.19,.21,1],roughness:.16,metalness:.12,emissive:[.018,.023,.029]}});
+ carEntities.push({id:'m3-tail-slim-'+side,position:[-2.365,.73,side*.57],rotation:[0,0,0],mesh:{kind:'box',size:[.026,.038,.25]},material:{kind:'default',color:[.12,.008,.006,1],roughness:.20,metalness:.04,emissive:[.018,.001,.001]}});
+} 
+carEntities.push(
+ {id:'m3-cabin-core',position:[-.05,1.02,0],rotation:[0,0,0],mesh:{kind:'box',size:[1.52,.70,1.42]},material:{kind:'default',color:[.010,.014,.018,1],roughness:.82}},
+ {id:'m3-dashboard',position:[.58,.90,0],rotation:[0,0,0],mesh:{kind:'box',size:[.34,.16,1.28]},material:{kind:'default',color:[.018,.020,.021,1],roughness:.90}}
+);
 const human=[
  {id:'person:torso',mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:[.17,.20,.19,1],roughness:.92}},
  {id:'person:head',mesh:{kind:'sphere',radius:.5,segments:20},material:{kind:'default',color:[.45,.31,.24,1],roughness:.78}},
@@ -61,7 +65,7 @@ for(let i=0;i<7;i++)yardEntities.push({id:'yard-seam-'+i,position:[0,-.102,-5.8+
 const scene=new Scene({
  version:1,seed:26092026,gravity:[0,-9.81,0],ground:-.11,clearColor:[.52,.68,.86,1],
  environment:{temperatureC:15,humidity:.43,precipitation:'rare',snowfall:'none',sunlight:.92,groundMoisture:.18,wind:[.8,0,.25],clock:{startHour:15.2}},
- rendering:{sunDirection:[-.46,.66,-.59],sunColor:[1.0,.90,.72],skyColor:[.52,.68,.88],sunIntensity:3.05,exposure:1.12,shadowExtent:30,fogDensity:.0007},
+ rendering:{sunDirection:[.55,.65,-.52],sunColor:[1.0,.90,.72],skyColor:[.52,.68,.88],sunIntensity:3.15,exposure:1.12,shadowExtent:30,fogDensity:.0007},
  camera:{position:[4.8,1.75,-5.0],target:[.35,.82,-.05],fov:40,focusDistance:7,aperture:.035},
  entities:[
   ...yardEntities,
