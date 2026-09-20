@@ -502,9 +502,10 @@ export class WebGPURenderer implements Renderer{
     });
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
-    this.profiler.measure('prepare',()=>{for(const e of classified.visible)this.prepare(e);});
+    const frameModels=new Map<string,Mat4>();
+    const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
     const culled=this.profiler.measure('cull',()=>{
-      const inView=(entity:RuntimeEntity,matrix:Mat4)=>intersectsClip(this.mesh(entity.mesh!).bounds,multiply4(matrix,this.model(entity)));
+      const inView=(entity:RuntimeEntity,matrix:Mat4)=>intersectsClip(this.mesh(entity.mesh!).bounds,multiply4(matrix,modelFor(entity)));
       const cameraOpaque=classified.opaque.filter(e=>inView(e,vp)).sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
       const cameraTransparent=classified.transparent.filter(e=>inView(e,vp));
       const shadowCasters=classified.opaque.filter(e=>inView(e,lightVP));
@@ -512,7 +513,10 @@ export class WebGPURenderer implements Renderer{
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
-    const shadowPlan=this.profiler.measure('prepare',()=>this.prepareShadowBatches(shadowDrawables));
+    const prepared=new Map<string,RuntimeEntity>();
+    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...shadowDrawables,...culled.reflectedObjects])prepared.set(entity.id,entity);
+    this.profiler.measure('prepare',()=>{for(const entity of prepared.values())this.prepare(entity,modelFor(entity));});
+    const shadowPlan=this.profiler.measure('prepare',()=>this.prepareShadowBatches(shadowDrawables,modelFor));
     this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:shadowPlan.instances});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
     this.profiler.measure('encode.shadow',()=>{
@@ -576,7 +580,7 @@ export class WebGPURenderer implements Renderer{
     this.profiler.resolve(encoder);
     this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
     this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.previousCamera=[...camera.position];this.previousTarget=[...camera.target];this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
-    const liveIds=new Set<string>();for(const entity of classified.visible){this.previousModels.set(entity.id,this.model(entity));liveIds.add(entity.id);}for(const id of this.previousModels.keys())if(!liveIds.has(id))this.previousModels.delete(id);
+    this.previousModels.clear();for(const entity of prepared.values())this.previousModels.set(entity.id,modelFor(entity));
   }
   private queueMaterialLoads(scene:Scene):void{
     if(this.disposed)return;
@@ -619,8 +623,8 @@ export class WebGPURenderer implements Renderer{
     }
   }
 
-  private prepare(entity:RuntimeEntity):void{
-    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url),model=this.model(entity);
+  private prepare(entity:RuntimeEntity,model:Mat4=this.model(entity)):void{
+    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url);
     this.mesh(entity.mesh!);
     const surfaceState=this.lastScene?.surfaces.surface(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
@@ -636,7 +640,7 @@ export class WebGPURenderer implements Renderer{
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean):void{const mesh=this.mesh(entity.mesh!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
   private drawShadowBatch(pass:GPUAny,batch:ShadowBatchPlan):void{const first=batch.items[0]!,mesh=this.mesh(first.mesh!),object=this.objects.get(first.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setVertexBuffer(1,batch.buffer);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count,batch.items.length);}
-  private prepareShadowBatches(entities:readonly RuntimeEntity[]):{singles:RuntimeEntity[];batches:ShadowBatchPlan[];instances:number}{
+  private prepareShadowBatches(entities:readonly RuntimeEntity[],modelFor:(entity:RuntimeEntity)=>Mat4=(entity=>this.model(entity))):{singles:RuntimeEntity[];batches:ShadowBatchPlan[];instances:number}{
     const singles:RuntimeEntity[]=[],groups=new Map<string,{key:string;items:RuntimeEntity[];culled:boolean}>();
     for(const entity of entities){const key=shadowBatchKey(entity),culled=canCullBack(entity);let group=groups.get(key);if(!group){group={key,items:[],culled};groups.set(key,group);}group.items.push(entity);}
     const used=new Set<string>(),batches:ShadowBatchPlan[]=[];let instances=0;
@@ -644,7 +648,7 @@ export class WebGPURenderer implements Renderer{
       if(group.items.length<4){singles.push(...group.items);continue;}
       used.add(group.key);let batch=this.shadowBatches.get(group.key),capacity=1;while(capacity<group.items.length)capacity<<=1;
       if(!batch||batch.capacity<group.items.length){batch?.buffer.destroy();batch={buffer:this.device.createBuffer({size:capacity*64,usage:0x20|0x08}),capacity};this.shadowBatches.set(group.key,batch);}
-      const data=new Float32Array(group.items.length*16);group.items.forEach((entity,index)=>data.set(this.model(entity),index*16));
+      const data=new Float32Array(group.items.length*16);group.items.forEach((entity,index)=>data.set(modelFor(entity),index*16));
       if(!floatArrayEqual(batch.data,data)){this.device.queue.writeBuffer(batch.buffer,0,data);this.profiler.addUpload(data.byteLength,'instance');batch.data=data;}
       instances+=group.items.length;batches.push({key:group.key,items:group.items,culled:group.culled,buffer:batch.buffer});
     }
