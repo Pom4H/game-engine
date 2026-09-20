@@ -78,7 +78,7 @@ export function validatePassengerVehicleProfile(profile:PassengerVehicleProfile)
 }
 
 export function interpolateSection<T extends readonly number[]>(sections:readonly T[],station:number):number[]{
-  const x=clamp(station,-.5,.5),hi=sections.findIndex(section=>section[0]>=x);
+  const x=clamp(station,-.5,.5),hi=sections.findIndex(section=>section[0]!>=x);
   if(hi<=0)return [...sections[hi<0?sections.length-1:0]!];
   const a=sections[hi-1]!,b=sections[hi]!,t=(x-a[0]!)/(b[0]!-a[0]!);
   return a.map((value,index)=>index===0?x:mix(value,b[index]!,t));
