@@ -61,7 +61,7 @@ export function createVehicleAbuseScript(rig){
       // Person on the hood. Ordinary standing load + alternating dynamic landings.
       if(mid>=10.85&&mid<16.70){
         const u=(mid-10.85)/.72,cycle=Math.floor(u),phase=u-cycle,left=cycle%2===0;
-        const z=left?-.34:.34,landing=Math.exp(-((phase-.10)/.12)**2);
+        const z=left?-.34:.34,landing=Math.exp(-(((phase-.10)/.12)**2));
         rig.applyBodyLoad([1.22,0,z],790+1_850*landing);
         const key='hood-land-'+cycle;
         if(phase>.08&&phase<.18&&!fired.has(key)){
@@ -72,7 +72,7 @@ export function createVehicleAbuseScript(rig){
 
       // Two-foot roof jumps. Static bodyweight while planted; strong short landing pulse.
       if(mid>=16.95&&mid<22.65){
-        const u=(mid-16.95)/1.18,phase=u-Math.floor(u),landing=Math.exp(-((phase-.34)/.105)**2);
+        const u=(mid-16.95)/1.18,phase=u-Math.floor(u),landing=Math.exp(-(((phase-.34)/.105)**2));
         rig.applyBodyLoad([-.04,0,0],760+3_250*landing);
       }
 
