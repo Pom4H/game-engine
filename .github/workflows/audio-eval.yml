@@ -1,0 +1,44 @@
+name: Audio evaluation suite
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/audio-eval-suite]
+
+permissions:
+  contents: read
+
+jobs:
+  render-audio-eval:
+    runs-on: self-hosted
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Verify engine
+        run: bun run ci
+      - name: Record evaluation clips
+        run: |
+          if not exist artifacts\audio-eval mkdir artifacts\audio-eval
+          node dist/cli.js record tools/audio-eval/01-dry-snow.scene.ts --duration 4.8 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/01-dry-snow.mp4
+          node dist/cli.js record tools/audio-eval/02-wet-snow.scene.ts --duration 4.8 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/02-wet-snow.mp4
+          node dist/cli.js record tools/audio-eval/03-thin-steel-knock.scene.ts --duration 3.0 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/03-thin-steel-knock.mp4
+          node dist/cli.js record tools/audio-eval/04-heavy-steel-hit.scene.ts --duration 3.0 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/04-heavy-steel-hit.mp4
+          node dist/cli.js record tools/audio-eval/05-glass-tap.scene.ts --duration 3.0 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/05-glass-tap.mp4
+          node dist/cli.js record tools/audio-eval/06-glass-fracture.scene.ts --duration 3.0 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/06-glass-fracture.mp4
+          node dist/cli.js record tools/audio-eval/07-steel-drop-concrete.scene.ts --duration 3.2 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/07-steel-drop-concrete.mp4
+          node dist/cli.js record tools/audio-eval/08-wood-drop-concrete.scene.ts --duration 3.2 --fps 30 --width 1280 --height 720 --out artifacts/audio-eval/08-wood-drop-concrete.mp4
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: audio-eval-${{ github.sha }}
+          path: artifacts/audio-eval/
+          if-no-files-found: error
+          retention-days: 14
