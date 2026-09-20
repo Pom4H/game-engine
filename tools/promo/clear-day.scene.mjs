@@ -16,20 +16,20 @@ spec.environment={
   clock:{startHour:11.8,hoursPerSecond:0},
 };
 spec.rendering={
-  sunDirection:[-.42,.74,-.52],
-  sunColor:[1,.93,.82],
-  sunIntensity:4.9,
-  skyColor:[.24,.46,.78],
-  fogDensity:.00055,
-  exposure:1.03,
+  sunDirection:[-.36,.79,-.49],
+  sunColor:[1,.955,.88],
+  sunIntensity:4.45,
+  skyColor:[.31,.53,.82],
+  fogDensity:.00038,
+  exposure:.94,
   shadowExtent:30,
 };
 spec.camera={
-  position:[-15.92,1.45,-3.62],
-  target:[-20.08,.74,-1.42],
-  fov:31,
-  focusDistance:4.85,
-  aperture:.010,
+  position:[-15.76,1.33,-3.82],
+  target:[-20.16,.77,-1.42],
+  fov:29.5,
+  focusDistance:5.05,
+  aperture:.006,
 };
 
 // Keep the reference car exactly at its authored start pose. Headlights remain on
@@ -38,11 +38,11 @@ spec.animation={...spec.animation,vehicles:[]};
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
-    entity.material={...entity.material,color:[.30,.31,.33,1]};
+    entity.material={...entity.material,color:[.36,.37,.39,1],roughness:.115,metalness:.06};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:.00035,iceDepthM:.00008,waterDepthM:.0028};
-    entity.material={...entity.material,color:[.075,.078,.082,1],roughness:.74};
+    entity.environmental={...entity.environmental,snowDepthM:.00018,iceDepthM:.00016,waterDepthM:.0034};
+    entity.material={...entity.material,color:[.060,.064,.070,1],roughness:.69};
   }
 }
 
