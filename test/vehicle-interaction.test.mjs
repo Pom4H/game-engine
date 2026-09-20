@@ -112,7 +112,10 @@ test('mechanism audio is deterministic and non-silent',()=>{
 test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
   const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
   assert.equal(m3.generatedTriangles,9798,'packed render assembly should preserve all source FBX triangles');
-  assert.equal(byId.get('body').mesh.indices.length/3,m3.bodyTriangles*4,'render-only PN subdivision should add curvature without changing structural/source triangle accounting');
+  const body=byId.get('body');
+  assert.equal(body.mesh.indices.length/3,m3.bodyTriangles,'physical M3 shell must remain the compact source topology');
+  assert.equal(body.renderMesh?.kind,'triangle-mesh');
+  assert.ok(body.renderMesh.indices.length>body.mesh.indices.length*16,'hero render topology should refine independently of the physical shell');
   const originalFbxIds=[
     'body','windshield-front','windshield-rear','window-front-left','window-front-right',
     'mirror-left','mirror-right','plastic-trim','exhaust','rim-front-left','tire-front-left',
