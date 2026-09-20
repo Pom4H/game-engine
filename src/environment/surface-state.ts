@@ -6,6 +6,7 @@
 import type {EnvironmentState} from './types.js';
 import type {RuntimeEntity} from '../scene/scene.js';
 import type {SurfaceUse} from '../scene/types.js';
+import {deriveSurfaceState} from '../materials/surface.js';
 
 export interface SurfaceEnvironmentState {
   readonly id:string;
@@ -15,7 +16,13 @@ export interface SurfaceEnvironmentState {
   waterDepthM:number;
   iceDepthM:number;
   slush:number;
+  wetness:number;
+  moss:number;
   dirt:number;
+  wear:number;
+  roughness:number;
+  acousticDamping:number;
+  darkening:number;
   trafficHeatC:number;
   trackMelt:number;
   puddle:number;
@@ -33,9 +40,24 @@ export interface BodyEnvironmentState {
 }
 
 export interface SurfaceEnvironmentField {readonly center:readonly[number,number];readonly size:readonly[number,number];readonly nx:number;readonly nz:number;readonly cells:SurfaceEnvironmentState[]}
+export interface SurfaceContactWork {
+  readonly sourceId:string;
+  readonly surfaceId:string;
+  readonly x:number;
+  readonly z:number;
+  readonly radiusM:number;
+  readonly durationSeconds:number;
+  readonly speedMps:number;
+  readonly slipSpeedMps:number;
+  readonly normalLoadN:number;
+  readonly frictionCoefficient:number;
+}
 export class SurfaceEnvironmentSystem {
   readonly fields=new Map<string,SurfaceEnvironmentField>();
-  remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);}
+  private readonly claimedContactBodies=new Set<string>();
+  remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);this.claimedContactBodies.delete(id);}
+  claimContactBody(id:string):void{this.claimedContactBodies.add(id);}
+  releaseContactBody(id:string):void{this.claimedContactBodies.delete(id);}
   field(id:string):SurfaceEnvironmentField|undefined{return this.fields.get(id);}
   sample(id:string,x:number,z:number):SurfaceEnvironmentState|undefined{
     const field=this.fields.get(id);if(!field)return undefined;
@@ -46,15 +68,20 @@ export class SurfaceEnvironmentSystem {
   readonly surfaces=new Map<string,SurfaceEnvironmentState>();
   readonly bodies=new Map<string,BodyEnvironmentState>();
 
-  step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
+  /** Reconcile authored entities into physical state without advancing time. */
+  reconcile(environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
     for(const id of [...this.surfaces.keys(),...this.bodies.keys()])if(!entities.has(id))this.remove(id);
     this.ensureStates(environment,entities);
+  }
+
+  step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
+    this.reconcile(environment,entities);
     this.applyTraffic(dt,entities);
     for(const [id,state] of this.surfaces){
       const entity=entities.get(id);if(!entity)continue;
       const field=this.fields.get(id)!;
       for(const cell of field.cells)this.stepSurface(cell,entity,dt,worldSeconds,environment);
-      for(const key of ['temperatureC','snowDepthM','waterDepthM','iceDepthM','slush','dirt','trafficHeatC','puddle','frictionScale'] as const)state[key]=field.cells.reduce((sum,cell)=>sum+cell[key],0)/field.cells.length;
+      for(const key of ['temperatureC','snowDepthM','waterDepthM','iceDepthM','slush','wetness','moss','dirt','wear','roughness','acousticDamping','darkening','trafficHeatC','puddle','frictionScale'] as const)state[key]=field.cells.reduce((sum,cell)=>sum+cell[key],0)/field.cells.length;
       state.trackMelt=Math.max(...field.cells.map(cell=>cell.trackMelt));
     }
     for(const [id,state] of this.bodies){
@@ -66,13 +93,49 @@ export class SurfaceEnvironmentSystem {
   surface(id:string):SurfaceEnvironmentState|undefined{return this.surfaces.get(id);}
   body(id:string):BodyEnvironmentState|undefined{return this.bodies.get(id);}
 
+  /** Apply localized mechanical work from an authoritative contact patch. */
+  applyContactWork(work:SurfaceContactWork):boolean{
+    if(!work.sourceId||!work.surfaceId||![work.x,work.z,work.radiusM,work.durationSeconds,work.speedMps,work.slipSpeedMps,work.normalLoadN,work.frictionCoefficient].every(Number.isFinite)||work.radiusM<=0||work.durationSeconds<=0||work.normalLoadN<0||work.frictionCoefficient<0)return false;
+    const field=this.fields.get(work.surfaceId);if(!field)return false;
+    const cellX=field.size[0]/field.nx,cellZ=field.size[1]/field.nz,halfDiag=Math.hypot(cellX,cellZ)*.5;
+    const localX=work.x-field.center[0]+field.size[0]/2,localZ=work.z-field.center[1]+field.size[1]/2;
+    const minX=Math.max(0,Math.floor((localX-work.radiusM-halfDiag)/cellX)),maxX=Math.min(field.nx-1,Math.floor((localX+work.radiusM+halfDiag)/cellX));
+    const minZ=Math.max(0,Math.floor((localZ-work.radiusM-halfDiag)/cellZ)),maxZ=Math.min(field.nz-1,Math.floor((localZ+work.radiusM+halfDiag)/cellZ));
+    const touched:SurfaceEnvironmentState[]=[];
+    for(let iz=minZ;iz<=maxZ;iz++)for(let ix=minX;ix<=maxX;ix++){
+      const x=field.center[0]+((ix+.5)/field.nx-.5)*field.size[0],z=field.center[1]+((iz+.5)/field.nz-.5)*field.size[1];
+      if(Math.hypot(x-work.x,z-work.z)<=work.radiusM+halfDiag)touched.push(field.cells[iz*field.nx+ix]!);
+    }
+    if(!touched.length)return false;
+    const effectiveSlip=work.slipSpeedMps+work.speedMps*.018;
+    const energy=Math.max(0,work.normalLoadN*work.frictionCoefficient*effectiveSlip*work.durationSeconds),energyPerCell=energy/touched.length;
+    for(const surface of touched){
+      surface.trafficHeatC=Math.min(12,surface.trafficHeatC+energyPerCell/1.8e6);
+      surface.trackMelt=Math.min(1,surface.trackMelt+Math.min(1,energyPerCell/85_000)*.12);
+      const wet=surface.waterDepthM>0||surface.snowDepthM>0||surface.slush>.02?1:.1;
+      surface.dirt=Math.min(1,surface.dirt+work.speedMps*work.durationSeconds*.0008*wet);
+    }
+    const bodyState=this.bodies.get(work.sourceId),sample=this.sample(work.surfaceId,work.x,work.z);
+    if(bodyState&&sample){
+      const spray=Math.min(1,(sample.slush+sample.puddle)*work.speedMps/8);
+      bodyState.rearSnow=Math.min(1,bodyState.rearSnow+spray*work.durationSeconds*.13);
+      bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*work.durationSeconds*.09);
+      bodyState.wetness=Math.min(1,bodyState.wetness+spray*work.durationSeconds*.15);
+    }
+    return true;
+  }
+
   private ensureStates(environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
     for(const entity of entities.values()){
       const use=entity.environmental?.surfaceUse;
       if(use&&!this.surfaces.has(entity.id)){
+        const authored=entity.material.surface,snowDepthM=entity.environmental?.snowDepthM??0,waterDepthM=entity.environmental?.waterDepthM??0,iceDepthM=entity.environmental?.iceDepthM??0;
+        const snowFactor=Math.min(1,snowDepthM/.025),iceFactor=Math.min(1,iceDepthM/.003),waterFactor=Math.min(1,waterDepthM/.003);
+        const phaseFriction=Math.max(.16,1-snowFactor*.42-iceFactor*.72-waterFactor*.12);
         this.surfaces.set(entity.id,{
-          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0,iceDepthM:entity.environmental?.iceDepthM??0,
-          slush:0,dirt:entity.material.surface.dirt*.25,trafficHeatC:0,trackMelt:0,puddle:0,frictionScale:1,
+          id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM,waterDepthM,iceDepthM,
+          slush:0,wetness:Math.max(authored.wetness,waterFactor),moss:authored.moss,dirt:authored.dirt,wear:authored.wear,roughness:authored.roughness,acousticDamping:authored.acousticDamping,darkening:authored.darkening,
+          trafficHeatC:0,trackMelt:0,puddle:Math.max(0,Math.min(1,waterDepthM/.006)),frictionScale:Math.max(.08,Math.min(1.18,authored.frictionScale*phaseFriction)),
         });
       }
       if(use&&!this.fields.has(entity.id)){
@@ -87,6 +150,7 @@ export class SurfaceEnvironmentSystem {
 
   private applyTraffic(dt:number,entities:ReadonlyMap<string,RuntimeEntity>):void{
     for(const [bodyId,bodyState] of this.bodies){
+      if(this.claimedContactBodies.has(bodyId))continue;
       const bodyEntity=entities.get(bodyId),body=bodyEntity?.body;if(!bodyEntity||!body)continue;
       const vx=body.velocity[0],vz=body.velocity[2],speed=Math.hypot(vx,vz);
       if(speed>.1){bodyState.directionX=vx/speed;bodyState.directionZ=vz/speed;}
@@ -119,16 +183,25 @@ export class SurfaceEnvironmentSystem {
   }
 
   private stepSurface(state:SurfaceEnvironmentState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState):void{
-    const use=state.use,material=entity.material.kind;
+    const use=state.use;
     const drift=use==='curb'?1.9:use==='sidewalk'?1.2:use==='road'?.78:1;
     const wind=Math.hypot(environment.wind[0],environment.wind[2]),windDeposit=1+Math.min(.55,wind/12)*(use==='curb'?.8:use==='sidewalk'?.25:-.08);
     const coldSnow=environment.temperatureC<=1.2?1:Math.max(0,1-(environment.temperatureC-1.2)/2.5);
     state.snowDepthM+=environment.snowfallRate*worldSeconds*drift*windDeposit*coldSnow;
 
-    // Surface thermal inertia: dark asphalt absorbs sun, traffic adds local heat.
-    const solarGain=material==='asphalt'?8.5:material==='concrete'?5.1:3;
+    // Thermal response is a consequence of material properties, never its name.
+    // solarAbsorptivity controls equilibrium gain; volumetric heat capacity and
+    // conductivity control how quickly the exposed layer approaches it.
+    const profile=entity.material.profile,thermal=profile.thermal;
+    const volumetricCapacity=Math.max(1,profile.density*thermal.specificHeatJkgK);
+    const referenceCapacity=2_000_000;
+    const inertia=Math.sqrt(volumetricCapacity/referenceCapacity);
+    const solarGain=10*thermal.solarAbsorptivity/Math.max(.45,inertia);
     const target=environment.temperatureC+environment.sunlight*solarGain+state.trafficHeatC;
-    const thermalTau=material==='asphalt'?1200:1800;
+    // Higher conductivity couples the exposed skin to more bulk material instead
+    // of making the surface magically absorb solar energy faster.
+    const bulkCoupling=1+Math.sqrt(Math.max(.01,thermal.conductivityWmK))*.12;
+    const thermalTau=Math.max(180,900*inertia*bulkCoupling);
     const thermalBlend=1-Math.exp(-worldSeconds/thermalTau);
     state.temperatureC+=(target-state.temperatureC)*thermalBlend;
     state.trafficHeatC*=Math.exp(-worldSeconds/950);
@@ -159,8 +232,18 @@ export class SurfaceEnvironmentSystem {
     const retention=use==='road'?.55+state.trackMelt*.55:use==='curb'?.85:.66;
     state.puddle=Math.max(0,Math.min(1,state.waterDepthM/.006*retention));
 
-    const snowFactor=Math.min(1,state.snowDepthM/.025),iceFactor=Math.min(1,state.iceDepthM/.003),waterFactor=Math.min(1,state.waterDepthM/.003);
-    state.frictionScale=Math.max(.16,1-snowFactor*.42-iceFactor*.72-state.slush*.5-waterFactor*.12);
+    const exposure=deriveSurfaceState(profile,entity.material,environment);
+    const waterFactor=Math.min(1,state.waterDepthM/.003),snowFactor=Math.min(1,state.snowDepthM/.025),iceFactor=Math.min(1,state.iceDepthM/.003);
+    state.wetness=Math.max(exposure.wetness,waterFactor,state.slush*.72);
+    state.moss=exposure.moss;
+    state.wear=exposure.wear;
+    // Traffic/slush dirt is persistent state; authored aging supplies its floor.
+    state.dirt=Math.max(exposure.dirt,state.dirt);
+    state.roughness=Math.max(.02,Math.min(1,exposure.roughness+state.dirt*.045-state.wetness*.07+state.slush*.05));
+    state.acousticDamping=Math.max(0,Math.min(1,profile.acoustic.damping+state.wetness*.22+state.moss*.34+state.slush*.12));
+    state.darkening=Math.max(0,Math.min(1,exposure.darkening+state.wetness*.18+state.dirt*.08));
+    const phaseFriction=Math.max(.16,1-snowFactor*.42-iceFactor*.72-state.slush*.5-waterFactor*.12);
+    state.frictionScale=Math.max(.08,Math.min(1.18,exposure.frictionScale*phaseFriction));
 
   }
 

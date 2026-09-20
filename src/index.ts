@@ -12,7 +12,7 @@ export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/c
 export {demoScene} from './demo.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
 
-export {material,materialKinds,type MaterialKind,type PhysicalMaterial,type AcousticMaterial} from './materials/catalog.js';
+export {material,materialKinds,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
 export type {EngineEvent,ImpactEvent,FractureEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
@@ -21,7 +21,7 @@ export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type Pla
 
 export {resolveEnvironment,resolveEnvironmentAt,environmentTimeScale,type EnvironmentSpec,type EnvironmentState,type EnvironmentClockSpec,type WeatherKeyframe,type Precipitation,type Snowfall} from './environment/types.js';
 export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTreatment,type MaterialSurfaceSpec,type SurfaceState} from './materials/surface.js';
-export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironmentState,type SurfaceEnvironmentField} from './environment/surface-state.js';
+export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironmentState,type SurfaceEnvironmentField,type SurfaceContactWork} from './environment/surface-state.js';
 /** @deprecated Prefer SurfaceEnvironmentSystem and generic surface state types. */
 export {WinterSystem,type WinterSurfaceState,type WinterBodyState} from './environment/winter.js';
 

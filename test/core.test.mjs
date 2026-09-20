@@ -167,3 +167,49 @@ test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{
   assert.ok(dayRoad.snowDepthM<nightSnow,'daytime energy balance should melt accumulated road snow');
   assert.ok(dayRoad.waterDepthM>0||dayRoad.puddle>.02,'melted snow should create water/puddle state');
 });
+
+
+test('material ontology owns mechanical thermal optical and acoustic causes',()=>{
+  const glass=material('glass'),steel=material('steel'),asphalt=material('asphalt'),concrete=material('concrete');
+  assert.equal(glass.mechanical.brittle,true);
+  assert.ok(glass.optical.transmission>.8&&glass.optical.ior>1);
+  assert.ok(steel.optical.metalness>.8);
+  assert.ok(asphalt.thermal.solarAbsorptivity>concrete.thermal.solarAbsorptivity);
+  assert.ok(asphalt.thermal.specificHeatJkgK>0&&concrete.thermal.conductivityWmK>0);
+  assert.equal('brittle' in glass,false,'legacy mechanical fields must not live at the material root');
+  assert.equal('failureStressPa' in glass,false);
+});
+
+test('evolving surface state is the shared render physics and acoustic projection',()=>{
+  const scene=new Scene({
+    version:1,ground:-100,
+    environment:{temperatureC:-1,snowfall:'none',sunlight:.35,humidity:.82,groundMoisture:.75,precipitation:'frequent'},
+    entities:[
+      {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[18,.2,6]},material:{kind:'asphalt'},environmental:{surfaceUse:'road',waterDepthM:.003}},
+      {id:'traffic',position:[-4,.65,0],mesh:{kind:'box',size:[4.5,1.3,1.9]},material:{kind:'steel'},body:{motion:'kinematic',mass:1500,velocity:[6,0,0]}},
+    ],
+  });
+  const authored=scene.entities.get('road').material.surface;
+  for(let i=0;i<75;i++)scene.step(1/60);
+  const live=scene.surfaces.surface('road'),contact=scene.surfaces.sample('road',0,0);
+  assert.ok(live&&contact);
+  assert.ok(contact.dirt>authored.dirt,'contact work must evolve dirt beyond the authored baseline');
+  assert.ok(contact.wetness>=authored.wetness,'water phase must project into wetness');
+  assert.ok(contact.acousticDamping>=material('asphalt').acoustic.damping,'wet contact must damp the same acoustic state consumed by events');
+  assert.ok(contact.roughness>=.02&&contact.roughness<=1);
+  assert.ok(contact.frictionScale<authored.frictionScale,'water/phase state must reduce effective friction from the same surface record');
+});
+
+test('thermal response comes from material profile rather than a renderer/material-name branch',()=>{
+  const scene=new Scene({
+    version:1,ground:-100,
+    environment:{temperatureC:0,snowfall:'none',sunlight:1,humidity:.2,groundMoisture:.1,precipitation:'arid'},
+    entities:[
+      {id:'asphalt',position:[-3,-.1,0],mesh:{kind:'box',size:[4,.2,4]},material:{kind:'asphalt'},environmental:{surfaceUse:'generic'}},
+      {id:'concrete',position:[3,-.1,0],mesh:{kind:'box',size:[4,.2,4]},material:{kind:'concrete'},environmental:{surfaceUse:'generic'}},
+    ],
+  });
+  for(let i=0;i<600;i++)scene.step(1/60);
+  const asphalt=scene.surfaces.surface('asphalt'),concrete=scene.surfaces.surface('concrete');
+  assert.ok(asphalt.temperatureC>concrete.temperatureC, `expected dark high-absorptivity asphalt to warm more: ${asphalt.temperatureC} <= ${concrete.temperatureC}`);
+});

@@ -2,6 +2,7 @@ import {AnimationSystem} from '../animation/locomotion.js';
 import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
+import type {SimulationTier} from '../core/kernel.js';
 import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
 import {SurfaceEnvironmentSystem} from '../environment/surface-state.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
@@ -20,7 +21,7 @@ import {SceneSystemRuntime} from './system-runtime.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
-  readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';
+  readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';readonly finish?:import('../materials/surface.js').MaterialFinish;readonly ageYears?:number;readonly treatment?:import('../materials/surface.js').MaterialTreatment;
   readonly color:Color;
   readonly texture?:SurfaceTextureSpec;
   readonly profile:PhysicalMaterial;
@@ -75,7 +76,11 @@ export class Scene {
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
+    // Initial environmental facts exist before the first scheduled surface tick.
+    // Cadence controls evolution, not whether authored physical state exists.
+    this.surfaces.reconcile(this.environment,this.entities);
     this.contacts=new SurfaceContactSystem(this);
+    this.syncSurfaceVisuals();
     for(const {surfaceId,...options} of this.spec.surfaceContacts?.snow??[])this.contacts.addSnowSurface(surfaceId,options);
     for(const {entityId,...options} of this.spec.surfaceContacts?.wheels??[])this.contacts.addWheelContact(entityId,options);
     for(const walker of this.spec.animation?.walkers??[])this.animation.addWalker(walker);
@@ -91,7 +96,7 @@ export class Scene {
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
-    const shouldCollide=spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.brittle;
+    const shouldCollide=spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle;
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
     const body=shouldCollide?this.physics.add(new RigidBody({
       id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),kinematic:spec.body?.motion==='kinematic',
@@ -123,15 +128,15 @@ export class Scene {
     this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.physics.remove(id);this.entities.delete(id);this.surfaces.remove(id);
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
-  step(dt=1/60):void{
+  step(dt=1/60,tier:SimulationTier='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
     const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,{} as SceneModuleContext,'detailed',{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
-      for(const command of commands)this.commit(command,dt,at);
+    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+      for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});
   }
-  private commit(command:InternalCommand,dt:number,at:number):void{
+  private commit(command:InternalCommand,at:number):void{
     if(command.type==='spawn'){this.add(command.entity);return;}
     if(command.type==='remove'){this.remove(command.id);return;}
     if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));return;}
@@ -139,7 +144,7 @@ export class Scene {
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
       const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);return;
     }
-    this.systemRuntime.run(command.action,dt,at);
+    this.systemRuntime.run(command.action,command.deltaSeconds,at);
   }
 
   private installSystemRuntime():void{
@@ -221,8 +226,8 @@ export class Scene {
       this.pushEvent({
         type:'impact',id:++this.eventSequence,time:at,point:contact.point,normal:contact.normal,a:contact.a,b:contact.b,
         materialA:a.material.kind,materialB:b?.material.kind??this.physics.groundMaterial.kind,
-        ...(entityA?{surfaceA:surfaceAcoustics(entityA.material.surface)}:{}),
-        ...(entityB?{surfaceB:surfaceAcoustics(entityB.material.surface)}:{}),
+        ...(entityA?{surfaceA:surfaceAcoustics(this.surfaces.sample(entityA.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityA.id)??entityA.material.surface)}:{}),
+        ...(entityB?{surfaceB:surfaceAcoustics(this.surfaces.sample(entityB.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityB.id)??entityB.material.surface)}:{}),
         energy:contact.normalEnergy,impulse:contact.impulse,speed:contact.normalSpeed,size:Math.max(.02,Math.min(characteristicSize(a),b?characteristicSize(b):characteristicSize(a))),
       });
     }
@@ -331,4 +336,4 @@ function bodyShape(mesh:Primitive|undefined,body:BodySpec,scale:Vec3):CollisionS
 function polygonArea2(points:readonly (readonly[number,number])[]):number{let area=0;for(let i=0;i<points.length;i++){const a=points[i]!,b=points[(i+1)%points.length]!;area+=a[0]*b[1]-b[0]*a[1];}return area*.5;}
 function polygonBounds(points:readonly (readonly[number,number])[]){let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const p of points){minX=Math.min(minX,p[0]);maxX=Math.max(maxX,p[0]);minY=Math.min(minY,p[1]);maxY=Math.max(maxY,p[1]);}return{minX,maxX,minY,maxY};}
 
-function surfaceAcoustics(surface:SurfaceState){return{wetness:surface.wetness,moss:surface.moss,damping:surface.acousticDamping};}
+function surfaceAcoustics(surface:Pick<SurfaceState,'wetness'|'moss'|'acousticDamping'>){return{wetness:surface.wetness,moss:surface.moss,damping:surface.acousticDamping};}
