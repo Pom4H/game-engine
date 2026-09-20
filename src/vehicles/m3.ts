@@ -84,13 +84,13 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
 
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
-export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),35,.018);}
+export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.034);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,35,.018));
+  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,.034));
   // A second render-only PN pass is cheap for one hero vehicle (~18k body tris)
   // and removes the visible faceting left by the compact 1,126-triangle source.
   // Physics, structural binding and the packed source stay untouched.
-  return subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,42,.0075));
+  return subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.012));
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   const base=m3HighFidelityBody();
