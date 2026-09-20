@@ -113,9 +113,9 @@ function roundedRectFrameMesh(width:number,height:number,radius:number,border:nu
 
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
-export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.034);}
+export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.034,true);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,.034));
+  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,.034,true));
   const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.012));
   // Third render-only refinement targets silhouette and long clearcoat highlights.
   // Physics and the structural cage continue to use the compact source shell.
