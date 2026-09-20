@@ -69,7 +69,7 @@ export class RigidBody {
   wake():void{if(this.sleeping){this.sleeping=false;this.sleepTimer=0;}}
   applyLocalCrush(outwardNormal:Vec3,depth:number):void{
     if(this.shape.kind!=='box'||!this.collisionHalf||!Number.isFinite(depth)||depth<=0)return;
-    const abs=[Math.abs(outwardNormal[0]),Math.abs(outwardNormal[1]),Math.abs(outwardNormal[2])],axis:0|1|2=abs[0]>=abs[1]&&abs[0]>=abs[2]?0:abs[1]>=abs[2]?1:2,sign=outwardNormal[axis]>=0?1:-1,base=this.shape.half[axis];
+    const ax=Math.abs(outwardNormal[0]),ay=Math.abs(outwardNormal[1]),az=Math.abs(outwardNormal[2]),axis:0|1|2=ax>=ay&&ax>=az?0:ay>=az?1:2,sign=outwardNormal[axis]>=0?1:-1,base=this.shape.half[axis];
     const side=sign>0?this.crushPositive:this.crushNegative,current=side[axis],capacity=Math.max(0,base*1.45-current),applied=Math.min(depth,capacity);
     if(applied<=0)return;side[axis]+=applied;
     this.collisionHalf[axis]=Math.max(base*.22,base-(this.crushPositive[axis]+this.crushNegative[axis])*.5);
