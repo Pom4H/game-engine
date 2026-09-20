@@ -46,15 +46,31 @@ test('moving rigid motion can sleep structurally without losing translation or r
     sleepDelay:.02,sleepSpeed:.01,internalDamping:12,iterations:8,
   });
   const linear=[20,1,-3],angular=[.4,-.25,.3];
+  const angularMomentum=(positions,center,linearVelocity,angularVelocity)=>{
+    const out=[0,0,0];
+    for(let i=0;i<4;i++){
+      const j=i*3,x=positions[j]-center[0],y=positions[j+1]-center[1],z=positions[j+2]-center[2];
+      const vx=linearVelocity[0]+angularVelocity[1]*z-angularVelocity[2]*y;
+      const vy=linearVelocity[1]+angularVelocity[2]*x-angularVelocity[0]*z;
+      const vz=linearVelocity[2]+angularVelocity[0]*y-angularVelocity[1]*x;
+      out[0]+=y*vz-z*vy;out[1]+=z*vx-x*vz;out[2]+=x*vy-y*vx;
+    }
+    return out;
+  };
+  const initialPositions=[...body.position],initialCenter=[
+    (initialPositions[0]+initialPositions[3]+initialPositions[6]+initialPositions[9])/4,
+    (initialPositions[1]+initialPositions[4]+initialPositions[7]+initialPositions[10])/4,
+    (initialPositions[2]+initialPositions[5]+initialPositions[8]+initialPositions[11])/4,
+  ];
+  const initialL=angularMomentum(initialPositions,initialCenter,linear,angular);
   body.activateFromRigid([0,0,0],linear,angular);
   for(let i=0;i<4&&body.stats.mode==='active';i++)body.step(1/120,[0,0,0]);
   assert.equal(body.stats.mode,'dormant');
   const baked=body.takeBakedState();
   assert.ok(baked);
-  for(let i=0;i<3;i++){
-    assert.ok(Math.abs(baked.linearVelocity[i]-linear[i])<1e-8,{actual:baked.linearVelocity,linear});
-    assert.ok(Math.abs(baked.angularVelocity[i]-angular[i])<1e-7,{actual:baked.angularVelocity,angular});
-  }
+  for(let i=0;i<3;i++)assert.ok(Math.abs(baked.linearVelocity[i]-linear[i])<1e-8,JSON.stringify({actual:baked.linearVelocity,linear}));
+  const bakedL=angularMomentum([...baked.positions],baked.centerOfMass,baked.linearVelocity,baked.angularVelocity);
+  for(let i=0;i<3;i++)assert.ok(Math.abs(bakedL[i]-initialL[i])<1e-6,JSON.stringify({bakedL,initialL,omega:baked.angularVelocity}));
 });
 
 test('render skin is a sparse binding over the structural cage, not a second physics mesh',()=>{
