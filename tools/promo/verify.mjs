@@ -48,7 +48,7 @@ for(const s of shots){
  assert.ok(Number.isFinite(native.wetness)&&native.wetness>=0&&native.wetness<=1);
  assert.equal(e.m3.sha256,sourceM3.sha256,`${s.id}: source M3 changed`);
  assert.equal(e.m3.sourceBytes,sourceM3.sourceBytes,`${s.id}: reference byte size changed`);
- assert.match(e.m3.representation,/parametric control sections/i);
+ assert.match(e.m3.representation,/parametric.*shell/i);
  integerWithin(e.m3.profileBytes,1,4096,`${s.id}: compact M3 profile bytes`);
  assert.ok(e.m3.sourceBytes/e.m3.profileBytes>10,`${s.id}: M3 profile no longer provides >10x source-data reduction`);
  integerWithin(e.m3.triangles,1000,10000,`${s.id}: generated M3 triangles`);
