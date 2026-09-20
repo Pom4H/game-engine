@@ -36,24 +36,25 @@ function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,samp
   const wetness=((event.surfaceA?.wetness??0)+(event.surfaceB?.wetness??0))/2,moss=((event.surfaceA?.moss??0)+(event.surfaceB?.moss??0))/2;
   const damping=Math.max(.025,surfaceDamping),brightness=Math.max(.06,(a.brightness+b.brightness)/2*(1-wetness*.28-moss*.52));
   const geometryScale=Math.max(.35,Math.sqrt(Math.max(.04,event.size))),base=Math.max(85,Math.sqrt(a.resonanceHz*b.resonanceHz)/geometryScale);
-  const glass=event.materialA==='glass'||event.materialB==='glass',metal=event.materialA==='steel'||event.materialB==='steel';
-  // Real body impacts are dominated by a broadband onset and rapidly decorrelating
-  // sheet/cavity motion. Keep modal ringing subtle and deliberately inharmonic so a
-  // sequence of kicks does not turn into a tuned percussion instrument.
+  const glass=event.materialA==='glass'||event.materialB==='glass',metal=event.materialA==='steel'||event.materialB==='steel',carPanel=event.a==='m3-panel'||event.b==='m3-panel';
+  // Vehicle sheet metal is not a xylophone. Its audible identity here is the
+  // broadband contact onset, cavity pressure and short oil-canning release.
+  // Reserve modal ringing for glass/other resonant objects, not car body panels.
   const ratios=glass?[1,1.71,2.93,4.21]:[1,1.58,2.37,3.61];
   const frequencies=ratios.map(r=>base*r*(.94+rng()*.12)),phases=ratios.map(()=>rng()*Math.PI*2);
-  const modalStrength=glass?.105:metal?.052:.026;
+  const modalStrength=carPanel?0:glass?.09:metal?.018:.012;
   let fast=0,slow=0,body=0;
   for(let i=0;i<left.length;i++){
     const t=i/sampleRate,white=rng()*2-1;
     fast+=.22*(white-fast);slow+=.028*(white-slow);body+=.010*(white-body);
     const band=fast-slow,edge=white-fast;
     const onset=(edge*.72+band*.38)*Math.exp(-t*(82+wetness*24))*(.38+brightness*.34);
-    const cavity=body*Math.exp(-t*(17+10*damping))*(metal?.68:.44);
-    const buckle=metal?band*Math.exp(-t*(24+18*damping))*.28:0;
+    const cavity=body*Math.exp(-t*(17+10*damping))*(carPanel?.88:metal?.60:.40);
+    const buckle=metal?band*Math.exp(-t*(carPanel?31:24+18*damping))*(carPanel?.42:.18):0;
+    const thump=carPanel?slow*Math.exp(-t*(13+event.speed*1.5))*.72:0;
     let modal=0;
     for(let m=0;m<frequencies.length;m++)modal+=Math.sin(2*Math.PI*frequencies[m]!*t+phases[m]!)*Math.exp(-t*(34+10*m+40*damping))*(modalStrength/(1+m*.8));
-    const sample=(onset+cavity+buckle+modal)*amplitude*(1-moss*.18);
+    const sample=(onset+cavity+buckle+thump+modal)*amplitude*(1-moss*.18);
     left[i]=sample*gainL;right[i]=sample*gainR;
   }
 }
