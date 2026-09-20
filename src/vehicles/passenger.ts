@@ -185,7 +185,7 @@ function triangleMesh(positions:number[],indices:number[]):Extract<Primitive,{ki
     const ux=bx-ax,uy=by-ay,uz=bz-az,vx=cx-ax,vy=cy-ay,vz=cz-az,nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
     for(const base of [ia,ib,ic]){normals[base]=normals[base]!+nx;normals[base+1]=normals[base+1]!+ny;normals[base+2]=normals[base+2]!+nz;}
   }
-  for(let i=0;i<normals.length;i+=3){const length=Math.hypot(normals[i]!,normals[i+1]!,normals[i+2]!)||1;normals[i]/=length;normals[i+1]/=length;normals[i+2]/=length;}
+  for(let i=0;i<normals.length;i+=3){const length=Math.hypot(normals[i]!,normals[i+1]!,normals[i+2]!)||1;normals[i]=normals[i]!/length;normals[i+1]=normals[i+1]!/length;normals[i+2]=normals[i+2]!/length;}
   return{kind:'triangle-mesh',positions,normals,indices};
 }
 
@@ -249,7 +249,7 @@ export function passengerStructuralDefinition(
     addDistance(a,b+1,.00062);addDistance(a+1,b,.00062);
     addDistance(a+2,b+3,.00045);addDistance(a+3,b+2,.00045);
     addDistance(a,b+2,.00048);addDistance(a+1,b+3,.00048);
-    const tets:[[number,number,number,number],...Array<[number,number,number,number]>]=[
+    const tets:[number,number,number,number][]=[
       [a,a+1,a+2,b],[a+1,a+2,a+3,b+3],[a+1,a+2,b,b+3],[a+1,b,b+1,b+3],[a+2,b,b+2,b+3],
     ];
     for(const [i,j,k,l] of tets)constraints.push({kind:'volume',a:i,b:j,c:k,d:l,compliance:2.5e-10,yieldRatio:.10,breakRatio:.55,plasticity:.22});
