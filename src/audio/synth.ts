@@ -59,7 +59,7 @@ function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,samp
 }
 function impactDuration(event:ImpactEvent):number{
   const profiles=[material(event.materialA),material(event.materialB)],damping=(profiles[0].acoustic.damping+profiles[1].acoustic.damping)*.5,dims=event.dimensionsA??[event.size,event.size,event.size],d=[...dims].sort((a,b)=>a-b),plate=(d[0]??1)/Math.max(.01,Math.sqrt((d[1]??1)*(d[2]??1)))<.12;
-  return Math.min(1.45,Math.max(.24,.32+(1-damping)*.36+(plate?.42:0)+Math.log1p(event.energy)*.018));
+  return Math.min(1.45,Math.max(.24,.32+(1-damping)*.36+(plate ? .42 : 0)+Math.log1p(event.energy)*.018));
 }
 function modalBank(profile:ReturnType<typeof material>,dimensions:readonly number[],rng:()=>number,fixed:boolean){
   const d=[...dimensions].map(value=>Math.max(.002,Math.abs(value))).sort((x,y)=>x-y),h=d[0]??.02,b=d[1]??h,a=d[2]??b,span=Math.sqrt(a*b),thin=h/Math.max(.002,span),plate=thin<.12,phases:number[]=[],frequencies:number[]=[],decays:number[]=[],gains:number[]=[];
