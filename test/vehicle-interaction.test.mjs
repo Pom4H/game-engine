@@ -83,6 +83,20 @@ test('M3 interaction rig combines thermal contraction, reversible flex, plastic 
   assert.ok(rig.shellPositions().every(Number.isFinite));
 });
 
+test('human-scale loads dent panels and move suspension without plastically crushing the crash cage',()=>{
+  const rig=new M3InteractionRig(1700);
+  const baseline=rig.state.structuralPlasticWorkJ;
+  for(let tick=0;tick<720;tick++){
+    const phase=(tick%86)/86,landing=Math.exp(-(((phase-.12)/.11)**2));
+    rig.applyBodyLoad([tick%172<86?1.15:-.05,0,tick%172<86?-.32:.12],760+3_200*landing);
+    if(tick%86===10)rig.impact({time:tick/120,point:[.4,1.2,-.7],normal:[0,1,0],energyJ:175,radiusM:.24,thicknessM:.00075,effectiveMassKg:52});
+    rig.step(1/120);
+  }
+  assert.equal(rig.state.structuralPlasticWorkJ,baseline);
+  assert.ok(rig.state.panelPermanentDepthM>0,rig.state);
+  assert.ok(rig.shellPositions().every(Number.isFinite));
+});
+
 test('mechanism audio is deterministic and non-silent',()=>{
   const events=[
     {type:'mechanism',id:1,time:.1,point:[0,0,0],mechanism:'door-latch',energy:9,speed:1.8,size:1.1},
