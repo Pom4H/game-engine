@@ -25,11 +25,11 @@ spec.rendering={
   shadowExtent:30,
 };
 spec.camera={
-  position:[-11.55,1.18,-4.02],
-  target:[-20.05,.72,-1.38],
-  fov:30,
-  focusDistance:8.85,
-  aperture:.085,
+  position:[-15.15,1.06,-4.10],
+  target:[-20.55,.70,-1.38],
+  fov:28,
+  focusDistance:6.10,
+  aperture:.075,
 };
 
 // Keep the reference car exactly at its authored start pose. Headlights remain on
@@ -47,6 +47,7 @@ spec.entities=spec.entities.filter(entity=>{
   return true;
 });
 spec.entities.push(
+  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'default',color:[.018,.020,.024,1],roughness:.46,metalness:.02}},
   {id:'hero-bank-near',position:[-13,.18,-4.18],mesh:{kind:'snowdrift',size:[62,.48,1.08],seed:4617,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
   {id:'hero-bank-far',position:[-13,.18,4.12],mesh:{kind:'snowdrift',size:[62,.56,1.22],seed:9121,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
 );
@@ -56,8 +57,8 @@ for(const entity of spec.entities){
     entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.125,metalness:.035};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:.00003,waterDepthM:.0010};
-    entity.material={...entity.material,color:[.018,.020,.024,1],roughness:.88};
+    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00035};
+    entity.material={...entity.material,color:[.014,.016,.020,1],roughness:.72};
   }
 }
 
