@@ -388,7 +388,7 @@ export class WebGPURenderer implements Renderer{
   private depth:GPUAny=null;private hdr:GPUAny=null;private normal:GPUAny=null;private specular:GPUAny=null;private velocity:GPUAny=null;private effectsHdr:GPUAny=null;private effectsBind:GPUAny=null;private taaA:GPUAny=null;private taaB:GPUAny=null;private taaBindAB:GPUAny=null;private taaBindBA:GPUAny=null;private presentBindA:GPUAny=null;private presentBindB:GPUAny=null;private reflection:GPUAny=null;private reflectionDepth:GPUAny=null;private depthW=0;private depthH=0;
   private fixedResolution:readonly [number,number]|undefined;
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
-  private readonly meshes=new Map<string,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
+  private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private environmentKey='';private environmentUpdates=0;
@@ -665,7 +665,7 @@ export class WebGPURenderer implements Renderer{
     for(const [key,batch] of this.shadowBatches)if(!used.has(key)){batch.buffer.destroy();this.shadowBatches.delete(key);}
     return{singles,batches,instances};
   }
-  private mesh(primitive:Primitive):GPUMesh{const key=primitiveKey(primitive),found=this.meshes.get(key);if(found)return found;const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);return mesh;}
+  private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
   private collect(scene:Scene):void{this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>e.material?.texture?[e.material.texture.url]:[])));const live=[...scene.entities.values()].filter(e=>e.mesh),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(e.mesh!)));if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.index.destroy();this.meshes.delete(key);}}
   private label(text:string):GPUAny{
@@ -705,7 +705,16 @@ function taaJitter(frame:number):readonly[number,number]{const i=(frame%8)+1;ret
 
 function distance2(a:Vec3,b:Vec3):number{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[2];return x*x+y*y+z*z;}
 
-function shadowBatchKey(entity:RuntimeEntity):string{return primitiveKey(entity.mesh!)+'|'+(canCullBack(entity)?1:0);}
+const shadowPrimitiveIds=new WeakMap<object,number>();let nextShadowPrimitiveId=1;
+function shadowGeometryKey(primitive:Primitive):string{
+  if(primitive.kind==='box'||primitive.kind==='plane'||primitive.kind==='shard')return primitive.kind;
+  if(primitive.kind==='sphere')return 'sphere:'+(primitive.segments??20);
+  if(primitive.kind==='cylinder')return 'cylinder:'+primitive.radius+':'+primitive.height+':'+(primitive.topRadius??primitive.radius)+':'+(primitive.segments??20);
+  if(primitive.kind==='torus')return 'torus:'+primitive.radius+':'+primitive.tube+':'+(primitive.segments??40);
+  let id=shadowPrimitiveIds.get(primitive as object);if(id===undefined){id=nextShadowPrimitiveId++;shadowPrimitiveIds.set(primitive as object,id);}
+  return primitive.kind+':'+id;
+}
+function shadowBatchKey(entity:RuntimeEntity):string{return shadowGeometryKey(entity.mesh!)+'|'+(canCullBack(entity)?1:0);}
 function canCullBack(entity:RuntimeEntity):boolean{
   const kind=entity.mesh?.kind;
   return kind==='box'||kind==='sphere'||kind==='cylinder'||kind==='torus'||kind==='polygon-prism';
