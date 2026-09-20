@@ -33,11 +33,28 @@ function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,samp
   const a=material(event.materialA).acoustic,b=material(event.materialB).acoustic;
   const surfaceDamping=((event.surfaceA?.damping??a.damping)+(event.surfaceB?.damping??b.damping))/2;
   const wetness=((event.surfaceA?.wetness??0)+(event.surfaceB?.wetness??0))/2,moss=((event.surfaceA?.moss??0)+(event.surfaceB?.moss??0))/2;
-  const damping=Math.max(.025,surfaceDamping),brightness=Math.max(.06,(a.brightness+b.brightness)/2*(1-wetness*.28-moss*.52));
-  const geometryScale=Math.max(.35,Math.sqrt(Math.max(.04,event.size))),base=Math.max(70,Math.sqrt(a.resonanceHz*b.resonanceHz)/geometryScale);
-  const modes=[1,1.43,2.07,2.91],phases=modes.map(()=>rng()*Math.PI*2),softness=1-moss*.35;
-  for(let i=0;i<left.length;i++){const t=i/sampleRate,env=Math.exp(-t*(10+34*damping)),attack=Math.min(1,t*.004*sampleRate),noise=(rng()*2-1)*Math.exp(-t*(55+wetness*25))*(a.noise+b.noise)*.22*softness;let sample=noise;for(let m=0;m<modes.length;m++)sample+=Math.sin(2*Math.PI*base*modes[m]!*t+phases[m]!)*env*(1/(1+m*.72))*(.55+brightness*.55);sample*=amplitude*attack*.34*(1-moss*.18);left[i]=sample*gainL;right[i]=sample*gainR;}
+  const banks=[
+    modalBank(a,event.dimensionsA??[event.size,event.size,event.size],rng),
+    ...(event.b==='ground'?[]:[modalBank(b,event.dimensionsB??[event.size,event.size,event.size],rng)]),
+  ];
+  const contactBrightness=Math.max(.04,(a.brightness+b.brightness)/2*(1-wetness*.30-moss*.55)),contactNoise=(a.noise+b.noise)*.5;
+  for(let i=0;i<left.length;i++){
+    const t=i/sampleRate,attack=Math.min(1,t*.004*sampleRate),contactEnv=Math.exp(-t*(48+wetness*32+surfaceDamping*18));
+    let sample=(rng()*2-1)*contactEnv*contactNoise*(.10+contactBrightness*.18)*(1-moss*.2);
+    for(const bank of banks){
+      const env=Math.exp(-t*bank.decay);
+      for(let m=0;m<bank.ratios.length;m++)sample+=Math.sin(2*Math.PI*bank.base*bank.ratios[m]!*t+bank.phases[m]!)*env*bank.gain/(1+m*.68);
+    }
+    sample*=amplitude*attack*.34;left[i]=sample*gainL;right[i]=sample*gainR;
+  }
 }
+function modalBank(profile:ReturnType<typeof material>['acoustic'],dimensions:readonly number[],rng:()=>number){
+  const d=[...dimensions].map(value=>Math.max(.002,Math.abs(value))).sort((x,y)=>x-y),thickness=d[0]??.02,mid=d[1]??thickness,large=d[2]??mid,span=Math.max(.04,Math.sqrt(mid*large)),thinness=Math.min(1,thickness/span),plate=clamp01(1-thinness*4);
+  const scale=Math.max(.28,Math.min(2.8,Math.pow(thickness/.02,.30)*Math.pow(.5/span,.52))),aspect=Math.max(1,Math.min(4,large/Math.max(.002,mid)));
+  const ratios=[1,1.38+.12/aspect,2.02+.14*aspect,2.72+.09/aspect],phases=ratios.map(()=>rng()*Math.PI*2);
+  return{base:Math.max(55,profile.resonanceHz*scale),ratios,phases,decay:4.5+profile.damping*28+(1-plate)*18,gain:(.18+profile.brightness*.45)*(.38+plate*.85)};
+}
+function clamp01(value:number){return Math.max(0,Math.min(1,Number.isFinite(value)?value:0));}
 
 function fractureVoice(event:FractureEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
   const profile=material(event.material).acoustic,thicknessScale=Math.sqrt(Math.max(.25,event.thickness/.01)),sizeScale=Math.max(.65,event.size),base=Math.max(260,profile.resonanceHz*thicknessScale/Math.sqrt(sizeScale));
