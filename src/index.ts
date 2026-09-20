@@ -6,6 +6,8 @@ export {PlasticDeformationSystem,type DeformableBodySpec,type SceneDeformationSp
 export {StructuralBody,type StructuralDefinition,type StructuralNodeSpec,type StructuralConstraintSpec,type StructuralDistanceSpec,type StructuralVolumeSpec,type StructuralStats,type BakedStructuralState} from './physics/structure.js';
 export {bindStructuralSkin,applyStructuralSkin,type StructuralSkinBinding} from './physics/structural-skin.js';
 export {AdaptiveStructuralController,type ReducedRigidState,type StructuralActivationPolicy,type StructuralActivation,type AdaptiveStructuralStats} from './physics/adaptive-structure.js';
+export {generatePassengerVehicle,passengerStructuralDefinition,interpolateSection,validatePassengerVehicleProfile,type PassengerVehicleProfile,type PassengerSideSection,type PassengerRoofSection,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole} from './vehicles/passenger.js';
+export {M3_PARAMETRIC_PROFILE} from './vehicles/m3.js';
 export {Scene,type RuntimeEntity} from './scene/scene.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
