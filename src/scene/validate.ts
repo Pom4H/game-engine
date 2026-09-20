@@ -105,6 +105,8 @@ function validateBindings(scene:Record<string,unknown>,entities:readonly EntityS
       if(body.body.shape==='sphere')throw new TypeError(`${path}.bodyId must use a box collision envelope`);
       if(!body.mesh&&!body.body.collisionSize)throw new TypeError(`${path}.bodyId requires body.collisionSize when it has no mesh`);
       const ids=boundedArray(item.visualIds,`${path}.visualIds`,4096);if(!ids.length)throw new TypeError(`${path}.visualIds must not be empty`);
+      const deform=item.deformVisualIds===undefined?ids:boundedArray(item.deformVisualIds,`${path}.deformVisualIds`,4096),deformSet=new Set(deform.map(String));
+      for(const id of deformSet)if(!ids.map(String).includes(id))throw new TypeError(`${path}.deformVisualIds must be a subset of visualIds`);
       for(const [j,value] of ids.entries()){
         const p=`${path}.visualIds[${j}]`,id=stableId(value,p),visual=reference(id,p);
         if(visualIds.has(id))throw new TypeError(`${p} is already owned by another deformation body`);visualIds.add(id);
