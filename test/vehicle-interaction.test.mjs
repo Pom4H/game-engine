@@ -119,9 +119,11 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
   ];
   assert.ok(originalFbxIds.every(id=>byId.get(id)?.mesh.kind==='triangle-mesh'),'original FBX wheels/lights/trim must never fall back to primitive stand-ins');
   for(const id of originalFbxIds)assert.ok(byId.has(id),`missing original FBX-derived M3 part: ${id}`);
-  for(const id of ['interior-dashboard','interior-seat-left','interior-seat-right','interior-rear-seat']){
-    assert.equal(byId.get(id)?.role,'dark',`${id} must remain render-only cabin occlusion`);
-    assert.equal(m3PartBody(byId.get(id),true),undefined,`${id} must not duplicate vehicle physics mass`);
+  for(const id of ['windshield-front','windshield-rear','window-front-left','window-front-right']){
+    const backing=byId.get('interior-'+id),glass=byId.get(id);
+    assert.equal(backing?.role,'dark',`interior-${id} must remain render-only cabin occlusion`);
+    assert.equal(backing?.mesh,glass?.mesh,`interior-${id} should reuse the packed glazing mesh without new geometry payload`);
+    assert.equal(m3PartBody(backing,true),undefined,`interior-${id} must not duplicate vehicle physics mass`);
   }
 
   assert.equal(byId.get('body').material.kind,'steel');
