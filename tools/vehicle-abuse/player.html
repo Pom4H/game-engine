@@ -47,6 +47,7 @@ const scene=new Scene({
 const rig=new M3InteractionRig(1700);rig.setTemperatureC(-15);const script=createVehicleAbuseScript(rig);
 const baseParts=new Map(geometry.parts.map(part=>['m3-'+part.id,{position:[...part.position],rotation:[...(part.rotation??[0,0,0])]}]));
 const bodyBase=geometry.body;let simSteps=0;const events=[],telemetry=[];
+const mix=(a,b,t)=>a+(b-a)*t;
 
 const rotate=(p,r)=>{const [rx,,rz]=r,sx=Math.sin(rx),cx=Math.cos(rx),sz=Math.sin(rz),cz=Math.cos(rz);let [x,y,z]=p;const x1=x*cz-y*sz,y1=x*sz+y*cz;return[x1,y1*cx-z*sx,y1*sx+z*cx];};
 function applyCar(){
