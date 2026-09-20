@@ -193,8 +193,8 @@ fn acesPresent(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+
  var color=max(vec3<f32>(0),center+(center-neighbourhood)*.17)*f.sunColor.w;
  color=pow(acesPresent(color),vec3<f32>(1.0/2.2));
  let luma=dot(color,vec3<f32>(.2126,.7152,.0722));
- color=mix(vec3<f32>(luma),color,1.075);
- color=clamp((color-.5)*1.045+.5,vec3<f32>(0),vec3<f32>(1));
+ color=mix(vec3<f32>(luma),color,1.035);
+ color=clamp((color-.5)*1.025+.5,vec3<f32>(0),vec3<f32>(1));
  // Cool reflected winter fill and warm sun highlights produce photographic
  // separation while retaining the physical HDR light ratios.
  color+=vec3<f32>(-.006,.001,.010)*(1.0-smoothstep(.22,.55,luma));
