@@ -157,33 +157,39 @@ export class PlasticDeformationSystem {
     const radius=clamp(baseRadius*(.78+Math.pow(Math.max(1,energy/threshold),.18)*.22),baseRadius*.65,baseRadius*1.75);
     const area=Math.PI*radius*radius,volume=area*state.spec.skinThicknessM;
     const elasticYieldEnergy=.5*mechanical.yieldStressPa*mechanical.yieldStressPa/Math.max(1,mechanical.youngModulusPa)*volume;
-    const demandJ=Math.max(0,energy-elasticYieldEnergy)*mechanical.plasticity;
-    if(demandJ<=0)return;
     const workPerMetre=Math.max(1,mechanical.yieldStressPa*area*state.spec.skinThicknessM/Math.max(.04,radius));
+    const existing=this.findDent(state,point,outwardNormal,radius),remainingDepth=Math.max(0,state.spec.maxDentM-(existing?.depth??0));
+    const capacityJ=remainingDepth*workPerMetre/.85;
+    const demandJ=Math.min(Math.max(0,energy-elasticYieldEnergy)*mechanical.plasticity,capacityJ);
+    if(demandJ<=0)return;
     return{state,root,point:Object.freeze([...point]) as Vec3,outwardNormal:Object.freeze([...outwardNormal]) as Vec3,radius,baseRadius,demandJ,workPerMetre};
   }
 
   private applyPlasticWork(request:PlasticContact,energy:number):number{
     if(energy<=0)return 0;
     const {state,root,point,outwardNormal,radius,baseRadius,workPerMetre}=request;
-    const depth=clamp(energy/workPerMetre*.85,.001,state.spec.maxDentM);
-    if(depth<.002)return 0;
+    const depthIncrement=energy/workPerMetre*.85;
+    if(depthIncrement<.002)return 0;
 
-    let dent=state.dents.find(existing=>
-      V3.length(V3.sub(existing.point,point))<Math.min(existing.radius,radius)*.48&&
-      V3.dot(existing.outwardNormal,outwardNormal)>.72
-    );
+    let dent=this.findDent(state,point,outwardNormal,radius);
     if(dent){
       dent.energy+=energy;
-      dent.depth=clamp(Math.max(dent.depth,depth)+depth*.32,0,state.spec.maxDentM);
+      dent.depth=clamp(dent.depth+depthIncrement,0,state.spec.maxDentM);
       dent.radius=clamp(Math.max(dent.radius,radius)*(1+Math.min(.08,energy/100000)),baseRadius*.65,baseRadius*1.9);
     }else{
-      dent={point,outwardNormal,radius,depth,energy};
+      dent={point,outwardNormal,radius,depth:clamp(depthIncrement,0,state.spec.maxDentM),energy};
       state.dents.push(dent);if(state.dents.length>20)state.dents.shift();
     }
     root.body!.applyLocalCrush(outwardNormal,depth*.72);
     this.dirty.add(state);
     return energy;
+  }
+
+  private findDent(state:DeformableState,point:Vec3,outwardNormal:Vec3,radius:number):PlasticDent|undefined{
+    return state.dents.find(existing=>
+      V3.length(V3.sub(existing.point,point))<Math.min(existing.radius,radius)*.48&&
+      V3.dot(existing.outwardNormal,outwardNormal)>.72
+    );
   }
 
   private syncPose(state:DeformableState,entities:ReadonlyMap<string,RuntimeEntity>):void{
