@@ -60,9 +60,12 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  var value=0.0;let texel=1.0/vec2<f32>(textureDimensions(shadowMap));
  let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233))+floor(f.up.w*60.0)*.618)*43758.5453)*6.2831853;
  let cs=cos(phase);let sn=sin(phase);let rot=mat2x2<f32>(cs,-sn,sn,cs);
- let taps=array<vec2<f32>,4>(vec2<f32>(-.65,-.35),vec2<f32>(.35,-.72),vec2<f32>(.72,.38),vec2<f32>(-.38,.68));
- for(var i=0;i<4;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*1.55,clip.z-.000025);}
- let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.25,smoothstep(0.0,.025,edge));
+ // Each linear comparison sample is already a hardware-filtered 2x2 PCF tap.
+ // Two temporally rotated taps give eight effective comparisons per frame and TAA
+ // integrates the changing phase, avoiding the cost of four explicit taps.
+ let taps=array<vec2<f32>,2>(vec2<f32>(-.66,-.38),vec2<f32>(.66,.38));
+ for(var i=0;i<2;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*1.45,clip.z-.000025);}
+ let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.5,smoothstep(0.0,.025,edge));
 }
 
 struct VOut {
@@ -234,22 +237,26 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   // Snow accumulation is derived from mass balance. Road tracks expose wet/slushy
   // asphalt only if traffic actually supplied enough contact work.
   let snowBase=clamp(snowDepth/0.055,0.0,1.0);
-  var snowMask=upward*snowBase*smoothstep(0.12,0.82,fbm(in.worldPos*1.9+seed*3.1)+snowBase*.74);
-  if(surfaceUse>.5 && surfaceUse<1.5){
-    snowMask*=1.0-track*.96;
+  var snowMask=0.0;
+  // Most objects have no deposited snow. Skip nine 3D-noise reads on those
+  // fragments instead of evaluating an FBM that will later be multiplied by zero.
+  if(snowBase>.001){
+    snowMask=upward*snowBase*smoothstep(0.12,0.82,fbm(in.worldPos*1.9+seed*3.1)+snowBase*.74);
+    if(surfaceUse>.5 && surfaceUse<1.5){snowMask*=1.0-track*.96;}
+    if(surfaceUse>2.5 && surfaceUse<3.5){snowMask=clamp(snowMask+snowBase*.38,0.0,1.0);}
+    let slushColor=mix(vec3<f32>(0.48,0.5,0.5),vec3<f32>(0.22,0.19,0.16),clamp(u.weather.x+u.motion.z,0.0,1.0));
+    albedo=mix(albedo,slushColor,snowMask*slush*.52);
+    albedo=mix(albedo,vec3<f32>(0.89,0.93,0.97),snowMask*(1.0-slush*.55));
   }
-  if(surfaceUse>2.5 && surfaceUse<3.5){
-    snowMask=clamp(snowMask+snowBase*.38,0.0,1.0);
-  }
-  let slushColor=mix(vec3<f32>(0.48,0.5,0.5),vec3<f32>(0.22,0.19,0.16),clamp(u.weather.x+u.motion.z,0.0,1.0));
-  albedo=mix(albedo,slushColor,snowMask*slush*.52);
-  albedo=mix(albedo,vec3<f32>(0.89,0.93,0.97),snowMask*(1.0-slush*.55));
 
   // Moving bodies accumulate fresh snow on upward and rear-facing surfaces.
-  let motionDir=normalize(vec3<f32>(u.motion.x,0.0,u.motion.y)+vec3<f32>(0.0001,0.0,0.0));
-  let rearFacing=smoothstep(0.05,0.9,dot(n,-motionDir));
-  let bodySnow=clamp(u.surfaceDynamics.z*upward+u.surfaceDynamics.w*rearFacing,0.0,1.0);
-  albedo=mix(albedo,vec3<f32>(0.91,0.945,0.98),bodySnow*smoothstep(.18,.78,fbm(in.worldPos*4.4+seed)+.25));
+  let bodyDeposit=max(u.surfaceDynamics.z,u.surfaceDynamics.w);
+  if(bodyDeposit>.001){
+    let motionDir=normalize(vec3<f32>(u.motion.x,0.0,u.motion.y)+vec3<f32>(0.0001,0.0,0.0));
+    let rearFacing=smoothstep(0.05,0.9,dot(n,-motionDir));
+    let bodySnow=clamp(u.surfaceDynamics.z*upward+u.surfaceDynamics.w*rearFacing,0.0,1.0);
+    albedo=mix(albedo,vec3<f32>(0.91,0.945,0.98),bodySnow*smoothstep(.18,.78,fbm(in.worldPos*4.4+seed)+.25));
+  }
 
   if(u.texture.w>.5){
     let w=pow(abs(n),vec3<f32>(6));let weights=w/max(w.x+w.y+w.z,.001);let tex=texelAt(in.worldPos,weights);
@@ -261,8 +268,11 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
 
   // Water is also state, not a material override. Procedural depressions localize
   // the scalar water volume into shallow puddles.
-  let depression=1.0-fbm(in.worldPos*0.58+seed*6.0);
-  let puddleMask=u.surfaceDynamics.x*smoothstep(0.7-u.surfaceDynamics.x*.35,0.9-u.surfaceDynamics.x*.12,depression)*upward;
+  var puddleMask=0.0;
+  if(u.surfaceDynamics.x>.001){
+    let depression=1.0-fbm(in.worldPos*0.58+seed*6.0);
+    puddleMask=u.surfaceDynamics.x*smoothstep(0.7-u.surfaceDynamics.x*.35,0.9-u.surfaceDynamics.x*.12,depression)*upward;
+  }
   let wetness=clamp(u.surface.y+u.motion.w+waterDepth/0.006+puddleMask*.5,0.0,1.0);
   albedo*=1.0-u.surface.w-wetness*.24;
 
@@ -411,7 +421,7 @@ export class WebGPURenderer implements Renderer{
     const frameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}}]});
     const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*8)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
-    const frame=device.createBuffer({size:400,usage:0x40|0x08}),shadow=device.createTexture({size:[4096,4096],format:'depth32float',usage:0x10|0x04});
+    const frame=device.createBuffer({size:400,usage:0x40|0x08}),shadow=device.createTexture({size:[2048,2048],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[64,64,6],mipLevelCount:7,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
@@ -456,7 +466,7 @@ export class WebGPURenderer implements Renderer{
     for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
     const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04});
     this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.normal=texture('rgba16float',1);this.specular=texture('rgba8unorm',1);this.velocity=texture('rg16float',1);this.effectsHdr=texture('rgba16float',1);this.taaA=texture('rgba16float',1);this.taaB=texture('rgba16float',1);
-    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
+    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'depth32float',usage:0x10});
     const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
     const bloomBind=(texture:GPUAny)=>this.device.createBindGroup({layout:this.gpu.bloomLayout,entries:[{binding:0,resource:texture.createView()},{binding:1,resource:this.gpu.sampler}]});this.bloomDownBind=bloomBind(this.hdr);this.bloomHorizontalBind=bloomBind(this.bloomA);this.bloomVerticalBind=bloomBind(this.bloomB);
     this.gpu.lightBind=this.device.createBindGroup({layout:this.gpu.lightLayout,entries:[{binding:0,resource:{buffer:this.gpu.frame}},{binding:1,resource:this.gpu.shadow.createView()},{binding:2,resource:this.gpu.comparison},{binding:3,resource:this.reflection.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.lightBuffer}},{binding:6,resource:{buffer:this.gpu.cellBuffer}},{binding:7,resource:this.gpu.noiseVolume.createView()},{binding:8,resource:this.gpu.noiseSampler},{binding:9,resource:this.gpu.environmentView}]});
