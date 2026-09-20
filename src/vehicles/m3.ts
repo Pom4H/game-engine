@@ -86,10 +86,25 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
  * cage; trim, glazing, wheels, lights, mirrors and exhaust retain their FBX geometry.
  */
 export function generateM3Vehicle():ParametricPassengerGeometry{
-  const body=m3HighFidelityBody();
+  const body=m3HighFidelityBody(),sources=m3FbxParts();
+  const backingPosition=(source:(typeof sources)[number]):readonly[number,number,number]=>{
+    const [x,y,z]=source.center;
+    if(source.id==='windshield-front')return[x-.018,y-.004,z];
+    if(source.id==='windshield-rear')return[x+.018,y-.004,z];
+    if(source.id.includes('-left'))return[x,y,z+.012];
+    if(source.id.includes('-right'))return[x,y,z-.012];
+    return source.center;
+  };
+  const glazingBackers=sources.filter(source=>source.sourceMaterial==='Window').map(source=>Object.freeze({
+    id:'interior-'+source.id,
+    role:'dark' as const,
+    mesh:source.mesh,
+    position:backingPosition(source),
+    material:{kind:'default' as const,finish:'smooth' as const,roughness:.48,metalness:0},
+  }));
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
-    ...m3FbxParts().map(source=>Object.freeze({
+    ...sources.map(source=>Object.freeze({
       id:source.id,
       role:sourceRole(source.sourceMaterial,source.id),
       mesh:source.mesh,
@@ -97,15 +112,12 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
       ...(source.wheel?{wheel:true}:{}),
       material:sourceMaterial(source.sourceMaterial,source.id),
     })),
-    // The reference FBX is an exterior model. A tiny opaque cabin proxy prevents
-    // physically impossible sight lines through both windscreens while giving
-    // glazing real dashboard/seat silhouettes. These parts are render-only.
-    Object.freeze({id:'interior-dashboard',role:'dark',mesh:{kind:'box' as const,size:[.58,.10,1.20] as const},position:[.28,.69,0] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.72}}),
-    Object.freeze({id:'interior-seat-left',role:'dark',mesh:{kind:'box' as const,size:[.20,.52,.40] as const},position:[-.25,.82,-.38] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.86,pattern:'fabric' as const}}),
-    Object.freeze({id:'interior-seat-right',role:'dark',mesh:{kind:'box' as const,size:[.20,.52,.40] as const},position:[-.25,.82,.38] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.86,pattern:'fabric' as const}}),
-    Object.freeze({id:'interior-rear-seat',role:'dark',mesh:{kind:'box' as const,size:[.14,.30,1.08] as const},position:[-1.08,.63,0] as const,rotation:[0,0,-.08] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,pattern:'fabric' as const}}),
+    // Exterior FBX has no cabin. Reuse each glazing mesh a few millimetres inward
+    // as a dark interior backing: no new geometry payload, no impossible sightline
+    // through the entire car, and the transparent outer pane still owns reflections.
+    ...glazingBackers,
   ];
-  const generatedTriangles=parts.reduce((sum,part)=>sum+(part.mesh.kind==='triangle-mesh'?part.mesh.indices.length/3:0),0);
+  const generatedTriangles=body.indices.length/3+sources.reduce((sum,source)=>sum+source.mesh.indices.length/3,0);
   return Object.freeze({
     profile:M3_PARAMETRIC_PROFILE,
     parts:Object.freeze(parts),
