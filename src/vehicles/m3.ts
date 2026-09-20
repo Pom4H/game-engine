@@ -157,6 +157,11 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     Object.freeze({id:'hood-roundel-white-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.034,0],[.034,-.034],[0,-.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.18,metalness:.01}}),
   ];
   const frontDetail:ParametricVehiclePart[]=[
+    Object.freeze({id:'kidney-recess-left',role:'dark' as const,mesh:{kind:'box' as const,size:[.020,.505,.292] as const},position:[2.386,.635,-.235] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
+    Object.freeze({id:'kidney-recess-right',role:'dark' as const,mesh:{kind:'box' as const,size:[.020,.505,.292] as const},position:[2.386,.635,.235] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
+    Object.freeze({id:'lower-intake-recess',role:'dark' as const,mesh:{kind:'box' as const,size:[.026,.205,.82] as const},position:[2.372,.305,0] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.94,metalness:0}}),
+    Object.freeze({id:'side-intake-left',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:0 as const,points:[[-.16,-.16],[-.13,.16],[.13,.13],[.18,-.10]] as const,thickness:.024},position:[2.395,.33,-.68] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.90,metalness:0}}),
+    Object.freeze({id:'side-intake-right',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:0 as const,points:[[-.16,-.16],[-.13,.16],[.13,.13],[.18,-.10]] as const,thickness:.024},position:[2.395,.33,.68] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.90,metalness:0}}),
     Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,-.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
     Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
     Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
@@ -212,7 +217,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
   if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
-  if(part.role==='light')return{...base,color:[.70,.80,.94,1],emissive:lightsOn?[.66,.80,1.02]:[.014,.018,.024]};
+  if(part.role==='light')return{...base,color:[.54,.68,.86,1],emissive:lightsOn?[.34,.46,.70]:[.012,.016,.022],roughness:.11};
   if(part.role==='tail')return{...base,color:[.34,.012,.008,1],emissive:lightsOn?[.7,.015,.006]:[.018,.001,.001]};
   if(part.role==='metal')return{...base,color:[.16,.17,.18,1]};
   return{...base,color:[.026,.029,.032,1]};
