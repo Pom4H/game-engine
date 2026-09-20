@@ -723,7 +723,7 @@ export class WebGPURenderer implements Renderer{
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],60);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],64);
     uniform.set([entity.material.roughness??-1,entity.material.metalness??entity.material.profile.optical.metalness,entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,entity.material.profile.optical.ior],68);uniform.set([...(entity.material.emissive??[0,0,0]),0],72);
     const texture=entity.material.texture,normalReady=!!(texture?.normalUrl&&this.surfaceTextures.get(texture.normalUrl)),ormReady=!!(texture?.ormUrl&&this.surfaceTextures.get(texture.ormUrl));
-    uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture&&this.surfaceTextures.get(texture.url)?1:0],76);
+    uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture?.url&&this.surfaceTextures.get(texture.url)?1:0],76);
     uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],80);
     if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);this.profiler.addUpload(pixels.byteLength,'surface');}
     this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');object.uniformReady=true;object.lastModel=new Float32Array(model);object.lastPrevModel=new Float32Array(previousModel);
@@ -754,10 +754,10 @@ export class WebGPURenderer implements Renderer{
     const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);this.labels.set(text,texture);return texture;
   }
   private object(id:string,width:number,height:number,label:string,textureSpec?:SurfaceTextureSpec):GPUObject{
-    const materialTexture=textureSpec?this.surfaceTextures.get(textureSpec.url):undefined;
+    const materialTexture=textureSpec?.url?this.surfaceTextures.get(textureSpec.url):undefined;
     const normalTexture=textureSpec?.normalUrl?this.surfaceTextures.get(textureSpec.normalUrl):undefined;
     const ormTexture=textureSpec?.ormUrl?this.surfaceTextures.get(textureSpec.ormUrl):undefined;
-    const materialKey=textureSpec?[materialTexture?textureSpec.url:'',normalTexture?textureSpec.normalUrl:'',ormTexture?textureSpec.ormUrl:''].join('|'):undefined;
+    const materialKey=textureSpec?[materialTexture&&textureSpec.url?textureSpec.url:'',normalTexture?textureSpec.normalUrl:'',ormTexture?textureSpec.ormUrl:''].join('|'):undefined;
     const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===label&&existing.materialKey===materialKey)return existing;
     if(existing){existing.uniform.destroy();if(existing.owned!==false)existing.texture.destroy();}
     const uniform=this.device.createBuffer({size:336,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
