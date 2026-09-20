@@ -112,12 +112,17 @@ test('mechanism audio is deterministic and non-silent',()=>{
 test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
   const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
   assert.equal(m3.generatedTriangles,9798,'packed render assembly should preserve all source FBX triangles');
-  assert.ok(m3.parts.every(part=>part.mesh.kind==='triangle-mesh'),'M3 render fidelity must not fall back to primitive wheel/light/trim substitutes');
-  for(const id of [
+  const originalFbxIds=[
     'body','windshield-front','windshield-rear','window-front-left','window-front-right',
     'mirror-left','mirror-right','plastic-trim','exhaust','rim-front-left','tire-front-left',
     'rim-rear-right','tire-rear-right','day-lights','rear-lights',
-  ])assert.ok(byId.has(id),`missing original FBX-derived M3 part: ${id}`);
+  ];
+  assert.ok(originalFbxIds.every(id=>byId.get(id)?.mesh.kind==='triangle-mesh'),'original FBX wheels/lights/trim must never fall back to primitive stand-ins');
+  for(const id of originalFbxIds)assert.ok(byId.has(id),`missing original FBX-derived M3 part: ${id}`);
+  for(const id of ['interior-dashboard','interior-seat-left','interior-seat-right','interior-rear-seat']){
+    assert.equal(byId.get(id)?.role,'dark',`${id} must remain render-only cabin occlusion`);
+    assert.equal(m3PartBody(byId.get(id),true),undefined,`${id} must not duplicate vehicle physics mass`);
+  }
 
   assert.equal(byId.get('body').material.kind,'steel');
   assert.equal(byId.get('windshield-front').material.kind,'glass');
