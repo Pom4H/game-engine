@@ -180,7 +180,7 @@ export class PlasticDeformationSystem {
       dent={point,outwardNormal,radius,depth:clamp(depthIncrement,0,state.spec.maxDentM),energy};
       state.dents.push(dent);if(state.dents.length>20)state.dents.shift();
     }
-    root.body!.applyLocalCrush(outwardNormal,depth*.72);
+    root.body!.applyLocalCrush(outwardNormal,depthIncrement*.72);
     this.dirty.add(state);
     return energy;
   }
