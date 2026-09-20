@@ -25,11 +25,11 @@ spec.rendering={
   shadowExtent:30,
 };
 spec.camera={
-  position:[-15.72,1.20,-3.05],
-  target:[-20.15,.72,-1.42],
-  fov:29.5,
-  focusDistance:4.75,
-  aperture:.018,
+  position:[-13.35,1.08,-3.10],
+  target:[-20.12,.70,-1.42],
+  fov:22.5,
+  focusDistance:6.98,
+  aperture:.13,
 };
 
 // Keep the reference car exactly at its authored start pose. Headlights remain on
