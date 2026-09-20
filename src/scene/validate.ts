@@ -144,16 +144,22 @@ function optionalNumber(obj:Record<string,unknown>,key:string,path:string,min=-I
 function vector(value:unknown,length:number,path:string,min=-Infinity,max=Infinity):void{if(!Array.isArray(value)||value.length!==length)throw new TypeError(`${path} must have ${length} components`);value.forEach((v,i)=>number(v,`${path}[${i}]`,min,max));}
 function choice(value:unknown,values:readonly unknown[],path:string):void{if(value!==undefined&&!values.includes(value))throw new TypeError(`${path} is unknown`);}
 
+function assetUrl(value:unknown,path:string):void{
+  if(typeof value!=='string'||value.length===0||value.length>8192||/[\s\u0000-\u001f\u007f\\]/u.test(value))throw new TypeError(`${path} must be a nonempty HTTP(S) or relative asset URL`);
+  const scheme=/^([a-z][a-z0-9+.-]*):/i.exec(value);
+  if(scheme&&!/^https?:\/\//i.test(value))throw new TypeError(`${path} must use HTTP(S) or a relative asset path`);
+  try{const parsed=new URL(value,'https://scene-assets.invalid/');if(!['http:','https:'].includes(parsed.protocol))throw new Error('unsupported scheme');}
+  catch{throw new TypeError(`${path} must be a valid HTTP(S) or relative asset URL`);}
+}
 function surfaceTexture(value:unknown,path:string):void{
-  const texture=object(value,path),url=texture.url;
-  if(typeof url!=='string'||url.length===0||url.length>8192||/[\s\u0000-\u001f\u007f\\]/u.test(url))throw new TypeError(`${path}.url must be a nonempty HTTP(S) or relative asset URL`);
-  const scheme=/^([a-z][a-z0-9+.-]*):/i.exec(url);
-  if(scheme&&!/^https?:\/\//i.test(url))throw new TypeError(`${path}.url must use HTTP(S) or a relative asset path`);
-  try{const parsed=new URL(url,'https://scene-assets.invalid/');if(!['http:','https:'].includes(parsed.protocol))throw new Error('unsupported scheme');}
-  catch{throw new TypeError(`${path}.url must be a valid HTTP(S) or relative asset URL`);}
+  const texture=object(value,path);assetUrl(texture.url,`${path}.url`);
+  if(texture.normalUrl!==undefined)assetUrl(texture.normalUrl,`${path}.normalUrl`);
+  if(texture.ormUrl!==undefined)assetUrl(texture.ormUrl,`${path}.ormUrl`);
   optionalNumber(texture,'sizeM',path,.01,1000);
   optionalNumber(texture,'bumpStrength',path,0,2);
   optionalNumber(texture,'albedoStrength',path,0,1);
+  optionalNumber(texture,'normalStrength',path,0,2);
+  optionalNumber(texture,'ormStrength',path,0,1);
 }
 function materialSpec(value:unknown,path:string):void{
   const m=object(value,path);
