@@ -52,11 +52,15 @@ export async function serveScene(input?:SceneSpec,options:LocalSceneServerOption
 
 async function localAssets(scene:SceneSpec|undefined,directory:string):Promise<LocalAssets>{
   const urls=new Set<string>();
+  const addTexture=(texture:import('../scene/types.js').SurfaceTextureSpec|undefined)=>{
+    if(!texture)return;
+    for(const url of [texture.url,texture.normalUrl,texture.ormUrl])if(url)urls.add(url);
+  };
   for(const entity of scene?.entities??[]){
-    if(entity.material?.texture)urls.add(entity.material.texture.url);
-    if(entity.environmental?.snowMaterial?.texture)urls.add(entity.environmental.snowMaterial.texture.url);
+    addTexture(entity.material?.texture);
+    addTexture(entity.environmental?.snowMaterial?.texture);
   }
-  for(const surface of scene?.surfaceContacts?.snow??[])if(surface.material?.texture)urls.add(surface.material.texture.url);
+  for(const surface of scene?.surfaceContacts?.snow??[])addTexture(surface.material?.texture);
   const root=await realpath(directory),files=new Map<string,string>();
   for(const url of urls){
     // Absolute and protocol-relative network URLs retain normal browser/CORS
