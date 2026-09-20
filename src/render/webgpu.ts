@@ -432,6 +432,28 @@ fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
 }
 `;
 
+const PROBE_SHADER=`
+struct U {
+  model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
+  surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
+  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
+}
+struct P {vp:mat4x4<f32>,sun:vec4<f32>,sunColor:vec4<f32>,sky:vec4<f32>}
+@group(0) @binding(0) var<uniform> u:U;
+@group(1) @binding(0) var<uniform> p:P;
+struct O {@builtin(position) position:vec4<f32>,@location(0) normal:vec3<f32>}
+@vertex fn vs(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>)->O{
+ let world=u.model*vec4<f32>(position,1);let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;
+ var out:O;out.position=p.vp*world;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);return out;
+}
+@fragment fn fs(in:O)->@location(0) vec4<f32>{
+ let n=normalize(in.normal),ndl=max(dot(n,p.sun.xyz),0.0),up=.35+1.15*max(n.y,0.0);
+ let base=pow(max(u.color.rgb,vec3<f32>(0)),vec3<f32>(2.2));
+ let radiance=base*(p.sky.rgb*up+p.sunColor.rgb*p.sun.w*ndl*.72)+u.emission.rgb;
+ return vec4<f32>(radiance,1);
+}
+`;
+
 export class WebGPURenderer implements Renderer{
   private depth:GPUAny=null;private hdr:GPUAny=null;private normal:GPUAny=null;private specular:GPUAny=null;private velocity:GPUAny=null;private effectsHdr:GPUAny=null;private effectsBind:GPUAny=null;private taaA:GPUAny=null;private taaB:GPUAny=null;private taaBindAB:GPUAny=null;private taaBindBA:GPUAny=null;private presentBindA:GPUAny=null;private presentBindB:GPUAny=null;private reflection:GPUAny=null;private reflectionDepth:GPUAny=null;private depthW=0;private depthH=0;
   private fixedResolution:readonly [number,number]|undefined;
