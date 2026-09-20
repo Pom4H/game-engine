@@ -8,7 +8,9 @@ export {bindStructuralSkin,applyStructuralSkin,type StructuralSkinBinding} from 
 export {StructuralStaticContactSolver,type StructuralStaticBox,type StructuralContactStats} from './physics/structural-contact.js';
 export {AdaptiveStructuralController,type ReducedRigidState,type StructuralActivationPolicy,type StructuralActivation,type AdaptiveStructuralStats} from './physics/adaptive-structure.js';
 export {generatePassengerVehicle,passengerStructuralDefinition,interpolateSection,validatePassengerVehicleProfile,type PassengerVehicleProfile,type PassengerSideSection,type PassengerRoofSection,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole} from './vehicles/passenger.js';
-export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE} from './vehicles/m3.js';
+export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,generateM3Vehicle} from './vehicles/m3.js';
+export {M3_HIGH_FIDELITY_SHELL,M3_SHELL_FIDELITY,m3HighFidelityBody} from './vehicles/m3-shell.js';
+export {decodePackedShell,type PackedShell} from './vehicles/packed-shell.js';
 export {Scene,type RuntimeEntity} from './scene/scene.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
