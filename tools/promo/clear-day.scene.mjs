@@ -41,8 +41,8 @@ for(const entity of spec.entities){
     entity.material={...entity.material,color:[.19,.205,.225,1],roughness:.105,metalness:.055};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:.00022,iceDepthM:.00010,waterDepthM:.00115};
-    entity.material={...entity.material,color:[.035,.039,.045,1],roughness:.76};
+    entity.environmental={...entity.environmental,snowDepthM:.00012,iceDepthM:.00003,waterDepthM:.00018};
+    entity.material={...entity.material,color:[.028,.031,.036,1],roughness:.86};
   }
 }
 
