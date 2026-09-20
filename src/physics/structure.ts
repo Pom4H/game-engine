@@ -42,12 +42,18 @@ export interface StructuralDefinition {
   readonly sleepSpeed?:number;
   /** Continuous quiet time required before automatic bake. */
   readonly sleepDelay?:number;
+  /** Axial internal damping rate in 1/s. Pair impulses preserve rigid translation and angular momentum. */
+  readonly internalDamping?:number;
 }
 
 export interface BakedStructuralState {
   readonly positions:Float64Array;
   readonly broken:Uint8Array;
   readonly plasticWorkJ:number;
+  /** Mass centre used to hand the sleeping shape back to a reduced rigid body. */
+  readonly centerOfMass:Vec3;
+  readonly linearVelocity:Vec3;
+  readonly angularVelocity:Vec3;
 }
 
 export interface StructuralStats {
@@ -65,7 +71,7 @@ const VOLUME:ConstraintKind=1;
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
 
 /**
- * Allocation-free XPBD structural core.
+ * SoA XPBD structural core.
  *
  * It deliberately owns the nodal mass while active. A caller can transfer a rigid
  * velocity field into the nodes with activateFromRigid(), solve structural motion,
@@ -98,18 +104,21 @@ export class StructuralBody {
   private readonly yieldForce:Float64Array;
   private readonly lambda:Float64Array;
   private readonly predictedMeasure:Float64Array;
+  private readonly impulseWeights:Float64Array;
   readonly broken:Uint8Array;
 
   readonly totalMass:number;
   readonly iterations:number;
   readonly sleepSpeed:number;
   readonly sleepDelay:number;
+  readonly internalDamping:number;
 
   mode:'active'|'dormant'='dormant';
   plasticWorkJ=0;
   steps=0;
   private quietTime=0;
   private dt=0;
+  private pendingBake:BakedStructuralState|undefined;
 
   constructor(readonly definition:StructuralDefinition){
     const nodeCount=definition.nodes.length,const constraintCount=definition.constraints.length;
@@ -118,6 +127,7 @@ export class StructuralBody {
     this.iterations=Math.max(1,Math.min(32,Math.floor(definition.iterations??8)));
     this.sleepSpeed=clamp(definition.sleepSpeed??.035,.001,2);
     this.sleepDelay=clamp(definition.sleepDelay??.22,.01,10);
+    this.internalDamping=clamp(definition.internalDamping??8,0,200);
 
     this.position=new Float64Array(nodeCount*3);
     this.previous=new Float64Array(nodeCount*3);
@@ -154,6 +164,7 @@ export class StructuralBody {
     this.yieldForce=new Float64Array(constraintCount);
     this.lambda=new Float64Array(constraintCount);
     this.predictedMeasure=new Float64Array(constraintCount);
+    this.impulseWeights=new Float64Array(nodeCount);
     this.broken=new Uint8Array(constraintCount);
 
     for(let i=0;i<constraintCount;i++){
@@ -204,7 +215,7 @@ export class StructuralBody {
   get nodeCount():number{return this.mass.length;}
   get constraintCount():number{return this.kind.length;}
 
-  wake():void{this.mode='active';this.quietTime=0;}
+  wake():void{this.mode='active';this.quietTime=0;this.pendingBake=undefined;}
 
   /**
    * Transfer a reduced rigid state into the nodal mass exactly once.
@@ -234,7 +245,7 @@ export class StructuralBody {
    */
   applyImpulse(point:Vec3,impulse:Vec3,radius=.45):void{
     if(!point.every(Number.isFinite)||!impulse.every(Number.isFinite)||!Number.isFinite(radius)||radius<=0)throw new TypeError('Invalid structural impulse');
-    const weights=new Float64Array(this.nodeCount);let sum=0,nearest=0,nearestD=Infinity;
+    const weights=this.impulseWeights;weights.fill(0);let sum=0,nearest=0,nearestD=Infinity;
     for(let i=0;i<this.nodeCount;i++){
       const j=i*3,d=Math.hypot(this.position[j]!-point[0],this.position[j+1]!-point[1],this.position[j+2]!-point[2]);
       if(d<nearestD){nearestD=d;nearest=i;}
@@ -277,6 +288,7 @@ export class StructuralBody {
    * Elastic energy is intentionally discarded only at this explicit LOD boundary.
    */
   bake():BakedStructuralState{
+    const rigid=this.rigidState();
     for(let i=0;i<this.constraintCount;i++){
       if(this.broken[i])continue;
       this.rest[i]=this.measure(i);
@@ -285,11 +297,21 @@ export class StructuralBody {
     }
     this.previous.set(this.position);
     this.velocity.fill(0);this.force.fill(0);this.quietTime=0;this.mode='dormant';
-    return Object.freeze({
+    const baked=Object.freeze({
       positions:new Float64Array(this.position),
       broken:new Uint8Array(this.broken),
       plasticWorkJ:this.plasticWorkJ,
+      centerOfMass:Object.freeze([...rigid.centerOfMass]) as Vec3,
+      linearVelocity:Object.freeze([...rigid.linearVelocity]) as Vec3,
+      angularVelocity:Object.freeze([...rigid.angularVelocity]) as Vec3,
     });
+    this.pendingBake=baked;
+    return baked;
+  }
+
+  /** Auto-bake stores the rigid handoff until the owning LOD manager consumes it. */
+  takeBakedState():BakedStructuralState|undefined{
+    const value=this.pendingBake;this.pendingBake=undefined;return value;
   }
 
   deformationOffsets():Float64Array{
@@ -371,13 +393,12 @@ export class StructuralBody {
   }
 
   private finishStep():void{
-    const invDt=1/this.dt;let maxSpeed=0;
+    const invDt=1/this.dt;
     for(let i=0;i<this.nodeCount;i++){
       const j=i*3;
       this.velocity[j]=(this.position[j]!-this.previous[j]!)*invDt;
       this.velocity[j+1]=(this.position[j+1]!-this.previous[j+1]!)*invDt;
       this.velocity[j+2]=(this.position[j+2]!-this.previous[j+2]!)*invDt;
-      maxSpeed=Math.max(maxSpeed,Math.hypot(this.velocity[j]!,this.velocity[j+1]!,this.velocity[j+2]!));
     }
 
     for(let i=0;i<this.constraintCount;i++){
@@ -409,9 +430,77 @@ export class StructuralBody {
       }
     }
 
+    this.dampInternalVelocities();
+    const internalSpeed=this.internalSpeed();
     this.steps++;
-    if(maxSpeed<this.sleepSpeed)this.quietTime+=this.dt;else this.quietTime=0;
+    if(internalSpeed<this.sleepSpeed)this.quietTime+=this.dt;else this.quietTime=0;
     if(this.quietTime>=this.sleepDelay)this.bake();
+  }
+
+  private dampInternalVelocities():void{
+    if(this.internalDamping<=0)return;
+    const gain=1-Math.exp(-this.internalDamping*this.dt);
+    for(let i=0;i<this.constraintCount;i++){
+      if(this.broken[i]||this.kind[i]!==DISTANCE)continue;
+      const a=this.ia[i]!,b=this.ib[i]!,A=a*3,B=b*3;
+      const dx=this.position[B]!-this.position[A]!,dy=this.position[B+1]!-this.position[A+1]!,dz=this.position[B+2]!-this.position[A+2]!;
+      const length=Math.hypot(dx,dy,dz);if(length<1e-10)continue;
+      const nx=dx/length,ny=dy/length,nz=dz/length;
+      const relative=(this.velocity[B]!-this.velocity[A]!)*nx+(this.velocity[B+1]!-this.velocity[A+1]!)*ny+(this.velocity[B+2]!-this.velocity[A+2]!)*nz;
+      const denom=this.inverseMass[a]!+this.inverseMass[b]!;if(denom<=1e-14)continue;
+      const impulse=-relative*gain/denom,ia=this.inverseMass[a]!*impulse,ib=this.inverseMass[b]!*impulse;
+      this.velocity[A]-=nx*ia;this.velocity[A+1]-=ny*ia;this.velocity[A+2]-=nz*ia;
+      this.velocity[B]+=nx*ib;this.velocity[B+1]+=ny*ib;this.velocity[B+2]+=nz*ib;
+    }
+  }
+
+  /** Internal strain-rate proxy invariant to whole-body translation and rigid rotation. */
+  private internalSpeed():number{
+    let peak=0;
+    for(let i=0;i<this.constraintCount;i++){
+      if(this.broken[i])continue;
+      if(this.kind[i]===DISTANCE){
+        const a=this.ia[i]!,b=this.ib[i]!,A=a*3,B=b*3;
+        const dx=this.position[B]!-this.position[A]!,dy=this.position[B+1]!-this.position[A+1]!,dz=this.position[B+2]!-this.position[A+2]!;
+        const length=Math.hypot(dx,dy,dz);if(length<1e-10)continue;
+        const relative=((this.velocity[B]!-this.velocity[A]!)*dx+(this.velocity[B+1]!-this.velocity[A+1]!)*dy+(this.velocity[B+2]!-this.velocity[A+2]!)*dz)/length;
+        peak=Math.max(peak,Math.abs(relative));
+      }else{
+        const a=this.ia[i]!,b=this.ib[i]!,c=this.ic[i]!,d=this.id[i]!,A=this.point(a),B=this.point(b),C=this.point(c),D=this.point(d);
+        const gb=V3.scale(V3.cross(V3.sub(C,A),V3.sub(D,A)),1/6);
+        const gc=V3.scale(V3.cross(V3.sub(D,A),V3.sub(B,A)),1/6);
+        const gd=V3.scale(V3.cross(V3.sub(B,A),V3.sub(C,A)),1/6);
+        const ga:MutableVec3=[-gb[0]-gc[0]-gd[0],-gb[1]-gc[1]-gd[1],-gb[2]-gc[2]-gd[2]];
+        const rate=V3.dot(ga,this.velocityPoint(a))+V3.dot(gb,this.velocityPoint(b))+V3.dot(gc,this.velocityPoint(c))+V3.dot(gd,this.velocityPoint(d));
+        const area=Math.max(1e-9,Math.abs(this.rest[i]!)**(2/3));
+        peak=Math.max(peak,Math.abs(rate)/area);
+      }
+    }
+    return peak;
+  }
+
+  private rigidState():{centerOfMass:MutableVec3;linearVelocity:MutableVec3;angularVelocity:MutableVec3}{
+    const center:MutableVec3=[0,0,0],linear:MutableVec3=[0,0,0];
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,m=this.mass[i]!;
+      center[0]+=m*this.position[j]!;center[1]+=m*this.position[j+1]!;center[2]+=m*this.position[j+2]!;
+      linear[0]+=m*this.velocity[j]!;linear[1]+=m*this.velocity[j+1]!;linear[2]+=m*this.velocity[j+2]!;
+    }
+    center[0]/=this.totalMass;center[1]/=this.totalMass;center[2]/=this.totalMass;
+    linear[0]/=this.totalMass;linear[1]/=this.totalMass;linear[2]/=this.totalMass;
+    let ixx=0,iyy=0,izz=0,ixy=0,ixz=0,iyz=0;const angular:MutableVec3=[0,0,0];
+    for(let i=0;i<this.nodeCount;i++){
+      const j=i*3,m=this.mass[i]!,x=this.position[j]!-center[0],y=this.position[j+1]!-center[1],z=this.position[j+2]!-center[2];
+      const vx=this.velocity[j]!-linear[0],vy=this.velocity[j+1]!-linear[1],vz=this.velocity[j+2]!-linear[2];
+      angular[0]+=m*(y*vz-z*vy);angular[1]+=m*(z*vx-x*vz);angular[2]+=m*(x*vy-y*vx);
+      ixx+=m*(y*y+z*z);iyy+=m*(x*x+z*z);izz+=m*(x*x+y*y);
+      ixy-=m*x*y;ixz-=m*x*z;iyz-=m*y*z;
+    }
+    return{centerOfMass:center,linearVelocity:linear,angularVelocity:solveSymmetric3(ixx,ixy,ixz,iyy,iyz,izz,angular)};
+  }
+
+  private velocityPoint(node:number):MutableVec3{
+    const j=node*3;return[this.velocity[j]!,this.velocity[j+1]!,this.velocity[j+2]!];
   }
 
   private measure(index:number):number{
@@ -430,4 +519,21 @@ export class StructuralBody {
   private point(node:number):MutableVec3{
     const j=node*3;return[this.position[j]!,this.position[j+1]!,this.position[j+2]!];
   }
+}
+
+function solveSymmetric3(a:number,b:number,c:number,d:number,e:number,f:number,rhs:Vec3):MutableVec3{
+  let aa=a,dd=d,ff=f;
+  let det=aa*(dd*ff-e*e)-b*(b*ff-c*e)+c*(b*e-c*dd);
+  const scale=Math.max(1,Math.abs(aa)+Math.abs(dd)+Math.abs(ff));
+  if(Math.abs(det)<1e-12*scale*scale*scale){
+    const regularization=scale*1e-9;aa+=regularization;dd+=regularization;ff+=regularization;
+    det=aa*(dd*ff-e*e)-b*(b*ff-c*e)+c*(b*e-c*dd);
+  }
+  if(Math.abs(det)<1e-30)return[0,0,0];
+  const [x,y,z]=rhs;
+  return[
+    ((dd*ff-e*e)*x+(c*e-b*ff)*y+(b*e-c*dd)*z)/det,
+    ((c*e-b*ff)*x+(aa*ff-c*c)*y+(b*c-aa*e)*z)/det,
+    ((b*e-c*dd)*x+(b*c-aa*e)*y+(aa*dd-b*b)*z)/det,
+  ];
 }
