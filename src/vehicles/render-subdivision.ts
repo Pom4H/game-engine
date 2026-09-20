@@ -104,3 +104,30 @@ export function subdivideSmoothTriangleMesh(mesh:TriangleMesh,plan=buildSmoothSu
   }
   return{kind:'triangle-mesh',positions,normals,indices};
 }
+
+
+/**
+ * Rebuild normals across coincident render vertices while preserving genuine creases.
+ * Imported compact meshes commonly duplicate vertices per triangle/material island;
+ * this pass removes lighting faceting without changing positions or topology.
+ */
+export function smoothCoincidentNormals(mesh:TriangleMesh,creaseDegrees=52,positionEpsilonM=1e-5):TriangleMesh{
+  if(!Number.isFinite(creaseDegrees)||creaseDegrees<=0||creaseDegrees>=90)throw new RangeError('creaseDegrees must be in (0,90)');
+  const cosine=Math.cos(creaseDegrees*Math.PI/180),count=mesh.positions.length/3;
+  const buckets=new Map<string,number[]>();
+  const key=(i:number)=>`${Math.round(mesh.positions[i*3]!/positionEpsilonM)},${Math.round(mesh.positions[i*3+1]!/positionEpsilonM)},${Math.round(mesh.positions[i*3+2]!/positionEpsilonM)}`;
+  for(let i=0;i<count;i++){const k=key(i),items=buckets.get(k);if(items)items.push(i);else buckets.set(k,[i]);}
+  const out=[...mesh.normals];
+  for(const items of buckets.values()){
+    if(items.length<2)continue;
+    const clusters:{members:number[];sum:[number,number,number]}[]=[];
+    for(const index of items){
+      const n=normal(mesh,index);let best:-1|number=-1,bestDot=cosine;
+      for(let i=0;i<clusters.length;i++){const s=clusters[i]!.sum,l=Math.hypot(...s)||1,d=(n[0]*s[0]+n[1]*s[1]+n[2]*s[2])/l;if(d>bestDot){bestDot=d;best=i;}}
+      if(best<0)clusters.push({members:[index],sum:[n[0],n[1],n[2]]});
+      else{const cluster=clusters[best]!;cluster.members.push(index);cluster.sum[0]+=n[0];cluster.sum[1]+=n[1];cluster.sum[2]+=n[2];}
+    }
+    for(const cluster of clusters){const n=normalize(cluster.sum);for(const index of cluster.members)out.splice(index*3,3,n[0],n[1],n[2]);}
+  }
+  return{...mesh,normals:out};
+}
