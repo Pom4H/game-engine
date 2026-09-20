@@ -20,7 +20,7 @@ window.ready=false;window.failure=null;
 try{
 const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas),geometry=generateM3Vehicle();
 const paint=[.17,.205,.255,1];
-const carEntities=geometry.parts.filter(part=>part.id!=='window-front-left').map(part=>{
+const carEntities=geometry.parts.map(part=>{
  const body=m3PartBody(part,false);
  return{id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:m3PartMaterial(part,paint,false),...(body?{body}:{})};
 });
@@ -94,8 +94,9 @@ function applyCar(time=0){
  }
  const body=scene.entities.get('m3-body');body.mesh=rig.shellMesh(bodyBase);
  const theta=-rig.door.angle,hinge=[.98,.77,-.952],dx=-.55,c=Math.cos(theta),s=Math.sin(theta),doorLocal=[hinge[0]+c*dx,hinge[1],hinge[2]-s*dx],doorWorld=rotate(doorLocal,rotation);
- const door=scene.entities.get('door-panel'),glass=scene.entities.get('door-window'),opening=scene.entities.get('door-opening'),doorShot=time>=3.05&&time<7.92;
+ const door=scene.entities.get('door-panel'),glass=scene.entities.get('door-window'),opening=scene.entities.get('door-opening'),closedWindow=scene.entities.get('m3-window-front-left'),doorShot=time>=3.05&&time<7.92;
  const show=doorShot?1:0;door.scale.splice(0,3,show,show,show);glass.scale.splice(0,3,show,show,show);opening.scale.splice(0,3,show,show,show);
+ if(closedWindow)closedWindow.scale.splice(0,3,1-show,1-show,1-show);
  door.position.splice(0,3,doorWorld[0],doorWorld[1]+pose.heave,doorWorld[2]);door.rotation.splice(0,3,rotation[0],theta,rotation[2]);
  const winOffset=rotate([0,.47,0],rotation);glass.position.splice(0,3,doorWorld[0]+winOffset[0],doorWorld[1]+pose.heave+winOffset[1],doorWorld[2]+winOffset[2]);glass.rotation.splice(0,3,rotation[0],theta,rotation[2]);
  const op=rotate([.43,.77,-.947],rotation);opening.position.splice(0,3,op[0],op[1]+pose.heave,op[2]);opening.rotation.splice(0,3,...rotation);
