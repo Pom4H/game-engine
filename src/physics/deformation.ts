@@ -6,6 +6,8 @@ import type {Contact} from './world.js';
 export interface DeformableBodySpec {
   readonly bodyId:string;
   readonly visualIds:readonly string[];
+  /** Optional subset of visualIds that receives plastic mesh deformation. Others only follow the body pose. */
+  readonly deformVisualIds?:readonly string[];
   /** Effective sheet/skin thickness participating in local plastic work. */
   readonly skinThicknessM?:number;
   /** Base radius of a local crush zone. */
@@ -30,6 +32,7 @@ interface VisualBinding {
   readonly scale:Vec3;
   readonly positions:readonly number[];
   readonly indices:readonly number[];
+  readonly deform:boolean;
 }
 interface DeformableState {
   readonly spec:Required<Pick<DeformableBodySpec,'skinThicknessM'|'radiusM'|'maxDentM'|'minEnergyJ'>>&DeformableBodySpec;
@@ -49,7 +52,8 @@ export class PlasticDeformationSystem {
     if(!input.bodyId||this.states.has(input.bodyId)||!input.visualIds.length)throw new TypeError('Deformable body requires a distinct bodyId and visualIds');
     const root=entities.get(input.bodyId);
     if(!root?.body||root.body.shape.kind!=='box')throw new TypeError('Deformable body requires a box physics body');
-    const ids=new Set<string>(),visuals:VisualBinding[]=[];
+    const ids=new Set<string>(),deformIds=new Set(input.deformVisualIds??input.visualIds),visuals:VisualBinding[]=[];
+    for(const id of deformIds)if(!input.visualIds.includes(id))throw new TypeError(`Deformable visual ${id} must also be listed in visualIds`);
     for(const id of input.visualIds){
       if(ids.has(id))throw new TypeError(`Duplicate deformable visual ${id}`);ids.add(id);
       const entity=entities.get(id),mesh=entity?.mesh;
@@ -66,11 +70,13 @@ export class PlasticDeformationSystem {
         scale:Object.freeze([...entity.scale]) as Vec3,
         positions:Object.freeze([...mesh.positions]),
         indices:Object.freeze([...mesh.indices]),
+        deform:deformIds.has(id),
       }));
     }
     const spec=Object.freeze({
       ...input,
       visualIds:Object.freeze([...input.visualIds]),
+      ...(input.deformVisualIds?{deformVisualIds:Object.freeze([...input.deformVisualIds])}:{}),
       skinThicknessM:clamp(input.skinThicknessM??.0009,.0002,.02),
       radiusM:clamp(input.radiusM??.58,.06,2.5),
       maxDentM:clamp(input.maxDentM??.72,.01,1.8),
@@ -143,6 +149,7 @@ export class PlasticDeformationSystem {
   private syncState(state:DeformableState,entities:ReadonlyMap<string,RuntimeEntity>):void{
     this.syncPose(state,entities);
     for(const visual of state.visuals){
+      if(!visual.deform)continue;
       const entity=entities.get(visual.id);if(!entity)continue;
       const positions=[...visual.positions];
       for(let i=0;i<positions.length;i+=3){
