@@ -39,7 +39,10 @@ export type ParametricVehiclePartRole='paint'|'glass'|'tire'|'rim'|'light'|'tail
 export interface ParametricVehiclePart {
   readonly id:string;
   readonly role:ParametricVehiclePartRole;
+  /** Physical/fallback geometry. */
   readonly mesh:Primitive;
+  /** Optional high-detail visual geometry consumed only by the renderer/deformation skin. */
+  readonly renderMesh?:Primitive;
   readonly position:Vec3;
   readonly rotation?:Vec3;
   readonly wheel?:boolean;
