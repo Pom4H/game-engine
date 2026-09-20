@@ -219,12 +219,13 @@ export class StructuralBody {
 
   /**
    * Transfer a reduced rigid state into the nodal mass exactly once.
-   * Every node receives v + omega x r, so no second hidden rigid mass is created.
+   * centerOfMass and linearVelocity must describe the same rigid COM state.
+   * Every node receives vCOM + omega x r, so no second hidden rigid mass is created.
    */
-  activateFromRigid(origin:Vec3,linearVelocity:Vec3,angularVelocity:Vec3):void{
-    if(!origin.every(Number.isFinite)||!linearVelocity.every(Number.isFinite)||!angularVelocity.every(Number.isFinite))throw new TypeError('Rigid activation vectors must be finite');
+  activateFromRigid(centerOfMass:Vec3,linearVelocity:Vec3,angularVelocity:Vec3):void{
+    if(!centerOfMass.every(Number.isFinite)||!linearVelocity.every(Number.isFinite)||!angularVelocity.every(Number.isFinite))throw new TypeError('Rigid activation vectors must be finite');
     for(let i=0;i<this.nodeCount;i++){
-      const j=i*3,r:Vec3=[this.position[j]!-origin[0],this.position[j+1]!-origin[1],this.position[j+2]!-origin[2]];
+      const j=i*3,r:Vec3=[this.position[j]!-centerOfMass[0],this.position[j+1]!-centerOfMass[1],this.position[j+2]!-centerOfMass[2]];
       const spin=V3.cross(angularVelocity,r);
       this.velocity[j]=linearVelocity[0]+spin[0];
       this.velocity[j+1]=linearVelocity[1]+spin[1];
