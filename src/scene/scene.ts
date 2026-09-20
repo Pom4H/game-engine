@@ -226,7 +226,7 @@ export class Scene {
       this.pushEvent({
         type:'impact',id:++this.eventSequence,time:at,point:contact.point,normal:contact.normal,a:contact.a,b:contact.b,
         materialA:a.material.kind,materialB:b?.material.kind??this.physics.groundMaterial.kind,
-        dimensionsA:acousticDimensions(a),...(b?{dimensionsB:acousticDimensions(b)}:{}),
+        dimensionsA:acousticDimensions(a),fixedA:!a.invMass&&!a.kinematic,...(b?{dimensionsB:acousticDimensions(b),fixedB:!b.invMass&&!b.kinematic}:{}),
         ...(entityA?{surfaceA:surfaceAcoustics(this.surfaces.sample(entityA.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityA.id)??entityA.material.surface)}:{}),
         ...(entityB?{surfaceB:surfaceAcoustics(this.surfaces.sample(entityB.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityB.id)??entityB.material.surface)}:{}),
         energy:contact.normalEnergy,impulse:contact.impulse,speed:contact.normalSpeed,size:Math.max(.02,Math.min(characteristicSize(a),b?characteristicSize(b):characteristicSize(a))),
