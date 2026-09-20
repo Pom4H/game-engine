@@ -37,7 +37,7 @@ export interface SurfaceTextureSpec {
   readonly ormUrl?:string;
   readonly ormStrength?:number;
 }
-export interface MaterialSpec { texture?:SurfaceTextureSpec; label?:string; roughness?:number; metalness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
+export interface MaterialSpec { texture?:SurfaceTextureSpec; label?:string; roughness?:number; metalness?:number; /** Dielectric top-coat intensity independent of the base layer. */ clearcoat?:number; clearcoatRoughness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
 export type SurfaceUse='generic'|'road'|'sidewalk'|'curb';
 export interface EnvironmentalSpec { /** Appearance inherited by engine-generated snow cover; the base surface retains its own material. */ snowMaterial?:MaterialSpec; surfaceUse?:SurfaceUse; /** Initial settled snow, in metres. */ snowDepthM?:number; iceDepthM?:number; waterDepthM?:number }
 export interface BodySpec {
