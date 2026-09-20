@@ -23,9 +23,11 @@ try{
  const evaluate=async code=>{const r=await send('Runtime.evaluate',{expression:`(async()=>{${code}})()`,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description??r.exceptionDetails.text);return r.result?.value;};
  await send('Runtime.enable');await send('Page.enable');await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:host.url+'&play=0&profile=1'});
  for(let i=0;i<200;i++){if(await evaluate('return !!window.__GAME_ENGINE__'))break;const failure=await evaluate('return document.documentElement.dataset.engineError');if(failure)throw new Error(failure);await new Promise(r=>setTimeout(r,100));}
- // Fixed arrival camera keeps benchmark comparisons independent of promo captures.
- const shot={camera:[-21.51,1.6320200678244328,6.16],target:[-15.46,1.3620200678244327,3.795]};
- await evaluate(`window.__GAME_ENGINE__.seek(4);window.__GAME_ENGINE__.setCamera(${JSON.stringify({position:shot.camera,target:shot.target,fov:46,focusDistance:20,aperture:0})});await window.__GAME_ENGINE__.flush();
+ // Preserve the historical street camera by default; visual-target scenes benchmark their authored camera.
+ const historical={position:[-21.51,1.6320200678244328,6.16],target:[-15.46,1.3620200678244327,3.795],fov:46,focusDistance:20,aperture:0};
+ const camera=process.env.BENCH_USE_SCENE_CAMERA==='1'||sceneFile!=='street.scene.mjs'?spec.camera:historical;
+ const cameraCommand=camera?`window.__GAME_ENGINE__.setCamera(${JSON.stringify(camera)});`:'';
+ await evaluate(`window.__GAME_ENGINE__.seek(${sceneTime});${cameraCommand}await window.__GAME_ENGINE__.flush();
  const {WebGPURenderer}=await import('/dist/render/webgpu.js');const {Scene}=await import('/dist/scene/scene.js');
  const original=WebGPURenderer.prototype.render,step=Scene.prototype.step;
  window.bench={active:false,frames:[],completions:[],cpu:[],simCpu:[],pending:[]};
