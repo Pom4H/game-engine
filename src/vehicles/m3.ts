@@ -129,10 +129,26 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
  * kinematic so fracture sees their true relative velocity; ductile trim stays on the
  * parent vehicle collision/structural model instead of duplicating mass.
  */
+function partMeshSize(part:ParametricVehiclePart):readonly[number,number,number]{
+  if(part.mesh.kind!=='triangle-mesh')return[1,1,1];
+  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
+  for(let i=0;i<part.mesh.positions.length;i+=3)for(let axis=0;axis<3;axis++){const value=part.mesh.positions[i+axis]!;lo[axis]=Math.min(lo[axis]!,value);hi[axis]=Math.max(hi[axis]!,value);}
+  return[hi[0]!-lo[0]!,hi[1]!-lo[1]!,hi[2]!-lo[2]!] as const;
+}
+
+function brittleCollisionSize(part:ParametricVehiclePart):readonly[number,number,number]{
+  const size=partMeshSize(part);
+  if(part.id.startsWith('windshield-'))return[.005,Math.max(.05,size[1]),Math.max(.05,size[2])];
+  if(part.id.startsWith('window-'))return[Math.max(.05,size[0]),Math.max(.05,size[1]),.0045];
+  if(part.id.startsWith('mirror-'))return[.004,Math.max(.04,size[1]),Math.max(.04,size[2])];
+  return size;
+}
+
 export function m3PartBody(part:ParametricVehiclePart,moving=false):BodySpec|undefined{
   const kind=part.material?.kind;
   if(kind!=='glass'&&kind!=='mirror')return;
-  return moving?{mass:kind==='mirror'?.45:7.5,motion:'kinematic'}:{mass:0};
+  const collisionSize=brittleCollisionSize(part);
+  return moving?{mass:kind==='mirror'?.45:7.5,motion:'kinematic',collisionSize}:{mass:0,collisionSize};
 }
 
 export interface M3StructuralBlueprint {
