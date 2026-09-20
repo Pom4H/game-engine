@@ -50,7 +50,10 @@ export interface EntitySpec {
   position?:Vec3;
   rotation?:Vec3;
   scale?:Vec3;
+  /** Authoritative physical/collision geometry. Renderer uses it when renderMesh is absent. */
   mesh?:Primitive;
+  /** Optional high-detail visual geometry. Never changes mass, contacts or environmental queries. */
+  renderMesh?:Primitive;
   material?:MaterialSpec;
   environmental?:EnvironmentalSpec;
   light?:LightSpec;
