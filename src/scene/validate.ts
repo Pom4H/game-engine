@@ -169,28 +169,31 @@ function materialSpec(value:unknown,path:string):void{
   if(m.color!==undefined)vector(m.color,4,`${path}.color`,0,1);
 }
 
+function primitiveSpec(value:unknown,path:string):void{
+  const m=object(value,path);
+  if(!['box','sphere','plane','shard','polygon-prism','cylinder','snowdrift','triangle-mesh','torus'].includes(String(m.kind)))throw new TypeError(`${path}.kind is unknown`);
+  if(m.kind==='torus'){number(m.radius,`${path}.radius`,Number.MIN_VALUE);number(m.tube,`${path}.tube`,Number.MIN_VALUE);optionalNumber(m,'segments',path,8,128);}
+  if(m.kind==='triangle-mesh'){if(!Array.isArray(m.positions)||!Array.isArray(m.normals)||m.positions.length!==m.normals.length||m.positions.length<9||m.positions.length%3||m.positions.length>900000)throw new TypeError(`${path} requires matching vertex and normal triplets`);m.positions.forEach((v,i)=>number(v,`${path}.positions[${i}]`));m.normals.forEach((v,i)=>number(v,`${path}.normals[${i}]`));if(!Array.isArray(m.indices)||!m.indices.length||m.indices.length%3||m.indices.length>1800000)throw new TypeError(`${path}.indices must contain triangles`);for(const index of m.indices)if(!Number.isInteger(index)||index<0||index>=m.positions.length/3)throw new TypeError(`${path}.indices out of bounds`);}
+  if(m.kind==='snowdrift'){vector(m.size,3,`${path}.size`,Number.MIN_VALUE);number(m.seed,`${path}.seed`);optionalNumber(m,'segments',path,4,128);optionalNumber(m,'offset',path);if(m.continuous!==undefined&&typeof m.continuous!=='boolean')throw new TypeError(`${path}.continuous must be boolean`);}
+  if(m.kind==='cylinder'){number(m.radius,`${path}.radius`,Number.MIN_VALUE);number(m.height,`${path}.height`,Number.MIN_VALUE);optionalNumber(m,'topRadius',path,0);optionalNumber(m,'segments',path,3,128);}
+  if(m.kind==='box'||m.kind==='shard'){if(m.size!==undefined||m.kind==='shard')vector(m.size,3,`${path}.size`,Number.MIN_VALUE);}
+  if(m.kind==='plane'&&m.size!==undefined)vector(m.size,2,`${path}.size`,Number.MIN_VALUE);
+  if(m.kind==='sphere'){optionalNumber(m,'radius',path,Number.MIN_VALUE);if(m.segments!==undefined){number(m.segments,`${path}.segments`,3,256);if(!Number.isInteger(m.segments))throw new TypeError(`${path}.segments must be integer`);}}
+  if(m.kind==='shard'||m.kind==='polygon-prism')choice(m.axis,[0,1,2],`${path}.axis`);
+  if(m.kind==='shard')optionalNumber(m,'skew',path,-1,1);
+  if(m.kind==='polygon-prism'){
+    number(m.thickness,`${path}.thickness`,Number.MIN_VALUE);
+    if(!Array.isArray(m.points)||m.points.length<3||m.points.length>4096)throw new TypeError(`${path}.points requires 3..4096 vertices`);
+    m.points.forEach((p,i)=>vector(p,2,`${path}.points[${i}]`));
+  }
+}
+
 export function validateEntity(value:unknown):EntitySpec{
   const e=object(value,'entity'),id=e.id;
   if(typeof id!=='string'||!id||id.length>180)throw new TypeError('entity requires a stable id');
   for(const key of ['position','rotation','scale'])if(e[key]!==undefined)vector(e[key],3,`${id}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
-  if(e.mesh!==undefined){
-    const m=object(e.mesh,`${id}.mesh`),path=`${id}.mesh`;
-    if(!['box','sphere','plane','shard','polygon-prism','cylinder','snowdrift','triangle-mesh','torus'].includes(String(m.kind)))throw new TypeError(`${path}.kind is unknown`);
-    if(m.kind==='torus'){number(m.radius,`${path}.radius`,Number.MIN_VALUE);number(m.tube,`${path}.tube`,Number.MIN_VALUE);optionalNumber(m,'segments',path,8,128);}
-    if(m.kind==='triangle-mesh'){if(!Array.isArray(m.positions)||!Array.isArray(m.normals)||m.positions.length!==m.normals.length||m.positions.length<9||m.positions.length%3||m.positions.length>900000)throw new TypeError(`${path} requires matching vertex and normal triplets`);m.positions.forEach((v,i)=>number(v,`${path}.positions[${i}]`));m.normals.forEach((v,i)=>number(v,`${path}.normals[${i}]`));if(!Array.isArray(m.indices)||!m.indices.length||m.indices.length%3||m.indices.length>1800000)throw new TypeError(`${path}.indices must contain triangles`);for(const index of m.indices)if(!Number.isInteger(index)||index<0||index>=m.positions.length/3)throw new TypeError(`${path}.indices out of bounds`);}
-    if(m.kind==='snowdrift'){vector(m.size,3,`${path}.size`,Number.MIN_VALUE);number(m.seed,`${path}.seed`);optionalNumber(m,'segments',path,4,128);optionalNumber(m,'offset',path);if(m.continuous!==undefined&&typeof m.continuous!=='boolean')throw new TypeError(`${path}.continuous must be boolean`);}
-    if(m.kind==='cylinder'){number(m.radius,`${path}.radius`,Number.MIN_VALUE);number(m.height,`${path}.height`,Number.MIN_VALUE);optionalNumber(m,'topRadius',path,0);optionalNumber(m,'segments',path,3,128);}
-    if(m.kind==='box'||m.kind==='shard'){if(m.size!==undefined||m.kind==='shard')vector(m.size,3,`${path}.size`,Number.MIN_VALUE);}
-    if(m.kind==='plane'&&m.size!==undefined)vector(m.size,2,`${path}.size`,Number.MIN_VALUE);
-    if(m.kind==='sphere'){optionalNumber(m,'radius',path,Number.MIN_VALUE);if(m.segments!==undefined){number(m.segments,`${path}.segments`,3,256);if(!Number.isInteger(m.segments))throw new TypeError(`${path}.segments must be integer`);}}
-    if(m.kind==='shard'||m.kind==='polygon-prism')choice(m.axis,[0,1,2],`${path}.axis`);
-    if(m.kind==='shard')optionalNumber(m,'skew',path,-1,1);
-    if(m.kind==='polygon-prism'){
-      number(m.thickness,`${path}.thickness`,Number.MIN_VALUE);
-      if(!Array.isArray(m.points)||m.points.length<3||m.points.length>4096)throw new TypeError(`${path}.points requires 3..4096 vertices`);
-      m.points.forEach((p,i)=>vector(p,2,`${path}.points[${i}]`));
-    }
-  }
+  if(e.mesh!==undefined)primitiveSpec(e.mesh,`${id}.mesh`);
+  if(e.renderMesh!==undefined)primitiveSpec(e.renderMesh,`${id}.renderMesh`);
   if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);}
   if(e.material!==undefined)materialSpec(e.material,`${id}.material`);
   if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);if(env.snowMaterial!==undefined)materialSpec(env.snowMaterial,`${id}.environmental.snowMaterial`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
