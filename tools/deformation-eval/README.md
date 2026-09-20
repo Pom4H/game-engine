@@ -1,13 +1,16 @@
 # M3 plastic deformation evaluation
 
-All clips use the same imported BMW M3 geometry and the same generic engine
-`PlasticDeformationSystem`. No crash-specific morph target or hand-authored dent
-is used.
+All clips use the same compact M3 model: a parametric macro/structural profile
+with an optional quantized high-fidelity exterior shell. The expanded imported
+mesh JSON is no longer part of the runtime or repository. No crash-specific morph
+target or hand-authored dent is used.
 
-The physics body owns mass, inertia and contact response. Imported render parts
-follow that body. Metal body panels receive persistent plastic deformation from
-contact energy relative to the steel yield profile; wheels, tyres, glass and lights
-follow the body but are not treated as sheet steel.
+The existing movie scenes still exercise the reduced `PlasticDeformationSystem`
+for visual acceptance. In parallel, the structural regression suite derives a
+28-node closed collision cage from exactly the same M3 profile and runs XPBD
+cage-vs-wall contact at 90 km/h. That path owns nodal mass, plastic strain and
+collision projection directly rather than shrinking a rigid OBB. Wheels, tyres,
+glass and lights are presentation parts and are not treated as sheet steel.
 
 Clips:
 
@@ -23,3 +26,8 @@ The evaluation target is the *shape and locality of permanent crush*: low energy
 should create shallow local damage, severe energy should consume more crush space,
 offset and pole impacts should remain asymmetric, and roof loading should not turn
 into the same front-crash deformation field.
+
+
+## Model representation
+
+The M3 macro profile serializes to 663 bytes. The optional deduplicated exterior shell stores 700 unique vertices / 1,126 triangles in a 10,956-byte uint16 position+index payload. Together that is 11,619 bytes of model-specific shape data before base64/source-code overhead, versus 241,628 bytes for the original FBX and 1,194,172 bytes for the removed expanded JSON. Structural physics consumes the macro profile, not the packed render shell.
