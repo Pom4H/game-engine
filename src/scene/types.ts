@@ -29,6 +29,12 @@ export interface SurfaceTextureSpec {
   readonly bumpStrength?:number;
   /** Blend of image albedo with the base material; defaults to 1. */
   readonly albedoStrength?:number;
+  /** Optional tangent-space normal detail, projected with the same world scale. */
+  readonly normalUrl?:string;
+  readonly normalStrength?:number;
+  /** Optional glTF-style ORM map: R=occlusion, G=roughness, B=metalness. */
+  readonly ormUrl?:string;
+  readonly ormStrength?:number;
 }
 export interface MaterialSpec { texture?:SurfaceTextureSpec; label?:string; roughness?:number; metalness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
 export type SurfaceUse='generic'|'road'|'sidewalk'|'curb';
