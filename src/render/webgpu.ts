@@ -346,7 +346,10 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   color+=(base*(1.0-fresnel)*(1.0-metal)/3.14159+specular)*f.sunColor.rgb*f.sun.w*nl*shadow;
   let environmentFresnel=f0+(1.0-f0)*pow(1.0-nv,5.0);
   let reflectionDir=reflect(-viewDir,n);
-  let environmentRadiance=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
+  let fallbackEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
+  let localProbe=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,0).rgb;
+  let localProbeWeight=f.environment.w*(1.0-smoothstep(.08,.46,roughness))*.90;
+  let environmentRadiance=mix(fallbackEnvironment,localProbe,localProbeWeight);
   let envC0=vec4<f32>(-1.0,-.0275,-.572,.022);let envC1=vec4<f32>(1.0,.0425,1.04,-.04);
   let envR=roughness*envC0+envC1;let envA004=min(envR.x*envR.x,exp2(-9.28*nv))*envR.x+envR.y;
   let envBRDF=vec2<f32>(-1.04,1.04)*envA004+envR.zw;
@@ -375,7 +378,8 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   // a physically strong grazing reflection. Avoid treating it as blue plastic.
   if(materialKind>.5&&materialKind<1.5){
     let glassF=.04+.96*pow(1.0-nv,5.0);
-    let glassEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
+    let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
+    let glassEnvironment=mix(glassFallback,localProbe,f.environment.w*(1.0-smoothstep(.08,.32,roughness))*.72);
     color=mix(base*.055,glassEnvironment,.22+glassF*.54);
   }
   if(materialKind>9.5){
