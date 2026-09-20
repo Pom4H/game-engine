@@ -1,0 +1,43 @@
+name: M3 deformation evaluation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/plastic-car-deformation]
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    runs-on: self-hosted
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Verify engine
+        run: bun run ci
+      - name: Record M3 deformation clips
+        run: |
+          if not exist artifacts\m3-deformation mkdir artifacts\m3-deformation
+          node dist/cli.js record tools/deformation-eval/01-front-low.mjs --duration 3.2 --fps 30 --width 1280 --height 720 --out artifacts/m3-deformation/01-front-low.mp4
+          node dist/cli.js record tools/deformation-eval/02-front-54kph.mjs --duration 3.2 --fps 30 --width 1280 --height 720 --out artifacts/m3-deformation/02-front-54kph.mp4
+          node dist/cli.js record tools/deformation-eval/03-front-90kph.mjs --duration 3.2 --fps 30 --width 1280 --height 720 --out artifacts/m3-deformation/03-front-90kph.mp4
+          node dist/cli.js record tools/deformation-eval/04-offset-front.mjs --duration 3.4 --fps 30 --width 1280 --height 720 --out artifacts/m3-deformation/04-offset-front.mp4
+          node dist/cli.js record tools/deformation-eval/05-side-pole.mjs --duration 3.4 --fps 30 --width 1280 --height 720 --out artifacts/m3-deformation/05-side-pole.mp4
+          node dist/cli.js record tools/deformation-eval/06-rear.mjs --duration 3.2 --fps 30 --width 1280 --height 720 --out artifacts/m3-deformation/06-rear.mp4
+          node dist/cli.js record tools/deformation-eval/07-roof-crush.mjs --duration 3.6 --fps 30 --width 1280 --height 720 --out artifacts/m3-deformation/07-roof-crush.mp4
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: m3-deformation-${{ github.sha }}
+          path: artifacts/m3-deformation/
+          if-no-files-found: error
+          retention-days: 14
