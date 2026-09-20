@@ -301,7 +301,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let f0=mix(vec3<f32>(.04),base,metal);let fresnel=f0+(1.0-f0)*pow(1.0-vh,5.0);
   let specular=d*g*fresnel/max(4.0*nv*nl,.001);
   let shadow=shadowAt(in.worldPos,n);
-  let hemisphere=f.sky.rgb*(mix(.16,.38,smoothstep(-.65,0.0,n.y))+1.75*max(n.y,0.0));
+  let skyLuma=dot(f.sky.rgb,vec3<f32>(.2126,.7152,.0722));let diffuseSky=mix(vec3<f32>(skyLuma),f.sky.rgb,.42);let hemisphere=diffuseSky*(mix(.16,.38,smoothstep(-.65,0.0,n.y))+1.75*max(n.y,0.0));
   let bounce=vec3<f32>(.10,.105,.11)*(1.0-max(n.y,0.0))*sunlight;
   var color=base*(hemisphere+bounce)*(1.0-metal*.8);
   color+=(base*(1.0-fresnel)*(1.0-metal)/3.14159+specular)*f.sunColor.rgb*f.sun.w*nl*shadow;
