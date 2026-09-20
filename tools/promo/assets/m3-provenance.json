@@ -1,8 +1,13 @@
 {
   "source": "BMW M3.fbx",
   "sha256": "9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67",
-  "sourceKind": "User supplied local asset, previously referenced by TheGame",
-  "conversion": "metres; +Y up; +X forward; straight front wheels; crease-aware smooth paint/tyre normals",
-  "parts": 19,
-  "triangles": 9798
+  "sourceBytes": 241628,
+  "sourceKind": "User supplied local reference, previously inspected by TheGame",
+  "representation": "Authored parametric control sections; no imported FBX vertices, topology, normals or UVs at runtime",
+  "referenceTriangles": 9798,
+  "sampledEnvelopeMeanErrorMm": {
+    "width": 6.4,
+    "top": 6,
+    "bottom": 6.8
+  }
 }
