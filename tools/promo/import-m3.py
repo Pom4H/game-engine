@@ -1,4 +1,6 @@
-"""Offline converter for the user supplied BMW M3 FBX 7400.
+"""Reference-only inspector/converter for the user supplied BMW M3 FBX 7400.
+Production geometry is generated from src/vehicles/m3.ts; this tool must not
+create or update a runtime mesh asset.
 Adapted from the local TheGame inspection reader; requires numpy.
 Restricted to this asset format, XYZ transforms and indexed polygon normals.
 Keeps authored split normals and material assignments; removes front-wheel steering.
@@ -7,7 +9,7 @@ import argparse,struct,zlib,hashlib
 from pathlib import Path
 parser=argparse.ArgumentParser()
 parser.add_argument('fbx',type=Path)
-parser.add_argument('--output',type=Path,default=Path('tools/promo/assets'))
+parser.add_argument('--output',type=Path,default=Path('artifacts/m3-reference-import'))
 args=parser.parse_args();output=args.output;output.mkdir(parents=True,exist_ok=True)
 b=args.fbx.read_bytes()
 if len(b)>32*1024*1024 or b[:23]!=b'Kaydara FBX Binary  \x00\x1a\x00' or struct.unpack_from('<I',b,23)[0]!=7400:raise ValueError('Expected a binary FBX 7400 smaller than 32 MB')
