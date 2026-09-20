@@ -68,6 +68,7 @@ test('built-in systems run at declared cadence without losing simulated time',()
  assert.equal(counts.get('engine:surfaces'),30);
  assert.equal(counts.get('engine:animation'),60);
  assert.equal(counts.get('engine:physics'),60);
+ assert.equal(counts.get('engine:deformation'),60);
  assert.equal(counts.get('engine:cleanup'),10);
  assert.equal(counts.get('engine:clock'),60);
  assert.ok(Math.abs(scene.time-1)<1e-12);
@@ -85,7 +86,7 @@ test('aggregate and dormant tiers skip expensive local simulation but keep world
  assert.ok(Math.abs(aggregate.time-1)<1e-12);
 
  const dormant=new Scene(spec);let expensive=0;
- for(let i=0;i<60;i++){dormant.step(1/60,'dormant');if(dormant.lastExecution.some(id=>['engine:surfaces','engine:animation','engine:physics','engine:surface-contacts'].includes(id)))expensive++;}
+ for(let i=0;i<60;i++){dormant.step(1/60,'dormant');if(dormant.lastExecution.some(id=>['engine:surfaces','engine:animation','engine:physics','engine:deformation','engine:surface-contacts'].includes(id)))expensive++;}
  assert.equal(expensive,0);
  assert.equal(dormant.entities.get('body').position[0],start);
  assert.ok(Math.abs(dormant.time-1)<1e-12);
