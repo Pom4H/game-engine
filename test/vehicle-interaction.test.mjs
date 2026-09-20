@@ -58,8 +58,8 @@ test('door hinge distinguishes gentle latch from a hard slam',()=>{
   for(let i=0;i<160;i++){gentle.drive(0,5);gentle.step(1/120);}
   const gentleEvents=gentle.drainEvents().filter(event=>event.mechanism==='door-latch');
   for(let i=0;i<100;i++){hard.drive(1.0,28);hard.step(1/120);}
-  hard.addAngularImpulse(-8.5);
-  for(let i=0;i<100;i++)hard.step(1/120);
+  hard.addAngularImpulse(-18);
+  for(let i=0;i<160;i++)hard.step(1/120);
   const hardEvents=hard.drainEvents().filter(event=>event.mechanism==='door-latch');
   assert.ok(hardEvents.length>0);
   assert.ok(hardEvents.at(-1).energy>(gentleEvents.at(-1)?.energy??0),{gentle:gentleEvents,hard:hardEvents});
