@@ -25,20 +25,20 @@ const server=createServer(async(req,res)=>{
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;
 const chrome=await chromePath(),profile=await mkdtemp(join(tmpdir(),'vehicle-abuse-'));
 const child=spawn(chrome,['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu',`--user-data-dir=${profile}`,'--remote-debugging-port=0','--window-size=1280,720','about:blank'],{stdio:['ignore','ignore','pipe']});
-let socket,sequence=0;const pending=new Map();
+let socket,sequence=0;const pending=new Map(),browserEvents=[];
 try{
   const endpoint=await new Promise((resolve,reject)=>{let text='';const timer=setTimeout(()=>reject(new Error(text)),20_000);child.stderr.on('data',data=>{text+=data;const m=text.match(/DevTools listening on (ws:\/\/\S+)/);if(m){clearTimeout(timer);resolve(m[1]);}});child.on('error',reject);});
   const debugPort=new URL(endpoint).port;let page;
   for(let i=0;i<100;i++){const pages=await(await fetch(`http://127.0.0.1:${debugPort}/json/list`)).json();page=pages.find(candidate=>candidate.type==='page');if(page)break;await sleep(80);}
   if(!page?.webSocketDebuggerUrl)throw new Error('Chrome page target not found');
   socket=new WebSocket(page.webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
-  socket.addEventListener('message',event=>{const message=JSON.parse(String(event.data));if(!message.id)return;const item=pending.get(message.id);if(!item)return;pending.delete(message.id);clearTimeout(item.timer);message.error?item.reject(new Error(message.error.message)):item.resolve(message.result);});
+  socket.addEventListener('message',event=>{const message=JSON.parse(String(event.data));if(!message.id){if(message.method==='Runtime.exceptionThrown'||message.method==='Log.entryAdded'||message.method==='Runtime.consoleAPICalled'){browserEvents.push(message);if(browserEvents.length>40)browserEvents.shift();}return;}const item=pending.get(message.id);if(!item)return;pending.delete(message.id);clearTimeout(item.timer);message.error?item.reject(new Error(message.error.message)):item.resolve(message.result);});
   const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++sequence,timer=setTimeout(()=>{pending.delete(id);reject(new Error(`Timeout: ${method}`));},30_000);pending.set(id,{resolve,reject,timer});socket.send(JSON.stringify({id,method,params}));});
   const evaluate=async expression=>{const result=await send('Runtime.evaluate',{expression:`(async()=>{${expression}})()`,awaitPromise:true,returnByValue:true});if(result.exceptionDetails)throw new Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);return result.result?.value;};
-  await send('Page.enable');await send('Runtime.enable');await send('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+  await send('Page.enable');await send('Runtime.enable');await send('Log.enable');await send('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   await send('Page.navigate',{url:`http://127.0.0.1:${port}/`});
   for(let i=0;i<120;i++){if(await evaluate('return window.ready===true'))break;await sleep(100);}
-  if(!await evaluate('return window.ready===true'))throw new Error(await evaluate('return window.failure??"Player not ready"'));
+  if(!await evaluate('return window.ready===true')){const state=await evaluate('return {failure:window.failure??null,ready:window.ready??null,readyState:document.readyState,href:location.href}');throw new Error('Player not ready: '+JSON.stringify(state)+'\nCDP: '+JSON.stringify(browserEvents.slice(-12)));}
   const duration=await evaluate('return window.demo.duration'),fps=30,frames=Math.round(duration*fps),silent=join(out,'m3-human-abuse-silent.mp4');
   const encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart',silent],{stdio:['pipe','inherit','inherit']});
   const completed=once(encoder,'exit');
