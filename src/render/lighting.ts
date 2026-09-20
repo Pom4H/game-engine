@@ -139,7 +139,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  let coc=min(6.0,abs(z-f.params.z)/max(z,.1)*f.params.w);
  var base=textureSampleLevel(hdr,linearSampler,uv,0).rgb;
  if(coc>.15){var sum=base;for(var k=0;k<8;k++){sum+=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*coc/size,0).rgb;}base=sum/9.0;}
- var color=base*(1.0-min(.52,occlusion*.29));
+ var color=base*(1.0-min(.58,occlusion*.34));
  // Screen-space radiance for smooth materials, with explicit misses. Wet ground
  // uses its geometry reflection pass; rough/offscreen surfaces keep sky fallback.
  let coating=textureLoad(reflectance,pixel,0);let rough=normalSample.a;
