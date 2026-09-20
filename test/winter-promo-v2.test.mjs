@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,Scene,SnowSurface,SnowFootprints,StructuralBody,batchStaticScenery,generatePassengerVehicle,material,passengerStructuralDefinition,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
+import {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,M3_SHELL_FIDELITY,Scene,SnowSurface,SnowFootprints,StructuralBody,batchStaticScenery,generateM3Vehicle,material,passengerStructuralDefinition,primitiveMesh,renderAmbience,renderFootsteps,validateScene} from '../dist/index.js';
 import {compose} from '../dist/math.js';
 import {pedestrianPose,WALK} from '../tools/promo/actors.mjs';
 
@@ -47,11 +47,16 @@ test('wet tyre audio suppresses hiss and footstep audio starts at the recorded c
 });
 
 test('M3 is reconstructed from a compact profile and shares that shape with structural physics',()=>{
- const bytes=new TextEncoder().encode(JSON.stringify(M3_PARAMETRIC_PROFILE)).length,geometry=generatePassengerVehicle(M3_PARAMETRIC_PROFILE);
+ const bytes=new TextEncoder().encode(JSON.stringify(M3_PARAMETRIC_PROFILE)).length,geometry=generateM3Vehicle();
  assert.equal(M3_REFERENCE_PROVENANCE.sha256,'9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67');
  assert.equal(M3_REFERENCE_PROVENANCE.sourceBytes,241628);
  assert.ok(bytes<4096,{bytes});
  assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/bytes>10,{sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,profileBytes:bytes});
+ assert.equal(geometry.body.positions.length/3,M3_SHELL_FIDELITY.uniqueVertices);
+ assert.equal(geometry.body.indices.length/3,M3_SHELL_FIDELITY.triangles);
+ assert.ok(M3_SHELL_FIDELITY.maxPositionErrorMm<.04,M3_SHELL_FIDELITY);
+ assert.ok(M3_SHELL_FIDELITY.normalizedMaxFit>=.9999,M3_SHELL_FIDELITY);
+ assert.ok(M3_REFERENCE_PROVENANCE.sourceBytes/M3_SHELL_FIDELITY.binaryPayloadBytes>20,M3_SHELL_FIDELITY);
  assert.equal(geometry.parts.filter(part=>part.role==='tire').length,4);
  assert.equal(geometry.parts.filter(part=>part.role==='rim').length,4);
  assert.ok(geometry.generatedTriangles>500&&geometry.generatedTriangles<10000,geometry);
