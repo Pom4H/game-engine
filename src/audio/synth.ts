@@ -58,7 +58,7 @@ function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,samp
   }
 }
 function impactDuration(event:ImpactEvent):number{
-  const profiles=[material(event.materialA),material(event.materialB)],damping=(profiles[0].acoustic.damping+profiles[1].acoustic.damping)*.5,dims=event.dimensionsA??[event.size,event.size,event.size],d=[...dims].sort((a,b)=>a-b),plate=(d[0]??1)/Math.max(.01,Math.sqrt((d[1]??1)*(d[2]??1)))<.12;
+  const profileA=material(event.materialA),profileB=material(event.materialB),damping=(profileA.acoustic.damping+profileB.acoustic.damping)*.5,dims=event.dimensionsA??[event.size,event.size,event.size],sorted=[...dims].sort((a,b)=>a-b),d0=sorted[0]??1,d1=sorted[1]??1,d2=sorted[2]??1,plate=d0/Math.max(.01,Math.sqrt(d1*d2))<.12;
   return Math.min(1.45,Math.max(.24,.32+(1-damping)*.36+(plate ? .42 : 0)+Math.log1p(event.energy)*.018));
 }
 function modalBank(profile:ReturnType<typeof material>,dimensions:readonly number[],rng:()=>number,fixed:boolean){
@@ -80,8 +80,8 @@ function modalBank(profile:ReturnType<typeof material>,dimensions:readonly numbe
   return{frequencies,phases,decays,gains};
 }
 function projectedArea(dimensions:readonly number[],normal:readonly number[]):number{
-  const d=[Math.max(.002,Math.abs(dimensions[0]??1)),Math.max(.002,Math.abs(dimensions[1]??1)),Math.max(.002,Math.abs(dimensions[2]??1))],n=[Math.abs(normal[0]??0),Math.abs(normal[1]??0),Math.abs(normal[2]??0)];
-  return d[1]*d[2]*n[0]+d[0]*d[2]*n[1]+d[0]*d[1]*n[2];
+  const dx=Math.max(.002,Math.abs(dimensions[0]??1)),dy=Math.max(.002,Math.abs(dimensions[1]??1)),dz=Math.max(.002,Math.abs(dimensions[2]??1)),nx=Math.abs(normal[0]??0),ny=Math.abs(normal[1]??0),nz=Math.abs(normal[2]??0);
+  return dy*dz*nx+dx*dz*ny+dx*dy*nz;
 }
 function poisson(kind:string):number{return kind==='glass'?.23:kind==='steel'?.29:kind==='wood'?.34:kind==='concrete'?.20:kind==='asphalt'?.35:.30;}
 function clamp01(value:number){return Math.max(0,Math.min(1,Number.isFinite(value)?value:0));}
