@@ -19,9 +19,13 @@ import {VEHICLE_ABUSE_DURATION,createVehicleAbuseScript,humanPose,phaseAt} from 
 window.ready=false;window.failure=null;
 try{
 const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas),geometry=generateM3Vehicle();
-const paint=[.028,.034,.043,1];
-const roleMaterial=role=>role==='paint'?{kind:'default',color:paint,roughness:.13,metalness:.78}:role==='glass'?{kind:'glass',color:[.028,.048,.062,.26],roughness:.045,metalness:.02}:role==='tire'?{kind:'default',color:[.016,.017,.018,1],roughness:.97,pattern:'rubber'}:role==='rim'||role==='metal'?{kind:'steel',color:[.10,.11,.12,1],roughness:.17,metalness:.96}:role==='light'?{kind:'glass',color:[.64,.72,.78,.55],roughness:.07,emissive:[.24,.29,.34]}:role==='tail'?{kind:'glass',color:[.24,.01,.006,.82],roughness:.08,emissive:[.10,.002,.001]}:{kind:'default',color:[.025,.028,.03,1],roughness:.44};
-const carEntities=geometry.parts.map(part=>({id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:roleMaterial(part.role)}));
+const paint=[.040,.052,.068,1];
+const roleMaterial=role=>role==='paint'?{kind:'default',color:paint,roughness:.18,metalness:.10}:role==='glass'?{kind:'default',color:[.018,.028,.036,1],roughness:.075,metalness:.12,pattern:'window'}:role==='tire'?{kind:'default',color:[.016,.017,.018,1],roughness:.97,pattern:'rubber'}:role==='rim'||role==='metal'?{kind:'steel',color:[.12,.13,.14,1],roughness:.20,metalness:.92}:{kind:'default',color:[.028,.031,.034,1],roughness:.44};
+const carEntities=geometry.parts.filter(part=>part.role!=='light'&&part.role!=='tail').map(part=>({id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:roleMaterial(part.role)}));
+for(const side of [-1,1]){
+ carEntities.push({id:'m3-headlight-slim-'+side,position:[2.365,.755,side*.56],rotation:[0,0,0],mesh:{kind:'box',size:[.028,.052,.30]},material:{kind:'default',color:[.32,.36,.39,1],roughness:.12,metalness:.16,emissive:[.085,.105,.125]}});
+ carEntities.push({id:'m3-tail-slim-'+side,position:[-2.365,.73,side*.57],rotation:[0,0,0],mesh:{kind:'box',size:[.028,.045,.29]},material:{kind:'default',color:[.22,.008,.006,1],roughness:.18,metalness:.05,emissive:[.055,.001,.001]}});
+}
 const human=[
  {id:'person:torso',mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:[.17,.20,.19,1],roughness:.92}},
  {id:'person:head',mesh:{kind:'sphere',radius:.5,segments:20},material:{kind:'default',color:[.45,.31,.24,1],roughness:.78}},
@@ -30,15 +34,15 @@ const human=[
  ...['l-foot','r-foot'].map(id=>({id:'person:'+id,mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:[.055,.06,.062,1],roughness:.96}})),
 ];
 const yardEntities=[
- {id:'ground',position:[0,-.17,0],mesh:{kind:'box',size:[26,.12,18]},material:{kind:'concrete',color:[.25,.235,.21,1],roughness:.88},environmental:{surfaceUse:'road'}},
- {id:'garage-back',position:[0,1.45,4.72],mesh:{kind:'box',size:[22,3.15,.38]},material:{kind:'concrete',color:[.48,.46,.42,1],roughness:.91,pattern:'plaster',ageYears:24}},
+ {id:'ground',position:[0,-.17,0],mesh:{kind:'box',size:[26,.12,18]},material:{kind:'concrete',color:[.34,.315,.275,1],roughness:.86},environmental:{surfaceUse:'road'}},
+ {id:'garage-back',position:[0,1.45,4.72],mesh:{kind:'box',size:[22,3.15,.38]},material:{kind:'concrete',color:[.57,.545,.49,1],roughness:.91,pattern:'plaster',ageYears:24}},
  {id:'garage-roof',position:[0,3.06,4.63],mesh:{kind:'box',size:[22,.24,1.15]},material:{kind:'concrete',color:[.32,.31,.29,1],roughness:.92,ageYears:28}},
  {id:'garage-lintel',position:[0,2.63,4.47],mesh:{kind:'box',size:[22,.18,.16]},material:{kind:'concrete',color:[.39,.38,.35,1],roughness:.9,ageYears:22}},
 ];
 const doorXs=[-8.1,-5.4,-2.7,0,2.7,5.4,8.1];
 for(let bay=0;bay<doorXs.length;bay++){
  const x=doorXs[bay];
- yardEntities.push({id:'garage-door-'+bay,position:[x,1.17,4.49],mesh:{kind:'box',size:[2.42,2.34,.055]},material:{kind:'default',color:[.54+.018*(bay%2),.535+.014*(bay%2),.515+.010*(bay%2),1],roughness:.72,metalness:.22,ageYears:16}});
+ yardEntities.push({id:'garage-door-'+bay,position:[x,1.17,4.49],mesh:{kind:'box',size:[2.42,2.34,.055]},material:{kind:'default',color:[.66+.018*(bay%2),.645+.014*(bay%2),.61+.010*(bay%2),1],roughness:.72,metalness:.22,ageYears:16}});
  for(let row=1;row<9;row++)yardEntities.push({id:'garage-slat-'+bay+'-'+row,position:[x,.12+row*.255,4.455],mesh:{kind:'box',size:[2.34,.018,.018]},material:{kind:'default',color:[.34,.335,.325,1],roughness:.76}});
  yardEntities.push({id:'garage-number-'+bay,position:[x,2.10,4.445],mesh:{kind:'box',size:[.24,.20,.014]},material:{kind:'default',color:[.10,.095,.085,1],roughness:.9}});
 }
@@ -55,21 +59,21 @@ for(let i=0;i<5;i++)yardEntities.push({id:'tire-stack-'+i,position:[-5.1,.12+i*.
 for(let i=0;i<7;i++)yardEntities.push({id:'yard-seam-'+i,position:[0,-.102,-5.8+i*1.75],mesh:{kind:'box',size:[21,.012,.018]},material:{kind:'default',color:[.08,.075,.067,1],roughness:.98}});
 
 const scene=new Scene({
- version:1,seed:26092026,gravity:[0,-9.81,0],ground:-.11,clearColor:[.42,.57,.72,1],
+ version:1,seed:26092026,gravity:[0,-9.81,0],ground:-.11,clearColor:[.52,.68,.86,1],
  environment:{temperatureC:15,humidity:.43,precipitation:'rare',snowfall:'none',sunlight:.92,groundMoisture:.18,wind:[.8,0,.25],clock:{startHour:15.2}},
- rendering:{sunDirection:[-.58,.79,-.22],sunColor:[1.0,.91,.76],skyColor:[.43,.59,.78],sunIntensity:2.35,exposure:.92,shadowExtent:30,fogDensity:.0012},
+ rendering:{sunDirection:[-.46,.66,-.59],sunColor:[1.0,.90,.72],skyColor:[.52,.68,.88],sunIntensity:3.05,exposure:1.12,shadowExtent:30,fogDensity:.0007},
  camera:{position:[4.8,1.75,-5.0],target:[.35,.82,-.05],fov:40,focusDistance:7,aperture:.035},
  entities:[
   ...yardEntities,
   ...carEntities,
   {id:'door-opening',position:[.43,.77,-.947],mesh:{kind:'polygon-prism',points:[[-.76,-.41],[.72,-.41],[.66,.39],[-.62,.39]],thickness:.028,axis:2},material:{kind:'default',color:[.008,.009,.010,1],roughness:.96}},
-  {id:'door-panel',position:[.43,.77,-.962],mesh:{kind:'polygon-prism',points:[[-.73,-.38],[.70,-.38],[.63,.37],[-.59,.37]],thickness:.040,axis:2},material:{kind:'default',color:paint,roughness:.13,metalness:.78}},
-  {id:'door-window',position:[.47,1.24,-.964],mesh:{kind:'polygon-prism',points:[[-.56,-.16],[.56,-.16],[.43,.17],[-.45,.17]],thickness:.016,axis:2},material:{kind:'glass',color:[.025,.046,.060,.24],roughness:.045}},
+  {id:'door-panel',position:[.43,.77,-.962],mesh:{kind:'polygon-prism',points:[[-.73,-.38],[.70,-.38],[.63,.37],[-.59,.37]],thickness:.040,axis:2},material:{kind:'default',color:paint,roughness:.18,metalness:.10}},
+  {id:'door-window',position:[.47,1.24,-.964],mesh:{kind:'polygon-prism',points:[[-.56,-.16],[.56,-.16],[.43,.17],[-.45,.17]],thickness:.016,axis:2},material:{kind:'default',color:[.016,.026,.034,1],roughness:.07,metalness:.12,pattern:'window'}},
   ...human,
  ],
 });
 const rig=new M3InteractionRig(1700);rig.setTemperatureC(15);const script=createVehicleAbuseScript(rig);
-const baseParts=new Map(geometry.parts.map(part=>['m3-'+part.id,{position:[...part.position],rotation:[...(part.rotation??[0,0,0])]}]));
+const baseParts=new Map(carEntities.map(part=>[part.id,{position:[...part.position],rotation:[...(part.rotation??[0,0,0])]}]));
 const bodyBase=geometry.body;let simSteps=0;const events=[],telemetry=[];
 const mix=(a,b,t)=>a+(b-a)*t;
 
@@ -125,10 +129,10 @@ function applyHuman(time){
 function cameraAt(t){
  if(t<7.9)return{position:[4.9,1.72,-5.15],target:[.28,.82,-.10],fov:39,focusDistance:7,aperture:.032};
  if(t<10.8)return{position:[3.65,1.45,-3.72],target:[.82,1.08,-.24],fov:37,focusDistance:5.6,aperture:.028};
- if(t<16.8)return{position:[4.35,1.92,-3.80],target:[1.02,.95,0],fov:38,focusDistance:5.8,aperture:.03};
- if(t<22.8)return{position:[3.45,2.22,-3.72],target:[-.04,1.20,0],fov:39,focusDistance:5.6,aperture:.032};
- if(t<30.4)return{position:[4.15,1.58,-4.20],target:[.10,.76,-.20],fov:40,focusDistance:6.0,aperture:.028};
- return{position:[3.15,1.34,-2.95],target:[.52,1.02,-.08],fov:36,focusDistance:4.4,aperture:.026};
+ if(t<16.8)return{position:[4.05,1.62,-3.45],target:[1.02,.95,0],fov:36,focusDistance:5.3,aperture:.026};
+ if(t<22.8)return{position:[3.05,1.92,-3.20],target:[-.04,1.18,0],fov:35,focusDistance:4.9,aperture:.028};
+ if(t<30.4)return{position:[3.85,1.42,-3.72],target:[.10,.78,-.18],fov:37,focusDistance:5.3,aperture:.024};
+ return{position:[3.00,1.18,-2.72],target:[.72,.96,-.06],fov:32,focusDistance:4.0,aperture:.022};
 }
 async function reset(){
  simSteps=0;events.length=0;telemetry.length=0;
