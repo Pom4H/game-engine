@@ -5,7 +5,7 @@ import type {EngineEvent,FractureEvent,ImpactEvent} from '../scene/events.js';
 export interface AudioChannels {left:Float32Array;right:Float32Array;sampleRate:number}
 
 export function synthesizeEvent(event:EngineEvent,sampleRate=48_000):AudioChannels{
-  const duration=event.type==='fracture'?Math.min(1.25,.32+event.size*.12):Math.min(.55,.09+event.size*.045+Math.log1p(event.energy)*.018);
+  const duration=event.type==='fracture'?Math.min(.85,.22+event.size*.08):impactDuration(event);
   const count=Math.max(1,Math.ceil(duration*sampleRate)),left=new Float32Array(count),right=new Float32Array(count);
   const rng=mulberry32((event.id^hashString(event.type))>>>0);
   const pan=Math.max(-.65,Math.min(.65,event.point[0]/25)),gainL=Math.sqrt((1-pan)/2),gainR=Math.sqrt((1+pan)/2);
@@ -30,37 +30,73 @@ export function wavBytes(audio:AudioChannels):Uint8Array{
 }
 
 function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
-  const a=material(event.materialA).acoustic,b=material(event.materialB).acoustic;
-  const surfaceDamping=((event.surfaceA?.damping??a.damping)+(event.surfaceB?.damping??b.damping))/2;
+  const profileA=material(event.materialA),profileB=material(event.materialB),surfaceDamping=((event.surfaceA?.damping??profileA.acoustic.damping)+(event.surfaceB?.damping??profileB.acoustic.damping))/2;
   const wetness=((event.surfaceA?.wetness??0)+(event.surfaceB?.wetness??0))/2,moss=((event.surfaceA?.moss??0)+(event.surfaceB?.moss??0))/2;
   const banks=[
-    modalBank(a,event.dimensionsA??[event.size,event.size,event.size],rng),
-    ...(event.b==='ground'?[]:[modalBank(b,event.dimensionsB??[event.size,event.size,event.size],rng)]),
+    modalBank(profileA,event.dimensionsA??[event.size,event.size,event.size],rng,event.fixedA??false),
+    ...(event.b==='ground'?[]:[modalBank(profileB,event.dimensionsB??[event.size,event.size,event.size],rng,event.fixedB??false)]),
   ];
-  const contactBrightness=Math.max(.04,(a.brightness+b.brightness)/2*(1-wetness*.30-moss*.55)),contactNoise=(a.noise+b.noise)*.5;
+  const hardness=Math.sqrt(Math.max(1e6,profileA.mechanical.youngModulusPa)*Math.max(1e6,profileB.mechanical.youngModulusPa));
+  const hardnessNorm=clamp01((Math.log10(hardness)-7)/4),contactBrightness=Math.max(.03,(profileA.acoustic.brightness+profileB.acoustic.brightness)/2*(1-wetness*.30-moss*.55));
+  const area=projectedArea(event.dimensionsA??[event.size,event.size,event.size],event.normal),air=clamp01(area*Math.max(0,event.speed)*.38),contactMs=.0015+.004*(1-hardnessNorm)+.0015*Math.min(1,event.size);
+  let transientLow=0,airLow=0;
   for(let i=0;i<left.length;i++){
-    const t=i/sampleRate,attack=Math.min(1,t*.004*sampleRate),contactEnv=Math.exp(-t*(48+wetness*32+surfaceDamping*18));
-    let sample=(rng()*2-1)*contactEnv*contactNoise*(.10+contactBrightness*.18)*(1-moss*.2);
+    const t=i/sampleRate,noise=rng()*2-1;
+    transientLow+=(noise-transientLow)*(1-Math.exp(-2*Math.PI*(900+contactBrightness*4200)/sampleRate));
+    airLow+=(noise-airLow)*(1-Math.exp(-2*Math.PI*(90+air*190)/sampleRate));
+    const strike=Math.exp(-Math.pow(t/contactMs,1.35))*((noise*.45+transientLow*.55)*(0.22+.78*hardnessNorm));
+    const thump=Math.sin(2*Math.PI*(72+event.size*18)*t)*Math.exp(-t*(42-14*Math.min(1,event.size)))*(.08+.14*Math.min(1,event.impulse/20));
+    const puff=airLow*Math.exp(-t*(18+air*8))*air*.24;
+    let sample=strike+thump+puff;
     for(const bank of banks){
-      const env=Math.exp(-t*bank.decay);
-      for(let m=0;m<bank.ratios.length;m++)sample+=Math.sin(2*Math.PI*bank.base*bank.ratios[m]!*t+bank.phases[m]!)*env*bank.gain/(1+m*.68);
+      for(let m=0;m<bank.frequencies.length;m++){
+        const frequency=bank.frequencies[m]!,env=Math.exp(-t*bank.decays[m]!);
+        sample+=Math.sin(2*Math.PI*frequency*t+bank.phases[m]!)*env*bank.gains[m]!;
+      }
     }
-    sample*=amplitude*attack*.34;left[i]=sample*gainL;right[i]=sample*gainR;
+    sample*=amplitude*.42*(1-moss*.16)*(1-surfaceDamping*.08);left[i]=sample*gainL;right[i]=sample*gainR;
   }
 }
-function modalBank(profile:ReturnType<typeof material>['acoustic'],dimensions:readonly number[],rng:()=>number){
-  const d=[...dimensions].map(value=>Math.max(.002,Math.abs(value))).sort((x,y)=>x-y),thickness=d[0]??.02,mid=d[1]??thickness,large=d[2]??mid,span=Math.max(.04,Math.sqrt(mid*large)),thinness=Math.min(1,thickness/span),plate=clamp01(1-thinness*4);
-  const scale=Math.max(.28,Math.min(2.8,Math.pow(thickness/.02,.30)*Math.pow(.5/span,.52))),aspect=Math.max(1,Math.min(4,large/Math.max(.002,mid)));
-  const ratios=[1,1.38+.12/aspect,2.02+.14*aspect,2.72+.09/aspect],phases=ratios.map(()=>rng()*Math.PI*2);
-  return{base:Math.max(55,profile.resonanceHz*scale),ratios,phases,decay:4.5+profile.damping*28+(1-plate)*18,gain:(.18+profile.brightness*.45)*(.38+plate*.85)};
+function impactDuration(event:ImpactEvent):number{
+  const profiles=[material(event.materialA),material(event.materialB)],damping=(profiles[0].acoustic.damping+profiles[1].acoustic.damping)*.5,dims=event.dimensionsA??[event.size,event.size,event.size],d=[...dims].sort((a,b)=>a-b),plate=(d[0]??1)/Math.max(.01,Math.sqrt((d[1]??1)*(d[2]??1)))<.12;
+  return Math.min(1.45,Math.max(.24,.32+(1-damping)*.36+(plate?.42:0)+Math.log1p(event.energy)*.018));
 }
+function modalBank(profile:ReturnType<typeof material>,dimensions:readonly number[],rng:()=>number,fixed:boolean){
+  const d=[...dimensions].map(value=>Math.max(.002,Math.abs(value))).sort((x,y)=>x-y),h=d[0]??.02,b=d[1]??h,a=d[2]??b,span=Math.sqrt(a*b),thin=h/Math.max(.002,span),plate=thin<.12,phases:number[]=[],frequencies:number[]=[],decays:number[]=[],gains:number[]=[];
+  const push=(frequency:number,gain:number,decay:number)=>{if(frequency<28||frequency>18_000)return;frequencies.push(frequency);phases.push(rng()*Math.PI*2);decays.push(decay);gains.push(gain);};
+  if(plate){
+    const nu=poisson(profile.kind),factor=Math.PI/2*h*Math.sqrt(profile.mechanical.youngModulusPa/(12*profile.density*(1-nu*nu)))*(fixed?2.15:1);
+    const modes:[[number,number],...Array<[number,number]>]=[[1,1],[2,1],[1,2],[2,2],[3,1],[1,3],[3,2],[2,3],[4,1],[1,4]];
+    for(let i=0;i<modes.length;i++){const [m,n]=modes[i]!,f=factor*((m/a)**2+(n/b)**2),highBoost=Math.min(1.7,1+f/1800);push(f,(.12+profile.acoustic.brightness*.20)*highBoost/(1+i*.28),3.2+profile.acoustic.damping*24+i*.32);}
+  }else{
+    const nu=poisson(profile.kind),shear=Math.sqrt(profile.mechanical.youngModulusPa/(2*(1+nu)*profile.density)),longitudinal=Math.sqrt(profile.mechanical.youngModulusPa*(1-nu)/(profile.density*(1+nu)*(1-2*nu))),axes=[a,b,h];
+    let index=0;
+    for(const length of axes){
+      push(shear/(2*length),(.04+profile.acoustic.brightness*.085)/(1+index*.2),10+profile.acoustic.damping*38);
+      push(longitudinal/(2*length),(.025+profile.acoustic.brightness*.055)/(1+index*.2),12+profile.acoustic.damping*42);
+      index++;
+    }
+  }
+  return{frequencies,phases,decays,gains};
+}
+function projectedArea(dimensions:readonly number[],normal:readonly number[]):number{
+  const d=[Math.max(.002,Math.abs(dimensions[0]??1)),Math.max(.002,Math.abs(dimensions[1]??1)),Math.max(.002,Math.abs(dimensions[2]??1))],n=[Math.abs(normal[0]??0),Math.abs(normal[1]??0),Math.abs(normal[2]??0)];
+  return d[1]*d[2]*n[0]+d[0]*d[2]*n[1]+d[0]*d[1]*n[2];
+}
+function poisson(kind:string):number{return kind==='glass'?.23:kind==='steel'?.29:kind==='wood'?.34:kind==='concrete'?.20:kind==='asphalt'?.35:.30;}
 function clamp01(value:number){return Math.max(0,Math.min(1,Number.isFinite(value)?value:0));}
 
 function fractureVoice(event:FractureEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
-  const profile=material(event.material).acoustic,thicknessScale=Math.sqrt(Math.max(.25,event.thickness/.01)),sizeScale=Math.max(.65,event.size),base=Math.max(260,profile.resonanceHz*thicknessScale/Math.sqrt(sizeScale));
-  const modes=[1,1.31,1.77,2.36,3.12],phases=modes.map(()=>rng()*Math.PI*2),tinks=Math.min(18,Math.max(4,Math.round(event.shardCount*.45)));
-  const tinkTimes=Array.from({length:tinks},()=>.015+rng()*.38).sort((a,b)=>a-b),tinkFreq=tinkTimes.map(()=>base*(1.2+rng()*2.8));
-  for(let i=0;i<left.length;i++){const t=i/sampleRate,crack=Math.exp(-t*48),ring=Math.exp(-t*(7+profile.damping*22));let sample=(rng()*2-1)*crack*(.32+profile.noise*.85);for(let m=0;m<modes.length;m++)sample+=Math.sin(2*Math.PI*base*modes[m]!*t+phases[m]!)*ring*(.48/(1+m*.62));for(let k=0;k<tinkTimes.length;k++){const age=t-tinkTimes[k]!;if(age>=0&&age<.18)sample+=Math.sin(2*Math.PI*tinkFreq[k]!*age)*Math.exp(-age*38)*(.08+rng()*.025);}sample*=amplitude*.34;left[i]=sample*gainL;right[i]=sample*gainR;}
+  const profile=material(event.material).acoustic,base=Math.max(240,profile.resonanceHz*Math.sqrt(Math.max(.25,event.thickness/.01))/Math.sqrt(Math.max(.65,event.size)));
+  // The fracture event is only the rupture itself. Subsequent shard impacts are
+  // real rigid-body contacts and synthesize their own clinks later in time.
+  let low=0;
+  for(let i=0;i<left.length;i++){
+    const t=i/sampleRate,noise=rng()*2-1;low+=(noise-low)*(1-Math.exp(-2*Math.PI*(1800+profile.brightness*4200)/sampleRate));
+    const crack=(noise*.65+low*.35)*Math.exp(-t*(62-profile.brightness*10));
+    const release=Math.sin(2*Math.PI*base*t)*Math.exp(-t*(18+profile.damping*35))*.18+Math.sin(2*Math.PI*base*1.73*t+.7)*Math.exp(-t*(24+profile.damping*42))*.09;
+    const sample=(crack*(.32+profile.noise*.75)+release)*amplitude*.44;left[i]=sample*gainL;right[i]=sample*gainR;
+  }
 }
 
 function softLimit(data:Float32Array){for(let i=0;i<data.length;i++)data[i]=Math.tanh(data[i]!*.92);}
