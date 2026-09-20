@@ -6,7 +6,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
-import {renderAudio,wavBytes} from '../../dist/index.js';
+import {renderAudio,renderAmbience,wavBytes} from '../../dist/index.js';
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const root=fileURLToPath(new URL('../../',import.meta.url)),tool=join(root,'tools/vehicle-abuse'),out=join(root,'artifacts/vehicle-abuse');
@@ -56,7 +56,13 @@ try{
   const events=await evaluate('return window.demo.events()'),telemetry=await evaluate('return window.demo.telemetry()'),evidence=await evaluate('return window.demo.inspect()');
   if(evidence.errors?.length)throw new Error('Renderer errors: '+JSON.stringify(evidence.errors));
   await writeFile(join(out,'events.json'),JSON.stringify(events,null,2));await writeFile(join(out,'telemetry.json'),JSON.stringify(telemetry));await writeFile(join(out,'evidence.json'),JSON.stringify(evidence,null,2));
-  const audio=renderAudio(events,duration,48_000,0),wav=join(out,'m3-human-abuse.wav');await writeFile(wav,wavBytes(audio));
+  const audio=renderAudio(events,duration,48_000,0);
+  const ambience=renderAmbience([
+    {time:0,listener:[4.5,1.5,-4],target:[.4,.9,0],vehicle:[0,0,0],speedMps:0},
+    {time:duration,listener:[3.0,1.3,-2.5],target:[.4,1.0,0],vehicle:[0,0,0],speedMps:0},
+  ],duration,{sampleRate:48_000,seed:26092026,windSpeedMps:.9,vehicleGain:0});
+  for(let i=0;i<audio.left.length;i++){audio.left[i]=Math.tanh(audio.left[i]+ambience.left[i]*.42);audio.right[i]=Math.tanh(audio.right[i]+ambience.right[i]*.42);}
+  const wav=join(out,'m3-human-abuse.wav');await writeFile(wav,wavBytes(audio));
   const final=join(out,'m3-human-abuse.mp4'),mux=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-i',silent,'-i',wav,'-c:v','copy',...audioCodec,'-shortest','-movflags','+faststart',final],{stdio:['ignore','inherit','inherit']});
   const [muxCode]=await once(mux,'exit');if(muxCode!==0)throw new Error(`ffmpeg mux exit ${muxCode}`);
   console.log(JSON.stringify({final,duration,frames,events:events.length,evidence},null,2));
