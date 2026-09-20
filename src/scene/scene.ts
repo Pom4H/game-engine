@@ -226,6 +226,7 @@ export class Scene {
       this.pushEvent({
         type:'impact',id:++this.eventSequence,time:at,point:contact.point,normal:contact.normal,a:contact.a,b:contact.b,
         materialA:a.material.kind,materialB:b?.material.kind??this.physics.groundMaterial.kind,
+        dimensionsA:acousticDimensions(a),...(b?{dimensionsB:acousticDimensions(b)}:{}),
         ...(entityA?{surfaceA:surfaceAcoustics(this.surfaces.sample(entityA.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityA.id)??entityA.material.surface)}:{}),
         ...(entityB?{surfaceB:surfaceAcoustics(this.surfaces.sample(entityB.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityB.id)??entityB.material.surface)}:{}),
         energy:contact.normalEnergy,impulse:contact.impulse,speed:contact.normalSpeed,size:Math.max(.02,Math.min(characteristicSize(a),b?characteristicSize(b):characteristicSize(a))),
@@ -302,6 +303,7 @@ export class Scene {
 
 function dominantAxis(normal:Vec3):0|1|2{return Math.abs(normal[0])>=Math.abs(normal[1])&&Math.abs(normal[0])>=Math.abs(normal[2])?0:Math.abs(normal[1])>=Math.abs(normal[2])?1:2;}
 function planeAxes(axis:0|1|2):[0|1|2,0|1|2]{return axis===0?[1,2]:axis===1?[0,2]:[0,1];}
+function acousticDimensions(body:RigidBody):Vec3{return body.shape.kind==='sphere'?[body.shape.radius*2,body.shape.radius*2,body.shape.radius*2]:[body.shape.half[0]*2,body.shape.half[1]*2,body.shape.half[2]*2];}
 function characteristicSize(body:RigidBody):number{return body.shape.kind==='sphere'?body.shape.radius*2:Math.max(body.shape.half[0],body.shape.half[1],body.shape.half[2])*2;}
 function inferMass(profile:PhysicalMaterial,mesh:Primitive|undefined,scale:Vec3):number{return Math.max(.001,profile.density*meshVolume(mesh,scale));}
 function meshVolume(mesh:Primitive|undefined,scale:Vec3):number{
