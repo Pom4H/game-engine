@@ -110,7 +110,7 @@ function validateBindings(scene:Record<string,unknown>,entities:readonly EntityS
       for(const [j,value] of ids.entries()){
         const p=`${path}.visualIds[${j}]`,id=stableId(value,p),visual=reference(id,p);
         if(visualIds.has(id))throw new TypeError(`${p} is already owned by another deformation body`);visualIds.add(id);
-        if(visual.mesh?.kind!=='triangle-mesh')throw new TypeError(`${p} must reference a triangle mesh`);
+        if((visual.renderMesh??visual.mesh)?.kind!=='triangle-mesh')throw new TypeError(`${p} must reference a triangle mesh`);
         if(visual.body&&(visual.body.mass??(visual.body.velocity||visual.body.angularVelocity?1:0))>0)throw new TypeError(`${p} cannot also own a dynamic physics body`);
       }
       optionalNumber(item,'skinThicknessM',path,.0002,.02);optionalNumber(item,'radiusM',path,.06,2.5);optionalNumber(item,'maxDentM',path,.01,1.8);optionalNumber(item,'minEnergyJ',path,0,1e7);
