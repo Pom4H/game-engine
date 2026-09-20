@@ -25,10 +25,10 @@ spec.rendering={
   shadowExtent:30,
 };
 spec.camera={
-  position:[-15.72,.80,-3.38],
-  target:[-20.05,.76,-1.42],
-  fov:30,
-  focusDistance:4.8,
+  position:[-15.92,1.45,-3.62],
+  target:[-20.08,.74,-1.42],
+  fov:31,
+  focusDistance:4.85,
   aperture:.010,
 };
 
