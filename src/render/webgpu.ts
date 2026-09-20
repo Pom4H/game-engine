@@ -591,7 +591,7 @@ export class WebGPURenderer implements Renderer{
       return{vp,settings,lightVP,right,up,frame};
     });
     const {vp,lightVP,right,up,frame}=frameState;
-    this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene));
+    this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene,reflectionProbe?.position??scene.camera.target));
     const classified=this.profiler.measure('visibility',()=>{
       const visible=[...scene.entities.values()].filter(e=>renderPrimitive(e)),opaque=visible.filter(e=>e.material.color[3]>=.98),transparent=visible.filter(e=>e.material.color[3]<.98).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
       return{visible,opaque,transparent};
@@ -720,9 +720,9 @@ export class WebGPURenderer implements Renderer{
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
   dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
-  private updateEnvironmentMap(scene:Scene):void{
+  private updateEnvironmentMap(scene:Scene,origin:Vec3):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
-    const radiance=buildSceneRadianceProbe(scene,scene.camera.target,128);
+    const radiance=buildSceneRadianceProbe(scene,origin,128);
     const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
     const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
     const key=[...sun,...sunColor,...sky,...urbanColor,...groundColor,Math.round(probe[0]*2)/2,Math.round(probe[2]*2)/2,proxies.length,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20,Math.round(scene.environment.humidity*20)/20].map(value=>Number(value).toFixed(3)).join(':');
