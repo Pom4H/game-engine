@@ -118,7 +118,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.role==='glass')return{...base,color:[.035,.055,.072,.34]};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
   if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
-  if(part.role==='light')return{...base,color:[.76,.84,.94,1],emissive:lightsOn?[2.8,3.1,3.5]:[.025,.03,.035]};
+  if(part.role==='light')return{...base,color:[.76,.84,.94,1],emissive:lightsOn?[1.25,1.45,1.75]:[.018,.022,.028]};
   if(part.role==='tail')return{...base,color:[.34,.012,.008,1],emissive:lightsOn?[.7,.015,.006]:[.018,.001,.001]};
   if(part.role==='metal')return{...base,color:[.16,.17,.18,1]};
   return{...base,color:[.026,.029,.032,1]};
