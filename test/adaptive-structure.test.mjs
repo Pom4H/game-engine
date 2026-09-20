@@ -63,7 +63,7 @@ test('moving rigid motion can sleep structurally without losing translation or r
     (initialPositions[2]+initialPositions[5]+initialPositions[8]+initialPositions[11])/4,
   ];
   const initialL=angularMomentum(initialPositions,initialCenter,linear,angular);
-  body.activateFromRigid([0,0,0],linear,angular);
+  body.activateFromRigid(initialCenter,linear,angular);
   for(let i=0;i<4&&body.stats.mode==='active';i++)body.step(1/120,[0,0,0]);
   assert.equal(body.stats.mode,'dormant');
   const baked=body.takeBakedState();
