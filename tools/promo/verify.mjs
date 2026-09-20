@@ -50,7 +50,10 @@ for(const s of shots){
  assert.equal(e.m3.sourceBytes,sourceM3.sourceBytes,`${s.id}: reference byte size changed`);
  assert.match(e.m3.representation,/parametric.*shell/i);
  integerWithin(e.m3.profileBytes,1,4096,`${s.id}: compact M3 profile bytes`);
- assert.ok(e.m3.sourceBytes/e.m3.profileBytes>10,`${s.id}: M3 profile no longer provides >10x source-data reduction`);
+ integerWithin(e.m3.highFidelity.binaryPayloadBytes,1,32768,`${s.id}: quantized M3 shell bytes`);
+ assert.ok(e.m3.highFidelity.maxPositionErrorMm<.05,`${s.id}: quantized shell exceeded 0.05 mm error`);
+ const modelPayload=e.m3.profileBytes+e.m3.highFidelity.binaryPayloadBytes;
+ assert.ok(e.m3.sourceBytes/modelPayload>10,`${s.id}: hybrid M3 model-specific payload no longer provides >10x reduction`);
  integerWithin(e.m3.triangles,1000,10000,`${s.id}: generated M3 triangles`);
  integerWithin(e.m3.parts,20,64,`${s.id}: generated M3 parts`);
 
