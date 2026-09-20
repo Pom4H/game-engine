@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Scene,StructuralBody,applyStructuralSkin,bindStructuralSkin,material} from '../dist/index.js';
+import {AdaptiveStructuralController,Scene,StructuralBody,applyStructuralSkin,bindStructuralSkin,material} from '../dist/index.js';
 
 const steel=material('steel').mechanical;
 
@@ -186,6 +186,37 @@ const panel={
   normals:[1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],
   indices:[0,1,2,0,2,3,4,6,5,4,7,6],
 };
+
+test('adaptive structural LOD ignores small contacts, promotes severe impacts and returns one rigid handoff',()=>{
+  const body=new StructuralBody({
+    nodes:[{position:[-.5,0,0],mass:2},{position:[.5,0,0],mass:2}],
+    constraints:[{kind:'distance',a:0,b:1,areaM2:3e-4,material:{...steel,yieldStressPa:1e9,failureStrain:.9,plasticity:0}}],
+    sleepDelay:.02,sleepSpeed:.01,internalDamping:20,
+  });
+  const adaptive=new AdaptiveStructuralController(body,4,{specificEnergyJkg:100,minimumEnergyJ:500,impulseRadiusM:.4});
+  const rigid={mass:4,centerOfMass:[0,0,0],linearVelocity:[8,0,0],angularVelocity:[0,0,0]};
+  assert.equal(adaptive.thresholdJ,500);
+  assert.equal(adaptive.activate(rigid,{point:[.5,0,0],impulse:[1,0,0],normalEnergyJ:499}),false);
+  assert.equal(adaptive.mode,'reduced');
+  assert.equal(adaptive.stats.rejectedContacts,1);
+
+  assert.equal(adaptive.activate(rigid,{point:[.5,0,0],impulse:[0,0,0],normalEnergyJ:500}),true);
+  assert.equal(adaptive.mode,'structural');
+  assert.equal(adaptive.activate(rigid,{point:[.5,0,0],impulse:[0,0,0],normalEnergyJ:900}),false,'active mass must not be promoted twice');
+
+  let handoff;
+  for(let i=0;i<4&&!handoff;i++)handoff=adaptive.step(1/120,[0,0,0]);
+  assert.ok(handoff);
+  assert.equal(adaptive.mode,'reduced');
+  assert.equal(adaptive.stats.activations,1);
+  assert.ok(Math.abs(handoff.linearVelocity[0]-8)<1e-10,handoff);
+  assert.equal(adaptive.step(1/120,[0,0,0]),undefined,'reduced tier must not keep simulating hidden structural mass');
+});
+
+test('adaptive structural controller rejects a second mass model',()=>{
+  const body=bar();
+  assert.throws(()=>new AdaptiveStructuralController(body,body.totalMass+1),/exactly the reduced rigid mass/);
+});
 
 test('reduced plastic deformation spends the authoritative contact energy instead of post-processing it twice',()=>{
   const scene=new Scene({
