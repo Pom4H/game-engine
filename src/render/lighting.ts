@@ -14,19 +14,19 @@ fn hash(p:vec2<f32>)->f32 {return fract(sin(dot(p,vec2<f32>(127.1,311.7)))*43758
 fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);return mix(mix(hash(i),hash(i+vec2<f32>(1,0)),q.x),mix(hash(i+vec2<f32>(0,1)),hash(i+vec2<f32>(1,1)),q.x),q.y);}
 @fragment fn fs(i:Out)->@location(0) vec4<f32>{
  let p=i.uv*2.0-1.0;let ray=normalize(f.forward.xyz+f.right.xyz*p.x*f.right.w*f.forward.w+f.up.xyz*p.y*f.forward.w);
- let clear=smoothstep(.58,.92,f.environment.y);
- let authoredHorizon=f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027;
- let clearHorizon=vec3<f32>(.56,.73,.94);let clearZenith=vec3<f32>(.10,.28,.62);
- let horizon=mix(authoredHorizon,clearHorizon,clear*.58);
- let zenith=mix(f.sky.rgb*.45,clearZenith,clear*.68);
- var color=mix(horizon,zenith,pow(max(ray.y,0.0),.55));
- let sun=max(dot(ray,f.sun.xyz),0.0);color+=f.sunColor.rgb*f.sun.w*(pow(sun,110.0)*.085+smoothstep(.99976,.99993,sun)*1.65);
+ let humidity=clamp(f.environment.w,0.0,1.0);
+ let sunlight=clamp(f.environment.y,0.0,1.0);
+ let haze=smoothstep(.55,.98,humidity)*(1.0-.35*sunlight);
+ let horizon=f.sky.rgb*(1.12+.12*haze)+f.sunColor.rgb*f.sun.w*.018;
+ let zenith=f.sky.rgb*mix(.42,.58,haze);
+ var color=mix(horizon,zenith,pow(max(ray.y,0.0),.58));
+ let sun=max(dot(ray,f.sun.xyz),0.0);color+=f.sunColor.rgb*f.sun.w*(pow(sun,150.0)*.070+smoothstep(.99980,.99995,sun)*1.55);
  let q=ray.xz/max(.10,ray.y)*.8+vec2<f32>(f.up.w*.001,0);
  let clouds=noise(q)*.55+noise(q*2.1)*.29+noise(q*4.2)*.16;
- let cloudOpacity=(1.0-clear*.82)*smoothstep(.52,.86,clouds)*smoothstep(.02,.35,ray.y)*.32;
- color=mix(color,mix(f.sky.rgb*1.24,vec3<f32>(.88,.92,.97),clear*.35),cloudOpacity);
- // Bright clear winter horizons retain aerial perspective without grey fogging the whole frame.
- color+=clear*vec3<f32>(.08,.10,.13)*pow(1.0-max(ray.y,0.0),5.0);
+ let cloudDrive=smoothstep(.48,.88,humidity)*(1.0-.55*sunlight);
+ let cloudOpacity=cloudDrive*smoothstep(.50,.84,clouds)*smoothstep(.02,.35,ray.y)*.38;
+ color=mix(color,mix(f.sky.rgb*1.18,vec3<f32>(.82,.86,.90),haze*.55),cloudOpacity);
+ color+=f.sky.rgb*(.035+.055*haze)*pow(1.0-max(ray.y,0.0),5.0);
  return vec4<f32>(color,1);
 }`;
 /** Threshold/downsample followed by two separable Gaussian passes. Sampling a
@@ -162,7 +162,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
     indirect+=textureLoad(hdr,q,0).rgb*weight;indirectWeight+=weight;
    }
   }
-  if(indirectWeight>.001){color+=indirect/indirectWeight*.055*(.72+.28*normalSample.a);}
+  if(indirectWeight>.001){color+=indirect/indirectWeight*.034*(.72+.28*normalSample.a);}
  }
  // Screen-space radiance for smooth materials, with explicit misses. Wet ground
  // uses its geometry reflection pass; rough/offscreen surfaces keep sky fallback.
@@ -206,6 +206,10 @@ export const PRESENT_SHADER=FRAME_WGSL+`
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
 fn acesPresent(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3<f32>(0),vec3<f32>(1));}
+fn linearToSrgb(x:vec3<f32>)->vec3<f32>{
+ let lo=x*12.92;let hi=1.055*pow(max(x,vec3<f32>(0)),vec3<f32>(1.0/2.4))-.055;
+ return select(hi,lo,x<=vec3<f32>(.0031308));
+}
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
  let texel=1.0/vec2<f32>(textureDimensions(source));
  let center=textureSampleLevel(source,linearSampler,in.uv,0).rgb;
@@ -213,18 +217,13 @@ fn acesPresent(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+
                     textureSampleLevel(source,linearSampler,in.uv-vec2<f32>(texel.x,0),0).rgb+
                     textureSampleLevel(source,linearSampler,in.uv+vec2<f32>(0,texel.y),0).rgb+
                     textureSampleLevel(source,linearSampler,in.uv-vec2<f32>(0,texel.y),0).rgb)*.25;
- // Small display-space reconstruction sharpens TAA without reintroducing shimmer.
- var color=max(vec3<f32>(0),center+(center-neighbourhood)*.17)*f.sunColor.w;
- color=pow(acesPresent(color),vec3<f32>(1.0/2.2));
- let luma=dot(color,vec3<f32>(.2126,.7152,.0722));
- color=mix(vec3<f32>(luma),color,1.035);
- color=clamp((color-.5)*1.025+.5,vec3<f32>(0),vec3<f32>(1));
- // Cool reflected winter fill and warm sun highlights produce photographic
- // separation while retaining the physical HDR light ratios.
- color+=vec3<f32>(-.006,.001,.010)*(1.0-smoothstep(.22,.55,luma));
- color+=vec3<f32>(.010,.004,-.004)*smoothstep(.58,.92,luma);
- let vignette=1.0-.032*pow(length((in.uv-.5)*vec2<f32>(1.1,1.0)),1.8);
- return vec4<f32>(clamp(color,vec3<f32>(0),vec3<f32>(1))*vignette,1);
+ // Presentation is deliberately neutral: exposure + reconstruction + display
+ // transform only. Scene mood must come from radiance, materials and the camera.
+ let reconstructed=max(vec3<f32>(0),center+(center-neighbourhood)*.15)*f.sunColor.w;
+ let mapped=acesPresent(reconstructed);
+ let luma=dot(mapped,vec3<f32>(.2126,.7152,.0722));
+ mapped=mix(vec3<f32>(luma),mapped,1.015);
+ return vec4<f32>(clamp(linearToSrgb(mapped),vec3<f32>(0),vec3<f32>(1)),1);
 }
 `;
 
