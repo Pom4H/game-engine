@@ -13,7 +13,12 @@ export interface SurfaceContactHost {
  remove(id:string):void;
 }
 export interface SurfaceSample {readonly surfaceId:string;readonly height:number;readonly snowDepth:number;readonly waterDepth:number}
-export interface SurfaceFootprint extends SnowFootprint {readonly surfaceId:string}
+export interface SurfaceFootprint extends SnowFootprint {
+ readonly surfaceId:string;
+ readonly wetness:number;
+ readonly slush:number;
+ readonly temperatureC:number;
+}
 export interface WheelSurfaceContact {
  readonly id:string;
  /** Position of the bottom of the tyre, in world metres. */
@@ -139,7 +144,8 @@ export class SurfaceContactSystem {
    else if(depth>.002){binding.visible=true;this.applyMeshes(binding.skin);}
   }
   for(const stamp of created){const surface=this.sample(stamp.position);if(!surface)continue;
-   const event=Object.freeze({...stamp,surfaceId:surface.surfaceId});this.events.push(event);if(this.events.length>this.footprints.capacity)this.events.shift();
+   const state=this.host.surfaces.sample(surface.surfaceId,stamp.position[0],stamp.position[2])??this.host.surfaces.surface(surface.surfaceId);
+   const event=Object.freeze({...stamp,surfaceId:surface.surfaceId,wetness:state?.wetness??0,slush:state?.slush??0,temperatureC:state?.temperatureC??0});this.events.push(event);if(this.events.length>this.footprints.capacity)this.events.shift();
    const binding=this.surfaces.get(surface.surfaceId);if(binding?.visible){binding.skin.stamp(stamp);this.applyMeshes(binding.skin);}
   }
   this.stepSpray(dt,at,contacts);
