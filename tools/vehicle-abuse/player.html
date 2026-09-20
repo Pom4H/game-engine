@@ -75,7 +75,6 @@ const scene=new Scene({
   ...carEntities,
   {id:'door-opening',position:[.43,.77,-.947],mesh:{kind:'polygon-prism',points:[[-.76,-.41],[.72,-.41],[.66,.39],[-.62,.39]],thickness:.028,axis:2},material:{kind:'default',color:[.008,.009,.010,1],roughness:.96}},
   {id:'door-panel',position:[.43,.77,-.962],mesh:{kind:'polygon-prism',points:[[-.73,-.38],[.70,-.38],[.63,.37],[-.59,.37]],thickness:.040,axis:2},material:{kind:'steel',treatment:'painted',finish:'smooth',color:paint,roughness:.18,metalness:.10}},
-  {id:'door-window',position:[.47,1.24,-.964],mesh:{kind:'polygon-prism',points:[[-.56,-.16],[.56,-.16],[.43,.17],[-.45,.17]],thickness:.016,axis:2},material:{kind:'glass',finish:'polished',color:[.028,.045,.060,.34],roughness:.07,pattern:'window'},body:{mass:0}},
   ...human,
  ],
 });
@@ -94,11 +93,14 @@ function applyCar(time=0){
  }
  const body=scene.entities.get('m3-body');body.mesh=rig.shellMesh(bodyBase);
  const theta=-rig.door.angle,hinge=[.98,.77,-.952],dx=-.55,c=Math.cos(theta),s=Math.sin(theta),doorLocal=[hinge[0]+c*dx,hinge[1],hinge[2]-s*dx],doorWorld=rotate(doorLocal,rotation);
- const door=scene.entities.get('door-panel'),glass=scene.entities.get('door-window'),opening=scene.entities.get('door-opening'),closedWindow=scene.entities.get('m3-window-front-left'),doorShot=time>=3.05&&time<7.92;
- const show=doorShot?1:0;door.scale.splice(0,3,show,show,show);glass.scale.splice(0,3,show,show,show);opening.scale.splice(0,3,show,show,show);
- if(closedWindow)closedWindow.scale.splice(0,3,1-show,1-show,1-show);
+ const door=scene.entities.get('door-panel'),opening=scene.entities.get('door-opening'),doorGlass=scene.entities.get('m3-window-front-left'),doorGlassBase=baseParts.get('m3-window-front-left'),doorShot=time>=3.05&&time<7.92;
+ const show=doorShot?1:0;door.scale.splice(0,3,show,show,show);opening.scale.splice(0,3,show,show,show);
  door.position.splice(0,3,doorWorld[0],doorWorld[1]+pose.heave,doorWorld[2]);door.rotation.splice(0,3,rotation[0],theta,rotation[2]);
- const winOffset=rotate([0,.47,0],rotation);glass.position.splice(0,3,doorWorld[0]+winOffset[0],doorWorld[1]+pose.heave+winOffset[1],doorWorld[2]+winOffset[2]);glass.rotation.splice(0,3,rotation[0],theta,rotation[2]);
+ if(doorShot&&doorGlass&&doorGlassBase){
+  const rel=[doorGlassBase.position[0]-hinge[0],doorGlassBase.position[1]-hinge[1],doorGlassBase.position[2]-hinge[2]];
+  const glassLocal=[hinge[0]+c*rel[0]+s*rel[2],hinge[1]+rel[1],hinge[2]-s*rel[0]+c*rel[2]],glassWorld=rotate(glassLocal,rotation);
+  doorGlass.position.splice(0,3,glassWorld[0],glassWorld[1]+pose.heave,glassWorld[2]);doorGlass.rotation.splice(0,3,rotation[0],theta,rotation[2]);
+ }
  const op=rotate([.43,.77,-.947],rotation);opening.position.splice(0,3,op[0],op[1]+pose.heave,op[2]);opening.rotation.splice(0,3,...rotation);
 }
 function bone(id,a,b,width){
