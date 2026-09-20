@@ -225,7 +225,7 @@ export function passengerStructuralDefinition(
   if(!Number.isFinite(massKg)||massKg<=0)throw new RangeError('Passenger structural mass must be positive');
   const d=profile.dimensions,rearAxle=(-d.wheelbase/2+d.axleOffset)/d.length,frontAxle=(d.wheelbase/2+d.axleOffset)/d.length;
   const stations=[-.47,rearAxle,-.19,0,.10,frontAxle,.47].sort((a,b)=>a-b);
-  const nodes:{position:Vec3;mass:number}[]=[],constraints:StructuralConstraintSpec[]=[];
+  const nodes:{position:Vec3;mass:number}[]=[],constraints:StructuralConstraintSpec[]=[],collisionTriangles:[number,number,number][]=[];
   const nodeMass=massKg/(stations.length*4);
   for(const station of stations){
     const section=interpolateSection(profile.side,station),half=section[1]!*d.width/2,belt=section[2]!*d.height,top=vehicleTop(profile,station,half,belt),x=station*d.length;
@@ -249,10 +249,18 @@ export function passengerStructuralDefinition(
     addDistance(a,b+1,.00062);addDistance(a+1,b,.00062);
     addDistance(a+2,b+3,.00045);addDistance(a+3,b+2,.00045);
     addDistance(a,b+2,.00048);addDistance(a+1,b+3,.00048);
+    collisionTriangles.push(
+      [a,a+1,b+1],[a,b+1,b],
+      [a,a+2,b+2],[a,b+2,b],
+      [a+2,a+3,b+3],[a+2,b+3,b+2],
+      [a+1,b+1,b+3],[a+1,b+3,a+3],
+    );
     const tets:[number,number,number,number][]=[
       [a,a+1,a+2,b],[a+1,a+2,a+3,b+3],[a+1,a+2,b,b+3],[a+1,b,b+1,b+3],[a+2,b,b+2,b+3],
     ];
     for(const [i,j,k,l] of tets)constraints.push({kind:'volume',a:i,b:j,c:k,d:l,compliance:2.5e-10,yieldRatio:.10,breakRatio:.55,plasticity:.22});
   }
-  return{nodes,constraints,iterations:10,sleepSpeed:.025,sleepDelay:.18,internalDamping:11};
+  collisionTriangles.push([0,3,1],[0,2,3]);
+  const front=(stations.length-1)*4;collisionTriangles.push([front,front+1,front+3],[front,front+3,front+2]);
+  return{nodes,constraints,collisionTriangles,iterations:10,sleepSpeed:.025,sleepDelay:.18,internalDamping:11};
 }
