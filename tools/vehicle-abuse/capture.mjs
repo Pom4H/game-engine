@@ -40,7 +40,9 @@ try{
   for(let i=0;i<120;i++){if(await evaluate('return window.ready===true'))break;await sleep(100);}
   if(!await evaluate('return window.ready===true')){const state=await evaluate('return {failure:window.failure??null,ready:window.ready??null,readyState:document.readyState,href:location.href}');throw new Error('Player not ready: '+JSON.stringify(state)+'\nCDP: '+JSON.stringify(browserEvents.slice(-12)));}
   const duration=await evaluate('return window.demo.duration'),fps=30,frames=Math.round(duration*fps),silent=join(out,'m3-human-abuse-silent.mp4');
-  const encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart',silent],{stdio:['pipe','inherit','inherit']});
+  const available=await ffmpegEncoders(),videoCodec=ffmpegVideoArgs(available),audioCodec=ffmpegAudioArgs(available);
+  console.log('ffmpeg codecs',JSON.stringify({video:videoCodec,audio:audioCodec}));
+  const encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an',...videoCodec,'-movflags','+faststart',silent],{stdio:['pipe','inherit','inherit']});
   const completed=once(encoder,'exit');
   for(let frame=0;frame<frames;frame++){
     await evaluate(`await window.demo.frame(${frame/fps}); return true;`);
@@ -53,11 +55,36 @@ try{
   if(evidence.errors?.length)throw new Error('Renderer errors: '+JSON.stringify(evidence.errors));
   await writeFile(join(out,'events.json'),JSON.stringify(events,null,2));await writeFile(join(out,'telemetry.json'),JSON.stringify(telemetry));await writeFile(join(out,'evidence.json'),JSON.stringify(evidence,null,2));
   const audio=renderAudio(events,duration,48_000,0),wav=join(out,'m3-human-abuse.wav');await writeFile(wav,wavBytes(audio));
-  const final=join(out,'m3-human-abuse.mp4'),mux=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-i',silent,'-i',wav,'-c:v','copy','-c:a','aac','-b:a','192k','-shortest','-movflags','+faststart',final],{stdio:['ignore','inherit','inherit']});
+  const final=join(out,'m3-human-abuse.mp4'),mux=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-i',silent,'-i',wav,'-c:v','copy',...audioCodec,'-shortest','-movflags','+faststart',final],{stdio:['ignore','inherit','inherit']});
   const [muxCode]=await once(mux,'exit');if(muxCode!==0)throw new Error(`ffmpeg mux exit ${muxCode}`);
   console.log(JSON.stringify({final,duration,frames,events:events.length,evidence},null,2));
 }finally{
   socket?.close();for(const item of pending.values())clearTimeout(item.timer);if(!child.killed)child.kill();await Promise.race([once(child,'exit'),sleep(1000)]);server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(profile,{recursive:true,force:true});
+}
+
+async function ffmpegEncoders(){
+  return await new Promise((resolve,reject)=>{
+    const child=spawn('ffmpeg',['-hide_banner','-encoders'],{stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
+    child.stdout.on('data',chunk=>stdout+=chunk);child.stderr.on('data',chunk=>stderr+=chunk);child.once('error',reject);
+    child.once('exit',code=>code===0?resolve(stdout):reject(new Error('ffmpeg -encoders failed: '+stderr)));
+  });
+}
+function ffmpegVideoArgs(encoders){
+  const candidates=[
+    ['libx264',['-c:v','libx264','-profile:v','high','-level:v','4.0','-crf','18']],
+    ['h264_mf',['-c:v','h264_mf','-rate_control','quality','-quality','75']],
+    ['h264_videotoolbox',['-c:v','h264_videotoolbox','-q:v','65']],
+    ['h264_amf',['-c:v','h264_amf','-quality','quality']],
+    ['h264_qsv',['-c:v','h264_qsv','-global_quality','20']],
+    ['h264_nvenc',['-c:v','h264_nvenc','-preset','p5','-cq','20']],
+  ];
+  for(const [name,args] of candidates)if(encoders.includes(name))return[...args,'-pix_fmt','yuv420p'];
+  throw new Error('No H.264 encoder available in ffmpeg');
+}
+function ffmpegAudioArgs(encoders){
+  if(encoders.includes(' aac '))return['-c:a','aac','-b:a','192k'];
+  if(encoders.includes(' libmp3lame '))return['-c:a','libmp3lame','-b:a','192k'];
+  throw new Error('No AAC/MP3 encoder available in ffmpeg');
 }
 
 async function chromePath(){
