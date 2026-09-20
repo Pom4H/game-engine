@@ -21,7 +21,7 @@ export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/c
 export {demoScene} from './demo.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
 
-export {material,materialKinds,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
+export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
 export type {EngineEvent,ImpactEvent,FractureEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
