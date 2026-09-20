@@ -13,6 +13,7 @@ import {fracturePlate} from '../materials/glass-fracture.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
+import {PlasticDeformationSystem} from '../physics/deformation.js';
 import type {EngineEvent} from './events.js';
 import type {BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
@@ -34,7 +35,7 @@ export interface RuntimeEntity {
   position:MutableVec3;
   rotation:MutableVec3;
   scale:MutableVec3;
-  readonly mesh?:Primitive;
+  mesh?:Primitive;
   readonly material:RuntimeMaterial;
   readonly environmental?:EnvironmentalSpec;
   readonly light?:LightSpec;
@@ -48,6 +49,7 @@ export class Scene {
   readonly spec:SceneSpec;
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
+  readonly deformation=new PlasticDeformationSystem();
   readonly surfaces=new SurfaceEnvironmentSystem();
   /** @deprecated Use surfaces. Kept only while PR tooling/examples migrate. */
   get winter(){return this.surfaces;}
@@ -76,6 +78,7 @@ export class Scene {
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     for(const entity of this.spec.entities)this.add(entity);
+    for(const spec of this.spec.deformation?.bodies??[])this.deformation.attach(spec,this.entities);
     // Initial environmental facts exist before the first scheduled surface tick.
     // Cadence controls evolution, not whether authored physical state exists.
     this.surfaces.reconcile(this.environment,this.entities);
@@ -125,7 +128,7 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.physics.remove(id);this.entities.delete(id);this.surfaces.remove(id);
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);this.entities.delete(id);this.surfaces.remove(id);
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
@@ -166,6 +169,7 @@ export class Scene {
           return result.decision;
         });
       })
+      .use('deformation',()=>{this.deformation.step(this.physics.contacts,this.entities);})
       .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
       .use('events',({at})=>{this.emitContactEvents(at);})
       .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
@@ -326,6 +330,7 @@ function meshDimensions(mesh:Primitive,scale:Vec3):MutableVec3{
   return[(mesh.size?.[0]??1)*scale[0],.02*scale[1],(mesh.size?.[1]??1)*scale[2]];
 }
 function bodyShape(mesh:Primitive|undefined,body:BodySpec,scale:Vec3):CollisionShape{
+  if(body.collisionSize)return{kind:'box',half:[body.collisionSize[0]/2,body.collisionSize[1]/2,body.collisionSize[2]/2]};
   const shape=body.shape??'auto';
   if(shape==='sphere'||shape==='auto'&&mesh?.kind==='sphere')return{kind:'sphere',radius:(mesh?.kind==='sphere'?mesh.radius??1:1)*Math.max(scale[0],scale[1],scale[2])};
   if(mesh?.kind==='polygon-prism'||mesh?.kind==='cylinder'||mesh?.kind==='snowdrift'||mesh?.kind==='torus'||mesh?.kind==='triangle-mesh'){const d=meshDimensions(mesh,scale);return{kind:'box',half:[d[0]/2,d[1]/2,d[2]/2]};}
