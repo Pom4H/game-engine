@@ -120,6 +120,7 @@ export class StructuralBody {
   steps=0;
   private quietTime=0;
   private dt=0;
+  private thermalScaleValue=1;
   private pendingBake:BakedStructuralState|undefined;
 
   constructor(readonly definition:StructuralDefinition){
@@ -216,6 +217,30 @@ export class StructuralBody {
 
   get nodeCount():number{return this.mass.length;}
   get constraintCount():number{return this.kind.length;}
+  get thermalScale():number{return this.thermalScaleValue;}
+
+  /**
+   * Set uniform free thermal expansion/contraction relative to the material reference shape.
+   * A dormant body is repositioned stress-free around its COM; an active body keeps its
+   * instantaneous geometry and feels the changed rest lengths through the constraints.
+   */
+  setThermalScale(scale:number):void{
+    if(!Number.isFinite(scale)||scale<.97||scale>1.03)throw new RangeError('Structural thermal scale must be within 0.97..1.03');
+    const prior=this.thermalScaleValue;if(Math.abs(scale-prior)<1e-12)return;
+    if(this.mode==='dormant'){
+      const center=this.centerOfMass(),ratio=scale/prior;
+      for(let i=0;i<this.nodeCount;i++){
+        const j=i*3;
+        for(let axis=0;axis<3;axis++){
+          const k=j+axis;
+          this.position[k]=center[axis]+(this.position[k]!-center[axis])*ratio;
+          this.previous[k]=center[axis]+(this.previous[k]!-center[axis])*ratio;
+        }
+      }
+    }
+    this.thermalScaleValue=scale;
+    this.wake();
+  }
 
   /** Reposition a dormant structural shape without introducing velocity. */
   translate(offset:Vec3):void{
@@ -325,7 +350,8 @@ export class StructuralBody {
     const rigid=this.rigidState();
     for(let i=0;i<this.constraintCount;i++){
       if(this.broken[i])continue;
-      this.rest[i]=this.measure(i);
+      const thermalPower=this.kind[i]===DISTANCE?this.thermalScaleValue:this.thermalScaleValue**3;
+      this.rest[i]=this.measure(i)/thermalPower;
       this.originalRest[i]=this.rest[i]!;
       this.lambda[i]=0;
     }
@@ -397,7 +423,7 @@ export class StructuralBody {
     const a=this.ia[index]!,b=this.ib[index]!,A=a*3,B=b*3;
     const dx=this.position[B]!-this.position[A]!,dy=this.position[B+1]!-this.position[A+1]!,dz=this.position[B+2]!-this.position[A+2]!;
     const length=Math.hypot(dx,dy,dz);if(length<1e-10)return;
-    const nx=dx/length,ny=dy/length,nz=dz/length,C=length-this.rest[index]!;
+    const nx=dx/length,ny=dy/length,nz=dz/length,C=length-this.rest[index]!*this.thermalScaleValue;
     const alpha=this.compliance[index]!/(this.dt*this.dt),denom=this.inverseMass[a]!+this.inverseMass[b]!+alpha;
     if(denom<=1e-14)return;
     const dl=(-C-alpha*this.lambda[index]!)/denom;this.lambda[index]=this.lambda[index]!+dl;
@@ -413,7 +439,7 @@ export class StructuralBody {
     const gc=V3.scale(V3.cross(V3.sub(D,A),V3.sub(B,A)),1/6);
     const gd=V3.scale(V3.cross(V3.sub(B,A),V3.sub(C,A)),1/6);
     const ga:MutableVec3=[-gb[0]-gc[0]-gd[0],-gb[1]-gc[1]-gd[1],-gb[2]-gc[2]-gd[2]];
-    const current=V3.dot(V3.sub(B,A),V3.cross(V3.sub(C,A),V3.sub(D,A)))/6,Cv=current-this.rest[index]!;
+    const current=V3.dot(V3.sub(B,A),V3.cross(V3.sub(C,A),V3.sub(D,A)))/6,Cv=current-this.rest[index]!*this.thermalScaleValue**3;
     const alpha=this.compliance[index]!/(this.dt*this.dt);
     const denom=this.inverseMass[a]!*V3.dot(ga,ga)+this.inverseMass[b]!*V3.dot(gb,gb)+this.inverseMass[c]!*V3.dot(gc,gc)+this.inverseMass[d]!*V3.dot(gd,gd)+alpha;
     if(denom<=1e-14)return;
@@ -438,27 +464,29 @@ export class StructuralBody {
     for(let i=0;i<this.constraintCount;i++){
       if(this.broken[i])continue;
       const original=this.originalRest[i]!,trial=this.predictedMeasure[i]!,rest=this.rest[i]!;
+      const thermalPower=this.kind[i]===DISTANCE?this.thermalScaleValue:this.thermalScaleValue**3;
+      const effectiveOriginal=original*thermalPower,effectiveRest=rest*thermalPower;
       if(this.kind[i]===DISTANCE){
-        const trialStrain=(trial-rest)/Math.max(1e-9,Math.abs(original));
-        const originalStrain=(trial-original)/Math.max(1e-9,Math.abs(original));
+        const trialStrain=(trial-effectiveRest)/Math.max(1e-9,Math.abs(effectiveOriginal));
+        const originalStrain=(trial-effectiveOriginal)/Math.max(1e-9,Math.abs(effectiveOriginal));
         if(Math.abs(originalStrain)>this.breakLimit[i]!){this.broken[i]=1;continue;}
         const yieldStrain=this.yieldLimit[i]!;
         if(Math.abs(trialStrain)>yieldStrain&&this.plasticity[i]!>0){
-          const elastic=Math.sign(trialStrain)*yieldStrain*Math.abs(original);
-          const target=trial-elastic,delta=(target-rest)*this.plasticity[i]!;
+          const elastic=Math.sign(trialStrain)*yieldStrain*Math.abs(effectiveOriginal);
+          const targetEffective=trial-elastic,targetBase=targetEffective/thermalPower,delta=(targetBase-rest)*this.plasticity[i]!;
           if(Math.abs(delta)>1e-12){
             this.rest[i]=Math.max(Math.abs(original)*.04,rest+delta);
-            this.plasticWorkJ+=Math.abs(delta)*this.yieldForce[i]!;
+            this.plasticWorkJ+=Math.abs(delta*thermalPower)*this.yieldForce[i]!;
           }
         }
       }else{
-        const ratio=(trial-rest)/Math.max(1e-12,Math.abs(original));
-        const originalRatio=(trial-original)/Math.max(1e-12,Math.abs(original));
+        const ratio=(trial-effectiveRest)/Math.max(1e-12,Math.abs(effectiveOriginal));
+        const originalRatio=(trial-effectiveOriginal)/Math.max(1e-12,Math.abs(effectiveOriginal));
         if(Math.abs(originalRatio)>this.breakLimit[i]!){this.broken[i]=1;continue;}
         const yieldRatio=this.yieldLimit[i]!;
         if(Math.abs(ratio)>yieldRatio&&this.plasticity[i]!>0){
-          const elastic=Math.sign(ratio)*yieldRatio*Math.abs(original);
-          const target=trial-elastic,delta=(target-rest)*this.plasticity[i]!;
+          const elastic=Math.sign(ratio)*yieldRatio*Math.abs(effectiveOriginal);
+          const targetEffective=trial-elastic,targetBase=targetEffective/thermalPower,delta=(targetBase-rest)*this.plasticity[i]!;
           if(Math.abs(delta)>1e-15)this.rest[i]=rest+delta;
         }
       }
