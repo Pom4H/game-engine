@@ -68,9 +68,23 @@ export interface EntitySpec {
 }
 export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number }
 export interface CameraSpec { position:Vec3; target:Vec3; fov?:number; focusDistance?:number; aperture?:number }
+export interface ReflectionProbeSpec {
+  /** Fixed world-space origin. Mutually exclusive with entity. */
+  position?:Vec3;
+  /** Optional entity whose current transform anchors the probe. */
+  entity?:string;
+  offset?:Vec3;
+  /** Far clip / influence capture radius in metres. */
+  radius?:number;
+  /** Exact entity ids omitted from the captured environment (usually the reflected object itself). */
+  exclude?:readonly string[];
+  /** Faces refreshed per rendered frame. 1 amortizes the probe over six frames. */
+  facesPerFrame?:number;
+}
 export interface RenderingSpec {
   sunDirection?:Vec3; sunColor?:Vec3; skyColor?:Vec3;
   sunIntensity?:number; fogDensity?:number; exposure?:number; shadowExtent?:number;
+  reflectionProbe?:ReflectionProbeSpec;
 }
 export interface SceneAnimationSpec {
   readonly walkers?:readonly WalkerSpec[];
