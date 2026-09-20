@@ -1,16 +1,17 @@
 import {hashString,mulberry32} from '../core/random.js';
 import {material} from '../materials/catalog.js';
-import type {EngineEvent,FractureEvent,ImpactEvent} from '../scene/events.js';
+import type {EngineEvent,FractureEvent,ImpactEvent,MechanismEvent} from '../scene/events.js';
 
 export interface AudioChannels {left:Float32Array;right:Float32Array;sampleRate:number}
 
 export function synthesizeEvent(event:EngineEvent,sampleRate=48_000):AudioChannels{
-  const duration=event.type==='fracture'?Math.min(1.25,.32+event.size*.12):Math.min(.55,.09+event.size*.045+Math.log1p(event.energy)*.018);
+  const duration=event.type==='fracture'?Math.min(1.25,.32+event.size*.12):event.type==='mechanism'?Math.min(.9,.12+event.size*.08+Math.log1p(event.energy)*.02):Math.min(.55,.09+event.size*.045+Math.log1p(event.energy)*.018);
   const count=Math.max(1,Math.ceil(duration*sampleRate)),left=new Float32Array(count),right=new Float32Array(count);
   const rng=mulberry32((event.id^hashString(event.type))>>>0);
   const pan=Math.max(-.65,Math.min(.65,event.point[0]/25)),gainL=Math.sqrt((1-pan)/2),gainR=Math.sqrt((1+pan)/2);
-  const amplitude=event.type==='fracture'?Math.min(.75,.11+Math.log1p(event.energy)*.075):Math.min(.55,.035+Math.log1p(event.energy)*.06);
+  const amplitude=event.type==='fracture'?Math.min(.75,.11+Math.log1p(event.energy)*.075):event.type==='mechanism'?Math.min(.5,.03+Math.log1p(event.energy)*.052):Math.min(.55,.035+Math.log1p(event.energy)*.06);
   if(event.type==='fracture')fractureVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
+  else if(event.type==='mechanism')mechanismVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
   else impactVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
   softLimit(left);softLimit(right);return{left,right,sampleRate};
 }
@@ -37,6 +38,24 @@ function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,samp
   const geometryScale=Math.max(.35,Math.sqrt(Math.max(.04,event.size))),base=Math.max(70,Math.sqrt(a.resonanceHz*b.resonanceHz)/geometryScale);
   const modes=[1,1.43,2.07,2.91],phases=modes.map(()=>rng()*Math.PI*2),softness=1-moss*.35;
   for(let i=0;i<left.length;i++){const t=i/sampleRate,env=Math.exp(-t*(10+34*damping)),attack=Math.min(1,t*.004*sampleRate),noise=(rng()*2-1)*Math.exp(-t*(55+wetness*25))*(a.noise+b.noise)*.22*softness;let sample=noise;for(let m=0;m<modes.length;m++)sample+=Math.sin(2*Math.PI*base*modes[m]!*t+phases[m]!)*env*(1/(1+m*.72))*(.55+brightness*.55);sample*=amplitude*attack*.34*(1-moss*.18);left[i]=sample*gainL;right[i]=sample*gainR;}
+}
+
+function mechanismVoice(event:MechanismEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
+  const suspension=event.mechanism==='suspension',latch=event.mechanism==='door-latch',stop=event.mechanism==='door-stop';
+  const base=suspension?95:latch?180:stop?145:260;
+  const decay=suspension?12:latch?24:stop?19:28;
+  const hiss=suspension?.28:.06;
+  const knock=latch||stop?.72:.32;
+  let lp=0;
+  for(let i=0;i<left.length;i++){
+    const t=i/sampleRate,env=Math.exp(-t*decay),attack=Math.min(1,t*sampleRate*.012);
+    const noise=(rng()*2-1);lp+=.08*(noise-lp);
+    const mechanical=(Math.sin(2*Math.PI*base*t)+.42*Math.sin(2*Math.PI*base*1.83*t+.8))*env*knock;
+    const air=(noise*.35+lp*.65)*Math.exp(-t*(suspension?8:32))*hiss;
+    const chatter=suspension?Math.sin(2*Math.PI*(38+event.speed*18)*t)*Math.exp(-t*18)*.08:0;
+    const sample=(mechanical+air+chatter)*amplitude*attack;
+    left[i]=sample*gainL;right[i]=sample*gainR;
+  }
 }
 
 function fractureVoice(event:FractureEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
