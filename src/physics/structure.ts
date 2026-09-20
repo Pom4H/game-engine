@@ -188,7 +188,7 @@ export class StructuralBody {
         const axialStiffness=mechanical.youngModulusPa*constraint.areaM2/length;
         this.compliance[i]=1/Math.max(1e-12,axialStiffness);
         this.yieldLimit[i]=mechanical.yieldStressPa/mechanical.youngModulusPa;
-        this.breakLimit[i]=Math.max(this.yieldLimit[i],mechanical.failureStrain);
+        this.breakLimit[i]=Math.max(this.yieldLimit[i]!,mechanical.failureStrain);
         this.plasticity[i]=clamp(mechanical.plasticity,0,1);
         this.yieldForce[i]=mechanical.yieldStressPa*constraint.areaM2;
       }else{
@@ -236,7 +236,7 @@ export class StructuralBody {
   addForce(node:number,force:Vec3):void{
     this.validateIndex(node,this.nodeCount);
     if(!force.every(Number.isFinite))throw new TypeError('Structural force must be finite');
-    const j=node*3;this.force[j]+=force[0];this.force[j+1]+=force[1];this.force[j+2]+=force[2];this.wake();
+    const j=node*3;this.force[j]=this.force[j]!+force[0];this.force[j+1]=this.force[j+1]!+force[1];this.force[j+2]=this.force[j+2]!+force[2];this.wake();
   }
 
   /**
@@ -255,7 +255,7 @@ export class StructuralBody {
     for(let i=0;i<this.nodeCount;i++){
       const w=weights[i]!/sum;if(w<=0)continue;
       const j=i*3,s=w*this.inverseMass[i]!;
-      this.velocity[j]+=impulse[0]*s;this.velocity[j+1]+=impulse[1]*s;this.velocity[j+2]+=impulse[2]*s;
+      this.velocity[j]=this.velocity[j]!+impulse[0]*s;this.velocity[j+1]=this.velocity[j+1]!+impulse[1]*s;this.velocity[j+2]=this.velocity[j+2]!+impulse[2]*s;
     }
     this.wake();
   }
@@ -269,12 +269,12 @@ export class StructuralBody {
 
     for(let i=0;i<this.nodeCount;i++){
       const j=i*3,inv=this.inverseMass[i]!;
-      this.velocity[j]+=dt*(gravity[0]+this.force[j]!*inv);
-      this.velocity[j+1]+=dt*(gravity[1]+this.force[j+1]!*inv);
-      this.velocity[j+2]+=dt*(gravity[2]+this.force[j+2]!*inv);
-      this.position[j]+=dt*this.velocity[j]!;
-      this.position[j+1]+=dt*this.velocity[j+1]!;
-      this.position[j+2]+=dt*this.velocity[j+2]!;
+      this.velocity[j]=this.velocity[j]!+dt*(gravity[0]+this.force[j]!*inv);
+      this.velocity[j+1]=this.velocity[j+1]!+dt*(gravity[1]+this.force[j+1]!*inv);
+      this.velocity[j+2]=this.velocity[j+2]!+dt*(gravity[2]+this.force[j+2]!*inv);
+      this.position[j]=this.position[j]!+dt*this.velocity[j]!;
+      this.position[j+1]=this.position[j+1]!+dt*this.velocity[j+1]!;
+      this.position[j+2]=this.position[j+2]!+dt*this.velocity[j+2]!;
       this.force[j]=this.force[j+1]=this.force[j+2]=0;
     }
 
@@ -292,7 +292,7 @@ export class StructuralBody {
     for(let i=0;i<this.constraintCount;i++){
       if(this.broken[i])continue;
       this.rest[i]=this.measure(i);
-      this.originalRest[i]=this.rest[i];
+      this.originalRest[i]=this.rest[i]!;
       this.lambda[i]=0;
     }
     this.previous.set(this.position);
@@ -366,10 +366,10 @@ export class StructuralBody {
     const nx=dx/length,ny=dy/length,nz=dz/length,C=length-this.rest[index]!;
     const alpha=this.compliance[index]!/(this.dt*this.dt),denom=this.inverseMass[a]!+this.inverseMass[b]!+alpha;
     if(denom<=1e-14)return;
-    const dl=(-C-alpha*this.lambda[index]!)/denom;this.lambda[index]+=dl;
+    const dl=(-C-alpha*this.lambda[index]!)/denom;this.lambda[index]=this.lambda[index]!+dl;
     const wa=this.inverseMass[a]!*dl,wb=this.inverseMass[b]!*dl;
-    this.position[A]-=nx*wa;this.position[A+1]-=ny*wa;this.position[A+2]-=nz*wa;
-    this.position[B]+=nx*wb;this.position[B+1]+=ny*wb;this.position[B+2]+=nz*wb;
+    this.position[A]=this.position[A]!-nx*wa;this.position[A+1]=this.position[A+1]!-ny*wa;this.position[A+2]=this.position[A+2]!-nz*wa;
+    this.position[B]=this.position[B]!+nx*wb;this.position[B+1]=this.position[B+1]!+ny*wb;this.position[B+2]=this.position[B+2]!+nz*wb;
   }
 
   private solveVolume(index:number):void{
@@ -383,13 +383,13 @@ export class StructuralBody {
     const alpha=this.compliance[index]!/(this.dt*this.dt);
     const denom=this.inverseMass[a]!*V3.dot(ga,ga)+this.inverseMass[b]!*V3.dot(gb,gb)+this.inverseMass[c]!*V3.dot(gc,gc)+this.inverseMass[d]!*V3.dot(gd,gd)+alpha;
     if(denom<=1e-14)return;
-    const dl=(-Cv-alpha*this.lambda[index]!)/denom;this.lambda[index]+=dl;
+    const dl=(-Cv-alpha*this.lambda[index]!)/denom;this.lambda[index]=this.lambda[index]!+dl;
     this.applyGradient(a,ga,dl);this.applyGradient(b,gb,dl);this.applyGradient(c,gc,dl);this.applyGradient(d,gd,dl);
   }
 
   private applyGradient(node:number,gradient:Vec3,lambda:number):void{
     const j=node*3,s=this.inverseMass[node]!*lambda;
-    this.position[j]+=gradient[0]*s;this.position[j+1]+=gradient[1]*s;this.position[j+2]+=gradient[2]*s;
+    this.position[j]=this.position[j]!+gradient[0]*s;this.position[j+1]=this.position[j+1]!+gradient[1]*s;this.position[j+2]=this.position[j+2]!+gradient[2]*s;
   }
 
   private finishStep():void{
@@ -449,8 +449,8 @@ export class StructuralBody {
       const relative=(this.velocity[B]!-this.velocity[A]!)*nx+(this.velocity[B+1]!-this.velocity[A+1]!)*ny+(this.velocity[B+2]!-this.velocity[A+2]!)*nz;
       const denom=this.inverseMass[a]!+this.inverseMass[b]!;if(denom<=1e-14)continue;
       const impulse=-relative*gain/denom,ia=this.inverseMass[a]!*impulse,ib=this.inverseMass[b]!*impulse;
-      this.velocity[A]-=nx*ia;this.velocity[A+1]-=ny*ia;this.velocity[A+2]-=nz*ia;
-      this.velocity[B]+=nx*ib;this.velocity[B+1]+=ny*ib;this.velocity[B+2]+=nz*ib;
+      this.velocity[A]=this.velocity[A]!-nx*ia;this.velocity[A+1]=this.velocity[A+1]!-ny*ia;this.velocity[A+2]=this.velocity[A+2]!-nz*ia;
+      this.velocity[B]=this.velocity[B]!+nx*ib;this.velocity[B+1]=this.velocity[B+1]!+ny*ib;this.velocity[B+2]=this.velocity[B+2]!+nz*ib;
     }
   }
 
