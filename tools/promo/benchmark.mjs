@@ -3,11 +3,16 @@ import {spawn} from 'node:child_process';
 import {mkdtemp,mkdir,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {once} from 'node:events';
 import {serveScene} from '../../dist/cli/server.js';
-import spec from '../../tools/promo/street.scene.mjs';
+const sceneFile=process.env.BENCH_SCENE??'street.scene.mjs';
+const scenePath=resolve('tools/promo',sceneFile),sceneModule=await import(pathToFileURL(scenePath).href),spec=sceneModule.default??sceneModule.spec;
+if(!spec?.entities)throw new TypeError('Benchmark scene '+sceneFile+' did not export a SceneSpec');
 const output=resolve(process.env.BENCH_OUT??'artifacts/performance/after.json');await mkdir(resolve(output,'..'),{recursive:true});
-const root=resolve('.'),host=await serveScene(spec,{sceneDirectory:join(root,'tools/promo')}),profile=await mkdtemp(join(tmpdir(),'winter-fps-'));
+const warmupMs=Math.max(250,Number(process.env.BENCH_WARMUP_MS??3000)),sampleMs=Math.max(1000,Number(process.env.BENCH_SAMPLE_MS??10000)),sceneTime=Math.max(0,Number(process.env.BENCH_TIME??4));
+const cases=(process.env.BENCH_CASES??'1920x1080,1920x1080,1280x720').split(',').map((value,index)=>{const [width,height]=value.trim().split('x').map(Number);if(!Number.isInteger(width)||!Number.isInteger(height)||width<320||height<240)throw new RangeError('Invalid BENCH_CASES entry: '+value);return{label:width+'x'+height+'-'+(index+1),width,height};});
+const root=resolve('.'),host=await serveScene(spec,{sceneDirectory:join(root,'tools/promo')}),profile=await mkdtemp(join(tmpdir(),'engine-fps-'));
 const child=spawn(process.env.CHROME_PATH??(process.platform==='darwin'?'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome':'google-chrome'),['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--enable-unsafe-webgpu','--disable-background-timer-throttling','--disable-renderer-backgrounding',`--user-data-dir=${profile}`,'--remote-debugging-port=0','about:blank'],{stdio:['ignore','ignore','pipe']});
 let socket;const pending=new Map();let seq=0;
 try{
