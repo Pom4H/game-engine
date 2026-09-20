@@ -24,7 +24,7 @@ const server=createServer(async(req,res)=>{
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;
 const chrome=await chromePath(),profile=await mkdtemp(join(tmpdir(),'vehicle-abuse-'));
-const child=spawn(chrome,['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu',`--user-data-dir=${profile}`,'--remote-debugging-port=0','--window-size=1280,720','about:blank'],{stdio:['ignore','ignore','pipe']});
+const child=spawn(chrome,['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu',`--user-data-dir=${profile}`,'--remote-debugging-port=0','--window-size=1920,1080','about:blank'],{stdio:['ignore','ignore','pipe']});
 let socket,sequence=0;const pending=new Map(),browserEvents=[];
 try{
   const endpoint=await new Promise((resolve,reject)=>{let text='';const timer=setTimeout(()=>reject(new Error(text)),20_000);child.stderr.on('data',data=>{text+=data;const m=text.match(/DevTools listening on (ws:\/\/\S+)/);if(m){clearTimeout(timer);resolve(m[1]);}});child.on('error',reject);});
@@ -35,7 +35,7 @@ try{
   socket.addEventListener('message',event=>{const message=JSON.parse(String(event.data));if(!message.id){if(message.method==='Runtime.exceptionThrown'||message.method==='Log.entryAdded'||message.method==='Runtime.consoleAPICalled'){browserEvents.push(message);if(browserEvents.length>40)browserEvents.shift();}return;}const item=pending.get(message.id);if(!item)return;pending.delete(message.id);clearTimeout(item.timer);message.error?item.reject(new Error(message.error.message)):item.resolve(message.result);});
   const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++sequence,timer=setTimeout(()=>{pending.delete(id);reject(new Error(`Timeout: ${method}`));},30_000);pending.set(id,{resolve,reject,timer});socket.send(JSON.stringify({id,method,params}));});
   const evaluate=async expression=>{const result=await send('Runtime.evaluate',{expression:`(async()=>{${expression}})()`,awaitPromise:true,returnByValue:true});if(result.exceptionDetails)throw new Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);return result.result?.value;};
-  await send('Page.enable');await send('Runtime.enable');await send('Log.enable');await send('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+  await send('Page.enable');await send('Runtime.enable');await send('Log.enable');await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});
   await send('Page.navigate',{url:`http://127.0.0.1:${port}/`});
   for(let i=0;i<120;i++){if(await evaluate('return window.ready===true'))break;await sleep(100);}
   if(!await evaluate('return window.ready===true')){const state=await evaluate('return {failure:window.failure??null,ready:window.ready??null,readyState:document.readyState,href:location.href}');throw new Error('Player not ready: '+JSON.stringify(state)+'\nCDP: '+JSON.stringify(browserEvents.slice(-12)));}
@@ -80,8 +80,8 @@ async function ffmpegEncoders(){
 function ffmpegVideoArgs(encoders){
   const candidates=[
     ['libx264',['-c:v','libx264','-profile:v','high','-level:v','4.0','-crf','18']],
-    ['h264_mf',['-c:v','h264_mf','-rate_control','quality','-quality','75']],
-    ['h264_videotoolbox',['-c:v','h264_videotoolbox','-q:v','65']],
+    ['h264_mf',['-c:v','h264_mf','-rate_control','quality','-quality','88']],
+    ['h264_videotoolbox',['-c:v','h264_videotoolbox','-q:v','80']],
     ['h264_amf',['-c:v','h264_amf','-quality','quality']],
     ['h264_qsv',['-c:v','h264_qsv','-global_quality','20']],
     ['h264_nvenc',['-c:v','h264_nvenc','-preset','p5','-cq','20']],
