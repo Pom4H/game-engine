@@ -14,6 +14,48 @@ permissions:
   contents: read
 
 jobs:
+  visual-fast:
+    if: github.event_name == 'pull_request'
+    runs-on: [self-hosted, gpu, windows]
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Build render path
+        run: bun run build
+      - name: Reference render
+        run: |
+          if not exist artifacts mkdir artifacts
+          node dist/cli.js render tools/promo/clear-day.scene.mjs --time 0 --width 1920 --height 1080 --out artifacts/m3-reference.png
+          node tools/check-png.mjs artifacts/m3-reference.png
+      - name: Short GPU budget probe
+        env:
+          BENCH_SCENE: clear-day.scene.mjs
+          BENCH_USE_SCENE_CAMERA: "1"
+          BENCH_TIME: "0"
+          BENCH_CASES: 1920x1080
+          BENCH_WARMUP_MS: "350"
+          BENCH_SAMPLE_MS: "1200"
+          BENCH_OUT: artifacts/performance/visual-fast.json
+          MAX_P95_FRAME_MS: "30"
+        run: |
+          node tools/promo/benchmark.mjs
+          node tools/perf/assert-60fps.mjs artifacts/performance/visual-fast.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: visual-fast-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 3
+
   verify:
     runs-on: self-hosted
     timeout-minutes: 15
