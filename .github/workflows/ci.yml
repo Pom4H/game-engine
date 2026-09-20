@@ -16,7 +16,7 @@ permissions:
 jobs:
   visual-fast:
     if: github.event_name == 'pull_request'
-    runs-on: [self-hosted, gpu, windows]
+    runs-on: self-hosted
     timeout-minutes: 5
     defaults:
       run:
