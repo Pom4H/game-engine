@@ -22,6 +22,8 @@ export interface ImpactEvent {
   /** World-space resonator dimensions. Optional for synthetic/test events. */
   readonly dimensionsA?:Vec3;
   readonly dimensionsB?:Vec3;
+  readonly fixedA?:boolean;
+  readonly fixedB?:boolean;
   readonly energy:number;
   readonly impulse:number;
   readonly speed:number;
