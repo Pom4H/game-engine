@@ -34,6 +34,14 @@ jobs:
           if not exist artifacts mkdir artifacts
           node dist/cli.js render examples/window-gauntlet.ts --time 0.55 --width 1280 --height 720 --out artifacts/gpu-smoke.png
           node tools/check-png.mjs artifacts/gpu-smoke.png
+      - name: Winter street visual regression
+        run: |
+          node dist/cli.js render tools/promo/street.scene.mjs --time 0 --width 1920 --height 1080 --out artifacts/winter-street-now.png
+          node dist/cli.js render tools/promo/street.scene.mjs --time 8 --width 1920 --height 1080 --out artifacts/winter-street-car.png
+          node dist/cli.js render tools/promo/street.scene.mjs --time 24 --width 1920 --height 1080 --out artifacts/winter-street-footprints.png
+          node tools/check-png.mjs artifacts/winter-street-now.png
+          node tools/check-png.mjs artifacts/winter-street-car.png
+          node tools/check-png.mjs artifacts/winter-street-footprints.png
       - name: Deterministic video path
         run: node dist/cli.js record examples/window-gauntlet.ts --duration 2.5 --fps 24 --width 1280 --height 720 --out artifacts/gpu-smoke.mp4
       - uses: actions/upload-artifact@v7
