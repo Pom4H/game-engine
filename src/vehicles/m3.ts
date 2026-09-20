@@ -159,7 +159,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('mirror-'))return{...base,color:[.30,.34,.38,1]};
   if(part.id==='red-reflectors')return{...base,color:[.30,.012,.008,1]};
   if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055};
-  if(part.role==='glass')return{...base,color:[.07,.095,.12,.27],roughness:.055};
+  if(part.role==='glass')return{...base,color:[.075,.095,.115,.42],roughness:.065};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
