@@ -65,7 +65,7 @@ export interface SceneAnimationSpec {
 }
 export interface SceneSurfaceContactsSpec {
   readonly snow?:readonly (SnowContactSurfaceOptions & {readonly surfaceId:string})[];
-  readonly wheels?:readonly {readonly entityId:string;readonly radius?:number;readonly lateral?:Vec3}[];
+  readonly wheels?:readonly {readonly entityId:string;readonly radius?:number;readonly lateral?:Vec3;readonly pressureKPa?:number;readonly widthM?:number;readonly tyreMassKg?:number}[];
 }
 export interface SceneSpec {
   /** Declarative rig/routes restored by Scene construction, URL loading and reset. */
