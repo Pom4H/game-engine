@@ -16,7 +16,7 @@ fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);r
  let p=i.uv*2.0-1.0;let ray=normalize(f.forward.xyz+f.right.xyz*p.x*f.right.w*f.forward.w+f.up.xyz*p.y*f.forward.w);
  let clear=smoothstep(.58,.92,f.environment.y);
  let authoredHorizon=f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027;
- let clearHorizon=vec3<f32>(.56,.73,.94),clearZenith=vec3<f32>(.10,.28,.62);
+ let clearHorizon=vec3<f32>(.56,.73,.94);let clearZenith=vec3<f32>(.10,.28,.62);
  let horizon=mix(authoredHorizon,clearHorizon,clear*.58);
  let zenith=mix(f.sky.rgb*.45,clearZenith,clear*.68);
  var color=mix(horizon,zenith,pow(max(ray.y,0.0),.55));
