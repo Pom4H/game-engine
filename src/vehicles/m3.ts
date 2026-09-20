@@ -62,7 +62,7 @@ export const M3_PARAMETRIC_PROFILE:PassengerVehicleProfile=Object.freeze({
 function sourceRole(sourceMaterial:string,id:string):ParametricVehiclePartRole{
   if(sourceMaterial==='Window')return'glass';
   if(sourceMaterial==='Tires')return'tire';
-  if(sourceMaterial==='Rims')return'rim';
+  if(sourceMaterial==='Rims')return id.endsWith('wheel-hardware')?'metal':'rim';
   if(sourceMaterial==='DayLights'||sourceMaterial==='Transparent')return'light';
   if(sourceMaterial==='RearLight'||sourceMaterial==='RedPart')return'tail';
   if(sourceMaterial==='Exhaust')return'metal';
