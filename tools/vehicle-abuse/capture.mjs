@@ -46,6 +46,8 @@ try{
   const completed=once(encoder,'exit');
   for(let frame=0;frame<frames;frame++){
     await evaluate(`await window.demo.frame(${frame/fps}); return true;`);
+    const frameFailure=await evaluate('return window.failure??null');
+    if(frameFailure)throw new Error(`Browser failure at frame ${frame}: ${frameFailure}`);
     const shot=await send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false}),png=Buffer.from(shot.data,'base64');
     if(!encoder.stdin.write(png))await once(encoder.stdin,'drain');
     if(frame%120===0)console.log(`vehicle-abuse ${frame}/${frames}`);
