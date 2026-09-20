@@ -153,3 +153,42 @@ test('removing a wheel binding releases the body back to generic surface work',(
  scene.contacts.removeWheelContact('wheel');for(let i=0;i<30;i++)scene.step(1/60);
  assert.ok(scene.surfaces.surface('road').trackMelt>before,'unclaimed moving body should re-enter the generic fallback contact path');
 });
+
+
+test('tyre contact state derives slip patch pressure heat wear and live surface conditions from one contact',()=>{
+ const radius=.35,speed=8,scene=new Scene({version:1,ground:-100,environment:{temperatureC:12,snowfall:'none',sunlight:0,precipitation:'occasional'},entities:[
+  {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[80,.2,8]},material:{kind:'asphalt'},environmental:{surfaceUse:'road',waterDepthM:.001}},
+  {id:'rolling',position:[-8,radius,-1],mesh:{kind:'sphere',radius},body:{motion:'kinematic',mass:390,velocity:[speed,0,0],angularVelocity:[0,0,-speed/radius],friction:.75}},
+  {id:'locked',position:[-8,radius,1],mesh:{kind:'sphere',radius},body:{motion:'kinematic',mass:390,velocity:[speed,0,0],angularVelocity:[0,0,0],friction:.75}},
+ ],surfaceContacts:{wheels:[
+  {entityId:'rolling',radius,lateral:[0,0,1],pressureKPa:230,widthM:.245,tyreMassKg:10},
+  {entityId:'locked',radius,lateral:[0,0,1],pressureKPa:230,widthM:.245,tyreMassKg:10},
+ ]}});
+ for(let i=0;i<180;i++)scene.step();
+ const rolling=scene.contacts.tyre('rolling'),locked=scene.contacts.tyre('locked');
+ assert.ok(rolling&&locked);
+ assert.equal(rolling.surfaceId,'road');assert.equal(rolling.surfaceMaterial,'asphalt');
+ assert.ok(Math.abs(rolling.slipRatio)<.02,`rolling tyre slip should be near zero, got ${rolling.slipRatio}`);
+ assert.ok(locked.slipRatio>.9,`locked tyre slip ratio should approach one, got ${locked.slipRatio}`);
+ assert.ok(Math.abs(locked.slipAngleRad)<1e-8);
+ assert.ok(locked.temperatureC>rolling.temperatureC+.2,`sliding work must heat tyre: ${rolling.temperatureC} -> ${locked.temperatureC}`);
+ assert.ok(locked.wear>rolling.wear);
+ assert.ok(locked.patchAreaM2>.005&&locked.patchLengthM>0);
+ assert.ok(locked.wetness>0&&locked.waterDepthM>0);
+ assert.equal(scene.resources.get('engine:tyre-contacts').length,2);
+});
+
+test('tyre inflation pressure changes contact patch area without an authored visual effect',()=>{
+ const radius=.35,scene=new Scene({version:1,ground:-100,environment:{temperatureC:20,snowfall:'none'},entities:[
+  {id:'road',position:[0,-.1,0],mesh:{kind:'box',size:[12,.2,6]},material:{kind:'asphalt'},environmental:{surfaceUse:'road'}},
+  {id:'low',position:[0,radius,-1],mesh:{kind:'sphere',radius},body:{motion:'kinematic',mass:390,velocity:[0,0,0]}},
+  {id:'high',position:[0,radius,1],mesh:{kind:'sphere',radius},body:{motion:'kinematic',mass:390,velocity:[0,0,0]}},
+ ],surfaceContacts:{wheels:[
+  {entityId:'low',radius,pressureKPa:180,widthM:.245},
+  {entityId:'high',radius,pressureKPa:300,widthM:.245},
+ ]}});
+ scene.step();
+ const low=scene.contacts.tyre('low'),high=scene.contacts.tyre('high');assert.ok(low&&high);
+ assert.ok(low.patchAreaM2>high.patchAreaM2*1.5,`low pressure must enlarge patch: ${low.patchAreaM2} <= ${high.patchAreaM2}`);
+ assert.ok(low.pressureKPa<high.pressureKPa);
+});
