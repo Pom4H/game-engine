@@ -227,7 +227,8 @@ export class StructuralBody {
   setThermalScale(scale:number):void{
     if(!Number.isFinite(scale)||scale<.97||scale>1.03)throw new RangeError('Structural thermal scale must be within 0.97..1.03');
     const prior=this.thermalScaleValue;if(Math.abs(scale-prior)<1e-12)return;
-    if(this.mode==='dormant'){
+    const wasDormant=this.mode==='dormant';
+    if(wasDormant){
       const center=this.centerOfMass(),ratio=scale/prior;
       for(let i=0;i<this.nodeCount;i++){
         const j=i*3;
@@ -239,7 +240,7 @@ export class StructuralBody {
       }
     }
     this.thermalScaleValue=scale;
-    this.wake();
+    if(!wasDormant)this.wake();
   }
 
   /** Reposition a dormant structural shape without introducing velocity. */
