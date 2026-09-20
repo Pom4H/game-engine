@@ -226,7 +226,7 @@ test('M3 structural cage performs a real 90 km/h wall contact without a shrinkin
     {id:'wall',center:[0,1,0],half:[.20,1.5,2.2]},
   ],definition.collisionTriangles);
   body.translate([-3.0,0,0]);
-  const center=body.centerOfMass(),initialFront=Math.max(...Array.from({length:body.nodeCount},(_,i)=>body.position[i*3]));
+  const center=body.centerOfMass(),initialXs=Array.from({length:body.nodeCount},(_,i)=>body.position[i*3]),initialFront=Math.max(...initialXs),initialRear=Math.min(...initialXs),initialSpan=initialFront-initialRear;
   body.activateFromRigid(center,[25,0,0],[0,0,0]);
   for(let tick=0;tick<28;tick++)body.step(1/120,[0,0,0],structure=>wall.project(structure));
   const finalFront=Math.max(...Array.from({length:body.nodeCount},(_,i)=>body.position[i*3]));
@@ -235,8 +235,8 @@ test('M3 structural cage performs a real 90 km/h wall contact without a shrinkin
   assert.ok(body.broken.some(Boolean)||body.plasticWorkJ>100,{plasticWorkJ:body.plasticWorkJ,broken:[...body.broken]});
   assert.ok(finalFront<=-.20+1e-6,{initialFront,finalFront,wall:wall.stats});
   assert.ok(body.position.every(Number.isFinite));
-  const rear=Math.min(...Array.from({length:body.nodeCount},(_,i)=>body.position[i*3]));
-  assert.ok(finalFront-rear<M3_PARAMETRIC_PROFILE.dimensions.length*.98,{rear,finalFront});
+  const rear=Math.min(...Array.from({length:body.nodeCount},(_,i)=>body.position[i*3])),finalSpan=finalFront-rear;
+  assert.ok(finalSpan<initialSpan-.08,{initialRear,initialFront,initialSpan,rear,finalFront,finalSpan});
 });
 
 test('reduced plastic deformation spends the authoritative contact energy instead of post-processing it twice',()=>{
