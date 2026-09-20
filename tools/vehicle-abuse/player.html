@@ -84,7 +84,7 @@ function applyHuman(time){
  if(p.action==='door'){rhnd=[.62,1.00,-1.03];lhnd=[r[0]-.2,1.05,r[2]-.25];}
  if(p.action==='hand'){
    const targets=time<8.75?[[.05,1.43,-.18],8.35]:time<9.65?[[.45,1.12,-.945],9.18]:[[1.35,.96,-.08],10.03];
-   const pulse=Math.exp(-((time-targets[1])/.11)**2),target=targets[0];
+   const pulse=Math.exp(-(((time-targets[1])/.11)**2)),target=targets[0];
    rhnd=[mix(rs[0],target[0],pulse),mix(rs[1]-.15,target[1],pulse),mix(rs[2],target[2],pulse)];
  }
  if(p.action==='hood'||p.action==='roof'){lhnd=[r[0]-.30,r[1]+1.12,r[2]-.35];rhnd=[r[0]+.30,r[1]+1.12,r[2]+.35];}
