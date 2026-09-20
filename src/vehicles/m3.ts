@@ -100,10 +100,10 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     // The reference FBX is an exterior model. A tiny opaque cabin proxy prevents
     // physically impossible sight lines through both windscreens while giving
     // glazing real dashboard/seat silhouettes. These parts are render-only.
-    Object.freeze({id:'interior-dashboard',role:'dark',mesh:{kind:'box' as const,size:[.72,.18,1.34] as const},position:[.30,.82,0] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.72}}),
-    Object.freeze({id:'interior-seat-left',role:'dark',mesh:{kind:'box' as const,size:[.24,.64,.42] as const},position:[-.18,.90,-.39] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.86,pattern:'fabric' as const}}),
-    Object.freeze({id:'interior-seat-right',role:'dark',mesh:{kind:'box' as const,size:[.24,.64,.42] as const},position:[-.18,.90,.39] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.86,pattern:'fabric' as const}}),
-    Object.freeze({id:'interior-rear-seat',role:'dark',mesh:{kind:'box' as const,size:[.22,.58,1.24] as const},position:[-1.08,.84,0] as const,rotation:[0,0,-.08] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,pattern:'fabric' as const}}),
+    Object.freeze({id:'interior-dashboard',role:'dark',mesh:{kind:'box' as const,size:[.58,.10,1.20] as const},position:[.28,.69,0] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.72}}),
+    Object.freeze({id:'interior-seat-left',role:'dark',mesh:{kind:'box' as const,size:[.20,.52,.40] as const},position:[-.25,.82,-.38] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.86,pattern:'fabric' as const}}),
+    Object.freeze({id:'interior-seat-right',role:'dark',mesh:{kind:'box' as const,size:[.20,.52,.40] as const},position:[-.25,.82,.38] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.86,pattern:'fabric' as const}}),
+    Object.freeze({id:'interior-rear-seat',role:'dark',mesh:{kind:'box' as const,size:[.14,.30,1.08] as const},position:[-1.08,.63,0] as const,rotation:[0,0,-.08] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,pattern:'fabric' as const}}),
   ];
   const generatedTriangles=parts.reduce((sum,part)=>sum+(part.mesh.kind==='triangle-mesh'?part.mesh.indices.length/3:0),0);
   return Object.freeze({
