@@ -5,6 +5,7 @@ import type {BodySpec,Color,MaterialSpec} from '../scene/types.js';
 import {M3_FBX_PARTS_FIDELITY,m3FbxParts} from './m3-fbx-parts.js';
 import {passengerPartMaterial,passengerStructuralDefinition,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole,type PassengerVehicleProfile} from './passenger.js';
 import {M3_SHELL_FIDELITY,m3HighFidelityBody} from './m3-shell.js';
+import {buildSmoothSubdivisionPlan,subdivideSmoothTriangleMesh,type SmoothSubdivisionPlan,type TriangleMesh} from './render-subdivision.js';
 
 /**
  * BMW M3 visual fidelity is sourced from the user-supplied FBX, while the load-bearing
@@ -81,12 +82,21 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
   throw new TypeError(`Unknown M3 source material ${sourceMaterial} on ${id}`);
 }
 
+let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
+let renderBodyCache:TriangleMesh|undefined;
+export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),35,.018);}
+export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
+  const base=m3HighFidelityBody(),plan=m3RenderSubdivisionPlan();
+  if(mesh===base)return renderBodyCache??=subdivideSmoothTriangleMesh(mesh,plan);
+  return subdivideSmoothTriangleMesh(mesh,plan);
+}
+
 /**
  * Complete compact M3 render geometry. The body shell remains bound to the structural
  * cage; trim, glazing, wheels, lights, mirrors and exhaust retain their FBX geometry.
  */
 export function generateM3Vehicle():ParametricPassengerGeometry{
-  const body=m3HighFidelityBody(),sources=m3FbxParts();
+  const body=m3HighFidelityBody(),renderBody=m3SmoothRenderBody(body),sources=m3FbxParts();
   const backingPosition=(source:(typeof sources)[number]):readonly[number,number,number]=>{
     const [x,y,z]=source.center;
     if(source.id==='windshield-front')return[x-.018,y-.004,z];
@@ -103,7 +113,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     material:{kind:'default' as const,finish:'smooth' as const,roughness:.48,metalness:0},
   }));
   const parts:ParametricVehiclePart[]=[
-    Object.freeze({id:'body',role:'paint',mesh:body,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
+    Object.freeze({id:'body',role:'paint',mesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...sources.map(source=>Object.freeze({
       id:source.id,
       role:sourceRole(source.sourceMaterial,source.id),
