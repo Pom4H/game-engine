@@ -1,6 +1,7 @@
 // Reproducible native runtime throughput; GPU completion, not exported video FPS.
 import {spawn} from 'node:child_process';
-import {mkdtemp,mkdir,rm,writeFile} from 'node:fs/promises';
+import {access,mkdtemp,mkdir,rm,writeFile} from 'node:fs/promises';
+import {constants as FS} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -13,7 +14,8 @@ const output=resolve(process.env.BENCH_OUT??'artifacts/performance/after.json');
 const warmupMs=Math.max(250,Number(process.env.BENCH_WARMUP_MS??3000)),sampleMs=Math.max(1000,Number(process.env.BENCH_SAMPLE_MS??10000)),sceneTime=Math.max(0,Number(process.env.BENCH_TIME??4));
 const cases=(process.env.BENCH_CASES??'1920x1080,1920x1080,1280x720').split(',').map((value,index)=>{const [width,height]=value.trim().split('x').map(Number);if(!Number.isInteger(width)||!Number.isInteger(height)||width<320||height<240)throw new RangeError('Invalid BENCH_CASES entry: '+value);return{label:width+'x'+height+'-'+(index+1),width,height};});
 const root=resolve('.'),host=await serveScene(spec,{sceneDirectory:join(root,'tools/promo')}),profile=await mkdtemp(join(tmpdir(),'engine-fps-'));
-const child=spawn(process.env.CHROME_PATH??(process.platform==='darwin'?'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome':'google-chrome'),['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--enable-unsafe-webgpu','--disable-background-timer-throttling','--disable-renderer-backgrounding',`--user-data-dir=${profile}`,'--remote-debugging-port=0','about:blank'],{stdio:['ignore','ignore','pipe']});
+const chrome=await chromePath();
+const child=spawn(chrome,['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--enable-unsafe-webgpu','--disable-background-timer-throttling','--disable-renderer-backgrounding',`--user-data-dir=${profile}`,'--remote-debugging-port=0','about:blank'],{stdio:['ignore','ignore','pipe']});
 let socket;const pending=new Map();let seq=0;
 try{
  const endpoint=await new Promise((r,j)=>{let s='';const timeout=setTimeout(()=>j(new Error(s)),20000);child.stderr.on('data',d=>{s+=d;const m=s.match(/DevTools listening on (ws:\/\/\S+)/);if(m){clearTimeout(timeout);r(m[1]);}});child.on('error',j);});
@@ -46,3 +48,12 @@ try{
  }
  const report={measuredAt:new Date().toISOString(),scene:sceneFile,sceneTime,warmupMs,sampleMs,method:'Production BrowserRuntime autoplay; no screenshots or video encoding; render submissions and GPU queue-completion fences observed. Headless Chrome, audio not unlocked.',version,environment,results};await writeFile(output,JSON.stringify(report,null,2));
 }finally{socket?.close();child.kill();await Promise.race([once(child,'exit'),new Promise(r=>setTimeout(r,1000))]);await host.close();await rm(profile,{recursive:true,force:true});}
+
+
+async function chromePath(){
+ const env=process.env.CHROME_PATH??process.env.GOOGLE_CHROME_BIN;if(env&&await exists(env))return env;
+ const candidates=process.platform==='darwin'?['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','/Applications/Chromium.app/Contents/MacOS/Chromium']:process.platform==='win32'?['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe','C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe']:['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'];
+ for(const candidate of candidates)if(await exists(candidate))return candidate;
+ throw new Error('Chrome/Chromium not found. Set CHROME_PATH.');
+}
+async function exists(path){try{await access(path,FS.X_OK);return true;}catch{return false;}}
