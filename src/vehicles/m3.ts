@@ -149,9 +149,8 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.78,metalness:.01},
   }));
   const frontDetail:ParametricVehiclePart[]=[
-    Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(.34,.55,.105,.026),position:[2.407,.635,-.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
-    Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(.34,.55,.105,.026),position:[2.407,.635,.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
-    Object.freeze({id:'front-splitter',role:'dark' as const,mesh:{kind:'box' as const,size:[.055,.035,1.62] as const},position:[2.36,.188,0] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.32,metalness:.02}}),
+    Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,-.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
+    Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
     Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
     Object.freeze({id:'hood-seam-right',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
   ];
