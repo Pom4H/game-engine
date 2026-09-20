@@ -166,7 +166,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     let clay=noise3(in.worldPos*39.0);n=normalize(n+tangent*bevel.x*.20+vec3<f32>(0,bevel.y*.18,0)+tangent*(clay-.5)*.06);
     albedo*=.93+noise3(in.worldPos*21.0)*.10;
   }
-  if(materialKind>5.5){
+  if(materialKind>5.5&&materialKind<6.5){
     let dirty=(1.0-smoothstep(.03,.42,in.worldPos.y))*(.55+.45*noise3(in.worldPos*vec3<f32>(2.7,3.0,5.0)));let crystals=noise3(in.worldPos*22.0);
     albedo=mix(u.color.rgb,vec3<f32>(.37,.34,.30),dirty*.30);
     albedo*=.94+noise3(in.worldPos*5.0)*.06;
@@ -387,7 +387,7 @@ export class WebGPURenderer implements Renderer{
     const reflectionBind=device.createBindGroup({layout:lightLayout,entries:[{binding:0,resource:{buffer:frame}},{binding:1,resource:shadow.createView()},{binding:2,resource:comparison},{binding:3,resource:emptyLabel.createView()},{binding:4,resource:sampler},{binding:5,resource:{buffer:lightBuffer}},{binding:6,resource:{buffer:cellBuffer}},{binding:7,resource:noiseVolume.createView()},{binding:8,resource:noiseSampler},{binding:9,resource:environmentView}]});
     const layout=device.createPipelineLayout({bindGroupLayouts:[objectLayout,lightLayout]});
     const blend={color:{srcFactor:'src-alpha',dstFactor:'one-minus-src-alpha',operation:'add'},alpha:{srcFactor:'one',dstFactor:'one-minus-src-alpha',operation:'add'}};
-    const materialClasses=[0,1,2,3,4,5,6] as const;
+    const materialClasses=[0,1,2,3,4,5,6,7,8,9,10] as const;
     const make=(transparent:boolean,cullMode:'none'|'back',materialClass=-1)=>device.createRenderPipeline({layout,vertex,fragment:{module,entryPoint:'fs',constants:{MATERIAL_CLASS:materialClass},targets:[{format:'rgba16float',...(transparent?{blend}:{})},{format:'rgba16float',...(transparent?{writeMask:0}:{})},{format:'rgba8unorm',...(transparent?{writeMask:0}:{})},{format:'rg16float',...(transparent?{writeMask:0}:{})}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:!transparent,depthCompare:'less'}});
     const opaqueCulled=new Map(materialClasses.map(code=>[code,make(false,'back',code)])),opaqueDouble=new Map(materialClasses.map(code=>[code,make(false,'none',code)]));
     const transparent=make(true,'none',-1);
@@ -675,7 +675,7 @@ function partitionByCull(entities:readonly RuntimeEntity[]):Array<[boolean,Runti
   const groups:Array<[boolean,RuntimeEntity[]]>=[];if(culled.length)groups.push([true,culled]);if(double.length)groups.push([false,double]);return groups;
 }
 
-function materialCode(kind:string):number{return kind==='glass'?1:kind==='steel'?2:kind==='wood'?3:kind==='concrete'?4:kind==='asphalt'?5:kind==='snow'?6:0;}
+function materialCode(kind:string):number{return kind==='glass'?1:kind==='steel'?2:kind==='wood'?3:kind==='concrete'?4:kind==='asphalt'?5:kind==='snow'?6:kind==='rubber'?7:kind==='plastic'?8:kind==='aluminum'?9:kind==='mirror'?10:0;}
 function stableSeed(value:string):number{let h=2166136261>>>0;for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0)/4294967295;}
 
 function surfaceUseCode(use:string|undefined):number{return use==='road'?1:use==='sidewalk'?2:use==='curb'?3:0;}
