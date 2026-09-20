@@ -64,7 +64,7 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  // Two temporally rotated taps give eight effective comparisons per frame and TAA
  // integrates the changing phase, avoiding the cost of four explicit taps.
  let taps=array<vec2<f32>,2>(vec2<f32>(-.66,-.38),vec2<f32>(.66,.38));
- for(var i=0;i<2;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*1.45,clip.z-.000025);}
+ for(var i=0;i<2;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*2.15,clip.z-.000025);}
  let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.5,smoothstep(0.0,.025,edge));
 }
 
@@ -157,6 +157,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let surfaceUse=u.objectState.x;
   let treatment=u.objectState.y;
   let clearcoat=select(0.0,.82,treatment>3.5&&treatment<4.5);
+  let paintMicro=select(0.0,hash3(floor(in.worldPos*420.0))-.5,treatment>3.5&&treatment<4.5);
   let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
   let upward=smoothstep(0.05,0.82,n.y);
 
@@ -276,7 +277,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let wetness=clamp(u.surface.y+u.motion.w+waterDepth/0.006+puddleMask*.5,0.0,1.0);
   albedo*=1.0-u.surface.w-wetness*.24;
 
-  var roughness=clamp(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0)-wetness*.28,.08,1.0);
+  var roughness=clamp(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0)-wetness*.28+paintMicro*.018,.08,1.0);
   let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
   roughness=clamp(sqrt(roughness*roughness+min(.22,normalVariance*.18)),.08,1.0);
   var waterCoverage=1.0;
@@ -336,7 +337,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   if(materialKind>.5&&materialKind<1.5){
     let glassF=.04+.96*pow(1.0-nv,5.0);
     let glassEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
-    color=mix(base*.10,glassEnvironment,.46+glassF*.42);
+    color=mix(base*.055,glassEnvironment,.22+glassF*.54);
   }
   if(materialKind>9.5){
     color=mix(color,environmentRadiance,.58+.32*pow(1.0-nv,5.0));
