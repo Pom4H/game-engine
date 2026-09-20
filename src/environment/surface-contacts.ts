@@ -1,6 +1,7 @@
 import type {MutableVec3,Vec3} from '../math.js';
 import type {RuntimeEntity} from '../scene/scene.js';
 import type {EntitySpec,MaterialSpec} from '../scene/types.js';
+import type {MaterialKind} from '../materials/catalog.js';
 import {SnowFootprints,type FootContact,type SnowFootprint} from './footprints.js';
 import {SnowSurface,type SnowSurfaceOptions} from './snow-surface.js';
 import type {SurfaceEnvironmentSystem,SurfaceEnvironmentState} from './surface-state.js';
@@ -27,12 +28,38 @@ export interface WheelSurfaceContact {
  /** Unit direction away from the vehicle at this wheel. */
  readonly lateral?:Vec3;
 }
+export interface TyreContactState {
+ readonly id:string;
+ readonly grounded:boolean;
+ readonly surfaceId?:string;
+ readonly surfaceMaterial?:MaterialKind;
+ readonly speedMps:number;
+ readonly rollingSpeedMps:number;
+ readonly longitudinalSlipMps:number;
+ readonly lateralSlipMps:number;
+ readonly slipRatio:number;
+ readonly slipAngleRad:number;
+ readonly normalLoadN:number;
+ readonly patchAreaM2:number;
+ readonly patchLengthM:number;
+ readonly temperatureC:number;
+ readonly pressureKPa:number;
+ readonly wear:number;
+ readonly wetness:number;
+ readonly waterDepthM:number;
+ readonly snowDepthM:number;
+ readonly roughness:number;
+ readonly surfaceTemperatureC:number;
+}
 export interface SnowContactSurfaceOptions {
  readonly tileSize?:number;readonly coarseCellSize?:number;readonly detailedCellSize?:number;
  readonly maxTiles?:number;readonly maxDetailedTiles?:number;readonly seed?:number;readonly material?:MaterialSpec;
 }
 export interface SurfaceContactsOptions {readonly capacity?:number;readonly particleCapacity?:number;readonly id?:string}
-interface WheelBinding {readonly id:string;readonly radius?:number;readonly lateral?:Vec3}
+interface WheelBinding {
+ readonly id:string;readonly radius?:number;readonly lateral?:Vec3;
+ readonly pressureKPa?:number;readonly widthM?:number;readonly tyreMassKg?:number;
+}
 interface SprayParticle {readonly index:number;readonly born:number;readonly life:number;readonly origin:Vec3;readonly velocity:Vec3;readonly ground:number}
 interface SnowBinding {readonly source:string;readonly skin:SnowSurface;visible:boolean}
 const contactNamespaces=new WeakMap<SurfaceContactHost,{sequence:number;reserved:Set<string>}>();
@@ -72,7 +99,7 @@ export class SurfaceContactSystem {
  readonly footprints:SnowFootprints;
  private readonly host:SurfaceContactHost;private readonly id:string;private readonly particleCapacity:number;
  private readonly surfaces=new Map<string,SnowBinding>();private readonly wheels=new Map<string,WheelBinding>();
- private readonly particles=new Map<number,SprayParticle>();private readonly wheelEmission=new Map<string,number>();
+ private readonly particles=new Map<number,SprayParticle>();private readonly wheelEmission=new Map<string,number>();private readonly tyreState=new Map<string,TyreContactState>();
  private readonly events:SurfaceFootprint[]=[];private readonly particleIds=new Map<string,RuntimeEntity>();private readonly snowEntities=new Map<string,RuntimeEntity>();
  private sequence=0;private surfaceSequence=0;private time=-Infinity;private wetnessValue=0;private emitted=0;
  constructor(host:SurfaceContactHost,options:SurfaceContactsOptions={}){
@@ -101,12 +128,14 @@ export class SurfaceContactSystem {
   this.removeWheelContact(id);this.removeSnowSurface(id);this.snowEntities.delete(id);
   if(this.particleIds.delete(id))for(const [index] of this.particles)if(id===`${this.id}:spray:${index}`)this.particles.delete(index);
  }
- addWheelContact(entityId:string,options:{readonly radius?:number;readonly lateral?:Vec3}={}):void{
-  if(!this.host.entities.get(entityId)?.body||this.wheels.has(entityId)||options.radius!==undefined&&(!Number.isFinite(options.radius)||options.radius<=0)||options.lateral&&!finiteVec(options.lateral))throw new TypeError('Invalid wheel contact binding');
+ addWheelContact(entityId:string,options:{readonly radius?:number;readonly lateral?:Vec3;readonly pressureKPa?:number;readonly widthM?:number;readonly tyreMassKg?:number}={}):void{
+  if(!this.host.entities.get(entityId)?.body||this.wheels.has(entityId)||options.radius!==undefined&&(!Number.isFinite(options.radius)||options.radius<=0)||options.pressureKPa!==undefined&&(!Number.isFinite(options.pressureKPa)||options.pressureKPa<50||options.pressureKPa>600)||options.widthM!==undefined&&(!Number.isFinite(options.widthM)||options.widthM<.08||options.widthM>.6)||options.tyreMassKg!==undefined&&(!Number.isFinite(options.tyreMassKg)||options.tyreMassKg<1||options.tyreMassKg>80)||options.lateral&&!finiteVec(options.lateral))throw new TypeError('Invalid wheel contact binding');
   this.wheels.set(entityId,{id:entityId,...options,...(options.lateral?{lateral:Object.freeze([...options.lateral]) as Vec3}:{})});
   this.host.surfaces.claimContactBody(entityId);
  }
- removeWheelContact(entityId:string):void{this.wheels.delete(entityId);this.wheelEmission.delete(entityId);this.host.surfaces.releaseContactBody(entityId);}
+ removeWheelContact(entityId:string):void{this.wheels.delete(entityId);this.wheelEmission.delete(entityId);this.tyreState.delete(entityId);this.host.surfaces.releaseContactBody(entityId);}
+ tyre(id:string):TyreContactState|undefined{return this.tyreState.get(id);}
+ tyreStates():readonly TyreContactState[]{return [...this.tyreState.values()];}
  private state(entity:RuntimeEntity,x:number,z:number):Pick<SurfaceEnvironmentState,'snowDepthM'|'waterDepthM'>{
   return this.host.surfaces.sample(entity.id,x,z)??this.host.surfaces.surface(entity.id)??{snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0};
  }
@@ -143,7 +172,9 @@ export class SurfaceContactSystem {
    const binding=this.surfaces.get(surface.surfaceId);if(binding?.visible){binding.skin.stamp(stamp);this.applyMeshes(binding.skin);}
   }
   this.stepSpray(dt,at,contacts);
-  this.host.resources.set('engine:surface-contacts',Object.freeze({time:at,wetness:this.wetness,footprints:this.footprints.snapshot().length,sprayEmitted:this.emitted,sprayActive:this.particles.size}));
+  const tyreContacts=Object.freeze(this.tyreStates().map(state=>Object.freeze({...state})));
+  this.host.resources.set('engine:tyre-contacts',tyreContacts);
+  this.host.resources.set('engine:surface-contacts',Object.freeze({time:at,wetness:this.wetness,footprints:this.footprints.snapshot().length,sprayEmitted:this.emitted,sprayActive:this.particles.size,tyreContacts:tyreContacts.length}));
  }
  drainFootsteps():SurfaceFootprint[]{return this.events.splice(0);}
  private applyMeshes(skin:SnowSurface){
@@ -159,15 +190,33 @@ export class SurfaceContactSystem {
   this.wetnessValue=0;const live=new Set<string>();
   for(const wheel of contacts){
    live.add(wheel.id);
-   const speed=Math.hypot(wheel.velocity[0],wheel.velocity[2]),surface=wheel.grounded&&Math.abs(wheel.velocity[1])<.25?this.sample(wheel.position):undefined;
-   if(surface){
-    const source=this.host.entities.get(wheel.id),body=source?.body,surfaceEntity=this.host.entities.get(surface.surfaceId),radius=wheel.radius??(source?.mesh?.kind==='sphere'?(source.mesh.radius??1)*source.scale[1]:.3);
-    if(body&&surfaceEntity?.body){
-     const rollingSpeed=(wheel.angularSpeed??Math.hypot(...body.angularVelocity))*radius,lateral=wheel.lateral,lateralSpeed=lateral?Math.abs(wheel.velocity[0]*lateral[0]+wheel.velocity[2]*lateral[2]):0;
-     const slipSpeed=Math.hypot(Math.abs(speed-rollingSpeed),lateralSpeed),friction=Math.sqrt(Math.max(0,body.friction*surfaceEntity.body.friction));
-     this.host.surfaces.applyContactWork({sourceId:wheel.id,surfaceId:surface.surfaceId,x:wheel.position[0],z:wheel.position[2],radiusM:Math.max(.06,radius*.55),durationSeconds:dt,speedMps:speed,slipSpeedMps:slipSpeed,normalLoadN:Math.max(1,body.mass)*9.81,frictionCoefficient:friction});
-    }
-   }
+   const source=this.host.entities.get(wheel.id),body=source?.body,binding=this.wheels.get(wheel.id),speed=Math.hypot(wheel.velocity[0],wheel.velocity[2]),surface=wheel.grounded&&Math.abs(wheel.velocity[1])<.25?this.sample(wheel.position):undefined;
+   const radius=wheel.radius??binding?.radius??(source?.mesh?.kind==='sphere'?(source.mesh.radius??1)*source.scale[1]:.3);
+   const rollingSpeed=(wheel.angularSpeed??(body?Math.hypot(...body.angularVelocity):0))*radius;
+   const rawLateral=wheel.lateral??binding?.lateral;
+   let lateral:Vec3;
+   if(rawLateral){const l=Math.hypot(rawLateral[0],rawLateral[2])||1;lateral=[rawLateral[0]/l,0,rawLateral[2]/l];}
+   else if(speed>.05)lateral=[-wheel.velocity[2]/speed,0,wheel.velocity[0]/speed];
+   else lateral=[0,0,1];
+   let longitudinal:Vec3=[lateral[2],0,-lateral[0]];
+   if(wheel.velocity[0]*longitudinal[0]+wheel.velocity[2]*longitudinal[2]<0)longitudinal=[-longitudinal[0],0,-longitudinal[2]];
+   const longitudinalSpeed=wheel.velocity[0]*longitudinal[0]+wheel.velocity[2]*longitudinal[2],lateralSpeed=wheel.velocity[0]*lateral[0]+wheel.velocity[2]*lateral[2];
+   const longitudinalSlip=Math.abs(longitudinalSpeed)-rollingSpeed,slipRatio=longitudinalSlip/Math.max(.5,Math.abs(longitudinalSpeed)),slipAngle=Math.atan2(lateralSpeed,Math.max(.1,Math.abs(longitudinalSpeed))),slipSpeed=Math.hypot(longitudinalSlip,lateralSpeed);
+   const surfaceState=surface?this.host.surfaces.sample(surface.surfaceId,wheel.position[0],wheel.position[2])??this.host.surfaces.surface(surface.surfaceId):undefined,surfaceEntity=surface?this.host.entities.get(surface.surfaceId):undefined;
+   const normalLoad=body?Math.max(1,body.mass)*9.81:0,friction=body&&surfaceEntity?.body?Math.sqrt(Math.max(0,body.friction*surfaceEntity.body.friction*(surfaceState?.frictionScale??1))):0;
+   const previous=this.tyreState.get(wheel.id),nominalPressure=binding?.pressureKPa??230,tyreMass=binding?.tyreMassKg??10,width=binding?.widthM??Math.max(.12,Math.min(.36,radius*.64));
+   const ambient=surfaceState?.temperatureC??20,previousTemperature=previous?.temperatureC??ambient;
+   const frictionPower=wheel.grounded?normalLoad*friction*slipSpeed:0,heating=frictionPower*dt*.42/(tyreMass*1800),coolRate=.018+speed*.0065+(surfaceState?.waterDepthM??0)*18;
+   const temperature=previousTemperature+heating-(previousTemperature-ambient)*(1-Math.exp(-dt*coolRate)),pressure=nominalPressure*(temperature+273.15)/293.15;
+   const patchArea=wheel.grounded&&normalLoad>0?clamp(normalLoad/(Math.max(50,pressure)*1000),.002,.08):0,wear=clamp((previous?.wear??0)+frictionPower*dt/28_000_000,0,1);
+   const tyreState:TyreContactState=Object.freeze({
+    id:wheel.id,grounded:!!surface,...(surface?{surfaceId:surface.surfaceId}:{}) ,...(surfaceEntity?{surfaceMaterial:surfaceEntity.material.kind}:{}),
+    speedMps:speed,rollingSpeedMps:rollingSpeed,longitudinalSlipMps:longitudinalSlip,lateralSlipMps:lateralSpeed,slipRatio,slipAngleRad:slipAngle,
+    normalLoadN:normalLoad,patchAreaM2:patchArea,patchLengthM:patchArea/Math.max(.08,width),temperatureC:temperature,pressureKPa:pressure,wear,
+    wetness:surfaceState?.wetness??0,waterDepthM:surfaceState?.waterDepthM??0,snowDepthM:surfaceState?.snowDepthM??0,roughness:surfaceState?.roughness??surfaceEntity?.material.surface.roughness??0,surfaceTemperatureC:ambient,
+   });
+   this.tyreState.set(wheel.id,tyreState);
+   if(surface&&body&&surfaceEntity?.body)this.host.surfaces.applyContactWork({sourceId:wheel.id,surfaceId:surface.surfaceId,x:wheel.position[0],z:wheel.position[2],radiusM:Math.max(.06,radius*.55),durationSeconds:dt,speedMps:speed,slipSpeedMps:slipSpeed,normalLoadN:normalLoad,frictionCoefficient:friction});
    const wet=surface?clamp(surface.waterDepth/.004,0,1):0;
    // A stationary or airborne tyre makes neither spray nor a rolling-water sound.
    if(speed<.15||wet<.04){this.wheelEmission.delete(wheel.id);continue;}this.wetnessValue=Math.max(this.wetnessValue,wet*clamp(speed/.6,0,1));
@@ -178,12 +227,13 @@ export class SurfaceContactSystem {
    }this.wheelEmission.set(wheel.id,amount);
   }
   for(const id of this.wheelEmission.keys())if(!live.has(id))this.wheelEmission.delete(id);
+  for(const id of this.tyreState.keys())if(!live.has(id))this.tyreState.delete(id);
   for(const [index,p] of this.particles){const age=at-p.born,entity=this.particle(index),height=p.origin[1]+p.velocity[1]*age-4.905*age*age;
    if(age>=p.life||height<p.ground){entity.position=[0,-1000,0];this.particles.delete(index);continue;}
    entity.position=[p.origin[0]+p.velocity[0]*age,height,p.origin[2]+p.velocity[2]*age];
    const growth=.7+.3*clamp(age/.08,0,1);entity.scale=[.009*growth,.012+.016*(1-age/p.life),.009*growth] as MutableVec3;
   }
  }
- inspect(){return{surfaces:this.surfaces.size,wheelContacts:this.wheels.size,tiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.tileCount,0),detailedTiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.detailedTiles,0),footprints:this.footprints.snapshot().length,particles:this.particles.size,particleEntities:this.particleIds.size,sprayEmitted:this.emitted,wetness:this.wetness};}
- dispose():void{for(const id of [...this.surfaces.keys()])this.removeSnowSurface(id);for(const id of [...this.wheels.keys()])this.removeWheelContact(id);for(const [id,owned] of this.particleIds)if(this.host.entities.get(id)===owned)this.host.remove(id);this.particles.clear();this.particleIds.clear();this.snowEntities.clear();this.wheelEmission.clear();this.events.length=0;this.host.resources.delete('engine:surface-contacts');}
+ inspect(){return{surfaces:this.surfaces.size,wheelContacts:this.wheels.size,tiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.tileCount,0),detailedTiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.detailedTiles,0),footprints:this.footprints.snapshot().length,particles:this.particles.size,particleEntities:this.particleIds.size,sprayEmitted:this.emitted,wetness:this.wetness,tyreStates:this.tyreState.size};}
+ dispose():void{for(const id of [...this.surfaces.keys()])this.removeSnowSurface(id);for(const id of [...this.wheels.keys()])this.removeWheelContact(id);for(const [id,owned] of this.particleIds)if(this.host.entities.get(id)===owned)this.host.remove(id);this.particles.clear();this.particleIds.clear();this.snowEntities.clear();this.wheelEmission.clear();this.tyreState.clear();this.events.length=0;this.host.resources.delete('engine:surface-contacts');this.host.resources.delete('engine:tyre-contacts');}
 }
