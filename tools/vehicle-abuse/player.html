@@ -1,0 +1,133 @@
+<!doctype html>
+<html><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b0e12}canvas{width:100%;height:100%;display:block}
+#hud{position:fixed;left:24px;top:22px;color:#eef3f7;font:13px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;background:#0b1016cc;border:1px solid #ffffff20;padding:12px 14px;min-width:310px;backdrop-filter:blur(8px)}
+#phase{font-weight:700;letter-spacing:.08em;margin-bottom:7px}#metrics{color:#aebbc5;white-space:pre}
+</style>
+<canvas id="world"></canvas><div id="hud"><div id="phase">INIT</div><div id="metrics"></div></div>
+<script type="module">
+import {Scene,M3InteractionRig,generateM3Vehicle} from '/dist/index.js';
+import {WebGPURenderer} from '/dist/browser.js';
+import {VEHICLE_ABUSE_DURATION,createVehicleAbuseScript,humanPose,phaseAt} from '/timeline.mjs';
+
+const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas),geometry=generateM3Vehicle();
+const paint=[.075,.115,.18,1];
+const roleMaterial=role=>role==='paint'?{kind:'steel',color:paint,roughness:.23,metalness:.58}:role==='glass'?{kind:'glass',color:[.12,.19,.24,.34],roughness:.07,metalness:.05}:role==='tire'?{kind:'default',color:[.022,.025,.028,1],roughness:.94,pattern:'rubber'}:role==='rim'||role==='metal'?{kind:'steel',color:[.25,.28,.31,1],roughness:.24,metalness:.92}:role==='light'?{kind:'glass',color:[.78,.88,1,.72],roughness:.08,emissive:[.7,.82,1]}:role==='tail'?{kind:'glass',color:[.35,.012,.008,.8],roughness:.09,emissive:[.2,.004,.002]}:{kind:'default',color:[.035,.04,.045,1],roughness:.5};
+const carEntities=geometry.parts.map(part=>({id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:roleMaterial(part.role)}));
+const human=[
+ {id:'person:torso',mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:[.17,.20,.19,1],roughness:.92}},
+ {id:'person:head',mesh:{kind:'sphere',radius:.5,segments:20},material:{kind:'default',color:[.45,.31,.24,1],roughness:.78}},
+ ...['l-upper-arm','l-forearm','r-upper-arm','r-forearm','l-thigh','l-shin','r-thigh','r-shin'].map(id=>({id:'person:'+id,mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:id.includes('arm')?[.15,.18,.17,1]:[.10,.115,.12,1],roughness:.94}})),
+ ...['l-hand','r-hand'].map(id=>({id:'person:'+id,mesh:{kind:'sphere',radius:.5,segments:12},material:{kind:'default',color:[.43,.29,.22,1],roughness:.8}})),
+ ...['l-foot','r-foot'].map(id=>({id:'person:'+id,mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:[.055,.06,.062,1],roughness:.96}})),
+];
+const scene=new Scene({
+ version:1,seed:26092026,gravity:[0,-9.81,0],ground:-.11,clearColor:[.045,.065,.09,1],
+ environment:{temperatureC:-15,humidity:.55,precipitation:'rare',sunlight:.28,wind:[1.4,0,.4]},
+ rendering:{sunDirection:[-.5,.62,-.38],sunColor:[.83,.90,1],skyColor:[.20,.28,.40],sunIntensity:1.25,exposure:1.05,shadowExtent:22,fogDensity:.004},
+ camera:{position:[5.6,2.8,-6.2],target:[.25,.78,-.05],fov:46,focusDistance:8,aperture:.06},
+ entities:[
+  {id:'ground',position:[0,-.16,0],mesh:{kind:'box',size:[18,.1,12]},material:{kind:'asphalt',color:[.075,.082,.09,1],roughness:.72},environmental:{surfaceUse:'road'}},
+  {id:'curb',position:[0,.03,3.1],mesh:{kind:'box',size:[18,.25,.25]},material:{kind:'concrete',color:[.34,.35,.36,1],roughness:.85}},
+  ...carEntities,
+  {id:'door-opening',position:[.43,.77,-.947],mesh:{kind:'box',size:[1.12,.79,.025]},material:{kind:'default',color:[.012,.014,.016,1],roughness:.9}},
+  {id:'door-panel',position:[.43,.77,-.962],mesh:{kind:'box',size:[1.08,.76,.032]},material:{kind:'steel',color:paint,roughness:.23,metalness:.58}},
+  {id:'door-window',position:[.47,1.24,-.964],mesh:{kind:'box',size:[.96,.34,.018]},material:{kind:'glass',color:[.12,.19,.24,.30],roughness:.07}},
+  ...human,
+ ],
+});
+const rig=new M3InteractionRig(1700);rig.setTemperatureC(-15);const script=createVehicleAbuseScript(rig);
+const baseParts=new Map(geometry.parts.map(part=>['m3-'+part.id,{position:[...part.position],rotation:[...(part.rotation??[0,0,0])]}]));
+const bodyBase=geometry.body;let simSteps=0;const events=[],telemetry=[];
+
+const rotate=(p,r)=>{const [rx,,rz]=r,sx=Math.sin(rx),cx=Math.cos(rx),sz=Math.sin(rz),cz=Math.cos(rz);let [x,y,z]=p;const x1=x*cz-y*sz,y1=x*sz+y*cz;return[x1,y1*cx-z*sx,y1*sx+z*cx];};
+function applyCar(){
+ const state=rig.state,pose=state.suspension,rotation=[pose.roll,0,pose.pitch],scale=state.thermalScale;
+ for(const [id,base] of baseParts){
+  const e=scene.entities.get(id);if(!e)continue;
+  const p=id==='m3-body'?[0,0,0]:[base.position[0]*scale,base.position[1],base.position[2]*scale],q=rotate(p,rotation);
+  e.position.splice(0,3,q[0],q[1]+pose.heave,q[2]);e.rotation.splice(0,3,base.rotation[0]+rotation[0],base.rotation[1],base.rotation[2]+rotation[2]);
+ }
+ const body=scene.entities.get('m3-body');body.mesh=rig.shellMesh(bodyBase);
+ const theta=-rig.door.angle,hinge=[.98,.77,-.952],dx=-.55,c=Math.cos(theta),s=Math.sin(theta),doorLocal=[hinge[0]+c*dx,hinge[1],hinge[2]-s*dx],doorWorld=rotate(doorLocal,rotation);
+ const door=scene.entities.get('door-panel'),glass=scene.entities.get('door-window'),opening=scene.entities.get('door-opening');
+ door.position.splice(0,3,doorWorld[0],doorWorld[1]+pose.heave,doorWorld[2]);door.rotation.splice(0,3,rotation[0],theta,rotation[2]);
+ const winOffset=rotate([0,.47,0],rotation);glass.position.splice(0,3,doorWorld[0]+winOffset[0],doorWorld[1]+pose.heave+winOffset[1],doorWorld[2]+winOffset[2]);glass.rotation.splice(0,3,rotation[0],theta,rotation[2]);
+ const op=rotate([.43,.77,-.947],rotation);opening.position.splice(0,3,op[0],op[1]+pose.heave,op[2]);opening.rotation.splice(0,3,...rotation);
+}
+function bone(id,a,b,width){
+ const e=scene.entities.get('person:'+id),d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],len=Math.hypot(...d)||.001;
+ e.position.splice(0,3,(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);
+ e.scale.splice(0,3,width,len,width);e.rotation.splice(0,3,Math.atan2(d[2],d[1]),0,Math.asin(Math.max(-1,Math.min(1,-d[0]/len))));
+}
+function applyHuman(time){
+ const p=humanPose(time),r=p.root,walk=p.action==='walk'?Math.sin(p.strike*Math.PI*2):0;
+ let lf=[r[0]-.11,r[1]+.05,r[2]-.11],rf=[r[0]+.11,r[1]+.05,r[2]+.11];
+ if(p.action==='walk'){lf=[r[0]-.18*walk,r[1]+.05+Math.max(0,walk)*.08,r[2]-.12];rf=[r[0]+.18*walk,r[1]+.05+Math.max(0,-walk)*.08,r[2]+.12];}
+ if(p.action==='hood'){lf=[r[0]-.12,r[1]+(p.side<0?0:.08),r[2]-.24];rf=[r[0]+.12,r[1]+(p.side>0?0:.08),r[2]+.24];}
+ if(p.action==='roof'){lf=[r[0]-.14,r[1],r[2]-.16];rf=[r[0]+.14,r[1],r[2]+.16];}
+ if(p.action==='kick'){
+   const k=Math.sin(Math.PI*Math.max(0,Math.min(1,(p.strike-.08)/.55)))**2;
+   lf=[r[0]-.13,r[1]+.05,r[2]-.09];rf=[r[0]+.10,r[1]+.08+.28*k,r[2]+.12+.58*k];
+ }
+ const hipY=r[1]+.88,lh=[r[0]-.08,hipY,r[2]-.13],rh=[r[0]+.08,hipY,r[2]+.13],lk=[(lh[0]+lf[0])/2-.05,(lh[1]+lf[1])/2,r[2]-.13],rk=[(rh[0]+rf[0])/2+.05,(rh[1]+rf[1])/2,r[2]+.13];
+ const chest=[r[0],r[1]+1.26,r[2]],ls=[r[0],r[1]+1.43,r[2]-.22],rs=[r[0],r[1]+1.43,r[2]+.22];
+ let lhnd=[r[0]-.18,r[1]+1.05,r[2]-.32],rhnd=[r[0]+.18,r[1]+1.05,r[2]+.32];
+ if(p.action==='door'){rhnd=[.62,1.00,-1.03];lhnd=[r[0]-.2,1.05,r[2]-.25];}
+ if(p.action==='hand'){
+   const targets=time<8.75?[[.05,1.43,-.18],8.35]:time<9.65?[[.45,1.12,-.945],9.18]:[[1.35,.96,-.08],10.03];
+   const pulse=Math.exp(-((time-targets[1])/.11)**2),target=targets[0];
+   rhnd=[mix(rs[0],target[0],pulse),mix(rs[1]-.15,target[1],pulse),mix(rs[2],target[2],pulse)];
+ }
+ if(p.action==='hood'||p.action==='roof'){lhnd=[r[0]-.30,r[1]+1.12,r[2]-.35];rhnd=[r[0]+.30,r[1]+1.12,r[2]+.35];}
+ if(p.action==='kick'){lhnd=[r[0]-.22,r[1]+1.08,r[2]-.26];rhnd=[r[0]+.18,r[1]+1.12,r[2]+.24];}
+ const le=[(ls[0]+lhnd[0])/2-.05,(ls[1]+lhnd[1])/2, (ls[2]+lhnd[2])/2],re=[(rs[0]+rhnd[0])/2+.05,(rs[1]+rhnd[1])/2,(rs[2]+rhnd[2])/2];
+ const torso=scene.entities.get('person:torso');torso.position.splice(0,3,...chest);torso.scale.splice(0,3,.42,.68,.32);
+ const head=scene.entities.get('person:head');head.position.splice(0,3,r[0],r[1]+1.78,r[2]);head.scale.splice(0,3,.20,.23,.19);
+ bone('l-thigh',lh,lk,.15);bone('l-shin',lk,lf,.13);bone('r-thigh',rh,rk,.15);bone('r-shin',rk,rf,.13);
+ bone('l-upper-arm',ls,le,.12);bone('l-forearm',le,lhnd,.10);bone('r-upper-arm',rs,re,.12);bone('r-forearm',re,rhnd,.10);
+ for(const [id,pos] of [['l-hand',lhnd],['r-hand',rhnd]]){const e=scene.entities.get('person:'+id);e.position.splice(0,3,...pos);e.scale.splice(0,3,.105,.105,.105);}
+ for(const [id,pos] of [['l-foot',lf],['r-foot',rf]]){const e=scene.entities.get('person:'+id);e.position.splice(0,3,...pos);e.scale.splice(0,3,.28,.08,.14);}
+}
+function cameraAt(t){
+ if(t<7.9)return{position:[4.4,2.25,-5.0],target:[.25,.85,-.25],fov:45};
+ if(t<10.8)return{position:[4.0,2.15,-4.3],target:[.7,1.05,-.35],fov:43};
+ if(t<16.8)return{position:[4.8,2.75,-4.3],target:[1.0,.88,0],fov:44};
+ if(t<22.8)return{position:[3.8,3.25,-4.5],target:[-.05,1.10,0],fov:43};
+ return{position:[4.5,2.25,-4.8],target:[0,.78,-.2],fov:44};
+}
+async function reset(){
+ simSteps=0;events.length=0;telemetry.length=0;
+ window.rig=rig;
+}
+await renderer.prepareMaterials(scene);
+window.ready=true;window.failure=null;
+window.demo={
+ duration:VEHICLE_ABUSE_DURATION,
+ async reset(){location.reload();},
+ async frame(t){
+   const desired=Math.max(0,Math.round(t*120));
+   while(simSteps<desired){
+     script.step(1/120);events.push(...rig.drainEvents());simSteps++;
+     if(simSteps%2===0)scene.step(1/60);
+   }
+   applyCar();applyHuman(t);scene.camera=cameraAt(t);
+   const phase=phaseAt(t),state=rig.state;
+   document.getElementById('phase').textContent=phase.label;
+   document.getElementById('metrics').textContent=
+     'T = −15 °C\n'+
+     'thermal scale  '+state.thermalScale.toFixed(7)+'\n'+
+     'elastic flex   '+(state.panelElasticDepthM*1000).toFixed(2)+' mm\n'+
+     'permanent dent '+(state.panelPermanentDepthM*1000).toFixed(2)+' mm\n'+
+     'suspension     '+(state.suspension.heave*1000).toFixed(1)+' mm\n'+
+     'door angle     '+(state.doorAngle*180/Math.PI).toFixed(1)+'°';
+   telemetry.push({t,state:structuredClone(state),phase:phase.label});
+   await renderer.prepareMaterials(scene);renderer.render(scene);await renderer.flush();
+   return this.inspect();
+ },
+ inspect(){return{...renderer.inspect(),time:simSteps/120,state:rig.state,events:events.length,phase:phaseAt(simSteps/120).label};},
+ events(){return events;},telemetry(){return telemetry;}
+};
+applyCar();applyHuman(0);renderer.render(scene);await renderer.flush();
+</script>
