@@ -11,6 +11,8 @@ import {Scene,M3InteractionRig,generateM3Vehicle} from '/dist/index.js';
 import {WebGPURenderer} from '/dist/browser.js';
 import {VEHICLE_ABUSE_DURATION,createVehicleAbuseScript,humanPose,phaseAt} from '/timeline.mjs';
 
+window.ready=false;window.failure=null;
+try{
 const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas),geometry=generateM3Vehicle();
 const paint=[.075,.115,.18,1];
 const roleMaterial=role=>role==='paint'?{kind:'steel',color:paint,roughness:.23,metalness:.58}:role==='glass'?{kind:'glass',color:[.12,.19,.24,.34],roughness:.07,metalness:.05}:role==='tire'?{kind:'default',color:[.022,.025,.028,1],roughness:.94,pattern:'rubber'}:role==='rim'||role==='metal'?{kind:'steel',color:[.25,.28,.31,1],roughness:.24,metalness:.92}:role==='light'?{kind:'glass',color:[.78,.88,1,.72],roughness:.08,emissive:[.7,.82,1]}:role==='tail'?{kind:'glass',color:[.35,.012,.008,.8],roughness:.09,emissive:[.2,.004,.002]}:{kind:'default',color:[.035,.04,.045,1],roughness:.5};
@@ -130,4 +132,7 @@ window.demo={
  events(){return events;},telemetry(){return telemetry;}
 };
 applyCar();applyHuman(0);renderer.render(scene);await renderer.flush();
+}catch(error){
+  window.failure=error?.stack??String(error);console.error(error);
+}
 </script>
