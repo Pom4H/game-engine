@@ -5,7 +5,7 @@ import type {BodySpec,Color,MaterialSpec} from '../scene/types.js';
 import {M3_FBX_PARTS_FIDELITY,m3FbxParts} from './m3-fbx-parts.js';
 import {passengerPartMaterial,passengerStructuralDefinition,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole,type PassengerVehicleProfile} from './passenger.js';
 import {M3_SHELL_FIDELITY,m3HighFidelityBody} from './m3-shell.js';
-import {buildSmoothSubdivisionPlan,subdivideSmoothTriangleMesh,type SmoothSubdivisionPlan,type TriangleMesh} from './render-subdivision.js';
+import {buildSmoothSubdivisionPlan,smoothCoincidentNormals,subdivideSmoothTriangleMesh,type SmoothSubdivisionPlan,type TriangleMesh} from './render-subdivision.js';
 
 /**
  * BMW M3 visual fidelity is sourced from the user-supplied FBX, while the load-bearing
@@ -119,7 +119,8 @@ function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
   const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.012));
   // Third render-only refinement targets silhouette and long clearcoat highlights.
   // Physics and the structural cage continue to use the compact source shell.
-  return subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,.004));
+  const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,.004));
+  return smoothCoincidentNormals(third,58,2e-5);
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   const base=m3HighFidelityBody();
