@@ -266,9 +266,10 @@ export class M3InteractionRig {
     for(let i=0;i<this.structure.nodeCount;i++){const j=i*3,m=this.structure.mass[i]!;vx+=m*this.structure.velocity[j]!;vy+=m*this.structure.velocity[j+1]!;vz+=m*this.structure.velocity[j+2]!;}
     vx/=this.structure.totalMass;vy/=this.structure.totalMass;vz/=this.structure.totalMass;
     for(let i=0;i<this.structure.nodeCount;i++){
-      const j=i*3;this.structure.position[j]-=dx;this.structure.position[j+1]-=dy;this.structure.position[j+2]-=dz;
-      this.structure.previous[j]-=dx;this.structure.previous[j+1]-=dy;this.structure.previous[j+2]-=dz;
-      this.structure.velocity[j]-=vx;this.structure.velocity[j+1]-=vy;this.structure.velocity[j+2]-=vz;
+      const j=i*3;
+      this.structure.position[j]=this.structure.position[j]!-dx;this.structure.position[j+1]=this.structure.position[j+1]!-dy;this.structure.position[j+2]=this.structure.position[j+2]!-dz;
+      this.structure.previous[j]=this.structure.previous[j]!-dx;this.structure.previous[j+1]=this.structure.previous[j+1]!-dy;this.structure.previous[j+2]=this.structure.previous[j+2]!-dz;
+      this.structure.velocity[j]=this.structure.velocity[j]!-vx;this.structure.velocity[j+1]=this.structure.velocity[j+1]!-vy;this.structure.velocity[j+2]=this.structure.velocity[j+2]!-vz;
     }
     for(const event of this.door.drainEvents())this.events.push({...event,id:++this.eventSequence,time:this.time,point:[.1,.8,-M3_PARAMETRIC_PROFILE.dimensions.width/2]});
     for(const event of this.suspension.drainEvents())this.events.push({...event,id:++this.eventSequence,time:this.time});
@@ -303,6 +304,6 @@ function recomputeNormals(positions:readonly number[],indices:readonly number[])
     const ux=bx-ax,uy=by-ay,uz=bz-az,vx=cx-ax,vy=cy-ay,vz=cz-az,nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
     for(const base of [ia,ib,ic]){normals[base]=normals[base]!+nx;normals[base+1]=normals[base+1]!+ny;normals[base+2]=normals[base+2]!+nz;}
   }
-  for(let i=0;i<normals.length;i++){if(i%3)continue;const n=Math.hypot(normals[i]!,normals[i+1]!,normals[i+2]!)||1;normals[i]/=n;normals[i+1]/=n;normals[i+2]/=n;}
+  for(let i=0;i<normals.length;i++){if(i%3)continue;const n=Math.hypot(normals[i]!,normals[i+1]!,normals[i+2]!)||1;normals[i]=normals[i]!/n;normals[i+1]=normals[i+1]!/n;normals[i+2]=normals[i+2]!/n;}
   return normals;
 }
