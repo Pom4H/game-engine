@@ -1,4 +1,4 @@
-import {generateM3Vehicle,sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
+import {generateM3Vehicle,m3PartBody,m3PartMaterial,sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
 
 // Only the cast, rig binding, garment shapes and route are authored here.
 // Locomotion, IK, planted contacts and transform updates are engine systems.
@@ -106,12 +106,10 @@ const PROCEDURAL_M3=generateM3Vehicle();
 export function makeM3(id,x,z,color,speed=0){
  const entities=[],motions=[];
  for(const part of PROCEDURAL_M3.parts){
-  const paint=part.role==='paint',glass=part.role==='glass',rim=part.role==='rim',tire=part.role==='tire',light=part.role==='light',tail=part.role==='tail',metal=part.role==='metal';
-  const c=paint?color:glass?[.115,.17,.21,.72]:rim?[.26,.29,.31,1]:tire?[.027,.03,.032,1]:light?[.80,.89,1,1]:tail?[.34,.012,.008,1]:metal?[.23,.25,.26,1]:[.024,.028,.031,1];
-  const position=[x+part.position[0],.006+part.position[1],z+part.position[2]];
-  const e={id:id+'-'+part.id,position,mesh:part.mesh,material:{kind:glass?'glass':'default',color:c,roughness:paint?.23:glass?.09:rim?.30:tire?.91:metal?.34:.50,metalness:paint?.24:rim?.87:metal?.9:glass?.18:0,...(tire?{pattern:'rubber'}:{}),...(light?{emissive:speed?[2.8,3.1,3.5]:[.12,.14,.17]}:tail?{emissive:speed?[.7,.015,.006]:[0,0,0]}:{})},...(part.rotation?{rotation:[...part.rotation]}:{})};
+  const position=[x+part.position[0],.006+part.position[1],z+part.position[2]],body=m3PartBody(part,!!speed);
+  const e={id:id+'-'+part.id,position,mesh:part.mesh,material:m3PartMaterial(part,color,!!speed),...(body?{body}:{}),...(part.rotation?{rotation:[...part.rotation]}:{})};
   entities.push(e);
-  if(speed)motions.push({id:e.id,origin:position,speed,wheel:!!part.wheel,radius:CAR.radius});
+  if(speed)motions.push({id:e.id,origin:position,wheel:!!part.wheel,radius:CAR.radius});
  }
  return{entities,motions,geometry:PROCEDURAL_M3};
 }
