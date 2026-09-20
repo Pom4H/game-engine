@@ -40,14 +40,21 @@ export function transferFragmentMotion(source:RigidBody,fragments:readonly Rigid
   }
   // Dynamic source velocity already includes the solver impulse; never add it twice.
   let velocity:Vec3=source.invMass?source.velocity:V3.scale(impulse,1/mass);
-  let scatterBudget=Math.max(0,energyLoss)*.15;
+  let scatterBudget=Math.max(0,energyLoss)*.045;
   if(!source.invMass){
     const translationEnergy=.5*mass*V3.dot(velocity,velocity),limit=Math.max(0,energyLoss)*.5;
     if(translationEnergy>limit)velocity=V3.scale(velocity,Math.sqrt(limit/translationEnergy));
   }
   const sourceL=source.invMass?multiply(inertia(source),source.angularVelocity):zero();
-  const bulkAngular=solve(combined,sourceL),rng=mulberry32(seed);
-  const kicks=fragments.map(()=>[rng()*2-1,rng()*2-1,rng()*2-1] as MutableVec3);
+  const bulkAngular=solve(combined,sourceL),rng=mulberry32(seed),impulseLength=V3.length(impulse),normal:Vec3=impulseLength>1e-9?V3.scale(impulse,1/impulseLength):[0,0,1];
+  // Brittle plates release mostly inside their own plane. The bulk impulse carries
+  // fragments through the failed surface; random energy fans them tangentially
+  // instead of exploding isotropically like a grenade.
+  const kicks=offsets.map(offset=>{
+    const radial=V3.sub(offset,V3.scale(normal,V3.dot(offset,normal))),radialLength=V3.length(radial),r=radialLength>1e-8?V3.scale(radial,1/radialLength):V3.normalize(V3.cross(normal,Math.abs(normal[1])<.8?[0,1,0]:[1,0,0]));
+    const jitterRaw:[number,number,number]=[rng()*2-1,rng()*2-1,rng()*2-1],jitterPlane=V3.sub(jitterRaw,V3.scale(normal,V3.dot(jitterRaw,normal)));
+    return V3.add(V3.scale(r,.68+rng()*.42),V3.scale(jitterPlane,.18)) as MutableVec3;
+  });
   const spins=fragments.map(()=>[rng()*2-1,rng()*2-1,rng()*2-1] as MutableVec3),mean=zero();
   for(let i=0;i<fragments.length;i++)for(let k=0;k<3;k++)mean[k]!+=fragments[i]!.mass*kicks[i]![k]!/mass;
   const scatterL=zero();
