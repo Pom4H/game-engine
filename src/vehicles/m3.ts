@@ -148,6 +148,13 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     position:[2.365,.225+row*.043,0] as const,
     material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.78,metalness:.01},
   }));
+  const badge:ParametricVehiclePart[]=[
+    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.052,height:.006,segments:32},position:[1.83,.985,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.16,metalness:.10}}),
+    Object.freeze({id:'hood-roundel-blue-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.034,0],[.034,.034],[0,.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.18,metalness:.02}}),
+    Object.freeze({id:'hood-roundel-blue-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.034,0],[-.034,-.034],[0,-.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.18,metalness:.02}}),
+    Object.freeze({id:'hood-roundel-white-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.034,0],[-.034,.034],[0,.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.18,metalness:.01}}),
+    Object.freeze({id:'hood-roundel-white-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.034,0],[.034,-.034],[0,-.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.18,metalness:.01}}),
+  ];
   const frontDetail:ParametricVehiclePart[]=[
     Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,-.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
     Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
@@ -168,6 +175,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     ...grilleSlats,
     ...lowerIntake,
     ...frontDetail,
+    ...badge,
     ...interior,
     ...sources.map(source=>Object.freeze({
       id:source.id,
@@ -194,6 +202,9 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id==='transparent-lenses')return{...base,color:[.42,.50,.55,.22]};
   if(part.id.startsWith('mirror-'))return{...base,color:[.30,.34,.38,1]};
   if(part.id==='red-reflectors')return{...base,color:[.30,.012,.008,1]};
+  if(part.id.startsWith('hood-roundel-blue-'))return{...base,color:[.015,.19,.58,1]};
+  if(part.id.startsWith('hood-roundel-white-'))return{...base,color:[.86,.89,.93,1]};
+  if(part.id==='hood-roundel-ring')return{...base,color:[.012,.015,.020,1]};
   if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055};
   if(part.role==='glass')return{...base,color:[.075,.095,.115,.42],roughness:.065};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
