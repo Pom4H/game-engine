@@ -1,10 +1,10 @@
 import {makeLaboratory} from './laboratory.mjs';
 import {makeM3,makePedestrian,pedestrianAnimation,CAR} from './actors.mjs';
 import {batchStaticScenery} from '../../dist/index.js';
-// Original street geometry in metres; user supplied M3 imported offline.
+// Original street geometry in metres; M3 is reconstructed from a compact parametric profile.
 const C={snow:[.93,.955,.975,1],stone:[.59,.57,.52,1],dark:[.07,.075,.078,1],metal:[.16,.18,.19,1],glass:[.16,.23,.28,1]};
 const rng=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
-export function makeCity(kind='street',m3){if(kind==='laboratory')return makeLaboratory();
+export function makeCity(kind='street'){if(kind==='laboratory')return makeLaboratory();
 
  const entities=[],random=rng(20260920),motions=[];let sequence=0;
  const add=(id,p,mesh,color=C.stone,extra={})=>{const e={id,position:p,mesh,material:{kind:'default',color,roughness:.8,...extra.material},...extra};if(extra.material)e.material={kind:'default',color,roughness:.8,...extra.material};entities.push(e);return e;};
@@ -159,7 +159,7 @@ export function makeCity(kind='street',m3){if(kind==='laboratory')return makeLab
   }
  }
  function car(id,x,z,color,speed=0){
-  const data=makeM3(m3,id,x,z,color,speed);entities.push(...data.entities);motions.push(...data.motions);
+  const data=makeM3(id,x,z,color,speed);entities.push(...data.entities);motions.push(...data.motions);
   if(!speed){bank(id+'-roof-snow',[x-.35,1.46,z],[1.36,.07,1.28],79);bank(id+'-hood-snow',[x+1.38,1.01,z],[1.05,.055,1.38],98);}
   if(speed)for(const side of [-1,1])for(const xx of [-1.301,1.536])add(id+'-contact'+side+xx,[x+xx,.346,z+side*.80],{kind:'sphere',radius:.346},[0,0,0,0],{body:{motion:'kinematic',mass:390,velocity:[speed,0,0],friction:.7}});
  }
