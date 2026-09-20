@@ -28,7 +28,7 @@ struct U {
   surfacePhase: vec4<f32>, // snow depth m, water depth m, slush, ice depth m
   surfaceDynamics: vec4<f32>, // puddle, track melt, body deposition, rear deposition
   motion: vec4<f32>,      // dir x, dir z, road dirt, body wetness
-  objectState: vec4<f32>, // surface-use code
+  objectState: vec4<f32>, // surface-use code, treatment code
   fieldFrame: vec4<f32>,
   fieldSize: vec4<f32>,
   pbr:vec4<f32>,
@@ -152,6 +152,8 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let label=textureSample(labelTexture,labelSampler,in.uv);albedo=mix(albedo,label.rgb,label.a);
   let materialKind=select(u.weather.w,f32(MATERIAL_CLASS),MATERIAL_CLASS>=0);
   let surfaceUse=u.objectState.x;
+  let treatment=u.objectState.y;
+  let clearcoat=select(0.0,.82,treatment>3.5&&treatment<4.5);
   let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
   let upward=smoothstep(0.05,0.82,n.y);
 
@@ -300,6 +302,35 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let envR=roughness*envC0+envC1;let envA004=min(envR.x*envR.x,exp2(-9.28*nv))*envR.x+envR.y;
   let envBRDF=vec2<f32>(-1.04,1.04)*envA004+envR.zw;
   color+=environmentRadiance*(f0*envBRDF.x+envBRDF.y);
+
+  // Painted metal is a layered dielectric clear coat over the colored base.
+  // The second lobe preserves sharp sky/building reflections without turning the
+  // underlying paint into a polished bulk metal.
+  if(clearcoat>0.0){
+    let coatRough=.075,coatA2=pow(coatRough,4.0);
+    let coatD=coatA2/(3.14159*pow(nh*nh*(coatA2-1.0)+1.0,2.0));
+    let coatK=pow(coatRough+1.0,2.0)/8.0;
+    let coatG=(nv/(nv*(1.0-coatK)+coatK))*(nl/(nl*(1.0-coatK)+coatK));
+    let coatF=.04+.96*pow(1.0-vh,5.0);
+    let coatSpec=coatD*coatG*coatF/max(4.0*nv*nl,.001);
+    color*=1.0-clearcoat*coatF*.28;
+    color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec*clearcoat;
+    let coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,.35).rgb;
+    let coatEnvF=.04+.96*pow(1.0-nv,5.0);
+    color+=coatEnvironment*coatEnvF*clearcoat*.72;
+  }
+
+  // Automotive glass is mostly transmitted scene color from the blend pass plus
+  // a physically strong grazing reflection. Avoid treating it as blue plastic.
+  if(materialKind>.5&&materialKind<1.5){
+    let glassF=.04+.96*pow(1.0-nv,5.0);
+    let glassEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
+    color=mix(base*.10,glassEnvironment,.46+glassF*.42);
+  }
+  if(materialKind>9.5){
+    color=mix(color,environmentRadiance,.58+.32*pow(1.0-nv,5.0));
+  }
+
   let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal);}}
   color+=u.emission.rgb;
   if(materialKind>4.5&&materialKind<5.5&&n.y>.8&&in.reflected==0u){
@@ -312,7 +343,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
   color=mix(color,f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027,clamp(fog,0.0,.96));
-  var out:GOut;out.color=vec4<f32>(color,select(u.color.a,mix(u.color.a*.25,.82,pow(1.0-nv,5.0)),materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(environmentFresnel,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
+  var out:GOut;out.color=vec4<f32>(color,select(u.color.a,mix(u.color.a*.20,.62,pow(1.0-nv,5.0)),materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(environmentFresnel,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
 const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
@@ -679,3 +710,4 @@ function materialCode(kind:string):number{return kind==='glass'?1:kind==='steel'
 function stableSeed(value:string):number{let h=2166136261>>>0;for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0)/4294967295;}
 
 function surfaceUseCode(use:string|undefined):number{return use==='road'?1:use==='sidewalk'?2:use==='curb'?3:0;}
+function treatmentCode(value:string|undefined):number{return value==='sealed'?1:value==='biocide'?2:value==='galvanized'?3:value==='painted'?4:0;}
