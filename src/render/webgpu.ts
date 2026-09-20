@@ -707,7 +707,8 @@ function distance2(a:Vec3,b:Vec3):number{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[
 
 const shadowPrimitiveIds=new WeakMap<object,number>();let nextShadowPrimitiveId=1;
 function shadowGeometryKey(primitive:Primitive):string{
-  if(primitive.kind==='box'||primitive.kind==='plane'||primitive.kind==='shard')return primitive.kind;
+  if(primitive.kind==='box'||primitive.kind==='plane')return primitive.kind;
+  if(primitive.kind==='shard')return 'shard:'+(primitive.axis??2)+':'+(primitive.skew??0);
   if(primitive.kind==='sphere')return 'sphere:'+(primitive.segments??20);
   if(primitive.kind==='cylinder')return 'cylinder:'+primitive.radius+':'+primitive.height+':'+(primitive.topRadius??primitive.radius)+':'+(primitive.segments??20);
   if(primitive.kind==='torus')return 'torus:'+primitive.radius+':'+primitive.tube+':'+(primitive.segments??40);
