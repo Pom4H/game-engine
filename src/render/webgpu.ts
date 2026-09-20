@@ -17,6 +17,7 @@ interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;index:GPUAny;count:number;form
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
+function renderPrimitive(entity:RuntimeEntity):Primitive|undefined{return entity.renderMesh??entity.mesh;}
 const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`
 override MATERIAL_CLASS:i32=-1;
 struct U {
@@ -512,7 +513,7 @@ export class WebGPURenderer implements Renderer{
     const {vp,lightVP,right,up,frame}=frameState;
     this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene));
     const classified=this.profiler.measure('visibility',()=>{
-      const visible=[...scene.entities.values()].filter(e=>e.mesh),opaque=visible.filter(e=>e.material.color[3]>=.98),transparent=visible.filter(e=>e.material.color[3]<.98).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
+      const visible=[...scene.entities.values()].filter(e=>renderPrimitive(e)),opaque=visible.filter(e=>e.material.color[3]>=.98),transparent=visible.filter(e=>e.material.color[3]<.98).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
       return{visible,opaque,transparent};
     });
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
@@ -520,7 +521,7 @@ export class WebGPURenderer implements Renderer{
     const frameModels=this.frameModels;frameModels.clear();
     const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
     const culled=this.profiler.measure('cull',()=>{
-      const inView=(entity:RuntimeEntity,matrix:Mat4)=>{multiply4Into(matrix,modelFor(entity),this.cullScratch);return intersectsClip(this.mesh(entity.mesh!).bounds,this.cullScratch);};
+      const inView=(entity:RuntimeEntity,matrix:Mat4)=>{multiply4Into(matrix,modelFor(entity),this.cullScratch);return intersectsClip(this.mesh(renderPrimitive(entity)!).bounds,this.cullScratch);};
       const cameraOpaque=classified.opaque.filter(e=>inView(e,vp)).sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
       const cameraTransparent=classified.transparent.filter(e=>inView(e,vp));
       const shadowCasters=classified.opaque.filter(e=>inView(e,lightVP));
@@ -578,7 +579,7 @@ export class WebGPURenderer implements Renderer{
     });
     this.profiler.setWork({drawCalls:this.drawCalls,triangles:this.triangles,snowInstances});
     if(this.profiler.enabled){
-      const sumTriangles=(entities:readonly RuntimeEntity[])=>entities.reduce((sum,e)=>sum+this.mesh(e.mesh!).triangles,0);
+      const sumTriangles=(entities:readonly RuntimeEntity[])=>entities.reduce((sum,e)=>sum+this.mesh(renderPrimitive(e)!).triangles,0);
       const materialDraws:Record<string,number>={},materialTriangles:Record<string,number>={};
       for(const e of [...culled.cameraOpaque,...culled.cameraTransparent]){const kind=e.material.kind,triangles=this.mesh(e.mesh!).triangles;materialDraws[kind]=(materialDraws[kind]??0)+1;materialTriangles[kind]=(materialTriangles[kind]??0)+triangles;}
       const work=this.profiler.currentWork();
@@ -683,7 +684,7 @@ export class WebGPURenderer implements Renderer{
 
   private prepare(entity:RuntimeEntity,model:Mat4=this.model(entity)):void{
     const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture?.url);
-    this.mesh(entity.mesh!);
+    this.mesh(renderPrimitive(entity)!);
     const surfaceState=this.lastScene?.surfaces.surface(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
     if(!dynamic&&object.uniformReady&&!modelChanged&&!previousChanged)return;
@@ -696,8 +697,8 @@ export class WebGPURenderer implements Renderer{
     if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);this.profiler.addUpload(pixels.byteLength,'surface');}
     this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');object.uniformReady=true;object.lastModel=new Float32Array(model);object.lastPrevModel=new Float32Array(previousModel);
   }
-  private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean):void{const mesh=this.mesh(entity.mesh!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
-  private drawShadowBatch(pass:GPUAny,batch:ShadowBatchPlan):void{const first=batch.items[0]!,mesh=this.mesh(first.mesh!),object=this.objects.get(first.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setVertexBuffer(1,batch.buffer);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count,batch.items.length);}
+  private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean):void{const mesh=this.mesh(renderPrimitive(entity)!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
+  private drawShadowBatch(pass:GPUAny,batch:ShadowBatchPlan):void{const first=batch.items[0]!,mesh=this.mesh(renderPrimitive(first)!),object=this.objects.get(first.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setVertexBuffer(1,batch.buffer);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count,batch.items.length);}
   private prepareShadowBatches(entities:readonly RuntimeEntity[],modelFor:(entity:RuntimeEntity)=>Mat4=(entity=>this.model(entity))):{singles:RuntimeEntity[];batches:ShadowBatchPlan[];instances:number}{
     const singles:RuntimeEntity[]=[],groups=new Map<string,{key:string;items:RuntimeEntity[];culled:boolean}>();
     for(const entity of entities){const key=shadowBatchKey(entity),culled=canCullBack(entity);let group=groups.get(key);if(!group){group={key,items:[],culled};groups.set(key,group);}group.items.push(entity);}
@@ -715,7 +716,7 @@ export class WebGPURenderer implements Renderer{
   }
   private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
-  private collect(scene:Scene):void{this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>e.material?.texture?[e.material.texture.url]:[])));const live=[...scene.entities.values()].filter(e=>e.mesh),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(e.mesh!)));if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id))this.modelCache.delete(id);for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.index.destroy();this.meshes.delete(key);}}
+  private collect(scene:Scene):void{this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>e.material?.texture?[e.material.texture.url]:[])));const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id))this.modelCache.delete(id);for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.index.destroy();this.meshes.delete(key);}}
   private label(text:string):GPUAny{
     if(!text)return this.gpu.emptyLabel;const cached=this.labels.get(text);if(cached)return cached;
     const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle='#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
@@ -729,7 +730,7 @@ export class WebGPURenderer implements Renderer{
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[{binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:(materialTexture??this.gpu.emptyLabel).createView()},{binding:5,resource:this.gpu.surfaceSampler}]}),object={uniform,bind,texture,width,height,owned:width>0,label,...(materialKey?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
-    const mesh=entity.mesh,base:Vec3=mesh?.kind==='box'||mesh?.kind==='shard'?mesh.size??[1,1,1]:mesh?.kind==='sphere'?[2*(mesh.radius??1),2*(mesh.radius??1),2*(mesh.radius??1)]:mesh?.kind==='plane'?[mesh.size?.[0]??1,1,mesh.size?.[1]??1]:[1,1,1];
+    const mesh=renderPrimitive(entity),base:Vec3=mesh?.kind==='box'||mesh?.kind==='shard'?mesh.size??[1,1,1]:mesh?.kind==='sphere'?[2*(mesh.radius??1),2*(mesh.radius??1),2*(mesh.radius??1)]:mesh?.kind==='plane'?[mesh.size?.[0]??1,1,mesh.size?.[1]??1]:[1,1,1];
     const px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.modelCache.get(entity.id);
     if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
     const matrix=compose(entity.position,entity.rotation,[sx,sy,sz]);this.modelCache.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix});return matrix;
@@ -771,9 +772,9 @@ function shadowGeometryKey(primitive:Primitive):string{
   let id=shadowPrimitiveIds.get(primitive as object);if(id===undefined){id=nextShadowPrimitiveId++;shadowPrimitiveIds.set(primitive as object,id);}
   return primitive.kind+':'+id;
 }
-function shadowBatchKey(entity:RuntimeEntity):string{return shadowGeometryKey(entity.mesh!)+'|'+(canCullBack(entity)?1:0);}
+function shadowBatchKey(entity:RuntimeEntity):string{return shadowGeometryKey(renderPrimitive(entity)!)+'|'+(canCullBack(entity)?1:0);}
 function canCullBack(entity:RuntimeEntity):boolean{
-  const kind=entity.mesh?.kind;
+  const kind=renderPrimitive(entity)?.kind;
   return kind==='box'||kind==='sphere'||kind==='cylinder'||kind==='torus'||kind==='polygon-prism';
 }
 function materialPipelineGroups(entities:readonly RuntimeEntity[]):Array<[[number,boolean],RuntimeEntity[]]>{
