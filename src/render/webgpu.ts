@@ -447,7 +447,7 @@ struct O {@builtin(position) position:vec4<f32>,@location(0) normal:vec3<f32>}
  var out:O;out.position=p.vp*world;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);return out;
 }
 @fragment fn fs(in:O)->@location(0) vec4<f32>{
- let n=normalize(in.normal),ndl=max(dot(n,p.sun.xyz),0.0),up=.35+1.15*max(n.y,0.0);
+ let n=normalize(in.normal);let ndl=max(dot(n,p.sun.xyz),0.0);let up=.35+1.15*max(n.y,0.0);
  let base=pow(max(u.color.rgb,vec3<f32>(0)),vec3<f32>(2.2));
  let radiance=base*(p.sky.rgb*up+p.sunColor.rgb*p.sun.w*ndl*.72)+u.emission.rgb;
  return vec4<f32>(radiance,1);
