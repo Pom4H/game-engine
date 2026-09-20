@@ -10,6 +10,7 @@ import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
 import {RenderProfiler} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
+import {buildSceneRadianceProbe} from './radiance.js';
 
 type GPUAny=any;
 export interface WebGPURendererOptions {profiling?:boolean}
@@ -332,9 +333,14 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let f0=mix(vec3<f32>(.04),base,metal);let fresnel=f0+(1.0-f0)*pow(1.0-vh,5.0);
   let specular=d*g*fresnel/max(4.0*nv*nl,.001);
   let shadow=shadowAt(in.worldPos,n);
-  let skyLuma=dot(f.sky.rgb,vec3<f32>(.2126,.7152,.0722));let diffuseSky=mix(vec3<f32>(skyLuma),f.sky.rgb,.42);let hemisphere=diffuseSky*(mix(.16,.38,smoothstep(-.65,0.0,n.y))+1.75*max(n.y,0.0));
-  let bounce=vec3<f32>(.10,.105,.11)*(1.0-max(n.y,0.0))*sunlight;
-  var color=base*(hemisphere+bounce)*(1.0-metal*.8)*materialAO;
+  // Diffuse and specular now query the same world-radiance representation.
+  // High-mip cubemap radiance is the cheap irradiance cache; screen-space
+  // transport later only refines local visibility/colour bleed.
+  let diffuseDirection=normalize(n+vec3<f32>(0,.16,0));
+  let diffuseEnvironment=textureSampleLevel(environmentMap,reflectionSampler,diffuseDirection,6.1).rgb;
+  let horizonEnvironment=textureSampleLevel(environmentMap,reflectionSampler,normalize(n+viewDir*.18),5.4).rgb;
+  let diffuseIrradiance=mix(diffuseEnvironment,horizonEnvironment,.16)*.94;
+  var color=base*diffuseIrradiance*(1.0-metal)*materialAO;
   color+=(base*(1.0-fresnel)*(1.0-metal)/3.14159+specular)*f.sunColor.rgb*f.sun.w*nl*shadow;
   let environmentFresnel=f0+(1.0-f0)*pow(1.0-nv,5.0);
   let reflectionDir=reflect(-viewDir,n);
@@ -459,7 +465,7 @@ export class WebGPURenderer implements Renderer{
     const frame=device.createBuffer({size:400,usage:0x40|0x08}),shadow=device.createTexture({size:[2048,2048],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
-    const environmentMap=device.createTexture({label:'prefiltered environment',size:[128,128,6],mipLevelCount:8,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
+    const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
     const surfaceSampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',maxAnisotropy:8});
     const emptyField=device.createTexture({size:[1,1],format:'rgba32float',usage:0x04|0x02}),emptyLabel=device.createTexture({size:[1,1],format:'rgba8unorm',usage:0x04|0x02});device.queue.writeTexture({texture:emptyField},new Float32Array(4),{bytesPerRow:16},[1,1]);device.queue.writeTexture({texture:emptyLabel},new Uint8Array(4),{bytesPerRow:4},[1,1]);
     const frameBind=device.createBindGroup({layout:frameLayout,entries:[{binding:0,resource:{buffer:frame}}]});
@@ -501,8 +507,8 @@ export class WebGPURenderer implements Renderer{
     for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
     const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04});
     this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.normal=texture('rgba16float',1);this.specular=texture('rgba8unorm',1);this.velocity=texture('rg16float',1);this.effectsHdr=texture('rgba16float',1);this.taaA=texture('rgba16float',1);this.taaB=texture('rgba16float',1);
-    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'depth32float',usage:0x10});
-    const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
+    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
+    const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
     const bloomBind=(texture:GPUAny)=>this.device.createBindGroup({layout:this.gpu.bloomLayout,entries:[{binding:0,resource:texture.createView()},{binding:1,resource:this.gpu.sampler}]});this.bloomDownBind=bloomBind(this.hdr);this.bloomHorizontalBind=bloomBind(this.bloomA);this.bloomVerticalBind=bloomBind(this.bloomB);
     this.gpu.lightBind=this.device.createBindGroup({layout:this.gpu.lightLayout,entries:[{binding:0,resource:{buffer:this.gpu.frame}},{binding:1,resource:this.gpu.shadow.createView()},{binding:2,resource:this.gpu.comparison},{binding:3,resource:this.reflection.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.lightBuffer}},{binding:6,resource:{buffer:this.gpu.cellBuffer}},{binding:7,resource:this.gpu.noiseVolume.createView()},{binding:8,resource:this.gpu.noiseSampler},{binding:9,resource:this.gpu.environmentView}]});
     this.effectsBind=this.device.createBindGroup({layout:this.gpu.effects.getBindGroupLayout(0),entries:[{binding:0,resource:this.hdr.createView()},{binding:1,resource:this.normal.createView()},{binding:2,resource:this.depth.createView()},{binding:3,resource:this.gpu.sampler},{binding:4,resource:{buffer:this.gpu.frame}},{binding:5,resource:this.specular.createView()},{binding:6,resource:this.bloomA.createView()}]});
@@ -535,7 +541,7 @@ export class WebGPURenderer implements Renderer{
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
       frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,1],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([scene.environment.sunlight,0,camera.focusDistance??20,camera.aperture??0],44);
       frame.set(multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0])),48);
-      frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,0],96);
+      frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);
       this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength,'frame');
       return{vp,settings,lightVP,right,up,frame};
     });
@@ -649,42 +655,14 @@ export class WebGPURenderer implements Renderer{
   dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
   private updateEnvironmentMap(scene:Scene):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
-    // Build a low-frequency radiance proxy from the actual scene palette. This is
-    // not a painted-in cubemap: changes to building/surface materials immediately
-    // alter the specular environment while keeping the probe essentially free.
-    const urban=[0,0,0],groundPalette=[0,0,0];let urbanWeight=0,groundWeight=0;
-    for(const entity of scene.entities.values()){
-      const material=entity.material,color=material.color;
-      const pattern=material.pattern;
-      if(pattern==='brick'||pattern==='plaster'||pattern==='window'||material.label){
-        const weight=pattern==='window'?.35:1;
-        urban[0]=urban[0]!+color[0]*weight;urban[1]=urban[1]!+color[1]*weight;urban[2]=urban[2]!+color[2]*weight;urbanWeight+=weight;
-      }
-      if(material.kind==='snow'||material.kind==='asphalt'||material.kind==='concrete'){
-        const weight=material.kind==='snow'?1.3:1;
-        groundPalette[0]=groundPalette[0]!+color[0]*weight;groundPalette[1]=groundPalette[1]!+color[1]*weight;groundPalette[2]=groundPalette[2]!+color[2]*weight;groundWeight+=weight;
-      }
-    }
-    const urbanColor:[number,number,number]=urbanWeight?[urban[0]!/urbanWeight,urban[1]!/urbanWeight,urban[2]!/urbanWeight]:[sky[0]*.7,sky[1]*.65,sky[2]*.6];
-    const groundColor:[number,number,number]=groundWeight?[groundPalette[0]!/groundWeight,groundPalette[1]!/groundWeight,groundPalette[2]!/groundWeight]:[sky[0]*.13,sky[1]*.12,sky[2]*.11];
-    const probe=scene.camera.target;
-    const proxies:{dir:Vec3;color:[number,number,number];threshold:number;strength:number}[]=[];
-    for(const entity of scene.entities.values()){
-      if(entity.material.color[3]<.98||entity.id.startsWith('passing-')||entity.id.startsWith('walker-'))continue;
-      const pattern=entity.material.pattern,kind=entity.material.kind;
-      if(!(pattern==='brick'||pattern==='plaster'||pattern==='window'||entity.material.label||kind==='concrete'||kind==='snow'||kind==='wood'))continue;
-      const delta=V3.sub(entity.position,probe),distance=V3.length(delta);if(distance<2.4||distance>85)continue;
-      const radius=pattern==='brick'||pattern==='plaster'?5.5:pattern==='window'?2.4:entity.material.label?2.2:kind==='snow'?2.8:kind==='concrete'?3.2:1.4;
-      const angle=Math.min(.72,Math.atan2(radius,distance)+.035),threshold=Math.cos(angle),direction=V3.scale(delta,1/distance),color=entity.material.color;
-      const emission=entity.material.emissive??[0,0,0],strength=(pattern==='window'?.78:pattern==='brick'||pattern==='plaster'?1:kind==='snow'?.72:.58)/(1+distance*.006);
-      proxies.push({dir:direction,color:[color[0]*.72+emission[0]*.18,color[1]*.72+emission[1]*.18,color[2]*.72+emission[2]*.18],threshold,strength});
-    }
-    proxies.sort((a,b)=>b.strength-a.strength);if(proxies.length>96)proxies.length=96;
-    const key=[...sun,...sunColor,...sky,...urbanColor,...groundColor,Math.round(probe[0]*2)/2,Math.round(probe[2]*2)/2,proxies.length,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20].map(value=>Number(value).toFixed(3)).join(':');
+    const radiance=buildSceneRadianceProbe(scene,scene.camera.target,128);
+    const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
+    const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
+    const key=[...sun,...sunColor,...sky,...urbanColor,...groundColor,Math.round(probe[0]*2)/2,Math.round(probe[2]*2)/2,proxies.length,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20,Math.round(scene.environment.humidity*20)/20].map(value=>Number(value).toFixed(3)).join(':');
     if(key===this.environmentKey)return;this.environmentKey=key;this.environmentUpdates++;
-    const levels=8;
+    const levels=9;
     for(let mip=0;mip<levels;mip++){
-      const size=Math.max(1,128>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
+      const size=Math.max(1,256>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
       for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
         const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
         const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
