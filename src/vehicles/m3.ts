@@ -175,7 +175,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     interior.push(Object.freeze({id:`interior-headrest-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.22,.22,.30] as const},position:[-.05,1.14,side*.37] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0}}));
   }
   const parts:ParametricVehiclePart[]=[
-    Object.freeze({id:'body',role:'paint',mesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
+    Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...grilleSlats,
     ...lowerIntake,
     ...frontDetail,
