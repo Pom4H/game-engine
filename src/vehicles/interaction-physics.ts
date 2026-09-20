@@ -76,8 +76,15 @@ export class ElasticPlasticPanelResponse {
   step(dt:number):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.05)throw new RangeError('Panel response dt must be in (0,.05]');
     for(const mode of this.modes){
-      const acceleration=-mode.omega*mode.omega*mode.elastic-2*mode.damping*mode.omega*mode.velocity;
-      mode.velocity+=acceleration*dt;mode.elastic+=mode.velocity*dt;
+      // Integrate the damped panel mode analytically. Automotive/glass local modes can be
+      // several kHz; an explicit or semi-implicit Euler step at 120 Hz is unstable there
+      // even though the physical response itself is perfectly bounded.
+      const omega=mode.omega,zeta=clamp(mode.damping,0,.999999),wd=omega*Math.sqrt(Math.max(1e-12,1-zeta*zeta));
+      const decay=Math.exp(-zeta*omega*dt),c=Math.cos(wd*dt),s=Math.sin(wd*dt);
+      const x0=mode.elastic,v0=mode.velocity,b=(v0+zeta*omega*x0)/wd,osc=x0*c+b*s;
+      const x=decay*osc,v=decay*(-zeta*omega*osc-x0*wd*s+b*wd*c);
+      if(!Number.isFinite(x)||!Number.isFinite(v))throw new Error('Non-finite panel mode response');
+      mode.elastic=x;mode.velocity=v;
       if(Math.abs(mode.elastic)<2e-6&&Math.abs(mode.velocity)<2e-5){mode.elastic=0;mode.velocity=0;}
     }
   }
