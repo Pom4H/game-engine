@@ -209,7 +209,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('hood-roundel-blue-'))return{...base,color:[.015,.19,.58,1]};
   if(part.id.startsWith('hood-roundel-white-'))return{...base,color:[.86,.89,.93,1]};
   if(part.id==='hood-roundel-ring')return{...base,color:[.012,.015,.020,1]};
-  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055};
+  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055,clearcoat:.94,clearcoatRoughness:.055};
   if(part.role==='glass')return{...base,color:[.075,.095,.115,.42],roughness:.065};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
