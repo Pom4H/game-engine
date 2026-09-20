@@ -234,8 +234,9 @@ export class StructuralBody {
         const j=i*3;
         for(let axis=0;axis<3;axis++){
           const k=j+axis;
-          this.position[k]=center[axis]+(this.position[k]!-center[axis])*ratio;
-          this.previous[k]=center[axis]+(this.previous[k]!-center[axis])*ratio;
+          const centerAxis=center[axis]!;
+          this.position[k]=centerAxis+(this.position[k]!-centerAxis)*ratio;
+          this.previous[k]=centerAxis+(this.previous[k]!-centerAxis)*ratio;
         }
       }
     }
