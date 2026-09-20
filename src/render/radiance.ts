@@ -31,7 +31,7 @@ export interface SceneRadianceProbe {
  */
 export function buildSceneRadianceProbe(scene:Scene,origin:Vec3=scene.camera.target,maxProxies=128):SceneRadianceProbe{
   const candidates:{proxy:RadianceProxy;score:number;ground:boolean}[]=[];
-  const background=[0,0,0],ground=[0,0,0];let backgroundWeight=0,groundWeight=0;
+  const background:[number,number,number]=[0,0,0],ground:[number,number,number]=[0,0,0];let backgroundWeight=0,groundWeight=0;
 
   for(const entity of scene.entities.values()){
     if(entity.material.color[3]<.98)continue;
@@ -97,7 +97,7 @@ function primitiveRadius(primitive:Primitive,scale:Vec3):number{
   if(primitive.kind==='torus')return (primitive.radius+primitive.tube)*Math.max(sx,sy,sz);
   if(primitive.kind==='cylinder')return Math.hypot(primitive.radius*Math.max(sx,sz),primitive.height*.5*sy);
   if(primitive.kind==='box'||primitive.kind==='shard'||primitive.kind==='snowdrift'){
-    const s=primitive.size;return .5*Math.hypot(s[0]*sx,s[1]*sy,s[2]*sz);
+    const s=primitive.size??[1,1,1];return .5*Math.hypot(s[0]*sx,s[1]*sy,s[2]*sz);
   }
   if(primitive.kind==='plane'){const s=primitive.size??[1,1];return .5*Math.hypot(s[0]*sx,s[1]*sz);}
   if(primitive.kind==='polygon-prism'){
