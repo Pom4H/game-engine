@@ -5,7 +5,7 @@ import {applyStructuralSkin} from '../physics/structural-skin.js';
 import {StructuralBody} from '../physics/structure.js';
 import type {EngineEvent,ImpactEvent,MechanismEvent} from '../scene/events.js';
 import type {Primitive} from '../scene/types.js';
-import {M3_PARAMETRIC_PROFILE,m3StructuralBlueprint,type M3StructuralBlueprint} from './m3.js';
+import {M3_PARAMETRIC_PROFILE,m3SmoothRenderBody,m3StructuralBlueprint,type M3StructuralBlueprint} from './m3.js';
 
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
 
@@ -294,7 +294,7 @@ export class M3InteractionRig {
 
   shellMesh(base:Extract<Primitive,{kind:'triangle-mesh'}>):Extract<Primitive,{kind:'triangle-mesh'}>{
     const positions=[...this.shellPositions()],normals=recomputeNormals(positions,base.indices);
-    return{kind:'triangle-mesh',positions,normals,indices:base.indices};
+    return m3SmoothRenderBody({kind:'triangle-mesh',positions,normals,indices:base.indices});
   }
 
   drainEvents():EngineEvent[]{return this.events.splice(0);}
