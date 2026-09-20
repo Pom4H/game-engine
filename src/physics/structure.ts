@@ -224,7 +224,7 @@ export class StructuralBody {
     for(let i=0;i<this.nodeCount;i++){
       const j=i*3;
       for(let axis=0;axis<3;axis++){
-        const k=j+axis,value=offset[axis];
+        const k=j+axis,value=offset[axis]!;
         this.position[k]=this.position[k]!+value;
         this.previous[k]=this.previous[k]!+value;
         this.originalPosition[k]=this.originalPosition[k]!+value;
