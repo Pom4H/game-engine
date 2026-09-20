@@ -609,8 +609,18 @@ export class WebGPURenderer implements Renderer{
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
+    const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
+    if(reflectionProbe){
+      const radius2=(reflectionProbe.radius+12)**2,candidates=classified.opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
+      for(let index=0;index<reflectionProbe.facesPerFrame;index++){
+        const face=(this.localProbeFace+index)%6,faceVp=probeVP(reflectionProbe.position,face,reflectionProbe.radius);
+        const entities=candidates.filter(entity=>{multiply4Into(faceVp,modelFor(entity),this.cullScratch);return intersectsClip(this.mesh(renderPrimitive(entity)!).bounds,this.cullScratch);});
+        probeFaces.push({face,vp:faceVp,entities});
+        const data=probeUniform(scene,reflectionProbe.position,faceVp);this.device.queue.writeBuffer(this.gpu.probeFrames[face],0,data);this.profiler.addUpload(data.byteLength,'frame');
+      }
+    }
     const prepared=new Map<string,RuntimeEntity>();
-    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...shadowDrawables,...culled.reflectedObjects])prepared.set(entity.id,entity);
+    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...shadowDrawables,...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
     this.profiler.measure('prepare',()=>{for(const entity of prepared.values())this.prepare(entity,modelFor(entity));});
     const shadowPlan=this.profiler.measure('prepare',()=>this.prepareShadowBatches(shadowDrawables,modelFor));
     this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:shadowPlan.instances});
@@ -622,6 +632,18 @@ export class WebGPURenderer implements Renderer{
       for(const batch of shadowPlan.batches){shadow.setPipeline(batch.culled?this.gpu.shadowCulledInstanced:this.gpu.shadowDoubleInstanced);this.drawShadowBatch(shadow,batch);}
       this.profiler.endOcclusion(shadow,query);shadow.end();
     });
+    this.profiler.measure('encode.probe',()=>{
+      const settings=scene.spec.rendering??{},sky=settings.skyColor??[.26,.34,.47];
+      for(let index=0;index<probeFaces.length;index++){
+        const capture=probeFaces[index]!,timing=index===0?this.profiler.timestampWrites('probe'):undefined;
+        const view=this.gpu.localProbeMap.createView({dimension:'2d',baseArrayLayer:capture.face,arrayLayerCount:1});
+        const pass=encoder.beginRenderPass({label:`render.probe.${capture.face}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view,clearValue:{r:sky[0]*1.05,g:sky[1]*1.05,b:sky[2]*1.05,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.gpu.localProbeDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
+        pass.setBindGroup(1,this.gpu.probeFrameBinds[capture.face]);
+        for(const [culled,group] of partitionByCull(capture.entities)){pass.setPipeline(culled?this.gpu.probeCulled:this.gpu.probeDouble);for(const entity of group)this.draw(pass,entity,false);}
+        pass.end();
+      }
+    });
+    if(probeFaces.length){for(const capture of probeFaces)this.localProbeMask|=1<<capture.face;this.localProbeFace=(probeFaces.at(-1)!.face+1)%6;}
     this.profiler.measure('encode.reflection',()=>{
       const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
       reflect.setBindGroup(1,this.gpu.reflectionBind);const query=this.profiler.beginOcclusion(reflect,'reflection');
