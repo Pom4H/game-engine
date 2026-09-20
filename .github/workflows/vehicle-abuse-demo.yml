@@ -1,0 +1,48 @@
+name: M3 human interaction demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [physics/adaptive-xpbd-structure]
+    paths:
+      - 'src/vehicles/**'
+      - 'src/physics/**'
+      - 'src/materials/**'
+      - 'src/audio/**'
+      - 'src/scene/events.ts'
+      - 'tools/vehicle-abuse/**'
+      - 'test/vehicle-interaction.test.mjs'
+      - '.github/workflows/vehicle-abuse-demo.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vehicle-abuse-demo
+  cancel-in-progress: true
+
+jobs:
+  record:
+    runs-on: self-hosted
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Verify engine and interaction physics
+        run: bun run ci
+      - name: Record physical interaction scene
+        run: node tools/vehicle-abuse/capture.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: m3-human-interaction-${{ github.sha }}
+          path: artifacts/vehicle-abuse/
+          if-no-files-found: error
+          retention-days: 14
