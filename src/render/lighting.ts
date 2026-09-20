@@ -14,12 +14,19 @@ fn hash(p:vec2<f32>)->f32 {return fract(sin(dot(p,vec2<f32>(127.1,311.7)))*43758
 fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);return mix(mix(hash(i),hash(i+vec2<f32>(1,0)),q.x),mix(hash(i+vec2<f32>(0,1)),hash(i+vec2<f32>(1,1)),q.x),q.y);}
 @fragment fn fs(i:Out)->@location(0) vec4<f32>{
  let p=i.uv*2.0-1.0;let ray=normalize(f.forward.xyz+f.right.xyz*p.x*f.right.w*f.forward.w+f.up.xyz*p.y*f.forward.w);
- let horizon=f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027;
- var color=mix(horizon,f.sky.rgb*.45,pow(max(ray.y,0.0),.5));
- let sun=max(dot(ray,f.sun.xyz),0.0);color+=f.sunColor.rgb*f.sun.w*(pow(sun,90.0)*.1+smoothstep(.99972,.9999,sun)*1.8);
+ let clear=smoothstep(.58,.92,f.environment.y);
+ let authoredHorizon=f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027;
+ let clearHorizon=vec3<f32>(.56,.73,.94),clearZenith=vec3<f32>(.10,.28,.62);
+ let horizon=mix(authoredHorizon,clearHorizon,clear*.58);
+ let zenith=mix(f.sky.rgb*.45,clearZenith,clear*.68);
+ var color=mix(horizon,zenith,pow(max(ray.y,0.0),.55));
+ let sun=max(dot(ray,f.sun.xyz),0.0);color+=f.sunColor.rgb*f.sun.w*(pow(sun,110.0)*.085+smoothstep(.99976,.99993,sun)*1.65);
  let q=ray.xz/max(.10,ray.y)*.8+vec2<f32>(f.up.w*.001,0);
  let clouds=noise(q)*.55+noise(q*2.1)*.29+noise(q*4.2)*.16;
- color=mix(color,f.sky.rgb*1.30,smoothstep(.52,.86,clouds)*smoothstep(.02,.35,ray.y)*.36);
+ let cloudOpacity=(1.0-clear*.82)*smoothstep(.52,.86,clouds)*smoothstep(.02,.35,ray.y)*.32;
+ color=mix(color,mix(f.sky.rgb*1.24,vec3<f32>(.88,.92,.97),clear*.35),cloudOpacity);
+ // Bright clear winter horizons retain aerial perspective without grey fogging the whole frame.
+ color+=clear*vec3<f32>(.08,.10,.13)*pow(1.0-max(ray.y,0.0),5.0);
  return vec4<f32>(color,1);
 }`;
 /** Threshold/downsample followed by two separable Gaussian passes. Sampling a
@@ -179,7 +186,7 @@ fn acesPresent(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
  var color=textureSampleLevel(source,linearSampler,in.uv,0).rgb*f.sunColor.w;
  color=pow(acesPresent(color),vec3<f32>(1.0/2.2));
- let vignette=1.0-.13*pow(length((in.uv-.5)*vec2<f32>(1.1,1.0)),1.8);
+ let vignette=1.0-.045*pow(length((in.uv-.5)*vec2<f32>(1.1,1.0)),1.8);
  return vec4<f32>(color*vignette,1);
 }
 `;
