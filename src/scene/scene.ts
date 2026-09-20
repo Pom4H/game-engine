@@ -165,11 +165,13 @@ export class Scene {
           if(result.fracture){
             if(this.pendingFractures.has(result.fracture.body.id))return{mode:'penetrate',energyLoss:0};
             this.pendingFractures.set(result.fracture.body.id,result.fracture);
+            return result.decision;
           }
-          return result.decision;
+          const plasticWork=this.deformation.absorbContact(contact,this.entities);
+          return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
         });
       })
-      .use('deformation',()=>{this.deformation.step(this.physics.contacts,this.entities);})
+      .use('deformation',()=>{this.deformation.step(this.entities);})
       .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
       .use('events',({at})=>{this.emitContactEvents(at);})
       .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
