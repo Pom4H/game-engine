@@ -7,6 +7,15 @@ import type {PassengerVehicleProfile} from './passenger.js';
  * vertices/topology. Values come from the independently authored TheGame profile
  * whose local FBX comparison was tightened to ~6 mm mean sampled envelope error.
  */
+export const M3_REFERENCE_PROVENANCE=Object.freeze({
+  source:'BMW M3.fbx',
+  sha256:'9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67',
+  sourceBytes:241628,
+  representation:'authored parametric control sections',
+  origin:'TheGame procedural M3 profile, no imported FBX vertices/topology at runtime',
+  sampledEnvelopeMeanErrorMm:Object.freeze({width:6.4,top:6.0,bottom:6.8}),
+});
+
 export const M3_PARAMETRIC_PROFILE:PassengerVehicleProfile=Object.freeze({
   id:'m3-procedural',
   dimensions:Object.freeze({
