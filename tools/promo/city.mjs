@@ -182,7 +182,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  // chunks and sparse pushed-up crests. Weather/contacts still own later change.
  const dressing=rng(617309);
  for(const side of [-1,1]){
-  for(let i=0;i<360;i++){
+  for(let i=0;i<120;i++){
    const xx=-50+dressing()*134,zz=side*(2.98+dressing()*.57),size=.025+dressing()*.115;
    lump('plough-grit-'+side+'-'+i,[xx,.007+size*.13,zz],[size*(1.2+dressing()),size*.48,size],i%3===0?[.40,.385,.34,1]:[.66,.66,.61,1]);
   }
@@ -201,12 +201,12 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
    const xx=-49+i*1.55+(dressing()-.5)*.6;
    bank('walk-edge-'+side+'-'+i,[xx,.152,side*(6.49+(dressing()-.5)*.17)],[.65+dressing()*.75,.028+dressing()*.06,.48+dressing()*.50],78000+i*11+side,12);
   }
-  for(let i=0;i<900;i++){
+  for(let i=0;i<300;i++){
    const xx=-48+dressing()*132,edge=i%3===0?4.18+dressing()*.35:5.72+dressing()*.68,r=.009+dressing()*.035;
    lump('walk-grain-'+side+'-'+i,[xx,.181+r*.09,side*edge],[r*(1.1+dressing()),r*.40,r],i%11===0?[.64,.635,.595,1]:[.90,.92,.90,1]);
   }
   // Small compacted slush fragments remain between the cleared wheel tracks.
-  for(let i=0;i<160;i++){const xx=-48+dressing()*132,zz=side*(.12+dressing()*.29),size=.023+dressing()*.075;lump('centre-slush-'+side+'-'+i,[xx,.004,zz],[size*1.9,size*.25,size],[.44,.44,.405,1]);}
+  for(let i=0;i<60;i++){const xx=-48+dressing()*132,zz=side*(.12+dressing()*.29),size=.023+dressing()*.075;lump('centre-slush-'+side+'-'+i,[xx,.004,zz],[size*1.9,size*.25,size],[.44,.44,.405,1]);}
  }
  // Markings worn and partially buried in the wet carriageway.
  // The old lane line is mostly covered by ploughed wet snow.
