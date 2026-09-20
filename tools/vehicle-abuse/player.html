@@ -12,14 +12,14 @@ window.addEventListener('error',event=>{window.failure=event.error?.stack??event
 window.addEventListener('unhandledrejection',event=>{window.failure=event.reason?.stack??String(event.reason);});
 </script>
 <script type="module">
-import {Scene,M3InteractionRig,generateM3Vehicle} from '/dist/index.js';
+import {Scene,M3InteractionRig,generateM3Vehicle,clothLoftMesh} from '/dist/index.js';
 import {WebGPURenderer} from '/dist/browser.js';
 import {VEHICLE_ABUSE_DURATION,createVehicleAbuseScript,humanPose,phaseAt} from '/timeline.mjs';
 
 window.ready=false;window.failure=null;
 try{
 const canvas=document.getElementById('world'),renderer=await WebGPURenderer.create(canvas),geometry=generateM3Vehicle();
-const paint=[.040,.052,.068,1];
+const paint=[.17,.205,.255,1];
 const roleMaterial=role=>role==='paint'?{kind:'default',color:paint,roughness:.18,metalness:.10}:role==='glass'?{kind:'default',color:[.018,.028,.036,1],roughness:.075,metalness:.12,pattern:'window'}:role==='tire'?{kind:'default',color:[.016,.017,.018,1],roughness:.97,pattern:'rubber'}:role==='rim'||role==='metal'?{kind:'steel',color:[.12,.13,.14,1],roughness:.20,metalness:.92}:{kind:'default',color:[.028,.031,.034,1],roughness:.44};
 const carEntities=geometry.parts.filter(part=>part.role!=='light'&&part.role!=='tail'&&part.role!=='glass').map(part=>({id:'m3-'+part.id,position:[...part.position],rotation:[...(part.rotation??[0,0,0])],mesh:part.mesh,material:roleMaterial(part.role)}));
 for(const side of [-1,1]){
@@ -30,12 +30,17 @@ carEntities.push(
  {id:'m3-cabin-core',position:[-.54,1.03,0],rotation:[0,0,0],mesh:{kind:'box',size:[2.82,.82,1.56]},material:{kind:'default',color:[.008,.012,.016,1],roughness:.84}},
  {id:'m3-dashboard',position:[.58,.90,0],rotation:[0,0,0],mesh:{kind:'box',size:[.34,.16,1.28]},material:{kind:'default',color:[.018,.020,.021,1],roughness:.90}}
 );
+const loft=(rings,roundness=.86,folds=.012,seed=1)=>clothLoftMesh({rings,roundness,folds,seed,radialSegments:28,subdivisions:3});
+const torsoMesh=loft([[-.5,.39,.35],[-.28,.49,.43],[.08,.47,.41],[.36,.41,.37],[.5,.34,.31]],.86,.018,17);
+const limbMesh=loft([[-.5,.40,.42],[-.28,.49,.49],[.08,.48,.47],[.34,.44,.44],[.5,.38,.39]],.92,.010,23);
+const bootMesh=loft([[-.5,.42,.44],[-.22,.50,.48],[.12,.44,.46],[.33,.30,.41],[.5,.25,.34]],.70,.006,31);
 const human=[
- {id:'person:torso',mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:[.17,.20,.19,1],roughness:.92}},
- {id:'person:head',mesh:{kind:'sphere',radius:.5,segments:20},material:{kind:'default',color:[.45,.31,.24,1],roughness:.78}},
- ...['l-upper-arm','l-forearm','r-upper-arm','r-forearm','l-thigh','l-shin','r-thigh','r-shin'].map(id=>({id:'person:'+id,mesh:{kind:'cylinder',radius:.5,height:1,segments:14},material:{kind:'default',color:id.includes('arm')?[.105,.11,.105,1]:[.055,.058,.06,1],roughness:.95}})),
- ...['l-hand','r-hand'].map(id=>({id:'person:'+id,mesh:{kind:'sphere',radius:.5,segments:12},material:{kind:'default',color:[.43,.29,.22,1],roughness:.8}})),
- ...['l-foot','r-foot'].map(id=>({id:'person:'+id,mesh:{kind:'box',size:[1,1,1]},material:{kind:'default',color:[.055,.06,.062,1],roughness:.96}})),
+ {id:'person:torso',mesh:torsoMesh,material:{kind:'default',color:[.20,.22,.205,1],roughness:.94,pattern:'fabric'}},
+ {id:'person:head',mesh:{kind:'sphere',radius:.5,segments:28},material:{kind:'default',color:[.53,.36,.27,1],roughness:.72}},
+ ...['l-upper-arm','l-forearm','r-upper-arm','r-forearm'].map(id=>({id:'person:'+id,mesh:limbMesh,material:{kind:'default',color:[.18,.19,.18,1],roughness:.95,pattern:'fabric'}})),
+ ...['l-thigh','l-shin','r-thigh','r-shin'].map(id=>({id:'person:'+id,mesh:limbMesh,material:{kind:'default',color:[.075,.082,.09,1],roughness:.96,pattern:'fabric'}})),
+ ...['l-hand','r-hand'].map(id=>({id:'person:'+id,mesh:{kind:'sphere',radius:.5,segments:18},material:{kind:'default',color:[.50,.33,.25,1],roughness:.76}})),
+ ...['l-foot','r-foot'].map(id=>({id:'person:'+id,mesh:bootMesh,material:{kind:'default',color:[.055,.058,.06,1],roughness:.96}})),
 ];
 const yardEntities=[
  {id:'ground',position:[0,-.17,0],mesh:{kind:'box',size:[26,.12,18]},material:{kind:'concrete',color:[.34,.315,.275,1],roughness:.86},environmental:{surfaceUse:'road'}},
@@ -56,8 +61,8 @@ yardEntities.push(
  {id:'cabinet-top',position:[-3.85,.98,3.72],mesh:{kind:'box',size:[.76,.045,.52]},material:{kind:'steel',color:[.12,.12,.115,1],roughness:.32,metalness:.82}},
  {id:'dumpster',position:[7.2,.64,3.70],mesh:{kind:'box',size:[1.35,1.28,.82]},material:{kind:'default',color:[.12,.19,.13,1],roughness:.88,ageYears:18}},
  {id:'crate',position:[-5.0,.25,3.65],mesh:{kind:'box',size:[.74,.50,.62]},material:{kind:'default',color:[.32,.20,.105,1],roughness:.93}},
- {id:'puddle-a',position:[4.0,-.103,-1.2],mesh:{kind:'box',size:[2.6,.012,1.2]},material:{kind:'glass',color:[.055,.075,.085,.28],roughness:.08,metalness:.08}},
- {id:'puddle-b',position:[-4.6,-.102,1.45],mesh:{kind:'box',size:[1.7,.012,.72]},material:{kind:'glass',color:[.05,.065,.075,.25],roughness:.09}}
+ {id:'puddle-a',position:[4.0,-.103,-1.2],mesh:{kind:'box',size:[2.6,.012,1.2]},material:{kind:'default',color:[.095,.10,.095,1],roughness:.28,metalness:.02}},
+ {id:'puddle-b',position:[-4.6,-.102,1.45],mesh:{kind:'box',size:[1.7,.012,.72]},material:{kind:'default',color:[.09,.095,.09,1],roughness:.30,metalness:.02}}
 );
 for(let i=0;i<5;i++)yardEntities.push({id:'tire-stack-'+i,position:[-5.1,.12+i*.19,3.18],rotation:[Math.PI/2,0,0],mesh:{kind:'torus',radius:.31,tube:.085,segments:24},material:{kind:'default',color:[.025,.025,.024,1],roughness:.98,pattern:'rubber'}});
 for(let i=0;i<7;i++)yardEntities.push({id:'yard-seam-'+i,position:[0,-.102,-5.8+i*1.75],mesh:{kind:'box',size:[21,.012,.018]},material:{kind:'default',color:[.08,.075,.067,1],roughness:.98}});
@@ -65,7 +70,7 @@ for(let i=0;i<7;i++)yardEntities.push({id:'yard-seam-'+i,position:[0,-.102,-5.8+
 const scene=new Scene({
  version:1,seed:26092026,gravity:[0,-9.81,0],ground:-.11,clearColor:[.52,.68,.86,1],
  environment:{temperatureC:15,humidity:.43,precipitation:'rare',snowfall:'none',sunlight:.92,groundMoisture:.18,wind:[.8,0,.25],clock:{startHour:15.2}},
- rendering:{sunDirection:[.55,.65,-.52],sunColor:[1.0,.90,.72],skyColor:[.52,.68,.88],sunIntensity:3.15,exposure:1.12,shadowExtent:30,fogDensity:.0007},
+ rendering:{sunDirection:[.49,.69,-.53],sunColor:[1.0,.88,.68],skyColor:[.24,.36,.52],sunIntensity:4.10,exposure:.93,shadowExtent:24,fogDensity:.0004},
  camera:{position:[4.8,1.75,-5.0],target:[.35,.82,-.05],fov:40,focusDistance:7,aperture:.035},
  entities:[
   ...yardEntities,
@@ -82,7 +87,7 @@ const bodyBase=geometry.body;let simSteps=0;const events=[],telemetry=[];
 const mix=(a,b,t)=>a+(b-a)*t;
 
 const rotate=(p,r)=>{const [rx,,rz]=r,sx=Math.sin(rx),cx=Math.cos(rx),sz=Math.sin(rz),cz=Math.cos(rz);let [x,y,z]=p;const x1=x*cz-y*sz,y1=x*sz+y*cz;return[x1,y1*cx-z*sx,y1*sx+z*cx];};
-function applyCar(){
+function applyCar(time=0){
  const state=rig.state,pose=state.suspension,rotation=[pose.roll,0,pose.pitch],scale=state.thermalScale;
  for(const [id,base] of baseParts){
   const e=scene.entities.get(id);if(!e)continue;
@@ -91,7 +96,8 @@ function applyCar(){
  }
  const body=scene.entities.get('m3-body');body.mesh=rig.shellMesh(bodyBase);
  const theta=-rig.door.angle,hinge=[.98,.77,-.952],dx=-.55,c=Math.cos(theta),s=Math.sin(theta),doorLocal=[hinge[0]+c*dx,hinge[1],hinge[2]-s*dx],doorWorld=rotate(doorLocal,rotation);
- const door=scene.entities.get('door-panel'),glass=scene.entities.get('door-window'),opening=scene.entities.get('door-opening');
+ const door=scene.entities.get('door-panel'),glass=scene.entities.get('door-window'),opening=scene.entities.get('door-opening'),doorShot=time>=3.05&&time<7.92;
+ const show=doorShot?1:0;door.scale.splice(0,3,show,show,show);glass.scale.splice(0,3,show,show,show);opening.scale.splice(0,3,show,show,show);
  door.position.splice(0,3,doorWorld[0],doorWorld[1]+pose.heave,doorWorld[2]);door.rotation.splice(0,3,rotation[0],theta,rotation[2]);
  const winOffset=rotate([0,.47,0],rotation);glass.position.splice(0,3,doorWorld[0]+winOffset[0],doorWorld[1]+pose.heave+winOffset[1],doorWorld[2]+winOffset[2]);glass.rotation.splice(0,3,rotation[0],theta,rotation[2]);
  const op=rotate([.43,.77,-.947],rotation);opening.position.splice(0,3,op[0],op[1]+pose.heave,op[2]);opening.rotation.splice(0,3,...rotation);
@@ -111,8 +117,9 @@ function applyHuman(time){
    const k=Math.sin(Math.PI*Math.max(0,Math.min(1,(p.strike-.08)/.55)))**2;
    lf=[r[0]-.13,r[1]+.05,r[2]-.09];rf=[r[0]+.10,r[1]+.08+.28*k,r[2]+.12+.58*k];
  }
- const hipY=r[1]+.88,lh=[r[0]-.08,hipY,r[2]-.13],rh=[r[0]+.08,hipY,r[2]+.13],lk=[(lh[0]+lf[0])/2-.05,(lh[1]+lf[1])/2,r[2]-.13],rk=[(rh[0]+rf[0])/2+.05,(rh[1]+rf[1])/2,r[2]+.13];
- const chest=[r[0],r[1]+1.26,r[2]],ls=[r[0],r[1]+1.43,r[2]-.22],rs=[r[0],r[1]+1.43,r[2]+.22];
+ const dynamic=(p.action==='hood'||p.action==='roof')?Math.max(0,Math.sin(p.strike*Math.PI*2)):0,kneeDrop=(p.action==='hood'?0.07:0.12)*dynamic;
+ const hipY=r[1]+.88-kneeDrop,lh=[r[0]-.08,hipY,r[2]-.13],rh=[r[0]+.08,hipY,r[2]+.13],lk=[(lh[0]+lf[0])/2+.06,(lh[1]+lf[1])/2-.05-kneeDrop,r[2]-.13],rk=[(rh[0]+rf[0])/2+.09,(rh[1]+rf[1])/2-.05-kneeDrop,r[2]+.13];
+ const lean=p.action==='kick'?.10:p.action==='roof'?.035*dynamic:0,chest=[r[0]+lean,r[1]+1.26-kneeDrop*.45,r[2]],ls=[r[0]+lean,r[1]+1.43-kneeDrop*.35,r[2]-.22],rs=[r[0]+lean,r[1]+1.43-kneeDrop*.35,r[2]+.22];
  let lhnd=[r[0]-.18,r[1]+1.05,r[2]-.32],rhnd=[r[0]+.18,r[1]+1.05,r[2]+.32];
  if(p.action==='door'){rhnd=[.62,1.00,-1.03];lhnd=[r[0]-.2,1.05,r[2]-.25];}
  if(p.action==='hand'){
@@ -120,23 +127,24 @@ function applyHuman(time){
    const pulse=Math.exp(-(((time-targets[1])/.11)**2)),target=targets[0];
    rhnd=[mix(rs[0],target[0],pulse),mix(rs[1]-.15,target[1],pulse),mix(rs[2],target[2],pulse)];
  }
- if(p.action==='hood'||p.action==='roof'){lhnd=[r[0]-.30,r[1]+1.12,r[2]-.35];rhnd=[r[0]+.30,r[1]+1.12,r[2]+.35];}
+ if(p.action==='hood'||p.action==='roof'){const swing=Math.sin(p.strike*Math.PI*2);lhnd=[r[0]-.24-.13*swing,r[1]+1.13+.16*Math.max(0,-swing),r[2]-.42];rhnd=[r[0]+.24+.13*swing,r[1]+1.13+.16*Math.max(0,swing),r[2]+.42];}
  if(p.action==='kick'){lhnd=[r[0]-.22,r[1]+1.08,r[2]-.26];rhnd=[r[0]+.18,r[1]+1.12,r[2]+.24];}
  const le=[(ls[0]+lhnd[0])/2-.05,(ls[1]+lhnd[1])/2, (ls[2]+lhnd[2])/2],re=[(rs[0]+rhnd[0])/2+.05,(rs[1]+rhnd[1])/2,(rs[2]+rhnd[2])/2];
- const torso=scene.entities.get('person:torso');torso.position.splice(0,3,...chest);torso.scale.splice(0,3,.42,.68,.32);
+ const torso=scene.entities.get('person:torso');torso.position.splice(0,3,...chest);torso.scale.splice(0,3,.52,.78,.42);torso.rotation.splice(0,3,0,0,p.action==='kick'?-0.12:p.action==='roof'?.04*dynamic:0);
  const head=scene.entities.get('person:head');head.position.splice(0,3,r[0],r[1]+1.78,r[2]);head.scale.splice(0,3,.20,.23,.19);
  bone('l-thigh',lh,lk,.15);bone('l-shin',lk,lf,.13);bone('r-thigh',rh,rk,.15);bone('r-shin',rk,rf,.13);
  bone('l-upper-arm',ls,le,.12);bone('l-forearm',le,lhnd,.10);bone('r-upper-arm',rs,re,.12);bone('r-forearm',re,rhnd,.10);
  for(const [id,pos] of [['l-hand',lhnd],['r-hand',rhnd]]){const e=scene.entities.get('person:'+id);e.position.splice(0,3,...pos);e.scale.splice(0,3,.105,.105,.105);}
- for(const [id,pos] of [['l-foot',lf],['r-foot',rf]]){const e=scene.entities.get('person:'+id);e.position.splice(0,3,...pos);e.scale.splice(0,3,.28,.08,.14);}
+ for(const [id,pos] of [['l-foot',lf],['r-foot',rf]]){const e=scene.entities.get('person:'+id);e.position.splice(0,3,...pos);e.scale.splice(0,3,.34,.17,.20);}
 }
 function cameraAt(t){
- if(t<7.9)return{position:[4.9,1.72,-5.15],target:[.28,.82,-.10],fov:39,focusDistance:7,aperture:.032};
- if(t<10.8)return{position:[3.65,1.45,-3.72],target:[.82,1.08,-.24],fov:37,focusDistance:5.6,aperture:.028};
- if(t<16.8)return{position:[4.05,1.62,-3.45],target:[1.02,.95,0],fov:36,focusDistance:5.3,aperture:.026};
- if(t<22.8)return{position:[3.05,1.92,-3.20],target:[-.04,1.18,0],fov:35,focusDistance:4.9,aperture:.028};
- if(t<30.4)return{position:[3.85,1.42,-3.72],target:[.10,.78,-.18],fov:37,focusDistance:5.3,aperture:.024};
- return{position:[3.00,1.18,-2.72],target:[.72,.96,-.06],fov:32,focusDistance:4.0,aperture:.022};
+ if(t<3.05)return{position:[5.7,1.62,-5.55],target:[.25,.78,-.08],fov:36,focusDistance:7.8,aperture:.026};
+ if(t<7.92)return{position:[3.20,1.34,-3.05],target:[.48,.92,-.72],fov:34,focusDistance:4.5,aperture:.024};
+ if(t<10.8)return{position:[2.95,1.32,-2.68],target:[1.05,1.04,-.20],fov:31,focusDistance:3.55,aperture:.020};
+ if(t<16.8)return{position:[3.10,1.38,-2.62],target:[1.22,.94,-.02],fov:29,focusDistance:3.35,aperture:.018};
+ if(t<22.8)return{position:[2.20,1.82,-2.48],target:[-.03,1.36,-.02],fov:28,focusDistance:3.1,aperture:.018};
+ if(t<30.4)return{position:[2.95,1.14,-2.72],target:[.18,.71,-.67],fov:31,focusDistance:3.65,aperture:.020};
+ return{position:[2.58,1.24,-2.35],target:[.42,1.00,-.04],fov:27,focusDistance:3.1,aperture:.018};
 }
 async function reset(){
  simSteps=0;events.length=0;telemetry.length=0;
@@ -153,7 +161,7 @@ window.demo={
      script.step(1/120);events.push(...rig.drainEvents());simSteps++;
      if(simSteps%2===0)scene.step(1/60);
    }
-   applyCar();applyHuman(t);scene.camera=cameraAt(t);
+   applyCar(t);applyHuman(t);scene.camera=cameraAt(t);
    const phase=phaseAt(t),state=rig.state;
    document.getElementById('phase').textContent=phase.label;
    document.getElementById('metrics').textContent=
@@ -169,7 +177,7 @@ window.demo={
  inspect(){return{...renderer.inspect(),time:simSteps/120,state:rig.state,events:events.length,phase:phaseAt(simSteps/120).label};},
  events(){return events;},telemetry(){return telemetry;}
 };
-applyCar();applyHuman(0);renderer.render(scene);await renderer.flush();
+applyCar(0);applyHuman(0);renderer.render(scene);await renderer.flush();
 }catch(error){
   window.failure=error?.stack??String(error);console.error(error);
 }
