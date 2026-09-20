@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DoorHinge,ElasticPlasticPanelResponse,FourCornerSuspension,M3InteractionRig,
-  M3_REFERENCE_PROVENANCE,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
+  M3_REFERENCE_PROVENANCE,Scene,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
   material,renderAudio,thermalLinearScale,
 } from '../dist/index.js';
 
@@ -127,8 +127,10 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
   assert.equal(byId.get('tire-front-left').material.kind,'rubber');
 
   const window=byId.get('window-front-right'),tire=byId.get('tire-front-right');
-  assert.equal(m3PartBody(window,false).mass,0,'parked glazing must stay mounted/static');
-  assert.equal(m3PartBody(window,true).motion,'kinematic','moving glazing must publish contact velocity for fracture');
+  const parkedWindow=m3PartBody(window,false),movingWindow=m3PartBody(window,true);
+  assert.equal(parkedWindow.mass,0,'parked glazing must stay mounted/static');
+  assert.equal(movingWindow.motion,'kinematic','moving glazing must publish contact velocity for fracture');
+  assert.ok(parkedWindow.collisionSize[2]<=.005,'side glazing collision thickness must be physical rather than its curved mesh AABB');
   assert.equal(m3PartBody(tire,true),undefined,'tyres share vehicle/wheel physics rather than adding duplicate rigid mass');
   assert.equal(m3PartMaterial(window,[.1,.2,.3,1],false).kind,'glass');
   assert.ok(m3PartMaterial(window,[.1,.2,.3,1],false).color[3]<.98,'automotive glazing should enter the transparent render path');
@@ -148,4 +150,23 @@ test('split M3 glazing has local geometry around its own origin for contact and 
     assert.ok(Math.hypot(...center)<1e-5,`${part.id} mesh should be local to part origin, got ${center}`);
     assert.ok(Math.hypot(...part.position)>.5,`${part.id} should retain its vehicle-local mounting origin`);
   }
+});
+
+
+test('an imported M3 side window fractures through the normal Scene contact pipeline',()=>{
+  const m3=generateM3Vehicle(),window=m3.parts.find(part=>part.id==='window-front-left');
+  assert.ok(window);
+  const id='m3-window-front-left',position=[...window.position],scene=new Scene({
+    version:1,gravity:[0,0,0],ground:-100,
+    entities:[
+      {id,position,mesh:window.mesh,material:m3PartMaterial(window),body:m3PartBody(window,false)},
+      {id:'impactor',position:[position[0],position[1],position[2]-.42],mesh:{kind:'sphere',radius:.06},material:{kind:'steel'},body:{mass:2,velocity:[0,0,8]}},
+    ],
+  });
+  const events=[];for(let i=0;i<18;i++){scene.step(1/60);events.push(...scene.drainEvents());}
+  assert.equal(scene.entities.has(id),false,'window should be removed after brittle failure');
+  const fracture=events.find(event=>event.type==='fracture'&&event.entity===id);
+  assert.ok(fracture,'FBX-derived glazing must reach the shared material fracture system');
+  assert.ok(fracture.thickness<=.0055,fracture);
+  assert.ok([...scene.entities.keys()].some(key=>key.startsWith(id+':shard:')),'fracture should create engine-owned debris');
 });
