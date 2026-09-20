@@ -9,7 +9,7 @@ The visual target is the supplied winter-street reference. The current scene use
 | Time | Take | Visible mechanism |
 |---|---|---|
 | 00–08 | Street arrival | Walker on the right, wet street on the left, snow-covered architecture and warm shops |
-| 08–16 | BMW M3 | Imported geometry, coherent rolling wheels, wet contact and native spray |
+| 08–16 | BMW M3 | Procedural body reconstructed from compact control sections, coherent rolling wheels, wet contact and native spray |
 | 16–24 | Pedestrian | Planted-foot locomotion, terrain-aware placement, articulated winter clothing |
 | 24–30 | Boots close-up | Surface compression and the persistent trail created by real foot contacts |
 | 30–38 | Snowbanks | Irregular piles, granular material detail and wind-driven falling flakes |
@@ -22,7 +22,7 @@ Every take reconstructs the authored scene and advances it to the correct point 
 | Concern | Native engine | Scene authoring / movie tools |
 |---|---|---|
 | Character movement | `AnimationSystem`: timing, stance anchors, terrain sampling, two-bone IK and resulting transforms | Character geometry, garment shapes, joint bindings, starting pose and route parameters |
-| Car movement | Native vehicle motion and wheel rotation, physics contact bodies | Imported M3 parts, route velocity, wheel radius and contact bindings |
+| Car movement | Native vehicle motion and wheel rotation, physics contact bodies | Compact M3 control profile, route velocity and contact bindings; geometry is generated once and reused |
 | Snow contact | `SurfaceContactSystem`, `SnowFootprints`, `SnowSurface`: contact detection, persistent records, bounded adaptive tiles and mesh deformation | Surface IDs, material appearance, optional geometry budgets |
 | Water contact | Surface bounds and water-state queries, wheel contact, bounded particle pool and ballistic spray | Authored road/puddle geometry and initial water depth |
 | Lighting and materials | WebGPU shading, many-light grid, shadow mapping, reflections, texture loading/sampling/cache ownership | Lamp positions, intensities, material descriptors and image asset URLs |
@@ -65,17 +65,19 @@ The engine executes animation before physics, then surface contacts. Footprint g
 
 ## Assets and practical limits
 
-- `assets/m3.json` is converted from the user's local `BMW M3.fbx`, whose SHA-256 is `9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67`. It contains 19 material parts, 9,798 triangles and four separate wheels. `m3-provenance.json` retains the source information. Conversion removes authored steering and smooths paint, wheel and tyre normals while retaining the source silhouette. No new third-party download or license assertion is made.
-- `import-m3.py` adapts the restricted binary FBX 7400 inspection reader from the user's local TheGame tools. It is an offline converter for this asset.
+- The production/promo M3 no longer ships an expanded mesh asset. `src/vehicles/m3.ts` stores the compact authored control profile recovered from TheGame: physical dimensions, nine longitudinal side sections, five roof sections and a small wheel/shape parameter set. `src/vehicles/passenger.ts` reconstructs render geometry from those controls and derives the structural cage from the same profile. The original local `BMW M3.fbx` (241,628 bytes, SHA-256 `9c03464b3407ff1ab45cf4b3b913ee108ed454e4d7e5a82da438667af8cc2d67`) is reference/provenance only; no FBX vertices, normals, UVs or topology are required at runtime.
+- This follows the measured TheGame representation rather than conventional mesh compression. The old authored `M3_REFERENCE` block was about 1.7 KB (~1.0 KB gzip), while the reusable generator family was about 118 KB (~38 KB gzip). The source FBX was 241,628 bytes. The previous game-engine `assets/m3.json` expansion was 1,194,172 bytes and is intentionally removed.
+- The TheGame comparison measured mean sampled envelope errors of roughly 6.4 mm in width, 6.0 mm at the top and 6.8 mm at the bottom. Those are section-envelope measurements, not pointwise mesh error or a claim of branded 1:1 geometry.
+- `import-m3.py` remains only as an offline reference/inspection converter for the user's local FBX; generated JSON is not a runtime or repository asset.
 - `assets/snow-granular.png` and `assets/brick-weathered.png` are AI-generated material images. They were generated with the built-in imagegen tool and are sampled on engine geometry as surface detail. Exact prompts and provenance are saved in `assets/material-provenance.json`. There are no AI-generated scene frames or movie shots in the capture pipeline.
-- The M3 remains a low-poly source model. The pedestrian is a procedurally authored articulated model, without a scanned human or motion-capture performance. Garment folds are geometry/material detail; no dynamic cloth solver is claimed.
+- The M3 remains a low-detail procedural approximation driven by authored sections. The pedestrian is a procedurally authored articulated model, without a scanned human or motion-capture performance. Garment folds are geometry/material detail; no dynamic cloth solver is claimed.
 - Snow uses a local heightfield compression and displaced-rim model, not a full granular-material flow simulation. Vehicle travel follows an authored kinematic route; this movie does not demonstrate a complete driving controller or tyre-force model.
 - The wind, engine, tyres, snow crunch and music are synthesized. Footstep timing follows native contact records; the engine sound is not an authentic recorded M3 sample. No third-party audio samples are used.
 - Automated verification checks capture completeness and engine evidence. The extracted frames still require visual inspection for framing, lighting, material quality and animation defects.
 
 ## Reproduce and verify
 
-Requires Bun, Node 22+, ffmpeg/ffprobe and Google Chrome with WebGPU on macOS. The optional FBX conversion requires Python 3 and numpy. The engine has no additional runtime package dependency.
+Requires Bun, Node 22+, ffmpeg/ffprobe and Google Chrome with WebGPU. The optional reference-only FBX inspection/conversion requires Python 3 and numpy. The engine has no additional runtime package dependency.
 
 The same scene can also be opened directly in the production browser runtime,
 without the movie player:
