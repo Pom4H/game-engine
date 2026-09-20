@@ -32,11 +32,14 @@ test('thin steel panel returns after sub-yield hand tap but retains a dent after
   assert.ok(panel.maxPermanentDepthM>.0002,panel.maxPermanentDepthM);
 });
 
-test('glass hand tap remains elastic and produces no plastic dent',()=>{
+test('glass hand tap remains elastic, finite at 120 Hz, and produces no plastic dent',()=>{
   const panel=new ElasticPlasticPanelResponse();
   const result=panel.impact({point:[0,1,0],normal:[0,0,1],energyJ:.7,radiusM:.08,thicknessM:.004,material:'glass'});
   assert.equal(result.plasticEnergyJ,0);
   assert.equal(panel.maxPermanentDepthM,0);
+  for(let i=0;i<300;i++)panel.step(1/120);
+  assert.ok(Number.isFinite(panel.maxElasticDepthM),panel.maxElasticDepthM);
+  assert.ok(panel.maxElasticDepthM<1e-4,panel.maxElasticDepthM);
 });
 
 test('four-corner suspension rolls under alternating left/right hood loads and emits damper events',()=>{
