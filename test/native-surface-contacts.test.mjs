@@ -78,7 +78,7 @@ test('Scene.step alone orders weather, rig placement, physics, snow impressions 
  }
  assert.ok(Math.abs(scene.entities.get('car-mesh').position[0]-1)<1e-10);assert.ok(Math.abs(scene.entities.get('tyre-contact').position[0]-1)<1e-10);
  assert.deepEqual(scene.entities.get('walker-head').position,scene.animation.pose('walker').joints.head);
- assert.ok(records.length>=5);assert.deepEqual(records.map(({surfaceId,...record})=>record),scene.contacts.footprints.snapshot());
+ assert.ok(records.length>=5);assert.deepEqual(records.map(({surfaceId,wetness,slush,temperatureC,...record})=>record),scene.contacts.footprints.snapshot());
  assert.ok(records.every(r=>r.surfaceId==='path'&&r.time>0&&r.time<=scene.time));assert.ok(scene.contacts.sprayEmitted>20);assert.ok(scene.contacts.wetness>.1);assert.ok(scene.surfaces.surface('path').snowDepthM>.0605);
  const order=scene.lastExecution;for(const [before,after] of [['surfaces','animation'],['animation','physics'],['physics','surface-contacts'],['surface-contacts','events'],['events','clock']])assert.ok(order.indexOf('engine:'+before)<order.indexOf('engine:'+after));
  assert.equal(scene.resources.get('engine:surface-contacts').time,scene.time);assert.ok(scene.contacts.inspect().particleEntities<=96);
