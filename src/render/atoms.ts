@@ -154,7 +154,7 @@ const attachment=(width:number,height:number,samples:number,bytesPerSample:numbe
   logicalResolveBytes:width*height*resolveBytesPerPixel,
 });
 export interface BuildRenderAtomsInput {
-  width:number;height:number;swapchainBytesPerPixel?:number;
+  width:number;height:number;shadowMapSize:number;swapchainBytesPerPixel?:number;
   shadowDraws:number;reflectionDraws:number;mainOpaqueDraws:number;mainTransparentDraws:number;snowInstances:number;
   shadowTriangles:number;reflectionTriangles:number;mainOpaqueTriangles:number;mainTransparentTriangles:number;
   materialDraws:Readonly<Record<string,number>>;materialTriangles:Readonly<Record<string,number>>;
@@ -192,7 +192,7 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     byPass:Object.freeze(byPass),
   });
   const attachments={
-    shadow:attachment(4096,4096,1,4),
+    shadow:attachment(input.shadowMapSize,input.shadowMapSize,1,4),
     reflectionColor:attachment(halfW,halfH,1,8),
     reflectionDepth:attachment(halfW,halfH,1,4),
     mainHdr:attachment(input.width,input.height,1,8),
