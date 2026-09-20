@@ -148,7 +148,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let coverage=depthSpan(pixel);
   if(coverage.y-coverage.x<.015+z*.001){
    let ray=reflect(normalize(pos),n);let origin=pos+n*.035;var previous=origin;var previousDelta=-.1;
-   for(var step=1;step<=20;step++){
+   for(var step=1;step<=28;step++){
     let t=.05*f32(step)+.028*f32(step*step);let q=origin+ray*t;if(q.z>-.08){break;}
     let ruv=project(q);
     if(any(ruv<vec2<f32>(.005))||any(ruv>vec2<f32>(.995))){break;}
@@ -160,11 +160,11 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
      let hitWorldNormal=textureLoad(normals,hp,0).xyz*2.0-1.0;let facing=dot(viewNormal(hitWorldNormal),-ray);let gap=abs(-hi.z-hitZ);let thickness=min(.08,.025+t*.004);
      if(gap<thickness&&facing>.05&&hitCoverage.y-hitCoverage.x<.015+hitZ*.001&&length(hitWorldNormal)>.92&&distance(hitUV,uv)*size.y>3.0){
       let edge=smoothstep(0.0,.08,min(min(hitUV.x,1.0-hitUV.x),min(hitUV.y,1.0-hitUV.y)));
-      let strength=edge*pow(1.0-rough,2.0)*smoothstep(.05,.4,facing)*(1.0-smoothstep(thickness*.5,thickness,gap));
+      let strength=edge*pow(1.0-rough,1.55)*smoothstep(.04,.34,facing)*(1.0-smoothstep(thickness*.5,thickness,gap));
       let radius=clamp(rough*rough*t/max(hitZ,.1)*size.y/(f.forward.w*2.0)*.18,.5,10.0);
-      var radiance=textureSampleLevel(hdr,linearSampler,hitUV,0).rgb*.34;
-      for(var tap=0;tap<6;tap++){radiance+=textureSampleLevel(hdr,linearSampler,hitUV+offsets[tap]*radius/size,0).rgb*.11;}
-      color=color*(1.0-coating.rgb*strength*.55)+radiance*coating.rgb*strength;break;
+      var radiance=textureSampleLevel(hdr,linearSampler,hitUV,0).rgb*.40;
+      for(var tap=0;tap<6;tap++){radiance+=textureSampleLevel(hdr,linearSampler,hitUV+offsets[tap]*radius/size,0).rgb*.10;}
+      color=color*(1.0-coating.rgb*strength*.72)+radiance*coating.rgb*strength*.90;break;
      }
     }
     previous=q;previousDelta=delta;
