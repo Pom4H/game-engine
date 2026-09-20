@@ -132,7 +132,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
 export function m3PartBody(part:ParametricVehiclePart,moving=false):BodySpec|undefined{
   const kind=part.material?.kind;
   if(kind!=='glass'&&kind!=='mirror')return;
-  return{mass:kind==='mirror'?.45:7.5,...(moving?{motion:'kinematic' as const}:{})};
+  return moving?{mass:kind==='mirror'?.45:7.5,motion:'kinematic'}:{mass:0};
 }
 
 export interface M3StructuralBlueprint {
