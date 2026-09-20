@@ -348,7 +348,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let reflectionDir=reflect(-viewDir,n);
   let fallbackEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
   let localProbe=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,0).rgb;
-  let localProbeWeight=f.environment.w*(1.0-smoothstep(.08,.46,roughness))*.90;
+  let localProbeWeight=f.params.y*(1.0-smoothstep(.08,.46,roughness))*.90;
   let environmentRadiance=mix(fallbackEnvironment,localProbe,localProbeWeight);
   let envC0=vec4<f32>(-1.0,-.0275,-.572,.022);let envC1=vec4<f32>(1.0,.0425,1.04,-.04);
   let envR=roughness*envC0+envC1;let envA004=min(envR.x*envR.x,exp2(-9.28*nv))*envR.x+envR.y;
@@ -369,7 +369,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color*=1.0-clearcoat*coatF*.28;
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec*clearcoat;
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,.35).rgb;
-    if(f.environment.w>.5){coatEnvironment=mix(coatEnvironment,localProbe,.92);}
+    if(f.params.y>.5){coatEnvironment=mix(coatEnvironment,localProbe,.92);}
     let coatEnvF=.04+.96*pow(1.0-nv,5.0);
     color+=coatEnvironment*coatEnvF*clearcoat*.78;
   }
@@ -379,7 +379,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   if(materialKind>.5&&materialKind<1.5){
     let glassF=.04+.96*pow(1.0-nv,5.0);
     let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
-    let glassEnvironment=mix(glassFallback,localProbe,f.environment.w*(1.0-smoothstep(.08,.32,roughness))*.72);
+    let glassEnvironment=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.08,.32,roughness))*.72);
     color=mix(base*.055,glassEnvironment,.22+glassF*.54);
   }
   if(materialKind>9.5){
@@ -560,6 +560,13 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('lifecycle',()=>this.collect(scene));
     this.profiler.measure('resize',()=>this.resize());
     this.lastScene=scene;
+    const reflectionProbe=resolveReflectionProbe(scene);
+    if(!reflectionProbe){this.localProbeMask=0;this.localProbeKey='';this.localProbePosition=null;}
+    else{
+      const reset=this.localProbeKey!==reflectionProbe.key||(this.localProbePosition&&distance2(this.localProbePosition,reflectionProbe.position)>Math.max(2,reflectionProbe.radius*.16)**2);
+      if(reset){this.localProbeMask=0;this.localProbeFace=0;}
+      this.localProbeKey=reflectionProbe.key;this.localProbePosition=[...reflectionProbe.position];
+    }
     this.profiler.measure('materials',()=>this.queueMaterialLoads(scene));
     this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);
     const lightGrid=this.profiler.measure('lights',()=>{
@@ -577,7 +584,7 @@ export class WebGPURenderer implements Renderer{
       lightVP[12]=Math.round(lightVP[12]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;lightVP[13]=Math.round(lightVP[13]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;
       const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(Math.abs(forward[1])>.9999?[1,0,0]:V3.cross(forward,[0,1,0])),up=V3.cross(right,forward),frame=new Float32Array(100);
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
-      frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,1],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([scene.environment.sunlight,0,camera.focusDistance??20,camera.aperture??0],44);
+      frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,1],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([scene.environment.sunlight,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
       frame.set(multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0])),48);
       frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);
       this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength,'frame');
