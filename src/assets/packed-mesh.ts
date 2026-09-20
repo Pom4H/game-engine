@@ -24,6 +24,21 @@ function decodeU16(base64:string):Uint16Array{
   for(let i=0;i<out.length;i++)out[i]=view.getUint16(i*2,true);
   return out;
 }
+function encodeBytes(bytes:Uint8Array):string{
+  let binary='';const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(bytes.length,i+chunk)));
+  return btoa(binary);
+}
+function encodeU16(values:readonly number[]):string{
+  const bytes=new Uint8Array(values.length*2),view=new DataView(bytes.buffer);
+  for(let i=0;i<values.length;i++)view.setUint16(i*2,values[i]!,true);
+  return encodeBytes(bytes);
+}
+function encodeU32(values:readonly number[]):string{
+  const bytes=new Uint8Array(values.length*4),view=new DataView(bytes.buffer);
+  for(let i=0;i<values.length;i++)view.setUint32(i*4,values[i]!,true);
+  return encodeBytes(bytes);
+}
 function decodeU32(base64:string):Uint32Array{
   const bytes=decodeBytes(base64);
   if(bytes.byteLength%4)throw new RangeError('Packed mesh uint32 payload is misaligned');
@@ -54,6 +69,32 @@ function recomputeNormals(positions:readonly number[],indices:readonly number[])
  * Large visual assets may switch only the index stream to uint32 without changing
  * the scene/runtime representation.
  */
+function encodeOctNormal(x:number,y:number,z:number):readonly[number,number]{
+  const length=Math.abs(x)+Math.abs(y)+Math.abs(z)||1;let ox=x/length,oy=y/length,oz=z/length;
+  if(oz<0){const px=ox,py=oy;ox=(1-Math.abs(py))*Math.sign(px||1);oy=(1-Math.abs(px))*Math.sign(py||1);}
+  return[Math.max(0,Math.min(255,Math.round((ox*.5+.5)*255))),Math.max(0,Math.min(255,Math.round((oy*.5+.5)*255)))];
+}
+
+/** Encode an authored triangle mesh into the compact runtime representation. */
+export function encodePackedMesh(mesh:Extract<Primitive,{kind:'triangle-mesh'}>):PackedMesh{
+  const vertices=mesh.positions.length/3,triangles=mesh.indices.length/3;
+  if(!Number.isInteger(vertices)||vertices<3||mesh.normals.length!==mesh.positions.length||!Number.isInteger(triangles)||triangles<1)throw new RangeError('Triangle mesh arrays are inconsistent');
+  const min:[number,number,number]=[Infinity,Infinity,Infinity],max:[number,number,number]=[-Infinity,-Infinity,-Infinity];
+  for(let i=0;i<mesh.positions.length;i++){const value=mesh.positions[i]!;if(!Number.isFinite(value))throw new RangeError('Triangle mesh position is not finite');const axis=(i%3) as 0|1|2;min[axis]=Math.min(min[axis],value);max[axis]=Math.max(max[axis],value);}
+  const quantized=Array<number>(mesh.positions.length);
+  for(let i=0;i<mesh.positions.length;i++){const axis=(i%3) as 0|1|2,span=max[axis]-min[axis],value=span>0?(mesh.positions[i]!-min[axis])/span:0;quantized[i]=Math.max(0,Math.min(65535,Math.round(value*65535)));}
+  const normalBytes=new Uint8Array(vertices*2);
+  for(let vertex=0;vertex<vertices;vertex++){const base=vertex*3,x=mesh.normals[base]!,y=mesh.normals[base+1]!,z=mesh.normals[base+2]!;if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(z))throw new RangeError('Triangle mesh normal is not finite');const packed=encodeOctNormal(x,y,z);normalBytes[vertex*2]=packed[0];normalBytes[vertex*2+1]=packed[1];}
+  let needsU32=vertices>65535;
+  for(const index of mesh.indices){if(!Number.isInteger(index)||index<0||index>=vertices)throw new RangeError('Triangle mesh index out of range');if(index>65535)needsU32=true;}
+  return Object.freeze({
+    min:Object.freeze([...min]) as Vec3,max:Object.freeze([...max]) as Vec3,
+    positionsU16Base64:encodeU16(quantized),normalsOct8Base64:encodeBytes(normalBytes),
+    ...(needsU32?{indicesU32Base64:encodeU32(mesh.indices)}:{indicesU16Base64:encodeU16(mesh.indices)}),
+    vertices,triangles,
+  });
+}
+
 export function decodePackedMesh(mesh:PackedMesh):Extract<Primitive,{kind:'triangle-mesh'}>{
   if(!Number.isSafeInteger(mesh.vertices)||mesh.vertices<3||!Number.isSafeInteger(mesh.triangles)||mesh.triangles<1)throw new RangeError('Packed mesh counts are invalid');
   if((mesh.indicesU16Base64?1:0)+(mesh.indicesU32Base64?1:0)!==1)throw new RangeError('Packed mesh requires exactly one index payload');
