@@ -11,6 +11,7 @@ export {generatePassengerVehicle,passengerStructuralDefinition,interpolateSectio
 export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,generateM3Vehicle,m3StructuralBlueprint,type M3StructuralBlueprint} from './vehicles/m3.js';
 export {M3_HIGH_FIDELITY_SHELL,M3_SHELL_FIDELITY,m3HighFidelityBody} from './vehicles/m3-shell.js';
 export {decodePackedShell,type PackedShell} from './vehicles/packed-shell.js';
+export {ElasticPlasticPanelResponse,FourCornerSuspension,DoorHinge,M3InteractionRig,type PanelImpactInput,type PanelImpactResult,type SuspensionPose,type VehicleInteractionImpact,type VehicleInteractionState} from './vehicles/interaction-physics.js';
 export {Scene,type RuntimeEntity} from './scene/scene.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
@@ -22,7 +23,7 @@ export {demoScene} from './demo.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
 
 export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
-export type {EngineEvent,ImpactEvent,FractureEvent} from './scene/events.js';
+export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
 
