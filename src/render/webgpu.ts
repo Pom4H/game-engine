@@ -623,11 +623,11 @@ export class WebGPURenderer implements Renderer{
       const pattern=material.pattern;
       if(pattern==='brick'||pattern==='plaster'||pattern==='window'||material.label){
         const weight=pattern==='window'?.35:1;
-        urban[0]+=color[0]*weight;urban[1]+=color[1]*weight;urban[2]+=color[2]*weight;urbanWeight+=weight;
+        urban[0]=urban[0]!+color[0]*weight;urban[1]=urban[1]!+color[1]*weight;urban[2]=urban[2]!+color[2]*weight;urbanWeight+=weight;
       }
       if(material.kind==='snow'||material.kind==='asphalt'||material.kind==='concrete'){
         const weight=material.kind==='snow'?1.3:1;
-        groundPalette[0]+=color[0]*weight;groundPalette[1]+=color[1]*weight;groundPalette[2]+=color[2]*weight;groundWeight+=weight;
+        groundPalette[0]=groundPalette[0]!+color[0]*weight;groundPalette[1]=groundPalette[1]!+color[1]*weight;groundPalette[2]=groundPalette[2]!+color[2]*weight;groundWeight+=weight;
       }
     }
     const urbanColor:[number,number,number]=urbanWeight?[urban[0]!/urbanWeight,urban[1]!/urbanWeight,urban[2]!/urbanWeight]:[sky[0]*.7,sky[1]*.65,sky[2]*.6];
