@@ -85,10 +85,17 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
 export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),35,.018);}
+function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
+  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,35,.018));
+  // A second render-only PN pass is cheap for one hero vehicle (~18k body tris)
+  // and removes the visible faceting left by the compact 1,126-triangle source.
+  // Physics, structural binding and the packed source stay untouched.
+  return subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,42,.0075));
+}
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
-  const base=m3HighFidelityBody(),plan=m3RenderSubdivisionPlan();
-  if(mesh===base)return renderBodyCache??=subdivideSmoothTriangleMesh(mesh,plan);
-  return subdivideSmoothTriangleMesh(mesh,plan);
+  const base=m3HighFidelityBody();
+  if(mesh===base)return renderBodyCache??=smoothBodyTwice(mesh);
+  return smoothBodyTwice(mesh);
 }
 
 /**
@@ -143,7 +150,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id==='transparent-lenses')return{...base,color:[.42,.50,.55,.22]};
   if(part.id.startsWith('mirror-'))return{...base,color:[.30,.34,.38,1]};
   if(part.id==='red-reflectors')return{...base,color:[.30,.012,.008,1]};
-  if(part.role==='paint')return{...base,color:paint,roughness:.16,metalness:.08};
+  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055};
   if(part.role==='glass')return{...base,color:[.035,.055,.072,.34]};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
   if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
