@@ -42,6 +42,10 @@ jobs:
           node tools/check-png.mjs artifacts/winter-street-now.png
           node tools/check-png.mjs artifacts/winter-street-car.png
           node tools/check-png.mjs artifacts/winter-street-footprints.png
+      - name: Clear-day M3 visual target
+        run: |
+          node dist/cli.js render tools/promo/clear-day.scene.mjs --time 0 --width 1920 --height 1080 --out artifacts/m3-clear-day-front.png
+          node tools/check-png.mjs artifacts/m3-clear-day-front.png
       - name: Deterministic video path
         run: node dist/cli.js record examples/window-gauntlet.ts --duration 2.5 --fps 24 --width 1280 --height 720 --out artifacts/gpu-smoke.mp4
       - uses: actions/upload-artifact@v7
