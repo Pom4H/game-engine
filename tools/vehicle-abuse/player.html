@@ -6,6 +6,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b0e12}can
 #phase{font-weight:700;letter-spacing:.08em;margin-bottom:7px}#metrics{color:#aebbc5;white-space:pre}
 </style>
 <canvas id="world"></canvas><div id="hud"><div id="phase">INIT</div><div id="metrics"></div></div>
+<script>
+window.ready=false;window.failure=null;
+window.addEventListener('error',event=>{window.failure=event.error?.stack??event.message??('Resource error: '+event.target?.src);});
+window.addEventListener('unhandledrejection',event=>{window.failure=event.reason?.stack??String(event.reason);});
+</script>
 <script type="module">
 import {Scene,M3InteractionRig,generateM3Vehicle} from '/dist/index.js';
 import {WebGPURenderer} from '/dist/browser.js';
