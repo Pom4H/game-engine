@@ -33,7 +33,7 @@ const pixels=oracle.points.map(point=>project(point));
 const raw=await run(process.execPath,[
   'dist/cli.js','probe','tools/render-oracle.scene.mjs',
   '--width',String(oracle.width),'--height',String(oracle.height),
-  '--stage','all','--pixels',JSON.stringify(pixels),
+  '--stage','all','--frames','8','--pixels',JSON.stringify(pixels),
 ]);
 const report=JSON.parse(raw),pointById=new Map(oracle.points.map(point=>[point.id,point]));
 const stageMaps=new Map();
