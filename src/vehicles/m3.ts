@@ -139,12 +139,12 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   // cannot outgrow the bumper/hood opening independently.
   const fascia=Object.freeze({
     x:M3_PARAMETRIC_PROFILE.dimensions.length*.5,
-    centerY:M3_PARAMETRIC_PROFILE.dimensions.height*.425,
-    centerZ:M3_PARAMETRIC_PROFILE.dimensions.width*.098,
-    kidneyWidth:M3_PARAMETRIC_PROFILE.dimensions.width*.148,
-    kidneyHeight:M3_PARAMETRIC_PROFILE.dimensions.height*.315,
-    radius:M3_PARAMETRIC_PROFILE.dimensions.height*.050,
-    border:M3_PARAMETRIC_PROFILE.dimensions.width*.0074,
+    centerY:M3_PARAMETRIC_PROFILE.dimensions.height*.430,
+    centerZ:M3_PARAMETRIC_PROFILE.dimensions.width*.091,
+    kidneyWidth:M3_PARAMETRIC_PROFILE.dimensions.width*.134,
+    kidneyHeight:M3_PARAMETRIC_PROFILE.dimensions.height*.280,
+    radius:M3_PARAMETRIC_PROFILE.dimensions.height*.046,
+    border:M3_PARAMETRIC_PROFILE.dimensions.width*.0068,
   });
   const recessWidth=fascia.kidneyWidth-fascia.border*2.2;
   const recessHeight=fascia.kidneyHeight-fascia.border*2.4;
@@ -235,14 +235,14 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('hood-roundel-blue-'))return{...base,color:[.015,.19,.58,1]};
   if(part.id.startsWith('hood-roundel-white-'))return{...base,color:[.86,.89,.93,1]};
   if(part.id==='hood-roundel-ring')return{...base,color:[.012,.015,.020,1]};
-  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055,clearcoat:.94,clearcoatRoughness:.055};
-  if(part.role==='glass')return{...base,color:[.075,.095,.115,.42],roughness:.065};
+  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.165,metalness:.025,clearcoat:.88,clearcoatRoughness:.082};
+  if(part.role==='glass')return{...base,color:[.065,.075,.085,.24],roughness:.095};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
   if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
-  if(part.role==='light')return{...base,color:[.54,.68,.86,1],emissive:lightsOn?[.34,.46,.70]:[.012,.016,.022],roughness:.11};
-  if(part.role==='tail')return{...base,color:[.34,.012,.008,1],emissive:lightsOn?[.7,.015,.006]:[.018,.001,.001]};
+  if(part.role==='light')return{...base,color:[.74,.82,.92,1],emissive:lightsOn?[.11,.14,.20]:[.008,.010,.014],roughness:.14};
+  if(part.role==='tail')return{...base,color:[.30,.010,.007,1],emissive:lightsOn?[.22,.010,.004]:[.012,.001,.001]};
   if(part.role==='metal')return{...base,color:[.16,.17,.18,1]};
   return{...base,color:[.026,.029,.032,1]};
 }
