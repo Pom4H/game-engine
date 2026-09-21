@@ -133,10 +133,12 @@ export class PlasticDeformationSystem {
   }
 
   /** Commit deferred mesh work after physics; physics state was already changed causally. */
-  step(entities:ReadonlyMap<string,RuntimeEntity>):void{
+  step(entities:ReadonlyMap<string,RuntimeEntity>):boolean{
+    const geometryChanged=this.dirty.size>0;
     for(const state of this.states.values())this.syncPose(state,entities);
     for(const state of this.dirty)this.syncState(state,entities);
     this.dirty.clear();
+    return geometryChanged;
   }
 
   remove(id:string):void{
