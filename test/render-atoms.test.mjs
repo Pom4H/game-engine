@@ -14,7 +14,7 @@ test('WGSL atom census expands reachable helper functions without inventing runt
 
 test('render atom report exposes command and logical memory costs',()=>{
  const report=buildRenderAtomReport({
-  width:1280,height:720,shadowDraws:3,reflectionDraws:2,mainOpaqueDraws:4,mainTransparentDraws:1,snowInstances:100,
+  width:1280,height:720,shadowMapSize:4096,shadowDraws:3,reflectionDraws:2,mainOpaqueDraws:4,mainTransparentDraws:1,snowInstances:100,
   shadowTriangles:300,reflectionTriangles:200,mainOpaqueTriangles:400,mainTransparentTriangles:50,
   materialDraws:{asphalt:3,glass:2},materialTriangles:{asphalt:300,glass:150},shadowBatchedInstances:0,shadowBatchedDraws:0,
   uploads:{total:1000,uniform:600,surface:200,light:100,frame:64,snow:36,environment:0,instance:0},shaders:{},
