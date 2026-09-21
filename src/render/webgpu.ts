@@ -491,6 +491,7 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;
+  private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
@@ -638,6 +639,10 @@ export class WebGPURenderer implements Renderer{
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
+    const shadowDirty=!this.shadowValid||!matrixEqual(this.shadowLightVP??undefined,lightVP)||shadowDrawables.length!==this.shadowState.size||shadowDrawables.some(entity=>{
+      const previous=this.shadowState.get(entity.id),primitive=renderPrimitive(entity)!;
+      return !previous||previous.primitive!==primitive||!matrixEqual(previous.model,modelFor(entity));
+    });
     const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
     if(reflectionProbe){
       const radius2=(reflectionProbe.radius+12)**2,candidates=classified.opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
@@ -649,12 +654,13 @@ export class WebGPURenderer implements Renderer{
       }
     }
     const prepared=new Map<string,RuntimeEntity>();
-    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...shadowDrawables,...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
+    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...(shadowDirty?shadowDrawables:[]),...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
     this.profiler.measure('prepare',()=>{for(const entity of prepared.values())this.prepare(entity,modelFor(entity));});
-    const shadowPlan=this.profiler.measure('prepare',()=>this.prepareShadowBatches(shadowDrawables,modelFor));
+    const shadowPlan=shadowDirty?this.profiler.measure('prepare',()=>this.prepareShadowBatches(shadowDrawables,modelFor)):{singles:[] as RuntimeEntity[],batches:[] as ShadowBatchPlan[],instances:0};
     this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:shadowPlan.instances});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
     this.profiler.measure('encode.shadow',()=>{
+      if(!shadowDirty)return;
       const timing=this.profiler.timestampWrites('shadow'),occlusion=this.profiler.occlusionSet(),shadow=encoder.beginRenderPass({label:'render.shadow',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       shadow.setBindGroup(1,this.gpu.frameBind);const query=this.profiler.beginOcclusion(shadow,'shadow');
       for(const [culled,group] of partitionByCull(shadowPlan.singles)){shadow.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);for(const e of group)this.draw(shadow,e,false);}
@@ -715,9 +721,9 @@ export class WebGPURenderer implements Renderer{
       for(const e of [...culled.cameraOpaque,...culled.cameraTransparent]){const kind=e.material.kind,triangles=this.mesh(renderPrimitive(e)!).triangles;materialDraws[kind]=(materialDraws[kind]??0)+1;materialTriangles[kind]=(materialTriangles[kind]??0)+triangles;}
       const work=this.profiler.currentWork();
       this.profiler.setAtoms(buildRenderAtomReport({
-        width:this.canvas.width,height:this.canvas.height,shadowMapSize:SHADOW_MAP_SIZE,shadowDraws:shadowPlan.singles.length+shadowPlan.batches.length,reflectionDraws:culled.reflectedObjects.length,shadowBatchedInstances:shadowPlan.instances,shadowBatchedDraws:shadowPlan.batches.length,
+        width:this.canvas.width,height:this.canvas.height,shadowMapSize:SHADOW_MAP_SIZE,shadowDraws:shadowDirty?shadowPlan.singles.length+shadowPlan.batches.length:0,reflectionDraws:culled.reflectedObjects.length,shadowBatchedInstances:shadowDirty?shadowPlan.instances:0,shadowBatchedDraws:shadowDirty?shadowPlan.batches.length:0,
         mainOpaqueDraws:culled.cameraOpaque.length,mainTransparentDraws:culled.cameraTransparent.length,snowInstances,
-        shadowTriangles:sumTriangles(shadowDrawables),reflectionTriangles:sumTriangles(culled.reflectedObjects),
+        shadowTriangles:shadowDirty?sumTriangles(shadowDrawables):0,reflectionTriangles:sumTriangles(culled.reflectedObjects),
         mainOpaqueTriangles:sumTriangles(culled.cameraOpaque),mainTransparentTriangles:sumTriangles(culled.cameraTransparent),
         materialDraws,materialTriangles,
         uploads:{total:work.uploadBytes,uniform:work.uniformUploadBytes,surface:work.surfaceUploadBytes,light:work.lightUploadBytes,frame:work.frameUploadBytes,snow:work.snowUploadBytes,environment:work.environmentUploadBytes,instance:work.instanceUploadBytes},
@@ -726,6 +732,10 @@ export class WebGPURenderer implements Renderer{
     }
     this.profiler.resolve(encoder);
     this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
+    if(shadowDirty){
+      this.shadowValid=true;this.shadowLightVP=new Float32Array(lightVP);this.shadowState.clear();
+      for(const entity of shadowDrawables)this.shadowState.set(entity.id,{primitive:renderPrimitive(entity)!,model:new Float32Array(modelFor(entity))});
+    }
     this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.previousCamera=[...camera.position];this.previousTarget=[...camera.target];this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
     this.previousModels.clear();for(const entity of prepared.values())this.previousModels.set(entity.id,modelFor(entity));
   }
