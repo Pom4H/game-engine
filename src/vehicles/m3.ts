@@ -195,6 +195,18 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     interior.push(Object.freeze({id:`interior-seat-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.38,.58,.43] as const},position:[.02,.78,side*.37] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.92,metalness:0}}));
     interior.push(Object.freeze({id:`interior-headrest-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.22,.22,.30] as const},position:[-.05,1.14,side*.37] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0}}));
   }
+  const glazingBackings:ParametricVehiclePart[]=sources
+    .filter(source=>source.sourceMaterial==='Window')
+    .map(source=>{
+      const inward:readonly[number,number,number]=source.id==='windshield-front'?[-.018,0,0]:source.id==='windshield-rear'?[.018,0,0]:[0,0,source.center[2]<0?.012:-.012];
+      return Object.freeze({
+        id:`interior-${source.id}`,
+        role:'dark' as const,
+        mesh:source.mesh,
+        position:[source.center[0]+inward[0],source.center[1]+inward[1],source.center[2]+inward[2]] as const,
+        material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0},
+      });
+    });
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...grilleSlats,
@@ -202,6 +214,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     ...frontDetail,
     ...badge,
     ...interior,
+    ...glazingBackings,
     ...sources.map(source=>Object.freeze({
       id:source.id,
       role:sourceRole(source.sourceMaterial,source.id),
@@ -225,6 +238,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
 export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.13,1],lightsOn=false):MaterialSpec{
   const base=part.material??passengerPartMaterial(part.role);
   if(part.id==='transparent-lenses')return{...base,color:[.42,.50,.55,.22]};
+  if(part.id.startsWith('interior-windshield-')||part.id.startsWith('interior-window-'))return{...base,color:[.018,.022,.026,.20],roughness:.82,metalness:0};
   if(part.id.startsWith('mirror-'))return{...base,color:[.30,.34,.38,1]};
   if(part.id==='red-reflectors')return{...base,color:[.30,.012,.008,1]};
   if(part.id.startsWith('hood-roundel-blue-'))return{...base,color:[.015,.19,.58,1]};
