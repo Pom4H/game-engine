@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "metric": "PhotorealismGap",
+  "metric": "RendererConsistencyGap",
   "lowerIsBetter": true,
   "fast": {
     "gap": 0.6131289322929493,
