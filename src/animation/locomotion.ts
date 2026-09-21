@@ -106,6 +106,12 @@ export class AnimationSystem {
  private readonly driven=new Map<string,{position:Vec3;heading:number;speed:number;time:number}>();
  private publishedFeet:readonly FootContact[]=Object.freeze([]);
  get feet():readonly FootContact[]{return this.publishedFeet;}
+ controlledEntityIds():ReadonlySet<string>{
+  const ids=new Set<string>();
+  for(const spec of this.walkers.values())for(const binding of spec.bindings??[])ids.add(binding.entity);
+  for(const spec of this.vehicles.values())for(const part of spec.parts)ids.add(part.id);
+  return ids;
+ }
  addWalker(input:WalkerSpec):void {checkedWalker(input);if(this.walkers.has(input.id)||this.vehicles.has(input.id))throw new TypeError(`Duplicate animated actor ${input.id}`);this.walkers.set(input.id,structuredClone(input));}
  addVehicle(input:VehicleMotionSpec):void {
   if(!input.id||input.id.length>160||this.walkers.has(input.id)||this.vehicles.has(input.id))throw new TypeError('Vehicle requires a distinct stable id');finiteVec3(input.velocity,'Vehicle velocity');
