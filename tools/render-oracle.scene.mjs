@@ -37,6 +37,11 @@ export const oracle=Object.freeze({
     point('mirror-target',1.05,1.02),
     point('mirror-control',1.65,1.02),
 
+    point('ao-contact-hdr',-1.90,.12,0,'hdr'),
+    point('ao-contact-effects',-1.90,.12,0,'effects'),
+    point('ao-open-hdr',1.90,.12,0,'hdr'),
+    point('ao-open-effects',1.90,.12,0,'effects'),
+
     point('reflection-black',-.82,.52,0,'reflection'),
     point('reflection-gray',0,.52,0,'reflection'),
     point('reflection-white',.82,.52,0,'reflection'),
@@ -65,6 +70,8 @@ export const oracle=Object.freeze({
   contracts:Object.freeze([
     {kind:'delta',id:'emission-delta',a:'emission-off',b:'emission-on',expected:[.25,.50,1.0],tolerance:.025},
     {kind:'ratio',id:'diffuse-linear-response',black:'diffuse-black',mid:'diffuse-gray',white:'diffuse-white',expected:Math.pow(.5,2.2),tolerance:.045},
+    {kind:'rangeRatio',id:'ao-contact-attenuation',low:'ao-contact-effects',high:'ao-contact-hdr',minimum:.70,maximum:1.0},
+    {kind:'rangeRatio',id:'ao-open-preservation',low:'ao-open-effects',high:'ao-open-hdr',minimum:.94,maximum:1.06},
     {kind:'ratio',id:'reflection-diffuse-linear-response',black:'reflection-black',mid:'reflection-gray',white:'reflection-white',expected:Math.pow(.5,2.2),tolerance:.045},
     {kind:'delta',id:'reflection-emission-delta',a:'reflection-emission-off',b:'reflection-emission-on',expected:[4,.08,.02],tolerance:.06},
     {kind:'gain',id:'roughness-specular-gain',low:'specular-rough',high:'specular-smooth',minimum:40},
@@ -111,6 +118,10 @@ export default defineScene({
     {id:'mirror-target',position:[1.05,1.02,0],mesh:orientedQuad([0,0,0],[.21924,.08770,.97170],.28,.28),material:mirror},
     {id:'mirror-control',position:[1.65,1.02,0],mesh:orientedQuad([0,0,0],[0,0,1],.28,.28),material:mirror},
     {id:'mirror-source',position:[2.20,1.02,4],mesh:orientedQuad([0,0,0],[0,0,-1],.8,.8),material:{kind:'default',color:black,roughness:1,metalness:0,emissive:[4,.05,.02]}},
+
+    {id:'ao-contact',position:[-1.90,.12,0],mesh:orientedQuad([0,0,0],[.70710678,0,.70710678],.28,.28),material:matte([.82,.82,.82,1])},
+    {id:'ao-blocker',position:[-1.66,.12,.015],mesh:quad(0,0,.12,.26),material:matte([.03,.03,.03,1])},
+    {id:'ao-open',position:[1.90,.12,0],mesh:orientedQuad([0,0,0],[.70710678,0,.70710678],.28,.28),material:matte([.82,.82,.82,1])},
 
     {id:'diffuse-black',position:[0,0,0],mesh:quad(-.82,.52),material:matte([0,0,0,1])},
     {id:'diffuse-gray',position:[0,0,0],mesh:quad(0,.52),material:matte([.5,.5,.5,1])},
