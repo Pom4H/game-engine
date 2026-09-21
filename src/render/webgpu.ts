@@ -11,6 +11,7 @@ import type {Renderer,RenderStats} from './types.js';
 import {RenderProfiler} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 import {buildSceneRadianceProbe} from './radiance.js';
+import {cameraProjection} from './calibrated-camera.js';
 
 type GPUAny=any;
 const SHADOW_MAP_SIZE=1536;
@@ -559,7 +560,7 @@ export class WebGPURenderer implements Renderer{
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
     const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*8)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
-    const frame=device.createBuffer({size:400,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
+    const frame=device.createBuffer({size:416,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
@@ -659,18 +660,19 @@ export class WebGPURenderer implements Renderer{
     });
     void lightGrid;
     const frameState=this.profiler.measure('frame',()=>{
-      const cameraView=lookAt(camera.position,camera.target),projection=perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),cullVP=multiply4(projection,cameraView),jitter=taaJitter(frameId);
-      projection[8]=-2*jitter[0]/this.canvas.width;projection[9]=2*jitter[1]/this.canvas.height;
+      const cameraView=lookAt(camera.position,camera.target),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
+      projection[8]+=-2*jitter[0]/this.canvas.width;projection[9]+=2*jitter[1]/this.canvas.height;
       const vp=multiply4(projection,cameraView);
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
       const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
       lightVP[12]=Math.round(lightVP[12]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;lightVP[13]=Math.round(lightVP[13]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;
       const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(Math.abs(forward[1])>.9999?[1,0,0]:V3.cross(forward,[0,1,0])),up=V3.cross(right,forward),frame=new Float32Array(100);
-      const reflectionVP=multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0]));
+      const reflectionVP=multiply4(baseProjection,lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0]));
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
-      frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,0],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([this.pointLights>0?1:0,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
+      const [projectionX,projectionY,projectionOffsetX,projectionOffsetY]=projectionInfo.ray,tanY=1/projectionY,aspectLike=projectionY/projectionX;
+      frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,0],28);frame.set([...forward,tanY],32);frame.set([...right,aspectLike],36);frame.set([...up,scene.time],40);frame.set([this.pointLights>0?1:0,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
       frame.set(reflectionVP,48);
-      frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);
+      frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);frame.set([projectionX,projectionY,projectionOffsetX,projectionOffsetY],100);
       this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength,'frame');
       return{vp,cullVP,reflectionVP,settings,lightVP,right,up,frame};
     });
