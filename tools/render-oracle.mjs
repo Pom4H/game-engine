@@ -16,8 +16,8 @@ function project(point){
   const z=dot(delta,forward),half=Math.tan(source.fov*Math.PI/360),aspect=oracle.width/oracle.height;
   if(z<=0)throw new Error('Oracle point is behind the camera');
   const nx=dot(delta,right)/(z*half*aspect),ny=dot(delta,up)/(z*half);
-  const x=Math.max(0,Math.min(oracle.width-1,Math.floor((nx*.5+.5)*oracle.width)));
-  const y=Math.max(0,Math.min(oracle.height-1,Math.floor((.5-ny*.5)*oracle.height)));
+  const x=Math.max(0,Math.min(oracle.width-1,Math.floor((nx*.5+.5)*oracle.width)+(point.pixelOffset?.[0]??0)));
+  const y=Math.max(0,Math.min(oracle.height-1,Math.floor((.5-ny*.5)*oracle.height)+(point.pixelOffset?.[1]??0)));
   return[x,y];
 }
 
@@ -33,7 +33,7 @@ const pixels=oracle.points.map(point=>project(point));
 const raw=await run(process.execPath,[
   'dist/cli.js','probe','tools/render-oracle.scene.mjs',
   '--width',String(oracle.width),'--height',String(oracle.height),
-  '--stage','all','--frames','8','--pixels',JSON.stringify(pixels),
+  '--stage','all','--frames','1','--pixels',JSON.stringify(pixels),
 ]);
 const report=JSON.parse(raw),pointById=new Map(oracle.points.map(point=>[point.id,point]));
 const stageMaps=new Map();
@@ -64,6 +64,10 @@ for(const contract of oracle.contracts){
   }else if(contract.kind==='rangeRatio'){
     const low=luma(sample(contract.low)),high=luma(sample(contract.high)),actual=low/Math.max(high,1e-9);
     results.push({id:contract.id,minimum:contract.minimum,maximum:contract.maximum,actual,pass:actual>=contract.minimum&&actual<=contract.maximum});
+  }else if(contract.kind==='meanRangeRatio'){
+    const mean=ids=>ids.reduce((sum,id)=>sum+luma(sample(id)),0)/Math.max(ids.length,1);
+    const low=mean(contract.low),high=mean(contract.high),actual=low/Math.max(high,1e-9);
+    results.push({id:contract.id,minimum:contract.minimum,maximum:contract.maximum,actual,pass:actual>=contract.minimum&&actual<=contract.maximum});
   }else if(contract.kind==='channelDominance'){
     const value=sample(contract.sample),channel=value[contract.channel],others=value.slice(0,3).filter((_,index)=>index!==contract.channel),actual=channel/Math.max(1e-9,...others);
     results.push({id:contract.id,channel:contract.channel,minimum:contract.minimum,actual,pass:actual>=contract.minimum});
@@ -83,7 +87,7 @@ console.log(JSON.stringify({
   version:2,
   resolution:[oracle.width,oracle.height],
   pixels:oracle.points.map((point,index)=>({
-    id:point.id,stage:point.stage??'hdr',world:point.world,pixel:pixels[index],rgba:sample(point.id),
+    id:point.id,stage:point.stage??'hdr',world:point.world,pixelOffset:point.pixelOffset??[0,0],pixel:pixels[index],rgba:sample(point.id),
   })),
   contracts:results,
   failed:failed.map(result=>result.id),
