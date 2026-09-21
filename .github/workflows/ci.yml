@@ -34,6 +34,8 @@ jobs:
         run: node --test test/core.test.mjs test/deformation.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
       - name: Radiometric pixel oracle
         run: node tools/render-oracle.mjs
+      - name: Photorealism North Star
+        run: node tools/photorealism/run.mjs --mode fast --out artifacts/photorealism-fast
       - name: Reference render
         run: |
           if not exist artifacts mkdir artifacts
@@ -78,6 +80,8 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Typecheck, build and tests
         run: bun run ci
+      - name: Photorealism North Star full
+        run: node tools/photorealism/run.mjs --mode full --out artifacts/photorealism-full
       - name: WebGPU production smoke
         run: |
           if not exist artifacts mkdir artifacts
