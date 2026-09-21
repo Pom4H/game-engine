@@ -14,7 +14,11 @@ New-Item -ItemType Directory -Force -Path $archives | Out-Null
 function Download-And-Extract([string]$Name,[string]$Url,[scriptblock]$Keep) {
   $archive = Join-Path $archives $Name
   Write-Host "Downloading $Url"
-  & curl.exe -L --fail --retry 5 --retry-delay 3 -C - -o $archive $Url
+  & curl.exe -L --fail --retry 2 --retry-delay 2 -C - -o $archive $Url
+  if ($LASTEXITCODE -ne 0 -and $Url -match '^https://downloads\.cs\.stanford\.edu/') {
+    Write-Host "Stanford DNS unavailable; retrying the same HTTPS origin via pinned current A record"
+    & curl.exe --resolve "downloads.cs.stanford.edu:443:171.64.64.22" -L --fail --retry 5 --retry-delay 3 -C - -o $archive $Url
+  }
   if ($LASTEXITCODE -ne 0) { throw "curl failed for $Url" }
   Write-Host "Indexing $Name"
   $entries = & tar.exe -tzf $archive
