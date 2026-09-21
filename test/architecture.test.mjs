@@ -51,10 +51,10 @@ test('renderer releases object/unique mesh resources but retains shared geometry
  const handle=id=>({destroy:()=>destroyed.push(id)});
  renderer.objects=new Map([['alive',{uniform:handle('live-u'),texture:handle('live-t')}],['dead',{uniform:handle('dead-u'),texture:handle('dead-t') }]]);
  const box={kind:'box'},sphere={kind:'sphere'};
- renderer.meshes=new Map([[primitiveKey(box),{vertex:handle('box-v'),index:handle('box-i')}],[primitiveKey(sphere),{vertex:handle('sphere-v'),index:handle('sphere-i') }]]);
- renderer.collect({entities:new Map([['alive',{id:'alive',mesh:box}]])});
- assert.deepEqual(destroyed,['dead-u','dead-t','sphere-v','sphere-i']);assert.equal(renderer.meshes.size,1);assert.equal(renderer.objects.size,1);
- renderer.collect({entities:new Map()});assert.equal(renderer.objects.size,0);assert.equal(renderer.meshes.size,0);assert.equal(destroyed.length,8);
+ renderer.meshes=new Map([[primitiveKey(box),{vertex:handle('box-v'),color:handle('box-c'),index:handle('box-i')}],[primitiveKey(sphere),{vertex:handle('sphere-v'),color:handle('sphere-c'),index:handle('sphere-i') }]]);
+ renderer.collect({entities:new Map([['alive',{id:'alive',mesh:box,material:{color:[1,1,1,1]}}]])});
+ assert.deepEqual(destroyed,['dead-u','dead-t','sphere-v','sphere-c','sphere-i']);assert.equal(renderer.meshes.size,1);assert.equal(renderer.objects.size,1);
+ renderer.collect({entities:new Map()});assert.equal(renderer.objects.size,0);assert.equal(renderer.meshes.size,0);assert.equal(destroyed.length,10);
 });
 
 
