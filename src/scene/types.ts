@@ -67,7 +67,32 @@ export interface EntitySpec {
   body?:BodySpec;
 }
 export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number }
-export interface CameraSpec { position:Vec3; target:Vec3; fov?:number; focusDistance?:number; aperture?:number }
+export interface CameraIntrinsicsSpec {
+  /** Focal lengths in pixels of the calibration image. */
+  fx:number; fy:number;
+  /** Principal point in pixels of the calibration image. */
+  cx:number; cy:number;
+  /** Calibration image dimensions. Rendering at another aspect ratio is rejected. */
+  width:number; height:number;
+}
+export interface CameraSpec {
+  position:Vec3; target:Vec3;
+  /** Convenience vertical FOV for authored cameras. Ignored when intrinsics are present. */
+  fov?:number;
+  /** Exact pinhole calibration for measured/real-world captures. */
+  intrinsics?:CameraIntrinsicsSpec;
+  focusDistance?:number; aperture?:number;
+}
+export interface EnvironmentRadianceSpec {
+  /** Equirectangular measured radiance, RGB half-float pixels in row-major order. */
+  width:number; height:number; rgb16fBase64:string;
+  /** Rotation taking world directions into the environment-camera coordinate system. */
+  worldToEnvironment?:readonly [number,number,number, number,number,number, number,number,number];
+  /** Dataset convention. Stanford-ORB uses +Y up and +Z at the left seam. */
+  convention?:'stanford-orb'|'latlong-y-up';
+  /** Physical scale multiplier. Keep at 1 for calibrated captures. */
+  intensity?:number;
+}
 export interface ReflectionProbeSpec {
   /** Fixed world-space origin. Mutually exclusive with entity. */
   position?:Vec3;
@@ -85,6 +110,8 @@ export interface RenderingSpec {
   sunDirection?:Vec3; sunColor?:Vec3; skyColor?:Vec3;
   sunIntensity?:number; fogDensity?:number; exposure?:number; shadowExtent?:number;
   reflectionProbe?:ReflectionProbeSpec;
+  /** Measured HDR environment. When present it replaces the synthetic distant-radiance proxy. */
+  environmentRadiance?:EnvironmentRadianceSpec;
 }
 export interface SceneAnimationSpec {
   readonly walkers?:readonly WalkerSpec[];
