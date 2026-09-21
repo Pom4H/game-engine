@@ -55,7 +55,7 @@ spec.entities=spec.entities.filter(entity=>{
   return true;
 });
 spec.entities.push(
-  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.105,.110,.118,1],roughness:.71},environmental:{surfaceUse:'road',snowDepthM:.0012,iceDepthM:.00055,waterDepthM:.00052}},
+  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.145,.150,.158,1],roughness:.71},environmental:{surfaceUse:'road',snowDepthM:.0012,iceDepthM:.00055,waterDepthM:.00052}},
   {id:'hero-bank-near',position:[-13,.13,-4.18],mesh:{kind:'snowdrift',size:[62,.34,1.04],seed:4617,segments:64,continuous:true},material:{kind:'snow',color:[.955,.968,.98,1],roughness:.86,texture:{url:'/assets/snow-granular.png',sizeM:.30,bumpStrength:.24,albedoStrength:.24}}},
   {id:'hero-bank-far',position:[-13,.145,4.12],mesh:{kind:'snowdrift',size:[62,.40,1.16],seed:9121,segments:64,continuous:true},material:{kind:'snow',color:[.955,.968,.98,1],roughness:.86,texture:{url:'/assets/snow-granular.png',sizeM:.30,bumpStrength:.24,albedoStrength:.24}}},
 );
@@ -66,7 +66,7 @@ for(const entity of spec.entities){
   }
   if(entity.id==='road'&&entity.environmental){
     entity.environmental={...entity.environmental,snowDepthM:.0012,iceDepthM:.00055,waterDepthM:.00052};
-    entity.material={...entity.material,color:[.105,.110,.118,1],roughness:.71};
+    entity.material={...entity.material,color:[.145,.150,.158,1],roughness:.71};
   }
   if(entity.id.includes('lamp')&&entity.id.endsWith('-glow')){
     if(entity.light)entity.light={...entity.light,intensity:.15,range:8};
