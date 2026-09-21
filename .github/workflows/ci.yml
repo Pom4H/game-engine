@@ -85,6 +85,12 @@ jobs:
           bun-version: 1.4.2
       - name: Install
         run: bun install --frozen-lockfile
+      - name: Vehicle framework reference fit
+        env:
+          REFERENCE_GLB_URL: https://cdn.3dassets.dev/assets/32529/v1/model.glb
+        run: |
+          bun run build
+          node tools/pickup-reference-check.mjs
       - name: Typecheck, build and tests
         run: bun run ci
       - name: WebGPU production smoke
