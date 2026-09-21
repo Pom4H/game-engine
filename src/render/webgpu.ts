@@ -434,6 +434,33 @@ fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
 }
 `;
 
+const REFLECTION_LOD_SHADER=FRAME_WGSL+`
+override MATERIAL_CLASS:i32=-1;
+struct U {
+  model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
+  surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
+  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
+}
+@group(0) @binding(0) var<uniform> u:U;
+@group(1) @binding(0) var<uniform> f:Frame;
+struct O {@builtin(position) position:vec4<f32>,@location(0) normal:vec3<f32>,@location(1) worldPos:vec3<f32>}
+@vertex fn reflectionVS(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>)->O{
+  let world=u.model*vec4<f32>(position,1);let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;
+  var out:O;out.position=f.reflectionVP*world;out.worldPos=world.xyz;
+  out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);return out;
+}
+@fragment fn fs(in:O)->@location(0) vec4<f32>{
+  if(in.worldPos.y<.04){discard;}
+  let n=normalize(in.normal);
+  let base=pow(max(u.color.rgb,vec3<f32>(0)),vec3<f32>(2.2));
+  let ndl=max(dot(n,f.sun.xyz),0.0);
+  let sky=f.sky.rgb*(.18+.60*max(n.y,0.0));
+  let direct=f.sunColor.rgb*f.sun.w*ndl*.318309886;
+  let radiance=base*(sky+direct)+u.emission.rgb;
+  return vec4<f32>(radiance,1);
+}
+`;
+
 const PROBE_SHADER=`
 struct U {
   model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
@@ -472,7 +499,7 @@ export class WebGPURenderer implements Renderer{
     this.surfaceTextures=new SurfaceTextures(device);this.profiler=new RenderProfiler(device,{enabled:profiling,timestampQueries});
     this.shaderAtoms=profiling?Object.freeze({
       material:analyzeWGSL('material',materialShader(),['vs','fs','shadowVS']),
-      reflection:analyzeWGSL('reflection',materialShader(true),['reflectionVS','fs']),
+      reflection:analyzeWGSL('reflection',REFLECTION_LOD_SHADER,['reflectionVS','fs']),
       sky:analyzeWGSL('sky',SKY_SHADER,['vs','fs']),
       snow:analyzeWGSL('snow',SNOW_SHADER,['vs','fs']),
       bloom:analyzeWGSL('bloom',BLOOM_SHADER,['vs','downsample','horizontal','vertical']),
@@ -489,7 +516,7 @@ export class WebGPURenderer implements Renderer{
     const device=await adapter.requestDevice(timestampQueries?{requiredFeatures:['timestamp-query']}:undefined),context=canvas.getContext('webgpu') as any,format=gpu.getPreferredCanvasFormat();context.configure({device,format,alphaMode:'opaque'});
     // The reflection plane clip uses discard. Keep it out of the main material
     // pipeline so opaque geometry can use early depth rejection on tile GPUs.
-    const module=device.createShaderModule({code:materialShader()}),reflectionModule=device.createShaderModule({code:materialShader(true)}),vertex={module,entryPoint:'vs',buffers:[{arrayStride:24,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'}]}]};
+    const module=device.createShaderModule({code:materialShader()}),reflectionModule=device.createShaderModule({code:REFLECTION_LOD_SHADER}),vertex={module,entryPoint:'vs',buffers:[{arrayStride:24,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'}]}]};
     const objectLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'unfilterable-float'}},{binding:2,visibility:2,texture:{sampleType:'float'}},{binding:3,visibility:2,sampler:{type:'filtering'}},{binding:4,visibility:2,texture:{sampleType:'float'}},{binding:5,visibility:2,sampler:{type:'filtering'}},{binding:6,visibility:2,texture:{sampleType:'float'}},{binding:7,visibility:2,texture:{sampleType:'float'}}]});
     const frameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
@@ -547,7 +574,7 @@ export class WebGPURenderer implements Renderer{
     for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
     const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04|(format==='rgba16float'?0x01:0)});
     this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.normal=texture('rgba16float',1);this.specular=texture('rgba8unorm',1);this.velocity=texture('rg16float',1);this.effectsHdr=texture('rgba16float',1);this.taaA=texture('rgba16float',1);this.taaB=texture('rgba16float',1);
-    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
+    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04|0x01});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
     const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
     const bloomBind=(texture:GPUAny)=>this.device.createBindGroup({layout:this.gpu.bloomLayout,entries:[{binding:0,resource:texture.createView()},{binding:1,resource:this.gpu.sampler}]});this.bloomDownBind=bloomBind(this.hdr);this.bloomHorizontalBind=bloomBind(this.bloomA);this.bloomVerticalBind=bloomBind(this.bloomB);
     this.gpu.lightBind=this.device.createBindGroup({layout:this.gpu.lightLayout,entries:[{binding:0,resource:{buffer:this.gpu.frame}},{binding:1,resource:this.gpu.shadow.createView()},{binding:2,resource:this.gpu.comparison},{binding:3,resource:this.reflection.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.lightBuffer}},{binding:6,resource:{buffer:this.gpu.cellBuffer}},{binding:7,resource:this.gpu.noiseVolume.createView()},{binding:8,resource:this.gpu.noiseSampler},{binding:9,resource:this.gpu.environmentView},{binding:10,resource:this.gpu.localProbeView}]});
@@ -718,16 +745,20 @@ export class WebGPURenderer implements Renderer{
   }
   async prepareMaterials(scene:Scene):Promise<void>{const urls=new Set([...scene.entities.values()].flatMap(e=>{const t=e.material.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];}));await Promise.all([...urls].map(async url=>{await this.surfaceTextures.load(url);this.failedMaterials.delete(url);}));}
   async sampleLinearPixels(points:readonly (readonly [number,number])[],stage:import('./types.js').LinearPixelStage='hdr'):Promise<readonly import('./types.js').LinearPixelSample[]>{
-    const source=stage==='hdr'?this.hdr:stage==='effects'?this.effectsHdr:(this.taaHistoryIndex===0?this.taaA:this.taaB);
+    const source=stage==='hdr'?this.hdr:stage==='reflection'?this.reflection:stage==='effects'?this.effectsHdr:(this.taaHistoryIndex===0?this.taaA:this.taaB);
     if(!source)throw new Error(`Linear ${stage} target unavailable`);
     if(points.length>512)throw new RangeError('At most 512 linear pixel samples per readback');
     if(!points.length)return[];
+    const sourceW=stage==='reflection'?Math.max(1,Math.floor(this.depthW/2)):this.depthW;
+    const sourceH=stage==='reflection'?Math.max(1,Math.floor(this.depthH/2)):this.depthH;
     const stride=256,buffer=this.device.createBuffer({size:stride*points.length,usage:0x01|0x08});
     const encoder=this.device.createCommandEncoder({label:'render.linear-pixel-readback'});
     for(let index=0;index<points.length;index++){
       const [x,y]=points[index]!;
       if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=this.depthW||y>=this.depthH){buffer.destroy();throw new RangeError(`Pixel (${x},${y}) outside ${this.depthW}x${this.depthH}`);}
-      encoder.copyTextureToBuffer({texture:source,origin:[x,y,0]},{buffer,offset:index*stride,bytesPerRow:stride,rowsPerImage:1},[1,1,1]);
+      const sx=stage==='reflection'?Math.min(sourceW-1,Math.floor(x*sourceW/this.depthW)):x;
+      const sy=stage==='reflection'?Math.min(sourceH-1,Math.floor(y*sourceH/this.depthH)):y;
+      encoder.copyTextureToBuffer({texture:source,origin:[sx,sy,0]},{buffer,offset:index*stride,bytesPerRow:stride,rowsPerImage:1},[1,1,1]);
     }
     this.device.queue.submit([encoder.finish()]);
     await buffer.mapAsync(0x01);
