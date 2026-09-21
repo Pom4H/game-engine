@@ -690,7 +690,7 @@ export class WebGPURenderer implements Renderer{
     }
     const prepared=new Map<string,RuntimeEntity>();
     for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...(shadowDirty?staticShadowDrawables:[]),...dynamicShadowDrawables,...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
-    this.profiler.measure('prepare',()=>{for(const entity of prepared.values())this.prepare(entity,modelFor(entity));});
+    this.profiler.measure('prepare',()=>{for(const entity of prepared.values()){const model=modelFor(entity);if(this.needsPrepare(entity,model))this.prepare(entity,model);}});
     this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:0});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
     this.profiler.measure('encode.shadow',()=>{
@@ -880,6 +880,20 @@ export class WebGPURenderer implements Renderer{
     }
   }
 
+  private needsPrepare(entity:RuntimeEntity,model:Mat4):boolean{
+    const scene=this.lastScene,field=scene?.surfaces.field?.(entity.id),surfaceState=scene?.surfaces.surface(entity.id),body=scene?.surfaces.body(entity.id);
+    if(field||surfaceState||body)return true;
+    const object=this.objects.get(entity.id);
+    if(!object?.uniformReady)return true;
+    const texture=entity.material.texture;
+    const materialTexture=texture?.url?this.surfaceTextures.get(texture.url):undefined;
+    const normalTexture=texture?.normalUrl?this.surfaceTextures.get(texture.normalUrl):undefined;
+    const ormTexture=texture?.ormUrl?this.surfaceTextures.get(texture.ormUrl):undefined;
+    const materialKey=texture?[materialTexture&&texture.url?texture.url:'',normalTexture?texture.normalUrl:'',ormTexture?texture.ormUrl:''].join('|'):undefined;
+    if(object.width!==0||object.height!==0||object.label!==(entity.material.label??'')||object.materialKey!==materialKey)return true;
+    const previousModel=this.previousModels.get(entity.id)??model;
+    return !matrixEqual(object.lastModel,model)||!matrixEqual(object.lastPrevModel,previousModel);
+  }
   private prepare(entity:RuntimeEntity,model:Mat4=this.model(entity)):void{
     const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture);
     this.mesh(renderPrimitive(entity)!);
