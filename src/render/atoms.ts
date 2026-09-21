@@ -163,7 +163,7 @@ export interface BuildRenderAtomsInput {
   shaders:Readonly<Record<string,ShaderProgramAtoms>>;
 }
 export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomReport{
-  const full=input.width*input.height,quarterW=Math.max(1,Math.floor(input.width/4)),quarterH=Math.max(1,Math.floor(input.height/4)),halfW=Math.max(1,Math.floor(input.width/2)),halfH=Math.max(1,Math.floor(input.height/2));
+  const full=input.width*input.height,halfW=Math.max(1,Math.floor(input.width/2)),halfH=Math.max(1,Math.floor(input.height/2));
   const snowTriangles=input.snowInstances*2;
   const indexedTriangles=input.shadowTriangles+input.reflectionTriangles+input.mainOpaqueTriangles+input.mainTransparentTriangles;
   const byPass={
@@ -202,21 +202,21 @@ export function buildRenderAtomReport(input:BuildRenderAtomsInput):RenderAtomRep
     mainDepth:attachment(input.width,input.height,1,4),
     effectsHdr:attachment(input.width,input.height,1,8),
     taaHistory:attachment(input.width,input.height,1,8),
-    bloomDownsample:attachment(quarterW,quarterH,1,8),
-    bloomHorizontal:attachment(quarterW,quarterH,1,8),
-    bloomVertical:attachment(quarterW,quarterH,1,8),
+    bloomDownsample:attachment(halfW,halfH,1,8),
+    bloomHorizontal:attachment(halfW,halfH,1,8),
+    bloomVertical:attachment(halfW,halfH,1,8),
     present:attachment(input.width,input.height,1,input.swapchainBytesPerPixel??4),
   };
   const all=Object.values(attachments),logicalAttachmentWriteBytes=all.reduce((sum,a)=>sum+a.logicalWriteBytes,0),logicalResolveBytes=all.reduce((sum,a)=>sum+a.logicalResolveBytes,0);
-  const quarter=quarterW*quarterH;
+  const bloomPixels=halfW*halfH;
   const memory:RenderMemoryAtoms=Object.freeze({
     uploads:Object.freeze({...input.uploads}),
     attachments:Object.freeze(attachments),
     logicalAttachmentWriteBytes,logicalResolveBytes,
     fullscreenTextureReadBytes:Object.freeze({
-      bloomDownsample:quarter*16*8,
-      bloomHorizontal:quarter*17*8,
-      bloomVertical:quarter*17*8,
+      bloomDownsample:bloomPixels*16*8,
+      bloomHorizontal:bloomPixels*17*8,
+      bloomVertical:bloomPixels*17*8,
       effectsMinimum:full*(8+8+4+4+8),
       effectsOpaqueAoExtra:full*(4*4+24*4),
       effectsDofExtra:full*12*8,
