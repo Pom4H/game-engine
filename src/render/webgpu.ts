@@ -402,7 +402,17 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     let glassR0=pow((glassIor-1.0)/(glassIor+1.0),2.0);
     let glassF=glassR0+(1.0-glassR0)*pow(1.0-nv,5.0);
     let size=vec2<f32>(textureDimensions(opaqueScene));
-    let screenUV=clamp(in.position.xy/size,vec2<f32>(.001),vec2<f32>(.999));
+    let incident=-viewDir;
+    let refractedDir=normalize(refract(incident,n,1.0/glassIor));
+    let modelScale=vec3<f32>(length(u.model[0].xyz),length(u.model[1].xyz),length(u.model[2].xyz));
+    let opticalDistance=clamp(min(modelScale.x,min(modelScale.y,modelScale.z))*.12,.01,.18);
+    let bend=(refractedDir-incident)*opticalDistance;
+    let cameraDepth=max(dot(in.worldPos-f.eye.xyz,f.forward.xyz),.25);
+    let uvOffset=vec2<f32>(
+      dot(bend,f.right.xyz)/(2.0*cameraDepth*f.forward.w*f.right.w),
+      -dot(bend,f.up.xyz)/(2.0*cameraDepth*f.forward.w)
+    );
+    let screenUV=clamp(in.position.xy/size+uvOffset,vec2<f32>(.001),vec2<f32>(.999));
     var transmitted=textureSampleLevel(opaqueScene,reflectionSampler,screenUV,0).rgb;
     let transmission=clamp(u.emission.w,0.0,1.0);
     transmitted*=transmission*transmission;
