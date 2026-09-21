@@ -4,10 +4,32 @@ param(
 $ErrorActionPreference = "Stop"
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
 $ready = Join-Path $Root ".car-subset-v1.ready"
-if (Test-Path $ready) {
-  Write-Host "Stanford-ORB Car subset already cached at $Root"
+
+function Test-CarSubset {
+  $transforms = @(Get-ChildItem -Path $Root -Recurse -Filter transforms_test.json -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6)' })
+  $envs = @(Get-ChildItem -Path $Root -Recurse -Filter *.exr -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]env_map[\\/]' })
+  $mesh = @(Get-ChildItem -Path $Root -Recurse -Filter mesh.obj -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004.*mesh_blender' })
+  $testImages = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test[\\/]' })
+  $testMasks = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test_mask[\\/]' })
+  $complete = $transforms.Count -ge 3 -and $envs.Count -ge 3 -and $mesh.Count -ge 1 -and $testImages.Count -ge 3 -and $testMasks.Count -ge 3
+  return [pscustomobject]@{
+    Complete=$complete
+    Transforms=$transforms.Count
+    Envs=$envs.Count
+    Mesh=$mesh.Count
+    TestImages=$testImages.Count
+    TestMasks=$testMasks.Count
+  }
+}
+
+$existing = Test-CarSubset
+if ($existing.Complete) {
+  Set-Content -Path $ready -Value "Stanford-ORB Car subset v1"
+  Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)"
   exit 0
 }
+if (Test-Path $ready) { Remove-Item -Force $ready }
+
 $archives = Join-Path $Root "_archives"
 New-Item -ItemType Directory -Force -Path $archives | Out-Null
 
@@ -40,11 +62,9 @@ Download-And-Extract "ground_truth.tar.gz" "https://downloads.cs.stanford.edu/vi
   ($_ -match '(^|/)car_scene00(2|4|6)/env_map/') -or ($_ -match '(^|/)car_scene004/mesh_blender/')
 }
 
-$transforms = @(Get-ChildItem -Path $Root -Recurse -Filter transforms_test.json | Where-Object { $_.FullName -match 'car_scene00(2|4|6)' })
-$envs = @(Get-ChildItem -Path $Root -Recurse -Filter *.exr | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]env_map[\\/]' })
-$mesh = @(Get-ChildItem -Path $Root -Recurse -Filter mesh.obj | Where-Object { $_.FullName -match 'car_scene004.*mesh_blender' })
-if ($transforms.Count -lt 3 -or $envs.Count -lt 3 -or $mesh.Count -lt 1) {
-  throw "Incomplete Stanford Car cache: transforms=$($transforms.Count), envs=$($envs.Count), mesh=$($mesh.Count)"
+$final = Test-CarSubset
+if (-not $final.Complete) {
+  throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
 }
 Set-Content -Path $ready -Value "Stanford-ORB Car subset v1"
-Write-Host "Stanford-ORB Car subset ready: transforms=$($transforms.Count), envs=$($envs.Count), mesh=$($mesh.Count)"
+Write-Host "Stanford-ORB Car subset ready: transforms=$($final.Transforms), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
