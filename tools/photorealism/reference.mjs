@@ -1,5 +1,6 @@
 import {mkdir} from 'node:fs/promises';
 import {dirname} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import scene,{northStar} from './scene.mjs';
 import {writeExr,writePng} from './io.mjs';
 import {material as physicalMaterial} from '../../dist/materials/catalog.js';
@@ -190,7 +191,7 @@ export function displayTransform(linear,width,height){
   return out;
 }
 const option=(name,fallback)=>{const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:fallback;};
-if(import.meta.url===new URL(process.argv[1],'file:').href){
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   const width=Number(option('--width','320')),height=Number(option('--height','180')),spp=Number(option('--spp','64')),png=option('--png','artifacts/photorealism/reference.png'),exr=option('--exr','artifacts/photorealism/reference.exr');
   if(!Number.isSafeInteger(width)||!Number.isSafeInteger(height)||!Number.isSafeInteger(spp)||width<16||height<9||spp<1)throw new RangeError('Invalid reference render dimensions or spp');
   await mkdir(dirname(png),{recursive:true});await mkdir(dirname(exr),{recursive:true});
