@@ -644,7 +644,9 @@ export class WebGPURenderer implements Renderer{
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
-    const shadowDirty=!this.shadowValid||!matrixEqual(this.shadowLightVP??undefined,lightVP)||shadowDrawables.length!==this.shadowState.size||shadowDrawables.some(entity=>{
+    const staticShadowDrawables=shadowDrawables.filter(isStaticShadowCaster);
+    const dynamicShadowDrawables=shadowDrawables.filter(entity=>!isStaticShadowCaster(entity));
+    const shadowDirty=!this.shadowValid||!matrixEqual(this.shadowLightVP??undefined,lightVP)||staticShadowDrawables.length!==this.shadowState.size||staticShadowDrawables.some(entity=>{
       const previous=this.shadowState.get(entity.id),primitive=renderPrimitive(entity)!;
       return !previous||previous.primitive!==primitive||!matrixEqual(previous.model,modelFor(entity));
     });
@@ -659,18 +661,28 @@ export class WebGPURenderer implements Renderer{
       }
     }
     const prepared=new Map<string,RuntimeEntity>();
-    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...(shadowDirty?shadowDrawables:[]),...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
+    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...(shadowDirty?staticShadowDrawables:[]),...dynamicShadowDrawables,...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
     this.profiler.measure('prepare',()=>{for(const entity of prepared.values())this.prepare(entity,modelFor(entity));});
-    const shadowPlan=shadowDirty?this.profiler.measure('prepare',()=>this.prepareShadowBatches(shadowDrawables,modelFor)):{singles:[] as RuntimeEntity[],batches:[] as ShadowBatchPlan[],instances:0};
-    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:shadowPlan.instances});
+    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:0});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
     this.profiler.measure('encode.shadow',()=>{
-      if(!shadowDirty)return;
-      const timing=this.profiler.timestampWrites('shadow'),occlusion=this.profiler.occlusionSet(),shadow=encoder.beginRenderPass({label:'render.shadow',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
-      shadow.setBindGroup(1,this.gpu.frameBind);const query=this.profiler.beginOcclusion(shadow,'shadow');
-      for(const [culled,group] of partitionByCull(shadowPlan.singles)){shadow.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);for(const e of group)this.draw(shadow,e,false);}
-      for(const batch of shadowPlan.batches){shadow.setPipeline(batch.culled?this.gpu.shadowCulledInstanced:this.gpu.shadowDoubleInstanced);this.drawShadowBatch(shadow,batch);}
-      this.profiler.endOcclusion(shadow,query);shadow.end();
+      if(shadowDirty){
+        const staticPass=encoder.beginRenderPass({label:'render.shadow.static',colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+        staticPass.setBindGroup(1,this.gpu.frameBind);
+        for(const [culled,group] of partitionByCull(staticShadowDrawables)){
+          staticPass.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);
+          for(const entity of group)this.draw(staticPass,entity,false);
+        }
+        staticPass.end();
+      }
+      const timing=this.profiler.timestampWrites('shadow'),occlusion=this.profiler.occlusionSet();
+      const dynamicPass=encoder.beginRenderPass({label:'render.shadow.dynamic',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.dynamicShadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      dynamicPass.setBindGroup(1,this.gpu.frameBind);const query=this.profiler.beginOcclusion(dynamicPass,'shadow');
+      for(const [culled,group] of partitionByCull(dynamicShadowDrawables)){
+        dynamicPass.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);
+        for(const entity of group)this.draw(dynamicPass,entity,false);
+      }
+      this.profiler.endOcclusion(dynamicPass,query);dynamicPass.end();
     });
     this.profiler.measure('encode.probe',()=>{
       const settings=scene.spec.rendering??{},sky=settings.skyColor??[.26,.34,.47];
@@ -726,9 +738,9 @@ export class WebGPURenderer implements Renderer{
       for(const e of [...culled.cameraOpaque,...culled.cameraTransparent]){const kind=e.material.kind,triangles=this.mesh(renderPrimitive(e)!).triangles;materialDraws[kind]=(materialDraws[kind]??0)+1;materialTriangles[kind]=(materialTriangles[kind]??0)+triangles;}
       const work=this.profiler.currentWork();
       this.profiler.setAtoms(buildRenderAtomReport({
-        width:this.canvas.width,height:this.canvas.height,shadowMapSize:SHADOW_MAP_SIZE,shadowDraws:shadowDirty?shadowPlan.singles.length+shadowPlan.batches.length:0,reflectionDraws:culled.reflectedObjects.length,shadowBatchedInstances:shadowDirty?shadowPlan.instances:0,shadowBatchedDraws:shadowDirty?shadowPlan.batches.length:0,
+        width:this.canvas.width,height:this.canvas.height,shadowMapSize:SHADOW_MAP_SIZE,shadowDraws:(shadowDirty?staticShadowDrawables.length:0)+dynamicShadowDrawables.length,reflectionDraws:culled.reflectedObjects.length,shadowBatchedInstances:0,shadowBatchedDraws:0,
         mainOpaqueDraws:culled.cameraOpaque.length,mainTransparentDraws:culled.cameraTransparent.length,snowInstances,
-        shadowTriangles:shadowDirty?sumTriangles(shadowDrawables):0,reflectionTriangles:sumTriangles(culled.reflectedObjects),
+        shadowTriangles:(shadowDirty?sumTriangles(staticShadowDrawables):0)+sumTriangles(dynamicShadowDrawables),reflectionTriangles:sumTriangles(culled.reflectedObjects),
         mainOpaqueTriangles:sumTriangles(culled.cameraOpaque),mainTransparentTriangles:sumTriangles(culled.cameraTransparent),
         materialDraws,materialTriangles,
         uploads:{total:work.uploadBytes,uniform:work.uniformUploadBytes,surface:work.surfaceUploadBytes,light:work.lightUploadBytes,frame:work.frameUploadBytes,snow:work.snowUploadBytes,environment:work.environmentUploadBytes,instance:work.instanceUploadBytes},
@@ -739,7 +751,7 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
     if(shadowDirty){
       this.shadowValid=true;this.shadowLightVP=new Float32Array(lightVP);this.shadowState.clear();
-      for(const entity of shadowDrawables)this.shadowState.set(entity.id,{primitive:renderPrimitive(entity)!,model:new Float32Array(modelFor(entity))});
+      for(const entity of staticShadowDrawables)this.shadowState.set(entity.id,{primitive:renderPrimitive(entity)!,model:new Float32Array(modelFor(entity))});
     }
     this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.previousCamera=[...camera.position];this.previousTarget=[...camera.target];this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
     this.previousModels.clear();for(const entity of prepared.values())this.previousModels.set(entity.id,modelFor(entity));
@@ -969,6 +981,10 @@ function shadowGeometryKey(primitive:Primitive):string{
   return primitive.kind+':'+id;
 }
 function shadowBatchKey(entity:RuntimeEntity):string{return shadowGeometryKey(renderPrimitive(entity)!)+'|'+(canCullBack(entity)?1:0);}
+function isStaticShadowCaster(entity:RuntimeEntity):boolean{
+  const body=entity.body;
+  return !body||(!body.kinematic&&body.invMass===0);
+}
 function canCullBack(entity:RuntimeEntity):boolean{
   const kind=renderPrimitive(entity)?.kind;
   return kind==='box'||kind==='sphere'||kind==='cylinder'||kind==='torus'||kind==='polygon-prism';
