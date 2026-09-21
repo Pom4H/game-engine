@@ -21,6 +21,8 @@ function Test-CarSubset {
     Mesh=$mesh.Count
     TestImages=$testImages.Count
     TestMasks=$testMasks.Count
+    Albedo=$albedo.Count
+    Depth=$depth.Count
   }
 }
 
@@ -90,7 +92,7 @@ Import-LocalNovelTransforms
 $existing = Test-CarSubset
 if ($existing.Complete) {
   Set-Content -Path $ready -Value "Stanford-ORB Car subset v3"
-  Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)"
+  Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks), albedo=$($existing.Albedo), depth=$($existing.Depth)"
   exit 0
 }
 if (Test-Path $ready) { Remove-Item -Force $ready }
@@ -110,7 +112,7 @@ Download-And-Extract "ground_truth.tar.gz" "https://downloads.cs.stanford.edu/vi
 
 $final = Test-CarSubset
 if (-not $final.Complete) {
-  throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
+  throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks), albedo=$($final.Albedo), depth=$($final.Depth)"
 }
 Set-Content -Path $ready -Value "Stanford-ORB Car subset v3"
 Write-Host "Stanford-ORB Car subset ready: transforms=$($final.Transforms), novel=$($final.Novel), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
