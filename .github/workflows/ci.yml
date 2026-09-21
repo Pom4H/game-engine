@@ -32,6 +32,14 @@ jobs:
         run: bun run build
       - name: Fast engine invariants
         run: node --test test/core.test.mjs test/deformation.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
+      - name: Vehicle reference geometry probe
+        env:
+          REFERENCE_GLB_URL: https://cdn.3dassets.dev/assets/32529/v1/model.glb
+          REFERENCE_GLB_REPORT: artifacts/pickup-reference.json
+        run: |
+          if not exist artifacts mkdir artifacts
+          node tools/reference-glb-report.mjs
+
       - name: Radiometric pixel oracle
         run: node tools/render-oracle.mjs
       - name: Reference render
