@@ -1,6 +1,6 @@
 import type {Primitive} from '../scene/types.js';
 
-export interface MeshData {vertices:Float32Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
+export interface MeshData {vertices:Float32Array;colors:Uint8Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
 const primitiveKeys=new WeakMap<Primitive,string>();
 export function primitiveKey(primitive:Primitive):string{return primitiveKeys.get(primitive)??JSON.stringify(primitive);}
 /** Called only on the scene's owned geometry copy. A shallow user freeze is not
@@ -10,7 +10,7 @@ export function freezePrimitive(primitive:Primitive):Primitive{
  freeze(primitive);primitiveKeys.set(primitive,JSON.stringify(primitive));return primitive;
 }
 export function primitiveMesh(primitive:Primitive):MeshData{
-  if(primitive.kind==='triangle-mesh')return pack([...primitive.positions],[...primitive.normals],[...primitive.indices]);
+  if(primitive.kind==='triangle-mesh')return pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined);
   if(primitive.kind==='torus')return torusMesh(primitive.radius,primitive.tube,primitive.segments??40);
   if(primitive.kind==='cylinder')return cylinderMesh(primitive.radius,primitive.height,primitive.topRadius??primitive.radius,Math.round(primitive.segments??20));
   if(primitive.kind==='snowdrift')return snowDriftMesh(primitive.size,primitive.seed,primitive.segments??56,primitive.continuous??false,primitive.offset??0);
@@ -20,11 +20,14 @@ export function primitiveMesh(primitive:Primitive):MeshData{
   if(primitive.kind==='polygon-prism')return polygonPrismMesh(primitive.axis??2,primitive.points,primitive.thickness);
   return sphereMesh(Math.max(6,Math.min(64,Math.round(primitive.segments??20))));
 }
-function pack(positions:number[],normals:number[],indices:number[]):MeshData{
-  const vertices=new Float32Array((positions.length/3)*6);
-  for(let i=0;i<positions.length/3;i++){vertices[i*6]=positions[i*3]!;vertices[i*6+1]=positions[i*3+1]!;vertices[i*6+2]=positions[i*3+2]!;vertices[i*6+3]=normals[i*3]!;vertices[i*6+4]=normals[i*3+1]!;vertices[i*6+5]=normals[i*3+2]!;}
-  const Index=positions.length/3>65535?Uint32Array:Uint16Array;
-  return{vertices,indices:new Index(indices),indexFormat:Index===Uint32Array?'uint32':'uint16'};
+function pack(positions:number[],normals:number[],indices:number[],sourceColors?:number[]):MeshData{
+  const count=positions.length/3,vertices=new Float32Array(count*6),colors=new Uint8Array(count*4);
+  for(let i=0;i<count;i++){
+    vertices[i*6]=positions[i*3]!;vertices[i*6+1]=positions[i*3+1]!;vertices[i*6+2]=positions[i*3+2]!;vertices[i*6+3]=normals[i*3]!;vertices[i*6+4]=normals[i*3+1]!;vertices[i*6+5]=normals[i*3+2]!;
+    for(let channel=0;channel<4;channel++)colors[i*4+channel]=Math.round(Math.max(0,Math.min(1,sourceColors?.[i*4+channel]??1))*255);
+  }
+  const Index=count>65535?Uint32Array:Uint16Array;
+  return{vertices,colors,indices:new Index(indices),indexFormat:Index===Uint32Array?'uint32':'uint16'};
 }
 function boxMesh():MeshData{
   const p:number[]=[],n:number[]=[],i:number[]=[];
