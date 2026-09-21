@@ -661,7 +661,7 @@ export class WebGPURenderer implements Renderer{
     void lightGrid;
     const frameState=this.profiler.measure('frame',()=>{
       const cameraView=lookAt(camera.position,camera.target),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
-      projection[8]+=-2*jitter[0]/this.canvas.width;projection[9]+=2*jitter[1]/this.canvas.height;
+      projection[8]=projection[8]!-2*jitter[0]/this.canvas.width;projection[9]=projection[9]!+2*jitter[1]/this.canvas.height;
       const vp=multiply4(projection,cameraView);
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
       const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
