@@ -37,6 +37,7 @@ struct U {
   fieldSize: vec4<f32>,
   pbr:vec4<f32>,
   emission:vec4<f32>,
+  optical:vec4<f32>, // ior, transmission, reserved, reserved
   texture:vec4<f32>, // size metres, bump amount, albedo blend, enabled
   detail:vec4<f32>,  // normal strength, normal enabled, ORM strength, ORM enabled
 }
@@ -393,13 +394,19 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color+=coatEnvironment*coatEnvF*clearcoat*.78;
   }
 
-  // Automotive glass is mostly transmitted scene color from the blend pass plus
-  // a physically strong grazing reflection. Avoid treating it as blue plastic.
+  // Glass transmission and reflection share one energy budget. The blend target
+  // carries straight-through radiance; source color contributes only the Fresnel
+  // reflected share. Transmission comes from the authoritative optical profile.
+  var glassOpacity=u.color.a;
   if(materialKind>.5&&materialKind<1.5){
-    let glassF=.04+.96*pow(1.0-nv,5.0);
+    let glassIor=max(1.0001,u.optical.x);
+    let glassR0=pow((glassIor-1.0)/(glassIor+1.0),2.0);
+    let glassF=glassR0+(1.0-glassR0)*pow(1.0-nv,5.0);
+    let glassTransmission=clamp(u.optical.y,0.0,1.0);
+    glassOpacity=clamp(1.0-glassTransmission*(1.0-glassF),.001,1.0);
     let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
     let glassEnvironment=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.08,.32,roughness))*.72);
-    color=mix(base*.055,glassEnvironment,.22+glassF*.54);
+    color=glassEnvironment*(glassF/max(glassOpacity,.001));
   }
   if(materialKind>9.5){
     color=mix(color,environmentRadiance,.58+.32*pow(1.0-nv,5.0));
@@ -423,7 +430,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let grazing=pow(1.0-nv,5.0);
   let clearcoatScreen=vec3<f32>(clearcoat*(.52+.36*grazing));
   let screenReflectance=max(environmentFresnel,clearcoatScreen);
-  let glassOpacity=mix(clamp(u.color.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
+  var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
 const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
@@ -456,7 +463,7 @@ override MATERIAL_CLASS:i32=-1;
 struct U {
   model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
   surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
-  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
+  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,optical:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
 }
 @group(0) @binding(0) var<uniform> u:U;
 @group(1) @binding(0) var<uniform> f:Frame;
@@ -482,7 +489,7 @@ const PROBE_SHADER=`
 struct U {
   model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
   surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
-  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
+  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,optical:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
 }
 struct P {vp:mat4x4<f32>,sun:vec4<f32>,sunColor:vec4<f32>,sky:vec4<f32>}
 @group(0) @binding(0) var<uniform> u:U;
@@ -924,14 +931,15 @@ export class WebGPURenderer implements Renderer{
     const surfaceState=this.lastScene?.surfaces.surface(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
     if(!dynamic&&object.uniformReady&&!modelChanged&&!previousChanged)return;
-    const uniform=new Float32Array(84);
+    const uniform=new Float32Array(88);
     uniform.set(model,0);uniform.set(previousModel,16);uniform.set(entity.material.color,32);uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
     uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],52);uniform.set([surfaceUseCode(entity.environmental?.surfaceUse),treatmentCode(entity.material.treatment),entity.material.clearcoat??-1,entity.material.clearcoatRoughness??-1],56);
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],60);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],64);
     uniform.set([entity.material.roughness??-1,entity.material.metalness??entity.material.profile.optical.metalness,entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,entity.material.profile.optical.ior],68);uniform.set([...(entity.material.emissive??[0,0,0]),0],72);
+    uniform.set([entity.material.profile.optical.ior,entity.material.profile.optical.transmission,0,0],76);
     const texture=entity.material.texture,normalReady=!!(texture?.normalUrl&&this.surfaceTextures.get(texture.normalUrl)),ormReady=!!(texture?.ormUrl&&this.surfaceTextures.get(texture.ormUrl));
-    uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture?.url&&this.surfaceTextures.get(texture.url)?1:0],76);
-    uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],80);
+    uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture?.url&&this.surfaceTextures.get(texture.url)?1:0],80);
+    uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],84);
     if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);this.profiler.addUpload(pixels.byteLength,'surface');}
     this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');object.uniformReady=true;object.lastModel=new Float32Array(model);object.lastPrevModel=new Float32Array(previousModel);
   }
@@ -978,7 +986,7 @@ export class WebGPURenderer implements Renderer{
     const materialKey=textureSpec?[materialTexture&&textureSpec.url?textureSpec.url:'',normalTexture?textureSpec.normalUrl:'',ormTexture?textureSpec.ormUrl:''].join('|'):undefined;
     const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===label&&existing.materialKey===materialKey)return existing;
     if(existing){existing.uniform.destroy();if(existing.owned!==false)existing.texture.destroy();}
-    const uniform=this.device.createBuffer({size:336,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
+    const uniform=this.device.createBuffer({size:352,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
     const fallback=this.gpu.emptyLabel;
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
       {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},
