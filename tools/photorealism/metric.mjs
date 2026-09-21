@@ -70,7 +70,7 @@ const production=await readPng(args.production),reference=await readPng(args.ref
 const full=evaluateRegion(production,reference),crops=[];
 for(const crop of northStar.crops){const p=rectPixels(production,crop.rect),r=rectPixels(reference,crop.rect),result=evaluateRegion(p,r);crops.push({id:crop.id,weight:crop.weight??1,rect:crop.rect,...result});}
 const weight=crops.reduce((sum,c)=>sum+c.weight,0)||1,cropGap=crops.reduce((sum,c)=>sum+c.gap*c.weight,0)/weight,gap=.55*full.gap+.45*cropGap;
-const report={version:1,metric:'PhotorealismGap',lowerIsBetter:true,mode:args.mode,resolution:[production.width,production.height],gap,full,cropGap,crops,weights:{full:.55,crops:.45,components:{logLuminance:.35,structural:.25,detail:.20,edge:.10,chroma:.10}}};
+const report={version:1,metric:'RendererConsistencyGap',lowerIsBetter:true,mode:args.mode,resolution:[production.width,production.height],gap,full,cropGap,crops,weights:{full:.55,crops:.45,components:{logLuminance:.35,structural:.25,detail:.20,edge:.10,chroma:.10}}};
 if(args.baseline){
   const baseline=JSON.parse(await readFile(args.baseline,'utf8')),entry=baseline[args.mode]??baseline;
   report.baseline={gap:entry.gap,tolerance:entry.tolerance??.005,delta:gap-entry.gap};
@@ -81,4 +81,4 @@ if(args.baseline){
 }
 await mkdir(dirname(args.out),{recursive:true});await writeFile(args.out,JSON.stringify(report,null,2));
 console.log(JSON.stringify({metric:report.metric,mode:report.mode,gap:report.gap,baseline:report.baseline??null,crops:Object.fromEntries(crops.map(c=>[c.id,c.gap])),report:args.out}));
-if(args.assert&&report.regressions?.length){console.error('Photorealism regression: '+JSON.stringify(report.regressions));process.exitCode=1;}
+if(args.assert&&report.regressions?.length){console.error('Renderer consistency regression: '+JSON.stringify(report.regressions));process.exitCode=1;}
