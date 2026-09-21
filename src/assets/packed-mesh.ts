@@ -6,6 +6,7 @@ export interface PackedMesh {
   readonly max:Vec3;
   readonly positionsU16Base64:string;
   readonly normalsOct8Base64?:string;
+  readonly colorsRGBA8Base64?:string;
   readonly indicesU16Base64?:string;
   readonly indicesU32Base64?:string;
   readonly vertices:number;
@@ -85,11 +86,13 @@ export function encodePackedMesh(mesh:Extract<Primitive,{kind:'triangle-mesh'}>)
   for(let i=0;i<mesh.positions.length;i++){const axis=(i%3) as 0|1|2,span=max[axis]-min[axis],value=span>0?(mesh.positions[i]!-min[axis])/span:0;quantized[i]=Math.max(0,Math.min(65535,Math.round(value*65535)));}
   const normalBytes=new Uint8Array(vertices*2);
   for(let vertex=0;vertex<vertices;vertex++){const base=vertex*3,x=mesh.normals[base]!,y=mesh.normals[base+1]!,z=mesh.normals[base+2]!;if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(z))throw new RangeError('Triangle mesh normal is not finite');const packed=encodeOctNormal(x,y,z);normalBytes[vertex*2]=packed[0];normalBytes[vertex*2+1]=packed[1];}
+  let colorBytes:Uint8Array|undefined;
+  if(mesh.colors){if(mesh.colors.length!==vertices*4)throw new RangeError('Triangle mesh color count mismatch');colorBytes=new Uint8Array(vertices*4);for(let i=0;i<mesh.colors.length;i++){const value=mesh.colors[i]!;if(!Number.isFinite(value)||value<0||value>1)throw new RangeError('Triangle mesh color is outside [0,1]');colorBytes[i]=Math.round(value*255);}}
   let needsU32=vertices>65535;
   for(const index of mesh.indices){if(!Number.isInteger(index)||index<0||index>=vertices)throw new RangeError('Triangle mesh index out of range');if(index>65535)needsU32=true;}
   return Object.freeze({
     min:Object.freeze([...min]) as Vec3,max:Object.freeze([...max]) as Vec3,
-    positionsU16Base64:encodeU16(quantized),normalsOct8Base64:encodeBytes(normalBytes),
+    positionsU16Base64:encodeU16(quantized),normalsOct8Base64:encodeBytes(normalBytes),...(colorBytes?{colorsRGBA8Base64:encodeBytes(colorBytes)}:{}),
     ...(needsU32?{indicesU32Base64:encodeU32(mesh.indices)}:{indicesU16Base64:encodeU16(mesh.indices)}),
     vertices,triangles,
   });
@@ -119,5 +122,7 @@ export function decodePackedMesh(mesh:PackedMesh):Extract<Primitive,{kind:'trian
     normals=Array<number>(positions.length);
     for(let vertex=0;vertex<mesh.vertices;vertex++){const n=octNormal(packed[vertex*2]!,packed[vertex*2+1]!),base=vertex*3;normals[base]=n[0];normals[base+1]=n[1];normals[base+2]=n[2];}
   }else normals=recomputeNormals(positions,indices);
-  return{kind:'triangle-mesh',positions,normals,indices};
+  let colors:number[]|undefined;
+  if(mesh.colorsRGBA8Base64){const packed=decodeBytes(mesh.colorsRGBA8Base64);if(packed.length!==mesh.vertices*4)throw new RangeError('Packed mesh color count mismatch');colors=Array.from(packed,value=>value/255);}
+  return{kind:'triangle-mesh',positions,normals,indices,...(colors?{colors}: {})};
 }
