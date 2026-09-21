@@ -112,6 +112,25 @@ function sceneModule({meshImport,camera,environment,material,exposure}){
   },null,2).replace('"mesh": null','"mesh": mesh')});\n`;
 }
 
+const calibrationScene=manifest.calibration[0]?.scene;
+if(!calibrationScene)throw new Error('Stanford-ORB manifest has no calibration scene');
+const calibrationTestPath=await findSuffix(`blender_LDR/${calibrationScene}/transforms_test.json`);
+const calibrationNovelPath=await findSuffix(`blender_LDR/${calibrationScene}/transforms_novel.json`);
+const calibrationTestMetadata=JSON.parse(await readFile(calibrationTestPath,'utf8'));
+const calibrationNovelMetadata=JSON.parse(await readFile(calibrationNovelPath,'utf8'));
+
+function captureFrame(item,split){
+  if(split==='calibration'){
+    const frame=calibrationTestMetadata.frames[item.testIndex];
+    if(!frame)throw new RangeError(`${item.scene} has no calibration test frame ${item.testIndex}`);
+    return{metadata:calibrationTestMetadata,frame};
+  }
+  const frames=calibrationNovelMetadata.frames.filter(frame=>frame.scene_name===item.scene);
+  const frame=frames[item.testIndex];
+  if(!frame)throw new RangeError(`${calibrationScene} transforms_novel has no ${item.scene} frame ${item.testIndex}`);
+  return{metadata:calibrationNovelMetadata,frame};
+}
+
 const meshPath=await findSuffix(`ground_truth/${manifest.calibration[0].scene}/mesh_blender/mesh.obj`);
 console.log(JSON.stringify({phase:'mesh',path:meshPath}));
 const mesh=parseObj(await readFile(meshPath,'utf8')),packed=encodePackedMesh(mesh);
@@ -120,8 +139,7 @@ await writeFile(join(out,'mesh.mjs'),`import {decodePackedMesh} from '../../../d
 const captures=[];
 for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manifest.heldOut]]){
   for(const item of list){
-    const transforms=await findSuffix(`blender_LDR/${item.scene}/transforms_test.json`),sceneDir=dirname(transforms),metadata=JSON.parse(await readFile(transforms,'utf8')),frame=metadata.frames[item.testIndex];
-    if(!frame)throw new RangeError(`${item.scene} has no test frame ${item.testIndex}`);
+    const targetTransforms=await findSuffix(`blender_LDR/${item.scene}/transforms_test.json`),sceneDir=dirname(targetTransforms),{metadata,frame}=captureFrame(item,split);
     const frameRel=frame.file_path.replace(/^\.\//,''),stem=basename(frameRel),sourceReference=join(sceneDir,frameRel+'.png'),sourceMask=join(sceneDir,dirname(frameRel)+'_mask',stem+'.png');
     await stat(sourceReference);await stat(sourceMask);
     const id=`${item.scene}-test${item.testIndex}`,reference=join(out,id+'-reference.png'),mask=join(out,id+'-mask.png');
