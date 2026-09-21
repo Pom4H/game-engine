@@ -122,11 +122,11 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let yd=positionAt(pixel+vec2<i32>(0,1),size)-pos;let yu=pos-positionAt(pixel-vec2<i32>(0,1),size);
   let dx=select(xr,xl,dot(xl,xl)<dot(xr,xr));let dy=select(yd,yu,dot(yu,yu)<dot(yd,yd));
   var geometric=cross(dy,dx);geometric=normalize(geometric+n*.00000001);geometric*=select(-1.0,1.0,dot(geometric,n)>0.0);
-  let directions=array<vec2<f32>,6>(vec2<f32>(1,0),vec2<f32>(.5,.866),vec2<f32>(-.5,.866),vec2<f32>(-1,0),vec2<f32>(-.5,-.866),vec2<f32>(.5,-.866));
+  let directions=array<vec2<f32>,4>(vec2<f32>(1,0),vec2<f32>(0,1),vec2<f32>(-1,0),vec2<f32>(0,-1));
   let radii=array<f32,2>(.035,.24);let weights=array<f32,2>(.58,.42);
   for(var ring=0;ring<2;ring++){
    let worldRadius=radii[ring];let radius=clamp(worldRadius*size.y/(max(z,.1)*f.forward.w*2.0),1.0,64.0);
-   for(var k=0;k<6;k++){
+   for(var k=0;k<4;k++){
     let delta=positionAt(pixel+vec2<i32>(round(directions[k]*radius)),size)-pos;let separation=length(delta);
     let horizon=max(dot(geometric,delta/max(separation,.001))-.06,0.0);
     let range=1.0-smoothstep(worldRadius*.30,worldRadius*1.25,separation);
@@ -138,17 +138,17 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  }
  let coc=min(6.0,abs(z-f.params.z)/max(z,.1)*f.params.w);
  var base=textureSampleLevel(hdr,linearSampler,uv,0).rgb;
- if(coc>.15){var sum=base;for(var k=0;k<8;k++){sum+=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*coc/size,0).rgb;}base=sum/9.0;}
+ if(coc>.15){var sum=base;for(var k=0;k<4;k++){sum+=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*coc/size,0).rgb;}base=sum/5.0;}
  var color=base*(1.0-min(.58,occlusion*.34));
  // One-ring screen-space diffuse bounce. Samples are projected in world metres,
  // so the effect is stable across resolution and naturally rejects same-plane
  // neighbours through the hemisphere term. This gives cheap local colour bleed
  // under cars, beside warm masonry and around shop recesses without scene probes.
  if(d<.99999){
-  let giDirs=array<vec2<f32>,6>(vec2<f32>(1,0),vec2<f32>(.5,.866),vec2<f32>(-.5,.866),vec2<f32>(-1,0),vec2<f32>(-.5,-.866),vec2<f32>(.5,-.866));
+  let giDirs=array<vec2<f32>,4>(vec2<f32>(.707,.707),vec2<f32>(-.707,.707),vec2<f32>(-.707,-.707),vec2<f32>(.707,-.707));
   let giRadius=clamp(.42*size.y/(max(z,.1)*f.forward.w*2.0),3.0,42.0);
   var indirect=vec3<f32>(0);var indirectWeight=0.0;
-  for(var gi=0;gi<6;gi++){
+  for(var gi=0;gi<4;gi++){
    let q=clamp(pixel+vec2<i32>(round(giDirs[gi]*giRadius)),vec2<i32>(0),dims-1);
    let qp=positionAt(q,size);let delta=qp-pos;let separation=length(delta);
    if(separation>.035&&separation<.82){
@@ -168,18 +168,18 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  // uses its geometry reflection pass; rough/offscreen surfaces keep sky fallback.
  let coating=textureLoad(reflectance,pixel,0);let rough=normalSample.a;
  // Only smooth reflective pixels pay the neighbourhood-depth and ray-march cost.
- if(d<.99999&&rough<.55&&coating.a>.5&&length(wn)>.92){
+ if(d<.99999&&rough<.09&&coating.a>.5&&length(wn)>.92){
   let coverage=depthSpan(pixel);
   if(coverage.y-coverage.x<.015+z*.001){
    let ray=reflect(normalize(pos),n);let origin=pos+n*.035;var previous=origin;var previousDelta=-.1;
-   for(var step=1;step<=28;step++){
-    let t=.05*f32(step)+.028*f32(step*step);let q=origin+ray*t;if(q.z>-.08){break;}
+   for(var step=1;step<=12;step++){
+    let t=.06*f32(step)+.060*f32(step*step);let q=origin+ray*t;if(q.z>-.08){break;}
     let ruv=project(q);
     if(any(ruv<vec2<f32>(.005))||any(ruv>vec2<f32>(.995))){break;}
     let coord=clamp(vec2<i32>(ruv*size),vec2<i32>(0),dims-1);let sceneZ=linearDepth(textureLoad(depth,coord,0));let delta=-q.z-sceneZ;
     if(delta>0.0&&previousDelta<=0.0&&t>.20){
      var lo=previous;var hi=q;var hitUV=ruv;
-     for(var refine=0;refine<3;refine++){let mid=(lo+hi)*.5;hitUV=project(mid);let hp=clamp(vec2<i32>(hitUV*size),vec2<i32>(0),dims-1);if(-mid.z>linearDepth(textureLoad(depth,hp,0))){hi=mid;}else{lo=mid;}}
+     for(var refine=0;refine<2;refine++){let mid=(lo+hi)*.5;hitUV=project(mid);let hp=clamp(vec2<i32>(hitUV*size),vec2<i32>(0),dims-1);if(-mid.z>linearDepth(textureLoad(depth,hp,0))){hi=mid;}else{lo=mid;}}
      hitUV=project(hi);let hp=clamp(vec2<i32>(hitUV*size),vec2<i32>(0),dims-1);let hitCoverage=depthSpan(hp);let hitZ=linearDepth(textureLoad(depth,hp,0));
      let hitWorldNormal=textureLoad(normals,hp,0).xyz*2.0-1.0;let facing=dot(viewNormal(hitWorldNormal),-ray);let gap=abs(-hi.z-hitZ);let thickness=min(.08,.025+t*.004);
      if(gap<thickness&&facing>.05&&hitCoverage.y-hitCoverage.x<.015+hitZ*.001&&length(hitWorldNormal)>.92&&distance(hitUV,uv)*size.y>3.0){
@@ -187,7 +187,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
       let strength=edge*pow(1.0-rough,1.55)*smoothstep(.04,.34,facing)*(1.0-smoothstep(thickness*.5,thickness,gap));
       let radius=clamp(rough*rough*t/max(hitZ,.1)*size.y/(f.forward.w*2.0)*.18,.5,10.0);
       var radiance=textureSampleLevel(hdr,linearSampler,hitUV,0).rgb*.40;
-      for(var tap=0;tap<6;tap++){radiance+=textureSampleLevel(hdr,linearSampler,hitUV+offsets[tap]*radius/size,0).rgb*.10;}
+      for(var tap=0;tap<4;tap++){radiance+=textureSampleLevel(hdr,linearSampler,hitUV+offsets[tap]*radius/size,0).rgb*.15;}
       color=color*(1.0-coating.rgb*strength*.72)+radiance*coating.rgb*strength*.90;break;
      }
     }
