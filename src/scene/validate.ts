@@ -59,13 +59,32 @@ export function validateScene(value:unknown):SceneSpec{
       }
     }
   }
-  if(scene.camera!==undefined){const camera=object(scene.camera,'camera');optionalNumber(camera,'fov','camera',1,179);optionalNumber(camera,'focusDistance','camera',.05);optionalNumber(camera,'aperture','camera',0,20);if(JSON.stringify(camera.position)===JSON.stringify(camera.target))throw new TypeError('camera position and target must differ');if(!Array.isArray(camera.position)||!Array.isArray(camera.target))throw new TypeError('camera position/target must be vec3');finiteVec3(camera.position as number[],'camera.position');finiteVec3(camera.target as number[],'camera.target');}
+  if(scene.camera!==undefined){
+    const camera=object(scene.camera,'camera');optionalNumber(camera,'fov','camera',1,179);optionalNumber(camera,'focusDistance','camera',.05);optionalNumber(camera,'aperture','camera',0,20);
+    if(JSON.stringify(camera.position)===JSON.stringify(camera.target))throw new TypeError('camera position and target must differ');
+    if(!Array.isArray(camera.position)||!Array.isArray(camera.target))throw new TypeError('camera position/target must be vec3');
+    finiteVec3(camera.position as number[],'camera.position');finiteVec3(camera.target as number[],'camera.target');
+    if(camera.intrinsics!==undefined){
+      const intrinsics=object(camera.intrinsics,'camera.intrinsics');
+      for(const key of ['fx','fy'])number(intrinsics[key],`camera.intrinsics.${key}`,Number.MIN_VALUE);
+      for(const key of ['cx','cy'])number(intrinsics[key],`camera.intrinsics.${key}`,-1e9,1e9);
+      for(const key of ['width','height']){number(intrinsics[key],`camera.intrinsics.${key}`,1,16384);if(!Number.isInteger(intrinsics[key]))throw new TypeError(`camera.intrinsics.${key} must be integer`);}
+    }
+  }
   if(scene.rendering!==undefined){
     const r=object(scene.rendering,'rendering');
     if(r.sunDirection!==undefined){vector(r.sunDirection,3,'rendering.sunDirection');if(Math.hypot(...r.sunDirection as number[])<1e-8)throw new TypeError('rendering.sunDirection must be nonzero');}
     for(const key of ['sunColor','skyColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);
     for(const key of ['sunIntensity','fogDensity','exposure'])optionalNumber(r,key,'rendering',0);
     optionalNumber(r,'shadowExtent','rendering',.1,10000);
+    if(r.environmentRadiance!==undefined){
+      const env=object(r.environmentRadiance,'rendering.environmentRadiance');
+      for(const key of ['width','height']){number(env[key],`rendering.environmentRadiance.${key}`,1,4096);if(!Number.isInteger(env[key]))throw new TypeError(`rendering.environmentRadiance.${key} must be integer`);}
+      if(typeof env.rgb16fBase64!=='string'||env.rgb16fBase64.length<8)throw new TypeError('rendering.environmentRadiance.rgb16fBase64 must be base64 text');
+      if(env.worldToEnvironment!==undefined)vector(env.worldToEnvironment,9,'rendering.environmentRadiance.worldToEnvironment');
+      choice(env.convention,['stanford-orb','latlong-y-up'],'rendering.environmentRadiance.convention');
+      optionalNumber(env,'intensity','rendering.environmentRadiance',0,1e6);
+    }
     if(r.reflectionProbe!==undefined){
       const probe=object(r.reflectionProbe,'rendering.reflectionProbe'),hasPosition=probe.position!==undefined,hasEntity=probe.entity!==undefined;
       if(hasPosition===hasEntity)throw new TypeError('rendering.reflectionProbe requires exactly one of position or entity');
