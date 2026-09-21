@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "material": {
+    "kind": "default",
+    "color": [0.18, 0.18, 0.20, 1],
+    "roughness": 0.22,
+    "metalness": 0.04,
+    "clearcoat": 1.0,
+    "clearcoatRoughness": 0.055,
+    "treatment": "painted"
+  },
+  "exposure": 1.0,
+  "frozenFrom": "car_scene004:test[0]",
+  "comment": "Calibration-only parameters. Held-out scene002/006 must never modify this file."
+}
