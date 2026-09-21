@@ -370,7 +370,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
       f.irradiance6.rgb*(.315391565*(3.0*z*z-1.0))+
       f.irradiance7.rgb*(1.092548431*x*z)+
       f.irradiance8.rgb*(.546274215*(x*x-y*y))
-    );
+    )/3.141592654;
   }else{
     let diffuseDirection=normalize(n+vec3<f32>(0,.16,0));
     let diffuseEnvironment=textureSampleLevel(environmentMap,reflectionSampler,diffuseDirection,6.1).rgb;
