@@ -717,8 +717,9 @@ export class WebGPURenderer implements Renderer{
     }
   }
   async prepareMaterials(scene:Scene):Promise<void>{const urls=new Set([...scene.entities.values()].flatMap(e=>{const t=e.material.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];}));await Promise.all([...urls].map(async url=>{await this.surfaceTextures.load(url);this.failedMaterials.delete(url);}));}
-  async sampleLinearPixels(points:readonly (readonly [number,number])[]):Promise<readonly import('./types.js').LinearPixelSample[]>{
-    if(!this.hdr)throw new Error('HDR target unavailable');
+  async sampleLinearPixels(points:readonly (readonly [number,number])[],stage:import('./types.js').LinearPixelStage='hdr'):Promise<readonly import('./types.js').LinearPixelSample[]>{
+    const source=stage==='hdr'?this.hdr:stage==='effects'?this.effectsHdr:(this.taaHistoryIndex===0?this.taaA:this.taaB);
+    if(!source)throw new Error(`Linear ${stage} target unavailable`);
     if(points.length>512)throw new RangeError('At most 512 linear pixel samples per readback');
     if(!points.length)return[];
     const stride=256,buffer=this.device.createBuffer({size:stride*points.length,usage:0x01|0x08});
@@ -726,7 +727,7 @@ export class WebGPURenderer implements Renderer{
     for(let index=0;index<points.length;index++){
       const [x,y]=points[index]!;
       if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=this.depthW||y>=this.depthH){buffer.destroy();throw new RangeError(`Pixel (${x},${y}) outside ${this.depthW}x${this.depthH}`);}
-      encoder.copyTextureToBuffer({texture:this.hdr,origin:[x,y,0]},{buffer,offset:index*stride,bytesPerRow:stride,rowsPerImage:1},[1,1,1]);
+      encoder.copyTextureToBuffer({texture:source,origin:[x,y,0]},{buffer,offset:index*stride,bytesPerRow:stride,rowsPerImage:1},[1,1,1]);
     }
     this.device.queue.submit([encoder.finish()]);
     await buffer.mapAsync(0x01);
