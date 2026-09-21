@@ -103,6 +103,46 @@ function parseObj(text){
   if(!positions.length||positions.some(v=>!Number.isFinite(v))||normals.some(v=>!Number.isFinite(v)))throw new TypeError('OBJ did not produce finite triangle geometry');
   return{kind:'triangle-mesh',positions,normals,indices};
 }
+function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+function median(values){
+  if(!values.length)return 0;
+  const sorted=[...values].sort((a,b)=>a-b),mid=sorted.length>>1;
+  return sorted.length&1?sorted[mid]:(sorted[mid-1]+sorted[mid])*.5;
+}
+async function calibrateVertexColors(mesh,sceneDir,metadata,items){
+  const vertices=mesh.positions.length/3,samplesByPosition=new Map();
+  const keyAt=i=>`${mesh.positions[i*3]},${mesh.positions[i*3+1]},${mesh.positions[i*3+2]}`;
+  for(let i=0;i<vertices;i++)if(!samplesByPosition.has(keyAt(i)))samplesByPosition.set(keyAt(i),[]);
+  for(const item of items){
+    const frame=metadata.frames[item.testIndex];if(!frame)throw new RangeError(`Calibration frame ${item.testIndex} is missing`);
+    const rel=frame.file_path.replace(/^\.\//,''),stem=basename(rel),image=await readPng(join(sceneDir,rel+'.png')),mask=await readPng(join(sceneDir,dirname(rel)+'_mask',stem+'.png'));
+    const m=frame.transform_matrix,position=[m[0][3],m[1][3],m[2][3]],right=[m[0][0],m[1][0],m[2][0]],up=[m[0][1],m[1][1],m[2][1]],back=[m[0][2],m[1][2],m[2][2]];
+    const angle=Number(frame.camera_angle_x??metadata.camera_angle_x),focal=.5*image.width/Math.tan(.5*angle);
+    for(let i=0;i<vertices;i++){
+      const p=[mesh.positions[i*3],mesh.positions[i*3+1],mesh.positions[i*3+2]],n=[mesh.normals[i*3],mesh.normals[i*3+1],mesh.normals[i*3+2]],delta=[p[0]-position[0],p[1]-position[1],p[2]-position[2]];
+      const depth=-dot(delta,back);if(depth<=1e-5)continue;
+      const view=norm([position[0]-p[0],position[1]-p[1],position[2]-p[2]]);if(dot(n,view)<.06)continue;
+      const x=Math.round(focal*dot(delta,right)/depth+image.width*.5),y=Math.round(image.height*.5-focal*dot(delta,up)/depth);
+      if(x<2||y<2||x>=image.width-2||y>=image.height-2)continue;
+      const maskAt=(xx,yy)=>mask.rgb[(yy*mask.width+xx)*3];
+      if(maskAt(x,y)<128||maskAt(x-2,y)<128||maskAt(x+2,y)<128||maskAt(x,y-2)<128||maskAt(x,y+2)<128)continue;
+      const q=(y*image.width+x)*3;
+      samplesByPosition.get(keyAt(i)).push([image.rgb[q]/255,image.rgb[q+1]/255,image.rgb[q+2]/255]);
+    }
+  }
+  const colors=new Array(vertices*4),observed=new Set();
+  for(let i=0;i<vertices;i++){
+    const samples=samplesByPosition.get(keyAt(i));
+    let rgb;
+    if(samples?.length){
+      rgb=[median(samples.map(v=>v[0])),median(samples.map(v=>v[1])),median(samples.map(v=>v[2]))];
+      observed.add(keyAt(i));
+    }else rgb=[.50,.50,.50];
+    colors[i*4]=rgb[0];colors[i*4+1]=rgb[1];colors[i*4+2]=rgb[2];colors[i*4+3]=1;
+  }
+  return{colors,coverage:observed.size/Math.max(1,samplesByPosition.size),positions:samplesByPosition.size,observed:observed.size};
+}
+
 function sceneModule({meshImport,camera,environment,material,exposure}){
   return `import {defineScene} from '@rom4/game-engine';\nimport mesh from '${meshImport}';\nexport default defineScene(${JSON.stringify({
     version:1,seed:1,gravity:[0,0,0],ground:-100,
@@ -115,9 +155,13 @@ function sceneModule({meshImport,camera,environment,material,exposure}){
 const calibrationScene=manifest.calibration[0]?.scene;
 if(!calibrationScene)throw new Error('Stanford-ORB manifest has no calibration scene');
 
+const calibrationTransforms=await findSuffix(`blender_LDR/${calibrationScene}/transforms_test.json`),calibrationSceneDir=dirname(calibrationTransforms),calibrationMetadata=JSON.parse(await readFile(calibrationTransforms,'utf8'));
 const meshPath=await findSuffix(`ground_truth/${manifest.calibration[0].scene}/mesh_blender/mesh.obj`);
 console.log(JSON.stringify({phase:'mesh',path:meshPath}));
-const mesh=parseObj(await readFile(meshPath,'utf8')),packed=encodePackedMesh(mesh);
+const mesh=parseObj(await readFile(meshPath,'utf8')),albedo=await calibrateVertexColors(mesh,calibrationSceneDir,calibrationMetadata,manifest.calibration);
+mesh.colors=albedo.colors;
+console.log(JSON.stringify({phase:'albedo-calibration',views:manifest.calibration.map(v=>v.testIndex),coverage:albedo.coverage,positions:albedo.positions,observed:albedo.observed}));
+const packed=encodePackedMesh(mesh);
 await writeFile(join(out,'mesh.mjs'),`import {decodePackedMesh} from '../../../dist/assets/packed-mesh.js';\nexport default decodePackedMesh(${JSON.stringify(packed)});\n`);
 
 const captures=[];
