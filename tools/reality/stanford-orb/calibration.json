@@ -2,14 +2,19 @@
   "version": 1,
   "material": {
     "kind": "default",
-    "color": [0.18, 0.18, 0.20, 1],
+    "color": [
+      1,
+      1,
+      1,
+      1
+    ],
     "roughness": 0.22,
     "metalness": 0.04,
-    "clearcoat": 1.0,
+    "clearcoat": 1,
     "clearcoatRoughness": 0.055,
     "treatment": "painted"
   },
-  "exposure": 1.0,
-  "frozenFrom": "car_scene004:test[0]",
-  "comment": "Calibration-only parameters. Held-out scene002/006 must never modify this file."
+  "exposure": 1,
+  "frozenFrom": "car_scene004:test[0,2,4] vertex-color calibration",
+  "comment": "Calibration-only spatial albedo from scene004 test[0,2,4]. Held-out views test[1,3] never modify material or vertex colors."
 }
