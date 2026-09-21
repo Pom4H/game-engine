@@ -45,8 +45,8 @@ export interface RenderProfileSnapshot {
 }
 
 type GPUAny=any;
-interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null}
-interface OcclusionSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number}
+interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null;usedMask:number}
+interface OcclusionSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;usedMask:number}
 const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,shadowBatchedInstances:0,uploadBytes:0,uniformUploadBytes:0,surfaceUploadBytes:0,lightUploadBytes:0,frameUploadBytes:0,snowUploadBytes:0,environmentUploadBytes:0,instanceUploadBytes:0});
 const percentile=(values:readonly number[],q:number)=>{if(!values.length)return 0;const a=[...values].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor((a.length-1)*q))]!;};
 const stats=(values:readonly number[]):QuantumStats=>({meanMs:values.length?values.reduce((a,b)=>a+b,0)/values.length:0,p50Ms:percentile(values,.5),p95Ms:percentile(values,.95),maxMs:values.length?Math.max(...values):0});
@@ -74,12 +74,12 @@ export class RenderProfiler {
     if(this.enabled)for(let i=0;i<4;i++)this.occlusionSlots.push({
       resolve:device.createBuffer({label:`render occlusion resolve ${i}`,size:this.occlusionBytes,usage:0x0200|0x0004}),
       read:device.createBuffer({label:`render occlusion readback ${i}`,size:this.occlusionBytes,usage:0x0001|0x0008}),
-      pending:false,frame:0,generation:0,
+      pending:false,frame:0,generation:0,usedMask:0,
     });
     if(this.timestampQueries)for(let i=0;i<4;i++)this.slots.push({
       resolve:device.createBuffer({label:`render profile resolve ${i}`,size:this.queryBytes,usage:0x0200|0x0004}),
       read:device.createBuffer({label:`render profile readback ${i}`,size:this.queryBytes,usage:0x0001|0x0008}),
-      pending:false,frame:0,generation:0,work:null,
+      pending:false,frame:0,generation:0,work:null,usedMask:0,
     });
   }
 
@@ -87,8 +87,8 @@ export class RenderProfiler {
     this.frame++;if(!this.enabled)return this.frame;this.frameStart=performance.now();this.cpuQuanta={};this.work=emptyWork();
     this.active=this.timestampQueries?(this.slots.find(slot=>!slot.pending)??null):null;
     this.activeOcclusion=this.enabled?(this.occlusionSlots.find(slot=>!slot.pending)??null):null;
-    if(this.active){this.active.frame=this.frame;this.active.generation=this.generation;this.active.work=null;}
-    if(this.activeOcclusion){this.activeOcclusion.frame=this.frame;this.activeOcclusion.generation=this.generation;}
+    if(this.active){this.active.frame=this.frame;this.active.generation=this.generation;this.active.work=null;this.active.usedMask=0;}
+    if(this.activeOcclusion){this.activeOcclusion.frame=this.frame;this.activeOcclusion.generation=this.generation;this.activeOcclusion.usedMask=0;}
     return this.frame;
   }
   measure<T>(name:RenderCpuQuantum,run:()=>T):T{if(!this.enabled)return run();const at=performance.now();try{return run();}finally{this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+(performance.now()-at);}}
@@ -101,12 +101,14 @@ export class RenderProfiler {
   occlusionSet():GPUAny|undefined{return this.activeOcclusion&&this.occlusionQuerySet?this.occlusionQuerySet:undefined;}
   beginOcclusion(pass:GPUAny,name:'shadow'|'reflection'|'mainOpaque'|'mainTransparent'|'snow'):boolean{
     if(!this.activeOcclusion||!this.occlusionQuerySet)return false;
-    const index=name==='shadow'?0:name==='reflection'?1:name==='mainOpaque'?2:name==='mainTransparent'?3:4;pass.beginOcclusionQuery(index);return true;
+    const index=name==='shadow'?0:name==='reflection'?1:name==='mainOpaque'?2:name==='mainTransparent'?3:4;
+    this.activeOcclusion.usedMask|=1<<index;pass.beginOcclusionQuery(index);return true;
   }
   endOcclusion(pass:GPUAny,active:boolean):void{if(active)pass.endOcclusionQuery();}
   timestampWrites(name:RenderGpuQuantum):Record<string,unknown>|undefined{
     if(!this.active||!this.querySet)return undefined;
     const i=RENDER_GPU_QUANTA.indexOf(name);if(i<0)return undefined;
+    this.active.usedMask|=1<<i;
     return{querySet:this.querySet,beginningOfPassWriteIndex:i*2,endOfPassWriteIndex:i*2+1};
   }
   resolve(encoder:GPUAny):void{
@@ -118,13 +120,13 @@ export class RenderProfiler {
     if(!this.enabled)return;const cpu=freezeFrame(this.frame,performance.now()-this.frameStart,this.cpuQuanta,this.work);
     this.push(this.cpuHistory,cpu);
     const occ=this.activeOcclusion;this.activeOcclusion=null;
-    if(occ&&this.occlusionQuerySet){occ.pending=true;void occ.read.mapAsync(0x0001).then(()=>{const raw=new BigUint64Array(occ.read.getMappedRange());const result:Object={};const values=[Number(raw[0]!),Number(raw[1]!),Number(raw[2]!),Number(raw[3]!),Number(raw[4]!)],quantitative=values.some(value=>value>1);const raster:RasterSampleFrame={frame:occ.frame,quantitative,shadow:values[0]!,reflection:values[1]!,mainOpaque:values[2]!,mainTransparent:values[3]!,snow:values[4]!};occ.read.unmap();if(occ.generation===this.generation)this.latestRaster=Object.freeze(raster);occ.pending=false;}).catch(()=>{try{occ.read.unmap();}catch{}occ.pending=false;});}
+    if(occ&&this.occlusionQuerySet){occ.pending=true;void occ.read.mapAsync(0x0001).then(()=>{const raw=new BigUint64Array(occ.read.getMappedRange());const values=Array.from({length:5},(_,i)=>(occ.usedMask&(1<<i))?Number(raw[i]!):0),quantitative=values.some(value=>value>1);const raster:RasterSampleFrame={frame:occ.frame,quantitative,shadow:values[0]!,reflection:values[1]!,mainOpaque:values[2]!,mainTransparent:values[3]!,snow:values[4]!};occ.read.unmap();if(occ.generation===this.generation)this.latestRaster=Object.freeze(raster);occ.pending=false;}).catch(()=>{try{occ.read.unmap();}catch{}occ.pending=false;});}
     const slot=this.active;this.active=null;if(!slot||!this.querySet)return;
     slot.pending=true;
     void slot.read.mapAsync(0x0001).then(()=>{
       const raw=new BigUint64Array(slot.read.getMappedRange()),quanta:Record<string,number>={};let total=0;
       for(let i=0;i<RENDER_GPU_QUANTA.length;i++){
-        const begin=raw[i*2]!,end=raw[i*2+1]!,ms=end>=begin?Number(end-begin)/1e6:0;
+        const used=(slot.usedMask&(1<<i))!==0,begin=raw[i*2]!,end=raw[i*2+1]!,ms=used&&end>=begin?Number(end-begin)/1e6:0;
         quanta[RENDER_GPU_QUANTA[i]!]=ms;total+=ms;
       }
       slot.read.unmap();if(slot.generation===this.generation)this.push(this.gpuHistory,freezeFrame(slot.frame,total,quanta,slot.work??emptyWork()));slot.pending=false;slot.work=null;
