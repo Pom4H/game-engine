@@ -66,6 +66,8 @@ export class Scene {
   environment:EnvironmentState;
   time=0;
   tick=0;
+  /** Changes only when renderer-owned structure/geometry membership changes, not on ordinary motion. */
+  renderStructureRevision=0;
   camera:CameraSpec;
   private eventSequence=0;
   private readonly eventQueue:EngineEvent[]=[];
@@ -119,7 +121,7 @@ export class Scene {
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
-    this.entities.set(spec.id,runtime);
+    this.entities.set(spec.id,runtime);this.renderStructureRevision++;
     return runtime;
   }
 
@@ -131,7 +133,7 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);this.entities.delete(id);this.surfaces.remove(id);
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
@@ -174,7 +176,7 @@ export class Scene {
           return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
         });
       })
-      .use('deformation',()=>{this.deformation.step(this.entities);})
+      .use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
       .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
       .use('events',({at})=>{this.emitContactEvents(at);})
       .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
