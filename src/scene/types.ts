@@ -9,7 +9,7 @@ import type {SceneDeformationSpec} from '../physics/deformation.js';
 export type Color = readonly [number,number,number,number];
 export type Primitive =
   | {kind:'box'; size?:Vec3}
-  | {kind:'triangle-mesh';positions:readonly number[];normals:readonly number[];indices:readonly number[]}
+  | {kind:'triangle-mesh';positions:readonly number[];normals:readonly number[];indices:readonly number[]; /** Optional sRGB vertex albedo, RGBA per vertex in [0,1]. */ colors?:readonly number[]}
   | {kind:'torus';radius:number;tube:number;segments?:number}
   | {kind:'cylinder'; radius:number; height:number; topRadius?:number; segments?:number}
   | {kind:'snowdrift'; size:Vec3; seed:number; segments?:number; continuous?:boolean; offset?:number}
