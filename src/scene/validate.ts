@@ -63,7 +63,7 @@ export function validateScene(value:unknown):SceneSpec{
     const camera=object(scene.camera,'camera');optionalNumber(camera,'fov','camera',1,179);optionalNumber(camera,'focusDistance','camera',.05);optionalNumber(camera,'aperture','camera',0,20);
     if(JSON.stringify(camera.position)===JSON.stringify(camera.target))throw new TypeError('camera position and target must differ');
     if(!Array.isArray(camera.position)||!Array.isArray(camera.target))throw new TypeError('camera position/target must be vec3');
-    finiteVec3(camera.position as number[],'camera.position');finiteVec3(camera.target as number[],'camera.target');
+    finiteVec3(camera.position as number[],'camera.position');finiteVec3(camera.target as number[],'camera.target');if(camera.up!==undefined){if(!Array.isArray(camera.up))throw new TypeError('camera.up must be vec3');finiteVec3(camera.up as number[],'camera.up');if(Math.hypot(...camera.up as number[])<1e-8)throw new TypeError('camera.up must be nonzero');}
     if(camera.intrinsics!==undefined){
       const intrinsics=object(camera.intrinsics,'camera.intrinsics');
       for(const key of ['fx','fy'])number(intrinsics[key],`camera.intrinsics.${key}`,Number.MIN_VALUE);
