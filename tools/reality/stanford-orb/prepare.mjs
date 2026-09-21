@@ -115,20 +115,22 @@ function sceneModule({meshImport,camera,environment,material,exposure}){
 const calibrationScene=manifest.calibration[0]?.scene;
 if(!calibrationScene)throw new Error('Stanford-ORB manifest has no calibration scene');
 const calibrationTestPath=await findSuffix(`blender_LDR/${calibrationScene}/transforms_test.json`);
-const calibrationNovelPath=await findSuffix(`blender_LDR/${calibrationScene}/transforms_novel.json`);
 const calibrationTestMetadata=JSON.parse(await readFile(calibrationTestPath,'utf8'));
-const calibrationNovelMetadata=JSON.parse(await readFile(calibrationNovelPath,'utf8'));
+const novelSuffix=`blender_LDR/${calibrationScene}/transforms_novel.json`.toLowerCase();
+const novelMatches=(await files()).filter(path=>path.replaceAll('\\','/').toLowerCase().endsWith(novelSuffix));
+const calibrationNovelMetadata=novelMatches.length===1?JSON.parse(await readFile(novelMatches[0],'utf8')):null;
 
-function captureFrame(item,split){
-  if(split==='calibration'){
+function captureFrame(item){
+  if(item.scene===calibrationScene){
     const frame=calibrationTestMetadata.frames[item.testIndex];
-    if(!frame)throw new RangeError(`${item.scene} has no calibration test frame ${item.testIndex}`);
-    return{metadata:calibrationTestMetadata,frame};
+    if(!frame)throw new RangeError(`${item.scene} has no test frame ${item.testIndex}`);
+    return{metadata:calibrationTestMetadata,frame,poseSource:'test'};
   }
+  if(!calibrationNovelMetadata)throw new Error(`Cross-scene capture ${item.scene} requires ${calibrationScene}/transforms_novel.json`);
   const frames=calibrationNovelMetadata.frames.filter(frame=>frame.scene_name===item.scene);
   const frame=frames[item.testIndex];
   if(!frame)throw new RangeError(`${calibrationScene} transforms_novel has no ${item.scene} frame ${item.testIndex}`);
-  return{metadata:calibrationNovelMetadata,frame};
+  return{metadata:calibrationNovelMetadata,frame,poseSource:'novel'};
 }
 
 const meshPath=await findSuffix(`ground_truth/${manifest.calibration[0].scene}/mesh_blender/mesh.obj`);
@@ -139,7 +141,7 @@ await writeFile(join(out,'mesh.mjs'),`import {decodePackedMesh} from '../../../d
 const captures=[];
 for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manifest.heldOut]]){
   for(const item of list){
-    const targetTransforms=await findSuffix(`blender_LDR/${item.scene}/transforms_test.json`),sceneDir=dirname(targetTransforms),{metadata,frame}=captureFrame(item,split);
+    const targetTransforms=await findSuffix(`blender_LDR/${item.scene}/transforms_test.json`),sceneDir=dirname(targetTransforms),{metadata,frame,poseSource}=captureFrame(item);
     const frameRel=frame.file_path.replace(/^\.\//,''),stem=basename(frameRel),sourceReference=join(sceneDir,frameRel+'.png'),sourceMask=join(sceneDir,dirname(frameRel)+'_mask',stem+'.png');
     await stat(sourceReference);await stat(sourceMask);
     const id=`${item.scene}-test${item.testIndex}`,reference=join(out,id+'-reference.png'),mask=join(out,id+'-mask.png');
@@ -147,7 +149,7 @@ for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manif
     const envPath=await findSuffix(`ground_truth/${item.scene}/env_map/${stem}.exr`),{camera,worldToEnvironment}=cameraFromFrame(metadata,frame),radiance=measuredEnvironment(envPath);
     const environment={...radiance,worldToEnvironment,convention:'stanford-orb',intensity:1},scenePath=join(out,id+'.mjs');
     await writeFile(scenePath,sceneModule({meshImport:'./mesh.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
-    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask});
+    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,poseSource,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask});
   }
 }
 await writeFile(join(out,'captures.json'),JSON.stringify({version:1,dataset:manifest.dataset,object:manifest.object,calibration:calibration.frozenFrom,captures},null,2));
