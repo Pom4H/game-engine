@@ -122,11 +122,11 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let yd=positionAt(pixel+vec2<i32>(0,1),size)-pos;let yu=pos-positionAt(pixel-vec2<i32>(0,1),size);
   let dx=select(xr,xl,dot(xl,xl)<dot(xr,xr));let dy=select(yd,yu,dot(yu,yu)<dot(yd,yd));
   var geometric=cross(dy,dx);geometric=normalize(geometric+n*.00000001);geometric*=select(-1.0,1.0,dot(geometric,n)>0.0);
-  let directions=array<vec2<f32>,4>(vec2<f32>(1,0),vec2<f32>(0,1),vec2<f32>(-1,0),vec2<f32>(0,-1));
+  let directions=array<vec2<f32>,3>(vec2<f32>(1,0),vec2<f32>(-.5,.866),vec2<f32>(-.5,-.866));
   let radii=array<f32,2>(.035,.24);let weights=array<f32,2>(.58,.42);
   for(var ring=0;ring<2;ring++){
    let worldRadius=radii[ring];let radius=clamp(worldRadius*size.y/(max(z,.1)*f.forward.w*2.0),1.0,64.0);
-   for(var k=0;k<4;k++){
+   for(var k=0;k<3;k++){
     let delta=positionAt(pixel+vec2<i32>(round(directions[k]*radius)),size)-pos;let separation=length(delta);
     let horizon=max(dot(geometric,delta/max(separation,.001))-.06,0.0);
     let range=1.0-smoothstep(worldRadius*.30,worldRadius*1.25,separation);
@@ -145,10 +145,10 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  // neighbours through the hemisphere term. This gives cheap local colour bleed
  // under cars, beside warm masonry and around shop recesses without scene probes.
  if(d<.99999){
-  let giDirs=array<vec2<f32>,4>(vec2<f32>(.707,.707),vec2<f32>(-.707,.707),vec2<f32>(-.707,-.707),vec2<f32>(.707,-.707));
+  let giDirs=array<vec2<f32>,3>(vec2<f32>(0,1),vec2<f32>(-.866,-.5),vec2<f32>(.866,-.5));
   let giRadius=clamp(.42*size.y/(max(z,.1)*f.forward.w*2.0),3.0,42.0);
   var indirect=vec3<f32>(0);var indirectWeight=0.0;
-  for(var gi=0;gi<4;gi++){
+  for(var gi=0;gi<3;gi++){
    let q=clamp(pixel+vec2<i32>(round(giDirs[gi]*giRadius)),vec2<i32>(0),dims-1);
    let qp=positionAt(q,size);let delta=qp-pos;let separation=length(delta);
    if(separation>.035&&separation<.82){
