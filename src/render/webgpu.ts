@@ -601,7 +601,7 @@ export class WebGPURenderer implements Renderer{
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
-    this.profiler.measure('lifecycle',()=>this.collect(scene));
+    const structureChanged=this.profiler.measure('lifecycle',()=>this.collect(scene));
     this.profiler.measure('resize',()=>this.resize());
     this.lastScene=scene;
     const reflectionProbe=resolveReflectionProbe(scene);
@@ -611,7 +611,7 @@ export class WebGPURenderer implements Renderer{
       if(reset){this.localProbeMask=0;this.localProbeFace=0;}
       this.localProbeKey=reflectionProbe.key;this.localProbePosition=[...reflectionProbe.position];
     }
-    this.profiler.measure('materials',()=>this.queueMaterialLoads(scene));
+    this.profiler.measure('materials',()=>{if(structureChanged)this.queueMaterialLoads(scene);});
     this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);
     const currentLightGridKey=lightGridCauseKey(this.lastLights,camera.position);
     const lightGrid=this.profiler.measure('lights',()=>{
@@ -935,8 +935,8 @@ export class WebGPURenderer implements Renderer{
   }
   private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
-  private collect(scene:Scene):void{
-    if(this.collectedScene===scene&&this.collectedRevision===scene.renderStructureRevision)return;
+  private collect(scene:Scene):boolean{
+    if(this.collectedScene===scene&&this.collectedRevision===scene.renderStructureRevision)return false;
     this.collectedScene=scene;this.collectedRevision=scene.renderStructureRevision;
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
@@ -945,6 +945,7 @@ export class WebGPURenderer implements Renderer{
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}
     for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id)){this.modelCache.delete(id);this.cullCache.delete(id);}
     for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.index.destroy();this.meshes.delete(key);}
+    return true;
   }
   private label(text:string):GPUAny{
     if(!text)return this.gpu.emptyLabel;const cached=this.labels.get(text);if(cached)return cached;
