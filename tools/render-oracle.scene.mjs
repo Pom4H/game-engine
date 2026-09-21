@@ -96,9 +96,9 @@ export default defineScene({
 
     // The target mirror normal is the bisector that reflects the camera ray into
     // the +Z/+X probe texel containing mirror-source. The control faces +Z.
-    {id:'mirror-target',position:[0,0,0],mesh:orientedQuad([1.05,1.02,0],[.21924,.08770,.97170],.28,.28),material:mirror},
-    {id:'mirror-control',position:[0,0,0],mesh:orientedQuad([1.65,1.02,0],[0,0,1],.28,.28),material:mirror},
-    {id:'mirror-source',position:[0,0,0],mesh:orientedQuad([2.20,1.02,4],[0,0,-1],.8,.8),material:{kind:'default',color:black,roughness:1,metalness:0,emissive:[4,.05,.02]}},
+    {id:'mirror-target',position:[1.05,1.02,0],mesh:orientedQuad([0,0,0],[.21924,.08770,.97170],.28,.28),material:mirror},
+    {id:'mirror-control',position:[1.65,1.02,0],mesh:orientedQuad([0,0,0],[0,0,1],.28,.28),material:mirror},
+    {id:'mirror-source',position:[2.20,1.02,4],mesh:orientedQuad([0,0,0],[0,0,-1],.8,.8),material:{kind:'default',color:black,roughness:1,metalness:0,emissive:[4,.05,.02]}},
 
     {id:'diffuse-black',position:[0,0,0],mesh:quad(-.82,.52),material:matte([0,0,0,1])},
     {id:'diffuse-gray',position:[0,0,0],mesh:quad(0,.52),material:matte([.5,.5,.5,1])},
