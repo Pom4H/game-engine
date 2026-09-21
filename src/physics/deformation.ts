@@ -147,6 +147,12 @@ export class PlasticDeformationSystem {
     for(const [bodyId,state] of this.states)if(state.visuals.some(visual=>visual.id===id)){this.dirty.delete(state);this.states.delete(bodyId);}
   }
 
+  visualEntityIds():ReadonlySet<string>{
+    const ids=new Set<string>();
+    for(const state of this.states.values())for(const visual of state.visuals)ids.add(visual.id);
+    return ids;
+  }
+
   dents(bodyId:string):readonly PlasticDent[]{return Object.freeze((this.states.get(bodyId)?.dents??[]).map(dent=>Object.freeze({...dent,point:Object.freeze([...dent.point]) as Vec3,outwardNormal:Object.freeze([...dent.outwardNormal]) as Vec3})));}
   inspect(){return{bodies:this.states.size,dents:[...this.states.values()].reduce((sum,state)=>sum+state.dents.length,0),plasticWorkJ:this.plasticWorkJ};}
 
