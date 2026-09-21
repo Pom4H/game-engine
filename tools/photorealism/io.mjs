@@ -40,8 +40,8 @@ export async function readPng(path){
     if(type==='IHDR'){width=data.readUInt32BE(0);height=data.readUInt32BE(4);bitDepth=data[8];colorType=data[9];interlace=data[12];}
     else if(type==='IDAT')idat.push(data);else if(type==='IEND')break;
   }
-  if(bitDepth!==8||interlace!==0||!(colorType===2||colorType===6))throw new TypeError('PNG decoder supports non-interlaced RGB/RGBA8 only');
-  const channels=colorType===2?3:4,stride=width*channels,packed=inflateSync(Buffer.concat(idat)),scan=Buffer.alloc(stride*height);
+  if(bitDepth!==8||interlace!==0||![0,2,4,6].includes(colorType))throw new TypeError('PNG decoder supports non-interlaced grayscale/RGB/RGBA8 only');
+  const channels=colorType===0?1:colorType===2?3:colorType===4?2:4,stride=width*channels,packed=inflateSync(Buffer.concat(idat)),scan=Buffer.alloc(stride*height);
   let source=0;
   for(let y=0;y<height;y++){
     const filter=packed[source++],row=y*stride,previous=(y-1)*stride;
@@ -51,7 +51,7 @@ export async function readPng(path){
     }
   }
   const rgb=new Uint8Array(width*height*3);
-  for(let i=0,j=0;i<scan.length;i+=channels,j+=3){rgb[j]=scan[i];rgb[j+1]=scan[i+1];rgb[j+2]=scan[i+2];}
+  for(let i=0,j=0;i<scan.length;i+=channels,j+=3){if(colorType===0||colorType===4){rgb[j]=scan[i];rgb[j+1]=scan[i];rgb[j+2]=scan[i];}else{rgb[j]=scan[i];rgb[j+1]=scan[i+1];rgb[j+2]=scan[i+2];}}
   return{width,height,rgb};
 }
 
