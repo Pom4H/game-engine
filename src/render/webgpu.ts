@@ -70,9 +70,9 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  // Each linear comparison sample is already a hardware-filtered 2x2 PCF tap.
  // Two temporally rotated taps give eight effective comparisons per frame and TAA
  // integrates the changing phase, avoiding the cost of four explicit taps.
- let taps=array<vec2<f32>,4>(vec2<f32>(-.78,-.26),vec2<f32>(.24,-.82),vec2<f32>(.80,.30),vec2<f32>(-.20,.84));
- for(var i=0;i<4;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*2.20,clip.z-.000025);}
- let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.25,smoothstep(0.0,.025,edge));
+ let taps=array<vec2<f32>,2>(vec2<f32>(-.62,-.34),vec2<f32>(.62,.34));
+ for(var i=0;i<2;i++){value+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*texel*2.35,clip.z-.000025);}
+ let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,value*.5,smoothstep(0.0,.025,edge));
 }
 
 struct VOut {
@@ -350,7 +350,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let reflectionDir=reflect(-viewDir,n);
   let fallbackEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
   let localProbe=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,0).rgb;
-  let localProbeWeight=f.params.y*(1.0-smoothstep(.08,.46,roughness))*.90;
+  let localProbeWeight=f.params.y*(1.0-smoothstep(.06,.38,roughness))*.56;
   let environmentRadiance=mix(fallbackEnvironment,localProbe,localProbeWeight);
   let envC0=vec4<f32>(-1.0,-.0275,-.572,.022);let envC1=vec4<f32>(1.0,.0425,1.04,-.04);
   let envR=roughness*envC0+envC1;let envA004=min(envR.x*envR.x,exp2(-9.28*nv))*envR.x+envR.y;
@@ -371,9 +371,9 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color*=1.0-clearcoat*coatF*.28;
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec*clearcoat;
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,.35).rgb;
-    if(f.params.y>.5){coatEnvironment=mix(coatEnvironment,localProbe,.92);}
+    if(f.params.y>.5){coatEnvironment=mix(coatEnvironment,localProbe,.62);}
     let coatEnvF=.04+.96*pow(1.0-nv,5.0);
-    color+=coatEnvironment*coatEnvF*clearcoat*.78;
+    color+=coatEnvironment*coatEnvF*clearcoat*.68;
   }
 
   // Automotive glass is mostly transmitted scene color from the blend pass plus
@@ -381,15 +381,15 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   if(materialKind>.5&&materialKind<1.5){
     let glassF=.04+.96*pow(1.0-nv,5.0);
     let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
-    let glassEnvironment=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.08,.32,roughness))*.72);
-    color=mix(base*.055,glassEnvironment,.22+glassF*.54);
+    let glassEnvironment=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.06,.28,roughness))*.45);
+    color=mix(base*.040,glassEnvironment,.12+glassF*.46);
   }
   if(materialKind>9.5){
     color=mix(color,environmentRadiance,.58+.32*pow(1.0-nv,5.0));
   }
   // Rough dry asphalt is an absorber, not a sky-colored mirror. Keep the broad
   // dielectric lobe subdued until actual water/ice state creates local coverage.
-  if(materialKind>4.5&&materialKind<5.5){color*=mix(.34,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
+  if(materialKind>4.5&&materialKind<5.5){color*=mix(.48,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
 
   let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal);}}
   color+=u.emission.rgb;
@@ -406,7 +406,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let grazing=pow(1.0-nv,5.0);
   let clearcoatScreen=vec3<f32>(clearcoat*(.52+.36*grazing));
   let screenReflectance=max(environmentFresnel,clearcoatScreen);
-  let glassOpacity=mix(clamp(u.color.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
+  let glassOpacity=mix(clamp(u.color.a*.82,.10,.40),.66,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
 const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
@@ -499,8 +499,8 @@ export class WebGPURenderer implements Renderer{
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
-    const localProbeMap=device.createTexture({label:'local reflection probe',size:[128,128,6],format:'rgba16float',usage:0x10|0x04}),localProbeView=localProbeMap.createView({dimension:'cube'});
-    const localProbeDepth=device.createTexture({label:'local reflection probe depth',size:[128,128],format:'depth32float',usage:0x10});
+    const localProbeMap=device.createTexture({label:'local reflection probe',size:[256,256,6],format:'rgba16float',usage:0x10|0x04}),localProbeView=localProbeMap.createView({dimension:'cube'});
+    const localProbeDepth=device.createTexture({label:'local reflection probe depth',size:[256,256],format:'depth32float',usage:0x10});
     const surfaceSampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',maxAnisotropy:8});
     const emptyField=device.createTexture({size:[1,1],format:'rgba32float',usage:0x04|0x02}),emptyLabel=device.createTexture({size:[1,1],format:'rgba8unorm',usage:0x04|0x02});device.queue.writeTexture({texture:emptyField},new Float32Array(4),{bytesPerRow:16},[1,1]);device.queue.writeTexture({texture:emptyLabel},new Uint8Array(4),{bytesPerRow:4},[1,1]);
     const frameBind=device.createBindGroup({layout:frameLayout,entries:[{binding:0,resource:{buffer:frame}}]});
@@ -547,7 +547,7 @@ export class WebGPURenderer implements Renderer{
     for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
     const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04});
     this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.normal=texture('rgba16float',1);this.specular=texture('rgba8unorm',1);this.velocity=texture('rg16float',1);this.effectsHdr=texture('rgba16float',1);this.taaA=texture('rgba16float',1);this.taaB=texture('rgba16float',1);
-    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
+    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4))],format:'depth32float',usage:0x10});
     const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
     const bloomBind=(texture:GPUAny)=>this.device.createBindGroup({layout:this.gpu.bloomLayout,entries:[{binding:0,resource:texture.createView()},{binding:1,resource:this.gpu.sampler}]});this.bloomDownBind=bloomBind(this.hdr);this.bloomHorizontalBind=bloomBind(this.bloomA);this.bloomVerticalBind=bloomBind(this.bloomB);
     this.gpu.lightBind=this.device.createBindGroup({layout:this.gpu.lightLayout,entries:[{binding:0,resource:{buffer:this.gpu.frame}},{binding:1,resource:this.gpu.shadow.createView()},{binding:2,resource:this.gpu.comparison},{binding:3,resource:this.reflection.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.lightBuffer}},{binding:6,resource:{buffer:this.gpu.cellBuffer}},{binding:7,resource:this.gpu.noiseVolume.createView()},{binding:8,resource:this.gpu.noiseSampler},{binding:9,resource:this.gpu.environmentView},{binding:10,resource:this.gpu.localProbeView}]});
