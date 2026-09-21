@@ -23,11 +23,13 @@ test('render profiler resolves named GPU pass timestamps asynchronously',async()
  const profiler=new RenderProfiler(fakeDevice,{enabled:true,timestampQueries:true,capacity:16});profiler.beginFrame();
  const shadow=profiler.timestampWrites('shadow');assert.equal(shadow.beginningOfPassWriteIndex,0);assert.equal(shadow.endOfPassWriteIndex,1);
  assert.equal(profiler.timestampWrites('present').endOfPassWriteIndex,RENDER_GPU_QUANTA.length*2-1);
+ const occlusionPass={beginOcclusionQuery(index){assert.equal(index,0);},endOcclusionQuery(){}};
+ const occlusionActive=profiler.beginOcclusion(occlusionPass,'shadow');assert.equal(occlusionActive,true);profiler.endOcclusion(occlusionPass,occlusionActive);
  const encoder={
   resolveQuerySet(query,_first,count,buffer){const raw=new BigUint64Array(buffer.data);if(query.type==='occlusion'){for(let i=0;i<count;i++)raw[i]=BigInt(i+1);}else for(let i=0;i<count/2;i++){raw[i*2]=BigInt(i)*2_000_000n;raw[i*2+1]=raw[i*2]+1_000_000n;}},
   copyBufferToBuffer(source,sourceOffset,target,targetOffset,size){new Uint8Array(target.data,targetOffset,size).set(new Uint8Array(source.data,sourceOffset,size));},
  };
- profiler.setWork({shadowCasters:12});profiler.resolve(encoder);profiler.submitted();await Promise.resolve();await Promise.resolve();
+ profiler.setWork({shadowCasters:12});profiler.resolve(encoder);profiler.submitted();await new Promise(resolve=>setImmediate(resolve));
  const profile=profiler.inspect();assert.equal(profile.gpuFrames,1);assert.equal(profile.latestGpu.work.shadowCasters,12);assert.equal(profile.rasterSamples.shadow,1);assert.equal(profile.gpuTotal.meanMs,RENDER_GPU_QUANTA.length);
  for(const name of RENDER_GPU_QUANTA)assert.equal(profile.gpu[name].meanMs,1);
  profiler.dispose();
