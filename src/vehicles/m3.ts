@@ -121,7 +121,7 @@ function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
   const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,.007,true));
   const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.0025));
   const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,.001));
-  return smoothCoincidentNormals(third,88,1e-4);
+  return smoothCoincidentNormals(third,58,2e-5);
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   const base=m3HighFidelityBody();
