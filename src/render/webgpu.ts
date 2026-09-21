@@ -403,7 +403,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     let glassF=glassR0+(1.0-glassR0)*pow(1.0-nv,5.0);
     let size=vec2<f32>(textureDimensions(opaqueScene));
     let screenUV=clamp(in.position.xy/size,vec2<f32>(.001),vec2<f32>(.999));
-    let transmitted=textureSampleLevel(opaqueScene,reflectionSampler,screenUV,0).rgb;
+    var transmitted=textureSampleLevel(opaqueScene,reflectionSampler,screenUV,0).rgb;
     let transmission=clamp(u.emission.w,0.0,1.0);
     transmitted*=transmission*transmission;
     let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
