@@ -134,6 +134,6 @@ export default defineScene({
     // sun ray to the receiver while the camera ray passes beside it.
     {id:'shadow-lit',position:[0,0,0],mesh:quad(-.70,-1.22,.20,.18),material:matte([1,1,1,1])},
     {id:'shadowed',position:[0,0,0],mesh:quad(.70,-1.22,.20,.18),material:matte([1,1,1,1])},
-    {id:'shadow-blocker',position:[.70,-1.22,3],mesh:{kind:'box',size:[.07,.07,.07]},material:matte(black)},
+    {id:'shadow-blocker',position:[.70,-1.22,3],mesh:{kind:'box',size:[.07,.07,.07]},material:matte(black),body:{motion:'kinematic'}},
   ],
 });
