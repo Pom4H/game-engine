@@ -393,13 +393,20 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color+=coatEnvironment*coatEnvF*clearcoat*.78;
   }
 
-  // Automotive glass is mostly transmitted scene color from the blend pass plus
-  // a physically strong grazing reflection. Avoid treating it as blue plastic.
+  // Glass keeps the true background from alpha blending, but replaces part of
+  // the straight-through signal with radiance queried along the refracted world
+  // direction. Reflection/refraction split is driven by IOR Fresnel, not styling.
   if(materialKind>.5&&materialKind<1.5){
-    let glassF=.04+.96*pow(1.0-nv,5.0);
+    let glassIor=max(1.0001,u.pbr.w);
+    let glassR0=pow((glassIor-1.0)/(glassIor+1.0),2.0);
+    let glassF=glassR0+(1.0-glassR0)*pow(1.0-nv,5.0);
     let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
-    let glassEnvironment=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.08,.32,roughness))*.72);
-    color=mix(base*.055,glassEnvironment,.22+glassF*.54);
+    let glassReflection=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.08,.32,roughness))*.72);
+    let refractedDir=normalize(refract(-viewDir,n,1.0/glassIor));
+    let transmissionFallback=textureSampleLevel(environmentMap,reflectionSampler,refractedDir,max(.05,roughness)*4.0).rgb;
+    var glassTransmission=transmissionFallback;
+    if(f.params.y>.5){glassTransmission=mix(transmissionFallback,textureSampleLevel(localProbeMap,reflectionSampler,refractedDir,0).rgb,.82);}
+    color=mix(glassTransmission,glassReflection,glassF);
   }
   if(materialKind>9.5){
     color=mix(color,environmentRadiance,.58+.32*pow(1.0-nv,5.0));
