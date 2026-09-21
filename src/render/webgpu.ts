@@ -463,7 +463,7 @@ export class WebGPURenderer implements Renderer{
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private environmentKey='';private environmentUpdates=0;
+  private pointLights=0;private lightOverflow=0;private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
@@ -744,11 +744,26 @@ export class WebGPURenderer implements Renderer{
   dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
   private updateEnvironmentMap(scene:Scene,origin:Vec3):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
+    if(this.environmentScene!==scene){this.environmentScene=scene;this.environmentKey='';}
+    // Check the authoritative causes before building the expensive scene-radiance proxy.
+    // Nearby dynamic detail is handled by SSR/local probes; the distant fallback only
+    // needs rebuilding when its world-space origin, atmosphere or scene identity changes.
+    const causeKey=[
+      scene.entities.size,scene.spec.seed??0,
+      ...sun,...sunColor,...sky,
+      Math.round(origin[0]*2)/2,Math.round(origin[1]*2)/2,Math.round(origin[2]*2)/2,
+      Math.round(intensity*20)/20,
+      Math.round(scene.environment.sunlight*20)/20,
+      Math.round(scene.environment.humidity*20)/20,
+      Math.round(scene.environment.temperatureC*2)/2,
+      Math.round(scene.environment.groundMoisture*20)/20,
+      Math.round(scene.environment.snowfallRate*1e6)/1e6,
+    ].map(value=>Number(value).toFixed(3)).join(':');
+    if(causeKey===this.environmentKey)return;
     const radiance=buildSceneRadianceProbe(scene,origin,128);
     const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
     const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
-    const key=[...sun,...sunColor,...sky,...urbanColor,...groundColor,Math.round(probe[0]*2)/2,Math.round(probe[2]*2)/2,proxies.length,Math.round(intensity*20)/20,Math.round(scene.environment.sunlight*20)/20,Math.round(scene.environment.humidity*20)/20].map(value=>Number(value).toFixed(3)).join(':');
-    if(key===this.environmentKey)return;this.environmentKey=key;this.environmentUpdates++;
+    this.environmentKey=causeKey;this.environmentUpdates++;
     const levels=9;
     for(let mip=0;mip<levels;mip++){
       const size=Math.max(1,256>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
