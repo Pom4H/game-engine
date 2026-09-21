@@ -16,20 +16,20 @@ spec.environment={
   clock:{startHour:11.8,hoursPerSecond:0},
 };
 spec.rendering={
-  sunDirection:[.42,.80,-.42],
-  sunColor:[1,.975,.93],
-  sunIntensity:3.05,
-  skyColor:[.30,.45,.66],
-  fogDensity:.00028,
-  exposure:1.03,
+  sunDirection:[.36,.84,-.40],
+  sunColor:[1,.98,.94],
+  sunIntensity:2.78,
+  skyColor:[.29,.45,.70],
+  fogDensity:.00022,
+  exposure:1.06,
   shadowExtent:30,
 };
 spec.camera={
-  position:[-15.15,1.17,-4.10],
-  target:[-20.55,.72,-1.38],
-  fov:28,
-  focusDistance:6.10,
-  aperture:.050,
+  position:[-14.55,1.02,-4.08],
+  target:[-20.48,.66,-1.38],
+  fov:32,
+  focusDistance:6.35,
+  aperture:.032,
 };
 
 // Keep the reference car exactly at its authored start pose. Headlights remain on
@@ -48,25 +48,33 @@ spec.rendering.reflectionProbe={
 // This is visual LOD, not a different material/lighting path.
 spec.entities=spec.entities.filter(entity=>{
   const id=entity.id;
-  if(id.startsWith('batch:plough-grit-')||id.startsWith('batch:walk-grain-')||id.startsWith('batch:centre-slush-'))return false;
+  if(id.startsWith('batch:plough-grit-')||id.startsWith('batch:walk-grain-')||id.startsWith('batch:centre-slush-')||id.startsWith('puddle'))return false;
   // Replace near-road batched snow dressing with two coherent high-resolution
   // banks; the distant roof/window snow stays untouched.
   if(id.startsWith('batch:')&&entity.material?.kind==='snow'&&Math.abs(entity.position?.[2]??99)<8.6)return false;
   return true;
 });
 spec.entities.push(
-  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.028,.031,.036,1],roughness:.68},environmental:{surfaceUse:'road',snowDepthM:0,iceDepthM:0,waterDepthM:.00065}},
-  {id:'hero-bank-near',position:[-13,.16,-4.18],mesh:{kind:'snowdrift',size:[62,.42,1.08],seed:4617,segments:96,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93,texture:{url:'/assets/snow-granular.png',sizeM:1.2,bumpStrength:.4,albedoStrength:.45}}},
-  {id:'hero-bank-far',position:[-13,.17,4.12],mesh:{kind:'snowdrift',size:[62,.50,1.22],seed:9121,segments:96,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93,texture:{url:'/assets/snow-granular.png',sizeM:1.2,bumpStrength:.4,albedoStrength:.45}}},
+  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.105,.110,.118,1],roughness:.71},environmental:{surfaceUse:'road',snowDepthM:.0012,iceDepthM:.00055,waterDepthM:.00052}},
+  {id:'hero-bank-near',position:[-13,.13,-4.18],mesh:{kind:'snowdrift',size:[62,.34,1.04],seed:4617,segments:64,continuous:true},material:{kind:'snow',color:[.955,.968,.98,1],roughness:.86,texture:{url:'/assets/snow-granular.png',sizeM:.30,bumpStrength:.24,albedoStrength:.24}}},
+  {id:'hero-bank-far',position:[-13,.145,4.12],mesh:{kind:'snowdrift',size:[62,.40,1.16],seed:9121,segments:64,continuous:true},material:{kind:'snow',color:[.955,.968,.98,1],roughness:.86,texture:{url:'/assets/snow-granular.png',sizeM:.30,bumpStrength:.24,albedoStrength:.24}}},
 );
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
-    entity.material={...entity.material,color:[.255,.262,.272,1],roughness:.17,metalness:.025};
+    entity.material={...entity.material,color:[.265,.272,.282,1],roughness:.185,metalness:.02};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00055};
-    entity.material={...entity.material,color:[.025,.028,.032,1],roughness:.68};
+    entity.environmental={...entity.environmental,snowDepthM:.0012,iceDepthM:.00055,waterDepthM:.00052};
+    entity.material={...entity.material,color:[.105,.110,.118,1],roughness:.71};
+  }
+  if(entity.id.includes('lamp')&&entity.id.endsWith('-glow')){
+    if(entity.light)entity.light={...entity.light,intensity:.15,range:8};
+    entity.material={...entity.material,emissive:[.08,.055,.025]};
+  }
+  if(entity.material?.pattern==='plaster'){
+    const [r,g,b,a]=entity.material.color,l=r*.299+g*.587+b*.114;
+    entity.material={...entity.material,color:[l+(r-l)*.48,l+(g-l)*.48,l+(b-l)*.48,a],roughness:Math.max(.86,entity.material.roughness??.9)};
   }
 }
 
