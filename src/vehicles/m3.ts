@@ -113,15 +113,15 @@ function roundedRectFrameMesh(width:number,height:number,radius:number,border:nu
 
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
-export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.007,true);}
+export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),68,.010,true);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  // The source FBX is intentionally low-poly. Curvature should interpolate it,
-  // not re-sculpt it: millimetre-scale PN displacement is enough to remove
-  // faceted silhouettes while preserving the authored G80 panel volumes.
-  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,.007,true));
-  const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.0025));
-  const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,.001));
-  return smoothCoincidentNormals(third,58,2e-5);
+  // The compact shell is the control cage. Render subdivision is allowed to bend
+  // broad adjacent panels while the source's strong normal splits still preserve
+  // authored creases. This is curvature reconstruction, not extra stored geometry.
+  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,68,.010,true));
+  const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,70,.0035));
+  const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,72,.0014));
+  return smoothCoincidentNormals(third,72,1e-4);
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   const base=m3HighFidelityBody();
