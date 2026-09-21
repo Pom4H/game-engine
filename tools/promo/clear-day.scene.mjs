@@ -18,18 +18,18 @@ spec.environment={
 spec.rendering={
   sunDirection:[.36,.84,-.40],
   sunColor:[1,.98,.94],
-  sunIntensity:2.78,
+  sunIntensity:3.02,
   skyColor:[.29,.45,.70],
-  fogDensity:.00022,
-  exposure:1.06,
+  fogDensity:.00020,
+  exposure:1.10,
   shadowExtent:30,
 };
 spec.camera={
-  position:[-14.55,1.02,-4.08],
-  target:[-20.48,.66,-1.38],
+  position:[-15.62,.96,-3.78],
+  target:[-20.38,.64,-1.38],
   fov:32,
-  focusDistance:6.35,
-  aperture:.032,
+  focusDistance:5.55,
+  aperture:.025,
 };
 
 // Keep the reference car exactly at its authored start pose. Headlights remain on
@@ -55,26 +55,36 @@ spec.entities=spec.entities.filter(entity=>{
   return true;
 });
 spec.entities.push(
-  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.145,.150,.158,1],roughness:.71},environmental:{surfaceUse:'road',snowDepthM:.0012,iceDepthM:.00055,waterDepthM:.00052}},
-  {id:'hero-bank-near',position:[-13,.13,-4.18],mesh:{kind:'snowdrift',size:[62,.34,1.04],seed:4617,segments:64,continuous:true},material:{kind:'snow',color:[.955,.968,.98,1],roughness:.86,texture:{url:'/assets/snow-granular.png',sizeM:.30,bumpStrength:.24,albedoStrength:.24}}},
-  {id:'hero-bank-far',position:[-13,.145,4.12],mesh:{kind:'snowdrift',size:[62,.40,1.16],seed:9121,segments:64,continuous:true},material:{kind:'snow',color:[.955,.968,.98,1],roughness:.86,texture:{url:'/assets/snow-granular.png',sizeM:.30,bumpStrength:.24,albedoStrength:.24}}},
+  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.225,.232,.242,1],roughness:.70},environmental:{surfaceUse:'road',snowDepthM:.0018,iceDepthM:.00082,waterDepthM:.00105}},
 );
+const heroSnowMaterial={kind:'snow',color:[.962,.973,.985,1],roughness:.85,texture:{url:'/assets/snow-granular.png',sizeM:.26,bumpStrength:.26,albedoStrength:.22}};
+for(const bank of [
+  {id:'near',z:-4.18,y:.115,height:.34,width:1.04,seed:4617},
+  {id:'far',z:4.12,y:.13,height:.40,width:1.16,seed:9121},
+]){
+  const tile=5.2,start=-44,end=18;
+  for(let x=start+tile/2,index=0;x<end;x+=tile,index++)spec.entities.push({
+    id:`hero-bank-${bank.id}-${index}`,
+    position:[x,bank.y,bank.z],
+    mesh:{kind:'snowdrift',size:[tile,bank.height,bank.width],seed:bank.seed,segments:40,continuous:true,offset:x},
+    material:heroSnowMaterial,
+  });
+}
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
     entity.material={...entity.material,color:[.265,.272,.282,1],roughness:.185,metalness:.02};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:.0012,iceDepthM:.00055,waterDepthM:.00052};
-    entity.material={...entity.material,color:[.145,.150,.158,1],roughness:.71};
+    entity.environmental={...entity.environmental,snowDepthM:.0018,iceDepthM:.00082,waterDepthM:.00105};
+    entity.material={...entity.material,color:[.225,.232,.242,1],roughness:.71};
   }
   if(entity.id.includes('lamp')&&entity.id.endsWith('-glow')){
     if(entity.light)entity.light={...entity.light,intensity:.15,range:8};
     entity.material={...entity.material,emissive:[.08,.055,.025]};
   }
   if(entity.material?.pattern==='plaster'){
-    const [r,g,b,a]=entity.material.color,l=r*.299+g*.587+b*.114;
-    entity.material={...entity.material,color:[l+(r-l)*.48,l+(g-l)*.48,l+(b-l)*.48,a],roughness:Math.max(.86,entity.material.roughness??.9)};
+    entity.material={...entity.material,pattern:'brick',color:[.74,.67,.61,1],roughness:.88,texture:{url:'/assets/brick-weathered.png',sizeM:1.42,bumpStrength:.34,albedoStrength:.92}};
   }
 }
 
