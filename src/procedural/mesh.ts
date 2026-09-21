@@ -97,8 +97,9 @@ export function snowDriftMesh(size:readonly[number,number,number],seed:number,se
   const cross=Math.max(0,1-4*displaced*displaced);
   const ends=continuous?1:Math.pow(Math.max(0,Math.sin(Math.PI*(u+.5))),.60);
   const drift=.48+noise(x*.63+phase,z*1.2)*.44+noise(x*2.8,z*3.3+phase)*.27;
-  const grain=(noise(x*17.3+phase,z*21.8)-.5)*.025+(noise(x*6.4,z*9.2+phase)-.5)*.09;
-  return Math.max(0,size[1]*(Math.pow(cross,1.30+.24*Math.sin(x*.31+phase))*ends*drift*(1+v*ridge*2.0)+grain*cross));
+  const grain=(noise(x*17.3+phase,z*21.8)-.5)*.045+(noise(x*6.4,z*9.2+phase)-.5)*.14;
+  const crust=(noise(x*3.9+phase*2.0,z*7.3-phase)-.5)*.07;
+  return Math.max(0,size[1]*(Math.pow(cross,1.30+.24*Math.sin(x*.31+phase))*ends*drift*(1+v*ridge*2.0)+(grain+crust)*cross));
  };
  const point=(u:number,v:number):readonly[number,number,number]=>{
   const x=u*size[0]+offset;
