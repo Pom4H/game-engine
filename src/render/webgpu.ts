@@ -160,14 +160,17 @@ fn ormTexelAt(p:vec3<f32>,weights:vec3<f32>)->vec3<f32>{
 struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location(2) specular:vec4<f32>,@location(3) velocity:vec2<f32>}
 @fragment fn fs(in: VOut) -> GOut {
   ${reflection?'if(in.worldPos.y<.04){discard;}':''}
-  let fieldUV=(in.worldPos.xz-u.fieldFrame.xy)/max(u.fieldFrame.zw,vec2<f32>(0.001))+vec2<f32>(0.5);
-  let cell=clamp(vec2<i32>(floor(fieldUV*u.fieldSize.xy)),vec2<i32>(0),vec2<i32>(u.fieldSize.xy)-vec2<i32>(1));
-  let local=textureLoad(fieldTexture,cell,0);
   let hasField=u.fieldSize.z>0.5;
-  let track=select(tyreTracks(in.worldPos.z)*u.surfaceDynamics.y,local.x,hasField);
-  let snowDepth=select(u.surfacePhase.x,local.y,hasField);
-  let waterDepth=select(u.surfacePhase.y,local.z,hasField);
-  let slush=select(u.surfacePhase.z,local.w,hasField);
+  var track=tyreTracks(in.worldPos.z)*u.surfaceDynamics.y;
+  var snowDepth=u.surfacePhase.x;
+  var waterDepth=u.surfacePhase.y;
+  var slush=u.surfacePhase.z;
+  if(hasField){
+    let fieldUV=(in.worldPos.xz-u.fieldFrame.xy)/max(u.fieldFrame.zw,vec2<f32>(0.001))+vec2<f32>(0.5);
+    let cell=clamp(vec2<i32>(floor(fieldUV*u.fieldSize.xy)),vec2<i32>(0),vec2<i32>(u.fieldSize.xy)-vec2<i32>(1));
+    let local=textureLoad(fieldTexture,cell,0);
+    track=local.x;snowDepth=local.y;waterDepth=local.z;slush=local.w;
+  }
 
   let geometricNormal=normalize(in.normal);
   var n=geometricNormal;
