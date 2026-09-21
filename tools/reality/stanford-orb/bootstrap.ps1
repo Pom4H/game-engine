@@ -9,7 +9,6 @@ $ready = Join-Path $Root ".car-subset-v3.ready"
 
 function Test-CarSubset {
   $transforms = @(Get-ChildItem -Path $Root -Recurse -Filter transforms_test.json -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6)' })
-  $novel = @(Get-ChildItem -Path $Root -Recurse -Filter transforms_novel.json -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004' })
   $envs = @(Get-ChildItem -Path $Root -Recurse -Filter *.exr -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]env_map[\\/]' })
   $mesh = @(Get-ChildItem -Path $Root -Recurse -Filter mesh.obj -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004.*mesh_blender' })
   $testImages = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test[\\/]' })
@@ -18,7 +17,6 @@ function Test-CarSubset {
   return [pscustomobject]@{
     Complete=$complete
     Transforms=$transforms.Count
-    Novel=$novel.Count
     Envs=$envs.Count
     Mesh=$mesh.Count
     TestImages=$testImages.Count
@@ -92,7 +90,7 @@ Import-LocalNovelTransforms
 $existing = Test-CarSubset
 if ($existing.Complete) {
   Set-Content -Path $ready -Value "Stanford-ORB Car subset v3"
-  Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), novel=$($existing.Novel), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)"
+  Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)"
   exit 0
 }
 if (Test-Path $ready) { Remove-Item -Force $ready }
@@ -112,7 +110,7 @@ Download-And-Extract "ground_truth.tar.gz" "https://downloads.cs.stanford.edu/vi
 
 $final = Test-CarSubset
 if (-not $final.Complete) {
-  throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), novel=$($final.Novel), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
+  throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
 }
 Set-Content -Path $ready -Value "Stanford-ORB Car subset v3"
 Write-Host "Stanford-ORB Car subset ready: transforms=$($final.Transforms), novel=$($final.Novel), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
