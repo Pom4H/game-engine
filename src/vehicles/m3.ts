@@ -5,7 +5,7 @@ import type {BodySpec,Color,MaterialSpec} from '../scene/types.js';
 import {M3_FBX_PARTS_FIDELITY,m3FbxParts} from './m3-fbx-parts.js';
 import {passengerPartMaterial,passengerStructuralDefinition,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole,type PassengerVehicleProfile} from './passenger.js';
 import {M3_SHELL_FIDELITY,m3HighFidelityBody} from './m3-shell.js';
-import {buildSmoothSubdivisionPlan,smoothCoincidentNormals,subdivideSmoothTriangleMesh,type SmoothSubdivisionPlan,type TriangleMesh} from './render-subdivision.js';
+import {buildSmoothSubdivisionPlan,smoothCoincidentNormals,subdivideSmoothTriangleMesh,weldCoincidentTriangleMesh,type SmoothSubdivisionPlan,type TriangleMesh} from './render-subdivision.js';
 
 /**
  * BMW M3 visual fidelity is sourced from the user-supplied FBX, while the load-bearing
@@ -114,17 +114,18 @@ function roundedRectFrameMesh(width:number,height:number,radius:number,border:nu
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderSourceCache:TriangleMesh|undefined;
 let renderBodyCache:TriangleMesh|undefined;
-function m3RenderSource():TriangleMesh{return renderSourceCache??=smoothCoincidentNormals(m3HighFidelityBody(),64,2e-5);}
-export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3RenderSource(),68,.010,true);}
+function m3RenderSource():TriangleMesh{return renderSourceCache??=weldCoincidentTriangleMesh(m3HighFidelityBody(),2e-5);}
+export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3RenderSource(),62,.009,false);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  // First reconstruct a continuous normal field over coincident low-poly paint
-  // vertices. PN subdivision can then infer broad body curvature from the compact
-  // cage instead of faithfully preserving every source triangle as a visible facet.
-  const source=mesh===m3HighFidelityBody()?m3RenderSource():smoothCoincidentNormals(mesh,64,2e-5);
-  const first=subdivideSmoothTriangleMesh(source,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(source,68,.010,true));
-  const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,70,.0035));
-  const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,72,.0014));
-  return smoothCoincidentNormals(third,72,1e-4);
+  // CarPaint is one continuous stamped shell. Source vertex duplication was an
+  // encoding detail, not extra sheet-metal seams, so weld it before reconstructing
+  // curvature. True open boundaries (arches, glazing openings, part borders) stay
+  // fixed and therefore keep the characteristic silhouette.
+  const source=mesh===m3HighFidelityBody()?m3RenderSource():weldCoincidentTriangleMesh(mesh,2e-5);
+  const first=subdivideSmoothTriangleMesh(source,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(source,62,.009,false));
+  const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,66,.0030,false));
+  const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,70,.0012,false));
+  return smoothCoincidentNormals(third,70,1e-4);
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   const base=m3HighFidelityBody();
