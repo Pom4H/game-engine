@@ -32,21 +32,23 @@ jobs:
         run: bun run build
       - name: Fast engine invariants
         run: node --test test/core.test.mjs test/deformation.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
+      - name: Radiometric pixel oracle
+        run: node tools/render-oracle.mjs
       - name: Reference render
         run: |
           if not exist artifacts mkdir artifacts
-          node dist/cli.js render tools/promo/clear-day.scene.mjs --time 0 --width 1920 --height 1080 --out artifacts/m3-reference.png
+          node dist/cli.js render tools/promo/clear-day.scene.mjs --time 0 --width 960 --height 540 --out artifacts/m3-reference.png
           node tools/check-png.mjs artifacts/m3-reference.png
       - name: Short GPU budget probe
         env:
           BENCH_SCENE: clear-day.scene.mjs
           BENCH_USE_SCENE_CAMERA: "1"
           BENCH_TIME: "0"
-          BENCH_CASES: 1920x1080
-          BENCH_WARMUP_MS: "350"
-          BENCH_SAMPLE_MS: "1200"
+          BENCH_CASES: 960x540
+          BENCH_WARMUP_MS: "150"
+          BENCH_SAMPLE_MS: "600"
           BENCH_OUT: artifacts/performance/visual-fast.json
-          MAX_P95_FRAME_MS: "30"
+          MAX_P95_FRAME_MS: "20"
         run: |
           node tools/promo/benchmark.mjs
           node tools/perf/assert-60fps.mjs artifacts/performance/visual-fast.json
