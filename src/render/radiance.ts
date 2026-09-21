@@ -29,6 +29,8 @@ export interface SceneRadianceProbe {
  * world-space lets it become a clipmapped/probe-grid cache without changing
  * material shading or reflection semantics.
  */
+const triangleMeshExtents=new WeakMap<object,readonly [number,number,number]>();
+
 export function buildSceneRadianceProbe(scene:Scene,origin:Vec3=scene.camera.target,maxProxies=128):SceneRadianceProbe{
   const candidates:{proxy:RadianceProxy;score:number;ground:boolean}[]=[];
   const background:[number,number,number]=[0,0,0],ground:[number,number,number]=[0,0,0];let backgroundWeight=0,groundWeight=0;
@@ -104,11 +106,20 @@ function primitiveRadius(primitive:Primitive,scale:Vec3):number{
     let r2=0;for(const p of primitive.points)r2=Math.max(r2,p[0]*p[0]+p[1]*p[1]);
     return Math.hypot(Math.sqrt(r2)*Math.max(sx,sy,sz),primitive.thickness*.5*Math.max(sx,sy,sz));
   }
-  let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
-  for(let i=0;i<primitive.positions.length;i+=3){
-    const x=primitive.positions[i]!*sx,y=primitive.positions[i+1]!*sy,z=primitive.positions[i+2]!*sz;
-    minX=Math.min(minX,x);minY=Math.min(minY,y);minZ=Math.min(minZ,z);
-    maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);maxZ=Math.max(maxZ,z);
+  // Triangle meshes are immutable render assets in Scene. Their local extents are
+  // a property of the mesh, not of the frame, so never rescan every vertex while
+  // rebuilding the radiance projection. Non-uniform entity scale is still applied
+  // exactly here, preserving the same authoritative geometry result.
+  let extents=triangleMeshExtents.get(primitive as object);
+  if(!extents){
+    let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+    for(let i=0;i<primitive.positions.length;i+=3){
+      const x=primitive.positions[i]!,y=primitive.positions[i+1]!,z=primitive.positions[i+2]!;
+      minX=Math.min(minX,x);minY=Math.min(minY,y);minZ=Math.min(minZ,z);
+      maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);maxZ=Math.max(maxZ,z);
+    }
+    extents=Number.isFinite(minX)?[maxX-minX,maxY-minY,maxZ-minZ] as const:[1,1,1] as const;
+    triangleMeshExtents.set(primitive as object,extents);
   }
-  return Number.isFinite(minX)?.5*Math.hypot(maxX-minX,maxY-minY,maxZ-minZ):.5*Math.max(sx,sy,sz);
+  return .5*Math.hypot(extents[0]*sx,extents[1]*sy,extents[2]*sz);
 }
