@@ -660,14 +660,14 @@ export class WebGPURenderer implements Renderer{
     });
     void lightGrid;
     const frameState=this.profiler.measure('frame',()=>{
-      const cameraView=lookAt(camera.position,camera.target),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
+      const cameraUp=camera.up??[0,1,0],cameraView=lookAt(camera.position,camera.target,cameraUp),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
       projection[8]=projection[8]!-2*jitter[0]/this.canvas.width;projection[9]=projection[9]!+2*jitter[1]/this.canvas.height;
       const vp=multiply4(projection,cameraView);
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
       const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
       lightVP[12]=Math.round(lightVP[12]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;lightVP[13]=Math.round(lightVP[13]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;
-      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(Math.abs(forward[1])>.9999?[1,0,0]:V3.cross(forward,[0,1,0])),up=V3.cross(right,forward),frame=new Float32Array(100);
-      const reflectionVP=multiply4(baseProjection,lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0]));
+      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(V3.cross(forward,cameraUp)),up=V3.normalize(V3.cross(right,forward)),frame=new Float32Array(104);
+      const reflectionVP=multiply4(baseProjection,lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[cameraUp[0],-cameraUp[1],cameraUp[2]]));
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
       const [projectionX,projectionY,projectionOffsetX,projectionOffsetY]=projectionInfo.ray,tanY=1/projectionY,aspectLike=projectionY/projectionX;
       frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,0],28);frame.set([...forward,tanY],32);frame.set([...right,aspectLike],36);frame.set([...up,scene.time],40);frame.set([this.pointLights>0?1:0,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
