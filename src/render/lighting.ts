@@ -122,17 +122,16 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let yd=positionAt(pixel+vec2<i32>(0,1),size)-pos;let yu=pos-positionAt(pixel-vec2<i32>(0,1),size);
   let dx=select(xr,xl,dot(xl,xl)<dot(xr,xr));let dy=select(yd,yu,dot(yu,yu)<dot(yd,yd));
   var geometric=cross(dy,dx);geometric=normalize(geometric+n*.00000001);geometric*=select(-1.0,1.0,dot(geometric,n)>0.0);
-  let directions=array<vec2<f32>,6>(vec2<f32>(1,0),vec2<f32>(.5,.866),vec2<f32>(-.5,.866),vec2<f32>(-1,0),vec2<f32>(-.5,-.866),vec2<f32>(.5,-.866));
+  let directions=array<vec2<f32>,4>(vec2<f32>(1,0),vec2<f32>(0,1),vec2<f32>(-1,0),vec2<f32>(0,-1));
   let radii=array<f32,2>(.035,.24);let weights=array<f32,2>(.58,.42);
   for(var ring=0;ring<2;ring++){
    let worldRadius=radii[ring];let radius=clamp(worldRadius*size.y/(max(z,.1)*f.forward.w*2.0),1.0,64.0);
-   for(var k=0;k<6;k++){
+   for(var k=0;k<4;k++){
     let delta=positionAt(pixel+vec2<i32>(round(directions[k]*radius)),size)-pos;let separation=length(delta);
     let horizon=max(dot(geometric,delta/max(separation,.001))-.06,0.0);
     let range=1.0-smoothstep(worldRadius*.30,worldRadius*1.25,separation);
-    // The inner ring strengthens boot/snow and trim/wall contacts without
-    // spreading the darkness over the broad foreground/background gap.
-    occlusion+=horizon*range*weights[ring]*smoothstep(.0015,.004,separation);
+    // Preserve the six-direction estimator's energy while sampling four axes.
+    occlusion+=horizon*range*weights[ring]*1.5*smoothstep(.0015,.004,separation);
    }
   }
  }
