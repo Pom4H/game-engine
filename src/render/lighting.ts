@@ -3,7 +3,7 @@ export const FRAME_WGSL=`
 struct Frame {
  lightVP:mat4x4<f32>, sun:vec4<f32>, sunColor:vec4<f32>, sky:vec4<f32>,
  eye:vec4<f32>, forward:vec4<f32>, right:vec4<f32>, up:vec4<f32>, params:vec4<f32>, reflectionVP:mat4x4<f32>,
- viewVP:mat4x4<f32>, previousVP:mat4x4<f32>, environment:vec4<f32>
+ viewVP:mat4x4<f32>, previousVP:mat4x4<f32>, environment:vec4<f32>, projection:vec4<f32>
 }
 `;
 export const SKY_SHADER=FRAME_WGSL+`
@@ -13,7 +13,7 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 fn hash(p:vec2<f32>)->f32 {return fract(sin(dot(p,vec2<f32>(127.1,311.7)))*43758.54);}
 fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);return mix(mix(hash(i),hash(i+vec2<f32>(1,0)),q.x),mix(hash(i+vec2<f32>(0,1)),hash(i+vec2<f32>(1,1)),q.x),q.y);}
 @fragment fn fs(i:Out)->@location(0) vec4<f32>{
- let p=i.uv*2.0-1.0;let ray=normalize(f.forward.xyz+f.right.xyz*p.x*f.right.w*f.forward.w+f.up.xyz*p.y*f.forward.w);
+ let p=i.uv*2.0-1.0;let ray=normalize(f.forward.xyz+f.right.xyz*((p.x-f.projection.z)/f.projection.x)+f.up.xyz*((p.y-f.projection.w)/f.projection.y));
  let humidity=clamp(f.environment.w,0.0,1.0);
  let sunlight=clamp(f.environment.y,0.0,1.0);
  let haze=smoothstep(.55,.98,humidity)*(1.0-.35*sunlight);
@@ -94,8 +94,8 @@ export const EFFECTS_SHADER=FRAME_WGSL+`
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
 fn linearDepth(d:f32)->f32{return 500.0/(10000.0-d*9999.95);}
-fn viewPos(uv:vec2<f32>,z:f32)->vec3<f32>{return vec3<f32>((uv.x*2.0-1.0)*f.right.w*f.forward.w*z,(1.0-uv.y*2.0)*f.forward.w*z,-z);}
-fn project(p:vec3<f32>)->vec2<f32>{return vec2<f32>(p.x/(-p.z*f.forward.w*f.right.w)*.5+.5,.5-p.y/(-p.z*f.forward.w)*.5);}
+fn viewPos(uv:vec2<f32>,z:f32)->vec3<f32>{let ndc=vec2<f32>(uv.x*2.0-1.0,1.0-uv.y*2.0);return vec3<f32>((ndc.x-f.projection.z)/f.projection.x*z,(ndc.y-f.projection.w)/f.projection.y*z,-z);}
+fn project(p:vec3<f32>)->vec2<f32>{let ndc=vec2<f32>(f.projection.x*p.x/max(-p.z,.0001)+f.projection.z,f.projection.y*p.y/max(-p.z,.0001)+f.projection.w);return vec2<f32>(ndc.x*.5+.5,.5-ndc.y*.5);}
 fn viewNormal(n:vec3<f32>)->vec3<f32>{return normalize(vec3<f32>(dot(n,f.right.xyz),dot(n,f.up.xyz),-dot(n,f.forward.xyz)));}
 fn depthSpan(pixel:vec2<i32>)->vec2<f32>{
  let dims=vec2<i32>(textureDimensions(depth));let p=clamp(pixel,vec2<i32>(0),dims-1);
@@ -130,7 +130,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let sn=phaseSin[phaseIndex];
   let radii=array<f32,2>(.035,.24);let weights=array<f32,2>(.58,.42);
   for(var ring=0;ring<2;ring++){
-   let worldRadius=radii[ring];let radius=clamp(worldRadius*size.y/(max(z,.1)*f.forward.w*2.0),1.0,64.0);
+   let worldRadius=radii[ring];let radius=clamp(worldRadius*size.y*f.projection.y/(max(z,.1)*2.0),1.0,64.0);
    for(var k=0;k<4;k++){
     let baseDirection=baseDirections[k];
     let direction=vec2<f32>(baseDirection.x*cs-baseDirection.y*sn,baseDirection.x*sn+baseDirection.y*cs);
@@ -152,7 +152,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  // under cars, beside warm masonry and around shop recesses without scene probes.
  if(d<.99999){
   let giDirs=array<vec2<f32>,6>(vec2<f32>(1,0),vec2<f32>(.5,.866),vec2<f32>(-.5,.866),vec2<f32>(-1,0),vec2<f32>(-.5,-.866),vec2<f32>(.5,-.866));
-  let giRadius=clamp(.42*size.y/(max(z,.1)*f.forward.w*2.0),3.0,42.0);
+  let giRadius=clamp(.42*size.y*f.projection.y/(max(z,.1)*2.0),3.0,42.0);
   var indirect=vec3<f32>(0);var indirectWeight=0.0;
   for(var gi=0;gi<6;gi++){
    let q=clamp(pixel+vec2<i32>(round(giDirs[gi]*giRadius)),vec2<i32>(0),dims-1);
