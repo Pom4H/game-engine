@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
-$ready = Join-Path $Root ".car-subset-v2.ready"
+$ready = Join-Path $Root ".car-subset-v3.ready"
 
 function Test-CarSubset {
   $transforms = @(Get-ChildItem -Path $Root -Recurse -Filter transforms_test.json -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6)' })
@@ -14,7 +14,7 @@ function Test-CarSubset {
   $mesh = @(Get-ChildItem -Path $Root -Recurse -Filter mesh.obj -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004.*mesh_blender' })
   $testImages = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test[\\/]' })
   $testMasks = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test_mask[\\/]' })
-  $complete = $transforms.Count -ge 3 -and $novel.Count -ge 1 -and $envs.Count -ge 3 -and $mesh.Count -ge 1 -and $testImages.Count -ge 3 -and $testMasks.Count -ge 3
+  $complete = $transforms.Count -ge 3 -and $envs.Count -ge 3 -and $mesh.Count -ge 1 -and $testImages.Count -ge 5 -and $testMasks.Count -ge 5
   return [pscustomobject]@{
     Complete=$complete
     Transforms=$transforms.Count
@@ -91,14 +91,14 @@ function Download-And-Extract([string]$Name,[string]$Url,[scriptblock]$Keep) {
 Import-LocalNovelTransforms
 $existing = Test-CarSubset
 if ($existing.Complete) {
-  Set-Content -Path $ready -Value "Stanford-ORB Car subset v2"
+  Set-Content -Path $ready -Value "Stanford-ORB Car subset v3"
   Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), novel=$($existing.Novel), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)"
   exit 0
 }
 if (Test-Path $ready) { Remove-Item -Force $ready }
 
 if (-not $Download) {
-  throw "Stanford-ORB Car subset is incomplete at $Root (transforms=$($existing.Transforms), novel=$($existing.Novel), envs=$($existing.Envs), mesh=$($existing.Mesh)). Keep blender_LDR.tar.gz in Downloads or extract car_scene004/transforms_novel.json; CI never downloads the multi-GB archives."
+  throw "Stanford-ORB Car fast subset is incomplete at $Root (transforms=$($existing.Transforms), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)). Fast RealityGap does not require transforms_novel.json; CI never downloads the multi-GB archives."
 }
 
 Download-And-Extract "blender_LDR.tar.gz" "https://downloads.cs.stanford.edu/viscam/StanfordORB/blender_LDR.tar.gz" {
@@ -114,5 +114,5 @@ $final = Test-CarSubset
 if (-not $final.Complete) {
   throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), novel=$($final.Novel), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
 }
-Set-Content -Path $ready -Value "Stanford-ORB Car subset v2"
+Set-Content -Path $ready -Value "Stanford-ORB Car subset v3"
 Write-Host "Stanford-ORB Car subset ready: transforms=$($final.Transforms), novel=$($final.Novel), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
