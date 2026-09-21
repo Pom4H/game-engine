@@ -13,7 +13,7 @@ import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms
 import {buildSceneRadianceProbe} from './radiance.js';
 
 type GPUAny=any;
-const SHADOW_MAP_SIZE=2048;
+const SHADOW_MAP_SIZE=1536;
 export interface WebGPURendererOptions {profiling?:boolean}
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
