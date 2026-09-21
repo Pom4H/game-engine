@@ -659,10 +659,15 @@ export class WebGPURenderer implements Renderer{
         const value={primitive,model,camera:test(cullVP),shadow:test(lightVP),reflection:entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP)};
         this.cullCache.set(entity.id,value);return value;
       };
-      const cameraOpaque=classified.opaque.filter(e=>visibilityFor(e).camera).sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
-      const cameraTransparent=classified.transparent.filter(e=>visibilityFor(e).camera).sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
-      const shadowCasters=classified.opaque.filter(e=>visibilityFor(e).shadow);
-      const reflectedObjects=classified.opaque.filter(e=>visibilityFor(e).reflection);
+      const cameraOpaque:RuntimeEntity[]=[],cameraTransparent:RuntimeEntity[]=[],shadowCasters:RuntimeEntity[]=[],reflectedObjects:RuntimeEntity[]=[];
+      for(const entity of classified.visible){
+        const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
+        if(visible.camera)(opaque?cameraOpaque:cameraTransparent).push(entity);
+        if(opaque&&visible.shadow)shadowCasters.push(entity);
+        if(opaque&&visible.reflection)reflectedObjects.push(entity);
+      }
+      cameraOpaque.sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
+      cameraTransparent.sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
