@@ -7,9 +7,13 @@ const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]
 const norm=a=>{const l=Math.hypot(...a)||1;return a.map(v=>v/l);};
 const luma=rgba=>rgba[0]*.2126+rgba[1]*.7152+rgba[2]*.0722;
 
-function project(world){
-  const {position,target,fov}=oracle.camera,forward=norm(sub(target,position)),right=norm(cross(forward,[0,1,0])),up=norm(cross(right,forward)),delta=sub(world,position);
-  const z=dot(delta,forward),half=Math.tan(fov*Math.PI/360),aspect=oracle.width/oracle.height;
+function project(point){
+  const reflected=point.stage==='reflection',source=oracle.camera;
+  const position=reflected?[source.position[0],.03-source.position[1],source.position[2]]:source.position;
+  const target=reflected?[source.target[0],.03-source.target[1],source.target[2]]:source.target;
+  const upAxis=reflected?[0,-1,0]:[0,1,0];
+  const forward=norm(sub(target,position)),right=norm(cross(forward,upAxis)),up=norm(cross(right,forward)),delta=sub(point.world,position);
+  const z=dot(delta,forward),half=Math.tan(source.fov*Math.PI/360),aspect=oracle.width/oracle.height;
   if(z<=0)throw new Error('Oracle point is behind the camera');
   const nx=dot(delta,right)/(z*half*aspect),ny=dot(delta,up)/(z*half);
   const x=Math.max(0,Math.min(oracle.width-1,Math.floor((nx*.5+.5)*oracle.width)));
@@ -25,7 +29,7 @@ function run(binary,args){
   });
 }
 
-const pixels=oracle.points.map(point=>project(point.world));
+const pixels=oracle.points.map(point=>project(point));
 const raw=await run(process.execPath,[
   'dist/cli.js','probe','tools/render-oracle.scene.mjs',
   '--width',String(oracle.width),'--height',String(oracle.height),
@@ -33,7 +37,7 @@ const raw=await run(process.execPath,[
 ]);
 const report=JSON.parse(raw),pointById=new Map(oracle.points.map(point=>[point.id,point]));
 const stageMaps=new Map();
-for(const stage of ['hdr','effects','taa']){
+for(const stage of ['hdr','reflection','effects','taa']){
   const map=new Map();
   oracle.points.forEach((point,index)=>map.set(point.id,report.samplesByStage[stage][index].rgba));
   stageMaps.set(stage,map);
