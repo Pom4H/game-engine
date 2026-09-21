@@ -614,6 +614,7 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('materials',()=>this.queueMaterialLoads(scene));
     this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);
     const lightGrid=this.profiler.measure('lights',()=>{
+      if(!this.lastLights.length){this.pointLights=0;this.lightOverflow=0;return undefined;}
       const grid=buildLightGrid(this.lastLights,camera.position);this.pointLights=grid.count;this.lightOverflow=grid.overflow;
       this.device.queue.writeBuffer(this.gpu.lightBuffer,0,grid.lights);this.device.queue.writeBuffer(this.gpu.cellBuffer,0,grid.cells);
       this.profiler.addUpload(grid.lights.byteLength+grid.cells.byteLength,'light');return grid;
