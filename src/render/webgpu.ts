@@ -359,8 +359,12 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let environmentFresnel=f0+(1.0-f0)*pow(1.0-nv,5.0);
   let reflectionDir=reflect(-viewDir,n);
   let fallbackEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
-  let localProbe=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,0).rgb;
   let localProbeWeight=f.params.y*(1.0-smoothstep(.08,.46,roughness))*.90;
+  var localProbe=fallbackEnvironment;
+  let glassLike=materialKind>.5&&materialKind<1.5;
+  if(f.params.y>.5&&(localProbeWeight>.001||clearcoat>0.0||glassLike)){
+    localProbe=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,0).rgb;
+  }
   let environmentRadiance=mix(fallbackEnvironment,localProbe,localProbeWeight);
   let envC0=vec4<f32>(-1.0,-.0275,-.572,.022);let envC1=vec4<f32>(1.0,.0425,1.04,-.04);
   let envR=roughness*envC0+envC1;let envA004=min(envR.x*envR.x,exp2(-9.28*nv))*envR.x+envR.y;
