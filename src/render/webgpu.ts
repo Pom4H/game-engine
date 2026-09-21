@@ -5,7 +5,7 @@ import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_G
 import {FRAME_WGSL,SKY_SHADER,EFFECTS_SHADER,PRESENT_SHADER,BLOOM_SHADER,TAA_SHADER} from './lighting.js';
 import {V3,compose,lookAt,multiply4,perspective,type Mat4,type Vec3} from '../math.js';
 import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
-import type {Primitive,CameraSpec,SurfaceTextureSpec} from '../scene/types.js';
+import type {Primitive,CameraSpec,SurfaceTextureSpec,EnvironmentRadianceSpec} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
 import {RenderProfiler} from './profiler.js';
@@ -527,7 +527,7 @@ export class WebGPURenderer implements Renderer{
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
@@ -896,6 +896,24 @@ export class WebGPURenderer implements Renderer{
   private updateEnvironmentMap(scene:Scene,origin:Vec3):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
     if(this.environmentScene!==scene){this.environmentScene=scene;this.environmentKey='';}
+    const measured=settings.environmentRadiance;
+    if(measured){
+      if(this.measuredRadianceSpec!==measured){this.measuredRadiance=decodeMeasuredRadiance(measured);this.measuredRadianceSpec=measured;}
+      const source=this.measuredRadiance!;
+      const m=measured.worldToEnvironment??[1,0,0,0,1,0,0,0,1],sampleKey=[measured.width,measured.height,measured.rgb16fBase64.length,measured.rgb16fBase64.slice(0,24),measured.rgb16fBase64.slice(-24),measured.convention??'latlong-y-up',measured.intensity??1,...m].join(':');
+      if(sampleKey===this.environmentKey)return;
+      this.environmentKey=sampleKey;this.environmentUpdates++;
+      const levels=9;
+      for(let mip=0;mip<levels;mip++){
+        const size=Math.max(1,256>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
+        for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+          const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),rgb=sampleMeasuredRadiance(measured,source,dir,roughness),gain=measured.intensity??1;
+          pixels[offset++]=float16(rgb[0]*gain);pixels[offset++]=float16(rgb[1]*gain);pixels[offset++]=float16(rgb[2]*gain);pixels[offset++]=float16(1);
+        }
+        this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow:size*8,rowsPerImage:size},[size,size,6]);this.profiler.addUpload(pixels.byteLength,'environment');
+      }
+      return;
+    }
     // Check the authoritative causes before building the expensive scene-radiance proxy.
     // Nearby dynamic detail is handled by SSR/local probes; the distant fallback only
     // needs rebuilding when its world-space origin, atmosphere or scene identity changes.
@@ -1056,6 +1074,49 @@ function float16(value:number):number{
   if(exp<=0){if(exp<-10)return sign;return sign|((mantissa|0x800000)>>(14-exp));}
   if(exp>=31)return sign|0x7c00;
   return sign|(exp<<10)|(mantissa>>13);
+}
+
+function decodeMeasuredRadiance(spec:EnvironmentRadianceSpec):Float32Array{
+  const binary=atob(spec.rgb16fBase64),expected=spec.width*spec.height*3*2;
+  if(binary.length!==expected)throw new RangeError(`Measured radiance payload is ${binary.length} bytes; expected ${expected}`);
+  const bytes=new Uint8Array(expected);for(let i=0;i<expected;i++)bytes[i]=binary.charCodeAt(i);
+  const view=new DataView(bytes.buffer),rgb=new Float32Array(spec.width*spec.height*3);
+  for(let i=0;i<rgb.length;i++)rgb[i]=Math.max(0,halfToFloat(view.getUint16(i*2,true)));
+  return rgb;
+}
+function measuredDirection(spec:EnvironmentRadianceSpec,direction:Vec3):Vec3{
+  const m=spec.worldToEnvironment??[1,0,0,0,1,0,0,0,1],d:Vec3=[
+    m[0]*direction[0]+m[1]*direction[1]+m[2]*direction[2],
+    m[3]*direction[0]+m[4]*direction[1]+m[5]*direction[2],
+    m[6]*direction[0]+m[7]*direction[1]+m[8]*direction[2],
+  ];
+  return V3.normalize(d);
+}
+function bilinearMeasured(spec:EnvironmentRadianceSpec,rgb:Float32Array,direction:Vec3):[number,number,number]{
+  const d=measuredDirection(spec,direction),pi=Math.PI;
+  const u=spec.convention==='stanford-orb'
+    ?(Math.atan2(d[0],-d[2])+pi)/(2*pi)
+    :(Math.atan2(d[2],d[0])/(2*pi)+.5);
+  const v=Math.acos(Math.max(-1,Math.min(1,d[1])))/pi,x=((u%1+1)%1)*spec.width-.5,y=Math.max(0,Math.min(spec.height-1,v*(spec.height-1))),x0=Math.floor(x),y0=Math.floor(y),tx=x-x0,ty=y-y0;
+  const at=(xx:number,yy:number,channel:number)=>rgb[(Math.max(0,Math.min(spec.height-1,yy))*spec.width+((xx%spec.width)+spec.width)%spec.width)*3+channel]!;
+  const out:[number,number,number]=[0,0,0];
+  for(let ch=0;ch<3;ch++){const a=at(x0,y0,ch)*(1-tx)+at(x0+1,y0,ch)*tx,b=at(x0,y0+1,ch)*(1-tx)+at(x0+1,y0+1,ch)*tx;out[ch]=a*(1-ty)+b*ty;}
+  return out;
+}
+const RADIANCE_TAPS:readonly (readonly [number,number,number])[]=[
+  [0,0,2.5],[.34,0,1],[-.34,0,1],[0,.34,1],[0,-.34,1],
+  [.62,.62,1],[-.62,.62,1],[.62,-.62,1],[-.62,-.62,1],
+  [.92,0,.65],[-.92,0,.65],[0,.92,.65],[0,-.92,.65],
+];
+function sampleMeasuredRadiance(spec:EnvironmentRadianceSpec,rgb:Float32Array,direction:Vec3,roughness:number):[number,number,number]{
+  if(roughness<.015)return bilinearMeasured(spec,rgb,direction);
+  const up:Vec3=Math.abs(direction[1])>.96?[1,0,0]:[0,1,0],t=V3.normalize(V3.cross(up,direction)),b=V3.cross(direction,t),spread=Math.tan(Math.min(1.18,roughness*roughness*1.28));
+  let r=0,g=0,bl=0,total=0;
+  for(const [x,y,w] of RADIANCE_TAPS){
+    const d=V3.normalize([direction[0]+(t[0]*x+b[0]*y)*spread,direction[1]+(t[1]*x+b[1]*y)*spread,direction[2]+(t[2]*x+b[2]*y)*spread]),s=bilinearMeasured(spec,rgb,d);
+    r+=s[0]*w;g+=s[1]*w;bl+=s[2]*w;total+=w;
+  }
+  return[r/total,g/total,bl/total];
 }
 
 function orthographic(extent:number,near:number,far:number):Mat4{return new Float32Array([1/extent,0,0,0,0,1/extent,0,0,0,0,1/(near-far),0,0,0,near/(near-far),1]);}
