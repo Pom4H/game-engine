@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "metric": "PhotorealismGap",
+  "lowerIsBetter": true,
+  "fast": {
+    "gap": 0.6131289322929493,
+    "tolerance": 0.005,
+    "crops": [
+      {
+        "id": "paint-clearcoat",
+        "gap": 0.42515694590206055,
+        "tolerance": 0.015
+      },
+      {
+        "id": "glass",
+        "gap": 0.6294457044826686,
+        "tolerance": 0.015
+      },
+      {
+        "id": "metal",
+        "gap": 0.32103870458215655,
+        "tolerance": 0.015
+      },
+      {
+        "id": "ground-contact",
+        "gap": 0.3197675149561597,
+        "tolerance": 0.015
+      },
+      {
+        "id": "concrete",
+        "gap": 0.2644082201948224,
+        "tolerance": 0.015
+      },
+      {
+        "id": "emission-reflection",
+        "gap": 0.22481209934063098,
+        "tolerance": 0.015
+      }
+    ]
+  }
+}

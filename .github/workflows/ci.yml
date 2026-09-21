@@ -35,7 +35,7 @@ jobs:
       - name: Radiometric pixel oracle
         run: node tools/render-oracle.mjs
       - name: Photorealism North Star
-        run: node tools/photorealism/run.mjs --mode fast --out artifacts/photorealism-fast
+        run: node tools/photorealism/run.mjs --mode fast --out artifacts/photorealism-fast --baseline tools/photorealism/baseline.json --assert
       - name: Reference render
         run: |
           if not exist artifacts mkdir artifacts
