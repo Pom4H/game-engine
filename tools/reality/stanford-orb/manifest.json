@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "dataset": "Stanford-ORB",
+  "object": "car",
+  "resolution": 512,
+  "sources": {
+    "ldr": "https://downloads.cs.stanford.edu/viscam/StanfordORB/blender_LDR.tar.gz",
+    "groundTruth": "https://downloads.cs.stanford.edu/viscam/StanfordORB/ground_truth.tar.gz"
+  },
+  "calibration": [
+    {"scene": "car_scene004", "testIndex": 0}
+  ],
+  "heldOut": [
+    {"scene": "car_scene002", "testIndex": 0},
+    {"scene": "car_scene006", "testIndex": 0}
+  ],
+  "notes": "scene004 may define frozen material/alignment parameters. scene002 and scene006 are never calibration targets. Fast CI uses one official test capture per held-out scene; full evaluation may use the complete test split."
+}
