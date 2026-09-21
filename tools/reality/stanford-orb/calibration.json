@@ -14,7 +14,7 @@
     "clearcoatRoughness": 0.24,
     "treatment": "painted"
   },
-  "exposure": 1,
-  "frozenFrom": "car_scene004:test[0,2,4] dielectric BRDF + vertex-color calibration",
-  "comment": "Calibration-only BRDF/albedo. Held-out views test[1,3] never modify material, exposure or vertex colors."
+  "exposure": 2,
+  "frozenFrom": "car_scene004:test[0,2,4] dielectric BRDF + vertex-color + ACES exposure calibration",
+  "comment": "Calibration-only. Exposure=2 minimizes masked calibration RGB error after the engine ACES transform; held-out test[1,3] never select parameters."
 }
