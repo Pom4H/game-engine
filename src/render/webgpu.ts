@@ -66,15 +66,20 @@ struct U {
 fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  let clip=f.lightVP*vec4<f32>(p+n*.003,1);let uv=clip.xy*.5*vec2<f32>(1,-1)+.5;
  if(any(uv<vec2<f32>(0))||any(uv>vec2<f32>(1))||clip.z>1.0||clip.z<0.0){return 1.0;}
- var staticValue=0.0;var dynamicValue=0.0;
+ var staticValue=0.0;var dynamicValue=2.0;
  let staticTexel=1.0/vec2<f32>(textureDimensions(shadowMap));
- let dynamicTexel=1.0/vec2<f32>(textureDimensions(dynamicShadowMap));
  let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233))+floor(f.up.w*60.0)*.618)*43758.5453)*6.2831853;
  let cs=cos(phase);let sn=sin(phase);let rot=mat2x2<f32>(cs,-sn,sn,cs);
  let taps=array<vec2<f32>,2>(vec2<f32>(-.78,-.26),vec2<f32>(.80,.30));
  for(var i=0;i<2;i++){
   staticValue+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*staticTexel*2.20,clip.z-.000025);
-  dynamicValue+=textureSampleCompareLevel(dynamicShadowMap,shadowSampler,uv+rot*taps[i]*dynamicTexel*1.55,clip.z-.000025);
+ }
+ if(f.eye.w>.5){
+  dynamicValue=0.0;
+  let dynamicTexel=1.0/vec2<f32>(textureDimensions(dynamicShadowMap));
+  for(var i=0;i<2;i++){
+   dynamicValue+=textureSampleCompareLevel(dynamicShadowMap,shadowSampler,uv+rot*taps[i]*dynamicTexel*1.55,clip.z-.000025);
+  }
  }
  let visibility=min(staticValue,dynamicValue)*.5;
  let edge=min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));return mix(1.0,visibility,smoothstep(0.0,.025,edge));
@@ -619,7 +624,7 @@ export class WebGPURenderer implements Renderer{
       lightVP[12]=Math.round(lightVP[12]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;lightVP[13]=Math.round(lightVP[13]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;
       const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(Math.abs(forward[1])>.9999?[1,0,0]:V3.cross(forward,[0,1,0])),up=V3.cross(right,forward),frame=new Float32Array(100);
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
-      frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,1],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([scene.environment.sunlight,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
+      frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,0],28);frame.set([...forward,Math.tan((camera.fov??55)*Math.PI/360)],32);frame.set([...right,this.canvas.width/this.canvas.height],36);frame.set([...up,scene.time],40);frame.set([scene.environment.sunlight,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
       frame.set(multiply4(perspective((camera.fov??55)*Math.PI/180,this.canvas.width/this.canvas.height),lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[0,-1,0])),48);
       frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);
       this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength,'frame');
@@ -646,6 +651,12 @@ export class WebGPURenderer implements Renderer{
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
     const staticShadowDrawables=shadowDrawables.filter(isStaticShadowCaster);
     const dynamicShadowDrawables=shadowDrawables.filter(entity=>!isStaticShadowCaster(entity));
+    if(dynamicShadowDrawables.length){
+      frame[31]=1;
+      const dynamicShadowFlag=new Float32Array([1]);
+      this.device.queue.writeBuffer(this.gpu.frame,31*4,dynamicShadowFlag);
+      this.profiler.addUpload(dynamicShadowFlag.byteLength,'frame');
+    }
     const shadowDirty=!this.shadowValid||!matrixEqual(this.shadowLightVP??undefined,lightVP)||staticShadowDrawables.length!==this.shadowState.size||staticShadowDrawables.some(entity=>{
       const previous=this.shadowState.get(entity.id),primitive=renderPrimitive(entity)!;
       return !previous||previous.primitive!==primitive||!matrixEqual(previous.model,modelFor(entity));
