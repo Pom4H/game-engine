@@ -1,5 +1,6 @@
 param(
-  [string]$Root = $(if ($env:REALITY_DATA_ROOT) { $env:REALITY_DATA_ROOT } else { Join-Path $env:USERPROFILE ".cache\game-engine-reality\stanford-orb" })
+  [string]$Root = $(if ($env:REALITY_DATA_ROOT) { $env:REALITY_DATA_ROOT } else { Join-Path $env:USERPROFILE ".cache\game-engine-reality\stanford-orb" }),
+  [switch]$Download
 )
 $ErrorActionPreference = "Stop"
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
@@ -29,6 +30,10 @@ if ($existing.Complete) {
   exit 0
 }
 if (Test-Path $ready) { Remove-Item -Force $ready }
+
+if (-not $Download) {
+  throw "Stanford-ORB Car subset is not installed at $Root. Extract car_scene002/004/006 from blender_LDR and ground_truth there. CI never downloads the multi-GB archives."
+}
 
 $archives = Join-Path $Root "_archives"
 New-Item -ItemType Directory -Force -Path $archives | Out-Null
