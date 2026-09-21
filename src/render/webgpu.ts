@@ -1,7 +1,7 @@
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
-import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHTS_PER_CELL} from './light-grid.js';
+import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
 import {FRAME_WGSL,SKY_SHADER,EFFECTS_SHADER,PRESENT_SHADER,BLOOM_SHADER,TAA_SHADER} from './lighting.js';
 import {V3,compose,lookAt,multiply4,perspective,type Mat4,type Vec3} from '../math.js';
 import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
@@ -504,7 +504,7 @@ export class WebGPURenderer implements Renderer{
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
@@ -613,7 +613,10 @@ export class WebGPURenderer implements Renderer{
     }
     this.profiler.measure('materials',()=>this.queueMaterialLoads(scene));
     this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);
+    const currentLightGridKey=lightGridCauseKey(this.lastLights,camera.position);
     const lightGrid=this.profiler.measure('lights',()=>{
+      if(currentLightGridKey===this.lightGridKey)return undefined;
+      this.lightGridKey=currentLightGridKey;
       if(!this.lastLights.length){this.pointLights=0;this.lightOverflow=0;return undefined;}
       const grid=buildLightGrid(this.lastLights,camera.position);this.pointLights=grid.count;this.lightOverflow=grid.overflow;
       this.device.queue.writeBuffer(this.gpu.lightBuffer,0,grid.lights);this.device.queue.writeBuffer(this.gpu.cellBuffer,0,grid.cells);
@@ -962,6 +965,14 @@ function orthographic(extent:number,near:number,far:number):Mat4{return new Floa
 function halton(index:number,base:number):number{let f=1,result=0,i=index;while(i>0){f/=base;result+=f*(i%base);i=Math.floor(i/base);}return result;}
 function taaJitter(frame:number):readonly[number,number]{const i=(frame%8)+1;return[halton(i,2)-.5,halton(i,3)-.5];}
 
+function lightGridCauseKey(lights:readonly RuntimeEntity[],eye:Vec3):string{
+  const values:(string|number)[]=[Math.floor(eye[0]/LIGHT_GRID_CELL),Math.floor(eye[2]/LIGHT_GRID_CELL),lights.length];
+  for(const entity of lights){
+    const light=entity.light!;
+    values.push(entity.id,entity.position[0],entity.position[1],entity.position[2],light.range??12,light.intensity??1,...(light.color??[1,.78,.5]));
+  }
+  return values.join(':');
+}
 function distance2(a:Vec3,b:Vec3):number{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[2];return x*x+y*y+z*z;}
 interface ResolvedReflectionProbe{position:Vec3;radius:number;facesPerFrame:number;exclude:ReadonlySet<string>;key:string}
 const PROBE_FACE_DIRECTIONS:readonly Vec3[]=Object.freeze([[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]] as const);
