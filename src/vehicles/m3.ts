@@ -112,13 +112,16 @@ function roundedRectFrameMesh(width:number,height:number,radius:number,border:nu
 }
 
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
+let renderSourceCache:TriangleMesh|undefined;
 let renderBodyCache:TriangleMesh|undefined;
-export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),68,.010,true);}
+function m3RenderSource():TriangleMesh{return renderSourceCache??=smoothCoincidentNormals(m3HighFidelityBody(),64,2e-5);}
+export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3RenderSource(),68,.010,true);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  // The compact shell is the control cage. Render subdivision is allowed to bend
-  // broad adjacent panels while the source's strong normal splits still preserve
-  // authored creases. This is curvature reconstruction, not extra stored geometry.
-  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,68,.010,true));
+  // First reconstruct a continuous normal field over coincident low-poly paint
+  // vertices. PN subdivision can then infer broad body curvature from the compact
+  // cage instead of faithfully preserving every source triangle as a visible facet.
+  const source=mesh===m3HighFidelityBody()?m3RenderSource():smoothCoincidentNormals(mesh,64,2e-5);
+  const first=subdivideSmoothTriangleMesh(source,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(source,68,.010,true));
   const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,70,.0035));
   const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,72,.0014));
   return smoothCoincidentNormals(third,72,1e-4);
