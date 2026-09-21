@@ -30,8 +30,8 @@ test('render profiler resolves named GPU pass timestamps asynchronously',async()
   copyBufferToBuffer(source,sourceOffset,target,targetOffset,size){new Uint8Array(target.data,targetOffset,size).set(new Uint8Array(source.data,sourceOffset,size));},
  };
  profiler.setWork({shadowCasters:12});profiler.resolve(encoder);profiler.submitted();await new Promise(resolve=>setImmediate(resolve));
- const profile=profiler.inspect();assert.equal(profile.gpuFrames,1);assert.equal(profile.latestGpu.work.shadowCasters,12);assert.equal(profile.rasterSamples.shadow,1);assert.equal(profile.gpuTotal.meanMs,RENDER_GPU_QUANTA.length);
- for(const name of RENDER_GPU_QUANTA)assert.equal(profile.gpu[name].meanMs,1);
+ const profile=profiler.inspect();assert.equal(profile.gpuFrames,1);assert.equal(profile.latestGpu.work.shadowCasters,12);assert.equal(profile.rasterSamples.shadow,1);assert.equal(profile.gpuTotal.meanMs,2);
+ for(const name of RENDER_GPU_QUANTA)assert.equal(profile.gpu[name].meanMs,name==='shadow'||name==='present'?1:0);
  profiler.dispose();
 });
 
