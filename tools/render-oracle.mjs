@@ -26,26 +26,62 @@ function run(binary,args){
 }
 
 const pixels=oracle.points.map(point=>project(point.world));
-const raw=await run(process.execPath,['dist/cli.js','probe','tools/render-oracle.scene.mjs','--width',String(oracle.width),'--height',String(oracle.height),'--pixels',JSON.stringify(pixels)]);
-const report=JSON.parse(raw),samples=new Map();
-oracle.points.forEach((point,index)=>samples.set(point.id,report.samples[index].rgba));
+const raw=await run(process.execPath,[
+  'dist/cli.js','probe','tools/render-oracle.scene.mjs',
+  '--width',String(oracle.width),'--height',String(oracle.height),
+  '--stage','all','--pixels',JSON.stringify(pixels),
+]);
+const report=JSON.parse(raw),pointById=new Map(oracle.points.map(point=>[point.id,point]));
+const stageMaps=new Map();
+for(const stage of ['hdr','effects','taa']){
+  const map=new Map();
+  oracle.points.forEach((point,index)=>map.set(point.id,report.samplesByStage[stage][index].rgba));
+  stageMaps.set(stage,map);
+}
+const sample=id=>{
+  const point=pointById.get(id);if(!point)throw new Error('Unknown oracle point '+id);
+  return stageMaps.get(point.stage??'hdr').get(id);
+};
 
 const results=[];
 for(const contract of oracle.contracts){
   if(contract.kind==='delta'){
-    const a=samples.get(contract.a),b=samples.get(contract.b),actual=b.slice(0,3).map((v,i)=>v-a[i]),errors=actual.map((v,i)=>Math.abs(v-contract.expected[i]));
+    const a=sample(contract.a),b=sample(contract.b),actual=b.slice(0,3).map((v,i)=>v-a[i]),errors=actual.map((v,i)=>Math.abs(v-contract.expected[i]));
     results.push({id:contract.id,expected:contract.expected,actual,error:Math.max(...errors),pass:errors.every(e=>e<=contract.tolerance)});
   }else if(contract.kind==='ratio'){
-    const black=luma(samples.get(contract.black)),mid=luma(samples.get(contract.mid)),white=luma(samples.get(contract.white)),actual=(mid-black)/Math.max(1e-9,white-black),error=Math.abs(actual-contract.expected);
+    const black=luma(sample(contract.black)),mid=luma(sample(contract.mid)),white=luma(sample(contract.white)),actual=(mid-black)/Math.max(1e-9,white-black),error=Math.abs(actual-contract.expected);
     results.push({id:contract.id,expected:contract.expected,actual,error,pass:error<=contract.tolerance});
   }else if(contract.kind==='gain'){
-    const low=luma(samples.get(contract.low)),high=luma(samples.get(contract.high)),actual=high/Math.max(low,1e-9);
+    const low=luma(sample(contract.low)),high=luma(sample(contract.high)),actual=high/Math.max(low,1e-9);
     results.push({id:contract.id,minimum:contract.minimum,actual,pass:actual>=contract.minimum});
   }else if(contract.kind==='difference'){
-    const low=luma(samples.get(contract.low)),high=luma(samples.get(contract.high)),actual=high-low;
+    const low=luma(sample(contract.low)),high=luma(sample(contract.high)),actual=high-low;
     results.push({id:contract.id,minimum:contract.minimum,actual,pass:actual>=contract.minimum});
+  }else if(contract.kind==='rangeRatio'){
+    const low=luma(sample(contract.low)),high=luma(sample(contract.high)),actual=low/Math.max(high,1e-9);
+    results.push({id:contract.id,minimum:contract.minimum,maximum:contract.maximum,actual,pass:actual>=contract.minimum&&actual<=contract.maximum});
+  }else if(contract.kind==='channelDominance'){
+    const value=sample(contract.sample),channel=value[contract.channel],others=value.slice(0,3).filter((_,index)=>index!==contract.channel),actual=channel/Math.max(1e-9,...others);
+    results.push({id:contract.id,channel:contract.channel,minimum:contract.minimum,actual,pass:actual>=contract.minimum});
+  }else if(contract.kind==='channelGain'){
+    const low=sample(contract.low)[contract.channel],high=sample(contract.high)[contract.channel],actual=high/Math.max(low,1e-9);
+    results.push({id:contract.id,channel:contract.channel,minimum:contract.minimum,actual,pass:actual>=contract.minimum});
+  }else if(contract.kind==='channelDifference'){
+    const low=sample(contract.low)[contract.channel],high=sample(contract.high)[contract.channel],actual=high-low;
+    results.push({id:contract.id,channel:contract.channel,minimum:contract.minimum,actual,pass:actual>=contract.minimum});
+  }else{
+    throw new Error('Unknown oracle contract '+contract.kind);
   }
 }
+
 const failed=results.filter(result=>!result.pass);
-console.log(JSON.stringify({version:1,resolution:[oracle.width,oracle.height],pixels:oracle.points.map((point,index)=>({id:point.id,world:point.world,pixel:pixels[index],rgba:report.samples[index].rgba})),contracts:results,failed:failed.map(result=>result.id)},null,2));
+console.log(JSON.stringify({
+  version:2,
+  resolution:[oracle.width,oracle.height],
+  pixels:oracle.points.map((point,index)=>({
+    id:point.id,stage:point.stage??'hdr',world:point.world,pixel:pixels[index],rgba:sample(point.id),
+  })),
+  contracts:results,
+  failed:failed.map(result=>result.id),
+},null,2));
 if(failed.length)process.exitCode=1;
