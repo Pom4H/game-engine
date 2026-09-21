@@ -58,6 +58,25 @@ spec.entities.push(
   {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.225,.232,.242,1],roughness:.70},environmental:{surfaceUse:'road',snowDepthM:.0015,iceDepthM:.00060,waterDepthM:.00072}},
 );
 const heroSnowMaterial={kind:'snow',color:[.962,.973,.985,1],roughness:.85,texture:{url:'/assets/snow-granular.png',sizeM:.26,bumpStrength:.26,albedoStrength:.22}};
+function snowCrumbs(id,z,side,seed){
+  let state=seed>>>0;const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
+  const positions=[],normals=[],indices=[];let vertex=0;
+  for(let i=0;i<150;i++){
+    const x=-39+random()*54;
+    const edge=(random()**.55)*.82;
+    const localZ=z+side*(edge-.30);
+    const radius=.018+random()*.075,height=radius*(.55+random()*1.35);
+    const sides=5+(i%3),start=vertex;
+    positions.push(x,.145+height,localZ);normals.push(0,1,0);vertex++;
+    for(let k=0;k<sides;k++){
+      const a=k/sides*Math.PI*2,rr=radius*(.72+random()*.38);
+      positions.push(x+Math.cos(a)*rr,.14+random()*.018,localZ+Math.sin(a)*rr);
+      const nx=Math.cos(a)*.55,nz=Math.sin(a)*.55,l=Math.hypot(nx,.84,nz);normals.push(nx/l,.84/l,nz/l);vertex++;
+    }
+    for(let k=0;k<sides;k++)indices.push(start,start+1+k,start+1+(k+1)%sides);
+  }
+  return{id,position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:heroSnowMaterial};
+}
 for(const bank of [
   {id:'near',z:-4.18,y:.115,height:.34,width:1.04,seed:4617},
   {id:'far',z:4.12,y:.13,height:.40,width:1.16,seed:9121},
@@ -70,6 +89,7 @@ for(const bank of [
     material:heroSnowMaterial,
   });
 }
+spec.entities.push(snowCrumbs('hero-snow-crumbs-near',-4.18,-1,78123),snowCrumbs('hero-snow-crumbs-far',4.12,1,99117));
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
@@ -85,6 +105,9 @@ for(const entity of spec.entities){
   }
   if(entity.material?.pattern==='plaster'){
     entity.material={...entity.material,pattern:'brick',color:[.74,.67,.61,1],roughness:.88,texture:{url:'/assets/brick-weathered.png',sizeM:1.42,bumpStrength:.34,albedoStrength:.92}};
+  }
+  if(entity.material?.pattern==='window'){
+    entity.material={...entity.material,color:[.10,.13,.16,1],metalness:.02,roughness:.14,emissive:(entity.material.emissive??[0,0,0]).map(v=>v*.55)};
   }
 }
 
