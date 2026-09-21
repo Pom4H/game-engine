@@ -77,6 +77,8 @@ export interface CameraIntrinsicsSpec {
 }
 export interface CameraSpec {
   position:Vec3; target:Vec3;
+  /** Calibrated camera up direction. Defaults to world +Y for authored cameras. */
+  up?:Vec3;
   /** Convenience vertical FOV for authored cameras. Ignored when intrinsics are present. */
   fov?:number;
   /** Exact pinhole calibration for measured/real-world captures. */
