@@ -134,6 +134,7 @@ export class Scene {
     for(const entity of this.entities.values())if(entity.body&&(entity.body.invMass>0||entity.body.kinematic))ids.add(entity.id);
     for(const id of this.animation.controlledEntityIds())ids.add(id);
     for(const id of this.deformation.visualEntityIds())ids.add(id);
+    for(const id of this.contacts?.controlledEntityIds()??[])ids.add(id);
     this.renderMoverRevision=this.renderStructureRevision;this.renderMovers=ids;return ids;
   }
   remove(id:string):void{
