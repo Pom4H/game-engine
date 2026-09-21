@@ -15,7 +15,7 @@ function Test-CarSubset {
   $testMasks = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test_mask[\\/]' })
   $albedo = @(Get-ChildItem -Path $Root -Recurse -Filter *.npy -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004.*[\\/]pseudo_gt_albedo[\\/]' })
   $depth = @(Get-ChildItem -Path $Root -Recurse -Filter *.npy -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004.*[\\/]z_depth[\\/]' })
-  $complete = $transforms.Count -ge 3 -and $envs.Count -ge 5 -and $mesh.Count -ge 1 -and $testImages.Count -ge 5 -and $testMasks.Count -ge 5 -and $albedo.Count -ge 5 -and $depth.Count -ge 5
+  $complete = $transforms.Count -ge 3 -and $envs.Count -ge 5 -and $mesh.Count -ge 1 -and $testImages.Count -ge 5 -and $testMasks.Count -ge 5
   return [pscustomobject]@{
     Complete=$complete; Transforms=$transforms.Count; Envs=$envs.Count; Mesh=$mesh.Count
     TestImages=$testImages.Count; TestMasks=$testMasks.Count; Albedo=$albedo.Count; Depth=$depth.Count
@@ -91,7 +91,7 @@ if (Test-Path $ready) { Remove-Item -Force $ready }
 
 if (-not $Download) {
   Write-State "Stanford-ORB cache incomplete:" $existing
-  throw "Fast RealityGap requires scene004 pseudo_gt_albedo and z_depth in addition to the existing images/env/mesh. Put the extracted ground_truth archive under Downloads/Desktop or the cache; CI will not download multi-GB archives."
+  throw "Fast RealityGap is missing its required images/env/mesh subset. pseudo_gt_albedo/z_depth are optional calibration upgrades and do not block the fast loop."
 }
 
 if ($existing.Transforms -lt 3 -or $existing.TestImages -lt 5 -or $existing.TestMasks -lt 5) {
