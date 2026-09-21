@@ -24,6 +24,10 @@ async function findSuffix(suffix){
   if(matches.length!==1)throw new Error(`Expected one ${suffix} under ${root}, found ${matches.length}`);
   return matches[0];
 }
+async function findOptionalSuffix(suffix){
+  const normalized=suffix.replaceAll('\\','/').toLowerCase(),matches=(await files()).filter(p=>p.replaceAll('\\','/').toLowerCase().endsWith(normalized));
+  return matches.length===1?matches[0]:null;
+}
 const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
 const norm=a=>{const l=Math.hypot(...a)||1;return a.map(v=>v/l);};
 
@@ -119,18 +123,39 @@ function readNpy(buffer){
   else throw new TypeError(`Unsupported NPY dtype ${descr}`);
   return{shape,data};
 }
-async function gtNpy(scene,kind,stem){const path=await findSuffix(`ground_truth/${scene}/${kind}/${stem}.npy`);return{path,...readNpy(await readFile(path))};}
+async function gtNpy(scene,kind,stem){const path=await findOptionalSuffix(`ground_truth/${scene}/${kind}/${stem}.npy`);return path?{path,...readNpy(await readFile(path))}:null;}
 function sampleBilinear(data,width,height,channels,x,y,out){
   const x0=Math.max(0,Math.min(width-1,Math.floor(x))),y0=Math.max(0,Math.min(height-1,Math.floor(y))),x1=Math.min(width-1,x0+1),y1=Math.min(height-1,y0+1),tx=x-x0,ty=y-y0;
   for(let ch=0;ch<channels;ch++){const a=data[(y0*width+x0)*channels+ch]*(1-tx)+data[(y0*width+x1)*channels+ch]*tx,b=data[(y1*width+x0)*channels+ch]*(1-tx)+data[(y1*width+x1)*channels+ch]*tx;out[ch]=a*(1-ty)+b*ty;}
   return out;
+}
+function median(values){if(!values.length)return 0;const sorted=[...values].sort((a,b)=>a-b),mid=sorted.length>>1;return sorted.length&1?sorted[mid]:(sorted[mid-1]+sorted[mid])*.5;}
+async function calibrateCapturedRgb(mesh,sceneDir,metadata,items){
+  const vertices=mesh.positions.length/3,samples=Array.from({length:vertices},()=>[]);
+  for(const item of items){
+    const frame=metadata.frames[item.testIndex];if(!frame)continue;
+    const relPath=frame.file_path.replace(/^\.\//,''),stem=basename(relPath),image=await readPng(join(sceneDir,relPath+'.png')),mask=await readPng(join(sceneDir,dirname(relPath)+'_mask',stem+'.png')),m=frame.transform_matrix,position=[m[0][3],m[1][3],m[2][3]],right=[m[0][0],m[1][0],m[2][0]],up=[m[0][1],m[1][1],m[2][1]],back=[m[0][2],m[1][2],m[2][2]],angle=Number(frame.camera_angle_x??metadata.camera_angle_x),focal=.5*image.width/Math.tan(.5*angle);
+    for(let i=0;i<vertices;i++){
+      const p=[mesh.positions[i*3],mesh.positions[i*3+1],mesh.positions[i*3+2]],n=[mesh.normals[i*3],mesh.normals[i*3+1],mesh.normals[i*3+2]],delta=[p[0]-position[0],p[1]-position[1],p[2]-position[2]],depth=-dot(delta,back);if(depth<=1e-5)continue;
+      const facing=dot(n,norm(sub(position,p)));if(facing<.06)continue;
+      const x=Math.round(focal*dot(delta,right)/depth+image.width*.5),y=Math.round(image.height*.5-focal*dot(delta,up)/depth);if(x<2||y<2||x>=image.width-2||y>=image.height-2)continue;
+      const at=(xx,yy)=>mask.rgb[(yy*mask.width+xx)*3];if(at(x,y)<128||at(x-2,y)<128||at(x+2,y)<128||at(x,y-2)<128||at(x,y+2)<128)continue;
+      const q=(y*image.width+x)*3;samples[i].push([image.rgb[q]/255,image.rgb[q+1]/255,image.rgb[q+2]/255]);
+    }
+  }
+  const colors=new Array(vertices*4);let observed=0;
+  for(let i=0;i<vertices;i++){const s=samples[i];if(s.length){observed++;colors[i*4]=median(s.map(v=>v[0]));colors[i*4+1]=median(s.map(v=>v[1]));colors[i*4+2]=median(s.map(v=>v[2]));}else{colors[i*4]=.5;colors[i*4+1]=.5;colors[i*4+2]=.5;}colors[i*4+3]=1;}
+  console.log(JSON.stringify({phase:'albedo-calibration',source:'captured-rgb-fallback',views:items.map(v=>v.testIndex),coverage:observed/vertices,observed,vertices}));
+  return{colors,coverage:observed/vertices,positions:vertices,observed};
 }
 async function calibrateVertexColors(mesh,_sceneDir,metadata,items){
   const scene=items[0]?.scene;if(!scene)throw new Error('No calibration scene');
   const vertices=mesh.positions.length/3,sums=new Float64Array(vertices*3),weights=new Float64Array(vertices),sample=[0,0,0,0],stats={projected:0,depthAccepted:0,facingAccepted:0};
   for(const item of items){
     const frame=metadata.frames[item.testIndex];if(!frame)throw new RangeError(`Calibration frame ${item.testIndex} is missing`);
-    const stem=basename(frame.file_path.replace(/^\.\//,'')),albedo=await gtNpy(scene,'pseudo_gt_albedo',stem),depth=await gtNpy(scene,'z_depth',stem),ah=albedo.shape[0],aw=albedo.shape[1],ac=albedo.shape[2]??1,dh=depth.shape[0],dw=depth.shape[1];
+    const stem=basename(frame.file_path.replace(/^\.\//,'')),albedo=await gtNpy(scene,'pseudo_gt_albedo',stem),depth=await gtNpy(scene,'z_depth',stem);
+    if(!albedo||!depth)return calibrateCapturedRgb(mesh,_sceneDir,metadata,items);
+    const ah=albedo.shape[0],aw=albedo.shape[1],ac=albedo.shape[2]??1,dh=depth.shape[0],dw=depth.shape[1];
     if(ac<3||ah!==dh||aw!==dw)throw new RangeError(`GT albedo/depth mismatch for ${scene}/${stem}: ${albedo.shape} vs ${depth.shape}`);
     const m=frame.transform_matrix,position=[m[0][3],m[1][3],m[2][3]],right=norm([m[0][0],m[1][0],m[2][0]]),up=norm([m[0][1],m[1][1],m[2][1]]),forward=norm([-m[0][2],-m[1][2],-m[2][2]]),angle=Number(frame.camera_angle_x??metadata.camera_angle_x),fx=.5*aw/Math.tan(.5*angle),fy=fx;
     for(let i=0;i<vertices;i++){
