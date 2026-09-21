@@ -545,7 +545,7 @@ export class WebGPURenderer implements Renderer{
     if(this.depthW===width&&this.depthH===height)return;
     this.canvas.width=width;this.canvas.height=height;this.depthW=width;this.depthH=height;
     for(const target of [this.depth,this.hdr,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
-    const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04});
+    const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04|(format==='rgba16float'?0x01:0)});
     this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.normal=texture('rgba16float',1);this.specular=texture('rgba8unorm',1);this.velocity=texture('rg16float',1);this.effectsHdr=texture('rgba16float',1);this.taaA=texture('rgba16float',1);this.taaB=texture('rgba16float',1);
     this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
     const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
@@ -717,6 +717,26 @@ export class WebGPURenderer implements Renderer{
     }
   }
   async prepareMaterials(scene:Scene):Promise<void>{const urls=new Set([...scene.entities.values()].flatMap(e=>{const t=e.material.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];}));await Promise.all([...urls].map(async url=>{await this.surfaceTextures.load(url);this.failedMaterials.delete(url);}));}
+  async sampleLinearPixels(points:readonly (readonly [number,number])[]):Promise<readonly import('./types.js').LinearPixelSample[]>{
+    if(!this.hdr)throw new Error('HDR target unavailable');
+    if(points.length>512)throw new RangeError('At most 512 linear pixel samples per readback');
+    if(!points.length)return[];
+    const stride=256,buffer=this.device.createBuffer({size:stride*points.length,usage:0x01|0x08});
+    const encoder=this.device.createCommandEncoder({label:'render.linear-pixel-readback'});
+    for(let index=0;index<points.length;index++){
+      const [x,y]=points[index]!;
+      if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=this.depthW||y>=this.depthH){buffer.destroy();throw new RangeError(`Pixel (${x},${y}) outside ${this.depthW}x${this.depthH}`);}
+      encoder.copyTextureToBuffer({texture:this.hdr,origin:[x,y,0]},{buffer,offset:index*stride,bytesPerRow:stride,rowsPerImage:1},[1,1,1]);
+    }
+    this.device.queue.submit([encoder.finish()]);
+    await buffer.mapAsync(0x01);
+    const mapped=buffer.getMappedRange(),view=new DataView(mapped),result:import('./types.js').LinearPixelSample[]=[];
+    for(let index=0;index<points.length;index++){
+      const [x,y]=points[index]!,offset=index*stride;
+      result.push({x,y,rgba:[halfToFloat(view.getUint16(offset,true)),halfToFloat(view.getUint16(offset+2,true)),halfToFloat(view.getUint16(offset+4,true)),halfToFloat(view.getUint16(offset+6,true))]});
+    }
+    buffer.unmap();buffer.destroy();return result;
+  }
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();}
   inspect():RenderStats{const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*2+this.objects.size+this.shadowBatches.size+10,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,errors:[...this.errors],...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};}
   profile(){return this.profiler.inspect();}
@@ -833,6 +853,12 @@ function cubeDirection(face:number,u:number,v:number):Vec3{
   return V3.normalize(raw);
 }
 const halfFloatScratch=new Float32Array(1),halfFloatBits=new Uint32Array(halfFloatScratch.buffer);
+function halfToFloat(bits:number):number{
+  const sign=(bits&0x8000)?-1:1,exp=(bits>>>10)&0x1f,fraction=bits&0x3ff;
+  if(exp===0)return sign*Math.pow(2,-14)*(fraction/1024);
+  if(exp===31)return fraction?NaN:sign*Infinity;
+  return sign*Math.pow(2,exp-15)*(1+fraction/1024);
+}
 function float16(value:number):number{
   if(!Number.isFinite(value))return value<0?0xfc00:0x7c00;
   halfFloatScratch[0]=value;const x=halfFloatBits[0]!,sign=(x>>>16)&0x8000,exp=((x>>>23)&0xff)-127+15,mantissa=x&0x7fffff;
