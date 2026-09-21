@@ -53,6 +53,8 @@ export const oracle=Object.freeze({
 
     point('shadow-lit',-.70,-1.22),
     point('shadowed',.70,-1.22),
+    point('shadow-edge',.742,-1.22),
+    point('shadow-outside',.760,-1.22),
   ]),
   contracts:Object.freeze([
     {kind:'delta',id:'emission-delta',a:'emission-off',b:'emission-on',expected:[.25,.50,1.0],tolerance:.025},
@@ -61,6 +63,8 @@ export const oracle=Object.freeze({
     {kind:'difference',id:'clearcoat-highlight-gain',low:'coat-off',high:'coat-on',minimum:.015},
     {kind:'rangeRatio',id:'glass-fresnel-transmission',low:'glass-grazing',high:'glass-front',minimum:.45,maximum:.98},
     {kind:'rangeRatio',id:'directional-shadow-visibility',low:'shadowed',high:'shadow-lit',minimum:0,maximum:.30},
+    {kind:'rangeRatio',id:'directional-shadow-penumbra',low:'shadow-edge',high:'shadow-lit',minimum:.12,maximum:.88},
+    {kind:'rangeRatio',id:'directional-shadow-outside',low:'shadow-outside',high:'shadow-lit',minimum:.82,maximum:1.12},
     {kind:'channelDominance',id:'mirror-probe-red',sample:'mirror-target',channel:0,minimum:3},
     {kind:'channelGain',id:'mirror-directed-reflection',low:'mirror-control',high:'mirror-target',channel:0,minimum:2},
     {kind:'channelDifference',id:'indirect-red-bounce',low:'bounce-control',high:'bounce-receiver',channel:0,minimum:.035},
