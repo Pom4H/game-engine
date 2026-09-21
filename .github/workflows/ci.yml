@@ -89,6 +89,7 @@ jobs:
           BENCH_WARMUP_MS: "1500"
           BENCH_SAMPLE_MS: "5000"
           BENCH_OUT: artifacts/performance/clear-day.json
+          MAX_P95_FRAME_MS: "24"
         run: |
           node tools/promo/benchmark.mjs
           node tools/perf/assert-60fps.mjs artifacts/performance/clear-day.json
