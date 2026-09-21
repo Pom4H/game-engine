@@ -81,11 +81,9 @@ jobs:
       - name: Build reality render path
         run: bun run build
       - name: Persistent reality cache path
-        shell: powershell
-        run: echo "REALITY_DATA_ROOT=$env:USERPROFILE\.cache\game-engine-reality\stanford-orb" >> $env:GITHUB_ENV
+        run: echo REALITY_DATA_ROOT=%USERPROFILE%\.cache\game-engine-reality\stanford-orb>>%GITHUB_ENV%
       - name: Bootstrap Stanford-ORB Car
-        shell: powershell
-        run: .\tools\reality\stanford-orb\bootstrap.ps1
+        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\reality\stanford-orb\bootstrap.ps1
       - name: Prepare calibrated captures
         run: node tools/reality/stanford-orb/prepare.mjs --out artifacts/reality/stanford-orb
       - name: RealityGap held-out
