@@ -2,6 +2,7 @@ import {readFile,writeFile,mkdir,readdir,stat} from 'node:fs/promises';
 import {resolve,dirname,basename,join,relative} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {encodePackedMesh} from '../../../dist/assets/packed-mesh.js';
+import {readPng,writePng} from '../../photorealism/io.mjs';
 
 const arg=(name,fallback)=>{const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:fallback;};
 const root=resolve(arg('--root',process.env.REALITY_DATA_ROOT??'reality-data/stanford-orb'));
@@ -25,6 +26,23 @@ async function findSuffix(suffix){
 }
 const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
 const norm=a=>{const l=Math.hypot(...a)||1;return a.map(v=>v/l);};
+
+async function benchmarkPng(source,target,{mask=false}={}){
+  const image=await readPng(source),size=manifest.resolution;
+  if(image.width===size&&image.height===size){await writePng(target,size,size,image.rgb);return target;}
+  if(image.width%size||image.height%size)throw new RangeError(`Stanford image ${source} is ${image.width}x${image.height}; expected an integer downscale to ${size}`);
+  const fx=image.width/size,fy=image.height/size,out=new Uint8Array(size*size*3),area=fx*fy;
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+    let r=0,g=0,b=0;
+    for(let yy=0;yy<fy;yy++)for(let xx=0;xx<fx;xx++){
+      const p=(((y*fy+yy)*image.width)+(x*fx+xx))*3;r+=image.rgb[p];g+=image.rgb[p+1];b+=image.rgb[p+2];
+    }
+    const q=(y*size+x)*3;
+    if(mask){const on=(r/area)>=127.5?255:0;out[q]=on;out[q+1]=on;out[q+2]=on;}
+    else{out[q]=Math.round(r/area);out[q+1]=Math.round(g/area);out[q+2]=Math.round(b/area);}
+  }
+  await writePng(target,size,size,out);return target;
+}
 
 function cameraFromFrame(metadata,frame){
   const m=frame.transform_matrix;if(!Array.isArray(m)||m.length!==4)throw new TypeError('Stanford frame transform_matrix missing');
@@ -104,12 +122,14 @@ for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manif
   for(const item of list){
     const transforms=await findSuffix(`blender_LDR/${item.scene}/transforms_test.json`),sceneDir=dirname(transforms),metadata=JSON.parse(await readFile(transforms,'utf8')),frame=metadata.frames[item.testIndex];
     if(!frame)throw new RangeError(`${item.scene} has no test frame ${item.testIndex}`);
-    const frameRel=frame.file_path.replace(/^\.\//,''),stem=basename(frameRel),reference=join(sceneDir,frameRel+'.png'),mask=join(sceneDir,dirname(frameRel)+'_mask',stem+'.png');
-    await stat(reference);await stat(mask);
+    const frameRel=frame.file_path.replace(/^\.\//,''),stem=basename(frameRel),sourceReference=join(sceneDir,frameRel+'.png'),sourceMask=join(sceneDir,dirname(frameRel)+'_mask',stem+'.png');
+    await stat(sourceReference);await stat(sourceMask);
+    const id=`${item.scene}-test${item.testIndex}`,reference=join(out,id+'-reference.png'),mask=join(out,id+'-mask.png');
+    await benchmarkPng(sourceReference,reference);await benchmarkPng(sourceMask,mask,{mask:true});
     const envPath=await findSuffix(`ground_truth/${item.scene}/env_map/${stem}.exr`),{camera,worldToEnvironment}=cameraFromFrame(metadata,frame),radiance=measuredEnvironment(envPath);
-    const environment={...radiance,worldToEnvironment,convention:'stanford-orb',intensity:1},id=`${item.scene}-test${item.testIndex}`,scenePath=join(out,id+'.mjs');
+    const environment={...radiance,worldToEnvironment,convention:'stanford-orb',intensity:1},scenePath=join(out,id+'.mjs');
     await writeFile(scenePath,sceneModule({meshImport:'./mesh.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
-    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,scenePath,reference,mask,environment:envPath});
+    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask});
   }
 }
 await writeFile(join(out,'captures.json'),JSON.stringify({version:1,dataset:manifest.dataset,object:manifest.object,calibration:calibration.frozenFrom,captures},null,2));
