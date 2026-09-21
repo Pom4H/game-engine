@@ -246,7 +246,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
   if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
-  if(part.role==='light')return{...base,color:[.74,.82,.92,1],emissive:lightsOn?[.11,.14,.20]:[.008,.010,.014],roughness:.14};
+  if(part.role==='light')return{...base,color:[.72,.80,.90,1],emissive:lightsOn?[.055,.070,.105]:[.008,.010,.014],roughness:.16};
   if(part.role==='tail')return{...base,color:[.30,.010,.007,1],emissive:lightsOn?[.22,.010,.004]:[.012,.001,.001]};
   if(part.role==='metal')return{...base,color:[.16,.17,.18,1]};
   return{...base,color:[.026,.029,.032,1]};
