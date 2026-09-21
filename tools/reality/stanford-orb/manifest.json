@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "dataset": "Stanford-ORB",
   "object": "car",
   "resolution": 512,
@@ -8,11 +8,17 @@
     "groundTruth": "https://downloads.cs.stanford.edu/viscam/StanfordORB/ground_truth.tar.gz"
   },
   "calibration": [
-    {"scene": "car_scene004", "testIndex": 0}
+    {"scene": "car_scene004", "testIndex": 0},
+    {"scene": "car_scene004", "testIndex": 2},
+    {"scene": "car_scene004", "testIndex": 4}
   ],
   "heldOut": [
+    {"scene": "car_scene004", "testIndex": 1},
+    {"scene": "car_scene004", "testIndex": 3}
+  ],
+  "novelHeldOut": [
     {"scene": "car_scene002", "testIndex": 0},
     {"scene": "car_scene006", "testIndex": 0}
   ],
-  "notes": "scene004 may define frozen material/alignment parameters. scene002 and scene006 are never calibration targets. Fast CI uses one official test capture per held-out scene; full evaluation may use the complete test split."
+  "notes": "Fast CI calibrates only on scene004 test[0,2,4] and scores scene004 test[1,3]. Cross-scene relighting remains a stricter optional tier and requires scene004/transforms_novel.json. Held-out views never modify frozen material parameters."
 }
