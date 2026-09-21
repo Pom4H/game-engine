@@ -67,7 +67,7 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: visual-fast
     runs-on: self-hosted
-    timeout-minutes: 45
+    timeout-minutes: 8
     defaults:
       run:
         shell: cmd
@@ -97,9 +97,10 @@ jobs:
           retention-days: 7
 
   verify:
-    # Draft PRs use the dedicated visual-fast GPU loop; full verification resumes
-    # automatically when the PR is marked ready or lands on main.
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    # On PRs, the real-world fast loop owns the GPU runner first. Full verification
+    # starts only after RealityGap succeeds. Main pushes still verify directly.
+    needs: [reality-fast]
+    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.draft == false && needs.reality-fast.result == 'success'))
     runs-on: self-hosted
     timeout-minutes: 15
     defaults:
