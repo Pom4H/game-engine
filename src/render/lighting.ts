@@ -113,9 +113,13 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  // Background with a pinhole camera cannot contribute AO/GI/SSR and has zero
  // circle-of-confusion. Return the mathematically identical HDR+bloom result
  // before normal/depth-neighbour work; large sky regions become almost free.
- if(d>=.99999&&f.params.w<=0.0){
-  let background=textureSampleLevel(hdr,linearSampler,uv,0).rgb+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28;
-  return vec4<f32>(background,1);
+ if(d>=.99999){
+  let backgroundZ=linearDepth(d);
+  let backgroundCoc=min(6.0,abs(backgroundZ-f.params.z)/max(backgroundZ,.1)*f.params.w);
+  if(backgroundCoc<=.15){
+   let background=textureSampleLevel(hdr,linearSampler,uv,0).rgb+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28;
+   return vec4<f32>(background,1);
+  }
  }
  let z=linearDepth(d);let pos=viewPos(uv,z);
  let normalSample=textureLoad(normals,pixel,0);let wn=normalSample.xyz*2.0-1.0;
