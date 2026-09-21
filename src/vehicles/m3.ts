@@ -134,12 +134,28 @@ export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
  */
 export function generateM3Vehicle():ParametricPassengerGeometry{
   const body=m3HighFidelityBody(),renderBody=m3SmoothRenderBody(body),sources=m3FbxParts();
+  // The grille used to be authored as an independent oversized prop. Keep one
+  // fascia envelope tied to the vehicle dimensions so the recess, frame and slats
+  // cannot outgrow the bumper/hood opening independently.
+  const fascia=Object.freeze({
+    x:M3_PARAMETRIC_PROFILE.dimensions.length*.5,
+    centerY:M3_PARAMETRIC_PROFILE.dimensions.height*.425,
+    centerZ:M3_PARAMETRIC_PROFILE.dimensions.width*.098,
+    kidneyWidth:M3_PARAMETRIC_PROFILE.dimensions.width*.148,
+    kidneyHeight:M3_PARAMETRIC_PROFILE.dimensions.height*.315,
+    radius:M3_PARAMETRIC_PROFILE.dimensions.height*.050,
+    border:M3_PARAMETRIC_PROFILE.dimensions.width*.0074,
+  });
+  const recessWidth=fascia.kidneyWidth-fascia.border*2.2;
+  const recessHeight=fascia.kidneyHeight-fascia.border*2.4;
+  const slatSpan=recessWidth-fascia.border*1.4;
+  const slatStep=recessHeight/7.0;
   const grilleSlats:ParametricVehiclePart[]=[];
-  for(const side of [-1,1] as const)for(let row=0;row<6;row++)grilleSlats.push(Object.freeze({
-    id:`kidney-${side<0?'left':'right'}-slat-${row}`,
+  for(const side of [-1,1] as const)for(let row=1;row<=6;row++)grilleSlats.push(Object.freeze({
+    id:`kidney-${side<0?'left':'right'}-slat-${row-1}`,
     role:'dark' as const,
-    mesh:{kind:'box' as const,size:[.034,.016,.285] as const},
-    position:[2.385,.455+row*.067,side*.235] as const,
+    mesh:{kind:'box' as const,size:[.022,.012,slatSpan] as const},
+    position:[fascia.x-.010,fascia.centerY-recessHeight*.5+slatStep*row,side*fascia.centerZ] as const,
     material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.72,metalness:.01},
   }));
   const lowerIntake:ParametricVehiclePart[]=Array.from({length:5},(_,row)=>Object.freeze({
@@ -157,11 +173,11 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     Object.freeze({id:'hood-roundel-white-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.034,0],[.034,-.034],[0,-.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.18,metalness:.01}}),
   ];
   const frontDetail:ParametricVehiclePart[]=[
-    Object.freeze({id:'kidney-recess-left',role:'dark' as const,mesh:{kind:'box' as const,size:[.020,.505,.292] as const},position:[2.386,.635,-.235] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
-    Object.freeze({id:'kidney-recess-right',role:'dark' as const,mesh:{kind:'box' as const,size:[.020,.505,.292] as const},position:[2.386,.635,.235] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
+    Object.freeze({id:'kidney-recess-left',role:'dark' as const,mesh:{kind:'box' as const,size:[.014,recessHeight,recessWidth] as const},position:[fascia.x-.012,fascia.centerY,-fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
+    Object.freeze({id:'kidney-recess-right',role:'dark' as const,mesh:{kind:'box' as const,size:[.014,recessHeight,recessWidth] as const},position:[fascia.x-.012,fascia.centerY,fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
     Object.freeze({id:'lower-intake-recess',role:'dark' as const,mesh:{kind:'box' as const,size:[.026,.205,.82] as const},position:[2.372,.305,0] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.94,metalness:0}}),
-    Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,-.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
-    Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(.325,.535,.092,.017),position:[2.407,.635,.235] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
+    Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(fascia.kidneyWidth,fascia.kidneyHeight,fascia.radius,fascia.border),position:[fascia.x+.004,fascia.centerY,-fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
+    Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(fascia.kidneyWidth,fascia.kidneyHeight,fascia.radius,fascia.border),position:[fascia.x+.004,fascia.centerY,fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
     Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
     Object.freeze({id:'hood-seam-right',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
   ];
@@ -219,7 +235,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('hood-roundel-blue-'))return{...base,color:[.015,.19,.58,1]};
   if(part.id.startsWith('hood-roundel-white-'))return{...base,color:[.86,.89,.93,1]};
   if(part.id==='hood-roundel-ring')return{...base,color:[.012,.015,.020,1]};
-  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055};
+  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055,clearcoat:.94,clearcoatRoughness:.055};
   if(part.role==='glass')return{...base,color:[.075,.095,.115,.42],roughness:.065};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
