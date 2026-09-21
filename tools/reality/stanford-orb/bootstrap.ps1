@@ -8,14 +8,16 @@ $ready = Join-Path $Root ".car-subset-v1.ready"
 
 function Test-CarSubset {
   $transforms = @(Get-ChildItem -Path $Root -Recurse -Filter transforms_test.json -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6)' })
+  $novel = @(Get-ChildItem -Path $Root -Recurse -Filter transforms_novel.json -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004' })
   $envs = @(Get-ChildItem -Path $Root -Recurse -Filter *.exr -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]env_map[\\/]' })
   $mesh = @(Get-ChildItem -Path $Root -Recurse -Filter mesh.obj -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene004.*mesh_blender' })
   $testImages = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test[\\/]' })
   $testMasks = @(Get-ChildItem -Path $Root -Recurse -Filter *.png -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'car_scene00(2|4|6).*[\\/]test_mask[\\/]' })
-  $complete = $transforms.Count -ge 3 -and $envs.Count -ge 3 -and $mesh.Count -ge 1 -and $testImages.Count -ge 3 -and $testMasks.Count -ge 3
+  $complete = $transforms.Count -ge 3 -and $novel.Count -ge 1 -and $envs.Count -ge 3 -and $mesh.Count -ge 1 -and $testImages.Count -ge 3 -and $testMasks.Count -ge 3
   return [pscustomobject]@{
     Complete=$complete
     Transforms=$transforms.Count
+    Novel=$novel.Count
     Envs=$envs.Count
     Mesh=$mesh.Count
     TestImages=$testImages.Count
@@ -26,7 +28,7 @@ function Test-CarSubset {
 $existing = Test-CarSubset
 if ($existing.Complete) {
   Set-Content -Path $ready -Value "Stanford-ORB Car subset v1"
-  Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)"
+  Write-Host "Stanford-ORB Car subset already present: transforms=$($existing.Transforms), novel=$($existing.Novel), envs=$($existing.Envs), mesh=$($existing.Mesh), images=$($existing.TestImages), masks=$($existing.TestMasks)"
   exit 0
 }
 if (Test-Path $ready) { Remove-Item -Force $ready }
@@ -61,7 +63,7 @@ function Download-And-Extract([string]$Name,[string]$Url,[scriptblock]$Keep) {
 }
 
 Download-And-Extract "blender_LDR.tar.gz" "https://downloads.cs.stanford.edu/viscam/StanfordORB/blender_LDR.tar.gz" {
-  $_ -match '(^|/)car_scene00(2|4|6)/(transforms_test\.json|test/|test_mask/)'
+  $_ -match '(^|/)car_scene00(2|4|6)/(transforms_test\.json|test/|test_mask/)' -or $_ -match '(^|/)car_scene004/transforms_novel\.json'
 }
 Download-And-Extract "ground_truth.tar.gz" "https://downloads.cs.stanford.edu/viscam/StanfordORB/ground_truth.tar.gz" {
   ($_ -match '(^|/)car_scene00(2|4|6)/env_map/') -or ($_ -match '(^|/)car_scene004/mesh_blender/')
@@ -69,7 +71,7 @@ Download-And-Extract "ground_truth.tar.gz" "https://downloads.cs.stanford.edu/vi
 
 $final = Test-CarSubset
 if (-not $final.Complete) {
-  throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
+  throw "Incomplete Stanford Car cache: transforms=$($final.Transforms), novel=$($final.Novel), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
 }
 Set-Content -Path $ready -Value "Stanford-ORB Car subset v1"
 Write-Host "Stanford-ORB Car subset ready: transforms=$($final.Transforms), envs=$($final.Envs), mesh=$($final.Mesh), images=$($final.TestImages), masks=$($final.TestMasks)"
