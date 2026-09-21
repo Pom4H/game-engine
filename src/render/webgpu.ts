@@ -510,7 +510,7 @@ export class WebGPURenderer implements Renderer{
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -649,6 +649,7 @@ export class WebGPURenderer implements Renderer{
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     const frameModels=this.frameModels;frameModels.clear();
     const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
+    const renderMoverIds=scene.renderMoverIds();
     const culled=this.profiler.measure('cull',()=>{
       const viewsChanged=!matrixEqual(this.cullCameraVP??undefined,cullVP)||!matrixEqual(this.cullLightVP??undefined,lightVP)||!matrixEqual(this.cullReflectionVP??undefined,reflectionVP);
       if(viewsChanged){
@@ -662,8 +663,22 @@ export class WebGPURenderer implements Renderer{
         const value={primitive,model,camera:test(cullVP),shadow:test(lightVP),reflection:entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP)};
         this.cullCache.set(entity.id,value);return value;
       };
-      const cameraOpaque:RuntimeEntity[]=[],cameraTransparent:RuntimeEntity[]=[],shadowCasters:RuntimeEntity[]=[],reflectedObjects:RuntimeEntity[]=[];
-      for(const entity of classified.visible){
+      const staticDirty=viewsChanged||this.staticCullRevision!==scene.renderStructureRevision;
+      if(staticDirty){
+        const cameraOpaque:RuntimeEntity[]=[],cameraTransparent:RuntimeEntity[]=[],shadowCasters:RuntimeEntity[]=[],reflectedObjects:RuntimeEntity[]=[];
+        for(const entity of classified.visible){
+          if(renderMoverIds.has(entity.id))continue;
+          const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
+          if(visible.camera)(opaque?cameraOpaque:cameraTransparent).push(entity);
+          if(opaque&&visible.shadow)shadowCasters.push(entity);
+          if(opaque&&visible.reflection)reflectedObjects.push(entity);
+        }
+        this.staticCameraOpaque=cameraOpaque;this.staticCameraTransparent=cameraTransparent;this.staticShadowCasters=shadowCasters;this.staticReflectedObjects=reflectedObjects;
+        this.staticCullRevision=scene.renderStructureRevision;
+      }
+      const cameraOpaque=[...this.staticCameraOpaque],cameraTransparent=[...this.staticCameraTransparent],shadowCasters=[...this.staticShadowCasters],reflectedObjects=[...this.staticReflectedObjects];
+      for(const id of renderMoverIds){
+        const entity=scene.entities.get(id);if(!entity||!renderPrimitive(entity))continue;
         const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
         if(visible.camera)(opaque?cameraOpaque:cameraTransparent).push(entity);
         if(opaque&&visible.shadow)shadowCasters.push(entity);
@@ -674,7 +689,6 @@ export class WebGPURenderer implements Renderer{
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
-    const renderMoverIds=scene.renderMoverIds();
     const staticShadowDrawables=shadowDrawables.filter(entity=>isStaticShadowCaster(entity,renderMoverIds));
     const dynamicShadowDrawables=shadowDrawables.filter(entity=>!isStaticShadowCaster(entity,renderMoverIds));
     if(dynamicShadowDrawables.length){
