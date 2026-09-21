@@ -66,7 +66,7 @@ function buildObjects(){
       const radius=(mesh.radius??1)*Math.max(scaleV[0],scaleV[1],scaleV[2]);
       objects.push({id:entity.id,kind:'sphere',center:position,radius,material});
     }else if(mesh.kind==='box'){
-      const size=mesh.size??[1,1,1],half:[number,number,number]=[size[0]*scaleV[0]/2,size[1]*scaleV[1]/2,size[2]*scaleV[2]/2];
+      const size=mesh.size??[1,1,1],half=[size[0]*scaleV[0]/2,size[1]*scaleV[1]/2,size[2]*scaleV[2]/2];
       objects.push({id:entity.id,kind:'box',min:[position[0]-half[0],position[1]-half[1],position[2]-half[2]],max:[position[0]+half[0],position[1]+half[1],position[2]+half[2]],material});
     }
   }
