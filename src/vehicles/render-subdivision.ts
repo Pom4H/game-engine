@@ -28,7 +28,7 @@ export function weldCoincidentTriangleMesh(mesh:TriangleMesh,positionEpsilonM=1e
   for(let i=0;i<remap.length;i++){
     const k=key(i);let out=byPosition.get(k);
     if(out===undefined){out=positions.length/3;byPosition.set(k,out);positions.push(mesh.positions[i*3]!,mesh.positions[i*3+1]!,mesh.positions[i*3+2]!);normalSums.push(0,0,0);counts.push(0);}
-    remap[i]=out;normalSums[out*3]+=mesh.normals[i*3]!;normalSums[out*3+1]+=mesh.normals[i*3+1]!;normalSums[out*3+2]+=mesh.normals[i*3+2]!;counts[out]=counts[out]!+1;
+    remap[i]=out;normalSums[out*3]=(normalSums[out*3]??0)+mesh.normals[i*3]!;normalSums[out*3+1]=(normalSums[out*3+1]??0)+mesh.normals[i*3+1]!;normalSums[out*3+2]=(normalSums[out*3+2]??0)+mesh.normals[i*3+2]!;counts[out]=(counts[out]??0)+1;
   }
   for(const source of mesh.indices)indices.push(remap[source]!);
   const normals:number[]=[];
