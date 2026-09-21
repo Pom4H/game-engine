@@ -573,7 +573,7 @@ export class WebGPURenderer implements Renderer{
 @fragment fn fs(@builtin(position) p:vec4<f32>)->@location(0) vec4<f32>{
  let size=vec2<f32>(textureDimensions(source));return vec4<f32>(textureSampleLevel(source,sourceSampler,p.xy/size,0).rgb,1);
 }`});
-    const blit=device.createRenderPipeline({layout:'auto',vertex:{module:blitModule,entryPoint:'vs'},fragment:{module:blitModule,entryPoint:'fs',targets:[{format:'rgba16float'},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list'}});
+    const blit=device.createRenderPipeline({layout:'auto',vertex:{module:blitModule,entryPoint:'vs'},fragment:{module:blitModule,entryPoint:'fs',targets:[{format:'rgba16float'},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'always'}});
     const probeModule=device.createShaderModule({code:PROBE_SHADER}),probePipelineLayout=device.createPipelineLayout({bindGroupLayouts:[objectLayout,probeFrameLayout]});
     const makeProbe=(cullMode:'none'|'back')=>device.createRenderPipeline({layout:probePipelineLayout,vertex:{module:probeModule,entryPoint:'vs',buffers:vertex.buffers},fragment:{module:probeModule,entryPoint:'fs',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:true,depthCompare:'less'}});
     const probeCulled=makeProbe('back'),probeDouble=makeProbe('none');
