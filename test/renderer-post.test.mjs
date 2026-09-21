@@ -3,17 +3,17 @@ import assert from 'node:assert/strict';
 import {WebGPURenderer} from '../dist/render/webgpu.js';
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 
-test('quarter-resolution bloom targets and bind groups resize together and release all generations exactly once',t=>{
+test('half-resolution bloom targets and bind groups resize together and release all generations exactly once',t=>{
  const previous=globalThis.devicePixelRatio;globalThis.devicePixelRatio=1;t.after(()=>{if(previous===undefined)delete globalThis.devicePixelRatio;else globalThis.devicePixelRatio=previous;});
  const resources=[],resource=(descriptor={})=>{const result={descriptor,destroys:0,createView(){return{texture:this};},destroy(){this.destroys++;}};resources.push(result);return result;};
  const renderer=Object.create(WebGPURenderer.prototype);Object.assign(renderer,{
   canvas:{clientWidth:320,clientHeight:180,width:0,height:0},depthW:0,depthH:0,materialLoads:new Map(),failedMaterials:new Set(),objects:new Map(),meshes:new Map(),labels:new Map(),surfaceTextures:{dispose(){}},
   device:{createTexture:resource,createBindGroup:descriptor=>descriptor},gpu:{lightLayout:{},bloomLayout:{},comparison:{},sampler:{},effects:{getBindGroupLayout(){return{};}},taa:{getBindGroupLayout(){return{};}},taaParams:resource(),present:{getBindGroupLayout(){return{};}},noiseVolume:resource(),noiseSampler:{},shadow:resource(),dynamicShadow:resource(),environmentView:{},localProbeView:{},probeFrames:[],frame:resource(),lightBuffer:resource(),cellBuffer:resource(),snowUniform:resource(),emptyField:resource(),emptyLabel:resource()},
  });
- const before=resources.length;renderer.resize();const first=resources.slice(before);assert.equal(first.length,13);assert.deepEqual(renderer.bloomA.descriptor.size,[80,45]);assert.deepEqual(renderer.bloomB.descriptor.size,[80,45]);
+ const before=resources.length;renderer.resize();const first=resources.slice(before);assert.equal(first.length,13);assert.deepEqual(renderer.bloomA.descriptor.size,[160,90]);assert.deepEqual(renderer.bloomB.descriptor.size,[160,90]);
  assert.equal(renderer.effectsBind.entries.find(e=>e.binding===6).resource.texture,renderer.bloomA);assert.equal(renderer.taaBindAB.entries.find(e=>e.binding===0).resource.texture,renderer.effectsHdr);assert.equal(renderer.taaBindBA.entries.find(e=>e.binding===0).resource.texture,renderer.effectsHdr);assert.equal(renderer.taaBindAB.entries.find(e=>e.binding===1).resource.texture,renderer.taaA);assert.equal(renderer.taaBindBA.entries.find(e=>e.binding===1).resource.texture,renderer.taaB);assert.equal(renderer.presentBindA.entries.find(e=>e.binding===0).resource.texture,renderer.taaA);assert.equal(renderer.presentBindB.entries.find(e=>e.binding===0).resource.texture,renderer.taaB);assert.equal(renderer.bloomHorizontalBind.entries[0].resource.texture,renderer.bloomA);assert.equal(renderer.bloomVerticalBind.entries[0].resource.texture,renderer.bloomB);
  renderer.resize();assert.equal(resources.length,before+13);assert.ok(first.every(r=>r.destroys===0));
- renderer.canvas.clientWidth=640;renderer.canvas.clientHeight=360;renderer.resize();assert.ok(first.every(r=>r.destroys===1));assert.deepEqual(renderer.bloomA.descriptor.size,[160,90]);assert.equal(renderer.effectsBind.entries.find(e=>e.binding===6).resource.texture,renderer.bloomA);assert.equal(renderer.presentBindA.entries.find(e=>e.binding===0).resource.texture,renderer.taaA);assert.equal(renderer.presentBindB.entries.find(e=>e.binding===0).resource.texture,renderer.taaB);
+ renderer.canvas.clientWidth=640;renderer.canvas.clientHeight=360;renderer.resize();assert.ok(first.every(r=>r.destroys===1));assert.deepEqual(renderer.bloomA.descriptor.size,[320,180]);assert.equal(renderer.effectsBind.entries.find(e=>e.binding===6).resource.texture,renderer.bloomA);assert.equal(renderer.presentBindA.entries.find(e=>e.binding===0).resource.texture,renderer.taaA);assert.equal(renderer.presentBindB.entries.find(e=>e.binding===0).resource.texture,renderer.taaB);
  renderer.dispose();renderer.dispose();assert.ok(resources.every(r=>r.destroys===1));
 });
 
