@@ -21,6 +21,21 @@ const positionKey=(mesh:TriangleMesh,index:number)=>`${mesh.positions[index*3]},
 const dot=(a:readonly number[],b:readonly number[])=>a[0]!*b[0]!+a[1]!*b[1]!+a[2]!*b[2]!;
 const normalize=(v:readonly[number,number,number]):[number,number,number]=>{const l=Math.hypot(...v)||1;return[v[0]/l,v[1]/l,v[2]/l];};
 
+export function weldCoincidentTriangleMesh(mesh:TriangleMesh,positionEpsilonM=1e-5):TriangleMesh{
+  if(!Number.isFinite(positionEpsilonM)||positionEpsilonM<=0||positionEpsilonM>.01)throw new RangeError('Invalid weld epsilon');
+  const positions:number[]=[],normalSums:number[]=[],counts:number[]=[],indices:number[]=[],byPosition=new Map<string,number>(),remap=new Int32Array(mesh.positions.length/3);
+  const key=(i:number)=>`${Math.round(mesh.positions[i*3]!/positionEpsilonM)},${Math.round(mesh.positions[i*3+1]!/positionEpsilonM)},${Math.round(mesh.positions[i*3+2]!/positionEpsilonM)}`;
+  for(let i=0;i<remap.length;i++){
+    const k=key(i);let out=byPosition.get(k);
+    if(out===undefined){out=positions.length/3;byPosition.set(k,out);positions.push(mesh.positions[i*3]!,mesh.positions[i*3+1]!,mesh.positions[i*3+2]!);normalSums.push(0,0,0);counts.push(0);}
+    remap[i]=out;normalSums[out*3]+=mesh.normals[i*3]!;normalSums[out*3+1]+=mesh.normals[i*3+1]!;normalSums[out*3+2]+=mesh.normals[i*3+2]!;counts[out]=counts[out]!+1;
+  }
+  for(const source of mesh.indices)indices.push(remap[source]!);
+  const normals:number[]=[];
+  for(let i=0;i<positions.length/3;i++){const n=normalize([normalSums[i*3]!,normalSums[i*3+1]!,normalSums[i*3+2]!]);normals.push(...n);}
+  return{kind:'triangle-mesh',positions,normals,indices};
+}
+
 export function buildSmoothSubdivisionPlan(mesh:TriangleMesh,creaseDegrees=35,maxDisplacementM=.018,smoothBoundaries=false):SmoothSubdivisionPlan{
   if(mesh.indices.length%3)throw new RangeError('Subdivision requires triangle indices');
   if(!Number.isFinite(creaseDegrees)||creaseDegrees<=0||creaseDegrees>=90)throw new RangeError('creaseDegrees must be in (0,90)');
