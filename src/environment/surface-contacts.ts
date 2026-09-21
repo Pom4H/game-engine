@@ -83,6 +83,7 @@ export class SurfaceContactSystem {
  get wetness(){return this.wetnessValue;}
  get sprayEmitted(){return this.emitted;}
  get emittedCount(){return this.emitted;}
+ controlledEntityIds():ReadonlySet<string>{return new Set(this.particleIds.keys());}
  addSnowSurface(surfaceId:string,options:SnowContactSurfaceOptions={}):SnowSurface{
   if(this.surfaces.has(surfaceId))throw new TypeError(`Snow surface already registered: ${surfaceId}`);
   const entity=this.host.entities.get(surfaceId);if(!entity?.environmental?.surfaceUse)throw new TypeError(`No environmental surface: ${surfaceId}`);
