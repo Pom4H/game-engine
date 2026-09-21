@@ -37,6 +37,12 @@ export const oracle=Object.freeze({
     point('mirror-target',1.05,1.02),
     point('mirror-control',1.65,1.02),
 
+    point('reflection-black',-.82,.52,0,'reflection'),
+    point('reflection-gray',0,.52,0,'reflection'),
+    point('reflection-white',.82,.52,0,'reflection'),
+    point('reflection-emission-off',-1.70,1.05,0,'reflection'),
+    point('reflection-emission-on',-1.28,1.05,.22,'reflection'),
+
     point('diffuse-black',-.82,.52),
     point('diffuse-gray',0,.52),
     point('diffuse-white',.82,.52),
@@ -59,6 +65,8 @@ export const oracle=Object.freeze({
   contracts:Object.freeze([
     {kind:'delta',id:'emission-delta',a:'emission-off',b:'emission-on',expected:[.25,.50,1.0],tolerance:.025},
     {kind:'ratio',id:'diffuse-linear-response',black:'diffuse-black',mid:'diffuse-gray',white:'diffuse-white',expected:Math.pow(.5,2.2),tolerance:.045},
+    {kind:'ratio',id:'reflection-diffuse-linear-response',black:'reflection-black',mid:'reflection-gray',white:'reflection-white',expected:Math.pow(.5,2.2),tolerance:.045},
+    {kind:'delta',id:'reflection-emission-delta',a:'reflection-emission-off',b:'reflection-emission-on',expected:[4,.08,.02],tolerance:.06},
     {kind:'gain',id:'roughness-specular-gain',low:'specular-rough',high:'specular-smooth',minimum:40},
     {kind:'difference',id:'clearcoat-highlight-gain',low:'coat-off',high:'coat-on',minimum:.015},
     {kind:'rangeRatio',id:'glass-fresnel-transmission',low:'glass-grazing',high:'glass-front',minimum:.45,maximum:.98},
