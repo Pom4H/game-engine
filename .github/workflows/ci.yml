@@ -103,7 +103,7 @@ jobs:
 
   reality-fast:
     if: github.event_name == 'pull_request'
-    needs: performance-1080
+    needs: visual-fast
     runs-on: self-hosted
     timeout-minutes: 8
     defaults:
@@ -137,8 +137,8 @@ jobs:
   verify:
     # On PRs, performance runs on a controlled GPU before RealityGap/visual exports.
     # Full verification starts only after both gates have succeeded. Main pushes verify directly.
-    needs: [reality-fast]
-    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.draft == false && needs.reality-fast.result == 'success'))
+    needs: [reality-fast, performance-1080]
+    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.draft == false && needs.reality-fast.result == 'success' && needs.performance-1080.result == 'success'))
     runs-on: self-hosted
     timeout-minutes: 15
     defaults:
