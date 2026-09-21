@@ -63,9 +63,47 @@ jobs:
           retention-days: 3
 
 
-  reality-fast:
+  performance-1080:
     if: github.event_name == 'pull_request'
     needs: visual-fast
+    runs-on: self-hosted
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Build render path
+        run: bun run build
+      - name: Clear-day 1080p sustained runtime gate
+        env:
+          BENCH_SCENE: clear-day.scene.mjs
+          BENCH_USE_SCENE_CAMERA: "1"
+          BENCH_TIME: "0"
+          BENCH_CASES: 1920x1080
+          BENCH_WARMUP_MS: "1500"
+          BENCH_SAMPLE_MS: "5000"
+          BENCH_OUT: artifacts/performance/clear-day.json
+        run: |
+          node tools/promo/benchmark.mjs
+          node tools/perf/assert-60fps.mjs artifacts/performance/clear-day.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: performance-1080-${{ github.sha }}
+          path: artifacts/performance/
+          if-no-files-found: warn
+          retention-days: 7
+
+
+  reality-fast:
+    if: github.event_name == 'pull_request'
+    needs: performance-1080
     runs-on: self-hosted
     timeout-minutes: 8
     defaults:
@@ -97,8 +135,8 @@ jobs:
           retention-days: 7
 
   verify:
-    # On PRs, the real-world fast loop owns the GPU runner first. Full verification
-    # starts only after RealityGap succeeds. Main pushes still verify directly.
+    # On PRs, performance runs on a controlled GPU before RealityGap/visual exports.
+    # Full verification starts only after both gates have succeeded. Main pushes verify directly.
     needs: [reality-fast]
     if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.draft == false && needs.reality-fast.result == 'success'))
     runs-on: self-hosted
@@ -134,18 +172,6 @@ jobs:
         run: |
           node dist/cli.js render tools/promo/clear-day.scene.mjs --time 0 --width 1920 --height 1080 --out artifacts/m3-clear-day-front.png
           node tools/check-png.mjs artifacts/m3-clear-day-front.png
-      - name: Clear-day 1080p runtime benchmark
-        env:
-          BENCH_SCENE: clear-day.scene.mjs
-          BENCH_USE_SCENE_CAMERA: "1"
-          BENCH_TIME: "0"
-          BENCH_CASES: 1920x1080
-          BENCH_WARMUP_MS: "1500"
-          BENCH_SAMPLE_MS: "5000"
-          BENCH_OUT: artifacts/performance/clear-day.json
-        run: |
-          node tools/promo/benchmark.mjs
-          node tools/perf/assert-60fps.mjs artifacts/performance/clear-day.json
       - name: Deterministic video path
         run: node dist/cli.js record examples/window-gauntlet.ts --duration 2.5 --fps 24 --width 1280 --height 720 --out artifacts/gpu-smoke.mp4
       - uses: actions/upload-artifact@v7
