@@ -39,6 +39,8 @@ export const oracle=Object.freeze({
     point('bounce-control',-.55,1.05,0,'effects'),
     point('mirror-target',1.05,1.02),
     point('mirror-control',1.65,1.02),
+    point('point-lit',.20,1.22),
+    point('point-control',.75,1.22),
 
     ...patchPoints('ao-contact-hdr',-1.90,.12,'hdr'),
     ...patchPoints('ao-contact-effects',-1.90,.12,'effects'),
@@ -92,6 +94,7 @@ export const oracle=Object.freeze({
     {kind:'channelDominance',id:'mirror-probe-red',sample:'mirror-target',channel:0,minimum:3},
     {kind:'channelGain',id:'mirror-directed-reflection',low:'mirror-control',high:'mirror-target',channel:0,minimum:2},
     {kind:'channelDifference',id:'indirect-red-bounce',low:'bounce-control',high:'bounce-receiver',channel:0,minimum:.035},
+    {kind:'gain',id:'point-light-local-gain',low:'point-control',high:'point-lit',minimum:1.15},
   ]),
 });
 
@@ -127,6 +130,9 @@ export default defineScene({
     {id:'mirror-target',position:[1.05,1.02,0],mesh:orientedQuad([0,0,0],[.21924,.08770,.97170],.28,.28),material:mirror},
     {id:'mirror-control',position:[1.65,1.02,0],mesh:orientedQuad([0,0,0],[0,0,1],.28,.28),material:mirror},
     {id:'mirror-source',position:[2.20,1.02,4],mesh:orientedQuad([0,0,0],[0,0,-1],.8,.8),material:{kind:'default',color:black,roughness:1,metalness:0,emissive:[4,.05,.02]}},
+    {id:'point-lit',position:[0,0,0],mesh:quad(.20,1.22,.26,.20),material:matte([.20,.20,.20,1])},
+    {id:'point-control',position:[0,0,0],mesh:quad(.75,1.22,.26,.20),material:matte([.20,.20,.20,1])},
+    {id:'point-source',position:[.20,1.22,.18],light:{kind:'point',color:[1,1,1],intensity:4,range:.35}},
 
     {id:'ao-contact',position:[-1.90,.12,0],mesh:orientedQuad([0,0,0],[.70710678,0,.70710678],.28,.28),material:matte([.82,.82,.82,1])},
     {id:'ao-blocker',position:[-1.66,.12,.015],mesh:quad(0,0,.12,.26),material:matte([.03,.03,.03,1])},
