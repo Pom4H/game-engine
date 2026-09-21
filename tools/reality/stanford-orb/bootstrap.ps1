@@ -61,11 +61,57 @@ function Import-LocalGroundTruth {
     }
   }
 
-  foreach ($archive in @(
-    (Join-Path $Root "_archives\ground_truth.tar.gz"),
-    (Join-Path $env:USERPROFILE "Downloads\ground_truth.tar.gz"),
-    (Join-Path $env:USERPROFILE "Desktop\ground_truth.tar.gz")
-  )) {
+  $archives = @((Join-Path $Root "_archives\ground_truth.tar.gz"))
+  foreach ($searchRoot in @((Join-Path $env:USERPROFILE "Downloads"), (Join-Path $env:USERPROFILE "Desktop"), (Join-Path $env:USERPROFILE "Documents"))) {
+    if (-not (Test-Path $searchRoot)) { continue }
+    $archives += @(Get-ChildItem -Path $searchRoot -Recurse -File -ErrorAction SilentlyContinue |
+      Where-Object { $_.Name -match '^ground[_ -]?truth.*\.tar(\.gz)?
+}
+
+function Download-And-Extract([string]$Name,[string]$Url,[scriptblock]$Keep) {
+  $archives = Join-Path $Root "_archives"; New-Item -ItemType Directory -Force -Path $archives | Out-Null
+  $archive = Join-Path $archives $Name
+  & curl.exe -L --fail --retry 2 --retry-delay 2 -C - -o $archive $Url
+  if ($LASTEXITCODE -ne 0 -and $Url -match '^https://downloads\.cs\.stanford\.edu/') {
+    & curl.exe --resolve "downloads.cs.stanford.edu:443:171.64.64.22" -L --fail --retry 5 --retry-delay 3 -C - -o $archive $Url
+  }
+  if ($LASTEXITCODE -ne 0) { throw "curl failed for $Url" }
+  if (-not (Extract-Selected $archive $Keep)) { throw "Could not extract selected Stanford data from $archive" }
+  Remove-Item -Force $archive -ErrorAction SilentlyContinue
+}
+
+Import-LocalGroundTruth
+$existing = Test-CarSubset
+if ($existing.Complete) {
+  Set-Content -Path $ready -Value "Stanford-ORB Car subset v4"
+  Write-State "Stanford-ORB Car subset ready:" $existing
+  exit 0
+}
+if (Test-Path $ready) { Remove-Item -Force $ready }
+
+if (-not $Download) {
+  Write-State "Stanford-ORB cache incomplete:" $existing
+  throw "Fast RealityGap requires scene004 pseudo_gt_albedo and z_depth in addition to the existing images/env/mesh. Put the extracted ground_truth archive under Downloads/Desktop or the cache; CI will not download multi-GB archives."
+}
+
+if ($existing.Transforms -lt 3 -or $existing.TestImages -lt 5 -or $existing.TestMasks -lt 5) {
+  Download-And-Extract "blender_LDR.tar.gz" "https://downloads.cs.stanford.edu/viscam/StanfordORB/blender_LDR.tar.gz" {
+    $_ -match '(^|/)car_scene00(2|4|6)/(transforms_test\.json|test/|test_mask/)'
+  }
+}
+Download-And-Extract "ground_truth.tar.gz" "https://downloads.cs.stanford.edu/viscam/StanfordORB/ground_truth.tar.gz" {
+  ($_ -match '(^|/)car_scene00(2|4|6)/env_map/') -or
+  ($_ -match '(^|/)car_scene004/(mesh_blender|pseudo_gt_albedo|z_depth)/')
+}
+
+$final = Test-CarSubset
+if (-not $final.Complete) { Write-State "Stanford-ORB cache still incomplete:" $final; throw "Incomplete Stanford Car cache" }
+Set-Content -Path $ready -Value "Stanford-ORB Car subset v4"
+Write-State "Stanford-ORB Car subset ready:" $final
+ } |
+      Select-Object -ExpandProperty FullName)
+  }
+  foreach ($archive in ($archives | Select-Object -Unique)) {
     if (Extract-Selected $archive { $_ -match '(^|/)car_scene004/(pseudo_gt_albedo|z_depth)/' }) { return }
   }
 }
