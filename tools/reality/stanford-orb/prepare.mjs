@@ -104,43 +104,55 @@ function parseObj(text){
   return{kind:'triangle-mesh',positions,normals,indices};
 }
 function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
-function median(values){
-  if(!values.length)return 0;
-  const sorted=[...values].sort((a,b)=>a-b),mid=sorted.length>>1;
-  return sorted.length&1?sorted[mid]:(sorted[mid-1]+sorted[mid])*.5;
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const linearToSrgb=x=>{x=Math.max(0,Math.min(1,x));return x<=.0031308?12.92*x:1.055*Math.pow(x,1/2.4)-.055;};
+
+function readNpy(buffer){
+  if(buffer.subarray(0,6).toString('latin1')!=='\x93NUMPY')throw new TypeError('Invalid NPY magic');
+  const major=buffer[6],headerBytes=major===1?2:4,headerOffset=8,headerLength=headerBytes===2?buffer.readUInt16LE(headerOffset):buffer.readUInt32LE(headerOffset),dataOffset=headerOffset+headerBytes+headerLength,header=buffer.subarray(headerOffset+headerBytes,dataOffset).toString('latin1');
+  const descr=/['"]descr['"]\s*:\s*['"]([^'"]+)['"]/.exec(header)?.[1],fortran=/['"]fortran_order['"]\s*:\s*(True|False)/.exec(header)?.[1],shapeText=/['"]shape['"]\s*:\s*\(([^)]*)\)/.exec(header)?.[1];
+  if(!descr||fortran!=='False'||shapeText===undefined)throw new TypeError('Unsupported NPY header');
+  const shape=shapeText.split(',').map(v=>v.trim()).filter(Boolean).map(Number),count=shape.reduce((a,b)=>a*b,1),view=new DataView(buffer.buffer,buffer.byteOffset+dataOffset,buffer.byteLength-dataOffset),data=new Float32Array(count);
+  if(descr==='<f4'||descr==='|f4')for(let i=0;i<count;i++)data[i]=view.getFloat32(i*4,true);
+  else if(descr==='<f8'||descr==='|f8')for(let i=0;i<count;i++)data[i]=view.getFloat64(i*8,true);
+  else if(descr==='|u1'||descr==='<u1')for(let i=0;i<count;i++)data[i]=view.getUint8(i);
+  else throw new TypeError(`Unsupported NPY dtype ${descr}`);
+  return{shape,data};
 }
-async function calibrateVertexColors(mesh,sceneDir,metadata,items){
-  const vertices=mesh.positions.length/3,samplesByPosition=new Map();
-  const keyAt=i=>`${mesh.positions[i*3]},${mesh.positions[i*3+1]},${mesh.positions[i*3+2]}`;
-  for(let i=0;i<vertices;i++)if(!samplesByPosition.has(keyAt(i)))samplesByPosition.set(keyAt(i),[]);
+async function gtNpy(scene,kind,stem){const path=await findSuffix(`ground_truth/${scene}/${kind}/${stem}.npy`);return{path,...readNpy(await readFile(path))};}
+function sampleBilinear(data,width,height,channels,x,y,out){
+  const x0=Math.max(0,Math.min(width-1,Math.floor(x))),y0=Math.max(0,Math.min(height-1,Math.floor(y))),x1=Math.min(width-1,x0+1),y1=Math.min(height-1,y0+1),tx=x-x0,ty=y-y0;
+  for(let ch=0;ch<channels;ch++){const a=data[(y0*width+x0)*channels+ch]*(1-tx)+data[(y0*width+x1)*channels+ch]*tx,b=data[(y1*width+x0)*channels+ch]*(1-tx)+data[(y1*width+x1)*channels+ch]*tx;out[ch]=a*(1-ty)+b*ty;}
+  return out;
+}
+async function calibrateVertexColors(mesh,_sceneDir,metadata,items){
+  const scene=items[0]?.scene;if(!scene)throw new Error('No calibration scene');
+  const vertices=mesh.positions.length/3,sums=new Float64Array(vertices*3),weights=new Float64Array(vertices),sample=[0,0,0,0],stats={projected:0,depthAccepted:0,facingAccepted:0};
   for(const item of items){
     const frame=metadata.frames[item.testIndex];if(!frame)throw new RangeError(`Calibration frame ${item.testIndex} is missing`);
-    const rel=frame.file_path.replace(/^\.\//,''),stem=basename(rel),image=await readPng(join(sceneDir,rel+'.png')),mask=await readPng(join(sceneDir,dirname(rel)+'_mask',stem+'.png'));
-    const m=frame.transform_matrix,position=[m[0][3],m[1][3],m[2][3]],right=[m[0][0],m[1][0],m[2][0]],up=[m[0][1],m[1][1],m[2][1]],back=[m[0][2],m[1][2],m[2][2]];
-    const angle=Number(frame.camera_angle_x??metadata.camera_angle_x),focal=.5*image.width/Math.tan(.5*angle);
+    const stem=basename(frame.file_path.replace(/^\.\//,'')),albedo=await gtNpy(scene,'pseudo_gt_albedo',stem),depth=await gtNpy(scene,'z_depth',stem),ah=albedo.shape[0],aw=albedo.shape[1],ac=albedo.shape[2]??1,dh=depth.shape[0],dw=depth.shape[1];
+    if(ac<3||ah!==dh||aw!==dw)throw new RangeError(`GT albedo/depth mismatch for ${scene}/${stem}: ${albedo.shape} vs ${depth.shape}`);
+    const m=frame.transform_matrix,position=[m[0][3],m[1][3],m[2][3]],right=norm([m[0][0],m[1][0],m[2][0]]),up=norm([m[0][1],m[1][1],m[2][1]]),forward=norm([-m[0][2],-m[1][2],-m[2][2]]),angle=Number(frame.camera_angle_x??metadata.camera_angle_x),fx=.5*aw/Math.tan(.5*angle),fy=fx;
     for(let i=0;i<vertices;i++){
-      const p=[mesh.positions[i*3],mesh.positions[i*3+1],mesh.positions[i*3+2]],n=[mesh.normals[i*3],mesh.normals[i*3+1],mesh.normals[i*3+2]],delta=[p[0]-position[0],p[1]-position[1],p[2]-position[2]];
-      const depth=-dot(delta,back);if(depth<=1e-5)continue;
-      const view=norm([position[0]-p[0],position[1]-p[1],position[2]-p[2]]);if(dot(n,view)<.06)continue;
-      const x=Math.round(focal*dot(delta,right)/depth+image.width*.5),y=Math.round(image.height*.5-focal*dot(delta,up)/depth);
-      if(x<2||y<2||x>=image.width-2||y>=image.height-2)continue;
-      const maskAt=(xx,yy)=>mask.rgb[(yy*mask.width+xx)*3];
-      if(maskAt(x,y)<128||maskAt(x-2,y)<128||maskAt(x+2,y)<128||maskAt(x,y-2)<128||maskAt(x,y+2)<128)continue;
-      const q=(y*image.width+x)*3;
-      samplesByPosition.get(keyAt(i)).push([image.rgb[q]/255,image.rgb[q+1]/255,image.rgb[q+2]/255]);
+      const p=[mesh.positions[i*3],mesh.positions[i*3+1],mesh.positions[i*3+2]],n=norm([mesh.normals[i*3],mesh.normals[i*3+1],mesh.normals[i*3+2]]),rel=sub(p,position),z=dot(rel,forward);
+      if(z<=1e-5)continue;
+      const x=fx*dot(rel,right)/z+aw*.5,y=ah*.5-fy*dot(rel,up)/z;if(x<1||y<1||x>=aw-2||y>=ah-2)continue;stats.projected++;
+      const gtDepth=sampleBilinear(depth.data,dw,dh,1,x,y,sample)[0];if(!Number.isFinite(gtDepth)||gtDepth<=0||Math.abs(gtDepth-z)>Math.max(.003,.0125*Math.abs(gtDepth)))continue;stats.depthAccepted++;
+      const facing=Math.max(0,dot(n,norm(sub(position,p))));if(facing<.08)continue;stats.facingAccepted++;
+      sampleBilinear(albedo.data,aw,ah,ac,x,y,sample);const w=facing*facing;
+      for(let ch=0;ch<3;ch++)sums[i*3+ch]+=linearToSrgb(sample[ch])*w;weights[i]+=w;
     }
   }
-  const colors=new Array(vertices*4),observed=new Set();
-  for(let i=0;i<vertices;i++){
-    const samples=samplesByPosition.get(keyAt(i));
-    let rgb;
-    if(samples?.length){
-      rgb=[median(samples.map(v=>v[0])),median(samples.map(v=>v[1])),median(samples.map(v=>v[2]))];
-      observed.add(keyAt(i));
-    }else rgb=[.50,.50,.50];
-    colors[i*4]=rgb[0];colors[i*4+1]=rgb[1];colors[i*4+2]=rgb[2];colors[i*4+3]=1;
-  }
-  return{colors,coverage:observed.size/Math.max(1,samplesByPosition.size),positions:samplesByPosition.size,observed:observed.size};
+  const colors=new Array(vertices*4),known=new Uint8Array(vertices);let observed=0;
+  for(let i=0;i<vertices;i++){if(weights[i]>0){known[i]=1;observed++;for(let ch=0;ch<3;ch++)colors[i*4+ch]=Math.max(0,Math.min(1,sums[i*3+ch]/weights[i]));}colors[i*4+3]=1;}
+  const neighbors=Array.from({length:vertices},()=>[]);
+  for(let i=0;i<mesh.indices.length;i+=3){const a=mesh.indices[i],b=mesh.indices[i+1],d=mesh.indices[i+2];neighbors[a].push(b,d);neighbors[b].push(a,d);neighbors[d].push(a,b);}
+  let filled=observed;
+  for(let pass=0;pass<16&&filled<vertices;pass++){const pending=[];for(let i=0;i<vertices;i++)if(!known[i]){let r=0,g=0,b=0,n=0;for(const j of neighbors[i])if(known[j]){r+=colors[j*4];g+=colors[j*4+1];b+=colors[j*4+2];n++;}if(n)pending.push([i,r/n,g/n,b/n]);}if(!pending.length)break;for(const [i,r,g,b] of pending){colors[i*4]=r;colors[i*4+1]=g;colors[i*4+2]=b;known[i]=1;filled++;}}
+  let mr=0,mg=0,mb=0,mc=0;for(let i=0;i<vertices;i++)if(known[i]){mr+=colors[i*4];mg+=colors[i*4+1];mb+=colors[i*4+2];mc++;}const fallback=[mr/Math.max(1,mc),mg/Math.max(1,mc),mb/Math.max(1,mc)];
+  for(let i=0;i<vertices;i++)if(!known[i]){colors[i*4]=fallback[0];colors[i*4+1]=fallback[1];colors[i*4+2]=fallback[2];}
+  console.log(JSON.stringify({phase:'albedo-calibration',source:'pseudo_gt_albedo+z_depth',views:items.map(v=>v.testIndex),coverage:observed/vertices,observed,filled,vertices,meanSrgb:fallback,...stats}));
+  return{colors,coverage:observed/vertices,positions:vertices,observed};
 }
 
 function sceneModule({meshImport,camera,environment,material,exposure}){
