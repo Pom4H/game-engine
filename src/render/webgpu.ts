@@ -194,12 +194,12 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     albedo*=.93+noise3(in.worldPos*21.0)*.10;
   }
   if(materialKind>5.5&&materialKind<6.5){
-    let dirty=(1.0-smoothstep(.03,.42,in.worldPos.y))*(.55+.45*noise3(in.worldPos*vec3<f32>(2.7,3.0,5.0)));let crystals=noise3(in.worldPos*22.0);
-    albedo=mix(u.color.rgb,vec3<f32>(.37,.34,.30),dirty*.30);
-    albedo*=.94+noise3(in.worldPos*5.0)*.06;
-    let grad=vec3<f32>(noise3(in.worldPos*22.0+vec3<f32>(.3,0,0))-crystals,noise3(in.worldPos*22.0+vec3<f32>(0,.3,0))-crystals,noise3(in.worldPos*22.0+vec3<f32>(0,0,.3))-crystals);
-    n=normalize(n+(grad-n*dot(grad,n))*.48);
-    let clusters=noise3(in.worldPos*8.0);albedo*=.91+clusters*.12;
+    let dirty=(1.0-smoothstep(.025,.34,in.worldPos.y))*(.45+.55*noise3(in.worldPos*vec3<f32>(2.7,3.0,5.0)));let crystals=noise3(in.worldPos*42.0);
+    albedo=mix(u.color.rgb,vec3<f32>(.37,.34,.30),dirty*.15);
+    albedo*=.965+noise3(in.worldPos*7.0)*.055;
+    let grad=vec3<f32>(noise3(in.worldPos*42.0+vec3<f32>(.16,0,0))-crystals,noise3(in.worldPos*42.0+vec3<f32>(0,.16,0))-crystals,noise3(in.worldPos*42.0+vec3<f32>(0,0,.16))-crystals);
+    n=normalize(n+(grad-n*dot(grad,n))*.62);
+    let clusters=noise3(in.worldPos*9.5);albedo*=.94+clusters*.09;
   }
   if(u.pbr.z>3.5&&u.pbr.z<4.5){
     let q=clamp(in.uv,vec2<f32>(0),vec2<f32>(1));
@@ -343,7 +343,13 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let diffuseDirection=normalize(n+vec3<f32>(0,.16,0));
   let diffuseEnvironment=textureSampleLevel(environmentMap,reflectionSampler,diffuseDirection,6.1).rgb;
   let horizonEnvironment=textureSampleLevel(environmentMap,reflectionSampler,normalize(n+viewDir*.18),5.4).rgb;
-  let diffuseIrradiance=mix(diffuseEnvironment,horizonEnvironment,.16)*.94;
+  var diffuseIrradiance=mix(diffuseEnvironment,horizonEnvironment,.16)*.94;
+  if(materialKind>5.5&&materialKind<6.5){
+    // Snow is a highly multiple-scattering dielectric: shadowed facets remain
+    // bright and only weakly inherit the blue sky instead of becoming blue clay.
+    let snowAmbient=mix(vec3<f32>(.50),f.sky.rgb*1.08,.22);
+    diffuseIrradiance=max(diffuseIrradiance,snowAmbient);
+  }
   var color=base*diffuseIrradiance*(1.0-metal)*materialAO;
   color+=(base*(1.0-fresnel)*(1.0-metal)/3.14159+specular)*f.sunColor.rgb*f.sun.w*nl*shadow;
   let environmentFresnel=f0+(1.0-f0)*pow(1.0-nv,5.0);
@@ -389,7 +395,12 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   // Rough dry asphalt is an absorber, not a sky-colored mirror. Keep the broad
   // dielectric lobe subdued until actual water/ice state creates local coverage.
-  if(materialKind>4.5&&materialKind<5.5){color*=mix(.48,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
+  if(materialKind>4.5&&materialKind<5.5){color*=mix(.68,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
+  if(materialKind>5.5&&materialKind<6.5){
+    let crystal=hash3(floor(in.worldPos*135.0));
+    let glint=pow(max(dot(n,halfDir),0.0),150.0)*smoothstep(.72,.98,crystal)*shadow;
+    color+=f.sunColor.rgb*f.sun.w*glint*.055;
+  }
 
   let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal);}}
   color+=u.emission.rgb;
