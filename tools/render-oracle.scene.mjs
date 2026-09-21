@@ -23,7 +23,10 @@ const orientedQuad=(center,normal,w=.32,h=.32)=>{
 };
 
 const camera={position:[0,0,20],target:[0,0,0],fov:8};
-const point=(id,x,y,z=0,stage='hdr')=>({id,world:[x,y,z],stage});
+const point=(id,x,y,z=0,stage='hdr',pixelOffset=[0,0])=>({id,world:[x,y,z],stage,pixelOffset});
+const patchOffsets=[[0,0],[1,0],[0,1],[1,1]];
+const patchPoints=(prefix,x,y,stage)=>patchOffsets.map((offset,index)=>point(`${prefix}-${index}`,x,y,0,stage,offset));
+const patchIds=prefix=>patchOffsets.map((_,index)=>`${prefix}-${index}`);
 const black=[0,0,0,1];
 const matte=color=>({kind:'default',color,roughness:1,metalness:0,clearcoat:0});
 
@@ -37,14 +40,14 @@ export const oracle=Object.freeze({
     point('mirror-target',1.05,1.02),
     point('mirror-control',1.65,1.02),
 
-    point('ao-contact-hdr',-1.90,.12,0,'hdr'),
-    point('ao-contact-taa',-1.90,.12,0,'taa'),
-    point('ao-open-hdr',1.90,.12,0,'hdr'),
-    point('ao-open-taa',1.90,.12,0,'taa'),
-    point('ao-diagonal-contact-hdr',-1.90,-.34,0,'hdr'),
-    point('ao-diagonal-contact-taa',-1.90,-.34,0,'taa'),
-    point('ao-diagonal-open-hdr',1.90,-.34,0,'hdr'),
-    point('ao-diagonal-open-taa',1.90,-.34,0,'taa'),
+    ...patchPoints('ao-contact-hdr',-1.90,.12,'hdr'),
+    ...patchPoints('ao-contact-effects',-1.90,.12,'effects'),
+    ...patchPoints('ao-open-hdr',1.90,.12,'hdr'),
+    ...patchPoints('ao-open-effects',1.90,.12,'effects'),
+    ...patchPoints('ao-diagonal-contact-hdr',-1.90,-.34,'hdr'),
+    ...patchPoints('ao-diagonal-contact-effects',-1.90,-.34,'effects'),
+    ...patchPoints('ao-diagonal-open-hdr',1.90,-.34,'hdr'),
+    ...patchPoints('ao-diagonal-open-effects',1.90,-.34,'effects'),
 
     point('reflection-black',-.82,.52,0,'reflection'),
     point('reflection-gray',0,.52,0,'reflection'),
@@ -74,10 +77,10 @@ export const oracle=Object.freeze({
   contracts:Object.freeze([
     {kind:'delta',id:'emission-delta',a:'emission-off',b:'emission-on',expected:[.25,.50,1.0],tolerance:.025},
     {kind:'ratio',id:'diffuse-linear-response',black:'diffuse-black',mid:'diffuse-gray',white:'diffuse-white',expected:Math.pow(.5,2.2),tolerance:.045},
-    {kind:'rangeRatio',id:'ao-contact-attenuation',low:'ao-contact-taa',high:'ao-contact-hdr',minimum:.70,maximum:1.0},
-    {kind:'rangeRatio',id:'ao-open-preservation',low:'ao-open-taa',high:'ao-open-hdr',minimum:.94,maximum:1.06},
-    {kind:'rangeRatio',id:'ao-diagonal-contact-attenuation',low:'ao-diagonal-contact-taa',high:'ao-diagonal-contact-hdr',minimum:.70,maximum:.99},
-    {kind:'rangeRatio',id:'ao-diagonal-open-preservation',low:'ao-diagonal-open-taa',high:'ao-diagonal-open-hdr',minimum:.94,maximum:1.06},
+    {kind:'meanRangeRatio',id:'ao-contact-attenuation',low:patchIds('ao-contact-effects'),high:patchIds('ao-contact-hdr'),minimum:.90,maximum:.995},
+    {kind:'meanRangeRatio',id:'ao-open-preservation',low:patchIds('ao-open-effects'),high:patchIds('ao-open-hdr'),minimum:.97,maximum:1.03},
+    {kind:'meanRangeRatio',id:'ao-diagonal-contact-attenuation',low:patchIds('ao-diagonal-contact-effects'),high:patchIds('ao-diagonal-contact-hdr'),minimum:.90,maximum:.995},
+    {kind:'meanRangeRatio',id:'ao-diagonal-open-preservation',low:patchIds('ao-diagonal-open-effects'),high:patchIds('ao-diagonal-open-hdr'),minimum:.97,maximum:1.03},
     {kind:'ratio',id:'reflection-diffuse-linear-response',black:'reflection-black',mid:'reflection-gray',white:'reflection-white',expected:Math.pow(.5,2.2),tolerance:.045},
     {kind:'delta',id:'reflection-emission-delta',a:'reflection-emission-off',b:'reflection-emission-on',expected:[4,.08,.02],tolerance:.06},
     {kind:'gain',id:'roughness-specular-gain',low:'specular-rough',high:'specular-smooth',minimum:40},
