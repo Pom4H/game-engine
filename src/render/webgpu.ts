@@ -317,18 +317,20 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   roughness=clamp(sqrt(roughness*roughness+min(.22,normalVariance*.18)),.08,1.0);
   var waterCoverage=1.0;
   if(materialKind>4.5&&materialKind<5.5){
-    let hollows=noise3(in.worldPos*vec3<f32>(1.4,.1,2.3))*.78+noise3(in.worldPos*vec3<f32>(7.5,.1,9.3))*.22;
-    // A damp film darkens stone but does not submerge the aggregate. Only
-    // depressions filled by the local water column become smooth puddles.
+    let hollows=noise3(in.worldPos*vec3<f32>(.55,.1,4.8))*.66+noise3(in.worldPos*vec3<f32>(2.4,.1,13.0))*.34;
+    // Thin winter films collect as broken streaks and shallow lenses along the
+    // road, not giant binary puddle islands.
     let fill=clamp(waterDepth/.006,0.0,1.0);
-    waterCoverage=smoothstep(.64,.80,hollows+fill*.50)*smoothstep(.00015,.0012,waterDepth);
+    waterCoverage=smoothstep(.73,.88,hollows+fill*.25)*smoothstep(.00018,.00125,waterDepth);
+    let iceFill=clamp(u.surfacePhase.w/.0015,0.0,1.0);
+    let iceCoverage=smoothstep(.70,.90,hollows+iceFill*.18)*iceFill;
     let aggregate=noise3(in.worldPos*37.0+seed);
     let mineralRoughness=clamp(max(roughness,.60)+(aggregate-.5)*.24,.50,.93);
-    roughness=mix(mineralRoughness,.11+noise3(in.worldPos*3.0)*.045,waterCoverage);
-    albedo*=mix(1.0,.62,waterCoverage);
-    // Millimetres of water level out the gravel; its normals must not turn the
-    // planar reflection into waves across the entire road.
-    n=normalize(mix(n,geometricNormal,waterCoverage*.94));
+    let filmCoverage=max(waterCoverage,iceCoverage*.72);
+    roughness=mix(mineralRoughness,.10+noise3(in.worldPos*3.0)*.04,filmCoverage);
+    albedo*=mix(1.0,.72,filmCoverage);
+    // Millimetres of water/ice level out the gravel; keep reflection planes flat.
+    n=normalize(mix(n,geometricNormal,filmCoverage*.94));
   }
   let metal=select(u.pbr.y,mappedMetalness,mappedMetalness>=0.0);let base=pow(max(albedo,vec3<f32>(0)),vec3<f32>(2.2));
   let nv=max(dot(n,viewDir),.001);let nl=max(dot(n,light),0.0);let nh=max(dot(n,halfDir),0.0);let vh=max(dot(viewDir,halfDir),0.0);
@@ -387,8 +389,8 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   if(materialKind>.5&&materialKind<1.5){
     let glassF=.04+.96*pow(1.0-nv,5.0);
     let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
-    let glassEnvironment=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.06,.28,roughness))*.45);
-    color=mix(base*.040,glassEnvironment,.12+glassF*.46);
+    let glassEnvironment=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.06,.28,roughness))*.55);
+    color=mix(base*.025,glassEnvironment,.28+glassF*.52);
   }
   if(materialKind>9.5){
     color=mix(color,environmentRadiance,.58+.32*pow(1.0-nv,5.0));
