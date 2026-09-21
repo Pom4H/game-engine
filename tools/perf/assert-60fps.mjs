@@ -3,7 +3,8 @@ import {resolve} from 'node:path';
 
 const file=resolve(process.argv[2]??'artifacts/performance/clear-day.json');
 const report=JSON.parse(await readFile(file,'utf8'));
-const width=Number(process.env.PERF_WIDTH??1920),height=Number(process.env.PERF_HEIGHT??1080);
+const single=report.results?.length===1?report.results[0]:undefined;
+const width=Number(process.env.PERF_WIDTH??single?.width??1920),height=Number(process.env.PERF_HEIGHT??single?.height??1080);
 const minFps=Number(process.env.MIN_COMPLETED_FPS??59);
 const maxP95=Number(process.env.MAX_P95_FRAME_MS??18);
 const minRealtime=Number(process.env.MIN_SIMULATION_TO_WALL??.97);
