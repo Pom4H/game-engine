@@ -11,5 +11,5 @@ jobs:
     uses: Pom4H/usegit/.github/workflows/reusable.yml@ebcde459a27b454f8680dc59f61c361404105b7b
     with:
       tool_ref: ebcde459a27b454f8680dc59f61c361404105b7b
-      runs_on: self-hosted
+      runs_on: windows-latest
       windows: true
