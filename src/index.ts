@@ -38,8 +38,6 @@ export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type Pla
 export {resolveEnvironment,resolveEnvironmentAt,environmentTimeScale,type EnvironmentSpec,type EnvironmentState,type EnvironmentClockSpec,type WeatherKeyframe,type Precipitation,type Snowfall} from './environment/types.js';
 export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTreatment,type MaterialSurfaceSpec,type SurfaceState} from './materials/surface.js';
 export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironmentState,type SurfaceEnvironmentField,type SurfaceContactWork} from './environment/surface-state.js';
-/** @deprecated Prefer SurfaceEnvironmentSystem and generic surface state types. */
-export {WinterSystem,type WinterSurfaceState,type WinterBodyState} from './environment/winter.js';
 
 export type {SceneModule,SceneModuleContext,SceneCommand} from './scene/modules.js';
 export {SceneSystemRuntime,type SystemFrame,type SystemHandler} from './scene/system-runtime.js';

@@ -1,0 +1,20 @@
+{
+  "id": "EXP-1007",
+  "question": "Can the retired winter compatibility module be removed before the world-runtime integration?",
+  "hypothesis": "The old WinterSystem and Winter* type aliases have no in-repository consumers; SurfaceEnvironmentSystem is the current canonical API.",
+  "status": "locally-validated",
+  "conditions": {
+    "base": "09a5bdbf71210426c65cd1c95b0038d744f56eb5",
+    "scope": "private package @rom4/game-engine at version 0.1.0",
+    "externalConsumers": "not verified"
+  },
+  "evidence": [
+    "repository code search found WinterSystem and WinterSurfaceState only in src/environment/winter.ts and src/index.ts",
+    "the Scene and resource graph use SurfaceEnvironmentSystem and surface-state"
+  ],
+  "acceptance": {
+    "build": "no internal imports of deleted compatibility module",
+    "api": "canonical SurfaceEnvironmentSystem export remains available"
+  },
+  "decision": "Remove the unused compatibility module and deprecated root exports; document the public API break in the PR"
+}
