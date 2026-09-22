@@ -31,6 +31,7 @@ export interface PassengerVehicleProfile {
     readonly rimRatio:number;
     readonly spokes:number;
     readonly dish:number;
+    readonly split?:number;
   };
 }
 
@@ -204,6 +205,18 @@ export function passengerPartMaterial(role:ParametricVehiclePartRole):Omit<Mater
   return{kind:'plastic',finish:'smooth',roughness:.44,metalness:0};
 }
 
+export function generatePassengerWheelParts(profileInput:PassengerVehicleProfile):readonly ParametricVehiclePart[]{
+  const profile=validatePassengerVehicleProfile(profileInput),d=profile.dimensions,parts:ParametricVehiclePart[]=[];
+  const front=d.wheelbase/2+d.axleOffset,rear=-d.wheelbase/2+d.axleOffset,major=d.wheelRadius*(1+profile.wheel.rimRatio)/2,tube=d.wheelRadius*(1-profile.wheel.rimRatio)/2;
+  for(const [axle,x] of [['front',front],['rear',rear]] as const)for(const [side,z] of [['left',-d.track/2],['right',d.track/2]] as const){
+    const key=`${axle}-${side}`,rotation:[number,number,number]=[Math.PI/2,0,0],wheel=true;
+    parts.push({id:`tire-${key}`,role:'tire',mesh:{kind:'torus',radius:major,tube:Math.max(.018,tube),segments:32},position:[x,d.wheelRadius,z],rotation,wheel});
+    parts.push({id:`rim-${key}`,role:'rim',mesh:{kind:'torus',radius:d.wheelRadius*profile.wheel.rimRatio*.78,tube:d.wheelRadius*.055,segments:profile.wheel.spokes*4},position:[x,d.wheelRadius,z],rotation,wheel});
+    parts.push({id:`hub-${key}`,role:'metal',mesh:{kind:'cylinder',radius:d.wheelRadius*.14,height:profile.wheel.width*.65,segments:20},position:[x,d.wheelRadius,z],rotation,wheel});
+  }
+  return Object.freeze(parts.map(part=>Object.freeze({...part,material:passengerPartMaterial(part.role)})));
+}
+
 export function generatePassengerVehicle(profileInput:PassengerVehicleProfile):ParametricPassengerGeometry{
   const profile=validatePassengerVehicleProfile(profileInput),stations=stationSamples(profile),rings=stations.map(station=>bodyCrossSection(profile,station)),body=meshFromRings(rings);
   const parts:ParametricVehiclePart[]=[
@@ -213,14 +226,8 @@ export function generatePassengerVehicle(profileInput:PassengerVehicleProfile):P
     {id:'windshield',role:'glass',mesh:windshield(profile,true),position:[0,0,0]},
     {id:'rear-glass',role:'glass',mesh:windshield(profile,false),position:[0,0,0]},
   ];
-  const d=profile.dimensions,front=d.wheelbase/2+d.axleOffset,rear=-d.wheelbase/2+d.axleOffset,major=d.wheelRadius*(1+profile.wheel.rimRatio)/2,tube=d.wheelRadius*(1-profile.wheel.rimRatio)/2;
-  for(const [axle,x] of [['front',front],['rear',rear]] as const)for(const [side,z] of [['left',-d.track/2],['right',d.track/2]] as const){
-    const key=`${axle}-${side}`,rotation:[number,number,number]=[Math.PI/2,0,0],wheel=true;
-    parts.push({id:`tire-${key}`,role:'tire',mesh:{kind:'torus',radius:major,tube:Math.max(.018,tube),segments:32},position:[x,d.wheelRadius,z],rotation,wheel});
-    parts.push({id:`rim-${key}`,role:'rim',mesh:{kind:'torus',radius:d.wheelRadius*profile.wheel.rimRatio*.78,tube:d.wheelRadius*.055,segments:profile.wheel.spokes*4},position:[x,d.wheelRadius,z],rotation,wheel});
-    parts.push({id:`hub-${key}`,role:'metal',mesh:{kind:'cylinder',radius:d.wheelRadius*.14,height:profile.wheel.width*.65,segments:20},position:[x,d.wheelRadius,z],rotation,wheel});
-  }
-  const lampY=interpolateSection(profile.side,.43)[2]!*d.height-.06,tailY=interpolateSection(profile.side,-.43)[2]!*d.height-.05;
+  parts.push(...generatePassengerWheelParts(profile));
+  const d=profile.dimensions,lampY=interpolateSection(profile.side,.43)[2]!*d.height-.06,tailY=interpolateSection(profile.side,-.43)[2]!*d.height-.05;
   for(const side of [-1,1] as const){
     parts.push({id:`headlight-${side}`,role:'light',mesh:{kind:'box',size:[.05,.12,.42]},position:[d.length*.488,lampY,side*d.width*.29]});
     parts.push({id:`taillight-${side}`,role:'tail',mesh:{kind:'box',size:[.05,.11,.38]},position:[-d.length*.488,tailY,side*d.width*.29]});

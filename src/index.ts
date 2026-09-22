@@ -7,9 +7,13 @@ export {StructuralBody,type StructuralDefinition,type StructuralNodeSpec,type St
 export {bindStructuralSkin,applyStructuralSkin,type StructuralSkinBinding} from './physics/structural-skin.js';
 export {StructuralStaticContactSolver,type StructuralStaticBox,type StructuralContactStats} from './physics/structural-contact.js';
 export {AdaptiveStructuralController,type ReducedRigidState,type StructuralActivationPolicy,type StructuralActivation,type AdaptiveStructuralStats} from './physics/adaptive-structure.js';
-export {generatePassengerVehicle,passengerPartMaterial,passengerStructuralDefinition,interpolateSection,validatePassengerVehicleProfile,type PassengerVehicleProfile,type PassengerSideSection,type PassengerRoofSection,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole} from './vehicles/passenger.js';
-export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,generateM3Vehicle,m3PartMaterial,m3PartBody,m3StructuralBlueprint,type M3StructuralBlueprint} from './vehicles/m3.js';
+export {generatePassengerVehicle,generatePassengerWheelParts,passengerPartMaterial,passengerStructuralDefinition,interpolateSection,validatePassengerVehicleProfile,type PassengerVehicleProfile,type PassengerSideSection,type PassengerRoofSection,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole} from './vehicles/passenger.js';
+export {geometryRepresentationReport,type CausalGeometryRepresentation,type GeometryResidualLayer,type GeometryResidualKind,type GeometryFidelity,type GeometryRepresentationReport} from './geometry/representation.js';
+export {compareTriangleSurfaces,type TriangleSurface,type SurfaceDistanceReport} from './geometry/compare.js';
+export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,M3_VEHICLE_DEFINITION,generateM3Vehicle,generateM3ProceduralWheelVehicle,m3PartMaterial,m3PartBody,m3StructuralBlueprint,type M3StructuralBlueprint} from './vehicles/m3.js';
+export {M3_CAUSAL_GEOMETRY_REPRESENTATION,m3GeometryRepresentationReport} from './vehicles/m3-representation.js';
 export {M3_HIGH_FIDELITY_SHELL,M3_SHELL_FIDELITY,m3HighFidelityBody} from './vehicles/m3-shell.js';
+export {M3_DETAILED_BODY_PARAMETERS,generateDetailedThreeBoxBody,generateDetailedThreeBoxGlass,generateM3DetailedProceduralBody,generateM3DetailedProceduralGlass,type DetailedThreeBoxParameters,type M3DetailedBodyParameters} from './vehicles/m3-detailed-procedural.js';
 export {M3_FBX_PARTS_FIDELITY,M3_FBX_PART_SOURCES,m3FbxParts,type M3FbxPartSource} from './vehicles/m3-fbx-parts.js';
 export {decodePackedShell,type PackedShell} from './vehicles/packed-shell.js';
 export {encodePackedMesh,decodePackedMesh,type PackedMesh} from './assets/packed-mesh.js';
@@ -56,3 +60,7 @@ export type {SurfaceTextureSpec} from './scene/types.js';
 export {RenderProfiler,RENDER_CPU_QUANTA,RENDER_GPU_QUANTA,type RenderCpuQuantum,type RenderGpuQuantum,type RenderWork,type QuantumStats,type RenderFrameTiming,type RenderProfileSnapshot} from './render/profiler.js';
 
 export {analyzeWGSL,buildRenderAtomReport,type ShaderOperationAtoms,type ShaderEntryAtoms,type ShaderProgramAtoms,type RenderCommandAtoms,type RenderGeometryAtoms,type RenderMemoryAtoms,type RenderAtomReport} from './render/atoms.js';
+
+export {detailedRoadWheelMeshes,detailedPassengerWheelMeshes,type RoadWheelGeometrySpec} from './vehicles/passenger-wheel.js';
+export {compileVehicle,type VehicleDefinition,type VehicleFamily,type VehicleReferenceProvenance,type ThreeBoxVehicleDefinition,type CompiledVehicleGeometry} from './vehicles/framework.js';
+export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type DoubleCabPickupVehicleDefinition} from './vehicles/pickup.js';

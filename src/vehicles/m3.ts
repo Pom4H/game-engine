@@ -3,8 +3,11 @@ import {bindStructuralSkin,type StructuralSkinBinding} from '../physics/structur
 import type {StructuralDefinition} from '../physics/structure.js';
 import type {BodySpec,Color,MaterialSpec} from '../scene/types.js';
 import {M3_FBX_PARTS_FIDELITY,m3FbxParts} from './m3-fbx-parts.js';
-import {passengerPartMaterial,passengerStructuralDefinition,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole,type PassengerVehicleProfile} from './passenger.js';
+import {generatePassengerWheelParts,passengerPartMaterial,passengerStructuralDefinition,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole,type PassengerVehicleProfile} from './passenger.js';
 import {M3_SHELL_FIDELITY,m3HighFidelityBody} from './m3-shell.js';
+import {detailedPassengerWheelMeshes} from './passenger-wheel.js';
+import {M3_DETAILED_BODY_PARAMETERS} from './m3-detailed-procedural.js';
+import type {ThreeBoxVehicleDefinition} from './framework.js';
 import {buildSmoothSubdivisionPlan,smoothCoincidentNormals,subdivideSmoothTriangleMesh,type SmoothSubdivisionPlan,type TriangleMesh} from './render-subdivision.js';
 
 /**
@@ -57,7 +60,15 @@ export const M3_PARAMETRIC_PROFILE:PassengerVehicleProfile=Object.freeze({
   hoodCrown:.030,
   shoulder:.20,
   lowerWidth:.964,
-  wheel:Object.freeze({width:.30,rimRatio:.80,spokes:10,dish:.032}),
+  wheel:Object.freeze({width:.30,rimRatio:.80,spokes:10,split:.016,dish:.032}),
+});
+
+export const M3_VEHICLE_DEFINITION:ThreeBoxVehicleDefinition=Object.freeze({
+  id:'bmw-m3-g80',
+  family:'three-box',
+  body:M3_DETAILED_BODY_PARAMETERS,
+  wheel:Object.freeze({...M3_PARAMETRIC_PROFILE.wheel}),
+  reference:Object.freeze({sha256:M3_REFERENCE_PROVENANCE.sha256,sourceBytes:M3_REFERENCE_PROVENANCE.sourceBytes,triangles:9798}),
 });
 
 function sourceRole(sourceMaterial:string,id:string):ParametricVehiclePartRole{
@@ -224,6 +235,24 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     bodyTriangles:body.indices.length/3,
     generatedTriangles,
   });
+}
+
+const isReferenceWheelPart=(part:{id:string;wheel?:boolean})=>!!part.wheel||part.id==='front-wheel-hardware'||part.id==='rear-wheel-hardware';
+
+/**
+ * Experimental representation that moves repeated wheel geometry from the FBX residual
+ * into the shared passenger generator. The reference-wheel M3 remains the default.
+ */
+export function generateM3ProceduralWheelVehicle():ParametricPassengerGeometry{
+  const reference=generateM3Vehicle(),parts:ParametricVehiclePart[]=[...reference.parts.filter(part=>!isReferenceWheelPart(part))];
+  const d=M3_PARAMETRIC_PROFILE.dimensions,front=d.wheelbase/2+d.axleOffset,rear=-d.wheelbase/2+d.axleOffset;
+  for(const [axle,x] of [['front',front],['rear',rear]] as const)for(const [side,z,sign] of [['left',-d.track/2,-1],['right',d.track/2,1]] as const){
+    const wheel=detailedPassengerWheelMeshes(M3_PARAMETRIC_PROFILE,sign);
+    parts.push(Object.freeze({id:`tire-${axle}-${side}`,role:'tire' as const,mesh:wheel.tire,position:[x,d.wheelRadius,z] as const,wheel:true,material:passengerPartMaterial('tire')}));
+    parts.push(Object.freeze({id:`rim-${axle}-${side}`,role:'rim' as const,mesh:wheel.rim,position:[x,d.wheelRadius,z] as const,wheel:true,material:passengerPartMaterial('rim')}));
+  }
+  const primitiveTriangles=(part:ParametricVehiclePart)=>part.mesh.kind==='triangle-mesh'?part.mesh.indices.length/3:part.mesh.kind==='torus'?(part.mesh.segments??16)*8:part.mesh.kind==='cylinder'?(part.mesh.segments??16)*4:part.mesh.kind==='box'?12:0;
+  return Object.freeze({profile:reference.profile,parts:Object.freeze(parts),body:reference.body,bodyTriangles:reference.bodyTriangles,generatedTriangles:parts.reduce((sum,part)=>sum+primitiveTriangles(part),0)});
 }
 
 /** Material descriptor consumed by Scene: visual overrides never discard the physical material kind. */
