@@ -13,6 +13,16 @@ function run(command,args){
     child.once('error',fail);child.once('exit',code=>code===0?ok():fail(new Error(`${command} ${args.join(' ')} exited ${code}`)));
   });
 }
+if(manifest.calibrationMode==='inverse-render'){
+  for(const capture of manifest.captures.filter(c=>c.split==='calibration')){
+    if(!capture.inverseBasis)throw new Error(`Calibration capture ${capture.id} is missing inverse basis scenes`);
+    const captureDir=join(dir,capture.id);await mkdir(captureDir,{recursive:true});
+    await run(process.execPath,['dist/cli.js','render',capture.inverseBasis.whiteScenePath,'--time','0','--width','512','--height','512','--out',join(captureDir,'basis-white.png')]);
+    await run(process.execPath,['dist/cli.js','render',capture.inverseBasis.blackScenePath,'--time','0','--width','512','--height','512','--out',join(captureDir,'basis-black.png')]);
+  }
+  await run(process.execPath,['tools/reality/stanford-orb/inverse-calibrate.mjs','--dir',dir]);
+}
+
 const reports=[];
 for(const capture of manifest.captures){
   const captureDir=join(dir,capture.id);await mkdir(captureDir,{recursive:true});
