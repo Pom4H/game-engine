@@ -55,7 +55,7 @@ spec.entities=spec.entities.filter(entity=>{
   return true;
 });
 spec.entities.push(
-  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.052,.056,.061,1],roughness:.68},environmental:{surfaceUse:'road',snowDepthM:0,iceDepthM:0,waterDepthM:.00082}},
+  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.034,.037,.041,1],roughness:.74},environmental:{surfaceUse:'road',snowDepthM:0,iceDepthM:0,waterDepthM:.00030}},
   {id:'hero-bank-near',position:[-13,.18,-4.18],mesh:{kind:'snowdrift',size:[62,.48,1.08],seed:4617,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
   {id:'hero-bank-far',position:[-13,.18,4.12],mesh:{kind:'snowdrift',size:[62,.56,1.22],seed:9121,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
 );
@@ -65,8 +65,8 @@ for(const entity of spec.entities){
     entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.125,metalness:.035};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00070};
-    entity.material={...entity.material,color:[.047,.051,.056,1],roughness:.70};
+    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00026};
+    entity.material={...entity.material,color:[.031,.034,.038,1],roughness:.76};
   }
 }
 
