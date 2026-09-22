@@ -258,7 +258,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  for(const e of entities)if(e.material?.pattern==='brick'){e.material.texture={url:'/assets/brick-weathered.png',sizeM:1.55,bumpStrength:.40,albedoStrength:1};e.material.color=[.88,.82,.76,1];}
  const spec={version:1,seed:20260920,ground:-100,
   environment:hero
-   ?{temperatureC:-3,humidity:.58,groundMoisture:.42,precipitation:'rare',snowfall:'moderate',sunlight:.88,wind:[.35,0,.08],clock:{startHour:14.7,hoursPerSecond:0}}
+   ?{temperatureC:-3,humidity:.58,groundMoisture:.42,precipitation:'none',snowfall:'none',sunlight:.88,wind:[.35,0,.08],clock:{startHour:14.7,hoursPerSecond:0}}
    :{temperatureC:-6,humidity:.76,groundMoisture:.36,precipitation:'rare',snowfall:'moderate',sunlight:.24,wind:[.7,0,.2],clock:{startHour:17.3,hoursPerSecond:0}},
   rendering:hero
    ?{sunDirection:[.42,.80,-.42],sunColor:[1,.955,.88],sunIntensity:3.35,skyColor:[.33,.50,.72],fogDensity:.00055,exposure:1.02,shadowExtent:35}
