@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "84f2db6ac702b6878b2742226fb94afa30981d81",
+  "parents": [
+    "4dac05a9b4cf8b7314d2c59988bf578d3b5ccf5d"
+  ],
+  "authoredAt": "2026-09-22T15:14:23+03:00",
+  "recordedAt": "2026-09-22T12:23:12.136Z",
+  "experiment": "winter-quality",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "vehicle: recover M3 glass and grille optical anatomy",
+    "experiment": "winter-quality",
+    "observation": "all eight hero samples show black glazing and two unstructured black kidney faces after the duplicate fascia removal.",
+    "hypothesis": "removing coplanar opaque glass copies and adding only recessed vertical inlays inside the retained FBX openings will restore optical depth without changing body geometry.",
+    "intervention": "rely on the existing authored cabin for window occlusion, increase glazing transmission, and add twelve thin vertical plastic inlays inside the two source fascia openings.",
+    "prediction": "windows expose cabin/reflection structure and grille openings gain depth in all eight samples while native hero throughput does not regress.",
+    "targets": [],
+    "guards": [
+      "FBX body/plastic-trim geometry, renderer shaders, RealityGap and vehicle physics remain unchanged"
+    ],
+    "dependsOn": [
+      "4dac05a9b4cf8b7314d2c59988bf578d3b5ccf5d"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-quality"
+      ],
+      "Causal-Observation": [
+        "all eight hero samples show black glazing and two unstructured black kidney faces after the duplicate fascia removal."
+      ],
+      "Causal-Hypothesis": [
+        "removing coplanar opaque glass copies and adding only recessed vertical inlays inside the retained FBX openings will restore optical depth without changing body geometry."
+      ],
+      "Causal-Intervention": [
+        "rely on the existing authored cabin for window occlusion, increase glazing transmission, and add twelve thin vertical plastic inlays inside the two source fascia openings."
+      ],
+      "Causal-Prediction": [
+        "windows expose cabin/reflection structure and grille openings gain depth in all eight samples while native hero throughput does not regress."
+      ],
+      "Causal-Depends-On": [
+        "4dac05a9b4cf8b7314d2c59988bf578d3b5ccf5d"
+      ],
+      "Causal-Guard": [
+        "FBX body/plastic-trim geometry, renderer shaders, RealityGap and vehicle physics remain unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35726010727",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35726010727"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
