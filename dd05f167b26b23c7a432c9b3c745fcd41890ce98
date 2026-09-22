@@ -1,0 +1,217 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "dd05f167b26b23c7a432c9b3c745fcd41890ce98",
+  "parents": [
+    "32485c654c1ca15004e02ce9aee712997fa137e1"
+  ],
+  "authoredAt": "2026-09-22T17:53:05+03:00",
+  "recordedAt": "2026-09-22T15:03:25.780Z",
+  "experiment": "winter-m3-fascia",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: recess M3 grille inlays and kill chrome-like glare",
+    "experiment": "winter-m3-fascia",
+    "observation": "visual-fast artifact on 32485c6 shows twelve bright protruding vertical bars dominating the front fascia.",
+    "hypothesis": "current low-roughness slightly-metallic inlays are reflecting the environment like chrome and sit too far forward.",
+    "intervention": "recess, shrink and roughen only the procedural grille inlays.",
+    "prediction": "next m3-reference capture shows dark recessed grille structure with preserved G80 front proportions.",
+    "targets": [],
+    "guards": [
+      "source FBX fascia geometry, body subdivision, Stanford path and renderer shaders remain unchanged"
+    ],
+    "dependsOn": [
+      "32485c654c1ca15004e02ce9aee712997fa137e1"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-m3-fascia"
+      ],
+      "Causal-Observation": [
+        "visual-fast artifact on 32485c6 shows twelve bright protruding vertical bars dominating the front fascia."
+      ],
+      "Causal-Hypothesis": [
+        "current low-roughness slightly-metallic inlays are reflecting the environment like chrome and sit too far forward."
+      ],
+      "Causal-Intervention": [
+        "recess, shrink and roughen only the procedural grille inlays."
+      ],
+      "Causal-Prediction": [
+        "next m3-reference capture shows dark recessed grille structure with preserved G80 front proportions."
+      ],
+      "Causal-Depends-On": [
+        "32485c654c1ca15004e02ce9aee712997fa137e1"
+      ],
+      "Causal-Guard": [
+        "source FBX fascia geometry, body subdivision, Stanford path and renderer shaders remain unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35743439486",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35743439486"
+  },
+  "jobs": {
+    "reality": "success",
+    "visualFast": "success",
+    "performance1080": "success"
+  },
+  "observations": {
+    "reality": {
+      "dataset": "Stanford-ORB",
+      "object": "car",
+      "gap": 0.23837613511163935,
+      "baseline": {
+        "gap": 0.23563216891992333,
+        "tolerance": 0.003,
+        "delta": 0.0027439661917160185
+      },
+      "regressions": [],
+      "heldOut": [
+        {
+          "capture": "car_scene004-test1",
+          "gap": 0.2663534144711415,
+          "psnr": 17.35991339852934,
+          "ssim": 0.7455449979819455,
+          "components": {
+            "lpips": null,
+            "structural": 0.2544550020180545,
+            "logLuminance": 0.09720753821776511,
+            "edge": 0.7076154502378703,
+            "chroma": 0.06648376364636399
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.5219900681696762,
+              "interior": 0.7529757939293016,
+              "radiusPx": 4,
+              "boundaryPixels": 2154,
+              "interiorPixels": 15020,
+              "errorShare": {
+                "boundary": 0.14486255037935694,
+                "interior": 0.8551374496206433
+              },
+              "referenceWeightShare": {
+                "boundary": 0.19637725899408162,
+                "interior": 0.803622741005922
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5481155788811337,
+              "components": {
+                "lpips": null,
+                "structural": 0.9175418467015429,
+                "logLuminance": 0.20200777725230615,
+                "edge": 0.9275244134024243,
+                "chroma": 0.137615456104401
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.6937513680570516,
+                  "interior": 0.9846503601049248,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2154,
+                  "interiorPixels": 15020,
+                  "errorShare": {
+                    "boundary": 0.14688237863484574,
+                    "interior": 0.8531176213651561
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.19637725899408162,
+                    "interior": 0.803622741005922
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test1\\flat-albedo-production.png"
+            }
+          }
+        },
+        {
+          "capture": "car_scene004-test3",
+          "gap": 0.2103988557521372,
+          "psnr": 20.25698762995468,
+          "ssim": 0.828285914757499,
+          "components": {
+            "lpips": null,
+            "structural": 0.17171408524250098,
+            "logLuminance": 0.07659547175763654,
+            "edge": 0.6057346928319939,
+            "chroma": 0.04504722467779646
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.4799062518866265,
+              "interior": 0.6387072222036098,
+              "radiusPx": 4,
+              "boundaryPixels": 2431,
+              "interiorPixels": 19062,
+              "errorShare": {
+                "boundary": 0.1645027155621785,
+                "interior": 0.8354972844378228
+              },
+              "referenceWeightShare": {
+                "boundary": 0.20763430667834948,
+                "interior": 0.7923656933216517
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5511460629120786,
+              "components": {
+                "lpips": null,
+                "structural": 0.9382717563522766,
+                "logLuminance": 0.20666145355053964,
+                "edge": 0.906145575814743,
+                "chroma": 0.13929177123786873
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.691176569230431,
+                  "interior": 0.9624768140493941,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2431,
+                  "interiorPixels": 19062,
+                  "errorShare": {
+                    "boundary": 0.158376282547586,
+                    "interior": 0.8416237174524145
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.20763430667834948,
+                    "interior": 0.7923656933216517
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test3\\flat-albedo-production.png"
+            }
+          }
+        }
+      ]
+    },
+    "performance1080": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "1920x1080",
+      "submittedFps": 66.38141320382813,
+      "completedFps": 65.52071204405634,
+      "p95FrameMs": 21.80000001192093,
+      "gpuP95Ms": 14.38965,
+      "simulationToWallRatio": 0.9963876781096659,
+      "rendererErrors": []
+    },
+    "visualFast": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "960x540",
+      "submittedFps": 116.97660467348743,
+      "completedFps": 116.1175069444537,
+      "p95FrameMs": 11.699999988079071,
+      "gpuP95Ms": 6.04408,
+      "simulationToWallRatio": 0.9831367059452653,
+      "rendererErrors": []
+    }
+  },
+  "verdict": "observed"
+}
