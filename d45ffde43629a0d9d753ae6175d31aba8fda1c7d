@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "d45ffde43629a0d9d753ae6175d31aba8fda1c7d",
+  "parents": [
+    "4214ae73a73b8a50ef65c8d033160dea038dfca6"
+  ],
+  "authoredAt": "2026-09-22T21:49:13+03:00",
+  "recordedAt": "2026-09-22T18:50:30.482Z",
+  "experiment": "hot-appearance-patch",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "feedback: patch appearance in-place during hot sweeps",
+    "experiment": "hot-appearance-patch",
+    "observation": "hot batch retained Chrome/WebGPU but still replaced the whole Scene for every 3-number material hypothesis.",
+    "hypothesis": "patching only appearance causes removes scene/CDP overhead while preserving deterministic render state.",
+    "intervention": "live appearance patch API + renderer cache invalidation + patch-based sweep manifest.",
+    "prediction": "24-candidate Winter Hero sweep approaches actual render cost per candidate.",
+    "targets": [],
+    "guards": [
+      "standalone render behavior, physics state, geometry and production material model remain unchanged"
+    ],
+    "dependsOn": [
+      "4214ae73a73b8a50ef65c8d033160dea038dfca6"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "hot-appearance-patch"
+      ],
+      "Causal-Observation": [
+        "hot batch retained Chrome/WebGPU but still replaced the whole Scene for every 3-number material hypothesis."
+      ],
+      "Causal-Hypothesis": [
+        "patching only appearance causes removes scene/CDP overhead while preserving deterministic render state."
+      ],
+      "Causal-Intervention": [
+        "live appearance patch API + renderer cache invalidation + patch-based sweep manifest."
+      ],
+      "Causal-Prediction": [
+        "24-candidate Winter Hero sweep approaches actual render cost per candidate."
+      ],
+      "Causal-Depends-On": [
+        "4214ae73a73b8a50ef65c8d033160dea038dfca6"
+      ],
+      "Causal-Guard": [
+        "standalone render behavior, physics state, geometry and production material model remain unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35769727160",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35769727160"
+  },
+  "jobs": {
+    "reality": "skipped",
+    "visualFast": "failure",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
