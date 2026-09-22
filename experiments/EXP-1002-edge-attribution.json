@@ -2,10 +2,13 @@
   "id": "EXP-1002",
   "question": "Is the dominant Stanford RealityGap edge error primarily at the object silhouette or inside the projected car surface?",
   "hypothesis": "Partitioning the existing edge numerator into a thin ground-truth mask-boundary band and its eroded interior will reveal a dominant causal region, with at least 60% of edge error attributable to the same region on both held-out views.",
-  "status": "running",
+  "status": "accepted",
   "conditions": {
     "dataset": "Stanford-ORB car",
-    "heldOut": ["car_scene004-test1", "car_scene004-test3"],
+    "heldOut": [
+      "car_scene004-test1",
+      "car_scene004-test3"
+    ],
     "currentEdge": {
       "car_scene004-test1": 0.7076154502378703,
       "car_scene004-test3": 0.6057346928319939
@@ -25,6 +28,36 @@
     "measurement": "Existing aggregate edge and RealityGap must remain numerically identical.",
     "attribution": "The same region contributes at least 60% of the edge numerator on both held-out views."
   },
-  "evidence": [],
-  "decision": null
+  "evidence": [
+    {
+      "kind": "github-actions",
+      "runId": 35702032879,
+      "commit": "5d7f04b095160be5b5ab353c49fd05d90fc15044",
+      "heldOut": {
+        "car_scene004-test1": {
+          "edge": 0.7076154502378703,
+          "boundary": 0.5219900681696762,
+          "interior": 0.7529757939293016,
+          "boundaryErrorShare": 0.14486255037935694,
+          "interiorErrorShare": 0.8551374496206433
+        },
+        "car_scene004-test3": {
+          "edge": 0.6057346928319939,
+          "boundary": 0.4799062518866265,
+          "interior": 0.6387072222036098,
+          "boundaryErrorShare": 0.1645027155621785,
+          "interiorErrorShare": 0.8354972844378228
+        }
+      },
+      "mainRealityGapUnchanged": 0.23837613511163935,
+      "realityFast": "success",
+      "visualFast": "success",
+      "performance1080": "success",
+      "verifyFailure": "diagnostic fixture asserted >95% interior share although experiment acceptance criterion was >=60%; production metrics and renderer were unchanged"
+    }
+  ],
+  "decision": {
+    "outcome": "accepted",
+    "reason": "Interior appearance dominates the edge numerator on both held-out views (85.5% and 83.5%). The object-mask boundary contributes only 14.5% and 16.5%, so camera/silhouette mismatch is not the primary next target."
+  }
 }

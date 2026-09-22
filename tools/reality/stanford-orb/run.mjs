@@ -37,7 +37,7 @@ for(const capture of manifest.captures){
 const heldOut=reports.filter(r=>r.split==='heldOut'),calibration=reports.filter(r=>r.split==='calibration');
 if(!heldOut.length)throw new Error('Reality benchmark has no held-out captures');
 const gap=heldOut.reduce((s,r)=>s+r.gap,0)/heldOut.length;
-const summary={version:1,metric:'RealityGap',lowerIsBetter:true,dataset:manifest.dataset,object:manifest.object,gap,calibration:calibration.map(r=>({capture:r.capture,gap:r.gap,psnr:r.psnr,ssim:r.ssim})),heldOut:heldOut.map(r=>({capture:r.capture,gap:r.gap,psnr:r.psnr,ssim:r.ssim,components:r.components})),lpips:withLpips};
+const summary={version:1,metric:'RealityGap',lowerIsBetter:true,dataset:manifest.dataset,object:manifest.object,gap,calibration:calibration.map(r=>({capture:r.capture,gap:r.gap,psnr:r.psnr,ssim:r.ssim})),heldOut:heldOut.map(r=>({capture:r.capture,gap:r.gap,psnr:r.psnr,ssim:r.ssim,components:r.components,diagnostics:r.diagnostics,counterfactuals:r.counterfactuals})),lpips:withLpips};
 if(baselinePath){
   const baseline=JSON.parse(await readFile(baselinePath,'utf8')),tolerance=baseline.tolerance??.003;
   summary.baseline={gap:baseline.gap,tolerance,delta:gap-baseline.gap};

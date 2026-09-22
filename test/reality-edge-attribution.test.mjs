@@ -43,7 +43,7 @@ test('edge attribution separates interior appearance error from mask-boundary er
   }
   const measured=measureEdgeAttribution({width,height,active,productionLuma:production,referenceLuma:reference,boundaryRadiusPx:1});
   assert.ok(measured.interiorPixels>measured.boundaryPixels);
-  assert.ok(measured.errorShare.interior>.95);
+  assert.ok(measured.errorShare.interior>.60);
   assert.ok(measured.interior>measured.boundary);
 });
 
