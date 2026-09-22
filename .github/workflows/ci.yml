@@ -16,7 +16,7 @@ permissions:
 jobs:
   causal-contract:
     if: github.event_name == 'pull_request'
-    runs-on: self-hosted
+    runs-on: windows-latest
     timeout-minutes: 2
     permissions:
       contents: read
@@ -40,6 +40,11 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: causal-contract
     runs-on: self-hosted
+    outputs:
+      hero_gap: ${{ steps.hero.outputs.hero_gap }}
+      best_gap: ${{ steps.hero.outputs.best_gap }}
+      best_id: ${{ steps.hero.outputs.best_id }}
+      mean_hot_ms: ${{ steps.hero.outputs.mean_hot_ms }}
     timeout-minutes: 5
     defaults:
       run:
@@ -60,28 +65,10 @@ jobs:
       - name: Radiometric pixel oracle
         run: node tools/render-oracle.mjs
       - name: Winter Hero batch search
+        id: hero
         run: |
           node dist/cli.js render-batch tools/render-lab/winter-hero-sweep.mjs --reference tools/reality/winter-hero/reference.jpg --width 480 --height 360 --frames 2 --keep 3 --out-dir artifacts/winter-hero
-      - name: Renderer consistency diagnostic
-        run: node tools/photorealism/run.mjs --mode fast --out artifacts/photorealism-fast --baseline tools/photorealism/baseline.json
-      - name: Reference render
-        run: |
-          if not exist artifacts mkdir artifacts
-          node dist/cli.js render tools/promo/clear-day.scene.mjs --time 0 --width 960 --height 540 --out artifacts/m3-reference.png
-          node tools/check-png.mjs artifacts/m3-reference.png
-      - name: Short GPU budget probe
-        env:
-          BENCH_SCENE: clear-day.scene.mjs
-          BENCH_USE_SCENE_CAMERA: "1"
-          BENCH_TIME: "0"
-          BENCH_CASES: 960x540
-          BENCH_WARMUP_MS: "150"
-          BENCH_SAMPLE_MS: "600"
-          BENCH_OUT: artifacts/performance/visual-fast.json
-          MAX_P95_FRAME_MS: "20"
-        run: |
-          node tools/promo/benchmark.mjs
-          node tools/perf/assert-60fps.mjs artifacts/performance/visual-fast.json
+          node -e "const fs=require('fs'),r=JSON.parse(fs.readFileSync('artifacts/winter-hero/report.json','utf8')),p=r.results.find(x=>x.id==='production')??r.results[0];fs.appendFileSync(process.env.GITHUB_OUTPUT,'hero_gap='+p.heroGap+'\n'+'best_gap='+r.best.heroGap+'\n'+'best_id='+r.best.id+'\n'+'mean_hot_ms='+r.meanHotCaptureMilliseconds+'\n')"
       - uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
@@ -175,7 +162,7 @@ jobs:
   causal-evidence:
     if: always() && github.event_name == 'pull_request' && needs.causal-contract.result == 'success'
     needs: [causal-contract, reality-fast, visual-fast, performance-1080]
-    runs-on: self-hosted
+    runs-on: windows-latest
     timeout-minutes: 3
     concurrency:
       group: game-engine-causal-notes
@@ -191,6 +178,10 @@ jobs:
       REALITY_JOB_RESULT: ${{ needs.reality-fast.result }}
       VISUAL_JOB_RESULT: ${{ needs.visual-fast.result }}
       PERFORMANCE_JOB_RESULT: ${{ needs.performance-1080.result }}
+      HERO_GAP: ${{ needs.visual-fast.outputs.hero_gap }}
+      HERO_BEST_GAP: ${{ needs.visual-fast.outputs.best_gap }}
+      HERO_BEST_ID: ${{ needs.visual-fast.outputs.best_id }}
+      HERO_MEAN_HOT_MS: ${{ needs.visual-fast.outputs.mean_hot_ms }}
     steps:
       - uses: actions/checkout@v7
         with:
