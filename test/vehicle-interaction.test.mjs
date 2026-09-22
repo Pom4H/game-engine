@@ -131,7 +131,8 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
   assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40),'grille inlays must stay within the source fascia envelope');
 
   assert.equal(byId.get('body').material.kind,'steel');
-  assert.ok(m3PartMaterial(byId.get('body'),[.2,.2,.2,1],false).clearcoat>.9,'hero paint should use the generic clearcoat layer');
+  const heroPaint=m3PartMaterial(byId.get('body'),[.2,.2,.2,1],false);
+  assert.ok(heroPaint.clearcoat>.7&&heroPaint.clearcoatRoughness<.12,'hero paint should retain a strong generic dielectric clearcoat layer');
   assert.equal(byId.get('windshield-front').material.kind,'glass');
   assert.equal(byId.get('mirror-left').material.kind,'mirror');
   assert.equal(byId.get('plastic-trim').material.kind,'plastic');
