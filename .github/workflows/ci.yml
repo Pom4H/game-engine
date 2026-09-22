@@ -24,6 +24,8 @@ jobs:
         shell: cmd
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
@@ -58,7 +60,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: visual-fast-${{ github.sha }}
+          name: visual-fast-${{ github.event.pull_request.head.sha }}
           path: artifacts/
           if-no-files-found: error
           retention-days: 3
@@ -74,6 +76,8 @@ jobs:
         shell: cmd
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
@@ -97,7 +101,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: performance-1080-${{ github.sha }}
+          name: performance-1080-${{ github.event.pull_request.head.sha }}
           path: artifacts/performance/
           if-no-files-found: warn
           retention-days: 7
@@ -112,9 +116,13 @@ jobs:
         shell: cmd
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
+      - name: Causal commit contract
+        run: bun tools/causality/check.mjs HEAD
       - name: Install
         run: bun install --frozen-lockfile
       - name: Build reality render path
@@ -130,16 +138,70 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: reality-fast-${{ github.sha }}
+          name: reality-fast-${{ github.event.pull_request.head.sha }}
           path: artifacts/reality/
           if-no-files-found: warn
           retention-days: 7
 
+  causal-evidence:
+    if: always() && github.event_name == 'pull_request'
+    needs: [reality-fast, visual-fast, performance-1080]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    concurrency:
+      group: game-engine-causal-notes
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      actions: read
+    env:
+      CAUSAL_SHA: ${{ github.event.pull_request.head.sha }}
+      REALITY_JOB_RESULT: ${{ needs.reality-fast.result }}
+      VISUAL_JOB_RESULT: ${{ needs.visual-fast.result }}
+      PERFORMANCE_JOB_RESULT: ${{ needs.performance-1080.result }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: reality-fast-${{ github.event.pull_request.head.sha }}
+          path: causal-input/reality
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: visual-fast-${{ github.event.pull_request.head.sha }}
+          path: causal-input/visual
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: performance-1080-${{ github.event.pull_request.head.sha }}
+          path: causal-input/performance
+      - name: Build causal evidence
+        run: node tools/causality/record.mjs --subject "$CAUSAL_SHA" --input causal-input --out artifacts/causality/evidence.json
+      - name: Attach evidence to the evaluated commit
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin refs/notes/causality:refs/notes/causality || true
+          git notes --ref=causality add -f -F artifacts/causality/evidence.json "$CAUSAL_SHA"
+          git push origin refs/notes/causality
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: causal-evidence-${{ github.event.pull_request.head.sha }}
+          path: artifacts/causality/
+          if-no-files-found: warn
+          retention-days: 90
+
   verify:
     # On PRs, performance runs on a controlled GPU before RealityGap/visual exports.
     # Full verification starts only after both gates have succeeded. Main pushes verify directly.
-    needs: [reality-fast, performance-1080]
-    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.draft == false && needs.reality-fast.result == 'success' && needs.performance-1080.result == 'success'))
+    needs: [reality-fast, performance-1080, causal-evidence]
+    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.draft == false && needs.reality-fast.result == 'success' && needs.performance-1080.result == 'success' && needs.causal-evidence.result == 'success'))
     runs-on: self-hosted
     timeout-minutes: 15
     defaults:

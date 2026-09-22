@@ -19,7 +19,10 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
-    "ci": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs"
+    "ci": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs",
+    "causality:check": "node tools/causality/check.mjs HEAD",
+    "causality:history": "node tools/causality/history.mjs",
+    "reality:history": "node tools/causality/history.mjs --experiment stanford-orb"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
