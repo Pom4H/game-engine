@@ -59,6 +59,9 @@ jobs:
         run: node --test test/core.test.mjs test/deformation.test.mjs test/irradiance.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
       - name: Radiometric pixel oracle
         run: node tools/render-oracle.mjs
+      - name: Winter Hero batch search
+        run: |
+          node dist/cli.js render-batch tools/render-lab/winter-hero-sweep.mjs --reference tools/reality/winter-hero/reference.jpg --width 480 --height 360 --frames 2 --keep 3 --out-dir artifacts/winter-hero
       - name: Renderer consistency diagnostic
         run: node tools/photorealism/run.mjs --mode fast --out artifacts/photorealism-fast --baseline tools/photorealism/baseline.json
       - name: Reference render
@@ -81,6 +84,7 @@ jobs:
           node tools/perf/assert-60fps.mjs artifacts/performance/visual-fast.json
       - uses: actions/upload-artifact@v7
         if: always()
+        continue-on-error: true
         with:
           name: visual-fast-${{ github.event.pull_request.head.sha }}
           path: artifacts/
@@ -122,6 +126,7 @@ jobs:
           node tools/perf/assert-60fps.mjs artifacts/performance/clear-day.json
       - uses: actions/upload-artifact@v7
         if: always()
+        continue-on-error: true
         with:
           name: performance-1080-${{ github.event.pull_request.head.sha }}
           path: artifacts/performance/
@@ -160,6 +165,7 @@ jobs:
         run: node tools/reality/stanford-orb/run.mjs --dir artifacts/reality/stanford-orb --baseline tools/reality/stanford-orb/baseline.json --assert
       - uses: actions/upload-artifact@v7
         if: always()
+        continue-on-error: true
         with:
           name: reality-fast-${{ github.event.pull_request.head.sha }}
           path: artifacts/reality/
@@ -217,6 +223,7 @@ jobs:
           git push origin refs/notes/causality
       - uses: actions/upload-artifact@v7
         if: always()
+        continue-on-error: true
         with:
           name: causal-evidence-${{ github.event.pull_request.head.sha }}
           path: artifacts/causality/
@@ -224,10 +231,10 @@ jobs:
           retention-days: 90
 
   verify:
-    # On PRs, performance runs on a controlled GPU before RealityGap/visual exports.
-    # Full verification starts only after both gates have succeeded. Main pushes verify directly.
+    # The expensive full-scene/video suite is a release/main guard, not an experiment loop.
+    # PR experiments are guarded by visual-fast + 1080p performance + Stanford RealityGap.
     needs: [reality-fast, performance-1080, causal-evidence]
-    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.draft == false && needs.reality-fast.result == 'success' && needs.performance-1080.result == 'success' && needs.causal-evidence.result == 'success'))
+    if: always() && github.event_name != 'pull_request'
     runs-on: self-hosted
     timeout-minutes: 15
     defaults:
@@ -265,6 +272,7 @@ jobs:
         run: node dist/cli.js record examples/window-gauntlet.ts --duration 2.5 --fps 24 --width 1280 --height 720 --out artifacts/gpu-smoke.mp4
       - uses: actions/upload-artifact@v7
         if: always()
+        continue-on-error: true
         with:
           name: game-engine-ci-${{ github.sha }}
           path: artifacts/
