@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "8b127657e7582ae843b46324ab268b6ce783836e",
+  "parents": [
+    "dd05f167b26b23c7a432c9b3c745fcd41890ce98"
+  ],
+  "authoredAt": "2026-09-22T18:13:39+03:00",
+  "recordedAt": "2026-09-22T15:17:14.125Z",
+  "experiment": "winter-m3-paint",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: tame M3 paint mirror response",
+    "experiment": "winter-m3-paint",
+    "observation": "dd05f16 artifact remains dominated by white probe streaks and chrome-like body response.",
+    "hypothesis": "paint lobes are sharper than the target surface and amplify geometric frequency.",
+    "intervention": "broaden base and clearcoat lobes and slightly reduce clearcoat/metalness.",
+    "prediction": "next fixed-camera capture has smoother gray body gradients while retaining sun and environment highlights.",
+    "targets": [],
+    "guards": [
+      "geometry, glass, Stanford scene and renderer code are unchanged"
+    ],
+    "dependsOn": [
+      "dd05f167b26b23c7a432c9b3c745fcd41890ce98"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-m3-paint"
+      ],
+      "Causal-Observation": [
+        "dd05f16 artifact remains dominated by white probe streaks and chrome-like body response."
+      ],
+      "Causal-Hypothesis": [
+        "paint lobes are sharper than the target surface and amplify geometric frequency."
+      ],
+      "Causal-Intervention": [
+        "broaden base and clearcoat lobes and slightly reduce clearcoat/metalness."
+      ],
+      "Causal-Prediction": [
+        "next fixed-camera capture has smoother gray body gradients while retaining sun and environment highlights."
+      ],
+      "Causal-Depends-On": [
+        "dd05f167b26b23c7a432c9b3c745fcd41890ce98"
+      ],
+      "Causal-Guard": [
+        "geometry, glass, Stanford scene and renderer code are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35745848359",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35745848359"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
