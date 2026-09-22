@@ -1,0 +1,123 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "5d7f04b095160be5b5ab353c49fd05d90fc15044",
+  "parents": [
+    "a4de0a48533417dca1549895115245fdccb2a797"
+  ],
+  "authoredAt": "2026-09-22T10:55:04+03:00",
+  "recordedAt": "2026-09-22T08:04:26.577Z",
+  "experiment": "reality-diagnostics",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "reality: attribute edge error to silhouette or interior",
+    "experiment": "reality-diagnostics",
+    "observation": "Stanford held-out edge error is 0.7076 and 0.6057 while log-luminance is 0.0972 and 0.0766 and chroma is 0.0665 and 0.0450, so the aggregate metric does not identify the next physical cause.",
+    "hypothesis": "separating mask-boundary and interior edge error will identify whether geometry/calibration or projected appearance is the dominant next target.",
+    "intervention": "add boundary/interior edge attribution as diagnostics while preserving the exact existing aggregate edge calculation and RealityGap weights.",
+    "prediction": "aggregate RealityGap remains numerically unchanged and one causal region contributes at least sixty percent of edge numerator on both held-out views.",
+    "targets": [],
+    "guards": [
+      "renderer output and RealityGap decision formula are unchanged"
+    ],
+    "dependsOn": [
+      "a4de0a48533417dca1549895115245fdccb2a797"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "reality-diagnostics"
+      ],
+      "Causal-Observation": [
+        "Stanford held-out edge error is 0.7076 and 0.6057 while log-luminance is 0.0972 and 0.0766 and chroma is 0.0665 and 0.0450, so the aggregate metric does not identify the next physical cause."
+      ],
+      "Causal-Hypothesis": [
+        "separating mask-boundary and interior edge error will identify whether geometry/calibration or projected appearance is the dominant next target."
+      ],
+      "Causal-Intervention": [
+        "add boundary/interior edge attribution as diagnostics while preserving the exact existing aggregate edge calculation and RealityGap weights."
+      ],
+      "Causal-Prediction": [
+        "aggregate RealityGap remains numerically unchanged and one causal region contributes at least sixty percent of edge numerator on both held-out views."
+      ],
+      "Causal-Depends-On": [
+        "a4de0a48533417dca1549895115245fdccb2a797"
+      ],
+      "Causal-Guard": [
+        "renderer output and RealityGap decision formula are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35702032879",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35702032879"
+  },
+  "jobs": {
+    "reality": "success",
+    "visualFast": "success",
+    "performance1080": "success"
+  },
+  "observations": {
+    "reality": {
+      "dataset": "Stanford-ORB",
+      "object": "car",
+      "gap": 0.23837613511163935,
+      "baseline": {
+        "gap": 0.23563216891992333,
+        "tolerance": 0.003,
+        "delta": 0.0027439661917160185
+      },
+      "regressions": [],
+      "heldOut": [
+        {
+          "capture": "car_scene004-test1",
+          "gap": 0.2663534144711415,
+          "psnr": 17.35991339852934,
+          "ssim": 0.7455449979819455,
+          "components": {
+            "lpips": null,
+            "structural": 0.2544550020180545,
+            "logLuminance": 0.09720753821776511,
+            "edge": 0.7076154502378703,
+            "chroma": 0.06648376364636399
+          }
+        },
+        {
+          "capture": "car_scene004-test3",
+          "gap": 0.2103988557521372,
+          "psnr": 20.25698762995468,
+          "ssim": 0.828285914757499,
+          "components": {
+            "lpips": null,
+            "structural": 0.17171408524250098,
+            "logLuminance": 0.07659547175763654,
+            "edge": 0.6057346928319939,
+            "chroma": 0.04504722467779646
+          }
+        }
+      ]
+    },
+    "performance1080": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "1920x1080",
+      "submittedFps": 72.73163226541041,
+      "completedFps": 71.83596139812283,
+      "p95FrameMs": 18.900000005960464,
+      "gpuP95Ms": 12.55804,
+      "simulationToWallRatio": 0.9957306798240677,
+      "rendererErrors": []
+    },
+    "visualFast": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "960x540",
+      "submittedFps": 101.79640718562874,
+      "completedFps": 100.90018795073557,
+      "p95FrameMs": 12.699999988079071,
+      "gpuP95Ms": 6.711999999999999,
+      "simulationToWallRatio": 0.9813705921490359,
+      "rendererErrors": []
+    }
+  },
+  "verdict": "observed"
+}
