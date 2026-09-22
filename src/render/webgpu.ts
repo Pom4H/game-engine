@@ -395,7 +395,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let environmentFresnel=f0+(1.0-f0)*pow(1.0-nv,5.0);
   let reflectionDir=reflect(-viewDir,n);
   let fallbackEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
-  let localProbeWeight=f.params.y*(1.0-smoothstep(.08,.46,roughness))*.90;
+  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.75;
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
   if(f.params.y>.5&&(localProbeWeight>.001||clearcoat>0.0||glassLike)){
@@ -425,7 +425,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
       // Local probes are spatially correct but intentionally sharp. A rougher
       // dielectric clear coat must not inherit the full level-0 cubemap as a
       // mirror; blend probe energy continuously from the authored coat roughness.
-      let coatProbeWeight=(1.0-smoothstep(.045,.18,coatRough))*.72;
+      let coatProbeWeight=(1.0-smoothstep(.04,.16,coatRough))*.42;
       coatEnvironment=mix(coatEnvironment,localProbe,coatProbeWeight);
     }
     let coatEnvF=.04+.96*pow(1.0-nv,5.0);
