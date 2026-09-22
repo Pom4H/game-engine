@@ -124,9 +124,9 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     grilleSlats.push(Object.freeze({
       id:`grille-inlay-${side<0?'left':'right'}-${column}`,
       role:'dark' as const,
-      mesh:{kind:'box' as const,size:[.010,.34,.009] as const},
-      position:[2.389,.625,z] as const,
-      material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.26,metalness:.03},
+      mesh:{kind:'box' as const,size:[.008,.31,.006] as const},
+      position:[2.365,.625,z] as const,
+      material:{kind:'plastic' as const,finish:'rough' as const,roughness:.78,metalness:0},
     }));
   }
   const badge:ParametricVehiclePart[]=[
