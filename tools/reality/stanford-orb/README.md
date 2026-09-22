@@ -2,9 +2,11 @@
 
 This benchmark is the renderer's external reality feedback loop. It measures the production WebGPU path against held-out Stanford-ORB car captures while keeping calibration views separate.
 
-## North Star
+## Controlled renderer North Star
 
 Minimize held-out `RealityGap` without violating the runtime guards.
+
+Stanford-ORB is intentionally a **controlled renderer truth**, not the sole end-to-end visual target for a complete game world. Full-scene photorealism is additionally guarded by `tools/reality/winter-hero/`, while Stanford remains authoritative for held-out real-capture renderer regressions.
 
 Current committed baseline:
 

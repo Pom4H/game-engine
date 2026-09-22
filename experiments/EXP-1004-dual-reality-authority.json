@@ -1,0 +1,30 @@
+{
+  "id": "EXP-1004",
+  "question": "Is Stanford-ORB sufficient as the sole photorealism North Star for complete game scenes?",
+  "hypothesis": "Keeping Stanford-ORB as the controlled renderer truth while adding a fixed end-to-end winter hero photo target will reject scene-level visual regressions that Stanford cannot observe, without weakening renderer correctness or runtime guards.",
+  "status": "running",
+  "conditions": {
+    "dependsOn": [
+      "EXP-1001",
+      "EXP-1002"
+    ],
+    "stanfordBaseline": 0.23563216891992333,
+    "sceneTarget": "tools/reality/winter-hero/reference.jpg",
+    "sceneTargetProvenance": "AI-generated photorealistic target derived from the authored winter M3 composition; visual target only, not physical ground truth",
+    "currentWinterCompletedFps": 55.57,
+    "finalRuntimeTargetFps": 60
+  },
+  "authority": {
+    "stanfordOrb": "controlled renderer truth: geometry/camera/measured environment/BRDF/exposure on held-out real captures",
+    "winterHero": "end-to-end world appearance: car/road/snow/buildings/glass/contact/GI/reflections/exposure/composition",
+    "runtime": "1080p frame budget",
+    "rule": "A render change must not regress Stanford-ORB, must move the winter hero toward the reference, and must preserve the runtime guard."
+  },
+  "acceptance": {
+    "stanford": "no held-out RealityGap regression beyond the existing tolerance",
+    "winterHero": "visual target distance must improve versus the parent baseline once the fixed hero capture metric is wired",
+    "runtime": "intermediate changes must not regress the measured parent throughput; final target is >=59 completed FPS and GPU p95 <=16.67 ms"
+  },
+  "evidence": [],
+  "decision": null
+}

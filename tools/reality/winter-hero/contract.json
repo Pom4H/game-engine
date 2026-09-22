@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "winter-hero",
+  "reference": "reference.jpg",
+  "resolution": [
+    960,
+    720
+  ],
+  "lowerIsBetter": true,
+  "role": "end-to-end photorealism target",
+  "provenance": {
+    "kind": "ai-generated-reference",
+    "generatedAt": "2026-09-22",
+    "note": "This image is a target for appearance, not measured ground truth. Stanford-ORB remains the external real-capture renderer gate."
+  },
+  "targetFeatures": [
+    "continuous automotive paint highlights",
+    "physically plausible automotive glass transmission and Fresnel reflection",
+    "strong but soft vehicle-ground contact",
+    "dark wet asphalt with spatially varying shallow water and slush",
+    "multi-scale snow clumps, granular detail and dirty melt edges",
+    "brick and storefront material depth without blown-out windows",
+    "local color bleed and indirect light between snow, car and facades",
+    "stable reflections and shadows during motion"
+  ],
+  "guards": {
+    "stanfordRealityGap": "must not regress beyond tools/reality/stanford-orb/baseline.json tolerance",
+    "targetCompletedFps": 59,
+    "targetGpuP95Ms": 16.67
+  }
+}
