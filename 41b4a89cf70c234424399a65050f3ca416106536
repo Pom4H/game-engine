@@ -1,0 +1,110 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "41b4a89cf70c234424399a65050f3ca416106536",
+  "parents": [
+    "2e039afcfe76daa57b82fd1fc5f27df8965f019a"
+  ],
+  "authoredAt": "2026-09-22T08:56:48+03:00",
+  "recordedAt": "2026-09-22T06:02:52.893Z",
+  "experiment": "development-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "dev: close the causal loop on tolerance, ancestry and repeats",
+    "experiment": "development-loop",
+    "observation": "the first durable note works but has empty parent metadata, treats an in-tolerance RealityGap delta as a directional result, and does not prevent repeating an already measured hypothesis plus intervention.",
+    "hypothesis": "preserving ancestry, respecting metric tolerance, and checking prior causal fingerprints before GPU work will turn the ledger from chronological metadata into a reliable causal feedback loop.",
+    "intervention": "fetch parent history for evidence, make Stanford verdicts tolerance-aware, keep generic outcomes descriptive, and reject exact prior experiment fingerprints unless explicitly superseded.",
+    "prediction": "future notes contain parent SHAs, in-tolerance RealityGap changes remain neutral, generic failures are recorded without false causal attribution, and repeated experiments stop before expensive Stanford rendering.",
+    "targets": [],
+    "guards": [
+      "RealityGap and renderer performance measurement implementations are unchanged"
+    ],
+    "dependsOn": [
+      "2e039afcfe76daa57b82fd1fc5f27df8965f019a"
+    ],
+    "supersedes": [
+      "2e039afcfe76daa57b82fd1fc5f27df8965f019a"
+    ],
+    "trailers": {
+      "Causal-Experiment": [
+        "development-loop"
+      ],
+      "Causal-Observation": [
+        "the first durable note works but has empty parent metadata, treats an in-tolerance RealityGap delta as a directional result, and does not prevent repeating an already measured hypothesis plus intervention."
+      ],
+      "Causal-Hypothesis": [
+        "preserving ancestry, respecting metric tolerance, and checking prior causal fingerprints before GPU work will turn the ledger from chronological metadata into a reliable causal feedback loop."
+      ],
+      "Causal-Intervention": [
+        "fetch parent history for evidence, make Stanford verdicts tolerance-aware, keep generic outcomes descriptive, and reject exact prior experiment fingerprints unless explicitly superseded."
+      ],
+      "Causal-Prediction": [
+        "future notes contain parent SHAs, in-tolerance RealityGap changes remain neutral, generic failures are recorded without false causal attribution, and repeated experiments stop before expensive Stanford rendering."
+      ],
+      "Causal-Depends-On": [
+        "2e039afcfe76daa57b82fd1fc5f27df8965f019a"
+      ],
+      "Causal-Supersedes": [
+        "2e039afcfe76daa57b82fd1fc5f27df8965f019a"
+      ],
+      "Causal-Guard": [
+        "RealityGap and renderer performance measurement implementations are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35692715019",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35692715019"
+  },
+  "jobs": {
+    "reality": "success",
+    "visualFast": "failure",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": {
+      "dataset": "Stanford-ORB",
+      "object": "car",
+      "gap": 0.23837613511163935,
+      "baseline": {
+        "gap": 0.23563216891992333,
+        "tolerance": 0.003,
+        "delta": 0.0027439661917160185
+      },
+      "regressions": [],
+      "heldOut": [
+        {
+          "capture": "car_scene004-test1",
+          "gap": 0.2663534144711415,
+          "psnr": 17.35991339852934,
+          "ssim": 0.7455449979819455,
+          "components": {
+            "lpips": null,
+            "structural": 0.2544550020180545,
+            "logLuminance": 0.09720753821776511,
+            "edge": 0.7076154502378703,
+            "chroma": 0.06648376364636399
+          }
+        },
+        {
+          "capture": "car_scene004-test3",
+          "gap": 0.2103988557521372,
+          "psnr": 20.25698762995468,
+          "ssim": 0.828285914757499,
+          "components": {
+            "lpips": null,
+            "structural": 0.17171408524250098,
+            "logLuminance": 0.07659547175763654,
+            "edge": 0.6057346928319939,
+            "chroma": 0.04504722467779646
+          }
+        }
+      ]
+    },
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
