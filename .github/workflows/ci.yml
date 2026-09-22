@@ -38,7 +38,7 @@ jobs:
 
   visual-fast:
     if: github.event_name == 'pull_request'
-    needs: reality-fast
+    needs: causal-contract
     runs-on: self-hosted
     timeout-minutes: 5
     defaults:
