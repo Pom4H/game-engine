@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "0ff45bdbf8d68d97a1130fbe0388c5ef86985c11",
+  "parents": [
+    "767b89f60c7e7eb7292739745d93737be9065bdd"
+  ],
+  "authoredAt": "2026-09-22T19:52:13+03:00",
+  "recordedAt": "2026-09-22T16:56:01.416Z",
+  "experiment": "winter-m3-surface",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: use causal M3 panel surface for hero paint shell",
+    "experiment": "winter-m3-surface",
+    "observation": "767b89f artifact retains polygonal wheel arches, hood ridges and door facets even with correct clearcoat-probe roughness.",
+    "hypothesis": "surface geometry, not BRDF, is now the dominant cause.",
+    "intervention": "use the existing detailed M3 semantic panel compiler only for render paint geometry.",
+    "prediction": "fixed-camera highlights become smooth and the car silhouette reads as stamped sheet metal rather than a low-poly shell.",
+    "targets": [],
+    "guards": [
+      "physical body remains M3_HIGH_FIDELITY_SHELL; FBX trim/glass/wheels/lights remain unchanged"
+    ],
+    "dependsOn": [
+      "767b89f60c7e7eb7292739745d93737be9065bdd"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-m3-surface"
+      ],
+      "Causal-Observation": [
+        "767b89f artifact retains polygonal wheel arches, hood ridges and door facets even with correct clearcoat-probe roughness."
+      ],
+      "Causal-Hypothesis": [
+        "surface geometry, not BRDF, is now the dominant cause."
+      ],
+      "Causal-Intervention": [
+        "use the existing detailed M3 semantic panel compiler only for render paint geometry."
+      ],
+      "Causal-Prediction": [
+        "fixed-camera highlights become smooth and the car silhouette reads as stamped sheet metal rather than a low-poly shell."
+      ],
+      "Causal-Depends-On": [
+        "767b89f60c7e7eb7292739745d93737be9065bdd"
+      ],
+      "Causal-Guard": [
+        "physical body remains M3_HIGH_FIDELITY_SHELL; FBX trim/glass/wheels/lights remain unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35756961555",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35756961555"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
