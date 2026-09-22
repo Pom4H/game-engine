@@ -8,7 +8,7 @@
     "legacyEvidenceRef": "refs/notes/causality",
     "newEvidenceRef": "refs/notes/usegit",
     "legacyHistoryRewrite": false,
-    "usegitRevision": "5ab0deb174391f6b55db000d9aecd0949ce31234",
+    "usegitRevision": "7569f91822a8cc5119d989c0f062f8efcd55ec2b",
     "ciRunner": "self-hosted"
   },
   "metrics": [
@@ -34,6 +34,11 @@
         "commit": "5ab0deb174391f6b55db000d9aecd0949ce31234",
         "change": "Reusable workflow now accepts runs_on and uses portable bash steps."
       }
+    },
+    {
+      "kind": "cross-project-portability-failure",
+      "runId": 35699807888,
+      "observation": "Self-hosted Windows runner started, but the reusable workflow assumed bash; usegit EXP-0011 removed shell assumptions in revision 7569f91822a8cc5119d989c0f062f8efcd55ec2b"
     }
   ],
   "decision": null

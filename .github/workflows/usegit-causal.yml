@@ -3,13 +3,12 @@ name: usegit
 
 on:
   push:
-  pull_request:
 
 jobs:
   causal-history:
     permissions:
       contents: write
-    uses: Pom4H/usegit/.github/workflows/reusable.yml@5ab0deb174391f6b55db000d9aecd0949ce31234
+    uses: Pom4H/usegit/.github/workflows/reusable.yml@7569f91822a8cc5119d989c0f062f8efcd55ec2b
     with:
-      tool_ref: 5ab0deb174391f6b55db000d9aecd0949ce31234
+      tool_ref: 7569f91822a8cc5119d989c0f062f8efcd55ec2b
       runs_on: self-hosted
