@@ -1,0 +1,30 @@
+{
+  "id": "EXP-1006",
+  "question": "Can large scenery stop dominating repeated physics broad-phase rebuilds without missing contacts?",
+  "hypothesis": "Representing footprints larger than 64 cells as one bounding cell rectangle lowers index construction cost while returning the same candidate set for every query cell rectangle.",
+  "status": "locally-validated",
+  "conditions": {
+    "base": "09a5bdbf71210426c65cd1c95b0038d744f56eb5",
+    "fixture": "5 large 140 m surfaces, 100 small bodies, 8 m cells; 80 rebuilds and 8000 queries per sample",
+    "comparison": "8 alternating old/new measurements in one Node 24 process",
+    "scope": "CPU broad-phase only; no renderer or RealityGap changes"
+  },
+  "metrics": {
+    "oldMedianMs": 60.07,
+    "newMedianMs": 19.18,
+    "oldCells": 676,
+    "newCells": 144,
+    "oversizedItems": 5
+  },
+  "evidence": [
+    "cell-rectangle candidate oracle passed for 90 varied objects including negative coordinates, updates and cache invalidation",
+    "50-step large-floor rigid-body comparison against old implementation passed locally",
+    "tools/profiling/spatial-broadphase.mjs reproduces the new implementation's fixture"
+  ],
+  "acceptance": {
+    "candidateCoverage": "no missed query cell overlaps",
+    "contact": "large static floor continues to resolve body support",
+    "performance": "fixture median improves without claiming full-frame FPS"
+  },
+  "decision": "Keep oversized path if repository typecheck/tests pass; investigate whole-scene gain separately"
+}
