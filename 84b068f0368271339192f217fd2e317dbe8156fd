@@ -1,0 +1,85 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "84b068f0368271339192f217fd2e317dbe8156fd",
+  "parents": [
+    "9024570b7b7a5f0db9c3e802c19230d2374a936c"
+  ],
+  "authoredAt": "2026-09-22T20:11:48+03:00",
+  "recordedAt": "2026-09-22T17:19:28.954Z",
+  "experiment": "ci-runner-contention",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "ci: move usegit metadata workflow off scarce GPU runner",
+    "experiment": "ci-runner-contention",
+    "observation": "recent branch runs show usegit push jobs occupying the same self-hosted queue between every visual CI attempt.",
+    "hypothesis": "moving metadata work to hosted Windows removes the queue dependency without changing evidence semantics.",
+    "intervention": "reusable usegit workflow now requests windows-latest.",
+    "prediction": "next visual-fast starts immediately after causal-contract instead of waiting for usegit runner cleanup.",
+    "targets": [],
+    "guards": [
+      "usegit tool ref, workflow logic, permissions and evidence transport are unchanged"
+    ],
+    "dependsOn": [
+      "9024570b7b7a5f0db9c3e802c19230d2374a936c"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "ci-runner-contention"
+      ],
+      "Causal-Observation": [
+        "recent branch runs show usegit push jobs occupying the same self-hosted queue between every visual CI attempt."
+      ],
+      "Causal-Hypothesis": [
+        "moving metadata work to hosted Windows removes the queue dependency without changing evidence semantics."
+      ],
+      "Causal-Intervention": [
+        "reusable usegit workflow now requests windows-latest."
+      ],
+      "Causal-Prediction": [
+        "next visual-fast starts immediately after causal-contract instead of waiting for usegit runner cleanup."
+      ],
+      "Causal-Depends-On": [
+        "9024570b7b7a5f0db9c3e802c19230d2374a936c"
+      ],
+      "Causal-Guard": [
+        "usegit tool ref, workflow logic, permissions and evidence transport are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35759101831",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35759101831"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "success",
+    "performance1080": "success"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "1920x1080",
+      "submittedFps": 70.11726163160904,
+      "completedFps": 69.24169494216551,
+      "p95FrameMs": 18.599999964237213,
+      "gpuP95Ms": 13.1568,
+      "simulationToWallRatio": 0.9954919861277794,
+      "rendererErrors": []
+    },
+    "visualFast": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "960x540",
+      "submittedFps": 98.38020470915951,
+      "completedFps": 97.31642583194721,
+      "p95FrameMs": 14.700000047683716,
+      "gpuP95Ms": 7.328280000000001,
+      "simulationToWallRatio": 0.9771771174815513,
+      "rendererErrors": []
+    }
+  },
+  "verdict": "observed"
+}
