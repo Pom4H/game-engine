@@ -5,7 +5,7 @@
     "082da0504ffdd5a583390b676bcd98d2c30a5d03"
   ],
   "authoredAt": "2026-09-22T18:53:18+03:00",
-  "recordedAt": "2026-09-22T16:01:09.369Z",
+  "recordedAt": "2026-09-22T16:10:01.020Z",
   "experiment": "winter-m3-pn-amplitude",
   "declaration": {
     "schema": "game-engine.causal-commit/v1",
@@ -50,7 +50,7 @@
   "run": {
     "repository": "Pom4H/game-engine",
     "id": "35750381239",
-    "attempt": "1",
+    "attempt": "2",
     "url": "https://github.com/Pom4H/game-engine/actions/runs/35750381239"
   },
   "jobs": {
@@ -195,11 +195,11 @@
     "performance1080": {
       "scene": "clear-day.scene.mjs",
       "resolution": "1920x1080",
-      "submittedFps": 68.5862827434513,
-      "completedFps": 67.69825918809875,
-      "p95FrameMs": 24.599999964237213,
-      "gpuP95Ms": 14.0308,
-      "simulationToWallRatio": 0.9964673731920249,
+      "submittedFps": 69.17924622613216,
+      "completedFps": 68.37133936735667,
+      "p95FrameMs": 26.19999998807907,
+      "gpuP95Ms": 13.64672,
+      "simulationToWallRatio": 0.9963677563397614,
       "rendererErrors": []
     },
     "visualFast": {
