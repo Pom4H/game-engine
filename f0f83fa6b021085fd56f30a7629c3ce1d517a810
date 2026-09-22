@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "f0f83fa6b021085fd56f30a7629c3ce1d517a810",
+  "parents": [
+    "63b6007c0a780daefae02bb4c19fb5ef9ee197ba"
+  ],
+  "authoredAt": "2026-09-22T22:01:03+03:00",
+  "recordedAt": "2026-09-22T19:06:40.220Z",
+  "experiment": "hot-appearance-revision",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "feedback: separate appearance revision from render structure",
+    "experiment": "hot-appearance-revision",
+    "observation": "24-candidate hot sweep still spends long wall time because each patch follows renderStructureRevision.",
+    "hypothesis": "separate appearance causality removes environment/probe/shadow/cull recomputation.",
+    "intervention": "dedicated appearance revision and uniform/TAA-only renderer invalidation.",
+    "prediction": "candidate cost approaches render+presentation-readback cost.",
+    "targets": [],
+    "guards": [
+      "geometry membership and non-optical rendering changes retain structural invalidation"
+    ],
+    "dependsOn": [
+      "63b6007c0a780daefae02bb4c19fb5ef9ee197ba"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "hot-appearance-revision"
+      ],
+      "Causal-Observation": [
+        "24-candidate hot sweep still spends long wall time because each patch follows renderStructureRevision."
+      ],
+      "Causal-Hypothesis": [
+        "separate appearance causality removes environment/probe/shadow/cull recomputation."
+      ],
+      "Causal-Intervention": [
+        "dedicated appearance revision and uniform/TAA-only renderer invalidation."
+      ],
+      "Causal-Prediction": [
+        "candidate cost approaches render+presentation-readback cost."
+      ],
+      "Causal-Depends-On": [
+        "63b6007c0a780daefae02bb4c19fb5ef9ee197ba"
+      ],
+      "Causal-Guard": [
+        "geometry membership and non-optical rendering changes retain structural invalidation"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35771034691",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35771034691"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
