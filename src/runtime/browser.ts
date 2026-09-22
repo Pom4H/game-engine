@@ -5,7 +5,7 @@ import {ProceduralAudio,type AmbientAudioState} from '../audio/browser.js';
 import {FixedClock} from '../core/fixed-clock.js';
 import {Scene} from '../scene/scene.js';
 import type {EngineEvent} from '../scene/events.js';
-import type {CameraSpec,SceneSpec} from '../scene/types.js';
+import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
@@ -67,6 +67,7 @@ export class BrowserRuntime {
     await this.renderer.prepareMaterials?.(this.scene);
     this.render();await this.renderer.flush();
   }
+  patchAppearance(patch:AppearancePatch):void{this.pause();this.scene.patchAppearance(patch);}
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
   render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
   async drain():Promise<void>{await this.renderer.flush();}
@@ -103,7 +104,7 @@ export class BrowserRuntime {
     };
   }
 
-  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),replaceScene:scene=>this.replaceScene(scene),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
+  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),replaceScene:scene=>this.replaceScene(scene),patchAppearance:patch=>this.patchAppearance(patch),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
   private frame=(now:number)=>{
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];

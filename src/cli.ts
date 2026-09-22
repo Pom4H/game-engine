@@ -10,7 +10,7 @@ import {wavBytes} from './audio/synth.js';
 import {renderSceneAudio} from './audio/offline.js';
 import {decodeScene,sceneURL} from './scene/url.js';
 import {validateScene} from './scene/validate.js';
-import type {SceneSpec} from './scene/types.js';
+import type {AppearancePatch,SceneSpec} from './scene/types.js';
 
 const args=process.argv.slice(2),command=args.shift()??'help';
 const distributionDirectory=dirname(fileURLToPath(import.meta.url));
@@ -38,8 +38,8 @@ async function loadSceneFile(file:string):Promise<SceneSpec>{const path=resolve(
 interface RenderOptions{out:string;time:number;width:number;height:number}
 async function render(scene:SceneSpec,options:RenderOptions,sceneDirectory:string):Promise<void>{const host=await serveScene(scene,{sceneDirectory,distributionDirectory});let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();await browser.evaluate(`const engine=window.__GAME_ENGINE__;engine.seek(${JSON.stringify(options.time)});await engine.flush();for(let i=0;i<7;i++){engine.render();await engine.drain();}true`);await assertBrowserRenderer(browser);await writeFile(options.out,await browser.screenshot());}finally{await browser?.close();await host.close();}}
 interface RenderBatchOptions{outDir:string;width:number;height:number;frames:number;reference?:string;keep:number}
-interface RenderBatchCapture{readonly id:string;readonly file?:string;readonly scene?:SceneSpec;readonly time?:number;readonly frames?:number;readonly meta?:Record<string,unknown>}
-interface RenderBatchManifest{readonly assetRoot?:string;readonly captures:readonly RenderBatchCapture[]}
+interface RenderBatchCapture{readonly id:string;readonly file?:string;readonly scene?:SceneSpec;readonly patch?:AppearancePatch;readonly time?:number;readonly frames?:number;readonly meta?:Record<string,unknown>}
+interface RenderBatchManifest{readonly assetRoot?:string;readonly base?:string;readonly captures:readonly RenderBatchCapture[]}
 async function loadBatchManifest(file:string):Promise<RenderBatchManifest>{
   const path=resolve(file),ext=extname(path).toLowerCase();
   if(ext==='.json')return JSON.parse(await readFile(path,'utf8')) as RenderBatchManifest;
@@ -62,10 +62,13 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
   for(const capture of captures){
     if(typeof capture.id!=='string'||!/^[A-Za-z0-9._-]{1,80}$/.test(capture.id)||ids.has(capture.id))throw new TypeError('batch capture ids must be unique filesystem-safe names');
     ids.add(capture.id);
-    if((capture.file===undefined)===(capture.scene===undefined))throw new TypeError(`batch capture ${capture.id} must provide exactly one of file or scene`);
+    const sources=Number(capture.file!==undefined)+Number(capture.scene!==undefined)+Number(capture.patch!==undefined);
+    if(sources!==1)throw new TypeError(`batch capture ${capture.id} must provide exactly one of file, scene or patch`);
+    if(capture.patch!==undefined&&!manifest.base)throw new TypeError(`batch capture ${capture.id} uses patch but manifest.base is missing`);
     const frames=capture.frames??options.frames;if(!Number.isInteger(frames)||frames<1||frames>32)throw new RangeError(`batch capture ${capture.id} frames must be in [1,32]`);
   }
-  const load=async(capture:RenderBatchCapture)=>capture.scene?validateScene(capture.scene):await loadSceneFile(resolve(directory,capture.file!));
+  const baseScene=manifest.base?await loadSceneFile(resolve(directory,manifest.base)):undefined;
+  const load=async(capture:RenderBatchCapture)=>capture.patch?baseScene!:capture.scene?validateScene(capture.scene):await loadSceneFile(resolve(directory,capture.file!));
   const first=await load(captures[0]!),assetRoot=resolve(directory,manifest.assetRoot??'.');
   const reference=options.reference?referenceDataUrl(options.reference,await readFile(options.reference)):undefined;
   await mkdir(options.outDir,{recursive:true});
@@ -76,8 +79,10 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
     const warm=performance.now();
     for(let index=0;index<captures.length;index++){
       const capture=captures[index]!,scene=index===0?first:await load(capture),time=capture.time??0,frames=capture.frames??options.frames,begin=performance.now();scenes.push(scene);
-      const replace=index===0?'':`await engine.replaceScene(${JSON.stringify(scene)});`;
-      await browser.evaluate(`const engine=window.__GAME_ENGINE__;${replace}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
+      const transition=capture.patch
+        ?`engine.patchAppearance(${JSON.stringify(capture.patch)});`
+        :(index===0?'':`await engine.replaceScene(${JSON.stringify(scene)});`);
+      await browser.evaluate(`const engine=window.__GAME_ENGINE__;${transition}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
       await assertBrowserRenderer(browser);
       let heroGap:number|undefined;
       if(reference){
@@ -112,7 +117,10 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
     if(reference&&options.keep>0){
       for(const item of ranked.slice(0,Math.min(options.keep,ranked.length))){
         const index=results.indexOf(item),capture=captures[index]!,scene=scenes[index]!,time=capture.time??0,frames=capture.frames??options.frames;
-        await browser.evaluate(`const engine=window.__GAME_ENGINE__;await engine.replaceScene(${JSON.stringify(scene)});engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
+        const transition=capture.patch
+          ?`await engine.replaceScene(${JSON.stringify(baseScene)});engine.patchAppearance(${JSON.stringify(capture.patch)});`
+          :`await engine.replaceScene(${JSON.stringify(scene)});`;
+        await browser.evaluate(`const engine=window.__GAME_ENGINE__;${transition}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
         await writeFile(join(options.outDir,`${item.id}.png`),await browser.screenshot());
       }
     }
