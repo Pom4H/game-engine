@@ -106,15 +106,12 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
       await assertBrowserRenderer(browser);
       let heroGap:number|undefined;
       if(reference){
+        const currentPng=(await browser.screenshot()).toString('base64');
         heroGap=await browser.evaluate(`
-          const canvas=document.querySelector('canvas[data-game-engine]'),engine=window.__GAME_ENGINE__;
-          if(!globalThis.__GE_HERO_REF__){
-            const source=${JSON.stringify(reference)},comma=source.indexOf(','),header=source.slice(5,comma),encoded=source.slice(comma+1),raw=atob(encoded),bytes=new Uint8Array(raw.length);
-            for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-            const mime=header.split(';',1)[0]||'image/jpeg';
-            globalThis.__GE_HERO_REF__=await createImageBitmap(new Blob([bytes],{type:mime}));
-          }
-          const current=await createImageBitmap(await engine.capture()),ref=globalThis.__GE_HERO_REF__,w=canvas.width,h=canvas.height;
+          const canvas=document.querySelector('canvas[data-game-engine]');
+          const loadImage=src=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('image decode failed'));image.src=src;});
+          if(!globalThis.__GE_HERO_REF__)globalThis.__GE_HERO_REF__=await loadImage(${JSON.stringify(reference)});
+          const current=await loadImage('data:image/png;base64,${currentPng}'),ref=globalThis.__GE_HERO_REF__,w=canvas.width,h=canvas.height;
           const a=new OffscreenCanvas(w,h),b=new OffscreenCanvas(w,h),ac=a.getContext('2d',{willReadFrequently:true}),bc=b.getContext('2d',{willReadFrequently:true});
           ac.drawImage(current,0,0,w,h);bc.drawImage(ref,0,0,w,h);
           const ap=ac.getImageData(0,0,w,h).data,bp=bc.getImageData(0,0,w,h).data;
@@ -127,7 +124,6 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
             chroma+=(Math.abs((ar-ay)-(br-by))+Math.abs((ag-ay)-(bg-by))+Math.abs((ab-ay)-(bb-by)))/3;
             if(x+1<w&&y+1<h){const ix=i+4,iy=i+w*4;const ae=Math.hypot(Y(ap,ix)-Y(ap,i),Y(ap,iy)-Y(ap,i))/255,be=Math.hypot(Y(bp,ix)-Y(bp,i),Y(bp,iy)-Y(bp,i))/255;edge+=Math.abs(ae-be);edgeN++;}
           }
-          current.close();
           return .55*(luma/(w*h))+.20*(chroma/(w*h))+.25*(edge/Math.max(1,edgeN));
         `);
       }else{
