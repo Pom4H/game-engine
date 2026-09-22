@@ -122,52 +122,49 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
   const reference=options.reference?referenceDataUrl(options.reference,await readFile(options.reference)):undefined;
   await mkdir(options.outDir,{recursive:true});
   const host=await serveScene(first,{sceneDirectory:assetRoot,distributionDirectory});let browser:BrowserSession|undefined;
-  const started=performance.now(),results:{id:string;milliseconds:number;metricMilliseconds?:number;heroGap?:number;meta?:Record<string,unknown>}[]=[],scenes:SceneSpec[]=[];
+  const started=performance.now(),results:{id:string;milliseconds:number;metricMilliseconds?:number;heroGap?:number;meta?:Record<string,unknown>}[]=[],topFrames:{id:string;heroGap:number;png:Buffer}[]=[];
   try{
     browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
     if(reference)await prepareHeroMetric(browser,reference);
     let metricPath:'canvas'|'screenshot'='canvas',metricParityDelta:number|undefined;
     const warm=performance.now();
     for(let index=0;index<captures.length;index++){
-      const capture=captures[index]!,scene=index===0?first:await load(capture),time=capture.time??0,frames=capture.frames??options.frames,begin=performance.now();scenes.push(scene);
+      const capture=captures[index]!,scene=index===0?first:await load(capture),time=capture.time??0,frames=capture.frames??options.frames,begin=performance.now();
       const transition=capture.patch
         ?`engine.patchAppearance(${JSON.stringify(capture.patch)});`
         :(index===0?'':`await engine.replaceScene(${JSON.stringify(scene)});`);
       await browser.evaluate(`const engine=window.__GAME_ENGINE__;${transition}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
       await assertBrowserRenderer(browser);
-      let heroGap:number|undefined,metricMilliseconds:number|undefined;
+      let heroGap:number|undefined,metricMilliseconds:number|undefined,candidatePng:Buffer|undefined;
       if(reference){
         const metricStart=performance.now();
         if(index===0){
           let direct:number|undefined;
           try{direct=await browser.evaluate('return globalThis.__GE_HERO_METRIC__.canvas()');}catch{}
-          const png=(await browser.screenshot()).toString('base64');
-          const screenshot:number=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${png}')`);
+          candidatePng=await browser.screenshot();
+          const screenshot:number=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${candidatePng.toString('base64')}')`);
           metricParityDelta=direct===undefined?Infinity:Math.abs(direct-screenshot);
           if(!Number.isFinite(metricParityDelta)||metricParityDelta>1e-6)metricPath='screenshot';
           heroGap=metricPath==='canvas'?direct:screenshot;
         }else if(metricPath==='canvas')heroGap=await browser.evaluate('return globalThis.__GE_HERO_METRIC__.canvas()');
         else{
-          const png=(await browser.screenshot()).toString('base64');
-          heroGap=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${png}')`);
+          candidatePng=await browser.screenshot();
+          heroGap=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${candidatePng.toString('base64')}')`);
         }
         metricMilliseconds=performance.now()-metricStart;
       }else{
         const out=join(options.outDir,`${capture.id}.png`);await writeFile(out,await browser.screenshot());
       }
+      if(heroGap!==undefined&&options.keep>0&&(topFrames.length<options.keep||heroGap<topFrames[topFrames.length-1]!.heroGap)){
+        topFrames.push({id:capture.id,heroGap,png:candidatePng??await browser.screenshot()});
+        topFrames.sort((a,b)=>a.heroGap-b.heroGap);
+        if(topFrames.length>options.keep)topFrames.pop();
+      }
       results.push({id:capture.id,milliseconds:performance.now()-begin,...(heroGap===undefined?{}:{heroGap}),...(metricMilliseconds===undefined?{}:{metricMilliseconds}),...(capture.meta?{meta:capture.meta}:{})});
+      console.log(JSON.stringify({capture:capture.id,index:index+1,total:captures.length,milliseconds:results[index]!.milliseconds,metricPath:reference?metricPath:null,heroGap}));
     }
     const ranked=[...results].sort((a,b)=>(a.heroGap??Infinity)-(b.heroGap??Infinity));
-    if(reference&&options.keep>0){
-      for(const item of ranked.slice(0,Math.min(options.keep,ranked.length))){
-        const index=results.indexOf(item),capture=captures[index]!,scene=scenes[index]!,time=capture.time??0,frames=capture.frames??options.frames;
-        const transition=capture.patch
-          ?`await engine.replaceScene(${JSON.stringify(baseScene)});engine.patchAppearance(${JSON.stringify(capture.patch)});`
-          :`await engine.replaceScene(${JSON.stringify(scene)});`;
-        await browser.evaluate(`const engine=window.__GAME_ENGINE__;${transition}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
-        await writeFile(join(options.outDir,`${item.id}.png`),await browser.screenshot());
-      }
-    }
+    for(const item of topFrames)await writeFile(join(options.outDir,`${item.id}.png`),item.png);
     const total=performance.now()-started,report={version:2,width:options.width,height:options.height,captures:results.length,startupMilliseconds:warm-started,batchMilliseconds:total-(warm-started),totalMilliseconds:total,meanHotCaptureMilliseconds:results.reduce((sum,item)=>sum+item.milliseconds,0)/results.length,metricPath:reference?metricPath:null,metricParityDelta:reference?metricParityDelta:null,best:ranked[0]??null,ranked,results};
     await writeFile(join(options.outDir,'report.json'),JSON.stringify(report,null,2));return report;
   }finally{await browser?.close();await host.close();}
