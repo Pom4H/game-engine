@@ -1,0 +1,62 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "9128d6b32718a65ae4c4b4d5dcd3120c785f278c",
+  "parents": [
+    "aa7a04ee197c3609f3bf06375dbd9e614da68855"
+  ],
+  "authoredAt": "2026-09-22T10:28:50+03:00",
+  "recordedAt": "2026-09-22T07:35:37.079Z",
+  "experiment": "development-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "dev: repin usegit for self-hosted causal CI",
+    "experiment": "development-loop",
+    "observation": "the first usegit caller failed before its first step because reusable CI hard-coded ubuntu-latest while game-engine requires its self-hosted runner.",
+    "hypothesis": "the corrected reusable runner contract will let game-engine validate and materialize usegit evidence on existing infrastructure.",
+    "intervention": "repin usegit to 5ab0deb174391f6b55db000d9aecd0949ce31234 and pass runs_on self-hosted without changing engine or RealityGap behavior.",
+    "prediction": "the usegit job starts on the self-hosted runner, validates post-bootstrap trailers, builds its report and writes refs/notes/usegit.",
+    "targets": [],
+    "guards": [
+      "renderer RealityGap and existing game-engine CI logic are unchanged"
+    ],
+    "dependsOn": [],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "development-loop"
+      ],
+      "Causal-Observation": [
+        "the first usegit caller failed before its first step because reusable CI hard-coded ubuntu-latest while game-engine requires its self-hosted runner."
+      ],
+      "Causal-Hypothesis": [
+        "the corrected reusable runner contract will let game-engine validate and materialize usegit evidence on existing infrastructure."
+      ],
+      "Causal-Intervention": [
+        "repin usegit to 5ab0deb174391f6b55db000d9aecd0949ce31234 and pass runs_on self-hosted without changing engine or RealityGap behavior."
+      ],
+      "Causal-Prediction": [
+        "the usegit job starts on the self-hosted runner, validates post-bootstrap trailers, builds its report and writes refs/notes/usegit."
+      ],
+      "Causal-Guard": [
+        "renderer RealityGap and existing game-engine CI logic are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35699810975",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35699810975"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
