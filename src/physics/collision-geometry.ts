@@ -22,9 +22,20 @@ export function colliderBounds(input:Collider):ColliderBounds{
   if(c.kind==='sphere')return{min:[-c.radius,-c.radius,-c.radius],max:[c.radius,c.radius,c.radius]};
   if(c.kind==='box')return{min:[-c.half[0],-c.half[1],-c.half[2]],max:[c.half[0],c.half[1],c.half[2]]};
   if(c.kind==='capsule')return{min:[-c.radius,-c.halfHeight-c.radius,-c.radius],max:[c.radius,c.halfHeight+c.radius,c.radius]};
-  if(c.kind==='heightfield'){const minY=Math.min(...c.heights),maxY=Math.max(...c.heights);return{min:[0,minY,0],max:[(c.width-1)*c.cellSize,maxY,(c.depth-1)*c.cellSize]};}
-  const points:readonly Vec3[]=c.kind==='convex'?c.points:Array.from({length:c.positions.length/3},(_,i)=>[c.positions[i*3]!,c.positions[i*3+1]!,c.positions[i*3+2]!] as Vec3);
+  if(c.kind==='heightfield'){
+    let minY=Infinity,maxY=-Infinity;
+    for(const height of c.heights){minY=Math.min(minY,height);maxY=Math.max(maxY,height);}
+    return{min:[0,minY,0],max:[(c.width-1)*c.cellSize,maxY,(c.depth-1)*c.cellSize]};
+  }
   const min:[number,number,number]=[Infinity,Infinity,Infinity],max:[number,number,number]=[-Infinity,-Infinity,-Infinity];
-  for(const point of points)for(let axis=0;axis<3;axis++){const value=point[axis]!;min[axis]=Math.min(min[axis]!,value);max[axis]=Math.max(max[axis]!,value);}
+  if(c.kind==='convex'){
+    for(const point of c.points)for(let axis=0;axis<3;axis++){
+      const value=point[axis]!;min[axis]=Math.min(min[axis]!,value);max[axis]=Math.max(max[axis]!,value);
+    }
+  }else{
+    for(let i=0;i<c.positions.length;i+=3)for(let axis=0;axis<3;axis++){
+      const value=c.positions[i+axis]!;min[axis]=Math.min(min[axis]!,value);max[axis]=Math.max(max[axis]!,value);
+    }
+  }
   return{min,max};
 }

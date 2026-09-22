@@ -2,8 +2,10 @@ import {SpatialHash} from '../core/spatial-hash.js';
 import {material,type PhysicalMaterial} from '../materials/catalog.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
+import {validateCollider,type Collider} from './collision-geometry.js';
 
-export type CollisionShape = {kind:'sphere';radius:number}|{kind:'box';half:Vec3};
+/** Narrow-phase shapes supported by PhysicsWorld, drawn from the canonical collider schema. */
+export type CollisionShape = Extract<Collider,{kind:'sphere'|'box'}>;
 export interface RigidBodyOptions {
   id:string;
   position:Vec3;
@@ -46,6 +48,8 @@ export class RigidBody {
 
   constructor(options:RigidBodyOptions){
     if(!options.id)throw new TypeError('Rigid body id is required');
+    if(options.shape.kind!=='sphere'&&options.shape.kind!=='box')throw new TypeError('PhysicsWorld supports sphere and box colliders');
+    validateCollider(options.shape);
     const mass=options.mass??0;
     if(!Number.isFinite(mass)||mass<0)throw new RangeError('Body mass must be finite and non-negative');
     this.id=options.id;

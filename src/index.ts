@@ -68,7 +68,7 @@ export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type Doub
 
 export {locationAt,locationIdAt,locationBounds,locationsInRadius,distanceToLocation,LOCATION_SIZE,LOCATION_SCHEMA_VERSION,type WorldLocation} from './world/locations.js';
 export {InterestPlanner,DEFAULT_INTEREST,type InterestSubject,type InterestDecision,type InterestConfig} from './world/interest.js';
-export {CompactResidencyStore,jsonColdCodec,simulationTierFor,DEFAULT_TIER_THRESHOLDS,type ColdCodec,type SimulationInterest,type TierThresholds} from './world/residency.js';
+export {CompactResidencyStore,jsonColdCodec,type ColdCodec} from './world/residency.js';
 export {LocationScheduler,type ScheduledLocation,type WorkBudget,type WorkPlan} from './world/scheduler.js';
 export {InMemoryOwnership} from './world/ownership.js';
 export {WorldMailbox,type WorldMessage,type EnqueueOutcome} from './world/messages.js';

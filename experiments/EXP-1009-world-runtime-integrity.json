@@ -1,0 +1,17 @@
+{
+  "id": "EXP-1009",
+  "question": "Can the extracted world modules share engine authorities and reject invalid state without partial commits?",
+  "hypothesis": "One tier planner and collider schema, detached checkpoints, and validated replication/input boundaries remove contradictory or partially committed state.",
+  "status": "locally-validated",
+  "conditions": {
+    "dependsOn": ["EXP-1005", "EXP-1008"],
+    "scope": "generic world runtime and existing sphere/box PhysicsWorld; no unsupported collision claim"
+  },
+  "evidence": [
+    "removed unused duplicate simulationTierFor threshold table",
+    "RigidBody shape is the supported subset of Collider and rejects invalid dimensions or unsupported narrow-phase kinds",
+    "failed checkpoint restore and malformed replication/input batches leave previous state intact",
+    "large 512x512 heightfield and triangle-mesh bounds pass without argument expansion"
+  ],
+  "decision": "Keep one causal authority for each state and validate before mutating; complete Scene checkpoint adapters remain future work"
+}

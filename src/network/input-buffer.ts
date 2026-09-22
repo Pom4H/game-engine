@@ -6,9 +6,12 @@ export class InputCommandBuffer<T extends Sequenced=Sequenced>{
   skipped=0;processedThrough=65535;
   push(commands:readonly T[],now:number):T[]{
     if(!Number.isFinite(now))throw new RangeError('Input buffer time must be finite');
+    for(const command of commands)
+      if(!Number.isSafeInteger(command.commandSeq)||command.commandSeq<0||command.commandSeq>65535)
+        throw new RangeError('commandSeq must be uint16');
     if(this.expected===null&&commands.length)this.expected=commands[0]!.commandSeq;
     if(this.expected===null)return[];
-    for(const command of commands){if(!Number.isSafeInteger(command.commandSeq)||command.commandSeq<0||command.commandSeq>65535)throw new RangeError('commandSeq must be uint16');const d=distance(command.commandSeq,this.expected);if(d<32768&&d<=INPUT_REORDER_WINDOW)this.pending.set(command.commandSeq,command);}
+    for(const command of commands){const d=distance(command.commandSeq,this.expected);if(d<32768&&d<=INPUT_REORDER_WINDOW)this.pending.set(command.commandSeq,command);}
     return this.drain(now);
   }
   drain(now:number,waitMs=INPUT_REORDER_WAIT_MS):T[]{

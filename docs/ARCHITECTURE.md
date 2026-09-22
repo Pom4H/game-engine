@@ -257,3 +257,19 @@ locations took 33.58 ms before and 2.20 ms after (15.3×). Results were
 identical for the recorded decisions and drain order. These are CPU fixture
 timings, not a claim about GPU frame rate or the entire Scene.
 
+## Runtime state boundaries
+
+`InterestPlanner` is the single authority for detailed/active/aggregate/dormant
+decisions; there is no second distance threshold table in the residency store.
+
+`Collider` is the one shape schema. `PhysicsWorld.CollisionShape` is its
+sphere/box subset and validates that subset at the body boundary. Other
+collider kinds describe authoring geometry but do not imply narrow-phase
+contact support. Heightfield and triangle-mesh bounds scan numeric arrays
+without expanding them into argument lists or per-vertex objects.
+
+Checkpoint reads return detached state; restore validates the whole sequence
+before replacing history. A replication receiver validates and clones an
+entire delta before committing any entity revision. These contracts are for
+generic world state; a complete Scene checkpoint still requires explicit
+physics, surface and event adapters.

@@ -1,21 +1,5 @@
 import {SIMULATION_TIERS,type SimulationTier} from '../core/kernel.js';
 
-export interface SimulationInterest{
-  readonly distanceM?:number;readonly directlyObserved?:boolean;readonly controlled?:boolean;
-  readonly physicallyCoupled?:boolean;readonly owned?:boolean;readonly hasPendingWork?:boolean;
-}
-export interface TierThresholds{readonly detailedM:number;readonly activeM:number;readonly aggregateM:number}
-export const DEFAULT_TIER_THRESHOLDS:TierThresholds={detailedM:128,activeM:768,aggregateM:5000};
-export function simulationTierFor(interest:SimulationInterest,thresholds:TierThresholds=DEFAULT_TIER_THRESHOLDS):SimulationTier{
-  if(!(thresholds.detailedM>=0&&thresholds.activeM>=thresholds.detailedM&&thresholds.aggregateM>=thresholds.activeM))throw new RangeError('Invalid simulation tier thresholds');
-  if(interest.controlled||interest.physicallyCoupled)return'detailed';
-  const distance=interest.distanceM;if(distance!==undefined&&(!Number.isFinite(distance)||distance<0))throw new RangeError('Invalid simulation distance');
-  if(interest.directlyObserved&&distance!==undefined&&distance<=thresholds.detailedM)return'detailed';
-  if(distance!==undefined&&distance<=thresholds.activeM)return'active';
-  if(interest.owned||interest.hasPendingWork)return'aggregate';
-  if(distance!==undefined&&distance<=thresholds.aggregateM)return'aggregate';
-  return'dormant';
-}
 export interface ColdCodec<T>{readonly encode:(value:Readonly<T>)=>Uint8Array;readonly decode:(bytes:Uint8Array)=>T}
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 export function jsonColdCodec<T>():ColdCodec<T>{return{encode:value=>encoder.encode(JSON.stringify(value)),decode:bytes=>JSON.parse(decoder.decode(bytes)) as T};}
