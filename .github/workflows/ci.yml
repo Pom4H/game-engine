@@ -7,7 +7,7 @@ on:
   pull_request:
 
 concurrency:
-  group: game-engine-ci-${{ github.ref }}
+  group: game-engine-ci-v2-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
