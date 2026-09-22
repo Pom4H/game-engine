@@ -20,7 +20,7 @@
     "decisionAndDrainOutputEqual": true
   },
   "evidence": [
-    "test/world-runtime.test.mjs checks exact distances after observer motion and deterministic target drains",
+    "test/world-runtime-scale.test.mjs checks exact distances after observer motion and deterministic target drains",
     "tools/profiling/world-runtime.mjs reproduces the post-change fixture",
     "local TypeScript typecheck, build and focused physics/world tests passed"
   ],
