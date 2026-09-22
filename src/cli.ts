@@ -65,14 +65,19 @@ async function prepareHeroMetric(browser:BrowserSession,reference:string):Promis
     const source=new Image();source.src=${JSON.stringify(reference)};await source.decode();
     const canvas=document.querySelector('canvas[data-game-engine]');
     if(!canvas)throw new Error('Game Engine canvas not found');
-    const width=canvas.width,height=canvas.height;
+    const width=canvas.width,height=canvas.height,count=width*height;
     const current=new OffscreenCanvas(width,height),ctx=current.getContext('2d',{willReadFrequently:true});
     const target=new OffscreenCanvas(width,height),targetCtx=target.getContext('2d',{willReadFrequently:true});
     targetCtx.drawImage(source,0,0,width,height);
     const bp=targetCtx.getImageData(0,0,width,height).data;
     const Y=(p,i)=>.2126*p[i]+.7152*p[i+1]+.0722*p[i+2];
-    const score=()=>{
-      const ap=ctx.getImageData(0,0,width,height).data;
+    const targetY=new Float64Array(count),currentY=new Float64Array(count),targetEdge=new Float64Array(count);
+    for(let i=0;i<count;i++)targetY[i]=Y(bp,i*4);
+    for(let y=0;y+1<height;y++)for(let x=0;x+1<width;x++){
+      const i=y*width+x;
+      targetEdge[i]=Math.hypot(targetY[i+1]-targetY[i],targetY[i+width]-targetY[i])/255;
+    }
+    const legacy=ap=>{
       let luma=0,chroma=0,edge=0,edgeN=0;
       for(let y=0;y<height;y++)for(let x=0;x<width;x++){
         const i=(y*width+x)*4,ay=Y(ap,i)/255,by=Y(bp,i)/255;
@@ -83,10 +88,25 @@ async function prepareHeroMetric(browser:BrowserSession,reference:string):Promis
       }
       return .55*(luma/(width*height))+.20*(chroma/(width*height))+.25*(edge/Math.max(1,edgeN));
     };
+    const score=ap=>{
+      for(let i=0;i<count;i++)currentY[i]=Y(ap,i*4);
+      let luma=0,chroma=0,edge=0;
+      for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+        const pixel=y*width+x,i=pixel*4,ay=currentY[pixel]/255,by=targetY[pixel]/255;
+        luma+=Math.abs(ay-by);
+        const ar=ap[i]/255,ag=ap[i+1]/255,ab=ap[i+2]/255,br=bp[i]/255,bg=bp[i+1]/255,bb=bp[i+2]/255;
+        chroma+=(Math.abs((ar-ay)-(br-by))+Math.abs((ag-ay)-(bg-by))+Math.abs((ab-ay)-(bb-by)))/3;
+        if(x+1<width&&y+1<height){const ae=Math.hypot(currentY[pixel+1]-currentY[pixel],currentY[pixel+width]-currentY[pixel])/255;edge+=Math.abs(ae-targetEdge[pixel]);}
+      }
+      return .55*(luma/count)+.20*(chroma/count)+.25*(edge/Math.max(1,(width-1)*(height-1)));
+    };
     globalThis.__GE_HERO_METRIC__={
-      canvas:()=>{ctx.drawImage(canvas,0,0,width,height);return score();},
-      screenshot:async url=>{const image=new Image();image.src=url;await image.decode();ctx.drawImage(image,0,0,width,height);return score();}
-    };true
+      screenshot:async(url,mode)=>{
+        const image=new Image();image.src=url;await image.decode();ctx.drawImage(image,0,0,width,height);
+        const ap=ctx.getImageData(0,0,width,height).data;
+        return mode==='compare'?{cached:score(ap),legacy:legacy(ap)}:mode==='legacy'?legacy(ap):score(ap);
+      }
+    };
   `);
 }
 async function loadBatchManifest(file:string):Promise<RenderBatchManifest>{
@@ -126,7 +146,7 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
   try{
     browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
     if(reference)await prepareHeroMetric(browser,reference);
-    let metricPath:'canvas'|'screenshot'='canvas',metricParityDelta:number|undefined;
+    let metricPath:'cached'|'legacy'='cached',metricParityDelta:number|undefined;
     const warm=performance.now();
     for(let index=0;index<captures.length;index++){
       const capture=captures[index]!,scene=index===0?first:await load(capture),time=capture.time??0,frames=capture.frames??options.frames,begin=performance.now();
@@ -138,18 +158,15 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
       let heroGap:number|undefined,metricMilliseconds:number|undefined,candidatePng:Buffer|undefined;
       if(reference){
         const metricStart=performance.now();
+        candidatePng=await browser.screenshot();
+        const dataUrl=`data:image/png;base64,${candidatePng.toString('base64')}`;
         if(index===0){
-          let direct:number|undefined;
-          try{direct=await browser.evaluate('return globalThis.__GE_HERO_METRIC__.canvas()');}catch{}
-          candidatePng=await browser.screenshot();
-          const screenshot:number=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${candidatePng.toString('base64')}')`);
-          metricParityDelta=direct===undefined?Infinity:Math.abs(direct-screenshot);
-          if(!Number.isFinite(metricParityDelta)||metricParityDelta>1e-6)metricPath='screenshot';
-          heroGap=metricPath==='canvas'?direct:screenshot;
-        }else if(metricPath==='canvas')heroGap=await browser.evaluate('return globalThis.__GE_HERO_METRIC__.canvas()');
-        else{
-          candidatePng=await browser.screenshot();
-          heroGap=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${candidatePng.toString('base64')}')`);
+          const scores:{cached:number;legacy:number}=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot(${JSON.stringify(dataUrl)},'compare')`);
+          metricParityDelta=Math.abs(scores.cached-scores.legacy);
+          if(!Number.isFinite(metricParityDelta)||metricParityDelta>1e-9)metricPath='legacy';
+          heroGap=metricPath==='cached'?scores.cached:scores.legacy;
+        }else{
+          heroGap=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot(${JSON.stringify(dataUrl)},${JSON.stringify(metricPath)})`);
         }
         metricMilliseconds=performance.now()-metricStart;
       }else{
