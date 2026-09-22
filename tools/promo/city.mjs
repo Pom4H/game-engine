@@ -243,17 +243,14 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   // wet road as physically dark asphalt instead of a bright brown diffuse slab.
   for(let i=entities.length-1;i>=0;i--){
    const id=entities[i].id;
-   if(id.startsWith('plough-grit-')||id.startsWith('walk-grain-')||id.startsWith('centre-slush-')||id.startsWith('plough-shoulder-')||id.startsWith('plough-crest-'))entities.splice(i,1);
+   if(id.startsWith('plough-grit-')||id.startsWith('walk-grain-')||id.startsWith('centre-slush-')||id.startsWith('plough-shoulder-')||id.startsWith('plough-crest-')||id.startsWith('puddle'))entities.splice(i,1);
   }
   bank('hero-bank-near',[-13,.18,-4.12],[118,.48,1.08],4617,72);
   bank('hero-bank-far',[-13,.18,4.08],[118,.56,1.22],9121,72);
   for(const entity of entities){
    if(entity.id==='road'){
-    entity.material={...entity.material,color:[.014,.016,.020,1],roughness:.72};
-    entity.environmental={...entity.environmental,snowDepthM:.001,iceDepthM:.00003,waterDepthM:.0010};
-   }
-   if(entity.id.startsWith('puddle')){
-    entity.material={...entity.material,color:[.025,.032,.040,1],roughness:.10};
+    entity.material={...entity.material,color:[.012,.014,.017,1],roughness:.58};
+    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:.00002,waterDepthM:.0012};
    }
   }
  }
