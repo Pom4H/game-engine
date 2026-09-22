@@ -1,0 +1,62 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "79d1777f87aef13d05e6c59e261b0732d92231ae",
+  "parents": [
+    "477f992bb62394a80a36eba9a5a9ce59d0149dd1"
+  ],
+  "authoredAt": "2026-09-22T10:37:13+03:00",
+  "recordedAt": "2026-09-22T07:41:12.275Z",
+  "experiment": "development-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "dev: bind usegit to the runner execution contract",
+    "experiment": "development-loop",
+    "observation": "self-hosted selection works, but the Windows runner blocks its default PowerShell script wrapper under ExecutionPolicy.",
+    "hypothesis": "passing the same cmd shell already used by game-engine CI will make usegit validation and evidence persistence executable without changing target infrastructure.",
+    "intervention": "repin usegit to c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a and pass runner_shell cmd to the reusable causal workflow.",
+    "prediction": "causal validation, report generation and refs/notes/usegit persistence all complete on NUCBOX_M6ULTRA.",
+    "targets": [],
+    "guards": [
+      "no renderer RealityGap physics or performance behavior changes"
+    ],
+    "dependsOn": [],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "development-loop"
+      ],
+      "Causal-Observation": [
+        "self-hosted selection works, but the Windows runner blocks its default PowerShell script wrapper under ExecutionPolicy."
+      ],
+      "Causal-Hypothesis": [
+        "passing the same cmd shell already used by game-engine CI will make usegit validation and evidence persistence executable without changing target infrastructure."
+      ],
+      "Causal-Intervention": [
+        "repin usegit to c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a and pass runner_shell cmd to the reusable causal workflow."
+      ],
+      "Causal-Prediction": [
+        "causal validation, report generation and refs/notes/usegit persistence all complete on NUCBOX_M6ULTRA."
+      ],
+      "Causal-Guard": [
+        "no renderer RealityGap physics or performance behavior changes"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35700523980",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35700523980"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
