@@ -23,9 +23,11 @@ Required trailers are `Causal-Experiment`, `Causal-Observation`, `Causal-Hypothe
 
 `WIP`, `fixup!`, and `squash!` are not accepted as causal evidence on a PR HEAD. Intermediate local commits are fine; before pushing a hypothesis for CI, squash/fix them into one interpretable intervention.
 
+The contract also fingerprints `experiment + hypothesis + intervention` against prior notes. Re-running the exact same causal experiment is rejected before the expensive Stanford render. If new evidence really justifies repeating a prior intervention, say so explicitly with `Causal-Supersedes: <sha>`.
+
 ## CI = observation
 
-CI evaluates the exact commit. `tools/causality/record.mjs` joins the declaration with RealityGap and performance artifacts and emits `game-engine.causal-evidence/v1`.
+CI evaluates the exact PR head commit, not GitHub's synthetic PR merge commit. `tools/causality/record.mjs` joins the declaration with RealityGap and performance artifacts and emits `game-engine.causal-evidence/v1`.
 
 The evidence is attached to the evaluated SHA with `git notes` in `refs/notes/causality`. This avoids rewriting the commit after measurements exist. The code commit stays immutable while the measured effect becomes durable Git metadata.
 
@@ -42,7 +44,7 @@ git notes --ref=causality show <sha>
 ## Causal model
 
 ```text
-parent commit
+parent commit = prior state
     │
     ├─ observation
     ├─ hypothesis
@@ -65,12 +67,21 @@ git note = observed effect + verdict
 next hypothesis
 ```
 
-This makes rejected hypotheses first-class history. A future engineer or agent can query what was tried, on which state, what changed, and why it was kept or discarded instead of repeating old experiments.
+This makes rejected and neutral hypotheses first-class history. A future engineer or agent can query what was tried, on which state, what changed, and what happened instead of rediscovering the same path.
+
+## Verdict semantics
+
+A verdict is only as strong as the experiment whose outcome can actually be evaluated.
+
+For `stanford-orb`, CI has an objective metric and tolerance, so it may classify a result as `accepted`, `neutral`, `rejected`, or `incomplete`.
+
+For other experiment classes the generic recorder uses `observed`. A failing unrelated CI gate is stored as an observation, but it is not automatically treated as proof that the declared intervention caused that failure.
 
 ## Rules
 
 1. One pushed experiment commit should represent one interpretable intervention. If several independent causes change at once, the measurement cannot tell which one caused the effect.
 2. Predictions are written before CI. Do not rewrite them after seeing the result.
-3. The held-out benchmark never feeds calibration or authoring decisions directly.
-4. A result is evidence for one Git state, not a timeless claim. Follow-up commits create new states and new evidence.
-5. Baselines advance only after an accepted experiment; a baseline update must reference the evidence it promotes with `Causal-Depends-On`.
+3. An exact previously measured hypothesis + intervention is not rerun implicitly. Change the causal claim, or reference the prior experiment with `Causal-Supersedes`.
+4. The held-out benchmark never feeds calibration or authoring decisions directly.
+5. A result is evidence for one Git state, not a timeless claim. Follow-up commits create new states and new evidence.
+6. Baselines advance only after an accepted experiment; a baseline update must reference the evidence it promotes with `Causal-Depends-On`.

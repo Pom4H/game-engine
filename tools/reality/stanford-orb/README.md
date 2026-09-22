@@ -10,6 +10,7 @@ Current committed baseline:
 
 ```text
 RealityGap = 0.23563216891992333
+tolerance  = ±0.003
 ```
 
 Runtime guards used by CI include `completedFps >= 59`, `submittedFps >= 59`, real-time simulation ratio, and GPU p95 `<= 16.67 ms`. Frame-time gates are defined by the workflow and may be stricter for individual tiers.
@@ -30,6 +31,8 @@ Causal-Guard: completedFps >= 59
 Causal-Guard: gpuP95Ms <= 16.67
 ```
 
+Before the expensive render, CI fetches `refs/notes/causality` and rejects an exact previously evaluated `experiment + hypothesis + intervention` fingerprint unless the new commit explicitly references that experiment with `Causal-Supersedes`.
+
 CI then renders the held-out captures, computes RealityGap, measures the GPU/runtime budget, and attaches the combined observation to the exact commit in `refs/notes/causality`.
 
 To see the experiment history:
@@ -43,11 +46,11 @@ The history is derived from Git; there is no manually maintained experiment log 
 
 ## Interpretation
 
-For `stanford-orb` notes, the automatic verdict is:
+For `stanford-orb` notes, the committed baseline tolerance is part of the statistical decision boundary:
 
-- `accepted`: RealityGap improved relative to the committed baseline and the measured CI guards passed;
-- `rejected`: RealityGap regressed, a regression was reported, or a measured CI guard failed;
-- `neutral`: the measured RealityGap equals the baseline;
+- `accepted`: RealityGap improves by more than the baseline tolerance and the measured CI guards pass;
+- `neutral`: RealityGap delta remains inside `±tolerance`; this is treated as noise / no demonstrated improvement;
+- `rejected`: RealityGap regresses by more than the tolerance, a benchmark regression is reported, or a required measured guard fails;
 - `incomplete`: enough evidence was not produced to decide.
 
-A rejected note is valuable. It prevents the same renderer idea from being rediscovered and retried without new evidence.
+A rejected or neutral note is valuable. It records a tested path so the next iteration starts from evidence rather than rediscovering the same renderer idea.

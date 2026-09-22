@@ -122,7 +122,9 @@ jobs:
         with:
           bun-version: 1.4.2
       - name: Causal commit contract
-        run: bun tools/causality/check.mjs HEAD
+        run: |
+          git fetch origin refs/notes/causality:refs/notes/causality || echo No existing causal notes ref
+          bun tools/causality/check.mjs HEAD --against-notes causality
       - name: Install
         run: bun install --frozen-lockfile
       - name: Build reality render path
@@ -166,7 +168,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 1
+          fetch-depth: 2
       - uses: actions/download-artifact@v7
         continue-on-error: true
         with:

@@ -48,19 +48,24 @@ export function validateCausalCommit(commit){
   return errors;
 }
 
+export function causalFingerprint(commit){
+  const normalize=value=>String(value??'').toLowerCase().trim().replace(/\s+/g,' ');
+  return [normalize(commit.experiment),normalize(commit.hypothesis),normalize(commit.intervention)].join('\n');
+}
+
 export function classifyEvidence({experiment,jobs={},reality=null}){
   const states=Object.values(jobs).filter(Boolean);
-  if(states.some(state=>['failure','cancelled','timed_out','action_required'].includes(state)))return 'rejected';
-  if(states.some(state=>state==='skipped'))return 'incomplete';
-  if(reality?.regressions?.length)return 'rejected';
   if(experiment==='stanford-orb'){
-    const delta=reality?.baseline?.delta;
+    if(states.some(state=>['failure','cancelled','timed_out','action_required'].includes(state)))return 'rejected';
+    if(states.some(state=>state==='skipped'))return 'incomplete';
+    if(reality?.regressions?.length)return 'rejected';
+    const delta=reality?.baseline?.delta,tolerance=reality?.baseline?.tolerance??0;
     if(Number.isFinite(delta)){
-      if(delta<0)return 'accepted';
-      if(delta>0)return 'rejected';
+      if(delta < -tolerance)return 'accepted';
+      if(delta > tolerance)return 'rejected';
       return 'neutral';
     }
     return 'incomplete';
   }
-  return states.length&&states.every(state=>state==='success')?'verified':'incomplete';
+  return 'observed';
 }
