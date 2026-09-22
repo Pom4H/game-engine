@@ -1,7 +1,7 @@
 {
   "id": "EXP-WINTER-BATCH-FAST-METRIC",
-  "question": "Can the winter-hero sweep score WebGPU canvas pixels in the browser without per-candidate PNG/CDP round trips while preserving the screenshot metric?",
-  "hypothesis": "A reused browser-side canvas and cached reference pixels will return the same hero gap within 1e-6 and reduce hot capture time across the 24-candidate sweep.",
+  "question": "Can the winter-hero sweep score 24 candidates faster while preserving the screenshot-based quality metric?",
+  "hypothesis": "Caching the screenshot reference luminance and edge response will preserve the legacy pixel score within 1e-9 while reducing per-candidate metric time.",
   "status": "running",
   "conditions": {
     "parent": "220a2b61fba3a339fee4f7d884391f293002a3a5",
@@ -15,10 +15,33 @@
     "baseline": "Page.captureScreenshot + base64 transfer + PNG decode + two new canvases per candidate"
   },
   "acceptance": {
-    "parity": "first candidate direct-canvas and screenshot hero gaps differ by at most 1e-6; otherwise use screenshot for the whole batch",
+    "parity": "first candidate cached and legacy screenshot scores differ by at most 1e-9; otherwise use legacy for the whole batch",
     "quality": "Stanford-ORB held-out and fixed winter hero remain within their existing limits",
     "speed": "record meanHotCaptureMilliseconds, metricPath, metricParityDelta and per-candidate metricMilliseconds"
   },
-  "evidence": [],
-  "decision": null
+  "evidence": [
+    {
+      "run": "https://github.com/Pom4H/game-engine/actions/runs/35778003031",
+      "captures": 24,
+      "startupMilliseconds": 16294.33,
+      "batchMilliseconds": 3478.62,
+      "meanHotCaptureMilliseconds": 144.75,
+      "metricPath": "screenshot",
+      "bestGap": 0.17464096907184345,
+      "stanfordRegressions": 0,
+      "performance1080": {
+        "completedFps": 28.77,
+        "gpuP95Ms": 20.57,
+        "status": "failed before renderer optimization"
+      }
+    }
+  ],
+  "decision": "Direct canvas readback rejected. Retain screenshot authority; run cached luminance parity and timing on next head.",
+  "negativeKnowledge": {
+    "directWebGpuCanvas": {
+      "result": "falsified on the Windows GPU runner",
+      "firstCandidateGapDelta": 0.0627324588403533,
+      "decision": "Do not score the WebGPU canvas via a 2D drawImage. Use the PNG screenshot as the pixel authority."
+    }
+  }
 }
