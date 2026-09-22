@@ -60,6 +60,35 @@ async function probeScene(scene:SceneSpec,options:ProbeOptions,sceneDirectory:st
 interface RenderBatchOptions{outDir:string;width:number;height:number;frames:number;reference?:string;keep:number}
 interface RenderBatchCapture{readonly id:string;readonly file?:string;readonly scene?:SceneSpec;readonly patch?:AppearancePatch;readonly time?:number;readonly frames?:number;readonly meta?:Record<string,unknown>}
 interface RenderBatchManifest{readonly assetRoot?:string;readonly base?:string;readonly captures:readonly RenderBatchCapture[]}
+async function prepareHeroMetric(browser:BrowserSession,reference:string):Promise<void>{
+  await browser.evaluate(`
+    const source=new Image();source.src=${JSON.stringify(reference)};await source.decode();
+    const canvas=document.querySelector('canvas[data-game-engine]');
+    if(!canvas)throw new Error('Game Engine canvas not found');
+    const width=canvas.width,height=canvas.height;
+    const current=new OffscreenCanvas(width,height),ctx=current.getContext('2d',{willReadFrequently:true});
+    const target=new OffscreenCanvas(width,height),targetCtx=target.getContext('2d',{willReadFrequently:true});
+    targetCtx.drawImage(source,0,0,width,height);
+    const bp=targetCtx.getImageData(0,0,width,height).data;
+    const Y=(p,i)=>.2126*p[i]+.7152*p[i+1]+.0722*p[i+2];
+    const score=()=>{
+      const ap=ctx.getImageData(0,0,width,height).data;
+      let luma=0,chroma=0,edge=0,edgeN=0;
+      for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+        const i=(y*width+x)*4,ay=Y(ap,i)/255,by=Y(bp,i)/255;
+        luma+=Math.abs(ay-by);
+        const ar=ap[i]/255,ag=ap[i+1]/255,ab=ap[i+2]/255,br=bp[i]/255,bg=bp[i+1]/255,bb=bp[i+2]/255;
+        chroma+=(Math.abs((ar-ay)-(br-by))+Math.abs((ag-ay)-(bg-by))+Math.abs((ab-ay)-(bb-by)))/3;
+        if(x+1<width&&y+1<height){const ix=i+4,iy=i+width*4;const ae=Math.hypot(Y(ap,ix)-Y(ap,i),Y(ap,iy)-Y(ap,i))/255,be=Math.hypot(Y(bp,ix)-Y(bp,i),Y(bp,iy)-Y(bp,i))/255;edge+=Math.abs(ae-be);edgeN++;}
+      }
+      return .55*(luma/(width*height))+.20*(chroma/(width*height))+.25*(edge/Math.max(1,edgeN));
+    };
+    globalThis.__GE_HERO_METRIC__={
+      canvas:()=>{ctx.drawImage(canvas,0,0,width,height);return score();},
+      screenshot:async url=>{const image=new Image();image.src=url;await image.decode();ctx.drawImage(image,0,0,width,height);return score();}
+    };true
+  `);
+}
 async function loadBatchManifest(file:string):Promise<RenderBatchManifest>{
   const path=resolve(file),ext=extname(path).toLowerCase();
   if(ext==='.json')return JSON.parse(await readFile(path,'utf8')) as RenderBatchManifest;
@@ -93,9 +122,11 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
   const reference=options.reference?referenceDataUrl(options.reference,await readFile(options.reference)):undefined;
   await mkdir(options.outDir,{recursive:true});
   const host=await serveScene(first,{sceneDirectory:assetRoot,distributionDirectory});let browser:BrowserSession|undefined;
-  const started=performance.now(),results:{id:string;milliseconds:number;heroGap?:number;meta?:Record<string,unknown>}[]=[],scenes:SceneSpec[]=[];
+  const started=performance.now(),results:{id:string;milliseconds:number;metricMilliseconds?:number;heroGap?:number;meta?:Record<string,unknown>}[]=[],scenes:SceneSpec[]=[];
   try{
     browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
+    if(reference)await prepareHeroMetric(browser,reference);
+    let metricPath:'canvas'|'screenshot'='canvas',metricParityDelta:number|undefined;
     const warm=performance.now();
     for(let index=0;index<captures.length;index++){
       const capture=captures[index]!,scene=index===0?first:await load(capture),time=capture.time??0,frames=capture.frames??options.frames,begin=performance.now();scenes.push(scene);
@@ -104,32 +135,27 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
         :(index===0?'':`await engine.replaceScene(${JSON.stringify(scene)});`);
       await browser.evaluate(`const engine=window.__GAME_ENGINE__;${transition}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
       await assertBrowserRenderer(browser);
-      let heroGap:number|undefined;
+      let heroGap:number|undefined,metricMilliseconds:number|undefined;
       if(reference){
-        const currentPng=(await browser.screenshot()).toString('base64');
-        heroGap=await browser.evaluate(`
-          const canvas=document.querySelector('canvas[data-game-engine]');
-          const loadImage=src=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('image decode failed'));image.src=src;});
-          if(!globalThis.__GE_HERO_REF__)globalThis.__GE_HERO_REF__=await loadImage(${JSON.stringify(reference)});
-          const current=await loadImage('data:image/png;base64,${currentPng}'),ref=globalThis.__GE_HERO_REF__,w=canvas.width,h=canvas.height;
-          const a=new OffscreenCanvas(w,h),b=new OffscreenCanvas(w,h),ac=a.getContext('2d',{willReadFrequently:true}),bc=b.getContext('2d',{willReadFrequently:true});
-          ac.drawImage(current,0,0,w,h);bc.drawImage(ref,0,0,w,h);
-          const ap=ac.getImageData(0,0,w,h).data,bp=bc.getImageData(0,0,w,h).data;
-          let luma=0,chroma=0,edge=0,edgeN=0;
-          const Y=(p,i)=>.2126*p[i]+.7152*p[i+1]+.0722*p[i+2];
-          for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-            const i=(y*w+x)*4,ay=Y(ap,i)/255,by=Y(bp,i)/255;
-            luma+=Math.abs(ay-by);
-            const ar=ap[i]/255,ag=ap[i+1]/255,ab=ap[i+2]/255,br=bp[i]/255,bg=bp[i+1]/255,bb=bp[i+2]/255;
-            chroma+=(Math.abs((ar-ay)-(br-by))+Math.abs((ag-ay)-(bg-by))+Math.abs((ab-ay)-(bb-by)))/3;
-            if(x+1<w&&y+1<h){const ix=i+4,iy=i+w*4;const ae=Math.hypot(Y(ap,ix)-Y(ap,i),Y(ap,iy)-Y(ap,i))/255,be=Math.hypot(Y(bp,ix)-Y(bp,i),Y(bp,iy)-Y(bp,i))/255;edge+=Math.abs(ae-be);edgeN++;}
-          }
-          return .55*(luma/(w*h))+.20*(chroma/(w*h))+.25*(edge/Math.max(1,edgeN));
-        `);
+        const metricStart=performance.now();
+        if(index===0){
+          let direct:number|undefined;
+          try{direct=await browser.evaluate('return globalThis.__GE_HERO_METRIC__.canvas()');}catch{}
+          const png=(await browser.screenshot()).toString('base64');
+          const screenshot:number=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${png}')`);
+          metricParityDelta=direct===undefined?Infinity:Math.abs(direct-screenshot);
+          if(!Number.isFinite(metricParityDelta)||metricParityDelta>1e-6)metricPath='screenshot';
+          heroGap=metricPath==='canvas'?direct:screenshot;
+        }else if(metricPath==='canvas')heroGap=await browser.evaluate('return globalThis.__GE_HERO_METRIC__.canvas()');
+        else{
+          const png=(await browser.screenshot()).toString('base64');
+          heroGap=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot('data:image/png;base64,${png}')`);
+        }
+        metricMilliseconds=performance.now()-metricStart;
       }else{
         const out=join(options.outDir,`${capture.id}.png`);await writeFile(out,await browser.screenshot());
       }
-      results.push({id:capture.id,milliseconds:performance.now()-begin,...(heroGap===undefined?{}:{heroGap}),...(capture.meta?{meta:capture.meta}:{})});
+      results.push({id:capture.id,milliseconds:performance.now()-begin,...(heroGap===undefined?{}:{heroGap}),...(metricMilliseconds===undefined?{}:{metricMilliseconds}),...(capture.meta?{meta:capture.meta}:{})});
     }
     const ranked=[...results].sort((a,b)=>(a.heroGap??Infinity)-(b.heroGap??Infinity));
     if(reference&&options.keep>0){
@@ -142,7 +168,7 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
         await writeFile(join(options.outDir,`${item.id}.png`),await browser.screenshot());
       }
     }
-    const total=performance.now()-started,report={version:2,width:options.width,height:options.height,captures:results.length,startupMilliseconds:warm-started,batchMilliseconds:total-(warm-started),totalMilliseconds:total,meanHotCaptureMilliseconds:results.reduce((sum,item)=>sum+item.milliseconds,0)/results.length,best:ranked[0]??null,ranked,results};
+    const total=performance.now()-started,report={version:2,width:options.width,height:options.height,captures:results.length,startupMilliseconds:warm-started,batchMilliseconds:total-(warm-started),totalMilliseconds:total,meanHotCaptureMilliseconds:results.reduce((sum,item)=>sum+item.milliseconds,0)/results.length,metricPath:reference?metricPath:null,metricParityDelta:reference?metricParityDelta:null,best:ranked[0]??null,ranked,results};
     await writeFile(join(options.outDir,'report.json'),JSON.stringify(report,null,2));return report;
   }finally{await browser?.close();await host.close();}
 }
