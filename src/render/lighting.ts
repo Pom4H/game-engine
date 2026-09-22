@@ -82,6 +82,12 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
  if(depth>.99999){weight=min(weight,.55);}
  let delta=max(max(abs(previous.r-current.r),abs(previous.g-current.g)),abs(previous.b-current.b));
  weight*=1.0-smoothstep(.12,.55,delta);
+ // Preserve sub-pixel decals, trim and material boundaries. Static high-contrast
+ // pixels already have strong current-frame evidence; accumulating 90% bilinear
+ // history there turns real detail into a stable blur.
+ let localRange=max(max(hi.r-lo.r,hi.g-lo.g),hi.b-lo.b);
+ let detail=smoothstep(.035,.20,localRange);
+ weight*=mix(1.0,.58,detail);
  return vec4<f32>(mix(current,previous,weight),1);
 }
 `;
