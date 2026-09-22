@@ -1,0 +1,217 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "767b89f60c7e7eb7292739745d93737be9065bdd",
+  "parents": [
+    "5154134c97a56d73fb0f7b302857d3f33b1d350f"
+  ],
+  "authoredAt": "2026-09-22T19:09:29+03:00",
+  "recordedAt": "2026-09-22T16:18:19.370Z",
+  "experiment": "winter-m3-paint",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: make local-probe clearcoat respect roughness",
+    "experiment": "winter-m3-paint",
+    "observation": "5154134 visual artifact is nearly unchanged by paint coefficient and PN displacement tuning; sharp local-probe bands remain dominant.",
+    "hypothesis": "renderer clearcoat probe blending bypasses the material roughness cause.",
+    "intervention": "weight local-probe clearcoat contribution by coat roughness instead of fixed 0.92.",
+    "prediction": "M3 body reflections broaden materially in the next fixed-camera artifact without removing local environmental response.",
+    "targets": [],
+    "guards": [
+      "Stanford measured environment path, base BRDF, geometry, physics and reflection probe capture remain unchanged"
+    ],
+    "dependsOn": [
+      "5154134c97a56d73fb0f7b302857d3f33b1d350f"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-m3-paint"
+      ],
+      "Causal-Observation": [
+        "5154134 visual artifact is nearly unchanged by paint coefficient and PN displacement tuning; sharp local-probe bands remain dominant."
+      ],
+      "Causal-Hypothesis": [
+        "renderer clearcoat probe blending bypasses the material roughness cause."
+      ],
+      "Causal-Intervention": [
+        "weight local-probe clearcoat contribution by coat roughness instead of fixed 0.92."
+      ],
+      "Causal-Prediction": [
+        "M3 body reflections broaden materially in the next fixed-camera artifact without removing local environmental response."
+      ],
+      "Causal-Depends-On": [
+        "5154134c97a56d73fb0f7b302857d3f33b1d350f"
+      ],
+      "Causal-Guard": [
+        "Stanford measured environment path, base BRDF, geometry, physics and reflection probe capture remain unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35752232827",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35752232827"
+  },
+  "jobs": {
+    "reality": "success",
+    "visualFast": "success",
+    "performance1080": "success"
+  },
+  "observations": {
+    "reality": {
+      "dataset": "Stanford-ORB",
+      "object": "car",
+      "gap": 0.23837613511163935,
+      "baseline": {
+        "gap": 0.23563216891992333,
+        "tolerance": 0.003,
+        "delta": 0.0027439661917160185
+      },
+      "regressions": [],
+      "heldOut": [
+        {
+          "capture": "car_scene004-test1",
+          "gap": 0.2663534144711415,
+          "psnr": 17.35991339852934,
+          "ssim": 0.7455449979819455,
+          "components": {
+            "lpips": null,
+            "structural": 0.2544550020180545,
+            "logLuminance": 0.09720753821776511,
+            "edge": 0.7076154502378703,
+            "chroma": 0.06648376364636399
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.5219900681696762,
+              "interior": 0.7529757939293016,
+              "radiusPx": 4,
+              "boundaryPixels": 2154,
+              "interiorPixels": 15020,
+              "errorShare": {
+                "boundary": 0.14486255037935694,
+                "interior": 0.8551374496206433
+              },
+              "referenceWeightShare": {
+                "boundary": 0.19637725899408162,
+                "interior": 0.803622741005922
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5481155788811337,
+              "components": {
+                "lpips": null,
+                "structural": 0.9175418467015429,
+                "logLuminance": 0.20200777725230615,
+                "edge": 0.9275244134024243,
+                "chroma": 0.137615456104401
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.6937513680570516,
+                  "interior": 0.9846503601049248,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2154,
+                  "interiorPixels": 15020,
+                  "errorShare": {
+                    "boundary": 0.14688237863484574,
+                    "interior": 0.8531176213651561
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.19637725899408162,
+                    "interior": 0.803622741005922
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test1\\flat-albedo-production.png"
+            }
+          }
+        },
+        {
+          "capture": "car_scene004-test3",
+          "gap": 0.2103988557521372,
+          "psnr": 20.25698762995468,
+          "ssim": 0.828285914757499,
+          "components": {
+            "lpips": null,
+            "structural": 0.17171408524250098,
+            "logLuminance": 0.07659547175763654,
+            "edge": 0.6057346928319939,
+            "chroma": 0.04504722467779646
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.4799062518866265,
+              "interior": 0.6387072222036098,
+              "radiusPx": 4,
+              "boundaryPixels": 2431,
+              "interiorPixels": 19062,
+              "errorShare": {
+                "boundary": 0.1645027155621785,
+                "interior": 0.8354972844378228
+              },
+              "referenceWeightShare": {
+                "boundary": 0.20763430667834948,
+                "interior": 0.7923656933216517
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5511460629120786,
+              "components": {
+                "lpips": null,
+                "structural": 0.9382717563522766,
+                "logLuminance": 0.20666145355053964,
+                "edge": 0.906145575814743,
+                "chroma": 0.13929177123786873
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.691176569230431,
+                  "interior": 0.9624768140493941,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2431,
+                  "interiorPixels": 19062,
+                  "errorShare": {
+                    "boundary": 0.158376282547586,
+                    "interior": 0.8416237174524145
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.20763430667834948,
+                    "interior": 0.7923656933216517
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test3\\flat-albedo-production.png"
+            }
+          }
+        }
+      ]
+    },
+    "performance1080": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "1920x1080",
+      "submittedFps": 69.35561240822409,
+      "completedFps": 68.60419137999209,
+      "p95FrameMs": 20.899999976158142,
+      "gpuP95Ms": 13.477440000000001,
+      "simulationToWallRatio": 0.9960292079759334,
+      "rendererErrors": []
+    },
+    "visualFast": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "960x540",
+      "submittedFps": 109.52146028613714,
+      "completedFps": 108.36668944519005,
+      "p95FrameMs": 13.5,
+      "gpuP95Ms": 6.998599999999999,
+      "simulationToWallRatio": 0.9702351586910054,
+      "rendererErrors": []
+    }
+  },
+  "verdict": "observed"
+}
