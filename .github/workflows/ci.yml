@@ -148,6 +148,8 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build reality render path
         run: bun run build
+      - name: Geometry oracle preflight
+        run: node --test test/render-subdivision.test.mjs
       - name: Persistent reality cache path
         run: echo REALITY_DATA_ROOT=%USERPROFILE%\.cache\game-engine-reality\stanford-orb>>%GITHUB_ENV%
       - name: Bootstrap Stanford-ORB Car
