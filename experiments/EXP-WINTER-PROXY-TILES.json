@@ -1,0 +1,23 @@
+{
+  "id": "EXP-WINTER-PROXY-TILES",
+  "question": "Can procedural environment map rebuilds avoid testing every radiance proxy for every cube texel while producing identical pixel values?",
+  "hypothesis": "Conservative 16px cube-direction tiles cull only proxies whose threshold cannot intersect a tile, preserving contribution order and map values while lowering CPU rebuild time.",
+  "status": "running",
+  "conditions": {
+    "parent": "6205ef751dde2933e1cb71509441c1313df50171",
+    "profile": "CI run 35778003031: environment CPU max 590.7ms; 1080p completed 28.77fps, GPU p95 20.57ms",
+    "mips": 9,
+    "maximumProxies": 128,
+    "tilePixels": 16
+  },
+  "acceptance": {
+    "correctness": "For every face/mip texel, every proxy with dot(direction, proxy.dir)>threshold remains in its original order; renderer visual and Stanford gates remain within baseline.",
+    "cpu": "Report median full-scan vs tiled proxy accumulation on same 128-proxy fixture and remeasure environment CPU spikes in GPU CI.",
+    "runtime": "Track 1080p completed FPS and GPU p95; do not claim GPU improvement from CPU-only culling."
+  },
+  "evidence": [
+    "local property test on mip edges passed, 13 profile-related tests passed",
+    "synthetic 128-proxy, seven-mip fixture: 67,104,768 -> 10,366,864 dot checks; paired medians 1016.54 -> 339.07 ms, accumulated contribution exactly equal"
+  ],
+  "decision": null
+}
