@@ -8,8 +8,9 @@
     "legacyEvidenceRef": "refs/notes/causality",
     "newEvidenceRef": "refs/notes/usegit",
     "legacyHistoryRewrite": false,
-    "usegitRevision": "7569f91822a8cc5119d989c0f062f8efcd55ec2b",
-    "ciRunner": "self-hosted"
+    "usegitRevision": "c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a",
+    "ciRunner": "self-hosted",
+    "ciShell": "cmd"
   },
   "metrics": [
     "post_bootstrap_metadata_coverage",
@@ -39,6 +40,12 @@
       "kind": "cross-project-portability-failure",
       "runId": 35699807888,
       "observation": "Self-hosted Windows runner started, but the reusable workflow assumed bash; usegit EXP-0011 removed shell assumptions in revision 7569f91822a8cc5119d989c0f062f8efcd55ec2b"
+    },
+    {
+      "kind": "cross-project-portability-failure",
+      "runId": 35700259542,
+      "observation": "Windows default PowerShell was blocked by execution policy; usegit EXP-0011 now treats runner_shell as explicit infrastructure.",
+      "followUpCommit": "c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a"
     }
   ],
   "decision": null

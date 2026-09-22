@@ -8,7 +8,8 @@ jobs:
   causal-history:
     permissions:
       contents: write
-    uses: Pom4H/usegit/.github/workflows/reusable.yml@7569f91822a8cc5119d989c0f062f8efcd55ec2b
+    uses: Pom4H/usegit/.github/workflows/reusable.yml@c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a
     with:
-      tool_ref: 7569f91822a8cc5119d989c0f062f8efcd55ec2b
+      tool_ref: c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a
       runs_on: self-hosted
+      runner_shell: cmd
