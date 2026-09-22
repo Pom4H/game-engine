@@ -64,3 +64,23 @@ export {analyzeWGSL,buildRenderAtomReport,type ShaderOperationAtoms,type ShaderE
 export {detailedRoadWheelMeshes,detailedPassengerWheelMeshes,type RoadWheelGeometrySpec} from './vehicles/passenger-wheel.js';
 export {compileVehicle,type VehicleDefinition,type VehicleFamily,type VehicleReferenceProvenance,type ThreeBoxVehicleDefinition,type CompiledVehicleGeometry} from './vehicles/framework.js';
 export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type DoubleCabPickupVehicleDefinition} from './vehicles/pickup.js';
+
+
+export {locationAt,locationIdAt,locationBounds,locationsInRadius,distanceToLocation,LOCATION_SIZE,LOCATION_SCHEMA_VERSION,type WorldLocation} from './world/locations.js';
+export {InterestPlanner,DEFAULT_INTEREST,type InterestSubject,type InterestDecision,type InterestConfig} from './world/interest.js';
+export {CompactResidencyStore,jsonColdCodec,simulationTierFor,DEFAULT_TIER_THRESHOLDS,type ColdCodec,type SimulationInterest,type TierThresholds} from './world/residency.js';
+export {LocationScheduler,type ScheduledLocation,type WorkBudget,type WorkPlan} from './world/scheduler.js';
+export {InMemoryOwnership} from './world/ownership.js';
+export {WorldMailbox,type WorldMessage,type EnqueueOutcome} from './world/messages.js';
+export {WorldRuntime,type WorldRuntimeSubject,type WorldRuntimePlan} from './world/runtime.js';
+export type {LocationId,OwnerToken,TickToken,WorkerJob,WorkerResult,WorldPoint,WorldPoint3} from './world/contracts.js';
+export type {LocationSnapshot,LocationCommit,LocationStore,AsyncLocationStore} from './world/storage.js';
+export {CheckpointTimeline,jsonCheckpointCodec,type EngineCheckpoint,type CheckpointCodec} from './checkpoint/timeline.js';
+export {InputCommandBuffer,INPUT_REORDER_WAIT_MS,INPUT_REORDER_WINDOW,type Sequenced} from './network/input-buffer.js';
+export {ProjectionDeltaTracker,ReplicationStream,ReplicationReceiver,type RevisionedProjection,type ProjectionDelta,type ReplicationFrame} from './network/replication.js';
+export {AtmosphereField,createAirSample,thermodynamics,type WeatherAir,type AirSample,type WeatherReader} from './physics/atmosphere.js';
+export {Aerodynamics,polar,type ForceBody,type AeroSurface,type BodyDrag,type SurfaceTelemetry,type AeroTelemetry} from './physics/aerodynamics.js';
+export {validateCollider,colliderBounds,type Collider,type ColliderBounds} from './physics/collision-geometry.js';
+export {AudioScene,type AcousticSourceMode,type AcousticSource,type AcousticListener,type AudioSceneBudget,type AdmittedAcousticSource,type AudioSceneFrame} from './audio/scene.js';
+export {tyreResponse,combinedTyreResponse,loadSensitiveGrip,limitCombinedForce,tyreContactForce,type TyreContactInput} from './vehicles/tyre.js';
+export {ParticleEmitter,type Particle,type ParticleSpawn} from './particles/emitter.js';

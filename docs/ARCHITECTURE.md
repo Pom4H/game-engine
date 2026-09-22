@@ -176,3 +176,59 @@ No renderer branch is allowed to become the authoritative owner of a physical
 fact. Snow, wetness, dirt, moss or wear may change shading, but their physical
 meaning is produced upstream. Conversely userland authors semantic materials and
 environmental intent, not WGSL branches or low-level contact response.
+
+
+## World runtime boundary
+
+The engine now owns reusable world-scale primitives without importing any game domain:
+stable 256 m simulation locations, observer-driven interest tiers, hot/cold residency,
+bounded location scheduling, fencing-token ownership, deterministic mailboxes,
+transport-agnostic replication and input reordering.
+
+A game still owns the meaning of the state inside a location. NPC needs, businesses,
+police, airports, quests and settlement generation are application rules. The engine
+only decides which location representation is resident and when generic work may run.
+
+The intended large-world flow is:
+
+SceneSpec / application state
+        |
+        v
+WorldRuntime -> interest -> residency -> LocationScheduler
+        |                                  |
+        +---- ownership / mailbox ----------+
+        |
+        v
+Scene (detailed / active / aggregate / dormant)
+        |
+        +-> checkpoint timeline
+        +-> replication frames
+        +-> renderer / AudioScene
+
+CheckpointTimeline is a generic deterministic history container. It deliberately does
+not claim that SceneSnapshot is now a complete Scene checkpoint: physics, surface,
+deformation and event systems still need explicit bake/restore adapters before full
+Scene rewind can be called complete.
+
+## Generic physical extension points
+
+AtmosphereField and Aerodynamics are game-independent physical primitives. Weather is
+supplied through a reader callback; aerodynamic surfaces consume local point velocity
+and apply forces through the ForceBody adapter. Aircraft types and airports stay in
+applications. The same API can drive a wing attached to a car.
+
+The tyre module provides the mature combined-slip/load-sensitive response extracted
+from The Game without vehicle classes. Powertrain, steering and suspension controllers
+can compose it later around generic wheel contacts.
+
+collision-geometry.ts defines the canonical collider data model for sphere, box,
+capsule, convex, triangle mesh and heightfield geometry plus validation/bounds.
+PhysicsWorld still solves its existing sphere/box narrow phase in this change. The
+new collider kinds are an explicit migration boundary, not a false claim that mesh
+contacts are already implemented.
+
+AudioScene is likewise presentation-API independent. It performs bounded deterministic
+source admission from physical/world causes; browser AudioContext/AudioWorklet ownership
+remains an adapter above it. ParticleEmitter provides one bounded transient primitive
+for snow, spray, dust, sparks, rain and similar projections instead of another
+special-purpose lifetime container per effect.

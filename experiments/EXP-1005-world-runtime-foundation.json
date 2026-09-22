@@ -1,0 +1,21 @@
+{
+  "id": "EXP-1005",
+  "question": "Can the remaining reusable world-scale systems be extracted from The Game without importing gameplay concepts or weakening the existing Scene boundary?",
+  "hypothesis": "World residency/checkpoint/replication/atmosphere/audio/collider primitives can be expressed as small transport- and game-independent modules while Scene remains the local physical authority.",
+  "status": "running",
+  "conditions": {
+    "dependsOn": [
+      "EXP-1000"
+    ],
+    "source": "Pom4H/thegame generic engine primitives",
+    "guard": "no NPC, economy, airport, quest, city-generator or browser UI dependencies"
+  },
+  "acceptance": {
+    "architecture": "new modules import only game-engine primitives and standard platform APIs",
+    "determinism": "location, scheduling, replication and input ordering have fixed tests",
+    "physics": "atmosphere/aerodynamics/tyre primitives are driven by physical inputs rather than vehicle types",
+    "honesty": "generic collider schema is not presented as implemented narrow-phase support"
+  },
+  "evidence": [],
+  "decision": null
+}
