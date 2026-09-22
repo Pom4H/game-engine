@@ -95,13 +95,13 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
 
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
-export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.018,true);}
+export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,0,true);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,.018,true));
-  const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.006));
+  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,0,true));
+  const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,0));
   // Third render-only refinement targets silhouette and long clearcoat highlights.
   // Physics and the structural cage continue to use the compact source shell.
-  const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,.002));
+  const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,0));
   return smoothCoincidentNormals(third,58,2e-5);
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
