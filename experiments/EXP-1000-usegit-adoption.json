@@ -8,9 +8,10 @@
     "legacyEvidenceRef": "refs/notes/causality",
     "newEvidenceRef": "refs/notes/usegit",
     "legacyHistoryRewrite": false,
-    "usegitRevision": "c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a",
+    "usegitRevision": "ebcde459a27b454f8680dc59f61c361404105b7b",
     "ciRunner": "self-hosted",
-    "ciShell": "cmd"
+    "ciShell": "cmd",
+    "ciLane": "windows-cmd"
   },
   "metrics": [
     "post_bootstrap_metadata_coverage",
@@ -46,6 +47,12 @@
       "runId": 35700259542,
       "observation": "Windows default PowerShell was blocked by execution policy; usegit EXP-0011 now treats runner_shell as explicit infrastructure.",
       "followUpCommit": "c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a"
+    },
+    {
+      "kind": "workflow-compile-failure",
+      "runId": 35700520129,
+      "observation": "Dynamic runner_shell could not construct a reusable job; usegit now exposes a static Windows/cmd execution lane.",
+      "followUpCommit": "ebcde459a27b454f8680dc59f61c361404105b7b"
     }
   ],
   "decision": null

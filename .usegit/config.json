@@ -6,6 +6,6 @@
   "integrationPolicy": "boundary-only",
   "tool": {
     "repository": "Pom4H/usegit",
-    "ref": "c2a3bcfb32707bedf3e6fbc92221181ce48a4a5a"
+    "ref": "ebcde459a27b454f8680dc59f61c361404105b7b"
   }
 }
