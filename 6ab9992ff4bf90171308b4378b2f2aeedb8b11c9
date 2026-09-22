@@ -1,0 +1,74 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "6ab9992ff4bf90171308b4378b2f2aeedb8b11c9",
+  "parents": [
+    "d6626c4b56abe9068b8d8862ee20bfaaa36f802f"
+  ],
+  "authoredAt": "2026-09-22T16:55:59+03:00",
+  "recordedAt": "2026-09-22T14:07:12.595Z",
+  "experiment": "winter-hero-photorealism",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: canonicalize smooth shared-edge subdivision",
+    "experiment": "winter-hero-photorealism",
+    "observation": "smooth M3 body regions still show triangle-scale highlight discontinuities after repeated subdivision and coincident-normal smoothing.",
+    "hypothesis": "duplicated imported normals make adjacent triangles generate different PN midpoints for the same nominally smooth geometric edge.",
+    "intervention": "average endpoint normals per smooth geometric edge and reuse one canonical curved midpoint for every triangle sharing that edge; lock the invariant with a duplicated-vertex regression test.",
+    "prediction": "shared smooth edges become position-identical after subdivision, long clearcoat highlights become continuous, Stanford RealityGap does not regress, and 1080p performance remains within the parent guard.",
+    "targets": [],
+    "guards": [
+      "hard edges and open boundaries keep their existing linear subdivision",
+      "physics and source M3 geometry are unchanged"
+    ],
+    "dependsOn": [
+      "d6626c4b56abe9068b8d8862ee20bfaaa36f802f"
+    ],
+    "supersedes": [
+      "9c39673871f60a85faea1189ab8a54ef8d8a9909"
+    ],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-hero-photorealism"
+      ],
+      "Causal-Observation": [
+        "smooth M3 body regions still show triangle-scale highlight discontinuities after repeated subdivision and coincident-normal smoothing."
+      ],
+      "Causal-Hypothesis": [
+        "duplicated imported normals make adjacent triangles generate different PN midpoints for the same nominally smooth geometric edge."
+      ],
+      "Causal-Intervention": [
+        "average endpoint normals per smooth geometric edge and reuse one canonical curved midpoint for every triangle sharing that edge; lock the invariant with a duplicated-vertex regression test."
+      ],
+      "Causal-Prediction": [
+        "shared smooth edges become position-identical after subdivision, long clearcoat highlights become continuous, Stanford RealityGap does not regress, and 1080p performance remains within the parent guard."
+      ],
+      "Causal-Depends-On": [
+        "d6626c4b56abe9068b8d8862ee20bfaaa36f802f"
+      ],
+      "Causal-Supersedes": [
+        "9c39673871f60a85faea1189ab8a54ef8d8a9909"
+      ],
+      "Causal-Guard": [
+        "hard edges and open boundaries keep their existing linear subdivision",
+        "physics and source M3 geometry are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35736809009",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35736809009"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
