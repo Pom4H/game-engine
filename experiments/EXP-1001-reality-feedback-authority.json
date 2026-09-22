@@ -1,0 +1,37 @@
+{
+  "id": "EXP-1001",
+  "question": "Should RendererConsistencyGap remain a blocking CI gate after held-out Stanford RealityGap and the radiometric pixel oracle became authoritative?",
+  "hypothesis": "Keeping RendererConsistencyGap as diagnostic evidence, while RealityGap, radiometric invariants and the 60 fps GPU budget remain blocking, will stop the internal synthetic reference from rejecting externally better renderer states without weakening physical or runtime guards.",
+  "status": "running",
+  "conditions": {
+    "realityBaseline": 0.23563216891992333,
+    "realityTolerance": 0.003,
+    "observedRealityGap": 0.23837613511163935,
+    "rendererConsistencyBaseline": 0.6131289322929493,
+    "observedRendererConsistencyGap": 0.6215425243471042,
+    "radiometricOracle": "pass",
+    "performance1080": "not-observed-because-consistency-gate-blocked"
+  },
+  "metrics": [
+    "reality_gap",
+    "renderer_consistency_gap",
+    "radiometric_oracle_failures",
+    "completed_fps",
+    "gpu_p95_ms",
+    "simulation_to_wall_ratio"
+  ],
+  "evidence": [
+    {
+      "kind": "github-actions",
+      "runId": 35692715019,
+      "realityGap": 0.23837613511163935,
+      "realityDelta": 0.0027439661917160185,
+      "realityWithinTolerance": true,
+      "rendererConsistencyGap": 0.6215425243471042,
+      "rendererConsistencyDelta": 0.008413592054154928,
+      "radiometricOracleFailures": 0,
+      "performance1080": null
+    }
+  ],
+  "decision": null
+}

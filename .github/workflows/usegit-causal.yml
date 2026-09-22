@@ -9,6 +9,6 @@ jobs:
   causal-history:
     permissions:
       contents: write
-    uses: Pom4H/usegit/.github/workflows/reusable.yml@experiment/causal-memory-v0
+    uses: Pom4H/usegit/.github/workflows/reusable.yml@6365a5d1540439fc79fd28bde49ae2d867333951
     with:
-      tool_ref: experiment/causal-memory-v0
+      tool_ref: 6365a5d1540439fc79fd28bde49ae2d867333951

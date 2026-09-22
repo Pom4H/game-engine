@@ -6,6 +6,6 @@
   "integrationPolicy": "boundary-only",
   "tool": {
     "repository": "Pom4H/usegit",
-    "ref": "experiment/causal-memory-v0"
+    "ref": "6365a5d1540439fc79fd28bde49ae2d867333951"
   }
 }
