@@ -1092,7 +1092,7 @@ export class WebGPURenderer implements Renderer{
       // but every scene-owned uniform/probe/culling cache must observe the new causes.
       for(const object of this.objects.values())object.uniformReady=false;
       this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbePosition=null;
-      this.shadowValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;this.environmentKey='';
+      this.shadowValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
