@@ -47,19 +47,52 @@ function maskInside(mask,x,y){
   for(const [dx,dy] of [[0,0],[-2,0],[2,0],[0,-2],[0,2]])if(mask.rgb[((yi+dy)*mask.width+(xi+dx))*3]<128)return false;
   return true;
 }
+function projectedMesh(camera,width,height){
+  const position=camera.position,forward=norm(sub(camera.target,position)),up=norm(camera.up??[0,1,0]),right=norm(cross(forward,up)),fx=camera.intrinsics.fx,fy=camera.intrinsics.fy,cx=camera.intrinsics.cx,cy=camera.intrinsics.cy,x=new Float32Array(vertices),y=new Float32Array(vertices),z=new Float32Array(vertices);
+  for(let i=0;i<vertices;i++){
+    const rel=[mesh.positions[i*3]-position[0],mesh.positions[i*3+1]-position[1],mesh.positions[i*3+2]-position[2]],depth=dot(rel,forward);
+    z[i]=depth;x[i]=fx*dot(rel,right)/Math.max(depth,1e-9)+cx;y[i]=cy-fy*dot(rel,up)/Math.max(depth,1e-9);
+  }
+  return{position,forward,up,right,x,y,z};
+}
+function rasterDepth(projected,width,height){
+  const depth=new Float32Array(width*height);depth.fill(Infinity);
+  const edge=(ax,ay,bx,by,px,py)=>(px-ax)*(by-ay)-(py-ay)*(bx-ax);
+  for(let t=0;t<mesh.indices.length;t+=3){
+    const ia=mesh.indices[t],ib=mesh.indices[t+1],ic=mesh.indices[t+2],za=projected.z[ia],zb=projected.z[ib],zc=projected.z[ic];
+    if(!(za>1e-6&&zb>1e-6&&zc>1e-6))continue;
+    const ax=projected.x[ia],ay=projected.y[ia],bx=projected.x[ib],by=projected.y[ib],cx=projected.x[ic],cy=projected.y[ic],area=edge(ax,ay,bx,by,cx,cy);
+    if(Math.abs(area)<1e-8)continue;
+    const minX=Math.max(0,Math.floor(Math.min(ax,bx,cx))),maxX=Math.min(width-1,Math.ceil(Math.max(ax,bx,cx))),minY=Math.max(0,Math.floor(Math.min(ay,by,cy))),maxY=Math.min(height-1,Math.ceil(Math.max(ay,by,cy)));
+    if(minX>maxX||minY>maxY)continue;
+    const positive=area>0,epsilon=Math.abs(area)*1e-6;
+    for(let py=minY;py<=maxY;py++)for(let px=minX;px<=maxX;px++){
+      const sx=px+.5,sy=py+.5,w0=edge(bx,by,cx,cy,sx,sy),w1=edge(cx,cy,ax,ay,sx,sy),w2=edge(ax,ay,bx,by,sx,sy);
+      if(positive?(w0 < -epsilon||w1 < -epsilon||w2 < -epsilon):(w0 > epsilon||w1 > epsilon||w2 > epsilon))continue;
+      const inv=1/area,d=(w0*za+w1*zb+w2*zc)*inv,index=py*width+px;
+      if(d>0&&d<depth[index])depth[index]=d;
+    }
+  }
+  return depth;
+}
+function visibleAt(projected,depth,width,height,index){
+  const x=projected.x[index],y=projected.y[index],z=projected.z[index],xi=Math.floor(x),yi=Math.floor(y);let closest=Infinity;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const px=xi+dx,py=yi+dy;if(px<0||py<0||px>=width||py>=height)continue;const d=depth[py*width+px];if(Number.isFinite(d))closest=Math.min(closest,Math.abs(d-z));}
+  return closest<=Math.max(.003,.012*Math.abs(z));
+}
 
 const samples=Array.from({length:vertices},()=>[]);
 const tmpT=[0,0,0],tmpW=[0,0,0],tmpB=[0,0,0];
 for(const capture of manifest.captures.filter(c=>c.split==='calibration')){
   if(!capture.inverseBasis)throw new Error(`Calibration capture ${capture.id} has no inverse basis`);
   const captureDir=join(dir,capture.id),target=await readPng(capture.reference),mask=await readPng(capture.mask),white=await readPng(join(captureDir,'basis-white.png')),black=await readPng(join(captureDir,'basis-black.png'));
-  const camera=capture.camera,position=camera.position,forward=norm(sub(camera.target,position)),up=norm(camera.up??[0,1,0]),right=norm(cross(forward,up)),fx=camera.intrinsics.fx,fy=camera.intrinsics.fy,cx=camera.intrinsics.cx,cy=camera.intrinsics.cy;
-  let accepted=0;
+  const camera=capture.camera,projected=projectedMesh(camera,target.width,target.height),position=projected.position,depthBuffer=rasterDepth(projected,target.width,target.height);
+  let accepted=0,occluded=0;
   for(let i=0;i<vertices;i++){
-    const p=[mesh.positions[i*3],mesh.positions[i*3+1],mesh.positions[i*3+2]],n=norm([mesh.normals[i*3],mesh.normals[i*3+1],mesh.normals[i*3+2]]),rel=sub(p,position),z=dot(rel,forward);
-    if(z<=1e-5)continue;
-    const x=fx*dot(rel,right)/z+cx,y=cy-fy*dot(rel,up)/z;
-    if(!maskInside(mask,x,y))continue;
+    const z=projected.z[i];if(z<=1e-5)continue;
+    const x=projected.x[i],y=projected.y[i];if(!maskInside(mask,x,y))continue;
+    if(!visibleAt(projected,depthBuffer,target.width,target.height,i)){occluded++;continue;}
+    const p=[mesh.positions[i*3],mesh.positions[i*3+1],mesh.positions[i*3+2]],n=norm([mesh.normals[i*3],mesh.normals[i*3+1],mesh.normals[i*3+2]]);
     const facing=Math.max(0,dot(n,norm(sub(position,p))));if(facing<.08)continue;
     sampleRgb(target,x,y,tmpT);sampleRgb(white,x,y,tmpW);sampleRgb(black,x,y,tmpB);
     const solved=[0,0,0];let valid=0,span=0;
@@ -72,7 +105,7 @@ for(const capture of manifest.captures.filter(c=>c.split==='calibration')){
     const weight=facing*facing*Math.max(.01,span/valid);
     samples[i].push({rgb:solved,weight});accepted++;
   }
-  console.log(JSON.stringify({phase:'inverse-albedo-view',capture:capture.id,accepted}));
+  console.log(JSON.stringify({phase:'inverse-albedo-view',capture:capture.id,accepted,occluded}));
 }
 
 const colors=new Array(vertices*4),known=new Uint8Array(vertices);let observed=0;
