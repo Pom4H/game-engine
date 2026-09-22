@@ -1,0 +1,28 @@
+{
+  "id": "EXP-1008",
+  "question": "Can world planning and message delivery scale with nearby observers and target location work instead of global Cartesian scans?",
+  "hypothesis": "Exact nearest-observer search and target-indexed mailboxes preserve decisions and message order while lowering bounded CPU fixture time.",
+  "status": "locally-validated",
+  "conditions": {
+    "base": "426f16752573bfa989272975131f5289c189a5f4",
+    "subjects": 4096,
+    "observers": 128,
+    "interestTicks": 8,
+    "locations": 512,
+    "messages": 4096,
+    "method": "eight alternating before/after runs in one Node 24 process, median of each"
+  },
+  "metrics": {
+    "interestBeforeMs": 126.26,
+    "interestAfterMs": 29.79,
+    "mailboxBeforeMs": 33.58,
+    "mailboxAfterMs": 2.20,
+    "decisionAndDrainOutputEqual": true
+  },
+  "evidence": [
+    "test/world-runtime.test.mjs checks exact distances after observer motion and deterministic target drains",
+    "tools/profiling/world-runtime.mjs reproduces the post-change fixture",
+    "local TypeScript typecheck, build and focused physics/world tests passed"
+  ],
+  "decision": "Keep the exact query and target bucket structure; full CI remains the integration gate"
+}

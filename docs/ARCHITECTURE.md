@@ -232,3 +232,28 @@ source admission from physical/world causes; browser AudioContext/AudioWorklet o
 remains an adapter above it. ParticleEmitter provides one bounded transient primitive
 for snow, spray, dust, sparks, rain and similar projections instead of another
 special-purpose lifetime container per effect.
+
+## World runtime cost
+
+`WorldRuntime` uses `InterestPlanner` decisions for residency and scheduling.
+With at most eight observers, the planner scans them directly. With more, it
+builds an exact two-dimensional nearest-observer tree for the current tick.
+For `S` subjects and `O` observers, the previous distance loop did
+`S × O` distance evaluations. Tree construction is bounded by the observer
+budget (256); queries are typically `O(S log O)`, with `O(S × O)` worst
+case. Moving observers are read again each tick.
+
+`WorldMailbox` keeps one global ID directory for duplicate detection and
+one bucket per target location. Draining a location now examines its own
+`m_target` pending messages, then sorts the ready subset. Previously each
+drain examined all `M` messages, even for an empty location. An old owner
+epoch is discarded from both directories when that location drains.
+
+Run `node tools/profiling/world-runtime.mjs` after building for the bounded
+world fixture. In an alternating Node 24 comparison with the original PR #19
+head `426f1675`, 4096 subjects × 128 observers × 8 ticks took 126.26 ms
+before and 29.79 ms after (4.2×); 4096 messages drained through 512
+locations took 33.58 ms before and 2.20 ms after (15.3×). Results were
+identical for the recorded decisions and drain order. These are CPU fixture
+timings, not a claim about GPU frame rate or the entire Scene.
+

@@ -16,6 +16,35 @@ export const DEFAULT_INTEREST:InterestConfig={
   detailedRadius:70,activeRadius:240,aggregateRadius:900,hysteresis:35,downgradeTicks:180,maxSubjects:4096,maxObservers:256
 };
 interface InterestMemory{tier:SimulationTier;downgradeAt:number|null}
+interface ObserverNode{
+  readonly point:WorldPoint;
+  readonly axis:0|1;
+  readonly left:ObserverNode|null;
+  readonly right:ObserverNode|null;
+}
+
+// A few observers are cheaper to scan. Larger sets use exact nearest-neighbour
+// search so distant locations do not inspect every observer on every tick.
+function observerTree(points:WorldPoint[],depth=0):ObserverNode|null{
+  if(!points.length)return null;
+  const axis=(depth%2) as 0|1;
+  points.sort((a,b)=>axis===0?a.x-b.x||a.z-b.z:a.z-b.z||a.x-b.x);
+  const middle=points.length>>1;
+  return{
+    point:points[middle]!,axis,
+    left:observerTree(points.slice(0,middle),depth+1),
+    right:observerTree(points.slice(middle+1),depth+1),
+  };
+}
+function closestObserver(node:ObserverNode|null,point:WorldPoint,best=Infinity):number{
+  if(!node)return best;
+  const dx=point.x-node.point.x,dz=point.z-node.point.z;
+  best=Math.min(best,Math.hypot(dx,dz));
+  const delta=node.axis===0?dx:dz;
+  const near=delta<0?node.left:node.right,far=delta<0?node.right:node.left;
+  best=closestObserver(near,point,best);
+  return Math.abs(delta)<=best?closestObserver(far,point,best):best;
+}
 
 export class InterestPlanner{
   readonly config:InterestConfig;private memory=new Map<string,InterestMemory>();private lastTick=-1;
@@ -34,10 +63,13 @@ export class InterestPlanner{
       if(![subject.x,subject.z,subject.radius??0].every(Number.isFinite)||(subject.radius??0)<0)throw new RangeError('Invalid interest subject');
     }
     for(const observer of observers)if(![observer.x,observer.z].every(Number.isFinite))throw new RangeError('Invalid observer');
+    const observerIndex=observers.length>8?observerTree([...observers]):null;
     this.lastTick=tick;const next=new Map<string,InterestMemory>();
     const decisions=subjects.map(subject=>{
-      let distance=Infinity;
-      for(const observer of observers)distance=Math.min(distance,Math.max(0,Math.hypot(observer.x-subject.x,observer.z-subject.z)-(subject.radius??0)));
+      let nearest=Infinity;
+      if(observerIndex)nearest=closestObserver(observerIndex,subject);
+      else for(const observer of observers)nearest=Math.min(nearest,Math.hypot(observer.x-subject.x,observer.z-subject.z));
+      const distance=Math.max(0,nearest-(subject.radius??0));
       const old=this.memory.get(subject.id),previousTier=old?.tier??'dormant',desired=subject.critical?'detailed':this.tierAt(distance);
       let tier=previousTier,downgradeAt=old?.downgradeAt??null;
       if(!old||this.rank(desired)<=this.rank(previousTier)){tier=desired;downgradeAt=null;}
