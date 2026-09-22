@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "63b6007c0a780daefae02bb4c19fb5ef9ee197ba",
+  "parents": [
+    "0be6dc399ef1da613921390a4530624d642efc66"
+  ],
+  "authoredAt": "2026-09-22T21:57:05+03:00",
+  "recordedAt": "2026-09-22T19:02:16.131Z",
+  "experiment": "hot-appearance-patch",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "fix: score Hero from in-memory CDP screenshots",
+    "experiment": "hot-appearance-patch",
+    "observation": "CI 35770202354 still failed with InvalidStateError after Blob decoding.",
+    "hypothesis": "the WebGPU canvas capture source itself is the unstable boundary.",
+    "intervention": "CDP screenshot in memory, no per-candidate disk file.",
+    "prediction": "HeroGap and hot-candidate timings are emitted.",
+    "targets": [],
+    "guards": [
+      "one browser, one GPU device, same rendering path, same metric formula"
+    ],
+    "dependsOn": [
+      "0be6dc399ef1da613921390a4530624d642efc66"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "hot-appearance-patch"
+      ],
+      "Causal-Observation": [
+        "CI 35770202354 still failed with InvalidStateError after Blob decoding."
+      ],
+      "Causal-Hypothesis": [
+        "the WebGPU canvas capture source itself is the unstable boundary."
+      ],
+      "Causal-Intervention": [
+        "CDP screenshot in memory, no per-candidate disk file."
+      ],
+      "Causal-Prediction": [
+        "HeroGap and hot-candidate timings are emitted."
+      ],
+      "Causal-Depends-On": [
+        "0be6dc399ef1da613921390a4530624d642efc66"
+      ],
+      "Causal-Guard": [
+        "one browser, one GPU device, same rendering path, same metric formula"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35770590560",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35770590560"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
