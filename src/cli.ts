@@ -107,12 +107,14 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
       let heroGap:number|undefined;
       if(reference){
         heroGap=await browser.evaluate(`
-          const canvas=document.querySelector('canvas[data-game-engine]');
+          const canvas=document.querySelector('canvas[data-game-engine]'),engine=window.__GAME_ENGINE__;
           if(!globalThis.__GE_HERO_REF__){
-            const blob=await (await fetch(${JSON.stringify(reference)})).blob();
-            globalThis.__GE_HERO_REF__=await createImageBitmap(blob);
+            const source=${JSON.stringify(reference)},comma=source.indexOf(','),header=source.slice(5,comma),encoded=source.slice(comma+1),raw=atob(encoded),bytes=new Uint8Array(raw.length);
+            for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+            const mime=header.split(';',1)[0]||'image/jpeg';
+            globalThis.__GE_HERO_REF__=await createImageBitmap(new Blob([bytes],{type:mime}));
           }
-          const current=await createImageBitmap(canvas),ref=globalThis.__GE_HERO_REF__,w=canvas.width,h=canvas.height;
+          const current=await createImageBitmap(await engine.capture()),ref=globalThis.__GE_HERO_REF__,w=canvas.width,h=canvas.height;
           const a=new OffscreenCanvas(w,h),b=new OffscreenCanvas(w,h),ac=a.getContext('2d',{willReadFrequently:true}),bc=b.getContext('2d',{willReadFrequently:true});
           ac.drawImage(current,0,0,w,h);bc.drawImage(ref,0,0,w,h);
           const ap=ac.getImageData(0,0,w,h).data,bp=bc.getImageData(0,0,w,h).data;
