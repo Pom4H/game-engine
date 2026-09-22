@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "3b36d7a080d202166dfacb32a59c241665fd5ccd",
+  "parents": [
+    "6ab9992ff4bf90171308b4378b2f2aeedb8b11c9"
+  ],
+  "authoredAt": "2026-09-22T17:03:05+03:00",
+  "recordedAt": "2026-09-22T14:12:42.310Z",
+  "experiment": "winter-hero-photorealism",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: align winter hero M3 basecoat with graphite target",
+    "experiment": "winter-hero-photorealism",
+    "observation": "the current hero authors the M3 base color as pale cyan while the fixed North Star is dark graphite; the rendered body therefore reads bright and diffuse even where reflections exist.",
+    "hypothesis": "matching the physical basecoat state increases clearcoat/base contrast and makes existing environment reflections read as automotive paint rather than flat plastic.",
+    "intervention": "change only the hero M3 authored paint color to graphite; non-hero street scenes and the generic M3 material model remain unchanged.",
+    "prediction": "all eight hero frames show darker body midtones and clearer reflected-building structure with no Stanford or runtime regression.",
+    "targets": [],
+    "guards": [
+      "renderer shaders, geometry, physics and Stanford calibration are unchanged"
+    ],
+    "dependsOn": [
+      "6ab9992ff4bf90171308b4378b2f2aeedb8b11c9"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-hero-photorealism"
+      ],
+      "Causal-Observation": [
+        "the current hero authors the M3 base color as pale cyan while the fixed North Star is dark graphite; the rendered body therefore reads bright and diffuse even where reflections exist."
+      ],
+      "Causal-Hypothesis": [
+        "matching the physical basecoat state increases clearcoat/base contrast and makes existing environment reflections read as automotive paint rather than flat plastic."
+      ],
+      "Causal-Intervention": [
+        "change only the hero M3 authored paint color to graphite; non-hero street scenes and the generic M3 material model remain unchanged."
+      ],
+      "Causal-Prediction": [
+        "all eight hero frames show darker body midtones and clearer reflected-building structure with no Stanford or runtime regression."
+      ],
+      "Causal-Depends-On": [
+        "6ab9992ff4bf90171308b4378b2f2aeedb8b11c9"
+      ],
+      "Causal-Guard": [
+        "renderer shaders, geometry, physics and Stanford calibration are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35737612050",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35737612050"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
