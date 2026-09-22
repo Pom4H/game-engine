@@ -1,4 +1,5 @@
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
+import {buildDirectionalProxyTiles} from './proxy-tiles.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
 import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
@@ -991,6 +992,7 @@ export class WebGPURenderer implements Renderer{
     const levels=9;
     for(let mip=0;mip<levels;mip++){
       const size=Math.max(1,256>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
+      const tiles=roughness<.74?buildDirectionalProxyTiles(proxies,size,cubeDirection):null;
       for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
         const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
         const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
@@ -1000,7 +1002,8 @@ export class WebGPURenderer implements Renderer{
         base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
         if(roughness<.74){
           let pr=0,pg=0,pb=0,total=0;
-          for(const proxy of proxies){
+          const candidates=tiles!.buckets[(face*tiles!.side+(y>>4))*tiles!.side+(x>>4)]!;
+          for(const proxy of candidates){
             const alignment=V3.dot(dir,proxy.dir);if(alignment<=proxy.threshold)continue;
             const q=(alignment-proxy.threshold)/Math.max(1e-5,1-proxy.threshold),sharp=mix(5.5,1.2,roughness*roughness),weight=Math.pow(q,sharp)*proxy.strength*(1-roughness*.62);
             pr+=proxy.color[0]*weight;pg+=proxy.color[1]*weight;pb+=proxy.color[2]*weight;total+=weight;
