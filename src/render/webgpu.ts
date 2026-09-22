@@ -288,6 +288,19 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     albedo=mix(albedo,vec3<f32>(0.89,0.93,0.97),snowMask*(1.0-slush*.55));
   }
 
+  // Bulk snow needs scale separation even when no authored texture is present.
+  // One procedural sample supplies both centimetre-scale tonal breakup and a
+  // screen-space micro-normal derivative, avoiding the smooth plaster look of
+  // large snow banks without adding geometry or scene-specific knowledge.
+  if(materialKind>5.5&&materialKind<6.5){
+    let snowMacro=noise3(in.worldPos*5.2+seed*7.1);
+    let snowGrain=noise3(in.worldPos*82.0+seed*19.7);
+    albedo*=.91+snowMacro*.085+snowGrain*.035;
+    let tx=normalize(dpdx(in.worldPos)+vec3<f32>(.000001,0,0));
+    let ty=normalize(dpdy(in.worldPos)+vec3<f32>(0,.000001,0));
+    n=normalize(n+(tx*dpdx(snowGrain)+ty*dpdy(snowGrain))*.24);
+  }
+
   // Moving bodies accumulate fresh snow on upward and rear-facing surfaces.
   let bodyDeposit=max(u.surfaceDynamics.z,u.surfaceDynamics.w);
   if(bodyDeposit>.001){
