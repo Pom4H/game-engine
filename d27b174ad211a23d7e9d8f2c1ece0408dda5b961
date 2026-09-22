@@ -1,0 +1,85 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "d27b174ad211a23d7e9d8f2c1ece0408dda5b961",
+  "parents": [
+    "6e8acf874e04032c0db78eeb24af8b7289d23ee0"
+  ],
+  "authoredAt": "2026-09-22T20:04:51+03:00",
+  "recordedAt": "2026-09-22T17:13:14.560Z",
+  "experiment": "ci-visual-first",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "ci: prioritize visual evidence before Stanford on one GPU runner",
+    "experiment": "ci-visual-first",
+    "observation": "generic self-hosted scheduling serializes parallel jobs and can run Stanford before the desired screenshot.",
+    "hypothesis": "explicit dependency gives deterministic shortest feedback for visual work.",
+    "intervention": "reality-fast now starts only after visual-fast succeeds.",
+    "prediction": "next PR run emits m3-reference before entering Stanford RealityGap.",
+    "targets": [],
+    "guards": [
+      "Stanford, 1080p performance, causal evidence and verify remain mandatory for final acceptance"
+    ],
+    "dependsOn": [
+      "6e8acf874e04032c0db78eeb24af8b7289d23ee0"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "ci-visual-first"
+      ],
+      "Causal-Observation": [
+        "generic self-hosted scheduling serializes parallel jobs and can run Stanford before the desired screenshot."
+      ],
+      "Causal-Hypothesis": [
+        "explicit dependency gives deterministic shortest feedback for visual work."
+      ],
+      "Causal-Intervention": [
+        "reality-fast now starts only after visual-fast succeeds."
+      ],
+      "Causal-Prediction": [
+        "next PR run emits m3-reference before entering Stanford RealityGap."
+      ],
+      "Causal-Depends-On": [
+        "6e8acf874e04032c0db78eeb24af8b7289d23ee0"
+      ],
+      "Causal-Guard": [
+        "Stanford, 1080p performance, causal evidence and verify remain mandatory for final acceptance"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35758348606",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35758348606"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "success",
+    "performance1080": "success"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "1920x1080",
+      "submittedFps": 70.34794252186293,
+      "completedFps": 69.46637196019253,
+      "p95FrameMs": 18.80000001192093,
+      "gpuP95Ms": 13.081880000000002,
+      "simulationToWallRatio": 0.9959296786949312,
+      "rendererErrors": []
+    },
+    "visualFast": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "960x540",
+      "submittedFps": 99.61151509351023,
+      "completedFps": 98.66798223976319,
+      "p95FrameMs": 13.300000011920929,
+      "gpuP95Ms": 7.6218,
+      "simulationToWallRatio": 0.9795132317528512,
+      "rendererErrors": []
+    }
+  },
+  "verdict": "observed"
+}
