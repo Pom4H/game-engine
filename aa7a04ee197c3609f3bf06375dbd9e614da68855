@@ -1,0 +1,62 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "aa7a04ee197c3609f3bf06375dbd9e614da68855",
+  "parents": [
+    "a2633e109e9462ad2c19773cbb29c6687110f755"
+  ],
+  "authoredAt": "2026-09-22T10:26:08+03:00",
+  "recordedAt": "2026-09-22T07:30:38.098Z",
+  "experiment": "development-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "ci: make synthetic renderer consistency diagnostic",
+    "experiment": "development-loop",
+    "observation": "held-out RealityGap is within tolerance and the radiometric oracle passes, but RendererConsistencyGap aborts visual-fast and prevents the 1080p GPU gate from running.",
+    "hypothesis": "the synthetic RendererConsistencyGap should remain diagnostic once held-out RealityGap and radiometric invariants are authoritative.",
+    "intervention": "remove only the --assert flag from the fast RendererConsistencyGap step and keep all external reality, radiometric and performance gates blocking.",
+    "prediction": "visual-fast records the consistency regression but continues to the GPU probes, while RealityGap and the pixel oracle retain their current pass/fail authority.",
+    "targets": [],
+    "guards": [
+      "no renderer physics material RealityGap metric or performance threshold changes"
+    ],
+    "dependsOn": [],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "development-loop"
+      ],
+      "Causal-Observation": [
+        "held-out RealityGap is within tolerance and the radiometric oracle passes, but RendererConsistencyGap aborts visual-fast and prevents the 1080p GPU gate from running."
+      ],
+      "Causal-Hypothesis": [
+        "the synthetic RendererConsistencyGap should remain diagnostic once held-out RealityGap and radiometric invariants are authoritative."
+      ],
+      "Causal-Intervention": [
+        "remove only the --assert flag from the fast RendererConsistencyGap step and keep all external reality, radiometric and performance gates blocking."
+      ],
+      "Causal-Prediction": [
+        "visual-fast records the consistency regression but continues to the GPU probes, while RealityGap and the pixel oracle retain their current pass/fail authority."
+      ],
+      "Causal-Guard": [
+        "no renderer physics material RealityGap metric or performance threshold changes"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35699589917",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35699589917"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
