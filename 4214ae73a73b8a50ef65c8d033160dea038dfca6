@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "4214ae73a73b8a50ef65c8d033160dea038dfca6",
+  "parents": [
+    "56f573ccec3650286cb3b058c7a4027cc5680466"
+  ],
+  "authoredAt": "2026-09-22T21:46:41+03:00",
+  "recordedAt": "2026-09-22T18:47:59.143Z",
+  "experiment": "winter-hero-fast-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "feedback: make Winter Hero the fast experimental loop",
+    "experiment": "winter-hero-fast-loop",
+    "observation": "Winter Hero reference existed but CI only checked PNG validity; artifact quota then failed an otherwise successful visual-fast job.",
+    "hypothesis": "score the real target first, retain only winners, and make transport non-gating.",
+    "intervention": "reference-scored hot batch + 24 variants + top-3 screenshots + release-only full verify.",
+    "prediction": "visual evidence arrives before Stanford/full verification and one run explores 24 hypotheses.",
+    "targets": [],
+    "guards": [
+      "production render path, Stanford RealityGap and 1080p performance gates remain unchanged"
+    ],
+    "dependsOn": [
+      "56f573ccec3650286cb3b058c7a4027cc5680466"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-hero-fast-loop"
+      ],
+      "Causal-Observation": [
+        "Winter Hero reference existed but CI only checked PNG validity; artifact quota then failed an otherwise successful visual-fast job."
+      ],
+      "Causal-Hypothesis": [
+        "score the real target first, retain only winners, and make transport non-gating."
+      ],
+      "Causal-Intervention": [
+        "reference-scored hot batch + 24 variants + top-3 screenshots + release-only full verify."
+      ],
+      "Causal-Prediction": [
+        "visual evidence arrives before Stanford/full verification and one run explores 24 hypotheses."
+      ],
+      "Causal-Depends-On": [
+        "56f573ccec3650286cb3b058c7a4027cc5680466"
+      ],
+      "Causal-Guard": [
+        "production render path, Stanford RealityGap and 1080p performance gates remain unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35769452104",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35769452104"
+  },
+  "jobs": {
+    "reality": "skipped",
+    "visualFast": "failure",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
