@@ -1,0 +1,22 @@
+{
+  "id": "EXP-WINTER-ENV-CACHE-CAUSE",
+  "question": "Why does the procedural environment map rebuild ten times during five seconds of a fixed clear-day scene?",
+  "hypothesis": "The generic renderStructureRevision invalidation clears environmentKey for deformation-driven geometry revisions even when no distant radiance cause changes. Removing that clear preserves the cause-key authority and eliminates nine redundant map builds.",
+  "status": "running",
+  "conditions": {
+    "parent": "06b32e08378ef031134f92151d14e6a8e2c26eba",
+    "baselineRun": "https://github.com/Pom4H/game-engine/actions/runs/35780276564",
+    "environmentUpdates": 10,
+    "changedCauseCounts": {},
+    "completedFps": 38.87,
+    "gpuP95Ms": 19.93,
+    "environmentMaxCpuMs": 297.2
+  },
+  "acceptance": {
+    "cache": "environment updates fall to one for the fixed clear-day scene, or only change with an explicit cause key",
+    "quality": "Winter Hero fixed candidate gaps remain unchanged; Stanford-ORB held-out reports no regressions",
+    "runtime": "1080p completed FPS rises and GPU p95 does not regress; preserve the 59fps gate"
+  },
+  "evidence": [],
+  "decision": null
+}
