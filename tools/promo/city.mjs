@@ -215,7 +215,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  for(let i=0;i<8;i++)box('crosswalk'+i,[48+(i-3.5)*.7,.004,0],[.31,.008,6.5],[.40,.41,.38,1]);
  bench('bench',-15,6.5,1);bench('bench-west',28,-6.2,-1);
  for(const [x,z,c] of [[32,2.75,[.23,.25,.27,1]]])car('parked-'+x,x,z,c);
- car('passing',CAR.startX,CAR.z,[.37,.49,.52,1],CAR.speed);
+ car('passing',CAR.startX,CAR.z,hero?[.18,.205,.235,1]:[.37,.49,.52,1],CAR.speed);
  entities.push(...makePedestrian());
  for(const [i,x] of [-11,9].entries()){
   const points=Array.from({length:40},(_,j)=>{const a=j/40*Math.PI*2,r=1+.06*Math.sin(a*5+.8)+.04*Math.sin(a*9);return[Math.cos(a)*1.6*r,Math.sin(a)*1.05*r];});
