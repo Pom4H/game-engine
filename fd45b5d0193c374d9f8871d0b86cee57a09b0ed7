@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "fd45b5d0193c374d9f8871d0b86cee57a09b0ed7",
+  "parents": [
+    "7d65c1915551214b7ff9db3d28265ac600c01da1"
+  ],
+  "authoredAt": "2026-09-22T22:35:50+03:00",
+  "recordedAt": "2026-09-22T19:42:46.372Z",
+  "experiment": "EXP-1008",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "docs(world): correct scaling experiment test path",
+    "experiment": "EXP-1008",
+    "observation": "evidence path named the original foundation suite.",
+    "hypothesis": "pointing to the scaling test identifies the exact regression coverage.",
+    "intervention": "correct one evidence string.",
+    "prediction": "tests and outputs unchanged.",
+    "targets": [],
+    "guards": [
+      "documentation-only correction"
+    ],
+    "dependsOn": [
+      "acfa0f02692c79c2d9d0e18d081ebc8a0f8f0c4f"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "EXP-1008"
+      ],
+      "Causal-Observation": [
+        "evidence path named the original foundation suite."
+      ],
+      "Causal-Hypothesis": [
+        "pointing to the scaling test identifies the exact regression coverage."
+      ],
+      "Causal-Intervention": [
+        "correct one evidence string."
+      ],
+      "Causal-Prediction": [
+        "tests and outputs unchanged."
+      ],
+      "Causal-Depends-On": [
+        "acfa0f02692c79c2d9d0e18d081ebc8a0f8f0c4f"
+      ],
+      "Causal-Guard": [
+        "documentation-only correction"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35774816339",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35774816339"
+  },
+  "jobs": {
+    "reality": "failure",
+    "visualFast": "skipped",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
