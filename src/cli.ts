@@ -22,7 +22,7 @@ async function main(){
   if(command==='decode'){const token=need(args.shift(),'scene token');console.log(JSON.stringify(decodeScene(token),null,2));return;}
   if(command==='serve'){const file=args[0]&&!args[0]!.startsWith('--')?args.shift():undefined,port=numberOption('--port',4173);const scene=file?await loadSceneFile(file):undefined;const host=await serveScene(scene,{port,...(file?{sceneDirectory:dirname(resolve(file))}:{})});console.log(`Game Engine: ${host.url}`);await new Promise<void>((resolve,reject)=>{host.server.on('close',resolve);host.server.on('error',reject);});return;}
   if(command==='render'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'frame.png'),time=numberOption('--time',0),width=numberOption('--width',1280),height=numberOption('--height',720);await render(await loadSceneFile(file),{out,time,width,height},dirname(resolve(file)));console.log(out);return;}
-  if(command==='render-batch'){const manifest=need(args.shift(),'batch manifest'),outDir=resolve(option('--out-dir')??'artifacts/render-batch'),width=numberOption('--width',480),height=numberOption('--height',270),frames=numberOption('--frames',3),reference=option('--reference'),keep=numberOption('--keep',reference?3:128);const result=await renderBatch(manifest,{outDir,width,height,frames,reference:reference?resolve(reference):undefined,keep});console.log(JSON.stringify(result,null,2));return;}
+  if(command==='render-batch'){const manifest=need(args.shift(),'batch manifest'),outDir=resolve(option('--out-dir')??'artifacts/render-batch'),width=numberOption('--width',480),height=numberOption('--height',270),frames=numberOption('--frames',3),reference=option('--reference'),keep=numberOption('--keep',reference?3:128);const result=await renderBatch(manifest,{outDir,width,height,frames,keep,...(reference?{reference:resolve(reference)}:{})});console.log(JSON.stringify(result,null,2));return;}
   if(command==='probe'){const file=need(args.shift(),'scene file'),time=numberOption('--time',0),width=numberOption('--width',256),height=numberOption('--height',144),frames=numberOption('--frames',1),stage=(option('--stage')??'hdr') as 'hdr'|'reflection'|'effects'|'taa'|'all',raw=need(option('--pixels'),'--pixels JSON'),points=JSON.parse(raw) as [number,number][];if(!Number.isInteger(frames)||frames<1||frames>32)throw new RangeError('--frames must be an integer in [1,32]');if(!['hdr','reflection','effects','taa','all'].includes(stage))throw new TypeError('--stage must be hdr, reflection, effects, taa or all');if(!Array.isArray(points)||!points.every(p=>Array.isArray(p)&&p.length===2&&Number.isInteger(p[0])&&Number.isInteger(p[1])))throw new TypeError('--pixels must be JSON [[x,y],...]');const result=await probeScene(await loadSceneFile(file),{time,width,height,frames,stage,points},dirname(resolve(file)));console.log(JSON.stringify(result));return;}
   if(command==='record'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'scene.mp4'),fps=numberOption('--fps',60),duration=numberOption('--duration',3),from=numberOption('--from',0),width=numberOption('--width',1920),height=numberOption('--height',1080);await record(await loadSceneFile(file),{out,fps,duration,from,width,height},dirname(resolve(file)));console.log(out);return;}
   if(command==='profile'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'render-profile.json'),duration=numberOption('--duration',5),warmup=numberOption('--warmup',2),from=numberOption('--from',0),width=numberOption('--width',1280),height=numberOption('--height',720);const report=await profileScene(await loadSceneFile(file),{duration,warmup,from,width,height},dirname(resolve(file)));await writeFile(out,JSON.stringify(report,null,2));console.log(out);return;}
@@ -37,6 +37,26 @@ async function loadSceneFile(file:string):Promise<SceneSpec>{const path=resolve(
 
 interface RenderOptions{out:string;time:number;width:number;height:number}
 async function render(scene:SceneSpec,options:RenderOptions,sceneDirectory:string):Promise<void>{const host=await serveScene(scene,{sceneDirectory,distributionDirectory});let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();await browser.evaluate(`const engine=window.__GAME_ENGINE__;engine.seek(${JSON.stringify(options.time)});await engine.flush();for(let i=0;i<7;i++){engine.render();await engine.drain();}true`);await assertBrowserRenderer(browser);await writeFile(options.out,await browser.screenshot());}finally{await browser?.close();await host.close();}}
+interface ProbeOptions{time:number;width:number;height:number;frames:number;stage:'hdr'|'reflection'|'effects'|'taa'|'all';points:readonly [number,number][]}
+async function probeScene(scene:SceneSpec,options:ProbeOptions,sceneDirectory:string){
+  const host=await serveScene(scene,{sceneDirectory,distributionDirectory});let browser:BrowserSession|undefined;
+  try{
+    browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
+    const result=await browser.evaluate(`
+      const engine=window.__GAME_ENGINE__;
+      engine.seek(${JSON.stringify(options.time)});await engine.flush();
+      for(let i=0;i<${JSON.stringify(options.frames)};i++){engine.render();await engine.drain();}
+      if(${JSON.stringify(options.stage)}==='all')return {
+        hdr:await engine.probeLinear(${JSON.stringify(options.points)},'hdr'),
+        reflection:await engine.probeLinear(${JSON.stringify(options.points)},'reflection'),
+        effects:await engine.probeLinear(${JSON.stringify(options.points)},'effects'),
+        taa:await engine.probeLinear(${JSON.stringify(options.points)},'taa'),
+      };
+      return await engine.probeLinear(${JSON.stringify(options.points)},${JSON.stringify(options.stage)});
+    `);
+    await assertBrowserRenderer(browser);return options.stage==='all'?{version:1,width:options.width,height:options.height,time:options.time,frames:options.frames,stage:'all',samplesByStage:result}:{version:1,width:options.width,height:options.height,time:options.time,frames:options.frames,stage:options.stage,samples:result};
+  }finally{await browser?.close();await host.close();}
+}
 interface RenderBatchOptions{outDir:string;width:number;height:number;frames:number;reference?:string;keep:number}
 interface RenderBatchCapture{readonly id:string;readonly file?:string;readonly scene?:SceneSpec;readonly patch?:AppearancePatch;readonly time?:number;readonly frames?:number;readonly meta?:Record<string,unknown>}
 interface RenderBatchManifest{readonly assetRoot?:string;readonly base?:string;readonly captures:readonly RenderBatchCapture[]}
