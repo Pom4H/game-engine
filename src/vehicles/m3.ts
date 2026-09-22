@@ -93,35 +93,6 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
   throw new TypeError(`Unknown M3 source material ${sourceMaterial} on ${id}`);
 }
 
-function roundedRectPoint(width:number,height:number,radius:number,t:number):readonly[number,number]{
-  const perimeter=2*(width+height-4*radius)+2*Math.PI*radius;
-  let d=((t%1)+1)%1*perimeter;
-  const straightW=width-2*radius,straightH=height-2*radius;
-  const pieces:[number,()=>readonly[number,number]][]=[
-    [straightW,()=>[-width/2+radius+d,height/2]],
-    [Math.PI*radius/2,()=>{const a=Math.PI/2-d/radius;return[width/2-radius+Math.cos(a)*radius,height/2-radius+Math.sin(a)*radius];}],
-    [straightH,()=>[width/2,height/2-radius-d]],
-    [Math.PI*radius/2,()=>{const a=0-d/radius;return[width/2-radius+Math.cos(a)*radius,-height/2+radius+Math.sin(a)*radius];}],
-    [straightW,()=>[width/2-radius-d,-height/2]],
-    [Math.PI*radius/2,()=>{const a=-Math.PI/2-d/radius;return[-width/2+radius+Math.cos(a)*radius,-height/2+radius+Math.sin(a)*radius];}],
-    [straightH,()=>[-width/2,-height/2+radius+d]],
-    [Math.PI*radius/2,()=>{const a=Math.PI-d/radius;return[-width/2+radius+Math.cos(a)*radius,height/2-radius+Math.sin(a)*radius];}],
-  ];
-  for(const [length,fn] of pieces){if(d<=length)return fn();d-=length;}
-  return[-width/2+radius,height/2];
-}
-function roundedRectFrameMesh(width:number,height:number,radius:number,border:number,segments=40):TriangleMesh{
-  const positions:number[]=[],normals:number[]=[],indices:number[]=[];
-  const innerW=width-2*border,innerH=height-2*border,innerR=Math.max(.01,radius-border);
-  for(let i=0;i<segments;i++){
-    const t=i/segments,o=roundedRectPoint(width,height,radius,t),inn=roundedRectPoint(innerW,innerH,innerR,t);
-    positions.push(0,o[1],o[0], 0,inn[1],inn[0]);
-    normals.push(1,0,0, 1,0,0);
-  }
-  for(let i=0;i<segments;i++){const n=(i+1)%segments,a=i*2,b=a+1,c0=n*2,d=c0+1;indices.push(a,c0,d,a,d,b);}
-  return{kind:'triangle-mesh',positions,normals,indices};
-}
-
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
 export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.034,true);}
@@ -145,37 +116,8 @@ export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
  */
 export function generateM3Vehicle():ParametricPassengerGeometry{
   const body=m3HighFidelityBody(),renderBody=m3SmoothRenderBody(body),sources=m3FbxParts();
-  // The grille used to be authored as an independent oversized prop. Keep one
-  // fascia envelope tied to the vehicle dimensions so the recess, frame and slats
-  // cannot outgrow the bumper/hood opening independently.
-  const fascia=Object.freeze({
-    x:M3_PARAMETRIC_PROFILE.dimensions.length*.5,
-    centerY:M3_PARAMETRIC_PROFILE.dimensions.height*.425,
-    centerZ:M3_PARAMETRIC_PROFILE.dimensions.width*.098,
-    kidneyWidth:M3_PARAMETRIC_PROFILE.dimensions.width*.148,
-    kidneyHeight:M3_PARAMETRIC_PROFILE.dimensions.height*.315,
-    radius:M3_PARAMETRIC_PROFILE.dimensions.height*.050,
-    border:M3_PARAMETRIC_PROFILE.dimensions.width*.0074,
-  });
-  const recessWidth=fascia.kidneyWidth-fascia.border*2.2;
-  const recessHeight=fascia.kidneyHeight-fascia.border*2.4;
-  const slatSpan=recessWidth-fascia.border*1.4;
-  const slatStep=recessHeight/7.0;
-  const grilleSlats:ParametricVehiclePart[]=[];
-  for(const side of [-1,1] as const)for(let row=1;row<=6;row++)grilleSlats.push(Object.freeze({
-    id:`kidney-${side<0?'left':'right'}-slat-${row-1}`,
-    role:'dark' as const,
-    mesh:{kind:'box' as const,size:[.022,.012,slatSpan] as const},
-    position:[fascia.x-.010,fascia.centerY-recessHeight*.5+slatStep*row,side*fascia.centerZ] as const,
-    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.72,metalness:.01},
-  }));
-  const lowerIntake:ParametricVehiclePart[]=Array.from({length:5},(_,row)=>Object.freeze({
-    id:`lower-intake-slat-${row}`,
-    role:'dark' as const,
-    mesh:{kind:'box' as const,size:[.032,.014,.69] as const},
-    position:[2.365,.225+row*.043,0] as const,
-    material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.78,metalness:.01},
-  }));
+  // Front fascia detail is retained from the packed FBX `plastic-trim` source.
+  // Do not layer a second procedural kidney/intake assembly over that geometry.
   const badge:ParametricVehiclePart[]=[
     Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.052,height:.006,segments:32},position:[1.83,.985,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.16,metalness:.10}}),
     Object.freeze({id:'hood-roundel-blue-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.034,0],[.034,.034],[0,.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.18,metalness:.02}}),
@@ -184,11 +126,6 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     Object.freeze({id:'hood-roundel-white-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.034,0],[.034,-.034],[0,-.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.18,metalness:.01}}),
   ];
   const frontDetail:ParametricVehiclePart[]=[
-    Object.freeze({id:'kidney-recess-left',role:'dark' as const,mesh:{kind:'box' as const,size:[.014,recessHeight,recessWidth] as const},position:[fascia.x-.012,fascia.centerY,-fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
-    Object.freeze({id:'kidney-recess-right',role:'dark' as const,mesh:{kind:'box' as const,size:[.014,recessHeight,recessWidth] as const},position:[fascia.x-.012,fascia.centerY,fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.92,metalness:0}}),
-    Object.freeze({id:'lower-intake-recess',role:'dark' as const,mesh:{kind:'box' as const,size:[.026,.205,.82] as const},position:[2.372,.305,0] as const,material:{kind:'plastic' as const,finish:'rough' as const,roughness:.94,metalness:0}}),
-    Object.freeze({id:'kidney-frame-left',role:'dark' as const,mesh:roundedRectFrameMesh(fascia.kidneyWidth,fascia.kidneyHeight,fascia.radius,fascia.border),position:[fascia.x+.004,fascia.centerY,-fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
-    Object.freeze({id:'kidney-frame-right',role:'dark' as const,mesh:roundedRectFrameMesh(fascia.kidneyWidth,fascia.kidneyHeight,fascia.radius,fascia.border),position:[fascia.x+.004,fascia.centerY,fascia.centerZ] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.18,metalness:.08}}),
     Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
     Object.freeze({id:'hood-seam-right',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
   ];
@@ -212,8 +149,6 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     }));
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
-    ...grilleSlats,
-    ...lowerIntake,
     ...frontDetail,
     ...badge,
     ...interior,

@@ -5,6 +5,7 @@ import {batchStaticScenery} from '../../dist/index.js';
 const C={snow:[.93,.955,.975,1],stone:[.59,.57,.52,1],dark:[.07,.075,.078,1],metal:[.16,.18,.19,1],glass:[.16,.23,.28,1]};
 const rng=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 export function makeCity(kind='street'){if(kind==='laboratory')return makeLaboratory();
+ const hero=kind==='hero';
 
  const entities=[],random=rng(20260920),motions=[];let sequence=0;
  const add=(id,p,mesh,color=C.stone,extra={})=>{const e={id,position:p,mesh,material:{kind:'default',color,roughness:.8,...extra.material},...extra};if(extra.material)e.material={kind:'default',color,roughness:.8,...extra.material};entities.push(e);return e;};
@@ -236,9 +237,40 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;rod('clock-index'+i,[98.86,16.9+Math.cos(a)*.83,Math.sin(a)*.83],[98.86,16.9+Math.cos(a)*.92,Math.sin(a)*.92],.025);}
  rod('clock-minute',[98.85,16.9,0],[98.85,16.9,.74],.037);rod('clock-hour',[98.84,16.9,0],[98.84,16.56,-.42],.05);
  box('cross-street',[91,-.075,0],[9,.15,50],[.16,.17,.18,1],{material:{kind:'asphalt',roughness:.68},environmental:{surfaceUse:'road',snowDepthM:.015,iceDepthM:.0008}});
+ if(hero){
+  // Recover the photographic hero state without special-casing renderer behavior:
+  // remove sub-pixel road dressing, keep continuous snow masses, and author the
+  // wet road as physically dark asphalt instead of a bright brown diffuse slab.
+  for(let i=entities.length-1;i>=0;i--){
+   const id=entities[i].id;
+   if(id.startsWith('plough-grit-')||id.startsWith('walk-grain-')||id.startsWith('centre-slush-')||id.startsWith('plough-shoulder-')||id.startsWith('plough-crest-'))entities.splice(i,1);
+  }
+  bank('hero-bank-near',[-13,.18,-4.12],[118,.48,1.08],4617,72);
+  bank('hero-bank-far',[-13,.18,4.08],[118,.56,1.22],9121,72);
+  for(const entity of entities){
+   if(entity.id==='road'){
+    entity.material={...entity.material,color:[.014,.016,.020,1],roughness:.72};
+    entity.environmental={...entity.environmental,snowDepthM:.001,iceDepthM:.00003,waterDepthM:.0010};
+   }
+   if(entity.id.startsWith('puddle')){
+    entity.material={...entity.material,color:[.025,.032,.040,1],roughness:.10};
+   }
+  }
+ }
  const snowTexture={url:'/assets/snow-granular.png',sizeM:1.2,bumpStrength:.4,albedoStrength:.45};for(const e of entities){if(e.material?.kind==='snow')e.material.texture=snowTexture;if(e.environmental?.snowDepthM)e.environmental.snowMaterial={texture:snowTexture};}
  for(const e of entities)if(e.material?.pattern==='brick'){e.material.texture={url:'/assets/brick-weathered.png',sizeM:1.55,bumpStrength:.40,albedoStrength:1};e.material.color=[.88,.82,.76,1];}
- const spec={version:1,seed:20260920,ground:-100,environment:{temperatureC:-6,humidity:.76,groundMoisture:.36,precipitation:'rare',snowfall:'moderate',sunlight:.24,wind:[.7,0,.2],clock:{startHour:17.3,hoursPerSecond:0}},rendering:{sunDirection:[-.65,.32,-.5],sunColor:[.70,.79,1],sunIntensity:1.8,skyColor:[.19,.24,.32],fogDensity:.0045,exposure:1.12,shadowExtent:35},camera:{position:[-29,1.45,5.8],target:[-2,2.6,-2.5],fov:47},entities};
+ const spec={version:1,seed:20260920,ground:-100,
+  environment:hero
+   ?{temperatureC:-3,humidity:.58,groundMoisture:.42,precipitation:'rare',snowfall:'moderate',sunlight:.88,wind:[.35,0,.08],clock:{startHour:14.7,hoursPerSecond:0}}
+   :{temperatureC:-6,humidity:.76,groundMoisture:.36,precipitation:'rare',snowfall:'moderate',sunlight:.24,wind:[.7,0,.2],clock:{startHour:17.3,hoursPerSecond:0}},
+  rendering:hero
+   ?{sunDirection:[.42,.80,-.42],sunColor:[1,.955,.88],sunIntensity:3.35,skyColor:[.33,.50,.72],fogDensity:.00055,exposure:1.02,shadowExtent:35}
+   :{sunDirection:[-.65,.32,-.5],sunColor:[.70,.79,1],sunIntensity:1.8,skyColor:[.19,.24,.32],fogDensity:.0045,exposure:1.12,shadowExtent:35},
+  camera:{position:[-29,1.45,5.8],target:[-2,2.6,-2.5],fov:47},entities};
+ if(hero){
+  const exclude=entities.filter(entity=>entity.id.startsWith('passing-')).map(entity=>entity.id);
+  spec.rendering.reflectionProbe={entity:'passing-body',offset:[0,.92,0],radius:42,exclude,facesPerFrame:1};
+ }
  if(kind==='courtyard'){spec.environment.sunlight=.12;spec.environment.snowfall='moderate';spec.rendering={sunDirection:[-.4,.5,-.3],sunColor:[.48,.63,1],sunIntensity:.70,skyColor:[.14,.20,.29],fogDensity:.006,exposure:1.10,shadowExtent:35};}
  spec.animation={walkers:[pedestrianAnimation()],vehicles:[{id:'passing',velocity:[CAR.speed,0,0],parts:motions.map(({id,origin,wheel,radius})=>({id,origin,wheel,radius}))}]};
  spec.surfaceContacts={snow:[{surfaceId:'walk-1',seed:701}],wheels:entities.filter(e=>e.id.startsWith('passing-contact')).map(e=>({entityId:e.id,radius:CAR.radius,lateral:[0,0,e.position[2]>CAR.z?1:-1]}))};

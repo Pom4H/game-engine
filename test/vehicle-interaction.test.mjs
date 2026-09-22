@@ -135,6 +135,7 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
   assert.equal(byId.get('windshield-front').material.kind,'glass');
   assert.equal(byId.get('mirror-left').material.kind,'mirror');
   assert.equal(byId.get('plastic-trim').material.kind,'plastic');
+  assert.equal([...byId.keys()].some(id=>id.startsWith('kidney-')||id.startsWith('lower-intake')),false,'packed FBX plastic-trim must be the single source of front fascia geometry');
   assert.equal(byId.get('rim-front-left').material.kind,'aluminum');
   assert.equal(byId.get('tire-front-left').material.kind,'rubber');
 
