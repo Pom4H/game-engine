@@ -119,7 +119,7 @@ export interface AppearanceMaterialPatch {
   readonly id?:string;
   readonly idPrefix?:string;
   readonly treatment?:MaterialTreatment;
-  readonly set:Readonly<Pick<MaterialSpec,'color'|'roughness'|'metalness'|'clearcoat'|'clearcoatRoughness'|'emissive'>>;
+  readonly set:Readonly<Pick<MaterialSpec,'color'|'roughness'|'metalness'|'clearcoat'|'clearcoatRoughness'>>;
 }
 export interface AppearancePatch {
   readonly rendering?:Partial<RenderingSpec>;
