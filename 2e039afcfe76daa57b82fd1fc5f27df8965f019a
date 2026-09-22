@@ -1,0 +1,103 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "2e039afcfe76daa57b82fd1fc5f27df8965f019a",
+  "parents": [],
+  "authoredAt": "2026-09-22T08:46:48+03:00",
+  "recordedAt": "2026-09-22T05:52:51.959Z",
+  "experiment": "development-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "ci: persist causal evidence on the self-hosted runner",
+    "experiment": "development-loop",
+    "observation": "causal-evidence failed before its first step with runner_id 0 while the GPU RealityGap job succeeded.",
+    "hypothesis": "the ledger logic is valid but the selected GitHub-hosted runner is unavailable for this repository.",
+    "intervention": "move causal-evidence to self-hosted and make its run commands use cmd-compatible environment and fallback syntax.",
+    "prediction": "causal-evidence starts, downloads available artifacts after both successful and failed gates, writes evidence.json, and pushes refs/notes/causality.",
+    "targets": [],
+    "guards": [
+      "renderer and RealityGap measurement code is unchanged"
+    ],
+    "dependsOn": [
+      "40a638cfa4defb0a4b8a2a96804c75ba3eec72ee"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "development-loop"
+      ],
+      "Causal-Observation": [
+        "causal-evidence failed before its first step with runner_id 0 while the GPU RealityGap job succeeded."
+      ],
+      "Causal-Hypothesis": [
+        "the ledger logic is valid but the selected GitHub-hosted runner is unavailable for this repository."
+      ],
+      "Causal-Intervention": [
+        "move causal-evidence to self-hosted and make its run commands use cmd-compatible environment and fallback syntax."
+      ],
+      "Causal-Prediction": [
+        "causal-evidence starts, downloads available artifacts after both successful and failed gates, writes evidence.json, and pushes refs/notes/causality."
+      ],
+      "Causal-Depends-On": [
+        "40a638cfa4defb0a4b8a2a96804c75ba3eec72ee"
+      ],
+      "Causal-Guard": [
+        "renderer and RealityGap measurement code is unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35692055763",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35692055763"
+  },
+  "jobs": {
+    "reality": "success",
+    "visualFast": "failure",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": {
+      "dataset": "Stanford-ORB",
+      "object": "car",
+      "gap": 0.23837613511163935,
+      "baseline": {
+        "gap": 0.23563216891992333,
+        "tolerance": 0.003,
+        "delta": 0.0027439661917160185
+      },
+      "regressions": [],
+      "heldOut": [
+        {
+          "capture": "car_scene004-test1",
+          "gap": 0.2663534144711415,
+          "psnr": 17.35991339852934,
+          "ssim": 0.7455449979819455,
+          "components": {
+            "lpips": null,
+            "structural": 0.2544550020180545,
+            "logLuminance": 0.09720753821776511,
+            "edge": 0.7076154502378703,
+            "chroma": 0.06648376364636399
+          }
+        },
+        {
+          "capture": "car_scene004-test3",
+          "gap": 0.2103988557521372,
+          "psnr": 20.25698762995468,
+          "ssim": 0.828285914757499,
+          "components": {
+            "lpips": null,
+            "structural": 0.17171408524250098,
+            "logLuminance": 0.07659547175763654,
+            "edge": 0.6057346928319939,
+            "chroma": 0.04504722467779646
+          }
+        }
+      ]
+    },
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "rejected"
+}
