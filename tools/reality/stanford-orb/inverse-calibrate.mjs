@@ -108,11 +108,28 @@ for(const capture of manifest.captures.filter(c=>c.split==='calibration')){
   console.log(JSON.stringify({phase:'inverse-albedo-view',capture:capture.id,accepted,occluded}));
 }
 
-const colors=new Array(vertices*4),known=new Uint8Array(vertices);let observed=0;
+function robustSample(list){
+  if(list.length===1)return list[0];
+  let best=list[0],bestScore=Infinity;
+  for(const candidate of list){
+    let disagreement=0,totalWeight=0;
+    for(const other of list){
+      const dr=candidate.rgb[0]-other.rgb[0],dg=candidate.rgb[1]-other.rgb[1],db=candidate.rgb[2]-other.rgb[2];
+      disagreement+=other.weight*Math.sqrt(dr*dr+dg*dg+db*db);totalWeight+=other.weight;
+    }
+    const consensus=disagreement/Math.max(totalWeight,1e-9);
+    const confidencePenalty=.018/Math.sqrt(Math.max(candidate.weight,1e-6));
+    const score=consensus+confidencePenalty;
+    if(score<bestScore){bestScore=score;best=candidate;}
+  }
+  return best;
+}
+const colors=new Array(vertices*4),known=new Uint8Array(vertices);let observed=0,multiView=0;
 for(let i=0;i<vertices;i++){
   const list=samples[i];
   if(list.length){
-    list.sort((a,b)=>b.weight-a.weight);const best=list[0];known[i]=1;observed++;
+    if(list.length>1)multiView++;
+    const best=robustSample(list);known[i]=1;observed++;
     colors[i*4]=best.rgb[0];colors[i*4+1]=best.rgb[1];colors[i*4+2]=best.rgb[2];
   }else{colors[i*4]=0;colors[i*4+1]=0;colors[i*4+2]=0;}
   colors[i*4+3]=1;
@@ -137,4 +154,4 @@ for(let i=0;i<vertices;i++)if(!known[i]){colors[i*4]=fallback[0];colors[i*4+1]=f
 
 const packed=encodePackedMesh({...mesh,colors});
 await writeFile(join(dir,'mesh.mjs'),`import {decodePackedMesh} from '../../../dist/assets/packed-mesh.js';\nexport default decodePackedMesh(${JSON.stringify(packed)});\n`);
-console.log(JSON.stringify({phase:'inverse-albedo-complete',observed,filled,vertices,coverage:observed/vertices,meanSrgb:fallback}));
+console.log(JSON.stringify({phase:'inverse-albedo-complete',fusion:'weighted-medoid',observed,multiView,filled,vertices,coverage:observed/vertices,meanSrgb:fallback}));
