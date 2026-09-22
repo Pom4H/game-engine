@@ -1060,7 +1060,16 @@ export class WebGPURenderer implements Renderer{
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
   private collect(scene:Scene):boolean{
     if(this.collectedScene===scene&&this.collectedRevision===scene.renderStructureRevision)return false;
+    const sceneChanged=this.collectedScene!==scene;
     this.collectedScene=scene;this.collectedRevision=scene.renderStructureRevision;
+    if(sceneChanged){
+      // Hot render-lab scene swaps deliberately retain GPU pipelines/mesh buffers,
+      // but every scene-owned uniform/probe/culling cache must observe the new causes.
+      for(const object of this.objects.values())object.uniformReady=false;
+      this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbePosition=null;
+      this.shadowValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
+      this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
+    }
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);

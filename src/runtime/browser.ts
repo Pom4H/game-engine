@@ -17,7 +17,7 @@ export class BrowserRuntime {
   readonly tickRate:number;
   readonly stepSeconds:number;
   readonly audio:ProceduralAudio|null;
-  private readonly initial:SceneSpec;
+  private initial:SceneSpec;
   private controls:WalkerControls|null=null;
   private readonly clock:FixedClock;
   private running=false;
@@ -59,6 +59,14 @@ export class BrowserRuntime {
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   reset():void{this.scene=new Scene(this.initial);this.render();}
+  async replaceScene(scene:SceneSpec):Promise<void>{
+    this.pause();
+    this.controls?.dispose();this.controls=null;
+    this.initial=structuredClone(scene);
+    this.scene=new Scene(this.initial);
+    await this.renderer.prepareMaterials?.(this.scene);
+    this.render();await this.renderer.flush();
+  }
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
   render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
   async drain():Promise<void>{await this.renderer.flush();}
@@ -95,7 +103,7 @@ export class BrowserRuntime {
     };
   }
 
-  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
+  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),replaceScene:scene=>this.replaceScene(scene),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
   private frame=(now:number)=>{
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];

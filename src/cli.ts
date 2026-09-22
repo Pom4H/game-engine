@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {spawn,type ChildProcess} from 'node:child_process';
-import {access,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
+import {access,mkdir,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
 import {constants as FS} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname,extname,join,resolve} from 'node:path';
@@ -22,13 +22,14 @@ async function main(){
   if(command==='decode'){const token=need(args.shift(),'scene token');console.log(JSON.stringify(decodeScene(token),null,2));return;}
   if(command==='serve'){const file=args[0]&&!args[0]!.startsWith('--')?args.shift():undefined,port=numberOption('--port',4173);const scene=file?await loadSceneFile(file):undefined;const host=await serveScene(scene,{port,...(file?{sceneDirectory:dirname(resolve(file))}:{})});console.log(`Game Engine: ${host.url}`);await new Promise<void>((resolve,reject)=>{host.server.on('close',resolve);host.server.on('error',reject);});return;}
   if(command==='render'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'frame.png'),time=numberOption('--time',0),width=numberOption('--width',1280),height=numberOption('--height',720);await render(await loadSceneFile(file),{out,time,width,height},dirname(resolve(file)));console.log(out);return;}
+  if(command==='render-batch'){const manifest=need(args.shift(),'batch manifest'),outDir=resolve(option('--out-dir')??'artifacts/render-batch'),width=numberOption('--width',480),height=numberOption('--height',270),frames=numberOption('--frames',7);const result=await renderBatch(manifest,{outDir,width,height,frames});console.log(JSON.stringify(result,null,2));return;}
   if(command==='probe'){const file=need(args.shift(),'scene file'),time=numberOption('--time',0),width=numberOption('--width',256),height=numberOption('--height',144),frames=numberOption('--frames',1),stage=(option('--stage')??'hdr') as 'hdr'|'reflection'|'effects'|'taa'|'all',raw=need(option('--pixels'),'--pixels JSON'),points=JSON.parse(raw) as [number,number][];if(!Number.isInteger(frames)||frames<1||frames>32)throw new RangeError('--frames must be an integer in [1,32]');if(!['hdr','reflection','effects','taa','all'].includes(stage))throw new TypeError('--stage must be hdr, reflection, effects, taa or all');if(!Array.isArray(points)||!points.every(p=>Array.isArray(p)&&p.length===2&&Number.isInteger(p[0])&&Number.isInteger(p[1])))throw new TypeError('--pixels must be JSON [[x,y],...]');const result=await probeScene(await loadSceneFile(file),{time,width,height,frames,stage,points},dirname(resolve(file)));console.log(JSON.stringify(result));return;}
   if(command==='record'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'scene.mp4'),fps=numberOption('--fps',60),duration=numberOption('--duration',3),from=numberOption('--from',0),width=numberOption('--width',1920),height=numberOption('--height',1080);await record(await loadSceneFile(file),{out,fps,duration,from,width,height},dirname(resolve(file)));console.log(out);return;}
   if(command==='profile'){const file=need(args.shift(),'scene file'),out=resolve(option('--out')??'render-profile.json'),duration=numberOption('--duration',5),warmup=numberOption('--warmup',2),from=numberOption('--from',0),width=numberOption('--width',1280),height=numberOption('--height',720);const report=await profileScene(await loadSceneFile(file),{duration,warmup,from,width,height},dirname(resolve(file)));await writeFile(out,JSON.stringify(report,null,2));console.log(out);return;}
   throw new Error(`Unknown command: ${command}`);
 }
 
-function help(){console.log(`game-engine — deterministic scene runtime\n\nUsage:\n  game-engine serve [scene.ts|scene.json] [--port 4173]\n  game-engine url <scene> [--base https://example.com/]\n  game-engine validate <scene>\n  game-engine render <scene> --time 2.5 --out frame.png [--width 1280 --height 720]\n  game-engine probe <scene> --pixels '[[64,48],[128,72]]' [--stage hdr|reflection|effects|taa|all] [--frames 1] [--width 256 --height 144]\n  game-engine record <scene> --duration 8 --fps 60 --out shot.mp4 [--from 0]\n  game-engine profile <scene> --duration 5 --warmup 2 --out render-profile.json [--width 1280 --height 720]\n\nScene modules export a SceneSpec as default. JSON is accepted directly.\nReferenced local material images resolve inside the scene file directory.\nrender/record use an installed Chromium/Chrome and no browser automation package.`);}
+function help(){console.log(`game-engine — deterministic scene runtime\n\nUsage:\n  game-engine serve [scene.ts|scene.json] [--port 4173]\n  game-engine url <scene> [--base https://example.com/]\n  game-engine validate <scene>\n  game-engine render <scene> --time 2.5 --out frame.png [--width 1280 --height 720]\n  game-engine render-batch <manifest.json> --out-dir artifacts/sweep [--width 480 --height 270] [--frames 7]\n  game-engine probe <scene> --pixels '[[64,48],[128,72]]' [--stage hdr|reflection|effects|taa|all] [--frames 1] [--width 256 --height 144]\n  game-engine record <scene> --duration 8 --fps 60 --out shot.mp4 [--from 0]\n  game-engine profile <scene> --duration 5 --warmup 2 --out render-profile.json [--width 1280 --height 720]\n\nScene modules export a SceneSpec as default. JSON is accepted directly.\nReferenced local material images resolve inside the scene file directory.\nrender/record use an installed Chromium/Chrome and no browser automation package.`);}
 function need<T>(value:T|undefined,label:string):T{if(value===undefined)throw new Error(`Missing ${label}`);return value;}
 function option(name:string):string|undefined{const i=args.indexOf(name);if(i<0)return;const value=args[i+1];if(!value||value.startsWith('--'))throw new Error(`${name} requires a value`);return value;}
 function numberOption(name:string,fallback:number):number{const raw=option(name);if(raw===undefined)return fallback;const value=Number(raw);if(!Number.isFinite(value))throw new Error(`${name} must be numeric`);return value;}
@@ -36,6 +37,45 @@ async function loadSceneFile(file:string):Promise<SceneSpec>{const path=resolve(
 
 interface RenderOptions{out:string;time:number;width:number;height:number}
 async function render(scene:SceneSpec,options:RenderOptions,sceneDirectory:string):Promise<void>{const host=await serveScene(scene,{sceneDirectory,distributionDirectory});let browser:BrowserSession|undefined;try{browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();await browser.evaluate(`const engine=window.__GAME_ENGINE__;engine.seek(${JSON.stringify(options.time)});await engine.flush();for(let i=0;i<7;i++){engine.render();await engine.drain();}true`);await assertBrowserRenderer(browser);await writeFile(options.out,await browser.screenshot());}finally{await browser?.close();await host.close();}}
+interface RenderBatchOptions{outDir:string;width:number;height:number;frames:number}
+interface RenderBatchCapture{readonly id:string;readonly file?:string;readonly scene?:SceneSpec;readonly time?:number;readonly frames?:number}
+interface RenderBatchManifest{readonly assetRoot?:string;readonly captures:readonly RenderBatchCapture[]}
+/**
+ * Render-lab fast path: Chrome, WebGPU device, shader pipelines and mesh buffers are
+ * warmed once, then Scene objects are swapped through the engine bridge. This turns
+ * parameter sweeps into GPU work instead of repeated browser/runtime startup.
+ */
+async function renderBatch(manifestFile:string,options:RenderBatchOptions){
+  if(!Number.isInteger(options.width)||!Number.isInteger(options.height)||options.width<16||options.height<9||options.width>4096||options.height>4096)throw new RangeError('batch dimensions must be integers in [16,4096]');
+  if(!Number.isInteger(options.frames)||options.frames<1||options.frames>32)throw new RangeError('--frames must be an integer in [1,32]');
+  const manifestPath=resolve(manifestFile),directory=dirname(manifestPath),manifest=JSON.parse(await readFile(manifestPath,'utf8')) as RenderBatchManifest,captures=manifest.captures;
+  if(!Array.isArray(captures)||captures.length<1||captures.length>128)throw new RangeError('batch manifest captures must contain 1..128 entries');
+  const ids=new Set<string>();
+  for(const capture of captures){
+    if(typeof capture.id!=='string'||!/^[A-Za-z0-9._-]{1,80}$/.test(capture.id)||ids.has(capture.id))throw new TypeError('batch capture ids must be unique filesystem-safe names');
+    ids.add(capture.id);
+    if((capture.file===undefined)===(capture.scene===undefined))throw new TypeError(`batch capture ${capture.id} must provide exactly one of file or scene`);
+    const frames=capture.frames??options.frames;if(!Number.isInteger(frames)||frames<1||frames>32)throw new RangeError(`batch capture ${capture.id} frames must be in [1,32]`);
+  }
+  const load=async(capture:RenderBatchCapture)=>capture.scene?validateScene(capture.scene):await loadSceneFile(resolve(directory,capture.file!));
+  const first=await load(captures[0]!),assetRoot=resolve(directory,manifest.assetRoot??'.');
+  await mkdir(options.outDir,{recursive:true});
+  const host=await serveScene(first,{sceneDirectory:assetRoot,distributionDirectory});let browser:BrowserSession|undefined;
+  const started=performance.now(),results:{id:string;milliseconds:number;out:string}[]=[];
+  try{
+    browser=await BrowserSession.launch(`${host.url}&play=0`,options.width,options.height);await browser.ready();
+    const warm=performance.now();
+    for(let index=0;index<captures.length;index++){
+      const capture=captures[index]!,scene=index===0?first:await load(capture),time=capture.time??0,frames=capture.frames??options.frames,out=join(options.outDir,`${capture.id}.png`),begin=performance.now();
+      const replace=index===0?'':`await engine.replaceScene(${JSON.stringify(scene)});`;
+      await browser.evaluate(`const engine=window.__GAME_ENGINE__;${replace}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
+      await assertBrowserRenderer(browser);await writeFile(out,await browser.screenshot());results.push({id:capture.id,milliseconds:performance.now()-begin,out});
+    }
+    const total=performance.now()-started;
+    return{version:1,width:options.width,height:options.height,captures:results.length,startupMilliseconds:warm-started,batchMilliseconds:total-(warm-started),totalMilliseconds:total,meanHotCaptureMilliseconds:results.reduce((sum,item)=>sum+item.milliseconds,0)/results.length,results};
+  }finally{await browser?.close();await host.close();}
+}
+
 interface ProbeOptions{time:number;width:number;height:number;frames:number;stage:'hdr'|'reflection'|'effects'|'taa'|'all';points:readonly [number,number][]}
 async function probeScene(scene:SceneSpec,options:ProbeOptions,sceneDirectory:string){
   const host=await serveScene(scene,{sceneDirectory,distributionDirectory});let browser:BrowserSession|undefined;
