@@ -2,7 +2,7 @@
   "id": "EXP-WINTER-ENV-CACHE-CAUSE",
   "question": "Why does the procedural environment map rebuild ten times during five seconds of a fixed clear-day scene?",
   "hypothesis": "The generic renderStructureRevision invalidation clears environmentKey for deformation-driven geometry revisions even when no distant radiance cause changes. Removing that clear preserves the cause-key authority and eliminates nine redundant map builds.",
-  "status": "running",
+  "status": "locally-validated",
   "conditions": {
     "parent": "06b32e08378ef031134f92151d14e6a8e2c26eba",
     "baselineRun": "https://github.com/Pom4H/game-engine/actions/runs/35780276564",
@@ -17,6 +17,22 @@
     "quality": "Winter Hero fixed candidate gaps remain unchanged; Stanford-ORB held-out reports no regressions",
     "runtime": "1080p completed FPS rises and GPU p95 does not regress; preserve the 59fps gate"
   },
-  "evidence": [],
-  "decision": null
+  "evidence": [
+    {
+      "run": "https://github.com/Pom4H/game-engine/actions/runs/35781331938",
+      "environmentUpdates": 1,
+      "changedCauseCounts": {},
+      "completedFps": 69.47871227588438,
+      "submittedFps": 70.2903470592579,
+      "gpuP95Ms": 12.96532,
+      "frameP95Ms": 19,
+      "simulationToWallRatio": 0.9951,
+      "winterHeroBestGap": 0.17464096907184345,
+      "stanfordGap": 0.23837613511163935,
+      "stanfordBaseline": 0.23563216891992333,
+      "stanfordTolerance": 0.003,
+      "stanfordRegressions": 0
+    }
+  ],
+  "decision": "Keep scene identity and explicit radiance cause key as environment authority. Do not clear the distant map for generic deformation revision; nearby changes use local probe. 1080p runtime gate passed."
 }
