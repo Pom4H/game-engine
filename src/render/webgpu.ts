@@ -566,7 +566,7 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
@@ -936,7 +936,12 @@ export class WebGPURenderer implements Renderer{
     buffer.unmap();buffer.destroy();return result;
   }
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();}
-  inspect():RenderStats{const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,errors:[...this.errors],...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};}
+  inspect():RenderStats{
+    const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);
+    return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,errors:[...this.errors],
+      ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
+      ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};
+  }
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
   dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
@@ -985,6 +990,14 @@ export class WebGPURenderer implements Renderer{
       Math.round(scene.environment.snowfallRate*1e6)/1e6,
     ].map(value=>Number(value).toFixed(3)).join(':');
     if(causeKey===this.environmentKey)return;
+    if(this.profiler.enabled&&this.environmentKey){
+      const causes=['entities','seed','sun.x','sun.y','sun.z','sunColor.r','sunColor.g','sunColor.b','sky.r','sky.g','sky.b','origin.x','origin.y','origin.z','intensity','sunlight','humidity','temperature','moisture','snowfall'];
+      const before=this.environmentKey.split(':'),after=causeKey.split(':');
+      for(let index=0;index<causes.length;index++)if(before[index]!==after[index]){
+        const cause=causes[index]!;
+        this.environmentInvalidations.set(cause,(this.environmentInvalidations.get(cause)??0)+1);
+      }
+    }
     const radiance=buildSceneRadianceProbe(scene,origin,128);
     const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
     const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
