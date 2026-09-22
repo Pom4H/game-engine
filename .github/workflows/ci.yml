@@ -14,6 +14,28 @@ permissions:
   contents: read
 
 jobs:
+  causal-contract:
+    if: github.event_name == 'pull_request'
+    runs-on: self-hosted
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Validate causal commit contract
+        run: |
+          git fetch origin refs/notes/causality:refs/notes/causality || echo No existing causal notes ref
+          bun tools/causality/check.mjs HEAD --against-notes causality
+
   visual-fast:
     if: github.event_name == 'pull_request'
     needs: reality-fast
@@ -109,6 +131,7 @@ jobs:
 
   reality-fast:
     if: github.event_name == 'pull_request'
+    needs: causal-contract
     runs-on: self-hosted
     timeout-minutes: 8
     defaults:
@@ -121,10 +144,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - name: Causal commit contract
-        run: |
-          git fetch origin refs/notes/causality:refs/notes/causality || echo No existing causal notes ref
-          bun tools/causality/check.mjs HEAD --against-notes causality
       - name: Install
         run: bun install --frozen-lockfile
       - name: Build reality render path
@@ -146,8 +165,8 @@ jobs:
           retention-days: 7
 
   causal-evidence:
-    if: always() && github.event_name == 'pull_request'
-    needs: [reality-fast, visual-fast, performance-1080]
+    if: always() && github.event_name == 'pull_request' && needs.causal-contract.result == 'success'
+    needs: [causal-contract, reality-fast, visual-fast, performance-1080]
     runs-on: self-hosted
     timeout-minutes: 3
     concurrency:
