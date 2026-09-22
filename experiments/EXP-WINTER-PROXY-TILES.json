@@ -2,7 +2,7 @@
   "id": "EXP-WINTER-PROXY-TILES",
   "question": "Can procedural environment map rebuilds avoid testing every radiance proxy for every cube texel while producing identical pixel values?",
   "hypothesis": "Conservative 16px cube-direction tiles cull only proxies whose threshold cannot intersect a tile, preserving contribution order and map values while lowering CPU rebuild time.",
-  "status": "running",
+  "status": "locally-validated",
   "conditions": {
     "parent": "6205ef751dde2933e1cb71509441c1313df50171",
     "profile": "CI run 35778003031: environment CPU max 590.7ms; 1080p completed 28.77fps, GPU p95 20.57ms",
@@ -17,7 +17,8 @@
   },
   "evidence": [
     "local property test on mip edges passed, 13 profile-related tests passed",
-    "synthetic 128-proxy, seven-mip fixture: 67,104,768 -> 10,366,864 dot checks; paired medians 1016.54 -> 339.07 ms, accumulated contribution exactly equal"
+    "synthetic 128-proxy, seven-mip fixture: 67,104,768 -> 10,366,864 dot checks; paired medians 1016.54 -> 339.07 ms, accumulated contribution exactly equal",
+    "GPU runs 35779130948 and 35781331938: Stanford held-out had no regressions; procedural cubemap keeps 256px/mip, tile property oracle passes; final map computed once after unrelated deformation invalidation was fixed."
   ],
-  "decision": null
+  "decision": "Retain conservative 16px direction tiles. Exact contribution sums and no false exclusions; synthetic CPU median 1016.54 -> 339.07ms, while end-to-end scene FPS depends on cache invalidation policy."
 }
