@@ -19,7 +19,9 @@
   "evidence": [
     "cell-rectangle candidate oracle passed for 90 varied objects including negative coordinates, updates and cache invalidation",
     "50-step large-floor rigid-body comparison against old implementation passed locally",
-    "tools/profiling/spatial-broadphase.mjs reproduces the new implementation's fixture"
+    "tools/profiling/spatial-broadphase.mjs reproduces the new implementation's fixture",
+    "PR branch strict TypeScript typecheck and production build passed with TypeScript 7.0.2",
+    "all three committed spatial-broadphase tests passed against locally built dist"
   ],
   "acceptance": {
     "candidateCoverage": "no missed query cell overlaps",
