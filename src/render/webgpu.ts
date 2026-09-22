@@ -677,7 +677,7 @@ export class WebGPURenderer implements Renderer{
       this.profiler.addUpload(grid.lights.byteLength+grid.cells.byteLength,'light');return grid;
     });
     void lightGrid;
-    this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene,reflectionProbe?.position??scene.camera.target));
+    this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene,reflectionProbe?.position??scene.camera.target,!!reflectionProbe));
     const frameState=this.profiler.measure('frame',()=>{
       const cameraUp=camera.up??[0,1,0],cameraView=lookAt(camera.position,camera.target,cameraUp),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
       projection[8]=projection[8]!-2*jitter[0]/this.canvas.width;projection[9]=projection[9]!+2*jitter[1]/this.canvas.height;
@@ -911,7 +911,7 @@ export class WebGPURenderer implements Renderer{
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
   dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
-  private updateEnvironmentMap(scene:Scene,origin:Vec3):void{
+  private updateEnvironmentMap(scene:Scene,origin:Vec3,localProbeOwnsNearby=false):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
     if(this.environmentScene!==scene){this.environmentScene=scene;this.environmentKey='';}
     const measured=settings.environmentRadiance;
@@ -941,10 +941,13 @@ export class WebGPURenderer implements Renderer{
     // Check the authoritative causes before building the expensive scene-radiance proxy.
     // Nearby dynamic detail is handled by SSR/local probes; the distant fallback only
     // needs rebuilding when its world-space origin, atmosphere or scene identity changes.
+    const environmentOriginKey=localProbeOwnsNearby?[0,0,0]:[
+      Math.round(origin[0]*2)/2,Math.round(origin[1]*2)/2,Math.round(origin[2]*2)/2,
+    ];
     const causeKey=[
       scene.entities.size,scene.spec.seed??0,
       ...sun,...sunColor,...sky,
-      Math.round(origin[0]*2)/2,Math.round(origin[1]*2)/2,Math.round(origin[2]*2)/2,
+      ...environmentOriginKey,
       Math.round(intensity*20)/20,
       Math.round(scene.environment.sunlight*20)/20,
       Math.round(scene.environment.humidity*20)/20,
