@@ -3,6 +3,6 @@
   "metric": "RealityGap",
   "dataset": "Stanford-ORB",
   "object": "car",
-  "gap": 0.23828495378587353,
+  "gap": 0.23563216891992333,
   "tolerance": 0.003
 }
