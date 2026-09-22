@@ -195,11 +195,33 @@ if(!calibrationScene)throw new Error('Stanford-ORB manifest has no calibration s
 const calibrationTransforms=await findSuffix(`blender_LDR/${calibrationScene}/transforms_test.json`),calibrationSceneDir=dirname(calibrationTransforms),calibrationMetadata=JSON.parse(await readFile(calibrationTransforms,'utf8'));
 const meshPath=await findSuffix(`ground_truth/${manifest.calibration[0].scene}/mesh_blender/mesh.obj`);
 console.log(JSON.stringify({phase:'mesh',path:meshPath}));
-const mesh=parseObj(await readFile(meshPath,'utf8')),albedo=await calibrateVertexColors(mesh,calibrationSceneDir,calibrationMetadata,manifest.calibration);
-mesh.colors=albedo.colors;
-console.log(JSON.stringify({phase:'albedo-calibration',views:manifest.calibration.map(v=>v.testIndex),coverage:albedo.coverage,positions:albedo.positions,observed:albedo.observed}));
-const packed=encodePackedMesh(mesh);
-await writeFile(join(out,'mesh.mjs'),`import {decodePackedMesh} from '../../../dist/assets/packed-mesh.js';\nexport default decodePackedMesh(${JSON.stringify(packed)});\n`);
+const mesh=parseObj(await readFile(meshPath,'utf8'));
+async function writeMeshModule(name,value){
+  const packed=encodePackedMesh(value);
+  await writeFile(join(out,name),`import {decodePackedMesh} from '../../../dist/assets/packed-mesh.js';\nexport default decodePackedMesh(${JSON.stringify(packed)});\n`);
+}
+async function hasPseudoGt(){
+  for(const item of manifest.calibration){
+    const frame=calibrationMetadata.frames[item.testIndex];if(!frame)return false;
+    const stem=basename(frame.file_path.replace(/^\.\//,''));
+    if(!(await findOptionalSuffix(`ground_truth/${item.scene}/pseudo_gt_albedo/${stem}.npy`))||!(await findOptionalSuffix(`ground_truth/${item.scene}/z_depth/${stem}.npy`)))return false;
+  }
+  return true;
+}
+const pseudoGtReady=await hasPseudoGt();
+let calibrationMode;
+if(pseudoGtReady){
+  const albedo=await calibrateVertexColors(mesh,calibrationSceneDir,calibrationMetadata,manifest.calibration);mesh.colors=albedo.colors;calibrationMode='pseudo-gt';
+  console.log(JSON.stringify({phase:'albedo-calibration',mode:calibrationMode,views:manifest.calibration.map(v=>v.testIndex),coverage:albedo.coverage,positions:albedo.positions,observed:albedo.observed}));
+  await writeMeshModule('mesh.mjs',mesh);
+}else{
+  calibrationMode='inverse-render';
+  await writeMeshModule('mesh-white.mjs',mesh);
+  await writeMeshModule('mesh.mjs',mesh);
+  const vertices=mesh.positions.length/3,black={...mesh,colors:Array.from({length:vertices*4},(_,i)=>i%4===3?1:0)};
+  await writeMeshModule('mesh-black.mjs',black);
+  console.log(JSON.stringify({phase:'albedo-calibration',mode:calibrationMode,vertices,reason:'pseudo_gt_albedo/z_depth unavailable'}));
+}
 
 const captures=[];
 for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manifest.heldOut]]){
@@ -213,8 +235,15 @@ for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manif
     const envPath=await findSuffix(`ground_truth/${item.scene}/env_map/${stem}.exr`),{camera,worldToEnvironment}=cameraFromFrame(metadata,frame),radiance=measuredEnvironment(envPath);
     const environment={...radiance,worldToEnvironment,convention:'stanford-orb',intensity:1},scenePath=join(out,id+'.mjs');
     await writeFile(scenePath,sceneModule({meshImport:'./mesh.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
-    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,poseSource,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask});
+    let inverseBasis;
+    if(calibrationMode==='inverse-render'&&split==='calibration'){
+      const whiteScenePath=join(out,id+'-basis-white.mjs'),blackScenePath=join(out,id+'-basis-black.mjs');
+      await writeFile(whiteScenePath,sceneModule({meshImport:'./mesh-white.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
+      await writeFile(blackScenePath,sceneModule({meshImport:'./mesh-black.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
+      inverseBasis={whiteScenePath,blackScenePath};
+    }
+    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,poseSource,camera,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask,...(inverseBasis?{inverseBasis}:{})});
   }
 }
-await writeFile(join(out,'captures.json'),JSON.stringify({version:1,dataset:manifest.dataset,object:manifest.object,calibration:calibration.frozenFrom,captures},null,2));
+await writeFile(join(out,'captures.json'),JSON.stringify({version:2,dataset:manifest.dataset,object:manifest.object,calibration:calibration.frozenFrom,calibrationMode,captures},null,2));
 console.log(JSON.stringify({phase:'prepared',root,out,captures:captures.map(c=>({id:c.id,split:c.split,reference:relative(root,c.reference)}))}));
