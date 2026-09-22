@@ -1,0 +1,24 @@
+{
+  "id": "EXP-WINTER-BATCH-FAST-METRIC",
+  "question": "Can the winter-hero sweep score WebGPU canvas pixels in the browser without per-candidate PNG/CDP round trips while preserving the screenshot metric?",
+  "hypothesis": "A reused browser-side canvas and cached reference pixels will return the same hero gap within 1e-6 and reduce hot capture time across the 24-candidate sweep.",
+  "status": "running",
+  "conditions": {
+    "parent": "220a2b61fba3a339fee4f7d884391f293002a3a5",
+    "manifest": "tools/render-lab/winter-hero-sweep.mjs",
+    "resolution": [
+      480,
+      360
+    ],
+    "frames": 2,
+    "captures": 24,
+    "baseline": "Page.captureScreenshot + base64 transfer + PNG decode + two new canvases per candidate"
+  },
+  "acceptance": {
+    "parity": "first candidate direct-canvas and screenshot hero gaps differ by at most 1e-6; otherwise use screenshot for the whole batch",
+    "quality": "Stanford-ORB held-out and fixed winter hero remain within their existing limits",
+    "speed": "record meanHotCaptureMilliseconds, metricPath, metricParityDelta and per-candidate metricMilliseconds"
+  },
+  "evidence": [],
+  "decision": null
+}
