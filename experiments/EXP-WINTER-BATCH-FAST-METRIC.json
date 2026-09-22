@@ -2,7 +2,7 @@
   "id": "EXP-WINTER-BATCH-FAST-METRIC",
   "question": "Can the winter-hero sweep score 24 candidates faster while preserving the screenshot-based quality metric?",
   "hypothesis": "Caching the screenshot reference luminance and edge response will preserve the legacy pixel score within 1e-9 while reducing per-candidate metric time.",
-  "status": "running",
+  "status": "locally-validated",
   "conditions": {
     "parent": "220a2b61fba3a339fee4f7d884391f293002a3a5",
     "manifest": "tools/render-lab/winter-hero-sweep.mjs",
@@ -34,9 +34,24 @@
         "gpuP95Ms": 20.57,
         "status": "failed before renderer optimization"
       }
+    },
+    {
+      "run": "https://github.com/Pom4H/game-engine/actions/runs/35781331938",
+      "captures": 24,
+      "metricPath": "cached",
+      "metricParityDelta": 0,
+      "batchMilliseconds": 3207.87,
+      "meanHotCaptureMilliseconds": 133.46,
+      "bestId": "p0_13-c0_055-e0_96",
+      "bestGap": 0.17464096907184345,
+      "stanfordRegressions": 0,
+      "performance1080": {
+        "completedFps": 69.48,
+        "gpuP95Ms": 12.97
+      }
     }
   ],
-  "decision": "Direct canvas readback rejected. Retain screenshot authority; run cached luminance parity and timing on next head.",
+  "decision": "Reject direct WebGPU canvas readback (gap delta 0.062732); retain screenshot authority, cached exact scoring and bounded scored-frame export.",
   "negativeKnowledge": {
     "directWebGpuCanvas": {
       "result": "falsified on the Windows GPU runner",
