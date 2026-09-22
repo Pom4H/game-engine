@@ -1,0 +1,62 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "791766e3e1bd74fedb118e1ea20c76c76494f833",
+  "parents": [
+    "c95c0091162926772b516fdb605902fe50864741"
+  ],
+  "authoredAt": "2026-09-22T22:03:56+03:00",
+  "recordedAt": "2026-09-22T19:16:33.078Z",
+  "experiment": "EXP-1007",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "refactor(surface): remove unused winter compatibility facade",
+    "experiment": "EXP-1007",
+    "observation": "only the facade and root index mention WinterSystem in repository code.",
+    "hypothesis": "internal simulation uses SurfaceEnvironmentSystem already.",
+    "intervention": "delete facade and its deprecated root exports.",
+    "prediction": "build and tests pass with the canonical exports.",
+    "targets": [],
+    "guards": [
+      "external consumer compatibility is a documented API break"
+    ],
+    "dependsOn": [],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "EXP-1007"
+      ],
+      "Causal-Observation": [
+        "only the facade and root index mention WinterSystem in repository code."
+      ],
+      "Causal-Hypothesis": [
+        "internal simulation uses SurfaceEnvironmentSystem already."
+      ],
+      "Causal-Intervention": [
+        "delete facade and its deprecated root exports."
+      ],
+      "Causal-Prediction": [
+        "build and tests pass with the canonical exports."
+      ],
+      "Causal-Guard": [
+        "external consumer compatibility is a documented API break"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35771415537",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35771415537"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
