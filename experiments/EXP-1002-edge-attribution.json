@@ -1,0 +1,30 @@
+{
+  "id": "EXP-1002",
+  "question": "Is the dominant Stanford RealityGap edge error primarily at the object silhouette or inside the projected car surface?",
+  "hypothesis": "Partitioning the existing edge numerator into a thin ground-truth mask-boundary band and its eroded interior will reveal a dominant causal region, with at least 60% of edge error attributable to the same region on both held-out views.",
+  "status": "running",
+  "conditions": {
+    "dataset": "Stanford-ORB car",
+    "heldOut": ["car_scene004-test1", "car_scene004-test3"],
+    "currentEdge": {
+      "car_scene004-test1": 0.7076154502378703,
+      "car_scene004-test3": 0.6057346928319939
+    },
+    "diagnosticBoundaryRadius": "max(2px, round(min(width,height)/128))",
+    "northStarDefinitionChanged": false,
+    "rendererChanged": false
+  },
+  "metrics": [
+    "existing_edge_component_bit_identity",
+    "edge_boundary_score",
+    "edge_interior_score",
+    "edge_boundary_error_share",
+    "edge_interior_error_share"
+  ],
+  "acceptance": {
+    "measurement": "Existing aggregate edge and RealityGap must remain numerically identical.",
+    "attribution": "The same region contributes at least 60% of the edge numerator on both held-out views."
+  },
+  "evidence": [],
+  "decision": null
+}
