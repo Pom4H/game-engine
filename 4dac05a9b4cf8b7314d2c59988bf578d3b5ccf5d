@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "4dac05a9b4cf8b7314d2c59988bf578d3b5ccf5d",
+  "parents": [
+    "de2f5b604b882714c207b69d523cfc6713bd7f9f"
+  ],
+  "authoredAt": "2026-09-22T15:07:21+03:00",
+  "recordedAt": "2026-09-22T12:17:59.581Z",
+  "experiment": "winter-quality",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: stop distant environment chasing a moving local probe",
+    "experiment": "winter-quality",
+    "observation": "entity-bound reflection probe motion invalidates the distant environment cache every 0.5 m and dominates CPU frame time.",
+    "hypothesis": "when a local probe owns nearby radiance, probe translation is not a cause for rebuilding the distant fallback environment.",
+    "intervention": "keep the first sampled world-space origin for distant synthetic radiance while a local probe is active; atmospheric and scene causes still invalidate it, and the local probe continues following the entity.",
+    "prediction": "hero native 1080p returns above 47.47 completed FPS, environment CPU p95 falls below 20 ms, and the eight sampled hero frames retain the recovered reflections.",
+    "targets": [],
+    "guards": [
+      "measured HDR environments, RealityGap metric, local probe rendering and physics are unchanged"
+    ],
+    "dependsOn": [
+      "de2f5b604b882714c207b69d523cfc6713bd7f9f"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-quality"
+      ],
+      "Causal-Observation": [
+        "entity-bound reflection probe motion invalidates the distant environment cache every 0.5 m and dominates CPU frame time."
+      ],
+      "Causal-Hypothesis": [
+        "when a local probe owns nearby radiance, probe translation is not a cause for rebuilding the distant fallback environment."
+      ],
+      "Causal-Intervention": [
+        "keep the first sampled world-space origin for distant synthetic radiance while a local probe is active; atmospheric and scene causes still invalidate it, and the local probe continues following the entity."
+      ],
+      "Causal-Prediction": [
+        "hero native 1080p returns above 47.47 completed FPS, environment CPU p95 falls below 20 ms, and the eight sampled hero frames retain the recovered reflections."
+      ],
+      "Causal-Depends-On": [
+        "de2f5b604b882714c207b69d523cfc6713bd7f9f"
+      ],
+      "Causal-Guard": [
+        "measured HDR environments, RealityGap metric, local probe rendering and physics are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35725323568",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35725323568"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
