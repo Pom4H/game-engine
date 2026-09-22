@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "7c5038173305986ee07ee367eb706697a9472d0f",
+  "parents": [
+    "4dd3a5d4dfd14818799f5da71c93fbd574139cf4"
+  ],
+  "authoredAt": "2026-09-22T21:50:56+03:00",
+  "recordedAt": "2026-09-22T18:52:49.609Z",
+  "experiment": "hot-appearance-patch",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "fix: restore probe helper after render-batch refactor",
+    "experiment": "hot-appearance-patch",
+    "observation": "previous CI stopped at TypeScript compile.",
+    "hypothesis": "two CLI integration mistakes are the blocker.",
+    "intervention": "restore probe helper and exact optional spread.",
+    "prediction": "next CI executes Winter Hero search.",
+    "targets": [],
+    "guards": [
+      "renderer and scene semantics unchanged"
+    ],
+    "dependsOn": [
+      "d45ffde43629a0d9d753ae6175d31aba8fda1c7d"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "hot-appearance-patch"
+      ],
+      "Causal-Observation": [
+        "previous CI stopped at TypeScript compile."
+      ],
+      "Causal-Hypothesis": [
+        "two CLI integration mistakes are the blocker."
+      ],
+      "Causal-Intervention": [
+        "restore probe helper and exact optional spread."
+      ],
+      "Causal-Prediction": [
+        "next CI executes Winter Hero search."
+      ],
+      "Causal-Depends-On": [
+        "d45ffde43629a0d9d753ae6175d31aba8fda1c7d"
+      ],
+      "Causal-Guard": [
+        "renderer and scene semantics unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35769911763",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35769911763"
+  },
+  "jobs": {
+    "reality": "skipped",
+    "visualFast": "failure",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
