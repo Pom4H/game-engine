@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "6e8acf874e04032c0db78eeb24af8b7289d23ee0",
+  "parents": [
+    "fda266cb32faf8cb9b3dddd0c1a4cd7631359c00"
+  ],
+  "authoredAt": "2026-09-22T20:00:52+03:00",
+  "recordedAt": "2026-09-22T17:06:49.388Z",
+  "experiment": "ci-visual-parallelism",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "ci: run visual feedback in parallel with Stanford reality gate",
+    "experiment": "ci-visual-parallelism",
+    "observation": "visual-fast is blocked behind independent Stanford RealityGap and dominates experiment turnaround.",
+    "hypothesis": "parallel execution gives earlier image evidence while preserving downstream joins.",
+    "intervention": "visual-fast now needs causal-contract instead of reality-fast.",
+    "prediction": "fixed-camera artifact appears while Stanford is still running.",
+    "targets": [],
+    "guards": [
+      "Stanford gate, 1080p gate, causal evidence and verify conditions remain mandatory"
+    ],
+    "dependsOn": [
+      "fda266cb32faf8cb9b3dddd0c1a4cd7631359c00"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "ci-visual-parallelism"
+      ],
+      "Causal-Observation": [
+        "visual-fast is blocked behind independent Stanford RealityGap and dominates experiment turnaround."
+      ],
+      "Causal-Hypothesis": [
+        "parallel execution gives earlier image evidence while preserving downstream joins."
+      ],
+      "Causal-Intervention": [
+        "visual-fast now needs causal-contract instead of reality-fast."
+      ],
+      "Causal-Prediction": [
+        "fixed-camera artifact appears while Stanford is still running."
+      ],
+      "Causal-Depends-On": [
+        "fda266cb32faf8cb9b3dddd0c1a4cd7631359c00"
+      ],
+      "Causal-Guard": [
+        "Stanford gate, 1080p gate, causal evidence and verify conditions remain mandatory"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35757901067",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35757901067"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
