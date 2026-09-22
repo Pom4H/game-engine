@@ -250,7 +250,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   for(const entity of entities){
    if(entity.id==='road'){
     entity.material={...entity.material,color:[.012,.014,.017,1],roughness:.58};
-    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:.00002,waterDepthM:.0012};
+    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:.00002,waterDepthM:.00045};
    }
   }
  }
