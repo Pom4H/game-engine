@@ -1,0 +1,62 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "a2633e109e9462ad2c19773cbb29c6687110f755",
+  "parents": [
+    "5b4d42752b7cce15f04c15a0c508464847b8575d"
+  ],
+  "authoredAt": "2026-09-22T10:25:04+03:00",
+  "recordedAt": "2026-09-22T07:28:03.016Z",
+  "experiment": "development-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "dev: pin usegit and import the active causal experiments",
+    "experiment": "development-loop",
+    "observation": "game-engine has a working project-local causal ledger but no common durable usegit protocol or portable experiment records.",
+    "hypothesis": "a pinned usegit bootstrap can take ownership of future design-time state while preserving the existing causality notes as immutable legacy evidence.",
+    "intervention": "pin usegit at 6365a5d1540439fc79fd28bde49ae2d867333951 and add explicit adoption and RealityGap feedback-authority experiment records without changing renderer behavior.",
+    "prediction": "both causal protocols validate this transition commit, no legacy history is rewritten, and the next renderer decision can be expressed as a normal usegit experiment.",
+    "targets": [],
+    "guards": [
+      "renderer RealityGap physics and performance implementations are unchanged"
+    ],
+    "dependsOn": [],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "development-loop"
+      ],
+      "Causal-Observation": [
+        "game-engine has a working project-local causal ledger but no common durable usegit protocol or portable experiment records."
+      ],
+      "Causal-Hypothesis": [
+        "a pinned usegit bootstrap can take ownership of future design-time state while preserving the existing causality notes as immutable legacy evidence."
+      ],
+      "Causal-Intervention": [
+        "pin usegit at 6365a5d1540439fc79fd28bde49ae2d867333951 and add explicit adoption and RealityGap feedback-authority experiment records without changing renderer behavior."
+      ],
+      "Causal-Prediction": [
+        "both causal protocols validate this transition commit, no legacy history is rewritten, and the next renderer decision can be expressed as a normal usegit experiment."
+      ],
+      "Causal-Guard": [
+        "renderer RealityGap physics and performance implementations are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35699500121",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35699500121"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
