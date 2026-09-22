@@ -116,8 +116,19 @@ export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
  */
 export function generateM3Vehicle():ParametricPassengerGeometry{
   const body=m3HighFidelityBody(),renderBody=m3SmoothRenderBody(body),sources=m3FbxParts();
-  // Front fascia detail is retained from the packed FBX `plastic-trim` source.
-  // Do not layer a second procedural kidney/intake assembly over that geometry.
+  // Front fascia surface remains the packed FBX `plastic-trim`. These are only
+  // recessed vertical inlays inside its two existing openings, not a second fascia.
+  const grilleSlats:ParametricVehiclePart[]=[];
+  for(const side of [-1,1] as const)for(let column=0;column<6;column++){
+    const z=side*.185+(column-2.5)*.038;
+    grilleSlats.push(Object.freeze({
+      id:`grille-inlay-${side<0?'left':'right'}-${column}`,
+      role:'dark' as const,
+      mesh:{kind:'box' as const,size:[.010,.34,.009] as const},
+      position:[2.389,.625,z] as const,
+      material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.26,metalness:.03},
+    }));
+  }
   const badge:ParametricVehiclePart[]=[
     Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.052,height:.006,segments:32},position:[1.83,.985,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.16,metalness:.10}}),
     Object.freeze({id:'hood-roundel-blue-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.034,0],[.034,.034],[0,.034]] as const,thickness:.006},position:[1.83,.990,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.18,metalness:.02}}),
@@ -138,21 +149,12 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     interior.push(Object.freeze({id:`interior-seat-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.38,.58,.43] as const},position:[.02,.78,side*.37] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.92,metalness:0}}));
     interior.push(Object.freeze({id:`interior-headrest-${side<0?'left':'right'}`,role:'dark' as const,mesh:{kind:'box' as const,size:[.22,.22,.30] as const},position:[-.05,1.14,side*.37] as const,material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0}}));
   }
-  const glazingBackings:ParametricVehiclePart[]=sources
-    .filter(source=>source.sourceMaterial==='Window')
-    .map(source=>Object.freeze({
-      id:`interior-${source.id}`,
-      role:'dark' as const,
-      mesh:source.mesh,
-      position:source.center,
-      material:{kind:'default' as const,finish:'rough' as const,roughness:.88,metalness:0},
-    }));
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...frontDetail,
+    ...grilleSlats,
     ...badge,
     ...interior,
-    ...glazingBackings,
     ...sources.map(source=>Object.freeze({
       id:source.id,
       role:sourceRole(source.sourceMaterial,source.id),
@@ -200,7 +202,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('hood-roundel-white-'))return{...base,color:[.86,.89,.93,1]};
   if(part.id==='hood-roundel-ring')return{...base,color:[.012,.015,.020,1]};
   if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.055,clearcoat:.94,clearcoatRoughness:.055};
-  if(part.role==='glass')return{...base,color:[.075,.095,.115,.42],roughness:.065};
+  if(part.role==='glass')return{...base,color:[.10,.14,.18,.28],roughness:.045};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};

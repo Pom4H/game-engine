@@ -124,11 +124,11 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
   assert.ok(originalFbxIds.every(id=>byId.get(id)?.mesh.kind==='triangle-mesh'),'original FBX wheels/lights/trim must never fall back to primitive stand-ins');
   for(const id of originalFbxIds)assert.ok(byId.has(id),`missing original FBX-derived M3 part: ${id}`);
   for(const id of ['windshield-front','windshield-rear','window-front-left','window-front-right']){
-    const backing=byId.get('interior-'+id),glass=byId.get(id);
-    assert.equal(backing?.role,'dark',`interior-${id} must remain render-only cabin occlusion`);
-    assert.equal(backing?.mesh,glass?.mesh,`interior-${id} should reuse the packed glazing mesh without new geometry payload`);
-    assert.equal(m3PartBody(backing,true),undefined,`interior-${id} must not duplicate vehicle physics mass`);
+    assert.equal(byId.has('interior-'+id),false,`interior-${id} must not be an opaque coplanar duplicate of glazing`);
   }
+  const grilleInlays=m3.parts.filter(part=>part.id.startsWith('grille-inlay-'));
+  assert.equal(grilleInlays.length,12,'two FBX kidney openings should receive six recessed vertical inlays each');
+  assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40),'grille inlays must stay within the source fascia envelope');
 
   assert.equal(byId.get('body').material.kind,'steel');
   assert.ok(m3PartMaterial(byId.get('body'),[.2,.2,.2,1],false).clearcoat>.9,'hero paint should use the generic clearcoat layer');
