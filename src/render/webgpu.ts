@@ -408,7 +408,13 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color*=1.0-clearcoat*coatF*.28;
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec*clearcoat;
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,.35).rgb;
-    if(f.params.y>.5){coatEnvironment=mix(coatEnvironment,localProbe,.92);}
+    if(f.params.y>.5){
+      // Local probes are spatially correct but intentionally sharp. A rougher
+      // dielectric clear coat must not inherit the full level-0 cubemap as a
+      // mirror; blend probe energy continuously from the authored coat roughness.
+      let coatProbeWeight=(1.0-smoothstep(.045,.18,coatRough))*.72;
+      coatEnvironment=mix(coatEnvironment,localProbe,coatProbeWeight);
+    }
     let coatEnvF=.04+.96*pow(1.0-nv,5.0);
     color+=coatEnvironment*coatEnvF*clearcoat*.78;
   }
