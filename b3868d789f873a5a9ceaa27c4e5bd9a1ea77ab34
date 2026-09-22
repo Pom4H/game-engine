@@ -1,0 +1,62 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "b3868d789f873a5a9ceaa27c4e5bd9a1ea77ab34",
+  "parents": [
+    "791766e3e1bd74fedb118e1ea20c76c76494f833"
+  ],
+  "authoredAt": "2026-09-22T22:09:55+03:00",
+  "recordedAt": "2026-09-22T19:23:16.830Z",
+  "experiment": "EXP-1006",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "test(physics): record branch build and contact evidence",
+    "experiment": "EXP-1006",
+    "observation": "exact PR branch typechecks, builds and passes its three new tests locally.",
+    "hypothesis": "full CI accepts the oversized broad-phase intervention without renderer regressions.",
+    "intervention": "record local evidence and run ready PR gates on the current head.",
+    "prediction": "typecheck, tests, RealityGap and performance gates pass.",
+    "targets": [],
+    "guards": [
+      "runtime implementation unchanged"
+    ],
+    "dependsOn": [],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "EXP-1006"
+      ],
+      "Causal-Observation": [
+        "exact PR branch typechecks, builds and passes its three new tests locally."
+      ],
+      "Causal-Hypothesis": [
+        "full CI accepts the oversized broad-phase intervention without renderer regressions."
+      ],
+      "Causal-Intervention": [
+        "record local evidence and run ready PR gates on the current head."
+      ],
+      "Causal-Prediction": [
+        "typecheck, tests, RealityGap and performance gates pass."
+      ],
+      "Causal-Guard": [
+        "runtime implementation unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35772008915",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35772008915"
+  },
+  "jobs": {
+    "reality": "failure",
+    "visualFast": "skipped",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
