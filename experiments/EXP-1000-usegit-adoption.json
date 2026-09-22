@@ -8,7 +8,8 @@
     "legacyEvidenceRef": "refs/notes/causality",
     "newEvidenceRef": "refs/notes/usegit",
     "legacyHistoryRewrite": false,
-    "usegitRevision": "6365a5d1540439fc79fd28bde49ae2d867333951"
+    "usegitRevision": "5ab0deb174391f6b55db000d9aecd0949ce31234",
+    "ciRunner": "self-hosted"
   },
   "metrics": [
     "post_bootstrap_metadata_coverage",
@@ -22,6 +23,17 @@
       "ref": "refs/notes/causality",
       "observedNotes": 2,
       "latestSubject": "41b4a89cf70c234424399a65050f3ca416106536"
+    },
+    {
+      "kind": "cross-project-portability-failure",
+      "runId": 35699590334,
+      "observation": "The first usegit caller failed before step execution because reusable.yml hard-coded ubuntu-latest; runner_id was 0.",
+      "followUp": {
+        "repository": "Pom4H/usegit",
+        "experiment": "EXP-0011",
+        "commit": "5ab0deb174391f6b55db000d9aecd0949ce31234",
+        "change": "Reusable workflow now accepts runs_on and uses portable bash steps."
+      }
     }
   ],
   "decision": null
