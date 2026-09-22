@@ -32,7 +32,7 @@ jobs:
       - name: Build render path
         run: bun run build
       - name: Fast engine invariants
-        run: node --test test/core.test.mjs test/deformation.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
+        run: node --test test/core.test.mjs test/deformation.test.mjs test/irradiance.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
       - name: Radiometric pixel oracle
         run: node tools/render-oracle.mjs
       - name: Renderer consistency
