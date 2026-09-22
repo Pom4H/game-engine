@@ -121,8 +121,8 @@ jobs:
 
 
   reality-fast:
-    if: github.event_name == 'pull_request'
-    needs: visual-fast
+    if: always() && github.event_name == 'pull_request' && needs.visual-fast.result == 'success'
+    needs: [visual-fast, performance-1080]
     runs-on: self-hosted
     timeout-minutes: 8
     defaults:
