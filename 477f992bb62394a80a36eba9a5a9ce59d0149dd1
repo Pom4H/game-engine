@@ -1,0 +1,62 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "477f992bb62394a80a36eba9a5a9ce59d0149dd1",
+  "parents": [
+    "9128d6b32718a65ae4c4b4d5dcd3120c785f278c"
+  ],
+  "authoredAt": "2026-09-22T10:34:08+03:00",
+  "recordedAt": "2026-09-22T07:38:41.671Z",
+  "experiment": "development-loop",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "dev: remove shell assumptions from usegit adoption",
+    "experiment": "development-loop",
+    "observation": "game-engine reached its self-hosted runner but usegit failed on an unavailable bash shell, and push plus pull-request triggers duplicate causal validation on the single runner.",
+    "hypothesis": "shell-neutral reusable steps plus one push-triggered causal run per commit will make the migration portable and reduce runner contention.",
+    "intervention": "repin usegit to 7569f91822a8cc5119d989c0f062f8efcd55ec2b, keep runs_on self-hosted, and remove the duplicate pull_request trigger from the game-engine usegit caller.",
+    "prediction": "usegit validates the exact pushed commit, generates its report, writes refs/notes/usegit, and consumes one runner slot instead of two.",
+    "targets": [],
+    "guards": [
+      "renderer RealityGap physics and game-engine performance gates are unchanged"
+    ],
+    "dependsOn": [],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "development-loop"
+      ],
+      "Causal-Observation": [
+        "game-engine reached its self-hosted runner but usegit failed on an unavailable bash shell, and push plus pull-request triggers duplicate causal validation on the single runner."
+      ],
+      "Causal-Hypothesis": [
+        "shell-neutral reusable steps plus one push-triggered causal run per commit will make the migration portable and reduce runner contention."
+      ],
+      "Causal-Intervention": [
+        "repin usegit to 7569f91822a8cc5119d989c0f062f8efcd55ec2b, keep runs_on self-hosted, and remove the duplicate pull_request trigger from the game-engine usegit caller."
+      ],
+      "Causal-Prediction": [
+        "usegit validates the exact pushed commit, generates its report, writes refs/notes/usegit, and consumes one runner slot instead of two."
+      ],
+      "Causal-Guard": [
+        "renderer RealityGap physics and game-engine performance gates are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35700264816",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35700264816"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
