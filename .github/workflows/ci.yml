@@ -126,7 +126,7 @@ jobs:
       - name: Prepare calibrated captures
         run: node tools/reality/stanford-orb/prepare.mjs --out artifacts/reality/stanford-orb
       - name: RealityGap held-out
-        run: node tools/reality/stanford-orb/run.mjs --dir artifacts/reality/stanford-orb
+        run: node tools/reality/stanford-orb/run.mjs --dir artifacts/reality/stanford-orb --baseline tools/reality/stanford-orb/baseline.json --assert
       - uses: actions/upload-artifact@v7
         if: always()
         with:
