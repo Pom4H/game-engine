@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "notesRef": "refs/notes/usegit",
+  "workRefPrefix": "refs/usegit/work/",
+  "granularityPolicy": "dynamic",
+  "integrationPolicy": "boundary-only",
+  "tool": {
+    "repository": "Pom4H/usegit",
+    "ref": "experiment/causal-memory-v0"
+  }
+}

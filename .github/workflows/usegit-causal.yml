@@ -1,0 +1,14 @@
+# usegit:managed
+name: usegit
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  causal-history:
+    permissions:
+      contents: write
+    uses: Pom4H/usegit/.github/workflows/reusable.yml@experiment/causal-memory-v0
+    with:
+      tool_ref: experiment/causal-memory-v0

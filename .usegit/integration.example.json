@@ -1,0 +1,13 @@
+{
+  "work": [
+    { "id": "WORK-0001", "status": "accepted" },
+    { "id": "WORK-0002", "status": "accepted" }
+  ],
+  "conflicts": [],
+  "boundaries": {
+    "humanReview": false,
+    "protectedTarget": false,
+    "release": false,
+    "externalContributor": false
+  }
+}
