@@ -6,7 +6,7 @@ import {M3_FBX_PARTS_FIDELITY,m3FbxParts} from './m3-fbx-parts.js';
 import {generatePassengerWheelParts,passengerPartMaterial,passengerStructuralDefinition,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole,type PassengerVehicleProfile} from './passenger.js';
 import {M3_SHELL_FIDELITY,m3HighFidelityBody} from './m3-shell.js';
 import {detailedPassengerWheelMeshes} from './passenger-wheel.js';
-import {M3_DETAILED_BODY_PARAMETERS} from './m3-detailed-procedural.js';
+import {generateM3DetailedProceduralBody,M3_DETAILED_BODY_PARAMETERS} from './m3-detailed-procedural.js';
 import type {ThreeBoxVehicleDefinition} from './framework.js';
 import {buildSmoothSubdivisionPlan,smoothCoincidentNormals,subdivideSmoothTriangleMesh,type SmoothSubdivisionPlan,type TriangleMesh} from './render-subdivision.js';
 
@@ -95,18 +95,34 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
 
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
+let causalRenderBodyCache:TriangleMesh|undefined;
 export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,0,true);}
+
+/**
+ * Production M3 appearance uses the causal panel compiler as the smooth render
+ * surface while the packed FBX shell remains the authoritative collision/deformation
+ * source. The old 1,126-triangle FBX paint shell is an excellent residual reference
+ * but its intentionally coarse polygon topology becomes visible under long clearcoat
+ * reflections. Reconstructing the panel surface from the measured M3 parameters
+ * removes those polygon planes without coupling physics to render density.
+ */
+function causalSmoothRenderBody():TriangleMesh{
+  if(causalRenderBodyCache)return causalRenderBodyCache;
+  const authored=generateM3DetailedProceduralBody();
+  const welded=smoothCoincidentNormals(authored,46,5e-5);
+  const first=subdivideSmoothTriangleMesh(welded,buildSmoothSubdivisionPlan(welded,48,.004,true));
+  const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,54,.0015));
+  return causalRenderBodyCache=smoothCoincidentNormals(second,58,2e-5);
+}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
   const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,0,true));
   const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,0));
-  // Third render-only refinement targets silhouette and long clearcoat highlights.
-  // Physics and the structural cage continue to use the compact source shell.
   const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,0));
   return smoothCoincidentNormals(third,58,2e-5);
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   const base=m3HighFidelityBody();
-  if(mesh===base)return renderBodyCache??=smoothBodyTwice(mesh);
+  if(mesh===base)return renderBodyCache??=causalSmoothRenderBody();
   return smoothBodyTwice(mesh);
 }
 
