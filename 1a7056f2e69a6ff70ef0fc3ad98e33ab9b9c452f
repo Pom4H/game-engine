@@ -1,0 +1,217 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "1a7056f2e69a6ff70ef0fc3ad98e33ab9b9c452f",
+  "parents": [
+    "12ae245388c95353bf21efb89216430fc1dd1685"
+  ],
+  "authoredAt": "2026-09-22T17:13:54+03:00",
+  "recordedAt": "2026-09-22T14:25:26.080Z",
+  "experiment": "winter-hero-photorealism",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: make winter hero a post-snowfall clear day",
+    "experiment": "winter-hero-photorealism",
+    "observation": "hero initial road snow is zero, but moderate snowfall continues for the 8-16 s M3 shot and surface-state re-whitens the carriageway; reducing water depth had negligible visual effect.",
+    "hypothesis": "the fixed photo target represents a clear post-snowfall interval, so retained snowbanks plus zero active snowfall is the correct world state.",
+    "intervention": "set only hero precipitation/snowfall to none; retained snow geometry and cold wet ground state remain.",
+    "prediction": "the road remains dark/wet through all eight M3 frames, falling flakes disappear, and the scene approaches the fixed Winter Hero target without renderer or performance cost.",
+    "targets": [],
+    "guards": [
+      "non-hero weather, renderer shaders, physics and Stanford calibration are unchanged"
+    ],
+    "dependsOn": [
+      "12ae245388c95353bf21efb89216430fc1dd1685"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "winter-hero-photorealism"
+      ],
+      "Causal-Observation": [
+        "hero initial road snow is zero, but moderate snowfall continues for the 8-16 s M3 shot and surface-state re-whitens the carriageway; reducing water depth had negligible visual effect."
+      ],
+      "Causal-Hypothesis": [
+        "the fixed photo target represents a clear post-snowfall interval, so retained snowbanks plus zero active snowfall is the correct world state."
+      ],
+      "Causal-Intervention": [
+        "set only hero precipitation/snowfall to none; retained snow geometry and cold wet ground state remain."
+      ],
+      "Causal-Prediction": [
+        "the road remains dark/wet through all eight M3 frames, falling flakes disappear, and the scene approaches the fixed Winter Hero target without renderer or performance cost."
+      ],
+      "Causal-Depends-On": [
+        "12ae245388c95353bf21efb89216430fc1dd1685"
+      ],
+      "Causal-Guard": [
+        "non-hero weather, renderer shaders, physics and Stanford calibration are unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35738872414",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35738872414"
+  },
+  "jobs": {
+    "reality": "success",
+    "visualFast": "success",
+    "performance1080": "success"
+  },
+  "observations": {
+    "reality": {
+      "dataset": "Stanford-ORB",
+      "object": "car",
+      "gap": 0.23837613511163935,
+      "baseline": {
+        "gap": 0.23563216891992333,
+        "tolerance": 0.003,
+        "delta": 0.0027439661917160185
+      },
+      "regressions": [],
+      "heldOut": [
+        {
+          "capture": "car_scene004-test1",
+          "gap": 0.2663534144711415,
+          "psnr": 17.35991339852934,
+          "ssim": 0.7455449979819455,
+          "components": {
+            "lpips": null,
+            "structural": 0.2544550020180545,
+            "logLuminance": 0.09720753821776511,
+            "edge": 0.7076154502378703,
+            "chroma": 0.06648376364636399
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.5219900681696762,
+              "interior": 0.7529757939293016,
+              "radiusPx": 4,
+              "boundaryPixels": 2154,
+              "interiorPixels": 15020,
+              "errorShare": {
+                "boundary": 0.14486255037935694,
+                "interior": 0.8551374496206433
+              },
+              "referenceWeightShare": {
+                "boundary": 0.19637725899408162,
+                "interior": 0.803622741005922
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5481155788811337,
+              "components": {
+                "lpips": null,
+                "structural": 0.9175418467015429,
+                "logLuminance": 0.20200777725230615,
+                "edge": 0.9275244134024243,
+                "chroma": 0.137615456104401
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.6937513680570516,
+                  "interior": 0.9846503601049248,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2154,
+                  "interiorPixels": 15020,
+                  "errorShare": {
+                    "boundary": 0.14688237863484574,
+                    "interior": 0.8531176213651561
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.19637725899408162,
+                    "interior": 0.803622741005922
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test1\\flat-albedo-production.png"
+            }
+          }
+        },
+        {
+          "capture": "car_scene004-test3",
+          "gap": 0.2103988557521372,
+          "psnr": 20.25698762995468,
+          "ssim": 0.828285914757499,
+          "components": {
+            "lpips": null,
+            "structural": 0.17171408524250098,
+            "logLuminance": 0.07659547175763654,
+            "edge": 0.6057346928319939,
+            "chroma": 0.04504722467779646
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.4799062518866265,
+              "interior": 0.6387072222036098,
+              "radiusPx": 4,
+              "boundaryPixels": 2431,
+              "interiorPixels": 19062,
+              "errorShare": {
+                "boundary": 0.1645027155621785,
+                "interior": 0.8354972844378228
+              },
+              "referenceWeightShare": {
+                "boundary": 0.20763430667834948,
+                "interior": 0.7923656933216517
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5511460629120786,
+              "components": {
+                "lpips": null,
+                "structural": 0.9382717563522766,
+                "logLuminance": 0.20666145355053964,
+                "edge": 0.906145575814743,
+                "chroma": 0.13929177123786873
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.691176569230431,
+                  "interior": 0.9624768140493941,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2431,
+                  "interiorPixels": 19062,
+                  "errorShare": {
+                    "boundary": 0.158376282547586,
+                    "interior": 0.8416237174524145
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.20763430667834948,
+                    "interior": 0.7923656933216517
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test3\\flat-albedo-production.png"
+            }
+          }
+        }
+      ]
+    },
+    "performance1080": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "1920x1080",
+      "submittedFps": 70.50974752350614,
+      "completedFps": 69.63211362067265,
+      "p95FrameMs": 19.69999998807907,
+      "gpuP95Ms": 13.097279999999998,
+      "simulationToWallRatio": 0.9953925641892475,
+      "rendererErrors": []
+    },
+    "visualFast": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "960x540",
+      "submittedFps": 97.85509538516015,
+      "completedFps": 96.98275861955709,
+      "p95FrameMs": 13,
+      "gpuP95Ms": 7.340040000000001,
+      "simulationToWallRatio": 0.98843530692081,
+      "rendererErrors": []
+    }
+  },
+  "verdict": "observed"
+}
