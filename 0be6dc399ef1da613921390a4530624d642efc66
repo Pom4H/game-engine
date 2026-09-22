@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "0be6dc399ef1da613921390a4530624d642efc66",
+  "parents": [
+    "7c5038173305986ee07ee367eb706697a9472d0f"
+  ],
+  "authoredAt": "2026-09-22T21:53:33+03:00",
+  "recordedAt": "2026-09-22T18:55:32.470Z",
+  "experiment": "hot-appearance-patch",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "fix: decode Hero metric from explicit image blobs",
+    "experiment": "hot-appearance-patch",
+    "observation": "CI 35769911763 failed in Winter Hero batch with InvalidStateError source image could not be decoded.",
+    "hypothesis": "direct WebGPU canvas/data fetch image sources are unreliable in this headless Chrome path.",
+    "intervention": "explicit reference/current image blobs.",
+    "prediction": "batch prints best HeroGap and latency report.",
+    "targets": [],
+    "guards": [
+      "metric formula and production rendering unchanged"
+    ],
+    "dependsOn": [
+      "7c5038173305986ee07ee367eb706697a9472d0f"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "hot-appearance-patch"
+      ],
+      "Causal-Observation": [
+        "CI 35769911763 failed in Winter Hero batch with InvalidStateError source image could not be decoded."
+      ],
+      "Causal-Hypothesis": [
+        "direct WebGPU canvas/data fetch image sources are unreliable in this headless Chrome path."
+      ],
+      "Causal-Intervention": [
+        "explicit reference/current image blobs."
+      ],
+      "Causal-Prediction": [
+        "batch prints best HeroGap and latency report."
+      ],
+      "Causal-Depends-On": [
+        "7c5038173305986ee07ee367eb706697a9472d0f"
+      ],
+      "Causal-Guard": [
+        "metric formula and production rendering unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35770202354",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35770202354"
+  },
+  "jobs": {
+    "reality": "skipped",
+    "visualFast": "failure",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
