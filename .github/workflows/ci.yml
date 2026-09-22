@@ -146,7 +146,7 @@ jobs:
   causal-evidence:
     if: always() && github.event_name == 'pull_request'
     needs: [reality-fast, visual-fast, performance-1080]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 3
     concurrency:
       group: game-engine-causal-notes
@@ -154,6 +154,9 @@ jobs:
     permissions:
       contents: write
       actions: read
+    defaults:
+      run:
+        shell: cmd
     env:
       CAUSAL_SHA: ${{ github.event.pull_request.head.sha }}
       REALITY_JOB_RESULT: ${{ needs.reality-fast.result }}
@@ -180,14 +183,14 @@ jobs:
           name: performance-1080-${{ github.event.pull_request.head.sha }}
           path: causal-input/performance
       - name: Build causal evidence
-        run: node tools/causality/record.mjs --subject "$CAUSAL_SHA" --input causal-input --out artifacts/causality/evidence.json
+        run: node tools/causality/record.mjs --subject "%CAUSAL_SHA%" --input causal-input --out artifacts/causality/evidence.json
       - name: Attach evidence to the evaluated commit
         if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin refs/notes/causality:refs/notes/causality || true
-          git notes --ref=causality add -f -F artifacts/causality/evidence.json "$CAUSAL_SHA"
+          git fetch origin refs/notes/causality:refs/notes/causality || echo No existing causal notes ref
+          git notes --ref=causality add -f -F artifacts/causality/evidence.json "%CAUSAL_SHA%"
           git push origin refs/notes/causality
       - uses: actions/upload-artifact@v7
         if: always()
