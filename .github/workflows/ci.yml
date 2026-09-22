@@ -131,7 +131,7 @@ jobs:
 
   reality-fast:
     if: github.event_name == 'pull_request'
-    needs: causal-contract
+    needs: visual-fast
     runs-on: self-hosted
     timeout-minutes: 8
     defaults:
