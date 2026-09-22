@@ -32,7 +32,17 @@ for(const capture of manifest.captures){
   const metricArgs=['tools/reality/metric.mjs','--production',production,'--reference',capture.reference,'--mask',capture.mask,'--capture',capture.id,'--out',report];
   if(withLpips)metricArgs.push('--lpips',lpips);
   await run(process.execPath,metricArgs);
-  reports.push({...JSON.parse(await readFile(report,'utf8')),split:capture.split,production,reference:capture.reference,mask:capture.mask});
+  const measured=JSON.parse(await readFile(report,'utf8'));
+  let counterfactuals;
+  if(capture.flatScenePath){
+    const flatProduction=join(captureDir,'flat-albedo-production.png'),flatReport=join(captureDir,'flat-albedo-report.json');
+    await run(process.execPath,['dist/cli.js','render',capture.flatScenePath,'--time','0','--width','512','--height','512','--out',flatProduction]);
+    await run(process.execPath,['tools/reality/metric.mjs','--production',flatProduction,'--reference',capture.reference,'--mask',capture.mask,'--capture',capture.id+'-flat-albedo','--out',flatReport]);
+    const flat=JSON.parse(await readFile(flatReport,'utf8'));
+    counterfactuals={flatAlbedo:{gap:flat.gap,components:flat.components,diagnostics:flat.diagnostics,production:flatProduction}};
+    console.log(JSON.stringify({metric:'RealityCounterfactual',capture:capture.id,kind:'flat-albedo',baseline:{gap:measured.gap,edge:measured.components.edge,interiorEdge:measured.diagnostics?.edge?.interior},counterfactual:{gap:flat.gap,edge:flat.components.edge,interiorEdge:flat.diagnostics?.edge?.interior}}));
+  }
+  reports.push({...measured,split:capture.split,production,reference:capture.reference,mask:capture.mask,counterfactuals});
 }
 const heldOut=reports.filter(r=>r.split==='heldOut'),calibration=reports.filter(r=>r.split==='calibration');
 if(!heldOut.length)throw new Error('Reality benchmark has no held-out captures');

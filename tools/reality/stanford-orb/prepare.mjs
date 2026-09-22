@@ -258,14 +258,18 @@ for(const [split,list] of [['calibration',calibrationItems],['heldOut',manifest.
     const envPath=await findSuffix(`ground_truth/${item.scene}/env_map/${stem}.exr`),{camera,worldToEnvironment}=cameraFromFrame(metadata,frame),radiance=measuredEnvironment(envPath);
     const environment={...radiance,worldToEnvironment,convention:'stanford-orb',intensity:1},scenePath=join(out,id+'.mjs');
     await writeFile(scenePath,sceneModule({meshImport:'./mesh.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
-    let inverseBasis;
+    let inverseBasis,flatScenePath;
     if(calibrationMode==='inverse-render'&&split==='calibration'){
       const whiteScenePath=join(out,id+'-basis-white.mjs'),blackScenePath=join(out,id+'-basis-black.mjs');
       await writeFile(whiteScenePath,sceneModule({meshImport:'./mesh-white.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
       await writeFile(blackScenePath,sceneModule({meshImport:'./mesh-black.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
       inverseBasis={whiteScenePath,blackScenePath};
     }
-    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,poseSource,camera,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask,...(inverseBasis?{inverseBasis}:{})});
+    if(calibrationMode==='inverse-render'&&split==='heldOut'){
+      flatScenePath=join(out,id+'-flat-albedo.mjs');
+      await writeFile(flatScenePath,sceneModule({meshImport:'./mesh-flat.mjs',camera,environment,material:calibration.material,exposure:calibration.exposure}));
+    }
+    captures.push({id,split,scene:item.scene,testIndex:item.testIndex,poseSource,camera,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask,...(inverseBasis?{inverseBasis}:{}),...(flatScenePath?{flatScenePath}:{})});
   }
 }
 await writeFile(join(out,'captures.json'),JSON.stringify({version:3,dataset:manifest.dataset,object:manifest.object,calibration:calibration.frozenFrom,calibrationMode,calibrationViews:calibrationItems.map(v=>v.testIndex),heldOutViews:manifest.heldOut.map(v=>v.testIndex),captures},null,2));

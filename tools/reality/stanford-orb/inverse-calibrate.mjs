@@ -154,4 +154,7 @@ for(let i=0;i<vertices;i++)if(!known[i]){colors[i*4]=fallback[0];colors[i*4+1]=f
 
 const packed=encodePackedMesh({...mesh,colors});
 await writeFile(join(dir,'mesh.mjs'),`import {decodePackedMesh} from '../../../dist/assets/packed-mesh.js';\nexport default decodePackedMesh(${JSON.stringify(packed)});\n`);
-console.log(JSON.stringify({phase:'inverse-albedo-complete',fusion:'weighted-medoid',observed,multiView,filled,vertices,coverage:observed/vertices,meanSrgb:fallback}));
+const flatColors=Array.from({length:vertices*4},(_,i)=>i%4===3?1:fallback[i%4]);
+const flatPacked=encodePackedMesh({...mesh,colors:flatColors});
+await writeFile(join(dir,'mesh-flat.mjs'),`import {decodePackedMesh} from '../../../dist/assets/packed-mesh.js';\nexport default decodePackedMesh(${JSON.stringify(flatPacked)});\n`);
+console.log(JSON.stringify({phase:'inverse-albedo-complete',fusion:'weighted-medoid',observed,multiView,filled,vertices,coverage:observed/vertices,meanSrgb:fallback,flatCounterfactual:true}));
