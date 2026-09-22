@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "56f573ccec3650286cb3b058c7a4027cc5680466",
+  "parents": [
+    "fd1728e09f94e873ba58cb0995d3e42aa0a0fe08"
+  ],
+  "authoredAt": "2026-09-22T21:38:19+03:00",
+  "recordedAt": "2026-09-22T18:40:52.695Z",
+  "experiment": "hot-render-batch",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "render: add hot WebGPU batch capture loop",
+    "experiment": "hot-render-batch",
+    "observation": "current 960x540 GPU p95 is ~7.7 ms but one CLI reference render occupies roughly 20 seconds wall time.",
+    "hypothesis": "persistent Chrome/WebGPU plus scene replacement removes the dominant fixed startup cost.",
+    "intervention": "reuse renderer/pipelines/buffers across manifest captures and explicitly invalidate only scene-owned caches.",
+    "prediction": "second and later captures in a batch are dramatically faster than standalone render commands.",
+    "targets": [],
+    "guards": [
+      "standalone render/probe/record/profile behavior and production renderer path remain unchanged"
+    ],
+    "dependsOn": [
+      "fd1728e09f94e873ba58cb0995d3e42aa0a0fe08"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "hot-render-batch"
+      ],
+      "Causal-Observation": [
+        "current 960x540 GPU p95 is ~7.7 ms but one CLI reference render occupies roughly 20 seconds wall time."
+      ],
+      "Causal-Hypothesis": [
+        "persistent Chrome/WebGPU plus scene replacement removes the dominant fixed startup cost."
+      ],
+      "Causal-Intervention": [
+        "reuse renderer/pipelines/buffers across manifest captures and explicitly invalidate only scene-owned caches."
+      ],
+      "Causal-Prediction": [
+        "second and later captures in a batch are dramatically faster than standalone render commands."
+      ],
+      "Causal-Depends-On": [
+        "fd1728e09f94e873ba58cb0995d3e42aa0a0fe08"
+      ],
+      "Causal-Guard": [
+        "standalone render/probe/record/profile behavior and production renderer path remain unchanged"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35768507129",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35768507129"
+  },
+  "jobs": {
+    "reality": "skipped",
+    "visualFast": "failure",
+    "performance1080": "skipped"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
