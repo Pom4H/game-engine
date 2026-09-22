@@ -1,0 +1,67 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "7d65c1915551214b7ff9db3d28265ac600c01da1",
+  "parents": [
+    "acfa0f02692c79c2d9d0e18d081ebc8a0f8f0c4f"
+  ],
+  "authoredAt": "2026-09-22T22:33:03+03:00",
+  "recordedAt": "2026-09-22T19:37:20.927Z",
+  "experiment": "EXP-1009",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "refactor(world): unify engine boundaries and atomic state updates",
+    "experiment": "EXP-1009",
+    "observation": "duplicate tier thresholds and mutable or partially committed state cross module boundaries.",
+    "hypothesis": "removing duplicated authority and validating before mutation preserves accepted inputs and rejects invalid ones atomically.",
+    "intervention": "consolidate types and stage checkpoint, replication, input and bounds operations.",
+    "prediction": "typecheck, physical contacts and deterministic world tests remain green.",
+    "targets": [],
+    "guards": [
+      "only sphere and box narrow phase are implemented"
+    ],
+    "dependsOn": [
+      "acfa0f02692c79c2d9d0e18d081ebc8a0f8f0c4f"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "EXP-1009"
+      ],
+      "Causal-Observation": [
+        "duplicate tier thresholds and mutable or partially committed state cross module boundaries."
+      ],
+      "Causal-Hypothesis": [
+        "removing duplicated authority and validating before mutation preserves accepted inputs and rejects invalid ones atomically."
+      ],
+      "Causal-Intervention": [
+        "consolidate types and stage checkpoint, replication, input and bounds operations."
+      ],
+      "Causal-Prediction": [
+        "typecheck, physical contacts and deterministic world tests remain green."
+      ],
+      "Causal-Depends-On": [
+        "acfa0f02692c79c2d9d0e18d081ebc8a0f8f0c4f"
+      ],
+      "Causal-Guard": [
+        "only sphere and box narrow phase are implemented"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35774536220",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35774536220"
+  },
+  "jobs": {
+    "reality": "cancelled",
+    "visualFast": "cancelled",
+    "performance1080": "cancelled"
+  },
+  "observations": {
+    "reality": null,
+    "performance1080": null,
+    "visualFast": null
+  },
+  "verdict": "observed"
+}
