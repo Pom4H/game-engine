@@ -193,6 +193,29 @@ const calibrationScene=manifest.calibration[0]?.scene;
 if(!calibrationScene)throw new Error('Stanford-ORB manifest has no calibration scene');
 
 const calibrationTransforms=await findSuffix(`blender_LDR/${calibrationScene}/transforms_test.json`),calibrationSceneDir=dirname(calibrationTransforms),calibrationMetadata=JSON.parse(await readFile(calibrationTransforms,'utf8'));
+const heldOutIndices=new Set(manifest.heldOut.filter(item=>item.scene===calibrationScene).map(item=>item.testIndex));
+const explicitCalibration=[...manifest.calibration];
+function frameViewDirection(frame){
+  const m=frame.transform_matrix;return norm([-m[0][2],-m[1][2],-m[2][2]]);
+}
+function selectCalibrationViews(budget=8){
+  const available=calibrationMetadata.frames.map((frame,testIndex)=>({scene:calibrationScene,testIndex,frame})).filter(item=>!heldOutIndices.has(item.testIndex));
+  const byIndex=new Map(available.map(item=>[item.testIndex,item])),selected=[];
+  for(const item of explicitCalibration){const found=byIndex.get(item.testIndex);if(found&&!selected.some(v=>v.testIndex===found.testIndex))selected.push(found);}
+  while(selected.length<Math.min(budget,available.length)){
+    let best=null,bestScore=-Infinity;
+    for(const item of available){
+      if(selected.some(v=>v.testIndex===item.testIndex))continue;
+      const dir=frameViewDirection(item.frame);
+      const score=selected.length?Math.min(...selected.map(v=>1-dot(dir,frameViewDirection(v.frame)))):1;
+      if(score>bestScore){bestScore=score;best=item;}
+    }
+    if(!best)break;selected.push(best);
+  }
+  return selected.map(({scene,testIndex})=>({scene,testIndex}));
+}
+const calibrationItems=selectCalibrationViews(Number(manifest.calibrationBudget??8));
+console.log(JSON.stringify({phase:'calibration-split',available:calibrationMetadata.frames.length,selected:calibrationItems.map(v=>v.testIndex),heldOut:[...heldOutIndices]}));
 const meshPath=await findSuffix(`ground_truth/${manifest.calibration[0].scene}/mesh_blender/mesh.obj`);
 console.log(JSON.stringify({phase:'mesh',path:meshPath}));
 const mesh=parseObj(await readFile(meshPath,'utf8'));
@@ -201,7 +224,7 @@ async function writeMeshModule(name,value){
   await writeFile(join(out,name),`import {decodePackedMesh} from '../../../dist/assets/packed-mesh.js';\nexport default decodePackedMesh(${JSON.stringify(packed)});\n`);
 }
 async function hasPseudoGt(){
-  for(const item of manifest.calibration){
+  for(const item of calibrationItems){
     const frame=calibrationMetadata.frames[item.testIndex];if(!frame)return false;
     const stem=basename(frame.file_path.replace(/^\.\//,''));
     if(!(await findOptionalSuffix(`ground_truth/${item.scene}/pseudo_gt_albedo/${stem}.npy`))||!(await findOptionalSuffix(`ground_truth/${item.scene}/z_depth/${stem}.npy`)))return false;
@@ -211,8 +234,8 @@ async function hasPseudoGt(){
 const pseudoGtReady=await hasPseudoGt();
 let calibrationMode;
 if(pseudoGtReady){
-  const albedo=await calibrateVertexColors(mesh,calibrationSceneDir,calibrationMetadata,manifest.calibration);mesh.colors=albedo.colors;calibrationMode='pseudo-gt';
-  console.log(JSON.stringify({phase:'albedo-calibration',mode:calibrationMode,views:manifest.calibration.map(v=>v.testIndex),coverage:albedo.coverage,positions:albedo.positions,observed:albedo.observed}));
+  const albedo=await calibrateVertexColors(mesh,calibrationSceneDir,calibrationMetadata,calibrationItems);mesh.colors=albedo.colors;calibrationMode='pseudo-gt';
+  console.log(JSON.stringify({phase:'albedo-calibration',mode:calibrationMode,views:calibrationItems.map(v=>v.testIndex),coverage:albedo.coverage,positions:albedo.positions,observed:albedo.observed}));
   await writeMeshModule('mesh.mjs',mesh);
 }else{
   calibrationMode='inverse-render';
@@ -224,7 +247,7 @@ if(pseudoGtReady){
 }
 
 const captures=[];
-for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manifest.heldOut]]){
+for(const [split,list] of [['calibration',calibrationItems],['heldOut',manifest.heldOut]]){
   for(const item of list){
     const targetTransforms=await findSuffix(`blender_LDR/${item.scene}/transforms_test.json`),sceneDir=dirname(targetTransforms),metadata=JSON.parse(await readFile(targetTransforms,'utf8')),frame=metadata.frames[item.testIndex],poseSource='test';
     if(!frame)throw new RangeError(`${item.scene} has no test frame ${item.testIndex}`);
@@ -245,5 +268,5 @@ for(const [split,list] of [['calibration',manifest.calibration],['heldOut',manif
     captures.push({id,split,scene:item.scene,testIndex:item.testIndex,poseSource,camera,scenePath,reference,mask,environment:envPath,sourceReference,sourceMask,...(inverseBasis?{inverseBasis}:{})});
   }
 }
-await writeFile(join(out,'captures.json'),JSON.stringify({version:2,dataset:manifest.dataset,object:manifest.object,calibration:calibration.frozenFrom,calibrationMode,captures},null,2));
+await writeFile(join(out,'captures.json'),JSON.stringify({version:3,dataset:manifest.dataset,object:manifest.object,calibration:calibration.frozenFrom,calibrationMode,calibrationViews:calibrationItems.map(v=>v.testIndex),heldOutViews:manifest.heldOut.map(v=>v.testIndex),captures},null,2));
 console.log(JSON.stringify({phase:'prepared',root,out,captures:captures.map(c=>({id:c.id,split:c.split,reference:relative(root,c.reference)}))}));
