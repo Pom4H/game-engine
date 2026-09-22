@@ -1,0 +1,219 @@
+{
+  "schema": "game-engine.causal-evidence/v1",
+  "subject": "d6626c4b56abe9068b8d8862ee20bfaaa36f802f",
+  "parents": [
+    "fe2375b3260f2e793287b84df419325cd2397264"
+  ],
+  "authoredAt": "2026-09-22T16:42:02+03:00",
+  "recordedAt": "2026-09-22T13:52:29.280Z",
+  "experiment": "dual-reality-authority",
+  "declaration": {
+    "schema": "game-engine.causal-commit/v1",
+    "subject": "reality: add end-to-end winter hero North Star",
+    "experiment": "dual-reality-authority",
+    "observation": "Stanford RealityGap can remain green while the winter game scene loses material separation, contact, snow/road realism and photographic integration.",
+    "hypothesis": "Stanford should remain authoritative for controlled held-out real captures, while a second fixed full-scene photo target should govern end-to-end appearance.",
+    "intervention": "add the generated winter hero reference, its machine-readable contract, EXP-1004, and explicitly scope Stanford-ORB as the controlled renderer gate.",
+    "prediction": "future render changes can no longer be accepted solely because Stanford stays green; they must also improve the complete winter hero while preserving performance.",
+    "targets": [],
+    "guards": [
+      "Stanford baseline and metric implementation are unchanged",
+      "production renderer behavior is unchanged by this commit"
+    ],
+    "dependsOn": [
+      "fe2375b3260f2e793287b84df419325cd2397264"
+    ],
+    "supersedes": [],
+    "trailers": {
+      "Causal-Experiment": [
+        "dual-reality-authority"
+      ],
+      "Causal-Observation": [
+        "Stanford RealityGap can remain green while the winter game scene loses material separation, contact, snow/road realism and photographic integration."
+      ],
+      "Causal-Hypothesis": [
+        "Stanford should remain authoritative for controlled held-out real captures, while a second fixed full-scene photo target should govern end-to-end appearance."
+      ],
+      "Causal-Intervention": [
+        "add the generated winter hero reference, its machine-readable contract, EXP-1004, and explicitly scope Stanford-ORB as the controlled renderer gate."
+      ],
+      "Causal-Prediction": [
+        "future render changes can no longer be accepted solely because Stanford stays green; they must also improve the complete winter hero while preserving performance."
+      ],
+      "Causal-Depends-On": [
+        "fe2375b3260f2e793287b84df419325cd2397264"
+      ],
+      "Causal-Guard": [
+        "Stanford baseline and metric implementation are unchanged",
+        "production renderer behavior is unchanged by this commit"
+      ]
+    }
+  },
+  "run": {
+    "repository": "Pom4H/game-engine",
+    "id": "35735248154",
+    "attempt": "1",
+    "url": "https://github.com/Pom4H/game-engine/actions/runs/35735248154"
+  },
+  "jobs": {
+    "reality": "success",
+    "visualFast": "success",
+    "performance1080": "success"
+  },
+  "observations": {
+    "reality": {
+      "dataset": "Stanford-ORB",
+      "object": "car",
+      "gap": 0.23837613511163935,
+      "baseline": {
+        "gap": 0.23563216891992333,
+        "tolerance": 0.003,
+        "delta": 0.0027439661917160185
+      },
+      "regressions": [],
+      "heldOut": [
+        {
+          "capture": "car_scene004-test1",
+          "gap": 0.2663534144711415,
+          "psnr": 17.35991339852934,
+          "ssim": 0.7455449979819455,
+          "components": {
+            "lpips": null,
+            "structural": 0.2544550020180545,
+            "logLuminance": 0.09720753821776511,
+            "edge": 0.7076154502378703,
+            "chroma": 0.06648376364636399
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.5219900681696762,
+              "interior": 0.7529757939293016,
+              "radiusPx": 4,
+              "boundaryPixels": 2154,
+              "interiorPixels": 15020,
+              "errorShare": {
+                "boundary": 0.14486255037935694,
+                "interior": 0.8551374496206433
+              },
+              "referenceWeightShare": {
+                "boundary": 0.19637725899408162,
+                "interior": 0.803622741005922
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5481155788811337,
+              "components": {
+                "lpips": null,
+                "structural": 0.9175418467015429,
+                "logLuminance": 0.20200777725230615,
+                "edge": 0.9275244134024243,
+                "chroma": 0.137615456104401
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.6937513680570516,
+                  "interior": 0.9846503601049248,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2154,
+                  "interiorPixels": 15020,
+                  "errorShare": {
+                    "boundary": 0.14688237863484574,
+                    "interior": 0.8531176213651561
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.19637725899408162,
+                    "interior": 0.803622741005922
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test1\\flat-albedo-production.png"
+            }
+          }
+        },
+        {
+          "capture": "car_scene004-test3",
+          "gap": 0.2103988557521372,
+          "psnr": 20.25698762995468,
+          "ssim": 0.828285914757499,
+          "components": {
+            "lpips": null,
+            "structural": 0.17171408524250098,
+            "logLuminance": 0.07659547175763654,
+            "edge": 0.6057346928319939,
+            "chroma": 0.04504722467779646
+          },
+          "diagnostics": {
+            "edge": {
+              "boundary": 0.4799062518866265,
+              "interior": 0.6387072222036098,
+              "radiusPx": 4,
+              "boundaryPixels": 2431,
+              "interiorPixels": 19062,
+              "errorShare": {
+                "boundary": 0.1645027155621785,
+                "interior": 0.8354972844378228
+              },
+              "referenceWeightShare": {
+                "boundary": 0.20763430667834948,
+                "interior": 0.7923656933216517
+              }
+            }
+          },
+          "counterfactuals": {
+            "flatAlbedo": {
+              "gap": 0.5511460629120786,
+              "components": {
+                "lpips": null,
+                "structural": 0.9382717563522766,
+                "logLuminance": 0.20666145355053964,
+                "edge": 0.906145575814743,
+                "chroma": 0.13929177123786873
+              },
+              "diagnostics": {
+                "edge": {
+                  "boundary": 0.691176569230431,
+                  "interior": 0.9624768140493941,
+                  "radiusPx": 4,
+                  "boundaryPixels": 2431,
+                  "interiorPixels": 19062,
+                  "errorShare": {
+                    "boundary": 0.158376282547586,
+                    "interior": 0.8416237174524145
+                  },
+                  "referenceWeightShare": {
+                    "boundary": 0.20763430667834948,
+                    "interior": 0.7923656933216517
+                  }
+                }
+              },
+              "production": "C:\\Users\\Roman\\actions-runner-game-engine\\_work\\game-engine\\game-engine\\artifacts\\reality\\stanford-orb\\car_scene004-test3\\flat-albedo-production.png"
+            }
+          }
+        }
+      ]
+    },
+    "performance1080": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "1920x1080",
+      "submittedFps": 69.77767114573246,
+      "completedFps": 68.90152412556688,
+      "p95FrameMs": 20.30000001192093,
+      "gpuP95Ms": 13.309719999999997,
+      "simulationToWallRatio": 0.9963478353664725,
+      "rendererErrors": []
+    },
+    "visualFast": {
+      "scene": "clear-day.scene.mjs",
+      "resolution": "960x540",
+      "submittedFps": 100.69790628115653,
+      "completedFps": 99.75308641975309,
+      "p95FrameMs": 12.899999976158142,
+      "gpuP95Ms": 7.678719999999999,
+      "simulationToWallRatio": 0.9803921568627457,
+      "rendererErrors": []
+    }
+  },
+  "verdict": "observed"
+}
