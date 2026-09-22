@@ -12,6 +12,16 @@
     "radiometricOracle": "pass",
     "performance1080": "not-observed-because-consistency-gate-blocked"
   },
+  "intervention": {
+    "change": "Run RendererConsistencyGap without --assert in visual-fast.",
+    "unchangedBlockingGuards": [
+      "Stanford held-out RealityGap --assert",
+      "radiometric pixel oracle",
+      "short GPU budget probe",
+      "1080p sustained runtime gate",
+      "full engine verification"
+    ]
+  },
   "metrics": [
     "reality_gap",
     "renderer_consistency_gap",
