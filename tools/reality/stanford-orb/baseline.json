@@ -1,8 +1,0 @@
-{
-  "version": 1,
-  "metric": "RealityGap",
-  "dataset": "Stanford-ORB",
-  "object": "car",
-  "gap": 0.23563216891992333,
-  "tolerance": 0.003
-}

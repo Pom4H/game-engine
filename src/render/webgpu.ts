@@ -1,4 +1,6 @@
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
+import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
+import {buildDirectionalProxyTiles} from './proxy-tiles.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
 import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
@@ -71,7 +73,9 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  if(any(uv<vec2<f32>(0))||any(uv>vec2<f32>(1))||clip.z>1.0||clip.z<0.0){return 1.0;}
  var staticValue=0.0;var dynamicValue=2.0;
  let staticTexel=1.0/vec2<f32>(textureDimensions(shadowMap));
- let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233))+floor(f.up.w*60.0)*.618)*43758.5453)*6.2831853;
+ // Stable world-space PCF rotation: changing the pattern every frame makes
+ // contact shadows crawl even when both the light and the receiver are still.
+ let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233)))*43758.5453)*6.2831853;
  let cs=cos(phase);let sn=sin(phase);let rot=mat2x2<f32>(cs,-sn,sn,cs);
  let taps=array<vec2<f32>,2>(vec2<f32>(-.78,-.26),vec2<f32>(.80,.30));
  for(var i=0;i<2;i++){
@@ -134,7 +138,7 @@ fn tyreTracks(z:f32)->f32{
  var out:VOut;out.vertexColor=vertexColor;let world=u.model*vec4<f32>(position,1);out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
 }
 
-fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,roughness:f32,base:vec3<f32>,f0:vec3<f32>,metal:f32)->vec3<f32>{
+fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,roughness:f32,base:vec3<f32>,f0:vec3<f32>,metal:f32,coat:f32,coatRoughness:f32)->vec3<f32>{
  let delta=source.position.xyz-world;let dist=length(delta);if(dist>=source.position.w){return vec3<f32>(0);}
  let l=delta/max(dist,.001);let nl=max(dot(n,l),0.0);let nv=max(dot(n,viewDir),.001);let h=normalize(l+viewDir);
  // Finite lamp size keeps specular stable at subpixel scale.
@@ -143,7 +147,13 @@ fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,r
  let g=nv/(nv*(1.0-k)+k)*nl/(nl*(1.0-k)+k);
  let fr=f0+(1.0-f0)*pow(1.0-max(dot(viewDir,h),0.0),5.0);
  let atten=pow(max(0.0,1.0-pow(dist/source.position.w,4.0)),2.0)/(1.0+dist*dist*.18);
- return (base*(1.0-fr)*(1.0-metal)/3.14159+d*g*fr/max(4.0*nv*nl,.001))*source.color.rgb*source.color.w*atten*nl;
+ if(coat<=0.0){return (base*(1.0-fr)*(1.0-metal)/3.14159+d*g*fr/max(4.0*nv*nl,.001))*source.color.rgb*source.color.w*atten*nl;}
+ let coatF=coat*(.04+.96*pow(1.0-max(dot(viewDir,h),0.0),5.0));
+ let cr=max(coatRoughness,.08+.18/max(dist,1.0));let ca2=pow(cr,4.0);
+ let cd=ca2/(3.14159*pow(nh*nh*(ca2-1.0)+1.0,2.0));let ck=pow(cr+1.0,2.0)/8.0;
+ let cg=nv/(nv*(1.0-ck)+ck)*nl/(nl*(1.0-ck)+ck);
+ let under=(base*(1.0-fr)*(1.0-metal)/3.14159+d*g*fr/max(4.0*nv*nl,.001))*(1.0-coatF);
+ return (under+vec3<f32>(cd*cg*coatF/max(4.0*nv*nl,.001)))*source.color.rgb*source.color.w*atten*nl;
 }
 
 fn texelAt(p:vec3<f32>,weights:vec3<f32>)->vec3<f32>{
@@ -288,6 +298,19 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     albedo=mix(albedo,vec3<f32>(0.89,0.93,0.97),snowMask*(1.0-slush*.55));
   }
 
+  // Bulk snow needs scale separation even when no authored texture is present.
+  // One procedural sample supplies both centimetre-scale tonal breakup and a
+  // screen-space micro-normal derivative, avoiding the smooth plaster look of
+  // large snow banks without adding geometry or scene-specific knowledge.
+  if(materialKind>5.5&&materialKind<6.5){
+    let snowMacro=noise3(in.worldPos*5.2+seed*7.1);
+    let snowGrain=noise3(in.worldPos*82.0+seed*19.7);
+    albedo*=.91+snowMacro*.085+snowGrain*.035;
+    let tx=normalize(dpdx(in.worldPos)+vec3<f32>(.000001,0,0));
+    let ty=normalize(dpdy(in.worldPos)+vec3<f32>(0,.000001,0));
+    n=normalize(n+(tx*dpdx(snowGrain)+ty*dpdy(snowGrain))*.24);
+  }
+
   // Moving bodies accumulate fresh snow on upward and rear-facing surfaces.
   let bodyDeposit=max(u.surfaceDynamics.z,u.surfaceDynamics.w);
   if(bodyDeposit>.001){
@@ -338,11 +361,13 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     // A damp film darkens stone but does not submerge the aggregate. Only
     // depressions filled by the local water column become smooth puddles.
     let fill=clamp(waterDepth/.006,0.0,1.0);
-    waterCoverage=smoothstep(.64,.80,hollows+fill*.50)*smoothstep(.00015,.0012,waterDepth);
+    // A damp film changes roughness before it fills every depression as a
+    // mirror. Scale subpixel puddle coverage by the available water volume.
+    waterCoverage=smoothstep(.64,.80,hollows+fill*.50)*smoothstep(.00015,.0012,waterDepth)*sqrt(fill);
     let aggregate=noise3(in.worldPos*37.0+seed);
     let mineralRoughness=clamp(max(roughness,.60)+(aggregate-.5)*.24,.50,.93);
-    roughness=mix(mineralRoughness,.11+noise3(in.worldPos*3.0)*.045,waterCoverage);
-    albedo*=mix(1.0,.62,waterCoverage);
+    roughness=mix(mineralRoughness,.21+noise3(in.worldPos*3.0)*.045,waterCoverage);
+    albedo*=mix(1.0,.75,waterCoverage);
     // Millimetres of water level out the gravel; its normals must not turn the
     // planar reflection into waves across the entire road.
     n=normalize(mix(n,geometricNormal,waterCoverage*.94));
@@ -351,7 +376,9 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let nv=max(dot(n,viewDir),.001);let nl=max(dot(n,light),0.0);let nh=max(dot(n,halfDir),0.0);let vh=max(dot(viewDir,halfDir),0.0);
   let a2=pow(roughness,4.0);let d=a2/(3.14159*pow(nh*nh*(a2-1.0)+1.0,2.0));
   let k=pow(roughness+1.0,2.0)/8.0;let g=(nv/(nv*(1.0-k)+k))*(nl/(nl*(1.0-k)+k));
-  let f0=mix(vec3<f32>(.04),base,metal);let fresnel=f0+(1.0-f0)*pow(1.0-vh,5.0);
+  // The engine's dielectric base assumes IOR 1.5: under an IOR 1.5 coat
+  // that interface is index-matched, rather than a second air/paint reflection.
+  let f0=mix(vec3<f32>(.04*(1.0-clearcoat)),base,metal);let fresnel=f0+(1.0-f0)*pow(1.0-vh,5.0);
   let specular=d*g*fresnel/max(4.0*nv*nl,.001);
   let shadow=shadowAt(in.worldPos,n);
   // Diffuse and specular now query the same world-radiance representation.
@@ -377,12 +404,17 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     let horizonEnvironment=textureSampleLevel(environmentMap,reflectionSampler,normalize(n+viewDir*.18),5.4).rgb;
     diffuseIrradiance=mix(diffuseEnvironment,horizonEnvironment,.16)*.94;
   }
-  var color=base*diffuseIrradiance*(1.0-metal)*materialAO;
-  color+=(base*(1.0-fresnel)*(1.0-metal)/3.14159+specular)*f.sunColor.rgb*f.sun.w*nl*shadow;
+  // Filter the coat normal distribution too; a sharp second lobe must not
+  // bypass the base layer's anti-aliasing on curved/subpixel panel edges.
+  let coatRough=clamp(sqrt(clearcoatRoughness*clearcoatRoughness+min(.22,normalVariance*.18)),.08,1.0);
+  let coatViewF=clearcoat*(.04+.96*pow(1.0-nv,5.0));
+  let coatLightF=clearcoat*(.04+.96*pow(1.0-vh,5.0));
+  var color=base*diffuseIrradiance*(1.0-metal)*materialAO*(1.0-coatViewF);
+  color+=(base*(1.0-fresnel)*(1.0-metal)/3.14159+specular)*f.sunColor.rgb*f.sun.w*nl*shadow*(1.0-coatLightF);
   let environmentFresnel=f0+(1.0-f0)*pow(1.0-nv,5.0);
   let reflectionDir=reflect(-viewDir,n);
   let fallbackEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
-  let localProbeWeight=f.params.y*(1.0-smoothstep(.08,.46,roughness))*.90;
+  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.75;
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
   if(f.params.y>.5&&(localProbeWeight>.001||clearcoat>0.0||glassLike)){
@@ -393,24 +425,27 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let envR=roughness*envC0+envC1;let envA004=min(envR.x*envR.x,exp2(-9.28*nv))*envR.x+envR.y;
   let envBRDF=vec2<f32>(-1.04,1.04)*envA004+envR.zw;
   let environmentWeight=select(1.0,mix(.22,1.0,waterCoverage),materialKind>4.5&&materialKind<5.5);
-  color+=environmentRadiance*(f0*envBRDF.x+envBRDF.y)*environmentWeight;
+  color+=environmentRadiance*(f0*envBRDF.x+envBRDF.y)*environmentWeight*pow(1.0-coatViewF,2.0);
 
-  // Painted metal is a layered dielectric clear coat over the colored base.
-  // The second lobe preserves sharp sky/building reflections without turning the
-  // underlying paint into a polished bulk metal.
+  // Both sources use the authored coat lobe. Roughness changes convolution,
+  // not whether the street exists in the reflection; local capture wins when ready.
   if(clearcoat>0.0){
-    let coatRough=clearcoatRoughness;let coatA2=pow(coatRough,4.0);
+    let coatA2=pow(coatRough,4.0);
     let coatD=coatA2/(3.14159*pow(nh*nh*(coatA2-1.0)+1.0,2.0));
     let coatK=pow(coatRough+1.0,2.0)/8.0;
     let coatG=(nv/(nv*(1.0-coatK)+coatK))*(nl/(nl*(1.0-coatK)+coatK));
-    let coatF=.04+.96*pow(1.0-vh,5.0);
-    let coatSpec=coatD*coatG*coatF/max(4.0*nv*nl,.001);
-    color*=1.0-clearcoat*coatF*.28;
-    color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec*clearcoat;
-    var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,.35).rgb;
-    if(f.params.y>.5){coatEnvironment=mix(coatEnvironment,localProbe,.92);}
-    let coatEnvF=.04+.96*pow(1.0-nv,5.0);
-    color+=coatEnvironment*coatEnvF*clearcoat*.78;
+    let coatSpec=coatD*coatG*coatLightF/max(4.0*nv*nl,.001);
+    color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec;
+    var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(environmentMap)-1u)).rgb;
+    if(f.params.y>.5){
+      let coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(localProbeMap)-1u)).rgb;
+      coatEnvironment=mix(coatEnvironment,coatLocal,f.params.y);
+    }
+    // Same split-sum BRDF fit as the base, evaluated at the coat roughness.
+    let coatR=coatRough*envC0+envC1;
+    let coatA004=min(coatR.x*coatR.x,exp2(-9.28*nv))*coatR.x+coatR.y;
+    let coatBRDF=vec2<f32>(-1.04,1.04)*coatA004+coatR.zw;
+    color+=coatEnvironment*(.04*coatBRDF.x+coatBRDF.y)*clearcoat;
   }
 
   // Glass is composited over the actual opaque scene. This keeps concrete,
@@ -444,9 +479,9 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   // Rough dry asphalt is an absorber, not a sky-colored mirror. Keep the broad
   // dielectric lobe subdued until actual water/ice state creates local coverage.
-  if(materialKind>4.5&&materialKind<5.5){color*=mix(.34,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
+  if(materialKind>4.5&&materialKind<5.5){color*=mix(.52,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
 
-  if(f.params.x>.5){let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal);}}}
+  if(f.params.x>.5){let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal,clearcoat,coatRough);}}}
   color+=u.emission.rgb;
   if(materialKind>4.5&&materialKind<5.5&&n.y>.8&&in.reflected==0u){
     let p=f.reflectionVP*vec4<f32>(in.worldPos,1);let uv=p.xy/p.w*vec2<f32>(.5,-.5)+.5;
@@ -459,9 +494,11 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
   color=mix(color,f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027,clamp(fog,0.0,.96));
   let grazing=pow(1.0-nv,5.0);
-  let clearcoatScreen=vec3<f32>(clearcoat*(.52+.36*grazing));
-  let screenReflectance=max(environmentFresnel,clearcoatScreen);
-  let glassOpacity=mix(clamp(u.color.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(1.0,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
+  let screenReflectance=environmentFresnel*pow(1.0-coatViewF,2.0)+vec3<f32>(coatViewF);
+  // Pack independent SSR roughness in reflectance.a; normal.a stays the base
+  // roughness for diffuse/AO. Zero alpha still disables asphalt SSR.
+  let screenRoughness=mix(roughness,min(roughness,coatRough),clearcoat);
+  let glassOpacity=mix(clamp(u.color.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(.5+.5*screenRoughness,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
 const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
@@ -544,10 +581,11 @@ export class WebGPURenderer implements Renderer{
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
+  private appearanceScene:Scene|null=null;private appearanceRevision=-1;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
-  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';
+  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
@@ -579,10 +617,10 @@ export class WebGPURenderer implements Renderer{
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
     const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*8)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
     const frame=device.createBuffer({size:560,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
-    const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear'});
+    const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
-    const localProbeMap=device.createTexture({label:'local reflection probe',size:[128,128,6],format:'rgba16float',usage:0x10|0x04}),localProbeView=localProbeMap.createView({dimension:'cube'});
+    const localProbeMap=device.createTexture({label:'local reflection probe',size:[128,128,6],mipLevelCount:PROBE_MIP_LEVELS,format:'rgba16float',usage:0x10|0x04}),localProbeView=localProbeMap.createView({dimension:'cube'});
     const localProbeDepth=device.createTexture({label:'local reflection probe depth',size:[128,128],format:'depth32float',usage:0x10});
     const surfaceSampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',maxAnisotropy:8});
     const emptyField=device.createTexture({size:[1,1],format:'rgba32float',usage:0x04|0x02}),emptyLabel=device.createTexture({size:[1,1],format:'rgba8unorm',usage:0x04|0x02});device.queue.writeTexture({texture:emptyField},new Float32Array(4),{bytesPerRow:16},[1,1]);device.queue.writeTexture({texture:emptyLabel},new Uint8Array(4),{bytesPerRow:4},[1,1]);
@@ -608,6 +646,17 @@ export class WebGPURenderer implements Renderer{
     const probeModule=device.createShaderModule({code:PROBE_SHADER}),probePipelineLayout=device.createPipelineLayout({bindGroupLayouts:[objectLayout,probeFrameLayout]});
     const makeProbe=(cullMode:'none'|'back')=>device.createRenderPipeline({layout:probePipelineLayout,vertex:{module:probeModule,entryPoint:'vs',buffers:vertex.buffers},fragment:{module:probeModule,entryPoint:'fs',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:true,depthCompare:'less'}});
     const probeCulled=makeProbe('back'),probeDouble=makeProbe('none');
+    const probeFilterModule=device.createShaderModule({label:'GGX local probe filter',code:PROBE_FILTER_SHADER});
+    const probeFilter=device.createRenderPipeline({layout:'auto',vertex:{module:probeFilterModule,entryPoint:'vs'},fragment:{module:probeFilterModule,entryPoint:'fs',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
+    const probeSource=localProbeMap.createView({dimension:'cube',baseMipLevel:0,mipLevelCount:1});
+    const probeFilterPasses=probeFilterPlan().map(capture=>{
+      const params=device.createBuffer({size:16,usage:0x40,mappedAtCreation:true});
+      new Float32Array(params.getMappedRange()).set([capture.face,capture.roughness,0,0]);params.unmap();
+      const bind=device.createBindGroup({layout:probeFilter.getBindGroupLayout(0),entries:[{binding:0,resource:probeSource},{binding:1,resource:sampler},{binding:2,resource:{buffer:params}}]});
+      const view=localProbeMap.createView({dimension:'2d',baseArrayLayer:capture.face,arrayLayerCount:1,baseMipLevel:capture.mip,mipLevelCount:1});
+      return{bind,view,params};
+    });
+
     const makeReflected=(cullMode:'none'|'back',materialClass:number)=>device.createRenderPipeline({layout,vertex:{...vertex,module:reflectionModule,entryPoint:'reflectionVS'},fragment:{module:reflectionModule,entryPoint:'fs',constants:{MATERIAL_CLASS:materialClass},targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:true,depthCompare:'less'}});
     const reflectedCulled=new Map(materialClasses.map(code=>[code,makeReflected('back',code)])),reflectedDouble=new Map(materialClasses.map(code=>[code,makeReflected('none',code)]));
     const shadowLayout=device.createPipelineLayout({bindGroupLayouts:[objectLayout,frameLayout]});
@@ -627,8 +676,8 @@ export class WebGPURenderer implements Renderer{
     const snowUniform=device.createBuffer({size:128,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
     const probeFrames=Array.from({length:6},(_,face)=>device.createBuffer({label:`reflection probe frame ${face}`,size:112,usage:0x40|0x08}));
     const probeFrameBinds=probeFrames.map(buffer=>device.createBindGroup({layout:probeFrameLayout,entries:[{binding:0,resource:{buffer}}]}));
-    for(const shader of [module,reflectionModule,probeModule,skyModule,effectsModule,taaModule,presentModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
-    return new WebGPURenderer(canvas,device,context,format,{localProbeMap,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,sky,effects,taa,taaParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
+    for(const shader of [module,reflectionModule,probeModule,probeFilterModule,skyModule,effectsModule,taaModule,presentModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
+    return new WebGPURenderer(canvas,device,context,format,{probeFilter,probeFilterPasses,localProbeMap,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,sky,effects,taa,taaParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
   }
   setResolution(width:number,height:number):void{
     if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');
@@ -655,6 +704,14 @@ export class WebGPURenderer implements Renderer{
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
+    const appearanceChanged=this.appearanceScene!==scene||this.appearanceRevision!==scene.appearanceRevision;
+    if(appearanceChanged){
+      this.appearanceScene=scene;this.appearanceRevision=scene.appearanceRevision;
+      // Material/exposure hypotheses only require uniform refresh and fresh TAA.
+      // Keep geometry, shadow maps, environment cubemaps, probes and culling hot.
+      for(const object of this.objects.values())object.uniformReady=false;
+      this.historyValid=false;
+    }
     const structureChanged=this.profiler.measure('lifecycle',()=>this.collect(scene));
     this.profiler.measure('resize',()=>this.resize());
     this.lastScene=scene;
@@ -665,6 +722,12 @@ export class WebGPURenderer implements Renderer{
       if(reset){this.localProbeMask=0;this.localProbeFace=0;}
       this.localProbeKey=reflectionProbe.key;this.localProbePosition=[...reflectionProbe.position];
     }
+    // The sixth face enables local radiance on the following frame. Invalidate
+    // TAA at that boundary so an incomplete-probe image cannot linger in glass
+    // and clearcoat for several frames. The same rule covers moving probe resets.
+    const probeComplete=!!reflectionProbe&&this.localProbeMask===63;
+    if(probeComplete!==this.probeComplete)this.historyValid=false;
+    this.probeComplete=probeComplete;
     this.profiler.measure('materials',()=>{if(structureChanged)this.queueMaterialLoads(scene);});
     this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);
     const currentLightGridKey=lightGridCauseKey(this.lastLights,camera.position);
@@ -677,7 +740,7 @@ export class WebGPURenderer implements Renderer{
       this.profiler.addUpload(grid.lights.byteLength+grid.cells.byteLength,'light');return grid;
     });
     void lightGrid;
-    this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene,reflectionProbe?.position??scene.camera.target));
+    this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene,reflectionProbe?.position??scene.camera.target,!!reflectionProbe));
     const frameState=this.profiler.measure('frame',()=>{
       const cameraUp=camera.up??[0,1,0],cameraView=lookAt(camera.position,camera.target,cameraUp),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
       projection[8]=projection[8]!-2*jitter[0]/this.canvas.width;projection[9]=projection[9]!+2*jitter[1]/this.canvas.height;
@@ -792,7 +855,7 @@ export class WebGPURenderer implements Renderer{
       const settings=scene.spec.rendering??{},sky=settings.skyColor??[.26,.34,.47];
       for(let index=0;index<probeFaces.length;index++){
         const capture=probeFaces[index]!,timing=index===0?this.profiler.timestampWrites('probe'):undefined;
-        const view=this.gpu.localProbeMap.createView({dimension:'2d',baseArrayLayer:capture.face,arrayLayerCount:1});
+        const view=this.gpu.localProbeMap.createView({dimension:'2d',baseArrayLayer:capture.face,arrayLayerCount:1,baseMipLevel:0,mipLevelCount:1});
         const pass=encoder.beginRenderPass({label:`render.probe.${capture.face}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view,clearValue:{r:sky[0]*1.05,g:sky[1]*1.05,b:sky[2]*1.05,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.gpu.localProbeDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
         pass.setBindGroup(1,this.gpu.probeFrameBinds[capture.face]);
         for(const [culled,group] of partitionByCull(capture.entities)){pass.setPipeline(culled?this.gpu.probeCulled:this.gpu.probeDouble);for(const entity of group)this.draw(pass,entity,false);}
@@ -800,6 +863,16 @@ export class WebGPURenderer implements Renderer{
       }
     });
     if(probeFaces.length){for(const capture of probeFaces)this.localProbeMask|=1<<capture.face;this.localProbeFace=(probeFaces.at(-1)!.face+1)%6;}
+    // Refilter after a complete capture cycle, never per material or slider value.
+    // Source view is level 0 only; attachment views are disjoint roughness levels.
+    if(probeFaces.length&&this.localProbeMask===63&&(!this.probeComplete||this.localProbeFace===0)){
+      this.profiler.measure('encode.probe',()=>{
+        for(const {view,bind} of this.gpu.probeFilterPasses){
+          const pass=encoder.beginRenderPass({label:'render.probe.filter',colorAttachments:[{view,loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
+          pass.setPipeline(this.gpu.probeFilter);pass.setBindGroup(0,bind);pass.draw(3);pass.end();
+        }
+      });
+    }
     this.profiler.measure('encode.reflection',()=>{
       const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
       reflect.setBindGroup(1,this.gpu.reflectionBind);const query=this.profiler.beginOcclusion(reflect,'reflection');
@@ -907,11 +980,16 @@ export class WebGPURenderer implements Renderer{
     buffer.unmap();buffer.destroy();return result;
   }
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();}
-  inspect():RenderStats{const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,errors:[...this.errors],...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};}
+  inspect():RenderStats{
+    const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);
+    return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10+this.gpu.probeFilterPasses.length,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,errors:[...this.errors],
+      ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
+      ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};
+  }
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
-  dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
-  private updateEnvironmentMap(scene:Scene,origin:Vec3):void{
+  dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
+  private updateEnvironmentMap(scene:Scene,origin:Vec3,localProbeOwnsNearby=false):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
     if(this.environmentScene!==scene){this.environmentScene=scene;this.environmentKey='';}
     const measured=settings.environmentRadiance;
@@ -941,10 +1019,13 @@ export class WebGPURenderer implements Renderer{
     // Check the authoritative causes before building the expensive scene-radiance proxy.
     // Nearby dynamic detail is handled by SSR/local probes; the distant fallback only
     // needs rebuilding when its world-space origin, atmosphere or scene identity changes.
+    const environmentOriginKey=localProbeOwnsNearby?[0,0,0]:[
+      Math.round(origin[0]*2)/2,Math.round(origin[1]*2)/2,Math.round(origin[2]*2)/2,
+    ];
     const causeKey=[
       scene.entities.size,scene.spec.seed??0,
       ...sun,...sunColor,...sky,
-      Math.round(origin[0]*2)/2,Math.round(origin[1]*2)/2,Math.round(origin[2]*2)/2,
+      ...environmentOriginKey,
       Math.round(intensity*20)/20,
       Math.round(scene.environment.sunlight*20)/20,
       Math.round(scene.environment.humidity*20)/20,
@@ -953,6 +1034,14 @@ export class WebGPURenderer implements Renderer{
       Math.round(scene.environment.snowfallRate*1e6)/1e6,
     ].map(value=>Number(value).toFixed(3)).join(':');
     if(causeKey===this.environmentKey)return;
+    if(this.profiler.enabled&&this.environmentKey){
+      const causes=['entities','seed','sun.x','sun.y','sun.z','sunColor.r','sunColor.g','sunColor.b','sky.r','sky.g','sky.b','origin.x','origin.y','origin.z','intensity','sunlight','humidity','temperature','moisture','snowfall'];
+      const before=this.environmentKey.split(':'),after=causeKey.split(':');
+      for(let index=0;index<causes.length;index++)if(before[index]!==after[index]){
+        const cause=causes[index]!;
+        this.environmentInvalidations.set(cause,(this.environmentInvalidations.get(cause)??0)+1);
+      }
+    }
     const radiance=buildSceneRadianceProbe(scene,origin,128);
     const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
     const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
@@ -960,6 +1049,7 @@ export class WebGPURenderer implements Renderer{
     const levels=9;
     for(let mip=0;mip<levels;mip++){
       const size=Math.max(1,256>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
+      const tiles=roughness<.74?buildDirectionalProxyTiles(proxies,size,cubeDirection):null;
       for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
         const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
         const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
@@ -969,7 +1059,8 @@ export class WebGPURenderer implements Renderer{
         base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
         if(roughness<.74){
           let pr=0,pg=0,pb=0,total=0;
-          for(const proxy of proxies){
+          const candidates=tiles!.buckets[(face*tiles!.side+(y>>4))*tiles!.side+(x>>4)]!;
+          for(const proxy of candidates){
             const alignment=V3.dot(dir,proxy.dir);if(alignment<=proxy.threshold)continue;
             const q=(alignment-proxy.threshold)/Math.max(1e-5,1-proxy.threshold),sharp=mix(5.5,1.2,roughness*roughness),weight=Math.pow(q,sharp)*proxy.strength*(1-roughness*.62);
             pr+=proxy.color[0]*weight;pg+=proxy.color[1]*weight;pb+=proxy.color[2]*weight;total+=weight;
@@ -1038,7 +1129,16 @@ export class WebGPURenderer implements Renderer{
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
   private collect(scene:Scene):boolean{
     if(this.collectedScene===scene&&this.collectedRevision===scene.renderStructureRevision)return false;
+    const sceneChanged=this.collectedScene!==scene,revisionChanged=this.collectedRevision!==scene.renderStructureRevision;
     this.collectedScene=scene;this.collectedRevision=scene.renderStructureRevision;
+    if(sceneChanged||revisionChanged){
+      // Hot render-lab scene swaps deliberately retain GPU pipelines/mesh buffers,
+      // but every scene-owned uniform/probe/culling cache must observe the new causes.
+      for(const object of this.objects.values())object.uniformReady=false;
+      this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbePosition=null;
+      this.shadowValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
+      this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
+    }
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);

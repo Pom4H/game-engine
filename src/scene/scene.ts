@@ -15,7 +15,7 @@ import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
 import type {EngineEvent} from './events.js';
-import type {BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
+import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
 import {SceneSystemRuntime} from './system-runtime.js';
@@ -68,6 +68,8 @@ export class Scene {
   tick=0;
   /** Changes only when renderer-owned structure/geometry membership changes, not on ordinary motion. */
   renderStructureRevision=0;
+  /** Shader-only authoring changes; does not invalidate geometry, shadows, probes or culling. */
+  appearanceRevision=0;
   camera:CameraSpec;
   private eventSequence=0;
   private readonly eventQueue:EngineEvent[]=[];
@@ -203,6 +205,29 @@ export class Scene {
   }
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
   setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
+  patchAppearance(patch:AppearancePatch):void{
+    let appearanceChanged=false,structureChanged=false;
+    if(patch.rendering){
+      const keys=Object.keys(patch.rendering);
+      this.spec.rendering={...(this.spec.rendering??{}),...structuredClone(patch.rendering)};
+      // Exposure/fog are frame uniforms. Lighting/probe/shadow authoring may
+      // change scene-derived caches and therefore takes the structural path.
+      if(keys.some(key=>key!=='exposure'&&key!=='fogDensity'))structureChanged=true;
+      else appearanceChanged=true;
+    }
+    for(const rule of patch.materials??[]){
+      for(const entity of this.entities.values()){
+        if(rule.id!==undefined&&entity.id!==rule.id)continue;
+        if(rule.idPrefix!==undefined&&!entity.id.startsWith(rule.idPrefix))continue;
+        if(rule.treatment!==undefined&&entity.material.treatment!==rule.treatment)continue;
+        if(rule.set.color&&rule.set.color[3]!==entity.material.color[3])throw new TypeError('appearance patch cannot change material alpha/classification');
+        (entity as {material:RuntimeMaterial}).material=Object.freeze({...entity.material,...structuredClone(rule.set)});
+        appearanceChanged=true;
+      }
+    }
+    if(structureChanged)this.renderStructureRevision++;
+    if(appearanceChanged)this.appearanceRevision++;
+  }
 
   private syncSurfaceVisuals():void{
     const keep=new Set<string>();

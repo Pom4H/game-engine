@@ -1,12 +1,9 @@
 {
   "name": "@rom4/game-engine",
   "version": "0.1.0",
-  "description": "URL-native deterministic WebGPU simulation engine with zero runtime dependencies.",
+  "description": "Deterministic simulation core with WebGPU rendering, physics, vehicles, audio and character controls.",
   "type": "module",
   "private": true,
-  "bin": {
-    "game-engine": "./dist/cli.js"
-  },
   "exports": {
     ".": "./dist/index.js",
     "./browser": "./dist/browser.js"
@@ -19,10 +16,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
-    "ci": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs",
-    "causality:check": "node tools/causality/check.mjs HEAD",
-    "causality:history": "node tools/causality/history.mjs",
-    "reality:history": "node tools/causality/history.mjs --experiment stanford-orb"
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

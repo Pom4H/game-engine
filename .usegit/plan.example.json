@@ -1,8 +1,0 @@
-{
-  "intent": "example",
-  "hypothesis": "implementation and its test form one causal unit",
-  "changes": [
-    { "path": "src/example", "causalUnit": "unit-a", "lines": 40 },
-    { "path": "test/example", "causalUnit": "unit-a", "lines": 25 }
-  ]
-}

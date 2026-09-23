@@ -65,8 +65,8 @@ export function buildSmoothSubdivisionPlan(mesh:TriangleMesh,creaseDegrees=35,ma
   });
 }
 
-function midpoint(mesh:TriangleMesh,a:number,b:number,smooth:boolean,maxDisplacementM:number):{p:[number,number,number];n:[number,number,number]}{
-  const pa=position(mesh,a),pb=position(mesh,b),na=normal(mesh,a),nb=normal(mesh,b);
+function midpoint(mesh:TriangleMesh,a:number,b:number,smooth:boolean,maxDisplacementM:number,na:readonly[number,number,number]=normal(mesh,a),nb:readonly[number,number,number]=normal(mesh,b)):{p:[number,number,number];n:[number,number,number]}{
+  const pa=position(mesh,a),pb=position(mesh,b);
   const linear:[number,number,number]=[(pa[0]+pb[0])*.5,(pa[1]+pb[1])*.5,(pa[2]+pb[2])*.5];
   const n=normalize([na[0]+nb[0],na[1]+nb[1],na[2]+nb[2]]);
   if(!smooth)return{p:linear,n};
@@ -95,10 +95,38 @@ export function subdivideSmoothTriangleMesh(mesh:TriangleMesh,plan=buildSmoothSu
   if(plan.sourceTriangles!==triangles||plan.smoothEdges.length!==triangles)throw new RangeError('Subdivision plan does not match mesh topology');
   const positions:number[]=[],normals:number[]=[],indices:number[]=[];
   const add=(p:readonly[number,number,number],n:readonly[number,number,number])=>{const index=positions.length/3;positions.push(...p);normals.push(...n);return index;};
+  const edgeKey=(a:number,b:number)=>{const ka=positionKey(mesh,a),kb=positionKey(mesh,b);return ka<kb?ka+'|'+kb:kb+'|'+ka;};
+
+  // A smooth geometric edge must produce one canonical curved midpoint for every
+  // triangle that references it. Imported meshes often duplicate vertices per
+  // triangle with slightly different normals; evaluating PN curvature separately
+  // would split the shared edge by micrometres and turn long automotive highlights
+  // into visible polygon bands.
+  type EndpointAverage={sum:[number,number,number];count:number};
+  type SharedEdge={endpoints:Map<string,EndpointAverage>;midpoint?:{p:[number,number,number];n:[number,number,number]}};
+  const sharedEdges=new Map<string,SharedEdge>();
+  const collect=(a:number,b:number)=>{
+    const key=edgeKey(a,b);let edge=sharedEdges.get(key);if(!edge){edge={endpoints:new Map()};sharedEdges.set(key,edge);}
+    for(const index of [a,b]){const pk=positionKey(mesh,index),n=normal(mesh,index),found=edge.endpoints.get(pk);if(found){found.sum[0]+=n[0];found.sum[1]+=n[1];found.sum[2]+=n[2];found.count++;}else edge.endpoints.set(pk,{sum:[n[0],n[1],n[2]],count:1});}
+  };
+  for(let triangle=0;triangle<triangles;triangle++){
+    const i=triangle*3,a=mesh.indices[i]!,b=mesh.indices[i+1]!,c=mesh.indices[i+2]!,smooth=plan.smoothEdges[triangle]!;
+    if(smooth[0])collect(a,b);if(smooth[1])collect(b,c);if(smooth[2])collect(c,a);
+  }
+  const sharedMidpoint=(a:number,b:number)=>{
+    const key=edgeKey(a,b),edge=sharedEdges.get(key);
+    if(!edge)return midpoint(mesh,a,b,true,plan.maxDisplacementM);
+    if(edge.midpoint)return edge.midpoint;
+    const averaged=(index:number):[number,number,number]=>{const value=edge.endpoints.get(positionKey(mesh,index));return value?normalize(value.sum):normal(mesh,index) as [number,number,number];};
+    return edge.midpoint=midpoint(mesh,a,b,true,plan.maxDisplacementM,averaged(a),averaged(b));
+  };
+
   for(let triangle=0;triangle<triangles;triangle++){
     const i=triangle*3,a=mesh.indices[i]!,b=mesh.indices[i+1]!,c=mesh.indices[i+2]!,smooth=plan.smoothEdges[triangle]!;
     const pa=position(mesh,a),pb=position(mesh,b),pc=position(mesh,c),na=normal(mesh,a),nb=normal(mesh,b),nc=normal(mesh,c);
-    const ab=midpoint(mesh,a,b,smooth[0],plan.maxDisplacementM),bc=midpoint(mesh,b,c,smooth[1],plan.maxDisplacementM),ca=midpoint(mesh,c,a,smooth[2],plan.maxDisplacementM);
+    const ab=smooth[0]?sharedMidpoint(a,b):midpoint(mesh,a,b,false,plan.maxDisplacementM);
+    const bc=smooth[1]?sharedMidpoint(b,c):midpoint(mesh,b,c,false,plan.maxDisplacementM);
+    const ca=smooth[2]?sharedMidpoint(c,a):midpoint(mesh,c,a,false,plan.maxDisplacementM);
     const base=positions.length/3;
     add(pa,na);add(pb,nb);add(pc,nc);add(ab.p,ab.n);add(bc.p,bc.n);add(ca.p,ca.n);
     indices.push(base,base+3,base+5, base+3,base+1,base+4, base+5,base+4,base+2, base+3,base+4,base+5);

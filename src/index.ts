@@ -1,5 +1,5 @@
 export {FixedClock} from './core/fixed-clock.js';
-export {SpatialHash,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
+export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
 export {EngineKernel,ModuleScheduler,ENGINE_PHASES,SIMULATION_TIERS,type EngineModule,type EnginePhase,type ModuleDescription,type ModuleFrame,type SimulationTier} from './core/kernel.js';
 export {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type PhysicsStats,type RigidBodyOptions} from './physics/world.js';
 export {PlasticDeformationSystem,type DeformableBodySpec,type SceneDeformationSpec,type PlasticDent} from './physics/deformation.js';
@@ -8,10 +8,7 @@ export {bindStructuralSkin,applyStructuralSkin,type StructuralSkinBinding} from 
 export {StructuralStaticContactSolver,type StructuralStaticBox,type StructuralContactStats} from './physics/structural-contact.js';
 export {AdaptiveStructuralController,type ReducedRigidState,type StructuralActivationPolicy,type StructuralActivation,type AdaptiveStructuralStats} from './physics/adaptive-structure.js';
 export {generatePassengerVehicle,generatePassengerWheelParts,passengerPartMaterial,passengerStructuralDefinition,interpolateSection,validatePassengerVehicleProfile,type PassengerVehicleProfile,type PassengerSideSection,type PassengerRoofSection,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole} from './vehicles/passenger.js';
-export {geometryRepresentationReport,type CausalGeometryRepresentation,type GeometryResidualLayer,type GeometryResidualKind,type GeometryFidelity,type GeometryRepresentationReport} from './geometry/representation.js';
-export {compareTriangleSurfaces,type TriangleSurface,type SurfaceDistanceReport} from './geometry/compare.js';
 export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,M3_VEHICLE_DEFINITION,generateM3Vehicle,generateM3ProceduralWheelVehicle,m3PartMaterial,m3PartBody,m3StructuralBlueprint,type M3StructuralBlueprint} from './vehicles/m3.js';
-export {M3_CAUSAL_GEOMETRY_REPRESENTATION,m3GeometryRepresentationReport} from './vehicles/m3-representation.js';
 export {M3_HIGH_FIDELITY_SHELL,M3_SHELL_FIDELITY,m3HighFidelityBody} from './vehicles/m3-shell.js';
 export {M3_DETAILED_BODY_PARAMETERS,generateDetailedThreeBoxBody,generateDetailedThreeBoxGlass,generateM3DetailedProceduralBody,generateM3DetailedProceduralGlass,type DetailedThreeBoxParameters,type M3DetailedBodyParameters} from './vehicles/m3-detailed-procedural.js';
 export {M3_FBX_PARTS_FIDELITY,M3_FBX_PART_SOURCES,m3FbxParts,type M3FbxPartSource} from './vehicles/m3-fbx-parts.js';
@@ -25,7 +22,6 @@ export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from
 export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,Primitive,MaterialSpec,CameraSpec,RenderingSpec,ReflectionProbeSpec,Color} from './scene/types.js';
 export {primitiveMesh,primitiveKey,type MeshData} from './procedural/mesh.js';
 export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/cloth.js';
-export {demoScene} from './demo.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
 
 export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
@@ -38,8 +34,6 @@ export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type Pla
 export {resolveEnvironment,resolveEnvironmentAt,environmentTimeScale,type EnvironmentSpec,type EnvironmentState,type EnvironmentClockSpec,type WeatherKeyframe,type Precipitation,type Snowfall} from './environment/types.js';
 export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTreatment,type MaterialSurfaceSpec,type SurfaceState} from './materials/surface.js';
 export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironmentState,type SurfaceEnvironmentField,type SurfaceContactWork} from './environment/surface-state.js';
-/** @deprecated Prefer SurfaceEnvironmentSystem and generic surface state types. */
-export {WinterSystem,type WinterSurfaceState,type WinterBodyState} from './environment/winter.js';
 
 export type {SceneModule,SceneModuleContext,SceneCommand} from './scene/modules.js';
 export {SceneSystemRuntime,type SystemFrame,type SystemHandler} from './scene/system-runtime.js';
@@ -54,6 +48,8 @@ export type {WalkerSpec,HumanoidJoint,HumanoidBinding,HumanoidPose,RigTransform,
 export {SurfaceContactSystem,surfaceContains,surfaceElevation} from './environment/surface-contacts.js';
 export type {SurfaceSample,SurfaceFootprint,WheelSurfaceContact,SnowContactSurfaceOptions} from './environment/surface-contacts.js';
 export {SnowSurface,snowRelief} from './environment/snow-surface.js';
+export {WalkWorld,walkerInput,type WalkBox} from './runtime/walker-motion.js';
+export {WalkerControls,type WalkerControlOptions} from './runtime/walker-controls.js';
 
 export type {SurfaceTextureSpec} from './scene/types.js';
 

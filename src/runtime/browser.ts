@@ -1,11 +1,11 @@
-import {WalkerControls} from './walker-controls.js';
+import {WalkerControls,type WalkerControlOptions} from './walker-controls.js';
 import {V3} from '../math.js';
 import type {FootstepSound} from '../audio/footsteps.js';
 import {ProceduralAudio,type AmbientAudioState} from '../audio/browser.js';
 import {FixedClock} from '../core/fixed-clock.js';
 import {Scene} from '../scene/scene.js';
 import type {EngineEvent} from '../scene/events.js';
-import type {CameraSpec,SceneSpec} from '../scene/types.js';
+import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
@@ -17,7 +17,7 @@ export class BrowserRuntime {
   readonly tickRate:number;
   readonly stepSeconds:number;
   readonly audio:ProceduralAudio|null;
-  private readonly initial:SceneSpec;
+  private initial:SceneSpec;
   private controls:WalkerControls|null=null;
   private readonly clock:FixedClock;
   private running=false;
@@ -34,7 +34,7 @@ export class BrowserRuntime {
     try{
       runtime=new BrowserRuntime(canvas,scene,renderer,options);
       if(options.resolution)renderer.setResolution(...options.resolution);
-      if(options.controlledWalker){runtime.scene.animation.driveWalker(options.controlledWalker,0,scene.animation?.walkers?.find(w=>w.id===options.controlledWalker)?.heading??0);runtime.controls=new WalkerControls(canvas,options.controlledWalker);runtime.scene.animation.step(0,runtime.scene.entities,p=>runtime!.scene.contacts.sample(p));}
+      if(options.controlledWalker)runtime.controlWalker(options.controlledWalker);
       await renderer.prepareMaterials(runtime.scene);runtime.render();if(options.autoplay!==false)runtime.resume();
       // Publish only a usable runtime. Failed loading must not replace another
       // live runtime's bridge or retain its own GPU/audio/gesture resources.
@@ -44,21 +44,40 @@ export class BrowserRuntime {
   }
 
   pause():void{this.running=false;if(this.raf)cancelAnimationFrame(this.raf);this.raf=0;}
+  controlWalker(id:string,options:WalkerControlOptions={}):WalkerControls{
+    if(this.disposed)throw new Error('Runtime is disposed');
+    const heading=this.scene.spec.animation?.walkers?.find(w=>w.id===id)?.heading;
+    if(heading===undefined)throw new TypeError(`Unknown walker: ${id}`);
+    this.scene.animation.driveWalker(id,0,heading);
+    this.scene.animation.step(this.scene.time,this.scene.entities,p=>this.scene.contacts.sample(p));
+    this.controls?.dispose();
+    this.controls=new WalkerControls(this.canvas,id,options);
+    return this.controls;
+  }
   async activateAudio():Promise<boolean>{const ready=this.audio?await this.audio.unlock():false;if(ready)this.audio?.updateAmbient(this.ambientAudioState());return ready;}
   resume():void{if(this.disposed||this.running)return;this.running=true;this.clock.reset(performance.now());this.raf=requestAnimationFrame(this.frame);}
   step(count=1){
     if(!Number.isSafeInteger(count)||count<1||count>1_000_000)throw new RangeError('step count must be an integer in [1, 1000000]');
-    const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];for(let i=0;i<count;i++){this.controls?.tick(this.scene);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());}
+    const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];for(let i=0;i<count;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());}
     this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   seek(seconds:number){
     if(!Number.isFinite(seconds)||seconds<0||seconds>86_400)throw new RangeError('seek time must be within one day');
     this.pause();if(seconds+1e-9<this.scene.time)this.reset();
     const target=Math.round(seconds*this.tickRate),remaining=Math.max(0,target-this.scene.tick);
-    for(let i=0;i<remaining;i++){this.controls?.tick(this.scene);this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
+    for(let i=0;i<remaining;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   reset():void{this.scene=new Scene(this.initial);this.render();}
+  async replaceScene(scene:SceneSpec):Promise<void>{
+    this.pause();
+    this.controls?.dispose();this.controls=null;
+    this.initial=structuredClone(scene);
+    this.scene=new Scene(this.initial);
+    await this.renderer.prepareMaterials?.(this.scene);
+    this.render();await this.renderer.flush();
+  }
+  patchAppearance(patch:AppearancePatch):void{this.pause();this.scene.patchAppearance(patch);}
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
   render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
   async drain():Promise<void>{await this.renderer.flush();}
@@ -95,11 +114,11 @@ export class BrowserRuntime {
     };
   }
 
-  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
+  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),replaceScene:scene=>this.replaceScene(scene),patchAppearance:patch=>this.patchAppearance(patch),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),inspect:()=>this.inspect()};}
   private frame=(now:number)=>{
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
-    this.clock.advance(now,()=>{this.controls?.tick(this.scene);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());});
+    this.clock.advance(now,()=>{this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());});
     this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();this.raf=requestAnimationFrame(this.frame);
   };
 }

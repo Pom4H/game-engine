@@ -39,10 +39,10 @@ function boxMesh():MeshData{
     [[1,-1,1, -1,-1,1, -1,1,1, 1,1,1],[0,0,1]],
     [[-1,-1,-1, 1,-1,-1, 1,1,-1, -1,1,-1],[0,0,-1]],
   ];
-  for(const [verts,normal] of faces){const base=p.length/3;for(let v=0;v<4;v++){p.push(verts[v*3]!*.5,verts[v*3+1]!*.5,verts[v*3+2]!*.5);n.push(...normal);}i.push(base,base+1,base+2,base,base+2,base+3);}
+  for(const [verts,normal] of faces){const base=p.length/3;for(let v=0;v<4;v++){p.push(verts[v*3]!*.5,verts[v*3+1]!*.5,verts[v*3+2]!*.5);n.push(...normal);}i.push(base,base+2,base+1,base,base+3,base+2);}
   return pack(p,n,i);
 }
-function planeMesh():MeshData{return pack([-0.5,0,-0.5, 0.5,0,-0.5, 0.5,0,0.5, -0.5,0,0.5],[0,1,0, 0,1,0, 0,1,0, 0,1,0],[0,1,2,0,2,3]);}
+function planeMesh():MeshData{return pack([-0.5,0,-0.5, 0.5,0,-0.5, 0.5,0,0.5, -0.5,0,0.5],[0,1,0, 0,1,0, 0,1,0, 0,1,0],[0,2,1,0,3,2]);}
 function shardMesh(axis:0|1|2,skew:number):MeshData{
   const s=Math.max(-.45,Math.min(.45,skew));
   const base=[
@@ -77,14 +77,14 @@ function polygonPrismMesh(axis:0|1|2,points:readonly (readonly [number,number])[
 function sphereMesh(segments:number):MeshData{
   const p:number[]=[],n:number[]=[],idx:number[]=[],rings=Math.max(4,Math.floor(segments/2));
   for(let y=0;y<=rings;y++){const v=y/rings,theta=v*Math.PI,s=Math.sin(theta),c=Math.cos(theta);for(let x=0;x<=segments;x++){const u=x/segments,phi=u*Math.PI*2,nx=Math.cos(phi)*s,nz=Math.sin(phi)*s;p.push(nx*.5,c*.5,nz*.5);n.push(nx,c,nz);}}
-  const row=segments+1;for(let y=0;y<rings;y++)for(let x=0;x<segments;x++){const a=y*row+x,b=a+row;idx.push(a,b,a+1,b,b+1,a+1);}
+  const row=segments+1;for(let y=0;y<rings;y++)for(let x=0;x<segments;x++){const a=y*row+x,b=a+row;idx.push(a,a+1,b,b,a+1,b+1);}
   return pack(p,n,idx);
 }
 
 function cylinderMesh(radius:number,height:number,top:number,segments:number):MeshData{
  const p:number[]=[],n:number[]=[],indices:number[]=[],slope=(radius-top)/height;
  for(let k=0;k<=segments;k++){const angle=k/segments*Math.PI*2,x=Math.cos(angle),z=Math.sin(angle),l=Math.hypot(1,slope);p.push(x*radius,-height/2,z*radius,x*top,height/2,z*top);n.push(x/l,slope/l,z/l,x/l,slope/l,z/l);if(k<segments){const a=k*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);}}
- for(const [y,r,sign] of [[-height/2,radius,-1],[height/2,top,1]]){const center=p.length/3;p.push(0,y!,0);n.push(0,sign!,0);for(let k=0;k<=segments;k++){const a=k/segments*Math.PI*2;p.push(Math.cos(a)*r!,y!,Math.sin(a)*r!);n.push(0,sign!,0);if(k<segments)indices.push(center,center+k+1,center+k+2);}}
+ for(const [y,r,sign] of [[-height/2,radius,-1],[height/2,top,1]]){const center=p.length/3;p.push(0,y!,0);n.push(0,sign!,0);for(let k=0;k<=segments;k++){const a=k/segments*Math.PI*2;p.push(Math.cos(a)*r!,y!,Math.sin(a)*r!);n.push(0,sign!,0);if(k<segments){if(sign!<0)indices.push(center,center+k+1,center+k+2);else indices.push(center,center+k+2,center+k+1);}}}
  return pack(p,n,indices);
 }
 /** Coherent bank silhouette with a smooth footprint, not a stack of ellipsoids. */

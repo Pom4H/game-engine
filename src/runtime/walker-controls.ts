@@ -1,32 +1,55 @@
 import type {Scene} from '../scene/scene.js';
-/** Browser input and follow camera. The animation system owns movement/contacts. */
+import {WalkWorld,walkerInput} from './walker-motion.js';
+export interface WalkerControlOptions {world?:WalkWorld;onExit?:()=>void;view?:{yaw:number;pitch:number}}
+/** Device input produces a velocity; AnimationSystem remains the sole integrator. */
 export class WalkerControls {
- private readonly keys=new Set<string>();private yaw=0;private elevation=1.65;private heading=0;private initialized=false;
- constructor(private readonly canvas:HTMLCanvasElement,private readonly walker:string){
-  canvas.tabIndex=0;canvas.addEventListener('keydown',this.down);canvas.addEventListener('keyup',this.up);canvas.addEventListener('click',this.lock);
-  window.addEventListener('keyup',this.up);window.addEventListener('blur',this.clear);document.addEventListener('pointerlockchange',this.unlock);document.addEventListener('mousemove',this.mouse);
+ private readonly keys=new Set<string>();private yaw=0;private pitch=-.13;private initialized=false;private active=false;
+ private readonly pointers=new Map<number,{x:number;y:number;lastX:number;lastY:number;move:boolean}>();private stick=[0,0];
+ constructor(private readonly canvas:HTMLCanvasElement,private readonly walker:string,private readonly options:WalkerControlOptions={}){
+  if(options.view){this.yaw=options.view.yaw;this.pitch=options.view.pitch;this.initialized=true;}
+  this.active=!options.onExit;canvas.addEventListener('click',this.click);
+  canvas.tabIndex=0;canvas.addEventListener('keydown',this.down);canvas.addEventListener('pointerdown',this.pointerDown);canvas.addEventListener('pointermove',this.pointerMove);
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,this.pointerUp);
+  window.addEventListener('keyup',this.up);window.addEventListener('blur',this.exit);document.addEventListener('visibilitychange',this.visibility);document.addEventListener('pointerlockchange',this.unlock);document.addEventListener('mousemove',this.mouse);
  }
- private down=(e:KeyboardEvent)=>{if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)){e.preventDefault();this.keys.add(e.code);}};
+ setActive(active:boolean):void{this.active=active;if(!active){this.clear();if(document.pointerLockElement===this.canvas)document.exitPointerLock();}}
+ enter(lock=true):void{this.active=true;this.canvas.focus({preventScroll:true});if(lock){try{const pending=this.canvas.requestPointerLock?.();pending?.catch(()=>{});}catch{/* Drag-look fallback remains available. */}}}
+ inspect(){return{active:this.active,yaw:this.yaw,pitch:this.pitch,pressed:[...this.keys]};}
+ private click=()=>{if(!this.options.onExit)this.enter();};
+ private down=(e:KeyboardEvent)=>{if(e.code==='Escape'){this.exit();return;}if(this.active&&['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)){e.preventDefault();this.keys.add(e.code);}};
  private up=(e:KeyboardEvent)=>{this.keys.delete(e.code);};
- private clear=()=>{this.keys.clear();};
- private unlock=()=>{if(document.pointerLockElement!==this.canvas)this.clear();};
- private lock=()=>{this.canvas.focus();const pending=this.canvas.requestPointerLock?.();pending?.catch(()=>{});};
- private mouse=(e:MouseEvent)=>{if(document.pointerLockElement===this.canvas){this.yaw-=e.movementX*.003;this.elevation=Math.max(.5,Math.min(4,this.elevation+e.movementY*.008));}};
- tick(scene:Scene):void{
-  const pose=scene.animation.pose(this.walker);if(!this.initialized&&pose){this.yaw=this.heading=pose.heading;this.initialized=true;}
+ private clear=()=>{this.keys.clear();this.pointers.clear();this.stick=[0,0];};
+ private exit=()=>{if(!this.active)return;this.setActive(false);this.options.onExit?.();};
+ private visibility=()=>{if(document.hidden)this.exit();};
+ private unlock=()=>{if(document.pointerLockElement!==this.canvas)this.exit();};
+ private look=(dx:number,dy:number)=>{this.yaw-=dx*.003;this.pitch=Math.max(-.8,Math.min(.5,this.pitch-dy*.003));};
+ private mouse=(e:MouseEvent)=>{if(this.active&&document.pointerLockElement===this.canvas)this.look(e.movementX,e.movementY);};
+ private pointerDown=(e:PointerEvent)=>{if(!this.active)return;this.canvas.focus({preventScroll:true});if(e.pointerType==='mouse'&&document.pointerLockElement===this.canvas)return;this.canvas.setPointerCapture(e.pointerId);const rect=this.canvas.getBoundingClientRect();this.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,move:e.pointerType!=='mouse'&&e.clientX<rect.left+rect.width*.5});};
+ private pointerMove=(e:PointerEvent)=>{const p=this.pointers.get(e.pointerId);if(!p||!this.active)return;if(p.move)this.stick=[Math.max(-1,Math.min(1,(p.y-e.clientY)/60)),Math.max(-1,Math.min(1,(e.clientX-p.x)/60))];else this.look(e.clientX-p.lastX,e.clientY-p.lastY);p.lastX=e.clientX;p.lastY=e.clientY;};
+ private pointerUp=(e:Event)=>{const id=(e as PointerEvent).pointerId;if(this.pointers.get(id)?.move)this.stick=[0,0];this.pointers.delete(id);};
+ tick(scene:Scene,dt=1/60):void{
+  const pose=scene.animation.pose(this.walker);if(!pose)return;if(!this.initialized){this.yaw=pose.heading;this.initialized=true;}
   const pressed=(...codes:string[])=>codes.some(code=>this.keys.has(code));
-  const forward=Number(pressed('KeyW','ArrowUp'))-Number(pressed('KeyS','ArrowDown')),right=Number(pressed('KeyD','ArrowRight'))-Number(pressed('KeyA','ArrowLeft'));
-  const moving=forward!==0||right!==0;
-  if(moving)this.heading=this.yaw-Math.atan2(right,forward);
-  scene.animation.driveWalker(this.walker,moving?(pressed('ShiftLeft','ShiftRight')?2.8:1.25):0,this.heading);
+  const forward=this.active?Number(pressed('KeyW','ArrowUp'))-Number(pressed('KeyS','ArrowDown'))+this.stick[0]!:0;
+  const right=this.active?Number(pressed('KeyD','ArrowRight'))-Number(pressed('KeyA','ArrowLeft'))+this.stick[1]!:0;
+  const input=walkerInput(forward,right,this.yaw,pressed('ShiftLeft','ShiftRight')||Math.hypot(...this.stick)>.85);
+  let {speed,heading}=input;
+  if(speed&&this.options.world&&dt>0){
+   const from=pose.position,to=this.options.world.move(from,Math.cos(heading)*speed*dt,-Math.sin(heading)*speed*dt);
+   const dx=to[0]-from[0],dz=to[2]-from[2];speed=Math.hypot(dx,dz)/dt;if(speed>1e-7)heading=Math.atan2(-dz,dx);else speed=0;
+  }
+  scene.animation.driveWalker(this.walker,speed,heading);
  }
  camera(scene:Scene):void{
-  const pose=scene.animation.pose(this.walker);if(!pose)return;const p=pose.position,c=Math.cos(this.yaw),s=Math.sin(this.yaw);
-  scene.setCamera({position:[p[0]-c*4.1,p[1]+this.elevation,p[2]+s*4.1],target:[p[0]+c*.65,p[1]+1.15,p[2]-s*.65],fov:55});
+  const pose=scene.animation.pose(this.walker);if(!pose)return;if(!this.initialized){this.yaw=pose.heading;this.initialized=true;}
+  const p=pose.position,target:[number,number,number]=[p[0],p[1]+1.25,p[2]],r=3.6*Math.cos(this.pitch);
+  const desired:[number,number,number]=[p[0]-Math.cos(this.yaw)*r,Math.max(p[1]+.3,target[1]-Math.sin(this.pitch)*3.6),p[2]+Math.sin(this.yaw)*r];
+  const position=this.options.world?.camera(target,desired)??desired;
+  scene.setCamera({...scene.camera,position,target});
  }
  dispose():void{
-  this.clear();this.canvas.removeEventListener('keydown',this.down);this.canvas.removeEventListener('keyup',this.up);this.canvas.removeEventListener('click',this.lock);
-  window.removeEventListener('keyup',this.up);window.removeEventListener('blur',this.clear);document.removeEventListener('pointerlockchange',this.unlock);document.removeEventListener('mousemove',this.mouse);
-  if(document.pointerLockElement===this.canvas)document.exitPointerLock();
+  this.setActive(false);this.canvas.removeEventListener('click',this.click);this.canvas.removeEventListener('keydown',this.down);this.canvas.removeEventListener('pointerdown',this.pointerDown);this.canvas.removeEventListener('pointermove',this.pointerMove);
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])this.canvas.removeEventListener(event,this.pointerUp);
+  window.removeEventListener('keyup',this.up);window.removeEventListener('blur',this.exit);document.removeEventListener('visibilitychange',this.visibility);document.removeEventListener('pointerlockchange',this.unlock);document.removeEventListener('mousemove',this.mouse);
  }
 }

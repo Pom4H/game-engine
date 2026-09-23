@@ -115,6 +115,16 @@ export interface RenderingSpec {
   /** Measured HDR environment. When present it replaces the synthetic distant-radiance proxy. */
   environmentRadiance?:EnvironmentRadianceSpec;
 }
+export interface AppearanceMaterialPatch {
+  readonly id?:string;
+  readonly idPrefix?:string;
+  readonly treatment?:MaterialTreatment;
+  readonly set:Readonly<Pick<MaterialSpec,'color'|'roughness'|'metalness'|'clearcoat'|'clearcoatRoughness'>>;
+}
+export interface AppearancePatch {
+  readonly rendering?:Partial<RenderingSpec>;
+  readonly materials?:readonly AppearanceMaterialPatch[];
+}
 export interface SceneAnimationSpec {
   readonly walkers?:readonly WalkerSpec[];
   readonly vehicles?:readonly VehicleMotionSpec[];
