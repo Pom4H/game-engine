@@ -1,9 +1,11 @@
+import {channelsOverlap,type CausalChannel} from './ontology.js';
+
 export type EnginePhase = 'input' | 'plan' | 'simulate' | 'commit' | 'publish';
 export const ENGINE_PHASES: readonly EnginePhase[] = ['input','plan','simulate','commit','publish'];
 export type SimulationTier = 'detailed' | 'active' | 'aggregate' | 'dormant';
 export const SIMULATION_TIERS: readonly SimulationTier[] = ['detailed','active','aggregate','dormant'];
 export interface ModuleFrame {readonly tick:number;readonly deltaSeconds:number;readonly tier:SimulationTier;readonly phase:EnginePhase}
-export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly string[];readonly writes:readonly string[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[];readonly context?:'none'}
+export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly CausalChannel[];readonly writes:readonly CausalChannel[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[];readonly context?:'none'}
 export interface EngineModule<Context,Command> extends ModuleDescription {readonly run:(context:Readonly<Context>,frame:ModuleFrame)=>readonly Command[]|void}
 export interface ModuleBatch {readonly phase:EnginePhase;readonly modules:readonly ModuleDescription[]}
 export interface KernelRunOptions<Context,Command>{
@@ -16,7 +18,7 @@ export interface KernelRunOptions<Context,Command>{
 }
 interface Registered {description:ModuleDescription;periodTicks:number}
 const phaseIndex=(phase:EnginePhase)=>ENGINE_PHASES.indexOf(phase);
-const intersects=(a:readonly string[],b:readonly string[])=>a.length>0&&b.length>0&&(a.includes('*')||b.includes('*')||a.some(key=>b.includes(key)));
+const intersects=(a:readonly CausalChannel[],b:readonly CausalChannel[])=>a.length>0&&b.length>0&&a.some(left=>b.some(right=>channelsOverlap(left,right)));
 function conflicts(a:ModuleDescription,b:ModuleDescription){return intersects(a.writes,b.reads)||intersects(a.writes,b.writes)||intersects(b.writes,a.reads);}
 function stable(description:ModuleDescription):ModuleDescription{return Object.freeze({...description,reads:Object.freeze([...description.reads]),writes:Object.freeze([...description.writes]),...(description.after?{after:Object.freeze([...description.after])}:{}),...(description.tiers?{tiers:Object.freeze([...description.tiers])}:{})});}
 /** Stable topological planning. Same-phase hazards require an explicit after path;
