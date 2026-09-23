@@ -1,13 +1,9 @@
 import type {Vec3} from '../math.js';
 import {V3} from '../math.js';
-import {StructuralBody,type BakedStructuralState} from './structure.js';
+import {StructuralBody,type BakedStructuralState,type StructureProjection} from './structure.js';
 
-export interface ReducedRigidState {
-  readonly mass:number;
-  readonly centerOfMass:Vec3;
-  readonly linearVelocity:Vec3;
-  readonly angularVelocity:Vec3;
-}
+export type ReducedRigidState=StructureProjection;
+export type StructureRepresentation='reduced'|'structural';
 
 export interface StructuralActivationPolicy {
   /** Normal impact energy per vehicle kilogram required to leave the cheap rigid/reduced tier. */
@@ -48,7 +44,8 @@ export interface AdaptiveStructuralStats {
 export class AdaptiveStructuralController {
   readonly thresholdJ:number;
   readonly impulseRadiusM:number;
-  private modeValue:'reduced'|'structural'='reduced';
+  private modeValue:StructureRepresentation='reduced';
+  private reducedState:StructureProjection|undefined;
   private activations=0;
   private rejectedContacts=0;
 
@@ -67,7 +64,16 @@ export class AdaptiveStructuralController {
     this.impulseRadiusM=Math.max(.03,Math.min(4,policy.impulseRadiusM??.55));
   }
 
-  get mode():'reduced'|'structural'{return this.modeValue;}
+  get mode():StructureRepresentation{return this.modeValue;}
+  get representation():StructureRepresentation{return this.modeValue;}
+
+  /** Canonical reduced projection currently owned by this structure.
+   * While structural simulation is active the projection is derived from nodes;
+   * while reduced it is the last accepted/baked handoff. */
+  projection():StructureProjection|undefined{
+    if(this.modeValue==='structural')return this.structure.projectReduced();
+    return this.reducedState;
+  }
 
   shouldActivate(normalEnergyJ:number):boolean{
     return Number.isFinite(normalEnergyJ)&&normalEnergyJ>=this.thresholdJ;
@@ -84,6 +90,7 @@ export class AdaptiveStructuralController {
     if(!rigid.centerOfMass.every(Number.isFinite)||!rigid.linearVelocity.every(Number.isFinite)||!rigid.angularVelocity.every(Number.isFinite))throw new TypeError('Rigid handoff must be finite');
     if(!cause.point.every(Number.isFinite)||!cause.impulse.every(Number.isFinite))throw new TypeError('Structural activation cause must be finite');
 
+    this.reducedState=freezeProjection(rigid);
     this.structure.activateFromRigid(rigid.centerOfMass,rigid.linearVelocity,rigid.angularVelocity);
     this.structure.applyImpulse(cause.point,cause.impulse,this.impulseRadiusM);
     this.modeValue='structural';
@@ -99,7 +106,7 @@ export class AdaptiveStructuralController {
     if(this.modeValue==='reduced')return;
     this.structure.step(dt,gravity);
     const baked=this.structure.takeBakedState();
-    if(baked)this.modeValue='reduced';
+    if(baked){this.reducedState=freezeProjection(baked);this.modeValue='reduced';}
     return baked;
   }
 
@@ -109,6 +116,7 @@ export class AdaptiveStructuralController {
     const baked=this.structure.bake();
     // bake() also queues the automatic handoff; consume that duplicate here.
     this.structure.takeBakedState();
+    this.reducedState=freezeProjection(baked);
     this.modeValue='reduced';
     return baked;
   }
@@ -141,4 +149,14 @@ export class AdaptiveStructuralController {
       plasticWorkJ:structural.plasticWorkJ,
     };
   }
+}
+
+
+function freezeProjection(value:StructureProjection):StructureProjection{
+  return Object.freeze({
+    mass:value.mass,
+    centerOfMass:Object.freeze([...value.centerOfMass]) as Vec3,
+    linearVelocity:Object.freeze([...value.linearVelocity]) as Vec3,
+    angularVelocity:Object.freeze([...value.angularVelocity]) as Vec3,
+  });
 }
