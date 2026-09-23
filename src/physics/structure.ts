@@ -48,7 +48,16 @@ export interface StructuralDefinition {
   readonly internalDamping?:number;
 }
 
-export interface BakedStructuralState {
+/** Canonical reduced projection of a structure.
+ * Rigid/reduced and nodal representations exchange exactly this state. */
+export interface StructureProjection {
+  readonly mass:number;
+  readonly centerOfMass:Vec3;
+  readonly linearVelocity:Vec3;
+  readonly angularVelocity:Vec3;
+}
+
+export interface BakedStructuralState extends StructureProjection {
   readonly positions:Float64Array;
   readonly broken:Uint8Array;
   readonly plasticWorkJ:number;
@@ -349,7 +358,7 @@ export class StructuralBody {
    * Elastic energy is intentionally discarded only at this explicit LOD boundary.
    */
   bake():BakedStructuralState{
-    const rigid=this.rigidState();
+    const rigid=this.projectReduced();
     for(let i=0;i<this.constraintCount;i++){
       if(this.broken[i])continue;
       const thermalPower=this.kind[i]===DISTANCE?this.thermalScaleValue:this.thermalScaleValue**3;
@@ -380,6 +389,18 @@ export class StructuralBody {
     const out=new Float64Array(this.position.length);
     for(let i=0;i<out.length;i++)out[i]=this.position[i]!-this.originalPosition[i]!;
     return out;
+  }
+
+  /** Project the current nodal representation onto the conserved rigid state.
+   * This is the only structural -> reduced kinematic handoff contract. */
+  projectReduced():StructureProjection{
+    const rigid=this.rigidState();
+    return Object.freeze({
+      mass:this.totalMass,
+      centerOfMass:Object.freeze([...rigid.centerOfMass]) as Vec3,
+      linearVelocity:Object.freeze([...rigid.linearVelocity]) as Vec3,
+      angularVelocity:Object.freeze([...rigid.angularVelocity]) as Vec3,
+    });
   }
 
   linearMomentum():MutableVec3{
