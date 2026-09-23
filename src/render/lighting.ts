@@ -192,7 +192,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  }
  // Screen-space radiance for smooth materials, with explicit misses. Wet ground
  // uses its geometry reflection pass; rough/offscreen surfaces keep sky fallback.
- let coating=textureLoad(reflectance,pixel,0);let rough=normalSample.a;
+ let coating=textureLoad(reflectance,pixel,0);let rough=clamp(coating.a*2.0-1.0,0.0,1.0);
  // Only smooth reflective pixels pay the neighbourhood-depth and ray-march cost.
  if(d<.99999&&rough<.55&&coating.a>.5&&length(wn)>.92){
   let coverage=depthSpan(pixel);

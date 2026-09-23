@@ -1,0 +1,55 @@
+{
+  "id": "EXP-CLEARCOAT-REFLECTION-CONSISTENCY",
+  "question": "Can coat roughness blur the actual street reflection without switching it off or retaining an unfiltered bright edge?",
+  "hypothesis": "GGX-filtered local capture, coherent coat energy/normal filtering, and a separate SSR roughness remove the contradictory parameter paths without changing user scene presets.",
+  "status": "running",
+  "conditions": {
+    "base": "349dc5dae355c4cf48abd1b0e18c53cb3385d608",
+    "scope": [
+      "src/render/webgpu.ts",
+      "src/render/lighting.ts",
+      "src/render/probe-filter.ts",
+      "test/clearcoat.test.mjs"
+    ],
+    "reference": "User door screenshot, 2026-09-23; visual acceptance pending",
+    "authority": "Only the user can approve appearance; compilation and invariants are not visual approval.",
+    "usegitContext": "Local pinned npx context attempted, blocked by unavailable DNS. Pinned context ran successfully on NUCBOX_M6ULTRA before patching; all work queues/leases/conflicts were empty. No work lease is replaced."
+  },
+  "acceptance": [
+    "Roughness filters the local cubemap at all values, including 0.16 and above.",
+    "Coat receives a normal-variance floor and base energy attenuation.",
+    "SSR uses coating roughness; non-coat AO continues using base roughness.",
+    "Type/build checks, scoped contracts and actual WebGPU smoke pass.",
+    "User verifies the same door and accepts the visual result."
+  ],
+  "evidence": [
+    {
+      "run": "https://github.com/Pom4H/game-engine/actions/runs/35857434427",
+      "result": "patch preflight failed before any source write: Windows CRLF did not match a multiline LF anchor",
+      "decision": "Normalize source line endings after verifying the Git blob; renderer was not executed in this attempt."
+    },
+    {
+      "run": "https://github.com/Pom4H/game-engine/actions/runs/35857905898",
+      "result": "typecheck rejected undeclared profiler lane encode.probe.filter",
+      "decision": "Attribute convolution to the existing typed encode.probe lane. Preserve zero-coat point-light fast path."
+    },
+    {
+      "run": "https://github.com/Pom4H/game-engine/actions/runs/35858130483",
+      "checks": [
+        "typecheck",
+        "build",
+        "clearcoat/look-dev/core/irradiance/material contracts",
+        "radiometric WebGPU oracle",
+        "live look-dev WebGPU smoke"
+      ],
+      "result": "passed",
+      "visualAcceptance": "pending user inspection"
+    }
+  ],
+  "limitations": [
+    "One local probe is still a spatial approximation, not ray tracing or parallax-correct multi-probe reflections.",
+    "32-tap GGX convolution is a bounded real-time approximation.",
+    "The existing SSR compositing approximation is retained; user acceptance and GPU performance must be checked, not inferred."
+  ],
+  "decision": "Repair material parameter semantics; do not change exposure, lighting, geometry, saved presets or the user-approved baseline."
+}
