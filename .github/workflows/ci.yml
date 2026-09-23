@@ -70,10 +70,10 @@ jobs:
           node -e "const fs=require('fs'),r=JSON.parse(fs.readFileSync('artifacts/winter-hero/report.json','utf8')),p=r.results.find(x=>x.id==='production')??r.results[0];fs.appendFileSync(process.env.GITHUB_OUTPUT,'hero_gap='+p.heroGap+'\n'+'best_gap='+r.best.heroGap+'\n'+'best_id='+r.best.id+'\n'+'mean_hot_ms='+r.meanHotCaptureMilliseconds+'\n')"
       - name: Preview Winter Hero without artifact storage
         run: node tools/render-lab/log-preview.mjs artifacts/winter-hero
-      - name: Compare batched road grit in a separate GPU session
+      - name: Compare residual road snow in a separate GPU session
         run: |
-          node dist/cli.js render-batch tools/render-lab/road-detail-sweep.mjs --reference tools/reality/winter-hero/reference.jpg --width 480 --height 360 --frames 8 --keep 1 --out-dir artifacts/road-detail
-          node tools/render-lab/log-preview.mjs artifacts/road-detail
+          node dist/cli.js render-batch tools/render-lab/road-snow-sweep.mjs --reference tools/reality/winter-hero/reference.jpg --width 480 --height 360 --frames 8 --keep 1 --out-dir artifacts/road-snow
+          node tools/render-lab/log-preview.mjs artifacts/road-snow
       - uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
@@ -138,25 +138,37 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Check Stanford scope
+        id: scope
+        run: node tools/ci/stanford-scope.mjs
       - uses: oven-sh/setup-bun@v2
+        if: steps.scope.outputs.run == 'true'
         with:
           bun-version: 1.4.2
       - name: Install
+        if: steps.scope.outputs.run == 'true'
         run: bun install --frozen-lockfile
       - name: Build reality render path
+        if: steps.scope.outputs.run == 'true'
         run: bun run build
       - name: Geometry oracle preflight
+        if: steps.scope.outputs.run == 'true'
         run: node --test test/render-subdivision.test.mjs
       - name: Persistent reality cache path
+        if: steps.scope.outputs.run == 'true'
         run: echo REALITY_DATA_ROOT=%USERPROFILE%\.cache\game-engine-reality\stanford-orb>>%GITHUB_ENV%
       - name: Bootstrap Stanford-ORB Car
+        if: steps.scope.outputs.run == 'true'
         run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\reality\stanford-orb\bootstrap.ps1
       - name: Prepare calibrated captures
+        if: steps.scope.outputs.run == 'true'
         run: node tools/reality/stanford-orb/prepare.mjs --out artifacts/reality/stanford-orb
       - name: RealityGap held-out
+        if: steps.scope.outputs.run == 'true'
         run: node tools/reality/stanford-orb/run.mjs --dir artifacts/reality/stanford-orb --baseline tools/reality/stanford-orb/baseline.json --assert
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: always() && steps.scope.outputs.run == 'true'
         continue-on-error: true
         with:
           name: reality-fast-${{ github.event.pull_request.head.sha }}
