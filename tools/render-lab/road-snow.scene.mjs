@@ -4,6 +4,7 @@ const scene=structuredClone(production);
 for(const entity of scene.entities){
   if(entity.id==='road'||entity.id==='hero-road-skin'){
     entity.environmental={...entity.environmental,snowDepthM:.055};
+    entity.material={...entity.material,color:[1,0,1,1]};
   }
 }
 console.log('ROAD_SNOW_AUTHORED',JSON.stringify(scene.entities.filter(entity=>entity.id==='road'||entity.id==='hero-road-skin').map(entity=>({id:entity.id,snowDepthM:entity.environmental?.snowDepthM,waterDepthM:entity.environmental?.waterDepthM}))));
