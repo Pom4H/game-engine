@@ -77,8 +77,7 @@ jobs:
       - name: Record moving winter hero from WebGPU
         run: |
           node dist/cli.js record tools/promo/moving-hero.scene.mjs --duration 2 --fps 12 --width 480 --height 360 --out artifacts/winter-hero/moving-hero.mp4
-          ffmpeg -y -v error -i artifacts/winter-hero/moving-hero.mp4 -c:v libx264 -preset veryfast -crf 32 -pix_fmt yuv420p -c:a aac -b:a 64k -movflags +faststart artifacts/winter-hero/moving-hero-preview.mp4
-          node tools/render-lab/log-video.mjs artifacts/winter-hero/moving-hero-preview.mp4
+          node tools/render-lab/log-video.mjs artifacts/winter-hero/moving-hero.mp4
       - uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
