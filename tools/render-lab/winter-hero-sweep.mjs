@@ -25,4 +25,10 @@ for(const shade of [.140,.180,.220,.260,.300,.360,.440]){
   captures.push({id:`road-${String(shade).replace('.','_')}`,time:0,frames:2,patch:{materials:[{id:'road',set:{color}},{id:'hero-road-skin',set:{color}}]},meta:{roadShade:shade}});
 }
 
+// Paint tone is tested on the same physically shaded car assembly.
+for(const shade of [.290,.340,.400,.460]){
+  const color=[shade,shade+.003,shade+.010,1];
+  captures.push({id:`paint-${String(shade).replace('.','_')}`,time:0,frames:2,patch:{materials:[{idPrefix:'passing-',treatment:'painted',set:{color}}]},meta:{paintShade:shade}});
+}
+
 export default {assetRoot:'../promo',base:'../promo/clear-day.scene.mjs',captures};
