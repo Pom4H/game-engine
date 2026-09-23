@@ -478,7 +478,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     let fres=.02+.96*pow(1.0-nv,5.0);
     color=mix(color,reflection,fres*max(waterCoverage,icePatch*.45));
   }
-  let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
+  // Temporary render-lab probe: expose snow sampled from the field (R),\n  // presence of a field (G), and the object's snow summary (B).\n  if(materialKind>4.5&&materialKind<5.5&&u.color.r>.9&&u.color.b>.9&&in.reflected==0u){\n    color=vec3<f32>(clamp(snowDepth/.055,0.0,1.0),select(0.0,1.0,hasField),clamp(u.surfacePhase.x/.055,0.0,1.0));\n  }\n  let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
   color=mix(color,f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027,clamp(fog,0.0,.96));
   let grazing=pow(1.0-nv,5.0);
   let clearcoatScreen=vec3<f32>(clearcoat*(.52+.36*grazing));

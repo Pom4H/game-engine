@@ -155,6 +155,7 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
         :(index===0?'':`await engine.replaceScene(${JSON.stringify(scene)});`);
       await browser.evaluate(`const engine=window.__GAME_ENGINE__;${transition}engine.seek(${JSON.stringify(time)});await engine.flush();for(let i=0;i<${JSON.stringify(frames)};i++){engine.render();await engine.drain();}true`);
       await assertBrowserRenderer(browser);
+      if(capture.id==='road-magenta-0_055')console.log('ROAD_SNOW_RUNTIME',JSON.stringify(await browser.evaluate("return window.__GAME_ENGINE__.inspect().surfaces.surfaces.filter(s=>s.id==='road'||s.id==='hero-road-skin').map(s=>({id:s.id,snowDepthM:s.snowDepthM,trackMelt:s.trackMelt}))")));
       let heroGap:number|undefined,metricMilliseconds:number|undefined,candidatePng:Buffer|undefined;
       if(reference){
         const metricStart=performance.now();
