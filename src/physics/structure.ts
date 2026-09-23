@@ -372,6 +372,7 @@ export class StructuralBody {
       positions:new Float64Array(this.position),
       broken:new Uint8Array(this.broken),
       plasticWorkJ:this.plasticWorkJ,
+      mass:rigid.mass,
       centerOfMass:Object.freeze([...rigid.centerOfMass]) as Vec3,
       linearVelocity:Object.freeze([...rigid.linearVelocity]) as Vec3,
       angularVelocity:Object.freeze([...rigid.angularVelocity]) as Vec3,
