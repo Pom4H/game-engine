@@ -17,6 +17,8 @@
     "A/B refuses mismatched views; imported data is validated; project-subpath asset URLs resolve.",
     "User manually approves the resulting appearance. Automated smoke does not count as that approval."
   ],
-  "evidence": ["7 local Node tests passed; module syntax checks passed. Real GPU integration and Pages deployment pending."],
-  "decision": "Replace the CI appearance-search loop with a human-controlled live tool; retain independent correctness/performance checks. No claim of restored promo quality until user review."
+  "evidence": [
+    {"run":"https://github.com/Pom4H/game-engine/actions/runs/35851712118","commit":"5792b7b8291945bfe3d32605c19dd35fd9ef70ec","runner":"NUCBOX_M6ULTRA","build":"passed","unitTests":"7/7 passed","realWebGPUControls":"passed","resolution":[1920,1080],"exposureMeanRGB":{"before":97.38891203703703,"after":51.69752314814815},"simulationTime":0.016666666666666666,"cameraUnchanged":true,"rendererErrors":[],"approvalPersistenceAndAB":"passed in disposable test profile; not user aesthetic approval","publication":"Blocked by GitHub Actions artifact storage quota after all rendering checks passed"}
+  ],
+  "decision": "Live controls are verified on the real renderer. Publish the checked app to a dedicated gh-pages/look-dev directory without artifact storage or force pushes. Do not change Pages administration settings automatically. Human visual acceptance remains pending."
 }

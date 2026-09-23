@@ -9,14 +9,13 @@ on:
       - tools/build-pages.ts
       - test/look-dev.test.mjs
 permissions:
-  contents: read
+  contents: write
   pages: write
-  id-token: write
 concurrency:
   group: github-pages
   cancel-in-progress: true
 jobs:
-  build:
+  build-and-publish:
     runs-on: self-hosted
     timeout-minutes: 10
     defaults:
@@ -33,24 +32,7 @@ jobs:
       - run: bun tools/build-pages.ts
       - name: Check live controls on the real WebGPU renderer
         run: node tools/look-dev/smoke.mjs
-      - uses: actions/configure-pages@v5
-      - name: Expose Git Bash and tar
-        run: |
-          echo C:\Program Files\Git\bin>>%GITHUB_PATH%
-          echo C:\Program Files\Git\usr\bin>>%GITHUB_PATH%
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
-          path: _site
-  deploy:
-    needs: build
-    runs-on: self-hosted
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Publish verified app without Actions artifact storage
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node tools/look-dev/publish.mjs

@@ -1,9 +1,7 @@
 # Live look development
 
 Run `bun run build`, then `node tools/look-dev/serve.mjs` and open the printed
-localhost URL. The Pages build publishes this same application; it checks out the
-triggering commit, not the historical `feat/engine-foundation` branch. The full
-commit is visible in the UI and in every preset.
+localhost URL. The full commit is visible in the UI and every preset.
 
 This is the ordinary `BrowserRuntime` / `WebGPURenderer`, the original
 `tools/promo/city.mjs` street and its native weather/contact/animation systems.
@@ -34,12 +32,23 @@ promise bit-identical images between GPU/driver/browser versions.
 A local MP4/image can be opened as a visual reference; the file is never uploaded.
 It is explicitly labelled as reference, not a capture of the running engine.
 
-The small Pages workflow performs a real-GPU smoke check: an exposure slider must
-change measured canvas luminance without advancing simulation or moving the
-camera. It also checks approval persistence, A/B and renderer errors. The page
-includes `look-dev-proof.png` and `look-dev-proof.json` from that check. This is an
-integration check, **not** an aesthetic score, game FPS gate or user approval.
-Stanford and performance tests remain independent; they do not choose this look.
+## Publication and verification
+
+The Pages workflow builds the triggering source commit, not the historical
+foundation branch. A real-GPU smoke check verifies that moving the actual exposure
+slider changes canvas luminance without advancing simulation or moving the camera.
+It also checks approval persistence, A/B and renderer errors. `look-dev-proof.png`
+and `look-dev-proof.json` contain the actual capture and machine-readable evidence.
+This is an integration check, not an aesthetic score, FPS gate or user approval.
+
+Actions artifact storage is not required. The verified static app is committed to
+`gh-pages/look-dev/`, preserving history and unrelated published files. No force
+pushes, removal of prior evidence, billing changes or automated Pages configuration
+changes. When Pages is configured for `gh-pages / (root)`, the publisher explicitly
+requests a Pages build and verifies the served manifest revision. If the site is
+configured differently, the app remains in that branch and the workflow reports
+that the owner must select Settings > Pages > Deploy from a branch > gh-pages /
+(root). Its administration settings are never silently changed.
 
 ## Preserve quality after approval
 
@@ -49,3 +58,4 @@ that fixed scene/pose/resolution and show before/after images. Do not replace th
 baseline automatically because a metric improved. Missing geometry, materials or
 lighting effects must be repaired in code; slider tuning cannot recover a missing
 rendering capability. No baseline is user-approved by this implementation itself.
+Stanford and performance tests remain independent; they do not choose this look.
