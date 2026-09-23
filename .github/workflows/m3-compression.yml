@@ -12,7 +12,7 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import re,base64,gzip,brotli
+          import re,base64,gzip,lzma
           files=['src/vehicles/m3-shell.ts','src/vehicles/m3-fbx-parts.ts']
           chunks=[]
           for path in files:
@@ -23,5 +23,10 @@ jobs:
           raw=b''.join(chunks)
           print('M3_RAW_BYTES='+str(len(raw)))
           print('M3_GZIP9_BYTES='+str(len(gzip.compress(raw,compresslevel=9))))
-          print('M3_BROTLI11_BYTES='+str(len(brotli.compress(raw,quality=11))))
+          open('/tmp/m3.raw','wb').write(raw)
+          PY
+          BROTLI=$(brotli -q 11 -c /tmp/m3.raw | wc -c)
+          echo M3_BROTLI11_BYTES=$BROTLI
+          exit 0
+          #
           PY
