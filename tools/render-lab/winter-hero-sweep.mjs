@@ -4,7 +4,8 @@ const exposure=[.96,1.02];
 
 // Capture the unpatched production scene first. The report's hero_gap output
 // must describe what users see, rather than the first experimental material.
-const captures=[{id:'production',time:0,frames:2,patch:{}}];
+// One face per frame: six probe faces, then two frames with complete radiance.
+const captures=[{id:'production',time:0,frames:8,patch:{}}];
 for(const pr of paintRoughness)for(const cr of clearcoatRoughness)for(const ex of exposure){
   const id=`p${String(pr).replace('.','_')}-c${String(cr).replace('.','_')}-e${String(ex).replace('.','_')}`;
   captures.push({
@@ -22,5 +23,7 @@ for(const pr of paintRoughness)for(const cr of clearcoatRoughness)for(const ex o
 for(const shade of [.018,.026,.042,.055]){
   captures.push({id:`road-${String(shade).replace('.','_')}`,time:0,frames:2,patch:{materials:[{id:'hero-road-skin',set:{color:[shade,shade+.003,shade+.007,1]}}]},meta:{roadShade:shade}});
 }
+
+captures.push({id:'road-film-0_0014',file:'road-film.scene.mjs',time:0,frames:8,meta:{waterDepthM:.0014}});
 
 export default {assetRoot:'../promo',base:'../promo/clear-day.scene.mjs',captures};

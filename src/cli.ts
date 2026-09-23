@@ -159,6 +159,9 @@ async function renderBatch(manifestFile:string,options:RenderBatchOptions){
       if(reference){
         const metricStart=performance.now();
         candidatePng=await browser.screenshot();
+        // Keep the unmodified baseline even when every candidate beats it.
+        // The fast visual loop still needs to inspect what production renders.
+        if(index===0&&options.keep>0)await writeFile(join(options.outDir,`${capture.id}.png`),candidatePng);
         const dataUrl=`data:image/png;base64,${candidatePng.toString('base64')}`;
         if(index===0){
           const scores:{cached:number;legacy:number}=await browser.evaluate(`return await globalThis.__GE_HERO_METRIC__.screenshot(${JSON.stringify(dataUrl)},'compare')`);
