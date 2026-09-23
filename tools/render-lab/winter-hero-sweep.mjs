@@ -24,6 +24,4 @@ for(const shade of [.018,.026,.042,.055]){
   captures.push({id:`road-${String(shade).replace('.','_')}`,time:0,frames:2,patch:{materials:[{id:'hero-road-skin',set:{color:[shade,shade+.003,shade+.007,1]}}]},meta:{roadShade:shade}});
 }
 
-captures.push({id:'road-film-0_0014',file:'road-film.scene.mjs',time:0,frames:8,meta:{waterDepthM:.0014}});
-
 export default {assetRoot:'../promo',base:'../promo/clear-day.scene.mjs',captures};
