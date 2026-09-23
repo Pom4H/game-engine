@@ -20,8 +20,9 @@ for(const pr of paintRoughness)for(const cr of clearcoatRoughness)for(const ex o
 
 // Road-tone candidates test a large, visually important part of the reference
 // without changing the underlying surface physics or shader path.
-for(const shade of [.018,.026,.042,.055]){
-  captures.push({id:`road-${String(shade).replace('.','_')}`,time:0,frames:2,patch:{materials:[{id:'hero-road-skin',set:{color:[shade,shade+.003,shade+.007,1]}}]},meta:{roadShade:shade}});
+for(const shade of [.055,.080,.110,.140,.180,.220]){
+  const color=[shade,shade+.003,shade+.007,1];
+  captures.push({id:`road-${String(shade).replace('.','_')}`,time:0,frames:2,patch:{materials:[{id:'road',set:{color}},{id:'hero-road-skin',set:{color}}]},meta:{roadShade:shade}});
 }
 
 export default {assetRoot:'../promo',base:'../promo/clear-day.scene.mjs',captures};
