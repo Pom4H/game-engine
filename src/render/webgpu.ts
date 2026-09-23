@@ -72,7 +72,9 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  if(any(uv<vec2<f32>(0))||any(uv>vec2<f32>(1))||clip.z>1.0||clip.z<0.0){return 1.0;}
  var staticValue=0.0;var dynamicValue=2.0;
  let staticTexel=1.0/vec2<f32>(textureDimensions(shadowMap));
- let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233))+floor(f.up.w*60.0)*.618)*43758.5453)*6.2831853;
+ // Stable world-space PCF rotation: changing the pattern every frame makes
+ // contact shadows crawl even when both the light and the receiver are still.
+ let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233)))*43758.5453)*6.2831853;
  let cs=cos(phase);let sn=sin(phase);let rot=mat2x2<f32>(cs,-sn,sn,cs);
  let taps=array<vec2<f32>,2>(vec2<f32>(-.78,-.26),vec2<f32>(.80,.30));
  for(var i=0;i<2;i++){
