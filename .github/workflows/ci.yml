@@ -63,6 +63,8 @@ jobs:
         run: node --test test/core.test.mjs test/deformation.test.mjs test/irradiance.test.mjs test/material-textures.test.mjs test/packed-mesh.test.mjs test/vehicle-interaction.test.mjs
       - name: Radiometric pixel oracle
         run: node tools/render-oracle.mjs
+      - name: Verify complete Winter Hero reference image
+        run: ffmpeg -v error -err_detect explode -i tools/reality/winter-hero/reference.jpg -frames:v 1 -f null -
       - name: Winter Hero batch search
         id: hero
         run: |
