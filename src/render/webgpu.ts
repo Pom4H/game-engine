@@ -354,11 +354,13 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     // A damp film darkens stone but does not submerge the aggregate. Only
     // depressions filled by the local water column become smooth puddles.
     let fill=clamp(waterDepth/.006,0.0,1.0);
-    waterCoverage=smoothstep(.64,.80,hollows+fill*.50)*smoothstep(.00015,.0012,waterDepth);
+    // A damp film changes roughness before it fills every depression as a
+    // mirror. Scale subpixel puddle coverage by the available water volume.
+    waterCoverage=smoothstep(.64,.80,hollows+fill*.50)*smoothstep(.00015,.0012,waterDepth)*sqrt(fill);
     let aggregate=noise3(in.worldPos*37.0+seed);
     let mineralRoughness=clamp(max(roughness,.60)+(aggregate-.5)*.24,.50,.93);
-    roughness=mix(mineralRoughness,.11+noise3(in.worldPos*3.0)*.045,waterCoverage);
-    albedo*=mix(1.0,.62,waterCoverage);
+    roughness=mix(mineralRoughness,.21+noise3(in.worldPos*3.0)*.045,waterCoverage);
+    albedo*=mix(1.0,.75,waterCoverage);
     // Millimetres of water level out the gravel; its normals must not turn the
     // planar reflection into waves across the entire road.
     n=normalize(mix(n,geometricNormal,waterCoverage*.94));
@@ -466,7 +468,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   // Rough dry asphalt is an absorber, not a sky-colored mirror. Keep the broad
   // dielectric lobe subdued until actual water/ice state creates local coverage.
-  if(materialKind>4.5&&materialKind<5.5){color*=mix(.34,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
+  if(materialKind>4.5&&materialKind<5.5){color*=mix(.52,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
 
   if(f.params.x>.5){let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal);}}}
   color+=u.emission.rgb;
