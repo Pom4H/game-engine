@@ -21,7 +21,7 @@ spec.rendering={
   sunIntensity:3.35,
   skyColor:[.33,.50,.72],
   fogDensity:.00038,
-  exposure:1.02,
+  exposure:.96,
   shadowExtent:30,
 };
 spec.camera={
@@ -62,7 +62,7 @@ spec.entities.push(
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
-    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.125,metalness:.035};
+    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.13,metalness:.035,clearcoatRoughness:.055};
   }
   if(entity.id==='road'&&entity.environmental){
     entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00026};
