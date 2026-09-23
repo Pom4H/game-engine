@@ -70,6 +70,10 @@ jobs:
           node -e "const fs=require('fs'),r=JSON.parse(fs.readFileSync('artifacts/winter-hero/report.json','utf8')),p=r.results.find(x=>x.id==='production')??r.results[0];fs.appendFileSync(process.env.GITHUB_OUTPUT,'hero_gap='+p.heroGap+'\n'+'best_gap='+r.best.heroGap+'\n'+'best_id='+r.best.id+'\n'+'mean_hot_ms='+r.meanHotCaptureMilliseconds+'\n')"
       - name: Preview Winter Hero without artifact storage
         run: node tools/render-lab/log-preview.mjs artifacts/winter-hero
+      - name: Compare residual snow on corrected road mesh
+        run: |
+          node dist/cli.js render-batch tools/render-lab/residual-snow-sweep.mjs --reference tools/reality/winter-hero/reference.jpg --width 480 --height 360 --frames 8 --keep 3 --out-dir artifacts/residual-snow
+          node tools/render-lab/log-preview.mjs artifacts/residual-snow
       - uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
