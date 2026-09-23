@@ -1,0 +1,22 @@
+{
+  "id": "EXP-LOOK-DEV-HUMAN-AUTHORITY",
+  "question": "Can a user tune and preserve the winter street appearance without the per-adjustment CI loop?",
+  "hypothesis": "A direct interface to production appearance uniforms/materials with a fixed pose and explicit approved preset gives immediate feedback while preventing metrics from silently replacing the user's accepted look.",
+  "status": "running",
+  "conditions": {
+    "renderer": "ordinary BrowserRuntime/WebGPURenderer",
+    "scene": "tools/promo/city.mjs street, not hero",
+    "reference": "user-provided game-engine-winter-promo-1080p.mp4; current renderer equivalence not claimed",
+    "authority": "The user chooses visual appearance. Stanford checks controlled renderer correctness; performance checks measure cost. Neither authorizes a new appearance baseline.",
+    "scope": ["tools/look-dev", "tools/build-pages.ts", ".github/workflows/pages.yml", ".github/workflows/ci.yml", "test/look-dev.test.mjs"],
+    "usegitContext": "Pinned npx context command attempted before edits; blocked by container DNS EAI_AGAIN. AGENTS, open PR metadata, source and existing authority experiment were read through GitHub connector. No work lease was claimed or replaced."
+  },
+  "acceptance": [
+    "Appearance edits change the actual GPU canvas without changing simulation time/camera or submitting CI.",
+    "Approval requires an explicit user action and preserves a PNG, full appearance preset, camera, time, resolution and engine revision.",
+    "A/B refuses mismatched views; imported data is validated; project-subpath asset URLs resolve.",
+    "User manually approves the resulting appearance. Automated smoke does not count as that approval."
+  ],
+  "evidence": ["7 local Node tests passed; module syntax checks passed. Real GPU integration and Pages deployment pending."],
+  "decision": "Replace the CI appearance-search loop with a human-controlled live tool; retain independent correctness/performance checks. No claim of restored promo quality until user review."
+}

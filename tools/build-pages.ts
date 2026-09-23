@@ -1,26 +1,16 @@
-import {cp,mkdir,readFile,writeFile} from 'node:fs/promises';
+import {cp,mkdir,rm,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {spawn} from 'node:child_process';
-
+import {execFileSync} from 'node:child_process';
 const root=resolve(import.meta.dirname,'..'),site=resolve(root,'_site');
-await mkdir(site,{recursive:true});
-await cp(resolve(root,'pages/index.html'),resolve(site,'index.html'));
+await rm(site,{recursive:true,force:true});
+await mkdir(resolve(site,'tools/look-dev'),{recursive:true});
+await mkdir(resolve(site,'tools/promo/assets'),{recursive:true});
+await cp(resolve(root,'tools/look-dev/index.html'),resolve(site,'index.html'));
+await cp(resolve(root,'tools/look-dev/state.mjs'),resolve(site,'tools/look-dev/state.mjs'));
 await cp(resolve(root,'dist'),resolve(site,'dist'),{recursive:true});
-
-const scene=await loadScene(resolve(root,'examples/winter-street.ts'));
-await writeFile(resolve(site,'scene.json'),JSON.stringify(scene));
+for(const name of ['city','actors','laboratory','shots'])await cp(resolve(root,`tools/promo/${name}.mjs`),resolve(site,`tools/promo/${name}.mjs`));
+for(const name of ['snow-granular','brick-weathered'])await cp(resolve(root,`tools/promo/assets/${name}.png`),resolve(site,`tools/promo/assets/${name}.png`));
+const revision=process.env.GITHUB_SHA??execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+await writeFile(resolve(site,'manifest.json'),JSON.stringify({revision},null,2));
 await writeFile(resolve(site,'.nojekyll'),'');
-console.log(`Pages site: ${site}`);
-
-async function loadScene(path:string){
-  const script=`const m=await import(${JSON.stringify(new URL('file://'+path.replaceAll('\\\\','/')).href)});process.stdout.write(JSON.stringify(m.default??m.scene));`;
-  const stdout=await capture(process.execPath,['--experimental-strip-types','--no-warnings','--input-type=module','-e',script]);
-  return JSON.parse(stdout);
-}
-async function capture(binary:string,args:string[]):Promise<string>{
-  return await new Promise((resolve,reject)=>{
-    const child=spawn(binary,args,{cwd:root,stdio:['ignore','pipe','pipe']});
-    let out='',err='';child.stdout.on('data',c=>out+=c);child.stderr.on('data',c=>err+=c);
-    child.once('error',reject);child.once('exit',code=>code===0?resolve(out):reject(new Error(err||`exit ${code}`)));
-  });
-}
+console.log(`Live look-dev site: ${site}; engine ${revision}`);

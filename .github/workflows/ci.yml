@@ -78,37 +78,7 @@ jobs:
         run: |
           node dist/cli.js record tools/promo/moving-hero.scene.mjs --duration 2 --fps 12 --width 480 --height 360 --out artifacts/winter-hero/moving-hero.mp4
           node tools/render-lab/log-video.mjs artifacts/winter-hero/moving-hero.mp4
-      - name: Publish latest render to GitHub Pages branch
-        shell: powershell
-        run: |
-          $ErrorActionPreference = "Stop"
-          $publish = Join-Path $env:RUNNER_TEMP "game-engine-render-pages"
-          if (Test-Path $publish) { Remove-Item -Recurse -Force $publish }
-          New-Item -ItemType Directory -Force $publish | Out-Null
-          $production = Get-ChildItem artifacts/winter-hero -Filter "*production*.png" | Select-Object -First 1
-          if (-not $production) { $production = Get-ChildItem artifacts/winter-hero -Filter "*.png" | Select-Object -First 1 }
-          if (-not $production) { throw "Winter Hero PNG not found" }
-          Copy-Item $production.FullName (Join-Path $publish "latest.png")
-          Copy-Item artifacts/winter-hero/moving-hero.mp4 (Join-Path $publish "latest.mp4")
-          Copy-Item artifacts/winter-hero/report.json (Join-Path $publish "report.json")
-          @'
-          <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>game-engine — latest GPU render</title>
-          <style>html{color-scheme:dark;background:#0b0b0c;color:#eee;font:14px system-ui}body{margin:0;padding:24px;max-width:1200px}img,video{display:block;width:100%;height:auto;margin:16px 0;background:#111}a{color:#9cf}</style>
-          <h1>Latest GPU render</h1><p id="meta"></p><img src="latest.png"><video src="latest.mp4" controls autoplay muted loop playsinline></video>
-          <p><a href="report.json">render metrics</a></p>
-          <script>fetch('report.json').then(r=>r.json()).then(r=>{const p=r.results.find(x=>x.id==='production');document.querySelector('#meta').textContent='Winter Hero gap '+p.heroGap.toFixed(6)})</script>
-          '@ | Set-Content -Encoding utf8 (Join-Path $publish "index.html")
-          Push-Location $publish
-          git init
-          git checkout -b gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "render: publish ${{ github.event.pull_request.head.sha }}"
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git push --force origin gh-pages
-          Pop-Location
+      # Pages is owned by pages.yml. A metric run must not force-push over the live look-dev UI.
       - uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
@@ -117,7 +87,6 @@ jobs:
           path: artifacts/
           if-no-files-found: error
           retention-days: 3
-
 
   performance-1080:
     if: github.event_name == 'pull_request'

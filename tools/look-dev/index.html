@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Game Engine · Look Dev</title>
+<style>
+:root{color-scheme:dark;font:14px/1.45 system-ui,sans-serif;background:#111316;color:#e4e8ed}*{box-sizing:border-box}body{margin:0}button,select,input{font:inherit}button,select,.file{min-height:38px;border:1px solid #383e47;border-radius:5px;background:#21262d;color:inherit;padding:7px 10px;cursor:pointer}button:hover,.file:hover{background:#303742}button:disabled{opacity:.4;cursor:default}button.primary{background:#d9e6f3;color:#152233;border-color:transparent}button[aria-pressed=true]{border-color:#a8c9ea;color:#c3e0ff}header{min-height:60px;display:flex;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #30353d}header strong{white-space:nowrap}header small{color:#929aa6}header .spacer{flex:1}.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;height:calc(100dvh - 61px)}main{min-width:0;display:flex;flex-direction:column;position:relative;background:#090b0d}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:10px 12px}.stage{flex:1;min-height:0;display:grid;place-items:center;overflow:hidden}.frame{position:relative;width:100%;max-height:100%;aspect-ratio:16/9;overflow:hidden}canvas{display:block;width:100%;height:100%;touch-action:none;object-fit:contain}.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}.badge{position:absolute;left:14px;top:14px;background:#10151dd9;padding:5px 10px;border-radius:4px;pointer-events:none}.bottom{display:flex;gap:10px;align-items:center;padding:12px;color:#99a4b2;font-size:12px}.bottom input{flex:1;min-width:30px}aside{overflow:auto;border-left:1px solid #30353d;padding:14px 16px;background:#181c21}details{border-bottom:1px solid #30353d;padding:12px 0}summary{cursor:pointer;font-weight:600;margin-bottom:10px}label.control{display:grid;grid-template-columns:1fr 70px;gap:5px;align-items:center;margin:13px 0}label.control span{color:#c1cad5}label.control input[type=range]{grid-column:1/3;width:100%;margin:0;accent-color:#a8c9ea}input[type=number]{width:70px;background:#11161c;color:inherit;border:1px solid #3d4652;border-radius:3px;padding:4px}input[type=color]{width:46px;height:30px;border:0;background:transparent;justify-self:end}input[type=file]{display:none}.hint{color:#929eac;font-size:12px;margin:10px 0}#status{white-space:pre-wrap;padding:0 12px 8px;color:#b9c8d9;font-size:12px}#status.error{color:#ffb2a8}#revision{font-family:ui-monospace,monospace;font-size:11px}#viewhint{margin-right:auto}#materials{width:100%}#panel-toggle{display:none}.reference{border:1px solid #515d6d;background:#0a0d11;color:inherit;max-width:95vw;max-height:95dvh;padding:12px}.reference::backdrop{background:#000b}.reference video,.reference img{display:block;max-width:85vw;max-height:77dvh;margin-top:10px}.hidden,[hidden]{display:none!important}:focus-visible{outline:2px solid #bddfff;outline-offset:3px}body.busy aside{pointer-events:none;opacity:.6}
+@media(max-width:850px){header{flex-wrap:wrap;gap:8px}header small{display:none}#panel-toggle{display:block}.layout{display:flex;flex-direction:column;height:calc(100dvh - 61px)}main{flex:1;min-height:240px}aside{max-height:42dvh;border-left:0;border-top:1px solid #30353d}body.panel-hidden aside{display:none}.toolbar{padding:6px;gap:4px}button,select,.file{min-height:40px;font-size:12px}header strong{font-size:13px}.bottom{padding:6px}.hint{font-size:11px}}
+</style></head><body>
+<header><strong>GAME ENGINE <span style="color:#8e9cab;font-weight:400">/ LOOK DEV</span></strong><small id="revision">Загрузка версии…</small><span class="spacer"></span><button id="panel-toggle">Настройки</button><button id="pin" class="primary" disabled>Зафиксировать A</button><button id="export" disabled>Пресет JSON</button><button id="png" disabled>Кадр PNG</button></header>
+<div class="layout"><main><div class="toolbar"><select id="scene" aria-label="Сцена"><option value="street">Зимняя улица из промо</option><option value="courtyard">Вечерний свет</option></select><select id="shot" aria-label="Ракурс"><option value="wide">Общий план</option><option value="arrival">Начало промо</option><option value="m3">Машина</option><option value="footsteps">Снег у ног</option></select><button id="compare" aria-pressed="false" disabled>A / B</button><button id="restore" disabled>Вернуть A</button><button id="reset">Сбросить</button><label class="file">Импорт JSON<input id="import" type="file" accept=".json,application/json"></label><label class="file">Видео-референс<input id="reference-file" type="file" accept="video/*,image/*"></label></div>
+<div class="stage" id="stage"><div class="frame" id="frame"><canvas id="world" aria-label="Живая сцена движка"></canvas><img id="baseline" hidden alt="Зафиксированный кадр A"><span class="badge" id="badge">Загрузка сцены…</span></div></div><div class="bottom"><button id="play" disabled>▶</button><label for="time">Время</label><input id="time" type="range" min="0" max="48" step="0.0166666667" value="0"><output id="time-value">0.00 с</output><span id="metrics">GPU —</span></div><div id="status" role="status" aria-live="polite">Подготовка WebGPU…</div></main>
+<aside><p class="hint">Перетаскивание — поворот камеры. Shift + перетаскивание — сдвиг. Колесо или щипок — расстояние. Изменение настройки ставит симуляцию на паузу.</p><details open><summary>Свет и атмосфера</summary><div id="light-controls"></div></details><details open><summary>Материалы</summary><select id="materials" aria-label="Группа материалов"><option value="asphalt">Асфальт</option><option value="snow">Снег</option><option value="paint">Кузов машины</option></select><p id="material-count" class="hint"></p><div id="material-controls"></div></details><details><summary>Камера и разрешение</summary><div id="camera-controls"></div><label class="control"><span>Рендер 16:9</span><select id="resolution"><option value="1280,720">1280 × 720</option><option value="1920,1080" selected>1920 × 1080</option><option value="2560,1440">2560 × 1440</option></select></label><p class="hint">Разрешение фиксировано. Автоматического снижения качества нет. GPU-время показано только при доступных timestamp queries; это не результат игрового FPS-теста.</p></details><p class="hint">A — кадр и параметры, которые зафиксировал ты. Черновик сохраняется отдельно и не заменяет A. Для передачи результата сохрани JSON и PNG.</p></aside></div>
+<dialog class="reference" id="reference-dialog"><button id="close-reference">Закрыть референс</button><p class="hint">Локальный файл. Это ориентир, не рендер текущей версии.</p><video id="reference-video" controls playsinline hidden></video><img id="reference-image" hidden alt="Загруженный пользователем референс"></dialog>
+<script type="module">
+import {SCHEMA, renderingControls, materialControls, validatePreset, angles, direction, colorHex, colorRGB, sameView, applyRendering, applyMaterial, relocateTextures} from './tools/look-dev/state.mjs';
+const $ = id => document.getElementById(id), clone = value => structuredClone(value);
+let runtime, makeCity, shots, revision = 'local-unversioned', state, pinned, baselineURL, referenceURL, playing = false, loading = true, showingA = false, controls = [], materialUI = [], cameraUI = [], saveTimer, lastMetrics = 0, lastStorageError = false, lastFrame = 0, accumulator = 0;
+const ready = () => runtime && !loading;
+function status(text, error = false) { $('status').textContent = text; $('status').classList.toggle('error', error); }
+function pause() { playing = false; accumulator = 0; runtime?.pause(); $('play').textContent = '▶'; }
+function current() { return validatePreset({...state, time: runtime.scene.time, camera: clone(runtime.scene.camera)}); }
+function remember(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { if (!lastStorageError) status('Хранилище браузера недоступно. Сохрани результат кнопкой «Пресет JSON».'); lastStorageError = true; return false; } }
+function read(key) { try { const raw = localStorage.getItem(key); return raw ? validatePreset(JSON.parse(raw)) : null; } catch { return null; } }
+async function savedFrame(value) {
+  if(!globalThis.indexedDB)return null;
+  return await new Promise((resolve,reject)=>{
+    const request=indexedDB.open('game-engine-look-dev',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('frames');
+    request.onerror=()=>reject(request.error);
+    request.onsuccess=()=>{
+      const db=request.result, tx=db.transaction('frames',value?'readwrite':'readonly'), store=tx.objectStore('frames');
+      const op=value?store.put(value,'approved'):store.get('approved');
+      let result=null;op.onsuccess=()=>{result=op.result;};
+      tx.oncomplete=()=>{db.close();resolve(value??result);};
+      tx.onerror=tx.onabort=()=>{db.close();reject(tx.error??new Error('Frame storage failed'));};
+    };
+  });
+}
+function dirty() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { if (ready()) remember('look-dev-draft-v1', current()); }, 400); showingA = false; $('baseline').hidden = true; $('compare').setAttribute('aria-pressed', 'false'); }
+function act(fn) { return async (...args) => { try { if (ready()) await fn(...args); } catch (error) { status(error.message ?? String(error), true); } }; }
+function control(parent, key, title, min, max, step, change) {
+  const label = document.createElement('label'); label.className = 'control';
+  const text = document.createElement('span'); text.textContent = title;
+  const number = document.createElement('input'), range = document.createElement('input'); number.type = 'number'; range.type = 'range';
+  for (const el of [number, range]) { el.min = min; el.max = max; el.step = step; el.setAttribute('aria-label', title); }
+  range.dataset.control = key; number.dataset.number = key;
+  let value = min;
+  const set = n => { value = n; range.value = n; number.value = Number(n.toFixed(5)); };
+  const update = act(event => { const n = Number(event.target.value); if (!event.target.value || !Number.isFinite(n) || n < min || n > max) { set(value); return; } pause(); change(n); set(n); dirty(); });
+  range.addEventListener('input', update); number.addEventListener('change', update);
+  label.append(text, number, range); parent.append(label); return {key, set, label};
+}
+function colorControl(parent, key, title, change) {
+  const label = document.createElement('label'); label.className = 'control'; const span = document.createElement('span'); span.textContent = title;
+  const input = document.createElement('input'); input.type = 'color'; input.dataset.control = key; input.setAttribute('aria-label', title);
+  input.addEventListener('input', act(() => { pause(); change(colorRGB(input.value)); dirty(); })); label.append(span, input); parent.append(label);
+  return {key, set: value => { input.value = colorHex(value); }};
+}
+function renderPatch(values) { applyRendering(runtime, state, values); }
+function materialTargets() {
+  return [...runtime.scene.entities.values()].filter(e => e.material.color[3] === 1 && ($('materials').value === 'asphalt' ? e.material.kind === 'asphalt' : $('materials').value === 'snow' ? e.material.kind === 'snow' : e.id.startsWith('passing-') && (/paint/i.test(e.id) || (e.material.clearcoat ?? 0) > 0)));
+}
+function materialPatch(values) { const ids = materialTargets().map(e => e.id); if (!ids.length) throw new Error('В этой группе нет доступных материалов'); applyMaterial(runtime, state, ids, values); }
+function refreshMaterials() {
+  const targets = materialTargets(), m = targets[0]?.material;
+  $('material-count').textContent = `${targets.length} объектов. Настройка меняет всю выбранную группу.`;
+  $('material-controls').hidden = !m;
+  if (m) for (const c of materialUI) c.set(c.key === 'color' ? m.color : (m[c.key] ?? (c.key === 'roughness' ? .8 : c.key === 'clearcoatRoughness' ? .1 : 0)));
+}
+function refresh() {
+  $('scene').value = state.scene; $('resolution').value = state.resolution.join(',');
+  const [azimuth, elevation] = angles(state.rendering.sunDirection);
+  for (const c of controls) c.set(c.key === 'azimuth' ? azimuth : c.key === 'elevation' ? elevation : state.rendering[c.key]);
+  for (const c of cameraUI) c.set(runtime.scene.camera[c.key] ?? (c.key === 'focusDistance' ? 20 : 0));
+  refreshMaterials(); $('shot').value = 'wide';
+}
+async function settle() { pause(); for (let i = 0; i < 16; i++) { runtime.render(); await runtime.drain(); } }
+async function load(preset) {
+  if (loading && runtime) return;
+  loading = true; pause(); document.body.classList.add('busy'); status('Подготовка сцены…');
+  try {
+    const sceneName = preset?.scene ?? $('scene').value;
+    const spec = relocateTextures(makeCity(sceneName).spec, new URL('./', location.href));
+    if (!runtime) {
+      const {BrowserRuntime} = await import('./dist/browser.js');
+      runtime = await BrowserRuntime.create($('world'), spec, {autoplay: false, audio: false, profiling: true, resolution: preset?.resolution ?? [1920,1080]});
+    } else await runtime.replaceScene(spec);
+    runtime.seek(preset?.time ?? 1 / 60);
+    state = preset ? clone(preset) : {schema: SCHEMA, engineRevision: revision, scene: sceneName, seed: spec.seed, time: runtime.scene.time, camera: clone(spec.camera), resolution: [1920,1080], rendering: clone(spec.rendering), materials: []};
+    state.engineRevision = revision; delete state.approvedAt;
+    validatePreset(state);
+    for (const rule of state.materials) if (!runtime.scene.entities.has(rule.id)) throw new Error(`Материал отсутствует в этой версии: ${rule.id}`);
+    runtime.patchAppearance({rendering: state.rendering, materials: state.materials});
+    runtime.scene.renderStructureRevision++;
+    runtime.renderer.setResolution(...state.resolution); runtime.setCamera(state.camera);
+    refresh(); showingA = false; $('baseline').hidden = true; $('compare').setAttribute('aria-pressed', 'false');
+    status('Изменения видны в живом рендере. Пауза фиксирует время, но не останавливает обновление картинки.');
+    window.__LOOK_DEV__.ready = true;
+  } finally { loading = false; document.body.classList.remove('busy'); }
+}
+function download(blob, name) { const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 30000); }
+async function pin() {
+  loading=true;document.body.classList.add('busy');
+  try { await settle(); pinned = {...current(), approvedAt: new Date().toISOString()};
+  const blob = await runtime.capture(); if (baselineURL) URL.revokeObjectURL(baselineURL); baselineURL = URL.createObjectURL(blob); $('baseline').src = baselineURL;
+  remember('look-dev-approved-v1', pinned); $('compare').disabled=false; $('restore').disabled=false;
+  try{if(!await savedFrame({preset:pinned,blob}))throw new Error('No IndexedDB');}catch{status('Кадр A сохранён только до закрытия вкладки. Экспортируй PNG.');return clone(pinned);}
+  status('A зафиксирован. Черновые изменения его не перезаписывают. Сохрани JSON и PNG для передачи.');
+  return clone(pinned);
+  }finally{loading=false;document.body.classList.remove('busy');}
+}
+function toggleA() {
+  if (!pinned || !baselineURL || !sameView(current(), pinned)) return;
+  showingA = !showingA; $('baseline').hidden = !showingA; $('compare').setAttribute('aria-pressed', String(showingA));
+}
+function fit() { const r = $('stage').getBoundingClientRect(); $('frame').style.width = Math.min(r.width, r.height * 16 / 9) + 'px'; }
+new ResizeObserver(fit).observe($('stage'));
+function cameraPatch(values) { pause(); runtime.setCamera({...runtime.scene.camera, ...values}); runtime.resetProfile?.(); state.camera = clone(runtime.scene.camera); dirty(); }
+function orbit(dx, dy, pan = false) {
+  const c = clone(runtime.scene.camera), d = c.position.map((v, i) => v - c.target[i]), radius = Math.hypot(...d);
+  if (pan) { const a = Math.atan2(d[2], d[0]), sx = dx * radius * .0015, sy = dy * radius * .0015; const shift = [Math.sin(a) * sx, sy, -Math.cos(a) * sx]; c.target = c.target.map((v,i) => v + shift[i]); c.position = c.position.map((v,i) => v + shift[i]); }
+  else { const a = Math.atan2(d[2], d[0]) - dx * .005, e = Math.max(-1.3, Math.min(1.45, Math.asin(d[1] / radius) + dy * .005)); c.position = direction(a * 180 / Math.PI, e * 180 / Math.PI).map((v,i) => c.target[i] + v * radius); }
+  cameraPatch(c);
+}
+function zoom(factor) { const c = clone(runtime.scene.camera), d = c.position.map((v,i) => v - c.target[i]), radius = Math.hypot(...d), next = Math.max(.3, Math.min(250, radius * factor)); c.position = d.map((v,i) => c.target[i] + v * next / radius); cameraPatch(c); }
+const pointers = new Map();
+$('world').addEventListener('pointerdown', event => { if (!ready()) return; $('world').setPointerCapture(event.pointerId); pointers.set(event.pointerId, [event.clientX,event.clientY]); });
+$('world').addEventListener('pointermove', act(event => {
+  const old = pointers.get(event.pointerId); if (!old) return;
+  const before = [...pointers.values()]; pointers.set(event.pointerId,[event.clientX,event.clientY]);
+  if (pointers.size === 2) { const after = [...pointers.values()], length = p => Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]); if (length(after)>5) zoom(length(before)/length(after)); }
+  else orbit(event.clientX-old[0],event.clientY-old[1],event.shiftKey || event.buttons===2);
+}));
+for (const name of ['pointerup','pointercancel','lostpointercapture']) $('world').addEventListener(name,event => pointers.delete(event.pointerId));
+$('world').addEventListener('contextmenu',event => event.preventDefault());
+$('world').addEventListener('wheel',event => { event.preventDefault(); if (ready()) zoom(Math.exp(event.deltaY*.001)); },{passive:false});
+$('panel-toggle').onclick=()=>document.body.classList.toggle('panel-hidden');
+$('scene').onchange=act(()=>load()); $('reset').onclick=act(()=>load());
+$('shot').onchange=act(async()=>{ pause(); const id=$('shot').value, shot = shots.find(s=>s.id===id); if (!shot) { cameraPatch(makeCity(state.scene).spec.camera); return; } const preset=current(); preset.time=Math.max(1/60,shot.offset??0); await load(preset); $('shot').value=id;
+  const base = shot.follow==='person' ? runtime.scene.animation.pose('walker').position : shot.follow==='car' ? [...runtime.scene.entities.values()].find(e=>e.id.startsWith('passing-')&&/carpaint/i.test(e.id))?.position ?? runtime.scene.entities.get('passing-body')?.position ?? [0,0,0] : [0,0,0];
+  cameraPatch({position:shot.from.map((v,i)=>v+base[i]),target:shot.lookFrom.map((v,i)=>v+base[i]),fov:shot.fov,focusDistance:shot.focus??20,aperture:shot.aperture??0}); for (const c of cameraUI)c.set(runtime.scene.camera[c.key]); });
+$('materials').onchange=act(refreshMaterials);
+$('resolution').onchange=act(()=>{ pause(); const resolution=$('resolution').value.split(',').map(Number); validatePreset({...current(),resolution}); state.resolution=resolution; runtime.renderer.setResolution(...resolution); runtime.resetProfile?.(); dirty(); });
+$('play').onclick=act(()=>{ if (playing)pause(); else { playing=true; lastFrame=performance.now(); accumulator=0; $('play').textContent='Ⅱ'; } });
+$('time').oninput=()=>{ $('time-value').textContent=Number($('time').value).toFixed(2)+' с'; };
+$('time').onchange=act(async()=>{ const preset=current(); preset.time=Math.min(48,Math.max(0,Math.round(Number($('time').value)*60)/60)); await load(preset); dirty(); });
+$('pin').onclick=act(pin); $('compare').onclick=act(toggleA); $('restore').onclick=act(async()=>{ if (pinned) { await load(pinned); dirty(); } });
+$('export').onclick=act(()=>{ const p=current(); const same=pinned && JSON.stringify({...p,approvedAt:undefined})===JSON.stringify({...pinned,approvedAt:undefined}); if(same)p.approvedAt=pinned.approvedAt; download(new Blob([JSON.stringify(p,null,2)+'\n'],{type:'application/json'}),same?'look-approved.json':'look-draft.json'); });
+$('png').onclick=act(async()=>{ await settle(); download(await runtime.capture(),'look-'+revision.slice(0,12)+'.png'); });
+$('import').onchange=act(async()=>{ const file=$('import').files[0]; if(!file)return; if(file.size>2_000_000)throw new Error('JSON слишком большой'); const p=validatePreset(JSON.parse(await file.text())); if(p.engineRevision!==revision&&!confirm('Пресет создан другой версией движка. Результат может отличаться. Загрузить для сравнения?'))return; await load(p); dirty(); $('import').value=''; });
+$('reference-file').onchange=()=>{ const file=$('reference-file').files[0]; if(!file)return; if(referenceURL)URL.revokeObjectURL(referenceURL); referenceURL=URL.createObjectURL(file); const video=file.type.startsWith('video/'); $('reference-video').hidden=!video; $('reference-image').hidden=video; (video?$('reference-video'):$('reference-image')).src=referenceURL; pause(); $('reference-dialog').showModal(); };
+$('close-reference').onclick=()=>{ $('reference-video').pause(); $('reference-dialog').close(); };
+$('reference-dialog').addEventListener('close',()=> $('reference-video').pause());
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+window.__LOOK_DEV__={ready:false,error:null,state:()=>current(),setRendering:values=>{pause();renderPatch(values);dirty();},pin,capture:async()=>{await settle();return runtime.capture();},stats:()=>runtime.inspect()};
+function frame(now) {
+  if (ready()&&!document.hidden) {
+    try {
+      if(playing){
+        accumulator+=Math.min(.1,Math.max(0,(now-lastFrame)/1000));
+        const count=Math.min(Math.floor(accumulator*60),2880-runtime.scene.tick);
+        if(count>0){runtime.step(count);accumulator-=count/60;}else runtime.render();
+        if(runtime.scene.tick>=2880)pause();
+      }else runtime.render();
+      lastFrame=now;
+      const comparable=Boolean(pinned&&baselineURL&&sameView({...state,time:runtime.scene.time,camera:runtime.scene.camera},pinned));
+      for(const id of ['pin','export','png','play'])$(id).disabled=false;
+      $('compare').disabled=!comparable; $('restore').disabled=!pinned;
+      if(showingA&&!comparable){showingA=false;$('baseline').hidden=true;}
+      $('badge').textContent=showingA?'A · зафиксировано':'B · живой рендер';
+      if(now-lastMetrics>400){ lastMetrics=now; const p=runtime.profile(), stats=runtime.renderer.inspect();
+        $('metrics').textContent=(p?.timestampQueries&&p.gpuTotal?`GPU p95 ${p.gpuTotal.p95Ms.toFixed(2)} мс`:'GPU-время недоступно')+` · ${stats.width} × ${stats.height}`;
+        if(document.activeElement!==$('time'))$('time').value=runtime.scene.time;
+        $('time-value').textContent=runtime.scene.time.toFixed(2)+' с';
+        if(stats.errors.length)status(stats.errors.join('\n'),true);
+      }
+    } catch(error){window.__LOOK_DEV__.error=String(error);status(String(error),true);pause();}
+  }
+  requestAnimationFrame(frame);
+}
+try {
+  if(!navigator.gpu)throw new Error('WebGPU недоступен. Открой стенд в браузере с WebGPU через HTTPS или localhost.');
+  const modules=await Promise.all([import('./tools/promo/city.mjs'),import('./tools/promo/shots.mjs'),fetch('./manifest.json').then(r=>{if(!r.ok)throw new Error('Нет manifest.json');return r.json();})]);
+  makeCity=modules[0].makeCity; shots=modules[1].shots; revision=modules[2].revision; $('revision').textContent=revision;
+  for(const c of renderingControls)controls.push(control($('light-controls'),...c,n=>renderPatch({[c[0]]:n})));
+  controls.push(control($('light-controls'),'azimuth','Направление солнца',-180,180,1,n=>renderPatch({sunDirection:direction(n,angles(state.rendering.sunDirection)[1])})));
+  controls.push(control($('light-controls'),'elevation','Высота солнца',-90,90,1,n=>renderPatch({sunDirection:direction(angles(state.rendering.sunDirection)[0],n)})));
+  for(const [key,title]of [['sunColor','Цвет солнца'],['skyColor','Цвет неба']])controls.push(colorControl($('light-controls'),key,title,rgb=>renderPatch({[key]:rgb})));
+  for(const c of materialControls)materialUI.push(control($('material-controls'),...c,n=>materialPatch({[c[0]]:n})));
+  materialUI.push(colorControl($('material-controls'),'color','Цвет материала',rgb=>materialPatch({color:[...rgb,1]})));
+  for(const c of [['fov','Поле зрения',20,100,1],['focusDistance','Фокус, м',.1,200,.1],['aperture','Диафрагма / размытие',0,4,.01]])cameraUI.push(control($('camera-controls'),...c,n=>cameraPatch({[c[0]]:n})));
+  const draft=read('look-dev-draft-v1'); let stored=null;try{stored=await savedFrame();}catch{}
+  let approved=read('look-dev-approved-v1');
+  if(stored?.preset){try{const p=validatePreset(stored.preset);if(!approved||p.approvedAt===approved.approvedAt)approved=p;else stored=null;}catch{stored=null;}}
+  await load(draft?.engineRevision===revision?draft:approved?.engineRevision===revision?approved:undefined);
+  if(approved?.engineRevision===revision){pinned=approved;if(stored?.blob){baselineURL=URL.createObjectURL(stored.blob);$('baseline').src=baselineURL;}$('restore').disabled=false;status('Сохранённый A доступен через «Вернуть A». Для нового A зафиксируй кадр.');}
+  else if(draft||approved)status('Есть пресет другой версии. Он не применён автоматически; версия движка изменилась.');
+  requestAnimationFrame(frame);
+} catch(error){window.__LOOK_DEV__.error=String(error);status(String(error),true);$('badge').textContent='Рендер не запущен';}
+window.addEventListener('pagehide',()=>{pause();runtime?.dispose();if(baselineURL)URL.revokeObjectURL(baselineURL);if(referenceURL)URL.revokeObjectURL(referenceURL);});
+</script></body></html>
