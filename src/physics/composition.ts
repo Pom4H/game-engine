@@ -29,8 +29,8 @@ export class PhysicalComposition<Event=never> {
   }
 
   step(dt:number):void{
-    this.structure.step(dt,this.gravity);
     for(const component of this.components)component.step(dt);
+    this.structure.step(dt,this.gravity);
   }
 
   drainEvents():Event[]{
