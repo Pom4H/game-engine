@@ -27,6 +27,4 @@ jobs:
           PY
           BROTLI=$(brotli -q 11 -c /tmp/m3.raw | wc -c)
           echo M3_BROTLI11_BYTES=$BROTLI
-          exit 0
-          #
-          PY
+          # benchmark intentionally reports sizes only
