@@ -67,6 +67,14 @@ export interface BakedStructuralState extends StructureProjection {
   readonly angularVelocity:Vec3;
 }
 
+export interface StructuralImpulsePulse {
+  readonly point:Vec3;
+  readonly impulse:Vec3;
+  readonly radius?:number;
+  /** Contact/load duration. BeamNG-like crumple must evolve over physical time, not one tick. */
+  readonly durationSeconds:number;
+}
+
 export interface StructuralStats {
   readonly mode:'active'|'dormant';
   readonly nodes:number;
@@ -116,6 +124,7 @@ export class StructuralBody {
   private readonly lambda:Float64Array;
   private readonly predictedMeasure:Float64Array;
   private readonly impulseWeights:Float64Array;
+  private readonly impulsePulses:{point:Vec3;remaining:MutableVec3;radius:number;remainingSeconds:number}[]=[];
   readonly broken:Uint8Array;
 
   readonly totalMass:number;
@@ -308,6 +317,28 @@ export class StructuralBody {
    * This is the bridge a contact manifold uses when an inactive region refines.
    */
   applyImpulse(point:Vec3,impulse:Vec3,radius=.45):void{
+    this.applyImpulseNow(point,impulse,radius);
+    this.wake();
+  }
+
+  /** Apply one contact impulse over finite physical time.
+   * The total impulse is conserved exactly; only its temporal delivery changes. */
+  scheduleImpulse(pulse:StructuralImpulsePulse):void{
+    if(!pulse.point.every(Number.isFinite)||!pulse.impulse.every(Number.isFinite)||!Number.isFinite(pulse.durationSeconds)||pulse.durationSeconds<=0||pulse.durationSeconds>.5)throw new TypeError('Invalid structural impulse pulse');
+    const radius=pulse.radius??.45;
+    if(!Number.isFinite(radius)||radius<=0)throw new TypeError('Invalid structural impulse radius');
+    this.impulsePulses.push({
+      point:Object.freeze([...pulse.point]) as Vec3,
+      remaining:[...pulse.impulse],
+      radius,
+      remainingSeconds:pulse.durationSeconds,
+    });
+    this.wake();
+  }
+
+  get pendingImpulsePulses():number{return this.impulsePulses.length;}
+
+  private applyImpulseNow(point:Vec3,impulse:Vec3,radius:number):void{
     if(!point.every(Number.isFinite)||!impulse.every(Number.isFinite)||!Number.isFinite(radius)||radius<=0)throw new TypeError('Invalid structural impulse');
     const weights=this.impulseWeights;weights.fill(0);let sum=0,nearest=0,nearestD=Infinity;
     for(let i=0;i<this.nodeCount;i++){
@@ -321,13 +352,13 @@ export class StructuralBody {
       const j=i*3,s=w*this.inverseMass[i]!;
       this.velocity[j]=this.velocity[j]!+impulse[0]*s;this.velocity[j+1]=this.velocity[j+1]!+impulse[1]*s;this.velocity[j+2]=this.velocity[j+2]!+impulse[2]*s;
     }
-    this.wake();
   }
 
   step(dt:number,gravity:Vec3=[0,-9.81,0],contactProjector?:(body:StructuralBody,iteration:number)=>void):void{
     if(this.mode==='dormant')return;
     if(!Number.isFinite(dt)||dt<=0||dt>1/30)throw new RangeError('Structural dt must be in (0, 1/30]');
     if(!gravity.every(Number.isFinite))throw new TypeError('Structural gravity must be finite');
+    this.applyScheduledImpulses(dt);
     this.dt=dt;
     this.previous.set(this.position);
 
@@ -425,6 +456,22 @@ export class StructuralBody {
   get stats():StructuralStats{
     let broken=0;for(const value of this.broken)broken+=value?1:0;
     return{mode:this.mode,nodes:this.nodeCount,constraints:this.constraintCount,broken,plasticWorkJ:this.plasticWorkJ,steps:this.steps};
+  }
+
+  private applyScheduledImpulses(dt:number):void{
+    for(let i=this.impulsePulses.length-1;i>=0;i--){
+      const pulse=this.impulsePulses[i]!;
+      const fraction=Math.min(1,dt/pulse.remainingSeconds);
+      const delivered:Vec3=[
+        pulse.remaining[0]*fraction,
+        pulse.remaining[1]*fraction,
+        pulse.remaining[2]*fraction,
+      ];
+      this.applyImpulseNow(pulse.point,delivered,pulse.radius);
+      pulse.remaining[0]-=delivered[0];pulse.remaining[1]-=delivered[1];pulse.remaining[2]-=delivered[2];
+      pulse.remainingSeconds-=dt;
+      if(pulse.remainingSeconds<=1e-9||V3.length(pulse.remaining)<1e-12)this.impulsePulses.splice(i,1);
+    }
   }
 
   private validateIndex(index:number,count:number):void{
