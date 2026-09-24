@@ -1,6 +1,7 @@
 import {material,thermalLinearScale,type MaterialKind} from '../materials/catalog.js';
 import type {Vec3} from '../math.js';
 import {V3} from '../math.js';
+import {PhysicalComposition} from '../physics/composition.js';
 import {applyStructuralSkin} from '../physics/structural-skin.js';
 import {StructuralBody} from '../physics/structure.js';
 import type {EngineEvent,ImpactEvent,MechanismEvent} from '../scene/events.js';
@@ -219,6 +220,7 @@ export class M3InteractionRig {
   readonly blueprint:M3StructuralBlueprint;
   readonly structure:StructuralBody;
   readonly panels=new ElasticPlasticPanelResponse();
+  readonly composition:PhysicalComposition<MechanismEvent>;
   readonly suspension:FourCornerSuspension;
   readonly door=new DoorHinge();
   readonly nodeRest:Float64Array;
@@ -240,6 +242,7 @@ export class M3InteractionRig {
     this.shellRest=new Float64Array(this.blueprint.skin.rest);
     this.structuralSkin=new Float64Array(this.shellRest.length);this.deformedShell=new Float64Array(this.shellRest.length);
     this.suspension=new FourCornerSuspension(massKg,profile.dimensions.wheelbase,profile.dimensions.track);
+    this.composition=new PhysicalComposition({structure:this.structure,components:[this.panels,this.door,this.suspension],gravity:[0,0,0]});
     this.referenceCenter=[...this.structure.centerOfMass()];
   }
 
@@ -254,7 +257,16 @@ export class M3InteractionRig {
     // taps, kicks or bodyweight incorrectly turns local sheet-metal work into chassis
     // plasticity. Reserve the expensive structural LOD for genuinely severe contacts.
     const structuralActivationEnergyJ=Math.max(350,this.massKg*.20);
-    if(input.material!=='glass'&&input.energyJ>=structuralActivationEnergyJ)this.structure.applyImpulse(input.point,V3.scale(V3.normalize(input.normal),-impulse),Math.max(.16,input.radiusM*1.25));
+    if(input.material!=='glass'&&input.energyJ>=structuralActivationEnergyJ){
+      const speed=effectiveMass>0?impulse/effectiveMass:0;
+      const duration=clamp(2*Math.max(.04,input.radiusM)/Math.max(1,speed),.08,.18);
+      this.structure.scheduleImpulse({
+        point:input.point,
+        impulse:V3.scale(V3.normalize(input.normal),-impulse),
+        radius:Math.max(.16,input.radiusM*1.25),
+        durationSeconds:duration,
+      });
+    }
     const event:ImpactEvent={type:'impact',id:++this.eventSequence,time:input.time,point:input.point,normal:input.normal,a:'m3-panel',b:'human',materialA:input.material??'steel',materialB:input.contactMaterial??'default',energy:input.energyJ,impulse,speed:effectiveMass>0?impulse/effectiveMass:0,size:input.radiusM*2};
     this.events.push(event);
     if(result.elasticEnergyJ>4&&input.energyJ>80)this.events.push({type:'mechanism',id:++this.eventSequence,time:input.time,point:input.point,mechanism:'panel-flex',energy:result.elasticEnergyJ,speed:Math.sqrt(Math.max(0,2*result.elasticEnergyJ/effectiveMass)),size:input.radiusM*2});
@@ -269,8 +281,7 @@ export class M3InteractionRig {
   }
 
   step(dt:number):void{
-    this.time+=dt;this.panels.step(dt);this.door.step(dt);this.suspension.step(dt);
-    this.structure.step(dt,[0,0,0]);
+    this.time+=dt;this.composition.step(dt);
     // Suspension owns rigid-body translation; the cage represents internal motion only.
     const center=this.structure.centerOfMass(),dx=center[0]-this.referenceCenter[0],dy=center[1]-this.referenceCenter[1],dz=center[2]-this.referenceCenter[2];
     let vx=0,vy=0,vz=0;
