@@ -62,3 +62,7 @@ export {analyzeWGSL,buildRenderAtomReport,type ShaderOperationAtoms,type ShaderE
 export {detailedRoadWheelMeshes,detailedPassengerWheelMeshes,type RoadWheelGeometrySpec} from './vehicles/passenger-wheel.js';
 export {compileVehicle,type VehicleDefinition,type VehicleFamily,type VehicleReferenceProvenance,type ThreeBoxVehicleDefinition,type CompiledVehicleGeometry} from './vehicles/framework.js';
 export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type DoubleCabPickupVehicleDefinition} from './vehicles/pickup.js';
+
+export {sanitizeExperimentValues,numberValue,stringValue,booleanValue,type ExperimentValue,type ExperimentValues,type ExperimentControl,type ExperimentPreset} from './experiments/schema.js';
+export {ExperimentSession,type ExperimentAdapter,type ExperimentDefinition,type ExperimentRecording} from './experiments/runtime.js';
+export {VEHICLE_EXPERIMENT,type VehicleExperimentFrame} from './experiments/vehicle.js';
