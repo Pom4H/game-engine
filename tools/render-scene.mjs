@@ -42,9 +42,9 @@ let page;
 for(let i=0;i<200;i++){try{const list=await (await fetch('http://127.0.0.1:'+port2+'/json/list')).json();page=list.find(x=>x.type==='page'&&x.webSocketDebuggerUrl);if(page)break}catch{}await new Promise(r=>setTimeout(r,50))}
 if(!page) throw new Error('Chrome page target unavailable');
 const ws=new WebSocket(page.webSocketDebuggerUrl);let id=0;const pending=new Map();
-ws.on('message',raw=>{const m=JSON.parse(raw);const p=pending.get(m.id);if(!p)return;pending.delete(m.id);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result)});
+ws.addEventListener('message',event=>{const m=JSON.parse(String(event.data));const p=pending.get(m.id);if(!p)return;pending.delete(m.id);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result)});
 const send=(method,params={})=>new Promise((resolve,reject)=>{const i=++id;pending.set(i,{resolve,reject});ws.send(JSON.stringify({id:i,method,params}))});
-await new Promise((resolve,reject)=>{ws.once('open',resolve);ws.once('error',reject)});
+await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true})});
 await send('Runtime.enable');await send('Page.enable');await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
 await send('Page.navigate',{url:'http://127.0.0.1:'+port+'/'});
 let ready=false,last='';
