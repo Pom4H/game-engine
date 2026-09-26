@@ -1,5 +1,5 @@
 import {deflateSync} from 'node:zlib';
-import {compose,lookAt,multiply4,V3,type Mat4, type Vec3} from '../math.js';
+import {lookAt,multiply4,V3,type Mat4, type Vec3} from '../math.js';
 import type {MeshData} from '../procedural/mesh.js';
 import {buildRenderFrame,renderPrimitive,type RenderObjectIR} from './frame.js';
 import type {CameraSpec,Color} from '../scene/types.js';
@@ -55,7 +55,7 @@ export class CpuRenderer implements Renderer{
  private rasterMesh(object:RenderObjectIR,camera:CameraSpec,vp:Mat4,lights:Light[],sun:Vec3,sunColor:Vec3,sunIntensity:number,exposure:number,fog:number):void{
   const {entity,mesh,model}=object,mv=multiply4(vp,model),v=mesh.vertices,c=mesh.colors;
   const projected=new Array<ProjectedVertex>(v.length/6);
-  for(let i=0;i<projected.length;i++){const p=transformPoint(mv,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const world=transformPoint(model,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const normal=transformNormal(model,[v[i*6+3]!,v[i*6+4]!,v[i*6+5]!],entity.scale);projected[i]={x:((p[0]/p[3])*.5+.5)*(this.width-1),y:(1-(p[1]/p[3])*.5-.5)*(this.height-1),z:p[2]/p[3],invW:1/p[3],world:[world[0],world[1],world[2]],normal,color:[c[i*4]!/255,c[i*4+1]!/255,c[i*4+2]!/255,c[i*4+3]!/255]};}
+  for(let i=0;i<projected.length;i++){const p=transformPoint(mv,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const world=transformPoint(model,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const normal=transformNormal(model,[v[i*6+3]!,v[i*6+4]!,v[i*6+5]!],[Math.hypot(model[0]!,model[1]!,model[2]!),Math.hypot(model[4]!,model[5]!,model[6]!),Math.hypot(model[8]!,model[9]!,model[10]!)]);projected[i]={x:((p[0]/p[3])*.5+.5)*(this.width-1),y:(1-(p[1]/p[3])*.5-.5)*(this.height-1),z:p[2]/p[3],invW:1/p[3],world:[world[0],world[1],world[2]],normal,color:[c[i*4]!/255,c[i*4+1]!/255,c[i*4+2]!/255,c[i*4+3]!/255]};}
   const idx=mesh.indices;
   for(let t=0;t<idx.length;t+=3){const a=projected[idx[t]!]!,b=projected[idx[t+1]!]!,d=projected[idx[t+2]!]!;if(a.invW<=0||b.invW<=0||d.invW<=0)continue;this.rasterTriangle(a,b,d,entity,camera,lights,sun,sunColor,sunIntensity,exposure,fog);}
  }
