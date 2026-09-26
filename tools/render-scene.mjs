@@ -57,4 +57,4 @@ if((renderer?.drawCalls??0)<=0&&(renderer?.triangles??0)<=0)throw new Error('Ren
 const shot=await send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
 const {mkdir,writeFile}=await import('node:fs/promises');await mkdir(resolve('artifacts'),{recursive:true});await writeFile(out,Buffer.from(shot.data,'base64'));
 console.log(JSON.stringify({out,width,height,renderer},null,2));
-ws.close();child.kill();server.close();await rm(profile,{recursive:true,force:true});
+ws.close();child.kill();server.close();try{await rm(profile,{recursive:true,force:true})}catch{}
