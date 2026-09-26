@@ -28,3 +28,26 @@ jobs:
           BROTLI=$(brotli -q 11 -c /tmp/m3.raw | wc -c)
           echo M3_BROTLI11_BYTES=$BROTLI
           # benchmark intentionally reports sizes only
+
+      - name: Install Chromium for WebGPU render
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium
+      - name: Build engine
+        shell: bash
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+      - name: Render current engine scene
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          node tools/render-scene.mjs tools/render-demo.scene.mjs 1280 720 artifacts/render.png
+      - name: Upload render
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-engine-render
+          path: artifacts/render.png
+          if-no-files-found: error
+          retention-days: 7
