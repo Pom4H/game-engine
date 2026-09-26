@@ -84,7 +84,7 @@ export class CpuRenderer implements Renderer{
  framebuffer():Uint8Array{return this.rgba.slice();}
 }
 
-mport {deflateSync} from 'node:zlib';
+import {deflateSync} from 'node:zlib';
 import {compose,lookAt,multiply4,V3,type Mat4, type Vec3} from '../math.js';
 import type {MeshData} from '../procedural/mesh.js';
 import {buildRenderFrame,renderPrimitive,type RenderObjectIR} from './frame.js';
