@@ -1,5 +1,5 @@
 name: M3 compression benchmark
-# render harness verification
+# render harness verification: native WebSocket
 on:
   push:
     paths:
