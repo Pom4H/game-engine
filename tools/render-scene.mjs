@@ -54,7 +54,7 @@ await send('Runtime.evaluate',{expression:'(async()=>{window.__GAME_ENGINE__.pau
 const inspection=await send('Runtime.evaluate',{expression:'window.__GAME_ENGINE__.inspect()',returnByValue:true});
 const renderer=inspection.result?.value?.renderer;
 if((renderer?.drawCalls??0)<=0&&(renderer?.triangles??0)<=0)throw new Error('Renderer produced no geometry: '+JSON.stringify(renderer));
-const shot=await send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
-const {mkdir,writeFile}=await import('node:fs/promises');await mkdir(resolve('artifacts'),{recursive:true});await writeFile(out,Buffer.from(shot.data,'base64'));
+const shot=await send('Runtime.evaluate',{expression:`(async()=>{const blob=await window.__CAPTURE__();const reader=new FileReader();const data=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(blob)});return data})()`,awaitPromise:true,returnByValue:true});
+const {mkdir,writeFile}=await import('node:fs/promises');await mkdir(resolve('artifacts'),{recursive:true});await writeFile(out,Buffer.from(shot.result.value,'base64'));
 console.log(JSON.stringify({out,width,height,renderer},null,2));
 ws.close();child.kill();server.close();try{await rm(profile,{recursive:true,force:true})}catch{}
