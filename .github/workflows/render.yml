@@ -41,6 +41,9 @@ jobs:
       - name: Validate PNG
         run: |
           node -e "const fs=require('fs'); const b=fs.readFileSync('artifacts/render.png'); if(b.readUInt32BE(0)!==0x89504e47) process.exit(1); console.log('PNG',b.length)"
+      - name: Validate CPU PNG
+        run: |
+          node -e "const fs=require('fs'); const b=fs.readFileSync('artifacts/cpu-render.png'); if(b.readUInt32BE(0)!==0x89504e47) process.exit(1); console.log('CPU PNG',b.length)"
       - uses: actions/upload-artifact@v7
         with:
           name: game-engine-render
