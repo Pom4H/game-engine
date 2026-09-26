@@ -14,6 +14,7 @@ export interface RenderFrameIR{
   readonly scene:Scene;
   readonly camera:CameraSpec;
   readonly objects:readonly RenderObjectIR[];
+  readonly objectsById:ReadonlyMap<string,RenderObjectIR>;
   readonly lights:readonly RuntimeEntity[];
 }
 export function renderPrimitive(entity:RuntimeEntity):Primitive|undefined{return entity.renderMesh??entity.mesh;}
@@ -35,5 +36,5 @@ export function buildRenderFrame(scene:Scene,camera:CameraSpec=scene.camera):Ren
     const primitive=renderPrimitive(entity);if(!primitive)continue;
     objects.push({entity,primitive,mesh:primitiveMesh(primitive),model:renderModel(entity)});
   }
-  return{scene,camera,objects,lights};
+  return{scene,camera,objects,objectsById:new Map(objects.map(object=>[object.entity.id,object] as const)),lights};
 }
