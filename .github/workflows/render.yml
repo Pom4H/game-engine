@@ -20,7 +20,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - name: Install Chromium\n        run: |\n          sudo apt-get update\n          sudo apt-get install -y chromium\n      - uses: oven-sh/setup-bun@v2
+      - name: Install Chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium\n      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
       - name: Install
@@ -29,7 +32,7 @@ jobs:
         run: bun run build
       - name: Render current engine scene
         run: |
-          if not exist artifacts mkdir artifacts
+          mkdir -p artifacts
           node tools/render-scene.mjs tools/render-demo.scene.mjs 1280 720 artifacts/render.png
       - name: Validate PNG
         run: |
