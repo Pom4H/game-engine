@@ -14,7 +14,8 @@ const sceneSource=await readFile(scenePath,'utf8');
 const dist=resolve('dist');
 
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.css':'text/css'};
-const html='<!doctype html><html><body style="margin:0;overflow:hidden;background:#111"><canvas id="c"></canvas><script type="module">'+sceneSource+'\n</script></body></html>';
+const sceneUrl='/tools/'+scenePath.slice(resolve('tools').length+1).replaceAll('\\\\','/');
+const html='<!doctype html><html><body style="margin:0;overflow:hidden;background:#111"><canvas id="c"></canvas><script type="module" src="'+sceneUrl+'"></script></body></html>';
 
 const server=createServer(async(req,res)=>{
   try{
@@ -25,6 +26,10 @@ const server=createServer(async(req,res)=>{
     if(url.pathname.startsWith('/dist/')){
       const p=join(dist,url.pathname.slice(6));
       const data=await readFile(p);res.writeHead(200,{'content-type':mime[extname(p)]??'application/octet-stream'});res.end(data);return;
+    }
+    if(url.pathname.startsWith('/tools/')){
+      const p=resolve('tools',url.pathname.slice(7));
+      const data=await readFile(p);res.writeHead(200,{'content-type':mime[extname(p)]??'text/javascript; charset=utf-8'});res.end(data);return;
     }
     res.writeHead(404);res.end();
   }catch(e){res.writeHead(500);res.end(String(e))}
