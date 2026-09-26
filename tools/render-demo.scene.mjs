@@ -1,25 +1,77 @@
+import {generateM3Vehicle,m3PartMaterial} from '/dist/index.js';
+
+const m3=generateM3Vehicle();
+const entities=[];
+
+const add=(id,position,mesh,material,extra={})=>{
+  entities.push({id,position,mesh,material,...extra});
+};
+
+add('ground',[0,-0.08,0],{kind:'plane',size:[34,28]},
+  {kind:'asphalt',color:[.035,.042,.050,1],roughness:.58,metalness:.04},
+  {environmental:{surfaceUse:'road',waterDepthM:.0018,snowDepthM:0,iceDepthM:0}});
+
+add('display-plinth',[0,0.025,0],{kind:'box',size:[8.8,.14,5.6]},
+  {color:[.095,.105,.115,1],roughness:.32,metalness:.28,clearcoat:.55,clearcoatRoughness:.12});
+
+add('back-wall',[-1.8,2.8,-5.8],{kind:'box',size:[15,6,.18]},
+  {color:[.055,.062,.072,1],roughness:.72,metalness:.04});
+
+add('back-floor',[-1.8,.01,-2.6],{kind:'box',size:[15,.025,7]},
+  {kind:'asphalt',color:[.022,.028,.035,1],roughness:.28,metalness:.12});
+
+for(const [side,z] of [['left',-3.8],['right',3.8]]){
+  add('snow-bank-'+side,[0,.20,z],{kind:'snowdrift',size:[18,.48,1.05],seed:side==='left'?4617:9121,segments:72,continuous:true},
+    {kind:'snow',color:[.86,.89,.94,1],roughness:.91});
+}
+
+const lightBar=(id,p,color,intensity)=>{
+  add(id,p,{kind:'box',size:[4.8,.07,.30]},
+    {color:[.72,.76,.82,1],roughness:.18,metalness:.12,emissive:color},
+    {light:{kind:'point',color,intensity,range:10}});
+};
+lightBar('key-light',[-.8,4.9,1.9],[.52,.66,.95],42);
+lightBar('fill-light',[-.5,3.7,-2.4],[.24,.34,.55],26);
+
+const heroPosition=[0,.18,0];
+for(const part of m3.parts){
+  const material=m3PartMaterial(part,[.46,.012,.008,1],true);
+  add('hero-'+part.id,
+    [heroPosition[0]+part.position[0],heroPosition[1]+part.position[1],heroPosition[2]+part.position[2]],
+    part.mesh,
+    material,
+    {
+      rotation:part.rotation??[0,0,0],
+      scale:part.scale??[1,1,1],
+      wheel:part.wheel,
+    });
+}
+
+add('headlight-L',[2.34,.82,.54],{kind:'box',size:[.035,.18,.32]},
+  {color:[.72,.82,.95,1],roughness:.08,metalness:.45,emissive:[1.2,.82,.45]},
+  {light:{kind:'point',color:[1,.72,.42],intensity:18,range:6}});
+add('headlight-R',[2.34,.82,-.54],{kind:'box',size:[.035,.18,.32]},
+  {color:[.72,.82,.95,1],roughness:.08,metalness:.45,emissive:[1.2,.82,.45]},
+  {light:{kind:'point',color:[1,.72,.42],intensity:18,range:6}});
+
 export const scene={
-  version:1,seed:42,gravity:[0,-9.81,0],ground:0,clearColor:[0.025,0.03,0.04,1],
-  camera:{position:[7,3.7,8.5],target:[0,1.0,0],fov:41.2,focusDistance:10,aperture:0.02},
-  rendering:{sunDirection:[-0.45,-1,-0.3],sunColor:[1,0.93,0.82],sunIntensity:3.2,skyColor:[0.18,0.23,0.32],exposure:1.05,shadowExtent:40,fogDensity:0.006},
-  entities:[
-    {id:'ground',position:[0,-0.08,0],mesh:{kind:'plane',size:[24,24]},material:{color:[0.055,0.065,0.075,1],roughness:0.82,metalness:0}},
-    {id:'platform',position:[0,0.04,0],mesh:{kind:'box',size:[9,0.12,6]},material:{color:[0.12,0.13,0.15,1],roughness:0.42,metalness:0.15}},
-    {id:'body',position:[0,1.0,0],mesh:{kind:'box',size:[3.9,0.82,1.8]},material:{color:[0.72,0.035,0.025,1],roughness:0.22,metalness:0.72,clearcoat:0.85,clearcoatRoughness:0.08}},
-    {id:'hood',position:[1.15,1.43,0],mesh:{kind:'box',size:[1.65,0.18,1.72]},material:{color:[0.62,0.025,0.02,1],roughness:0.2,metalness:0.75,clearcoat:0.9,clearcoatRoughness:0.06}},
-    {id:'roof',position:[-0.35,1.72,0],mesh:{kind:'box',size:[1.65,0.16,1.55]},material:{color:[0.055,0.065,0.075,1],roughness:0.14,metalness:0.35,clearcoat:0.65}},
-    {id:'glass',position:[-0.35,1.81,0],mesh:{kind:'box',size:[1.72,0.13,1.42]},material:{color:[0.025,0.08,0.11,0.9],roughness:0.08,metalness:0.55,clearcoat:0.95}},
-    {id:'front',position:[2.01,1.05,0],mesh:{kind:'box',size:[0.08,0.48,1.5]},material:{color:[0.055,0.065,0.07,1],roughness:0.28,metalness:0.8}},
-    {id:'grille',position:[2.055,1.02,0],mesh:{kind:'box',size:[0.025,0.34,0.82]},material:{color:[0.008,0.009,0.01,1],roughness:0.16,metalness:0.92}},
-    {id:'wheelFL',position:[1.28,0.55,0.98],mesh:{kind:'torus',radius:0.43,tube:0.14,segments:32},rotation:[Math.PI/2,0,0],material:{color:[0.018,0.02,0.023,1],roughness:0.36,metalness:0.25}},
-    {id:'wheelFR',position:[1.28,0.55,-0.98],mesh:{kind:'torus',radius:0.43,tube:0.14,segments:32},rotation:[Math.PI/2,0,0],material:{color:[0.018,0.02,0.023,1],roughness:0.36,metalness:0.25}},
-    {id:'wheelRL',position:[-1.28,0.55,0.98],mesh:{kind:'torus',radius:0.43,tube:0.14,segments:32},rotation:[Math.PI/2,0,0],material:{color:[0.018,0.02,0.023,1],roughness:0.36,metalness:0.25}},
-    {id:'wheelRR',position:[-1.28,0.55,-0.98],mesh:{kind:'torus',radius:0.43,tube:0.14,segments:32},rotation:[Math.PI/2,0,0],material:{color:[0.018,0.02,0.023,1],roughness:0.36,metalness:0.25}},
-    {id:'lampL',position:[2.1,1.22,0.57],mesh:{kind:'box',size:[0.06,0.22,0.34]},material:{color:[0.72,0.82,0.9,1],roughness:0.12,metalness:0.5},light:{kind:'point',color:[1,0.82,0.62],intensity:20,range:7}},
-    {id:'lampR',position:[2.1,1.22,-0.57],mesh:{kind:'box',size:[0.06,0.22,0.34]},material:{color:[0.72,0.82,0.9,1],roughness:0.12,metalness:0.5},light:{kind:'point',color:[1,0.82,0.62],intensity:20,range:7}},
-    {id:'backWall',position:[-1.5,2.7,-4],mesh:{kind:'box',size:[9,5.5,0.2]},material:{color:[0.07,0.075,0.085,1],roughness:0.7,metalness:0.05}},
-    {id:'lightBar',position:[-0.8,4.7,1.5],mesh:{kind:'box',size:[4.5,0.08,0.35]},material:{color:[0.8,0.82,0.86,1],roughness:0.2,metalness:0.1},light:{kind:'point',color:[0.75,0.85,1],intensity:35,range:9}}
-  ]
+  version:1,
+  seed:20260927,
+  gravity:[0,-9.81,0],
+  ground:0,
+  clearColor:[.012,.018,.028,1],
+  camera:{position:[6.5,2.15,5.7],target:[0,.88,0],fov:31,focusDistance:7.2,aperture:.045},
+  rendering:{
+    sunDirection:[-.42,-.78,-.34],
+    sunColor:[1,.91,.78],
+    sunIntensity:3.6,
+    skyColor:[.12,.18,.28],
+    exposure:1.0,
+    shadowExtent:30,
+    fogDensity:.0018,
+    reflectionProbe:{entity:'hero-body',offset:[0,.88,0],radius:28,exclude:[],facesPerFrame:1},
+  },
+  entities,
 };
 
 if(typeof window!=='undefined'){
