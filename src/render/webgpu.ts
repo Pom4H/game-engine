@@ -14,7 +14,7 @@ import {RenderProfiler} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
-import {renderPrimitive,renderModel,primitiveBaseScale} from './frame.js';
+import {buildRenderFrame,renderPrimitive,renderModel,primitiveBaseScale,type RenderFrameIR} from './frame.js';
 import {buildDiffuseIrradianceSH} from './irradiance.js';
 
 type GPUAny=any;
@@ -581,7 +581,7 @@ export class WebGPURenderer implements Renderer{
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
-  private appearanceScene:Scene|null=null;private appearanceRevision=-1;
+  private appearanceScene:Scene|null=null;private appearanceRevision=-1;private renderFrame:RenderFrameIR|null=null;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
@@ -704,6 +704,7 @@ export class WebGPURenderer implements Renderer{
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
+    this.renderFrame=buildRenderFrame(scene,camera);
     const appearanceChanged=this.appearanceScene!==scene||this.appearanceRevision!==scene.appearanceRevision;
     if(appearanceChanged){
       this.appearanceScene=scene;this.appearanceRevision=scene.appearanceRevision;
@@ -1169,7 +1170,7 @@ export class WebGPURenderer implements Renderer{
     ]}),object={uniform,bind,texture,width,height,owned:width>0,label,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
-    const base=primitiveBaseScale(renderPrimitive(entity)),matrix=renderModel(entity);
+    const shared=this.renderFrame?.objectsById.get(entity.id),base=primitiveBaseScale(renderPrimitive(entity)),matrix=shared?.model??renderModel(entity);
     const px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.modelCache.get(entity.id);
     if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
     this.modelCache.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix});return matrix;
