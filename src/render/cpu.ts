@@ -47,10 +47,8 @@ export class CpuRenderer implements Renderer{
   const proj=new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,this.far*nf,-1,0,0,this.near*this.far*nf,0]);
   const vp=multiply4(proj,view);
   const lights:Light[]=[];
-  for(const e of scene.entities.values())if(e.light)lights.push({position:[...e.position],color:[...(e.light.color??[1,1,1])],intensity:e.light.intensity??1,range:e.light.range??10});
-  this.pointLights=lights.length;
   const sunDir=V3.normalize(env.sunDirection??[-.45,-1,-.3]),sun=V3.normalize([-sunDir[0],-sunDir[1],-sunDir[2]]),sunColor=env.sunColor??[1,.93,.82],sunIntensity=env.sunIntensity??1,exposure=env.exposure??1,fog=env.fogDensity??0;
-  const frame=buildRenderFrame(scene,camera);for(const object of frame.objects){try{this.meshes++;this.drawCalls++;this.triangles+=object.mesh.indices.length/3;this.rasterMesh(object,camera,vp,lights,sun,sunColor,sunIntensity,exposure,fog);}catch(error){this.errors.push(error instanceof Error?error.message:String(error));}}
+  const frame=buildRenderFrame(scene,camera);for(const entity of frame.lights)lights.push({position:[...entity.position],color:[...(entity.light!.color??[1,1,1])],intensity:entity.light!.intensity??1,range:entity.light!.range??10});this.pointLights=lights.length;for(const object of frame.objects){try{this.meshes++;this.drawCalls++;this.triangles+=object.mesh.indices.length/3;this.rasterMesh(object,camera,vp,lights,sun,sunColor,sunIntensity,exposure,fog);}catch(error){this.errors.push(error instanceof Error?error.message:String(error));}}
  }
  private rasterMesh(object:RenderObjectIR,camera:CameraSpec,vp:Mat4,lights:Light[],sun:Vec3,sunColor:Vec3,sunIntensity:number,exposure:number,fog:number):void{
   const {entity,mesh,model}=object,mv=multiply4(vp,model),v=mesh.vertices,c=mesh.colors;
