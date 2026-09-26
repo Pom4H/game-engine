@@ -1,5 +1,5 @@
 name: M3 compression benchmark
-# render harness verification: engine bridge dispose
+# render harness verification: CPU profile contract
 on:
   push:
     paths:
