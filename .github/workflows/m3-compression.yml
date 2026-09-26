@@ -50,3 +50,16 @@ jobs:
           path: artifacts/render.png
           if-no-files-found: error
           retention-days: 7
+
+      - name: Render CPU artifact from the same engine scene
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          node tools/render-cpu.mjs 1280 720 artifacts/render-cpu.png
+      - name: Upload CPU render
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-engine-render-cpu
+          path: artifacts/render-cpu.png
+          if-no-files-found: error
+          retention-days: 7
