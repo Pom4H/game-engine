@@ -29,11 +29,6 @@ jobs:
           echo M3_BROTLI11_BYTES=$BROTLI
           # benchmark intentionally reports sizes only
 
-      - name: Install Chromium for WebGPU render
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium
       - name: Build engine
         shell: bash
         run: |
