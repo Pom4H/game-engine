@@ -7,7 +7,7 @@ import type {Primitive} from '../scene/types.js';
 export interface RenderObjectIR{
   readonly entity:RuntimeEntity;
   readonly primitive:Primitive;
-  readonly mesh:MeshData;
+  readonly mesh?:MeshData;
   readonly model:Mat4;
 }
 export interface RenderFrameIR{
@@ -29,12 +29,12 @@ export function renderModel(entity:RuntimeEntity):Mat4{
   const primitive=renderPrimitive(entity),base=primitiveBaseScale(primitive);
   return compose(entity.position,entity.rotation,[entity.scale[0]*base[0],entity.scale[1]*base[1],entity.scale[2]*base[2]]);
 }
-export function buildRenderFrame(scene:Scene,camera:CameraSpec=scene.camera):RenderFrameIR{
+export function buildRenderFrame(scene:Scene,camera:CameraSpec=scene.camera,options:{readonly includeMeshes?:boolean}={}):RenderFrameIR{
   const objects:RenderObjectIR[]=[],lights:RuntimeEntity[]=[];
   for(const entity of scene.entities.values()){
     if(entity.light)lights.push(entity);
     const primitive=renderPrimitive(entity);if(!primitive)continue;
-    objects.push({entity,primitive,mesh:primitiveMesh(primitive),model:renderModel(entity)});
+    objects.push({entity,primitive,...(options.includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model:renderModel(entity)});
   }
   return{scene,camera,objects,objectsById:new Map(objects.map(object=>[object.entity.id,object] as const)),lights};
 }
