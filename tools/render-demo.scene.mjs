@@ -2,7 +2,7 @@ import {BrowserRuntime} from '/dist/browser.js';
 
 const scene={
   version:1,seed:42,gravity:[0,-9.81,0],ground:0,clearColor:[0.025,0.03,0.04,1],
-  camera:{position:[7,3.7,8.5],target:[0,1.0,0],fov:0.72,focusDistance:10,aperture:0.02},
+  camera:{position:[7,3.7,8.5],target:[0,1.0,0],fov:41.2,focusDistance:10,aperture:0.02},
   rendering:{sunDirection:[-0.45,-1,-0.3],sunColor:[1,0.93,0.82],sunIntensity:3.2,skyColor:[0.18,0.23,0.32],exposure:1.05,shadowExtent:40,fogDensity:0.006},
   entities:[
     {id:'ground',position:[0,-0.08,0],mesh:{kind:'plane',size:[24,24]},material:{color:[0.055,0.065,0.075,1],roughness:0.82,metalness:0}},
