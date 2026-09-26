@@ -55,9 +55,9 @@ export class CpuRenderer implements Renderer{
   }
  }
  private rasterMesh(mesh:MeshData,entity:RuntimeEntity,vp:Mat4,camera:CameraSpec,lights:Light[],sun:Vec3,sunColor:Vec3,sunIntensity:number,exposure:number,fog:number):void{
-  const model=compose(entity.position,entity.rotation,entity.scale),mv=multiply4(vp,model),v=mesh.vertices,c=mesh.colors;
+  const primitive=entity.renderMesh??entity.mesh;const base=primitiveScale(primitive);const scale:[number,number,number]=[entity.scale[0]*base[0],entity.scale[1]*base[1],entity.scale[2]*base[2]];const model=compose(entity.position,entity.rotation,scale),mv=multiply4(vp,model),v=mesh.vertices,c=mesh.colors;
   const projected=new Array<ProjectedVertex>(v.length/6);
-  for(let i=0;i<projected.length;i++){const p=transformPoint(mv,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const world=transformPoint(model,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const normal=transformNormal(model,[v[i*6+3]!,v[i*6+4]!,v[i*6+5]!],entity.scale);projected[i]={x:((p[0]/p[3])*.5+.5)*(this.width-1),y:(1-(p[1]/p[3])*.5-.5)*(this.height-1),z:p[2]/p[3],invW:1/p[3],world:[world[0],world[1],world[2]],normal,color:[c[i*4]!/255,c[i*4+1]!/255,c[i*4+2]!/255,c[i*4+3]!/255]};}
+  for(let i=0;i<projected.length;i++){const p=transformPoint(mv,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const world=transformPoint(model,[v[i*6]!,v[i*6+1]!,v[i*6+2]!]);const normal=transformNormal(model,[v[i*6+3]!,v[i*6+4]!,v[i*6+5]!],scale);projected[i]={x:((p[0]/p[3])*.5+.5)*(this.width-1),y:(1-(p[1]/p[3])*.5-.5)*(this.height-1),z:p[2]/p[3],invW:1/p[3],world:[world[0],world[1],world[2]],normal,color:[c[i*4]!/255,c[i*4+1]!/255,c[i*4+2]!/255,c[i*4+3]!/255]};}
   const idx=mesh.indices;
   for(let t=0;t<idx.length;t+=3){const a=projected[idx[t]!]!,b=projected[idx[t+1]!]!,d=projected[idx[t+2]!]!;if(a.invW<=0||b.invW<=0||d.invW<=0)continue;this.rasterTriangle(a,b,d,entity,camera,lights,sun,sunColor,sunIntensity,exposure,fog);}
  }
@@ -87,6 +87,8 @@ export class CpuRenderer implements Renderer{
  profile(){return undefined;}resetProfile():void{}async prepareMaterials():Promise<void>{}async flush():Promise<void>{}dispose():void{}
  framebuffer():Uint8Array{return this.rgba.slice();}
 }
+
+function primitiveScale(primitive:import('../scene/types.js').Primitive|undefined):[number,number,number]{if(!primitive)return[1,1,1];if(primitive.kind==='box'||primitive.kind==='shard')return[...(primitive.size??[1,1,1])];if(primitive.kind==='sphere'){const d=2*(primitive.radius??1);return[d,d,d];}if(primitive.kind==='plane')return[primitive.size?.[0]??1,1,primitive.size?.[1]??1];return[1,1,1];}
 
 function chunk(type:string,data:Uint8Array):Buffer{const t=Buffer.from(type),payload=Buffer.concat([t,Buffer.from(data)]),out=Buffer.alloc(12+data.length);out.writeUInt32BE(data.length,0);payload.copy(out,4);out.writeUInt32BE(crc32(payload),8+data.length);return out;}
 function crc32(data:Uint8Array):number{let crc=0xffffffff;for(const byte of data){crc^=byte;for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}return(crc^0xffffffff)>>>0;}
