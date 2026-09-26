@@ -16,11 +16,11 @@ permissions:
 
 jobs:
   render:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - name: Install Chromium\n        run: |\n          sudo apt-get update\n          sudo apt-get install -y chromium\n      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
       - name: Install
