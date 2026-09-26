@@ -1,5 +1,5 @@
 name: M3 compression benchmark
-# render harness verification: single CPU renderer
+# render harness verification: CPU mesh guard
 on:
   push:
     paths:
