@@ -1,24 +1,15 @@
 name: Render
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tools/render-*.mjs'
+      - '.github/workflows/render.yml'
+      - 'package.json'
+      - 'bun.lock'
   workflow_dispatch:
-    inputs:
-      scene:
-        description: Scene module path
-        required: true
-        default: tools/promo/clear-day.scene.mjs
-      time:
-        description: Simulation time in seconds
-        required: true
-        default: "0"
-      width:
-        description: Width
-        required: true
-        default: "1920"
-      height:
-        description: Height
-        required: true
-        default: "1080"
 
 permissions:
   contents: read
@@ -27,9 +18,6 @@ jobs:
   render:
     runs-on: self-hosted
     timeout-minutes: 10
-    defaults:
-      run:
-        shell: cmd
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -39,14 +27,16 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build
         run: bun run build
-      - name: Render PNG
+      - name: Render current engine scene
         run: |
           if not exist artifacts mkdir artifacts
-          node dist/cli.js render ${{ inputs.scene }} --time ${{ inputs.time }} --width ${{ inputs.width }} --height ${{ inputs.height }} --out artifacts/render.png
-          node tools/check-png.mjs artifacts/render.png
+          node tools/render-scene.mjs tools/render-demo.scene.mjs 1280 720 artifacts/render.png
+      - name: Validate PNG
+        run: |
+          node -e "const fs=require('fs'); const b=fs.readFileSync('artifacts/render.png'); if(b.readUInt32BE(0)!==0x89504e47) process.exit(1); console.log('PNG',b.length)"
       - uses: actions/upload-artifact@v7
         with:
-          name: render-${{ github.sha }}
+          name: game-engine-render
           path: artifacts/render.png
           if-no-files-found: error
           retention-days: 7
