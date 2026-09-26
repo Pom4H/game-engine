@@ -1,5 +1,5 @@
 name: M3 compression benchmark
-# render harness verification: CDP capture value
+# render harness verification: canvas data URL
 on:
   push:
     paths:
