@@ -34,7 +34,7 @@ const port=server.address().port;
 const chrome=process.env.CHROME_PATH??(['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'].find(existsSync));
 if(!chrome) throw new Error('Chrome/Chromium not found');
 const profile=await mkdtemp(join(tmpdir(),'game-engine-chrome-'));
-const child=spawn(chrome,['--headless=new','--no-sandbox','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu','--use-angle=vulkan','--user-data-dir='+profile,'--remote-debugging-port=0','--window-size='+width+','+height,'about:blank'],{stdio:['ignore','pipe','pipe']});
+const child=spawn(chrome,['--headless=new','--no-sandbox','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu','--use-angle=swiftshader','--user-data-dir='+profile,'--remote-debugging-port=0','--window-size='+width+','+height,'about:blank'],{stdio:['ignore','pipe','pipe']});
 let stderr=''; child.stderr.on('data,c=>stderr+=c);
 const wsUrl=await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(new Error('Chrome DevTools timeout: '+stderr.slice(-2000))),10000);const f=c=>{const m=stderr.match(/DevTools listening on (ws:\/\/[^\s]+)/);if(m){clearTimeout(t);resolve(m[1])}};child.stderr.on('data',f);child.once('error',reject);});
 const port2=Number(new URL(wsUrl).port);
