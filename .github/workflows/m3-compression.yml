@@ -29,6 +29,9 @@ jobs:
           echo M3_BROTLI11_BYTES=$BROTLI
           # benchmark intentionally reports sizes only
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
       - name: Build engine
         shell: bash
         run: |
