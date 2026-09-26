@@ -1,5 +1,5 @@
 name: M3 compression benchmark
-# render harness verification: canvas data URL
+# render harness verification: CPU renderer import
 on:
   push:
     paths:
