@@ -5,7 +5,6 @@ import {existsSync} from 'node:fs';
 import {join,resolve,extname} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawn} from 'node:child_process';
-import {WebSocket} from 'ws';
 
 const [sceneFile,widthArg='1280',heightArg='720',outArg='artifacts/render.png'] = process.argv.slice(2);
 if(!sceneFile) throw new Error('usage: node tools/render-scene.mjs <scene.mjs> [width] [height] [out]');
