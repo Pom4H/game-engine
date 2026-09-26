@@ -1,0 +1,52 @@
+name: Render
+
+on:
+  workflow_dispatch:
+    inputs:
+      scene:
+        description: Scene module path
+        required: true
+        default: tools/promo/clear-day.scene.mjs
+      time:
+        description: Simulation time in seconds
+        required: true
+        default: "0"
+      width:
+        description: Width
+        required: true
+        default: "1920"
+      height:
+        description: Height
+        required: true
+        default: "1080"
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Build
+        run: bun run build
+      - name: Render PNG
+        run: |
+          if not exist artifacts mkdir artifacts
+          node dist/cli.js render ${{ inputs.scene }} --time ${{ inputs.time }} --width ${{ inputs.width }} --height ${{ inputs.height }} --out artifacts/render.png
+          node tools/check-png.mjs artifacts/render.png
+      - uses: actions/upload-artifact@v7
+        with:
+          name: render-${{ github.sha }}
+          path: artifacts/render.png
+          if-no-files-found: error
+          retention-days: 7
