@@ -14,7 +14,7 @@ import {RenderProfiler} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
-import {renderPrimitive,renderModel} from './frame.js';
+import {renderPrimitive,renderModel,primitiveBaseScale} from './frame.js';
 import {buildDiffuseIrradianceSH} from './irradiance.js';
 
 type GPUAny=any;
@@ -1169,11 +1169,7 @@ export class WebGPURenderer implements Renderer{
     ]}),object={uniform,bind,texture,width,height,owned:width>0,label,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
-    const primitive=renderPrimitive(entity),matrix=renderModel(entity),base=primitive?(
-      primitive.kind==='box'||primitive.kind==='shard'?primitive.size??[1,1,1]:
-      primitive.kind==='sphere'?[2*(primitive.radius??1),2*(primitive.radius??1),2*(primitive.radius??1)]:
-      primitive.kind==='plane'?[primitive.size?.[0]??1,1,primitive.size?.[1]??1]:[1,1,1]
-    ):[1,1,1];
+    const base=primitiveBaseScale(renderPrimitive(entity)),matrix=renderModel(entity);
     const px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.modelCache.get(entity.id);
     if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
     this.modelCache.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix});return matrix;
