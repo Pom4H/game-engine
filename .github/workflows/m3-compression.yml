@@ -1,5 +1,5 @@
 name: M3 compression benchmark
-# render harness verification: cleanup race
+# render harness verification: engine capture API
 on:
   push:
     paths:
