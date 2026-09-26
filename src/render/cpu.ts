@@ -88,7 +88,7 @@ export class CpuRenderer implements Renderer{
  framebuffer():Uint8Array{return this.rgba.slice();}
 }
 
-function primitiveScale(primitive:import('../scene/types.js').Primitive|undefined):[number,number,number]{if(!primitive)return[1,1,1];if(primitive.kind==='box'||primitive.kind==='shard')return[...(primitive.size??[1,1,1])];if(primitive.kind==='sphere'){const d=2*(primitive.radius??1);return[d,d,d];}if(primitive.kind==='plane')return[primitive.size?.[0]??1,1,primitive.size?.[1]??1];return[1,1,1];}
+function primitiveScale(primitive:import('../scene/types.js').Primitive|undefined):[number,number,number]{if(!primitive)return[1,1,1];if(primitive.kind==='box'||primitive.kind==='shard'){const s=primitive.size??[1,1,1];return[s[0],s[1],s[2]];}if(primitive.kind==='sphere'){const d=2*(primitive.radius??1);return[d,d,d];}if(primitive.kind==='plane')return[primitive.size?.[0]??1,1,primitive.size?.[1]??1];return[1,1,1];}
 
 function chunk(type:string,data:Uint8Array):Buffer{const t=Buffer.from(type),payload=Buffer.concat([t,Buffer.from(data)]),out=Buffer.alloc(12+data.length);out.writeUInt32BE(data.length,0);payload.copy(out,4);out.writeUInt32BE(crc32(payload),8+data.length);return out;}
 function crc32(data:Uint8Array):number{let crc=0xffffffff;for(const byte of data){crc^=byte;for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}return(crc^0xffffffff)>>>0;}
