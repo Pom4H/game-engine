@@ -53,6 +53,9 @@ export {WalkerControls,type WalkerControlOptions} from './runtime/walker-control
 
 export type {SurfaceTextureSpec} from './scene/types.js';
 
+export {CpuRenderer,encodePng} from './render/cpu.js';
+export type {Renderer,RenderStats,LinearPixelSample,LinearPixelStage,EngineBridge} from './render/types.js';
+
 export {RenderProfiler,RENDER_CPU_QUANTA,RENDER_GPU_QUANTA,type RenderCpuQuantum,type RenderGpuQuantum,type RenderWork,type QuantumStats,type RenderFrameTiming,type RenderProfileSnapshot} from './render/profiler.js';
 
 export {analyzeWGSL,buildRenderAtomReport,type ShaderOperationAtoms,type ShaderEntryAtoms,type ShaderProgramAtoms,type RenderCommandAtoms,type RenderGeometryAtoms,type RenderMemoryAtoms,type RenderAtomReport} from './render/atoms.js';
