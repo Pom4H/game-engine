@@ -1,4 +1,6 @@
-import {generateM3Vehicle,m3PartBody,m3PartMaterial,sampleWalker,bindHumanoid,clothLoftMesh} from '../../dist/index.js';
+import {generateM3Vehicle,m3PartBody,m3PartMaterial} from '../../dist/vehicles/m3.js';
+import {sampleWalker,bindHumanoid} from '../../dist/animation/locomotion.js';
+import {clothLoftMesh} from '../../dist/procedural/cloth.js';
 
 // Only the cast, rig binding, garment shapes and route are authored here.
 // Locomotion, IK, planted contacts and transform updates are engine systems.
