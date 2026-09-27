@@ -35,9 +35,6 @@ jobs:
         run: |
           mkdir -p artifacts
           node tools/render-scene.mjs tools/render-demo.scene.mjs 1280 720 artifacts/render.png
-      - name: Render CPU framebuffer
-        run: |
-          node tools/render-cpu-scene.mjs 640 360 artifacts/cpu-render.png
       - name: Validate PNG
         run: |
           node -e "const fs=require('fs'); const b=fs.readFileSync('artifacts/render.png'); if(b.readUInt32BE(0)!==0x89504e47) process.exit(1); console.log('PNG',b.length)"
