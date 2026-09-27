@@ -42,6 +42,8 @@ spec.rendering.reflectionProbe={
   radius:46,
   exclude:heroReflectionExclude,
   facesPerFrame:6,
+  // Tight local volume for parallax-correct reflections on the car body.
+  boxHalfExtents:[8,3,5],
 };
 // Hero daylight shot keeps the physically meaningful snow banks but drops the
 // thousands of sub-pixel dressing grains generated for the moving winter demo.
