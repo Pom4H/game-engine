@@ -1,0 +1,58 @@
+{
+  "sourceCommit": "432ff1ab5f128883d24d10866e36a0847b9810d0",
+  "workflowRun": 36351658625,
+  "artifact": 10942233321,
+  "success": true,
+  "checks": [
+    "two distinct owned seats; actual WebGPU; zero client physics bodies/steps",
+    "real keyboard/mouse -> authenticated input -> wheel drive/boost -> deformable impact",
+    "both browser decoders receive byte-identical authoritative pose and node frames",
+    "same replay time skins to identical vertices without a client solver",
+    "shared Ё console records real canvas images and frame-correlated CPU/GPU measurements",
+    "recorded filmstrip scrub does not seek the authoritative world or the replay view"
+  ],
+  "commonFrames": 109,
+  "maxOppositeNodeSpanChange": 0.48134885582238374,
+  "impactTime": 2.908333333333333,
+  "recording": {
+    "recording": false,
+    "frames": 12,
+    "images": 2,
+    "imageBytes": 45428,
+    "reason": "Stopped",
+    "limits": {
+      "maxFrames": 1800,
+      "maxImages": 300,
+      "maxImageBytes": 16777216,
+      "maxDurationMs": 30000
+    }
+  },
+  "exceptions": [],
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+  "clients": [
+    {
+      "seat": 0,
+      "clientPhysicsSteps": 0,
+      "clientBodies": 0,
+      "frames": 515,
+      "renderer": "webgpu",
+      "rendererErrors": [],
+      "timestampQueries": true
+    },
+    {
+      "seat": 1,
+      "clientPhysicsSteps": 0,
+      "clientBodies": 0,
+      "frames": 60,
+      "renderer": "webgpu",
+      "rendererErrors": [],
+      "timestampQueries": true
+    }
+  ],
+  "limits": [
+    "Same-host two-client browser test, not WAN latency acceptance",
+    "Viewport emulation is not a physical mobile-device test",
+    "Car chassis are rigid; the ball is deformable",
+    "Overall regression suite remains 215/218 with the same three existing failures"
+  ]
+}

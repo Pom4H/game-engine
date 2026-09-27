@@ -19,9 +19,12 @@ The normal `/docs/` TypeScript playground remains available with its existing sc
 The generated portable static site alone cannot host a match: the authority worker
 and HTTP host must be running.
 
-For a trusted LAN, set `HOST=0.0.0.0` and `ARENA_PUBLIC_ORIGIN=http://<host-address>:4173`
-explicitly before starting. Use that same origin on each client. The default is
-loopback only. This is a private-room developer host, not public Internet deployment,
+For separate computers, use a trusted HTTPS reverse proxy in front of the loopback
+host and set `ARENA_PUBLIC_ORIGIN=https://<your-arena-host>` before starting. Preserve
+that Host header and disable proxy response buffering for SSE. Use the same HTTPS
+origin on both clients. Plain HTTP on a LAN IP is not sufficient for WebGPU's secure
+context requirement (https://gpuweb.github.io/gpuweb/#navigator-gpu). The default is
+loopback only; localhost remains suitable for the two-tab developer test. This is a private-room developer host, not public Internet deployment,
 a production authentication system, matchmaking or anti-cheat. Do not expose it
 without an appropriate authenticated perimeter.
 

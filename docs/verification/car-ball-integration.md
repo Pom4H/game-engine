@@ -37,9 +37,49 @@ Dynamic mesh tests use a GPU mock to verify one vertex-buffer update and unchang
 index/color buffers. This does not establish native GPU or visual correctness.
 
 Sandbox Chromium navigation was blocked by a managed policy. No sandbox browser
-render is claimed. `tools/docs/arena-qa.mjs` is the separate native two-page WebGPU
-acceptance test; it writes screenshots and a browser report. Native acceptance
-must be reported from its actual run, not inferred from these CPU tests.
+render is claimed. The following tests ran on GitHub Actions after local validation.
+
+## Project toolchain and native browser acceptance
+
+Integration run `36351257655` tested exact source tree
+`fa1f8c689879e6b2daf07de07c420bb5eb46bee2` using Node 24.21.0, Bun 1.4.2 and
+TypeScript 7.0.2. Typecheck, engine build, editor build and 99/99 focused tests passed.
+A separate untouched-base worktree reproduced precisely the same three full-suite
+failures: 169/172 before, 215/218 after. The workflow's publication step was denied
+workflow-file permission; the already tested commit `4e383a0` was then published by
+the authorized GitHub connector. Installer and transport payload files are absent
+from the final tree. No permissions or branch protections were weakened.
+
+Native Windows run `36351658625`, commit
+`432ff1ab5f128883d24d10866e36a0847b9810d0`, passed BOTH the original editor/console
+browser acceptance and the two-player arena browser acceptance. The overall workflow
+remains red because the unchanged full regression suite still has those three failures.
+
+The arena test ran two actual Chrome 153 pages with the real WebGPU renderer, actual
+keyboard/mouse commands, HTTP input and SSE state from the authoritative Node worker:
+
+- Distinct owned player seats and zero client physics bodies/steps throughout.
+- 109 common authoritative frames compared exactly, including deformed ball nodes.
+- Driving and boost caused a real soft-body impact; maximum opposite-node span
+  change in that browser run was 0.48134885582238374 m.
+- Both visible meshes were compared at the same recorded time, 2.908333333333333 s;
+  vertex arrays matched exactly. Each tab is foregrounded and its real rendered
+  scene time is awaited, since an inactive Chrome tab can suspend RAF.
+- The existing console recorded 12 CPU frames and two real canvas images. Available
+  asynchronous GPU samples matched their corresponding CPU frame numbers.
+- Filmstrip scrubbing did not change the simulation or the replay playhead.
+- No uncaught browser exceptions or renderer errors in either client.
+
+Screenshots: `artifacts/arena/arena-kickoff.png`, `arena-soft-impact.png`,
+`arena-player-two.png`, `arena-recording.png` and `arena-mobile.png`.
+The mobile image uses Chrome viewport/touch emulation, NOT a physical phone test.
+The run's original evidence artifact is `10942233321` (`dsl-playground-evidence`).
+A compact, selected-field copy of its browser report is stored beside this report.
+
+This is functional native acceptance, not a speedup benchmark or a blanket smoothness
+claim. The trace includes first-map CPU initialization spikes (~192 ms and ~155 ms
+on the two clients). This first synchronous environment preparation is not hidden by
+quoting only warmed-up GPU timings. Recording, decoding and uploads also have costs.
 
 ## Deliberate remaining limits
 

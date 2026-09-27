@@ -81,4 +81,4 @@ globalThis.__ARENA__={inspect,get recording(){return recording;},get terminal(){
 window.addEventListener('pagehide',()=>{disposed=true;clearInterval(timer);worker?.terminate();controls.dispose();terminal.dispose();recording.dispose();view.dispose();renderer?.dispose();if(token)void fetch('/arena-network/leave',{method:'POST',headers:{'x-debug-token':token,'content-type':'application/json'},body:'{}',keepalive:true});});
 function resize(){const scale=Math.min(1,1280/innerWidth,720/innerHeight);renderer?.setResolution(Math.max(1,Math.round(innerWidth*scale)),Math.max(1,Math.round(innerHeight*scale)));}
 window.addEventListener('resize',resize);
-try{renderer=await WebGPURenderer.create(canvas,{profiling:true});resize();requestAnimationFrame(draw);await join();}catch(error){fail(error);}
+try{if(!isSecureContext)throw Error('WebGPU требует HTTPS или localhost. Открой арену через защищённый адрес.');renderer=await WebGPURenderer.create(canvas,{profiling:true});resize();requestAnimationFrame(draw);await join();}catch(error){fail(error);}

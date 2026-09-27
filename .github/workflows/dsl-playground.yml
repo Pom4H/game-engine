@@ -39,6 +39,7 @@ jobs:
       - name: Native WebGPU and two-way UI acceptance
         run: node tools/docs/qa.mjs
       - name: Two-player car-ball native WebGPU acceptance
+        if: ${{ always() && steps.build.outcome == 'success' }}
         run: node tools/docs/arena-qa.mjs
       - name: Full regressions (existing failures remain failures)
         if: ${{ always() && steps.build.outcome == 'success' }}
