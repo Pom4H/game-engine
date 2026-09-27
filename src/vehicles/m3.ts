@@ -132,6 +132,22 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
       material:{kind:'plastic' as const,finish:'polished' as const,roughness:.11,metalness:.16,clearcoat:.72,clearcoatRoughness:.045},
     }));
   }
+  // Two thin body-color polygon flares make the wheel arches catch a continuous
+  // highlight without replacing the authored high-fidelity body panels.
+  const wheelArchAccents:ParametricVehiclePart[]=[];
+  for(const [id,axle] of [['front',M3_PARAMETRIC_PROFILE.dimensions.wheelbase/2+M3_PARAMETRIC_PROFILE.dimensions.axleOffset],['rear',-M3_PARAMETRIC_PROFILE.dimensions.wheelbase/2+M3_PARAMETRIC_PROFILE.dimensions.axleOffset]] as const){
+    const outer=.392,inner=.365,points:readonly (readonly [number,number])[]=[
+      ...Array.from({length:15},(_,i)=>{const a=i*Math.PI/14;return[axle+Math.cos(a)*outer,M3_PARAMETRIC_PROFILE.dimensions.wheelRadius+Math.sin(a)*outer] as const;}),
+      ...Array.from({length:15},(_,i)=>{const a=Math.PI-i*Math.PI/14;return[axle+Math.cos(a)*inner,M3_PARAMETRIC_PROFILE.dimensions.wheelRadius+Math.sin(a)*inner] as const;}),
+    ];
+    wheelArchAccents.push(Object.freeze({
+      id:`wheel-arch-${id}-accent`,
+      role:'paint' as const,
+      mesh:{kind:'polygon-prism' as const,axis:2 as const,points,thickness:.010},
+      position:[0,0,-.956] as const,
+      material:{kind:'plastic' as const,finish:'polished' as const,roughness:.075,metalness:.045,clearcoat:.96,clearcoatRoughness:.03},
+    }));
+  }
   // BMW roundel: cylinders are Y-axis aligned, so the badge must remain almost
   // horizontal to face upward. The previous Z rotation (.92rad) put it nearly edge-on.
   const badge:ParametricVehiclePart[]=[
@@ -155,6 +171,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...frontDetail,
+    ...wheelArchAccents,
     ...grilleSlats,
     ...badge,
     ...interior,
