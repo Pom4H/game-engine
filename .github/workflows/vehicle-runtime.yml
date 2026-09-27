@@ -1,0 +1,44 @@
+name: Vehicle runtime
+
+on:
+  push:
+    branches: [codex/vehicle-causal-runtime]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: vehicle-runtime-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck && bun run build
+      - name: Runtime harness when present
+        run: |
+          mkdir -p artifacts/vehicle-runtime
+          if test -f tools/vehicle-runtime-harness.mjs; then node tools/vehicle-runtime-harness.mjs; fi
+      - name: Full regressions
+        run: |
+          mkdir -p artifacts/vehicle-runtime
+          node --test test/*.test.mjs > artifacts/vehicle-runtime/regressions.log 2>&1
+      - name: Reproducible source and compiled runtime
+        if: always()
+        run: |
+          mkdir -p artifacts/vehicle-runtime
+          git rev-parse HEAD > artifacts/vehicle-runtime/commit.txt
+          tar -czf artifacts/vehicle-runtime/source-runtime.tar.gz src dist test tools docs package.json bun.lock tsconfig.json tsconfig.build.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: vehicle-runtime-evidence
+          path: artifacts/vehicle-runtime/
+          if-no-files-found: error
+          retention-days: 14
