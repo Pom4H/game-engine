@@ -414,7 +414,11 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let environmentFresnel=f0+(1.0-f0)*pow(1.0-nv,5.0);
   let reflectionDir=reflect(-viewDir,n);
   let fallbackEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,roughness*6.0).rgb;
-  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.75;
+  // Vertical body panels benefit from the nearby city capture more than the
+  // forward-facing hood/fascia. Bias the local probe by surface orientation so
+  // the door gains building reflections without changing the established front look.
+  let sideReflection=smoothstep(.30,.82,abs(n.z));
+  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.75*mix(1.0,1.34,sideReflection);
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
   if(f.params.y>.5&&(localProbeWeight>.001||clearcoat>0.0||glassLike)){
