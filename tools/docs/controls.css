@@ -1,0 +1,24 @@
+/* Source-bound controls: stable rows, visible ownership, keyboard/touch-sized editing. */
+.control-row[hidden],.control-group[hidden],.parameter-tools[hidden],.parameter-empty[hidden]{display:none}
+.control-panel{width:280px;border-radius:2px}
+.parameter-tools{position:sticky;top:36px;z-index:1;display:flex;align-items:center;gap:8px;padding:9px 10px;background:#1b2228;border-bottom:1px solid var(--line)}
+.parameter-tools input{width:100%;min-width:0;background:#11171b;border:1px solid var(--line);border-radius:2px;padding:8px;color:var(--text);font-size:12px}
+.parameter-tools output{flex-shrink:0;font:10px ui-monospace,monospace;color:var(--muted)}
+.parameter-empty{padding:12px;color:var(--muted);font-size:12px}
+.row-actions{display:flex;align-items:center;gap:3px;flex-shrink:0}
+.control-row .row-title{margin-bottom:0}
+.control-context{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:10px/1.6 ui-monospace,monospace;color:var(--muted);margin:0 0 4px}
+.control-row .source-link,.value-reset{padding:5px;min-width:26px;min-height:28px;background:none;border:0;color:var(--muted)}
+.value-reset:disabled{opacity:.25}.value-reset:not(:disabled):hover{color:var(--accent);background:#92c8bd16}
+.scrubbable{cursor:ew-resize;user-select:none;text-decoration:underline dotted #73899566;text-underline-offset:4px}
+.control-row input[type=number]{min-height:30px;width:78px;padding:6px;font-size:12px}
+.control-row input[type=range]{min-height:30px;margin:0}
+.vector label{flex:1;min-width:0;width:auto}.vector input[type=number]{min-width:0;width:100%;padding:5px 2px}
+.control-row select{min-height:32px}.color-row input[type=color]{width:44px;height:32px}
+.toggle-row{display:flex;gap:10px;align-items:center;min-height:32px}.toggle-row input{width:20px;height:20px;accent-color:var(--accent)}.toggle-row output{font-size:12px;color:var(--muted)}
+.diagnostics-edit{width:100%;font-size:11px;color:var(--accent)}
+@media(min-width:1600px){.control-panel{width:280px}}
+@media(max-width:1100px){.control-panel{width:248px}}
+@media(max-width:800px){.control-panel{width:min(280px,calc(100% - 16px));bottom:44px}.control-tabs button{min-height:40px}.parameter-tools{top:40px}.parameter-tools input{min-height:40px;font-size:16px}.control-row input[type=number]{min-height:40px;font-size:16px;width:90px}.control-row input[type=range]{min-height:40px}.vector input[type=number]{width:100%;font-size:14px}.control-row select{min-height:40px;font-size:16px}.control-row .source-link,.value-reset{min-width:38px;min-height:40px}.color-row input[type=color]{height:40px}.toggle-row{min-height:40px}.row-title label{font-size:12px}}
+
+.control-panel:has(#diagnostics:not([hidden])) .parameter-empty{display:none}

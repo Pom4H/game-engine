@@ -30,7 +30,7 @@
   function context(node){
    const props=[],calls=[];for(let n=node.parent;n;n=n.parent){
     if(ts.isPropertyAssignment(n))props.unshift(propName(n.name));
-    if(ts.isCallExpression(n)){const name=n.expression.getText(file);const first=n.arguments[0];calls.push({name,id:first&&ts.isStringLiteral(first)?first.text:'',node:n});}
+    if(ts.isCallExpression(n)){const name=n.expression.getText(file);const first=n.arguments[0];calls.push({name,id:first&&(ts.isStringLiteral(first)||name==='assembly'&&ts.isIdentifier(first))?first.text:'',node:n});}
    }
    const paths=props.join('.'),names=calls.map(c=>c.name);
    const group=paths.includes('rendering')?'render':paths.includes('paint')||paths.includes('material')?'material':paths.includes('controls')||paths.includes('timeline')?'input':paths.includes('environment')||paths.includes('air')?'environment':names.some(n=>['chassis','roadWheels','wing','wheel','vehicle'].includes(n))?'mechanics':'scene';
@@ -56,7 +56,7 @@
    return null;
   }
   function add(node,config,ctx,key){
-   const v=resolve(node),at=node.getStart(file),editable=!!v&&config.shape!==undefined&&(config.shape===v.shape||(config.shape==='color'&&v.shape==='vector'));
+   const v=resolve(node),at=node.getStart(file),editable=!!v&&config.shape!==undefined&&(config.shape===v.shape||(config.shape==='color'&&v.shape==='vector'&&v.value.length>=3));
    const start=v?.start??at,end=v?.end??node.end;
    const rangeKey=start+':'+end;
    if(seen.has(rangeKey)){seen.get(rangeKey).uses++;return;}
@@ -98,9 +98,10 @@
   };
   if(binding.elements){
    if(!Array.isArray(value)||value.length!==binding.elements.length)throw new TypeError('Vector shape mismatch');
-   return binding.elements.map((e,i)=>{if(source.slice(e.start,e.end)!==e.raw)throw new Error('Source changed');return {from:e.start,to:e.end,insert:literal(value[i],'number')};}).filter((e,i)=>e.insert!==binding.elements[i].raw);
+   return binding.elements.map((e,i)=>{if(source.slice(e.start,e.end)!==e.raw)throw new Error('Source changed');return {from:e.start,to:e.end,insert:literal(value[i],'number')};}).filter((e,i)=>value[i]!==binding.elements[i].value);
   }
-  return [{from:binding.start,to:binding.end,insert:literal(value,binding.shape)}];
+  const insert=literal(value,binding.shape);
+  return value===binding.value?[]:[{from:binding.start,to:binding.end,insert}];
  }
  function applyEdits(source,edits){
   let previous=source.length+1;for(const e of [...edits].sort((a,b)=>b.from-a.from)){if(e.to>previous||e.from<0||e.to<e.from||e.to>source.length)throw new RangeError('Overlapping/invalid edits');source=source.slice(0,e.from)+e.insert+source.slice(e.to);previous=e.from;}return source;

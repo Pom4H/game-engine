@@ -1,5 +1,6 @@
 import {EXAMPLES,LEGACY_PENDING} from './examples.mjs';
 import {SourceDocument,rebaseBindings} from './document.mjs';
+import {BoundControls} from './controls.mjs';
 import {CompilerClient} from './compiler-client.mjs';
 import {BrowserRuntime} from './engine/runtime/browser.js';
 import {FixedClock} from './engine/core/fixed-clock.js';
@@ -12,10 +13,20 @@ const names={native:'Новый движок',ported:'Перенесено',part
 const fmt=(value,digits=2)=>Number.isFinite(value)?value.toFixed(digits):'—';
 const el=(tag,text,className)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;};
 const button=(text,action,cls)=>{const b=el('button',text,cls);b.type='button';b.onclick=action;return b;};
-let example=EXAMPLES[0],bindings=[],bindingReady=false,controlOrder='',runtime=null,boot=null,bootProgram=null,program=null,compiledRevision=-1;
+let example=EXAMPLES[0],bindings=[],bindingReady=false,resetBindings=true,runtime=null,boot=null,bootProgram=null,program=null,compiledRevision=-1;
 let timer=0,raf=0,running=false,lastHud=0,external=false,disposed=false,applySerial=0,lastSelection=[0,0],lastCompiler=null,lastPatch='rebuild',seekSerial=0;
 const clock=new FixedClock(1000/60,250,6),stats={compiles:0,liveEdits:0,rebuilds:0,frameMs:0,compileMs:0};
 const compiler=new CompilerClient(reply=>void accept(reply).catch(showError));
+const controls=new BoundControls({list:$('control-list'),search:$('parameter-search'),count:$('parameter-count'),empty:$('parameter-empty'),groups,
+ onEdit:changeBinding,onSelect:focusSource,begin:()=>doc.end(),end:()=>doc.end()});
+function focusSource(binding){
+ if(!binding)return;
+ if(innerWidth<801){document.querySelector('.workspace').dataset.pane='code';for(const b of document.querySelectorAll('button[data-pane]'))b.setAttribute('aria-pressed',String(b.dataset.pane==='code'));}
+ source.focus();source.setSelectionRange(binding.start,binding.end);source.scrollTop=Math.max(0,(binding.line-7)*parseFloat(getComputedStyle(source).lineHeight));syncScroll();controls.select(binding.start,binding.end);
+}
+function syncControlValues(){controls.update(bindings,{ready:bindingReady&&!external});}
+function renderBindings(next){bindings=next;bindingReady=true;controls.update(bindings,{ready:!external,reset:resetBindings});resetBindings=false;controls.select(...lastSelection);}
+
 function showError(error){const message=error instanceof Error?error.message:String(error);$('error').textContent=message.slice(0,1500);$('error').hidden=false;$('code-status').textContent='Ошибка · предыдущая сцена сохранена';if(!runtime)$('placeholder').textContent=message;}
 function clearError(){$('error').hidden=true;$('error').textContent='';}
 function selection(){return[source.selectionStart,source.selectionEnd];}
@@ -31,7 +42,7 @@ function schedule(delay=180){
  if(external){status('Импортированный код · нажмите «Применить»');return;}
  status('Изменения в коде…');if(timer)return;timer=setTimeout(()=>{timer=0;compiler.submit(doc.source,doc.revision);},delay);
 }
-function setSource(text,{group=null,cursor,trust=true,compile=true}={}){
+function setSource(text,{group=null,cursor,trust=!external,compile=true}={}){
  if(text.length>64000){showError('Лимит исходника — 64 000 символов');return false;}
  const oldSelection=selection();if(!doc.set(text,{group,selection:oldSelection}))return false;
  runtime?.cancelReplacement();seekSerial++;external=!trust;
@@ -39,10 +50,10 @@ function setSource(text,{group=null,cursor,trust=true,compile=true}={}){
  highlight();if(!group?.startsWith('hud:')&&!group?.startsWith('camera:')){bindingReady=false;syncControlValues();}
  if(compile)schedule(group?.startsWith('hud:')||group?.startsWith('camera:')?40:180);return true;
 }
-function restored(entry){if(!entry)return;runtime?.cancelReplacement();seekSerial++;source.value=doc.source;source.setSelectionRange(...(entry.selection??[0,0]));highlight();bindingReady=false;syncControlValues();external=false;schedule(0);}
+function restored(entry){if(!entry)return;runtime?.cancelReplacement();seekSerial++;source.value=doc.source;source.setSelectionRange(...(entry.selection??[0,0]));highlight();bindingReady=false;syncControlValues();schedule(0);}
 source.addEventListener('input',()=>{const text=source.value,cursor=selection();setSource(text,{group:'typing',cursor});});
 source.addEventListener('scroll',syncScroll);
-source.addEventListener('select',()=>{lastSelection=selection();for(const row of $('control-list').querySelectorAll('.control-row')){const b=bindings.find(b=>b.id===row.dataset.binding);row.classList.toggle('active',!!b&&lastSelection[0]<=b.end&&lastSelection[1]>=b.start);}});
+source.addEventListener('select',()=>{lastSelection=selection();controls.select(...lastSelection);});
 source.addEventListener('keydown',event=>{
  const command=event.metaKey||event.ctrlKey;
  if(command&&event.key.toLowerCase()==='z'){event.preventDefault();restored(event.shiftKey?doc.redo(selection()):doc.undo(selection()));return;}
@@ -61,70 +72,34 @@ source.addEventListener('keydown',event=>{
  }
 });
 $('undo').onclick=()=>restored(doc.undo(selection()));$('redo').onclick=()=>restored(doc.redo(selection()));
+addEventListener('keydown',event=>{
+ if(event.target===source||!(event.metaKey||event.ctrlKey))return;
+ const key=event.key.toLowerCase();
+ if(key==='z'||key==='y'){event.preventDefault();restored(key==='y'||event.shiftKey?doc.redo(selection()):doc.undo(selection()));}
+ if(key==='enter'){event.preventDefault();apply();}
+});
 function apply(){external=false;clearTimeout(timer);timer=0;status('Компиляция…');compiler.submit(doc.source,doc.revision);}
 $('apply').onclick=apply;
-function selectExample(id){
+function selectExample(id,{imported}={}){
  const next=EXAMPLES.find(x=>x.id===id);if(!next)return;pause();example=next;$('examples').value=id;
  $('filename').textContent=id+'.scene.ts';$('preview-title').textContent=next.title;$('scope-text').textContent=next.limit;$('scope-badge').textContent=names[next.status];$('scope-badge').className='badge '+next.status;
- external=false;setSource(next.source,{compile:false,cursor:[0,0]});doc.end();history.replaceState(null,'','#scene='+encodeURIComponent(id));apply();
+ resetBindings=true;clearTimeout(timer);timer=0;compiler.cancel();bindingReady=false;bindings=[];controls.update([],{ready:false,reset:true});$('parameter-search').value='';
+ external=imported!==undefined;setSource(imported??next.source,{compile:false,cursor:[0,0],trust:!external});doc.end();
+ if(external){status('Код из ссылки · нажмите «Применить»');$('placeholder').textContent='Код из ссылки ожидает подтверждения запуска';}
+ else{history.replaceState(null,'','#scene='+encodeURIComponent(id));apply();}
 }
 const groupNodes=new Map();for(const item of EXAMPLES){let group=groupNodes.get(item.group);if(!group){group=el('optgroup');group.label=item.group;groupNodes.set(item.group,group);$('examples').append(group);}const option=el('option',item.title);option.value=item.id;group.append(option);}
 $('examples').onchange=()=>selectExample($('examples').value);
-function sourceLink(binding){
- const b=button(':'+binding.line,()=>{const current=bindings.find(x=>x.id===binding.id);if(!current)return;source.focus();source.setSelectionRange(current.start,current.end);source.scrollTop=Math.max(0,(current.line-7)*parseFloat(getComputedStyle(source).lineHeight));syncScroll();},'source-link');b.title=(binding.where?binding.where+' · ':'')+binding.key+' → строка кода';return b;
-}
 function changeBinding(id,value,origin='hud'){
  if(!bindingReady)return;const binding=bindings.find(x=>x.id===id);if(!binding)return;
  try{const edits=editsFor(doc.source,binding,value);if(!edits.length)return;const next=applyEdits(doc.source,edits),rebased=rebaseBindings(bindings,edits,next,id,value);
   if(setSource(next,{group:origin==='camera'?'camera:orbit':origin+':'+id})){bindings=rebased;bindingReady=true;syncControlValues();}
  }catch(error){showError(error);}
 }
-function control(binding){
- const row=el('div',undefined,'control-row');row.dataset.binding=binding.id;row.dataset.key=binding.key;
- const title=el('div',undefined,'row-title'),label=el('label',binding.label+(binding.unit?' · '+binding.unit:''));label.title=[binding.where,binding.key,binding.reason].filter(Boolean).join(' · ');title.append(label,sourceLink(binding));row.append(title);
- const inputId='control-'+encodeURIComponent(binding.id);label.htmlFor=inputId;
- if(!binding.editable){row.append(el('code',binding.raw,'expression'));return row;}
- const input=(type,cls)=>{const i=el('input');i.type=type;if(cls)i.className=cls;i.setAttribute('aria-label',binding.label);return i;};
- if(binding.shape==='number'){
-  const line=el('div',undefined,'range-row'),range=input('range'),number=input('number');range.min=String(Math.min(binding.min,binding.value));range.max=String(Math.max(binding.max,binding.value));range.step=String(binding.step);number.step=String(binding.step);number.id=inputId;
-  range.oninput=()=>changeBinding(binding.id,range.valueAsNumber);number.oninput=()=>{if(Number.isFinite(number.valueAsNumber))changeBinding(binding.id,number.valueAsNumber);};line.append(range,number);row.append(line);
- }else if(binding.shape==='vector'){
-  const line=el('div',undefined,'vector');binding.value.forEach((_,i)=>{const label=el('label',['x','y','z','w'][i]),field=input('number');field.step='.01';field.dataset.axis=String(i);field.setAttribute('aria-label',binding.label+' '+['x','y','z','w'][i]);field.oninput=()=>{if(!Number.isFinite(field.valueAsNumber))return;const b=bindings.find(x=>x.id===binding.id),v=[...b.value];v[i]=field.valueAsNumber;changeBinding(binding.id,v);};label.append(field);line.append(label);});row.append(line);
- }else if(binding.shape==='color'){
-  const line=el('div',undefined,'color-row'),field=input('color');field.id=inputId;field.oninput=()=>{const b=bindings.find(x=>x.id===binding.id),v=[...b.value];for(let i=0;i<3;i++)v[i]=Number((parseInt(field.value.slice(i*2+1,i*2+3),16)/255).toFixed(4));changeBinding(binding.id,v);};line.append(field,el('output'));row.append(line);
- }else if(binding.shape==='select'){
-  const select=el('select');select.id=inputId;select.setAttribute('aria-label',binding.label);for(const value of binding.options){const option=el('option',value);option.value=value;select.append(option);}select.onchange=()=>changeBinding(binding.id,select.value);row.append(select);
- }else if(binding.shape==='boolean'){const field=input('checkbox');field.id=inputId;field.onchange=()=>changeBinding(binding.id,field.checked);row.append(field);}
- row.addEventListener('pointerdown',()=>doc.end());row.addEventListener('change',()=>doc.end());return row;
-}
-function renderBindings(next){
- bindings=next;bindingReady=true;const order=bindings.map(b=>b.id+(b.editable?'e':'r')).join('|');
- if(order!==controlOrder){
-  controlOrder=order;const open=new Set([...$('control-list').querySelectorAll('details[open]')].map(x=>x.dataset.group)),first=!$('control-list').children.length;
-  const nodes=[];
-  for(const key of ['camera','render','material','input','mechanics','environment','scene']){
-   const items=bindings.filter(b=>b.group===key);if(!items.length)continue;
-   const details=el('details',undefined,'control-group');details.dataset.group=key;details.open=first?['render','material'].includes(key):open.has(key);
-   const summary=el('summary',groups[key]);summary.append(el('small',String(items.length)));details.append(summary,...items.map(control));nodes.push(details);
-  }$('control-list').replaceChildren(...nodes);
- }
- syncControlValues();
-}
-function syncControlValues(){
- for(const row of $('control-list').children.length?$('control-list').querySelectorAll('.control-row'):[]){
-  const b=bindings.find(x=>x.id===row.dataset.binding);if(!b)continue;row.querySelector('.source-link').textContent=':'+b.line;
-  for(const field of row.querySelectorAll('input,select')){field.disabled=!bindingReady;
-   if(field===document.activeElement&&field.type==='number')continue;
-   if(field.type==='checkbox')field.checked=!!b.value;
-   else if(field.type==='color')field.value='#'+b.value.slice(0,3).map(x=>Math.round(Math.max(0,Math.min(1,x))*255).toString(16).padStart(2,'0')).join('');
-   else field.value=String(field.dataset.axis!==undefined?b.value[Number(field.dataset.axis)]:b.value);
-  }const out=row.querySelector('output');if(out)out.textContent=b.value.slice(0,3).map(v=>fmt(v,2)).join(' / ');
- }
-}
 async function accept(reply){
  if(disposed||reply.revision!==doc.revision||external)return;
+ if(reply.error){bindingReady=false;syncControlValues();if(reply.tokens)highlight(reply.tokens);showError(reply.error);return;}
  if(reply.bindings){renderBindings(reply.bindings);highlight(reply.tokens);}
- if(reply.error){showError(reply.error);return;}
  const serial=++applySerial,wasRunning=running;stats.compiles++;stats.compileMs=reply.compileMs;lastCompiler=reply.compilers;
  if(!boot){
   bootProgram=reply.program;boot=BrowserRuntime.create($('render'),reply.program.scene,{autoplay:false,audio:false,exposeBridge:true,profiling:true,install:s=>installProgram(s,reply.program)}).then(value=>{if(disposed){value.dispose();throw new Error('Editor disposed');}runtime=value;return value;});
@@ -175,8 +150,8 @@ function refreshHud(now,force=false){
 }
 function animate(now){if(disposed)return;try{if(running&&runtime&&program){let count=0;clock.advance(now,()=>count++);count=Math.min(count,Math.max(0,Math.ceil((program.durationSeconds-runtime.scene.time)*60)));if(count){const start=performance.now();runtime.step(count);stats.frameMs=performance.now()-start;}if(runtime.scene.time+1e-8>=program.durationSeconds)pause();}refreshHud(now);}catch(error){pause();showError(error);}raf=requestAnimationFrame(animate);}
 $('panel-toggle').onclick=()=>{const panel=$('control-panel');panel.hidden=!panel.hidden;$('panel-toggle').setAttribute('aria-expanded',String(!panel.hidden));};
-function tab(diagnostics){$('diagnostics').hidden=!diagnostics;$('control-list').hidden=diagnostics;$('parameters-tab').setAttribute('aria-pressed',String(!diagnostics));$('diagnostics-tab').setAttribute('aria-pressed',String(diagnostics));refreshHud(performance.now(),true);}
-$('parameters-tab').onclick=()=>tab(false);$('diagnostics-tab').onclick=()=>tab(true);
+function tab(diagnostics){$('diagnostics').hidden=!diagnostics;$('parameter-tools').hidden=diagnostics;$('parameter-empty').hidden=diagnostics;$('control-list').hidden=diagnostics;$('parameters-tab').setAttribute('aria-pressed',String(!diagnostics));$('diagnostics-tab').setAttribute('aria-pressed',String(diagnostics));refreshHud(performance.now(),true);}
+$('parameters-tab').onclick=()=>{tab(false);controls.filter();};$('diagnostics-tab').onclick=()=>tab(true);$('edit-parameters').onclick=()=>{tab(false);controls.filter();$('parameter-search').focus();};
 for(const b of document.querySelectorAll('[data-pane] button,button[data-pane]'))if(b.dataset.pane)b.onclick=()=>{document.querySelector('.workspace').dataset.pane=b.dataset.pane;for(const x of document.querySelectorAll('button[data-pane]'))x.setAttribute('aria-pressed',String(x===b));runtime?.render();};
 // Camera gestures edit exactly the orbit literals. Expressions remain read-only.
 let drag=null;
@@ -189,7 +164,7 @@ divider.onpointerdown=e=>{resizing=true;divider.setPointerCapture(e.pointerId);}
 new ResizeObserver(()=>{if(runtime&&!running)runtime.render();}).observe($('viewport'));
 function download(name,blob){const url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('save').onclick=()=>download(example.id+'.scene.ts',new Blob([doc.source],{type:'text/plain;charset=utf-8'}));$('open').onclick=()=>$('file').click();
-$('file').onchange=async()=>{const file=$('file').files?.[0];if(!file)return;try{if(file.size>64000)throw new RangeError('Лимит файла — 64 КБ');pause();setSource(await file.text(),{trust:false});status('Код из файла · нажмите «Применить»');}catch(error){showError(error);}finally{$('file').value='';}};
+$('file').onchange=async()=>{const file=$('file').files?.[0];if(!file)return;try{if(file.size>64000)throw new RangeError('Лимит файла — 64 КБ');pause();compiler.cancel();resetBindings=true;setSource(await file.text(),{trust:false});status('Код из файла · нажмите «Применить»');}catch(error){showError(error);}finally{$('file').value='';}};
 $('image').onclick=()=>{if(runtime)void runtime.capture().then(blob=>download(example.id+'.png',blob)).catch(showError);};
 const encode=text=>{let binary='';for(const byte of new TextEncoder().encode(text))binary+=String.fromCharCode(byte);return btoa(binary);};
 const decode=text=>{const data=atob(text);if(data.length>64000)throw new RangeError('Лимит ссылки — 64 КБ');return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(data,c=>c.charCodeAt(0)));};
@@ -204,6 +179,7 @@ addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(raf);clearTi
 // Small test/automation surface. Production uses exactly the same actions as a human.
 globalThis.__DSL_EDITOR__={get source(){return doc.source;},get revision(){return doc.revision;},get appliedRevision(){return compiledRevision;},get bindings(){return bindings;},get stats(){return {...stats};},get lastPatch(){return lastPatch;},get compilers(){return lastCompiler;},get program(){return program;},get runtime(){return runtime;},edit:(id,value)=>changeBinding(id,value),setSource:text=>setSource(text),select:selectExample,apply,seek,play,pause,undo:()=>restored(doc.undo(selection()))};
 if(innerWidth<801){$('control-panel').hidden=true;$('panel-toggle').setAttribute('aria-expanded','false');}
-const initialHash=new URLSearchParams(location.hash.slice(1)),id=initialHash.get('scene');selectExample(EXAMPLES.some(x=>x.id===id)?id:EXAMPLES[0].id);
-if(initialHash.has('source')){try{pause();setSource(decode(initialHash.get('source')),{trust:false,compile:false});clearTimeout(timer);timer=0;status('Код из ссылки · нажмите «Применить»');}catch(error){showError(error);}}
+const initialHash=new URLSearchParams(location.hash.slice(1)),id=initialHash.get('scene');
+try{selectExample(EXAMPLES.some(x=>x.id===id)?id:EXAMPLES[0].id,initialHash.has('source')?{imported:decode(initialHash.get('source'))}:{});}
+catch(error){external=true;showError(error);}
 raf=requestAnimationFrame(animate);

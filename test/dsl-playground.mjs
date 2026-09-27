@@ -35,7 +35,7 @@ test('scope-aware constant edits change the declaration; expressions are not ove
 });
 test('vector edits retain comments and alpha; aliased vector axes are not offered as independent controls',()=>{
  const code='const paint={color:[.1, /* green */ .2, .3, .65]};';const b=analyze(ts,code).bindings[0];
- assert.equal(applyEdits(code,editsFor(code,b,[.4,.5,.6,.65])), 'const paint={color:[0.4, /* green */ 0.5, 0.6, 0.65]};');
+ assert.equal(applyEdits(code,editsFor(code,b,[.4,.5,.6,.65])), 'const paint={color:[0.4, /* green */ 0.5, 0.6, .65]};');
  const other=analyze(ts,'const x=1; const a={position:[x,x,x]}').bindings[0];assert.equal(other.editable,false);
 });
 test('rapid HUD edits rebase source ranges without needing a compiler roundtrip',()=>{
@@ -94,4 +94,32 @@ test('authoring session reuses vehicle surface/wheels on appearance edits and re
 test('migration coverage never presents coupled-physics/network/storage as completed',()=>{
  for(const id of ['full-crash','full-network','full-storage','full-city','full-audio'])assert.ok(LEGACY_PENDING.some(x=>x.id===id));
  for(const x of EXAMPLES.filter(x=>x.legacy.includes('full-crash')))assert.equal(x.status,'partial');
+});
+
+test('bindings retain semantic IDs across literal length, comments and whitespace edits',()=>{
+ const a=EXAMPLES[0].source,b=a.replace('exposure: 1,','exposure: .625,').replace('roughness: .24','roughness: 0.125');
+ assert.deepEqual(analyze(ts,a).bindings.map(b=>b.id),analyze(ts,'// header\n'+b).bindings.map(b=>b.id));
+ const ids=analyze(ts,a).bindings.map(b=>b.id);assert.equal(new Set(ids).size,ids.length);
+});
+test('rebased shared scalar and vector references remain coherent before the worker replies',()=>{
+ let code='const r=.2; const cfg={rendering:{exposure:r},paint:{color:[r, .4, .5, 1]}};',bs=analyze(ts,code).bindings;
+ let b=bs.find(b=>b.key==='exposure'),edits=editsFor(code,b,.7);code=applyEdits(code,edits);bs=rebaseBindings(bs,edits,code,b.id,.7);
+ b=bs.find(b=>b.key==='color');assert.deepEqual(b.value,[.7,.4,.5,1]);assert.equal(b.elements[0].raw,'0.7');
+ edits=editsFor(code,b,[.7,.9,.5,1]);code=applyEdits(code,edits);bs=rebaseBindings(bs,edits,code,b.id,[.7,.9,.5,1]);
+ assert.equal(code,'const r=0.7; const cfg={rendering:{exposure:r},paint:{color:[r, 0.9, .5, 1]}};');
+ assert.equal(bs.find(b=>b.key==='exposure').value,.7);
+ edits=editsFor(code,bs.find(b=>b.key==='color'),[.3,.9,.5,1]);code=applyEdits(code,edits);bs=rebaseBindings(bs,edits,code,b.id,[.3,.9,.5,1]);
+ assert.equal(bs.find(b=>b.key==='exposure').value,.3);
+ assert.deepEqual(bs.find(b=>b.key==='color').value,[.3,.9,.5,1]);
+});
+test('no-op edits preserve numeric spelling, references and comments',()=>{
+ const code='const c={paint:{color:[.1, /* keep */ .2, .3, 1]}, massKg:1_500};';
+ for(const b of analyze(ts,code).bindings)assert.deepEqual(editsFor(code,b,b.value),[]);
+ assert.equal(analyze(ts,'const c={paint:{color:[.1,.2]}}').bindings[0].editable,false);
+});
+test('cancel invalidates pending compiler replies without running queued imported code',()=>{
+ const workers=[],seen=[];const c=new CompilerClient(r=>seen.push(r),{createWorker:()=>{const w={posted:[],dead:false,postMessage(x){this.posted.push(x)},terminate(){this.dead=true}};workers.push(w);return w;}});
+ c.submit('old',1);c.submit('queued',2);const old=workers[0],reply=old.onmessage;c.cancel();
+ reply({data:{id:old.posted[0].id,program:'old'}});assert.ok(old.dead);assert.equal(seen.length,0);assert.equal(old.posted.length,1);
+ c.submit('approved',3);const next=workers[1];next.onmessage({data:{id:next.posted[0].id,program:'approved'}});assert.equal(seen[0].program,'approved');c.dispose();
 });

@@ -7,7 +7,7 @@ const here=fileURLToPath(new URL('.',import.meta.url)),root=resolve(here,'../..'
 const out=resolve(root,process.env.DOCS_OUT??'.site');
 await rm(out,{recursive:true,force:true});await mkdir(join(out,'vendor'),{recursive:true});
 await cp(join(root,'dist'),join(out,'engine'),{recursive:true});
-for(const file of ['index.html','style.css','app.mjs','compiler-worker.js','compile.cjs','bindings.cjs','document.mjs','compiler-client.mjs','examples.mjs'])await cp(join(here,file),join(out,file));
+for(const file of ['index.html','style.css','controls.css','app.mjs','controls.mjs','compiler-worker.js','compile.cjs','bindings.cjs','document.mjs','compiler-client.mjs','examples.mjs'])await cp(join(here,file),join(out,file));
 const require=createRequire(import.meta.url);let compiler;
 try{compiler=require.resolve('typescript/lib/typescript.js');}catch{throw new Error('Install editor tooling: bun install --cwd tools/docs (or npm install --prefix tools/docs)');}
 await cp(compiler,join(out,'vendor/typescript.js'));

@@ -9,5 +9,6 @@ export class CompilerClient {
   worker.postMessage(job);
  }
  fail(worker,error){if(this.disposed||worker!==this.worker)return;const job=this.active;clearTimeout(this.timer);worker.terminate();this.worker=null;this.active=null;if(job?.id===this.serial)this.onReply({...job,error});this.pump();}
+ cancel(){clearTimeout(this.timer);this.serial++;this.worker?.terminate();this.worker=this.active=this.pending=null;}
  dispose(){this.disposed=true;clearTimeout(this.timer);this.worker?.terminate();this.worker=this.active=this.pending=null;}
 }

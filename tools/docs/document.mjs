@@ -13,9 +13,11 @@ export class SourceDocument {
 /** Rebase syntax locations after a token edit. Unrelated comments/formatting are untouched. */
 export function rebaseBindings(bindings,edits,source,changedId,value){
  const ordered=[...edits].sort((a,b)=>a.from-b.from);
+ const changedValue=range=>{const edit=ordered.find(e=>e.from===range.start&&e.to===range.end);if(!edit)return range.value;return range.shape==='boolean'?edit.insert==='true':range.shape==='select'?edit.insert.slice(1,-1):Number(edit.insert);};
  const map=(position,bias)=>{let delta=0;for(const e of ordered){if(position<e.from)break;if(position>=e.to){delta+=e.insert.length-(e.to-e.from);}else return e.from+delta+(bias>0?e.insert.length:0);}return position+delta;};
- return bindings.map(b=>{const start=map(b.start,-1),end=map(b.end,1),copy={...b,start,end,raw:source.slice(start,end),line:source.slice(0,start).split('\n').length};
-  if(b.elements)copy.elements=b.elements.map(e=>{const start=map(e.start,-1),end=map(e.end,1);return {...e,start,end,raw:source.slice(start,end)};});
-  if(b.id===changedId)copy.value=value;return copy;
+ return bindings.map(b=>{const start=map(b.start,-1),end=map(b.end,1),copy={...b,start,end,raw:source.slice(start,end),value:changedValue(b),line:source.slice(0,start).split('\n').length};
+  if(b.elements)copy.elements=b.elements.map(e=>{const start=map(e.start,-1),end=map(e.end,1);return {...e,start,end,raw:source.slice(start,end),value:changedValue(e)};});
+  if(copy.elements)copy.value=copy.elements.map(e=>e.value);
+  else if(b.id===changedId&&b.shape==='select')copy.value=value;return copy;
  });
 }
