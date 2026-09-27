@@ -17,5 +17,5 @@ for(const part of vehicle.parts){
 }
 spec.animation={...spec.animation,vehicles:[]};
 spec.surfaceContacts={...spec.surfaceContacts,wheels:[]};
-spec.rendering.reflectionProbe={...spec.rendering.reflectionProbe,entity:'passing-body'};
+spec.rendering.reflectionProbe={...spec.rendering.reflectionProbe,entity:'passing-body',exclude:spec.entities.filter(entity=>entity.id.startsWith('passing-')).map(entity=>entity.id)};
 export default spec;
