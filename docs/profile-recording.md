@@ -46,21 +46,28 @@ presentation times and restorable world checkpoints are not supplied by this pat
 
 ## Verification
 
-Local baseline source da4a0878452b76ee74748c415a4a484a53ae44bf was independently
-built/tested with Node 22.16.0 / TypeScript 5.8.3. The project declares TS ^7.0.2;
-local results do not verify that declared toolchain.
-
-Typecheck, engine build and portable site build pass. Focused recording/console/DSL
-tests: 47 pass / 0 fail. Full baseline: 151 pass / 3 fail. Modified tree: 159 pass /
+Local baseline da4a0878452b76ee74748c415a4a484a53ae44bf was independently tested
+with Node 22.16.0 / TypeScript 5.8.3: 151 pass / 3 fail. Modified tree: 159 pass /
 3 fail, with the same two clearcoat and one M3 geometry expectation. No assertions
-were weakened. The parallel native Chrome collector was added after this baseline.
+were weakened. The native Chrome collector was added after this baseline.
 
-Chromium production recorder UI with a synthetic 2D DOM fixture passes nine assertions
-(capture, frame correlation, scrub, saved/live separation, export, mobile bounds).
-This is NOT an engine render or WebGPU acceptance. Local editor navigation is blocked
-by environment policy; real WebGPU assertions are added to tools/docs/qa.mjs and the
-existing DSL workflow. Do not claim their success without an actual run.
+GitHub Actions run **36346118905** integrated commit
+**d33813657901635bc1927f9f08f8a72cce99b0be**. Linux typecheck, build and focused
+DSL/console/recording/native trace tests passed: **55 pass / 0 fail**. The Windows
+self-hosted job also built and ran the real editor in **HeadlessChrome 153 / WebGPU**:
+**44 browser assertions passed**, including actual canvas filmstrip, frame-keyed
+CPU/GPU joins, scrub/zoom/frame steps without changing the live scene tick, source
+binding roundtrip, Undo, worker recovery and mobile controls. The report records
+`timestampQueries:true` and no renderer errors; hardware adapter identity was not
+reported. This is functional acceptance, not a frame-rate or capture-overhead benchmark.
 
-The one-time branch-local integration workflow verifies exact input/output hashes,
-runs focused checks and deletes its own script/payload after applying the patch. It
-is a delivery mechanism, not a permanent CI source-code generator. main is untouched.
+Artifacts: `recording-webgpu-evidence` (**10940896463**) contains
+`engine-profiler.png`, `browser-report.json` and other native editor screenshots.
+`recording-integration-evidence` contains the exact source archive and test output.
+The verified CI used isolated TypeScript 5.8.3 / Node 22; it does NOT verify the
+project-declared TypeScript ^7.0.2 / Bun toolchain. Subsequent CSS layout refinement
+is covered by a separate nine-assertion production-UI DOM fixture; that fixture is
+not itself a WebGPU engine render. The existing DSL pipeline reruns native acceptance.
+
+The temporary delivery workflow and payload were removed after integration.
+Recording checks now live in the existing DSL workflow. main is untouched.
