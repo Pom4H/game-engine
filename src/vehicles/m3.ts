@@ -129,7 +129,8 @@ function refineM3FrontRenderMesh(mesh:TriangleMesh):TriangleMesh{
 }
 export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.006,true);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  const refined=refineM3FrontRenderMesh(mesh);\n  const first=subdivideSmoothTriangleMesh(refined,buildSmoothSubdivisionPlan(refined,42,.006,true));
+  const refined=refineM3FrontRenderMesh(mesh);
+  const first=subdivideSmoothTriangleMesh(refined,buildSmoothSubdivisionPlan(refined,42,.006,true));
   const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.002));
   // Final pass only resolves highlight continuity; the displacement is deliberately
   // sub-millimetre so the packed FBX surface remains the geometric authority.
