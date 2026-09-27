@@ -119,24 +119,26 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   // Front fascia surface remains the packed FBX `plastic-trim`. These are only
   // recessed vertical inlays inside its two existing openings, not a second fascia.
   const grilleSlats:ParametricVehiclePart[]=[];
-  // Real G80 M3 kidneys use horizontal aero slats, not vertical bars.
-  // Each slat spans the kidney opening in Z and is stacked in Y.
-  for(const side of [-1,1] as const)for(let row=0;row<7;row++){
-    const y=.50+row*.035;
+  // G80 M3 kidneys: broad vertical openings filled with closely spaced horizontal aero slats.
+  // The slat length tapers at the top/bottom so the silhouette reads as a kidney rather than a rectangle.
+  for(const side of [-1,1] as const)for(let row=0;row<11;row++){
+    const y=.365+row*.033;
+    const t=row/10;
+    const span=.245+.040*Math.sin(Math.PI*t);
     grilleSlats.push(Object.freeze({
       id:`grille-inlay-${side<0?'left':'right'}-${row}`,
       role:'dark' as const,
-      mesh:{kind:'box' as const,size:[.014,.020,.285] as const},
-      position:[2.375,y,side*.185] as const,
-      material:{kind:'plastic' as const,finish:'polished' as const,roughness:.18,metalness:.10},
+      mesh:{kind:'box' as const,size:[.012,.022,span] as const},
+      position:[2.375,y,side*(.185+.008*Math.cos(Math.PI*t))] as const,
+      material:{kind:'plastic' as const,finish:'polished' as const,roughness:.11,metalness:.16,clearcoat:.72,clearcoatRoughness:.045},
     }));
   }
   const badge:ParametricVehiclePart[]=[
-    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.043,height:.006,segments:32},position:[2.00,.965,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.16,metalness:.10}}),
-    Object.freeze({id:'hood-roundel-blue-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.032,0],[.0296,.0123],[.0226,.0226],[.0123,.0296],[0,.032]] as const,thickness:.006},position:[2.00,.970,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.18,metalness:.02}}),
-    Object.freeze({id:'hood-roundel-blue-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.032,0],[-.0296,-.0123],[-.0226,-.0226],[-.0123,-.0296],[0,-.032]] as const,thickness:.006},position:[2.00,.970,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.18,metalness:.02}}),
-    Object.freeze({id:'hood-roundel-white-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.032,0],[-.0296,.0123],[-.0226,.0226],[-.0123,.0296],[0,.032]] as const,thickness:.006},position:[2.00,.970,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.18,metalness:.01}}),
-    Object.freeze({id:'hood-roundel-white-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.032,0],[.0296,-.0123],[.0226,-.0226],[.0123,-.0296],[0,-.032]] as const,thickness:.006},position:[2.00,.970,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.18,metalness:.01}}),
+    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.056,height:.008,segments:40},position:[1.43,1.012,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.10,metalness:.34,clearcoat:.85,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-blue-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.041,0],[.038,.016],[.029,.029],[.016,.038],[0,.041]] as const,thickness:.008},position:[1.43,1.018,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.08,metalness:.08,clearcoat:.82,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-blue-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.041,0],[-.038,-.016],[-.029,-.029],[-.016,-.038],[0,-.041]] as const,thickness:.008},position:[1.43,1.018,0] as const,rotation:[0,0,.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.08,metalness:.08,clearcoat:.82,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-white-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.041,0],[-.038,.016],[-.029,.029],[-.016,.038],[0,.041]] as const,thickness:.008},position:[1.43,1.018,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.08,metalness:.04,clearcoat:.82,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-white-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.041,0],[.038,-.016],[.029,-.029],[.016,-.038],[0,-.041]] as const,thickness:.008},position:[1.43,1.018,0] as const,rotation:[0,0,.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.08,metalness:.04,clearcoat:.82,clearcoatRoughness:.035}}),
   ];
   const frontDetail:ParametricVehiclePart[]=[
     Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
@@ -203,7 +205,7 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('hood-roundel-blue-'))return{...base,color:[.015,.19,.58,1]};
   if(part.id.startsWith('hood-roundel-white-'))return{...base,color:[.86,.89,.93,1]};
   if(part.id==='hood-roundel-ring')return{...base,color:[.012,.015,.020,1]};
-  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.16,metalness:.035,clearcoat:.84,clearcoatRoughness:.085};
+  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.105,metalness:.045,clearcoat:.96,clearcoatRoughness:.032};
   if(part.role==='glass')return{...base,color:[.13,.18,.23,.20],roughness:.055};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
