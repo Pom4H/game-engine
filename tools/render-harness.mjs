@@ -10,6 +10,8 @@ import {spawn} from 'node:child_process';
 
 const [sceneFile,viewsFile,widthArg='1280',heightArg='720']=process.argv.slice(2);
 if(!sceneFile||!viewsFile)throw new Error('usage: node tools/render-harness.mjs <scene.mjs> <views.mjs> [width] [height]');
+const traceSeconds=Number(process.env.CHROME_TRACE_SECONDS??0);
+if(!Number.isFinite(traceSeconds)||traceSeconds<0||traceSeconds>30)throw new RangeError('CHROME_TRACE_SECONDS must be within 0..30');
 const width=Number(widthArg),height=Number(heightArg);
 if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1)throw new Error('invalid render size');
 const scenePath=resolve(sceneFile);
@@ -191,6 +193,24 @@ try{
   const hud={resolution:[width,height],views:results.map(({name,output,renderer,camera})=>({name,output,renderer,camera}))};
   await writeFile(resolve('artifacts/render-hud.json'),JSON.stringify(hud,null,2));
   console.log(JSON.stringify({views:results.length,outputs:results.map(result=>result.output),hud:'artifacts/render-hud.json'},null,2));
+  // Native sampling is opt-in and starts AFTER deterministic view captures.
+  // No per-function wrappers, browser observers or extra engine-side recording.
+  if(traceSeconds>0){
+    const {recordChromeTrace}=await import('./chrome-trace.mjs');
+    const evaluate=async expression=>{
+      const result=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});
+      if(result.exceptionDetails)throw new Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);
+      return result.result?.value;
+    };
+    const output=resolve(process.env.CHROME_TRACE_PATH??'artifacts/render.trace.json');
+    const trace=await recordChromeTrace(send,ws,output,async()=>{
+      await evaluate('__GAME_ENGINE__.resume()');
+      try{await new Promise(ok=>setTimeout(ok,traceSeconds*1000));}
+      finally{await evaluate('__GAME_ENGINE__.pause()');}
+      return evaluate('({tick:__RENDER_HARNESS__.runtime.scene.tick,time:__RENDER_HARNESS__.runtime.scene.time})');
+    },{timeoutMs:(traceSeconds+30)*1000});
+    console.log(JSON.stringify({chromeTrace:trace},null,2));
+  }
 }finally{
   await cleanup();
 }
