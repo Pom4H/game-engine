@@ -145,7 +145,7 @@ export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
 
 /** A thin, open semicircular fender detail: two concentric rings joined as quads. */
 function wheelArchAccentMesh(axle:number):Extract<ParametricVehiclePart['mesh'],{kind:'triangle-mesh'}>{
-  const outer=.388,inner=.374,segments=16,positions:number[]=[],normals:number[]=[],indices:number[]=[];
+  const outer=.388,inner=.374,segments=24,positions:number[]=[],normals:number[]=[],indices:number[]=[];
   for(let i=0;i<=segments;i++){
     const a=i/segments*Math.PI;
     const c=Math.cos(a),s=Math.sin(a);
