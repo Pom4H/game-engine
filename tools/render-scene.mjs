@@ -28,6 +28,10 @@ const server=createServer(async(req,res)=>{
       const p=join(dist,url.pathname.slice(6));
       const data=await readFile(p);res.writeHead(200,{'content-type':mime[extname(p)]??'application/octet-stream'});res.end(data);return;
     }
+    if(url.pathname.startsWith('/assets/')){
+      const p=resolve('tools/promo/assets',url.pathname.slice(8));
+      const data=await readFile(p);res.writeHead(200,{'content-type':url.pathname.endsWith('.png')?'image/png':'application/octet-stream','cache-control':'no-store'});res.end(data);return;
+    }
     if(url.pathname.startsWith('/tools/')){
       const p=resolve('tools',url.pathname.slice(7));
       const data=await readFile(p);res.writeHead(200,{'content-type':mime[extname(p)]??'text/javascript; charset=utf-8'});res.end(data);return;
