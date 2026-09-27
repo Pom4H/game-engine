@@ -9,15 +9,18 @@ import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
-export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean}
+export type SceneInstaller=(scene:Scene)=>void;
+export interface BrowserRuntimeOptions {install?:SceneInstaller;tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean}
 
 export class BrowserRuntime {
   scene:Scene;
   readonly renderer:Renderer;
   readonly tickRate:number;
   readonly stepSeconds:number;
-  readonly audio:ProceduralAudio|null;
+  audio:ProceduralAudio|null;
   private initial:SceneSpec;
+  private install:SceneInstaller|undefined;
+  private replacement=0;
   private controls:WalkerControls|null=null;
   private readonly clock:FixedClock;
   private running=false;
@@ -26,7 +29,7 @@ export class BrowserRuntime {
   private publishedBridge:EngineBridge|null=null;
 
   private constructor(private readonly canvas:HTMLCanvasElement,scene:SceneSpec,renderer:Renderer,options:BrowserRuntimeOptions){
-    this.initial=structuredClone(scene);this.scene=new Scene(this.initial);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
+    this.initial=structuredClone(scene);this.install=options.install;this.scene=this.constructScene(this.initial,this.install);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
   }
 
   static async create(canvas:HTMLCanvasElement,scene:SceneSpec,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
@@ -54,6 +57,10 @@ export class BrowserRuntime {
     this.controls=new WalkerControls(this.canvas,id,options);
     return this.controls;
   }
+  /** Explicit opt-in for editors that initially disable all audio/gesture listeners. */
+  setAudioEnabled(enabled:boolean):void{if(this.disposed)return;if(enabled)this.audio??=new ProceduralAudio();else{this.audio?.dispose();this.audio=null;}}
+  /** Cancel only an in-flight replacement; the current world continues. */
+  cancelReplacement():void{this.replacement++;}
   async activateAudio():Promise<boolean>{const ready=this.audio?await this.audio.unlock():false;if(ready)this.audio?.updateAmbient(this.ambientAudioState());return ready;}
   resume():void{if(this.disposed||this.running)return;this.running=true;this.clock.reset(performance.now());this.raf=requestAnimationFrame(this.frame);}
   step(count=1){
@@ -68,13 +75,19 @@ export class BrowserRuntime {
     for(let i=0;i<remaining;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
-  reset():void{const next=new Scene(this.initial);this.scene.dispose();this.scene=next;this.render();}
-  async replaceScene(scene:SceneSpec):Promise<void>{
-    this.pause();
-    this.controls?.dispose();this.controls=null;
-    this.initial=structuredClone(scene);
-    const next=new Scene(this.initial);this.scene.dispose();this.scene=next;
-    await this.renderer.prepareMaterials?.(this.scene);
+  private constructScene(spec:SceneSpec,install?:SceneInstaller):Scene{
+    const next=new Scene(spec);try{install?.(next);return next;}catch(error){next.dispose();throw error;}
+  }
+  reset():void{const next=this.constructScene(this.initial,this.install);this.scene.dispose();this.scene=next;this.render();}
+  /** Build and prepare first; a failed edit keeps the previous valid world alive. */
+  async replaceScene(scene:SceneSpec,install?:SceneInstaller):Promise<void>{
+    if(this.disposed)throw new Error('Runtime is disposed');
+    const serial=++this.replacement,initial=structuredClone(scene);
+    const next=this.constructScene(initial,install);
+    try{await this.renderer.prepareMaterials?.(next);}catch(error){next.dispose();throw error;}
+    if(this.disposed||serial!==this.replacement){next.dispose();return;}
+    this.pause();this.controls?.dispose();this.controls=null;
+    this.scene.dispose();this.scene=next;this.initial=initial;this.install=install;
     this.render();await this.renderer.flush();
   }
   patchAppearance(patch:AppearancePatch):void{this.pause();this.scene.patchAppearance(patch);}

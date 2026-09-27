@@ -1,0 +1,61 @@
+name: DSL playground
+on:
+  push:
+    branches: [codex/dsl-live-docs]
+    paths: ['src/**', 'tools/docs/**', 'test/dsl-playground.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dsl-playground-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - name: Install isolated editor compiler (not an engine runtime dependency)
+        run: npm install --prefix tools/docs --ignore-scripts --no-audit --no-fund
+      - name: Engine typecheck and build
+        run: bun run typecheck && bun run build
+        shell: cmd
+      - name: Source bindings, live edits and all demo programs
+        run: node --test test/dsl-playground.mjs
+      - name: Build portable playground
+        run: node tools/docs/build.mjs
+      - name: Locate native Chrome
+        shell: powershell
+        run: |
+          $candidates=@("$env:ProgramFiles\Google\Chrome\Application\chrome.exe","${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe","$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $chrome=$candidates | Where-Object {Test-Path $_} | Select-Object -First 1
+          if (-not $chrome) {throw "Native Chrome is required"}
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Native WebGPU and two-way UI acceptance
+        run: node tools/docs/qa.mjs
+      - name: Full regressions (existing failures remain failures)
+        shell: powershell
+        run: |
+          node --test test/*.test.mjs *> artifacts/dsl-playground/regressions.log
+          $status=$LASTEXITCODE
+          Get-Content artifacts/dsl-playground/regressions.log | Select-Object -Last 14
+          exit $status
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: dsl-playground-evidence
+          path: artifacts/dsl-playground/
+          retention-days: 14
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: dsl-playground-site
+          path: .site/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: warn

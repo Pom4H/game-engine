@@ -1,0 +1,6 @@
+{
+  "name": "@rom4/game-engine-docs-tools",
+  "private": true,
+  "type": "module",
+  "devDependencies": {"typescript": "5.8.3"}
+}

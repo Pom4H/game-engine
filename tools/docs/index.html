@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; media-src blob:; base-uri 'none'">
+  <title>game-engine · DSL playground</title>
+  <link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="./"><span class="mark" aria-hidden="true">⌘</span> game-engine <span class="muted">/</span> <span class="muted">playground</span></a>
+  <label class="scene-picker"><span class="sr-only">Демонстрационная сцена</span><select id="examples"></select></label>
+  <button id="coverage" class="quiet">Перенос сцен</button>
+  <button id="share" title="Скопировать ссылку. Код из ссылки требует подтверждения запуска.">Поделиться</button>
+</header>
+<nav class="mobile-tabs" aria-label="Рабочая область"><button data-pane="code">Код</button><button data-pane="preview" aria-pressed="true">Сцена</button></nav>
+<main class="workspace" data-pane="preview">
+  <section class="code-pane" aria-label="Исходный код сцены">
+    <div class="pane-header"><span class="file-label"><span class="ts">TS</span> <span id="filename">m3.scene.ts</span></span>
+      <div class="actions"><button id="undo" class="icon" title="Отменить · Ctrl/⌘ Z" aria-label="Отменить">↶</button><button id="redo" class="icon" title="Повторить · Ctrl/⌘ Shift Z" aria-label="Повторить">↷</button><button id="open" class="quiet">Открыть</button><button id="save" class="quiet">.ts ↓</button></div>
+    </div>
+    <div class="editor" id="editor">
+      <div class="gutter" aria-hidden="true"><pre id="line-numbers"></pre></div>
+      <div class="code-scroll"><pre id="highlight" aria-hidden="true"></pre><textarea id="source" aria-label="TypeScript DSL сцены" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea></div>
+    </div>
+    <div class="code-footer"><span id="code-status" role="status">Загрузка компилятора…</span><button id="apply" title="Проверить и применить · Ctrl/⌘ Enter">Применить</button></div>
+    <div id="error" class="error" role="alert" hidden></div>
+  </section>
+  <div class="divider" role="separator" aria-orientation="vertical" aria-label="Ширина редактора" tabindex="0"></div>
+  <section class="preview-pane" aria-label="Рендер и диагностика">
+    <div class="pane-header"><span><span id="live-dot" class="dot"></span><span id="preview-title">Реальный движок</span></span><div class="actions"><button id="image" class="quiet" title="Кадр из WebGPU canvas">PNG ↓</button><button id="panel-toggle" aria-expanded="true" aria-controls="control-panel">Параметры ↔ код</button></div></div>
+    <div class="viewport" id="viewport">
+      <canvas id="render" aria-label="WebGPU сцена"></canvas>
+      <div class="placeholder" id="placeholder">Подготовка WebGPU…</div>
+      <div class="viewport-label"><span id="update-mode">Первичная сборка</span><span class="muted" id="gesture-hint">Тянуть — камера · колесо — масштаб</span></div>
+      <aside id="control-panel" class="control-panel" aria-label="Параметры, связанные с исходным кодом">
+        <div class="control-tabs"><button id="parameters-tab" aria-pressed="true">Параметры</button><button id="diagnostics-tab" aria-pressed="false">Диагностика</button></div>
+        <div id="control-list"></div>
+        <div id="diagnostics" hidden><p class="muted">Результаты расчёта · только чтение</p><dl id="metrics"></dl><div id="parts"></div></div>
+      </aside>
+      <div class="render-hud" id="render-hud" role="status"><span>WebGPU</span><span>Ожидание первого кадра</span></div>
+    </div>
+    <div class="transport"><button id="play" class="primary" disabled>▶ Запуск</button><button id="step" title="Один физический шаг" disabled>Шаг</button><button id="reset" class="icon" aria-label="Сбросить симуляцию" title="Сбросить по текущему коду" disabled>↻</button><input id="time" type="range" min="0" max="20" step=".0166667" value="0" aria-label="Время симуляции, не параметр DSL" disabled><output id="time-label">0.00 / 20 с</output><button id="audio" aria-pressed="false" title="Звук создаётся только по этой кнопке" disabled>Звук выкл.</button></div>
+    <div class="scope"><span class="badge" id="scope-badge">DSL</span><span id="scope-text"></span></div>
+  </section>
+</main>
+<dialog id="coverage-dialog"><div class="dialog-head"><h2>Перенос из thegame/docs</h2><button id="close-coverage" aria-label="Закрыть">×</button></div><p class="muted">Каждый доступный пример исполняет новый движок. Частичный перенос не означает равенство старой физике или всему функционалу сцены.</p><div id="coverage-content"></div></dialog>
+<input id="file" type="file" accept=".ts,.js,.mjs,text/plain" hidden>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
