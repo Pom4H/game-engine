@@ -103,6 +103,28 @@ let renderBodyCache:TriangleMesh|undefined;
  */
 function refineM3FrontRenderMesh(mesh:TriangleMesh):TriangleMesh{
   const positions=[...mesh.positions],normals=[...mesh.normals],indices:number[]=[];
+  // Render-only control-point sculpt. Keep the outer dimensions/physics shell intact,
+  // but remove the two visible highlight kinks: hood crown and front fender shoulder.
+  const frontAxle=M3_PARAMETRIC_PROFILE.dimensions.wheelbase/2+M3_PARAMETRIC_PROFILE.dimensions.axleOffset;
+  for(let i=0;i<positions.length;i+=3){
+    const x=positions[i]!,y=positions[i+1]!,z=positions[i+2]!,az=Math.abs(z);
+    // Hood: a shallow longitudinal crown that fades to zero at the centreline edge
+    // and before the windscreen. Max displacement is only 7 mm.
+    if(x>.72&&y>.79&&az<.70){
+      const longitudinal=Math.sin(Math.min(1,Math.max(0,(x-.72)/1.55))*Math.PI);
+      const lateral=Math.max(0,1-(az/.70)**2);
+      positions[i+1]=y+.007*longitudinal*lateral;
+    }
+    // Fender: soften the shoulder immediately above/outboard of the front wheel.
+    // Move vertices by <=5 mm, tapering smoothly away from the axle and arch.
+    const dx=Math.abs(x-frontAxle);
+    if(dx<.58&&y>.48&&y<1.02&&az>.66){
+      const along=Math.cos(dx/.58*Math.PI/2);
+      const vertical=Math.sin(Math.min(1,Math.max(0,(y-.48)/.54))*Math.PI);
+      const side=z<0?-1:1;
+      positions[i+2]=z+side*.005*along*vertical;
+    }
+  }
   const midpointCache=new Map<string,number>();
   const midpoint=(a:number,b:number)=>{
     const lo=Math.min(a,b),hi=Math.max(a,b),key=`${lo}:${hi}`;
