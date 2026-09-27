@@ -5,6 +5,7 @@ import {readFile,writeFile,mkdir,mkdtemp,rm} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {join,resolve,extname} from 'node:path';
 import {tmpdir} from 'node:os';
+import {pathToFileURL} from 'node:url';
 import {spawn} from 'node:child_process';
 
 const [sceneFile,viewsFile,widthArg='1280',heightArg='720']=process.argv.slice(2);
@@ -14,7 +15,7 @@ if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1)throw 
 const scenePath=resolve(sceneFile);
 const viewsPath=resolve(viewsFile);
 const sceneUrl='/tools/'+scenePath.slice(resolve('tools').length+1).replaceAll('\\\\','/').replaceAll('\\','/');
-const views=(await import(viewsPath)).default;
+const views=(await import(pathToFileURL(viewsPath).href)).default;
 if(!Array.isArray(views)||views.length===0)throw new Error('views module must export a non-empty default array');
 
 const dist=resolve('dist');
