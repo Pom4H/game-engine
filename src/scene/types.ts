@@ -107,6 +107,8 @@ export interface ReflectionProbeSpec {
   exclude?:readonly string[];
   /** Faces refreshed per rendered frame. 1 amortizes the probe over six frames. */
   facesPerFrame?:number;
+  /** Half-extents of the local parallax-correction box around the probe origin. */
+  boxHalfExtents?:Vec3;
 }
 export interface RenderingSpec {
   sunDirection?:Vec3; sunColor?:Vec3; skyColor?:Vec3;
