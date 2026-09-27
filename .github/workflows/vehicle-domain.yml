@@ -31,13 +31,54 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
-      - name: Typecheck and full regression suite
-        run: bun run check
+      - name: Typecheck and build
+        run: bun run typecheck && bun run build
+      - name: Vehicle domain regression gates
+        run: node --test test/vehicle-domain.test.mjs
       - name: Geometry identity, edit locality and compilation measurements
         run: node --expose-gc tools/vehicle-domain-harness.mjs
+      - name: Full regression suite (failures remain failures)
+        run: |
+          mkdir -p artifacts/vehicle-domain
+          set +e
+          node --test test/*.test.mjs > artifacts/vehicle-domain/regression.log 2>&1
+          status=$?
+          grep -E '^(✔|✖|ℹ|test at)' artifacts/vehicle-domain/regression.log || true
+          exit "$status"
       - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
         with:
           name: vehicle-domain-report
           path: artifacts/vehicle-domain/
+          if-no-files-found: error
+          retention-days: 14
+  baseline:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - name: Untouched base regression suite
+        run: |
+          git rev-parse HEAD
+          set +e
+          bun run check > baseline-regression.log 2>&1
+          status=$?
+          grep -E '^(✔|✖|ℹ|test at)' baseline-regression.log || true
+          exit "$status"
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: vehicle-domain-baseline
+          path: baseline-regression.log
           if-no-files-found: error
           retention-days: 14
