@@ -1,0 +1,157 @@
+name: Consolidate arena on adaptive core
+on:
+  push:
+    branches: [codex/adaptive-core]
+    paths: ['.integration/arena-*.part', '.github/workflows/arena-delivery.yml']
+permissions:
+  contents: read
+concurrency:
+  group: arena-delivery-adaptive-core
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'Pom4H/game-engine' && github.ref == 'refs/heads/codex/adaptive-core'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Apply exact locally tested tree; remove delivery files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = e716c954eee6538caff562eea66f7df6cd8b1870
+          git fetch origin 4d3bb2e3b9c71b141d2b42ef9d1c4199b0c73e3f 9b0fb68d20f63d50de324034faa33c381637d969
+          cat .integration/arena-{0,1,2}.part > /tmp/arena.patch.xz
+          echo 'd391a7422bb05482cab13caf6a1a25c53e6b5d5422e733f3920341f75fe5213a  /tmp/arena.patch.xz' | sha256sum --check
+          python3 -c "import lzma,pathlib;pathlib.Path('/tmp/arena.patch').write_bytes(lzma.decompress(pathlib.Path('/tmp/arena.patch.xz').read_bytes()))"
+          git checkout 4d3bb2e3b9c71b141d2b42ef9d1c4199b0c73e3f -- docs/chrome-profiling.md docs/engine-console.md docs/profile-recording.md test/chrome-trace-native.mjs test/chrome-trace.test.mjs test/engine-console.test.mjs test/recording.test.mjs tools/chrome-trace.mjs tools/docs/app.mjs tools/docs/console.css tools/docs/console.mjs tools/docs/controls.css tools/docs/qa.mjs tools/docs/recording-ui.mjs tools/docs/recording.css tools/docs/recording.mjs tools/docs/style.css tools/render-harness.mjs
+          git apply --index --unidiff-zero /tmp/arena.patch
+          git rm .integration/arena-{0,1,2}.part .github/workflows/arena-delivery.yml
+          test "$(git write-tree)" = fa1f8c689879e6b2daf07de07c420bb5eb46bee2
+      - name: Project toolchain and focused regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/arena-integration
+          bun install --frozen-lockfile
+          npm install --prefix tools/docs --ignore-scripts --no-audit --no-fund
+          bun run typecheck && bun run build
+          node tools/docs/build.mjs
+          node --test test/car-ball.test.mjs test/arena-network.test.mjs test/network-projection.test.mjs test/network-buffer.test.mjs test/network-structure.test.mjs test/engine-console.test.mjs test/recording.test.mjs test/chrome-trace.test.mjs test/network-host.mjs test/dsl-playground.mjs | tee artifacts/arena-integration/focused.log
+          node tools/structural-network-harness.mjs | tee artifacts/arena-integration/structural-network.json
+      - name: Compare complete regressions against untouched base (retain failures)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/arena-baseline e716c954eee6538caff562eea66f7df6cd8b1870
+          ln -s "$PWD/node_modules" /tmp/arena-baseline/node_modules
+          (cd /tmp/arena-baseline && bun run build)
+          set +e
+          (cd /tmp/arena-baseline && node --test --test-reporter=spec test/*.test.mjs) > artifacts/arena-integration/baseline.log 2>&1
+          baseline_status=$?
+          node --test --test-reporter=spec test/*.test.mjs > artifacts/arena-integration/regression.log 2>&1
+          changed_status=$?
+          set -e
+          echo "baseline_status=$baseline_status changed_status=$changed_status" | tee artifacts/arena-integration/exit-status.txt
+          python3 - <<'PY'
+          import pathlib,re
+          root=pathlib.Path('artifacts/arena-integration')
+          def failures(name):
+              s=re.sub(r'\x1b\[[0-9;]*m','',(root/name).read_text())
+              print(name, '\n' + '\n'.join(x for x in s.splitlines() if x.startswith(('ℹ tests','ℹ pass','ℹ fail','✖'))))
+              return {re.sub(r' \([^\n]*ms\)$','',x[2:]) for x in s.splitlines() if x.startswith('✖ ') and x!='✖ failing tests:'}
+          before,after=failures('baseline.log'),failures('regression.log')
+          assert before==after, (before,after)
+          assert len(before)==3, before
+          PY
+      - name: Publish consolidated tree without overwriting concurrent work
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git write-tree)" = fa1f8c689879e6b2daf07de07c420bb5eb46bee2
+          test "$(git ls-remote origin refs/heads/codex/adaptive-core | cut -f1)" = "$GITHUB_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          message='feat(arena): consolidate console, structural networking and car-ball gameplay
+
+          Integrate the tested PR27 and PR28 implementations on adaptive-core.
+          Reuse Vehicle/PhysicsWorld, StructuralBody, Projection/Replica and console
+          recording. Add arcade controls, reciprocal nodal car-ball contacts, goals,
+          private two-player HTTP/SSE authority and passive WebGPU presentation.
+          Remove the obsolete numeric-vector API and temporary delivery files.
+
+          Exact tested source tree fa1f8c689879e6b2daf07de07c420bb5eb46bee2.
+          Local and CI focused suites pass; full suite retains the same 3 failures.
+          Native WebGPU acceptance runs separately in this workflow. This is not
+          RL numerical parity, deformable car chassis, pneumatic gas simulation,
+          wall driving, client prediction or internet matchmaking.'
+          commit=$(printf '%s\n' "$message" | git commit-tree fa1f8c689879e6b2daf07de07c420bb5eb46bee2 -p "$GITHUB_SHA" -p 4d3bb2e3b9c71b141d2b42ef9d1c4199b0c73e3f -p 9b0fb68d20f63d50de324034faa33c381637d969)
+          git push origin "$commit:refs/heads/codex/adaptive-core"
+          echo "sha=$commit" >> "$GITHUB_OUTPUT"
+          echo "$commit" > artifacts/arena-integration/commit.txt
+          git archive --format=tar.gz -o artifacts/arena-integration/source.tar.gz "$commit"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: arena-integration-evidence
+          path: artifacts/arena-integration/
+          retention-days: 14
+  native:
+    needs: integrate
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.integrate.outputs.commit }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: npm install --prefix tools/docs --ignore-scripts --no-audit --no-fund
+      - name: Build exact consolidated source
+        shell: cmd
+        run: bun run typecheck && bun run build && node tools/docs/build.mjs
+      - name: Locate native Chrome
+        shell: powershell
+        run: |
+          $candidates=@("$env:ProgramFiles\Google\Chrome\Application\chrome.exe","${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe","$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $chrome=$candidates | Where-Object {Test-Path $_} | Select-Object -First 1
+          if (-not $chrome) {throw "Native Chrome is required"}
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Native arena and existing console/editor acceptance
+        shell: powershell
+        run: |
+          node tools/docs/arena-qa.mjs
+          $arena=$LASTEXITCODE
+          node tools/docs/qa.mjs
+          $editor=$LASTEXITCODE
+          if ($arena -ne 0 -or $editor -ne 0) {exit 1}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: arena-native-evidence
+          path: |
+            artifacts/arena/
+            artifacts/dsl-playground/
+          retention-days: 14
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: arena-portable-site
+          path: .site/
+          include-hidden-files: true
+          retention-days: 14
