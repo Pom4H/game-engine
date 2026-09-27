@@ -1,5 +1,6 @@
 import scene from './promo/clear-day.scene.mjs';
 export {scene};
+// CI render uses direct browser-safe engine/runtime modules.
 if(typeof window!=='undefined'){
   try{
     const {BrowserRuntime}=await import('/dist/runtime/browser.js');
