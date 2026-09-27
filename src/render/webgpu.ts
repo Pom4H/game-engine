@@ -439,7 +439,8 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   }
   // Filter the coat normal distribution too; a sharp second lobe must not
   // bypass the base layer's anti-aliasing on curved/subpixel panel edges.
-  let paintCoatFloor=select(.0,.085,automotivePaint);\n  let coatRough=clamp(max(paintCoatFloor,sqrt(clearcoatRoughness*clearcoatRoughness+min(.06,normalVariance*.04))),.08,1.0);
+  let paintCoatFloor=select(.0,.105,automotivePaint);
+  let coatRough=clamp(max(paintCoatFloor,sqrt(clearcoatRoughness*clearcoatRoughness+min(.06,normalVariance*.04))),.08,1.0);
   let coatViewF=clearcoat*(.04+.96*pow(1.0-nv,5.0));
   let coatLightF=clearcoat*(.04+.96*pow(1.0-vh,5.0));
   var color=base*diffuseIrradiance*(1.0-metal)*materialAO*(1.0-coatViewF);
@@ -453,7 +454,8 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let sideReflection=smoothstep(.30,.82,abs(n.z));
   // Parallax correction fixes placement; roughness still needs a wider probe
   // footprint so painted panels do not read like a magnifying mirror.
-  let paintProbeScale=select(1.0,.72,automotivePaint);\n  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.68*mix(1.0,1.16,sideReflection)*paintProbeScale;
+  let paintProbeScale=select(1.0,.58,automotivePaint);
+  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.68*mix(1.0,1.16,sideReflection)*paintProbeScale;
   let localProbeLod=roughness*f32(textureNumLevels(localProbeMap)-1u)*.72;
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
@@ -479,7 +481,8 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(environmentMap)-1u)).rgb;
     if(f.params.y>.5){
       let coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),coatRough*f32(textureNumLevels(localProbeMap)-1u)).rgb;
-      coatEnvironment=mix(coatEnvironment,coatLocal,f.params.y);
+      let coatProbeWeight=f.params.y*select(1.0,.62,automotivePaint);
+      coatEnvironment=mix(coatEnvironment,coatLocal,coatProbeWeight);
     }
     // Same split-sum BRDF fit as the base, evaluated at the coat roughness.
     let coatR=coatRough*envC0+envC1;
