@@ -64,7 +64,7 @@ for(const entity of spec.entities){
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
     // Automotive metallic base + clear coat: keep the authored dielectric coat instead
     // of replacing it with a bare rough metal when the hero color is overridden.
-    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.145,metalness:.055,clearcoat:.90,clearcoatRoughness:.055};
+    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.18,metalness:.055,clearcoat:.82,clearcoatRoughness:.075};
   }
   if(entity.id==='road'&&entity.environmental){
     entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00035};
