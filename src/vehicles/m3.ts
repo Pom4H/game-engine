@@ -110,6 +110,23 @@ export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   return smoothBodyTwice(mesh);
 }
 
+/** A thin, open semicircular fender detail: two concentric rings joined as quads. */
+function wheelArchAccentMesh(axle:number):Extract<ParametricVehiclePart['mesh'],{kind:'triangle-mesh'}>{
+  const outer=.388,inner=.374,segments=16,positions:number[]=[],normals:number[]=[],indices:number[]=[];
+  for(let i=0;i<=segments;i++){
+    const a=i/segments*Math.PI;
+    const c=Math.cos(a),s=Math.sin(a);
+    positions.push(axle+c*outer,M3_PARAMETRIC_PROFILE.dimensions.wheelRadius+s*outer,0);
+    positions.push(axle+c*inner,M3_PARAMETRIC_PROFILE.dimensions.wheelRadius+s*inner,0);
+    normals.push(0,0,-1,0,0,-1);
+    if(i<segments){
+      const o=i*2,n=i*2+1,on=(i+1)*2,nn=(i+1)*2+1;
+      indices.push(o,n,nn,o,nn,on);
+    }
+  }
+  return{kind:'triangle-mesh',positions,normals,indices};
+}
+
 /**
  * Complete compact M3 render geometry. The body shell remains bound to the structural
  * cage; trim, glazing, wheels, lights, mirrors and exhaust retain their FBX geometry.
@@ -132,18 +149,14 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
       material:{kind:'plastic' as const,finish:'polished' as const,roughness:.11,metalness:.16,clearcoat:.72,clearcoatRoughness:.045},
     }));
   }
-  // Two thin body-color polygon flares make the wheel arches catch a continuous
-  // highlight without replacing the authored high-fidelity body panels.
+  // Exactly two thin polygon meshes, one per wheel: an open band following only
+  // the upper semicircle. It is an accent on the arch, never a wheel cover.
   const wheelArchAccents:ParametricVehiclePart[]=[];
   for(const [id,axle] of [['front',M3_PARAMETRIC_PROFILE.dimensions.wheelbase/2+M3_PARAMETRIC_PROFILE.dimensions.axleOffset],['rear',-M3_PARAMETRIC_PROFILE.dimensions.wheelbase/2+M3_PARAMETRIC_PROFILE.dimensions.axleOffset]] as const){
-    const outer=.392,inner=.365,points:readonly (readonly [number,number])[]=[
-      ...Array.from({length:15},(_,i)=>{const a=i*Math.PI/14;return[axle+Math.cos(a)*outer,M3_PARAMETRIC_PROFILE.dimensions.wheelRadius+Math.sin(a)*outer] as const;}),
-      ...Array.from({length:15},(_,i)=>{const a=Math.PI-i*Math.PI/14;return[axle+Math.cos(a)*inner,M3_PARAMETRIC_PROFILE.dimensions.wheelRadius+Math.sin(a)*inner] as const;}),
-    ];
     wheelArchAccents.push(Object.freeze({
       id:`wheel-arch-${id}-accent`,
       role:'paint' as const,
-      mesh:{kind:'polygon-prism' as const,axis:2 as const,points,thickness:.010},
+      mesh:wheelArchAccentMesh(axle),
       position:[0,0,-.956] as const,
       material:{kind:'plastic' as const,finish:'polished' as const,roughness:.075,metalness:.045,clearcoat:.96,clearcoatRoughness:.03},
     }));
