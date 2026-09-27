@@ -123,7 +123,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   for(const side of [-1,1] as const)for(let row=0;row<11;row++){
     const y=.365+row*.033;
     const t=row/10;
-    const span=.165+.075*Math.sin(Math.PI*t);
+    const span=.180+.085*Math.sin(Math.PI*t);
     grilleSlats.push(Object.freeze({
       id:`grille-inlay-${side<0?'left':'right'}-${row}`,
       role:'dark' as const,
@@ -133,10 +133,9 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     }));
   }
   const badge:ParametricVehiclePart[]=[
-    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.048,height:.008,segments:40},position:[1.48,.998,0] as const,rotation:[0,0,1.25] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.06,metalness:.28,clearcoat:.92,clearcoatRoughness:.035}}),
-    Object.freeze({id:'hood-roundel-blue-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.039,height:.010,segments:40},position:[1.48,.999,0] as const,rotation:[0,0,1.25] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.06,metalness:.08,clearcoat:.90,clearcoatRoughness:.035}}),
-    Object.freeze({id:'hood-roundel-white-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:0 as const,points:[[0,0],[.027,0],[.020,.020],[0,.027]] as const,thickness:.012},position:[1.48,1.000,0] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.055,metalness:.02}}),
-    Object.freeze({id:'hood-roundel-white-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:0 as const,points:[[0,0],[-.027,0],[-.020,-.020],[0,-.027]] as const,thickness:.012},position:[1.48,1.000,0] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.055,metalness:.02}}),
+    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.050,height:.008,segments:40},position:[1.66,1.001,0] as const,rotation:[0,0,1.25] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.06,metalness:.30,clearcoat:.92,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-white-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.041,height:.010,segments:40},position:[1.66,1.002,0] as const,rotation:[0,0,1.25] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.055,metalness:.02,clearcoat:.75,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-blue-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.029,height:.012,segments:40},position:[1.66,1.003,0] as const,rotation:[0,0,1.25] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.05,metalness:.10,clearcoat:.90,clearcoatRoughness:.03}}),
   ];
   const frontDetail:ParametricVehiclePart[]=[
     Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
