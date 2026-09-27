@@ -1,6 +1,7 @@
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
-import {buildDirectionalProxyTiles} from './proxy-tiles.js';
+import {bakeEnvironment,cubeDirection,float16,type EnvironmentMip} from './environment-bake.js';
+import {EnvironmentBaker} from './environment-jobs.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
 import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
@@ -615,7 +616,7 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;private renderFrame:RenderFrameIR|null=null;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentRequestKey='';private environmentContentKey='';private environmentBaker:EnvironmentBaker|undefined;private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private lastPresentationRevision=-1;private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
@@ -1019,17 +1020,20 @@ export class WebGPURenderer implements Renderer{
   inspect():RenderStats{
     const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);
     return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10+this.gpu.probeFilterPasses.length,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,errors:[...this.errors],
-      ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
+      ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,jobs:this.environmentBaker?.inspect(),invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
       ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};
   }
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
-  dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
+  dispose():void{if(this.disposed)return;this.disposed=true;this.environmentBaker?.dispose();this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
   private updateEnvironmentMap(scene:Scene,origin:Vec3,localProbeOwnsNearby=false):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
-    if(this.environmentScene!==scene){this.environmentScene=scene;this.environmentKey='';}
+    if(this.environmentScene!==scene){this.environmentBaker?.reset();this.environmentScene=scene;this.environmentKey='';this.environmentRequestKey='';this.environmentContentKey='';}
+    const contentKey=[scene.renderStructureRevision,scene.appearanceRevision,scene.presentationRevision].join(':');
+    if(contentKey!==this.environmentContentKey){this.environmentContentKey=contentKey;this.environmentBaker?.reset();this.environmentRequestKey='';}
     const measured=settings.environmentRadiance;
     if(measured){
+      this.environmentBaker?.reset();this.environmentRequestKey='';
       if(this.measuredRadianceSpec!==measured){this.measuredRadiance=decodeMeasuredRadiance(measured);this.measuredRadianceSpec=measured;}
       const source=this.measuredRadiance!;
       const m=measured.worldToEnvironment??[1,0,0,0,1,0,0,0,1],sampleKey=[measured.width,measured.height,measured.rgb16fBase64.length,measured.rgb16fBase64.slice(0,24),measured.rgb16fBase64.slice(-24),measured.convention??'latlong-y-up',measured.intensity??1,...m].join(':');
@@ -1051,6 +1055,7 @@ export class WebGPURenderer implements Renderer{
       }
       return;
     }
+    const completed=this.environmentBaker?.take();if(completed){this.installEnvironment(completed.mips);this.environmentKey=completed.key;this.environmentUpdates++;}
     if(this.environmentIrradiance[3]!==0)this.environmentIrradiance.fill(0);
     // Check the authoritative causes before building the expensive scene-radiance proxy.
     // Nearby dynamic detail is handled by SSR/local probes; the distant fallback only
@@ -1068,10 +1073,11 @@ export class WebGPURenderer implements Renderer{
       Math.round(scene.environment.temperatureC*2)/2,
       Math.round(scene.environment.groundMoisture*20)/20,
       Math.round(scene.environment.snowfallRate*1e6)/1e6,
+      scene.renderStructureRevision,scene.appearanceRevision,scene.presentationRevision,
     ].map(value=>Number(value).toFixed(3)).join(':');
-    if(causeKey===this.environmentKey)return;
+    if(causeKey===(this.environmentRequestKey||this.environmentKey))return;
     if(this.profiler.enabled&&this.environmentKey){
-      const causes=['entities','seed','sun.x','sun.y','sun.z','sunColor.r','sunColor.g','sunColor.b','sky.r','sky.g','sky.b','origin.x','origin.y','origin.z','intensity','sunlight','humidity','temperature','moisture','snowfall'];
+      const causes=['entities','seed','sun.x','sun.y','sun.z','sunColor.r','sunColor.g','sunColor.b','sky.r','sky.g','sky.b','origin.x','origin.y','origin.z','intensity','sunlight','humidity','temperature','moisture','snowfall','structure','appearance','presentation'];
       const before=this.environmentKey.split(':'),after=causeKey.split(':');
       for(let index=0;index<causes.length;index++)if(before[index]!==after[index]){
         const cause=causes[index]!;
@@ -1079,38 +1085,17 @@ export class WebGPURenderer implements Renderer{
       }
     }
     const radiance=buildSceneRadianceProbe(scene,origin,128);
-    const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
-    const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
-    this.environmentKey=causeKey;this.environmentUpdates++;
-    const levels=9;
-    for(let mip=0;mip<levels;mip++){
-      const size=Math.max(1,256>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
-      const tiles=roughness<.74?buildDirectionalProxyTiles(proxies,size,cubeDirection):null;
-      for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-        const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
-        const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
-        const t=Math.sqrt(up);let base:[number,number,number]=down>0?[mix(horizon[0],ground[0],down),mix(horizon[1],ground[1],down),mix(horizon[2],ground[2],down)]:[mix(horizon[0],zenith[0],t),mix(horizon[1],zenith[1],t),mix(horizon[2],zenith[2],t)];
-        const horizontal=Math.pow(Math.max(0,1-Math.abs(dir[1])),3)*(1-roughness*.72);
-        const urbanMix=horizontal*.28;
-        base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
-        if(roughness<.74){
-          let pr=0,pg=0,pb=0,total=0;
-          const candidates=tiles!.buckets[(face*tiles!.side+(y>>4))*tiles!.side+(x>>4)]!;
-          for(const proxy of candidates){
-            const alignment=V3.dot(dir,proxy.dir);if(alignment<=proxy.threshold)continue;
-            const q=(alignment-proxy.threshold)/Math.max(1e-5,1-proxy.threshold),sharp=mix(5.5,1.2,roughness*roughness),weight=Math.pow(q,sharp)*proxy.strength*(1-roughness*.62);
-            pr+=proxy.color[0]*weight;pg+=proxy.color[1]*weight;pb+=proxy.color[2]*weight;total+=weight;
-          }
-          if(total>.001){const amount=Math.min(.86,total/(.58+total));base=[mix(base[0],pr/total,amount),mix(base[1],pg/total,amount),mix(base[2],pb/total,amount)];}
-        }
-        const sunDot=Math.max(0,dir[0]*sun[0]+dir[1]*sun[1]+dir[2]*sun[2]),exponent=mix(900,2.4,roughness*roughness),sunLobe=Math.pow(sunDot,exponent)*intensity*mix(1.0,.12,roughness);
-        const average:[number,number,number]=[mix(sky[0]*.62,urbanColor[0]*.55,.22),mix(sky[1]*.66,urbanColor[1]*.55,.22),mix(sky[2]*.72,urbanColor[2]*.55,.22)],blur=roughness*roughness*.68;
-        for(let channel=0;channel<3;channel++)pixels[offset++]=float16(mix(base[channel]!+sunColor[channel]!*sunLobe,average[channel]!,blur));
-        pixels[offset++]=float16(1);
-      }
-      const bytesPerRow=size*8,rowsPerImage=size;
-      this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow,rowsPerImage},[size,size,6]);this.profiler.addUpload(pixels.byteLength,'environment');
+    const input={sun,sunColor,sky,intensity,radiance};
+    this.environmentRequestKey=causeKey;
+    if(!this.environmentKey){this.installEnvironment(bakeEnvironment(input));this.environmentKey=causeKey;this.environmentUpdates++;}
+    else{
+      this.environmentBaker??=new EnvironmentBaker(error=>this.errors.push(String(error)));
+      this.environmentBaker.request(causeKey,input);
     }
+  }
+
+  private installEnvironment(mips:readonly EnvironmentMip[]):void{
+    for(const {mip,size,pixels} of mips){this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow:size*8,rowsPerImage:size},[size,size,6]);this.profiler.addUpload(pixels.byteLength,'environment');}
   }
 
   private needsPrepare(entity:RuntimeEntity,model:Mat4):boolean{
@@ -1217,23 +1202,11 @@ function multiply4Into(a:ArrayLike<number>,b:ArrayLike<number>,out:Float32Array)
 function floatArrayEqual(a:Float32Array|undefined,b:Float32Array):boolean{if(!a||a.length!==b.length)return false;for(let i=0;i<b.length;i++)if(a[i]!==b[i])return false;return true;}
 function matrixEqual(a:Mat4|undefined,b:Mat4):boolean{if(!a)return false;for(let i=0;i<16;i++)if(a[i]!==b[i])return false;return true;}
 function mix(a:number,b:number,t:number):number{return a+(b-a)*t;}
-function cubeDirection(face:number,u:number,v:number):Vec3{
-  const raw:Vec3=face===0?[1,-v,-u]:face===1?[-1,-v,u]:face===2?[u,1,v]:face===3?[u,-1,-v]:face===4?[u,-v,1]:[-u,-v,-1];
-  return V3.normalize(raw);
-}
-const halfFloatScratch=new Float32Array(1),halfFloatBits=new Uint32Array(halfFloatScratch.buffer);
 function halfToFloat(bits:number):number{
   const sign=(bits&0x8000)?-1:1,exp=(bits>>>10)&0x1f,fraction=bits&0x3ff;
   if(exp===0)return sign*Math.pow(2,-14)*(fraction/1024);
   if(exp===31)return fraction?NaN:sign*Infinity;
   return sign*Math.pow(2,exp-15)*(1+fraction/1024);
-}
-function float16(value:number):number{
-  if(!Number.isFinite(value))return value<0?0xfc00:0x7c00;
-  halfFloatScratch[0]=value;const x=halfFloatBits[0]!,sign=(x>>>16)&0x8000,exp=((x>>>23)&0xff)-127+15,mantissa=x&0x7fffff;
-  if(exp<=0){if(exp<-10)return sign;return sign|((mantissa|0x800000)>>(14-exp));}
-  if(exp>=31)return sign|0x7c00;
-  return sign|(exp<<10)|(mantissa>>13);
 }
 
 function decodeMeasuredRadiance(spec:EnvironmentRadianceSpec):Float32Array{
