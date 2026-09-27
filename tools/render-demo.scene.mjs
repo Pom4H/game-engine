@@ -2,7 +2,7 @@ import scene from './promo/clear-day.scene.mjs';
 export {scene};
 if(typeof window!=='undefined'){
   try{
-    const {BrowserRuntime}=await import('/dist/browser.js');
+    const {BrowserRuntime}=await import('/dist/runtime/browser.js');
     const canvas=document.getElementById('c');
     canvas.width=innerWidth;canvas.height=innerHeight;
     const runtime=await BrowserRuntime.create(canvas,scene,{autoplay:false,audio:false,exposeBridge:true});
