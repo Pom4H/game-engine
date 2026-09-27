@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {AnimationSystem,solveTwoBone,sampleWalker,bindHumanoid} from '../dist/animation/locomotion.js';
+import {solveTwoBone,sampleWalker,bindHumanoid} from '../dist/animation/locomotion.js';
+import {AnimationSystem} from '../dist/animation/system.js';
 import {clothLoftMesh} from '../dist/procedural/cloth.js';
 import {Scene} from '../dist/index.js';
 const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));

@@ -1,4 +1,4 @@
-import {AnimationSystem} from '../animation/locomotion.js';
+import {AnimationSystem} from '../animation/system.js';
 import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
@@ -63,8 +63,6 @@ export class Scene {
   readonly physics:PhysicsWorld;
   readonly deformation=new PlasticDeformationSystem();
   readonly surfaces=new SurfaceEnvironmentSystem();
-  /** @deprecated Use surfaces. Kept only while PR tooling/examples migrate. */
-  get winter(){return this.surfaces;}
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();

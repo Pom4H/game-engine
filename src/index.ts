@@ -43,7 +43,8 @@ export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/
 
 export {renderFootsteps,type FootstepSound} from './audio/footsteps.js';
 
-export {AnimationSystem,sampleWalker,bindHumanoid,solveTwoBone} from './animation/locomotion.js';
+export {sampleWalker,bindHumanoid,solveTwoBone} from './animation/locomotion.js';
+export {AnimationSystem,type AnimationTarget} from './animation/system.js';
 export type {WalkerSpec,HumanoidJoint,HumanoidBinding,HumanoidPose,RigTransform,VehiclePart,VehicleMotionSpec,GroundSampler} from './animation/locomotion.js';
 export {SurfaceContactSystem,surfaceContains,surfaceElevation} from './environment/surface-contacts.js';
 export type {SurfaceSample,SurfaceFootprint,WheelSurfaceContact,SnowContactSurfaceOptions} from './environment/surface-contacts.js';

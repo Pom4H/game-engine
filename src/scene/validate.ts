@@ -1,4 +1,3 @@
-import {AnimationSystem,type WalkerSpec,type VehicleMotionSpec} from '../animation/locomotion.js';
 import {SnowSurface,type SnowSurfaceOptions} from '../environment/snow-surface.js';
 import {materialKinds} from '../materials/catalog.js';
 import {finiteVec3} from '../math.js';
@@ -109,27 +108,27 @@ function validateBindings(scene:Record<string,unknown>,entities:readonly EntityS
   if(scene.animation!==undefined){
     const a=object(scene.animation,'animation'),walkers=a.walkers===undefined?[]:boundedArray(a.walkers,'animation.walkers',128),vehicles=a.vehicles===undefined?[]:boundedArray(a.vehicles,'animation.vehicles',128);
     if(walkers.length+vehicles.length>128)throw new TypeError('animation supports at most 128 actors');
-    const validator=new AnimationSystem();
+    const actors=new Set<string>();
+    const actor=(value:unknown,path:string)=>{const id=stableId(value,path,160);if(actors.has(id))throw new TypeError(`Duplicate animated actor ${id}`);actors.add(id);};
     const claim=(id:string,path:string)=>{const entity=reference(id,path),body=entity.body;if(body&&body.motion!=='kinematic'&&(body.mass??(body.velocity||body.angularVelocity?1:0))>0)throw new TypeError(`${path} cannot bind a dynamic physics body`);if(claimed.has(id))throw new TypeError(`${path} binds entity ${id} more than once`);claimed.add(id);};
     for(const [i,raw] of walkers.entries()){
-      const path=`animation.walkers[${i}]`,w=object(raw,path);stableId(w.id,`${path}.id`,160);vector(w.root,3,`${path}.root`);number(w.speed,`${path}.speed`,0,12);optionalNumber(w,'heading',path);optionalNumber(w,'period',path,.25,4);optionalNumber(w,'heightScale',path,.25,3);
+      const path=`animation.walkers[${i}]`,w=object(raw,path);actor(w.id,`${path}.id`);vector(w.root,3,`${path}.root`);number(w.speed,`${path}.speed`,0,12);optionalNumber(w,'heading',path);optionalNumber(w,'period',path,.25,4);optionalNumber(w,'heightScale',path,.25,3);
       for(const [j,value] of (w.bindings===undefined?[]:boundedArray(w.bindings,`${path}.bindings`,4096)).entries()){
         const p=`${path}.bindings[${j}]`,b=object(value,p);claim(stableId(b.entity,`${p}.entity`),`${p}.entity`);
         if(!HUMANOID_JOINTS.includes(String(b.joint)))throw new TypeError(`${p}.joint is unknown`);
         choice(b.boneTo,HUMANOID_JOINTS,`${p}.boneTo`);choice(b.foot,['left','right'],`${p}.foot`);
         for(const key of ['offset','rotation','scale'])if(b[key]!==undefined)vector(b[key],3,`${p}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
       }
-      validator.addWalker(w as unknown as WalkerSpec);
     }
     for(const [i,raw] of vehicles.entries()){
-      const path=`animation.vehicles[${i}]`,v=object(raw,path);stableId(v.id,`${path}.id`,160);vector(v.velocity,3,`${path}.velocity`);optionalNumber(v,'startTime',path,0);
+      const path=`animation.vehicles[${i}]`,v=object(raw,path);actor(v.id,`${path}.id`);vector(v.velocity,3,`${path}.velocity`);optionalNumber(v,'startTime',path,0);
       const parts=boundedArray(v.parts,`${path}.parts`,4096);if(!parts.length)throw new TypeError(`${path}.parts must not be empty`);
       for(const [j,value] of parts.entries()){
         const p=`${path}.parts[${j}]`,part=object(value,p);claim(stableId(part.id,`${p}.id`),`${p}.id`);vector(part.origin,3,`${p}.origin`);
         if(part.wheel!==undefined&&typeof part.wheel!=='boolean')throw new TypeError(`${p}.wheel must be boolean`);
+        if(part.wheel&&part.radius===undefined)throw new TypeError(`${p}.radius is required for a wheel`);
         optionalNumber(part,'radius',p,Number.MIN_VALUE);if(part.rotation!==undefined)vector(part.rotation,3,`${p}.rotation`);choice(part.wheelAxis,[0,1,2],`${p}.wheelAxis`);
       }
-      validator.addVehicle(v as unknown as VehicleMotionSpec);
     }
   }
   if(scene.deformation!==undefined){
