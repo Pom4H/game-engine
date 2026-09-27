@@ -95,9 +95,41 @@ function sourceMaterial(sourceMaterial:string,id:string):Omit<MaterialSpec,'colo
 
 let renderSubdivisionPlan:SmoothSubdivisionPlan|undefined;
 let renderBodyCache:TriangleMesh|undefined;
+
+/**
+ * Add a small amount of render-only topology to the forward body shell.
+ * The packed/physical shell remains untouched; only triangles whose centroid is
+ * in the front third are split once so bumper/hood highlights have more samples.
+ */
+function refineM3FrontRenderMesh(mesh:TriangleMesh):TriangleMesh{
+  const positions=[...mesh.positions],normals=[...mesh.normals],indices:number[]=[];
+  const midpointCache=new Map<string,number>();
+  const midpoint=(a:number,b:number)=>{
+    const lo=Math.min(a,b),hi=Math.max(a,b),key=`${lo}:${hi}`;
+    const cached=midpointCache.get(key);if(cached!==undefined)return cached;
+    const ai=a*3,bi=b*3,index=positions.length/3;
+    positions.push(
+      (positions[ai]!+positions[bi]!)*.5,
+      (positions[ai+1]!+positions[bi+1]!)*.5,
+      (positions[ai+2]!+positions[bi+2]!)*.5,
+    );
+    const na=normals.slice(ai,ai+3),nb=normals.slice(bi,bi+3);
+    const nx=na[0]!+nb[0]!,ny=na[1]!+nb[1]!,nz=na[2]!+nb[2]!,length=Math.hypot(nx,ny,nz)||1;
+    normals.push(nx/length,ny/length,nz/length);
+    midpointCache.set(key,index);return index;
+  };
+  for(let i=0;i<mesh.indices.length;i+=3){
+    const a=mesh.indices[i]!,b=mesh.indices[i+1]!,c=mesh.indices[i+2]!;
+    const x=(positions[a*3]!+positions[b*3]!+positions[c*3]!)/3;
+    if(x<.95){indices.push(a,b,c);continue;}
+    const ab=midpoint(a,b),bc=midpoint(b,c),ca=midpoint(c,a);
+    indices.push(a,ab,ca,ab,b,bc,ab,bc,ca,ca,bc,c);
+  }
+  return{...mesh,positions,normals,indices};
+}
 export function m3RenderSubdivisionPlan():SmoothSubdivisionPlan{return renderSubdivisionPlan??=buildSmoothSubdivisionPlan(m3HighFidelityBody(),42,.006,true);}
 function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
-  const first=subdivideSmoothTriangleMesh(mesh,mesh===m3HighFidelityBody()?m3RenderSubdivisionPlan():buildSmoothSubdivisionPlan(mesh,42,.006,true));
+  const refined=refineM3FrontRenderMesh(mesh);\n  const first=subdivideSmoothTriangleMesh(refined,buildSmoothSubdivisionPlan(refined,42,.006,true));
   const second=subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.002));
   // Final pass only resolves highlight continuity; the displacement is deliberately
   // sub-millimetre so the packed FBX surface remains the geometric authority.
