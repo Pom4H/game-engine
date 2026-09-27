@@ -4,7 +4,10 @@ import {resolve,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=resolve(fileURLToPath(new URL('../..',import.meta.url)),process.env.DOCS_OUT??'.site');
 const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8','.cjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.ts':'text/plain; charset=utf-8','.png':'image/png'};
+const network=process.env.NETWORK_DEBUG==='1'?(await import('./network-host.mjs')).debugNetworkHost():null;
+if(network&&!['127.0.0.1','localhost','::1'].includes(process.env.HOST??'127.0.0.1'))throw new Error('Debug network must bind to loopback');
 const server=createServer(async(req,res)=>{
+ if(network&&await network.handle(req,res))return;
  try{
   let pathname=decodeURIComponent(new URL(req.url??'/','http://local').pathname);
   if(pathname==='/') {res.writeHead(302,{location:'/docs/'});res.end();return;}
@@ -20,4 +23,4 @@ const server=createServer(async(req,res)=>{
  }catch{res.writeHead(404,{'content-type':'text/plain'});res.end('Not found');}
 });
 server.listen(Number(process.env.PORT??4173),process.env.HOST??'127.0.0.1',()=>console.log(`http://${process.env.HOST??'127.0.0.1'}:${server.address().port}/docs/`));
-for(const event of ['SIGINT','SIGTERM'])process.on(event,()=>server.close(()=>process.exit()));
+for(const event of ['SIGINT','SIGTERM'])process.on(event,()=>{network?.dispose();server.close(()=>process.exit());});

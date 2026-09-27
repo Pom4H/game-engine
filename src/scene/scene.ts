@@ -32,6 +32,8 @@ interface FracturePiece{mesh:Primitive;position:MutableVec3;rotation:MutableVec3
 
 export interface RuntimeEntity {
   readonly id:string;
+  /** Presentation-only visibility; hidden network/LOD objects retain their cached geometry. */
+  presentationVisible?:boolean;
   position:MutableVec3;
   rotation:MutableVec3;
   scale:MutableVec3;
@@ -85,6 +87,16 @@ export class Scene {
   private generatedSequence=0;
   private surfaceVisualSequence=0;
   private readonly surfaceVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
+  private readonly presentationMovers=new Set<ReadonlySet<string>>();
+  /** External read-only projections mark dynamic visuals without creating fake physical bodies. */
+  trackPresentation(ids:readonly string[]):()=>void{
+    if(ids.some(id=>!this.entities.has(id)))throw new TypeError('Unknown presentation entity');
+    const set=new Set(ids);this.presentationMovers.add(set);this.renderStructureRevision++;
+    return()=>{if(this.presentationMovers.delete(set))this.renderStructureRevision++;};
+  }
+  /** Explicit seek/epoch discontinuity; ordinary packets must never invalidate temporal history. */
+  presentationRevision=0;
+  cutPresentation():void{this.presentationRevision++;}
   private renderMoverRevision=-1;
   private renderMovers:ReadonlySet<string>=new Set<string>();
 
@@ -148,6 +160,7 @@ export class Scene {
   renderMoverIds():ReadonlySet<string>{
     if(this.renderMoverRevision===this.renderStructureRevision)return this.renderMovers;
     const ids=new Set<string>();
+    for(const set of this.presentationMovers)for(const id of set)if(this.entities.has(id))ids.add(id);
     for(const entity of this.entities.values())if(entity.body&&(entity.body.invMass>0||entity.body.kinematic))ids.add(entity.id);
     for(const projection of this.projections.keys())for(const id of projection.visualIds)ids.add(id);
     for(const id of this.animation.controlledEntityIds())ids.add(id);
@@ -168,7 +181,7 @@ export class Scene {
     }
     this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
   }
-  dispose():void{for(const id of [...this.entities.keys()])this.remove(id);this.physics.clear();}
+  dispose():void{this.presentationMovers.clear();for(const id of [...this.entities.keys()])this.remove(id);this.physics.clear();}
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');

@@ -28,12 +28,12 @@ export class NetworkPanel{
   this.active=true;this.serial++;const serial=this.serial;
   this.worker=new Worker('./network-worker.js',{type:'module'});
   this.worker.onmessage=({data})=>{
-   if(data.serial!==serial)return;
+   if(!this.active||data.serial!==this.serial)return;
    try{
     if(data.kind==='frame'){const accepted=this.buffer.receive(data.frame,performance.now()/1000);if(accepted){this.tick=data.frame.tick;this.paused=data.frame.paused;}this.worker?.postMessage({kind:'ack',serial});}
-    else if(data.kind==='clip-start'){this.clipPending=new Replica(sceneMotion,this.epoch,600,32_000_000,0);}
+    else if(data.kind==='clip-start'){if(data.epoch!==this.epoch)return;this.clipPending=new Replica(sceneMotion,this.epoch,600,32_000_000,0);}
     else if(data.kind==='clip-chunk'){for(const f of data.frames)this.clipPending?.receive(f,performance.now()/1000);this.worker?.postMessage({kind:'clip-ack',serial});}
-    else if(data.kind==='clip-end'){this.clip=this.clipPending;this.clipPending=null;this.mode='replay';this.seek(this.clip.inspect().oldest);}
+    else if(data.kind==='clip-end'){if(!this.clipPending)return;this.clip=this.clipPending;this.clipPending=null;this.mode='replay';this.seek(this.clip.inspect().oldest);}
     else if(data.kind==='error')this.onError(new Error(data.error));
     else if(data.kind==='status')this.label.textContent=data.status;
    }catch(error){this.onError(error);this.worker?.postMessage({kind:'ack',serial});}
@@ -46,7 +46,7 @@ export class NetworkPanel{
   const previousCamera=this.runtime.scene.camera;await this.runtime.replaceScene(ready.scene);this.runtime.scene.setCamera(previousCamera);
   this.view?.dispose();this.epoch=ready.epoch;this.tick=ready.tick;this.paused=ready.paused;
   this.buffer=new Replica(sceneMotion,this.epoch,600,32_000_000,.1);this.buffer.receive(ready.frame,performance.now()/1000);
-  this.view=new SceneReplicaView(this.runtime.scene,ready.motionIds);this.mode='live';this.clip=null;this.runtime.scene.cutPresentation();this.view.apply(this.buffer.at(ready.time));
+  this.view=new SceneReplicaView(this.runtime.scene,ready.motionIds);this.mode='live';this.clip=null;this.clipPending=null;this.heldSample=null;this.worker?.postMessage({kind:'cancel-replay'});this.runtime.scene.cutPresentation();this.view.apply(this.buffer.at(ready.time));
   const follow=this.getProgram()?.follow;this.followOrigin=follow?[...this.runtime.scene.entities.get(follow)?.position??[0,0,0]]:null;
  }
  async command(action){const reply=await this.request(action);this.tick=reply.tick;this.paused=reply.paused;

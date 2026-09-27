@@ -11,7 +11,8 @@ onmessage=({data})=>{
   stream.onerror=()=>postMessage({kind:'status',status:'Ожидание сети · последняя поза сохранена',serial});
  }else if(data.kind==='replay'){
   const request=++clipSerial,connection=serial;clip=null;
-  (async()=>{try{const r=await fetch('/debug-network/replay',{method:'POST',headers:{'content-type':'application/json','x-debug-token':data.token},body:JSON.stringify({epoch:data.epoch,from:data.from,to:data.to})});const text=await r.text();if(text.length>48_000_000)throw Error('Replay size budget');const result=JSON.parse(text);if(!r.ok)throw Error(result.error);if(request!==clipSerial||connection!==serial)return;if(!Array.isArray(result.frames)||result.frames.length>600)throw Error('Replay frame budget');clip=result.frames.map(f=>sceneMotion.read(f));postMessage({kind:'clip-start',serial});clipNext();}catch(error){postMessage({kind:'error',error:String(error),serial:connection});}})();
+  (async()=>{try{const r=await fetch('/debug-network/replay',{method:'POST',headers:{'content-type':'application/json','x-debug-token':data.token},body:JSON.stringify({epoch:data.epoch,from:data.from,to:data.to})});const text=await r.text();if(text.length>48_000_000)throw Error('Replay size budget');const result=JSON.parse(text);if(!r.ok)throw Error(result.error);if(request!==clipSerial||connection!==serial)return;if(!Array.isArray(result.frames)||result.frames.length>600)throw Error('Replay frame budget');clip=result.frames.map(f=>sceneMotion.read(f));postMessage({kind:'clip-start',serial,epoch:result.epoch});clipNext();}catch(error){postMessage({kind:'error',error:String(error),serial:connection});}})();
+ }else if(data.kind==='cancel-replay'){clip=null;clipSerial++;
  }else if(data.kind==='clip-ack'&&data.serial===serial){clipNext();
  }else if(data.kind==='ack'&&data.serial===serial){busy=false;flush();}
  else if(data.kind==='stop'){stream?.close();stream=null;pending=null;busy=false;clip=null;clipSerial++;serial++;}

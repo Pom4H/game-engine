@@ -5,13 +5,13 @@
   <meta name="color-scheme" content="dark light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; media-src blob:; base-uri 'none'">
   <title>game-engine · DSL playground</title>
-  <link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./controls.css">
+  <link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./controls.css"><link rel="stylesheet" href="./network.css">
 </head>
 <body>
 <header class="topbar">
   <a class="wordmark" href="./"><span class="mark" aria-hidden="true">⌘</span> game-engine <span class="muted">/</span> <span class="muted">playground</span></a>
   <label class="scene-picker"><span class="sr-only">Демонстрационная сцена</span><select id="examples"></select></label>
-  <button id="coverage" class="quiet">Перенос сцен</button>
+  <button id="network-connect" title="Изолированный localhost стенд, не игровой production">Серверный стенд</button><button id="coverage" class="quiet">Перенос сцен</button>
   <button id="share" title="Скопировать ссылку. Код из ссылки требует подтверждения запуска.">Поделиться</button>
 </header>
 <nav class="mobile-tabs" aria-label="Рабочая область"><button data-pane="code">Код</button><button data-pane="preview" aria-pressed="true">Сцена</button></nav>
@@ -39,6 +39,11 @@
       </aside>
       <div class="render-hud" id="render-hud" role="status"><span>WebGPU</span><span>Ожидание первого кадра</span></div>
     </div>
+    <section id="network-panel" class="network-panel" hidden aria-label="Сервер, повтор и отладка">
+      <output id="network-status" aria-live="polite"></output>
+      <div class="network-actions"><button id="network-pause">▶ Сервер</button><button id="network-step">Шаг сервера</button><button id="network-dump">Дамп состояния ↓</button><button id="network-heap" title="Приватный V8 heap authority-worker. Требует NETWORK_HEAP=1">Heap на сервере</button><button id="network-replay">Повтор сервера</button><button id="network-live">В эфир</button></div>
+      <label>Просмотр записи <input id="network-time" type="range" min="0" max="0" step=".0166667" value="0"></label>
+    </section>
     <div class="transport"><button id="play" class="primary" disabled>▶ Запуск</button><button id="step" title="Один физический шаг" disabled>Шаг</button><button id="reset" class="icon" aria-label="Сбросить симуляцию" title="Сбросить по текущему коду" disabled>↻</button><input id="time" type="range" min="0" max="20" step=".0166667" value="0" aria-label="Время симуляции, не параметр DSL" disabled><output id="time-label">0.00 / 20 с</output><button id="audio" aria-pressed="false" title="Звук создаётся только по этой кнопке" disabled>Звук выкл.</button></div>
     <div class="scope"><span class="badge" id="scope-badge">DSL</span><span id="scope-text"></span></div>
   </section>

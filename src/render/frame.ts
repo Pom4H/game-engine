@@ -17,7 +17,7 @@ export interface RenderFrameIR{
   readonly objectsById:ReadonlyMap<string,RenderObjectIR>;
   readonly lights:readonly RuntimeEntity[];
 }
-export function renderPrimitive(entity:RuntimeEntity):Primitive|undefined{return entity.renderMesh??entity.mesh;}
+export function renderPrimitive(entity:RuntimeEntity):Primitive|undefined{return entity.presentationVisible===false?undefined:entity.renderMesh??entity.mesh;}
 export function primitiveBaseScale(primitive:Primitive|undefined):readonly [number,number,number]{
   if(!primitive)return[1,1,1];
   if(primitive.kind==='box'||primitive.kind==='shard'){const s=primitive.size??[1,1,1];return[s[0],s[1],s[2]];}
@@ -32,7 +32,7 @@ export function renderModel(entity:RuntimeEntity):Mat4{
 export function buildRenderFrame(scene:Scene,camera:CameraSpec=scene.camera,options:{readonly includeMeshes?:boolean}={}):RenderFrameIR{
   const objects:RenderObjectIR[]=[],lights:RuntimeEntity[]=[];
   for(const entity of scene.entities.values()){
-    if(entity.light)lights.push(entity);
+    if(entity.light&&entity.presentationVisible!==false)lights.push(entity);
     const primitive=renderPrimitive(entity);if(!primitive)continue;
     objects.push({entity,primitive,...(options.includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model:renderModel(entity)});
   }

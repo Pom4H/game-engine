@@ -618,7 +618,7 @@ export class WebGPURenderer implements Renderer{
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private probeComplete=false;
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private lastPresentationRevision=-1;private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -764,7 +764,7 @@ export class WebGPURenderer implements Renderer{
     if(probeComplete!==this.probeComplete)this.historyValid=false;
     this.probeComplete=probeComplete;
     this.profiler.measure('materials',()=>{if(structureChanged)this.queueMaterialLoads(scene);});
-    this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light);
+    this.lastCamera=camera.position;this.lastLights=[...scene.entities.values()].filter(e=>e.light&&e.presentationVisible!==false);
     const currentLightGridKey=lightGridCauseKey(this.lastLights,camera.position);
     const lightGrid=this.profiler.measure('lights',()=>{
       if(currentLightGridKey===this.lightGridKey)return undefined;
@@ -796,6 +796,7 @@ export class WebGPURenderer implements Renderer{
     const {vp,cullVP,reflectionVP,lightVP,right,up,frame}=frameState;
     const classified=this.profiler.measure('visibility',()=>({visible:this.collectedVisible,opaque:this.collectedOpaque,transparent:this.collectedTransparent}));
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
+    if(this.lastPresentationRevision!==scene.presentationRevision){this.historyValid=false;this.previousModels.clear();this.lastPresentationRevision=scene.presentationRevision;}
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     const frameModels=this.frameModels;frameModels.clear();
     const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
@@ -817,7 +818,7 @@ export class WebGPURenderer implements Renderer{
       if(staticDirty){
         const cameraOpaque:RuntimeEntity[]=[],cameraTransparent:RuntimeEntity[]=[],shadowCasters:RuntimeEntity[]=[],reflectedObjects:RuntimeEntity[]=[];
         for(const entity of classified.visible){
-          if(renderMoverIds.has(entity.id))continue;
+          if(renderMoverIds.has(entity.id)||entity.presentationVisible===false)continue;
           const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
           if(visible.camera)(opaque?cameraOpaque:cameraTransparent).push(entity);
           if(opaque&&visible.shadow)shadowCasters.push(entity);
@@ -853,7 +854,7 @@ export class WebGPURenderer implements Renderer{
     });
     const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
     if(reflectionProbe){
-      const radius2=(reflectionProbe.radius+12)**2,candidates=classified.opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
+      const radius2=(reflectionProbe.radius+12)**2,candidates=classified.opaque.filter(e=>e.presentationVisible!==false&&!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
       for(let index=0;index<reflectionProbe.facesPerFrame;index++){
         const face=(this.localProbeFace+index)%6,faceVp=probeVP(reflectionProbe.position,face,reflectionProbe.radius);
         const entities=candidates.filter(entity=>{multiply4Into(faceVp,modelFor(entity),this.cullScratch);return intersectsClip(this.mesh(renderPrimitive(entity)!).bounds,this.cullScratch);});
@@ -1175,7 +1176,7 @@ export class WebGPURenderer implements Renderer{
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
-    const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
+    const live=[...scene.entities.values()].filter(e=>e.renderMesh??e.mesh),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey((e.renderMesh??e.mesh)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);
     if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}

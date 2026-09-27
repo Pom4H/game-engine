@@ -12,7 +12,8 @@
     "./vehicles/runtime": "./dist/vehicles/vehicle.js",
     "./vehicles/scene": "./dist/vehicles/scene-vehicle.js",
     "./dsl": "./dist/dsl/index.js",
-    "./dsl/runtime": "./dist/dsl/runtime.js"
+    "./dsl/runtime": "./dist/dsl/runtime.js",
+    "./network": "./dist/network/index.js"
   },
   "files": [
     "dist",

@@ -1,3 +1,4 @@
+import {NetworkPanel} from './network-ui.mjs';
 import {EXAMPLES,LEGACY_PENDING} from './examples.mjs';
 import {SourceDocument,rebaseBindings} from './document.mjs';
 import {BoundControls} from './controls.mjs';
@@ -16,6 +17,7 @@ const button=(text,action,cls)=>{const b=el('button',text,cls);b.type='button';b
 let example=EXAMPLES[0],bindings=[],bindingReady=false,resetBindings=true,runtime=null,boot=null,bootProgram=null,program=null,compiledRevision=-1;
 let timer=0,raf=0,running=false,lastHud=0,external=false,disposed=false,applySerial=0,lastSelection=[0,0],lastCompiler=null,lastPatch='rebuild',seekSerial=0;
 const clock=new FixedClock(1000/60,250,6),stats={compiles:0,liveEdits:0,rebuilds:0,frameMs:0,compileMs:0};
+const network=new NetworkPanel({runtime:()=>runtime,program:()=>program,pause:()=>pause(),restore:()=>reset(),onError:showError,download});
 const compiler=new CompilerClient(reply=>void accept(reply).catch(showError));
 const controls=new BoundControls({list:$('control-list'),search:$('parameter-search'),count:$('parameter-count'),empty:$('parameter-empty'),groups,
  onEdit:changeBinding,onSelect:focusSource,begin:()=>doc.end(),end:()=>doc.end()});
@@ -81,7 +83,7 @@ addEventListener('keydown',event=>{
 function apply(){external=false;clearTimeout(timer);timer=0;status('Компиляция…');compiler.submit(doc.source,doc.revision);}
 $('apply').onclick=apply;
 function selectExample(id,{imported}={}){
- const next=EXAMPLES.find(x=>x.id===id);if(!next)return;pause();example=next;$('examples').value=id;
+ const next=EXAMPLES.find(x=>x.id===id);if(!next)return;if(network.active){network.stop();program=null;}pause();example=next;$('examples').value=id;
  $('filename').textContent=id+'.scene.ts';$('preview-title').textContent=next.title;$('scope-text').textContent=next.limit;$('scope-badge').textContent=names[next.status];$('scope-badge').className='badge '+next.status;
  resetBindings=true;clearTimeout(timer);timer=0;compiler.cancel();bindingReady=false;bindings=[];controls.update([],{ready:false,reset:true});$('parameter-search').value='';
  external=imported!==undefined;setSource(imported??next.source,{compile:false,cursor:[0,0],trust:!external});doc.end();
@@ -109,17 +111,18 @@ async function accept(reply){
  if(disposed||serial!==applySerial||reply.revision!==doc.revision)return;
  try{
   const next=reply.program,edit=program?planProgramEdit(program,next):{mode:'rebuild',reason:'Сцена готова'};
-  if(!program){if(next!==bootProgram){await engine.replaceScene(next.scene,s=>installProgram(s,next));if(serial!==applySerial||reply.revision!==doc.revision)return;}stats.rebuilds++;}else if(edit.mode==='live'){applyLiveProgram(engine.scene,program,next,edit);stats.liveEdits++;}
+  if(network.active){await network.edit(program,next,edit);if(serial!==applySerial||reply.revision!==doc.revision)return;}
+  else if(!program){if(next!==bootProgram){await engine.replaceScene(next.scene,s=>installProgram(s,next));if(serial!==applySerial||reply.revision!==doc.revision)return;}stats.rebuilds++;}else if(edit.mode==='live'){applyLiveProgram(engine.scene,program,next,edit);stats.liveEdits++;}
   else{await engine.replaceScene(next.scene,s=>installProgram(s,next));if(serial!==applySerial||reply.revision!==doc.revision)return;stats.rebuilds++;}
   program=next;compiledRevision=doc.revision;lastPatch=edit.mode;clearError();$('placeholder').hidden=true;
   $('update-mode').textContent=edit.mode==='live'?'Живое изменение · состояние сохранено':'Сборка из кода · начало опыта';
   $('time').max=String(program.durationSeconds);
-  for(const id of ['play','reset','time','step','audio'])$(id).disabled=false;
+  for(const id of ['play','reset','time','step','audio'])$(id).disabled=network.active;
   status(`r${doc.revision} · ${fmt(stats.compileMs,1)} мс · ${edit.mode==='live'?'без сброса':'сборка'}`);
-  engine.render();if(wasRunning&&engine.scene.time<program.durationSeconds)play();else pause(false);refreshHud(performance.now(),true);
+  engine.render();if(!network.active&&wasRunning&&engine.scene.time<program.durationSeconds)play();else pause(false);refreshHud(performance.now(),true);
  }catch(error){showError(error);}
 }
-function play(){if(!runtime||!program)return;if(runtime.scene.time>=program.durationSeconds){void reset(true);return;}running=true;clock.reset(performance.now());$('play').textContent='Ⅱ Пауза';$('live-dot').classList.add('running');}
+function play(){if(!runtime||!program||network.active)return;if(runtime.scene.time>=program.durationSeconds){void reset(true);return;}running=true;clock.reset(performance.now());$('play').textContent='Ⅱ Пауза';$('live-dot').classList.add('running');}
 function pause(silence=true){running=false;$('play').textContent='▶ Запуск';$('live-dot').classList.remove('running');if(silence&&runtime?.audio){runtime.setAudioEnabled(false);$('audio').textContent='Звук выкл.';$('audio').setAttribute('aria-pressed','false');}}
 async function reset(resume=false){if(!runtime||!program)return;pause();const p=program,serial=++seekSerial;await runtime.replaceScene(p.scene,s=>installProgram(s,p));if(serial!==seekSerial)return;lastPatch='rebuild';stats.rebuilds++;if(resume)play();refreshHud(performance.now(),true);}
 $('play').onclick=()=>running?pause():play();$('reset').onclick=()=>void reset().catch(showError);$('step').onclick=()=>{if(!runtime)return;pause();if(runtime.scene.time<program.durationSeconds)runtime.step();refreshHud(performance.now(),true);};
@@ -148,7 +151,7 @@ function refreshHud(now,force=false){
   }$('parts').replaceChildren(...cards);
  }
 }
-function animate(now){if(disposed)return;try{if(running&&runtime&&program){let count=0;clock.advance(now,()=>count++);count=Math.min(count,Math.max(0,Math.ceil((program.durationSeconds-runtime.scene.time)*60)));if(count){const start=performance.now();runtime.step(count);stats.frameMs=performance.now()-start;}if(runtime.scene.time+1e-8>=program.durationSeconds)pause();}refreshHud(now);}catch(error){pause();showError(error);}raf=requestAnimationFrame(animate);}
+function animate(now){if(disposed)return;try{if(network.active)network.frame(now);if(!network.active&&running&&runtime&&program){let count=0;clock.advance(now,()=>count++);count=Math.min(count,Math.max(0,Math.ceil((program.durationSeconds-runtime.scene.time)*60)));if(count){const start=performance.now();runtime.step(count);stats.frameMs=performance.now()-start;}if(runtime.scene.time+1e-8>=program.durationSeconds)pause();}refreshHud(now);}catch(error){pause();showError(error);}raf=requestAnimationFrame(animate);}
 $('panel-toggle').onclick=()=>{const panel=$('control-panel');panel.hidden=!panel.hidden;$('panel-toggle').setAttribute('aria-expanded',String(!panel.hidden));};
 function tab(diagnostics){$('diagnostics').hidden=!diagnostics;$('parameter-tools').hidden=diagnostics;$('parameter-empty').hidden=diagnostics;$('control-list').hidden=diagnostics;$('parameters-tab').setAttribute('aria-pressed',String(!diagnostics));$('diagnostics-tab').setAttribute('aria-pressed',String(diagnostics));refreshHud(performance.now(),true);}
 $('parameters-tab').onclick=()=>{tab(false);controls.filter();};$('diagnostics-tab').onclick=()=>tab(true);$('edit-parameters').onclick=()=>{tab(false);controls.filter();$('parameter-search').focus();};
@@ -175,9 +178,9 @@ function coverage(){
 }
 $('coverage').onclick=coverage;$('scope-badge').onclick=coverage;$('scope-badge').role='button';$('scope-badge').tabIndex=0;$('scope-badge').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')coverage();};$('close-coverage').onclick=()=>$('coverage-dialog').close();
 addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
-addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(raf);clearTimeout(timer);compiler.dispose();runtime?.dispose();},{once:true});
+addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(raf);clearTimeout(timer);compiler.dispose();network.stop();runtime?.dispose();},{once:true});
 // Small test/automation surface. Production uses exactly the same actions as a human.
-globalThis.__DSL_EDITOR__={get source(){return doc.source;},get revision(){return doc.revision;},get appliedRevision(){return compiledRevision;},get bindings(){return bindings;},get stats(){return {...stats};},get lastPatch(){return lastPatch;},get compilers(){return lastCompiler;},get program(){return program;},get runtime(){return runtime;},edit:(id,value)=>changeBinding(id,value),setSource:text=>setSource(text),select:selectExample,apply,seek,play,pause,undo:()=>restored(doc.undo(selection()))};
+globalThis.__DSL_EDITOR__={network,get source(){return doc.source;},get revision(){return doc.revision;},get appliedRevision(){return compiledRevision;},get bindings(){return bindings;},get stats(){return {...stats};},get lastPatch(){return lastPatch;},get compilers(){return lastCompiler;},get program(){return program;},get runtime(){return runtime;},edit:(id,value)=>changeBinding(id,value),setSource:text=>setSource(text),select:selectExample,apply,seek,play,pause,undo:()=>restored(doc.undo(selection()))};
 if(innerWidth<801){$('control-panel').hidden=true;$('panel-toggle').setAttribute('aria-expanded','false');}
 const initialHash=new URLSearchParams(location.hash.slice(1)),id=initialHash.get('scene');
 try{selectExample(EXAMPLES.some(x=>x.id===id)?id:EXAMPLES[0].id,initialHash.has('source')?{imported:decode(initialHash.get('source'))}:{});}
