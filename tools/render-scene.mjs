@@ -15,7 +15,7 @@ const sceneSource=await readFile(scenePath,'utf8');
 const dist=resolve('dist');
 
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.css':'text/css'};
-const sceneUrl='/tools/'+scenePath.slice(resolve('tools').length+1).replaceAll('\\\\','/');
+const sceneUrl='/tools/'+scenePath.slice(resolve('tools').length+1).replaceAll('\\\\','/').replaceAll('\\','/');
 const html='<!doctype html><html><body style="margin:0;overflow:hidden;background:#111"><canvas id="c"></canvas><script type="module" src="'+sceneUrl+'"></script></body></html>';
 
 const server=createServer(async(req,res)=>{
@@ -63,7 +63,15 @@ await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:tr
 await send('Runtime.enable');await send('Page.enable');await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
 await send('Page.navigate',{url:'http://127.0.0.1:'+port+'/'});
 let ready=false,last='';
-for(let i=0;i<300;i++){try{const r=await send('Runtime.evaluate',{expression:'({ready:!!window.__GAME_ENGINE__,error:window.__ENGINE_ERROR__||null})',returnByValue:true});const v=r.result?.value;if(v?.error)throw new Error(v.error);if(v?.ready){ready=true;break}}catch(e){last=String(e)}await new Promise(r=>setTimeout(r,50))}
+for(let i=0;i<300;i++){
+  try{
+    const r=await send('Runtime.evaluate',{expression:'({ready:document.documentElement.dataset.engineReady===\'1\',bridge:!!window.__GAME_ENGINE__,error:window.__ENGINE_ERROR__||null})',returnByValue:true});
+    const v=r.result?.value;
+    if(v?.error)throw new Error(v.error);
+    if(v?.ready||v?.bridge){ready=true;break}
+  }catch(e){last=String(e)}
+  await new Promise(r=>setTimeout(r,50));
+}
 if(!ready) throw new Error('Engine did not become ready: '+last);
 await send('Runtime.evaluate',{expression:'(async()=>{window.__GAME_ENGINE__.pause();window.__GAME_ENGINE__.seek(0);await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()',awaitPromise:true,returnByValue:true});
 const inspection=await send('Runtime.evaluate',{expression:'window.__GAME_ENGINE__.inspect()',returnByValue:true});
