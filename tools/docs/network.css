@@ -1,0 +1,4 @@
+#network-panel{padding:8px 12px;border-top:1px solid var(--line);background:var(--panel);font-size:12px}#network-panel[hidden]{display:none}#network-status{display:block;margin-bottom:6px;font:11px ui-monospace,monospace;overflow-wrap:anywhere}
+.network-actions{display:flex;gap:5px;flex-wrap:wrap}.network-actions button{min-height:32px}#network-time{width:100%;margin-top:8px}
+@media(max-width:700px){#network-panel{padding:8px}.network-actions button{min-height:40px}#network-status{font-size:10px}}
+#network-panel small{display:block;opacity:.7;margin-top:5px}
