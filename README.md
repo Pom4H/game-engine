@@ -15,3 +15,10 @@ The package exports simulation and scene APIs from `src/index.ts`, and `BrowserR
 A scene is validated data (`SceneSpec`). `Scene` can run without a browser for deterministic simulation. `PhysicsWorld` handles rigid contacts. Vehicle geometry comes from `compileVehicle` and the passenger, pickup, and M3 definitions. `AnimationSystem` owns walker and wheel transforms. `WalkWorld` supplies bounded static obstacle and camera queries; `BrowserRuntime.controlWalker(id, {world})` connects keyboard, pointer and touch input to an authored walker.
 
 Source code lives in `src/`; focused tests live in `test/`. Build output in `dist/` is generated and ignored.
+
+## Structural networking
+
+[Structural replication](docs/structural-network.md) transfers compact node offsets
+and packed breakage using the existing projection codec and playback clock. Run
+`node tools/structural-network-harness.mjs` after building to verify two loopback
+clients against the real structural solver. This is not a finished multiplayer game.
