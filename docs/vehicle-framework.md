@@ -53,7 +53,9 @@ now. Wheel geometry is also still a complete tire/rim pair per side. A rim edit 
 **not** yet avoid regenerating the tire inside that pair. No claim is made that every
 leaf already has an independent compiler.
 
-The compiler snapshots the small definition and freezes its owned output geometry.
+The compiler snapshots the small definition and freezes its owned output geometry
+without walking every scalar or serializing renderer cache keys. The Scene owns
+render-key construction for its own geometry copies.
 It never freezes caller inputs. Modifying an input object is detected by value keys;
 it cannot relabel or mutate a previous result. Runtime deformation works on scene-owned
 copies, not on these shared authoring meshes.
@@ -77,13 +79,17 @@ radius changes, body changes, malformed edits and semantic path validation.
 
 Output: `artifacts/vehicle-domain/report.json` and `report.md`. The GitHub workflow
 runs typechecking, the full regression suite and the harness on an isolated CPU runner.
-It publishes the report as an artifact and in the job summary.
+It publishes the report as an artifact and in the job summary. An independent job
+runs the untouched PR base to distinguish existing regressions from framework changes;
+full-suite failures are reported as failures, not ignored to make a green badge.
 
-Timings are CPU **authoring compilation**, reported as medians with all seven samples.
-Cold compilation is measured separately from incremental edits; timings are not flaky
-CI pass/fail thresholds. Deterministic structural checks are the regression gates.
-Unique source arrays are counted before Scene cloning; these are not claims about heap
-allocation, GPU residency or FPS. Emitted ESM import footprint is not a bundled size.
+Timings are CPU **authoring compilation**, reported as medians with all eleven samples
+after four untimed warmups per path. Paired runs alternate execution order to reduce
+order bias. A cold compile means an empty compiler cache, not a fresh process.
+Timings are not flaky CI pass/fail thresholds. Deterministic structural checks are
+the regression gates. Unique source arrays are counted before Scene cloning; these
+are not claims about heap allocation, GPU residency or FPS. Emitted ESM import
+footprint is not a bundled size.
 
 ## Scope
 

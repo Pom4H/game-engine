@@ -1,4 +1,4 @@
-import {freezePrimitive} from '../procedural/mesh.js';
+import {freezeVehicleMesh} from './geometry.js';
 import {detailedRoadWheelMeshes,type RoadWheelGeometrySpec} from './passenger-wheel.js';
 
 export type WheelSide = -1 | 1;
@@ -33,8 +33,8 @@ export class RoadWheelCompiler {
     const previous = this.cache.get(side);
     if (previous?.key===key) { this.hits++; return previous.value; }
     const mesh = detailedRoadWheelMeshes(spec,side);
-    freezePrimitive(mesh.tire);
-    freezePrimitive(mesh.rim);
+    freezeVehicleMesh(mesh.tire);
+    freezeVehicleMesh(mesh.rim);
     const value = Object.freeze(mesh);
     this.cache.set(side,{key,value});
     this.builds++;

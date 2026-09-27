@@ -48,16 +48,30 @@ export function geometryHash(vehicle) {
 const uniqueMeshes = vehicle => [...new Set(vehicle.parts.map(part=>part.mesh))];
 const sourceScalars = meshes => meshes.reduce((n,m)=>n+m.positions.length+m.normals.length+m.indices.length,0);
 const median = values => [...values].sort((a,b)=>a-b)[Math.floor(values.length/2)];
-function measure(run,count=7) {
-  const samples=[];
-  for (let i=0;i<count;i++) {
-    global.gc?.();
-    const start=performance.now();
-    const result=run(i);
-    samples.push(performance.now()-start);
-    assert.ok(result.generatedTriangles>0);
+const SAMPLE_COUNT=11, WARMUP_COUNT=4;
+function time(run,index) {
+  global.gc?.();
+  const start=performance.now(),result=run(index),elapsed=performance.now()-start;
+  assert.ok(result.generatedTriangles>0);
+  return elapsed;
+}
+function measurePair(legacy,framework) {
+  // Alternate execution order to reduce JIT/thermal/order bias. "Cold" below
+  // means a fresh compiler cache, not process startup; both algorithms are warmed.
+  for(let i=0;i<WARMUP_COUNT;i++) { legacy(i); framework(i); }
+  const oldSamples=[],newSamples=[];
+  for(let i=0;i<SAMPLE_COUNT;i++) {
+    const index=i+WARMUP_COUNT;
+    if(i%2===0) { oldSamples.push(time(legacy,index)); newSamples.push(time(framework,index)); }
+    else { newSamples.push(time(framework,index)); oldSamples.push(time(legacy,index)); }
   }
-  return {medianMs:median(samples),samplesMs:samples};
+  const stats=samplesMs=>({medianMs:median(samplesMs),samplesMs});
+  return {legacy:stats(oldSamples),framework:stats(newSamples)};
+}
+function measure(run) {
+  for(let i=0;i<WARMUP_COUNT;i++) run(i);
+  const samplesMs=Array.from({length:SAMPLE_COUNT},(_,i)=>time(run,i+WARMUP_COUNT));
+  return {medianMs:median(samplesMs),samplesMs};
 }
 
 // Traverse emitted ESM, where TypeScript-only imports have already disappeared.
@@ -89,11 +103,10 @@ async function main() {
     assert.equal(vehiclePart(edited,'glass').mesh,vehiclePart(current,'glass').mesh);
     assert.equal(geometryHash(edited),geometryHash(legacyVehicle(variant)));
     assert.equal(compiler.diagnostics.bodyBuilds,1);
-    const legacyCold=measure(()=>legacyVehicle(definition));
-    const frameworkCold=measure(()=>compileVehicle(definition));
-    const oldEdits=measure(i=>legacyVehicle({...definition,wheel:{...definition.wheel,spokes:definition.wheel.spokes+1+(i%2)}}));
+    const cold=measurePair(()=>legacyVehicle(definition),()=>compileVehicle(definition));
     const editCompiler=new VehicleCompiler(); editCompiler.compile(definition);
-    const edits=measure(i=>editCompiler.compile({...definition,wheel:{...definition.wheel,spokes:definition.wheel.spokes+1+(i%2)}}));
+    const wheelVariant=i=>({...definition,wheel:{...definition.wheel,spokes:definition.wheel.spokes+1+(i%2)}});
+    const edit=measurePair(i=>legacyVehicle(wheelVariant(i)),i=>editCompiler.compile(wheelVariant(i)));
     // Prime the stable variant before timing unchanged authoring data.
     editCompiler.compile({...definition,wheel:{...definition.wheel,spokes:definition.wheel.spokes+1}});
     const stable=measure(()=>editCompiler.compile({...definition,wheel:{...definition.wheel,spokes:definition.wheel.spokes+1}}));
@@ -103,19 +116,22 @@ async function main() {
       wheelEditBuilds:{body:compiler.diagnostics.bodyBuilds-coldDiagnostics.bodyBuilds,glass:compiler.diagnostics.glassBuilds-coldDiagnostics.glassBuilds,wheels:compiler.diagnostics.wheelBuilds-coldDiagnostics.wheelBuilds},
       uniqueAuthoringMeshes:{legacy:uniqueMeshes(legacy).length,framework:uniqueMeshes(current).length},
       uniqueAuthoringScalars:{legacy:sourceScalars(uniqueMeshes(legacy)),framework:sourceScalars(uniqueMeshes(current))},
-      timings:{legacyCold,frameworkCold,legacyWheelEdit:oldEdits,frameworkWheelEdit:edits,unchanged:stable},
-      wheelEditSpeedup:oldEdits.medianMs/edits.medianMs});
+      timings:{legacyCold:cold.legacy,frameworkCold:cold.framework,legacyWheelEdit:edit.legacy,frameworkWheelEdit:edit.framework,unchanged:stable},
+      wheelEditSpeedup:edit.legacy.medianMs/edit.framework.medianMs});
   }
   const root=await importFootprint('dist/index.js'),domain=await importFootprint('dist/vehicles/index.js'),wheel=await importFootprint('dist/vehicles/wheels.js');
   const compact=({modules,sourceBytes})=>({modules,sourceBytes});
-  const report={schema:1,node:process.version,platform:process.platform,arch:process.arch,
-    commit:process.env.GITHUB_SHA??null,samples:7,
-    notes:['CPU authoring compilation only; no FPS/GPU-speed claim.','Legacy oracle reproduces pre-framework assembly using unchanged generators.','Unique source arrays before Scene ownership/copying, not measured heap or GPU residency.','Import footprint is unbundled emitted ESM, not gzip or a production bundle.'],
+  const report={schema:2,node:process.version,platform:process.platform,arch:process.arch,
+    commit:process.env.GITHUB_SHA??null,samples:SAMPLE_COUNT,warmups:WARMUP_COUNT,pairedOrder:'alternating',
+    notes:['CPU authoring compilation only; no FPS/GPU-speed claim.','Cache-cold means a fresh compiler, not process startup; both algorithms have four untimed warmups.','Legacy oracle reproduces pre-framework assembly using unchanged generators.','Unique source arrays before Scene ownership/copying, not measured heap or GPU residency.','Import footprint is unbundled emitted ESM, not gzip or a production bundle.'],
     imports:{root:compact(root),vehicles:compact(domain),wheels:compact(wheel)},vehicles:rows};
   const md=['# Vehicle domain harness','',`Node ${report.node}; ${report.platform}/${report.arch}; median of ${report.samples} samples.`,
     '', '| Model | Exact geometry | Wheel builds cold | Body rebuilds on wheel edit | Wheel-edit median, old → new | Speedup |',
     '|---|---|---:|---:|---|---:|',
     ...rows.map(r=>`| ${r.id} | SHA-256 identical | 4 → ${r.coldBuilds.framework.wheelBuilds} | 1 → ${r.wheelEditBuilds.body} | ${r.timings.legacyWheelEdit.medianMs.toFixed(3)} → ${r.timings.frameworkWheelEdit.medianMs.toFixed(3)} ms | ${r.wheelEditSpeedup.toFixed(2)}× |`),
+    '', '| Model | Fresh compilation, old → new | Unchanged edit |',
+    '|---|---|---:|',
+    ...rows.map(r=>`| ${r.id} | ${r.timings.legacyCold.medianMs.toFixed(3)} → ${r.timings.frameworkCold.medianMs.toFixed(3)} ms | ${r.timings.unchanged.medianMs.toFixed(3)} ms |`),
     '',`ESM footprint: root ${root.modules} modules / ${root.sourceBytes} bytes; vehicles ${domain.modules} / ${domain.sourceBytes}; wheels ${wheel.modules} / ${wheel.sourceBytes}.`,
     '',...report.notes.map(note=>`- ${note}`),''].join('\n');
   await mkdir('artifacts/vehicle-domain',{recursive:true});

@@ -1,5 +1,5 @@
 import type {Primitive} from '../scene/types.js';
-import {freezePrimitive} from '../procedural/mesh.js';
+import {freezeVehicleMesh} from './geometry.js';
 import {passengerPartMaterial,type ParametricVehiclePart} from './passenger.js';
 import type {CompiledVehicleGeometry,VehicleDefinition} from './framework.js';
 import {RoadWheelCompiler} from './wheels.js';
@@ -33,8 +33,8 @@ export function assembleVehicleGeometry(
 ):CompiledVehicleGeometry {
   const {body,glass} = surfaces;
   // These meshes are compiler-owned. Never freeze an input definition or a scene.
-  if (!Object.isFrozen(body)) freezePrimitive(body);
-  if (!Object.isFrozen(glass)) freezePrimitive(glass);
+  if (!Object.isFrozen(body)) freezeVehicleMesh(body);
+  if (!Object.isFrozen(glass)) freezeVehicleMesh(glass);
   const parts:ParametricVehiclePart[] = [];
   const add = (id:string,role:ParametricVehiclePart['role'],mesh:VehicleMesh,position:readonly[number,number,number],wheel=false) => {
     parts.push(Object.freeze({id,role,mesh,position:Object.freeze(position),

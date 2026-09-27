@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VehicleCompiler,compileVehicle,vehiclePart,PICKUP_CANOPY_VEHICLE_DEFINITION} from '@rom4/game-engine/vehicles';
 import {RoadWheelCompiler} from '@rom4/game-engine/vehicles/wheels';
+import {freezeVehicleMesh} from '../dist/vehicles/geometry.js';
 import {M3_VEHICLE_DEFINITION} from '../dist/vehicles/m3.js';
 import {detailedRoadWheelMeshes} from '../dist/vehicles/passenger-wheel.js';
 import {legacyVehicle,geometryHash,importFootprint} from '../tools/vehicle-domain-harness.mjs';
@@ -112,4 +113,18 @@ test('legacy stateless API stays deterministic and retains no cross-call cache',
   const a=compileVehicle(PICKUP_CANOPY_VEHICLE_DEFINITION),b=compileVehicle(PICKUP_CANOPY_VEHICLE_DEFINITION);
   assert.notEqual(a.body,b.body);
   assert.equal(geometryHash(a),geometryHash(b));
+});
+
+// Protect every geometry channel, including optional vertex colours; a shallow
+// mesh freeze alone would allow edits to leak between shared axle instances.
+test('compiler-owned geometry freezes every numeric channel without serializing it',()=>{
+  const mesh={kind:'triangle-mesh',positions:[0,0,0],normals:[0,1,0],indices:[0],colors:[1,1,1,1],
+    toJSON(){throw new Error('Authoring ownership must not serialize renderer keys');}};
+  freezeVehicleMesh(mesh);
+  assert.ok(Object.isFrozen(mesh));
+  for(const key of ['positions','normals','indices','colors']) {
+    assert.ok(Object.isFrozen(mesh[key]));
+    assert.throws(()=>{mesh[key][0]=2;},TypeError);
+    assert.throws(()=>{mesh[key]=[];},TypeError);
+  }
 });
