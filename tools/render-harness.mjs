@@ -184,11 +184,13 @@ try{
     const output=resolve(view.output);
     await mkdir(join(output,'..'),{recursive:true});
     await writeFile(output,Buffer.from(encoded,'base64'));
-    results.push({name:view.name,output,renderer});
+    results.push({name:view.name,output,renderer,camera:view.camera});
     console.log(JSON.stringify(results.at(-1),null,2));
   }
 
-  console.log(JSON.stringify({views:results.length,outputs:results.map(result=>result.output)},null,2));
+  const hud={resolution:[width,height],views:results.map(({name,output,renderer,camera})=>({name,output,renderer,camera}))};
+  await writeFile(resolve('artifacts/render-hud.json'),JSON.stringify(hud,null,2));
+  console.log(JSON.stringify({views:results.length,outputs:results.map(result=>result.output),hud:'artifacts/render-hud.json'},null,2));
 }finally{
   await cleanup();
 }
