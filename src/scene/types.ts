@@ -53,6 +53,8 @@ export interface BodySpec {
   collisionSize?:Vec3;
 }
 export interface EntitySpec {
+  /** Render-only projection. Prevents implicit brittle-material colliders. */
+  collision?:'none';
   id:string;
   position?:Vec3;
   rotation?:Vec3;

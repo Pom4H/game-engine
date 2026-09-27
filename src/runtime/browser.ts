@@ -68,12 +68,12 @@ export class BrowserRuntime {
     for(let i=0;i<remaining;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
-  reset():void{this.scene=new Scene(this.initial);this.render();}
+  reset():void{const next=new Scene(this.initial);this.scene.dispose();this.scene=next;this.render();}
   async replaceScene(scene:SceneSpec):Promise<void>{
     this.pause();
     this.controls?.dispose();this.controls=null;
     this.initial=structuredClone(scene);
-    this.scene=new Scene(this.initial);
+    const next=new Scene(this.initial);this.scene.dispose();this.scene=next;
     await this.renderer.prepareMaterials?.(this.scene);
     this.render();await this.renderer.flush();
   }
@@ -88,7 +88,7 @@ export class BrowserRuntime {
   snapshot(){return this.scene.snapshot();}
   inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
-  dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
+  dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.audio?.dispose();this.scene.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
 
   private ambientAudioState():AmbientAudioState{
     const windSpeed=Math.hypot(this.scene.environment.wind[0],this.scene.environment.wind[2]);

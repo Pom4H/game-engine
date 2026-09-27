@@ -236,6 +236,8 @@ export function validateEntity(value:unknown):EntitySpec{
   const e=object(value,'entity'),id=e.id;
   if(typeof id!=='string'||!id||id.length>180)throw new TypeError('entity requires a stable id');
   for(const key of ['position','rotation','scale'])if(e[key]!==undefined)vector(e[key],3,`${id}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
+  if(e.collision!==undefined&&e.collision!=='none')throw new TypeError(`${id}.collision is unknown`);
+  if(e.collision==='none'&&(e.body!==undefined||e.environmental!==undefined))throw new TypeError(`${id}: render-only projections cannot author physical bodies or surfaces`);
   if(e.mesh!==undefined)primitiveSpec(e.mesh,`${id}.mesh`);
   if(e.renderMesh!==undefined)primitiveSpec(e.renderMesh,`${id}.renderMesh`);
   if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);}

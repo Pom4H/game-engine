@@ -9,7 +9,8 @@
     "./browser": "./dist/browser.js",
     "./vehicles": "./dist/vehicles/index.js",
     "./vehicles/wheels": "./dist/vehicles/wheels.js",
-    "./vehicles/runtime": "./dist/vehicles/vehicle.js"
+    "./vehicles/runtime": "./dist/vehicles/vehicle.js",
+    "./vehicles/scene": "./dist/vehicles/scene-vehicle.js"
   },
   "files": [
     "dist",
@@ -21,7 +22,8 @@
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs",
     "harness:vehicles": "tsc -p tsconfig.build.json && node --expose-gc tools/vehicle-domain-harness.mjs",
-    "harness:vehicle-runtime": "tsc -p tsconfig.build.json && node tools/vehicle-runtime-harness.mjs"
+    "harness:vehicle-runtime": "tsc -p tsconfig.build.json && node tools/vehicle-runtime-harness.mjs",
+    "harness:vehicle-scene": "tsc -p tsconfig.build.json && node tools/vehicle-scene-harness.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -46,6 +46,13 @@ export interface RuntimeEntity {
   /** Engine-generated transient geometry is removed after this simulation time. */
   expiresAt?:number;
 }
+/** One final-state projection; never a second simulation or a kernel per entity. */
+export interface SceneProjection {
+  readonly ownerId:string;
+  readonly visualIds:readonly string[];
+  sync():void;
+  dispose():void;
+}
 const DEFAULT_CAMERA:CameraSpec={position:[7,5,9],target:[0,1,0],fov:55};
 
 export class Scene {
@@ -61,6 +68,7 @@ export class Scene {
   readonly kernel=sceneKernel();
   readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
+  private readonly projections=new Map<SceneProjection,RuntimeEntity>();
   lastExecution:string[]=[];
   private pendingFractures=new Map<string,FractureDecision>();
   environment:EnvironmentState;
@@ -108,7 +116,7 @@ export class Scene {
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
-    const shouldCollide=spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle;
+    const shouldCollide=spec.collision!=='none'&&(spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle);
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
     const body=shouldCollide?this.physics.add(new RigidBody({
       id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),kinematic:spec.body?.motion==='kinematic',
@@ -129,17 +137,29 @@ export class Scene {
     return runtime;
   }
 
+  /** Register once; sync after the existing world/contacts/deformation pipeline. */
+  project(projection:SceneProjection):()=>void {
+    const owner=this.entities.get(projection.ownerId);
+    if(!owner||this.projections.has(projection)||projection.visualIds.some(id=>!this.entities.has(id)))throw new TypeError('Projection requires existing owned scene entities');
+    this.projections.set(projection,owner);this.renderStructureRevision++;
+    return()=>{if(this.projections.delete(projection))this.renderStructureRevision++;};
+  }
   use(module:SceneModule):this{this.kernel.use(module);return this;}
   renderMoverIds():ReadonlySet<string>{
     if(this.renderMoverRevision===this.renderStructureRevision)return this.renderMovers;
     const ids=new Set<string>();
     for(const entity of this.entities.values())if(entity.body&&(entity.body.invMass>0||entity.body.kinematic))ids.add(entity.id);
+    for(const projection of this.projections.keys())for(const id of projection.visualIds)ids.add(id);
     for(const id of this.animation.controlledEntityIds())ids.add(id);
     for(const id of this.deformation.visualEntityIds())ids.add(id);
     for(const id of this.contacts?.controlledEntityIds()??[])ids.add(id);
     this.renderMoverRevision=this.renderStructureRevision;this.renderMovers=ids;return ids;
   }
   remove(id:string):void{
+    const removing=this.entities.get(id);
+    for(const [projection,owner] of this.projections)if(owner===removing){this.projections.delete(projection);projection.dispose();}
+    if(this.entities.get(id)!==removing)return;
+
     // Only exact owned objects are removed; an authored replacement under a
     // formerly generated ID must survive source deletion and weather cleanup.
     for(const [key,visual] of this.surfaceVisuals){
@@ -148,6 +168,7 @@ export class Scene {
     }
     this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
   }
+  dispose():void{for(const id of [...this.entities.keys()])this.remove(id);this.physics.clear();}
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
@@ -156,6 +177,7 @@ export class Scene {
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});
+    for(const [projection,owner] of this.projections)if(this.entities.get(owner.id)===owner)projection.sync();
   }
   private commit(command:InternalCommand,at:number):void{
     if(command.type==='spawn'){this.add(command.entity);return;}

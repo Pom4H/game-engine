@@ -2,7 +2,7 @@ import type {Vec3} from '../math.js';
 import {finiteVec3} from '../math.js';
 import {validateCondition,type ConditionSpec} from './condition.js';
 
-interface PartSpec {readonly id:string;readonly at:Vec3;readonly massKg:number;readonly condition?:ConditionSpec;}
+interface PartSpec {readonly id:string;readonly at:Vec3;readonly massKg:number;readonly condition?:ConditionSpec;/** Optional chassis-local structural mount; defaults to at. */readonly mountAt?:Vec3;}
 export interface WheelSpec extends PartSpec {
   readonly kind:'wheel';readonly radiusM:number;readonly widthM:number;
   readonly suspension:{readonly restM:number;readonly travelM:number;readonly springNPerM:number;readonly damperNsPerM:number;readonly yieldForceN?:number};
@@ -49,7 +49,7 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
   let mass=chassisMass,cx=0,cy=0,cz=0;
   for(const p of source.parts){
     if(!p.id||p.id.length>180||ids.has(p.id))throw new RangeError('Parts require unique stable IDs');ids.add(p.id);
-    finiteVec3(p.at,'Part position');check(p.massKg,'Part mass',1e-6,1e7);validateCondition(p.condition??{});
+    finiteVec3(p.at,'Part position');if(p.mountAt)finiteVec3(p.mountAt,'Part mount');check(p.massKg,'Part mass',1e-6,1e7);validateCondition(p.condition??{});
     let center=p.at,inertia=0,area=0,slope=0,induced=0,chord:Vec3=[1,0,0],normal:Vec3=[0,1,0],diag:Vec3;
     if(p.kind==='wheel'){
       check(p.radiusM,'Wheel radius',.0001,100);check(p.widthM,'Wheel width',.0001,100);

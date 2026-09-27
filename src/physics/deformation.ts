@@ -2,6 +2,7 @@ import {freezePrimitive} from '../procedural/mesh.js';
 import {V3,type MutableVec3,type Vec3} from '../math.js';
 import type {RuntimeEntity} from '../scene/scene.js';
 import type {ContactCandidate} from './world.js';
+import type {DeformationField} from './deformation-field.js';
 
 export interface DeformableBodySpec {
   readonly bodyId:string;
@@ -37,8 +38,9 @@ interface VisualBinding {
 }
 interface DeformableState {
   readonly spec:Required<Pick<DeformableBodySpec,'skinThicknessM'|'radiusM'|'maxDentM'|'minEnergyJ'>>&DeformableBodySpec;
-  readonly visuals:readonly VisualBinding[];
+  visuals:readonly VisualBinding[];
   readonly dents:PlasticDent[];
+  revision:number;
 }
 interface PlasticContact {
   readonly state:DeformableState;
@@ -68,6 +70,7 @@ export class PlasticDeformationSystem {
   private readonly states=new Map<string,DeformableState>();
   private readonly dirty=new Set<DeformableState>();
   private plasticWorkJ=0;
+  private readonly fields=new Map<string,DeformationField>();
 
   attach(input:DeformableBodySpec,entities:ReadonlyMap<string,RuntimeEntity>):void{
     if(!input.bodyId||this.states.has(input.bodyId)||!input.visualIds.length)throw new TypeError('Deformable body requires a distinct bodyId and visualIds');
@@ -104,7 +107,7 @@ export class PlasticDeformationSystem {
       maxDentM:clamp(input.maxDentM??.72,.01,1.8),
       minEnergyJ:clamp(input.minEnergyJ??35,0,1e7),
     });
-    this.states.set(input.bodyId,{spec,visuals:Object.freeze(visuals),dents:[]});
+    this.states.set(input.bodyId,{spec,visuals:Object.freeze(visuals),dents:[],revision:0});
     this.syncState(this.states.get(input.bodyId)!,entities);
   }
 
@@ -143,14 +146,27 @@ export class PlasticDeformationSystem {
 
   remove(id:string):void{
     const own=this.states.get(id);if(own)this.dirty.delete(own);
-    this.states.delete(id);
-    for(const [bodyId,state] of this.states)if(state.visuals.some(visual=>visual.id===id)){this.dirty.delete(state);this.states.delete(bodyId);}
+    this.states.delete(id);this.fields.delete(id);
+    for(const state of this.states.values())if(state.visuals.some(visual=>visual.id===id))state.visuals=Object.freeze(state.visuals.filter(visual=>visual.id!==id));
   }
 
   visualEntityIds():ReadonlySet<string>{
     const ids=new Set<string>();
     for(const state of this.states.values())for(const visual of state.visuals)ids.add(visual.id);
     return ids;
+  }
+
+  /** The SAME authoritative deformation field used for skin vertices. Local coordinates
+   * are relative to the physics COM. Detached/removed state cannot be silently reused. */
+  field(bodyId:string):DeformationField {
+    const existing=this.fields.get(bodyId);if(existing)return existing;
+    const state=this.states.get(bodyId);if(!state)throw new RangeError(`No deformable body ${bodyId}`);
+    const owner=this;
+    const field=Object.freeze({
+      get revision(){if(owner.states.get(bodyId)!==state)throw new Error('Deformation field disposed');return state.revision;},
+      sample(rest:Vec3,out:MutableVec3){if(owner.states.get(bodyId)!==state)throw new Error('Deformation field disposed');deformPoint(state.dents,rest,out);},
+    });
+    this.fields.set(bodyId,field);return field;
   }
 
   dents(bodyId:string):readonly PlasticDent[]{return Object.freeze((this.states.get(bodyId)?.dents??[]).map(dent=>Object.freeze({...dent,point:Object.freeze([...dent.point]) as Vec3,outwardNormal:Object.freeze([...dent.outwardNormal]) as Vec3})));}
@@ -191,7 +207,7 @@ export class PlasticDeformationSystem {
       state.dents.push(dent);if(state.dents.length>20)state.dents.shift();
     }
     root.body!.applyLocalCrush(outwardNormal,depthIncrement*.72);
-    this.dirty.add(state);
+    state.revision++;this.dirty.add(state);
     return energy;
   }
 
@@ -222,13 +238,7 @@ export class PlasticDeformationSystem {
         const local:Vec3=[positions[i]!,positions[i+1]!,positions[i+2]!];
         const scaled:Vec3=[local[0]*visual.scale[0],local[1]*visual.scale[1],local[2]*visual.scale[2]];
         let rootPoint=V3.add(visual.offset,rotateLocal(visual.rotation,scaled));
-        for(const dent of state.dents){
-          const relative=V3.sub(rootPoint,dent.point),axial=V3.dot(relative,dent.outwardNormal),radial=V3.sub(relative,V3.scale(dent.outwardNormal,axial)),r=V3.length(radial);
-          if(r>dent.radius*1.55||Math.abs(axial)>dent.radius*1.15)continue;
-          const radialWeight=Math.exp(-2.6*(r/dent.radius)**2),axialWeight=Math.exp(-3.4*Math.abs(axial)/dent.radius),weight=radialWeight*axialWeight;
-          const displacement=V3.scale(dent.outwardNormal,-dent.depth*weight);
-          rootPoint=V3.add(rootPoint,displacement);
-        }
+        deformPoint(state.dents,rootPoint,rootPoint);
         const visualPoint=rotateWorldToLocal(visual.rotation,V3.sub(rootPoint,visual.offset));
         positions[i]=visualPoint[0]/visual.scale[0];positions[i+1]=visualPoint[1]/visual.scale[1];positions[i+2]=visualPoint[2]/visual.scale[2];
       }
@@ -237,6 +247,20 @@ export class PlasticDeformationSystem {
       if(visual.target==='renderMesh')entity.renderMesh=deformed;else entity.mesh=deformed;
     }
   }
+}
+
+/** One shared field kernel for mesh vertices and physical attachment frames. */
+function deformPoint(dents:readonly PlasticDent[],point:Vec3,out:MutableVec3):void {
+  let x=point[0],y=point[1],z=point[2];
+  for(const dent of dents){
+    const n=dent.outwardNormal,dx=x-dent.point[0],dy=y-dent.point[1],dz=z-dent.point[2];
+    const axial=dx*n[0]+dy*n[1]+dz*n[2];
+    const r=Math.hypot(dx-n[0]*axial,dy-n[1]*axial,dz-n[2]*axial);
+    if(r>dent.radius*1.55||Math.abs(axial)>dent.radius*1.15)continue;
+    const weight=Math.exp(-2.6*(r/dent.radius)**2)*Math.exp(-3.4*Math.abs(axial)/dent.radius),depth=dent.depth*weight;
+    x-=n[0]*depth;y-=n[1]*depth;z-=n[2]*depth;
+  }
+  out[0]=x;out[1]=y;out[2]=z;
 }
 
 function recomputeNormals(positions:readonly number[],indices:readonly number[]):number[]{
