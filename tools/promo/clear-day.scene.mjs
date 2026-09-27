@@ -62,7 +62,9 @@ spec.entities.push(
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
-    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.125,metalness:.035};
+    // Automotive metallic base + clear coat: keep the authored dielectric coat instead
+    // of replacing it with a bare rough metal when the hero color is overridden.
+    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.145,metalness:.055,clearcoat:.90,clearcoatRoughness:.055};
   }
   if(entity.id==='road'&&entity.environmental){
     entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00035};
