@@ -242,10 +242,10 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
-  if(part.role==='rim')return{...base,color:[.30,.32,.35,1],roughness:.16,metalness:.96};
+  if(part.role==='rim')return{...base,color:[.34,.36,.39,1],roughness:.19,metalness:.94};
   if(part.role==='light')return{...base,color:[.54,.68,.86,1],emissive:lightsOn?[.34,.46,.70]:[.012,.016,.022],roughness:.11};
   if(part.role==='tail')return{...base,color:[.34,.012,.008,1],emissive:lightsOn?[.7,.015,.006]:[.018,.001,.001]};
-  if(part.role==='metal')return{...base,color:[.16,.17,.18,1]};
+  if(part.role==='metal')return{...base,color:[.22,.24,.27,1],roughness:.24,metalness:.88};
   return{...base,color:[.026,.029,.032,1]};
 }
 
