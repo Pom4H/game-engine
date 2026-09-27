@@ -439,11 +439,14 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   // forward-facing hood/fascia. Bias the local probe by surface orientation so
   // the door gains building reflections without changing the established front look.
   let sideReflection=smoothstep(.30,.82,abs(n.z));
-  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.75*mix(1.0,1.34,sideReflection);
+  // Parallax correction fixes placement; roughness still needs a wider probe
+  // footprint so painted panels do not read like a magnifying mirror.
+  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.68*mix(1.0,1.16,sideReflection);
+  let localProbeLod=roughness*f32(textureNumLevels(localProbeMap)-1u)*.72;
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
   if(f.params.y>.5&&(localProbeWeight>.001||clearcoat>0.0||glassLike)){
-    localProbe=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),0).rgb;
+    localProbe=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),localProbeLod).rgb;
   }
   let environmentRadiance=mix(fallbackEnvironment,localProbe,localProbeWeight);
   let envC0=vec4<f32>(-1.0,-.0275,-.572,.022);let envC1=vec4<f32>(1.0,.0425,1.04,-.04);
