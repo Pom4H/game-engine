@@ -154,7 +154,6 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...frontDetail,
-    ...grilleBackings,
     ...grilleSlats,
     ...badge,
     ...interior,
