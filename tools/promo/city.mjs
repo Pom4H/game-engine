@@ -1,6 +1,6 @@
 import {makeLaboratory} from './laboratory.mjs';
 import {makeM3,makePedestrian,pedestrianAnimation,CAR} from './actors.mjs';
-import {batchStaticScenery} from '../../dist/index.js';
+import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 // Original street geometry in metres; M3 is reconstructed from a compact parametric profile.
 const C={snow:[.93,.955,.975,1],stone:[.59,.57,.52,1],dark:[.07,.075,.078,1],metal:[.16,.18,.19,1],glass:[.16,.23,.28,1]};
 const rng=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
