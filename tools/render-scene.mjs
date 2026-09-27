@@ -57,10 +57,17 @@ let page;
 for(let i=0;i<200;i++){try{const list=await (await fetch('http://127.0.0.1:'+port2+'/json/list')).json();page=list.find(x=>x.type==='page'&&x.webSocketDebuggerUrl);if(page)break}catch{}await new Promise(r=>setTimeout(r,50))}
 if(!page) throw new Error('Chrome page target unavailable');
 const ws=new WebSocket(page.webSocketDebuggerUrl);let id=0;const pending=new Map();
-ws.addEventListener('message',event=>{const m=JSON.parse(String(event.data));const p=pending.get(m.id);if(!p)return;pending.delete(m.id);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result)});
+const browserErrors=[];
+ws.addEventListener('message',event=>{
+  const m=JSON.parse(String(event.data));
+  if(m.method==='Runtime.exceptionThrown') browserErrors.push({type:'exception',details:m.params.exceptionDetails});
+  if(m.method==='Runtime.consoleAPICalled') browserErrors.push({type:'console',level:m.params.type,args:m.params.args?.map(a=>a.value??a.description??a.type)});
+  if(m.method==='Log.entryAdded') browserErrors.push({type:'log',entry:m.params.entry});
+  const p=pending.get(m.id);if(!p)return;pending.delete(m.id);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result);
+});
 const send=(method,params={})=>new Promise((resolve,reject)=>{const i=++id;pending.set(i,{resolve,reject});ws.send(JSON.stringify({id:i,method,params}))});
 await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true})});
-await send('Runtime.enable');await send('Page.enable');await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
+await send('Runtime.enable');await send('Page.enable');await send('Log.enable');await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
 await send('Page.navigate',{url:'http://127.0.0.1:'+port+'/'});
 let ready=false,last='';
 for(let i=0;i<300;i++){
@@ -72,7 +79,14 @@ for(let i=0;i<300;i++){
   }catch(e){last=String(e)}
   await new Promise(r=>setTimeout(r,50));
 }
-if(!ready) throw new Error('Engine did not become ready: '+last);
+if(!ready){
+  let state={};
+  try{
+    const r=await send('Runtime.evaluate',{expression:'({href:location.href,title:document.title,ready:document.documentElement.dataset.engineReady||null,bridge:!!window.__GAME_ENGINE__,error:window.__ENGINE_ERROR__||null,body:document.body?.innerText||\'\',html:document.documentElement.outerHTML.slice(0,5000)})',returnByValue:true});
+    state=r.result?.value??{};
+  }catch(e){last=last||String(e)}
+  throw new Error('Engine did not become ready: '+JSON.stringify({last,state,browserErrors:browserErrors.slice(-20)}));
+}
 await send('Runtime.evaluate',{expression:'(async()=>{window.__GAME_ENGINE__.pause();window.__GAME_ENGINE__.seek(0);await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()',awaitPromise:true,returnByValue:true});
 const inspection=await send('Runtime.evaluate',{expression:'window.__GAME_ENGINE__.inspect()',returnByValue:true});
 const renderer=inspection.result?.value?.renderer;
