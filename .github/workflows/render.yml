@@ -20,10 +20,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - name: Install Chromium
+      - name: Locate Chrome
+        shell: powershell
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium
+          $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source
+          if (-not $chrome) { $chrome = (Get-Command chromium.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw "Chrome/Chromium not found on self-hosted worker" }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "Using $chrome"
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
