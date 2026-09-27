@@ -1,3 +1,4 @@
+import {DynamicMesh} from '../procedural/dynamic-mesh.js';
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
 import {bakeEnvironment,cubeDirection,float16,type EnvironmentMip} from './environment-bake.js';
@@ -11,7 +12,7 @@ import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
 import type {Primitive,CameraSpec,SurfaceTextureSpec,EnvironmentRadianceSpec} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
-import {RenderProfiler} from './profiler.js';
+import {RenderProfiler,type RenderFrameListener} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
@@ -22,7 +23,7 @@ type GPUAny=any;
 const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean}
-interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
+interface GPUMesh{revision?:number;bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
@@ -810,7 +811,7 @@ export class WebGPURenderer implements Renderer{
       }
       const visibilityFor=(entity:RuntimeEntity)=>{
         const primitive=renderPrimitive(entity)!,model=modelFor(entity),cached=this.cullCache.get(entity.id);
-        if(cached&&cached.primitive===primitive&&cached.model===model)return cached;
+        if(cached&&!(primitive instanceof DynamicMesh)&&cached.primitive===primitive&&cached.model===model)return cached;
         const test=(matrix:Mat4)=>{multiply4Into(matrix,model,this.cullScratch);return intersectsClip(this.mesh(primitive).bounds,this.cullScratch);};
         const value={primitive,model,camera:test(cullVP),shadow:test(lightVP),reflection:entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP)};
         this.cullCache.set(entity.id,value);return value;
@@ -1023,6 +1024,7 @@ export class WebGPURenderer implements Renderer{
       ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,jobs:this.environmentBaker?.inspect(),invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
       ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};
   }
+  subscribeFrames(listener:RenderFrameListener){return this.profiler.subscribeFrames(listener);}
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
   dispose():void{if(this.disposed)return;this.disposed=true;this.environmentBaker?.dispose();this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
@@ -1146,7 +1148,7 @@ export class WebGPURenderer implements Renderer{
     for(const [key,batch] of this.shadowBatches)if(!used.has(key)){batch.buffer.destroy();this.shadowBatches.delete(key);}
     return{singles,batches,instances};
   }
-  private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),color:this.buffer(data.colors,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
+  private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity){if(primitive instanceof DynamicMesh&&byIdentity.revision!==primitive.revision){this.device.queue.writeBuffer(byIdentity.vertex,0,primitive.vertices);byIdentity.bounds=meshBounds(primitive.vertices);byIdentity.revision=primitive.revision;this.profiler.addUpload(primitive.vertices.byteLength);}return byIdentity;}const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),color:this.buffer(data.colors,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3,...(primitive instanceof DynamicMesh?{revision:primitive.revision}:{})};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
   private collect(scene:Scene):boolean{
     if(this.collectedScene===scene&&this.collectedRevision===scene.renderStructureRevision)return false;

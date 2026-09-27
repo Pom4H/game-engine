@@ -46,6 +46,13 @@ export interface RenderProfileSnapshot {
   readonly rasterSamples?:RasterSampleFrame;
 }
 
+/** Optional recording tap; GPU durations have no calibrated CPU-clock start. */
+export interface RenderFrameEvent {
+  readonly kind:'cpu'|'gpu';readonly generation:number;readonly timing:RenderFrameTiming;
+  readonly startMs?:number;readonly spans?:readonly RenderCpuSpan[];
+}
+export interface RenderCpuSpan {readonly name:string;readonly offsetMs:number;readonly durationMs:number}
+export type RenderFrameListener=(event:RenderFrameEvent)=>void;
 type GPUAny=any;
 interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null;usedMask:number}
 interface OcclusionSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;usedMask:number}
@@ -58,6 +65,8 @@ const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work
  * ring, so profiling never waits for the GPU in render().
  */
 export class RenderProfiler {
+  private readonly listeners=new Set<RenderFrameListener>();
+  private spans:RenderCpuSpan[]=[];
   private frame=0;private generation=0;private frameStart=0;private cpuQuanta:Record<string,number>={};private work=emptyWork();private atoms:RenderAtomReport|undefined;
   private readonly cpuHistory:RenderFrameTiming[]=[];private readonly gpuHistory:RenderFrameTiming[]=[];
   private readonly querySet:GPUAny|null;private readonly slots:GpuSlot[]=[];private active:GpuSlot|null=null;
@@ -84,14 +93,14 @@ export class RenderProfiler {
   }
 
   beginFrame():number{
-    this.frame++;if(!this.enabled)return this.frame;this.frameStart=performance.now();this.cpuQuanta={};this.work=emptyWork();
+    this.frame++;if(!this.enabled)return this.frame;this.frameStart=performance.now();this.cpuQuanta={};this.spans.length=0;this.work=emptyWork();
     this.active=this.timestampQueries?(this.slots.find(slot=>!slot.pending)??null):null;
     this.activeOcclusion=this.enabled?(this.occlusionSlots.find(slot=>!slot.pending)??null):null;
     if(this.active){this.active.frame=this.frame;this.active.generation=this.generation;this.active.work=null;this.active.usedMask=0;}
     if(this.activeOcclusion){this.activeOcclusion.frame=this.frame;this.activeOcclusion.generation=this.generation;this.activeOcclusion.usedMask=0;}
     return this.frame;
   }
-  measure<T>(name:RenderCpuQuantum,run:()=>T):T{if(!this.enabled)return run();const at=performance.now();try{return run();}finally{this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+(performance.now()-at);}}
+  measure<T>(name:RenderCpuQuantum,run:()=>T):T{if(!this.enabled)return run();const at=performance.now();try{return run();}finally{const ms=performance.now()-at;this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+ms;if(this.listeners.size)this.spans.push(Object.freeze({name,offsetMs:at-this.frameStart,durationMs:ms}));}}
   add(name:RenderCpuQuantum,ms:number):void{if(this.enabled&&Number.isFinite(ms)&&ms>=0)this.cpuQuanta[name]=(this.cpuQuanta[name]??0)+ms;}
   setWork(work:Partial<RenderWork>):void{if(this.enabled)Object.assign(this.work,work);}
   setAtoms(atoms:RenderAtomReport):void{if(this.enabled)this.atoms=atoms;}
@@ -133,6 +142,11 @@ export class RenderProfiler {
     }).catch(()=>{try{slot.read.unmap();}catch{}slot.pending=false;slot.work=null;});
   }
 
+  /** No history aggregation, no renderer wait and no world copy per delivered frame. */
+  subscribeFrames(listener:RenderFrameListener):()=>void{
+    if(!this.enabled)throw new Error('Enable renderer profiling before recording');
+    this.listeners.add(listener);return()=>{this.listeners.delete(listener);};
+  }
   reset():void{this.generation++;this.cpuHistory.length=0;this.gpuHistory.length=0;this.frame=0;this.cpuQuanta={};this.work=emptyWork();this.atoms=undefined;this.latestRaster=undefined;this.active=null;this.activeOcclusion=null;}
 
   inspect():RenderProfileSnapshot{
@@ -149,6 +163,13 @@ export class RenderProfiler {
       ...(this.atoms?{atoms:this.atoms}:{}),...(this.latestRaster?{rasterSamples:this.latestRaster}:{}),
     });
   }
-  dispose():void{this.querySet?.destroy?.();this.occlusionQuerySet?.destroy?.();for(const slot of this.slots){try{slot.read.unmap();}catch{}slot.resolve.destroy();slot.read.destroy();}for(const slot of this.occlusionSlots){try{slot.read.unmap();}catch{}slot.resolve.destroy();slot.read.destroy();}this.slots.length=0;this.occlusionSlots.length=0;}
-  private push(history:RenderFrameTiming[],value:RenderFrameTiming){history.push(value);if(history.length>this.capacity)history.splice(0,history.length-this.capacity);}
+  dispose():void{this.generation++;this.listeners.clear();this.querySet?.destroy?.();this.occlusionQuerySet?.destroy?.();for(const slot of this.slots){try{slot.read.unmap();}catch{}slot.resolve.destroy();slot.read.destroy();}for(const slot of this.occlusionSlots){try{slot.read.unmap();}catch{}slot.resolve.destroy();slot.read.destroy();}this.slots.length=0;this.occlusionSlots.length=0;}
+  private push(history:RenderFrameTiming[],value:RenderFrameTiming){
+    history.push(value);if(history.length>this.capacity)history.splice(0,history.length-this.capacity);
+    if(!this.listeners.size)return;
+    const cpu=history===this.cpuHistory;
+    const event:RenderFrameEvent=Object.freeze({kind:cpu?'cpu':'gpu',generation:this.generation,timing:value,...(cpu?{startMs:this.frameStart,spans:Object.freeze([...this.spans])}:{})});
+    // A diagnostic consumer must not turn a completed frame into a renderer failure.
+    for(const listener of this.listeners)try{listener(event);}catch(error){this.listeners.delete(listener);console.error('Render recorder detached:',error);}
+  }
 }

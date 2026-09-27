@@ -1,3 +1,6 @@
+> Historical first-transfer report. The following API example is superseded by
+> `buffer(width)` and `StructuralProjection`; see ../structural-network.md.
+
 # Structural numeric channels — first transfer, not the complete arena
 
 Base: `f292c28c36c8e9f5c12e9340aa95e513833647ea`, PR #26.

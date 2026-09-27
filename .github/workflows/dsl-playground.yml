@@ -1,8 +1,8 @@
 name: DSL playground
 on:
   push:
-    branches: [codex/dsl-live-docs]
-    paths: ['src/**', 'tools/docs/**', 'test/dsl-playground.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
+    branches: [codex/adaptive-core]
+    paths: ['src/**', 'tools/docs/**', 'test/dsl-playground.mjs', 'test/engine-console.test.mjs', 'test/recording.test.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
         run: bun run typecheck && bun run build
         shell: cmd
       - name: Source bindings, live edits and all demo programs
-        run: node --test test/dsl-playground.mjs
+        run: node --test test/dsl-playground.mjs test/engine-console.test.mjs test/recording.test.mjs
       - name: Build portable playground
         run: node tools/docs/build.mjs
       - name: Locate native Chrome
@@ -38,6 +38,8 @@ jobs:
           "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Native WebGPU and two-way UI acceptance
         run: node tools/docs/qa.mjs
+      - name: Two-player car-ball native WebGPU acceptance
+        run: node tools/docs/arena-qa.mjs
       - name: Full regressions (existing failures remain failures)
         if: ${{ always() && steps.build.outcome == 'success' }}
         shell: powershell
@@ -59,7 +61,9 @@ jobs:
         if: always()
         with:
           name: dsl-playground-evidence
-          path: artifacts/dsl-playground/
+          path: |
+            artifacts/dsl-playground/
+            artifacts/arena/
           retention-days: 14
           if-no-files-found: warn
       - uses: actions/upload-artifact@v7

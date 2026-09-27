@@ -1,11 +1,11 @@
 import type {CpuProfileSnapshot} from '../core/profiling.js';
 import type {AppearancePatch,CameraSpec,SceneSnapshot,SceneSpec} from '../scene/types.js';
 import type {Scene} from '../scene/scene.js';
-import type {RenderProfileSnapshot} from './profiler.js';
+import type {RenderProfileSnapshot,RenderFrameListener} from './profiler.js';
 export type LinearPixelStage='hdr'|'reflection'|'effects'|'taa';
 export interface LinearPixelSample {x:number;y:number;rgba:readonly[number,number,number,number]}
 export interface RenderStats {backend:'webgpu'|'cpu';width:number;height:number;drawCalls:number;triangles:number;meshes:number;objects?:number;buffers?:number;textures?:number;errors:readonly string[];pointLights?:number;lightOverflow?:number;materialTextures?:number;environmentCache?:{jobs?:Readonly<Record<string,number|boolean>>|undefined;updates:number;invalidations:Readonly<Record<string,number>>};reflectionProbe?:{validFaces:number;complete:boolean;nextFace:number;position?:readonly[number,number,number]};profile?:RenderProfileSnapshot}
-export interface Renderer {setResolution?(width:number,height:number):void;sampleLinearPixels?(points:readonly (readonly [number,number])[],stage?:LinearPixelStage):Promise<readonly LinearPixelSample[]>;prepareMaterials?(scene:Scene):Promise<void>;render(scene:Scene,camera?:CameraSpec):void;resize():void;inspect():RenderStats;profile?():RenderProfileSnapshot|undefined;resetProfile?():void;flush():Promise<void>;dispose():void}
+export interface Renderer {subscribeFrames?(listener:RenderFrameListener):()=>void;setResolution?(width:number,height:number):void;sampleLinearPixels?(points:readonly (readonly [number,number])[],stage?:LinearPixelStage):Promise<readonly LinearPixelSample[]>;prepareMaterials?(scene:Scene):Promise<void>;render(scene:Scene,camera?:CameraSpec):void;resize():void;inspect():RenderStats;profile?():RenderProfileSnapshot|undefined;resetProfile?():void;flush():Promise<void>;dispose():void}
 /** Renderer frames and synchronous system-call windows retain different clocks/units. */
 export interface EngineProfileSnapshot extends RenderProfileSnapshot {readonly systems:CpuProfileSnapshot}
 export interface EngineBridge {snapshot():SceneSnapshot;probeLinear(points:readonly (readonly [number,number])[],stage?:LinearPixelStage):Promise<readonly LinearPixelSample[]>;pause():void;resume():void;step(count?:number):SceneSnapshot;seek(seconds:number):SceneSnapshot;replaceScene(scene:SceneSpec):Promise<void>;patchAppearance(patch:AppearancePatch):void;setCamera(camera:CameraSpec):void;render():RenderStats;profile():EngineProfileSnapshot|undefined;resetProfile():void;drain():Promise<void>;flush():Promise<void>;dispose():void;inspect():Record<string,unknown>}

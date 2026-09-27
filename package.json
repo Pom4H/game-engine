@@ -13,7 +13,9 @@
     "./vehicles/scene": "./dist/vehicles/scene-vehicle.js",
     "./dsl": "./dist/dsl/index.js",
     "./dsl/runtime": "./dist/dsl/runtime.js",
-    "./network": "./dist/network/index.js"
+    "./network": "./dist/network/index.js",
+    "./examples/car-ball": "./dist/examples/car-ball.js",
+    "./vehicles/arcade": "./dist/vehicles/arcade.js"
   },
   "files": [
     "dist",
@@ -31,7 +33,8 @@
     "docs:build": "tsc -p tsconfig.build.json && node tools/docs/build.mjs",
     "docs:serve": "node tools/docs/server.mjs",
     "docs:test": "tsc -p tsconfig.build.json && node --test test/dsl-playground.mjs",
-    "docs:qa": "node tools/docs/qa.mjs"
+    "docs:qa": "node tools/docs/qa.mjs",
+    "arena": "node tools/arena.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

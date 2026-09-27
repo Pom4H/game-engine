@@ -1,119 +1,62 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {projection,vector,vector3,scalar,Replica,Publication} from '../dist/network/index.js';
-import {StructuralBody} from '../dist/physics/structure.js';
-import {StructuralStaticContactSolver} from '../dist/physics/structural-contact.js';
+import {projection,scalar,vector3,buffer,Replica,Publication,StructuralProjection,SceneReplicaView} from '../dist/network/index.js';
 import {bindStructuralSkin,applyStructuralSkin} from '../dist/physics/structural-skin.js';
-import {material} from '../dist/materials/catalog.js';
+import {Scene} from '../dist/scene/scene.js';
+import {runStructuralNetworkHarness} from '../tools/structural-network-harness.mjs';
+const stamp=(tick,epoch=1,sequence=tick)=>({epoch,sequence,tick,time:tick/60,paused:false});
+const rest=new Float64Array([-1,0,0,1,0,0]);
+const net=(links=1)=>new StructuralProjection(`cage-${links}/v1`,rest,links);
+const source=(x=0,links=1,id='ball',generation=0)=>({id,generation,position:[x,200+x,0],rotation:[0,x,0],scale:[1,1,1],nodes:rest.map((n,k)=>n+(k===1?x:0)),broken:new Uint8Array(links),secret:'PRIVATE',renderVertices:[99,88,77]});
+const close=(a,b)=>{assert.equal(a.length,b.length);for(let i=0;i<a.length;i++)assert.ok(Math.abs(a[i]-b[i])<1e-10,`${i}: ${a[i]} != ${b[i]}`);};
 
-const stamp=(tick,sequence=tick)=>({epoch:1,sequence,tick,time:tick/120,paused:false});
-const row=(data,generation=0)=>({id:'ball',generation,data});
-
-// Coarse elastic cage for a network/contact regression, not a pneumatic football model.
-function fixture(){
- const positions=[[.5,0,0],[-.5,0,0],[0,.5,0],[0,-.5,0],[0,0,.5],[0,0,-.5],[0,0,0]];
- const triangles=[];
- for(const x of [0,1])for(const y of [2,3])for(const z of [4,5])triangles.push([x,y,z]);
- const edges=new Set(),constraints=[];
- for(const triangle of triangles)for(let k=0;k<3;k++){
-  const pair=[triangle[k],triangle[(k+1)%3]].sort((a,b)=>a-b),key=pair.join(':');
-  if(!edges.has(key)){edges.add(key);constraints.push({kind:'distance',a:pair[0],b:pair[1],areaM2:1e-4,material:material('rubber').mechanical});}
- }
- for(const [a,b,c] of triangles)constraints.push({kind:'volume',a,b,c,d:6,compliance:1e-5,yieldRatio:1,breakRatio:2,plasticity:0});
- const body=new StructuralBody({nodes:positions.map(position=>({position,mass:1/7})),constraints,collisionTriangles:triangles,iterations:8,internalDamping:8});
- const contacts=new StructuralStaticContactSolver([{center:[1.5,0,0],half:[.15,2,2]}],triangles);
- body.activateFromRigid(body.centerOfMass(),[5,0,0],[0,0,0]);
- const rest=body.originalPosition.slice();
- // The skin also has vertices that are not physics nodes.
- const mesh=[...rest,...triangles.flatMap(ids=>[0,1,2].map(axis=>ids.reduce((s,id)=>s+positions[id][axis]/3,0)))];
- return {body,rest,binding:bindStructuralSkin(mesh,rest),contacts};
-}
-
-test('fixed vectors capture typed arrays without exposing solver state or aliasing live buffers',()=>{
- const schema=projection('cage/v1',{nodes:vector(195),temperature:scalar('linear',0,2000)});
- const nodes=Float64Array.from({length:195},(_,i)=>i/100),frame=schema.capture(stamp(0),[row({nodes,temperature:300,force:'PRIVATE FORCE',solver:'NOT ON WIRE'})]);
- const text=schema.encode(frame);nodes.fill(999);
- assert.equal(schema.decode(text).rows[0].values[194],1.94);
- assert.ok(!text.includes('PRIVATE FORCE'));assert.ok(!text.includes('NOT ON WIRE'));
- assert.equal(frame.rows[0].values.length,196);assert.ok(Object.isFrozen(frame.rows[0].values));
+test('fixed buffers share the existing codec; singleton buffer is not a scalar',()=>{
+ const s=projection('buffer-test/v1',{one:buffer(1),pose:vector3(),flags:buffer(2,{sample:'step',integer:true,min:0,max:0xffffffff})});
+ const frame=s.capture(stamp(0),[{id:'x',data:{one:new Float32Array([.5]),pose:[1,2,3],flags:new Uint32Array([0xffffffff,1])}}]);
+ assert.deepEqual(s.decode(s.encode(frame)),frame);assert.equal(frame.rows[0].values[0],.5);
+ assert.throws(()=>s.capture(stamp(1),[{id:'x',data:{one:.5,pose:[1,2,3],flags:[1,2]}}]));
+ const old=projection('old/v1',{x:scalar(),p:vector3()});assert.equal(old.signature,JSON.stringify(['old/v1',[['x',1,'step',-1e12,1e12],['p',3,'linear',-1e12,1e12]]]));
 });
-
-test('buffer validation rejects malformed components, wrong topology dimensions and excessive width',()=>{
- const schema=projection('nodes/v1',{nodes:vector(6)});
- for(const nodes of [[1,2],new Float64Array([0,0,0,0,0,Infinity]),[0,0,0,0,0,'1'],new BigInt64Array(6),new DataView(new ArrayBuffer(48)),null])
-  assert.throws(()=>schema.capture(stamp(0),[row({nodes})]));
- for(const n of [0,1,-1,2.5,Infinity,8193])assert.throws(()=>vector(n));
- assert.throws(()=>projection('too-wide',{a:vector(8192),b:scalar()}));
- assert.equal(schema.capture(stamp(0),[row({nodes:new Float32Array(6)})]).rows[0].values.length,6);
- assert.equal(schema.capture(stamp(0),[row({nodes:new Uint8Array(6)})]).rows[0].values.length,6);
+test('fixed-buffer validation rejects holes, fractions in masks, bigint and wrong dimensions',()=>{
+ const s=projection('x',{x:buffer(3,{sample:'step',integer:true})});
+ for(const x of [[1,,2],[1,.1,2],[1,2],new BigInt64Array([1n,2n,3n]),new DataView(new ArrayBuffer(24)),[NaN,1,2]])assert.throws(()=>s.capture(stamp(0),[{id:'x',data:{x}}]));
+ for(const width of [0,-1,1.2,NaN,Infinity,129])assert.throws(()=>projection('bad',{x:buffer(width)}));
+ assert.throws(()=>projection('bad',{x:buffer(1,{integer:true})}));assert.throws(()=>projection('bad',{x:buffer(2)},{maxStride:32769}));assert.throws(()=>projection('bad',{x:buffer(128),y:scalar()}));
 });
-
-test('numeric payload is bounded before capture/read copies large arrays',()=>{
- const schema=projection('bounded',{nodes:vector(24)},{maxBytes:256}),data={nodes:new Float64Array(24)};
- const frame=schema.capture(stamp(0),[row(data)]);
- assert.throws(()=>schema.capture(stamp(1),[row(data),{id:'other',data}]));
- const oversized=structuredClone(frame);oversized.rows.push({...oversized.rows[0],id:'other'});
- assert.throws(()=>schema.read(oversized));
- const impossible=projection('bounded',{nodes:vector(40)},{maxBytes:256});
- assert.throws(()=>impossible.capture(stamp(0),[row({nodes:new Float64Array(40)})]));
+test('compact structural capture excludes mesh/private/solver state and copies borrowed buffers',()=>{
+ const c=net(65),a=source(1,65),b=source(2,65,'second');a.broken[0]=a.broken[31]=a.broken[32]=a.broken[64]=1;
+ const frame=c.capture(stamp(1),[a,b]),text=c.schema.encode(frame);
+ assert.equal(c.schema.stride,18);assert.ok(!text.includes('PRIVATE'));assert.ok(!text.includes('renderVertices'));
+ assert.deepEqual(frame.rows[0].values.slice(-3),[2147483649,1,1]);assert.deepEqual(frame.rows[1].values.slice(-3),[0,0,0]);a.nodes.fill(99);a.broken.fill(0);assert.equal(frame.rows[0].values[10],1);
+ const r=new Replica(c.schema,1),view=c.bind('ball',1);r.receive(c.schema.decode(text),0);c.apply(r.at(1/60),view);assert.equal(view.nodes[1],1);assert.equal(view.broken[31],1);assert.equal(view.broken[64],1);
 });
-
-test('array channels use the existing angle/step interpolation rules',()=>{
- const schema=projection('channels',{spin:vector(2,'angle'),broken:vector(2,'step',0,1)}),replica=new Replica(schema,1);
- replica.receive(schema.capture(stamp(0),[row({spin:[3,-3],broken:[0,0]})]),0);
- replica.receive(schema.capture(stamp(120),[row({spin:[-3,3],broken:[1,0]})]),1);
- const values=replica.at(.5).rows[0].values;
- assert.ok(Math.abs(values[0]-Math.PI)<1e-12);assert.ok(Math.abs(values[1]+Math.PI)<1e-12);
- assert.deepEqual([...values.slice(2)],[0,0]);assert.equal(replica.at(1).rows[0].values[2],1);
+test('pose, interpolated nodes and discrete breakage use the same sampled time',()=>{
+ const c=net(),r=new Replica(c.schema,1),a=source(0),b=source(2);b.broken[0]=1;r.receive(c.capture(stamp(0),[a]),0);r.receive(c.capture(stamp(60),[b]),1);
+ const scene=new Scene({version:1,entities:[{id:'ball',mesh:{kind:'sphere',radius:1},collision:'none'}]}),pose=new SceneReplicaView(scene),shape=c.bind('ball',1);
+ const sample=r.at(.5);pose.apply(sample);c.apply(sample,shape);assert.equal(scene.entities.get('ball').position[0],1);assert.equal(shape.nodes[1],1);assert.equal(shape.broken[0],0);
+ c.apply(r.at(1),shape);assert.equal(shape.broken[0],1);assert.equal(shape.nodes[1],2);assert.equal(scene.physics.steps,0);assert.equal(scene.physics.bodies.size,0);pose.dispose();scene.dispose();
 });
-
-test('invalid final node is atomic; topology generations never blend or rewrite prior frames',()=>{
- const schema=projection('topology-a/v1',{position:vector3(),nodes:vector(6)}),replica=new Replica(schema,1);
- const first=schema.capture(stamp(0),[row({position:[0,0,0],nodes:[0,0,0,1,0,0]})]);replica.receive(first,0);
- const next=schema.capture(stamp(120),[row({position:[10,0,0],nodes:[10,0,0,11,0,0]},1)]);
- const bad=structuredClone(next);bad.rows[0].values[8]=NaN;
- assert.throws(()=>replica.receive(bad,1));assert.equal(replica.latest().tick,0);
- replica.receive(next,1);assert.deepEqual([...replica.at(.5).rows[0].values],first.rows[0].values);
- assert.deepEqual([...replica.at(1).rows[0].values],next.rows[0].values);
- const incompatible=projection('topology-b/v1',{position:vector3(),nodes:vector(6)}).capture(stamp(240),[row({position:[0,0,0],nodes:new Float64Array(6)})]);
- assert.throws(()=>replica.receive(incompatible,2));assert.equal(replica.latest().tick,120);
+test('geometry at two render densities binds to the same replicated cage without a second solver',()=>{
+ const c=net(),r=new Replica(c.schema,1),view=c.bind('ball',1),s=source(.3),low=bindStructuralSkin(rest,c.rest),densePoints=Float64Array.from({length:300},(_,i)=>i%3===0?-1+2*Math.floor(i/3)/99:0),high=bindStructuralSkin(densePoints,c.rest);
+ r.receive(c.capture(stamp(0),[s]),0);c.apply(r.at(0),view);for(const binding of [low,high]){const remote=new Float64Array(binding.rest.length),local=new Float64Array(binding.rest.length);applyStructuralSkin(binding,c.rest,view.nodes,remote);applyStructuralSkin(binding,c.rest,s.nodes,local);close(remote,local);}
 });
-
-test('one real structural authority feeds two passive skins through encoded frames and replay',t=>{
- const {body,rest,binding,contacts}=fixture(),schema=projection('octa-cage/world-space/v1',{center:vector3(),nodes:vector(rest.length)});
- const frames=[],wire=[];
- for(let tick=0;tick<=120;tick++){
-  if(tick)body.step(1/120,[0,0,0],b=>contacts.project(b));
-  if(tick%4)continue;
-  const f=schema.capture(stamp(tick),[row({center:body.centerOfMass(),nodes:body.position,force:body.force})]);
-  frames.push(f);const publication=new Publication(schema,f);wire.push(publication.text());assert.equal(publication.text(),wire.at(-1));
- }
- assert.ok(body.steps>0&&body.steps<=120);assert.equal(body.mode,'dormant');assert.ok(contacts.stats.contacts>0);
- // Check deformation, not merely a translating rigid mesh.
- const initialSpan=Math.hypot(...[0,1,2].map(axis=>rest[axis]-rest[3+axis]));
- const maxFlex=Math.max(...frames.map(f=>Math.abs(Math.hypot(...[0,1,2].map(axis=>f.rows[0].values[3+axis]-f.rows[0].values[6+axis]))-initialSpan)));
- assert.ok(maxFlex>.001,{maxFlex});
- const clients=[new Replica(schema,1),new Replica(schema,1)];
- for(const [clientIndex,client] of clients.entries())for(let i=0;i<wire.length;i++){
-  client.receive(schema.decode(wire[i]),i/30+clientIndex*.037+(i%3)*.003);
-  if(i>1&&i%3===0)assert.equal(client.receive(schema.decode(wire[i-2]),i/30+.05),false);
- }
- const outputs=clients.map(()=>new Float64Array(binding.vertexCount*3)),reference=new Float64Array(outputs[0].length);
- const nodesAtSample=new Float64Array(rest.length),steps=body.steps,live=body.position.slice();
- for(let sample=0;sample<=240;sample++){
-  const time=sample/240,lo=Math.min(frames.length-1,Math.floor(time*30+1e-10)),hi=Math.min(frames.length-1,lo+1),alpha=hi===lo?0:(time-frames[lo].time)/(frames[hi].time-frames[lo].time);
-  for(let k=0;k<nodesAtSample.length;k++){const a=frames[lo].rows[0].values[3+k],b=frames[hi].rows[0].values[3+k];nodesAtSample[k]=a+(b-a)*alpha;}
-  applyStructuralSkin(binding,rest,nodesAtSample,reference);
-  for(const [index,client] of clients.entries()){
-   const state=client.at(time).rows[0].values;
-   for(let axis=0;axis<3;axis++)assert.ok(Math.abs(state[axis]-Array.from({length:rest.length/3},(_,i)=>state[3+i*3+axis]/(rest.length/3)).reduce((a,b)=>a+b,0))<1e-9);
-   applyStructuralSkin(binding,rest,state.subarray(3),outputs[index]);
-   for(let k=0;k<reference.length;k++)assert.ok(Math.abs(outputs[index][k]-reference[k])<1e-9);
-  }
-  assert.deepEqual(outputs[0],outputs[1]);
- }
- const atImpact=clients[0].at(.25).rows[0].values.slice();clients[0].at(1);assert.deepEqual(clients[0].at(.25).rows[0].values,atImpact);
- assert.equal(body.steps,steps);assert.deepEqual(body.position,live);
- assert.equal(schema.stats.encodes,frames.length);assert.equal(clients[0].stats.allocations,1);assert.equal(clients[1].stats.allocations,1);
- t.diagnostic(JSON.stringify({authorityTicks:120,physicalSteps:body.steps,nodes:body.nodeCount,skinVertices:binding.vertexCount,publications:frames.length,renderSamplesPerClient:241,maxFlexMeters:maxFlex,contacts:contacts.stats.contacts}));
+test('generation, epoch and roster changes never reuse another body template',()=>{
+ const c=net(),r=new Replica(c.schema,1),view=c.bind('ball',1);r.receive(c.capture(stamp(0),[source(0)]),0);r.receive(c.capture(stamp(60),[source(9,1,'ball',1)]),1);
+ c.apply(r.at(.5),view);assert.equal(view.nodes[1],0);assert.equal(c.apply(r.at(1),view),false);assert.equal(view.visible,false);
+ const next=c.bind('ball',1,1);c.apply(r.at(1),next);assert.equal(next.nodes[1],9);r.receive(c.capture(stamp(120),[]),2);assert.equal(c.apply(r.at(2),next),false);
+ r.reset(2);r.receive(c.capture(stamp(0,2),[source(0)]),3);assert.equal(c.apply(r.at(0),view),false);const changed=new StructuralProjection('new-template/v2',rest,1);assert.throws(()=>changed.schema.decode(c.schema.encode(c.capture(stamp(1),[source()]))));
 });
+test('bad final row is rejected atomically before accepted replica history changes',()=>{
+ const c=net(),r=new Replica(c.schema,1);r.receive(c.capture(stamp(0),[source()]),0);for(const value of [NaN,.5,0x100000000,-1]){const bad=structuredClone(c.capture(stamp(1),[source(),source(0,1,'second')]));bad.rows[1].values[15]=value;assert.throws(()=>r.receive(bad,.1));assert.equal(r.latest().sequence,0);}
+});
+test('view validation does not partially overwrite nodes for corrupt masks or non-finite offsets',()=>{
+ const c=net(),r=new Replica(c.schema,1),view=c.bind('ball',1);r.receive(c.capture(stamp(0),[source(1)]),0);const frame=structuredClone(r.at(0));frame.rows[0].values[15]=2;assert.throws(()=>c.apply(frame,view));assert.deepEqual(view.nodes,rest);assert.equal(view.visible,false);frame.rows[0].values[15]=0;frame.rows[0].values[10]=NaN;assert.throws(()=>c.apply(frame,view));assert.deepEqual(view.nodes,rest);
+});
+test('loss/reordering holds authoritative deformation; replay does not resimulate',()=>{
+ const c=net(),r=new Replica(c.schema,1,4),view=c.bind('ball',1),nodes=view.nodes,bits=view.broken;for(let i=0;i<10;i++)r.receive(c.capture(stamp(i),[source(i/10)]),i/60);assert.equal(r.receive(c.capture(stamp(4),[source(100)]),1),false);c.apply(r.present(999),view);assert.equal(view.nodes[1],.9);c.apply(r.at(6/60),view);assert.ok(Math.abs(view.nodes[1]-.6)<1e-12);for(let i=0;i<100;i++)c.apply(r.at(.13),view);assert.equal(view.nodes,nodes);assert.equal(view.broken,bits);assert.equal(r.stats.allocations,1);assert.equal(r.latest().sequence,9);assert.equal(r.inspect().frames,4);
+});
+test('large structural cages opt into a bounded stride instead of arbitrary packet arrays',()=>{
+ const c=new StructuralProjection('max/v1',new Float64Array(2048*3),16384,{maxEntities:1}),s=source();s.nodes=new Float64Array(6144);s.broken=new Uint8Array(16384);assert.equal(c.schema.stride,6665);assert.doesNotThrow(()=>c.capture(stamp(0),[s]));assert.throws(()=>c.capture(stamp(0),[s,{...s,id:'other'}]));assert.throws(()=>new StructuralProjection('bad',new Float64Array(6147),1));assert.throws(()=>new StructuralProjection('bad',rest,16385));assert.throws(()=>new StructuralProjection('bad',[0,0,0,'1',0,0],1));assert.throws(()=>c.capture(stamp(0),[{...s,nodes:[0,0,0]}]));const small=net();assert.throws(()=>small.capture(stamp(0),[{...source(),nodes:['1',0,0,1,0,0]}]));assert.throws(()=>small.capture(stamp(0),[{...source(),broken:[2]}]));
+});
+test('one structural publication reuses identical bytes across readers',()=>{const c=net(),p=new Publication(c.schema,c.capture(stamp(0),[source()]));const text=p.text();for(let i=0;i<16;i++)assert.equal(p.text(),text);assert.equal(c.schema.stats.encodes,1);});
+test('real structural solver -> loopback stream -> two independent replicas and skins',async()=>{const report=await runStructuralNetworkHarness();assert.equal(report.clients,2);assert.equal(report.framesPerClient,61);assert.equal(report.authoritySteps,240);assert.equal(report.encodes,61);assert.ok(report.maxNodeError<1e-10);assert.ok(report.maxSkinError<1e-10);assert.ok(report.maxEdgeStrain>1e-4);});

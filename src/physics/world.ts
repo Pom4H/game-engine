@@ -442,7 +442,7 @@ function rotationBasis(rotation:Vec3):readonly[Vec3,Vec3,Vec3]{
 }
 function rotateLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[b[0][0]*v[0]+b[1][0]*v[1]+b[2][0]*v[2],b[0][1]*v[0]+b[1][1]*v[1]+b[2][1]*v[2],b[0][2]*v[0]+b[1][2]*v[1]+b[2][2]*v[2]];}
 function rotateWorldToLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[V3.dot(v,b[0]),V3.dot(v,b[1]),V3.dot(v,b[2])];}
-function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[local[0]*body.invInertiaLocal[0],local[1]*body.invInertiaLocal[1],local[2]*body.invInertiaLocal[2]];return rotateLocal(body.rotation,scaled);}
+export function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[local[0]*body.invInertiaLocal[0],local[1]*body.invInertiaLocal[1],local[2]*body.invInertiaLocal[2]];return rotateLocal(body.rotation,scaled);}
 function groundSupportVector(body:RigidBody):MutableVec3{return groundContactManifold(body).points[0]??[0,groundContactManifold(body).lowest,0];}
 function groundContactManifold(body:RigidBody):{lowest:number;points:MutableVec3[]}{
   if(body.shape.kind==='sphere')return{lowest:-body.shape.radius,points:[[0,-body.shape.radius,0]]};

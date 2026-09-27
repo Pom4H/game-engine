@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Car / Ball · game-engine</title><link rel="icon" href="data:,"><link rel="stylesheet" href="./arena.css"><link rel="stylesheet" href="./recording.css"></head>
+<body>
+<canvas id="arena" tabindex="0" aria-label="Сетевая автомобильная арена"></canvas>
+<header><a href="./">game-engine <span>/ car-ball</span></a><span id="connection">Подключение</span><button id="join">Войти в матч</button></header>
+<div class="scoreboard"><strong id="blue">0</strong><div><b id="clock">5:00</b><small id="phase">ОЖИДАНИЕ</small></div><strong id="orange">0</strong></div>
+<div id="error" role="alert" hidden></div>
+<aside id="boost"><b>100</b><span>BOOST</span><meter min="0" max="100" value="100"></meter></aside>
+<footer><span id="driver">Зритель</span><span>WASD · ЛКМ буст · ПКМ прыжок / повторно доворот · Shift дрифт · Q/E крен · Space камера</span><button id="diagnostics">Ё Диагностика</button></footer>
+<section id="console" hidden>
+<div class="console-head"><b>ENGINE / LIVE</b><button id="live">В эфир</button><button id="record">Запись кадров</button><button id="restart">Новый матч</button><button id="console-close">Закрыть</button></div>
+<label>Повтор <input id="replay" type="range" min="0" max="0" step=".00833333" value="0"></label>
+<pre id="metrics"></pre><section id="recording-panel" hidden aria-label="Запись рендера"></section>
+<div id="console-watches"></div><div id="console-log" role="log"></div>
+<form id="console-form"><label>&gt; <input id="console-input" placeholder="help · inspect scene · watch ball · record start" autocomplete="off" spellcheck="false" maxlength="2048"></label></form>
+
+</section>
+<nav class="touch" aria-label="Сенсорное управление"><div class="direction"><button data-drive="forward">▲</button><button data-drive="left">◀</button><button data-drive="reverse">▼</button><button data-drive="right">▶</button></div><div><button data-drive="camera">Камера</button><button data-drive="slide">Дрифт</button><button data-drive="jump">Прыжок</button><button data-drive="boost">Буст</button></div></nav>
+<script type="module" src="./arena.mjs"></script></body></html>

@@ -1,6 +1,6 @@
 /* Source-bound controls: stable rows, visible ownership, keyboard/touch-sized editing. */
 .control-row[hidden],.control-group[hidden],.parameter-tools[hidden],.parameter-empty[hidden]{display:none}
-.control-panel{width:280px;border-radius:2px}
+
 .parameter-tools{position:sticky;top:36px;z-index:1;display:flex;align-items:center;gap:8px;padding:9px 10px;background:#1b2228;border-bottom:1px solid var(--line)}
 .parameter-tools input{width:100%;min-width:0;background:#11171b;border:1px solid var(--line);border-radius:2px;padding:8px;color:var(--text);font-size:12px}
 .parameter-tools output{flex-shrink:0;font:10px ui-monospace,monospace;color:var(--muted)}
@@ -17,8 +17,8 @@
 .control-row select{min-height:32px}.color-row input[type=color]{width:44px;height:32px}
 .toggle-row{display:flex;gap:10px;align-items:center;min-height:32px}.toggle-row input{width:20px;height:20px;accent-color:var(--accent)}.toggle-row output{font-size:12px;color:var(--muted)}
 .diagnostics-edit{width:100%;font-size:11px;color:var(--accent)}
-@media(min-width:1600px){.control-panel{width:280px}}
-@media(max-width:1100px){.control-panel{width:248px}}
-@media(max-width:800px){.control-panel{width:min(280px,calc(100% - 16px));bottom:44px}.control-tabs button{min-height:40px}.parameter-tools{top:40px}.parameter-tools input{min-height:40px;font-size:16px}.control-row input[type=number]{min-height:40px;font-size:16px;width:90px}.control-row input[type=range]{min-height:40px}.vector input[type=number]{width:100%;font-size:14px}.control-row select{min-height:40px;font-size:16px}.control-row .source-link,.value-reset{min-width:38px;min-height:40px}.color-row input[type=color]{height:40px}.toggle-row{min-height:40px}.row-title label{font-size:12px}}
 
-.control-panel:has(#diagnostics:not([hidden])) .parameter-empty{display:none}
+
+@media(max-width:800px){.control-tabs button{min-height:40px}.parameter-tools{top:40px}.parameter-tools input{min-height:40px;font-size:16px}.control-row input[type=number]{min-height:40px;font-size:16px;width:90px}.control-row input[type=range]{min-height:40px}.vector input[type=number]{width:100%;font-size:14px}.control-row select{min-height:40px;font-size:16px}.control-row .source-link,.value-reset{min-width:38px;min-height:40px}.color-row input[type=color]{height:40px}.toggle-row{min-height:40px}.row-title label{font-size:12px}}
+
+

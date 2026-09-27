@@ -10,7 +10,7 @@ export {vehicle,wheel,wing,type VehicleBlueprint,type VehicleSpec,type WingSpec,
 export {PartCondition,type ConditionSpec} from './condition.js';
 export type {DeformationField} from '../physics/deformation-field.js';
 
-export interface VehicleControls {readonly throttle?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;}
+export interface VehicleControls {readonly handbrake?:number;readonly throttle?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;}
 export interface VehicleAir {readonly densityKgM3:number;readonly wind:Vec3;}
 export interface VehiclePose {readonly position?:Vec3;readonly rotation?:Vec3;readonly velocity?:Vec3;readonly angularVelocity?:Vec3;}
 export interface PartSample {
@@ -52,7 +52,7 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly parts:PartRuntime[];
   private readonly byId=new Map<string,PartRuntime>();
   private readonly views=new Map<string,PartSample>();
-  private readonly controls={throttle:0,brake:0,steer:0,pitch:0,roll:0,flap:0};
+  private readonly controls={handbrake:0,throttle:0,brake:0,steer:0,pitch:0,roll:0,flap:0};
   private air:VehicleAir={densityKgM3:1.225,wind:[0,0,0]};
   private readonly unbind:()=>void;
   private disposed=false;
@@ -95,7 +95,7 @@ export class Vehicle implements PhysicsForceDriver {
   get deformationBuilds():number{return this.parts.reduce((n,p)=>n+p.attachment.builds,0);}
   get deformationSamples():number{return this.parts.reduce((n,p)=>n+p.attachment.samples,0);}
   setControls(input:VehicleControls):void {
-    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
+    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'||key==='handbrake'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
     Object.assign(this.controls,input);if(Object.values(input).some(v=>v!==0))this.body.wake();
   }
   setAir(air:VehicleAir):void {
@@ -137,7 +137,7 @@ export class Vehicle implements PhysicsForceDriver {
       const r=p.arm,w=b.angularVelocity,v=p.velocity;
       v[0]=b.velocity[0]+w[1]*r[2]-w[2]*r[1];v[1]=b.velocity[1]+w[2]*r[0]-w[0]*r[2];v[2]=b.velocity[2]+w[0]*r[1]-w[1]*r[0];
       if(s.kind==='wing')this.aerodynamics(p,s,frame);
-      else {this.wheelForces(p,s,frame,dt);p.spin=(p.spin+p.omega*dt)%(Math.PI*2);}
+      else {this.wheelForces(p,s,frame,dt);p.spin+=p.omega*dt;}
       this.frame.add(p.force,p.arm);p.condition.observeLoad(s.kind==='wing'?p.lift:p.load);
     }
     // A sleeping supported body must react to changed wind or loss of support, too.
@@ -182,7 +182,8 @@ export class Vehicle implements PhysicsForceDriver {
     frame.rotate(p.localChord,p.chord);frame.rotate(p.localNormal,p.normal);
     const b=frame.basis,upY=p.normal[1],susp=s.suspension,radius=p.radius;
     const motor=this.controls.throttle*(s.driveTorqueNm??0),torque=s.drivePowerW===undefined?motor:Math.sign(motor)*Math.min(Math.abs(motor),s.drivePowerW/Math.max(1,Math.abs(p.omega)));
-    const brake=this.controls.brake*(s.brakeTorqueNm??0);
+    const slide=s.at[0]<0?this.controls.handbrake:0;
+    const brake=Math.max(this.controls.brake,slide)*(s.brakeTorqueNm??0);
     const length=upY>.15?(p.point[1]-this.world.ground-radius)/upY:Infinity;
     p.compression=Math.max(0,susp.restM-length);
     if(length>=susp.restM||upY<=.15||p.condition.failed||!p.attachment.valid){
@@ -208,7 +209,7 @@ export class Vehicle implements PhysicsForceDriver {
     const localX=tx*b[0]!+ty*b[1]!+tz*b[2]!,localY=tx*b[3]!+ty*b[4]!+tz*b[5]!,localZ=tx*b[6]!+ty*b[7]!+tz*b[8]!;
     const inv=this.body.invMass+localX*localX*this.body.invInertiaLocal[0]+localY*localY*this.body.invInertiaLocal[1]+localZ*localZ*this.body.invInertiaLocal[2];
     const relaxation=1-Math.exp(-Math.max(1,Math.abs(longitudinal))*dt/.25);
-    solveWheelContact(p.wheelSolve,dt,radius,p.compiled.inertia,p.omega,longitudinal,-lateral/Math.max(1.25,Math.abs(longitudinal)),p.load*p.grip,torque/radius,brake/radius,inv,p.longForce,p.sideForce,relaxation,12,9.5);
+    solveWheelContact(p.wheelSolve,dt,radius,p.compiled.inertia,p.omega,longitudinal,-lateral/Math.max(1.25,Math.abs(longitudinal)),p.load*p.grip*(1-.75*slide),torque/radius,brake/radius,inv,p.longForce,p.sideForce,relaxation,12,9.5);
     this.diagnostics.wheelSolves++;const solved=p.wheelSolve;p.omega=solved.speed;p.longForce=solved.force;p.sideForce=solved.sideForce;
     p.force[0]=fx*solved.force+rx*solved.sideForce;p.force[1]=p.load;p.force[2]=fz*solved.force+rz*solved.sideForce;
     const slip=p.omega*radius-(longitudinal+solved.force*dt*inv);

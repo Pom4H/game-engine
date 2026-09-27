@@ -1,17 +1,17 @@
 /** Explicit numeric projections. Unlisted simulation fields never enter a packet.
  * RU: Авторитетное состояние остаётся у симуляции; проекция выбирает только факты. */
 export type Sampling='linear'|'angle'|'step';
-export interface Field<W extends number=number>{readonly width:W;readonly sample:Sampling;readonly min:number;readonly max:number}
+export interface Field<W extends number=number>{readonly width:W;readonly sample:Sampling;readonly min:number;readonly max:number;readonly buffer?:true;readonly integer?:true}
+export type NumericBuffer=readonly number[]|Float32Array|Float64Array|Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array;
+/** Fixed-size buffers (nodes, joints, packed flags). Width belongs to the installed schema. */
+export const buffer=(width:number,options:{sample?:Sampling;min?:number;max?:number;integer?:boolean}={}):Field & {readonly buffer:true}=>Object.freeze({
+ width,sample:options.sample??'linear',min:options.min??-1e12,max:options.max??1e12,buffer:true,...(options.integer?{integer:true as const}:{}),
+});
+const numeric=(v:unknown,f:Field):v is number=>typeof v==='number'&&Number.isFinite(v)&&v>=f.min&&v<=f.max&&(!f.integer||Number.isSafeInteger(v));
 export const scalar=(sample:Sampling='step',min=-1e12,max=1e12):Field<1>=>Object.freeze({width:1,sample,min,max});
 export const vector3=(sample:Sampling='linear',min=-1e12,max=1e12):Field<3>=>Object.freeze({width:3,sample,min,max});
-/** Fixed-size numeric buffers (for example xyz cage nodes). Prepared once per topology.
- * Width one remains scalar(); vector3() keeps its existing tuple contract. */
-export const vector=<const W extends number>(width:W,sample:Sampling='linear',min=-1e12,max=1e12):Field<W>=>{
- if(!Number.isSafeInteger(width)||width<2||width>8192)throw new RangeError('Vector width outside 2..8192');
- return Object.freeze({width,sample,min,max});
-};
 export type Fields=Readonly<Record<string,Field>>;
-export type Values<S extends Fields>={readonly[K in keyof S]:S[K]['width'] extends 1?number:S[K]['width'] extends 3?readonly[number,number,number]|Float32Array|Float64Array:ArrayLike<number>};
+export type Values<S extends Fields>={readonly[K in keyof S]:S[K] extends {readonly buffer:true}?NumericBuffer:S[K]['width'] extends 1?number:readonly[number,number,number]|Float32Array|Float64Array};
 export interface Stamp{readonly epoch:number;readonly sequence:number;readonly tick:number;readonly time:number;readonly paused:boolean}
 export interface Row{readonly id:string;readonly generation:number;readonly values:readonly number[]}
 export interface Frame extends Stamp{readonly schema:string;readonly rows:readonly Row[]}
@@ -22,15 +22,14 @@ function stamp(s:Stamp):void{if(!safeInteger(s.epoch)||!safeInteger(s.sequence)|
 export class Projection<S extends Fields=Fields>{
  readonly layout:readonly Layout[];readonly stride:number;readonly signature:string;
  readonly stats={captures:0,records:0,encodes:0};
- /** maxBytes caps both encoded UTF-8 and flat numeric payload, not total JS heap. */
- constructor(readonly name:string,readonly fields:S,readonly maxEntities=1024,readonly maxBytes=2_000_000){
-  if(!identity(name)||!safeInteger(maxEntities,1,10000)||!safeInteger(maxBytes,128,16_000_000))throw new RangeError('Invalid projection budget');
+ /** Both flat numeric payload and encoded UTF-8 are bounded; this is not a total heap cap. */
+ constructor(readonly name:string,readonly fields:S,readonly maxEntities=1024,readonly maxBytes=2_000_000,readonly maxStride=128){
+  if(!identity(name)||!safeInteger(maxEntities,1,10000)||!safeInteger(maxBytes,128,16_000_000)||!safeInteger(maxStride,1,32768))throw new RangeError('Invalid projection budget');
   let offset=0;this.layout=Object.freeze(Object.entries(fields).map(([name,f])=>{
-   if(!identity(name)||!safeInteger(f.width,1,8192)||!['linear','angle','step'].includes(f.sample)||!Number.isFinite(f.min)||!Number.isFinite(f.max)||f.min>f.max)throw new TypeError('Invalid projected field');
+   if(!identity(name)||!safeInteger(f.width,1,maxStride)||(!f.buffer&&![1,3].includes(f.width))||(f.buffer!==undefined&&f.buffer!==true)||(f.integer!==undefined&&f.integer!==true)||(f.integer&&f.sample!=='step')||!['linear','angle','step'].includes(f.sample)||!Number.isFinite(f.min)||!Number.isFinite(f.max)||f.min>f.max)throw new TypeError('Invalid projected field');
    const entry=Object.freeze({name,offset,field:Object.freeze({...f})});offset+=f.width;return entry;
-  }));if(offset<1||offset>8192)throw new RangeError('Projection stride outside 1..8192');this.stride=offset;
-  // The exact layout is a compatibility contract, not a short hash or a security credential.
-  this.signature=JSON.stringify([name,this.layout.map(x=>[x.name,x.field.width,x.field.sample,x.field.min,x.field.max])]);
+  }));if(offset<1||offset>maxStride)throw new RangeError('Projection stride exceeds budget');this.stride=offset;
+  this.signature=JSON.stringify([name,this.layout.map(x=>[x.name,x.field.width,x.field.sample,x.field.min,x.field.max,...(x.field.buffer?['buffer']:[]),...(x.field.integer?['integer']:[])])]);
  }
  capture(at:Stamp,sources:Iterable<{readonly id:string;readonly generation?:number;readonly data:Values<S>}>):Frame{
   stamp(at);const rows:Row[]=[],ids=new Set<string>();
@@ -38,13 +37,9 @@ export class Projection<S extends Fields=Fields>{
    if(rows.length>=this.maxEntities||(rows.length+1)*this.stride*8>this.maxBytes||!identity(source.id)||ids.has(source.id)||!safeInteger(source.generation??0))throw new RangeError('Invalid/duplicate projection identity or capacity');
    ids.add(source.id);const values:number[]=[];
    for(const {name,field} of this.layout){
-    const raw=source.data[name],buffer=raw as ArrayLike<number>;
-    if(field.width!==1&&(!buffer||typeof buffer!=='object'||buffer.length!==field.width))throw new TypeError(`Invalid ${source.id}.${name}`);
-    for(let k=0;k<field.width;k++){
-     const value=field.width===1?raw:buffer[k];
-     if(typeof value!=='number'||!Number.isFinite(value)||value<field.min||value>field.max)throw new TypeError(`Invalid ${source.id}.${name}`);
-     values.push(value);
-    }
+    const raw=source.data[name],single=field.width===1&&!field.buffer;
+    if(!single&&((!Array.isArray(raw)&&!ArrayBuffer.isView(raw))||!('length' in raw)||raw.length!==field.width))throw new TypeError(`Invalid ${source.id}.${name}`);
+    for(let k=0;k<field.width;k++){const value=single?raw:(raw as NumericBuffer)[k];if(!numeric(value,field))throw new TypeError(`Invalid ${source.id}.${name}`);values.push(value);}
    }
    rows.push(Object.freeze({id:source.id,generation:source.generation??0,values:Object.freeze(values)}));
   }
@@ -58,7 +53,7 @@ export class Projection<S extends Fields=Fields>{
   const ids=new Set<string>(),rows:Row[]=[];
   for(const r of f.rows){
    if(!r||!identity(r.id)||ids.has(r.id)||!safeInteger(r.generation)||!Array.isArray(r.values)||r.values.length!==this.stride)throw new TypeError('Invalid projection row');ids.add(r.id);
-   for(const e of this.layout)for(let k=0;k<e.field.width;k++){const v=r.values[e.offset+k];if(typeof v!=='number'||!Number.isFinite(v)||v<e.field.min||v>e.field.max)throw new RangeError('Invalid projected number');}
+   for(const e of this.layout)for(let k=0;k<e.field.width;k++)if(!numeric(r.values[e.offset+k],e.field))throw new RangeError('Invalid projected number');
    rows.push(Object.freeze({id:r.id,generation:r.generation,values:Object.freeze([...r.values])}));
   }
   return Object.freeze({epoch:f.epoch,sequence:f.sequence,tick:f.tick,time:f.time,paused:f.paused,schema:f.schema,rows:Object.freeze(rows)});
@@ -66,7 +61,7 @@ export class Projection<S extends Fields=Fields>{
  decode(text:string):Frame{if(text.length>this.maxBytes||new TextEncoder().encode(text).length>this.maxBytes)throw new RangeError('Packet too large');return this.read(JSON.parse(text));}
  encode(frame:Frame):string{const text=JSON.stringify(frame);if(new TextEncoder().encode(text).length>this.maxBytes)throw new RangeError('Packet too large');this.stats.encodes++;return text;}
 }
-export const projection=<const S extends Fields>(name:string,fields:S,limits?:{maxEntities?:number;maxBytes?:number})=>new Projection(name,fields,limits?.maxEntities,limits?.maxBytes);
+export const projection=<const S extends Fields>(name:string,fields:S,limits?:{maxEntities?:number;maxBytes?:number;maxStride?:number})=>new Projection(name,fields,limits?.maxEntities,limits?.maxBytes,limits?.maxStride);
 /** One immutable publication/encoding per cohort; share it among viewers, never serialize in render(). */
 export class Publication{
  private encoded:string|undefined;
