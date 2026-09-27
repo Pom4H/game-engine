@@ -1,7 +1,6 @@
 import type {Primitive} from '../scene/types.js';
-import type {ParametricVehiclePart} from './passenger.js';
-import {passengerPartMaterial} from './passenger.js';
-import {detailedRoadWheelMeshes,type RoadWheelGeometrySpec} from './passenger-wheel.js';
+import type {RoadWheelGeometrySpec} from './passenger-wheel.js';
+import {assembleVehicleGeometry} from './assembly.js';
 import type {CompiledVehicleGeometry,VehicleReferenceProvenance} from './framework.js';
 
 type V3=readonly[number,number,number];
@@ -35,7 +34,7 @@ class MeshBuilder{
 }
 const merge=(...meshes:Mesh[]):Mesh=>{const positions:number[]=[],normals:number[]=[],indices:number[]=[];for(const m of meshes){const base=positions.length/3;positions.push(...m.positions);normals.push(...m.normals);for(const i of m.indices)indices.push(base+i);}return{kind:'triangle-mesh',positions,normals,indices};};
 function glassQuad(a:V3,b:V3,c:V3,d:V3):Mesh{const m=new MeshBuilder();m.quad(a,b,c,d);return m.mesh();}
-function pickupBody(def:DoubleCabPickupVehicleDefinition):Mesh{
+export function generateDoubleCabPickupBody(def:DoubleCabPickupVehicleDefinition):Mesh{
   const d=def.dimensions,b=def.body,m=new MeshBuilder(),half=d.width/2*.974,front=d.wheelbase/2+d.axleOffset,rear=-d.wheelbase/2+d.axleOffset,arch=d.wheelRadius+.055;
   // Side skins own wheel apertures: the wheel cause changes the panel boundary instead of lifting/filling a generic box.
   const xs=new Set<number>();for(let i=0;i<=32;i++)xs.add(-d.length/2+i*d.length/32);for(const axle of [rear,front])for(let i=0;i<=20;i++)xs.add(axle+Math.cos(i*Math.PI/20)*arch);
@@ -55,7 +54,7 @@ function pickupBody(def:DoubleCabPickupVehicleDefinition):Mesh{
   m.box(d.length*.49,b.bodyBottomHeight+.10,0,.16,.20,d.width*.94);m.box(-d.length*.49,b.bodyBottomHeight+.11,0,.17,.22,d.width*.93);
   return m.mesh();
 }
-function pickupGlass(def:DoubleCabPickupVehicleDefinition):Mesh{
+export function generateDoubleCabPickupGlass(def:DoubleCabPickupVehicleDefinition):Mesh{
   const d=def.dimensions,b=def.body,half=b.glassHalfWidth,roof=b.roofHalfWidth,sill=b.glassSillHeight,meshes:Mesh[]=[];
   meshes.push(glassQuad([def.hardpoints.hoodHingeX,sill,-half],[def.hardpoints.hoodHingeX,sill,half],[b.roofFrontX,d.height*.995,roof],[b.roofFrontX,d.height*.995,-roof]));
   const side=(s:-1|1)=>{const z=s*half,rz=s*roof;meshes.push(glassQuad([def.hardpoints.hoodHingeX-.015,sill,z],[b.roofFrontX,d.height*.982,rz],[.08,d.height*.992,rz],[.08,sill,z]));meshes.push(glassQuad([.02,sill,z],[.02,d.height*.992,rz],[b.cabRearX+.025,d.height*.975,rz],[b.cabRearX+.025,sill,z]));if(b.canopy){const cz=s*b.canopyHalfWidth*.995;meshes.push(glassQuad([b.bedFrontX+.03,sill,cz],[b.bedFrontX+.03,b.canopyRoofHeight-.035,s*b.canopyHalfWidth*.94],[b.canopyGlassRearX,b.canopyRoofHeight-.05,s*b.canopyHalfWidth*.92],[b.canopyGlassRearX,sill+.015,cz]));}};
@@ -66,8 +65,7 @@ function pickupGlass(def:DoubleCabPickupVehicleDefinition):Mesh{
   return merge(...meshes);
 }
 export function compileDoubleCabPickupVehicle(definition:DoubleCabPickupVehicleDefinition):CompiledVehicleGeometry{
-  const d=definition.dimensions,body=pickupBody(definition),glass=pickupGlass(definition),parts:ParametricVehiclePart[]=[{id:'body',role:'paint',mesh:body,position:[0,0,0],material:passengerPartMaterial('paint')},{id:'glass',role:'glass',mesh:glass,position:[0,0,0],material:passengerPartMaterial('glass')}],front=d.wheelbase/2+d.axleOffset,rear=-d.wheelbase/2+d.axleOffset;
-  for(const [axle,x] of [['front',front],['rear',rear]] as const)for(const [side,z,sign] of [['left',-d.track/2,-1],['right',d.track/2,1]] as const){const w=detailedRoadWheelMeshes({radius:d.wheelRadius,...definition.wheel},sign);parts.push({id:`tire-${axle}-${side}`,role:'tire',mesh:w.tire,position:[x,d.wheelRadius,z],wheel:true,material:passengerPartMaterial('tire')},{id:`rim-${axle}-${side}`,role:'rim',mesh:w.rim,position:[x,d.wheelRadius,z],wheel:true,material:passengerPartMaterial('rim')});}
-  const generatedTriangles=parts.reduce((n,p)=>n+(p.mesh.kind==='triangle-mesh'?p.mesh.indices.length/3:0),0);
-  return Object.freeze({definition,parts:Object.freeze(parts.map(part=>Object.freeze(part))),body,bodyTriangles:body.indices.length/3,generatedTriangles});
+  return assembleVehicleGeometry(definition,definition.dimensions,{
+    body:generateDoubleCabPickupBody(definition),glass:generateDoubleCabPickupGlass(definition),
+  });
 }

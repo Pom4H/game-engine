@@ -1,0 +1,43 @@
+name: Vehicle domain
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'tools/vehicle-domain-harness.mjs'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/vehicle-domain.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vehicle-domain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - name: Typecheck and full regression suite
+        run: bun run check
+      - name: Geometry identity, edit locality and compilation measurements
+        run: node --expose-gc tools/vehicle-domain-harness.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: vehicle-domain-report
+          path: artifacts/vehicle-domain/
+          if-no-files-found: error
+          retention-days: 14

@@ -6,7 +6,9 @@
   "private": true,
   "exports": {
     ".": "./dist/index.js",
-    "./browser": "./dist/browser.js"
+    "./browser": "./dist/browser.js",
+    "./vehicles": "./dist/vehicles/index.js",
+    "./vehicles/wheels": "./dist/vehicles/wheels.js"
   },
   "files": [
     "dist",
@@ -16,7 +18,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
-    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs"
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs",
+    "harness:vehicles": "tsc -p tsconfig.build.json && node --expose-gc tools/vehicle-domain-harness.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
