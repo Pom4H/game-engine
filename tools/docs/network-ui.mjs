@@ -50,7 +50,7 @@ export class NetworkPanel{
   const follow=this.getProgram()?.follow;this.followOrigin=follow?[...this.runtime.scene.entities.get(follow)?.position??[0,0,0]]:null;
  }
  async command(action){const reply=await this.request(action);this.tick=reply.tick;this.paused=reply.paused;
-  if(reply.frame){this.lastArrival=performance.now();this.buffer.receive(reply.frame,performance.now()/1000);this.view.apply(this.buffer.at(reply.time));this.runtime.scene.cutPresentation();}
+  if(reply.frame){this.lastArrival=performance.now();this.buffer.receive(reply.frame,performance.now()/1000);if(this.mode==='live'&&action!=='dump'&&action!=='heap'){this.view.apply(this.buffer.at(reply.time));this.runtime.scene.cutPresentation();}}
   this.update();return reply;
  }
  pauseServer(){return this.command('pause');}

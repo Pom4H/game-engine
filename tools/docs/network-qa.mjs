@@ -35,7 +35,10 @@ try{
  assert.equal(await evaluate('__DSL_EDITOR__.runtime.scene.entities.get("car")==__remoteRoot'),true);assert.deepEqual(await evaluate('[...__remoteRoot.position]'),root);checks.push('two-way paint edit on paused remote world preserves authoritative pose');
  const dump=await evaluate('__DSL_EDITOR__.network.command("dump")');assert.equal(dump.dump.tick,paused.tick+1);assert.equal(dump.dump.restorable,false);checks.push('bounded domain dump from the paused authority isolate');
  await evaluate('__DSL_EDITOR__.network.requestReplay()');await wait('__DSL_EDITOR__.network.clip !== null && __DSL_EDITOR__.network.mode === "replay"');await evaluate('__DSL_EDITOR__.network.seek(.2)');
- assert.equal((await evaluate('__DSL_EDITOR__.network.command("dump")')).tick,paused.tick+1);checks.push('server archive replay does not rewind or step the authoritative world');
+ const replayTick=await evaluate('__DSL_EDITOR__.runtime.scene.tick');
+ assert.equal((await evaluate('__DSL_EDITOR__.network.command("dump")')).tick,paused.tick+1);
+ assert.equal(await evaluate('__DSL_EDITOR__.runtime.scene.tick'),replayTick);assert.ok(replayTick<paused.tick);
+ checks.push('server archive replay does not rewind or step the authoritative world');
  console.log('capturing replay');await shot('network-replay');console.log('replay captured');
  console.log('running flight');await evaluate('__DSL_EDITOR__.network.resumeServer()');await wait('__DSL_EDITOR__.network.tick>970',30000);await evaluate('__DSL_EDITOR__.network.pauseServer()');
  const airborne=await evaluate('({y:__DSL_EDITOR__.runtime.scene.entities.get("car").position[1],physics:__DSL_EDITOR__.runtime.scene.physics.steps,network:__DSL_EDITOR__.network.inspect(),renderer:__DSL_EDITOR__.runtime.renderer.inspect(),camera:__DSL_EDITOR__.runtime.scene.camera})');
