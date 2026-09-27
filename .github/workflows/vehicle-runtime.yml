@@ -21,10 +21,10 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run typecheck && bun run build
-      - name: Runtime harness when present
-        run: |
-          mkdir -p artifacts/vehicle-runtime
-          if test -f tools/vehicle-runtime-harness.mjs; then node tools/vehicle-runtime-harness.mjs; fi
+      - name: Vehicle runtime tests
+        run: node --test test/vehicle-runtime.test.mjs
+      - name: Runway, lifetime and same-work benchmark
+        run: node tools/vehicle-runtime-harness.mjs
       - name: Full regressions
         run: |
           mkdir -p artifacts/vehicle-runtime
