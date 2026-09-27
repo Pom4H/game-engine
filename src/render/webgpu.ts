@@ -638,8 +638,10 @@ export class WebGPURenderer implements Renderer{
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
-    const localProbeMap=device.createTexture({label:'local reflection probe',size:[128,128,6],mipLevelCount:PROBE_MIP_LEVELS,format:'rgba16float',usage:0x10|0x04}),localProbeView=localProbeMap.createView({dimension:'cube'});
-    const localProbeDepth=device.createTexture({label:'local reflection probe depth',size:[128,128],format:'depth32float',usage:0x10});
+    // 192px local capture: 2.25x the linear sampling detail of the old 128px probe,
+    // while keeping the capture cheap enough to avoid a full-resolution reflection pass.
+    const localProbeMap=device.createTexture({label:'local reflection probe',size:[192,192,6],mipLevelCount:PROBE_MIP_LEVELS,format:'rgba16float',usage:0x10|0x04}),localProbeView=localProbeMap.createView({dimension:'cube'});
+    const localProbeDepth=device.createTexture({label:'local reflection probe depth',size:[192,192],format:'depth32float',usage:0x10});
     const surfaceSampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',maxAnisotropy:8});
     const emptyField=device.createTexture({size:[1,1],format:'rgba32float',usage:0x04|0x02}),emptyLabel=device.createTexture({size:[1,1],format:'rgba8unorm',usage:0x04|0x02});device.queue.writeTexture({texture:emptyField},new Float32Array(4),{bytesPerRow:16},[1,1]);device.queue.writeTexture({texture:emptyLabel},new Uint8Array(4),{bytesPerRow:4},[1,1]);
     const frameBind=device.createBindGroup({layout:frameLayout,entries:[{binding:0,resource:{buffer:frame}}]});
