@@ -374,6 +374,18 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     // clearcoat highlight; it is intentionally below the level of a noisy paint texture.
     albedo*=1.0+paintMicro*.010;
   }
+  let automotivePaint=treatment>3.5&&treatment<4.5;
+  // Two-scale procedural automotive finish. The broad component is the subtle
+  // orange-peel of real clearcoat; the fine component breaks up pin-sharp probe
+  // reflections without changing the underlying body geometry.
+  if(automotivePaint){
+    let peel=noise3(in.worldPos*92.0);
+    let peelX=noise3((in.worldPos+vec3<f32>(.006,0,0))*92.0)-peel;
+    let peelY=noise3((in.worldPos+vec3<f32>(0,.006,0))*92.0)-peel;
+    let peelZ=noise3((in.worldPos+vec3<f32>(0,0,.006))*92.0)-peel;
+    let peelGrad=vec3<f32>(peelX,peelY,peelZ);
+    n=normalize(n+(peelGrad-n*dot(peelGrad,n))*.035);
+  }
   let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
   roughness=clamp(sqrt(roughness*roughness+min(.06,normalVariance*.04)),.08,1.0);
   var waterCoverage=1.0;
@@ -427,7 +439,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   }
   // Filter the coat normal distribution too; a sharp second lobe must not
   // bypass the base layer's anti-aliasing on curved/subpixel panel edges.
-  let coatRough=clamp(sqrt(clearcoatRoughness*clearcoatRoughness+min(.06,normalVariance*.04)),.08,1.0);
+  let paintCoatFloor=select(.0,.085,automotivePaint);\n  let coatRough=clamp(max(paintCoatFloor,sqrt(clearcoatRoughness*clearcoatRoughness+min(.06,normalVariance*.04))),.08,1.0);
   let coatViewF=clearcoat*(.04+.96*pow(1.0-nv,5.0));
   let coatLightF=clearcoat*(.04+.96*pow(1.0-vh,5.0));
   var color=base*diffuseIrradiance*(1.0-metal)*materialAO*(1.0-coatViewF);
@@ -441,7 +453,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let sideReflection=smoothstep(.30,.82,abs(n.z));
   // Parallax correction fixes placement; roughness still needs a wider probe
   // footprint so painted panels do not read like a magnifying mirror.
-  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.68*mix(1.0,1.16,sideReflection);
+  let paintProbeScale=select(1.0,.72,automotivePaint);\n  let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.68*mix(1.0,1.16,sideReflection)*paintProbeScale;
   let localProbeLod=roughness*f32(textureNumLevels(localProbeMap)-1u)*.72;
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
