@@ -20,6 +20,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+      - name: Install Chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
@@ -27,15 +31,22 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build
         run: bun run build
+      - name: Render current engine scene
+        run: |
+          mkdir -p artifacts
+          node tools/render-scene.mjs tools/render-demo.scene.mjs 1280 720 artifacts/render.png
       - name: Render CPU framebuffer
         run: |
-          node tools/render-cpu-scene.mjs 1280 720 artifacts/render.png
+          node tools/render-cpu-scene.mjs 640 360 artifacts/cpu-render.png
       - name: Validate PNG
         run: |
           node -e "const fs=require('fs'); const b=fs.readFileSync('artifacts/render.png'); if(b.readUInt32BE(0)!==0x89504e47) process.exit(1); console.log('PNG',b.length)"
+      - name: Validate CPU PNG
+        run: |
+          node -e "const fs=require('fs'); const b=fs.readFileSync('artifacts/cpu-render.png'); if(b.readUInt32BE(0)!==0x89504e47) process.exit(1); console.log('CPU PNG',b.length)"
       - uses: actions/upload-artifact@v7
         with:
           name: game-engine-render
-          path: artifacts/render.png
+          path: artifacts/
           if-no-files-found: error
           retention-days: 7
