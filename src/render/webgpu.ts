@@ -18,7 +18,7 @@ import {buildRenderFrame,renderPrimitive,renderModel,primitiveBaseScale,type Ren
 import {buildDiffuseIrradianceSH} from './irradiance.js';
 
 type GPUAny=any;
-const SHADOW_MAP_SIZE=1536;
+const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean}
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
@@ -77,9 +77,12 @@ fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  // contact shadows crawl even when both the light and the receiver are still.
  let phase=fract(sin(dot(floor(p.xz*2.0),vec2<f32>(12.9898,78.233)))*43758.5453)*6.2831853;
  let cs=cos(phase);let sn=sin(phase);let rot=mat2x2<f32>(cs,-sn,sn,cs);
- let taps=array<vec2<f32>,2>(vec2<f32>(-.78,-.26),vec2<f32>(.80,.30));
- for(var i=0;i<2;i++){
-  staticValue+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*staticTexel*2.20,clip.z-.000025);
+ let taps=array<vec2<f32>,4>(
+  vec2<f32>(-.78,-.26),vec2<f32>(.80,.30),
+  vec2<f32>(-.24,.82),vec2<f32>(.36,-.76)
+ );
+ for(var i=0;i<4;i++){
+  staticValue+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+rot*taps[i]*staticTexel*2.05,clip.z-.000025);
  }
  if(f.eye.w>.5){
   dynamicValue=0.0;
@@ -694,7 +697,7 @@ export class WebGPURenderer implements Renderer{
     for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB])target?.destroy();
     const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04|(format==='rgba16float'?0x01:0)});
     this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.opaqueScene=texture('rgba16float',1);this.normal=texture('rgba16float',1);this.specular=texture('rgba8unorm',1);this.velocity=texture('rg16float',1);this.effectsHdr=texture('rgba16float',1);this.taaA=texture('rgba16float',1);this.taaB=texture('rgba16float',1);
-    this.reflection=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04|0x01});this.reflectionDepth=this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'depth32float',usage:0x10});
+    const reflectionScale=.625;const reflectionWidth=Math.max(1,Math.floor(width*reflectionScale)),reflectionHeight=Math.max(1,Math.floor(height*reflectionScale));this.reflection=this.device.createTexture({size:[reflectionWidth,reflectionHeight],format:'rgba16float',usage:0x10|0x04|0x01});this.reflectionDepth=this.device.createTexture({size:[reflectionWidth,reflectionHeight],format:'depth32float',usage:0x10});
     const bloomTexture=()=>this.device.createTexture({size:[Math.max(1,Math.floor(width/2)),Math.max(1,Math.floor(height/2))],format:'rgba16float',usage:0x10|0x04});this.bloomA=bloomTexture();this.bloomB=bloomTexture();
     const bloomBind=(texture:GPUAny)=>this.device.createBindGroup({layout:this.gpu.bloomLayout,entries:[{binding:0,resource:texture.createView()},{binding:1,resource:this.gpu.sampler}]});this.bloomDownBind=bloomBind(this.hdr);this.bloomHorizontalBind=bloomBind(this.bloomA);this.bloomVerticalBind=bloomBind(this.bloomB);
     this.gpu.lightBind=this.device.createBindGroup({layout:this.gpu.lightLayout,entries:[{binding:0,resource:{buffer:this.gpu.frame}},{binding:1,resource:this.gpu.shadow.createView()},{binding:2,resource:this.gpu.comparison},{binding:3,resource:this.reflection.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.lightBuffer}},{binding:6,resource:{buffer:this.gpu.cellBuffer}},{binding:7,resource:this.gpu.noiseVolume.createView()},{binding:8,resource:this.gpu.noiseSampler},{binding:9,resource:this.gpu.environmentView},{binding:10,resource:this.gpu.localProbeView},{binding:11,resource:this.gpu.dynamicShadow.createView()},{binding:12,resource:this.gpu.emptyLabel.createView()}]});
