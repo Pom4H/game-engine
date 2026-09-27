@@ -18,7 +18,7 @@ permissions:
 jobs:
   render:
     runs-on: self-hosted
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - name: Locate Chrome
@@ -44,16 +44,25 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build
         run: bun run build
-      - name: Render current engine scene
+      - name: Render four views
+        shell: powershell
         run: |
-          mkdir -p artifacts
-          node tools/render-scene.mjs tools/render-demo.scene.mjs 1280 720 artifacts/render.png
-      - name: Validate PNG
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          node tools/render-scene.mjs tools/promo/views/front.scene.mjs 1280 720 artifacts/render-front.png
+          node tools/render-scene.mjs tools/promo/views/rear.scene.mjs 1280 720 artifacts/render-rear.png
+          node tools/render-scene.mjs tools/promo/views/left.scene.mjs 1280 720 artifacts/render-left.png
+          node tools/render-scene.mjs tools/promo/views/right.scene.mjs 1280 720 artifacts/render-right.png
+      - name: Validate PNGs
+        shell: powershell
         run: |
-          node -e "const fs=require('fs'); const b=fs.readFileSync('artifacts/render.png'); if(b.readUInt32BE(0)!==0x89504e47) process.exit(1); console.log('PNG',b.length)"
+          Get-ChildItem artifacts/render-*.png | ForEach-Object {
+            $b=[IO.File]::ReadAllBytes($_.FullName)
+            if($b[0] -ne 137 -or $b[1] -ne 80 -or $b[2] -ne 78 -or $b[3] -ne 71){ throw "Invalid PNG: $($_.Name)" }
+            Write-Host "PNG $($_.Name) $($_.Length) bytes"
+          }
       - uses: actions/upload-artifact@v7
         with:
-          name: game-engine-render
+          name: game-engine-four-views
           path: artifacts/
           if-no-files-found: error
           retention-days: 7
