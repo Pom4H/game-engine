@@ -354,7 +354,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
 
   var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.018,.08,1.0);
   let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
-  roughness=clamp(sqrt(roughness*roughness+min(.22,normalVariance*.18)),.08,1.0);
+  roughness=clamp(sqrt(roughness*roughness+min(.06,normalVariance*.04)),.08,1.0);
   var waterCoverage=1.0;
   if(materialKind>4.5&&materialKind<5.5){
     let hollows=noise3(in.worldPos*vec3<f32>(1.4,.1,2.3))*.78+noise3(in.worldPos*vec3<f32>(7.5,.1,9.3))*.22;
@@ -406,7 +406,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   }
   // Filter the coat normal distribution too; a sharp second lobe must not
   // bypass the base layer's anti-aliasing on curved/subpixel panel edges.
-  let coatRough=clamp(sqrt(clearcoatRoughness*clearcoatRoughness+min(.22,normalVariance*.18)),.08,1.0);
+  let coatRough=clamp(sqrt(clearcoatRoughness*clearcoatRoughness+min(.06,normalVariance*.04)),.08,1.0);
   let coatViewF=clearcoat*(.04+.96*pow(1.0-nv,5.0));
   let coatLightF=clearcoat*(.04+.96*pow(1.0-vh,5.0));
   var color=base*diffuseIrradiance*(1.0-metal)*materialAO*(1.0-coatViewF);
