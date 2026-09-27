@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: game-engine-render
+  cancel-in-progress: true
+
 jobs:
   render:
     runs-on: self-hosted
