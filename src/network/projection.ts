@@ -1,11 +1,17 @@
 /** Explicit numeric projections. Unlisted simulation fields never enter a packet.
  * RU: Авторитетное состояние остаётся у симуляции; проекция выбирает только факты. */
 export type Sampling='linear'|'angle'|'step';
-export interface Field<W extends 1|3=1|3>{readonly width:W;readonly sample:Sampling;readonly min:number;readonly max:number}
+export interface Field<W extends number=number>{readonly width:W;readonly sample:Sampling;readonly min:number;readonly max:number}
 export const scalar=(sample:Sampling='step',min=-1e12,max=1e12):Field<1>=>Object.freeze({width:1,sample,min,max});
 export const vector3=(sample:Sampling='linear',min=-1e12,max=1e12):Field<3>=>Object.freeze({width:3,sample,min,max});
+/** Fixed-size numeric buffers (for example xyz cage nodes). Prepared once per topology.
+ * Width one remains scalar(); vector3() keeps its existing tuple contract. */
+export const vector=<const W extends number>(width:W,sample:Sampling='linear',min=-1e12,max=1e12):Field<W>=>{
+ if(!Number.isSafeInteger(width)||width<2||width>8192)throw new RangeError('Vector width outside 2..8192');
+ return Object.freeze({width,sample,min,max});
+};
 export type Fields=Readonly<Record<string,Field>>;
-export type Values<S extends Fields>={readonly[K in keyof S]:S[K]['width'] extends 1?number:readonly[number,number,number]};
+export type Values<S extends Fields>={readonly[K in keyof S]:S[K]['width'] extends 1?number:S[K]['width'] extends 3?readonly[number,number,number]|Float32Array|Float64Array:ArrayLike<number>};
 export interface Stamp{readonly epoch:number;readonly sequence:number;readonly tick:number;readonly time:number;readonly paused:boolean}
 export interface Row{readonly id:string;readonly generation:number;readonly values:readonly number[]}
 export interface Frame extends Stamp{readonly schema:string;readonly rows:readonly Row[]}
@@ -16,23 +22,29 @@ function stamp(s:Stamp):void{if(!safeInteger(s.epoch)||!safeInteger(s.sequence)|
 export class Projection<S extends Fields=Fields>{
  readonly layout:readonly Layout[];readonly stride:number;readonly signature:string;
  readonly stats={captures:0,records:0,encodes:0};
+ /** maxBytes caps both encoded UTF-8 and flat numeric payload, not total JS heap. */
  constructor(readonly name:string,readonly fields:S,readonly maxEntities=1024,readonly maxBytes=2_000_000){
   if(!identity(name)||!safeInteger(maxEntities,1,10000)||!safeInteger(maxBytes,128,16_000_000))throw new RangeError('Invalid projection budget');
   let offset=0;this.layout=Object.freeze(Object.entries(fields).map(([name,f])=>{
-   if(!identity(name)||![1,3].includes(f.width)||!['linear','angle','step'].includes(f.sample)||!Number.isFinite(f.min)||!Number.isFinite(f.max)||f.min>f.max)throw new TypeError('Invalid projected field');
+   if(!identity(name)||!safeInteger(f.width,1,8192)||!['linear','angle','step'].includes(f.sample)||!Number.isFinite(f.min)||!Number.isFinite(f.max)||f.min>f.max)throw new TypeError('Invalid projected field');
    const entry=Object.freeze({name,offset,field:Object.freeze({...f})});offset+=f.width;return entry;
-  }));if(offset<1||offset>128)throw new RangeError('Projection stride outside 1..128');this.stride=offset;
+  }));if(offset<1||offset>8192)throw new RangeError('Projection stride outside 1..8192');this.stride=offset;
   // The exact layout is a compatibility contract, not a short hash or a security credential.
   this.signature=JSON.stringify([name,this.layout.map(x=>[x.name,x.field.width,x.field.sample,x.field.min,x.field.max])]);
  }
  capture(at:Stamp,sources:Iterable<{readonly id:string;readonly generation?:number;readonly data:Values<S>}>):Frame{
   stamp(at);const rows:Row[]=[],ids=new Set<string>();
   for(const source of sources){
-   if(rows.length>=this.maxEntities||!identity(source.id)||ids.has(source.id)||!safeInteger(source.generation??0))throw new RangeError('Invalid/duplicate projection identity or capacity');
+   if(rows.length>=this.maxEntities||(rows.length+1)*this.stride*8>this.maxBytes||!identity(source.id)||ids.has(source.id)||!safeInteger(source.generation??0))throw new RangeError('Invalid/duplicate projection identity or capacity');
    ids.add(source.id);const values:number[]=[];
-   for(const {name,field} of this.layout){const raw=source.data[name];const v=field.width===1?[raw]:raw;
-    if(!Array.isArray(v)||v.length!==field.width||v.some(x=>typeof x!=='number'||!Number.isFinite(x)||x<field.min||x>field.max))throw new TypeError(`Invalid ${source.id}.${name}`);
-    values.push(...v as number[]);
+   for(const {name,field} of this.layout){
+    const raw=source.data[name],buffer=raw as ArrayLike<number>;
+    if(field.width!==1&&(!buffer||typeof buffer!=='object'||buffer.length!==field.width))throw new TypeError(`Invalid ${source.id}.${name}`);
+    for(let k=0;k<field.width;k++){
+     const value=field.width===1?raw:buffer[k];
+     if(typeof value!=='number'||!Number.isFinite(value)||value<field.min||value>field.max)throw new TypeError(`Invalid ${source.id}.${name}`);
+     values.push(value);
+    }
    }
    rows.push(Object.freeze({id:source.id,generation:source.generation??0,values:Object.freeze(values)}));
   }
@@ -42,7 +54,7 @@ export class Projection<S extends Fields=Fields>{
  read(input:unknown):Frame{
   if(!input||typeof input!=='object')throw new TypeError('Expected projection frame');
   const f=input as Frame;stamp(f);
-  if(f.schema!==this.signature||!Array.isArray(f.rows)||f.rows.length>this.maxEntities)throw new TypeError('Incompatible projection');
+  if(f.schema!==this.signature||!Array.isArray(f.rows)||f.rows.length>this.maxEntities||f.rows.length*this.stride*8>this.maxBytes)throw new TypeError('Incompatible projection');
   const ids=new Set<string>(),rows:Row[]=[];
   for(const r of f.rows){
    if(!r||!identity(r.id)||ids.has(r.id)||!safeInteger(r.generation)||!Array.isArray(r.values)||r.values.length!==this.stride)throw new TypeError('Invalid projection row');ids.add(r.id);
