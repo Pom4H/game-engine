@@ -22,6 +22,7 @@ jobs:
       - name: Install isolated editor compiler (not an engine runtime dependency)
         run: npm install --prefix tools/docs --ignore-scripts --no-audit --no-fund
       - name: Engine typecheck and build
+        id: build
         run: bun run typecheck && bun run build
         shell: cmd
       - name: Source bindings, live edits and all demo programs
@@ -38,12 +39,22 @@ jobs:
       - name: Native WebGPU and two-way UI acceptance
         run: node tools/docs/qa.mjs
       - name: Full regressions (existing failures remain failures)
+        if: ${{ always() && steps.build.outcome == 'success' }}
         shell: powershell
         run: |
+          New-Item -ItemType Directory -Force artifacts/dsl-playground | Out-Null
           node --test test/*.test.mjs *> artifacts/dsl-playground/regressions.log
           $status=$LASTEXITCODE
           Get-Content artifacts/dsl-playground/regressions.log | Select-Object -Last 14
           exit $status
+      - name: Reproducible source snapshot
+        if: always()
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force artifacts/dsl-playground | Out-Null
+          git rev-parse HEAD | Out-File -FilePath artifacts/dsl-playground/commit.txt -Encoding utf8
+          git archive --format=tar.gz -o artifacts/dsl-playground/source.tar.gz HEAD
+          if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
       - uses: actions/upload-artifact@v7
         if: always()
         with:
