@@ -48,6 +48,7 @@ try{
  const handle=await evaluate('(()=>{const r=__qaLabel.getBoundingClientRect();return {x:r.x+12,y:r.y+r.height/2};})()');
  await send('Input.dispatchMouseEvent',{type:'mousePressed',...handle,button:'left',buttons:1,clickCount:1});
  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:handle.x+40,y:handle.y,button:'left',buttons:1});await wait(settled);
+ assert.ok(await evaluate('__DSL_EDITOR__.source !== __qaGestureSource'));
  assert.ok(await evaluate(`__qaSlider===document.querySelector('[data-key="exposure"] input[type="range"]') && __qaLabel.isConnected`));
  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:handle.x+80,y:handle.y,button:'left',buttons:1});await wait(settled);
  await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:handle.x+80,y:handle.y,button:'left',buttons:0,clickCount:1});
@@ -62,7 +63,7 @@ try{
  assert.ok(await evaluate('__DSL_EDITOR__.source.includes("0.2745")'));await capture('hud-colour');checks.push('color picker roundtrip');
  await evaluate(`(()=>{const f=document.querySelector('#parameter-search');f.value='';f.dispatchEvent(new Event('input',{bubbles:true}));const v=document.querySelector('[data-key="sunDirection"] input[data-axis="2"]');v.value='-0.6';v.dispatchEvent(new Event('input',{bubbles:true}));})()`);await wait(settled);
  assert.equal(await evaluate('__DSL_EDITOR__.runtime.scene.spec.rendering.sunDirection[2]'),-.6);checks.push('vector component edits exact DSL token');
- await evaluate(`(()=>{const row=document.querySelector('[data-key="roughness"]');row.querySelector('.source-link').click();})()`);await capture('hud-two-way');
+ await evaluate(`(()=>{const search=document.querySelector('#parameter-search');search.value='Покрытие';search.dispatchEvent(new Event('input',{bubbles:true}));const row=document.querySelector('[data-key="roughness"]');row.querySelector('.source-link').click();})()`);await capture('hud-two-way');
  await evaluate(`__DSL_EDITOR__.setSource(__DSL_EDITOR__.source.replace('massKg: 1500','massKg: 1300'))`);await wait(settled);assert.equal(await evaluate('__DSL_EDITOR__.lastPatch'),'rebuild');assert.ok(await evaluate("__DSL_EDITOR__.runtime.scene.physics.bodies.get('car') !== __qaBody"));checks.push('construction edit is an explicit rebuild');
  await evaluate(`__DSL_EDITOR__.select('wear')`);await wait(settled);await evaluate('__DSL_EDITOR__.seek(.6)');
  const state=await evaluate(`(()=>{globalThis.__qaBody=__DSL_EDITOR__.runtime.scene.physics.bodies.get('car');return {tick:__DSL_EDITOR__.runtime.scene.tick,pos:[...__qaBody.position]};})()`);
@@ -73,6 +74,8 @@ try{
  for(const id of ['pickup','drive','wall','drop','collision','glass','materials','rendering','walker','snow','spatial','kernel','wings']){
   await evaluate(`__DSL_EDITOR__.select(${JSON.stringify(id)})`);await wait(settled);const r=await evaluate('__DSL_EDITOR__.runtime.renderer.inspect()');assert.ok(r.drawCalls>0&&r.triangles>0,id);checks.push('render '+id);
   if(['pickup','drop','glass','walker'].includes(id))await capture(id);
+  if(id==='snow'){await evaluate(`(()=>{const f=document.querySelector('[data-key="snowfall"] select');f.value='light';f.dispatchEvent(new Event('change',{bubbles:true}));})()`);await wait(settled);assert.equal(await evaluate('__DSL_EDITOR__.runtime.scene.spec.environment.snowfall'),'light');checks.push('enum choice edits source and rebuilds environmental initial state');}
+  if(id==='wings'){await evaluate(`(()=>{const f=document.querySelector('[data-key="wingsEnabled"] input');f.checked=false;f.dispatchEvent(new Event('change',{bubbles:true}));})()`);await wait(settled);assert.equal(await evaluate('__DSL_EDITOR__.program.vehicles[0].blueprint.parts.filter(p=>p.source.kind==="wing").length'),0);assert.equal(await evaluate('__DSL_EDITOR__.lastPatch'),'rebuild');await evaluate('__DSL_EDITOR__.undo()');await wait(settled);assert.equal(await evaluate('__DSL_EDITOR__.program.vehicles[0].blueprint.parts.filter(p=>p.source.kind==="wing").length'),2);checks.push('composition toggle updates code, removes wings and restores them with undo');}
  }
  await evaluate('__DSL_EDITOR__.seek(16.3)');const y=await evaluate('__DSL_EDITOR__.runtime.scene.physics.bodies.get("car").position[1]');assert.ok(y>.8,'real airborne position');await capture('wings-airborne');checks.push('wing demo runs live physics to takeoff');
  await evaluate(`__DSL_EDITOR__.select('m3')`);await wait(settled);
@@ -83,8 +86,9 @@ try{
  await evaluate(`document.querySelector('[data-key="exposure"] .source-link').click()`);assert.equal(await evaluate('document.querySelector(".workspace").dataset.pane'),'code');checks.push('mobile source link opens the code pane');
  await evaluate('document.querySelector("button[data-pane=preview]").click()');
  await send('Emulation.setDeviceMetricsOverride',{width:1600,height:960,deviceScaleFactor:1,mobile:false});
+ // A different query forces a new document; changing only the hash is same-document navigation.
  const imported=Buffer.from("while(true){}\n// Imported source must not autorun").toString('base64');
- await send('Page.navigate',{url:`http://127.0.0.1:${port}/docs/#scene=m3&source=${encodeURIComponent(imported)}`});await wait(`globalThis.__DSL_EDITOR__?.source.includes('Imported source must not autorun')`);await sleep(1500);assert.equal(await evaluate('__DSL_EDITOR__.appliedRevision'),-1);assert.equal(await evaluate('__DSL_EDITOR__.runtime'),null);checks.push('shared code requires explicit execution');
+ await send('Page.navigate',{url:`http://127.0.0.1:${port}/docs/?qa=shared-document#scene=m3&source=${encodeURIComponent(imported)}`});await wait(`globalThis.__DSL_EDITOR__?.source.includes('Imported source must not autorun')`);await sleep(1500);assert.equal(await evaluate('__DSL_EDITOR__.appliedRevision'),-1);assert.equal(await evaluate('__DSL_EDITOR__.runtime'),null);checks.push('shared code requires explicit execution');
  await evaluate(`__DSL_EDITOR__.setSource(__DSL_EDITOR__.source+'\\n// editing does not grant trust')`);await sleep(2300);assert.equal(await evaluate('__DSL_EDITOR__.runtime'),null);assert.equal(await evaluate('__DSL_EDITOR__.appliedRevision'),-1);assert.equal(await evaluate('document.querySelector("#error").hidden'),true);checks.push('editing imported code does not bypass Apply confirmation');
  assert.equal(errors.length,0,errors.join('\n'));
  const report={checks,renders,info,errors,notes:['Screenshots are actual native WebGPU canvas within the editor UI.','Simulation/graphics are the existing engine, not a second demo renderer.','No FPS, migration parity or BeamNG fidelity claim.']};await writeFile(join(output,'browser-report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
