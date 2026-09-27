@@ -18,7 +18,12 @@ jobs:
           node-version: 22
       - name: Analyze architecture
         run: node tools/architecture-analyze.mjs src | tee architecture-analysis.json
+      - name: Archive measured sources for reproducible offline verification
+        run: git archive --format=tar.gz --output=measured-source.tar.gz HEAD
       - uses: actions/upload-artifact@v4
         with:
           name: architecture-analysis
-          path: architecture-analysis.json
+          path: |
+            architecture-analysis.json
+            measured-source.tar.gz
+          retention-days: 7
