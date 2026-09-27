@@ -5,9 +5,10 @@ reproduce the problem and press **■ Стоп**. Click the CPU timeline, use th
 or arrow buttons, zoom with +/−, or play the saved filmstrip. Viewing the recording
 never calls `seek`, rebuilds geometry or steps physics. Pause the live world separately.
 
-The existing shell supports `record start`, `record stop`, `record clear`,
-`record export`, `record trace` and `inspect recording`. Writes to authored scene
-parameters still use the same original source-binding/Undo path.
+Shell: `record start`, `record stop`, `record clear`, `record export`, `record trace`
+and `inspect recording`. Authored parameter changes still use the original source
+bindings and shared Undo. The desktop layout keeps timeline, saved image and frame
+metadata visible together; the command log is compact while reviewing a recording.
 
 ## Evidence and limits
 
@@ -39,35 +40,38 @@ measured CPU intervals, screenshot events and unaligned GPU counters; actual Chr
 DevTools import acceptance is not yet verified. There is no recording import UI.
 
 This tab is a compact view of existing engine measurements, NOT a JS VM sampling
-profiler. For actual Chrome main/worker stacks, GC and native tracing, use the
-existing harness collector documented in **chrome-profiling.md**. It is preserved.
-Full physics/audio/network instrumentation, GPU resource lifetimes, exact compositor
-presentation times and restorable world checkpoints are not supplied by this patch.
+profiler. For native Chrome main/worker stacks, GC and trace capture, use the existing
+harness collector documented in **chrome-profiling.md**. It is preserved, not wired
+to the in-page record button. Full physics/audio/network instrumentation, GPU resource
+lifetimes, exact compositor presentation times and restorable world checkpoints are
+not supplied by this patch.
 
 ## Verification
 
-Local baseline da4a0878452b76ee74748c415a4a484a53ae44bf was independently tested
-with Node 22.16.0 / TypeScript 5.8.3: 151 pass / 3 fail. Modified tree: 159 pass /
-3 fail, with the same two clearcoat and one M3 geometry expectation. No assertions
-were weakened. The native Chrome collector was added after this baseline.
+**Final compact UI:** permanent DSL workflow run **36346447089**, source
+**ffd6f758453144ae6619069be9700fa43b65145c**. The project Bun/lockfile toolchain
+installed successfully; typecheck, build, focused DSL/console/recording tests and
+site build passed. Actual Windows self-hosted **HeadlessChrome153 / WebGPU** passed
+**44 browser checks**, including filmstrip recording, frame-keyed CPU/GPU joins,
+scrub/zoom without changing the live tick, source roundtrips/Undo, worker recovery,
+existing scenes and mobile controls. The renderer reported timestamp queries and no
+errors; adapter identity was unavailable. This is functional acceptance, not a
+frame-rate or capture-overhead benchmark.
 
-GitHub Actions run **36346118905** integrated commit
-**d33813657901635bc1927f9f08f8a72cce99b0be**. Linux typecheck, build and focused
-DSL/console/recording/native trace tests passed: **55 pass / 0 fail**. The Windows
-self-hosted job also built and ran the real editor in **HeadlessChrome 153 / WebGPU**:
-**44 browser assertions passed**, including actual canvas filmstrip, frame-keyed
-CPU/GPU joins, scrub/zoom/frame steps without changing the live scene tick, source
-binding roundtrip, Undo, worker recovery and mobile controls. The report records
-`timestampQueries:true` and no renderer errors; hardware adapter identity was not
-reported. This is functional acceptance, not a frame-rate or capture-overhead benchmark.
+The same run's full suite is **167 pass / 3 fail**: two clearcoat expectations and
+one M3 geometry expectation. These also failed in an independently tested baseline
+(151 pass / same 3 failures before recording and the concurrent native trace tests).
+Tests were not weakened: the overall workflow correctly remains red on regressions.
 
-Artifacts: `recording-webgpu-evidence` (**10940896463**) contains
-`engine-profiler.png`, `browser-report.json` and other native editor screenshots.
-`recording-integration-evidence` contains the exact source archive and test output.
-The verified CI used isolated TypeScript 5.8.3 / Node 22; it does NOT verify the
-project-declared TypeScript ^7.0.2 / Bun toolchain. Subsequent CSS layout refinement
-is covered by a separate nine-assertion production-UI DOM fixture; that fixture is
-not itself a WebGPU engine render. The existing DSL pipeline reruns native acceptance.
+Artifact **10940781873**, `dsl-playground-evidence`, contains the final
+`engine-profiler.png`, `browser-report.json`, `regressions.log`, `commit.txt`, exact
+source archive and other real editor screenshots. The built site is artifact
+**10941016571**, `dsl-playground-site`.
+
+Earlier dedicated run **36346118905** additionally passed **55 focused tests**
+including native Chrome collector tests on isolated TS5.8.3 / Node22, and passed
+native WebGPU acceptance before the layout refinement. A separate nine-assertion
+production-UI DOM fixture is only a component test, not evidence of an engine render.
 
 The temporary delivery workflow and payload were removed after integration.
 Recording checks now live in the existing DSL workflow. main is untouched.
