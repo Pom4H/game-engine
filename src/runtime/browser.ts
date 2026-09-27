@@ -1,3 +1,4 @@
+import {CpuProfiler} from '../core/profiling.js';
 import {WalkerControls,type WalkerControlOptions} from './walker-controls.js';
 import {V3} from '../math.js';
 import type {FootstepSound} from '../audio/footsteps.js';
@@ -18,6 +19,7 @@ export class BrowserRuntime {
   readonly tickRate:number;
   readonly stepSeconds:number;
   audio:ProceduralAudio|null;
+  private readonly profiler:CpuProfiler;
   private initial:SceneSpec;
   private install:SceneInstaller|undefined;
   private replacement=0;
@@ -29,6 +31,7 @@ export class BrowserRuntime {
   private publishedBridge:EngineBridge|null=null;
 
   private constructor(private readonly canvas:HTMLCanvasElement,scene:SceneSpec,renderer:Renderer,options:BrowserRuntimeOptions){
+    this.profiler=new CpuProfiler({enabled:options.profiling??false});
     this.initial=structuredClone(scene);this.install=options.install;this.scene=this.constructScene(this.initial,this.install);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
   }
 
@@ -66,7 +69,7 @@ export class BrowserRuntime {
   step(count=1){
     if(!Number.isSafeInteger(count)||count<1||count>1_000_000)throw new RangeError('step count must be an integer in [1, 1000000]');
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];for(let i=0;i<count;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());}
-    this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
+    this.playAudio(events,footsteps);this.render();return this.scene.snapshot();
   }
   seek(seconds:number){
     if(!Number.isFinite(seconds)||seconds<0||seconds>86_400)throw new RangeError('seek time must be within one day');
@@ -76,7 +79,7 @@ export class BrowserRuntime {
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   private constructScene(spec:SceneSpec,install?:SceneInstaller):Scene{
-    const next=new Scene(spec);try{install?.(next);return next;}catch(error){next.dispose();throw error;}
+    const next=new Scene(spec,this.profiler);try{install?.(next);return next;}catch(error){next.dispose();throw error;}
   }
   reset():void{const next=this.constructScene(this.initial,this.install);this.scene.dispose();this.scene=next;this.render();}
   /** Build and prepare first; a failed edit keeps the previous valid world alive. */
@@ -96,13 +99,21 @@ export class BrowserRuntime {
   async drain():Promise<void>{await this.renderer.flush();}
   async probeLinear(points:readonly (readonly [number,number])[],stage:import('../render/types.js').LinearPixelStage='hdr'){if(!this.renderer.sampleLinearPixels)throw new Error('Renderer does not support scene-linear pixel readback');await this.renderer.flush();return await this.renderer.sampleLinearPixels(points,stage);}
   async flush():Promise<void>{await this.renderer.prepareMaterials?.(this.scene);this.render();await this.renderer.flush();}
-  profile(){return this.renderer.profile?.()??this.renderer.inspect().profile;}
-  resetProfile():void{this.renderer.resetProfile?.();}
+  profile(){const render=this.renderer.profile?.()??this.renderer.inspect().profile;return render?{...render,systems:this.profiler.inspect()}:undefined;}
+  resetProfile():void{this.profiler.reset();this.renderer.resetProfile?.();}
   snapshot(){return this.scene.snapshot();}
   inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
   dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.audio?.dispose();this.scene.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
 
+  /** JS synthesis/submission only, not the WebAudio rendering thread or speaker latency. */
+  private playAudio(events:readonly EngineEvent[],footsteps:readonly FootstepSound[]):void{
+    if(!this.audio)return;
+    if(this.profiler.enabled)this.profiler.measure('audio:dispatch',()=>this.dispatchAudio(events,footsteps));else this.dispatchAudio(events,footsteps);
+  }
+  private dispatchAudio(events:readonly EngineEvent[],footsteps:readonly FootstepSound[]):void{
+    this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());
+  }
   private ambientAudioState():AmbientAudioState{
     const windSpeed=Math.hypot(this.scene.environment.wind[0],this.scene.environment.wind[2]);
     const snowfall=Math.max(0,Math.min(1,this.scene.environment.snowfallRate/2.2e-5));
@@ -132,6 +143,6 @@ export class BrowserRuntime {
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
     this.clock.advance(now,()=>{this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());});
-    this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();this.raf=requestAnimationFrame(this.frame);
+    this.playAudio(events,footsteps);this.render();this.raf=requestAnimationFrame(this.frame);
   };
 }

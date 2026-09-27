@@ -1,3 +1,4 @@
+export {CpuProfiler,timingStats,type CpuProfilerOptions,type CpuProfileSnapshot,type CpuScopeSnapshot} from './core/profiling.js';
 export {FixedClock} from './core/fixed-clock.js';
 export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
 export {EngineKernel,ModuleScheduler,ENGINE_PHASES,SIMULATION_TIERS,type EngineModule,type EnginePhase,type ModuleDescription,type ModuleFrame,type SimulationTier} from './core/kernel.js';
@@ -56,7 +57,7 @@ export type {SurfaceTextureSpec} from './scene/types.js';
 
 export {CpuRenderer,encodePng} from './render/cpu.js';
 export {buildRenderFrame,renderPrimitive,primitiveBaseScale,renderModel,type RenderFrameIR,type RenderObjectIR} from './render/frame.js';
-export type {Renderer,RenderStats,LinearPixelSample,LinearPixelStage,EngineBridge} from './render/types.js';
+export type {Renderer,RenderStats,LinearPixelSample,LinearPixelStage,EngineBridge,EngineProfileSnapshot} from './render/types.js';
 
 export {RenderProfiler,RENDER_CPU_QUANTA,RENDER_GPU_QUANTA,type RenderCpuQuantum,type RenderGpuQuantum,type RenderWork,type QuantumStats,type RenderFrameTiming,type RenderProfileSnapshot} from './render/profiler.js';
 

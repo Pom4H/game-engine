@@ -1,3 +1,4 @@
+import type {CpuProfiler} from '../core/profiling.js';
 import type {SystemAction} from './modules.js';
 
 export interface SystemFrame {
@@ -11,6 +12,7 @@ export type SystemHandler=(frame:SystemFrame)=>void;
  * reduces public commands and delegates system commands here.
  */
 export class SceneSystemRuntime {
+  constructor(private readonly profiler?:CpuProfiler){}
   private readonly handlers=new Map<SystemAction,SystemHandler>();
 
   use(action:SystemAction,handler:SystemHandler):this{
@@ -22,7 +24,8 @@ export class SceneSystemRuntime {
   run(action:SystemAction,dt:number,at:number):void{
     const handler=this.handlers.get(action);
     if(!handler)throw new TypeError(`No system implementation: ${action}`);
-    handler(Object.freeze({dt,at}));
+    const frame=Object.freeze({dt,at});
+    if(this.profiler?.enabled)this.profiler.measure(`system:${action}`,()=>handler(frame));else handler(frame);
   }
 
   get actions():readonly SystemAction[]{return Object.freeze([...this.handlers.keys()]);}

@@ -1,3 +1,6 @@
+import {timingStats as stats} from '../core/profiling.js';
+import type {QuantumStats} from '../core/profiling.js';
+export type {QuantumStats} from '../core/profiling.js';
 import type {RenderAtomReport} from './atoms.js';
 export const RENDER_CPU_QUANTA = [
   'lifecycle','resize','materials','lights','frame','environment','visibility','prepare','cull',
@@ -16,7 +19,6 @@ export interface RenderWork {
   drawCalls:number;triangles:number;snowInstances:number;shadowBatchedInstances:number;uploadBytes:number;
   uniformUploadBytes:number;surfaceUploadBytes:number;lightUploadBytes:number;frameUploadBytes:number;snowUploadBytes:number;environmentUploadBytes:number;instanceUploadBytes:number;
 }
-export interface QuantumStats {meanMs:number;p50Ms:number;p95Ms:number;maxMs:number}
 export interface RenderFrameTiming {
   readonly frame:number;
   readonly totalMs:number;
@@ -48,8 +50,6 @@ type GPUAny=any;
 interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null;usedMask:number}
 interface OcclusionSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;usedMask:number}
 const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,shadowBatchedInstances:0,uploadBytes:0,uniformUploadBytes:0,surfaceUploadBytes:0,lightUploadBytes:0,frameUploadBytes:0,snowUploadBytes:0,environmentUploadBytes:0,instanceUploadBytes:0});
-const percentile=(values:readonly number[],q:number)=>{if(!values.length)return 0;const a=[...values].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor((a.length-1)*q))]!;};
-const stats=(values:readonly number[]):QuantumStats=>({meanMs:values.length?values.reduce((a,b)=>a+b,0)/values.length:0,p50Ms:percentile(values,.5),p95Ms:percentile(values,.95),maxMs:values.length?Math.max(...values):0});
 const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work:RenderWork):RenderFrameTiming=>Object.freeze({frame,totalMs,quanta:Object.freeze({...quanta}),work:Object.freeze({...work})});
 
 /** Low-overhead renderer profiler.

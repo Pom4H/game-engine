@@ -1,3 +1,5 @@
+import type {CpuProfiler} from './profiling.js';
+
 export type EnginePhase = 'input' | 'plan' | 'simulate' | 'commit' | 'publish';
 export const ENGINE_PHASES: readonly EnginePhase[] = ['input','plan','simulate','commit','publish'];
 export type SimulationTier = 'detailed' | 'active' | 'aggregate' | 'dormant';
@@ -12,6 +14,8 @@ export interface KernelRunOptions<Context,Command>{
   readonly deltaSeconds?:number;
   /** Lazily project current state, only for batches that consume a context. */
   readonly read?:()=>Readonly<Context>;
+  /** Optional CPU observation; no clock is read by the mathematical modules. */
+  readonly profiler?:CpuProfiler;
   readonly onModule?:(module:ModuleDescription,frame:ModuleFrame)=>void;
 }
 interface Registered {description:ModuleDescription;periodTicks:number}
@@ -90,13 +94,15 @@ export class EngineKernel<Context,Command>{
   run(tick:number,context:Readonly<Context>,tier:SimulationTier='detailed',options:KernelRunOptions<Context,Command>={}):Command[]{
     const dt=options.deltaSeconds??1/this.scheduler.tickRate;if(!Number.isFinite(dt)||dt<=0)throw new RangeError('Kernel delta must be positive and finite');
     const commands:Command[]=[];let current=context;
-    for(const batch of this.scheduler.plan(tick,tier)){
-      const view=batch.modules.every(m=>m.context==='none')?Object.freeze({}) as Readonly<Context>:snapshot(options.read?.()??current),pending:Command[]=[];
+    const profiler=options.profiler?.enabled?options.profiler:undefined;
+    const plan=profiler?profiler.measure('kernel:plan',()=>this.scheduler.plan(tick,tier)):this.scheduler.plan(tick,tier);
+    for(const batch of plan){
+      const view=batch.modules.every(m=>m.context==='none')?Object.freeze({}) as Readonly<Context>:profiler?profiler.measure('kernel:read',()=>snapshot(options.read?.()??current)):snapshot(options.read?.()??current),pending:Command[]=[];
       for(const description of batch.modules){const module=this.modules.get(description.id)!;if(!module)throw new TypeError(`No implementation: ${description.id}`);
         const frame=Object.freeze({tick,deltaSeconds:dt*this.scheduler.tickRate/module.rateHz,tier,phase:module.phase});options.onModule?.(description,frame);
-        const result=module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);
+        const result=profiler?profiler.measure(`module:${module.id}`,()=>module.run(view,frame)):module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);
       }
-      if(pending.length){commands.push(...pending);if(options.commit)current=options.commit(pending,view,batch.phase);}
+      if(pending.length){commands.push(...pending);if(options.commit)current=profiler?profiler.measure('kernel:commit',()=>options.commit!(pending,view,batch.phase)):options.commit(pending,view,batch.phase);}
     }
     return commands;
   }

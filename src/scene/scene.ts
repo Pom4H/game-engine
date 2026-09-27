@@ -1,3 +1,4 @@
+import {CpuProfiler} from '../core/profiling.js';
 import {AnimationSystem} from '../animation/system.js';
 import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive} from '../procedural/mesh.js';
@@ -66,7 +67,7 @@ export class Scene {
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
-  readonly systemRuntime=new SceneSystemRuntime();
+  readonly systemRuntime:SceneSystemRuntime;
   readonly resources=new Map<string,unknown>();
   private readonly projections=new Map<SceneProjection,RuntimeEntity>();
   lastExecution:string[]=[];
@@ -98,7 +99,8 @@ export class Scene {
   private renderMoverRevision=-1;
   private renderMovers:ReadonlySet<string>=new Set<string>();
 
-  constructor(input:SceneSpec){
+  constructor(input:SceneSpec,readonly profiler=new CpuProfiler()){
+    this.systemRuntime=new SceneSystemRuntime(profiler);
     this.spec=validateScene(input);
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
@@ -183,11 +185,17 @@ export class Scene {
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
+    if(this.profiler.enabled)this.profiler.measure('scene:step',()=>this.advance(dt,tier));else this.advance(dt,tier);
+  }
+  private advance(dt:number,tier:SimulationTier):void{
     const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{profiler:this.profiler,read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});
+    if(this.profiler.enabled)this.profiler.measure('scene:projections',()=>this.syncProjections());else this.syncProjections();
+  }
+  private syncProjections():void{
     for(const [projection,owner] of this.projections)if(this.entities.get(owner.id)===owner)projection.sync();
   }
   private commit(command:InternalCommand,at:number):void{
