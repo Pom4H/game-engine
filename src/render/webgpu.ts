@@ -786,7 +786,7 @@ export class WebGPURenderer implements Renderer{
       const [projectionX,projectionY,projectionOffsetX,projectionOffsetY]=projectionInfo.ray,tanY=1/projectionY,aspectLike=projectionY/projectionX;
       frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,0],28);frame.set([...forward,tanY],32);frame.set([...right,aspectLike],36);frame.set([...up,scene.time],40);frame.set([this.pointLights>0?1:0,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
       frame.set(reflectionVP,48);
-      frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);frame.set([projectionX,projectionY,projectionOffsetX,projectionOffsetY],100);frame.set(this.environmentIrradiance,104);
+      frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);frame.set([projectionX,projectionY,projectionOffsetX,projectionOffsetY],100);frame.set(this.environmentIrradiance,104);if(this.localProbePosition&&this.localProbeBounds){frame.set([...this.localProbePosition,1],140);frame.set([...this.localProbeBounds.min,1],144);frame.set([...this.localProbeBounds.max,1],148);}else{frame.fill(0,140,152);}
       this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength,'frame');
       return{vp,cullVP,reflectionVP,settings,lightVP,right,up,frame};
     });
