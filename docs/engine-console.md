@@ -63,3 +63,10 @@ source-binding tests. `node tools/docs/qa.mjs` exercises the actual WebGPU edito
 console editing/Undo, watches, physical Ё key and Escape, then existing HUD tests.
 The DSL workflow runs this branch too. Inherited engine test failures are not
 hidden or weakened. This change makes no GPU performance or graphics-quality claim.
+
+## Recorded timeline
+
+The **Запись** tab and `record start | stop | clear | export | trace` reuse this
+same console. They retain actual renderer CPU intervals, frame-correlated GPU
+durations and a bounded canvas filmstrip. See `profile-recording.md` for exact
+capture limits, verification and the distinction from world rollback/JS sampling.

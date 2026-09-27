@@ -1,3 +1,4 @@
+import {mountRecording} from './recording-ui.mjs';
 import {consoleSession,mountConsole} from './console.mjs';
 import {NetworkPanel} from './network-ui.mjs';
 import {EXAMPLES,LEGACY_PENDING} from './examples.mjs';
@@ -20,15 +21,18 @@ let timer=0,raf=0,running=false,lastHud=0,external=false,disposed=false,applySer
 const clock=new FixedClock(1000/60,250,6),stats={compiles:0,liveEdits:0,rebuilds:0,frameMs:0,compileMs:0};
 const network=new NetworkPanel({runtime:()=>runtime,program:()=>program,pause:()=>pause(),restore:()=>reset(),onError:showError,download});
 const compiler=new CompilerClient(reply=>void accept(reply).catch(showError));
+const recording=mountRecording({host:$('recording-panel'),canvas:$('render'),runtime:()=>runtime,
+ metadata:()=>{const physical=runtime.scene.physics.stats;return{mode:network.active?'network-presentation':'local',tick:runtime.scene.tick,time:runtime.scene.time,revision:compiledRevision,entities:runtime.scene.entities.size,physicsBodies:physical.bodies,physicsContacts:physical.contacts};},download});
 // Readers expose existing domain views. The console owns no engine state or clock.
 const session=consoleSession({
- sources:{render:()=>runtime?.renderer.inspect(),profile:()=>runtime?.profile(),physics:()=>runtime?.scene.physics.stats,
+ sources:{recording:()=>recording.model.inspect(),render:()=>runtime?.renderer.inspect(),profile:()=>runtime?.profile(),physics:()=>runtime?.scene.physics.stats,
   scene:()=>runtime&&({tick:runtime.scene.tick,time:runtime.scene.time,entities:runtime.scene.entities.size}),
   entities:()=>runtime?.scene.entities,network:()=>network.inspect(),
   editor:()=>({revision:doc.revision,appliedRevision:compiledRevision,running,external,lastPatch,...stats})},
  bindings:()=>bindings,
  edit:(id,value)=>{doc.end();try{const changed=changeBinding(id,value,'console');return changed?`Source r${doc.revision} queued; applied r${compiledRevision}`:'Source unchanged';}finally{doc.end();}},
  actions:{
+  record:tail=>recording.command(tail),
   pause:target=>{if(target==='server'){if(!network.active)throw new Error('Server is not connected');return network.pauseServer().then(()=> 'Server paused');}localCommand(target);pause();return 'Local simulation paused';},
   play:target=>{if(target==='server'){if(!network.active)throw new Error('Server is not connected');return network.resumeServer().then(()=> 'Server resumed');}localCommand(target);play();return 'Local simulation running';},
   step:target=>{if(target==='server'){if(!network.active)throw new Error('Server is not connected');return network.command('step').then(()=> 'Server stepped');}localCommand(target);step();return `Local tick ${runtime.scene.tick}`;},
@@ -177,9 +181,15 @@ function refreshHud(now,force=false){
   }$('parts').replaceChildren(...cards);
  }
 }
-function animate(now){if(disposed)return;try{if(network.active)network.frame(now);if(!network.active&&running&&runtime&&program){let count=0;clock.advance(now,()=>count++);count=Math.min(count,Math.max(0,Math.ceil((program.durationSeconds-runtime.scene.time)*60)));if(count){const start=performance.now();runtime.step(count);stats.frameMs=performance.now()-start;}if(runtime.scene.time+1e-8>=program.durationSeconds)pause();}refreshHud(now);}catch(error){pause();showError(error);}raf=requestAnimationFrame(animate);}
-function tab(diagnostics){$('diagnostics').hidden=!diagnostics;$('parameter-tools').hidden=diagnostics;$('parameter-empty').hidden=diagnostics;$('control-list').hidden=diagnostics;$('parameters-tab').setAttribute('aria-pressed',String(!diagnostics));$('diagnostics-tab').setAttribute('aria-pressed',String(diagnostics));refreshHud(performance.now(),true);}
-$('parameters-tab').onclick=()=>{tab(false);controls.filter();};$('diagnostics-tab').onclick=()=>tab(true);$('edit-parameters').onclick=()=>{tab(false);controls.filter();$('parameter-search').focus();};
+function animate(now){if(disposed)return;try{if(network.active)network.frame(now);if(!network.active&&running&&runtime&&program){let count=0;clock.advance(now,()=>count++);count=Math.min(count,Math.max(0,Math.ceil((program.durationSeconds-runtime.scene.time)*60)));if(count){const start=performance.now();runtime.step(count);stats.frameMs=performance.now()-start;}if(runtime.scene.time+1e-8>=program.durationSeconds)pause();}recording.refresh(now);refreshHud(now);}catch(error){pause();showError(error);}raf=requestAnimationFrame(animate);}
+function tab(mode){
+ $('recording-panel').hidden=mode!=='recording';$('diagnostics').hidden=mode!=='diagnostics';
+ for(const id of ['parameter-tools','parameter-empty','control-list'])$(id).hidden=mode!=='parameters';
+ for(const id of ['parameters','diagnostics','recording'])$(id+'-tab').setAttribute('aria-pressed',String(id===mode));
+ if(mode==='parameters')controls.filter();recording.refresh(performance.now());refreshHud(performance.now(),true);
+}
+for(const mode of ['parameters','diagnostics','recording'])$(mode+'-tab').onclick=()=>tab(mode);
+$('edit-parameters').onclick=()=>{tab('parameters');$('parameter-search').focus();};
 for(const b of document.querySelectorAll('[data-pane] button,button[data-pane]'))if(b.dataset.pane)b.onclick=()=>{document.querySelector('.workspace').dataset.pane=b.dataset.pane;for(const x of document.querySelectorAll('button[data-pane]'))x.setAttribute('aria-pressed',String(x===b));runtime?.render();};
 // Camera gestures edit exactly the orbit literals. Expressions remain read-only.
 let drag=null;
@@ -203,9 +213,9 @@ function coverage(){
 }
 $('coverage').onclick=coverage;$('scope-badge').onclick=coverage;$('scope-badge').role='button';$('scope-badge').tabIndex=0;$('scope-badge').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')coverage();};$('close-coverage').onclick=()=>$('coverage-dialog').close();
 addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
-addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(raf);clearTimeout(timer);compiler.dispose();terminal.dispose();network.stop();runtime?.dispose();},{once:true});
+addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(raf);clearTimeout(timer);compiler.dispose();recording.dispose();terminal.dispose();network.stop();runtime?.dispose();},{once:true});
 // Small test/automation surface. Production uses exactly the same actions as a human.
-globalThis.__DSL_EDITOR__={network,console:session,get source(){return doc.source;},get revision(){return doc.revision;},get appliedRevision(){return compiledRevision;},get bindings(){return bindings;},get stats(){return {...stats};},get lastPatch(){return lastPatch;},get compilers(){return lastCompiler;},get program(){return program;},get runtime(){return runtime;},edit:(id,value)=>changeBinding(id,value),setSource:text=>setSource(text),select:selectExample,apply,seek,play,pause,undo:()=>restored(doc.undo(selection()))};
+globalThis.__DSL_EDITOR__={recording,network,console:session,get source(){return doc.source;},get revision(){return doc.revision;},get appliedRevision(){return compiledRevision;},get bindings(){return bindings;},get stats(){return {...stats};},get lastPatch(){return lastPatch;},get compilers(){return lastCompiler;},get program(){return program;},get runtime(){return runtime;},edit:(id,value)=>changeBinding(id,value),setSource:text=>setSource(text),select:selectExample,apply,seek,play,pause,undo:()=>restored(doc.undo(selection()))};
 const initialHash=new URLSearchParams(location.hash.slice(1)),id=initialHash.get('scene');
 try{selectExample(EXAMPLES.some(x=>x.id===id)?id:EXAMPLES[0].id,initialHash.has('source')?{imported:decode(initialHash.get('source'))}:{});}
 catch(error){external=true;showError(error);}

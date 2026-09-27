@@ -11,7 +11,7 @@ import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
 import type {Primitive,CameraSpec,SurfaceTextureSpec,EnvironmentRadianceSpec} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
-import {RenderProfiler} from './profiler.js';
+import {RenderProfiler,type RenderFrameListener} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
@@ -1023,6 +1023,7 @@ export class WebGPURenderer implements Renderer{
       ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,jobs:this.environmentBaker?.inspect(),invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
       ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};
   }
+  subscribeFrames(listener:RenderFrameListener){return this.profiler.subscribeFrames(listener);}
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
   dispose():void{if(this.disposed)return;this.disposed=true;this.environmentBaker?.dispose();this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}

@@ -49,6 +49,21 @@ try{
  assert.ok(await evaluate(`document.activeElement===document.querySelector('#panel-toggle')`));
  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ё',code:'Backquote',windowsVirtualKeyCode:192});
  await wait(`!document.querySelector('#control-panel').hidden && document.activeElement===document.querySelector('#console-input')`);checks.push('Ё opens, Escape closes and restores focus');
+ // Real recorded pixels, not seek/resimulation. These checks require native WebGPU.
+ await command('record start');await evaluate('__DSL_EDITOR__.play()');
+ await wait('__DSL_EDITOR__.recording.model.frames.length >= 8 && __DSL_EDITOR__.recording.model.images >= 2',60000);
+ await evaluate('__DSL_EDITOR__.pause()');await command('record stop');
+ await evaluate(`document.querySelector('#recording-tab').click();globalThis.__recordTick=__DSL_EDITOR__.runtime.scene.tick;const t=document.querySelector('[data-time]');t.value='0';t.dispatchEvent(new Event('input',{bubbles:true}));`);
+ await wait(`!document.querySelector('[data-image]').hidden && document.querySelector('[data-caption]').textContent.includes('Выбран '+__DSL_EDITOR__.recording.model.frames[0].key)`);
+ assert.ok(await evaluate(`(()=>{const m=__DSL_EDITOR__.recording.model;return !m.active && m.images>=2 && m.frames.every(f=>!f.gpu || f.gpu.frame===f.cpu.frame) && document.querySelector('[data-image]').src===m.imageAt(0).image;})()`));
+ assert.equal(await evaluate('__DSL_EDITOR__.runtime.scene.tick'),await evaluate('__recordTick'));
+ checks.push('recording: actual canvas filmstrip + frame-keyed CPU/GPU + scrub without physics seek');
+ await capture('engine-profiler');
+ await evaluate(`document.querySelector('[data-do=zoomIn]').click();document.querySelector('[data-do=next]').click()`);
+ await wait(`document.querySelector('[data-caption]').textContent.includes('Выбран '+__DSL_EDITOR__.recording.model.frames[1].key)`);
+ assert.equal(await evaluate('__DSL_EDITOR__.runtime.scene.tick'),await evaluate('__recordTick'));
+ checks.push('recording zoom and frame stepping preserve live scene');
+ await evaluate(`document.querySelector('#parameters-tab').click()`);
  const before=await canvasHash();
  await evaluate(`(()=>{globalThis.__qaBody=__DSL_EDITOR__.runtime.scene.physics.bodies.get('car');const field=document.querySelector('[data-key="exposure"] input[type="range"]');field.value='0.65';field.dispatchEvent(new Event('input',{bubbles:true}));})()`);await wait(settled);
  assert.ok(await evaluate("__DSL_EDITOR__.source.includes('exposure: 0.65')"));assert.ok(await evaluate("__DSL_EDITOR__.runtime.scene.physics.bodies.get('car') === __qaBody"));assert.equal(await evaluate('__DSL_EDITOR__.lastPatch'),'live');assert.notEqual(await canvasHash(),before);checks.push('HUD → source → shader pixels; body preserved');await capture('m3-exposure-edit');

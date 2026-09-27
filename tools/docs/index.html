@@ -5,7 +5,7 @@
   <meta name="color-scheme" content="dark light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; media-src blob:; base-uri 'none'">
   <title>game-engine · DSL playground</title>
-  <link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./controls.css"><link rel="stylesheet" href="./network.css"><link rel="stylesheet" href="./console.css">
+  <link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./controls.css"><link rel="stylesheet" href="./network.css"><link rel="stylesheet" href="./console.css"><link rel="stylesheet" href="./recording.css">
 </head>
 <body>
 <header class="topbar">
@@ -40,9 +40,10 @@
   </section>
 </main>
       <aside id="control-panel" class="engine-console" hidden inert aria-label="Консоль движка">
-        <div class="console-head"><div class="control-tabs"><button id="parameters-tab" aria-pressed="true">Параметры</button><button id="diagnostics-tab" aria-pressed="false">Диагностика</button></div><button id="network-connect" title="Изолированный localhost стенд, не игровой production">Серверный стенд</button><button id="console-close" aria-label="Закрыть консоль">Esc ×</button></div>
+        <div class="console-head"><div class="control-tabs"><button id="parameters-tab" aria-pressed="true">Параметры</button><button id="diagnostics-tab" aria-pressed="false">Диагностика</button><button id="recording-tab" aria-pressed="false">Запись</button></div><button id="network-connect" title="Изолированный localhost стенд, не игровой production">Серверный стенд</button><button id="console-close" aria-label="Закрыть консоль">Esc ×</button></div>
       <div class="render-hud" id="render-hud" role="status"><span>WebGPU</span><span>Ожидание первого кадра</span></div>
 <div class="console-content">
+<section id="recording-panel" hidden aria-label="Профиль и запись рендера"></section>
         <div class="parameter-tools" id="parameter-tools"><label class="sr-only" for="parameter-search">Найти параметр или деталь</label><input id="parameter-search" type="search" placeholder="Найти параметр…" autocomplete="off" spellcheck="false"><output id="parameter-count" aria-live="polite"></output></div>
         <div id="control-list"></div><p id="parameter-empty" class="parameter-empty" hidden>Нет параметров по этому запросу</p>
         <div id="diagnostics" hidden><p class="muted">Результаты расчёта · только чтение</p><button id="edit-parameters" class="diagnostics-edit">Изменить параметры ↔ код</button><dl id="metrics"></dl><div id="parts"></div></div>
