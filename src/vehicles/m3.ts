@@ -134,19 +134,6 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   }
   // BMW roundel: cylinders are Y-axis aligned, so the badge must remain almost
   // horizontal to face upward. The previous Z rotation (.92rad) put it nearly edge-on.
-  // Fine LED signature stays inside the retained FBX headlight envelope.
-  // Two narrow bars per side add the G80-like double daytime-running-light read
-  // without covering the original lens geometry.
-  const headlightSignature:ParametricVehiclePart[]=[];
-  for(const side of [-1,1] as const)for(let row=0;row<2;row++){
-    headlightSignature.push(Object.freeze({
-      id:`m3-drl-${side<0?'left':'right'}-${row}`,
-      role:'light' as const,
-      mesh:{kind:'box' as const,size:[.014,.022,.20] as const},
-      position:[2.205,.672+row*.047,side*.67] as const,
-      material:{kind:'plastic' as const,finish:'polished' as const,roughness:.08,metalness:.02,clearcoat:.55,clearcoatRoughness:.04},
-    }));
-  }
   const badge:ParametricVehiclePart[]=[
     Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.074,height:.010,segments:48},position:[1.86,1.012,0] as const,rotation:[0,0,-.10] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.045,metalness:.30,clearcoat:.94,clearcoatRoughness:.03}}),
     Object.freeze({id:'hood-roundel-white-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.061,height:.012,segments:48},position:[1.86,1.013,0] as const,rotation:[0,0,-.10] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.05,metalness:.02,clearcoat:.78,clearcoatRoughness:.03}}),
@@ -169,7 +156,6 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...frontDetail,
     ...grilleSlats,
-    ...headlightSignature,
     ...badge,
     ...interior,
     ...sources.map(source=>Object.freeze({
