@@ -175,6 +175,17 @@ fn ormTexelAt(p:vec3<f32>,weights:vec3<f32>)->vec3<f32>{
  return textureSample(ormTexture,surfaceSampler,p.zy/u.texture.x).rgb*weights.x+textureSample(ormTexture,surfaceSampler,p.xz/u.texture.x).rgb*weights.y+textureSample(ormTexture,surfaceSampler,p.xy/u.texture.x).rgb*weights.z;
 }
 struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location(2) specular:vec4<f32>,@location(3) velocity:vec2<f32>}
+fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>{
+  if(f.localProbePosition.w<.5){return reflectionDir;}
+  let ray=normalize(reflectionDir);
+  let safeRay=select(vec3<f32>(.00001),ray,abs(ray)>vec3<f32>(.00001));
+  let t0=(f.localProbeMin.xyz-worldPos)/safeRay;
+  let t1=(f.localProbeMax.xyz-worldPos)/safeRay;
+  let exitT=max(min(max(t0.x,t1.x),min(max(t0.y,t1.y),max(t0.z,t1.z))),0.0);
+  let hit=worldPos+ray*exitT;
+  return normalize(hit-f.localProbePosition.xyz);
+}
+
 @fragment fn fs(in: VOut) -> GOut {
   ${reflection?'if(in.worldPos.y<.04){discard;}':''}
   let hasField=u.fieldSize.z>0.5;
@@ -432,7 +443,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
   if(f.params.y>.5&&(localProbeWeight>.001||clearcoat>0.0||glassLike)){
-    localProbe=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,0).rgb;
+    localProbe=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),0).rgb;
   }
   let environmentRadiance=mix(fallbackEnvironment,localProbe,localProbeWeight);
   let envC0=vec4<f32>(-1.0,-.0275,-.572,.022);let envC1=vec4<f32>(1.0,.0425,1.04,-.04);
@@ -452,7 +463,7 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec;
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(environmentMap)-1u)).rgb;
     if(f.params.y>.5){
-      let coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(localProbeMap)-1u)).rgb;
+      let coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),coatRough*f32(textureNumLevels(localProbeMap)-1u)).rgb;
       coatEnvironment=mix(coatEnvironment,coatLocal,f.params.y);
     }
     // Same split-sum BRDF fit as the base, evaluated at the coat roughness.
@@ -603,7 +614,7 @@ export class WebGPURenderer implements Renderer{
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
-  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeKey='';private probeComplete=false;
+  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
@@ -634,7 +645,7 @@ export class WebGPURenderer implements Renderer{
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
     const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*8)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
-    const frame=device.createBuffer({size:560,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
+    const frame=device.createBuffer({size:608,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
@@ -737,11 +748,11 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('resize',()=>this.resize());
     this.lastScene=scene;
     const reflectionProbe=resolveReflectionProbe(scene);
-    if(!reflectionProbe){this.localProbeMask=0;this.localProbeKey='';this.localProbePosition=null;}
+    if(!reflectionProbe){this.localProbeMask=0;this.localProbeKey='';this.localProbePosition=null;this.localProbeBounds=null;}
     else{
       const reset=this.localProbeKey!==reflectionProbe.key||(this.localProbePosition&&distance2(this.localProbePosition,reflectionProbe.position)>Math.max(2,reflectionProbe.radius*.16)**2);
       if(reset){this.localProbeMask=0;this.localProbeFace=0;}
-      this.localProbeKey=reflectionProbe.key;this.localProbePosition=[...reflectionProbe.position];
+      this.localProbeKey=reflectionProbe.key;this.localProbePosition=[...reflectionProbe.position];this.localProbeBounds={min:[reflectionProbe.position[0]-reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]-reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]-reflectionProbe.boxHalfExtents[2]],max:[reflectionProbe.position[0]+reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]+reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]+reflectionProbe.boxHalfExtents[2]]};
     }
     // The sixth face enables local radiance on the following frame. Invalidate
     // TAA at that boundary so an incomplete-probe image cannot linger in glass
@@ -769,7 +780,7 @@ export class WebGPURenderer implements Renderer{
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
       const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
       lightVP[12]=Math.round(lightVP[12]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;lightVP[13]=Math.round(lightVP[13]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;
-      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(V3.cross(forward,cameraUp)),up=V3.normalize(V3.cross(right,forward)),frame=new Float32Array(140);
+      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(V3.cross(forward,cameraUp)),up=V3.normalize(V3.cross(right,forward)),frame=new Float32Array(152);
       const reflectionVP=multiply4(baseProjection,lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[cameraUp[0],-cameraUp[1],cameraUp[2]]));
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
       const [projectionX,projectionY,projectionOffsetX,projectionOffsetY]=projectionInfo.ray,tanY=1/projectionY,aspectLike=projectionY/projectionX;
@@ -1156,7 +1167,7 @@ export class WebGPURenderer implements Renderer{
       // Hot render-lab scene swaps deliberately retain GPU pipelines/mesh buffers,
       // but every scene-owned uniform/probe/culling cache must observe the new causes.
       for(const object of this.objects.values())object.uniformReady=false;
-      this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbePosition=null;
+      this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbePosition=null;this.localProbeBounds=null;
       this.shadowValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
@@ -1278,7 +1289,7 @@ function lightGridCauseKey(lights:readonly RuntimeEntity[],eye:Vec3):string{
   return values.join(':');
 }
 function distance2(a:Vec3,b:Vec3):number{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[2];return x*x+y*y+z*z;}
-interface ResolvedReflectionProbe{position:Vec3;radius:number;facesPerFrame:number;exclude:ReadonlySet<string>;key:string}
+interface ResolvedReflectionProbe{position:Vec3;radius:number;facesPerFrame:number;exclude:ReadonlySet<string>;boxHalfExtents:Vec3;key:string}
 const PROBE_FACE_DIRECTIONS:readonly Vec3[]=Object.freeze([[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]] as const);
 const PROBE_FACE_UP:readonly Vec3[]=Object.freeze([[0,-1,0],[0,-1,0],[0,0,1],[0,0,-1],[0,-1,0],[0,-1,0]] as const);
 function resolveReflectionProbe(scene:Scene):ResolvedReflectionProbe|undefined{
@@ -1287,8 +1298,9 @@ function resolveReflectionProbe(scene:Scene):ResolvedReflectionProbe|undefined{
   if(!anchor)return;
   const position:Vec3=[anchor[0]+offset[0],anchor[1]+offset[1],anchor[2]+offset[2]];
   const radius=Math.max(.5,Math.min(500,spec.radius??45)),facesPerFrame=Math.max(1,Math.min(6,Math.floor(spec.facesPerFrame??1))),exclude=new Set(spec.exclude??[]);
-  const key=JSON.stringify([spec.entity??spec.position,radius,[...exclude].sort()]);
-  return{position,radius,facesPerFrame,exclude,key};
+  const boxHalfExtents:Vec3=spec.boxHalfExtents?[...spec.boxHalfExtents] as Vec3:[8,3,5];
+  const key=JSON.stringify([spec.entity??spec.position,radius,boxHalfExtents,[...exclude].sort()]);
+  return{position,radius,facesPerFrame,exclude,boxHalfExtents,key};
 }
 function probeVP(position:Vec3,face:number,radius:number):Mat4{
   const direction=PROBE_FACE_DIRECTIONS[face]!,up=PROBE_FACE_UP[face]!,target=V3.add(position,direction);
