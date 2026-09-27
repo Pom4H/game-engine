@@ -1,0 +1,64 @@
+name: DSL playground
+on:
+  push:
+    branches: [codex/dsl-live-playground]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: playground-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck && bun run build
+      - run: bun run test:playground
+      - run: bun run build:playground
+      - uses: actions/upload-artifact@v7
+        with:
+          name: game-engine-dsl-playground
+          path: site/
+          if-no-files-found: error
+          retention-days: 14
+  browser:
+    needs: build
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v4
+        with:
+          name: game-engine-dsl-playground
+          path: site/
+      - name: Native Chrome
+        shell: powershell
+        run: |
+          $chrome = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { throw 'Chrome not found' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - run: node tools/qa-playground.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playground-browser-evidence
+          path: artifacts/playground/
+          if-no-files-found: error
+          retention-days: 14
+  regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - name: Full engine regressions (no skip/continue-on-error)
+        run: bun run test

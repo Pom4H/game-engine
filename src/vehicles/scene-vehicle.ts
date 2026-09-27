@@ -37,7 +37,7 @@ export function spawnVehicle(scene:Scene,blueprint:VehicleBlueprint,geometry:Com
   const rootSpec:EntitySpec={id,position:[position[0]+offset[0],position[1]+offset[1],position[2]+offset[2]],rotation,
     material:{kind:'steel'},body:{mass:blueprint.massKg,collisionSize:size,friction:.5,restitution:.05,...(options.velocity?{velocity:options.velocity}:{}),...(options.angularVelocity?{angularVelocity:options.angularVelocity}:{})}};
   const descriptions=geometry.parts.map(p=>{
-    const spec:EntitySpec={id:`${id}/${p.id}`,collision:'none',mesh:p.mesh,position:[0,0,0],
+    const spec:EntitySpec={id:`${id}/${p.id}`,collision:'none',mesh:p.mesh,...(p.renderMesh?{renderMesh:p.renderMesh}:{}),position:[0,0,0],
       material:p.role==='paint'?{...p.material,...options.paint}:p.material??{}};
     return {spec,part:p};
   });
@@ -108,7 +108,7 @@ export function spawnVehicle(scene:Scene,blueprint:VehicleBlueprint,geometry:Com
     };
     sync();
     if(options.damage!==false){
-      const skins=visuals.filter(v=>!v.part).map(v=>v.entity.id);
+      const skins=visuals.filter(v=>!v.part&&(v.entity.renderMesh??v.entity.mesh)?.kind==='triangle-mesh').map(v=>v.entity.id);
       if(!skins.length)throw new TypeError('Vehicle damage requires a chassis skin');
       scene.deformation.attach({bodyId:id,visualIds:skins,...options.damage},scene.entities);
       runtime.bindDeformation(scene.deformation.field(id));

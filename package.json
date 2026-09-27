@@ -10,7 +10,9 @@
     "./vehicles": "./dist/vehicles/index.js",
     "./vehicles/wheels": "./dist/vehicles/wheels.js",
     "./vehicles/runtime": "./dist/vehicles/vehicle.js",
-    "./vehicles/scene": "./dist/vehicles/scene-vehicle.js"
+    "./vehicles/scene": "./dist/vehicles/scene-vehicle.js",
+    "./dsl": "./dist/dsl/index.js",
+    "./dsl/runtime": "./dist/dsl/runtime.js"
   },
   "files": [
     "dist",
@@ -23,7 +25,10 @@
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs",
     "harness:vehicles": "tsc -p tsconfig.build.json && node --expose-gc tools/vehicle-domain-harness.mjs",
     "harness:vehicle-runtime": "tsc -p tsconfig.build.json && node tools/vehicle-runtime-harness.mjs",
-    "harness:vehicle-scene": "tsc -p tsconfig.build.json && node tools/vehicle-scene-harness.mjs"
+    "harness:vehicle-scene": "tsc -p tsconfig.build.json && node tools/vehicle-scene-harness.mjs",
+    "dev": "bun tools/dev-playground.mjs",
+    "build:playground": "bun tools/build-playground.mjs",
+    "test:playground": "tsc -p tsconfig.playground.json --outDir .qa --rootDir . && node --test playground/test/*.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

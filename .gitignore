@@ -3,3 +3,5 @@ dist/
 artifacts/
 .DS_Store
 *.log
+.qa/
+site/

@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","compilerOptions":{"lib":["ES2023","DOM","DOM.Iterable","WebWorker"],"esModuleInterop":true},"include":["src/**/*.ts","playground/**/*.ts"],"exclude":["playground/examples"]}
