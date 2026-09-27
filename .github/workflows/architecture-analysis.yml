@@ -2,7 +2,7 @@ name: architecture-analysis
 
 on:
   push:
-    branches: [codex/adaptive-core]
+    branches: [codex/adaptive-core, codex/engine-console]
   workflow_dispatch:
 
 permissions:
