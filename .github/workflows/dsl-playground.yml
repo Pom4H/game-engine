@@ -1,8 +1,8 @@
 name: DSL playground
 on:
   push:
-    branches: [codex/dsl-live-docs]
-    paths: ['src/**', 'tools/docs/**', 'test/dsl-playground.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
+    branches: [codex/dsl-live-docs, codex/engine-console]
+    paths: ['src/**', 'tools/docs/**', 'test/dsl-playground.mjs', 'test/engine-console.test.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
         run: bun run typecheck && bun run build
         shell: cmd
       - name: Source bindings, live edits and all demo programs
-        run: node --test test/dsl-playground.mjs
+        run: node --test test/dsl-playground.mjs test/engine-console.test.mjs
       - name: Build portable playground
         run: node tools/docs/build.mjs
       - name: Locate native Chrome

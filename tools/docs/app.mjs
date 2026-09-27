@@ -1,3 +1,4 @@
+import {consoleSession,mountConsole} from './console.mjs';
 import {NetworkPanel} from './network-ui.mjs';
 import {EXAMPLES,LEGACY_PENDING} from './examples.mjs';
 import {SourceDocument,rebaseBindings} from './document.mjs';
@@ -19,6 +20,28 @@ let timer=0,raf=0,running=false,lastHud=0,external=false,disposed=false,applySer
 const clock=new FixedClock(1000/60,250,6),stats={compiles:0,liveEdits:0,rebuilds:0,frameMs:0,compileMs:0};
 const network=new NetworkPanel({runtime:()=>runtime,program:()=>program,pause:()=>pause(),restore:()=>reset(),onError:showError,download});
 const compiler=new CompilerClient(reply=>void accept(reply).catch(showError));
+// Readers expose existing domain views. The console owns no engine state or clock.
+const session=consoleSession({
+ sources:{render:()=>runtime?.renderer.inspect(),profile:()=>runtime?.profile(),physics:()=>runtime?.scene.physics.stats,
+  scene:()=>runtime&&({tick:runtime.scene.tick,time:runtime.scene.time,entities:runtime.scene.entities.size}),
+  entities:()=>runtime?.scene.entities,network:()=>network.inspect(),
+  editor:()=>({revision:doc.revision,appliedRevision:compiledRevision,running,external,lastPatch,...stats})},
+ bindings:()=>bindings,
+ edit:(id,value)=>{doc.end();try{const changed=changeBinding(id,value,'console');return changed?`Source r${doc.revision} queued; applied r${compiledRevision}`:'Source unchanged';}finally{doc.end();}},
+ actions:{
+  pause:target=>{if(target==='server'){if(!network.active)throw new Error('Server is not connected');return network.pauseServer().then(()=> 'Server paused');}localCommand(target);pause();return 'Local simulation paused';},
+  play:target=>{if(target==='server'){if(!network.active)throw new Error('Server is not connected');return network.resumeServer().then(()=> 'Server resumed');}localCommand(target);play();return 'Local simulation running';},
+  step:target=>{if(target==='server'){if(!network.active)throw new Error('Server is not connected');return network.command('step').then(()=> 'Server stepped');}localCommand(target);step();return `Local tick ${runtime.scene.tick}`;},
+  reset:tail=>{localCommand(tail);return reset();},
+  seek:tail=>{localCommand();const seconds=Number(tail);if(!tail||!Number.isFinite(seconds)||seconds<0)throw new Error('seek <non-negative seconds>');return seek(seconds);},
+  undo:tail=>{noArguments(tail);restored(doc.undo(selection()));return `Source r${doc.revision}; applied r${compiledRevision}`;},
+  apply:tail=>{noArguments(tail);apply();return `Compiling source r${doc.revision}`;},
+ }
+});
+function noArguments(tail=''){if(tail)throw new Error('Unexpected arguments');}
+function localCommand(tail=''){noArguments(tail);if(!runtime||!program)throw new Error('Scene is not ready');if(network.active)throw new Error('Use an explicit server command or disconnect the server');}
+const terminal=mountConsole({panel:$('control-panel'),toggle:$('panel-toggle'),session,onOpen:()=>refreshHud(performance.now(),true)});
+
 const controls=new BoundControls({list:$('control-list'),search:$('parameter-search'),count:$('parameter-count'),empty:$('parameter-empty'),groups,
  onEdit:changeBinding,onSelect:focusSource,begin:()=>doc.end(),end:()=>doc.end()});
 function focusSource(binding){
@@ -93,10 +116,10 @@ function selectExample(id,{imported}={}){
 const groupNodes=new Map();for(const item of EXAMPLES){let group=groupNodes.get(item.group);if(!group){group=el('optgroup');group.label=item.group;groupNodes.set(item.group,group);$('examples').append(group);}const option=el('option',item.title);option.value=item.id;group.append(option);}
 $('examples').onchange=()=>selectExample($('examples').value);
 function changeBinding(id,value,origin='hud'){
- if(!bindingReady)return;const binding=bindings.find(x=>x.id===id);if(!binding)return;
- try{const edits=editsFor(doc.source,binding,value);if(!edits.length)return;const next=applyEdits(doc.source,edits),rebased=rebaseBindings(bindings,edits,next,id,value);
-  if(setSource(next,{group:origin==='camera'?'camera:orbit':origin+':'+id})){bindings=rebased;bindingReady=true;syncControlValues();}
- }catch(error){showError(error);}
+ if(!bindingReady||external){if(origin==='console')throw new Error('Bindings are not ready; Apply the source first');return false;}const binding=bindings.find(x=>x.id===id);if(!binding){if(origin==='console')throw new Error('Unknown source binding');return false;}
+ try{const edits=editsFor(doc.source,binding,value);if(!edits.length)return false;const next=applyEdits(doc.source,edits),rebased=rebaseBindings(bindings,edits,next,id,value);
+  if(setSource(next,{group:origin==='camera'?'camera:orbit':'hud:'+id})){bindings=rebased;bindingReady=true;syncControlValues();return true;}return false;
+ }catch(error){if(origin==='console')throw error;showError(error);return false;}
 }
 async function accept(reply){
  if(disposed||reply.revision!==doc.revision||external)return;
@@ -125,7 +148,8 @@ async function accept(reply){
 function play(){if(!runtime||!program||network.active)return;if(runtime.scene.time>=program.durationSeconds){void reset(true);return;}running=true;clock.reset(performance.now());$('play').textContent='Ⅱ Пауза';$('live-dot').classList.add('running');}
 function pause(silence=true){running=false;$('play').textContent='▶ Запуск';$('live-dot').classList.remove('running');if(silence&&runtime?.audio){runtime.setAudioEnabled(false);$('audio').textContent='Звук выкл.';$('audio').setAttribute('aria-pressed','false');}}
 async function reset(resume=false){if(!runtime||!program)return;pause();const p=program,serial=++seekSerial;await runtime.replaceScene(p.scene,s=>installProgram(s,p));if(serial!==seekSerial)return;lastPatch='rebuild';stats.rebuilds++;if(resume)play();refreshHud(performance.now(),true);}
-$('play').onclick=()=>running?pause():play();$('reset').onclick=()=>void reset().catch(showError);$('step').onclick=()=>{if(!runtime)return;pause();if(runtime.scene.time<program.durationSeconds)runtime.step();refreshHud(performance.now(),true);};
+function step(){if(!runtime||!program||network.active)return;pause();if(runtime.scene.time<program.durationSeconds)runtime.step();refreshHud(performance.now(),true);}
+$('play').onclick=()=>running?pause():play();$('reset').onclick=()=>void reset().catch(showError);$('step').onclick=step;
 $('time').oninput=()=>{void seek($('time').valueAsNumber).catch(showError);};
 async function seek(seconds){
  if(!runtime||!program)return;pause();const serial=++seekSerial;
@@ -139,8 +163,10 @@ $('audio').onclick=()=>{if(!runtime)return;if(runtime.audio){runtime.setAudioEna
 function metricsList(node,values){const fragment=document.createDocumentFragment();for(const [name,value] of values)fragment.append(el('dt',name),el('dd',String(value)));node.replaceChildren(fragment);}
 function refreshHud(now,force=false){
  if(!runtime||!program||!force&&now-lastHud<250)return;lastHud=now;
- const render=runtime.renderer.inspect(),profile=runtime.profile(),phys=runtime.scene.physics.stats,t=runtime.scene.time;
+ const t=runtime.scene.time;
  $('time').value=String(t);$('time-label').textContent=fmt(t)+' / '+program.durationSeconds+' с';
+ if($('control-panel').hidden)return;
+ const read=session.sample(),render=read('render'),profile=read('profile'),phys=read('physics');terminal.refresh(read);
  $('render-hud').replaceChildren(...[render.backend.toUpperCase(),`${render.triangles.toLocaleString('ru-RU')} △`,`${render.drawCalls} draw`,`CPU ${fmt(profile?.latestCpu?.totalMs)} мс`,profile?.latestGpu?`GPU ${fmt(profile.latestGpu.totalMs)} мс`:'GPU timer —'].map(text=>el('span',text)));
  if(render.errors?.length)showError('Ошибка рендера: '+render.errors.join('; '));
  if(!$('diagnostics').hidden){
@@ -152,7 +178,6 @@ function refreshHud(now,force=false){
  }
 }
 function animate(now){if(disposed)return;try{if(network.active)network.frame(now);if(!network.active&&running&&runtime&&program){let count=0;clock.advance(now,()=>count++);count=Math.min(count,Math.max(0,Math.ceil((program.durationSeconds-runtime.scene.time)*60)));if(count){const start=performance.now();runtime.step(count);stats.frameMs=performance.now()-start;}if(runtime.scene.time+1e-8>=program.durationSeconds)pause();}refreshHud(now);}catch(error){pause();showError(error);}raf=requestAnimationFrame(animate);}
-$('panel-toggle').onclick=()=>{const panel=$('control-panel');panel.hidden=!panel.hidden;$('panel-toggle').setAttribute('aria-expanded',String(!panel.hidden));};
 function tab(diagnostics){$('diagnostics').hidden=!diagnostics;$('parameter-tools').hidden=diagnostics;$('parameter-empty').hidden=diagnostics;$('control-list').hidden=diagnostics;$('parameters-tab').setAttribute('aria-pressed',String(!diagnostics));$('diagnostics-tab').setAttribute('aria-pressed',String(diagnostics));refreshHud(performance.now(),true);}
 $('parameters-tab').onclick=()=>{tab(false);controls.filter();};$('diagnostics-tab').onclick=()=>tab(true);$('edit-parameters').onclick=()=>{tab(false);controls.filter();$('parameter-search').focus();};
 for(const b of document.querySelectorAll('[data-pane] button,button[data-pane]'))if(b.dataset.pane)b.onclick=()=>{document.querySelector('.workspace').dataset.pane=b.dataset.pane;for(const x of document.querySelectorAll('button[data-pane]'))x.setAttribute('aria-pressed',String(x===b));runtime?.render();};
@@ -178,10 +203,9 @@ function coverage(){
 }
 $('coverage').onclick=coverage;$('scope-badge').onclick=coverage;$('scope-badge').role='button';$('scope-badge').tabIndex=0;$('scope-badge').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')coverage();};$('close-coverage').onclick=()=>$('coverage-dialog').close();
 addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
-addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(raf);clearTimeout(timer);compiler.dispose();network.stop();runtime?.dispose();},{once:true});
+addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(raf);clearTimeout(timer);compiler.dispose();terminal.dispose();network.stop();runtime?.dispose();},{once:true});
 // Small test/automation surface. Production uses exactly the same actions as a human.
-globalThis.__DSL_EDITOR__={network,get source(){return doc.source;},get revision(){return doc.revision;},get appliedRevision(){return compiledRevision;},get bindings(){return bindings;},get stats(){return {...stats};},get lastPatch(){return lastPatch;},get compilers(){return lastCompiler;},get program(){return program;},get runtime(){return runtime;},edit:(id,value)=>changeBinding(id,value),setSource:text=>setSource(text),select:selectExample,apply,seek,play,pause,undo:()=>restored(doc.undo(selection()))};
-if(innerWidth<801){$('control-panel').hidden=true;$('panel-toggle').setAttribute('aria-expanded','false');}
+globalThis.__DSL_EDITOR__={network,console:session,get source(){return doc.source;},get revision(){return doc.revision;},get appliedRevision(){return compiledRevision;},get bindings(){return bindings;},get stats(){return {...stats};},get lastPatch(){return lastPatch;},get compilers(){return lastCompiler;},get program(){return program;},get runtime(){return runtime;},edit:(id,value)=>changeBinding(id,value),setSource:text=>setSource(text),select:selectExample,apply,seek,play,pause,undo:()=>restored(doc.undo(selection()))};
 const initialHash=new URLSearchParams(location.hash.slice(1)),id=initialHash.get('scene');
 try{selectExample(EXAMPLES.some(x=>x.id===id)?id:EXAMPLES[0].id,initialHash.has('source')?{imported:decode(initialHash.get('source'))}:{});}
 catch(error){external=true;showError(error);}

@@ -1,0 +1,22 @@
+/* The drawer replaces sidebar/HUD placement. No renderer or engine imports. */
+.engine-console{position:fixed;inset:auto 0 0;z-index:50;height:min(64dvh,650px);min-height:240px;display:flex;flex-direction:column;background:var(--panel);border-top:1px solid var(--line);box-shadow:0 -12px 40px #0004;transform:translateY(0);transition:transform .16s ease-out;visibility:visible}
+.engine-console[hidden]{display:flex;transform:translateY(105%);visibility:hidden;pointer-events:none}
+.console-head{display:flex;flex-shrink:0;align-items:center;border-bottom:1px solid var(--line);gap:8px;padding-right:8px}
+.console-head .control-tabs{position:static;flex:1;border:0;max-width:320px}
+.console-head button{border-radius:0}
+.console-head #console-close{margin-left:auto}
+.render-hud{display:flex;flex-shrink:0;overflow:auto;font:11px ui-monospace,monospace;border-bottom:1px solid var(--line)}
+.console-content{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
+.console-content .parameter-tools{position:static}
+#control-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));align-items:start}
+#control-list[hidden]{display:none}
+.console-terminal{flex-shrink:0;border-top:1px solid var(--line);background:var(--bg)}
+#console-log,#console-watches{max-height:105px;overflow:auto;scrollbar-width:thin}
+#console-log pre,#console-watches pre{margin:0;padding:5px 12px;white-space:pre-wrap;overflow-wrap:anywhere;font:11px/1.4 ui-monospace,monospace}
+#console-watches{display:flex;gap:12px;color:var(--accent)}
+#console-watches pre{flex:1;min-width:160px}
+#console-form{display:flex;align-items:center;gap:10px;padding:7px 12px;border-top:1px solid var(--line)}
+#console-form label{color:var(--accent)}
+#console-input{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font:13px/1.4 ui-monospace,monospace;padding:6px}
+@media(max-width:800px){.engine-console{height:68dvh;min-height:220px}.console-head{gap:3px}.console-head button{font-size:11px;padding:8px}.console-head .control-tabs{max-width:none}#console-input{font-size:16px;min-height:40px}#console-form{padding:4px 8px}.render-hud{font-size:10px}#control-list{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.engine-console{transition:none}}

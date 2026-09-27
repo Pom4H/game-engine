@@ -32,7 +32,23 @@ try{
  const settled='__DSL_EDITOR__.runtime && __DSL_EDITOR__.appliedRevision === __DSL_EDITOR__.revision && document.querySelector("#error").hidden';
  await send('Runtime.enable');await send('Page.enable');await send('Emulation.setDeviceMetricsOverride',{width:1600,height:960,deviceScaleFactor:1,mobile:false});
  await send('Page.navigate',{url:`http://127.0.0.1:${port}/docs/`});await wait('!!globalThis.__DSL_EDITOR__');await wait(settled,60000);
+ assert.equal(await evaluate('document.querySelector("#control-panel").hidden'),true);await evaluate('document.querySelector("#panel-toggle").focus();document.querySelector("#panel-toggle").click()');checks.push('one console drawer; closed by default');
  info=await evaluate('(async()=>({userAgent:navigator.userAgent,adapter:(await navigator.gpu.requestAdapter())?.info?.toJSON?.()??null,renderer:__DSL_EDITOR__.runtime.renderer.inspect()}))()');assert.equal(info.renderer.backend,'webgpu');assert.ok(info.renderer.triangles>0);checks.push('native WebGPU first frame');await capture('m3-before');
+ // Console uses the same source-bound actions, and never writes derived state.
+ const command=async line=>{await evaluate(`(()=>{const input=document.querySelector('#console-input');input.value=${JSON.stringify(line)};document.querySelector('#console-form').requestSubmit();})()`);await wait(`!document.querySelector('#console-input').hasAttribute('aria-busy')`);};
+ await command('watch scene.tick');await command('watch profile.latestCpu.totalMs');
+ assert.ok(await evaluate(`document.querySelector('#console-watches').textContent.includes('scene.tick')`));checks.push('live console watches share existing diagnostics');
+ await evaluate(`globalThis.__consoleSource=__DSL_EDITOR__.source;globalThis.__consoleBody=__DSL_EDITOR__.runtime.scene.physics.bodies.get('car')`);
+ await command('set exposure 0.72');await wait(settled);
+ assert.equal(await evaluate('__DSL_EDITOR__.runtime.scene.spec.rendering.exposure'),.72);
+ assert.ok(await evaluate(`__DSL_EDITOR__.runtime.scene.physics.bodies.get('car')===__consoleBody`));checks.push('console set → exact DSL binding → live renderer; body preserved');
+ await command('undo');await wait(settled);assert.ok(await evaluate('__DSL_EDITOR__.source===__consoleSource'));checks.push('console shares source Undo');
+ await command('inspect physics');await capture('engine-console');
+ await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+ assert.ok(await evaluate(`document.querySelector('#control-panel').hidden && document.querySelector('#control-panel').inert`));
+ assert.ok(await evaluate(`document.activeElement===document.querySelector('#panel-toggle')`));
+ await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ё',code:'Backquote',windowsVirtualKeyCode:192});
+ await wait(`!document.querySelector('#control-panel').hidden && document.activeElement===document.querySelector('#console-input')`);checks.push('Ё opens, Escape closes and restores focus');
  const before=await canvasHash();
  await evaluate(`(()=>{globalThis.__qaBody=__DSL_EDITOR__.runtime.scene.physics.bodies.get('car');const field=document.querySelector('[data-key="exposure"] input[type="range"]');field.value='0.65';field.dispatchEvent(new Event('input',{bubbles:true}));})()`);await wait(settled);
  assert.ok(await evaluate("__DSL_EDITOR__.source.includes('exposure: 0.65')"));assert.ok(await evaluate("__DSL_EDITOR__.runtime.scene.physics.bodies.get('car') === __qaBody"));assert.equal(await evaluate('__DSL_EDITOR__.lastPatch'),'live');assert.notEqual(await canvasHash(),before);checks.push('HUD → source → shader pixels; body preserved');await capture('m3-exposure-edit');
