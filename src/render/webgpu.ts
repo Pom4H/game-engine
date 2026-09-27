@@ -208,6 +208,8 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   let treatmentClearcoat=select(0.0,.82,treatment>3.5&&treatment<4.5);
   let clearcoat=select(treatmentClearcoat,clamp(u.objectState.z,0.0,1.0),u.objectState.z>=0.0);
   let clearcoatRoughness=select(.075,clamp(u.objectState.w,.02,1.0),u.objectState.w>=0.0);
+  // Paint microflake stays procedural: no texture fetch, but it modulates both
+  // the base coat and its roughness so the clearcoat catches fine metallic breakup.
   let paintMicro=select(0.0,hash3(floor(in.worldPos*420.0))-.5,treatment>3.5&&treatment<4.5);
   let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
   let upward=smoothstep(0.05,0.82,n.y);
@@ -356,6 +358,11 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
   albedo*=1.0-u.surface.w-wetness*.24;
 
   var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.018,.08,1.0);
+  if(treatment>3.5&&treatment<4.5){
+    // Sub-percent tonal variation keeps the flake visible only inside the
+    // clearcoat highlight; it is intentionally below the level of a noisy paint texture.
+    albedo*=1.0+paintMicro*.010;
+  }
   let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
   roughness=clamp(sqrt(roughness*roughness+min(.06,normalVariance*.04)),.08,1.0);
   var waterCoverage=1.0;
@@ -479,7 +486,11 @@ struct GOut{@location(0) color:vec4<f32>,@location(1) normal:vec4<f32>,@location
     transmitted*=transmission*transmission;
     let glassFallback=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,max(.05,roughness)*5.0).rgb;
     let glassReflection=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.08,.32,roughness))*.72);
-    color=mix(transmitted,glassReflection,glassF);
+    // Preserve the cool pane tint in transmission while allowing the grazing
+    // Fresnel lobe to remain neutral and crisp against the city capture.
+    transmitted*=mix(vec3<f32>(1.0),u.color.rgb,clamp(1.0-transmission,.0,.35));
+    let reflectionTint=mix(vec3<f32>(1.0),u.color.rgb*.92+.08,clamp(glassF,.0,.72));
+    color=mix(transmitted,glassReflection*reflectionTint,glassF);
   }
   if(materialKind>9.5){
     color=mix(color,environmentRadiance,.58+.32*pow(1.0-nv,5.0));
