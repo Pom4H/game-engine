@@ -41,7 +41,7 @@ spec.rendering.reflectionProbe={
   offset:[0,.92,0],
   radius:46,
   exclude:heroReflectionExclude,
-  facesPerFrame:1,
+  facesPerFrame:6,
 };
 // Hero daylight shot keeps the physically meaningful snow banks but drops the
 // thousands of sub-pixel dressing grains generated for the moving winter demo.
