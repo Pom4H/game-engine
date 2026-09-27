@@ -167,23 +167,23 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   const badgeTilt=-.58;
   const circle=(radius:number,segments=32):readonly (readonly [number,number])[]=>Array.from(
     {length:segments},
-    (_,i)=>{const a=i/segments*Math.PI*2;return[badgeCenter[0]+Math.cos(a)*radius,badgeCenter[1]+Math.sin(a)*radius] as const;}
+    (_,i)=>{const a=i/segments*Math.PI*2;return[Math.cos(a)*radius,Math.sin(a)*radius] as const;}
   );
   const quadrant=(radius:number,start:number):readonly (readonly [number,number])[]=>[
-    badgeCenter,
+    [0,0],
     ...Array.from({length:9},(_,i)=>{
       const a=start+(i/8)*(Math.PI/2);
       return[badgeCenter[0]+Math.cos(a)*radius,badgeCenter[1]+Math.sin(a)*radius] as const;
     }),
   ];
   const badge:ParametricVehiclePart[]=[
-    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:circle(.086),thickness:.009},position:[0,1.014,0] as const,rotation:[0,0,badgeTilt] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.045,metalness:.30,clearcoat:.94,clearcoatRoughness:.03}}),
-    Object.freeze({id:'hood-roundel-white-disc',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:circle(.071),thickness:.009},position:[0,1.019,0] as const,rotation:[0,0,badgeTilt] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.05,metalness:.02,clearcoat:.78,clearcoatRoughness:.03}}),
+    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:circle(.086),thickness:.009},position:[badgeCenter[0],1.014,0] as const,rotation:[0,0,badgeTilt] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.045,metalness:.30,clearcoat:.94,clearcoatRoughness:.03}}),
+    Object.freeze({id:'hood-roundel-white-disc',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:circle(.071),thickness:.009},position:[badgeCenter[0],1.019,0] as const,rotation:[0,0,badgeTilt] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.05,metalness:.02,clearcoat:.78,clearcoatRoughness:.03}}),
     ...([0,Math.PI/2,Math.PI,Math.PI*1.5] as const).map((start,index)=>Object.freeze({
       id:`hood-roundel-blue-${index}`,
       role:'dark' as const,
       mesh:{kind:'polygon-prism' as const,axis:1 as const,points:quadrant(.056,start),thickness:.011},
-      position:[0,1.024,0] as const,
+      position:[badgeCenter[0],1.024,0] as const,
       rotation:[0,0,badgeTilt] as const,
       material:{kind:'plastic' as const,finish:'polished' as const,roughness:.045,metalness:.10,clearcoat:.92,clearcoatRoughness:.025},
     })),
