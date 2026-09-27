@@ -102,7 +102,7 @@ function smoothBodyTwice(mesh:TriangleMesh):TriangleMesh{
   // Final pass only resolves highlight continuity; the displacement is deliberately
   // sub-millimetre so the packed FBX surface remains the geometric authority.
   const third=subdivideSmoothTriangleMesh(second,buildSmoothSubdivisionPlan(second,52,.0005));
-  return smoothCoincidentNormals(third,58,2e-5);
+  return smoothCoincidentNormals(third,68,2e-5);
 }
 export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   const base=m3HighFidelityBody();
