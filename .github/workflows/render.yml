@@ -43,6 +43,10 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build
         run: bun run build
+      - name: Inspect browser bundle imports
+        shell: powershell
+        run: |
+          Get-ChildItem dist -Recurse -Filter *.js | Select-String -Pattern 'node:zlib|render/cpu|cpu.js' | ForEach-Object { Write-Host ("$($_.Path):$($_.LineNumber): $($_.Line)") }
       - name: Render current engine scene
         run: |
           mkdir -p artifacts
