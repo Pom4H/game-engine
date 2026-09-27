@@ -91,7 +91,7 @@ if(!ready){
   }catch(e){last=last||String(e)}
   throw new Error('Engine did not become ready: '+JSON.stringify({last,state,browserErrors:browserErrors.slice(-20)}));
 }
-await send('Runtime.evaluate',{expression:'(async()=>{window.__GAME_ENGINE__.pause();window.__GAME_ENGINE__.seek(0);await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()',awaitPromise:true,returnByValue:true});
+await send('Runtime.evaluate',{expression:'(async()=>{window.__GAME_ENGINE__.pause();window.__GAME_ENGINE__.seek(0);await window.__GAME_ENGINE__.flush();window.__GAME_ENGINE__.render();await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()',awaitPromise:true,returnByValue:true});
 const inspection=await send('Runtime.evaluate',{expression:'window.__GAME_ENGINE__.inspect()',returnByValue:true});
 const renderer=inspection.result?.value?.renderer;
 if((renderer?.drawCalls??0)<=0&&(renderer?.triangles??0)<=0)throw new Error('Renderer produced no geometry: '+JSON.stringify(renderer));
