@@ -75,10 +75,32 @@ export const M3_FBX_PART_SOURCES:readonly M3FbxPartSource[]=Object.freeze([
   Object.freeze({id:"tire-rear-right",sourceName:"Wheel_RR-Tires",sourceMaterial:"Tires",wheel:true,center:[-1.300873,0.343025,0.786994] as const,geometry:"g21"})
 ]);
 
+function refinePlasticTrim(mesh:ReturnType<typeof decodePackedShell>):ReturnType<typeof decodePackedShell>{
+  const positions=[...mesh.positions],normals=[...mesh.normals],indices:number[]=[];
+  const midpointCache=new Map<string,number>();
+  const midpoint=(a:number,b:number)=>{
+    const lo=Math.min(a,b),hi=Math.max(a,b),key=`${lo}:${hi}`;
+    const cached=midpointCache.get(key);if(cached!==undefined)return cached;
+    const ai=a*3,bi=b*3,index=positions.length/3;
+    positions.push((positions[ai]!+positions[bi]!)*.5,(positions[ai+1]!+positions[bi+1]!)*.5,(positions[ai+2]!+positions[bi+2]!)*.5);
+    const nx=normals[ai]!+normals[bi]!,ny=normals[ai+1]!+normals[bi+1]!,nz=normals[ai+2]!+normals[bi+2]!,length=Math.hypot(nx,ny,nz)||1;
+    normals.push(nx/length,ny/length,nz/length);
+    midpointCache.set(key,index);return index;
+  };
+  for(let i=0;i<mesh.indices.length;i+=3){
+    const a=mesh.indices[i]!,b=mesh.indices[i+1]!,d=mesh.indices[i+2]!;
+    const x=(positions[a*3]!+positions[b*3]!+positions[d*3]!)/3;
+    if(x<.70){indices.push(a,b,d);continue;}
+    const ab=midpoint(a,b),bd=midpoint(b,d),da=midpoint(d,a);
+    indices.push(a,ab,da,ab,b,bd,ab,bd,da,da,bd,d);
+  }
+  return{...mesh,positions,normals,indices};
+}
+
 const cache=new Map<string,ReturnType<typeof decodePackedShell>>();
 function geometry(key:string){
   let mesh=cache.get(key);
-  if(!mesh){const packed=GEOMETRY[key];if(!packed)throw new TypeError(`Unknown M3 packed geometry ${key}`);mesh=decodePackedShell(packed);cache.set(key,mesh);}
+  if(!mesh){const packed=GEOMETRY[key];if(!packed)throw new TypeError(`Unknown M3 packed geometry ${key}`);mesh=decodePackedShell(packed);if(key==='g3')mesh=refinePlasticTrim(mesh);cache.set(key,mesh);}
   return mesh;
 }
 
