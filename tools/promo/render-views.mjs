@@ -4,8 +4,8 @@ const optics={fov:30,focusDistance:6.2,aperture:.06};
 // Four true 45° three-quarter views: the reflection is visible across both
 // the front/rear fascia and the side panels instead of being edge-on.
 export default [
-  {name:'front-left',output:'artifacts/render22.png',camera:{...optics,position:[-16.06,1.05,-5.87],target}},
-  {name:'rear-left',output:'artifacts/render23.png',camera:{...optics,position:[-25.04,1.05,-5.87],target}},
-  {name:'rear-right',output:'artifacts/render24.png',camera:{...optics,position:[-25.04,1.05,3.11],target}},
-  {name:'front-right',output:'artifacts/render25.png',camera:{...optics,position:[-16.06,1.05,3.11],target}},
+  {name:'front-left',output:'artifacts/render26.png',camera:{...optics,position:[-16.06,1.05,-5.87],target}},
+  {name:'rear-left',output:'artifacts/render27.png',camera:{...optics,position:[-25.04,1.05,-5.87],target}},
+  {name:'rear-right',output:'artifacts/render28.png',camera:{...optics,position:[-25.04,1.05,3.11],target}},
+  {name:'front-right',output:'artifacts/render29.png',camera:{...optics,position:[-16.06,1.05,3.11],target}},
 ];
