@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {createServer} from 'node:http';
+import {createServer as createTcpServer} from 'node:net';
 import {readFile,mkdtemp,rm} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {join,resolve,extname} from 'node:path';
@@ -39,10 +40,19 @@ const port=server.address().port;
 const chrome=process.env.CHROME_PATH??(['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'].find(existsSync));
 if(!chrome) throw new Error('Chrome/Chromium not found');
 const profile=await mkdtemp(join(tmpdir(),'game-engine-chrome-'));
-const child=spawn(chrome,['--headless=new','--no-sandbox','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu','--use-angle=swiftshader','--user-data-dir='+profile,'--remote-debugging-port=0','--window-size='+width+','+height,'about:blank'],{stdio:['ignore','pipe','pipe']});
+const debugServer=createTcpServer();
+await new Promise((resolve,reject)=>{debugServer.once('error',reject);debugServer.listen(0,'127.0.0.1',resolve)});
+const debugPort=debugServer.address().port;
+debugServer.close();
+const child=spawn(chrome,['--headless=new','--no-sandbox','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu','--enable-gpu','--user-data-dir='+profile,'--remote-debugging-address=127.0.0.1','--remote-debugging-port='+debugPort,'--window-size='+width+','+height,'about:blank'],{stdio:['ignore','pipe','pipe']});
 let stderr=''; child.stderr.on('data',c=>stderr+=c);
-const wsUrl=await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(new Error('Chrome DevTools timeout: '+stderr.slice(-2000))),10000);const f=c=>{const m=stderr.match(/DevTools listening on (ws:\/\/[^\s]+)/);if(m){clearTimeout(t);resolve(m[1])}};child.stderr.on('data',f);child.once('error',reject);});
-const port2=Number(new URL(wsUrl).port);
+const port2=debugPort;
+let devtoolsReady=false;
+for(let i=0;i<200;i++){
+  try{const r=await fetch('http://127.0.0.1:'+port2+'/json/version');if(r.ok){devtoolsReady=true;break}}catch{}
+  await new Promise(r=>setTimeout(r,50));
+}
+if(!devtoolsReady){child.kill();throw new Error('Chrome DevTools timeout: '+stderr.slice(-2000));}
 let page;
 for(let i=0;i<200;i++){try{const list=await (await fetch('http://127.0.0.1:'+port2+'/json/list')).json();page=list.find(x=>x.type==='page'&&x.webSocketDebuggerUrl);if(page)break}catch{}await new Promise(r=>setTimeout(r,50))}
 if(!page) throw new Error('Chrome page target unavailable');
