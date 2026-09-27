@@ -133,9 +133,9 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     }));
   }
   const badge:ParametricVehiclePart[]=[
-    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.050,height:.008,segments:40},position:[1.66,1.001,0] as const,rotation:[0,0,1.25] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.06,metalness:.30,clearcoat:.92,clearcoatRoughness:.035}}),
-    Object.freeze({id:'hood-roundel-white-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.041,height:.010,segments:40},position:[1.66,1.002,0] as const,rotation:[0,0,1.25] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.055,metalness:.02,clearcoat:.75,clearcoatRoughness:.035}}),
-    Object.freeze({id:'hood-roundel-blue-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.029,height:.012,segments:40},position:[1.66,1.003,0] as const,rotation:[0,0,1.25] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.05,metalness:.10,clearcoat:.90,clearcoatRoughness:.03}}),
+    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.050,height:.008,segments:40},position:[1.86,.962,0] as const,rotation:[0,0,.92] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.06,metalness:.30,clearcoat:.92,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-white-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.041,height:.010,segments:40},position:[1.86,.963,0] as const,rotation:[0,0,1.25] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.055,metalness:.02,clearcoat:.75,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-blue-disc',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.029,height:.012,segments:40},position:[1.86,.964,0] as const,rotation:[0,0,1.25] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.05,metalness:.10,clearcoat:.90,clearcoatRoughness:.03}}),
   ];
   const frontDetail:ParametricVehiclePart[]=[
     Object.freeze({id:'hood-seam-left',role:'dark' as const,mesh:{kind:'box' as const,size:[1.26,.006,.008] as const},position:[1.32,1.012,-.704] as const,rotation:[0,0,-.022] as const,material:{kind:'plastic' as const,finish:'smooth' as const,roughness:.55,metalness:0}}),
