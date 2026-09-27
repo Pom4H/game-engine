@@ -119,6 +119,17 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   // Front fascia surface remains the packed FBX `plastic-trim`. These are only
   // recessed vertical inlays inside its two existing openings, not a second fascia.
   const grilleSlats:ParametricVehiclePart[]=[];
+  const grilleBackings:ParametricVehiclePart[]=[];
+  // Front-facing recessed kidney fields restore the characteristic tall, rounded G80 silhouette.
+  for(const side of [-1,1] as const){
+    grilleBackings.push(Object.freeze({
+      id:`grille-kidney-${side<0?'left':'right'}`,
+      role:'dark' as const,
+      mesh:{kind:'polygon-prism' as const,axis:0 as const,points:[[.34,-.18],[.36,-.25],[.43,-.29],[.68,-.29],[.74,-.23],[.76,0],[.74,.23],[.68,.29],[.43,.29],[.36,.25]] as const,thickness:.010},
+      position:[2.365,0,side*.185] as const,
+      material:{kind:'plastic' as const,finish:'polished' as const,roughness:.16,metalness:.08,clearcoat:.72,clearcoatRoughness:.05},
+    }));
+  }
   // G80 M3 kidneys: broad vertical openings filled with closely spaced horizontal aero slats.
   // The slat length tapers at the top/bottom so the silhouette reads as a kidney rather than a rectangle.
   for(const side of [-1,1] as const)for(let row=0;row<11;row++){
@@ -134,7 +145,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
     }));
   }
   const badge:ParametricVehiclePart[]=[
-    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.075,height:.009,segments:40},position:[1.48,1.055,0] as const,rotation:[0,0,-.12] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.10,metalness:.34,clearcoat:.85,clearcoatRoughness:.035}}),
+    Object.freeze({id:'hood-roundel-ring',role:'dark' as const,mesh:{kind:'cylinder' as const,radius:.085,height:.010,segments:40},position:[1.48,1.055,0] as const,rotation:[0,0,-.55] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.10,metalness:.34,clearcoat:.85,clearcoatRoughness:.035}}),
     Object.freeze({id:'hood-roundel-blue-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[.041,0],[.038,.016],[.029,.029],[.016,.038],[0,.041]] as const,thickness:.008},position:[1.48,1.061,0] as const,rotation:[0,0,-.12] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.08,metalness:.08,clearcoat:.82,clearcoatRoughness:.035}}),
     Object.freeze({id:'hood-roundel-blue-b',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.041,0],[-.038,-.016],[-.029,-.029],[-.016,-.038],[0,-.041]] as const,thickness:.008},position:[1.48,1.061,0] as const,rotation:[0,0,-.12] as const,material:{kind:'plastic' as const,finish:'polished' as const,roughness:.08,metalness:.08,clearcoat:.82,clearcoatRoughness:.035}}),
     Object.freeze({id:'hood-roundel-white-a',role:'dark' as const,mesh:{kind:'polygon-prism' as const,axis:1 as const,points:[[0,0],[-.041,0],[-.038,.016],[-.029,.029],[-.016,.038],[0,.041]] as const,thickness:.008},position:[1.48,1.061,0] as const,rotation:[0,0,-.12] as const,material:{kind:'default' as const,finish:'polished' as const,roughness:.08,metalness:.04,clearcoat:.82,clearcoatRoughness:.035}}),
@@ -156,6 +167,7 @@ export function generateM3Vehicle():ParametricPassengerGeometry{
   const parts:ParametricVehiclePart[]=[
     Object.freeze({id:'body',role:'paint',mesh:body,renderMesh:renderBody,position:[0,0,0] as const,material:passengerPartMaterial('paint')}),
     ...frontDetail,
+    ...grilleBackings,
     ...grilleSlats,
     ...badge,
     ...interior,
