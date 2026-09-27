@@ -93,6 +93,7 @@ export function validateScene(value:unknown):SceneSpec{
       if(probe.offset!==undefined)vector(probe.offset,3,'rendering.reflectionProbe.offset');
       optionalNumber(probe,'radius','rendering.reflectionProbe',.5,500);
       if(probe.facesPerFrame!==undefined){number(probe.facesPerFrame,'rendering.reflectionProbe.facesPerFrame',1,6);if(!Number.isInteger(probe.facesPerFrame))throw new TypeError('rendering.reflectionProbe.facesPerFrame must be integer');}
+      if(probe.boxHalfExtents!==undefined)vector(probe.boxHalfExtents,3,'rendering.reflectionProbe.boxHalfExtents',Number.MIN_VALUE);
       if(probe.exclude!==undefined){const excluded=boundedArray(probe.exclude,'rendering.reflectionProbe.exclude',4096);for(const [i,value] of excluded.entries()){const id=stableId(value,`rendering.reflectionProbe.exclude[${i}]`);if(!ids.has(id))throw new TypeError(`rendering.reflectionProbe.exclude[${i}] references missing entity ${id}`);}}
     }
   }
