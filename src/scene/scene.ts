@@ -67,8 +67,10 @@ export class Scene {
   tick=0;
   /** Changes only when renderer-owned structure/geometry membership changes, not on ordinary motion. */
   renderStructureRevision=0;
-  /** Shader-only authoring changes; does not invalidate geometry, shadows, probes or culling. */
+  /** Frame/material authoring changes that invalidate temporal presentation. */
   appearanceRevision=0;
+  /** Material radiance changes visible to scene captures (currently base color). */
+  radianceRevision=0;
   camera:CameraSpec;
   private eventSequence=0;
   private readonly eventQueue=trackRuntimeMemory('Scene','eventQueue','queue',[] as EngineEvent[]);
@@ -185,7 +187,7 @@ export class Scene {
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
   setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
   patchAppearance(patch:AppearancePatch):void{
-    let appearanceChanged=false,structureChanged=false;
+    let appearanceChanged=false,structureChanged=false,radianceChanged=false;
     if(patch.rendering){
       const keys=Object.keys(patch.rendering);
       this.spec.rendering={...(this.spec.rendering??{}),...structuredClone(patch.rendering)};
@@ -200,12 +202,14 @@ export class Scene {
         if(rule.idPrefix!==undefined&&!entity.id.startsWith(rule.idPrefix))continue;
         if(rule.treatment!==undefined&&entity.material.treatment!==rule.treatment)continue;
         if(rule.set.color&&rule.set.color[3]!==entity.material.color[3])throw new TypeError('appearance patch cannot change material alpha/classification');
+        if(rule.set.color&&rule.set.color.some((value,index)=>value!==entity.material.color[index]))radianceChanged=true;
         (entity as {material:RuntimeMaterial}).material=Object.freeze({...entity.material,...structuredClone(rule.set)});
         appearanceChanged=true;
       }
     }
     if(structureChanged)this.renderStructureRevision++;
     if(appearanceChanged)this.appearanceRevision++;
+    if(radianceChanged)this.radianceRevision++;
   }
 
   private syncSurfaceVisuals():void{
