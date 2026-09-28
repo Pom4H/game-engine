@@ -1,4 +1,5 @@
 import type {RuntimeCapability,RuntimeTimelineEntry,RuntimeTimelineScalar} from './runtime-timeline.js';
+import type {RuntimeMemoryEntry} from './runtime-memory.js';
 
 export interface RuntimeGanttRow{
   readonly id:number;
@@ -26,17 +27,23 @@ export interface RuntimeGanttProjection{
 
 /** Pure diagnostics projection. New runtime kinds appear automatically because
  * the task manager groups by declared owner/kind rather than a UI switch. */
-export function projectRuntimeGantt(entries:readonly RuntimeTimelineEntry[],now?:number):RuntimeGanttProjection{
+export function projectRuntimeGantt(entries:readonly RuntimeTimelineEntry[],now?:number,memory:readonly RuntimeMemoryEntry[]=[]):RuntimeGanttProjection{
   if(now!==undefined&&(!Number.isFinite(now)||now<0))throw new RangeError('Gantt time must be finite and non-negative');
-  if(!entries.length)return Object.freeze({start:now??0,end:now??0,groups:Object.freeze([]),rows:Object.freeze([]),edges:Object.freeze([])});
-  const maxRecorded=Math.max(...entries.map(entry=>entry.end??entry.start)),current=now??maxRecorded;
-  const rows=entries.map(entry=>{
+  if(!entries.length&&!memory.length)return Object.freeze({start:now??0,end:now??0,groups:Object.freeze([]),rows:Object.freeze([]),edges:Object.freeze([])});
+  const maxRecorded=entries.length?Math.max(...entries.map(entry=>entry.end??entry.start)):0,current=now??maxRecorded;
+  const timelineRows=entries.map(entry=>{
     const end=entry.end??Math.max(current,entry.start),group=`${entry.owner}/${entry.kind}`;
     return Object.freeze({
       id:entry.id,group,owner:entry.owner,kind:entry.kind,label:entry.name,start:entry.start,end,open:entry.end===null,
       ...(entry.cause!==undefined?{cause:entry.cause}:{}),refs:entry.refs,capabilities:entry.capabilities,data:entry.data,
     }) as RuntimeGanttRow;
-  }).sort((a,b)=>a.start-b.start||a.id-b.id);
+  });
+  const memoryRows=memory.map(entry=>Object.freeze({
+    id:-entry.id,group:`${entry.owner}/memory:${entry.kind}`,owner:entry.owner,kind:`memory:${entry.kind}`,label:entry.name,
+    start:0,end:current,open:true,refs:Object.freeze([]),capabilities:Object.freeze([]),
+    data:Object.freeze({type:entry.type,items:entry.items,bytes:entry.bytes,...(entry.capacity!==undefined?{capacity:entry.capacity}:{})}),
+  }) as RuntimeGanttRow);
+  const rows=[...timelineRows,...memoryRows].sort((a,b)=>a.start-b.start||a.id-b.id);
   const rowIds=new Set(rows.map(row=>row.id)),byGroup=new Map<string,{owner:string;kind:string;rows:number[]}>();
   for(const row of rows){let group=byGroup.get(row.group);if(!group){group={owner:row.owner,kind:row.kind,rows:[]};byGroup.set(row.group,group);}group.rows.push(row.id);}
   const groups=[...byGroup].map(([id,value])=>Object.freeze({id,owner:value.owner,kind:value.kind,rows:Object.freeze(value.rows)}));
