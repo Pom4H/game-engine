@@ -70,7 +70,7 @@ export class RuntimeTaskManager{
     detail.textContent='#'+row.id+' · '+formatTime(row.start)+(row.open?' → now':row.end===row.start?'':' → '+formatTime(row.end));label.append(name,detail);
     if(row.cause!==undefined){const cause=document.createElement('div');cause.className='cause';const parent=byId.get(row.cause);cause.textContent='← '+(parent?.label??'#'+row.cause);cause.onclick=event=>{event.stopPropagation();this.selected=row.cause!;this.refresh();};label.append(cause);}
     const track=document.createElement('div');track.className='track';const bar=document.createElement('div');bar.className='bar'+(row.open?' open':'')+(row.start===row.end?' event':'');
-    bar.style.left=((row.start-gantt.start)/span*100)+'%';bar.style.width=Math.max(row.start===row.end?.4:(row.end-row.start)/span*100,.25)+'%';bar.title=JSON.stringify(row.data);track.append(bar);
+    bar.style.left=((row.start-gantt.start)/span*100)+'%';bar.style.width=Math.max(row.start===row.end ? .4 : (row.end-row.start)/span*100,.25)+'%';bar.title=JSON.stringify(row.data);track.append(bar);
     const actions=document.createElement('div');actions.className='actions';
     for(const capability of row.capabilities){const button=document.createElement('button');button.textContent=capability.label;button.onclick=event=>{event.stopPropagation();void this.source.act(row.id,capability.id).then(()=>this.refresh()).catch(error=>console.error('Runtime action failed',error));};actions.append(button);}
     element.append(label,track,actions);return element;
