@@ -13,8 +13,6 @@ export interface KernelRunOptions<Context,Command>{
   /** Lazily project current state, only for batches that consume a context. */
   readonly read?:()=>Readonly<Context>;
   readonly onModule?:(module:ModuleDescription,frame:ModuleFrame)=>void;
-  /** Monotonic versions for causal resources. Required by incremental modules. */
-  readonly versions?:ReadonlyMap<string,number>;
 }
 interface Registered {description:ModuleDescription;periodTicks:number}
 const phaseIndex=(phase:EnginePhase)=>ENGINE_PHASES.indexOf(phase);
@@ -86,9 +84,16 @@ function snapshot<T>(context:T):Readonly<T>{
   };freeze(value);return value;
 }
 export class EngineKernel<Context,Command>{
-  readonly scheduler:ModuleScheduler;private readonly modules=new Map<string,EngineModule<Context,Command>>();private readonly seen=new Map<string,string>();
+  readonly scheduler:ModuleScheduler;private readonly modules=new Map<string,EngineModule<Context,Command>>();private readonly seen=new Map<string,string>();private readonly versions=new Map<string,number>();private anyVersion=0;private wildcardVersion=0;
   constructor(tickRate=60,capacity=64){this.scheduler=new ModuleScheduler(tickRate,capacity);}
   use(module:EngineModule<Context,Command>):this{if(typeof module.run!=='function')throw new TypeError('Kernel modules require a synchronous implementation');this.scheduler.use(module);this.modules.set(module.id,Object.freeze({...stable(module),run:module.run}));return this;}
+  /** Mark world state changed outside scheduled modules. Normal module writes are versioned automatically. */
+  invalidate(...resources:string[]):this{this.touch(resources);return this;}
+  private signature(reads:readonly string[]):string{return reads.includes('*')?`*:${this.anyVersion}`:`*:${this.wildcardVersion}|`+reads.map(key=>`${key}:${this.versions.get(key)??0}`).join('|');}
+  private touch(resources:readonly string[]):void{
+    if(!resources.length)return;this.anyVersion++;
+    for(const key of resources)if(key==='*')this.wildcardVersion++;else this.versions.set(key,(this.versions.get(key)??0)+1);
+  }
   run(tick:number,context:Readonly<Context>,tier:SimulationTier='detailed',options:KernelRunOptions<Context,Command>={}):Command[]{
     const dt=options.deltaSeconds??1/this.scheduler.tickRate;if(!Number.isFinite(dt)||dt<=0)throw new RangeError('Kernel delta must be positive and finite');
     const commands:Command[]=[];let current=context;
@@ -96,12 +101,11 @@ export class EngineKernel<Context,Command>{
       const view=batch.modules.every(m=>m.context==='none')?Object.freeze({}) as Readonly<Context>:snapshot(options.read?.()??current),pending:Command[]=[];
       for(const description of batch.modules){const module=this.modules.get(description.id)!;if(!module)throw new TypeError(`No implementation: ${description.id}`);
         if(module.incremental){
-          if(!options.versions)throw new TypeError(`Incremental module ${module.id} requires resource versions`);
-          const signature=module.reads.map(key=>`${key}:${options.versions!.get(key)??0}`).join('|');
+          const signature=this.signature(module.reads);
           if(this.seen.get(module.id)===signature)continue;this.seen.set(module.id,signature);
         }
         const frame=Object.freeze({tick,deltaSeconds:dt*this.scheduler.tickRate/module.rateHz,tier,phase:module.phase});options.onModule?.(description,frame);
-        const result=module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);
+        const result=module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);this.touch(module.writes);
       }
       if(pending.length){commands.push(...pending);if(options.commit)current=options.commit(pending,view,batch.phase);}
     }
