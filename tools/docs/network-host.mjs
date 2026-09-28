@@ -62,7 +62,7 @@ export function debugNetworkHost({arena=false,publicOrigin,datagrams=false}={}){
      session.at=Date.now();
      if(!['input','leave','replay','restart','ping'].includes(action))throw new Error('Unknown arena command');
      if(datagrams&&action==='input')throw Error('Continuous input requires QUIC datagrams');
-     const data=await body(req);const result=await ask({...data,action,peer});if(action==='leave'){peers.delete(peer);for(const v of viewers)if(v.peer===peer)v.res.end();}raw(res,result.text);return true;
+     const data=await body(req);const result=await ask({...data,action,peer});if(action==='leave'){peers.delete(peer);for(const v of viewers)if(v.peer===peer)v.res.end();}raw(res,result.text,action==='input'&&JSON.parse(result.text).reason==='stale-epoch'?400:200);return true;
     }
     if(req.method!=='POST'||req.headers['x-debug-token']!==token){json(res,{error:'Debug command denied'},403);return true;}
     const data=await body(req),action=path.slice(prefix.length);

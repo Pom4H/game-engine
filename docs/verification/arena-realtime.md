@@ -37,3 +37,45 @@ support or soft-ball flip reset. Rigid car chassis, elastic-volume soft ball; no
 model, full solver rollback, prediction/reconciliation, hostile public deployment,
 measured WAN latency guarantee or general no-stutter/FPS claim. Existing projection,
 worker, renderer, shell and explicit SSE diagnostic route remain shared.
+
+## Native verification and boundary fixes
+
+The initial native run `36381890293` at `035b7cc` passed the existing editor but
+reported zero QUIC handshakes. Provider 0.3.0 exposes the requested port rather than
+the OS-selected ephemeral port when zero is supplied. Commit `68cb403` supplies a
+real selected UDP port; private keys and certificate verification remain unchanged.
+
+Run `36382483835` then established two QUIC sessions and bidirectional datagrams but
+lost one client around restart. A deterministic worker regression reproduced the
+race: an already-admitted old input can follow a restart in the worker queue. The
+authority now drops obsolete epochs without consuming the new sequence or closing
+the peer. The test failed before the fix and passed afterward. The HTTP adapter
+retains its established 400 response for stale input; the unreliable path drops it.
+No ownership check or stale-sequence assertion is weakened.
+
+Run `36382919936`, commit `ca93c9872fafd85160d0ba165ce4a5be6428f5bb`, passed BOTH
+native editor/console acceptance and actual two-browser WebTransport/WebGPU arena
+acceptance. Original artifact: `10953541805` (`dsl-playground-evidence`).
+
+- Two authenticated QUIC sessions remained active after restart.
+- Native counters: 775 input and 719 output datagrams; no reported drops, rate limits
+  or backpressure timeouts in this short loopback run. Native queue bytes were zero
+  at the final sample. This is not a WAN loss or latency benchmark.
+- 223 common decoded snapshots matched exactly across clients, including car pose
+  and all soft nodes. Both meshes matched at replay time 2.7666666666666666 seconds.
+- A real keyboard/mouse-driven impact produced 0.9667255756101265 m maximum change
+  in the measured opposite-node span. This measures this elastic fixture, not a
+  calibrated pneumatic ball.
+- Both clients retained zero physics bodies/steps and no renderer errors or uncaught
+  exceptions. The shared recorder captured 12 CPU frames and two real canvas images;
+  available GPU samples matched their corresponding CPU frame numbers.
+
+Subsequent local verification includes the two new host/epoch tests: 15 added tests
+in total; full suite 230/233, with the SAME three inherited failures. The existing
+HTTP/SSE arena regression also passes after restoring HTTP status mapping at the
+adapter boundary. It is not a fallback for the UDP arena.
+
+The final source is tested again by the same read-only native workflow after the
+HTTP compatibility change. Read that final run's result separately; the native
+numbers above belong specifically to ca93c98. No complete green-CI, production
+release, zero-overhead or competitive-FPS latency claim is made.
