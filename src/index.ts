@@ -1,5 +1,6 @@
 export {FixedClock} from './core/fixed-clock.js';
 export {trackRuntimeMemory,trackRuntimeInstance,runtimeMemorySnapshot,type RuntimeMemoryEntry,type RuntimeMemoryKind} from './core/runtime-memory.js';
+export {beginRuntimeSpan,endRuntimeSpan,recordRuntimeEvent,runtimeTimelineSnapshot,runtimeTimelineEntry,type RuntimeCapability,type RuntimeTimelineEntry,type RuntimeTimelineInput,type RuntimeTimelineScalar} from './core/runtime-timeline.js';
 export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
 export {EngineKernel,ModuleScheduler,ENGINE_PHASES,SIMULATION_TIERS,type EngineModule,type EnginePhase,type ModuleDescription,type ModuleFrame,type SimulationTier} from './core/kernel.js';
 export {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type PhysicsStats,type RigidBodyOptions} from './physics/world.js';
@@ -27,7 +28,7 @@ export type {Vec3,MutableVec3,Mat4} from './math.js';
 
 export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
 export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
-export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
+export {renderAudio,synthesizeEvent,eventAudioDuration,wavBytes,type AudioChannels} from './audio/synth.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
 
 export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type PlateFragment,type Vec2} from './materials/glass-fracture.js';
