@@ -18,6 +18,7 @@ import type {EngineEvent} from './events.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext,type SystemAction} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
@@ -49,7 +50,7 @@ const DEFAULT_CAMERA:CameraSpec={position:[7,5,9],target:[0,1,0],fov:55};
 
 export class Scene {
   readonly spec:SceneSpec;
-  readonly entities=new Map<string,RuntimeEntity>();
+  readonly entities=trackRuntimeMemory('Scene','entities','state',new Map<string,RuntimeEntity>());
   readonly physics:PhysicsWorld;
   readonly deformation=new PlasticDeformationSystem();
   readonly surfaces=new SurfaceEnvironmentSystem();
@@ -58,9 +59,9 @@ export class Scene {
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
-  readonly resources=new Map<string,unknown>();
+  readonly resources=trackRuntimeMemory('Scene','resources','registry',new Map<string,unknown>());
   lastExecution:string[]=[];
-  private pendingFractures=new Map<string,FractureDecision>();
+  private pendingFractures=trackRuntimeMemory('Scene','pendingFractures','queue',new Map<string,FractureDecision>());
   environment:EnvironmentState;
   time=0;
   tick=0;
@@ -70,11 +71,11 @@ export class Scene {
   appearanceRevision=0;
   camera:CameraSpec;
   private eventSequence=0;
-  private readonly eventQueue:EngineEvent[]=[];
-  private readonly impactCooldown=new Map<string,number>();
+  private readonly eventQueue=trackRuntimeMemory('Scene','eventQueue','queue',[] as EngineEvent[]);
+  private readonly impactCooldown=trackRuntimeMemory('Scene','impactCooldown','cache',new Map<string,number>());
   private generatedSequence=0;
   private surfaceVisualSequence=0;
-  private readonly surfaceVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
+  private readonly surfaceVisuals=trackRuntimeMemory('Scene','surfaceVisuals','state',new Map<string,{source:string;entity:RuntimeEntity}>());
   private readonly systems:Record<SystemAction,(dt:number,at:number)=>void>={
     weather:(_dt,at)=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);},
     surfaces:(dt)=>{this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);this.syncSurfaceVisuals();},
@@ -95,6 +96,7 @@ export class Scene {
   };
 
   constructor(input:SceneSpec){
+    trackRuntimeInstance('Scene',this);
     this.spec=validateScene(input);
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
