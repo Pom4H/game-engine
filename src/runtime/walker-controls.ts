@@ -1,12 +1,13 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import type {Scene} from '../scene/scene.js';
 import {WalkWorld,walkerInput} from './walker-motion.js';
 export interface WalkerControlOptions {world?:WalkWorld;onExit?:()=>void;view?:{yaw:number;pitch:number}}
 /** Device input produces a velocity; AnimationSystem remains the sole integrator. */
 export class WalkerControls {
- private readonly keys=new Set<string>();private yaw=0;private pitch=-.13;private initialized=false;private active=false;
- private readonly pointers=new Map<number,{x:number;y:number;lastX:number;lastY:number;move:boolean}>();private stick=[0,0];
+ private readonly keys=trackRuntimeMemory('WalkerControls','keys','state',new Set<string>());private yaw=0;private pitch=-.13;private initialized=false;private active=false;
+ private readonly pointers=trackRuntimeMemory('WalkerControls','pointers','state',new Map<number,{x:number;y:number;lastX:number;lastY:number;move:boolean}>());private stick=[0,0];
  constructor(private readonly canvas:HTMLCanvasElement,private readonly walker:string,private readonly options:WalkerControlOptions={}){
-  if(options.view){this.yaw=options.view.yaw;this.pitch=options.view.pitch;this.initialized=true;}
+  trackRuntimeInstance('WalkerControls',this);if(options.view){this.yaw=options.view.yaw;this.pitch=options.view.pitch;this.initialized=true;}
   this.active=!options.onExit;canvas.addEventListener('click',this.click);
   canvas.tabIndex=0;canvas.addEventListener('keydown',this.down);canvas.addEventListener('pointerdown',this.pointerDown);canvas.addEventListener('pointermove',this.pointerMove);
   for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,this.pointerUp);
