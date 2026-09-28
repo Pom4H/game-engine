@@ -66,8 +66,8 @@ export class Scene {
   environment:EnvironmentState;
   time=0;
   tick=0;
-  /** Changes only when renderer-owned structure/geometry membership changes, not on ordinary motion. */
-  renderStructureRevision=0;
+  /** Changes when world geometry identity/topology changes; ordinary transforms do not. */
+  geometryRevision=0;
   /** Frame/material authoring changes that invalidate temporal presentation. */
   appearanceRevision=0;
   /** Material radiance changes visible to scene captures (currently base color). */
@@ -91,7 +91,7 @@ export class Scene {
         const plasticWork=this.deformation.absorbContact(contact,this.entities);return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
       });
     },
-    deformation:()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;},
+    deformation:()=>{if(this.deformation.step(this.entities))this.geometryRevision++;},
     'surface-contacts':(dt,at)=>{this.contacts.step(dt,at,this.animation.feet);},
     events:(_dt,at)=>{this.emitContactEvents(at);},
     fracture:(_dt,at)=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);},
@@ -153,7 +153,7 @@ export class Scene {
     if(mesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:physical`,at:this.time,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'physical',primitive:mesh.kind}}));
     if(renderMesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:render`,at:this.time,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'render',primitive:renderMesh.kind}}));
     this.entityTimeline.set(spec.id,Object.freeze(traces));
-    this.entities.set(spec.id,runtime);this.renderStructureRevision++;this.kernel.invalidate('entities');
+    this.entities.set(spec.id,runtime);this.geometryRevision++;this.kernel.invalidate('entities');
     return runtime;
   }
 
@@ -165,7 +165,7 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){for(const trace of this.entityTimeline.get(id)??[])endRuntimeSpan(trace,this.time);this.entityTimeline.delete(id);this.renderStructureRevision++;this.kernel.invalidate('entities');}
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){for(const trace of this.entityTimeline.get(id)??[])endRuntimeSpan(trace,this.time);this.entityTimeline.delete(id);this.geometryRevision++;this.kernel.invalidate('entities');}
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
@@ -198,14 +198,12 @@ export class Scene {
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
   setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
   patchAppearance(patch:AppearancePatch):void{
-    let appearanceChanged=false,structureChanged=false,radianceChanged=false;
+    let appearanceChanged=false,radianceChanged=false;
     if(patch.rendering){
       const keys=Object.keys(patch.rendering);
       this.spec.rendering={...(this.spec.rendering??{}),...structuredClone(patch.rendering)};
-      // Exposure/fog are frame uniforms. Lighting/probe/shadow authoring may
-      // change scene-derived caches and therefore takes the structural path.
-      if(keys.some(key=>key!=='exposure'&&key!=='fogDensity'))structureChanged=true;
-      else appearanceChanged=true;
+      // Rendering authoring is presentation state, never world geometry.
+      if(keys.length)appearanceChanged=true;
     }
     for(const rule of patch.materials??[]){
       for(const entity of this.entities.values()){
@@ -218,7 +216,6 @@ export class Scene {
         appearanceChanged=true;
       }
     }
-    if(structureChanged)this.renderStructureRevision++;
     if(appearanceChanged)this.appearanceRevision++;
     if(radianceChanged)this.radianceRevision++;
   }
