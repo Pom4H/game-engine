@@ -1,6 +1,7 @@
 /** Same native QUIC boundary as thegame, without its car-specific wire protocol.
  * Only hello/ack is reliable here; live input/state are datagrams, never TCP fallbacks. */
 import {createServer} from '@webtransport-bun/webtransport';
+import {createSocket} from 'node:dgram';
 import {readFile,mkdir} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -19,6 +20,10 @@ async function hello(stream){
  }finally{reader.releaseLock();}
 }
 export async function startArenaQuic(host,{port=4433,url,certPath,keyPath}={}){
+ if(!Number.isInteger(port)||port<0||port>65535)throw Error('Invalid QUIC port');
+ // Provider 0.3.0 exposes the requested port, not the OS-selected port when passed zero.
+ // Pick an ephemeral UDP port before opening the native listener; bind failure remains fatal.
+ if(port===0){const probe=createSocket('udp4');try{await new Promise((resolve,reject)=>{probe.once('error',reject);probe.bind(0,'127.0.0.1',resolve);});port=probe.address().port;}finally{probe.close();}}
  const local=!url,dir=resolve('.local/arena-quic');let cert=certPath,key=keyPath;
  if(!cert||!key){
   if(!local)throw Error('Public QUIC endpoint requires TLS certificate and key');await mkdir(dir,{recursive:true});cert=resolve(dir,'cert.pem');key=resolve(dir,'key.pem');
@@ -30,6 +35,7 @@ export async function startArenaQuic(host,{port=4433,url,certPath,keyPath}={}){
  const active=new Map();let closed=false;
  const stats={accepted:0,rejected:0,received:0,stale:0,malformed:0};
  const server=createServer({host:local?'127.0.0.1':process.env.ARENA_QUIC_HOST??'0.0.0.0',port,tls:{certPem,keyPem},
+  log:event=>{if(event.level==='error'||event.level==='warn')stats.lastTransportError=String(event.msg).slice(0,512);},
   limits:{maxSessions:8,maxHandshakesInFlight:4,maxStreamsPerSessionBidi:1,maxStreamsPerSessionUni:0,maxStreamsGlobal:8,maxDatagramSize:1200,maxQueuedBytesGlobal:65536,maxQueuedBytesPerSession:8192,maxQueuedBytesPerStream:4096,backpressureTimeoutMs:500,handshakeTimeoutMs:5000,idleTimeoutMs:10000},
   rateLimits:{handshakesPerSec:4,handshakesBurst:8,datagramsPerSec:160,datagramsBurst:32,streamsPerSec:8,streamsBurst:8},
   async onSession(session){
@@ -57,6 +63,6 @@ export async function startArenaQuic(host,{port=4433,url,certPath,keyPath}={}){
   },
  });
  return {config:{mode:'webtransport',url:url??`https://127.0.0.1:${server.address.port}/arena`,schema:arenaDatagram.signature,...(local?{certificateHash:fingerprint}:{})},
-  inspect:()=>({...stats,sessions:active.size,native:server.metricsSnapshot(),outboxes:[...active.values()].map(s=>s.queue?{queued:s.queue.queued,...s.queue.stats}:null)}),
+  inspect:()=>({...stats,port:server.address.port,sessions:active.size,native:server.metricsSnapshot(),outboxes:[...active.values()].map(s=>s.queue?{queued:s.queue.queued,...s.queue.stats}:null)}),
   async close(){closed=true;for(const a of active.values())a.stop();active.clear();await server.close();}};
 }
