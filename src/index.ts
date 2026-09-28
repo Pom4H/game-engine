@@ -1,5 +1,5 @@
 export {FixedClock} from './core/fixed-clock.js';
-export {trackRuntimeMemory,trackRuntimeInstance,runtimeMemorySnapshot,type RuntimeMemoryEntry,type RuntimeMemoryKind} from './core/runtime-memory.js';
+export {trackRuntimeMemory,trackRuntimeSlot,trackRuntimeInstance,runtimeMemorySnapshot,type RuntimeMemoryEntry,type RuntimeMemoryKind} from './core/runtime-memory.js';
 export {beginRuntimeSpan,endRuntimeSpan,recordRuntimeEvent,runtimeTimelineSnapshot,runtimeTimelineEntry,type RuntimeCapability,type RuntimeTimelineEntry,type RuntimeTimelineInput,type RuntimeTimelineScalar} from './core/runtime-timeline.js';
 export {projectRuntimeGantt,type RuntimeGanttRow,type RuntimeGanttGroup,type RuntimeGanttEdge,type RuntimeGanttProjection} from './core/runtime-gantt.js';
 export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
