@@ -631,7 +631,7 @@ export class WebGPURenderer implements Renderer{
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
-  private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
+  private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();private reflectionCause='';private reflectionValid=false;
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
@@ -749,7 +749,7 @@ export class WebGPURenderer implements Renderer{
     const taaBind=(history:GPUAny)=>this.device.createBindGroup({layout:this.gpu.taa.getBindGroupLayout(0),entries:[{binding:0,resource:this.effectsHdr.createView()},{binding:1,resource:history.createView()},{binding:2,resource:this.velocity.createView()},{binding:3,resource:this.depth.createView()},{binding:4,resource:this.gpu.sampler},{binding:5,resource:{buffer:this.gpu.taaParams}}]});
     this.taaBindAB=taaBind(this.taaA);this.taaBindBA=taaBind(this.taaB);
     const presentBind=(source:GPUAny)=>this.device.createBindGroup({layout:this.gpu.present.getBindGroupLayout(0),entries:[{binding:0,resource:source.createView()},{binding:1,resource:this.gpu.sampler},{binding:2,resource:{buffer:this.gpu.frame}}]});
-    this.presentBindA=presentBind(this.taaA);this.presentBindB=presentBind(this.taaB);this.historyValid=false;this.taaHistoryIndex=0;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
+    this.presentBindA=presentBind(this.taaA);this.presentBindB=presentBind(this.taaB);this.historyValid=false;this.taaHistoryIndex=0;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;this.reflectionValid=false;
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
@@ -923,11 +923,13 @@ export class WebGPURenderer implements Renderer{
         }
       });
     }
-    this.profiler.measure('encode.reflection',()=>{
+    const reflectionCause=[scene.renderStructureRevision,scene.appearanceRevision,...camera.position,...camera.target,...(camera.up??[0,1,0]),...frame.slice(16,28),...culled.reflectedObjects.flatMap(entity=>[entity.id,...entity.position,...entity.rotation])].join(':');
+    const reflectionDirty=!this.reflectionValid||reflectionCause!==this.reflectionCause;
+    if(reflectionDirty)this.profiler.measure('encode.reflection',()=>{
       const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
       reflect.setBindGroup(1,this.gpu.reflectionBind);const query=this.profiler.beginOcclusion(reflect,'reflection');
       for(const [key,group] of materialPipelineGroups(culled.reflectedObjects)){const [code,culled]=key;reflect.setPipeline((culled?this.gpu.reflectedCulled:this.gpu.reflectedDouble).get(code)!);for(const e of group)this.draw(reflect,e,false);}
-      this.profiler.endOcclusion(reflect,query);reflect.end();
+      this.profiler.endOcclusion(reflect,query);reflect.end();this.reflectionCause=reflectionCause;this.reflectionValid=true;
     });
     let snowInstances=0;
     this.profiler.measure('encode.main',()=>{
@@ -1186,7 +1188,7 @@ export class WebGPURenderer implements Renderer{
       // but every scene-owned uniform/probe/culling cache must observe the new causes.
       for(const object of this.objects.values())object.uniformReady=false;
       this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbeCause='';this.localProbePosition=null;this.localProbeBounds=null;
-      this.shadowValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
+      this.shadowValid=false;this.reflectionValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
