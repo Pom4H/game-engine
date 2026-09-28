@@ -128,7 +128,7 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
     assert.equal(byId.has('interior-'+id),false,`interior-${id} must not be an opaque coplanar duplicate of glazing`);
   }
   const grilleInlays=m3.parts.filter(part=>part.id.startsWith('grille-inlay-'));
-  assert.equal(grilleInlays.length,12,'two FBX kidney openings should receive six recessed vertical inlays each');
+  assert.equal(grilleInlays.length,22,'two FBX kidney openings should receive eleven recessed inlays each');
   assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40),'grille inlays must stay within the source fascia envelope');
 
   assert.equal(byId.get('body').material.kind,'steel');
