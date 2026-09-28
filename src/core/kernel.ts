@@ -85,7 +85,7 @@ function snapshot<T>(context:T):Readonly<T>{
   };freeze(value);return value;
 }
 export class EngineKernel<Context,Command>{
-  readonly scheduler:ModuleScheduler;private readonly modules=trackRuntimeMemory('EngineKernel','modules','registry',new Map<string,EngineModule<Context,Command>>());private readonly seen=trackRuntimeMemory('EngineKernel','incrementalSeen','cache',new Map<string,string>());private readonly versions=new Map<string,number>();private anyVersion=0;private wildcardVersion=0;
+  readonly scheduler:ModuleScheduler;private readonly modules=trackRuntimeMemory('EngineKernel','modules','registry',new Map<string,EngineModule<Context,Command>>());private readonly seen=trackRuntimeMemory('EngineKernel','incrementalSeen','cache',new Map<string,string>());private readonly versions=trackRuntimeMemory('EngineKernel','resourceVersions','cache',new Map<string,number>());private anyVersion=0;private wildcardVersion=0;
   constructor(tickRate=60,capacity=64){trackRuntimeInstance('EngineKernel',this);this.scheduler=new ModuleScheduler(tickRate,capacity);}
   use(module:EngineModule<Context,Command>):this{if(typeof module.run!=='function')throw new TypeError('Kernel modules require a synchronous implementation');this.scheduler.use(module);this.modules.set(module.id,Object.freeze({...stable(module),run:module.run}));return this;}
   /** Mark world state changed outside scheduled modules. Normal module writes are versioned automatically. */
