@@ -3,6 +3,7 @@ import {V3} from '../math.js';
 import type {FootstepSound} from '../audio/footsteps.js';
 import {ProceduralAudio,type AmbientAudioState} from '../audio/browser.js';
 import {FixedClock} from '../core/fixed-clock.js';
+import {runtimeMemorySnapshot,trackRuntimeInstance} from '../core/runtime-memory.js';
 import {Scene} from '../scene/scene.js';
 import type {EngineEvent} from '../scene/events.js';
 import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
@@ -26,7 +27,7 @@ export class BrowserRuntime {
   private publishedBridge:EngineBridge|null=null;
 
   private constructor(private readonly canvas:HTMLCanvasElement,scene:SceneSpec,renderer:Renderer,options:BrowserRuntimeOptions){
-    this.initial=structuredClone(scene);this.scene=new Scene(this.initial);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
+    trackRuntimeInstance('BrowserRuntime',this);this.initial=structuredClone(scene);this.scene=new Scene(this.initial);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
   }
 
   static async create(canvas:HTMLCanvasElement,scene:SceneSpec,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
@@ -83,7 +84,7 @@ export class BrowserRuntime {
   profile(){return this.renderer.profile?.()??this.renderer.inspect().profile;}
   resetProfile():void{this.renderer.resetProfile?.();}
   snapshot(){return this.scene.snapshot();}
-  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
+  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false},memory:{structures:runtimeMemorySnapshot()}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
   dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
 
