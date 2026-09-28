@@ -36,7 +36,7 @@ export interface SurfaceContactsOptions {readonly capacity?:number;readonly part
 interface WheelBinding {readonly id:string;readonly radius?:number;readonly lateral?:Vec3}
 interface SprayParticle {readonly index:number;readonly born:number;readonly life:number;readonly origin:Vec3;readonly velocity:Vec3;readonly ground:number}
 interface SnowBinding {readonly source:string;readonly skin:SnowSurface;visible:boolean}
-const contactNamespaces=new WeakMap<SurfaceContactHost,{sequence:number;reserved:Set<string>}>();
+const contactNamespaces=trackRuntimeMemory('SurfaceContactSystem','namespaces','registry',new WeakMap<SurfaceContactHost,{sequence:number;reserved:Set<string}>());
 function allocateNamespace(host:SurfaceContactHost,base:string):string{
  let state=contactNamespaces.get(host);if(!state){state={sequence:0,reserved:new Set()};contactNamespaces.set(host,state);}
  let candidate=base;
