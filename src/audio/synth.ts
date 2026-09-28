@@ -4,8 +4,11 @@ import type {EngineEvent,FractureEvent,ImpactEvent,MechanismEvent} from '../scen
 
 export interface AudioChannels {left:Float32Array;right:Float32Array;sampleRate:number}
 
+export function eventAudioDuration(event:EngineEvent):number{
+  return event.type==='fracture'?Math.min(1.25,.32+event.size*.12):event.type==='mechanism'?Math.min(.9,.12+event.size*.08+Math.log1p(event.energy)*.02):Math.min(.55,.09+event.size*.045+Math.log1p(event.energy)*.018);
+}
 export function synthesizeEvent(event:EngineEvent,sampleRate=48_000):AudioChannels{
-  const duration=event.type==='fracture'?Math.min(1.25,.32+event.size*.12):event.type==='mechanism'?Math.min(.9,.12+event.size*.08+Math.log1p(event.energy)*.02):Math.min(.55,.09+event.size*.045+Math.log1p(event.energy)*.018);
+  const duration=eventAudioDuration(event);
   const count=Math.max(1,Math.ceil(duration*sampleRate)),left=new Float32Array(count),right=new Float32Array(count);
   const rng=mulberry32((event.id^hashString(event.type))>>>0);
   const pan=Math.max(-.65,Math.min(.65,event.point[0]/25)),gainL=Math.sqrt((1-pan)/2),gainR=Math.sqrt((1+pan)/2);
