@@ -20,11 +20,12 @@ test('kernel order is stable and cadence is exact',()=>{
   kernel.run(1,{});assert.deepEqual(calls,['a']);calls.length=0;kernel.run(2,{});assert.deepEqual(calls,['a','b']);
 });
 
-test('incremental modules run only when a causal input version changes',()=>{
-  const kernel=new EngineKernel(60),versions=new Map([['source',1]]);let calls=0;
+test('incremental modules derive invalidation from kernel resource writes',()=>{
+  const kernel=new EngineKernel(60);let calls=0;
+  kernel.use({id:'source',phase:'simulate',rateHz:30,reads:[],writes:['source'],run:()=>[]});
   kernel.use({id:'projection',phase:'publish',rateHz:60,reads:['source'],writes:['view'],incremental:true,run:()=>{calls++;}});
-  kernel.run(1,{},'detailed',{versions});kernel.run(2,{},'detailed',{versions});assert.equal(calls,1);
-  versions.set('source',2);kernel.run(3,{},'detailed',{versions});assert.equal(calls,2);
+  kernel.run(1,{});kernel.run(2,{});kernel.run(3,{});assert.equal(calls,2,'projection runs initially and after the 30 Hz source writes');
+  kernel.invalidate('source').run(4,{});assert.equal(calls,3,'external world causes explicitly invalidate the same resource');
 });
 test('stateful modules remain cadence driven',()=>{
   const kernel=new EngineKernel(60);let calls=0;
