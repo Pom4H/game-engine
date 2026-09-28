@@ -26,7 +26,7 @@ interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;coun
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;material?:RuntimeMaterial;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;viewVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number;shadowGeneration?:number;shadowPrimitive?:Primitive;shadowModel?:Mat4}
-interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:ReadonlySet<string>;opaque:number}
+interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:Set<string>;opaque:number}
 interface StaticCullState{revision:number;cameraOpaque:RuntimeEntity[];cameraTransparent:RuntimeEntity[];shadowCasters:RuntimeEntity[];reflectedObjects:RuntimeEntity[]}
 interface CullViews{version:number;camera:Mat4|null;light:Mat4|null;reflection:Mat4|null}
 interface LocalProbeState{mask:number;face:number;position:Vec3|null;bounds:{min:Vec3;max:Vec3}|null;key:string;cause:string}
@@ -636,10 +636,21 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceRevision=-1;
   private readonly materialLoads=trackRuntimeMemory('WebGPURenderer','materialLoads','queue',new Map<string,Promise<void>>());private readonly failedMaterials=trackRuntimeMemory('WebGPURenderer','failedMaterials','cache',new Set<string>());private disposed=false;
-  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=trackRuntimeMemory('WebGPURenderer','environmentInvalidations','history',new Map<string,number>());private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=trackRuntimeMemory('WebGPURenderer','environmentIrradiance','state',new Float32Array(36));private renderWorld=trackRuntimeMemory('WebGPURenderer','renderWorld','state',{scene:null,revision:-1,visible:[],lights:[],movers:new Set(),opaque:0} as RenderWorldState);
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=trackRuntimeMemory('WebGPURenderer','environmentInvalidations','history',new Map<string,number>());private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=trackRuntimeMemory('WebGPURenderer','environmentIrradiance','state',new Float32Array(36));private renderWorld=trackRuntimeMemory('WebGPURenderer','renderWorld','state',{
+    scene:null,revision:-1,
+    visible:trackRuntimeMemory('WebGPURenderer','visibleEntities','index',[] as RuntimeEntity[]),
+    lights:trackRuntimeMemory('WebGPURenderer','lights','index',[] as RuntimeEntity[]),
+    movers:trackRuntimeMemory('WebGPURenderer','movingEntities','index',new Set<string>()),opaque:0,
+  } as RenderWorldState);
   private shadowLightVP:Mat4|null=null;private shadowGeneration=0;private shadowCount=0;private reflectionCause:string|null=null;
   private localProbe=trackRuntimeMemory('WebGPURenderer','localProbe','cache',{mask:0,face:0,position:null,bounds:null,key:'',cause:''} as LocalProbeState);
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private readonly entityState=trackRuntimeMemory('WebGPURenderer','entityState','cache',new Map<string,RenderEntityState>());private readonly cullScratch=trackRuntimeMemory('WebGPURenderer','cullScratch','state',new Float32Array(16));private cullViews=trackRuntimeMemory('WebGPURenderer','cullViews','cache',{version:0,camera:null,light:null,reflection:null} as CullViews);private staticCull=trackRuntimeMemory('WebGPURenderer','staticCull','cache',{revision:-1,cameraOpaque:[],cameraTransparent:[],shadowCasters:[],reflectedObjects:[]} as StaticCullState);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private readonly entityState=trackRuntimeMemory('WebGPURenderer','entityState','cache',new Map<string,RenderEntityState>());private readonly cullScratch=trackRuntimeMemory('WebGPURenderer','cullScratch','state',new Float32Array(16));private cullViews=trackRuntimeMemory('WebGPURenderer','cullViews','cache',{version:0,camera:null,light:null,reflection:null} as CullViews);private staticCull=trackRuntimeMemory('WebGPURenderer','staticCull','cache',{
+    revision:-1,
+    cameraOpaque:trackRuntimeMemory('WebGPURenderer','staticCameraOpaque','cache',[] as RuntimeEntity[]),
+    cameraTransparent:trackRuntimeMemory('WebGPURenderer','staticCameraTransparent','cache',[] as RuntimeEntity[]),
+    shadowCasters:trackRuntimeMemory('WebGPURenderer','staticShadowCasters','cache',[] as RuntimeEntity[]),
+    reflectedObjects:trackRuntimeMemory('WebGPURenderer','staticReflectedObjects','cache',[] as RuntimeEntity[]),
+  } as StaticCullState);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -771,15 +782,15 @@ export class WebGPURenderer implements Renderer{
     const reflectionProbe=resolveReflectionProbe(scene);
     if(!reflectionProbe){
       if(this.localProbe.mask===63)this.historyValid=false;
-      this.localProbe={mask:0,face:0,key:'',cause:'',position:null,bounds:null};
+      Object.assign(this.localProbe,{mask:0,face:0,key:'',cause:'',position:null,bounds:null});
     }else{
       const settings=scene.spec.rendering??{},probeCause=[reflectionProbe.key,...reflectionProbe.position,scene.geometryRevision,scene.radianceRevision,...(settings.sunDirection??[-.55,.48,-.35]),settings.sunIntensity??scene.environment.sunlight*3,...(settings.sunColor??[1,.87,.72]),...(settings.skyColor??[.26,.34,.47])].join(':');
       if(this.localProbe.cause!==probeCause){
         if(this.localProbe.mask===63)this.historyValid=false;
-        this.localProbe={
+        Object.assign(this.localProbe,{
           mask:0,face:0,key:reflectionProbe.key,cause:probeCause,position:[...reflectionProbe.position],
           bounds:{min:[reflectionProbe.position[0]-reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]-reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]-reflectionProbe.boxHalfExtents[2]],max:[reflectionProbe.position[0]+reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]+reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]+reflectionProbe.boxHalfExtents[2]]},
-        };
+        });
       }
     }
     this.profiler.measure('materials',()=>{if(structureChanged)this.queueMaterialLoads(scene);});
@@ -819,7 +830,7 @@ export class WebGPURenderer implements Renderer{
     const renderMoverIds=this.renderWorld.movers;
     const culled=this.profiler.measure('cull',()=>{
       const views=this.cullViews,viewsChanged=!matrixEqual(views.camera??undefined,cullVP)||!matrixEqual(views.light??undefined,lightVP)||!matrixEqual(views.reflection??undefined,reflectionVP);
-      if(viewsChanged)this.cullViews={version:views.version+1,camera:new Float32Array(cullVP),light:new Float32Array(lightVP),reflection:new Float32Array(reflectionVP)};
+      if(viewsChanged)Object.assign(this.cullViews,{version:views.version+1,camera:new Float32Array(cullVP),light:new Float32Array(lightVP),reflection:new Float32Array(reflectionVP)});
       const visibilityFor=(entity:RuntimeEntity)=>{
         const primitive=renderPrimitive(entity)!,model=modelFor(entity),state=this.entityState.get(entity.id)!;
         if(state.primitive===primitive&&state.viewVersion===this.cullViews.version)return state;
@@ -828,7 +839,8 @@ export class WebGPURenderer implements Renderer{
       };
       const staticDirty=viewsChanged||this.staticCull.revision!==scene.geometryRevision;
       if(staticDirty){
-        const cameraOpaque:RuntimeEntity[]=[],cameraTransparent:RuntimeEntity[]=[],shadowCasters:RuntimeEntity[]=[],reflectedObjects:RuntimeEntity[]=[];
+        const {cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects}=this.staticCull;
+        cameraOpaque.length=0;cameraTransparent.length=0;shadowCasters.length=0;reflectedObjects.length=0;
         for(const entity of visible){
           if(renderMoverIds.has(entity.id))continue;
           const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
@@ -836,7 +848,7 @@ export class WebGPURenderer implements Renderer{
           if(opaque&&visible.shadow)shadowCasters.push(entity);
           if(opaque&&visible.reflection)reflectedObjects.push(entity);
         }
-        this.staticCull={revision:scene.geometryRevision,cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
+        this.staticCull.revision=scene.geometryRevision;
       }
       const cameraOpaque=[...this.staticCull.cameraOpaque],cameraTransparent=[...this.staticCull.cameraTransparent],shadowCasters=[...this.staticCull.shadowCasters],reflectedObjects=[...this.staticCull.reflectedObjects];
       for(const id of renderMoverIds){
@@ -1196,11 +1208,12 @@ export class WebGPURenderer implements Renderer{
     const sceneChanged=world.scene!==scene,revisionChanged=world.revision!==scene.geometryRevision;
     if(sceneChanged||revisionChanged){
       for(const object of this.objects.values())object.uniformReady=false;
-      this.localProbe={mask:0,face:0,key:'',cause:'',position:null,bounds:null};
-      this.shadowLightVP=null;this.reflectionCause=null;this.staticCull.revision=-1;this.cullViews={version:this.cullViews.version,camera:null,light:null,reflection:null};
+      Object.assign(this.localProbe,{mask:0,face:0,key:'',cause:'',position:null,bounds:null});
+      this.shadowLightVP=null;this.reflectionCause=null;this.staticCull.revision=-1;Object.assign(this.cullViews,{camera:null,light:null,reflection:null});
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
-    const visible:RuntimeEntity[]=[],lights:RuntimeEntity[]=[],movers=new Set<string>(),ids=new Set<string>(),keys=new Set<string>(),labels=new Set<string>(),textures=new Set<string>();let opaque=0;
+    const {visible,lights,movers}=world;visible.length=0;lights.length=0;movers.clear();
+    const ids=new Set<string>(),keys=new Set<string>(),labels=new Set<string>(),textures=new Set<string>();let opaque=0;
     for(const entity of scene.entities.values()){
       if(entity.light)lights.push(entity);
       const texture=entity.material.texture;if(texture)for(const url of [texture.url,texture.normalUrl,texture.ormUrl])if(url)textures.add(url);
@@ -1212,7 +1225,7 @@ export class WebGPURenderer implements Renderer{
     for(const id of scene.animation.controlledEntityIds())movers.add(id);
     for(const id of scene.deformation.visualEntityIds())movers.add(id);
     for(const id of scene.contacts?.controlledEntityIds()??[])movers.add(id);
-    this.renderWorld={scene,revision:scene.geometryRevision,visible,lights,movers,opaque};
+    world.scene=scene;world.revision=scene.geometryRevision;world.opaque=opaque;
     this.surfaceTextures?.retain(textures);
     for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}
