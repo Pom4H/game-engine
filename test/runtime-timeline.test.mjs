@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  Scene,beginRuntimeSpan,endRuntimeSpan,recordRuntimeEvent,runtimeTimelineSnapshot,
+  Scene,beginRuntimeSpan,endRuntimeSpan,recordRuntimeEvent,runtimeTimelineSnapshot,projectRuntimeGantt,
   eventAudioDuration,synthesizeEvent,
 } from '../dist/index.js';
 
@@ -28,4 +28,17 @@ test('audio timeline duration can use the exact synthesis cause',()=>{
   const duration=eventAudioDuration(event),audio=synthesizeEvent(event,8000);
   assert.equal(audio.left.length,Math.ceil(duration*8000));
   assert.equal(audio.right.length,audio.left.length);
+});
+
+
+test('Gantt projection groups new runtime kinds and connects causes without UI type knowledge',()=>{
+  const root=beginRuntimeSpan({owner:'plugin-x',kind:'custom-resource',name:'root-x',at:3,refs:['x']});
+  const child=recordRuntimeEvent({owner:'plugin-x',kind:'custom-effect',name:'effect-x',at:3.2,cause:root,refs:['x'],capabilities:[{id:'custom.action',label:'Do it'}]});
+  const gantt=projectRuntimeGantt(runtimeTimelineSnapshot(),4);
+  assert.ok(gantt.groups.some(group=>group.id==='plugin-x/custom-resource'));
+  assert.ok(gantt.groups.some(group=>group.id==='plugin-x/custom-effect'));
+  assert.ok(gantt.edges.some(edge=>edge.from===root&&edge.to===child));
+  assert.equal(gantt.rows.find(row=>row.id===root)?.end,4,'open spans extend to current simulation time');
+  assert.equal(gantt.rows.find(row=>row.id===child)?.capabilities[0]?.id,'custom.action');
+  endRuntimeSpan(root,4);
 });
