@@ -19,14 +19,15 @@ test('probe filter normalizes radiance and reads only the captured level',()=>{
  assert.match(source,/baseMipLevel:capture.mip,mipLevelCount:1/);
  assert.match(source,/mipmapFilter:'linear'/);
 });
-test('coat roughness blurs local radiance rather than suppressing it',()=>{
- assert.doesNotMatch(source,/coatProbeWeight|reflectionDir,\.35\)/);
+test('coat roughness filters both environment and local probe with an explicit automotive weight',()=>{
  assert.match(source,/reflectionDir,coatRough\*f32\(textureNumLevels\(environmentMap\)-1u\)/);
- assert.match(source,/reflectionDir,coatRough\*f32\(textureNumLevels\(localProbeMap\)-1u\)/);
- assert.match(source,/coatEnvironment=mix\(coatEnvironment,coatLocal,f.params.y\)/);
+ assert.match(source,/parallaxProbeDirection\(in.worldPos,reflectionDir\),coatRough\*f32\(textureNumLevels\(localProbeMap\)-1u\)/);
+ assert.match(source,/coatProbeWeight=f.params.y\*select\(1\.0,\.62,automotivePaint\)/);
+ assert.match(source,/coatEnvironment=mix\(coatEnvironment,coatLocal,coatProbeWeight\)/);
 });
 test('coat applies the same normal-variance floor as base roughness',()=>{
- assert.match(source,/coatRough=clamp\(sqrt\(clearcoatRoughness\*clearcoatRoughness\+min\(\.22,normalVariance\*\.18\)\),\.08,1\.0\)/);
+ assert.match(source,/paintCoatFloor=select\(\.0,\.105,automotivePaint\)/);
+ assert.match(source,/coatRough=clamp\(max\(paintCoatFloor,sqrt\(clearcoatRoughness\*clearcoatRoughness\+min\(\.06,normalVariance\*\.04\)\)\),\.08,1\.0\)/);
  assert.match(source,/let coatA2=pow\(coatRough,4\.0\)/);
 });
 test('coat direct and indirect light attenuate the base without emissive gains',()=>{
