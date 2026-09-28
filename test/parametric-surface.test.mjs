@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {tessellateSurface} from '../dist/geometry/parametric-surface.js';
+test('adaptive surface spends triangles on curvature and converges',()=>{const s={id:'curve',point:(u,v)=>[u,v,.2*Math.sin(Math.PI*u)*Math.sin(Math.PI*v)]};const coarse=tessellateSurface(s,{errorM:.02}),fine=tessellateSurface(s,{errorM:.002});assert.ok(fine.indices.length>coarse.indices.length);assert.ok(fine.positions.every(Number.isFinite));});
+test('flat surface remains two triangles',()=>{const s={id:'flat',point:(u,v)=>[u,0,v]};const m=tessellateSurface(s,{errorM:.00001});assert.equal(m.indices.length/3,2);});
