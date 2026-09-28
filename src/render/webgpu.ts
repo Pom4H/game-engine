@@ -8,7 +8,7 @@ import {FRAME_WGSL,SKY_SHADER,EFFECTS_SHADER,PRESENT_SHADER,BLOOM_SHADER,TAA_SHA
 import {V3,compose,lookAt,multiply4,perspective,type Mat4,type Vec3} from '../math.js';
 import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
 import type {Primitive,CameraSpec,SurfaceTextureSpec,EnvironmentRadianceSpec} from '../scene/types.js';
-import type {Scene,RuntimeEntity} from '../scene/scene.js';
+import type {Scene,RuntimeEntity,RuntimeMaterial} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
 import {RenderProfiler} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
@@ -23,7 +23,7 @@ const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean}
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
-interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
+interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;material?:RuntimeMaterial;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;viewVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number;shadowGeneration?:number;shadowPrimitive?:Primitive;shadowModel?:Mat4}
 interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:ReadonlySet<string>;opaque:number}
@@ -634,7 +634,7 @@ export class WebGPURenderer implements Renderer{
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
   private readonly meshes=trackRuntimeMemory('WebGPURenderer','meshes','cache',new Map<string,GPUMesh>());private readonly meshByPrimitive=trackRuntimeMemory('WebGPURenderer','meshByPrimitive','cache',new WeakMap<object,GPUMesh>());private readonly objects=trackRuntimeMemory('WebGPURenderer','objects','cache',new Map<string,GPUObject>());private readonly shadowBatches=trackRuntimeMemory('WebGPURenderer','shadowBatches','cache',new Map<string,GPUShadowBatch>());private readonly errors=trackRuntimeMemory('WebGPURenderer','errors','queue',[] as string[]);private readonly labels=trackRuntimeMemory('WebGPURenderer','labels','cache',new Map<string,GPUAny>());
   private readonly surfaceTextures:SurfaceTextures;
-  private appearanceScene:Scene|null=null;private appearanceRevision=-1;
+  private appearanceRevision=-1;
   private readonly materialLoads=trackRuntimeMemory('WebGPURenderer','materialLoads','queue',new Map<string,Promise<void>>());private readonly failedMaterials=trackRuntimeMemory('WebGPURenderer','failedMaterials','cache',new Set<string>());private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=trackRuntimeMemory('WebGPURenderer','environmentInvalidations','history',new Map<string,number>());private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=trackRuntimeMemory('WebGPURenderer','environmentIrradiance','state',new Float32Array(36));private renderWorld=trackRuntimeMemory('WebGPURenderer','renderWorld','state',{scene:null,revision:-1,visible:[],lights:[],movers:new Set(),opaque:0} as RenderWorldState);
   private shadowLightVP:Mat4|null=null;private shadowGeneration=0;private shadowCount=0;private reflectionCause:string|null=null;
@@ -759,12 +759,10 @@ export class WebGPURenderer implements Renderer{
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
-    const appearanceChanged=this.appearanceScene!==scene||this.appearanceRevision!==scene.appearanceRevision;
-    if(appearanceChanged){
-      this.appearanceScene=scene;this.appearanceRevision=scene.appearanceRevision;
-      // Material/exposure hypotheses only require uniform refresh and fresh TAA.
-      // Keep geometry, shadow maps, environment cubemaps, probes and culling hot.
-      for(const object of this.objects.values())object.uniformReady=false;
+    if(this.appearanceRevision!==scene.appearanceRevision){
+      this.appearanceRevision=scene.appearanceRevision;
+      // Frame/material authoring invalidates temporal history. Individual material
+      // uniforms are invalidated by immutable material identity below.
       this.historyValid=false;
     }
     const structureChanged=this.profiler.measure('lifecycle',()=>this.collect(scene));
@@ -775,7 +773,7 @@ export class WebGPURenderer implements Renderer{
       if(this.localProbe.mask===63)this.historyValid=false;
       this.localProbe={mask:0,face:0,key:'',cause:'',position:null,bounds:null};
     }else{
-      const settings=scene.spec.rendering??{},probeCause=[reflectionProbe.key,...reflectionProbe.position,scene.renderStructureRevision,scene.appearanceRevision,...(settings.sunDirection??[-.55,.48,-.35]),settings.sunIntensity??scene.environment.sunlight*3,...(settings.sunColor??[1,.87,.72]),...(settings.skyColor??[.26,.34,.47])].join(':');
+      const settings=scene.spec.rendering??{},probeCause=[reflectionProbe.key,...reflectionProbe.position,scene.renderStructureRevision,scene.radianceRevision,...(settings.sunDirection??[-.55,.48,-.35]),settings.sunIntensity??scene.environment.sunlight*3,...(settings.sunColor??[1,.87,.72]),...(settings.skyColor??[.26,.34,.47])].join(':');
       if(this.localProbe.cause!==probeCause){
         if(this.localProbe.mask===63)this.historyValid=false;
         this.localProbe={
@@ -930,7 +928,7 @@ export class WebGPURenderer implements Renderer{
         }
       });
     }
-    const reflectionCause=[scene.renderStructureRevision,scene.appearanceRevision,...camera.position,...camera.target,...(camera.up??[0,1,0]),...frame.slice(16,28),...culled.reflectedObjects.flatMap(entity=>[entity.id,...entity.position,...entity.rotation])].join(':');
+    const reflectionCause=[scene.renderStructureRevision,scene.radianceRevision,...camera.position,...camera.target,...(camera.up??[0,1,0]),...frame.slice(16,28),...culled.reflectedObjects.flatMap(entity=>[entity.id,...entity.position,...entity.rotation])].join(':');
     const reflectionDirty=reflectionCause!==this.reflectionCause;
     if(reflectionDirty)this.profiler.measure('encode.reflection',()=>{
       const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
@@ -1140,7 +1138,7 @@ export class WebGPURenderer implements Renderer{
     const scene=this.lastScene,field=scene?.surfaces.field?.(entity.id),surfaceState=scene?.surfaces.surface(entity.id),body=scene?.surfaces.body(entity.id);
     if(field||surfaceState||body)return true;
     const object=this.objects.get(entity.id);
-    if(!object?.uniformReady)return true;
+    if(!object?.uniformReady||object.material!==entity.material)return true;
     const texture=entity.material.texture;
     const materialTexture=texture?.url?this.surfaceTextures.get(texture.url):undefined;
     const normalTexture=texture?.normalUrl?this.surfaceTextures.get(texture.normalUrl):undefined;
@@ -1165,7 +1163,7 @@ export class WebGPURenderer implements Renderer{
     uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture?.url&&this.surfaceTextures.get(texture.url)?1:0],76);
     uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],80);
     if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);this.profiler.addUpload(pixels.byteLength,'surface');}
-    this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');object.uniformReady=true;object.lastModel=new Float32Array(model);object.lastPrevModel=new Float32Array(previousModel);
+    this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');object.material=entity.material;object.uniformReady=true;object.lastModel=new Float32Array(model);object.lastPrevModel=new Float32Array(previousModel);
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean,withColor=true):void{const mesh=this.mesh(renderPrimitive(entity)!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);if(withColor)pass.setVertexBuffer(1,mesh.color);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
   private drawShadowBatch(pass:GPUAny,batch:ShadowBatchPlan):void{const first=batch.items[0]!,mesh=this.mesh(renderPrimitive(first)!),object=this.objects.get(first.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setVertexBuffer(1,batch.buffer);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count,batch.items.length);}
