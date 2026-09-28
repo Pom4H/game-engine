@@ -773,7 +773,7 @@ export class WebGPURenderer implements Renderer{
       if(this.localProbe.mask===63)this.historyValid=false;
       this.localProbe={mask:0,face:0,key:'',cause:'',position:null,bounds:null};
     }else{
-      const settings=scene.spec.rendering??{},probeCause=[reflectionProbe.key,...reflectionProbe.position,scene.renderStructureRevision,scene.radianceRevision,...(settings.sunDirection??[-.55,.48,-.35]),settings.sunIntensity??scene.environment.sunlight*3,...(settings.sunColor??[1,.87,.72]),...(settings.skyColor??[.26,.34,.47])].join(':');
+      const settings=scene.spec.rendering??{},probeCause=[reflectionProbe.key,...reflectionProbe.position,scene.geometryRevision,scene.radianceRevision,...(settings.sunDirection??[-.55,.48,-.35]),settings.sunIntensity??scene.environment.sunlight*3,...(settings.sunColor??[1,.87,.72]),...(settings.skyColor??[.26,.34,.47])].join(':');
       if(this.localProbe.cause!==probeCause){
         if(this.localProbe.mask===63)this.historyValid=false;
         this.localProbe={
@@ -826,7 +826,7 @@ export class WebGPURenderer implements Renderer{
         const test=(matrix:Mat4)=>{multiply4Into(matrix,model,this.cullScratch);return intersectsClip(this.mesh(primitive).bounds,this.cullScratch);};
         state.primitive=primitive;state.viewVersion=this.cullViews.version;state.camera=test(cullVP);state.shadow=test(lightVP);state.reflection=entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP);return state;
       };
-      const staticDirty=viewsChanged||this.staticCull.revision!==scene.renderStructureRevision;
+      const staticDirty=viewsChanged||this.staticCull.revision!==scene.geometryRevision;
       if(staticDirty){
         const cameraOpaque:RuntimeEntity[]=[],cameraTransparent:RuntimeEntity[]=[],shadowCasters:RuntimeEntity[]=[],reflectedObjects:RuntimeEntity[]=[];
         for(const entity of visible){
@@ -836,7 +836,7 @@ export class WebGPURenderer implements Renderer{
           if(opaque&&visible.shadow)shadowCasters.push(entity);
           if(opaque&&visible.reflection)reflectedObjects.push(entity);
         }
-        this.staticCull={revision:scene.renderStructureRevision,cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
+        this.staticCull={revision:scene.geometryRevision,cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
       }
       const cameraOpaque=[...this.staticCull.cameraOpaque],cameraTransparent=[...this.staticCull.cameraTransparent],shadowCasters=[...this.staticCull.shadowCasters],reflectedObjects=[...this.staticCull.reflectedObjects];
       for(const id of renderMoverIds){
@@ -928,7 +928,7 @@ export class WebGPURenderer implements Renderer{
         }
       });
     }
-    const reflectionCause=[scene.renderStructureRevision,scene.radianceRevision,...camera.position,...camera.target,...(camera.up??[0,1,0]),...frame.slice(16,28),...culled.reflectedObjects.flatMap(entity=>[entity.id,...entity.position,...entity.rotation])].join(':');
+    const reflectionCause=[scene.geometryRevision,scene.radianceRevision,...reflectionVP,...frame.slice(16,23),...frame.slice(24,27),...culled.reflectedObjects.flatMap(entity=>[entity.id,...entity.position,...entity.rotation])].join(':');
     const reflectionDirty=reflectionCause!==this.reflectionCause;
     if(reflectionDirty)this.profiler.measure('encode.reflection',()=>{
       const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
@@ -1186,8 +1186,8 @@ export class WebGPURenderer implements Renderer{
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
   private collect(scene:Scene):boolean{
     const world=this.renderWorld;
-    if(world.scene===scene&&world.revision===scene.renderStructureRevision)return false;
-    const sceneChanged=world.scene!==scene,revisionChanged=world.revision!==scene.renderStructureRevision;
+    if(world.scene===scene&&world.revision===scene.geometryRevision)return false;
+    const sceneChanged=world.scene!==scene,revisionChanged=world.revision!==scene.geometryRevision;
     if(sceneChanged||revisionChanged){
       for(const object of this.objects.values())object.uniformReady=false;
       this.localProbe={mask:0,face:0,key:'',cause:'',position:null,bounds:null};
@@ -1206,7 +1206,7 @@ export class WebGPURenderer implements Renderer{
     for(const id of scene.animation.controlledEntityIds())movers.add(id);
     for(const id of scene.deformation.visualEntityIds())movers.add(id);
     for(const id of scene.contacts?.controlledEntityIds()??[])movers.add(id);
-    this.renderWorld={scene,revision:scene.renderStructureRevision,visible,lights,movers,opaque};
+    this.renderWorld={scene,revision:scene.geometryRevision,visible,lights,movers,opaque};
     this.surfaceTextures?.retain(textures);
     for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}
