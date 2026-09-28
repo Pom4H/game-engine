@@ -632,7 +632,7 @@ export class WebGPURenderer implements Renderer{
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
-  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private probeComplete=false;
+  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private lastLights:RuntimeEntity[]=[];private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
@@ -765,10 +765,11 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('resize',()=>this.resize());
     this.lastScene=scene;
     const reflectionProbe=resolveReflectionProbe(scene);
-    if(!reflectionProbe){this.localProbeMask=0;this.localProbeKey='';this.localProbePosition=null;this.localProbeBounds=null;}
+    if(!reflectionProbe){this.localProbeMask=0;this.localProbeKey='';this.localProbeCause='';this.localProbePosition=null;this.localProbeBounds=null;}
     else{
-      const reset=this.localProbeKey!==reflectionProbe.key||(this.localProbePosition&&distance2(this.localProbePosition,reflectionProbe.position)>Math.max(2,reflectionProbe.radius*.16)**2);
-      if(reset){this.localProbeMask=0;this.localProbeFace=0;}
+      const settings=scene.spec.rendering??{},probeCause=[reflectionProbe.key,...reflectionProbe.position,scene.renderStructureRevision,scene.appearanceRevision,...(settings.sunDirection??[-.55,.48,-.35]),settings.sunIntensity??scene.environment.sunlight*3,...(settings.sunColor??[1,.87,.72]),...(settings.skyColor??[.26,.34,.47])].join(':');
+      const reset=this.localProbeCause!==probeCause;
+      if(reset){this.localProbeMask=0;this.localProbeFace=0;this.localProbeCause=probeCause;}
       this.localProbeKey=reflectionProbe.key;this.localProbePosition=[...reflectionProbe.position];this.localProbeBounds={min:[reflectionProbe.position[0]-reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]-reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]-reflectionProbe.boxHalfExtents[2]],max:[reflectionProbe.position[0]+reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]+reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]+reflectionProbe.boxHalfExtents[2]]};
     }
     // The sixth face enables local radiance on the following frame. Invalidate
@@ -866,7 +867,7 @@ export class WebGPURenderer implements Renderer{
       return !previous||previous.primitive!==primitive||!matrixEqual(previous.model,modelFor(entity));
     });
     const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
-    if(reflectionProbe){
+    if(reflectionProbe&&this.localProbeMask!==63){
       const radius2=(reflectionProbe.radius+12)**2,candidates=classified.opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
       for(let index=0;index<reflectionProbe.facesPerFrame;index++){
         const face=(this.localProbeFace+index)%6,faceVp=probeVP(reflectionProbe.position,face,reflectionProbe.radius);
@@ -1184,7 +1185,7 @@ export class WebGPURenderer implements Renderer{
       // Hot render-lab scene swaps deliberately retain GPU pipelines/mesh buffers,
       // but every scene-owned uniform/probe/culling cache must observe the new causes.
       for(const object of this.objects.values())object.uniformReady=false;
-      this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbePosition=null;this.localProbeBounds=null;
+      this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbeCause='';this.localProbePosition=null;this.localProbeBounds=null;
       this.shadowValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
