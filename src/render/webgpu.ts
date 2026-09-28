@@ -27,7 +27,8 @@ interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;heigh
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;viewVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number;shadowGeneration?:number;shadowPrimitive?:Primitive;shadowModel?:Mat4}
 interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:Set<string>;opaque:number}
-interface StaticCullState{revision:number;cameraOpaque:RuntimeEntity[];cameraTransparent:RuntimeEntity[];shadowCasters:RuntimeEntity[];reflectedObjects:RuntimeEntity[]}
+interface CullSet{cameraOpaque:RuntimeEntity[];cameraTransparent:RuntimeEntity[];shadowCasters:RuntimeEntity[];reflectedObjects:RuntimeEntity[]}
+interface StaticCullState extends CullSet{revision:number}
 interface CullViews{version:number;camera:Mat4|null;light:Mat4|null;reflection:Mat4|null}
 interface LocalProbeState{mask:number;face:number;position:Vec3|null;bounds:{min:Vec3;max:Vec3}|null;key:string;cause:string}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
@@ -650,7 +651,13 @@ export class WebGPURenderer implements Renderer{
     cameraTransparent:trackRuntimeMemory('WebGPURenderer','staticCameraTransparent','cache',[] as RuntimeEntity[]),
     shadowCasters:trackRuntimeMemory('WebGPURenderer','staticShadowCasters','cache',[] as RuntimeEntity[]),
     reflectedObjects:trackRuntimeMemory('WebGPURenderer','staticReflectedObjects','cache',[] as RuntimeEntity[]),
-  } as StaticCullState);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  } as StaticCullState);
+  private frameCull=trackRuntimeMemory('WebGPURenderer','frameCull','cache',{
+    cameraOpaque:trackRuntimeMemory('WebGPURenderer','frameCameraOpaque','cache',[] as RuntimeEntity[]),
+    cameraTransparent:trackRuntimeMemory('WebGPURenderer','frameCameraTransparent','cache',[] as RuntimeEntity[]),
+    shadowCasters:trackRuntimeMemory('WebGPURenderer','frameShadowCasters','cache',[] as RuntimeEntity[]),
+    reflectedObjects:trackRuntimeMemory('WebGPURenderer','frameReflectedObjects','cache',[] as RuntimeEntity[]),
+  } as CullSet);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -848,9 +855,14 @@ export class WebGPURenderer implements Renderer{
           if(opaque&&visible.shadow)shadowCasters.push(entity);
           if(opaque&&visible.reflection)reflectedObjects.push(entity);
         }
+        cameraOpaque.sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
+        cameraTransparent.sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
         this.staticCull.revision=scene.geometryRevision;
       }
-      const cameraOpaque=[...this.staticCull.cameraOpaque],cameraTransparent=[...this.staticCull.cameraTransparent],shadowCasters=[...this.staticCull.shadowCasters],reflectedObjects=[...this.staticCull.reflectedObjects];
+      if(!renderMoverIds.size)return this.staticCull;
+      const {cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects}=this.frameCull;
+      cameraOpaque.length=0;cameraTransparent.length=0;shadowCasters.length=0;reflectedObjects.length=0;
+      cameraOpaque.push(...this.staticCull.cameraOpaque);cameraTransparent.push(...this.staticCull.cameraTransparent);shadowCasters.push(...this.staticCull.shadowCasters);reflectedObjects.push(...this.staticCull.reflectedObjects);
       for(const id of renderMoverIds){
         const entity=scene.entities.get(id);if(!entity||!renderPrimitive(entity))continue;
         const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
@@ -860,7 +872,7 @@ export class WebGPURenderer implements Renderer{
       }
       cameraOpaque.sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
       cameraTransparent.sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
-      return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
+      return this.frameCull;
     });
     const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
     const staticShadowDrawables=shadowDrawables.filter(entity=>isStaticShadowCaster(entity,renderMoverIds));
