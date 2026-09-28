@@ -5,6 +5,8 @@ on:
     branches: [main, refactor/causal-runtime]
     paths:
       - 'src/**'
+      - 'test/**'
+      - 'tsconfig*.json'
       - 'tools/render-*.mjs'
       - 'tools/promo/**'
       - '.github/workflows/render.yml'
