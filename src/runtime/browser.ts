@@ -141,16 +141,14 @@ export class BrowserRuntime {
       const nextEvents=this.scene.drainEvents(),nextFootsteps=this.scene.contacts.drainFootsteps();
       if(publish){
         events.push(...nextEvents);footsteps.push(...nextFootsteps);
-        if(this.audio){
-          for(const event of nextEvents){
-            const cause=event.trace,parent=cause!==undefined?runtimeTimelineEntry(cause):undefined,refs=parent?.refs??[];
-            const sound=beginRuntimeSpan({owner:'ProceduralAudio',kind:'sound',name:`${event.type}:${event.id}`,at:event.time,...(cause!==undefined?{cause}:{}),refs,capabilities:[...(refs.length?[{id:'highlight',label:'Highlight'}]:[]),{id:'audio.play-event',label:'Play'},{id:'rewind',label:'Rewind here'}],data:{source:event.type},payload:event});
-            endRuntimeSpan(sound,event.time+eventAudioDuration(event));
-          }
-          for(const footstep of nextFootsteps){
-            const sound=beginRuntimeSpan({owner:'ProceduralAudio',kind:'sound',name:`footstep:${footstep.sequence}`,at:footstep.time,capabilities:[{id:'audio.play-footstep',label:'Play'},{id:'rewind',label:'Rewind here'}],data:{source:'footstep',depth:footstep.depth},payload:footstep});
-            endRuntimeSpan(sound,footstep.time+.38);
-          }
+        for(const event of nextEvents){
+          const cause=event.trace,parent=cause!==undefined?runtimeTimelineEntry(cause):undefined,refs=parent?.refs??[];
+          const sound=beginRuntimeSpan({owner:'ProceduralAudio',kind:'sound',name:`${event.type}:${event.id}`,at:event.time,...(cause!==undefined?{cause}:{}),refs,capabilities:[...(refs.length?[{id:'highlight',label:'Highlight'}]:[]),...(this.audio?[{id:'audio.play-event',label:'Play'}]:[]),{id:'rewind',label:'Rewind here'}],data:{source:event.type},payload:event});
+          endRuntimeSpan(sound,event.time+eventAudioDuration(event));
+        }
+        for(const footstep of nextFootsteps){
+          const sound=beginRuntimeSpan({owner:'ProceduralAudio',kind:'sound',name:`footstep:${footstep.sequence}`,at:footstep.time,capabilities:[...(this.audio?[{id:'audio.play-footstep',label:'Play'}]:[]),{id:'rewind',label:'Rewind here'}],data:{source:'footstep',depth:footstep.depth},payload:footstep});
+          endRuntimeSpan(sound,footstep.time+.38);
         }
       }
     }
