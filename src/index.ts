@@ -36,7 +36,7 @@ export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTr
 export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironmentState,type SurfaceEnvironmentField,type SurfaceContactWork} from './environment/surface-state.js';
 
 export type {SceneModule,SceneModuleContext,SceneCommand} from './scene/modules.js';
-export {SceneSystemRuntime,type SystemFrame,type SystemHandler} from './scene/system-runtime.js';
+export {CausalRuntime,SceneSystemRuntime,type Cause,type SystemFrame,type SystemHandler} from './scene/system-runtime.js';
 export {renderAmbience,type AmbienceFrame,type AmbienceOptions} from './audio/ambience.js';
 export {batchStaticScenery} from './procedural/static-batch.js';
 export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/footprints.js';
