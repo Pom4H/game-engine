@@ -8,7 +8,7 @@ export interface RuntimeTaskManagerSource{
 
 export class RuntimeTaskManager{
   private host:HTMLElement|null=null;
-  private timer:number|undefined;
+  private timer:ReturnType<typeof setInterval>|undefined;
   private opened=false;
   private selected:number|null=null;
   private readonly onKey=(event:KeyboardEvent)=>{
