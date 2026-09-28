@@ -25,6 +25,7 @@ interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;coun
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;cullVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean}
+interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:ReadonlySet<string>;opaque:number}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
 const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`
 override MATERIAL_CLASS:i32=-1;
@@ -631,7 +632,7 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedLights:RuntimeEntity[]=[];private renderMoverIds:ReadonlySet<string>=new Set();
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private renderWorld:RenderWorldState={scene:null,revision:-1,visible:[],lights:[],movers:new Set(),opaque:0};
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();private reflectionCause='';private reflectionValid=false;
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly entityState=new Map<string,RenderEntityState>();private readonly cullScratch=new Float32Array(16);private cullVersion=0;private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
@@ -780,12 +781,12 @@ export class WebGPURenderer implements Renderer{
     if(probeComplete!==this.probeComplete)this.historyValid=false;
     this.probeComplete=probeComplete;
     this.profiler.measure('materials',()=>{if(structureChanged)this.queueMaterialLoads(scene);});
-    this.lastCamera=camera.position;const currentLightGridKey=lightGridCauseKey(this.collectedLights,camera.position);
+    this.lastCamera=camera.position;const currentLightGridKey=lightGridCauseKey(this.renderWorld.lights,camera.position);
     const lightGrid=this.profiler.measure('lights',()=>{
       if(currentLightGridKey===this.lightGridKey)return undefined;
       this.lightGridKey=currentLightGridKey;
-      if(!this.collectedLights.length){this.pointLights=0;this.lightOverflow=0;return undefined;}
-      const grid=buildLightGrid(this.collectedLights,camera.position);this.pointLights=grid.count;this.lightOverflow=grid.overflow;
+      if(!this.renderWorld.lights.length){this.pointLights=0;this.lightOverflow=0;return undefined;}
+      const grid=buildLightGrid(this.renderWorld.lights,camera.position);this.pointLights=grid.count;this.lightOverflow=grid.overflow;
       this.device.queue.writeBuffer(this.gpu.lightBuffer,0,grid.lights);this.device.queue.writeBuffer(this.gpu.cellBuffer,0,grid.cells);
       this.profiler.addUpload(grid.lights.byteLength+grid.cells.byteLength,'light');return grid;
     });
@@ -809,11 +810,11 @@ export class WebGPURenderer implements Renderer{
       return{vp,cullVP,reflectionVP,settings,lightVP,right,up,frame};
     });
     const {vp,cullVP,reflectionVP,lightVP,right,up,frame}=frameState;
-    const visible=this.collectedVisible,opaque=this.collectedOpaque;
-    this.profiler.setWork({entities:scene.entities.size,visible:visible.length,opaque:opaque.length,transparent:visible.length-opaque.length});
+    const visible=this.renderWorld.visible;
+    this.profiler.setWork({entities:scene.entities.size,visible:visible.length,opaque:this.renderWorld.opaque,transparent:visible.length-this.renderWorld.opaque});
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     const modelFor=(entity:RuntimeEntity):Mat4=>this.model(entity);
-    const renderMoverIds=this.renderMoverIds;
+    const renderMoverIds=this.renderWorld.movers;
     const culled=this.profiler.measure('cull',()=>{
       const viewsChanged=!matrixEqual(this.cullCameraVP??undefined,cullVP)||!matrixEqual(this.cullLightVP??undefined,lightVP)||!matrixEqual(this.cullReflectionVP??undefined,reflectionVP);
       if(viewsChanged){
@@ -866,7 +867,7 @@ export class WebGPURenderer implements Renderer{
     });
     const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
     if(reflectionProbe&&this.localProbeMask!==63){
-      const radius2=(reflectionProbe.radius+12)**2,candidates=opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
+      const radius2=(reflectionProbe.radius+12)**2,candidates=visible.filter(e=>e.material.color[3]>=.98&&!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
       for(let index=0;index<reflectionProbe.facesPerFrame;index++){
         const face=(this.localProbeFace+index)%6,faceVp=probeVP(reflectionProbe.position,face,reflectionProbe.radius);
         const entities=candidates.filter(entity=>{multiply4Into(faceVp,modelFor(entity),this.cullScratch);return intersectsClip(this.mesh(renderPrimitive(entity)!).bounds,this.cullScratch);});
@@ -1178,23 +1179,30 @@ export class WebGPURenderer implements Renderer{
   private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),color:this.buffer(data.colors,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
   private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
   private collect(scene:Scene):boolean{
-    if(this.collectedScene===scene&&this.collectedRevision===scene.renderStructureRevision)return false;
-    const sceneChanged=this.collectedScene!==scene,revisionChanged=this.collectedRevision!==scene.renderStructureRevision;
-    this.collectedScene=scene;this.collectedRevision=scene.renderStructureRevision;
+    const world=this.renderWorld;
+    if(world.scene===scene&&world.revision===scene.renderStructureRevision)return false;
+    const sceneChanged=world.scene!==scene,revisionChanged=world.revision!==scene.renderStructureRevision;
     if(sceneChanged||revisionChanged){
-      // Hot render-lab scene swaps deliberately retain GPU pipelines/mesh buffers,
-      // but every scene-owned uniform/probe/culling cache must observe the new causes.
       for(const object of this.objects.values())object.uniformReady=false;
       this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbeCause='';this.localProbePosition=null;this.localProbeBounds=null;
       this.shadowValid=false;this.reflectionValid=false;this.staticCullRevision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
-    this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
-    const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
-    this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedLights=[...scene.entities.values()].filter(e=>e.light);
-    const movers=new Set(live.filter(e=>e.body&&(e.body.invMass>0||e.body.kinematic)).map(e=>e.id));
-    for(const id of scene.animation.controlledEntityIds())movers.add(id);for(const id of scene.deformation.visualEntityIds())movers.add(id);for(const id of scene.contacts?.controlledEntityIds()??[])movers.add(id);this.renderMoverIds=movers;
-    if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
+    const visible:RuntimeEntity[]=[],lights:RuntimeEntity[]=[],movers=new Set<string>(),ids=new Set<string>(),keys=new Set<string>(),labels=new Set<string>(),textures=new Set<string>();let opaque=0;
+    for(const entity of scene.entities.values()){
+      if(entity.light)lights.push(entity);
+      const texture=entity.material.texture;if(texture)for(const url of [texture.url,texture.normalUrl,texture.ormUrl])if(url)textures.add(url);
+      const primitive=renderPrimitive(entity);if(!primitive)continue;
+      visible.push(entity);ids.add(entity.id);keys.add(primitiveKey(primitive));labels.add(entity.material.label??'');
+      if(entity.material.color[3]>=.98)opaque++;
+      if(entity.body&&(entity.body.invMass>0||entity.body.kinematic))movers.add(entity.id);
+    }
+    for(const id of scene.animation.controlledEntityIds())movers.add(id);
+    for(const id of scene.deformation.visualEntityIds())movers.add(id);
+    for(const id of scene.contacts?.controlledEntityIds()??[])movers.add(id);
+    this.renderWorld={scene,revision:scene.renderStructureRevision,visible,lights,movers,opaque};
+    this.surfaceTextures?.retain(textures);
+    for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}
     for(const id of this.entityState.keys())if(!ids.has(id))this.entityState.delete(id);
     for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.color.destroy();m.index.destroy();this.meshes.delete(key);}
