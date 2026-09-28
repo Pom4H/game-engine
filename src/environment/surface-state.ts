@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 /** Unified physical environment state for exposed surfaces and moving bodies.
  * Snow, water, ice and slush are phases of the same state, not separate engine
  * subsystems. Future mud, dust, moss and wear belong here as additional
@@ -53,8 +54,8 @@ export interface SurfaceContactWork {
   readonly frictionCoefficient:number;
 }
 export class SurfaceEnvironmentSystem {
-  readonly fields=new Map<string,SurfaceEnvironmentField>();
-  private readonly claimedContactBodies=new Set<string>();
+  readonly fields=trackRuntimeMemory('SurfaceEnvironmentSystem','fields','state',new Map<string,SurfaceEnvironmentField>());
+  private readonly claimedContactBodies=trackRuntimeMemory('SurfaceEnvironmentSystem','claimedContactBodies','state',new Set<string>());
   remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);this.claimedContactBodies.delete(id);}
   claimContactBody(id:string):void{this.claimedContactBodies.add(id);}
   releaseContactBody(id:string):void{this.claimedContactBodies.delete(id);}
@@ -65,8 +66,9 @@ export class SurfaceEnvironmentSystem {
     if(u<0||u>1||v<0||v>1)return undefined;
     return field.cells[Math.min(field.nz-1,Math.floor(v*field.nz))*field.nx+Math.min(field.nx-1,Math.floor(u*field.nx))];
   }
-  readonly surfaces=new Map<string,SurfaceEnvironmentState>();
-  readonly bodies=new Map<string,BodyEnvironmentState>();
+  readonly surfaces=trackRuntimeMemory('SurfaceEnvironmentSystem','surfaces','state',new Map<string,SurfaceEnvironmentState>());
+  readonly bodies=trackRuntimeMemory('SurfaceEnvironmentSystem','bodies','state',new Map<string,BodyEnvironmentState>());
+  constructor(){trackRuntimeInstance('SurfaceEnvironmentSystem',this);}
 
   /** Reconcile authored entities into physical state without advancing time. */
   reconcile(environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
