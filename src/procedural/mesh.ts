@@ -1,7 +1,8 @@
+import {trackRuntimeMemory} from '../core/runtime-memory.js';
 import type {Primitive} from '../scene/types.js';
 
 export interface MeshData {vertices:Float32Array;colors:Uint8Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
-const primitiveKeys=new WeakMap<Primitive,string>();
+const primitiveKeys=trackRuntimeMemory('procedural.mesh','primitiveKeys','cache',new WeakMap<Primitive,string>());
 export function primitiveKey(primitive:Primitive):string{return primitiveKeys.get(primitive)??JSON.stringify(primitive);}
 /** Called only on the scene's owned geometry copy. A shallow user freeze is not
  * sufficient for caching: nested authoring arrays could still change. */
