@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   DoorHinge,ElasticPlasticPanelResponse,FourCornerSuspension,M3InteractionRig,
   M3_REFERENCE_PROVENANCE,M3_VEHICLE_DEFINITION,Scene,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
-  material,renderAudio,thermalLinearScale,
+  material,renderAudio,runtimeTimelineSnapshot,thermalLinearScale,
 } from '../dist/index.js';
 
 test('cold steel contracts the stress-free XPBD rest geometry without creating plastic work',()=>{
@@ -184,4 +184,12 @@ test('an imported M3 side window fractures through the normal Scene contact pipe
   assert.ok(fracture,'FBX-derived glazing must reach the shared material fracture system');
   assert.ok(fracture.thickness<=.0055,fracture);
   assert.ok([...scene.entities.keys()].some(key=>key.startsWith(id+':shard:')),'fracture should create engine-owned debris');
+  assert.ok(fracture.trace,'fracture event must carry a causal trace');
+  const timeline=runtimeTimelineSnapshot(),fractureRow=timeline.find(row=>row.id===fracture.trace),impactRow=fractureRow?.cause!==undefined?timeline.find(row=>row.id===fractureRow.cause):undefined;
+  assert.equal(fractureRow?.kind,'event:fracture');
+  assert.equal(impactRow?.kind,'event:impact','fracture must retain the contact event that caused it');
+  const shardRow=timeline.find(row=>row.kind==='entity'&&row.name.startsWith(id+':shard:')&&row.cause===fracture.trace);
+  assert.ok(shardRow,'generated debris must be a child of the fracture event');
+  assert.ok(timeline.some(row=>row.kind==='mesh'&&row.cause===shardRow.id),'shard mesh must remain a child of its entity');
+
 });
