@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from './runtime-memory.js';
 export interface SpatialItem { x: number; z: number; w?: number; l?: number }
 export const SPATIAL_QUERY_CAPACITY = 128;
 export const SPATIAL_QUERY_REFERENCES = 16_384;
@@ -5,10 +6,10 @@ export const SPATIAL_QUERY_REFERENCES = 16_384;
 export const SPATIAL_MAX_ITEM_CELLS = 64;
 /** X/Z broad phase with bounded query caching and batched invalidation. */
 export class SpatialHash<T extends object & SpatialItem = SpatialItem & object> {
-  private readonly buckets = new Map<string, T[]>(); private memberships = new WeakMap<T, string[]>();
-  private readonly oversized = new Map<T,{minX:number;maxX:number;minZ:number;maxZ:number}>();
-  private readonly queries = new Map<string, readonly T[]>(); private cachedReferences=0; private cacheHits=0; private cacheMisses=0; private batchDepth=0; private batchDirty=false;
-  constructor(readonly size=32){if(!Number.isFinite(size)||size<=0)throw new RangeError('Spatial cell size must be positive and finite');}
+  private readonly buckets = trackRuntimeMemory('SpatialHash','buckets','index',new Map<string, T[]>()); private memberships = trackRuntimeMemory('SpatialHash','memberships','index',new WeakMap<T, string[]>());
+  private readonly oversized = trackRuntimeMemory('SpatialHash','oversized','index',new Map<T,{minX:number;maxX:number;minZ:number;maxZ:number}>());
+  private readonly queries = trackRuntimeMemory('SpatialHash','queries','cache',new Map<string, readonly T[]>(),SPATIAL_QUERY_CAPACITY); private cachedReferences=0; private cacheHits=0; private cacheMisses=0; private batchDepth=0; private batchDirty=false;
+  constructor(readonly size=32){trackRuntimeInstance('SpatialHash',this);if(!Number.isFinite(size)||size<=0)throw new RangeError('Spatial cell size must be positive and finite');}
   add(item:T,radius=Math.hypot(item.w??1,item.l??1)/2):void{
     this.validate(item.x,item.z,radius);this.remove(item);
     const minX=Math.floor((item.x-radius)/this.size),maxX=Math.floor((item.x+radius)/this.size);
@@ -30,7 +31,7 @@ export class SpatialHash<T extends object & SpatialItem = SpatialItem & object> 
     for(const key of keys){const bucket=this.buckets.get(key);if(!bucket)continue;const i=bucket.indexOf(item);if(i>=0)bucket.splice(i,1);if(!bucket.length)this.buckets.delete(key);}
     this.memberships.delete(item);this.invalidateQueries();return true;
   }
-  clear():void{this.buckets.clear();this.oversized.clear();this.memberships=new WeakMap<T,string[]>();this.invalidateQueries();}
+  clear():void{this.buckets.clear();this.oversized.clear();this.memberships=trackRuntimeMemory('SpatialHash','memberships','index',new WeakMap<T,string[]>());this.invalidateQueries();}
   near(x:number,z:number,radius=8,out?:T[]):T[]{
     this.validate(x,z,radius);
     const minX=Math.floor((x-radius)/this.size),maxX=Math.floor((x+radius)/this.size);
