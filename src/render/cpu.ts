@@ -5,6 +5,7 @@ import {buildRenderFrame,renderPrimitive,type RenderObjectIR} from './frame.js';
 import type {CameraSpec,Color} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats,LinearPixelSample} from './types.js';
+import {trackRuntimeInstance,trackRuntimeMemory,trackRuntimeSlot} from '../core/runtime-memory.js';
 
 type ProjectedVertex={x:number;y:number;z:number;invW:number;world:Vec3;normal:Vec3;color:Color};
 type Light={position:Vec3;color:Vec3;intensity:number;range:number};
@@ -31,12 +32,12 @@ function hash(x:number,y:number):number{let n=Math.imul(x^Math.imul(y,374761393)
 export interface CpuRendererOptions{width?:number;height?:number;near?:number;far?:number;supersample?:number}
 export class CpuRenderer implements Renderer{
  private width:number;private height:number;private readonly near:number;private readonly far:number;
- private rgba:Uint8Array;private depth:Float32Array;private errors:string[]=[];private drawCalls=0;private triangles=0;private meshes=0;private pointLights=0;
- constructor(options:CpuRendererOptions={}){this.width=options.width??640;this.height=options.height??360;this.near=options.near??.05;this.far=options.far??10000;this.rgba=new Uint8Array(this.width*this.height*4);this.depth=new Float32Array(this.width*this.height);this.resize();}
+ private rgba:Uint8Array;private depth:Float32Array;private errors=trackRuntimeMemory('CpuRenderer','errors','queue',[] as string[]);private drawCalls=0;private triangles=0;private meshes=0;private pointLights=0;
+ constructor(options:CpuRendererOptions={}){trackRuntimeInstance('CpuRenderer',this);trackRuntimeSlot('CpuRenderer','rgba','state',this,'rgba');trackRuntimeSlot('CpuRenderer','depth','state',this,'depth');this.width=options.width??640;this.height=options.height??360;this.near=options.near??.05;this.far=options.far??10000;this.rgba=new Uint8Array(this.width*this.height*4);this.depth=new Float32Array(this.width*this.height);this.resize();}
  setResolution(width:number,height:number):void{if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');this.width=width;this.height=height;this.rgba=new Uint8Array(width*height*4);this.depth=new Float32Array(width*height);}
  resize():void{this.depth.fill(1);for(let i=0;i<this.rgba.length;i+=4){this.rgba[i]=0;this.rgba[i+1]=0;this.rgba[i+2]=0;this.rgba[i+3]=255;}}
  render(scene:Scene,camera:CameraSpec=scene.camera):void{
-  this.errors=[];this.drawCalls=0;this.triangles=0;this.meshes=0;
+  this.errors.length=0;this.drawCalls=0;this.triangles=0;this.meshes=0;
   const clear=scene.spec.clearColor??[0,0,0,1],env=scene.spec.rendering??{};
   const sky=env.skyColor??[.12,.16,.22];this.depth.fill(1);
   for(let y=0;y<this.height;y++){const t=y/Math.max(1,this.height-1),c=add3(mul3(sky,.72+.28*(1-t)),mul3([.04,.05,.07],t));for(let x=0;x<this.width;x++){const i=(y*this.width+x)*4;this.rgba[i]=rgb(c[0]);this.rgba[i+1]=rgb(c[1]);this.rgba[i+2]=rgb(c[2]);this.rgba[i+3]=rgb(clear[3]);}}
