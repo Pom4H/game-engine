@@ -58,15 +58,13 @@ export class BrowserRuntime {
   resume():void{if(this.disposed||this.running)return;this.running=true;this.clock.reset(performance.now());this.raf=requestAnimationFrame(this.frame);}
   step(count=1){
     if(!Number.isSafeInteger(count)||count<1||count>1_000_000)throw new RangeError('step count must be an integer in [1, 1000000]');
-    const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];for(let i=0;i<count;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());}
-    this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
+    this.advance(count,true);return this.scene.snapshot();
   }
   seek(seconds:number){
     if(!Number.isFinite(seconds)||seconds<0||seconds>86_400)throw new RangeError('seek time must be within one day');
     this.pause();if(seconds+1e-9<this.scene.time)this.reset();
     const target=Math.round(seconds*this.tickRate),remaining=Math.max(0,target-this.scene.tick);
-    for(let i=0;i<remaining;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
-    this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
+    this.advance(remaining,false);return this.scene.snapshot();
   }
   reset():void{this.scene=new Scene(this.initial);this.render();}
   async replaceScene(scene:SceneSpec):Promise<void>{
@@ -115,10 +113,20 @@ export class BrowserRuntime {
   }
 
   bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),replaceScene:scene=>this.replaceScene(scene),patchAppearance:patch=>this.patchAppearance(patch),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),dispose:()=>this.dispose(),inspect:()=>this.inspect()};}
+  /** One simulation path for live frames, deterministic stepping and replay seek. */
+  private advance(count:number,publish:boolean):void{
+    const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
+    for(let i=0;i<count;i++){
+      this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);
+      const nextEvents=this.scene.drainEvents(),nextFootsteps=this.scene.contacts.drainFootsteps();
+      if(publish){events.push(...nextEvents);footsteps.push(...nextFootsteps);}
+    }
+    if(publish){this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);}
+    this.audio?.updateAmbient(this.ambientAudioState());this.render();
+  }
   private frame=(now:number)=>{
     if(!this.running)return;
-    const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
-    this.clock.advance(now,()=>{this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());});
-    this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();this.raf=requestAnimationFrame(this.frame);
+    let count=0;this.clock.advance(now,()=>count++);if(count)this.advance(count,true);else this.render();
+    this.raf=requestAnimationFrame(this.frame);
   };
 }
