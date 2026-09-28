@@ -1,29 +1,44 @@
 import {readdir,readFile} from 'node:fs/promises';
 import {join,relative} from 'node:path';
-import * as TypeScript from 'typescript';
-const ts=TypeScript.default??TypeScript;
 
 async function files(dir){
   const out=[];for(const entry of await readdir(dir,{withFileTypes:true})){
     const path=join(dir,entry.name);if(entry.isDirectory())out.push(...await files(path));else if(entry.isFile()&&path.endsWith('.ts'))out.push(path);
   }return out;
 }
-const persistentKinds=new Set(['Map','Set','WeakMap','WeakSet']);
-const tracked=initializer=>ts.isCallExpression(initializer)&&ts.isIdentifier(initializer.expression)&&initializer.expression.text==='trackRuntimeMemory';
-const rawKind=initializer=>ts.isNewExpression(initializer)&&ts.isIdentifier(initializer.expression)&&persistentKinds.has(initializer.expression.text)?initializer.expression.text:null;
-const offenders=[];
+function masked(source){
+  const out=[...source];let state='code',escape=false;
+  const blank=i=>{if(source[i]!=='\n'&&source[i]!=='\r')out[i]=' ';};
+  for(let i=0;i<source.length;i++){
+    const ch=source[i],next=source[i+1];
+    if(state==='line'){blank(i);if(ch==='\n')state='code';continue;}
+    if(state==='block'){blank(i);if(ch==='*'&&next==='/'){blank(i+1);i++;state='code';}continue;}
+    if(state!=='code'){blank(i);if(escape){escape=false;continue;}if(ch==='\\'){escape=true;continue;}if(ch===state)state='code';continue;}
+    if(ch==='/'&&next==='/'){blank(i);blank(i+1);i++;state='line';continue;}
+    if(ch==='/'&&next==='*'){blank(i);blank(i+1);i++;state='block';continue;}
+    if(ch===String.fromCharCode(39)||ch===String.fromCharCode(34)||ch===String.fromCharCode(96)){blank(i);state=ch;}
+  }return out.join('');
+}
+const kinds=/\bnew\s+(Map|Set|WeakMap|WeakSet)\b/g,offenders=[];
 for(const file of await files('src')){
   if(file.endsWith('core/runtime-memory.ts'))continue;
-  const source=await readFile(file,'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
-  const report=(node,name,initializer)=>{
-    if(!initializer||tracked(initializer))return;
-    const kind=rawKind(initializer);if(!kind)return;
-    const pos=ast.getLineAndCharacterOfPosition(node.getStart(ast));
-    offenders.push(`${relative('.',file)}:${pos.line+1}: ${name} = new ${kind}()`);
-  };
-  for(const statement of ast.statements){
-    if(ts.isVariableStatement(statement))for(const decl of statement.declarationList.declarations)report(decl,decl.name.getText(ast),decl.initializer);
-    if(ts.isClassDeclaration(statement))for(const member of statement.members)if(ts.isPropertyDeclaration(member))report(member,member.name.getText(ast),member.initializer);
+  const source=await readFile(file,'utf8'),code=masked(source),stack=[];let pendingClass=false,match=kinds.exec(code);
+  for(let i=0;i<code.length&&match;){
+    const ch=code[i];
+    if(/[A-Za-z_$]/.test(ch)){let j=i+1;while(j<code.length&&/[\w$]/.test(code[j]))j++;if(code.slice(i,j)==='class')pendingClass=true;i=j;continue;}
+    if(ch==='{'){stack.push(pendingClass?'class':'block');pendingClass=false;}else if(ch==='}')stack.pop();
+    if(i>=match.index){
+      if(stack.length===0||stack.at(-1)==='class'){
+        const start=Math.max(code.lastIndexOf(';',match.index),code.lastIndexOf('{',match.index),code.lastIndexOf('}',match.index))+1;
+        const prefix=code.slice(start,match.index);
+        if(!/trackRuntimeMemory\s*\([^;{}]*$/.test(prefix)){
+          const line=source.slice(0,match.index).split('\n').length;
+          offenders.push(relative('.',file)+':'+line+': untracked persistent new '+match[1]+'()');
+        }
+      }
+      match=kinds.exec(code);
+    }
+    i++;
   }
 }
 if(offenders.length){
