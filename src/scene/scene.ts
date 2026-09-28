@@ -162,10 +162,10 @@ export class Scene {
   private commit(command:InternalCommand,at:number):void{
     if(command.type==='spawn'){this.add(command.entity);return;}
     if(command.type==='remove'){this.remove(command.id);return;}
-    if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));return;}
+    if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));this.bump(command.key);return;}
     if(command.type==='velocity'){
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
-      const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);return;
+      const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);this.bump('entities');return;
     }
     this.causal.apply({type:command.action,deltaSeconds:command.deltaSeconds},at);
   }
