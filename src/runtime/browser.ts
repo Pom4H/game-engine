@@ -49,7 +49,6 @@ export class BrowserRuntime {
     const heading=this.scene.spec.animation?.walkers?.find(w=>w.id===id)?.heading;
     if(heading===undefined)throw new TypeError(`Unknown walker: ${id}`);
     this.scene.animation.driveWalker(id,0,heading);
-    this.scene.animation.step(this.scene.time,this.scene.entities,p=>this.scene.contacts.sample(p));
     this.controls?.dispose();
     this.controls=new WalkerControls(this.canvas,id,options);
     return this.controls;
