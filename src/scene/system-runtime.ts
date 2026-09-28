@@ -28,9 +28,3 @@ export class CausalRuntime {
   get causes():readonly SystemAction[]{return Object.freeze([...this.effects.keys()]);}
 }
 
-/** @deprecated Use CausalRuntime.when/apply. */
-export class SceneSystemRuntime extends CausalRuntime {
-  use(action:SystemAction,handler:SystemHandler):this{this.when(action,handler);return this;}
-  run(action:SystemAction,dt:number,at:number):void{this.apply({type:action,deltaSeconds:dt},at);}
-  get actions():readonly SystemAction[]{return this.causes;}
-}
