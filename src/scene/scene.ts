@@ -138,7 +138,7 @@ export class Scene {
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
-    this.entities.set(spec.id,runtime);this.renderStructureRevision++;
+    this.entities.set(spec.id,runtime);this.renderStructureRevision++;this.kernel.invalidate('entities');
     return runtime;
   }
 
@@ -150,7 +150,7 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){this.renderStructureRevision++;this.kernel.invalidate('entities');}
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
