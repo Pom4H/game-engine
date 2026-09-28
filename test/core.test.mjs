@@ -20,6 +20,18 @@ test('kernel order is stable and cadence is exact',()=>{
   kernel.run(1,{});assert.deepEqual(calls,['a']);calls.length=0;kernel.run(2,{});assert.deepEqual(calls,['a','b']);
 });
 
+test('incremental modules run only when a causal input version changes',()=>{
+  const kernel=new EngineKernel(60),versions=new Map([['source',1]]);let calls=0;
+  kernel.use({id:'projection',phase:'publish',rateHz:60,reads:['source'],writes:['view'],incremental:true,run:()=>{calls++;}});
+  kernel.run(1,{},'detailed',{versions});kernel.run(2,{},'detailed',{versions});assert.equal(calls,1);
+  versions.set('source',2);kernel.run(3,{},'detailed',{versions});assert.equal(calls,2);
+});
+test('stateful modules remain cadence driven',()=>{
+  const kernel=new EngineKernel(60);let calls=0;
+  kernel.use({id:'physics',phase:'simulate',rateHz:60,reads:['entities'],writes:['entities'],run:()=>{calls++;}});
+  kernel.run(1,{});kernel.run(2,{});assert.equal(calls,2);
+});
+
 test('reflection probe authoring binds to scene entities without semantic renderer knowledge',()=>{
   const spec={version:1,entities:[{id:'hero',mesh:{kind:'box'}},{id:'ground',mesh:{kind:'box'}}],rendering:{reflectionProbe:{entity:'hero',offset:[0,1,0],radius:30,exclude:['hero'],facesPerFrame:1}}};
   const valid=validateScene(spec);assert.equal(valid.rendering.reflectionProbe.entity,'hero');
