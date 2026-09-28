@@ -1,12 +1,13 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import type {Vec3} from '../math.js';
 export interface FootContact {readonly id:string;readonly position:Vec3;readonly grounded:boolean;readonly yaw?:number}
 export interface SnowFootprint {readonly sequence:number;readonly foot:string;readonly position:Vec3;readonly yaw:number;readonly time:number;readonly depth:number}
 /** Foot planting, not elapsed time, creates a stamp. Airborne feet and bare ground
  * cannot leave snow impressions. Bounded storage keeps long sessions finite. */
 export class SnowFootprints {
- private readonly planted=new Set<string>();private sequence=0;private lastTime=-Infinity;
- private readonly records:SnowFootprint[]=[];
- constructor(readonly capacity=256){if(!Number.isSafeInteger(capacity)||capacity<1||capacity>10000)throw new RangeError('Invalid footprint capacity');}
+ private readonly planted=trackRuntimeMemory('SnowFootprints','planted','state',new Set<string>());private sequence=0;private lastTime=-Infinity;
+ private readonly records=trackRuntimeMemory('SnowFootprints','records','history',[] as SnowFootprint[]);
+ constructor(readonly capacity=256){trackRuntimeInstance('SnowFootprints',this);if(!Number.isSafeInteger(capacity)||capacity<1||capacity>10000)throw new RangeError('Invalid footprint capacity');}
  update(time:number,contacts:readonly FootContact[],surface:(position:Vec3)=>{height:number;snowDepth:number}|undefined):readonly SnowFootprint[]{
   if(!Number.isFinite(time)||time<this.lastTime)throw new RangeError('Footprint time must increase');
   const live=new Set<string>();
