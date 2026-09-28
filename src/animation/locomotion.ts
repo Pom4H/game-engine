@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import {V3,finiteVec3,type MutableVec3,type Vec3} from '../math.js';
 import type {FootContact} from '../environment/footprints.js';
 import type {RuntimeEntity} from '../scene/scene.js';
@@ -101,10 +102,11 @@ export function bindHumanoid(pose:HumanoidPose,bindings:readonly HumanoidBinding
 /** Engine-owned actor poses. Scene invokes this once at its authoritative
  * simulation time; cinematics only author rigs/routes and read these results. */
 export class AnimationSystem {
- private readonly walkers=new Map<string,WalkerSpec>();private readonly vehicles=new Map<string,VehicleMotionSpec>();
- private readonly poses=new Map<string,HumanoidPose>();private time=0;
- private readonly driven=new Map<string,{position:Vec3;heading:number;speed:number;time:number}>();
+ private readonly walkers=trackRuntimeMemory('AnimationSystem','walkers','registry',new Map<string,WalkerSpec>());private readonly vehicles=trackRuntimeMemory('AnimationSystem','vehicles','registry',new Map<string,VehicleMotionSpec>());
+ private readonly poses=trackRuntimeMemory('AnimationSystem','poses','state',new Map<string,HumanoidPose>());private time=0;
+ private readonly driven=trackRuntimeMemory('AnimationSystem','driven','state',new Map<string,{position:Vec3;heading:number;speed:number;time:number}>());
  private publishedFeet:readonly FootContact[]=Object.freeze([]);
+ constructor(){trackRuntimeInstance('AnimationSystem',this);}
  get feet():readonly FootContact[]{return this.publishedFeet;}
  controlledEntityIds():ReadonlySet<string>{
   const ids=new Set<string>();
