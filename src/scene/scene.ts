@@ -75,8 +75,6 @@ export class Scene {
   private generatedSequence=0;
   private surfaceVisualSequence=0;
   private readonly surfaceVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
-  private renderMoverRevision=-1;
-  private renderMovers:ReadonlySet<string>=new Set<string>();
 
   constructor(input:SceneSpec){
     this.spec=validateScene(input);
@@ -128,15 +126,6 @@ export class Scene {
   }
 
   use(module:SceneModule):this{this.kernel.use(module);return this;}
-  renderMoverIds():ReadonlySet<string>{
-    if(this.renderMoverRevision===this.renderStructureRevision)return this.renderMovers;
-    const ids=new Set<string>();
-    for(const entity of this.entities.values())if(entity.body&&(entity.body.invMass>0||entity.body.kinematic))ids.add(entity.id);
-    for(const id of this.animation.controlledEntityIds())ids.add(id);
-    for(const id of this.deformation.visualEntityIds())ids.add(id);
-    for(const id of this.contacts?.controlledEntityIds()??[])ids.add(id);
-    this.renderMoverRevision=this.renderStructureRevision;this.renderMovers=ids;return ids;
-  }
   remove(id:string):void{
     // Only exact owned objects are removed; an authored replacement under a
     // formerly generated ID must survive source deletion and weather cleanup.
