@@ -24,7 +24,7 @@ export interface WebGPURendererOptions {profiling?:boolean}
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
-interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;cullVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number}
+interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;cullVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number;shadowGeneration?:number;shadowPrimitive?:Primitive;shadowModel?:Mat4}
 interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:ReadonlySet<string>;opaque:number}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
 const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`
@@ -633,7 +633,7 @@ export class WebGPURenderer implements Renderer{
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private renderWorld:RenderWorldState={scene:null,revision:-1,visible:[],lights:[],movers:new Set(),opaque:0};
-  private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();private reflectionCause:string|null=null;
+  private shadowLightVP:Mat4|null=null;private shadowGeneration=0;private shadowCount=0;private reflectionCause:string|null=null;
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private readonly entityState=new Map<string,RenderEntityState>();private readonly cullScratch=new Float32Array(16);private cullVersion=0;private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
@@ -861,9 +861,9 @@ export class WebGPURenderer implements Renderer{
       this.device.queue.writeBuffer(this.gpu.frame,31*4,dynamicShadowFlag);
       this.profiler.addUpload(dynamicShadowFlag.byteLength,'frame');
     }
-    const shadowDirty=!this.shadowLightVP||!matrixEqual(this.shadowLightVP,lightVP)||staticShadowDrawables.length!==this.shadowState.size||staticShadowDrawables.some(entity=>{
-      const previous=this.shadowState.get(entity.id),primitive=renderPrimitive(entity)!;
-      return !previous||previous.primitive!==primitive||!matrixEqual(previous.model,modelFor(entity));
+    const shadowDirty=!this.shadowLightVP||!matrixEqual(this.shadowLightVP,lightVP)||staticShadowDrawables.length!==this.shadowCount||staticShadowDrawables.some(entity=>{
+      const state=this.entityState.get(entity.id),primitive=renderPrimitive(entity)!;
+      return !state||state.shadowGeneration!==this.shadowGeneration||state.shadowPrimitive!==primitive||!matrixEqual(state.shadowModel,modelFor(entity));
     });
     const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
     if(reflectionProbe&&this.localProbeMask!==63){
@@ -984,8 +984,8 @@ export class WebGPURenderer implements Renderer{
     this.profiler.resolve(encoder);
     this.profiler.measure('submit',()=>this.device.queue.submit([encoder.finish()]));this.profiler.submitted();
     if(shadowDirty){
-      this.shadowLightVP=new Float32Array(lightVP);this.shadowState.clear();
-      for(const entity of staticShadowDrawables)this.shadowState.set(entity.id,{primitive:renderPrimitive(entity)!,model:new Float32Array(modelFor(entity))});
+      this.shadowLightVP=new Float32Array(lightVP);this.shadowCount=staticShadowDrawables.length;this.shadowGeneration++;
+      for(const entity of staticShadowDrawables){const state=this.entityState.get(entity.id)!;state.shadowGeneration=this.shadowGeneration;state.shadowPrimitive=renderPrimitive(entity)!;state.shadowModel=new Float32Array(modelFor(entity));}
     }
     this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.previousCamera=[...camera.position];this.previousTarget=[...camera.target];this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
     for(const entity of prepared.values()){const state=this.entityState.get(entity.id)!;state.previousModel=modelFor(entity);state.previousFrame=frameId;}
