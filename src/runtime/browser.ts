@@ -94,7 +94,7 @@ export class BrowserRuntime {
   resetProfile():void{this.renderer.resetProfile?.();}
   snapshot(){return this.scene.snapshot();}
   timeline(){return runtimeTimelineSnapshot();}
-  gantt(){return projectRuntimeGantt(this.timeline(),this.scene.time);}
+  gantt(){return projectRuntimeGantt(this.timeline(),this.scene.time,runtimeMemorySnapshot());}
   registerTimelineAction(id:string,handler:TimelineAction):()=>void{if(!id||this.timelineActions.has(id))throw new TypeError(`Duplicate timeline action ${id}`);this.timelineActions.set(id,handler);return()=>{if(this.timelineActions.get(id)===handler)this.timelineActions.delete(id);};}
   async act(recordId:number,capability:string):Promise<unknown>{const entry=runtimeTimelineEntry(recordId);if(!entry)throw new TypeError(`Unknown timeline record ${recordId}`);if(!entry.capabilities.some(item=>item.id===capability))throw new TypeError(`Timeline record ${recordId} does not expose ${capability}`);const action=this.timelineActions.get(capability);if(!action)throw new TypeError(`No runtime action registered for ${capability}`);return await action(entry);}
   inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false},memory:{structures:runtimeMemorySnapshot()},timeline:{records:this.timeline(),gantt:this.gantt()}};}
