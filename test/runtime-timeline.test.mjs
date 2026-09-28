@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   Scene,beginRuntimeSpan,endRuntimeSpan,recordRuntimeEvent,runtimeTimelineSnapshot,projectRuntimeGantt,
-  eventAudioDuration,synthesizeEvent,
+  eventAudioDuration,synthesizeEvent,trackRuntimeMemory,runtimeMemorySnapshot,
 } from '../dist/index.js';
 
 test('runtime timeline preserves lifetime cause refs and declared capabilities',()=>{
@@ -41,4 +41,17 @@ test('Gantt projection groups new runtime kinds and connects causes without UI t
   assert.equal(gantt.rows.find(row=>row.id===root)?.end,4,'open spans extend to current simulation time');
   assert.equal(gantt.rows.find(row=>row.id===child)?.capabilities[0]?.id,'custom.action');
   endRuntimeSpan(root,4);
+});
+
+test('task manager projects live runtime memory without UI type knowledge',()=>{
+  const owner='test-memory-gantt-'+Date.now(),cache=trackRuntimeMemory(owner,'mesh-cache','cache',new Map(),16);
+  cache.set('mesh',1);
+  const memory=runtimeMemorySnapshot().filter(entry=>entry.owner===owner),gantt=projectRuntimeGantt([],2,memory);
+  const row=gantt.rows.find(item=>item.label==='mesh-cache');
+  assert.equal(row?.kind,'memory:cache');
+  assert.equal(row?.open,true);
+  assert.equal(row?.end,2);
+  assert.equal(row?.data.items,1);
+  assert.equal(row?.data.capacity,16);
+  assert.ok(gantt.groups.some(group=>group.id===owner+'/memory:cache'));
 });
