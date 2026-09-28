@@ -1,6 +1,7 @@
 import {readdir,readFile} from 'node:fs/promises';
 import {join,relative} from 'node:path';
-import * as ts from 'typescript';
+import * as TypeScript from 'typescript';
+const ts=TypeScript.default??TypeScript;
 
 async function files(dir){
   const out=[];for(const entry of await readdir(dir,{withFileTypes:true})){
