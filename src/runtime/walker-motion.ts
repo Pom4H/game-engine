@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import type {Vec3} from '../math.js';
 export interface WalkBox {readonly min:Vec3;readonly max:Vec3}
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
@@ -16,8 +17,8 @@ function hit(origin:Vec3,delta:Vec3,box:WalkBox,pad:Vec3):{time:number;axis:numb
 /** Static kinematic walking queries. Obstacles come from scene geometry before
  * render batching, not material/triangle batches whose bounds span the street. */
 export class WalkWorld {
- private readonly cells=new Map<string,WalkBox[]>();
- constructor(readonly boxes:readonly WalkBox[],readonly bounds:WalkBox){
+ private readonly cells=trackRuntimeMemory('WalkWorld','cells','index',new Map<string,WalkBox[]>());
+ constructor(readonly boxes:readonly WalkBox[],readonly bounds:WalkBox){trackRuntimeInstance('WalkWorld',this);
   for(const b of [...boxes,bounds])if(![...b.min,...b.max].every(Number.isFinite)||b.min.some((v,k)=>v>=b.max[k]!))throw new RangeError('Invalid walking bounds');
   for(const b of boxes)for(let x=Math.floor(b.min[0]/4);x<=Math.floor(b.max[0]/4);x++)for(let z=Math.floor(b.min[2]/4);z<=Math.floor(b.max[2]/4);z++){
    const key=x+':'+z,list=this.cells.get(key)??[];list.push(b);this.cells.set(key,list);
