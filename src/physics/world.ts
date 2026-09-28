@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import {SpatialHash} from '../core/spatial-hash.js';
 import {material,type PhysicalMaterial} from '../materials/catalog.js';
 import type {MutableVec3,Vec3} from '../math.js';
@@ -111,8 +112,8 @@ export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodi
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
   surfaceFrictionAt?:(body:RigidBody,point:Vec3)=>number;
-  readonly bodies=new Map<string,RigidBody>();
-  readonly contacts:Contact[]=[];
+  readonly bodies=trackRuntimeMemory('PhysicsWorld','bodies','state',new Map<string,RigidBody>());
+  readonly contacts=trackRuntimeMemory('PhysicsWorld','contacts','queue',[] as Contact[]);
   readonly index:SpatialHash<RigidBody>;
   steps=0;substeps=0;
   constructor(
@@ -120,7 +121,7 @@ export class PhysicsWorld {
     readonly ground=0,
     cellSize=8,
     readonly groundMaterial:PhysicalMaterial=material('concrete'),
-  ){this.index=new SpatialHash<RigidBody>(cellSize);}
+  ){trackRuntimeInstance('PhysicsWorld',this);this.index=new SpatialHash<RigidBody>(cellSize);}
 
   add(body:RigidBody):RigidBody{if(this.bodies.has(body.id))throw new TypeError(`Duplicate body ${body.id}`);this.bodies.set(body.id,body);return body;}
   remove(id:string):boolean{return this.bodies.delete(id);}
