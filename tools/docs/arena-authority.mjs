@@ -17,8 +17,9 @@ parentPort.on('message',m=>{
    if(!peers.has(m.peer))throw Error('Unknown peer');
    if(m.action==='leave'){peers.delete(m.peer);if(seat>=0){arena.release(seat);seats[seat]=null;}result={left:true};}
    else if(m.action==='input'){
-    if(seat<0||m.epoch!==epoch)throw Error('Not current driver');
-    result={accepted:arena.input(seat,m.sequence,m.controls),sequence:arena.ack[seat],tick:arena.tick,epoch};
+    if(seat<0)throw Error('Not current driver');
+    // Restart and already-admitted input can cross in the worker queue. Old epochs are normal loss, not a peer failure.
+    result=m.epoch!==epoch?{accepted:false,reason:'stale-epoch',sequence:arena.ack[seat],tick:arena.tick,epoch}:{accepted:arena.input(seat,m.sequence,m.controls),sequence:arena.ack[seat],tick:arena.tick,epoch};
    }else if(m.action==='replay'){if(m.epoch!==epoch)throw Error('Stale epoch');result={epoch,frames:session.history.exportRange(m.from,m.to)};}
    else if(m.action==='restart'){
     if(seat!==0)throw Error('Only first driver may restart this private room');arena.dispose();arena=new CarBallArena();install();result={epoch,frame:publish(true)};

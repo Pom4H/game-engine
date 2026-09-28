@@ -23,7 +23,7 @@ export async function startArenaQuic(host,{port=4433,url,certPath,keyPath}={}){
  if(!Number.isInteger(port)||port<0||port>65535)throw Error('Invalid QUIC port');
  // Provider 0.3.0 exposes the requested port, not the OS-selected port when passed zero.
  // Pick an ephemeral UDP port before opening the native listener; bind failure remains fatal.
- if(port===0){const probe=createSocket('udp4');try{await new Promise((resolve,reject)=>{probe.once('error',reject);probe.bind(0,'127.0.0.1',resolve);});port=probe.address().port;}finally{probe.close();}}
+ if(port===0){const probe=createSocket('udp4');try{await new Promise((resolve,reject)=>{probe.once('error',reject);probe.bind(0,'127.0.0.1',resolve);});port=probe.address().port;}finally{await new Promise(resolve=>probe.close(resolve));}}
  const local=!url,dir=resolve('.local/arena-quic');let cert=certPath,key=keyPath;
  if(!cert||!key){
   if(!local)throw Error('Public QUIC endpoint requires TLS certificate and key');await mkdir(dir,{recursive:true});cert=resolve(dir,'cert.pem');key=resolve(dir,'key.pem');
@@ -47,12 +47,12 @@ export async function startArenaQuic(host,{port=4433,url,certPath,keyPath}={}){
     const value=await hello(first.value);
     if(done||closed||value.schema!==arenaDatagram.signature||!Number.isInteger(value.mtu)||value.mtu<arenaDatagram.size||value.mtu>65535||typeof value.token!=='string'||active.has(value.token))throw Error('Invalid/duplicate hello');
     binding=host.bindDatagrams(value.token);active.set(binding.token,{stop,get queue(){return queue;}});
-    queue=new DatagramOutbox(bytes=>session.sendDatagram(bytes),()=>performance.now(),50,stop);
+    queue=new DatagramOutbox(bytes=>session.sendDatagram(bytes),()=>performance.now(),50,error=>{stats.lastError=String(error.message??error).slice(0,512);stop();});
     const writer=first.value.writable.getWriter();await writer.write(new TextEncoder().encode(JSON.stringify({ok:true,schema:arenaDatagram.signature,mtu:1200})));await writer.close();writer.releaseLock();
     if(done)return;clearTimeout(timer);stats.accepted++;void streams.read().then(next=>{if(!next.done)stop();},stop);
     unwatch=binding.subscribe(packet=>queue.offer(packet));
     let sequence=0,epoch=0,at=performance.now(),credit=24,busy=false,pending=null;
-    const submit=async()=>{if(busy||done)return;busy=true;try{while(pending&&!done){const m=pending;pending=null;await binding.input(m);}}catch{stop();}finally{busy=false;}};
+    const submit=async()=>{if(busy||done)return;busy=true;try{while(pending&&!done){const m=pending;pending=null;await binding.input(m);}}catch(error){stats.lastError=String(error.message??error).slice(0,512);stop();}finally{busy=false;}};
     for await(const bytes of session.incomingDatagrams()){
      if(done)break;const now=performance.now();credit=Math.min(24,credit+(now-at)*.12);at=now;if(--credit<0)throw Error('Input rate exceeded');
      let message;try{message=decodeArcadeInput(bytes);}catch{stats.malformed++;continue;}

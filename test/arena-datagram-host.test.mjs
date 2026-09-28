@@ -31,3 +31,19 @@ test('datagram room keeps reliable bootstrap identical to wire state and denies 
  peer.release();assert.equal((await send('ping',token)).status,403);
  await assert.rejects(()=>peer.input({epoch:reset.data.epoch,sequence:2,controls:idleInput()}));
 });
+
+// The host can admit a packet before learning that a queued restart changed the worker epoch.
+// Validate again AT the authority; rejecting obsolete input must not kill the QUIC peer.
+test('in-flight old input crossing restart is dropped at the authority without consuming the new sequence',async t=>{
+ const {Worker}=await import('node:worker_threads');
+ const worker=new Worker(new URL('../tools/docs/arena-authority.mjs',import.meta.url),{workerData:{epoch:100,datagrams:true}}),pending=new Map();let id=0;
+ t.after(()=>worker.terminate());
+ worker.on('message',m=>{const p=pending.get(m.id);if(!p)return;pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(JSON.parse(m.text));});
+ const ask=data=>new Promise((resolve,reject)=>{const serial=++id,timer=setTimeout(()=>{pending.delete(serial);reject(Error('Authority response timeout'));},5000);pending.set(serial,{resolve,reject,timer});worker.postMessage({...data,id:serial,peer:'owned-driver'});});
+ const first=await ask({action:'join'});
+ const restarting=ask({action:'restart'});
+ const crossing=ask({action:'input',epoch:first.epoch,sequence:0x7fffffff,controls:idleInput()});
+ const [next,discarded]=await Promise.all([restarting,crossing]);
+ assert.equal(discarded.accepted,false);assert.equal(discarded.reason,'stale-epoch');assert.equal(discarded.sequence,0);assert.equal(discarded.epoch,next.epoch);
+ const accepted=await ask({action:'input',epoch:next.epoch,sequence:1,controls:idleInput()});assert.equal(accepted.accepted,true);assert.equal(accepted.sequence,1);
+});
