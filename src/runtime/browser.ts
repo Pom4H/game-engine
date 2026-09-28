@@ -7,13 +7,14 @@ import {FixedClock} from '../core/fixed-clock.js';
 import {runtimeMemorySnapshot,trackRuntimeInstance,trackRuntimeMemory} from '../core/runtime-memory.js';
 import {beginRuntimeSpan,endRuntimeSpan,recordRuntimeEvent,runtimeTimelineEntry,runtimeTimelinePayload,runtimeTimelineSnapshot,type RuntimeTimelineEntry} from '../core/runtime-timeline.js';
 import {projectRuntimeGantt} from '../core/runtime-gantt.js';
+import {RuntimeTaskManager} from './task-manager.js';
 import {Scene} from '../scene/scene.js';
 import type {EngineEvent} from '../scene/events.js';
 import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
-export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean}
+export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean;taskManager?:boolean}
 type TimelineAction=(entry:RuntimeTimelineEntry)=>unknown|Promise<unknown>;
 
 export class BrowserRuntime {
@@ -30,6 +31,7 @@ export class BrowserRuntime {
   private disposed=false;
   private publishedBridge:EngineBridge|null=null;
   private readonly timelineActions=trackRuntimeMemory('BrowserRuntime','timelineActions','registry',new Map<string,TimelineAction>());
+  private readonly taskManager:RuntimeTaskManager|null;
 
   private constructor(private readonly canvas:HTMLCanvasElement,scene:SceneSpec,renderer:Renderer,options:BrowserRuntimeOptions){
     trackRuntimeInstance('BrowserRuntime',this);this.initial=structuredClone(scene);this.scene=new Scene(this.initial);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
@@ -44,6 +46,10 @@ export class BrowserRuntime {
     this.registerTimelineAction('rewind',entry=>this.seek(Math.max(0,entry.start-this.stepSeconds)));
     this.registerTimelineAction('audio.play-event',async entry=>{const event=runtimeTimelinePayload<EngineEvent>(entry.id);if(!event)throw new TypeError('Timeline sound has no engine event payload');await this.activateAudio();this.audio?.play([event]);});
     this.registerTimelineAction('audio.play-footstep',async entry=>{const event=runtimeTimelinePayload<FootstepSound>(entry.id);if(!event)throw new TypeError('Timeline footstep has no payload');await this.activateAudio();this.audio?.playFootsteps([event],this.scene.camera,event.time);});
+    this.taskManager=options.taskManager===false||typeof document==='undefined'?null:new RuntimeTaskManager({
+      snapshot:()=>({memory:runtimeMemorySnapshot(),gantt:this.gantt()}),
+      act:(recordId,capability)=>this.act(recordId,capability),
+    });
   }
 
   static async create(canvas:HTMLCanvasElement,scene:SceneSpec,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
@@ -104,9 +110,9 @@ export class BrowserRuntime {
   gantt(){return projectRuntimeGantt(this.timeline(),this.scene.time,runtimeMemorySnapshot());}
   registerTimelineAction(id:string,handler:TimelineAction):()=>void{if(!id||this.timelineActions.has(id))throw new TypeError(`Duplicate timeline action ${id}`);this.timelineActions.set(id,handler);return()=>{if(this.timelineActions.get(id)===handler)this.timelineActions.delete(id);};}
   async act(recordId:number,capability:string):Promise<unknown>{const entry=runtimeTimelineEntry(recordId);if(!entry)throw new TypeError(`Unknown timeline record ${recordId}`);if(!entry.capabilities.some(item=>item.id===capability))throw new TypeError(`Timeline record ${recordId} does not expose ${capability}`);const action=this.timelineActions.get(capability);if(!action)throw new TypeError(`No runtime action registered for ${capability}`);return await action(entry);}
-  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false},memory:{structures:runtimeMemorySnapshot()},timeline:{records:this.timeline(),gantt:this.gantt()}};}
+  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false},memory:{structures:runtimeMemorySnapshot()},timeline:{records:this.timeline(),gantt:this.gantt()},taskManager:this.taskManager?.inspect()??{available:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
-  dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.scene.dispose();this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
+  dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.taskManager?.dispose();this.scene.dispose();this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
 
   private ambientAudioState():AmbientAudioState{
     const windSpeed=Math.hypot(this.scene.environment.wind[0],this.scene.environment.wind[2]);
