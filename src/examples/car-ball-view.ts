@@ -1,3 +1,4 @@
+import {eulerFromQuaternion} from '../physics/rotation.js';
 import {Scene} from '../scene/scene.js';
 import type {EntitySpec,Color} from '../scene/types.js';
 import type {Vec3,MutableVec3} from '../math.js';
@@ -19,7 +20,7 @@ export class CarBallView {
  private readonly local=new ForceFrame();private readonly wheelBasis=new Float64Array(9);private readonly tmp:MutableVec3=[0,0,0];
  private generation=-1;private epoch=-1;private lastTime=-1;
  constructor(){
-  const entities:EntitySpec[]=arenaBoxes.filter(b=>b.visible).map(b=>box(b.id,b.position,b.size,b.id==='floor'?[.06,.16,.13,1]:b.id.startsWith('side')?[.12,.17,.23,1]:b.position[0]<0?[.035,.18,.42,1]:[.4,.115,.035,1]));
+  const entities:EntitySpec[]=arenaBoxes.filter(b=>b.visible).map(b=>({...box(b.id,b.position,b.size,b.id==='floor'?[.06,.16,.13,1]:b.id.startsWith('side')?[.12,.17,.23,1]:b.position[0]<0?[.035,.18,.42,1]:[.4,.115,.035,1]),rotation:b.rotation??[0,0,0]}));
   // Field markings, goal mouths and stands are ordinary engine geometry.
   entities.push(box('halfway',[0,.004,0],[.08,.008,36],[.8,.9,.85,1]));
   entities.push({id:'circle',position:[0,.013,0],mesh:{kind:'torus',radius:5,tube:.04,segments:64},material:{kind:'plastic',color:[.8,.9,.85,1]},collision:'none'});
@@ -29,7 +30,7 @@ export class CarBallView {
    entities.push(box(`goal-line:${s}`,[s*28,.009,0],[.12,.012,10],[.9,.94,.9,1]));
    for(const z of [-17.8,17.8])entities.push(box(`rail:${s}:${z}`,[s*14,1,z],[28,.09,.08],teams[s<0?0:1]!));
   }
-  PADS.forEach((at,i)=>entities.push({id:`pad:${i}`,position:at,mesh:{kind:'cylinder',radius:.8,height:.025,segments:20},material:{kind:'plastic',color:[1,.67,.12,1],emissive:[.3,.13,.01]},collision:'none'}));
+  PADS.forEach((pad,i)=>entities.push({id:`pad:${i}`,position:pad.position,mesh:{kind:'cylinder',radius:pad.amount===100?.8:.45,height:.025,segments:20},material:{kind:'plastic',color:[1,.67,.12,1],emissive:[.3,.13,.01]},collision:'none'}));
   for(let car=0;car<2;car++)for(const part of this.geometry.parts)entities.push({id:`car:${car}/${part.id}`,mesh:part.mesh,material:part.role==='paint'?{...part.material,color:teams[car]!,roughness:.34,metalness:.12,clearcoat:.35,clearcoatRoughness:.25}:part.material??{},collision:'none'});
   entities.push({id:'ball',mesh:{kind:'sphere',radius:1.45},material:{kind:'rubber',color:[.96,.93,.81,1],roughness:.67},collision:'none'});
   this.scene=new Scene({version:1,entities,environment:{temperatureC:20,sunlight:1,humidity:0,groundMoisture:0,precipitation:'arid',snowfall:'none'},camera:{position:[-23,5,8],target:[0,1,0],fov:70},rendering:{sunDirection:[-.3,.9,.45],sunIntensity:2.1,sunColor:[1,.96,.87],skyColor:[.38,.5,.7],fogDensity:.001,shadowExtent:45,exposure:1}});
@@ -43,7 +44,7 @@ export class CarBallView {
   if(this.lastTime===sample.time)return;this.lastTime=sample.time;
   const tmp=this.tmp;
   for(let car=0;car<2;car++){
-   const origin=o[`car${car}`]!,r=o[`rotation${car}`]!,f=this.frames[car]!;f.update([v[r]!,v[r+1]!,v[r+2]!]);
+   const origin=o[`car${car}`]!,r=o[`rotation${car}`]!,f=this.frames[car]!;eulerFromQuaternion(v.subarray(r,r+4),this.tmp);const rotation:MutableVec3=[...this.tmp];f.update(rotation);
    for(const part of this.geometry.parts){
     const e=this.scene.entities.get(`car:${car}/${part.id}`)!;
     tmp.splice(0,3,part.position[0],part.position[1]-.70,part.position[2]);
@@ -52,7 +53,7 @@ export class CarBallView {
     if(match){const wheel=(match[2]==='front'?0:2)+(match[3]==='left'?0:1),compression=v[o.compression!+car*4+wheel]!;
      tmp[1]=.04-.32+compression+.0475;
     }
-    f.rotate(tmp,tmp);for(let k=0;k<3;k++){e.position[k]=v[origin+k]!+tmp[k]!;e.rotation[k]=v[r+k]!;}
+    f.rotate(tmp,tmp);for(let k=0;k<3;k++){e.position[k]=v[origin+k]!+tmp[k]!;e.rotation[k]=rotation[k]!;}
     if(match){
      const wheel=(match[2]==='front'?0:2)+(match[3]==='left'?0:1),spin=v[o.spin!+car*4+wheel]!,steer=match[2]==='front'?v[o.steer!+car]!*.6:0;
      // Compose wheel local frame with the body frame before converting for this renderer.

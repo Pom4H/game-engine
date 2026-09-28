@@ -1,3 +1,4 @@
+import {sampleQuaternion} from '../physics/rotation.js';
 import {Projection,type Frame,type Row,safeInteger} from './projection.js';
 /** Adapted from thegame PlaybackClock at 4e7a577. Wall-time arrival never becomes render time.
  * No extrapolation after the newest cause; starvation is observable, not fabricated motion. */
@@ -59,9 +60,12 @@ export class Replica{
   for(const row of a.rows){
    let view=this.slots.get(row.id);if(!view){view={id:row.id,generation:row.generation,values:new Float64Array(this.projection.stride),seen:serial};this.slots.set(row.id,view);this.stats.allocations++;}
    view.generation=row.generation;const other=next.get(row.id),blend=other?.generation===row.generation;
-   for(const {offset,field} of this.projection.layout)for(let k=0;k<field.width;k++){
+   for(const {offset,field} of this.projection.layout){
+    if(field.sample==='quaternion'){sampleQuaternion(row.values,blend?other!.values:row.values,offset,alpha,view.values);continue;}
+    for(let k=0;k<field.width;k++){
     const j=offset+k,x=row.values[j]!,y=blend?other!.values[j]!:x;
     view.values[j]=field.sample==='step'?x:field.sample==='angle'?x+Math.atan2(Math.sin(y-x),Math.cos(y-x))*alpha:x+(y-x)*alpha;
+   }
    }
    out.rows.push(view);view.seen=serial;
   }

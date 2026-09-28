@@ -1,3 +1,5 @@
+import {advanceRotation} from './rotation.js';
+import {groundSupport,type WheelSupport} from './wheel-support.js';
 import {SpatialHash} from '../core/spatial-hash.js';
 import {material,type PhysicalMaterial} from '../materials/catalog.js';
 import type {MutableVec3,Vec3} from '../math.js';
@@ -118,6 +120,8 @@ export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodi
 
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
+  wheelSupport:WheelSupport;
+  private readonly rotationScratch=new Float64Array(4);
   surfaceFrictionAt?:(body:RigidBody,point:Vec3)=>number;
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
@@ -129,7 +133,7 @@ export class PhysicsWorld {
     readonly ground=0,
     cellSize=8,
     readonly groundMaterial:PhysicalMaterial=material('concrete'),
-  ){this.index=new SpatialHash<RigidBody>(cellSize);}
+  ){this.index=new SpatialHash<RigidBody>(cellSize);this.wheelSupport=groundSupport(ground);}
 
   add(body:RigidBody):RigidBody{if(this.bodies.has(body.id))throw new TypeError(`Duplicate body ${body.id}`);this.bodies.set(body.id,body);return body;}
   drive(body:RigidBody,driver:PhysicsForceDriver):()=>void{
@@ -174,14 +178,14 @@ export class PhysicsWorld {
     }
     for(const body of this.bodies.values())if(body.kinematic){
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
-      body.rotation[0]+=body.angularVelocity[0]*dt;body.rotation[1]+=body.angularVelocity[1]*dt;body.rotation[2]+=body.angularVelocity[2]*dt;
+      advanceRotation(body.rotation,body.angularVelocity,dt,this.rotationScratch);
     }
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping){
       body.supportedThisStep=false;
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
       const airAngular=Math.exp(-.08*dt);body.angularVelocity[0]*=airAngular;body.angularVelocity[1]*=airAngular;body.angularVelocity[2]*=airAngular;
-      body.rotation[0]+=body.angularVelocity[0]*dt;body.rotation[1]+=body.angularVelocity[1]*dt;body.rotation[2]+=body.angularVelocity[2]*dt;
+      advanceRotation(body.rotation,body.angularVelocity,dt,this.rotationScratch);
       this.resolveGround(body,dt);
     }
     this.rebuildIndex();

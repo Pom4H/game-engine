@@ -16,30 +16,51 @@ export function readArcadeInput(raw:unknown):ArcadeInput {
 /** Rocket-car force recipe on the existing four-wheel vehicle and ONE world integrator.
  * +X forward, +Y up. Values tune a game, not a claim of Rocket League numerical parity. */
 export class ArcadeVehicle extends Vehicle {
- input=idleInput();boost=100;grounded=false;jumps=0;airTime=0;private held=0;private lock=0;private consumedJump=0;private flip=0;
+ input=idleInput();boost=100;grounded=false;jumps=0;airTime=0;private held=0;private lock=0;private consumedJump=0;private flip=0;private resetContact=0;
+ readonly supportNormal:[number,number,number]=[0,1,0];wheelContacts=0;
+ /** Arcade adhesion only while wheels contact an authored surface. */
+ adhesionAcceleration=28;
  private readonly flipAxis:[number,number,number]=[0,0,0];
- readonly stats={jumps:0,dodges:0,boostSeconds:0};
+ readonly stats={jumps:0,dodges:0,boostSeconds:0,resets:0};
  override evaluate(dt:number):void {
   const b=this.body,i=this.input;this.frame.update(b.rotation);const basis=this.frame.basis;
   const speed=b.velocity[0]*basis[0]!+b.velocity[1]*basis[1]!+b.velocity[2]*basis[2]!;
   this.setControls({throttle:i.throttle*(Math.abs(speed)>32&&Math.sign(speed)===Math.sign(i.throttle)?0:1),steer:i.steer,handbrake:i.slide?1:0,brake:i.throttle===0?0:Math.sign(speed)!==Math.sign(i.throttle)&&Math.abs(speed)>1?1:0});
   super.evaluate(dt);
   this.lock=Math.max(0,this.lock-dt);
-  let supported=0;for(const p of this.blueprint.parts)if(p.source.kind==='wheel'&&this.part(p.source.id).loadN>this.body.mass*.4)supported++;
+  let supported=0;this.supportNormal.fill(0);
+  for(const p of this.blueprint.parts)if(p.source.kind==='wheel'){
+   const sample=this.part(p.source.id);if(sample.contact){supported++;for(let k=0;k<3;k++)this.supportNormal[k]!+=sample.contactNormal[k]!;}
+  }
+  this.wheelContacts=supported;const norm=Math.hypot(...this.supportNormal);if(norm>1e-8)for(let k=0;k<3;k++)this.supportNormal[k]!/=norm;
   this.grounded=this.lock===0&&supported>=2;
-  if(this.grounded){this.airTime=0;this.jumps=0;}else this.airTime+=dt;
+  this.resetContact=this.lock===0&&supported===4?this.resetContact+dt:0;
+  if(this.resetContact>=.02){if(this.jumps>0)this.stats.resets++;this.jumps=0;this.airTime=0;this.flip=0;}
+  else if(!this.grounded)this.airTime+=dt;
+  if(this.grounded){
+   const n=this.supportNormal,adhesion=this.adhesionAcceleration*(1-Math.max(0,n[1]));
+   for(let k=0;k<3;k++)this.force[k]!-=n[k]!*b.mass*adhesion;
+   // Steer the wheel-supported chassis toward the mean surface normal using torque, not pose snaps.
+   const up=[basis[3]!,basis[4]!,basis[5]!],error=[up[1]!*n[2]-up[2]!*n[1],up[2]!*n[0]-up[0]!*n[2],up[0]!*n[1]-up[1]!*n[0]];
+   for(const axis of [0,2]){
+    const base=axis*3,rate=b.angularVelocity[0]*basis[base]!+b.angularVelocity[1]*basis[base+1]!+b.angularVelocity[2]*basis[base+2]!;
+    const angle=error[0]!*basis[base]!+error[1]!*basis[base+1]!+error[2]!*basis[base+2]!;
+    const acceleration=angle*45-rate*5;
+    for(let k=0;k<3;k++)this.torque[k]!+=basis[base+k]!*acceleration/b.invInertiaLocal[axis]!;
+   }
+  }
   // A queued rising edge is consumed once, including when it is too late to jump.
   if(i.jumpSerial>this.consumedJump){
    this.consumedJump++;
-   if(this.grounded||this.jumps===1&&this.airTime<1.25){
-    const first=this.grounded;this.jumps=first?1:2;this.lock=.12;this.grounded=false;this.held=first?.18:0;
+   if(this.grounded&&this.jumps===0||!this.grounded&&this.jumps<2&&this.airTime<1.25){
+    const first=this.grounded&&this.jumps===0;this.jumps=first?1:2;this.lock=.12;this.grounded=false;this.held=first?.18:0;
     if(first)this.airTime=0;
     const amount=Math.hypot(i.pitch,i.steer);
     if(!first&&amount>.2){
      const x=-i.pitch/amount,z=i.steer/amount;
      for(let k=0;k<3;k++)b.velocity[k]!+=(basis[k]!*x+basis[6+k]!*z)*8;
      this.flip=.23;this.flipAxis.splice(0,3,z,0,-x);this.stats.dodges++;
-    }else for(let k=0;k<3;k++)b.velocity[k]!+=basis[3+k]!*6;
+    }else for(let k=0;k<3;k++)b.velocity[k]!+=(first?this.supportNormal[k]!:basis[3+k]!)*6;
     b.wake();this.stats.jumps++;
    }
   }
@@ -64,6 +85,6 @@ export class ArcadeVehicle extends Vehicle {
  discardJumpEdges():void {this.consumedJump=this.input.jumpSerial;}
  reset(position:Vec3,rotation:Vec3):void {
   const b=this.body;b.position.splice(0,3,...position);b.rotation.splice(0,3,...rotation);b.velocity.fill(0);b.angularVelocity.fill(0);b.wake();
-  this.boost=100;this.jumps=0;this.airTime=0;this.held=this.flip=this.lock=0;this.consumedJump=this.input.jumpSerial;
+  this.grounded=false;this.wheelContacts=0;this.resetContact=0;this.boost=100;this.jumps=0;this.airTime=0;this.held=this.flip=this.lock=0;this.consumedJump=this.input.jumpSerial;
  }
 }

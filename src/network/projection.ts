@@ -1,6 +1,6 @@
 /** Explicit numeric projections. Unlisted simulation fields never enter a packet.
  * RU: Авторитетное состояние остаётся у симуляции; проекция выбирает только факты. */
-export type Sampling='linear'|'angle'|'step';
+export type Sampling='linear'|'angle'|'step'|'quaternion';
 export interface Field<W extends number=number>{readonly width:W;readonly sample:Sampling;readonly min:number;readonly max:number;readonly buffer?:true;readonly integer?:true}
 export type NumericBuffer=readonly number[]|Float32Array|Float64Array|Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array;
 /** Fixed-size buffers (nodes, joints, packed flags). Width belongs to the installed schema. */
@@ -26,7 +26,7 @@ export class Projection<S extends Fields=Fields>{
  constructor(readonly name:string,readonly fields:S,readonly maxEntities=1024,readonly maxBytes=2_000_000,readonly maxStride=128){
   if(!identity(name)||!safeInteger(maxEntities,1,10000)||!safeInteger(maxBytes,128,16_000_000)||!safeInteger(maxStride,1,32768))throw new RangeError('Invalid projection budget');
   let offset=0;this.layout=Object.freeze(Object.entries(fields).map(([name,f])=>{
-   if(!identity(name)||!safeInteger(f.width,1,maxStride)||(!f.buffer&&![1,3].includes(f.width))||(f.buffer!==undefined&&f.buffer!==true)||(f.integer!==undefined&&f.integer!==true)||(f.integer&&f.sample!=='step')||!['linear','angle','step'].includes(f.sample)||!Number.isFinite(f.min)||!Number.isFinite(f.max)||f.min>f.max)throw new TypeError('Invalid projected field');
+   if(!identity(name)||!safeInteger(f.width,1,maxStride)||(!f.buffer&&![1,3].includes(f.width))||(f.buffer!==undefined&&f.buffer!==true)||(f.integer!==undefined&&f.integer!==true)||(f.integer&&f.sample!=='step')||!['linear','angle','step','quaternion'].includes(f.sample)||(f.sample==='quaternion'&&f.width!==4)||!Number.isFinite(f.min)||!Number.isFinite(f.max)||f.min>f.max)throw new TypeError('Invalid projected field');
    const entry=Object.freeze({name,offset,field:Object.freeze({...f})});offset+=f.width;return entry;
   }));if(offset<1||offset>maxStride)throw new RangeError('Projection stride exceeds budget');this.stride=offset;
   this.signature=JSON.stringify([name,this.layout.map(x=>[x.name,x.field.width,x.field.sample,x.field.min,x.field.max,...(x.field.buffer?['buffer']:[]),...(x.field.integer?['integer']:[])])]);
@@ -41,6 +41,7 @@ export class Projection<S extends Fields=Fields>{
     if(!single&&((!Array.isArray(raw)&&!ArrayBuffer.isView(raw))||!('length' in raw)||raw.length!==field.width))throw new TypeError(`Invalid ${source.id}.${name}`);
     for(let k=0;k<field.width;k++){const value=single?raw:(raw as NumericBuffer)[k];if(!numeric(value,field))throw new TypeError(`Invalid ${source.id}.${name}`);values.push(value);}
    }
+   for(const e of this.layout)if(e.field.sample==='quaternion'&&Math.abs(Math.hypot(...values.slice(e.offset,e.offset+4))-1)>1e-5)throw new TypeError('Quaternion must be normalized');
    rows.push(Object.freeze({id:source.id,generation:source.generation??0,values:Object.freeze(values)}));
   }
   this.stats.captures++;this.stats.records+=rows.length;return Object.freeze({...at,schema:this.signature,rows:Object.freeze(rows)});
@@ -54,6 +55,7 @@ export class Projection<S extends Fields=Fields>{
   for(const r of f.rows){
    if(!r||!identity(r.id)||ids.has(r.id)||!safeInteger(r.generation)||!Array.isArray(r.values)||r.values.length!==this.stride)throw new TypeError('Invalid projection row');ids.add(r.id);
    for(const e of this.layout)for(let k=0;k<e.field.width;k++)if(!numeric(r.values[e.offset+k],e.field))throw new RangeError('Invalid projected number');
+   for(const e of this.layout)if(e.field.sample==='quaternion'&&Math.abs(Math.hypot(...r.values.slice(e.offset,e.offset+4))-1)>1e-5)throw new TypeError('Quaternion must be normalized');
    rows.push(Object.freeze({id:r.id,generation:r.generation,values:Object.freeze([...r.values])}));
   }
   return Object.freeze({epoch:f.epoch,sequence:f.sequence,tick:f.tick,time:f.time,paused:f.paused,schema:f.schema,rows:Object.freeze(rows)});

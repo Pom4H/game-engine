@@ -9,3 +9,4 @@ export {PresentationLOD,projectedRadiusPx} from '../render/presentation-lod.js';
 export {populationCells,populationProjection} from './population.js';
 export {StructuralProjection} from './structure.js';
 export type {StructuralSource,StructuralView} from './structure.js';
+export {SnapshotDatagram,DatagramOutbox} from './datagram.js';

@@ -4,3 +4,5 @@ artifacts/
 .DS_Store
 *.log
 .site/
+
+.local/

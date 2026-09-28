@@ -5,13 +5,14 @@ import {randomBytes} from 'node:crypto';
 import {mkdirSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {LatestStateOutbox} from '../../dist/network/projection.js';
-export function debugNetworkHost({arena=false,publicOrigin}={}){
+export function debugNetworkHost({arena=false,publicOrigin,datagrams=false}={}){
+ const listeners=new Set();let transport=null;
  const prefix=arena?'/arena-network/':'/debug-network/',peers=new Map();
  const token=randomBytes(32).toString('hex'),viewers=new Set(),pending=new Map();let worker=null,serial=0,latest=null,meta=null,closed=false;
  const stats={publications:0,replaced:0,viewers:0},heapPath=process.env.NETWORK_HEAP==='1'?resolve('artifacts/network-private/authority.heapsnapshot'):undefined;
  if(heapPath)mkdirSync(resolve('artifacts/network-private'),{recursive:true});
- function boot(){if(worker)return;worker=new Worker(new URL(arena?'./arena-authority.mjs':'./network-authority.mjs',import.meta.url),{workerData:{epoch:Date.now(),heapPath},resourceLimits:{maxOldGenerationSizeMb:512}});
-  worker.on('message',m=>{if(m.kind==='frame'){latest=m;stats.publications++;for(const v of viewers){v.out.offer(m.text);flush(v);}return;}if(m.kind==='error'){for(const v of viewers)v.res.write(`event: fault\ndata: ${JSON.stringify(m.error)}\n\n`);return;}
+ function boot(){if(worker)return;worker=new Worker(new URL(arena?'./arena-authority.mjs':'./network-authority.mjs',import.meta.url),{workerData:{epoch:Date.now(),heapPath,datagrams},resourceLimits:{maxOldGenerationSizeMb:512}});
+  worker.on('message',m=>{if(m.kind==='frame'){latest=m;stats.publications++;if(m.packet)for(const fn of listeners)fn(m.packet);for(const v of viewers){if(m.text){v.out.offer(m.text);flush(v);}}return;}if(m.kind==='error'){for(const v of viewers)v.res.write(`event: fault\ndata: ${JSON.stringify(m.error)}\n\n`);return;}
    const p=pending.get(m.id);if(!p)return;pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(new Error(m.error)):p.resolve({text:m.text,ready:m.ready});});
   worker.on('error',error=>{for(const p of pending.values()){clearTimeout(p.timer);p.reject(error);}pending.clear();peers.clear();worker=null;latest=null;meta=null;for(const v of viewers)v.res.end();viewers.clear();});
  }
@@ -22,6 +23,15 @@ export function debugNetworkHost({arena=false,publicOrigin}={}){
  function json(res,value,status=200){res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'});res.end(JSON.stringify(value));}
  const heartbeat=setInterval(()=>{if(arena)for(const [peer,p] of peers)if(Date.now()-p.at>10000){peers.delete(peer);for(const v of viewers)if(v.peer===peer)v.res.end();void ask({action:'leave',peer}).catch(()=>{});}for(const v of viewers)if(!v.blocked)v.blocked=!v.res.write(': heartbeat\n\n');},1000);
  return {
+  configureTransport(value){transport=value;},
+  bindDatagrams(peer){
+   const p=peers.get(peer);if(!p||p.bound)throw Error('Join before QUIC hello');p.bound=true;
+   let detached=false;const owned=new Set();
+   return {token:peer,get epoch(){return latest?.epoch;},subscribe(fn){listeners.add(fn);owned.add(fn);if(latest?.packet)fn(latest.packet);return()=>{listeners.delete(fn);owned.delete(fn);};},
+    async input(message){if(detached||peers.get(peer)!==p)throw Error('Expired peer');p.at=Date.now();if(latest&&message.epoch!==latest.epoch)return;return ask({...message,action:'input',peer});},
+    release(){if(detached)return;detached=true;for(const fn of owned)listeners.delete(fn);owned.clear();if(peers.get(peer)===p){peers.delete(peer);void ask({action:'leave',peer}).catch(()=>{});}},
+   };
+  },
   async handle(req,res){
    const path=new URL(req.url,'http://localhost').pathname;if(!path.startsWith(prefix))return false;
    try{
@@ -31,9 +41,10 @@ export function debugNetworkHost({arena=false,publicOrigin}={}){
     if(!publicOrigin&&!['127.0.0.1','localhost','[::1]'].includes(new URL(expected).hostname))throw new Error('Invalid debug host');
     if(origin&&origin!==expected||req.headers['sec-fetch-site']==='cross-site')throw new Error('Cross-origin debug request denied');
     if(!arena&&path===prefix+'config'&&req.method==='GET'){json(res,{token,enabled:true});return true;}
-    if(path===prefix+'status'&&req.method==='GET'){json(res,{epoch:latest?.epoch,tick:latest?.tick,paused:latest?.paused,...stats,viewers:viewers.size});return true;}
+    if(path===prefix+'status'&&req.method==='GET'){json(res,{epoch:latest?.epoch,tick:latest?.tick,paused:latest?.paused,...stats,viewers:viewers.size,transport:transport?.inspect()??{mode:'sse'}});return true;}
     if(!arena&&path===prefix+'manifest'&&req.method==='GET'){if(!meta)throw new Error('No debug session');raw(res,meta);return true;}
     if(path===prefix+'events'&&req.method==='GET'){
+     if(arena&&datagrams)throw new Error('This room uses UDP/WebTransport; SSE is not a fallback');
      if(arena&&!peers.has(req.headers['x-debug-token']))throw new Error('Join before watching');
      if(viewers.size>=8||!worker)throw new Error('No session or viewer capacity reached');
      res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-store','connection':'keep-alive','x-accel-buffering':'no'});
@@ -45,11 +56,12 @@ export function debugNetworkHost({arena=false,publicOrigin}={}){
      if(action==='join'){
       if(peers.size>=8)throw new Error('Room full');
       const peer=randomBytes(24).toString('hex'),result=await ask({action:'join',peer});peers.set(peer,{at:Date.now()});
-      json(res,{...JSON.parse(result.text),token:peer});return true;
+      json(res,{...JSON.parse(result.text),token:peer,transport:transport?.config??{mode:'sse'}});return true;
      }
      const peer=req.headers['x-debug-token'],session=peers.get(peer);if(!session){json(res,{error:'Join required'},403);return true;}
      session.at=Date.now();
      if(!['input','leave','replay','restart','ping'].includes(action))throw new Error('Unknown arena command');
+     if(datagrams&&action==='input')throw Error('Continuous input requires QUIC datagrams');
      const data=await body(req);const result=await ask({...data,action,peer});if(action==='leave'){peers.delete(peer);for(const v of viewers)if(v.peer===peer)v.res.end();}raw(res,result.text);return true;
     }
     if(req.method!=='POST'||req.headers['x-debug-token']!==token){json(res,{error:'Debug command denied'},403);return true;}
@@ -61,6 +73,6 @@ export function debugNetworkHost({arena=false,publicOrigin}={}){
    }catch(error){json(res,{error:String(error.message??error)},400);}
    return true;
   },
-  dispose(){closed=true;clearInterval(heartbeat);for(const v of viewers)v.res.end();viewers.clear();for(const p of pending.values()){clearTimeout(p.timer);p.reject(new Error('Host disposed'));}pending.clear();void worker?.terminate();},
+  dispose(){closed=true;listeners.clear();void transport?.close();clearInterval(heartbeat);for(const v of viewers)v.res.end();viewers.clear();for(const p of pending.values()){clearTimeout(p.timer);p.reject(new Error('Host disposed'));}pending.clear();void worker?.terminate();},
  };
 }

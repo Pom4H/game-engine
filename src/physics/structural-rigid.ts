@@ -1,6 +1,7 @@
 import type {Vec3,MutableVec3} from '../math.js';
 import {V3} from '../math.js';
 import {RigidBody,applyInvInertiaWorld} from './world.js';
+import {advanceRotation} from './rotation.js';
 import {ForceFrame} from './force-frame.js';
 import type {StructuralBody} from './structure.js';
 
@@ -12,18 +13,22 @@ type Hit={node:number;rigid:RigidBody;normal:Vec3;point:Vec3;incoming:number;lam
 export class StructuralRigidContacts {
  private readonly hits:Hit[]=[];private readonly keys=new Map<string,Hit>();
  private readonly frames=new Map<RigidBody,ForceFrame>();private dt=0;
+ private readonly bounds=new Map<RigidBody,Float64Array>();
+ private readonly rotationScratch=new Float64Array(4);
  contacts=0;maxPenetration=0;
  constructor(readonly bodies:readonly RigidBody[],readonly surfaceNodes:number,readonly restitution=.68,readonly friction=.4){
   if(!Number.isSafeInteger(surfaceNodes)||surfaceNodes<1||bodies.some(b=>b.shape.kind!=='box'))throw new TypeError('Surface nodes and box colliders required');
-  for(const b of bodies)this.frames.set(b,new ForceFrame());
+  for(const b of bodies){this.frames.set(b,new ForceFrame());this.bounds.set(b,new Float64Array(6));}
  }
- begin(dt:number):void {if(!Number.isFinite(dt)||dt<=0||dt>1/30)throw new RangeError('Contact dt');this.dt=dt;this.hits.length=0;this.keys.clear();for(const [b,f] of this.frames)f.update(b.rotation);}
+ begin(dt:number):void {if(!Number.isFinite(dt)||dt<=0||dt>1/30)throw new RangeError('Contact dt');this.dt=dt;this.hits.length=0;this.keys.clear();for(const b of this.bodies)this.updateBounds(b);}
  project=(soft:StructuralBody):void=>{
   if(this.surfaceNodes>soft.nodeCount)throw new RangeError('Contact topology mismatch');
   for(let node=0;node<this.surfaceNodes;node++){
    const j=node*3;
    for(const b of this.bodies){
-    const basis=this.frames.get(b)!.basis,half=b.collisionHalf!,p=soft.position;
+    const p=soft.position,bound=this.bounds.get(b)!;
+    if(p[j]!<bound[0]!||p[j]!>bound[3]!||p[j+1]!<bound[1]!||p[j+1]!>bound[4]!||p[j+2]!<bound[2]!||p[j+2]!>bound[5]!)continue;
+    const basis=this.frames.get(b)!.basis,half=b.collisionHalf!;
     const dx=p[j]!-b.position[0],dy=p[j+1]!-b.position[1],dz=p[j+2]!-b.position[2];
     const x=dx*basis[0]!+dy*basis[1]!+dz*basis[2]!-b.collisionOffsetLocal[0],y=dx*basis[3]!+dy*basis[4]!+dz*basis[5]!-b.collisionOffsetLocal[1],z=dx*basis[6]!+dy*basis[7]!+dz*basis[8]!-b.collisionOffsetLocal[2];
     if(Math.abs(x)>=half[0]||Math.abs(y)>=half[1]||Math.abs(z)>=half[2])continue;
@@ -36,9 +41,9 @@ export class StructuralRigidContacts {
     hit.lambda+=lambda;this.maxPenetration=Math.max(this.maxPenetration,gaps[axis]!);
     for(let k=0;k<3;k++){
      p[j+k]!+=n[k]!*lambda*soft.inverseMass[node]!;
-     if(b.invMass){b.position[k]!-=n[k]!*lambda*b.invMass;b.velocity[k]!-=n[k]!*lambda*b.invMass/this.dt;b.rotation[k]!-=angular[k]!*lambda;b.angularVelocity[k]!-=angular[k]!*lambda/this.dt;}
+     if(b.invMass){b.position[k]!-=n[k]!*lambda*b.invMass;b.velocity[k]!-=n[k]!*lambda*b.invMass/this.dt;b.angularVelocity[k]!-=angular[k]!*lambda/this.dt;}
     }
-    if(b.invMass){b.wake();this.frames.get(b)!.update(b.rotation);}
+    if(b.invMass){advanceRotation(b.rotation,angular,-lambda,this.rotationScratch);b.wake();this.updateBounds(b);}
    }
   }
  };
@@ -54,6 +59,11 @@ export class StructuralRigidContacts {
    if(speed>1e-8){const dir=V3.scale(tangent,1/speed),c=V3.cross(arm,dir),inv=soft.inverseMass[node]!+b.invMass+(b.invMass?V3.dot(c,applyInvInertiaWorld(b,c)):0);
     this.impulse(soft,node,b,point,V3.scale(dir,-Math.min(speed/inv,Math.min(this.friction,b.friction)*(h.lambda/this.dt+impulse))));}
   }
+ }
+ /** Conservative AABB rejects remote OBBs before local-space arithmetic. Refresh after every correction. */
+ private updateBounds(b:RigidBody):void {
+  const frame=this.frames.get(b)!;frame.update(b.rotation);const m=frame.basis,h=b.collisionHalf!,o=b.collisionOffsetLocal,a=this.bounds.get(b)!;
+  for(let k=0;k<3;k++){const center=b.position[k]!+m[k]!*o[0]+m[3+k]!*o[1]+m[6+k]!*o[2],extent=Math.abs(m[k]!)*h[0]+Math.abs(m[3+k]!)*h[1]+Math.abs(m[6+k]!)*h[2];a[k]=center-extent-1e-10;a[k+3]=center+extent+1e-10;}
  }
  private relative(s:StructuralBody,node:number,b:RigidBody,p:Vec3,n:Vec3):number {
   const spin=V3.cross(b.angularVelocity,V3.sub(p,b.position));let v=0;for(let k=0;k<3;k++)v+=(s.velocity[node*3+k]!-b.velocity[k]!-spin[k]!)*n[k]!;return v;

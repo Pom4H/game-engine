@@ -6,7 +6,10 @@ const root=resolve(fileURLToPath(new URL('../..',import.meta.url)),process.env.D
 const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8','.cjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.ts':'text/plain; charset=utf-8','.png':'image/png'};
 const network=process.env.NETWORK_DEBUG==='1'?(await import('./network-host.mjs')).debugNetworkHost():null;
 if(network&&!['127.0.0.1','localhost','::1'].includes(process.env.HOST??'127.0.0.1'))throw new Error('Debug network must bind to loopback');
-const arena=process.env.ARENA==='1'?(await import('./network-host.mjs')).debugNetworkHost({arena:true,publicOrigin:process.env.ARENA_PUBLIC_ORIGIN}):null;
+const useDatagrams=process.env.ARENA_TRANSPORT!=='sse';
+const arena=process.env.ARENA==='1'?(await import('./network-host.mjs')).debugNetworkHost({arena:true,publicOrigin:process.env.ARENA_PUBLIC_ORIGIN,datagrams:useDatagrams}):null;
+let quic=null;
+if(arena&&useDatagrams){quic=await (await import('../transport/server.mjs')).startArenaQuic(arena,{port:Number(process.env.ARENA_QUIC_PORT??4433),url:process.env.ARENA_QUIC_URL,certPath:process.env.ARENA_TLS_CERT,keyPath:process.env.ARENA_TLS_KEY});arena.configureTransport(quic);}
 const server=createServer(async(req,res)=>{
  if(network&&await network.handle(req,res))return;
  if(arena&&await arena.handle(req,res))return;
@@ -20,7 +23,7 @@ const server=createServer(async(req,res)=>{
   const headers={'content-type':mime[extname(file)]??'application/octet-stream','cache-control':'no-cache','x-content-type-options':'nosniff'};
   // Compiler executes LOCAL authored code in a killable worker. Not an authority/security sandbox.
   // No networking from compiler code. Dynamic imports of local engine modules use script-src.
-  headers['content-security-policy']="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; worker-src 'self'; connect-src "+(pathname==='compiler-worker.js'?"'none'":"'self'")+"; media-src blob:; base-uri 'none'; frame-ancestors 'none'";
+  headers['content-security-policy']="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; worker-src 'self'; connect-src "+(pathname==='compiler-worker.js'?"'none'":("'self'"+(quic?" "+new URL(quic.config.url).origin:"")))+"; media-src blob:; base-uri 'none'; frame-ancestors 'none'";
   const body=await readFile(file);res.writeHead(200,headers);res.end(body);
  }catch{res.writeHead(404,{'content-type':'text/plain'});res.end('Not found');}
 });

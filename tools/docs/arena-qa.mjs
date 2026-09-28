@@ -13,7 +13,7 @@ if(!chrome)throw Error('CHROME_PATH must identify native Chrome with WebGPU');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function port(){const s=createServer();await new Promise((ok,no)=>{s.once('error',no);s.listen(0,'127.0.0.1',ok);});const n=s.address().port;await new Promise(ok=>s.close(ok));return n;}
 const http=await port(),debug=await port(),profile=await mkdtemp(join(tmpdir(),'arena-qa-')),connections=[],checks=[],exceptions=[];let stderr='',result={};
-const server=spawn(process.execPath,['tools/docs/server.mjs'],{env:{...process.env,PORT:String(http),ARENA:'1'},stdio:['ignore','pipe','pipe']});server.stderr.on('data',c=>stderr+=c);
+const server=spawn(process.execPath,['tools/docs/server.mjs'],{env:{...process.env,PORT:String(http),ARENA:'1',ARENA_QUIC_PORT:'0',ARENA_TRANSPORT:process.env.ARENA_TRANSPORT??'sse'},stdio:['ignore','pipe','pipe']});server.stderr.on('data',c=>stderr+=c);
 const browser=spawn(chrome,['--headless=new','--no-sandbox','--no-first-run','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu','--enable-gpu','--disable-background-timer-throttling','--disable-renderer-backgrounding',`--user-data-dir=${profile}`,`--remote-debugging-port=${debug}`,'about:blank'],{stdio:['ignore','pipe','pipe']});browser.stderr.on('data',c=>stderr+=c);
 async function connect(page){const ws=new WebSocket(page.webSocketDebuggerUrl);connections.push(ws);await new Promise((ok,no)=>{ws.addEventListener('open',ok,{once:true});ws.addEventListener('error',no,{once:true});});let serial=0;const waiting=new Map();
  ws.addEventListener('message',({data})=>{const m=JSON.parse(String(data));if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params.exceptionDetails.exception?.description??m.params.exceptionDetails.text);const p=waiting.get(m.id);if(p){waiting.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);}});
@@ -31,8 +31,9 @@ try{
  const second=await(await fetch(`http://127.0.0.1:${debug}/json/new?about:blank`,{method:'PUT'})).json(),q=await connect(second);
  await q.send('Page.navigate',{url:`http://127.0.0.1:${http}/docs/arena.html`});await q.wait('globalThis.__ARENA__?.replica?.latest() && __ARENA__.inspect().frames > 5');
  const pages=[p,q];const initial=await Promise.all(pages.map(c=>c.evalJS('__ARENA__.inspect()')));assert.deepEqual(initial.map(i=>i.seat),[0,1]);assert.ok(initial.every(i=>i.renderer.backend==='webgpu'&&i.clientPhysicsSteps===0&&i.clientBodies===0));checks.push('two distinct owned seats; actual WebGPU; zero client physics bodies/steps');await p.capture('arena-kickoff');
+ if(process.env.ARENA_TRANSPORT==='webtransport'){for(const c of pages)await c.wait('__ARENA__.inspect().transport === \'webtransport\'');checks.push('browser requireUnreliable: QUIC datagram transport, no SSE fallback');}
  await p.send('Page.bringToFront');await p.evalJS("document.querySelector('#restart').click()");await p.wait(`__ARENA__.inspect().epoch > ${initial[0].epoch}`);
- // Native input goes through ArcadeControls, the HTTP command route and the authority worker.
+ // Native input goes through ArcadeControls, the selected transport and the authority worker.
  await p.send('Input.dispatchKeyEvent',{type:'keyDown',key:'w',code:'KeyW',windowsVirtualKeyCode:87});
  await p.send('Input.dispatchMouseEvent',{type:'mousePressed',x:650,y:400,button:'left',buttons:1,clickCount:1});await sleep(3800);
  await p.send('Input.dispatchKeyEvent',{type:'keyUp',key:'w',code:'KeyW',windowsVirtualKeyCode:87});await p.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:650,y:400,button:'left',buttons:0,clickCount:1});
@@ -54,7 +55,9 @@ try{
  await p.send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await p.evalJS('__ARENA__.live()');
  await p.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});await p.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await p.capture('arena-mobile');
  const final=await Promise.all(pages.map(c=>c.evalJS('__ARENA__.inspect()')));assert.ok(final.every(i=>i.clientPhysicsSteps===0&&i.clientBodies===0&&i.renderer.errors.length===0));assert.deepEqual(exceptions,[]);
- result={success:true,checks,initial,final,commonFrames:common.length,maxOppositeNodeSpanChange:flex,impactTime:impact.time,recording:recording.stats,exceptions,userAgent:await p.evalJS('navigator.userAgent')};
+ const network=await (await fetch(`http://127.0.0.1:${http}/arena-network/status`)).json();if(process.env.ARENA_TRANSPORT==='webtransport'){assert.ok(network.transport.native.datagramsIn>0&&network.transport.native.datagramsOut>0);assert.ok(network.transport.outboxes.every(q=>q.queued<=2));checks.push('native UDP counters prove bidirectional datagrams; all send queues bounded');}
+ result={success:true,checks,initial,final,network,commonFrames:common.length,maxOppositeNodeSpanChange:flex,impactTime:impact.time,recording:recording.stats,exceptions,userAgent:await p.evalJS('navigator.userAgent')};
 }catch(error){result={success:false,checks,exceptions,error:String(error.stack??error)};process.exitCode=1;
+ try{result.network=await(await fetch(`http://127.0.0.1:${http}/arena-network/status`,{signal:AbortSignal.timeout(2000)})).json();}catch{}
  try{if(connections.length){const pages=await(await fetch(`http://127.0.0.1:${debug}/json/list`)).json();const p=await connect(pages.find(p=>p.type==='page'));await p.capture('arena-failure');result.errorPanel=await p.evalJS('document.querySelector("#error")?.textContent');}}catch{}
 }finally{await writeFile(join(output,'browser-report.json'),JSON.stringify(result,null,2));await writeFile(join(output,'browser-stderr.log'),stderr);for(const ws of connections)ws.close();server.kill();browser.kill();await sleep(200);await rm(profile,{recursive:true,force:true,maxRetries:8,retryDelay:200}).catch(()=>{});console.log(JSON.stringify(result,null,2));}

@@ -2,7 +2,7 @@ name: DSL playground
 on:
   push:
     branches: [codex/adaptive-core]
-    paths: ['src/**', 'tools/docs/**', 'test/dsl-playground.mjs', 'test/engine-console.test.mjs', 'test/recording.test.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
+    paths: ['src/**', 'tools/docs/**', 'tools/transport/**', 'test/datagram.test.mjs', 'test/arena-surfaces.test.mjs', 'test/dsl-playground.mjs', 'test/engine-console.test.mjs', 'test/recording.test.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,6 +21,8 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Install isolated editor compiler (not an engine runtime dependency)
         run: npm install --prefix tools/docs --ignore-scripts --no-audit --no-fund
+      - name: Install native QUIC boundary (same provider as thegame)
+        run: npm install --prefix tools/transport --ignore-scripts --no-audit --no-fund
       - name: Engine typecheck and build
         id: build
         run: bun run typecheck && bun run build
@@ -40,6 +42,8 @@ jobs:
         run: node tools/docs/qa.mjs
       - name: Two-player car-ball native WebGPU acceptance
         if: ${{ always() && steps.build.outcome == 'success' }}
+        env:
+          ARENA_TRANSPORT: webtransport
         run: node tools/docs/arena-qa.mjs
       - name: Full regressions (existing failures remain failures)
         if: ${{ always() && steps.build.outcome == 'success' }}
