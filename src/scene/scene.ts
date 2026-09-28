@@ -70,6 +70,8 @@ export class Scene {
   renderStructureRevision=0;
   /** Shader-only authoring changes; does not invalidate geometry, shadows, probes or culling. */
   appearanceRevision=0;
+  /** Monotonic causal versions consumed by incremental projections. */
+  readonly versions=new Map<string,number>([['entities',0],['appearance',0],['camera',0]]);
   camera:CameraSpec;
   private eventSequence=0;
   private readonly eventQueue:EngineEvent[]=[];
@@ -125,7 +127,7 @@ export class Scene {
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
-    this.entities.set(spec.id,runtime);this.renderStructureRevision++;
+    this.entities.set(spec.id,runtime);this.renderStructureRevision++;this.bump('entities');
     return runtime;
   }
 
@@ -146,13 +148,13 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){this.renderStructureRevision++;this.bump('entities');}
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
     const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,versions:this.versions,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});
@@ -204,7 +206,7 @@ export class Scene {
     }))};
   }
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
-  setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
+  setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);this.bump('camera');}
   patchAppearance(patch:AppearancePatch):void{
     let appearanceChanged=false,structureChanged=false;
     if(patch.rendering){
@@ -225,9 +227,11 @@ export class Scene {
         appearanceChanged=true;
       }
     }
-    if(structureChanged)this.renderStructureRevision++;
-    if(appearanceChanged)this.appearanceRevision++;
+    if(structureChanged){this.renderStructureRevision++;this.bump('entities');}
+    if(appearanceChanged){this.appearanceRevision++;this.bump('appearance');}
   }
+
+  private bump(resource:string):void{this.versions.set(resource,(this.versions.get(resource)??0)+1);}
 
   private syncSurfaceVisuals():void{
     const keep=new Set<string>();
