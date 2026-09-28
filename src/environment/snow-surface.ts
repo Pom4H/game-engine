@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import type {Vec3} from '../math.js';
 import type {EntitySpec,MaterialSpec} from '../scene/types.js';
 import type {SnowFootprint} from './footprints.js';
@@ -35,14 +36,14 @@ export function snowRelief(x:number,z:number,depth=.05,seed=1):number {
  * Scene identity, weather, contact detection and audio are owned by the caller. */
 export class SnowSurface {
  readonly options:Readonly<SnowSurfaceOptions>;
- readonly tiles=new Map<string,Tile>();
- private readonly records:SnowFootprint[]=[];
- private readonly dirty=new Set<string>();
+ readonly tiles=trackRuntimeMemory('SnowSurface','tiles','cache',new Map<string,Tile>());
+ private readonly records=trackRuntimeMemory('SnowSurface','records','history',[] as SnowFootprint[]);
+ private readonly dirty=trackRuntimeMemory('SnowSurface','dirty','queue',new Set<string>());
  private readonly nx:number;private readonly nz:number;private readonly cell:number;private readonly detailCell:number;
  private readonly capacity:number;private readonly detailedBudget:number;
  private heightValue:number;private depth:number;private revision=0;
  constructor(input:SnowSurfaceOptions){
-  if(typeof input.id!=='string'||!input.id||input.id.length>130||input.center.length!==2||input.size.length!==2||[...input.center,...input.size,input.height,input.yaw??0,input.snowDepth??.05].some(v=>!Number.isFinite(v))||input.size.some(v=>v<=0)||input.snowDepth!==undefined&&input.snowDepth<0)throw new TypeError('Invalid snow surface dimensions');
+  trackRuntimeInstance('SnowSurface',this);if(typeof input.id!=='string'||!input.id||input.id.length>130||input.center.length!==2||input.size.length!==2||[...input.center,...input.size,input.height,input.yaw??0,input.snowDepth??.05].some(v=>!Number.isFinite(v))||input.size.some(v=>v<=0)||input.snowDepth!==undefined&&input.snowDepth<0)throw new TypeError('Invalid snow surface dimensions');
   const tileSize=input.tileSize??2,maxTiles=input.maxTiles??256;
   this.cell=input.coarseCellSize??.12;this.detailCell=input.detailedCellSize??.024;this.capacity=input.capacity??256;this.detailedBudget=input.maxDetailedTiles??Math.min(28,maxTiles);
   if(!Number.isFinite(tileSize)||tileSize<=0||!Number.isFinite(this.cell)||this.cell<.025||!Number.isFinite(this.detailCell)||this.detailCell<.012||this.detailCell>this.cell||![maxTiles,this.capacity,this.detailedBudget].every(v=>Number.isSafeInteger(v)&&v>0)||maxTiles>4096||this.capacity>10000||this.detailedBudget>maxTiles)throw new RangeError('Invalid snow surface geometry budget');
