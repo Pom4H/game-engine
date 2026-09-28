@@ -18,7 +18,7 @@ import type {EngineEvent} from './events.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
-import {SceneSystemRuntime} from './system-runtime.js';
+import {CausalRuntime} from './system-runtime.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
@@ -59,7 +59,7 @@ export class Scene {
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
-  readonly systemRuntime=new SceneSystemRuntime();
+  readonly causal=new CausalRuntime();
   readonly resources=new Map<string,unknown>();
   lastExecution:string[]=[];
   private pendingFractures=new Map<string,FractureDecision>();
@@ -165,18 +165,18 @@ export class Scene {
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
       const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);return;
     }
-    this.systemRuntime.run(command.action,command.deltaSeconds,at);
+    this.causal.apply({type:command.action,deltaSeconds:command.deltaSeconds},at);
   }
 
   private installSystemRuntime():void{
-    this.systemRuntime
-      .use('weather',({at})=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);})
-      .use('surfaces',({dt})=>{
+    this.causal
+      .when('weather',({at})=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);})
+      .when('surfaces',({dt})=>{
         this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
         this.syncSurfaceVisuals();
       })
-      .use('animation',({at})=>{this.animation.step(at,this.entities,p=>this.contacts.sample(p));})
-      .use('physics',({dt})=>{
+      .when('animation',({at})=>{this.animation.step(at,this.entities,p=>this.contacts.sample(p));})
+      .when('physics',({dt})=>{
         this.pendingFractures.clear();
         this.physics.step(dt,contact=>{
           const result=evaluateFracture(contact);
@@ -189,12 +189,12 @@ export class Scene {
           return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
         });
       })
-      .use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
-      .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
-      .use('events',({at})=>{this.emitContactEvents(at);})
-      .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
-      .use('cleanup',({at})=>{this.cleanupGenerated(at);})
-      .use('clock',({at})=>{this.time=at;this.tick++;});
+      .when('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
+      .when('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
+      .when('events',({at})=>{this.emitContactEvents(at);})
+      .when('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
+      .when('cleanup',({at})=>{this.cleanupGenerated(at);})
+      .when('clock',({at})=>{this.time=at;this.tick++;});
   }
 
   snapshot():SceneSnapshot{
