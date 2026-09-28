@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import {mulberry32} from '../core/random.js';
 import type {EngineEvent} from '../scene/events.js';
 import type {CameraSpec} from '../scene/types.js';
@@ -14,9 +15,9 @@ export interface AmbientAudioState {
 interface Voice {readonly source:AudioBufferSourceNode;readonly gain:GainNode}
 export class ProceduralAudio {
  private context:AudioContext|null=null;private unlocked=false;private disposed=false;private ambient:AmbientGraph|null=null;
- private readonly voices=new Set<Voice>();private readonly maxVoices=48;
+ private readonly voices=trackRuntimeMemory('ProceduralAudio','voices','pool',new Set<Voice>(),48);private readonly maxVoices=48;
  private readonly unlockGesture=()=>{void this.unlock();};
- constructor(){
+ constructor(){trackRuntimeInstance('ProceduralAudio',this);
   addEventListener('pointerdown',this.unlockGesture,{once:true,capture:true});
   addEventListener('touchstart',this.unlockGesture,{once:true,capture:true,passive:true});
   addEventListener('keydown',this.unlockGesture,{once:true,capture:true});
