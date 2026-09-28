@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import {freezePrimitive} from '../procedural/mesh.js';
 import {V3,type MutableVec3,type Vec3} from '../math.js';
 import type {RuntimeEntity} from '../scene/scene.js';
@@ -65,9 +66,10 @@ const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,valu
  * back down into a reduced representation like this one.
  */
 export class PlasticDeformationSystem {
-  private readonly states=new Map<string,DeformableState>();
-  private readonly dirty=new Set<DeformableState>();
+  private readonly states=trackRuntimeMemory('PlasticDeformationSystem','states','state',new Map<string,DeformableState>());
+  private readonly dirty=trackRuntimeMemory('PlasticDeformationSystem','dirty','queue',new Set<DeformableState>());
   private plasticWorkJ=0;
+  constructor(){trackRuntimeInstance('PlasticDeformationSystem',this);}
 
   attach(input:DeformableBodySpec,entities:ReadonlyMap<string,RuntimeEntity>):void{
     if(!input.bodyId||this.states.has(input.bodyId)||!input.visualIds.length)throw new TypeError('Deformable body requires a distinct bodyId and visualIds');
