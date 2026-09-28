@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 interface PendingTexture {
  readonly controller:AbortController;
  cancelled:boolean;
@@ -9,8 +10,8 @@ interface PendingTexture {
  * awaitable for deterministic captures; each live URL is decoded/uploaded once.
  * retain() releases obsolete scenes, including their unfinished uploads. */
 export class SurfaceTextures {
- private readonly textures=new Map<string,any>();private readonly pending=new Map<string,PendingTexture>();private disposed=false;
- constructor(private readonly device:any){}
+ private readonly textures=trackRuntimeMemory('SurfaceTextures','textures','cache',new Map<string,any>());private readonly pending=trackRuntimeMemory('SurfaceTextures','pending','queue',new Map<string,PendingTexture>());private disposed=false;
+ constructor(private readonly device:any){trackRuntimeInstance('SurfaceTextures',this);}
  get(url:string):any{return this.textures.get(url);}
  async load(url:string):Promise<void>{
   if(this.disposed)throw new Error('Material textures have been disposed');
