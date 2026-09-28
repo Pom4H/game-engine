@@ -33,8 +33,8 @@ function validate(input:RuntimeTimelineInput):void{
 }
 function trim():void{
   while(order.length>CAPACITY){
-    const index=order.findIndex(id=>records.get(id)?.entry.end!==null),at=index>=0?index:0,id=order[at]!;
-    order.splice(at,1);records.delete(id);
+    const index=order.findIndex(id=>records.get(id)?.entry.end!==null);if(index<0)break;
+    const id=order[index]!;order.splice(index,1);records.delete(id);
   }
 }
 function create(input:RuntimeTimelineInput,end:number|null):number{
