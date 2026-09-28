@@ -33,7 +33,14 @@ export class BrowserRuntime {
 
   private constructor(private readonly canvas:HTMLCanvasElement,scene:SceneSpec,renderer:Renderer,options:BrowserRuntimeOptions){
     trackRuntimeInstance('BrowserRuntime',this);this.initial=structuredClone(scene);this.scene=new Scene(this.initial);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
-    this.registerTimelineAction('highlight',entry=>{this.renderer.highlight?.(entry.refs);return this.render();});
+    this.registerTimelineAction('highlight',entry=>{
+      const rows=this.timeline(),byId=new Map(rows.map(row=>[row.id,row] as const)),children=new Map<number,number[]>();
+      for(const row of rows)if(row.cause!==undefined){let list=children.get(row.cause);if(!list)children.set(row.cause,list=[]);list.push(row.id);}
+      let root=entry;while(root.cause!==undefined){const parent=byId.get(root.cause);if(!parent)break;root=parent;}
+      const related=new Set<number>([root.id]),queue=[root.id],refs=new Set<string>();
+      while(queue.length){const id=queue.shift()!,row=byId.get(id);if(row)for(const ref of row.refs)refs.add(ref);for(const child of children.get(id)??[])if(!related.has(child)){related.add(child);queue.push(child);}}
+      const live=[...refs].filter(id=>this.scene.entities.has(id));this.renderer.highlight?.(live.length?live:[...entry.refs]);return this.render();
+    });
     this.registerTimelineAction('rewind',entry=>this.seek(Math.max(0,entry.start-this.stepSeconds)));
     this.registerTimelineAction('audio.play-event',async entry=>{const event=runtimeTimelinePayload<EngineEvent>(entry.id);if(!event)throw new TypeError('Timeline sound has no engine event payload');await this.activateAudio();this.audio?.play([event]);});
     this.registerTimelineAction('audio.play-footstep',async entry=>{const event=runtimeTimelinePayload<FootstepSound>(entry.id);if(!event)throw new TypeError('Timeline footstep has no payload');await this.activateAudio();this.audio?.playFootsteps([event],this.scene.camera,event.time);});
