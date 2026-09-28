@@ -2,7 +2,7 @@ name: Render
 
 on:
   push:
-    branches: [main]
+    branches: [main, refactor/causal-runtime]
     paths:
       - 'src/**'
       - 'tools/render-*.mjs'
@@ -43,6 +43,8 @@ jobs:
           bun-version: 1.4.2
       - name: Install
         run: bun install --frozen-lockfile
+      - name: Check
+        run: bun run check
       - name: Build
         run: bun run build
       - name: Render promo views
