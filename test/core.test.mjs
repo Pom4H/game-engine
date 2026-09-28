@@ -33,6 +33,17 @@ test('stateful modules remain cadence driven',()=>{
   kernel.run(1,{});kernel.run(2,{});assert.equal(calls,2);
 });
 
+test('appearance authoring does not masquerade as geometry changes',()=>{
+  const scene=new Scene({version:1,entities:[{id:'paint',mesh:{kind:'box'},material:{color:[.2,.3,.4,1]}}]});
+  const geometry=scene.geometryRevision,radiance=scene.radianceRevision,appearance=scene.appearanceRevision;
+  scene.patchAppearance({rendering:{exposure:1.2,sunIntensity:2}});
+  assert.equal(scene.geometryRevision,geometry);assert.equal(scene.radianceRevision,radiance);assert.equal(scene.appearanceRevision,appearance+1);
+  scene.patchAppearance({materials:[{id:'paint',set:{roughness:.2}}]});
+  assert.equal(scene.geometryRevision,geometry);assert.equal(scene.radianceRevision,radiance);
+  scene.patchAppearance({materials:[{id:'paint',set:{color:[.3,.3,.4,1]}}]});
+  assert.equal(scene.radianceRevision,radiance+1);
+});
+
 test('reflection probe authoring binds to scene entities without semantic renderer knowledge',()=>{
   const spec={version:1,entities:[{id:'hero',mesh:{kind:'box'}},{id:'ground',mesh:{kind:'box'}}],rendering:{reflectionProbe:{entity:'hero',offset:[0,1,0],radius:30,exclude:['hero'],facesPerFrame:1}}};
   const valid=validateScene(spec);assert.equal(valid.rendering.reflectionProbe.entity,'hero');
