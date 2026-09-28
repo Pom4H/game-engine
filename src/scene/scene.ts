@@ -19,6 +19,7 @@ import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,Enviro
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext,type SystemAction} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
 import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
+import {beginRuntimeSpan,endRuntimeSpan,recordRuntimeEvent} from '../core/runtime-timeline.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
@@ -78,6 +79,7 @@ export class Scene {
   private generatedSequence=0;
   private surfaceVisualSequence=0;
   private readonly surfaceVisuals=trackRuntimeMemory('Scene','surfaceVisuals','state',new Map<string,{source:string;entity:RuntimeEntity}>());
+  private readonly entityTimeline=trackRuntimeMemory('Scene','entityTimeline','index',new Map<string,readonly number[]>());
   private readonly systems:Record<SystemAction,(dt:number,at:number)=>void>={
     weather:(_dt,at)=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);},
     surfaces:(dt)=>{this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);this.syncSurfaceVisuals();},
@@ -142,6 +144,15 @@ export class Scene {
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
+    const entityTrace=beginRuntimeSpan({
+      owner:'Scene',kind:'entity',name:spec.id,at:this.time,refs:[spec.id],
+      capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],
+      data:{material:runtime.material.kind,body:!!runtime.body,generated:runtime.expiresAt!==undefined},
+    });
+    const traces=[entityTrace];
+    if(mesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:physical`,at:this.time,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'physical',primitive:mesh.kind}}));
+    if(renderMesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:render`,at:this.time,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'render',primitive:renderMesh.kind}}));
+    this.entityTimeline.set(spec.id,Object.freeze(traces));
     this.entities.set(spec.id,runtime);this.renderStructureRevision++;this.kernel.invalidate('entities');
     return runtime;
   }
@@ -154,7 +165,7 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){this.renderStructureRevision++;this.kernel.invalidate('entities');}
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){for(const trace of this.entityTimeline.get(id)??[])endRuntimeSpan(trace,this.time);this.entityTimeline.delete(id);this.renderStructureRevision++;this.kernel.invalidate('entities');}
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
@@ -327,7 +338,16 @@ export class Scene {
     for(const entity of [...this.entities.values()])if(entity.expiresAt!==undefined&&entity.expiresAt<=at)this.remove(entity.id);
     for(const [key,time] of this.impactCooldown)if(at-time>2)this.impactCooldown.delete(key);
   }
-  private pushEvent(event:EngineEvent):void{this.eventQueue.push(event);if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);}
+  private pushEvent(event:EngineEvent):void{
+    const refs=event.type==='impact'?[event.a,...(event.b==='ground'?[]:[event.b])]:event.type==='fracture'?[event.entity]:[];
+    const trace=recordRuntimeEvent({
+      owner:'Scene',kind:`event:${event.type}`,name:`${event.type}:${event.id}`,at:event.time,refs,
+      capabilities:[...(refs.length?[{id:'highlight',label:'Highlight'}]:[]),{id:'rewind',label:'Rewind here'}],
+      data:{event:event.type,energy:event.energy},
+      payload:event,
+    });
+    this.eventQueue.push(Object.freeze({...event,trace}) as EngineEvent);if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);
+  }
 }
 
 function dominantAxis(normal:Vec3):0|1|2{return Math.abs(normal[0])>=Math.abs(normal[1])&&Math.abs(normal[0])>=Math.abs(normal[2])?0:Math.abs(normal[1])>=Math.abs(normal[2])?1:2;}
