@@ -1365,7 +1365,7 @@ function probeUniform(scene:Scene,position:Vec3,vp:Mat4):Float32Array{
 }
 
 
-const shadowPrimitiveIds=new WeakMap<object,number>();let nextShadowPrimitiveId=1;
+const shadowPrimitiveIds=trackRuntimeMemory('WebGPURenderer','shadowPrimitiveIds','cache',new WeakMap<object,number>());let nextShadowPrimitiveId=1;
 function shadowGeometryKey(primitive:Primitive):string{
   if(primitive.kind==='box'||primitive.kind==='plane')return primitive.kind;
   if(primitive.kind==='shard')return 'shard:'+(primitive.axis??2)+':'+(primitive.skew??0);
