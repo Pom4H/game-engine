@@ -1,0 +1,23 @@
+name: Spline surface harness
+on:
+  push:
+    branches: [codex/spline-surface-harness]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.4.2 }
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/parametric-surface.test.mjs
+      - run: node tools/spline-surface-harness.mjs | tee spline-report.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: spline-surface-report
+          path: spline-report.json
