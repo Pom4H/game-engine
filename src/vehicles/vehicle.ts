@@ -1,7 +1,7 @@
-import type {WheelHit} from '../physics/wheel-support.js';
+import {wheelHit,type WheelHit} from '../physics/wheel-support.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {finiteVec3} from '../math.js';
-import {PhysicsWorld,RigidBody,type PhysicsForceDriver} from '../physics/world.js';
+import {PhysicsWorld,RigidBody,applyInvInertiaWorld,type PhysicsForceDriver} from '../physics/world.js';
 import {ForceFrame} from '../physics/force-frame.js';
 import {DeformationAttachment,type DeformationField} from '../physics/deformation-field.js';
 import {solveWheelContact,type WheelContactResult} from '../physics/wheel-contact.js';
@@ -18,7 +18,7 @@ export interface PartSample {
   readonly id:string;readonly kind:'wheel'|'wing';readonly force:Vec3;readonly point:Vec3;
   /** COM-local frame used by the most recent physical force evaluation. */
   readonly localPosition:Vec3;readonly localChord:Vec3;readonly localNormal:Vec3;readonly mountValid:boolean;
-  readonly contact:boolean;readonly contactNormal:Vec3;readonly supportId:string;readonly loadN:number;readonly liftN:number;readonly dragN:number;readonly alphaRad:number;readonly stall:number;
+  readonly contact:boolean;readonly contactNormal:Vec3;readonly supportId:string;readonly fixedSupport:boolean;readonly loadN:number;readonly liftN:number;readonly dragN:number;readonly alphaRad:number;readonly stall:number;
   readonly angularSpeed:number;readonly spinRad:number;readonly compressionM:number;readonly permanentSetM:number;
   readonly plasticWorkJ:number;readonly slipPowerW:number;readonly dissipatedJ:number;readonly wear:number;readonly fatigue:number;readonly failed:boolean;
   readonly temperatureRiseK:number;readonly effectiveRadiusM:number;readonly effectiveGrip:number;readonly treadDepthM:number;readonly derivedBuilds:number;
@@ -61,6 +61,8 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly ownsBody:boolean;
   private readonly dragForce:MutableVec3=[0,0,0];
   private readonly referenceFrame:ForceFrame|undefined;
+  /** Optional reaction for a non-rigid support returned by world.wheelSupport. */
+  supportReaction:((hit:WheelHit,force:Vec3,dt:number)=>void)|undefined;
   readonly diagnostics={steps:0,supportQueries:0,aeroEvaluations:0,wheelSolves:0};
   constructor(readonly world:PhysicsWorld,readonly blueprint:VehicleBlueprint,pose:VehiclePose={},options:{reuseDerived?:boolean;body?:RigidBody}={}) {
     const position=pose.position??ZERO,rotation=pose.rotation??ZERO,velocity=pose.velocity??ZERO,angular=pose.angularVelocity??ZERO;
@@ -77,7 +79,7 @@ export class Vehicle implements PhysicsForceDriver {
     this.parts=blueprint.parts.map(compiled=>{
       const mount=compiled.source.mountAt,com=blueprint.centerOfMass;
       const anchor:Vec3=mount?[mount[0]-com[0],mount[1]-com[1],mount[2]-com[2]]:compiled.arm;
-      const part:PartRuntime={compiled,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),force:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:{distance:0,normal:[0,1,0],point:[0,0,0],id:''},down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,radius:0,tread:0,grip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,slipPower:0,derivedBuilds:0};
+      const part:PartRuntime={compiled,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),force:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:wheelHit(),down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,radius:0,tread:0,grip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,slipPower:0,derivedBuilds:0};
       if(compiled.source.kind==='wheel')part.omega=dot(this.body.velocity,[this.frame.basis[0]!,this.frame.basis[1]!,this.frame.basis[2]!])/compiled.source.radiusM;
       this.byId.set(compiled.source.id,part);return part;
     });
@@ -111,7 +113,7 @@ export class Vehicle implements PhysicsForceDriver {
     const s=p.compiled.source,c=p.condition;
     const view:PartSample=Object.freeze({id,kind:s.kind,force:viewVector(p.force),point:viewVector(p.point),
       localPosition:viewVector(p.localArm),localChord:viewVector(p.localChord),localNormal:viewVector(p.localNormal),get mountValid(){return p.attachment.valid;},
-      get contact(){return p.contact;},contactNormal:viewVector(p.support.normal),get supportId(){return p.contact?p.support.id:'';},get loadN(){return p.load;},get liftN(){return p.lift;},get dragN(){return p.drag;},get alphaRad(){return p.alpha;},get stall(){return p.stall;},
+      get contact(){return p.contact;},contactNormal:viewVector(p.support.normal),get supportId(){return p.contact?p.support.id:'';},get fixedSupport(){return p.contact&&p.support.triangle<0&&!p.support.body?.invMass&&!p.support.body?.kinematic;},get loadN(){return p.load;},get liftN(){return p.lift;},get dragN(){return p.drag;},get alphaRad(){return p.alpha;},get stall(){return p.stall;},
       get angularSpeed(){return p.omega;},get spinRad(){return p.spin;},get compressionM(){return p.compression;},get permanentSetM(){return p.permanent;},get plasticWorkJ(){return p.plasticWork;},
       get slipPowerW(){return p.slipPower;},get dissipatedJ(){return c.dissipatedJ;},get wear(){return c.wear;},get fatigue(){return c.fatigue;},get failed(){return c.failed;},
       get temperatureRiseK(){return c.temperatureRiseK;},get effectiveRadiusM(){return p.radius;},get effectiveGrip(){return p.grip;},
@@ -186,10 +188,10 @@ export class Vehicle implements PhysicsForceDriver {
     const slide=s.at[0]<0?this.controls.handbrake:0;
     const brake=Math.max(this.controls.brake,slide)*(s.brakeTorqueNm??0);
     for(let k=0;k<3;k++)p.down[k]=-p.normal[k]!;
-    const hit=this.world.wheelSupport(p.point,p.down,susp.restM+radius/.35,p.support),normal=p.support.normal;
+    const hit=this.world.wheelSupport(p.point,p.down,susp.restM+radius/.15,p.support,this.body),normal=p.support.normal;
     const alignment=hit?dot(normal,p.normal):0;
-    const length=hit&&alignment>.35?p.support.distance-radius/alignment:Infinity;
-    p.compression=Math.max(0,susp.restM-length);p.contact=length<susp.restM&&alignment>.35&&!p.condition.failed&&p.attachment.valid;
+    const length=hit&&alignment>.15?p.support.distance-radius/alignment:Infinity;
+    p.compression=Math.max(0,susp.restM-length);p.contact=length<susp.restM&&alignment>.15&&!p.condition.failed&&p.attachment.valid;
     if(!p.contact){
       p.longForce=p.sideForce=0;const free=p.omega+torque*dt/p.compiled.inertia;
       p.omega=Math.sign(free)*Math.max(0,Math.abs(free)-brake*dt/p.compiled.inertia);return;
@@ -197,7 +199,8 @@ export class Vehicle implements PhysicsForceDriver {
     const geometric=p.compression;
     // Compression-only elastoplastic spring return mapping. A held load is not another impact.
     if(susp.yieldForceN!==undefined){const next=Math.max(p.permanent,geometric-susp.yieldForceN/susp.springNPerM);p.plasticWork+=(next-p.permanent)*susp.yieldForceN;p.permanent=next;}
-    const compressionSpeed=-dot(p.velocity,normal)/alignment;
+    const sv=p.support.velocity;
+    const compressionSpeed=-((p.velocity[0]-sv[0])*normal[0]+(p.velocity[1]-sv[1])*normal[1]+(p.velocity[2]-sv[2])*normal[2])/alignment;
     p.load=Math.max(0,(susp.springNPerM*Math.max(0,geometric-p.permanent)+susp.damperNsPerM*compressionSpeed)/alignment);
     if(geometric>susp.travelM)p.load+=susp.springNPerM*(geometric-susp.travelM)*3;
     const alongNormal=dot(p.chord,normal);
@@ -207,7 +210,7 @@ export class Vehicle implements PhysicsForceDriver {
     p.point.splice(0,3,...p.support.point);
     for(let k=0;k<3;k++)p.arm[k]=p.point[k]!-this.body.position[k]!;
     const arm=p.arm,w=this.body.angularVelocity,v=this.body.velocity;
-    const pvx=v[0]+w[1]*arm[2]-w[2]*arm[1],pvy=v[1]+w[2]*arm[0]-w[0]*arm[2],pvz=v[2]+w[0]*arm[1]-w[1]*arm[0];
+    const pvx=v[0]+w[1]*arm[2]-w[2]*arm[1]-sv[0],pvy=v[1]+w[2]*arm[0]-w[0]*arm[2]-sv[1],pvz=v[2]+w[0]*arm[1]-w[1]*arm[0]-sv[2];
     const longitudinal=pvx*fx+pvy*fy+pvz*fz,lateral=pvx*rx+pvy*ry+pvz*rz;
     const tx=arm[1]*fz-arm[2]*fy,ty=arm[2]*fx-arm[0]*fz,tz=arm[0]*fy-arm[1]*fx;
     const localX=tx*b[0]!+ty*b[1]!+tz*b[2]!,localY=tx*b[3]!+ty*b[4]!+tz*b[5]!,localZ=tx*b[6]!+ty*b[7]!+tz*b[8]!;
@@ -216,6 +219,13 @@ export class Vehicle implements PhysicsForceDriver {
     solveWheelContact(p.wheelSolve,dt,radius,p.compiled.inertia,p.omega,longitudinal,-lateral/Math.max(1.25,Math.abs(longitudinal)),p.load*p.grip*(1-.75*slide),torque/radius,brake/radius,inv,p.longForce,p.sideForce,relaxation,12,9.5);
     this.diagnostics.wheelSolves++;const solved=p.wheelSolve;p.omega=solved.speed;p.longForce=solved.force;p.sideForce=solved.sideForce;
     p.force[0]=fx*solved.force+rx*solved.sideForce+normal[0]*p.load;p.force[1]=fy*solved.force+ry*solved.sideForce+normal[1]*p.load;p.force[2]=fz*solved.force+rz*solved.sideForce+normal[2]*p.load;
+    const hitBody=p.support.body;
+    if(hitBody?.invMass){
+      const rx=p.point[0]-hitBody.position[0],ry=p.point[1]-hitBody.position[1],rz=p.point[2]-hitBody.position[2];
+      const angular=applyInvInertiaWorld(hitBody,[ry*p.force[2]-rz*p.force[1],rz*p.force[0]-rx*p.force[2],rx*p.force[1]-ry*p.force[0]]);
+      for(let k=0;k<3;k++){hitBody.velocity[k]!-=p.force[k]!*dt*hitBody.invMass;hitBody.angularVelocity[k]!-=angular[k]!*dt;}hitBody.wake();
+    }
+    this.supportReaction?.(p.support,p.force,dt);
     const slip=p.omega*radius-(longitudinal+solved.force*dt*inv);
     p.slipPower=Math.max(0,solved.force*slip-solved.sideForce*lateral);
     p.condition.consumeWork(p.slipPower*dt);

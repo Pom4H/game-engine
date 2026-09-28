@@ -6,7 +6,7 @@ import {ForceFrame} from '../physics/force-frame.js';
 import {DynamicMesh} from '../procedural/dynamic-mesh.js';
 import {compileVehicle} from '../vehicles/framework.js';
 import {M3_VEHICLE_DEFINITION} from '../vehicles/m3.js';
-import {BALL,arenaBoxes,arenaProjection,PADS} from './car-ball.js';
+import {BALL,CAR_SCALE,arenaBoxes,arenaProjection,PADS} from './car-ball.js';
 import type {Sample} from '../network/playback.js';
 
 export const arenaOffset=Object.fromEntries(arenaProjection.layout.map(f=>[f.name,f.offset])) as Record<string,number>;
@@ -31,7 +31,7 @@ export class CarBallView {
    for(const z of [-17.8,17.8])entities.push(box(`rail:${s}:${z}`,[s*14,1,z],[28,.09,.08],teams[s<0?0:1]!));
   }
   PADS.forEach((pad,i)=>entities.push({id:`pad:${i}`,position:pad.position,mesh:{kind:'cylinder',radius:pad.amount===100?.8:.45,height:.025,segments:20},material:{kind:'plastic',color:[1,.67,.12,1],emissive:[.3,.13,.01]},collision:'none'}));
-  for(let car=0;car<2;car++)for(const part of this.geometry.parts)entities.push({id:`car:${car}/${part.id}`,mesh:part.mesh,material:part.role==='paint'?{...part.material,color:teams[car]!,roughness:.34,metalness:.12,clearcoat:.35,clearcoatRoughness:.25}:part.material??{},collision:'none'});
+  for(let car=0;car<2;car++)for(const part of this.geometry.parts)entities.push({id:`car:${car}/${part.id}`,scale:[CAR_SCALE,CAR_SCALE,CAR_SCALE],mesh:part.mesh,material:part.role==='paint'?{...part.material,color:teams[car]!,roughness:.34,metalness:.12,clearcoat:.35,clearcoatRoughness:.25}:part.material??{},collision:'none'});
   entities.push({id:'ball',mesh:{kind:'sphere',radius:1.45},material:{kind:'rubber',color:[.96,.93,.81,1],roughness:.67},collision:'none'});
   this.scene=new Scene({version:1,entities,environment:{temperatureC:20,sunlight:1,humidity:0,groundMoisture:0,precipitation:'arid',snowfall:'none'},camera:{position:[-23,5,8],target:[0,1,0],fov:70},rendering:{sunDirection:[-.3,.9,.45],sunIntensity:2.1,sunColor:[1,.96,.87],skyColor:[.38,.5,.7],fogDensity:.001,shadowExtent:45,exposure:1}});
   this.ballMesh=new DynamicMesh(BALL.definition.nodes.slice(0,BALL.surfaceNodes).flatMap(n=>[...n.position]),BALL.indices);
@@ -47,11 +47,11 @@ export class CarBallView {
    const origin=o[`car${car}`]!,r=o[`rotation${car}`]!,f=this.frames[car]!;eulerFromQuaternion(v.subarray(r,r+4),this.tmp);const rotation:MutableVec3=[...this.tmp];f.update(rotation);
    for(const part of this.geometry.parts){
     const e=this.scene.entities.get(`car:${car}/${part.id}`)!;
-    tmp.splice(0,3,part.position[0],part.position[1]-.70,part.position[2]);
+    tmp.splice(0,3,part.position[0]*CAR_SCALE,(part.position[1]-.70)*CAR_SCALE,part.position[2]*CAR_SCALE);
     // The same ordered four wheel states as the physical blueprint.
     const match=/^(tire|rim)-(front|rear)-(left|right)$/.exec(part.id);
     if(match){const wheel=(match[2]==='front'?0:2)+(match[3]==='left'?0:1),compression=v[o.compression!+car*4+wheel]!;
-     tmp[1]=.04-.32+compression+.0475;
+     tmp[1]=(.04-.32+.0475)*CAR_SCALE+compression;
     }
     f.rotate(tmp,tmp);for(let k=0;k<3;k++){e.position[k]=v[origin+k]!+tmp[k]!;e.rotation[k]=rotation[k]!;}
     if(match){

@@ -49,3 +49,18 @@ test('slow datagram sender retains at most one active and one latest packet; exp
  out.offer(new Uint8Array([1]));out.offer(new Uint8Array([2]));out.offer(new Uint8Array([3]));assert.equal(out.queued,2);assert.equal(out.stats.replaced,1);now=70;release();await new Promise(r=>setImmediate(r));assert.deepEqual(sent,[1]);assert.equal(out.stats.expired,1);
  out.offer(new Uint8Array([4]));release();await new Promise(r=>setImmediate(r));assert.deepEqual(sent,[1,4]);out.close();out.offer(new Uint8Array([5]));assert.equal(out.queued,0);assert.deepEqual(errors,[]);
 });
+
+test('backpressured browser selects the newest input only after writer capacity becomes available',async()=>{
+ let release,now=0;const sent=[],errors=[],gate=new Promise(resolve=>release=resolve);
+ const out=new DatagramOutbox(async bytes=>{sent.push(bytes[0]);},()=>now,40,e=>errors.push(e),()=>gate);
+ out.offer(new Uint8Array([0]));now=100;
+ for(let i=1;i<100;i++)out.offer(new Uint8Array([i]));
+ assert.equal(out.queued,2);assert.deepEqual(sent,[]);release();await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(sent,[99]);assert.equal(out.stats.replaced,99);assert.deepEqual(errors,[]);out.close();
+});
+test('closing a backpressured sender releases pending state and never reports a teardown as a send fault',async()=>{
+ let reject;const sent=[],errors=[],gate=new Promise((_,no)=>reject=no);
+ const out=new DatagramOutbox(async bytes=>{sent.push(bytes);},()=>0,40,e=>errors.push(e),()=>gate);
+ out.offer(new Uint8Array([1]));out.close();reject(Error('writer closed'));
+ await new Promise(resolve=>setImmediate(resolve));assert.deepEqual(sent,[]);assert.deepEqual(errors,[]);assert.equal(out.queued,0);
+});

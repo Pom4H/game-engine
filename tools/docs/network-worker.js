@@ -31,7 +31,7 @@ onmessage=({data})=>{
      const text=new TextEncoder().encode(JSON.stringify({token:connectionToken,schema:arenaDatagram.signature,mtu:wt.datagrams.maxDatagramSize})),hello=new Uint8Array(4+text.length);new DataView(hello.buffer).setUint32(0,text.length,true);hello.set(text,4);await writer.write(hello);await writer.close();writer.releaseLock();
      const ack=bidi.readable.getReader();let message='';for(;;){const part=await ack.read();if(part.done)break;message+=new TextDecoder().decode(part.value);if(message.length>4096)throw Error('Hello response budget');}ack.releaseLock();
      if(current!==serial||controller.signal.aborted)return;const welcome=JSON.parse(message);if(!welcome.ok||welcome.schema!==arenaDatagram.signature)throw Error('QUIC authentication rejected');clearTimeout(timeout);
-     const sender=wt.datagrams.writable.getWriter(),outgoing=new DatagramOutbox(async bytes=>{await sender.ready;await sender.write(bytes);},()=>performance.now(),40,error=>{wt.close();postMessage({kind:'error',error:String(error),serial:current});});
+     const sender=wt.datagrams.writable.getWriter(),outgoing=new DatagramOutbox(bytes=>sender.write(bytes),()=>performance.now(),40,error=>{wt.close();postMessage({kind:'error',error:String(error),serial:current});},()=>sender.ready);
      fast=outgoing;if(inputPending){outgoing.offer(encodeArcadeInput(inputPending.epoch,inputPending.sequence,inputPending.controls));inputPending=null;}
      postMessage({kind:'transport',mode:'webtransport',packetBytes:arenaDatagram.size,serial:current});
      const reader=wt.datagrams.readable.getReader();try{for(;;){const {done,value}=await reader.read();if(done)break;if(current!==serial)break;

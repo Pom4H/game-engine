@@ -38,16 +38,17 @@ export class SnapshotDatagram {
   return this.projection.read({schema:this.projection.signature,epoch:d.getFloat64(8,true),sequence:d.getUint32(16,true),tick:d.getUint32(20,true),time:d.getFloat64(24,true),paused:!!d.getUint8(36),rows:[{id:this.id,generation:d.getUint32(32,true),values:v}]});
  }
 }
-/** One active send plus one replaceable pending absolute state. Expire, never catch up stale state. */
+/** One active send plus one replaceable pending absolute state. Await transport capacity
+ * BEFORE choosing the latest packet; input accumulated during backpressure is never replayed. */
 export class DatagramOutbox {
  private pending:{bytes:Uint8Array;at:number}|undefined;private busy=false;private closed=false;
  readonly stats={replaced:0,expired:0,sent:0,bytes:0};
- constructor(private readonly send:(bytes:Uint8Array)=>Promise<void>,private readonly clock:()=>number=()=>performance.now(),readonly maxAgeMs=50,private readonly failed:(e:unknown)=>void=()=>{}){if(!Number.isFinite(maxAgeMs)||maxAgeMs<=0||maxAgeMs>1000)throw new RangeError('Datagram age budget');}
+ constructor(private readonly send:(bytes:Uint8Array)=>Promise<void>,private readonly clock:()=>number=()=>performance.now(),readonly maxAgeMs=50,private readonly failed:(e:unknown)=>void=()=>{},private readonly ready?:()=>Promise<unknown>){if(!Number.isFinite(maxAgeMs)||maxAgeMs<=0||maxAgeMs>1000)throw new RangeError('Datagram age budget');}
  offer(bytes:Uint8Array):void {if(this.closed)return;if(bytes.length>1200)throw new RangeError('Datagram MTU');if(this.pending)this.stats.replaced++;this.pending={bytes,at:this.clock()};void this.flush();}
  private async flush():Promise<void>{
   if(this.busy||this.closed)return;this.busy=true;
-  try{while(this.pending&&!this.closed){const p=this.pending;this.pending=undefined;if(this.clock()-p.at>this.maxAgeMs){this.stats.expired++;continue;}await this.send(p.bytes);this.stats.sent++;this.stats.bytes+=p.bytes.length;}}
-  catch(e){this.close();this.failed(e);}finally{this.busy=false;}
+  try{while(this.pending&&!this.closed){if(this.ready)await this.ready();if(this.closed||!this.pending)break;const p=this.pending;this.pending=undefined;if(this.clock()-p.at>this.maxAgeMs){this.stats.expired++;continue;}await this.send(p.bytes);this.stats.sent++;this.stats.bytes+=p.bytes.length;}}
+  catch(e){const report=!this.closed;this.close();if(report)this.failed(e);}finally{this.busy=false;}
  }
  get queued():number{return Number(this.busy)+Number(!!this.pending);}
  close():void{this.closed=true;this.pending=undefined;}

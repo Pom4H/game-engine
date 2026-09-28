@@ -21,8 +21,8 @@ and HTTP host must be running.
 
 For separate computers, use a trusted HTTPS reverse proxy in front of the loopback
 host and set `ARENA_PUBLIC_ORIGIN=https://<your-arena-host>` before starting. Preserve
-that Host header and disable proxy response buffering for SSE. Use the same HTTPS
-origin on both clients. Plain HTTP on a LAN IP is not sufficient for WebGPU's secure
+that Host header. Use the same HTTPS origin on both clients; the QUIC endpoint
+needs separate UDP forwarding, described below. Plain HTTP on a LAN IP is not sufficient for WebGPU's secure
 context requirement (https://gpuweb.github.io/gpuweb/#navigator-gpu). The default is
 loopback only; localhost remains suitable for the two-tab developer test. This is a private-room developer host, not public Internet deployment,
 a production authentication system, matchmaking or anti-cheat. Do not expose it
@@ -54,7 +54,7 @@ include countdown, whole-ball goal detection, kickoff, five-minute timer and ove
 `CarBallArena` is ordinary TypeScript with no browser, socket or GPU imports. Cars use
 `Vehicle` and the existing `PhysicsWorld` integrator. A 120 Hz game tick uses two
 substeps. `ArcadeVehicle` adds forces/torques to the same body; it never writes a
-second car pose for rendering. Cars currently have rigid chassis and a four-wheel suspension supporting static oriented surfaces. They are NOT fully coupled deformable car bodies in this demo.
+second car pose for rendering. Cars currently have rigid chassis and a four-wheel suspension supporting static, moving and deforming surfaces. They are NOT fully coupled deformable car bodies in this demo.
 
 The ball is a closed subdivided octasphere with 67 mass nodes (66 on the surface) and
 320 distance/volume constraints solved by the existing `StructuralBody`. Its compliant
@@ -68,8 +68,8 @@ need a richer contact model.
 The existing debug host now supports an explicit arena recipe in its Node worker.
 Server-selected numeric fields include both cars, ball nodes, wheel phases, controls
 acknowledgements, boost, score, pads and match phase. One immutable `Publication` is
-encoded once for all viewers, at up to 60 Hz with UDP/WebTransport (30 Hz only in the explicitly selected SSE diagnostic mode). Existing bounded SSE outboxes and
-`Replica` history/clock are reused. Only complete absolute snapshots may replace
+encoded once for all viewers, at up to 60 Hz with UDP/WebTransport (30 Hz only in the explicitly selected SSE diagnostic mode). The existing bounded `Replica` history/clock is reused; the realtime path uses
+expiring datagram outboxes instead of an SSE queue. Only complete absolute snapshots may replace
 unsent snapshots. Input has a server-owned seat, sequence and jump-edge counter;
 stale inputs are neutralized, departures release the seat, epoch resets fence an old
 match. The client never receives authority from a body-supplied seat or peer ID.
@@ -98,21 +98,42 @@ measure maximum component error about 0.50001 mm. Float32 is used for continuous
 fields, uint32 for discrete channels, float64 for authority time/epoch. Range overflow
 is an error rather than silent wrapping. The versioned layout is negotiated once.
 
-Each application outbox retains one active and one latest pending send, expiring
+Each application outbox waits for transport capacity BEFORE selecting its newest
+pending input, so waiting never turns into playback of obsolete controls. It retains
+one active and one latest pending send, expiring
 pending state after 40 ms (client) / 50 ms (server). Native queues also have hard caps;
 these are local queue limits, not an end-to-end latency guarantee. Browser reception
 and binary validation stay in the worker. Pose quaternions use shortest-path spherical
 interpolation; world angular velocity uses exponential rotation integration instead
 of incorrectly treating its components as Euler rates.
 
-Wheel support is now a prepared ray query against actual static rotated box colliders
-plus the floor. The same collision geometry supplies the visible floor-wall-ceiling
-ramps. Suspension and tyre forces resolve in the contact tangent/normal frame. A
-configurable arcade adhesion acceleration and alignment torque keep contacted wheels
-on walls and ceilings without teleporting the chassis. Four wheel contacts held for
-20 ms reload the jump; chassis/roof contact alone does not. The first jump impulse
-uses the support normal. This is not dynamic soft-ball flip-reset or general mesh/
-moving-platform support; a custom WheelSupport query can supply other geometry.
+Wheel support uses one prepared query over the installed rigid-body roster. Position,
+rotation, collision offset and crushed half-extents remain live; replace the query
+when bodies are added/removed. Cached bases/AABBs avoid repeating static geometry
+work. Suspension and tyre forces use the actual point velocity and surface normal,
+including rotating/moving boxes and spheres. Dynamic rigid support receives the
+opposite impulse. This is a ray-contact wheel model, not volumetric wheel CCD.
+
+The arena also queries the ball's CURRENT deformed triangles, interpolates their
+nodal velocity, and sends the opposite wheel force back to those same nodes using
+barycentric weights. No second ball collision proxy or mass is introduced. All four
+wheels touching briefly can reload a jump/flip; a sustained contact or a held button
+cannot create extra jump edges. Roof-only contact never reloads it. The first jump
+impulse uses the surface normal, including a wall or the ceiling.
+
+Cars use a consistent .72 match scale in physical construction and rendering; the
+wheel footprint now fits the 1.45 m-radius ball. The arcade chassis collider is lower
+(.5 m before scaling) so the bonnet proxy does not prevent wheel contact first.
+Mass, torque and suspension parameters scale explicitly in the recipe. Surface-test
+initial offsets scale with that construction; their contact/jump assertions remain.
+This is a gameplay tune, not a BMW specification or a solver-speedup claim.
+
+The same tessellated collider/render slabs form floor-wall-ceiling transitions.
+Speed-dependent arcade adhesion and alignment torque act only on fixed surfaces;
+they do not add an unbalanced magnetic force to the dynamic ball or platform.
+The model supports moving/deforming wheel contact, not arbitrary moving mesh/mesh
+collision or a calibrated coupled tire carcass. Existing nodal contacts and finite
+substeps still have their stated limitations at high speed.
 
 Six full boost pads award up to 100 and respawn after 10 simulation seconds; 28 small
 pads award 12 and respawn after four seconds. Server-owned pickup/cooldown state is
@@ -159,7 +180,7 @@ not a second VM profiler in the console.
 ```sh
 bun run typecheck
 bun run build
-node --test test/car-ball.test.mjs test/arena-network.test.mjs test/arena-surfaces.test.mjs test/datagram.test.mjs
+node --test test/car-ball.test.mjs test/arena-network.test.mjs test/arena-surfaces.test.mjs test/moving-support.test.mjs test/datagram.test.mjs
 node --test test/network-buffer.test.mjs test/network-structure.test.mjs
 node tools/docs/build.mjs
 node tools/docs/arena-qa.mjs

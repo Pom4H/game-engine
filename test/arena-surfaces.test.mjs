@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CarBallArena,PADS,ARENA_DT,arenaBoxes} from '../dist/examples/car-ball.js';
+import {CarBallArena,PADS,ARENA_DT,arenaBoxes,CAR_SCALE} from '../dist/examples/car-ball.js';
 import {idleInput} from '../dist/vehicles/arcade.js';
 import {ForceFrame} from '../dist/physics/force-frame.js';
 import {advanceRotation,quaternionFromEuler} from '../dist/physics/rotation.js';
@@ -11,7 +11,7 @@ for(const [name,position,rotation,normal] of [
  ['ceiling',[0,11.5,0],[Math.PI,0,0],[0,-1,0]],
  ['end',[27.5,6,9],[0,0,Math.PI/2],[-1,0,0]],
 ])test(`wheel support, propulsion, jump normal and four-wheel reset on ${name}`,()=>{
- const a=new CarBallArena();a.phase=1;const c=a.cars[0];c.reset(position,rotation);c.jumps=2;
+ const a=new CarBallArena();a.phase=1;const c=a.cars[0];c.reset(position.map((v,k)=>v+normal[k]*(.5*CAR_SCALE-.5)),rotation);c.jumps=2;
  // Establish contact before throttle and verify that only complete wheel contact reloads it.
  for(let tick=0;tick<8;tick++)a.step();assert.equal(c.wheelContacts,4);assert.equal(c.jumps,0);assert.equal(c.stats.resets,1);
  assert.ok(dot(c.supportNormal,normal)>.99);
@@ -20,7 +20,7 @@ for(const [name,position,rotation,normal] of [
  const before=c.body.velocity.slice();a.input(0,21,{...idleInput(),jump:true,jumpSerial:1});a.step();
  assert.equal(c.stats.jumps,1);assert.ok(dot(c.body.velocity.map((v,k)=>v-before[k]),normal)>4);assert.equal(c.jumps,1);
  // A held button or an old counter may not create a new jump after landing.
- c.reset(position,rotation);c.jumps=2;for(let tick=0;tick<12;tick++){a.input(0,22+tick,{...idleInput(),jump:true,jumpSerial:1});a.step();}
+ c.reset(position.map((v,k)=>v+normal[k]*(.5*CAR_SCALE-.5)),rotation);c.jumps=2;for(let tick=0;tick<12;tick++){a.input(0,22+tick,{...idleInput(),jump:true,jumpSerial:1});a.step();}
  assert.equal(c.jumps,0);assert.equal(c.stats.jumps,1);a.dispose();
 });
 test('roof/body contact without wheels never reloads a spent jump',()=>{
@@ -44,7 +44,7 @@ test('world angular velocity composes rotations correctly at arbitrary orientati
 });
 test('server boost pads spawn, award once, retain distinct capacities and respawn after their simulation cooldown',()=>{
  assert.equal(PADS.length,34);assert.equal(PADS.filter(p=>p.amount===100).length,6);
- for(const amount of [12,100]){const a=new CarBallArena();a.phase=1;const index=PADS.findIndex(p=>p.amount===amount),pad=PADS[index],c=a.cars[0];c.reset([pad.position[0],.5,pad.position[2]],[0,0,0]);c.boost=1;
+ for(const amount of [12,100]){const a=new CarBallArena();a.phase=1;const index=PADS.findIndex(p=>p.amount===amount),pad=PADS[index],c=a.cars[0];c.reset([pad.position[0],.5*CAR_SCALE,pad.position[2]],[0,0,0]);c.boost=1;
   a.step();assert.equal(c.boost,Math.min(100,1+amount));assert.equal(a.pads[index],pad.respawnSeconds);
   c.boost=0;c.reset([0,.5,0],[0,0,0]);
   for(let n=0;n<Math.round(pad.respawnSeconds/ARENA_DT)-1;n++)a.step();assert.ok(a.pads[index]>0);

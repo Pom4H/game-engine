@@ -1,6 +1,6 @@
 import {quaternionFromEuler} from '../physics/rotation.js';
 import {SnapshotDatagram} from '../network/datagram.js';
-import {staticWheelSupport} from '../physics/wheel-support.js';
+import {bodyWheelSupport,rayTriangles} from '../physics/wheel-support.js';
 import type {Vec3} from '../math.js';
 import {PhysicsWorld,RigidBody} from '../physics/world.js';
 import {StructuralBody} from '../physics/structure.js';
@@ -11,6 +11,8 @@ import {vehicle,wheel} from '../vehicles/components.js';
 import {projection,buffer,vector3,scalar,type Stamp} from '../network/projection.js';
 
 export const ARENA_DT=1/120;
+/** Match-scale construction: wheel footprint fits the deformable ball. Rendering uses the same scale. */
+export const CAR_SCALE=.72;
 export const BALL=elasticSphere();
 export const FIELD={halfLength:28,halfWidth:18,height:12,goalHalfWidth:5,goalHeight:4} as const;
 export interface BoostPad {readonly position:Vec3;readonly amount:number;readonly respawnSeconds:number;readonly radius:number;}
@@ -46,16 +48,16 @@ export const arenaBoxes:readonly ArenaBox[]=[
   {id:`goal-roof:${s}`,position:[s*30.5,4.5,0] as Vec3,size:[5,1,10] as Vec3,visible:false},
  ]),
 ];
-export const arenaProjection=projection('car-ball/v2',{
+export const arenaProjection=projection('car-ball/v3',{
  car0:vector3(),rotation0:buffer(4,{sample:'quaternion',min:-1,max:1}),velocity0:vector3(),car1:vector3(),rotation1:buffer(4,{sample:'quaternion',min:-1,max:1}),velocity1:vector3(),
  ball:vector3(),nodes:buffer(BALL.definition.nodes.length*3),boost:buffer(2,{min:0,max:100}),score:buffer(2,{sample:'step',min:0,max:1e6,integer:true}),
  remaining:scalar('linear',0,300),phase:scalar('step',0,3),pads:buffer(PADS.length,{sample:'step',min:0,max:10}),ack:buffer(2,{sample:'step',min:0,max:0x7fffffff,integer:true}),spin:buffer(8),compression:buffer(8),steer:buffer(2),
 },{maxEntities:1,maxBytes:32_000,maxStride:512});
 export const arenaDatagram=new SnapshotDatagram(arenaProjection,'arena',{nodes:{origin:'ball',step:.001}});
-const blueprint=(id:string)=>vehicle(id,{chassis:{massKg:300,sizeM:[4.65,.72,1.888],dragAreaM2:.8},parts:
+const blueprint=(id:string)=>vehicle(id,{chassis:{massKg:300*CAR_SCALE**3,sizeM:[4.65*CAR_SCALE,.5*CAR_SCALE,1.888*CAR_SCALE],dragAreaM2:.8*CAR_SCALE**2},parts:
  [1,-1].flatMap(x=>[-1,1].map(z=>wheel(`${x>0?'front':'rear'}.${z>0?'right':'left'}`,{
-  at:[x>0?1.5365:-1.3005,.04,z*.787],massKg:15,radiusM:.34,widthM:.25,steerRad:x>0?.6:0,driveTorqueNm:450,drivePowerW:18000,brakeTorqueNm:900,grip:1.7,
-  suspension:{restM:.32,travelM:.2,springNPerM:19000,damperNsPerM:1700},
+  at:[(x>0?1.5365:-1.3005)*CAR_SCALE,.04*CAR_SCALE,z*.787*CAR_SCALE],massKg:15*CAR_SCALE**3,radiusM:.34*CAR_SCALE,widthM:.25*CAR_SCALE,steerRad:x>0?.6:0,driveTorqueNm:450*CAR_SCALE**4,drivePowerW:18000*CAR_SCALE**3,brakeTorqueNm:900*CAR_SCALE**4,grip:1.7,
+  suspension:{restM:.32*CAR_SCALE,travelM:.2*CAR_SCALE,springNPerM:19000*CAR_SCALE,damperNsPerM:1700*CAR_SCALE**2},
  }))),});
 /** Executable game recipe. Browser-independent authoritative state, no network/GPU I/O.
  * Car mass integrates only in PhysicsWorld; the ball mass only in StructuralBody. */
@@ -72,9 +74,18 @@ export class CarBallArena {
   const boundaries=arenaBoxes.map(box=>new RigidBody({id:box.id,position:box.position,rotation:box.rotation??[0,0,0],shape:{kind:'box',half:box.size.map(n=>n/2) as unknown as Vec3},restitution:.75,friction:.45}));
   // The implicit ground owns rigid floor contact. The nodal solver uses its matching box.
   for(const b of boundaries)if(b.id!=='floor')this.world.add(b);
-  this.world.wheelSupport=staticWheelSupport(boundaries,this.world.ground);
   this.cars=[new ArcadeVehicle(this.world,blueprint('car:0'),{position:[-16,.64,0]}),new ArcadeVehicle(this.world,blueprint('car:1'),{position:[16,.64,0],rotation:[0,Math.PI,0]})];
   for(const car of this.cars){car.body.restitution=.7;car.body.friction=.18;}
+  const bodies=bodyWheelSupport([...boundaries,...this.cars.map(c=>c.body)],this.world.ground);
+  this.world.wheelSupport=(origin,direction,max,hit,exclude)=>{
+   const rigid=bodies(origin,direction,max,hit,exclude);
+   if(rayTriangles(origin,direction,rigid?hit.distance:max,this.ball.position,BALL.indices,hit,this.ball.velocity)){hit.id='ball';return true;}
+   return rigid;
+  };
+  for(const car of this.cars)car.supportReaction=(hit,force)=>{
+   if(hit.triangle<0)return;const t=hit.triangle*3,weights=[1-hit.u-hit.v,hit.u,hit.v];
+   for(let k=0;k<3;k++)this.ball.addForce(BALL.indices[t+k]!,[-force[0]*weights[k]!,-force[1]*weights[k]!,-force[2]*weights[k]!]);
+  };
   this.contacts=new StructuralRigidContacts([...boundaries,...this.cars.map(c=>c.body)],BALL.surfaceNodes);
   this.ball.translate([0,1.7,0]);this.ball.wake();
  }
