@@ -12,7 +12,7 @@ npm install --prefix tools/docs --ignore-scripts
 bun run arena
 ```
 
-Open `http://127.0.0.1:4173/docs/arena.html` twice. The first two connections receive
+Open `http://127.0.0.1:4173/games/car-ball/` twice. The first two connections receive
 server-owned seats. Additional connections spectate (eight total). No account service,
 external renderer, external physics library or engine runtime dependency is added.
 The normal `/docs/` TypeScript playground remains available with its existing scenes.
@@ -183,7 +183,7 @@ bun run build
 node --test test/car-ball.test.mjs test/arena-network.test.mjs test/arena-surfaces.test.mjs test/moving-support.test.mjs test/datagram.test.mjs
 node --test test/network-buffer.test.mjs test/network-structure.test.mjs
 node tools/docs/build.mjs
-node tools/docs/arena-qa.mjs
+node tools/games/qa.mjs
 ```
 
 Set ARENA_TRANSPORT=webtransport for the native UDP test (the unconfigured QA retains the explicit SSE diagnostic fixture). The last command needs native Chrome/WebGPU (`CHROME_PATH`); it opens two actual

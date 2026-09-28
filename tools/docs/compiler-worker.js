@@ -1,6 +1,6 @@
 /* Local authored TypeScript only. Import/share never autoruns. Killable, not a security sandbox. */
 importScripts('./vendor/typescript.js','./compile.cjs','./bindings.cjs');
-const api=import('./engine/dsl/index.js');
+const api=import('../engine/dsl/index.js');
 let session;
 self.onmessage=async({data})=>{
  let analyzed;

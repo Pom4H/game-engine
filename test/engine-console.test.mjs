@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {consoleSession,readPath,formatValue} from '../tools/docs/console.mjs';
+import {consoleSession,readPath,formatValue} from '../tools/shared/console.mjs';
 
 test('one sample shares readers; the next sample observes live state',()=>{
  let calls=0,tick=1;

@@ -24,7 +24,7 @@ npm install --prefix tools/docs --ignore-scripts
 bun run arena
 ```
 
-Open `http://127.0.0.1:4173/docs/arena.html` in two WebGPU browser windows.
+Open `http://127.0.0.1:4173/games/car-ball/` in two WebGPU browser windows.
 First two connections drive; subsequent viewers spectate. The same branch includes
 the DSL editor, the Ё console, recorded renderer filmstrip and structural networking.
 See [game controls, networking and limits](docs/car-ball.md) and

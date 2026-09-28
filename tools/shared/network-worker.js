@@ -1,7 +1,7 @@
-import {DatagramOutbox} from './engine/network/datagram.js';
-import {encodeArcadeInput} from './engine/network/arcade-wire.js';
+import {DatagramOutbox} from '../engine/network/datagram.js';
+import {encodeArcadeInput} from '../engine/network/arcade-wire.js';
 /* Network parsing off the render thread. One transferred frame + one replaceable pending frame. */
-import {sceneMotion} from './engine/network/scene-view.js';
+import {sceneMotion} from '../engine/network/scene-view.js';
 let schema=sceneMotion,endpoint='/debug-network/',connectionToken='';
 let transport=null,fast=null,inputPending=null;
 let stream=null,pending=null,busy=false,serial=0,clip=null,clipSerial=0;
@@ -14,10 +14,10 @@ onmessage=({data})=>{
   stream?.abort();serial=data.serial;pending=null;busy=false;endpoint=data.arena?'/arena-network/':'/debug-network/';connectionToken=data.token??'';
   const controller=new AbortController();stream=controller;const current=serial;
   (async()=>{
-   schema=data.arena?(await import('./engine/examples/car-ball.js')).arenaProjection:sceneMotion;
+   schema=data.arena?(await import('../engine/examples/car-ball.js')).arenaProjection:sceneMotion;
    if(data.transport?.mode==='webtransport'){
     if(typeof WebTransport==='undefined')throw Error('UDP/WebTransport is unavailable; no TCP fallback');
-    const {arenaDatagram}=await import('./engine/examples/car-ball.js'),config=data.transport;
+    const {arenaDatagram}=await import('../engine/examples/car-ball.js'),config=data.transport;
     if(config.schema!==arenaDatagram.signature)throw Error('Client/server datagram schema mismatch');
     const options={requireUnreliable:true,congestionControl:'low-latency',allowPooling:false};
     if(config.certificateHash)options.serverCertificateHashes=[{algorithm:'sha-256',value:Uint8Array.from(config.certificateHash.match(/../g),n=>parseInt(n,16))}];

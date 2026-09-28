@@ -1,0 +1,15 @@
+{
+  "base": "6bfb8c51228c99dad1cc91c647194a0643c5bb8a",
+  "runtime": "v22.16.0",
+  "samples": 400,
+  "entities": 211,
+  "carParts": 10,
+  "numericValues": 997200,
+  "poseAndBallBuffers": "exactly equal",
+  "oldLookups": 21600,
+  "newLookups": 0,
+  "oldRegex": 8000,
+  "newRegex": 0,
+  "simulationModified": false
+}
+

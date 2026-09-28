@@ -1,4 +1,4 @@
-import {Replica,SceneReplicaView,sceneMotion} from './engine/network/index.js';
+import {Replica,SceneReplicaView,sceneMotion} from '../engine/network/index.js';
 /** Optional local authority panel in the EXISTING editor. No second renderer, scene clock or writable settings store. */
 export class NetworkPanel{
  active=false;lastArrival=0;networkStatus='';pendingGpu=0;skippedFrames=0;buffer=null;view=null;worker=null;runtime=null;token='';epoch=0;tick=0;paused=true;mode='live';playhead=0;lastUpdate=0;frameCount=0;serial=0;
@@ -26,7 +26,7 @@ export class NetworkPanel{
   this.token=(await response.json()).token;this.pauseLocal();this.runtime=this.getRuntime();
   const ready=await this.request('init',{program:this.getProgram()});await this.install(ready);
   this.active=true;this.serial++;const serial=this.serial;
-  this.worker=new Worker('./network-worker.js',{type:'module'});
+  this.worker=new Worker(new URL('../shared/network-worker.js',import.meta.url),{type:'module'});
   this.worker.onmessage=({data})=>{
    if(!this.active||data.serial!==this.serial)return;
    try{

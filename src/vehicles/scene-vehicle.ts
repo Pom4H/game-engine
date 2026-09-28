@@ -1,3 +1,4 @@
+import {eulerFromBasis} from '../physics/rotation.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {finiteVec3} from '../math.js';
 import {ForceFrame} from '../physics/force-frame.js';
@@ -88,7 +89,7 @@ export function spawnVehicle(scene:Scene,blueprint:VehicleBlueprint,geometry:Com
             for(let k=0;k<3;k++)scratch[k]=axis===0?ch[k]!*c+n[k]!*s:axis===1?n[k]!*c-ch[k]!*s:ch[(k+1)%3]!*n[(k+2)%3]!-ch[(k+2)%3]!*n[(k+1)%3]!;
             frame.rotate(scratch,scratch);worldBasis.set(scratch,axis*3);
           }
-          euler(worldBasis,e.rotation);
+          eulerFromBasis(worldBasis,e.rotation);
           if(v.tire){e.scale[0]=e.scale[1]=p.effectiveRadiusM/v.radius!;}
         }else if(v.part?.kind==='wing'){
           const p=v.part;let changed=!v.key;
@@ -130,9 +131,4 @@ function wingMesh(p:PartSample,span:number,chord:number):Mesh {
     for(const index of face){positions.push(...points[index]!);normals.push(...nn.map(x=>x/length));}indices.push(base,base+1,base+2,base,base+2,base+3);
   }
   const mesh:Mesh={kind:'triangle-mesh',positions,normals,indices};freezeVehicleMesh(mesh);return mesh;
-}
-function euler(b:Float64Array,out:MutableVec3):void{
-  out[1]=Math.asin(Math.max(-1,Math.min(1,b[6]!)));
-  if(Math.abs(Math.cos(out[1]))>1e-7){out[0]=Math.atan2(-b[7]!,b[8]!);out[2]=Math.atan2(-b[3]!,b[0]!);}
-  else {out[0]=Math.sign(b[6]!)*Math.atan2(b[1]!,b[4]!);out[2]=0;}
 }

@@ -34,3 +34,10 @@ export function sampleQuaternion(a:ArrayLike<number>,b:ArrayLike<number>,offset:
  let norm=0;for(let k=0;k<4;k++){const v=a[offset+k]!*x+b[offset+k]!*y;out[offset+k]=v;norm+=v*v;}
  norm=Math.sqrt(norm);for(let k=0;k<4;k++)out[offset+k]!/=norm;
 }
+
+/** Convert the shared column-major f64 body basis into the renderer's Euler chart.
+ * Pure numeric boundary; output is caller-owned and may be reused. */
+export function eulerFromBasis(b:ArrayLike<number>,out:MutableVec3):void {
+ out[1]=Math.asin(Math.max(-1,Math.min(1,b[6]!)));
+ if(Math.abs(Math.cos(out[1]))>1e-7){out[0]=Math.atan2(-b[7]!,b[8]!);out[2]=Math.atan2(-b[3]!,b[0]!);}else{out[0]=Math.sign(b[6]!)*Math.atan2(b[1]!,b[4]!);out[2]=0;}
+}

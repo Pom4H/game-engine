@@ -26,10 +26,10 @@ async function connect(page){const ws=new WebSocket(page.webSocketDebuggerUrl);c
 }
 try{
  let first;for(let i=0;i<200;i++){try{const pages=await(await fetch(`http://127.0.0.1:${debug}/json/list`)).json();first=pages.find(p=>p.type==='page');if(first)break;}catch{}await sleep(50);}if(!first)throw Error('Chrome did not start');
- for(let i=0;i<100;i++){try{if((await fetch(`http://127.0.0.1:${http}/docs/arena.html`)).ok)break;}catch{}await sleep(50);}
- const p=await connect(first);await p.send('Page.navigate',{url:`http://127.0.0.1:${http}/docs/arena.html`});await p.wait('globalThis.__ARENA__?.replica?.latest() && __ARENA__.inspect().frames > 5');
+ for(let i=0;i<100;i++){try{if((await fetch(`http://127.0.0.1:${http}/games/car-ball/`)).ok)break;}catch{}await sleep(50);}
+ const p=await connect(first);await p.send('Page.navigate',{url:`http://127.0.0.1:${http}/games/car-ball/`});await p.wait('globalThis.__ARENA__?.replica?.latest() && __ARENA__.inspect().frames > 5');
  const second=await(await fetch(`http://127.0.0.1:${debug}/json/new?about:blank`,{method:'PUT'})).json(),q=await connect(second);
- await q.send('Page.navigate',{url:`http://127.0.0.1:${http}/docs/arena.html`});await q.wait('globalThis.__ARENA__?.replica?.latest() && __ARENA__.inspect().frames > 5');
+ await q.send('Page.navigate',{url:`http://127.0.0.1:${http}/games/car-ball/`});await q.wait('globalThis.__ARENA__?.replica?.latest() && __ARENA__.inspect().frames > 5');
  const pages=[p,q];const initial=await Promise.all(pages.map(c=>c.evalJS('__ARENA__.inspect()')));assert.deepEqual(initial.map(i=>i.seat),[0,1]);assert.ok(initial.every(i=>i.renderer.backend==='webgpu'&&i.clientPhysicsSteps===0&&i.clientBodies===0));checks.push('two distinct owned seats; actual WebGPU; zero client physics bodies/steps');await p.capture('arena-kickoff');
  if(process.env.ARENA_TRANSPORT==='webtransport'){for(const c of pages)await c.wait('__ARENA__.inspect().transport === \'webtransport\'');checks.push('browser requireUnreliable: QUIC datagram transport, no SSE fallback');}
  await p.send('Page.bringToFront');await p.evalJS("document.querySelector('#restart').click()");await p.wait(`__ARENA__.inspect().epoch > ${initial[0].epoch}`);

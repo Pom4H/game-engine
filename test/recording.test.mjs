@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FrameRecording,chromeTrace} from '../tools/docs/recording.mjs';
+import {FrameRecording,chromeTrace} from '../tools/shared/recording.mjs';
 import {RenderProfiler} from '../dist/render/profiler.js';
 const event=(frame,kind='cpu',generation=0,startMs=frame*10)=>({kind,generation,startMs,timing:{frame,totalMs:2,quanta:{main:1.5},work:{triangles:200}},spans:[{name:'main',offsetMs:.25,durationMs:1.5}]});
 const jpeg='data:image/jpeg;base64,/9j/AA==';

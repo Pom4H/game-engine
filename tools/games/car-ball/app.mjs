@@ -1,10 +1,10 @@
-import {consoleSession,mountConsole} from './console.mjs';
-import {mountRecording} from './recording-ui.mjs';
-import {CarBallView,arenaOffset as offset} from './engine/examples/car-ball-view.js';
-import {arenaProjection} from './engine/examples/car-ball.js';
-import {Replica} from './engine/network/playback.js';
-import {ArcadeControls} from './engine/runtime/arcade-controls.js';
-import {WebGPURenderer} from './engine/render/webgpu.js';
+import {consoleSession,mountConsole} from '../../shared/console.mjs';
+import {mountRecording} from '../../shared/recording-ui.mjs';
+import {CarBallView,arenaOffset as offset} from '../../engine/examples/car-ball-view.js';
+import {arenaProjection} from '../../engine/examples/car-ball.js';
+import {Replica} from '../../engine/network/playback.js';
+import {ArcadeControls} from '../../engine/runtime/arcade-controls.js';
+import {WebGPURenderer} from '../../engine/render/webgpu.js';
 const $=id=>document.getElementById(id),canvas=$('arena'),controls=new ArcadeControls(canvas),view=new CarBallView();
 let renderer,worker,replica,token='',seat=-1,epoch=0,sequence=0,serial=0,arrived=0,replay=null,inflight=false,pendingGpu=0,frames=0,dropped=0,disposed=false,lastUI=0,transportMode='connecting',lastPing=0,pinging=false;
 const camera=[-24,4,7],target=[0,1,0];
@@ -16,7 +16,7 @@ async function join(){
   if(token)await request('leave').catch(()=>{});
   const ready=await request('join');token=ready.token;seat=ready.seat;epoch=ready.epoch;sequence=ready.sequence;controls.setSerial(ready.jumpSerial);transportMode=ready.transport?.mode??'sse';
   replica=new Replica(arenaProjection,epoch,600,16_000_000,transportMode==='webtransport'?.035:.065);replica.receive(ready.frame,performance.now()/1000);arrived=performance.now();replay=null;
-  worker?.terminate();worker=new Worker('./network-worker.js',{type:'module'});const current=++serial;
+  worker?.terminate();worker=new Worker(new URL('../../shared/network-worker.js',import.meta.url),{type:'module'});const current=++serial;
   worker.onmessage=({data})=>{
    if(data.serial!==current)return;
    try{
