@@ -808,8 +808,8 @@ export class WebGPURenderer implements Renderer{
       return{vp,cullVP,reflectionVP,settings,lightVP,right,up,frame};
     });
     const {vp,cullVP,reflectionVP,lightVP,right,up,frame}=frameState;
-    const classified=this.profiler.measure('visibility',()=>({visible:this.collectedVisible,opaque:this.collectedOpaque,transparent:this.collectedTransparent}));
-    this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
+    const visible=this.collectedVisible,opaque=this.collectedOpaque,transparent=this.collectedTransparent;
+    this.profiler.setWork({entities:scene.entities.size,visible:visible.length,opaque:opaque.length,transparent:transparent.length});
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     const frameModels=this.frameModels;frameModels.clear();
     const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
@@ -830,7 +830,7 @@ export class WebGPURenderer implements Renderer{
       const staticDirty=viewsChanged||this.staticCullRevision!==scene.renderStructureRevision;
       if(staticDirty){
         const cameraOpaque:RuntimeEntity[]=[],cameraTransparent:RuntimeEntity[]=[],shadowCasters:RuntimeEntity[]=[],reflectedObjects:RuntimeEntity[]=[];
-        for(const entity of classified.visible){
+        for(const entity of visible){
           if(renderMoverIds.has(entity.id))continue;
           const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
           if(visible.camera)(opaque?cameraOpaque:cameraTransparent).push(entity);
@@ -867,7 +867,7 @@ export class WebGPURenderer implements Renderer{
     });
     const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
     if(reflectionProbe&&this.localProbeMask!==63){
-      const radius2=(reflectionProbe.radius+12)**2,candidates=classified.opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
+      const radius2=(reflectionProbe.radius+12)**2,candidates=opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,reflectionProbe.position)<=radius2);
       for(let index=0;index<reflectionProbe.facesPerFrame;index++){
         const face=(this.localProbeFace+index)%6,faceVp=probeVP(reflectionProbe.position,face,reflectionProbe.radius);
         const entities=candidates.filter(entity=>{multiply4Into(faceVp,modelFor(entity),this.cullScratch);return intersectsClip(this.mesh(renderPrimitive(entity)!).bounds,this.cullScratch);});
