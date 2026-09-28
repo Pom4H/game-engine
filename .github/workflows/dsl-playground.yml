@@ -2,7 +2,7 @@ name: DSL playground
 on:
   push:
     branches: [codex/adaptive-core]
-    paths: ['src/**', 'tools/docs/**', 'tools/transport/**', 'test/datagram.test.mjs', 'test/arena-surfaces.test.mjs', 'test/dsl-playground.mjs', 'test/engine-console.test.mjs', 'test/recording.test.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
+    paths: ['src/**', 'tools/docs/**', 'tools/transport/**', 'test/datagram.test.mjs', 'test/arena-surfaces.test.mjs', 'test/moving-support.test.mjs', 'test/arena-datagram-host.test.mjs', 'test/dsl-playground.mjs', 'test/engine-console.test.mjs', 'test/recording.test.mjs', 'package.json', '.github/workflows/dsl-playground.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -29,6 +29,8 @@ jobs:
         shell: cmd
       - name: Source bindings, live edits and all demo programs
         run: node --test test/dsl-playground.mjs test/engine-console.test.mjs test/recording.test.mjs
+      - name: Surface contacts, jump resets and datagram queue regressions
+        run: node --test test/moving-support.test.mjs test/arena-surfaces.test.mjs test/datagram.test.mjs test/arena-datagram-host.test.mjs
       - name: Build portable playground
         run: node tools/docs/build.mjs
       - name: Locate native Chrome
