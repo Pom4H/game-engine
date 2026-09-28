@@ -16,7 +16,7 @@ import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
 import {renderPrimitive,renderModel,primitiveBaseScale} from './frame.js';
 import {buildDiffuseIrradianceSH} from './irradiance.js';
-import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
+import {trackRuntimeMemory,trackRuntimeSlot,trackRuntimeInstance} from '../core/runtime-memory.js';
 
 type GPUAny=any;
 const SHADOW_MAP_SIZE=2048;
@@ -661,7 +661,10 @@ export class WebGPURenderer implements Renderer{
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
-    trackRuntimeInstance('WebGPURenderer',this);this.surfaceTextures=new SurfaceTextures(device);this.profiler=new RenderProfiler(device,{enabled:profiling,timestampQueries});
+    trackRuntimeInstance('WebGPURenderer',this);
+    for(const name of ['depth','hdr','opaqueScene','opaqueBind','normal','specular','velocity','effectsHdr','effectsBind','taaA','taaB','taaBindAB','taaBindBA','presentBindA','presentBindB','reflection','reflectionDepth','bloomA','bloomB','bloomDownBind','bloomHorizontalBind','bloomVerticalBind'] as const)trackRuntimeSlot('WebGPURenderer',name,'resource',this,name);
+    for(const name of ['measuredRadiance','shadowLightVP','previousVp','previousCamera','previousTarget','lastCamera'] as const)trackRuntimeSlot('WebGPURenderer',name,'state',this,name);
+    trackRuntimeMemory('WebGPURenderer','gpu','resource',gpu);trackRuntimeMemory('WebGPURenderer','device','resource',device);this.surfaceTextures=new SurfaceTextures(device);this.profiler=new RenderProfiler(device,{enabled:profiling,timestampQueries});
     this.shaderAtoms=profiling?Object.freeze({
       material:analyzeWGSL('material',materialShader(),['vs','fs','shadowVS']),
       reflection:analyzeWGSL('reflection',REFLECTION_LOD_SHADER,['reflectionVS','fs']),
