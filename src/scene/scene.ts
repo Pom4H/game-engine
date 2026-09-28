@@ -68,8 +68,6 @@ export class Scene {
   renderStructureRevision=0;
   /** Shader-only authoring changes; does not invalidate geometry, shadows, probes or culling. */
   appearanceRevision=0;
-  /** Monotonic causal versions consumed by incremental projections. */
-  readonly versions=new Map<string,number>([['entities',0],['appearance',0],['camera',0]]);
   camera:CameraSpec;
   private eventSequence=0;
   private readonly eventQueue:EngineEvent[]=[];
@@ -125,7 +123,7 @@ export class Scene {
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
-    this.entities.set(spec.id,runtime);this.renderStructureRevision++;this.bump('entities');
+    this.entities.set(spec.id,runtime);this.renderStructureRevision++;
     return runtime;
   }
 
@@ -146,13 +144,13 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){this.renderStructureRevision++;this.bump('entities');}
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
     const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,versions:this.versions,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});
@@ -160,10 +158,10 @@ export class Scene {
   private commit(command:InternalCommand,at:number):void{
     if(command.type==='spawn'){this.add(command.entity);return;}
     if(command.type==='remove'){this.remove(command.id);return;}
-    if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));this.bump(command.key);return;}
+    if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));return;}
     if(command.type==='velocity'){
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
-      const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);this.bump('entities');return;
+      const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);return;
     }
     this.runSystem(command.action,command.deltaSeconds,at);
   }
@@ -197,7 +195,7 @@ export class Scene {
     }))};
   }
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
-  setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);this.bump('camera');}
+  setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
   patchAppearance(patch:AppearancePatch):void{
     let appearanceChanged=false,structureChanged=false;
     if(patch.rendering){
@@ -218,11 +216,9 @@ export class Scene {
         appearanceChanged=true;
       }
     }
-    if(structureChanged){this.renderStructureRevision++;this.bump('entities');}
-    if(appearanceChanged){this.appearanceRevision++;this.bump('appearance');}
+    if(structureChanged)this.renderStructureRevision++;
+    if(appearanceChanged)this.appearanceRevision++;
   }
-
-  private bump(resource:string):void{this.versions.set(resource,(this.versions.get(resource)??0)+1);}
 
   private syncSurfaceVisuals():void{
     const keep=new Set<string>();
