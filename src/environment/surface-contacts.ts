@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from '../core/runtime-memory.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import type {RuntimeEntity} from '../scene/scene.js';
 import type {EntitySpec,MaterialSpec} from '../scene/types.js';
@@ -71,12 +72,12 @@ function surfaceDimensions(entity:RuntimeEntity):readonly[number,number]{
 export class SurfaceContactSystem {
  readonly footprints:SnowFootprints;
  private readonly host:SurfaceContactHost;private readonly id:string;private readonly particleCapacity:number;
- private readonly surfaces=new Map<string,SnowBinding>();private readonly wheels=new Map<string,WheelBinding>();
- private readonly particles=new Map<number,SprayParticle>();private readonly wheelEmission=new Map<string,number>();
- private readonly events:SurfaceFootprint[]=[];private readonly particleIds=new Map<string,RuntimeEntity>();private readonly snowEntities=new Map<string,RuntimeEntity>();
+ private readonly surfaces=trackRuntimeMemory('SurfaceContactSystem','surfaces','registry',new Map<string,SnowBinding>());private readonly wheels=trackRuntimeMemory('SurfaceContactSystem','wheels','registry',new Map<string,WheelBinding>());
+ private readonly particles=trackRuntimeMemory('SurfaceContactSystem','particles','pool',new Map<number,SprayParticle>());private readonly wheelEmission=trackRuntimeMemory('SurfaceContactSystem','wheelEmission','state',new Map<string,number>());
+ private readonly events=trackRuntimeMemory('SurfaceContactSystem','events','queue',[] as SurfaceFootprint[]);private readonly particleIds=trackRuntimeMemory('SurfaceContactSystem','particleIds','registry',new Map<string,RuntimeEntity>());private readonly snowEntities=trackRuntimeMemory('SurfaceContactSystem','snowEntities','registry',new Map<string,RuntimeEntity>());
  private sequence=0;private surfaceSequence=0;private time=-Infinity;private wetnessValue=0;private emitted=0;
  constructor(host:SurfaceContactHost,options:SurfaceContactsOptions={}){
-  this.host=host;const base=options.id??'__contacts';this.particleCapacity=options.particleCapacity??96;this.footprints=new SnowFootprints(options.capacity??256);
+  trackRuntimeInstance('SurfaceContactSystem',this);this.host=host;const base=options.id??'__contacts';this.particleCapacity=options.particleCapacity??96;this.footprints=new SnowFootprints(options.capacity??256);
   if(!base||base.length>100||!Number.isSafeInteger(this.particleCapacity)||this.particleCapacity<1||this.particleCapacity>2048)throw new RangeError('Invalid surface contact budget');
   this.id=allocateNamespace(host,base);
  }
