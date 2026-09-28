@@ -28,6 +28,7 @@ interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;viewVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number;shadowGeneration?:number;shadowPrimitive?:Primitive;shadowModel?:Mat4}
 interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:Set<string>;opaque:number}
 interface CullSet{cameraOpaque:RuntimeEntity[];cameraTransparent:RuntimeEntity[];shadowCasters:RuntimeEntity[];reflectedObjects:RuntimeEntity[]}
+interface ShadowWork{all:RuntimeEntity[];staticCasters:RuntimeEntity[];dynamicCasters:RuntimeEntity[]}
 interface StaticCullState extends CullSet{revision:number}
 interface CullViews{version:number;camera:Mat4|null;light:Mat4|null;reflection:Mat4|null}
 interface LocalProbeState{mask:number;face:number;position:Vec3|null;bounds:{min:Vec3;max:Vec3}|null;key:string;cause:string}
@@ -657,7 +658,13 @@ export class WebGPURenderer implements Renderer{
     cameraTransparent:trackRuntimeMemory('WebGPURenderer','frameCameraTransparent','cache',[] as RuntimeEntity[]),
     shadowCasters:trackRuntimeMemory('WebGPURenderer','frameShadowCasters','cache',[] as RuntimeEntity[]),
     reflectedObjects:trackRuntimeMemory('WebGPURenderer','frameReflectedObjects','cache',[] as RuntimeEntity[]),
-  } as CullSet);private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  } as CullSet);
+  private shadowWork=trackRuntimeMemory('WebGPURenderer','shadowWork','cache',{
+    all:trackRuntimeMemory('WebGPURenderer','frameShadowDrawables','cache',[] as RuntimeEntity[]),
+    staticCasters:trackRuntimeMemory('WebGPURenderer','frameStaticShadowCasters','cache',[] as RuntimeEntity[]),
+    dynamicCasters:trackRuntimeMemory('WebGPURenderer','frameDynamicShadowCasters','cache',[] as RuntimeEntity[]),
+  } as ShadowWork);
+  private readonly prepared=trackRuntimeMemory('WebGPURenderer','preparedEntities','cache',new Map<string,RuntimeEntity>());private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -877,9 +884,12 @@ export class WebGPURenderer implements Renderer{
       cameraTransparent.sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
       return this.frameCull;
     });
-    const shadowDrawables=culled.shadowCasters.filter(e=>!(e.material.emissive&&Math.max(...e.material.emissive)>1));
-    const staticShadowDrawables=shadowDrawables.filter(entity=>isStaticShadowCaster(entity,renderMoverIds));
-    const dynamicShadowDrawables=shadowDrawables.filter(entity=>!isStaticShadowCaster(entity,renderMoverIds));
+    const {all:shadowDrawables,staticCasters:staticShadowDrawables,dynamicCasters:dynamicShadowDrawables}=this.shadowWork;
+    shadowDrawables.length=0;staticShadowDrawables.length=0;dynamicShadowDrawables.length=0;
+    for(const entity of culled.shadowCasters){
+      if(entity.material.emissive&&Math.max(...entity.material.emissive)>1)continue;
+      shadowDrawables.push(entity);(isStaticShadowCaster(entity,renderMoverIds)?staticShadowDrawables:dynamicShadowDrawables).push(entity);
+    }
     if(dynamicShadowDrawables.length){
       frame[31]=1;
       const dynamicShadowFlag=new Float32Array([1]);
@@ -900,8 +910,13 @@ export class WebGPURenderer implements Renderer{
         const data=probeUniform(scene,reflectionProbe.position,faceVp);this.device.queue.writeBuffer(this.gpu.probeFrames[face],0,data);this.profiler.addUpload(data.byteLength,'frame');
       }
     }
-    const prepared=new Map<string,RuntimeEntity>();
-    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...(shadowDirty?staticShadowDrawables:[]),...dynamicShadowDrawables,...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
+    const prepared=this.prepared;prepared.clear();
+    for(const entity of culled.cameraOpaque)prepared.set(entity.id,entity);
+    for(const entity of culled.cameraTransparent)prepared.set(entity.id,entity);
+    if(shadowDirty)for(const entity of staticShadowDrawables)prepared.set(entity.id,entity);
+    for(const entity of dynamicShadowDrawables)prepared.set(entity.id,entity);
+    for(const entity of culled.reflectedObjects)prepared.set(entity.id,entity);
+    for(const capture of probeFaces)for(const entity of capture.entities)prepared.set(entity.id,entity);
     this.profiler.measure('prepare',()=>{for(const entity of prepared.values()){const model=modelFor(entity);if(this.needsPrepare(entity,model,frameId))this.prepare(entity,model,frameId);}});
     this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:0});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
