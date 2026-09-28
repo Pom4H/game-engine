@@ -1,4 +1,5 @@
 import type {RenderAtomReport} from './atoms.js';
+import {trackRuntimeInstance,trackRuntimeMemory,trackRuntimeSlot} from '../core/runtime-memory.js';
 export const RENDER_CPU_QUANTA = [
   'lifecycle','resize','materials','lights','frame','environment','visibility','prepare','cull',
   'encode.shadow','encode.probe','encode.reflection','encode.main','encode.bloom','encode.effects','encode.taa','encode.present','submit',
@@ -59,14 +60,15 @@ const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work
  */
 export class RenderProfiler {
   private frame=0;private generation=0;private frameStart=0;private cpuQuanta:Record<string,number>={};private work=emptyWork();private atoms:RenderAtomReport|undefined;
-  private readonly cpuHistory:RenderFrameTiming[]=[];private readonly gpuHistory:RenderFrameTiming[]=[];
-  private readonly querySet:GPUAny|null;private readonly slots:GpuSlot[]=[];private active:GpuSlot|null=null;
+  private readonly cpuHistory=trackRuntimeMemory('RenderProfiler','cpuHistory','history',[] as RenderFrameTiming[]);private readonly gpuHistory=trackRuntimeMemory('RenderProfiler','gpuHistory','history',[] as RenderFrameTiming[]);
+  private readonly querySet:GPUAny|null;private readonly slots=trackRuntimeMemory('RenderProfiler','timestampSlots','pool',[] as GpuSlot[],4);private active:GpuSlot|null=null;
   private readonly queryBytes=RENDER_GPU_QUANTA.length*2*8;
-  private readonly occlusionQuerySet:GPUAny|null;private readonly occlusionSlots:OcclusionSlot[]=[];private activeOcclusion:OcclusionSlot|null=null;
+  private readonly occlusionQuerySet:GPUAny|null;private readonly occlusionSlots=trackRuntimeMemory('RenderProfiler','occlusionSlots','pool',[] as OcclusionSlot[],4);private activeOcclusion:OcclusionSlot|null=null;
   private readonly occlusionBytes=5*8;private latestRaster:RasterSampleFrame|undefined;
 
   readonly enabled:boolean;readonly timestampQueries:boolean;private readonly capacity:number;
   constructor(private readonly device:GPUAny,options:{enabled?:boolean;timestampQueries?:boolean;capacity?:number}={}){
+    trackRuntimeInstance('RenderProfiler',this);trackRuntimeSlot('RenderProfiler','cpuQuanta','state',this,'cpuQuanta');trackRuntimeSlot('RenderProfiler','work','state',this,'work');trackRuntimeSlot('RenderProfiler','querySet','resource',this,'querySet');trackRuntimeSlot('RenderProfiler','occlusionQuerySet','resource',this,'occlusionQuerySet');
     this.enabled=options.enabled??true;this.timestampQueries=this.enabled&&(options.timestampQueries??false);this.capacity=options.capacity??1024;
     if(!Number.isSafeInteger(this.capacity)||this.capacity<8||this.capacity>4096)throw new RangeError('Invalid render profiler capacity');
     this.querySet=this.timestampQueries?device.createQuerySet({label:'render quantum timestamps',type:'timestamp',count:RENDER_GPU_QUANTA.length*2}):null;
