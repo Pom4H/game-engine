@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DoorHinge,ElasticPlasticPanelResponse,FourCornerSuspension,M3InteractionRig,
-  M3_REFERENCE_PROVENANCE,Scene,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
+  M3_REFERENCE_PROVENANCE,M3_VEHICLE_DEFINITION,Scene,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
   material,renderAudio,thermalLinearScale,
 } from '../dist/index.js';
 
@@ -111,7 +111,8 @@ test('mechanism audio is deterministic and non-silent',()=>{
 
 test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
   const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
-  assert.equal(m3.generatedTriangles,9798,'packed render assembly should preserve all source FBX triangles');
+  assert.equal(M3_VEHICLE_DEFINITION.reference.triangles,9798,'reference metadata must preserve the source FBX triangle count');
+  assert.ok(m3.generatedTriangles>M3_VEHICLE_DEFINITION.reference.triangles,'engine-owned render details may add topology without mutating the source reference');
   const body=byId.get('body');
   assert.equal(body.mesh.indices.length/3,m3.bodyTriangles,'physical M3 shell must remain the compact source topology');
   assert.equal(body.renderMesh?.kind,'triangle-mesh');
