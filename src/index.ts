@@ -66,3 +66,5 @@ export {analyzeWGSL,buildRenderAtomReport,type ShaderOperationAtoms,type ShaderE
 export {detailedRoadWheelMeshes,detailedPassengerWheelMeshes,type RoadWheelGeometrySpec} from './vehicles/passenger-wheel.js';
 export {compileVehicle,type VehicleDefinition,type VehicleFamily,type VehicleReferenceProvenance,type ThreeBoxVehicleDefinition,type CompiledVehicleGeometry} from './vehicles/framework.js';
 export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type DoubleCabPickupVehicleDefinition} from './vehicles/pickup.js';
+
+export {RuntimeTaskManager,type RuntimeTaskManagerSource} from './runtime/task-manager.js';
