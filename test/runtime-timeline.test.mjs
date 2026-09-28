@@ -55,3 +55,12 @@ test('task manager projects live runtime memory without UI type knowledge',()=>{
   assert.equal(row?.data.capacity,16);
   assert.ok(gantt.groups.some(group=>group.id===owner+'/memory:cache'));
 });
+
+
+test('scene dispose closes every live entity and mesh span',()=>{
+  const id='__timeline:test:dispose',scene=new Scene({version:1,ground:-100,entities:[{id,mesh:{kind:'box'},material:{kind:'steel'}}]});
+  const before=runtimeTimelineSnapshot().filter(row=>row.refs.includes(id)&&row.end===null);assert.ok(before.length>=2);
+  scene.dispose();
+  const after=runtimeTimelineSnapshot().filter(row=>before.some(previous=>previous.id===row.id));
+  assert.ok(after.every(row=>row.end===scene.time));
+});
