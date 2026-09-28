@@ -630,7 +630,7 @@ export class WebGPURenderer implements Renderer{
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
-  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedLights:RuntimeEntity[]=[];
+  private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedLights:RuntimeEntity[]=[];private renderMoverIds:ReadonlySet<string>=new Set();
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();private reflectionCause='';private reflectionValid=false;
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';private probeComplete=false;
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private previousModels=new Map<string,Mat4>();private readonly modelCache=new Map<string,{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4}>();private readonly frameModels=new Map<string,Mat4>();private readonly cullScratch=new Float32Array(16);private readonly cullCache=new Map<string,{primitive:Primitive;model:Mat4;camera:boolean;shadow:boolean;reflection:boolean}>();private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCullRevision=-1;private staticCameraOpaque:RuntimeEntity[]=[];private staticCameraTransparent:RuntimeEntity[]=[];private staticShadowCasters:RuntimeEntity[]=[];private staticReflectedObjects:RuntimeEntity[]=[];private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
@@ -813,7 +813,7 @@ export class WebGPURenderer implements Renderer{
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     const frameModels=this.frameModels;frameModels.clear();
     const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
-    const renderMoverIds=scene.renderMoverIds();
+    const renderMoverIds=this.renderMoverIds;
     const culled=this.profiler.measure('cull',()=>{
       const viewsChanged=!matrixEqual(this.cullCameraVP??undefined,cullVP)||!matrixEqual(this.cullLightVP??undefined,lightVP)||!matrixEqual(this.cullReflectionVP??undefined,reflectionVP);
       if(viewsChanged){
@@ -1193,6 +1193,8 @@ export class WebGPURenderer implements Renderer{
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedLights=[...scene.entities.values()].filter(e=>e.light);
+    const movers=new Set(live.filter(e=>e.body&&(e.body.invMass>0||e.body.kinematic)).map(e=>e.id));
+    for(const id of scene.animation.controlledEntityIds())movers.add(id);for(const id of scene.deformation.visualEntityIds())movers.add(id);for(const id of scene.contacts?.controlledEntityIds()??[])movers.add(id);this.renderMoverIds=movers;
     if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}
     for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id)){this.modelCache.delete(id);this.cullCache.delete(id);}
