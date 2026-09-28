@@ -18,7 +18,6 @@ import type {EngineEvent} from './events.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
-import {CausalRuntime} from './system-runtime.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
@@ -59,7 +58,6 @@ export class Scene {
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
-  readonly causal=new CausalRuntime();
   readonly resources=new Map<string,unknown>();
   lastExecution:string[]=[];
   private pendingFractures=new Map<string,FractureDecision>();
@@ -99,7 +97,7 @@ export class Scene {
     for(const {entityId,...options} of this.spec.surfaceContacts?.wheels??[])this.contacts.addWheelContact(entityId,options);
     for(const walker of this.spec.animation?.walkers??[])this.animation.addWalker(walker);
     for(const vehicle of this.spec.animation?.vehicles??[])this.animation.addVehicle(vehicle);
-    this.installSystemRuntime();
+    this.installSystems();
   }
 
   add(spec:EntitySpec):RuntimeEntity{
@@ -167,37 +165,30 @@ export class Scene {
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
       const body=this.entities.get(command.id)?.body;if(!body)throw new TypeError(`No body: ${command.id}`);body.velocity.splice(0,3,...command.value);this.bump('entities');return;
     }
-    this.causal.apply({type:command.action,deltaSeconds:command.deltaSeconds},at);
+    this.runSystem(command.action,command.deltaSeconds,at);
   }
 
-  private installSystemRuntime():void{
-    this.causal
-      .when('weather',({at})=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);})
-      .when('surfaces',({dt})=>{
-        this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
-        this.syncSurfaceVisuals();
-      })
-      .when('animation',({at})=>{this.animation.step(at,this.entities,p=>this.contacts.sample(p));})
-      .when('physics',({dt})=>{
-        this.pendingFractures.clear();
-        this.physics.step(dt,contact=>{
-          const result=evaluateFracture(contact);
-          if(result.fracture){
-            if(this.pendingFractures.has(result.fracture.body.id))return{mode:'penetrate',energyLoss:0};
-            this.pendingFractures.set(result.fracture.body.id,result.fracture);
-            return result.decision;
-          }
-          const plasticWork=this.deformation.absorbContact(contact,this.entities);
-          return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
-        });
-      })
-      .when('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
-      .when('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
-      .when('events',({at})=>{this.emitContactEvents(at);})
-      .when('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
-      .when('cleanup',({at})=>{this.cleanupGenerated(at);})
-      .when('clock',({at})=>{this.time=at;this.tick++;});
+  private readonly systems=new Map<string,(dt:number,at:number)=>void>();
+  private installSystems():void{
+    const use=(id:string,run:(dt:number,at:number)=>void)=>this.systems.set(id,run);
+    use('weather',(_dt,at)=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);});
+    use('surfaces',(dt)=>{this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);this.syncSurfaceVisuals();});
+    use('animation',(_dt,at)=>{this.animation.step(at,this.entities,p=>this.contacts.sample(p));});
+    use('physics',(dt)=>{
+      this.pendingFractures.clear();this.physics.step(dt,contact=>{
+        const result=evaluateFracture(contact);
+        if(result.fracture){if(this.pendingFractures.has(result.fracture.body.id))return{mode:'penetrate',energyLoss:0};this.pendingFractures.set(result.fracture.body.id,result.fracture);return result.decision;}
+        const plasticWork=this.deformation.absorbContact(contact,this.entities);return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
+      });
+    });
+    use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;});
+    use('surface-contacts',(dt,at)=>{this.contacts.step(dt,at,this.animation.feet);});
+    use('events',(_dt,at)=>{this.emitContactEvents(at);});
+    use('fracture',(_dt,at)=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);});
+    use('cleanup',(_dt,at)=>{this.cleanupGenerated(at);});
+    use('clock',(_dt,at)=>{this.time=at;this.tick++;});
   }
+  private runSystem(id:string,dt:number,at:number):void{const run=this.systems.get(id);if(!run)throw new TypeError(`No system: ${id}`);run(dt,at);}
 
   snapshot():SceneSnapshot{
     return{version:1,time:this.time,tick:this.tick,entities:[...this.entities.values()].map(entity=>({
