@@ -1222,7 +1222,7 @@ export class WebGPURenderer implements Renderer{
     ]}),object={uniform,bind,texture,width,height,owned:width>0,label,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
-    const shared=this.renderFrame?.objectsById.get(entity.id),base=primitiveBaseScale(renderPrimitive(entity)),matrix=shared?.model??renderModel(entity);
+    const base=primitiveBaseScale(renderPrimitive(entity)),matrix=renderModel(entity);
     const px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.modelCache.get(entity.id);
     if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
     this.modelCache.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix});return matrix;
