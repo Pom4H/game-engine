@@ -1,3 +1,4 @@
+import {trackRuntimeMemory} from '../core/runtime-memory.js';
 import {decodePackedShell,type PackedShell} from './packed-shell.js';
 import {smoothCoincidentNormals} from './render-subdivision.js';
 
@@ -98,7 +99,7 @@ function refinePlasticTrim(mesh:ReturnType<typeof decodePackedShell>):ReturnType
   return{...mesh,positions,normals,indices};
 }
 
-const cache=new Map<string,ReturnType<typeof decodePackedShell>>();
+const cache=trackRuntimeMemory('M3FbxParts','geometry','cache',new Map<string,ReturnType<typeof decodePackedShell>>());
 function geometry(key:string){
   let mesh=cache.get(key);
   if(!mesh){const packed=GEOMETRY[key];if(!packed)throw new TypeError(`Unknown M3 packed geometry ${key}`);mesh=decodePackedShell(packed);if(key==='g3')mesh=smoothCoincidentNormals(refinePlasticTrim(mesh),70,2e-5);cache.set(key,mesh);}
