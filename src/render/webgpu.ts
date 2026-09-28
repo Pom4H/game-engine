@@ -1231,7 +1231,7 @@ export class WebGPURenderer implements Renderer{
   private model(entity:RuntimeEntity):Mat4{
     const base=primitiveBaseScale(renderPrimitive(entity)),px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.entityState.get(entity.id);
     if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
-    const matrix=renderModel(entity);this.entityState.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix,cullVersion:-1,previousModel:cached?.previousModel,previousFrame:cached?.previousFrame});return matrix;
+    const matrix=renderModel(entity);this.entityState.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix,cullVersion:-1,...(cached?.previousModel?{previousModel:cached.previousModel}:{}),...(cached?.previousFrame!==undefined?{previousFrame:cached.previousFrame}:{})});return matrix;
   }
 }
 function multiply4Into(a:ArrayLike<number>,b:ArrayLike<number>,out:Float32Array):void{
