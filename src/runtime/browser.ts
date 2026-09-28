@@ -46,7 +46,7 @@ export class BrowserRuntime {
     this.registerTimelineAction('rewind',entry=>this.seek(Math.max(0,entry.start-this.stepSeconds)));
     this.registerTimelineAction('audio.play-event',async entry=>{const event=runtimeTimelinePayload<EngineEvent>(entry.id);if(!event)throw new TypeError('Timeline sound has no engine event payload');await this.activateAudio();this.audio?.play([event]);});
     this.registerTimelineAction('audio.play-footstep',async entry=>{const event=runtimeTimelinePayload<FootstepSound>(entry.id);if(!event)throw new TypeError('Timeline footstep has no payload');await this.activateAudio();this.audio?.playFootsteps([event],this.scene.camera,event.time);});
-    this.taskManager=options.taskManager===false||typeof document==='undefined'?null:new RuntimeTaskManager({
+    this.taskManager=options.taskManager===false||typeof document==='undefined'||typeof addEventListener==='undefined'?null:new RuntimeTaskManager({
       snapshot:()=>({memory:runtimeMemorySnapshot(),gantt:this.gantt()}),
       act:(recordId,capability)=>this.act(recordId,capability),
     });
