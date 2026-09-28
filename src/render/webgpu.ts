@@ -24,9 +24,10 @@ export interface WebGPURendererOptions {profiling?:boolean}
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
-interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;cullVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number;shadowGeneration?:number;shadowPrimitive?:Primitive;shadowModel?:Mat4}
+interface RenderEntityState{px:number;py:number;pz:number;rx:number;ry:number;rz:number;sx:number;sy:number;sz:number;matrix:Mat4;primitive?:Primitive;viewVersion:number;camera?:boolean;shadow?:boolean;reflection?:boolean;previousModel?:Mat4;previousFrame?:number;shadowGeneration?:number;shadowPrimitive?:Primitive;shadowModel?:Mat4}
 interface RenderWorldState{scene:Scene|null;revision:number;visible:RuntimeEntity[];lights:RuntimeEntity[];movers:ReadonlySet<string>;opaque:number}
 interface StaticCullState{revision:number;cameraOpaque:RuntimeEntity[];cameraTransparent:RuntimeEntity[];shadowCasters:RuntimeEntity[];reflectedObjects:RuntimeEntity[]}
+interface CullViews{version:number;camera:Mat4|null;light:Mat4|null;reflection:Mat4|null}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
 const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`
 override MATERIAL_CLASS:i32=-1;
@@ -636,7 +637,7 @@ export class WebGPURenderer implements Renderer{
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private renderWorld:RenderWorldState={scene:null,revision:-1,visible:[],lights:[],movers:new Set(),opaque:0};
   private shadowLightVP:Mat4|null=null;private shadowGeneration=0;private shadowCount=0;private reflectionCause:string|null=null;
   private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';private probeComplete=false;
-  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private readonly entityState=new Map<string,RenderEntityState>();private readonly cullScratch=new Float32Array(16);private cullVersion=0;private cullCameraVP:Mat4|null=null;private cullLightVP:Mat4|null=null;private cullReflectionVP:Mat4|null=null;private staticCull:StaticCullState={revision:-1,cameraOpaque:[],cameraTransparent:[],shadowCasters:[],reflectedObjects:[]};private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
+  private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private readonly entityState=new Map<string,RenderEntityState>();private readonly cullScratch=new Float32Array(16);private cullViews:CullViews={version:0,camera:null,light:null,reflection:null};private staticCull:StaticCullState={revision:-1,cameraOpaque:[],cameraTransparent:[],shadowCasters:[],reflectedObjects:[]};private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean){
@@ -817,16 +818,13 @@ export class WebGPURenderer implements Renderer{
     const modelFor=(entity:RuntimeEntity):Mat4=>this.model(entity);
     const renderMoverIds=this.renderWorld.movers;
     const culled=this.profiler.measure('cull',()=>{
-      const viewsChanged=!matrixEqual(this.cullCameraVP??undefined,cullVP)||!matrixEqual(this.cullLightVP??undefined,lightVP)||!matrixEqual(this.cullReflectionVP??undefined,reflectionVP);
-      if(viewsChanged){
-        this.cullVersion++;
-        this.cullCameraVP=new Float32Array(cullVP);this.cullLightVP=new Float32Array(lightVP);this.cullReflectionVP=new Float32Array(reflectionVP);
-      }
+      const views=this.cullViews,viewsChanged=!matrixEqual(views.camera??undefined,cullVP)||!matrixEqual(views.light??undefined,lightVP)||!matrixEqual(views.reflection??undefined,reflectionVP);
+      if(viewsChanged)this.cullViews={version:views.version+1,camera:new Float32Array(cullVP),light:new Float32Array(lightVP),reflection:new Float32Array(reflectionVP)};
       const visibilityFor=(entity:RuntimeEntity)=>{
         const primitive=renderPrimitive(entity)!,model=modelFor(entity),state=this.entityState.get(entity.id)!;
-        if(state.primitive===primitive&&state.cullVersion===this.cullVersion)return state;
+        if(state.primitive===primitive&&state.viewVersion===this.cullViews.version)return state;
         const test=(matrix:Mat4)=>{multiply4Into(matrix,model,this.cullScratch);return intersectsClip(this.mesh(primitive).bounds,this.cullScratch);};
-        state.primitive=primitive;state.cullVersion=this.cullVersion;state.camera=test(cullVP);state.shadow=test(lightVP);state.reflection=entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP);return state;
+        state.primitive=primitive;state.viewVersion=this.cullViews.version;state.camera=test(cullVP);state.shadow=test(lightVP);state.reflection=entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP);return state;
       };
       const staticDirty=viewsChanged||this.staticCull.revision!==scene.renderStructureRevision;
       if(staticDirty){
@@ -1185,7 +1183,7 @@ export class WebGPURenderer implements Renderer{
     if(sceneChanged||revisionChanged){
       for(const object of this.objects.values())object.uniformReady=false;
       this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbeCause='';this.localProbePosition=null;this.localProbeBounds=null;
-      this.shadowLightVP=null;this.reflectionCause=null;this.staticCull.revision=-1;this.cullCameraVP=null;this.cullLightVP=null;this.cullReflectionVP=null;
+      this.shadowLightVP=null;this.reflectionCause=null;this.staticCull.revision=-1;this.cullViews={version:this.cullViews.version,camera:null,light:null,reflection:null};
       this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;
     }
     const visible:RuntimeEntity[]=[],lights:RuntimeEntity[]=[],movers=new Set<string>(),ids=new Set<string>(),keys=new Set<string>(),labels=new Set<string>(),textures=new Set<string>();let opaque=0;
@@ -1231,7 +1229,7 @@ export class WebGPURenderer implements Renderer{
   private model(entity:RuntimeEntity):Mat4{
     const base=primitiveBaseScale(renderPrimitive(entity)),px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.entityState.get(entity.id);
     if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
-    const matrix=renderModel(entity);this.entityState.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix,cullVersion:-1,...(cached?.previousModel?{previousModel:cached.previousModel}:{}),...(cached?.previousFrame!==undefined?{previousFrame:cached.previousFrame}:{})});return matrix;
+    const matrix=renderModel(entity);this.entityState.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix,viewVersion:-1,...(cached?.previousModel?{previousModel:cached.previousModel}:{}),...(cached?.previousFrame!==undefined?{previousFrame:cached.previousFrame}:{})});return matrix;
   }
 }
 function multiply4Into(a:ArrayLike<number>,b:ArrayLike<number>,out:Float32Array):void{
