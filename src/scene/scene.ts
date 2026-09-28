@@ -119,7 +119,8 @@ export class Scene {
     for(const vehicle of this.spec.animation?.vehicles??[])this.animation.addVehicle(vehicle);
   }
 
-  add(spec:EntitySpec):RuntimeEntity{
+  add(spec:EntitySpec):RuntimeEntity{return this.addCausal(spec);}
+  private addCausal(spec:EntitySpec,origin:{cause?:number;at?:number;generated?:boolean}={}):RuntimeEntity{
     spec=validateEntity(spec);
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
     const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?freezePrimitive(structuredClone(spec.mesh)):undefined,renderMesh=spec.renderMesh?freezePrimitive(structuredClone(spec.renderMesh)):undefined;
@@ -144,28 +145,28 @@ export class Scene {
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
-    const entityTrace=beginRuntimeSpan({
-      owner:'Scene',kind:'entity',name:spec.id,at:this.time,refs:[spec.id],
+    const traceAt=origin.at??this.time,entityTrace=beginRuntimeSpan({
+      owner:'Scene',kind:'entity',name:spec.id,at:traceAt,...(origin.cause!==undefined?{cause:origin.cause}:{}),refs:[spec.id],
       capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],
-      data:{material:runtime.material.kind,body:!!runtime.body,generated:runtime.expiresAt!==undefined},
+      data:{material:runtime.material.kind,body:!!runtime.body,generated:origin.generated??false},
     });
     const traces=[entityTrace];
-    if(mesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:physical`,at:this.time,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'physical',primitive:mesh.kind}}));
-    if(renderMesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:render`,at:this.time,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'render',primitive:renderMesh.kind}}));
+    if(mesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:physical`,at:traceAt,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'physical',primitive:mesh.kind}}));
+    if(renderMesh)traces.push(beginRuntimeSpan({owner:'Scene',kind:'mesh',name:`${spec.id}:render`,at:traceAt,cause:entityTrace,refs:[spec.id],capabilities:[{id:'highlight',label:'Highlight'},{id:'rewind',label:'Rewind here'}],data:{role:'render',primitive:renderMesh.kind}}));
     this.entityTimeline.set(spec.id,Object.freeze(traces));
     this.entities.set(spec.id,runtime);this.geometryRevision++;this.kernel.invalidate('entities');
     return runtime;
   }
 
   use(module:SceneModule):this{this.kernel.use(module);return this;}
-  remove(id:string):void{
+  remove(id:string,at=this.time):void{
     // Only exact owned objects are removed; an authored replacement under a
     // formerly generated ID must survive source deletion and weather cleanup.
     for(const [key,visual] of this.surfaceVisuals){
-      if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
+      if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id,at);}
       else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){for(const trace of this.entityTimeline.get(id)??[])endRuntimeSpan(trace,this.time);this.entityTimeline.delete(id);this.geometryRevision++;this.kernel.invalidate('entities');}
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed){for(const trace of this.entityTimeline.get(id)??[])endRuntimeSpan(trace,at);this.entityTimeline.delete(id);this.geometryRevision++;this.kernel.invalidate('entities');}
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
@@ -177,8 +178,8 @@ export class Scene {
     }});
   }
   private commit(command:InternalCommand,at:number):void{
-    if(command.type==='spawn'){this.add(command.entity);return;}
-    if(command.type==='remove'){this.remove(command.id);return;}
+    if(command.type==='spawn'){this.addCausal(command.entity,{at});return;}
+    if(command.type==='remove'){this.remove(command.id,at);return;}
     if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));return;}
     if(command.type==='velocity'){
       if(command.value.length!==3||!command.value.every(Number.isFinite))throw new TypeError('velocity command requires a finite vec3');
@@ -196,6 +197,11 @@ export class Scene {
     }))};
   }
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
+  dispose():void{
+    this.contacts.dispose();
+    for(const traces of this.entityTimeline.values())for(const trace of traces)endRuntimeSpan(trace,this.time);
+    this.entityTimeline.clear();this.eventQueue.length=0;
+  }
   setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
   patchAppearance(patch:AppearancePatch):void{
     let appearanceChanged=false,radianceChanged=false;
@@ -311,39 +317,41 @@ export class Scene {
     const density=entity.material.profile.density,totalVolume=pieces.reduce((sum,p)=>sum+p.volume,0);
     const source=fracture.body,sourceMass=source.invMass?source.mass:density*totalVolume;
     const kick:Vec3=[-fracture.normal[0],-fracture.normal[1],-fracture.normal[2]],impulse=contact?.impulse??0;
+    let impactCause:number|undefined;
+    for(let i=this.eventQueue.length-1;i>=0;i--){const prior=this.eventQueue[i]!;if(prior.time+1e-9<at)break;if(prior.type==='impact'&&(prior.a===entity.id||prior.b===entity.id)){impactCause=prior.trace;break;}}
+    const fractureTrace=this.pushEvent({
+      type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
+      energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:pieces.length,size:Math.max(planar[0],planar[1]),
+    },impactCause);
     const fragments:RigidBody[]=[],rng=mulberry32(seed^0x91e10da5);
-    this.remove(entity.id);
+    this.remove(entity.id,at);
 
     for(const piece of pieces){
       const mass=sourceMass*piece.volume/totalVolume;
-      const id=`${entity.id}:shard:${this.generatedSequence++}`,shard=this.add({
+      const id=`${entity.id}:shard:${this.generatedSequence++}`,shard=this.addCausal({
         id,position:piece.position,rotation:piece.rotation,mesh:piece.mesh,
         material:{kind:entity.material.kind,color:entity.material.color,...(entity.material.roughness!==undefined?{roughness:entity.material.roughness}:{}),...(entity.material.metalness!==undefined?{metalness:entity.material.metalness}:{}),...(entity.material.emissive?{emissive:entity.material.emissive}:{})},
         body:{mass,restitution:.12,friction:.42,shape:'box'},
-      });
+      },{cause:fractureTrace,at,generated:true});
       if(shard.body){shard.body.fracturable=false;shard.body.collisionClass='debris';fragments.push(shard.body);}
       shard.expiresAt=at+4.5+rng()*1.5;
     }
     transferFragmentMotion(source,fragments,V3.scale(kick,impulse),fracture.requiredEnergy,seed^0x91e10da5);
-    this.pushEvent({
-      type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
-      energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:pieces.length,size:Math.max(planar[0],planar[1]),
-    });
   }
 
   private cleanupGenerated(at:number):void{
     for(const entity of [...this.entities.values()])if(entity.expiresAt!==undefined&&entity.expiresAt<=at)this.remove(entity.id);
     for(const [key,time] of this.impactCooldown)if(at-time>2)this.impactCooldown.delete(key);
   }
-  private pushEvent(event:EngineEvent):void{
+  private pushEvent(event:EngineEvent,cause?:number):number{
     const refs=event.type==='impact'?[event.a,...(event.b==='ground'?[]:[event.b])]:event.type==='fracture'?[event.entity]:[];
     const trace=recordRuntimeEvent({
-      owner:'Scene',kind:`event:${event.type}`,name:`${event.type}:${event.id}`,at:event.time,refs,
+      owner:'Scene',kind:`event:${event.type}`,name:`${event.type}:${event.id}`,at:event.time,...(cause!==undefined?{cause}:{}),refs,
       capabilities:[...(refs.length?[{id:'highlight',label:'Highlight'}]:[]),{id:'rewind',label:'Rewind here'}],
       data:{event:event.type,energy:event.energy},
       payload:event,
     });
-    this.eventQueue.push(Object.freeze({...event,trace}) as EngineEvent);if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);
+    this.eventQueue.push(Object.freeze({...event,trace}) as EngineEvent);if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);return trace;
   }
 }
 
