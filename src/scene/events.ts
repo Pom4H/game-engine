@@ -7,7 +7,9 @@ export interface ContactSurfaceAcoustics {
   readonly damping:number;
 }
 
-export interface ImpactEvent {
+interface TracedEvent {readonly trace?:number}
+
+export interface ImpactEvent extends TracedEvent {
   readonly type:'impact';
   readonly id:number;
   readonly time:number;
@@ -25,7 +27,7 @@ export interface ImpactEvent {
   readonly size:number;
 }
 
-export interface FractureEvent {
+export interface FractureEvent extends TracedEvent {
   readonly type:'fracture';
   readonly id:number;
   readonly time:number;
@@ -40,7 +42,7 @@ export interface FractureEvent {
   readonly size:number;
 }
 
-export interface MechanismEvent {
+export interface MechanismEvent extends TracedEvent {
   readonly type:'mechanism';
   readonly id:number;
   readonly time:number;
