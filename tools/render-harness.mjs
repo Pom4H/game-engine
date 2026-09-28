@@ -157,6 +157,13 @@ try{
     throw new Error('Render harness did not become ready: '+JSON.stringify({lastError,state:result.result?.value,browserErrors:browserErrors.slice(-20)}));
   }
 
+  const taskManagerSmoke=await send('Runtime.evaluate',{
+    expression:'(()=>{const gantt=window.__GAME_ENGINE__.gantt();window.dispatchEvent(new KeyboardEvent("keydown",{code:"Backquote",bubbles:true}));const host=document.getElementById("game-engine-task-manager"),text=host?.shadowRoot?.textContent??"";const opened=!!host&&!host.hidden&&text.includes("Memory")&&text.includes("Gantt");window.dispatchEvent(new KeyboardEvent("keydown",{code:"Backquote",bubbles:true}));return{opened,closed:!!host&&host.hidden,rows:gantt.rows.length,memory:gantt.rows.filter(row=>row.kind.startsWith("memory:")).length,entities:gantt.rows.filter(row=>row.kind==="entity").length,meshes:gantt.rows.filter(row=>row.kind==="mesh").length}})()',
+    returnByValue:true
+  });
+  const taskManager=taskManagerSmoke.result?.value;
+  if(!taskManager?.opened||!taskManager?.closed||taskManager.rows<=0||taskManager.memory<=0||taskManager.entities<=0||taskManager.meshes<=0)throw new Error('Runtime task manager smoke failed: '+JSON.stringify(taskManager));
+
   await send('Runtime.evaluate',{
     expression:'(async()=>{window.__GAME_ENGINE__.pause();window.__GAME_ENGINE__.seek(0);await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()',
     awaitPromise:true,returnByValue:true
