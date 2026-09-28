@@ -1,3 +1,4 @@
+import {trackRuntimeMemory,trackRuntimeInstance} from './runtime-memory.js';
 export type EnginePhase = 'input' | 'plan' | 'simulate' | 'commit' | 'publish';
 export const ENGINE_PHASES: readonly EnginePhase[] = ['input','plan','simulate','commit','publish'];
 export type SimulationTier = 'detailed' | 'active' | 'aggregate' | 'dormant';
@@ -23,10 +24,10 @@ function stable(description:ModuleDescription):ModuleDescription{return Object.f
  * stable IDs break ties only between independent modules. Dependencies can be
  * registered in any order and are checked when the completed graph is planned. */
 export class ModuleScheduler{
-  private readonly modules=new Map<string,Registered>();
-  private readonly plans=new Map<string,readonly ModuleBatch[]>();
+  private readonly modules=trackRuntimeMemory('ModuleScheduler','modules','registry',new Map<string,Registered>());
+  private readonly plans=trackRuntimeMemory('ModuleScheduler','plans','cache',new Map<string,readonly ModuleBatch[]>(),256);
   private order:Registered[]|null=null;private planBuilds=0;private planHits=0;
-  constructor(readonly tickRate=60,readonly capacity=64){if(!Number.isSafeInteger(tickRate)||tickRate<1||!Number.isSafeInteger(capacity)||capacity<1)throw new RangeError('Invalid module scheduler budget');}
+  constructor(readonly tickRate=60,readonly capacity=64){trackRuntimeInstance('ModuleScheduler',this);if(!Number.isSafeInteger(tickRate)||tickRate<1||!Number.isSafeInteger(capacity)||capacity<1)throw new RangeError('Invalid module scheduler budget');}
   use(module:ModuleDescription):this{
     if(typeof module.id!=='string'||!module.id||module.id.length>180||this.modules.has(module.id))throw new TypeError('Modules require distinct stable IDs');
     if(this.modules.size>=this.capacity)throw new RangeError('Module scheduler is full');
@@ -84,8 +85,8 @@ function snapshot<T>(context:T):Readonly<T>{
   };freeze(value);return value;
 }
 export class EngineKernel<Context,Command>{
-  readonly scheduler:ModuleScheduler;private readonly modules=new Map<string,EngineModule<Context,Command>>();private readonly seen=new Map<string,string>();private readonly versions=new Map<string,number>();private anyVersion=0;private wildcardVersion=0;
-  constructor(tickRate=60,capacity=64){this.scheduler=new ModuleScheduler(tickRate,capacity);}
+  readonly scheduler:ModuleScheduler;private readonly modules=trackRuntimeMemory('EngineKernel','modules','registry',new Map<string,EngineModule<Context,Command>>());private readonly seen=trackRuntimeMemory('EngineKernel','incrementalSeen','cache',new Map<string,string>());private readonly versions=new Map<string,number>();private anyVersion=0;private wildcardVersion=0;
+  constructor(tickRate=60,capacity=64){trackRuntimeInstance('EngineKernel',this);this.scheduler=new ModuleScheduler(tickRate,capacity);}
   use(module:EngineModule<Context,Command>):this{if(typeof module.run!=='function')throw new TypeError('Kernel modules require a synchronous implementation');this.scheduler.use(module);this.modules.set(module.id,Object.freeze({...stable(module),run:module.run}));return this;}
   /** Mark world state changed outside scheduled modules. Normal module writes are versioned automatically. */
   invalidate(...resources:string[]):this{this.touch(resources);return this;}
