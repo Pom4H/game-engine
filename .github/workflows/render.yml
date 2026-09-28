@@ -8,6 +8,7 @@ on:
       - 'test/**'
       - 'tsconfig*.json'
       - 'tools/render-*.mjs'
+      - 'tools/check-runtime-memory.mjs'
       - 'tools/promo/**'
       - '.github/workflows/render.yml'
       - 'package.json'
