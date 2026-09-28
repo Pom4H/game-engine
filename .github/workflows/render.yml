@@ -17,7 +17,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+
   render:
+    needs: check
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -43,8 +54,6 @@ jobs:
           bun-version: 1.4.2
       - name: Install
         run: bun install --frozen-lockfile
-      - name: Check
-        run: bun run check
       - name: Build
         run: bun run build
       - name: Render promo views
