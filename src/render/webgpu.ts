@@ -636,7 +636,7 @@ export class WebGPURenderer implements Renderer{
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private renderWorld:RenderWorldState={scene:null,revision:-1,visible:[],lights:[],movers:new Set(),opaque:0};
   private shadowLightVP:Mat4|null=null;private shadowGeneration=0;private shadowCount=0;private reflectionCause:string|null=null;
-  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';private probeComplete=false;
+  private localProbeMask=0;private localProbeFace=0;private localProbePosition:Vec3|null=null;private localProbeBounds:{min:Vec3;max:Vec3}|null=null;private localProbeKey='';private localProbeCause='';
   private drawCalls=0;private triangles=0;private lastCamera:Vec3=[0,0,0];private lastScene:Scene|null=null;private previousVp:Mat4|null=null;private previousCamera:Vec3|null=null;private previousTarget:Vec3|null=null;private readonly entityState=new Map<string,RenderEntityState>();private readonly cullScratch=new Float32Array(16);private cullViews:CullViews={version:0,camera:null,light:null,reflection:null};private staticCull:StaticCullState={revision:-1,cameraOpaque:[],cameraTransparent:[],shadowCasters:[],reflectedObjects:[]};private historyValid=false;private taaHistoryIndex=0;private lastRenderTime=-Infinity;
   private readonly profiler:RenderProfiler;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
@@ -769,19 +769,17 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('resize',()=>this.resize());
     this.lastScene=scene;
     const reflectionProbe=resolveReflectionProbe(scene);
-    if(!reflectionProbe){this.localProbeMask=0;this.localProbeKey='';this.localProbeCause='';this.localProbePosition=null;this.localProbeBounds=null;}
-    else{
+    if(!reflectionProbe){
+      if(this.localProbeMask===63)this.historyValid=false;
+      this.localProbeMask=0;this.localProbeFace=0;this.localProbeKey='';this.localProbeCause='';this.localProbePosition=null;this.localProbeBounds=null;
+    }else{
       const settings=scene.spec.rendering??{},probeCause=[reflectionProbe.key,...reflectionProbe.position,scene.renderStructureRevision,scene.appearanceRevision,...(settings.sunDirection??[-.55,.48,-.35]),settings.sunIntensity??scene.environment.sunlight*3,...(settings.sunColor??[1,.87,.72]),...(settings.skyColor??[.26,.34,.47])].join(':');
-      const reset=this.localProbeCause!==probeCause;
-      if(reset){this.localProbeMask=0;this.localProbeFace=0;this.localProbeCause=probeCause;}
+      if(this.localProbeCause!==probeCause){
+        if(this.localProbeMask===63)this.historyValid=false;
+        this.localProbeMask=0;this.localProbeFace=0;this.localProbeCause=probeCause;
+      }
       this.localProbeKey=reflectionProbe.key;this.localProbePosition=[...reflectionProbe.position];this.localProbeBounds={min:[reflectionProbe.position[0]-reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]-reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]-reflectionProbe.boxHalfExtents[2]],max:[reflectionProbe.position[0]+reflectionProbe.boxHalfExtents[0],reflectionProbe.position[1]+reflectionProbe.boxHalfExtents[1],reflectionProbe.position[2]+reflectionProbe.boxHalfExtents[2]]};
     }
-    // The sixth face enables local radiance on the following frame. Invalidate
-    // TAA at that boundary so an incomplete-probe image cannot linger in glass
-    // and clearcoat for several frames. The same rule covers moving probe resets.
-    const probeComplete=!!reflectionProbe&&this.localProbeMask===63;
-    if(probeComplete!==this.probeComplete)this.historyValid=false;
-    this.probeComplete=probeComplete;
     this.profiler.measure('materials',()=>{if(structureChanged)this.queueMaterialLoads(scene);});
     this.lastCamera=camera.position;const currentLightGridKey=lightGridCauseKey(this.renderWorld.lights,camera.position);
     const lightGrid=this.profiler.measure('lights',()=>{
@@ -909,10 +907,18 @@ export class WebGPURenderer implements Renderer{
         pass.end();
       }
     });
-    if(probeFaces.length){for(const capture of probeFaces)this.localProbeMask|=1<<capture.face;this.localProbeFace=(probeFaces.at(-1)!.face+1)%6;}
-    // Refilter after a complete capture cycle, never per material or slider value.
-    // Source view is level 0 only; attachment views are disjoint roughness levels.
-    if(probeFaces.length&&this.localProbeMask===63&&(!this.probeComplete||this.localProbeFace===0)){
+    if(probeFaces.length){
+      for(const capture of probeFaces)this.localProbeMask|=1<<capture.face;
+      this.localProbeFace=(probeFaces.at(-1)!.face+1)%6;
+      if(this.localProbeMask===63){
+        // The complete, filtered probe becomes authoritative immediately in this
+        // frame. Drop TAA history before main shading starts using new radiance.
+        this.historyValid=false;frame[45]=1;
+        const enabled=new Float32Array([1]);this.device.queue.writeBuffer(this.gpu.frame,45*4,enabled);this.profiler.addUpload(enabled.byteLength,'frame');
+      }
+    }
+    // Capture stops at mask 63, so this filter executes exactly once per cause.
+    if(probeFaces.length&&this.localProbeMask===63){
       this.profiler.measure('encode.probe',()=>{
         for(const {view,bind} of this.gpu.probeFilterPasses){
           const pass=encoder.beginRenderPass({label:'render.probe.filter',colorAttachments:[{view,loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
