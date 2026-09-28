@@ -3,7 +3,7 @@ export const ENGINE_PHASES: readonly EnginePhase[] = ['input','plan','simulate',
 export type SimulationTier = 'detailed' | 'active' | 'aggregate' | 'dormant';
 export const SIMULATION_TIERS: readonly SimulationTier[] = ['detailed','active','aggregate','dormant'];
 export interface ModuleFrame {readonly tick:number;readonly deltaSeconds:number;readonly tier:SimulationTier;readonly phase:EnginePhase}
-export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly string[];readonly writes:readonly string[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[];readonly context?:'none'}
+export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly string[];readonly writes:readonly string[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[];readonly context?:'none';/** Pure projection: rerun only when a declared input version changes. */readonly incremental?:boolean}
 export interface EngineModule<Context,Command> extends ModuleDescription {readonly run:(context:Readonly<Context>,frame:ModuleFrame)=>readonly Command[]|void}
 export interface ModuleBatch {readonly phase:EnginePhase;readonly modules:readonly ModuleDescription[]}
 export interface KernelRunOptions<Context,Command>{
@@ -13,6 +13,8 @@ export interface KernelRunOptions<Context,Command>{
   /** Lazily project current state, only for batches that consume a context. */
   readonly read?:()=>Readonly<Context>;
   readonly onModule?:(module:ModuleDescription,frame:ModuleFrame)=>void;
+  /** Monotonic versions for causal resources. Required by incremental modules. */
+  readonly versions?:ReadonlyMap<string,number>;
 }
 interface Registered {description:ModuleDescription;periodTicks:number}
 const phaseIndex=(phase:EnginePhase)=>ENGINE_PHASES.indexOf(phase);
@@ -84,7 +86,7 @@ function snapshot<T>(context:T):Readonly<T>{
   };freeze(value);return value;
 }
 export class EngineKernel<Context,Command>{
-  readonly scheduler:ModuleScheduler;private readonly modules=new Map<string,EngineModule<Context,Command>>();
+  readonly scheduler:ModuleScheduler;private readonly modules=new Map<string,EngineModule<Context,Command>>();private readonly seen=new Map<string,string>();
   constructor(tickRate=60,capacity=64){this.scheduler=new ModuleScheduler(tickRate,capacity);}
   use(module:EngineModule<Context,Command>):this{if(typeof module.run!=='function')throw new TypeError('Kernel modules require a synchronous implementation');this.scheduler.use(module);this.modules.set(module.id,Object.freeze({...stable(module),run:module.run}));return this;}
   run(tick:number,context:Readonly<Context>,tier:SimulationTier='detailed',options:KernelRunOptions<Context,Command>={}):Command[]{
@@ -93,6 +95,11 @@ export class EngineKernel<Context,Command>{
     for(const batch of this.scheduler.plan(tick,tier)){
       const view=batch.modules.every(m=>m.context==='none')?Object.freeze({}) as Readonly<Context>:snapshot(options.read?.()??current),pending:Command[]=[];
       for(const description of batch.modules){const module=this.modules.get(description.id)!;if(!module)throw new TypeError(`No implementation: ${description.id}`);
+        if(module.incremental){
+          if(!options.versions)throw new TypeError(`Incremental module ${module.id} requires resource versions`);
+          const signature=module.reads.map(key=>`${key}:${options.versions!.get(key)??0}`).join('|');
+          if(this.seen.get(module.id)===signature)continue;this.seen.set(module.id,signature);
+        }
         const frame=Object.freeze({tick,deltaSeconds:dt*this.scheduler.tickRate/module.rateHz,tier,phase:module.phase});options.onModule?.(description,frame);
         const result=module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);
       }
