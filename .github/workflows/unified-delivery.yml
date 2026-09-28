@@ -1,0 +1,100 @@
+name: Verify unified arena integration
+on:
+  push:
+    branches: [codex/adaptive-core]
+    paths: ['.integration/unified-*.part', '.github/workflows/unified-delivery.yml']
+permissions:
+  contents: read
+concurrency:
+  group: unified-arena-delivery
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'Pom4H/game-engine' && github.ref == 'refs/heads/codex/adaptive-core'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Apply exact sandbox-tested source without replacing concurrent work
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 1a6d0a2e8b2c8d552d7507ebcc548dc628baf76c
+          cat .integration/unified-{0,1,2}.part > /tmp/unified.patch.xz
+          echo '9747c286d269fe9b4d180b82fabf44e397279366642d03c23ce0015e05610021  /tmp/unified.patch.xz' | sha256sum --check
+          python3 -c "import lzma,pathlib;pathlib.Path('/tmp/unified.patch').write_bytes(lzma.decompress(pathlib.Path('/tmp/unified.patch.xz').read_bytes()))"
+          git apply --index --unidiff-zero /tmp/unified.patch
+          git rm .integration/unified-{0,1,2}.part
+          git rm --cached .github/workflows/unified-delivery.yml
+          test "$(git write-tree)" = aecbf2c2042ba0e27b6a3483f6a8c27bbd26f092
+          git add .github/workflows/unified-delivery.yml
+          git diff --cached --exit-code -- .github/workflows/
+      - name: Project toolchain and focused physics/network regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/unified-arena
+          bun install --frozen-lockfile
+          npm install --prefix tools/docs --ignore-scripts --no-audit --no-fund
+          bun run typecheck && bun run build
+          node --check tools/docs/network-worker.js
+          node tools/docs/build.mjs
+          node --test --test-concurrency=2 --test-reporter=tap test/datagram.test.mjs test/arena-surfaces.test.mjs test/moving-support.test.mjs test/car-ball.test.mjs test/arena-network.test.mjs test/arena-datagram-host.test.mjs | tee artifacts/unified-arena/focused.log
+      - name: Compare all regression failures with untouched base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/unified-base 1a6d0a2e8b2c8d552d7507ebcc548dc628baf76c
+          ln -s "$PWD/node_modules" /tmp/unified-base/node_modules
+          (cd /tmp/unified-base && bun run build)
+          set +e
+          (cd /tmp/unified-base && node --test --test-concurrency=2 --test-reporter=tap test/*.test.mjs) > artifacts/unified-arena/baseline.log 2>&1
+          baseline_status=$?
+          node --test --test-concurrency=2 --test-reporter=tap test/*.test.mjs > artifacts/unified-arena/regression.log 2>&1
+          changed_status=$?
+          set -e
+          echo "baseline_status=$baseline_status changed_status=$changed_status" | tee artifacts/unified-arena/exit-status.txt
+          python3 - <<'PY'
+          import pathlib,re,json
+          root=pathlib.Path('artifacts/unified-arena')
+          def report(name):
+              s=(root/name).read_text()
+              result={'failures':re.findall(r'^not ok \d+ - (.+)$',s,re.M),'summary':re.findall(r'^# (?:tests|pass|fail|duration_ms) .+$',s,re.M)}
+              print(name,json.dumps(result));return result
+          before,after=report('baseline.log'),report('regression.log')
+          assert set(before['failures'])==set(after['failures']), (before,after)
+          assert len(before['failures'])==3 and len(after['failures'])==3, (before,after)
+          (root/'comparison.json').write_text(json.dumps({'baseline':before,'integration':after},indent=2))
+          PY
+      - name: Publish normal files; workflow cleanup remains an explicit connector action
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm --cached .github/workflows/unified-delivery.yml
+          test "$(git write-tree)" = aecbf2c2042ba0e27b6a3483f6a8c27bbd26f092
+          git add .github/workflows/unified-delivery.yml
+          git diff --cached --exit-code -- .github/workflows/
+          test "$(git ls-remote origin refs/heads/codex/adaptive-core | cut -f1)" = "$GITHUB_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat(arena): unite native datagrams, all-surface driving and soft-ball flip reset' -m 'Retain the concurrent QUIC transport, quaternion math and shared timeline. Extend the existing wheel query to moving rigid bodies and actual deforming triangles with reciprocal reaction; use one scaled physical/render construction. Reload on a brief complete four-wheel contact. Select latest input after transport capacity is available. No second solver, codec, transport or clock.' -m 'Clean source tree aecbf2c2042ba0e27b6a3483f6a8c27bbd26f092. Sandbox and project-toolchain focused tests pass; full suite retains the same three inherited failures. Native browser acceptance follows after explicit workflow cleanup.'
+          commit=$(git rev-parse HEAD)
+          echo "$commit" > artifacts/unified-arena/commit.txt
+          git archive --format=tar.gz -o artifacts/unified-arena/source.tar.gz HEAD
+          git push origin "$commit:refs/heads/codex/adaptive-core"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: unified-arena-integration
+          path: artifacts/unified-arena/
+          retention-days: 14
