@@ -241,8 +241,8 @@ export class Scene {
       // physical surface state instead of painting a flat brown stripe in the shader.
       if(state.use==='road'&&state.slush>.08&&longSize>1&&crossSize>.8){
         const lanes=Math.max(1,Math.min(4,Math.round(crossSize/3.4)));
-        const height=Math.round(Math.min(.055,.008+state.slush*.045)*1000)/1000;
-        const width=Math.max(.18,Math.min(.46,crossSize/(lanes*8.5)));
+        const height=Math.round(Math.min(.07,.014+state.slush*.070)*1000)/1000;
+        const width=Math.max(.24,Math.min(.58,crossSize/(lanes*7.2)));
         const offsets:number[]=[];
         for(let lane=0;lane<lanes;lane++)offsets.push(-crossSize/2+(lane+.5)*crossSize/lanes);
         for(let boundary=1;boundary<lanes;boundary++)offsets.push(-crossSize/2+boundary*crossSize/lanes);
@@ -262,7 +262,7 @@ export class Scene {
             const preferred=`__surface:slush:${surfaceId}:${ridge}`,base=preferred.length<=140?preferred:`__surface:slush:${hashString(surfaceId).toString(36)}:${ridge}`;
             id=base;while(this.entities.has(id))id=`${base}:${this.surfaceVisualSequence++}`;
           }
-          const dirt=Math.max(0,Math.min(1,state.dirt)),color:[number,number,number,number]=[.31-.09*dirt,.305-.10*dirt,.285-.11*dirt,1];
+          const dirt=Math.max(0,Math.min(1,state.dirt+state.slush*.35)),color:[number,number,number,number]=[.34-.12*dirt,.325-.13*dirt,.29-.14*dirt,1];
           const entity=this.add({id:id!,position,rotation,mesh:{kind:'snowdrift',size,seed,segments:Math.max(20,Math.min(96,Math.ceil(longSize/1.6))),continuous:true,offset:source.position[longAxis]},material:{kind:'snow',color,roughness:.91}});
           this.surfaceVisuals.set(key,{source:surfaceId,entity});
         }
