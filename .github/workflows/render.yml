@@ -12,6 +12,9 @@ on:
       - 'bun.lock'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -59,10 +62,7 @@ jobs:
             if($_.Length -lt 1000){ throw "Suspiciously small PNG: $($_.Name)" }
             Write-Host "PNG $($_.Name) $($_.Length) bytes"
           }
-      - uses: actions/upload-artifact@v7
-        continue-on-error: true
-        with:
-          name: game-engine-promo-views
-          path: artifacts/
-          if-no-files-found: error
-          retention-days: 7
+      - name: Publish latest renders
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node tools/publish-release.mjs render-latest artifacts/render34.png artifacts/render35.png artifacts/render36.png artifacts/render37.png artifacts/render-hud.json
