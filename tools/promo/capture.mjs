@@ -19,18 +19,18 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=serv
 const profile=await mkdtemp(join(tmpdir(),'winter-promo-'));
 const chrome=process.env.CHROME_PATH;if(!chrome)throw new Error('CHROME_PATH is required for winter promo capture');
 const child=spawn(chrome,['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-extensions','--hide-scrollbars','--enable-unsafe-webgpu','--enable-gpu','--ignore-gpu-blocklist',`--user-data-dir=${profile}`,'--remote-debugging-port=0','--window-size=1920,1080','about:blank'],{stdio:['ignore','ignore','pipe']});
-let socket,sequence=0;const pending=new Map();
+let socket,sequence=0;const pending=new Map(),browserErrors=[];
 try{
  const endpoint=await new Promise((resolve,reject)=>{let text='';const timeout=setTimeout(()=>reject(new Error(text)),20000);child.stderr.on('data',data=>{text+=data;const m=text.match(/DevTools listening on (ws:\/\/\S+)/);if(m){clearTimeout(timeout);resolve(m[1]);}});child.on('error',reject);});
  const debugPort=new URL(endpoint).port;let page;
  for(let i=0;i<60;i++){const pages=await(await fetch(`http://127.0.0.1:${debugPort}/json/list`)).json();page=pages.find(p=>p.type==='page');if(page)break;await new Promise(r=>setTimeout(r,100));}
  socket=new WebSocket(page.webSocketDebuggerUrl);await new Promise((r,j)=>{socket.addEventListener('open',r,{once:true});socket.addEventListener('error',j,{once:true});});
- socket.addEventListener('message',event=>{const message=JSON.parse(String(event.data));if(!message.id)return;const entry=pending.get(message.id);if(!entry)return;pending.delete(message.id);clearTimeout(entry.timer);message.error?entry.reject(new Error(message.error.message)):entry.resolve(message.result);});
+ socket.addEventListener('message',event=>{const message=JSON.parse(String(event.data));if(message.method==='Runtime.exceptionThrown')browserErrors.push({type:'exception',details:message.params?.exceptionDetails});if(message.method==='Runtime.consoleAPICalled')browserErrors.push({type:'console',level:message.params?.type,args:message.params?.args?.map(arg=>arg.value??arg.description??arg.type)});if(message.method==='Log.entryAdded')browserErrors.push({type:'log',entry:message.params?.entry});if(!message.id)return;const entry=pending.get(message.id);if(!entry)return;pending.delete(message.id);clearTimeout(entry.timer);message.error?entry.reject(new Error(message.error.message)):entry.resolve(message.result);});
  const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++sequence,timer=setTimeout(()=>{pending.delete(id);reject(new Error(`Timeout: ${method}`));},30000);pending.set(id,{resolve,reject,timer});socket.send(JSON.stringify({id,method,params}));});
  const evaluate=async expression=>{const result=await send('Runtime.evaluate',{expression:`(async()=>{${expression}})()`,awaitPromise:true,returnByValue:true});if(result.exceptionDetails)throw new Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);return result.result?.value;};
- await send('Page.enable');await send('Runtime.enable');await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:`http://127.0.0.1:${port}/`});
- for(let i=0;i<100;i++){if(await evaluate('return window.ready===true'))break;await new Promise(r=>setTimeout(r,100));}
- if(!await evaluate('return window.ready===true'))throw new Error(await evaluate('return window.failure??"Player not ready"'));
+ await send('Page.enable');await send('Runtime.enable');await send('Log.enable');await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:`http://127.0.0.1:${port}/`});
+ for(let i=0;i<600;i++){const state=await evaluate('return {ready:window.ready===true,failure:window.failure??null}');if(state.ready)break;if(state.failure)throw new Error(state.failure);await new Promise(r=>setTimeout(r,100));}
+ if(!await evaluate('return window.ready===true')){const state=await evaluate('return {ready:window.ready??null,failure:window.failure??null,href:location.href}');throw new Error('Player not ready: '+JSON.stringify({state,browserErrors:browserErrors.slice(-30)}));}
  const screenshot=async()=>Buffer.from((await send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false})).data,'base64');
  const clips=process.argv[3]?shots.filter(s=>s.id===process.argv[3]):shots;
  for(const clip of clips){
