@@ -64,9 +64,9 @@ spec.entities.push(
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
-    // Automotive metallic base + clear coat: keep the authored dielectric coat instead
-    // of replacing it with a bare rough metal when the hero color is overridden.
-    entity.material={...entity.material,color:[.245,.248,.255,1],roughness:.115,metalness:.045,clearcoat:.92,clearcoatRoughness:.045};
+    // The scene chooses only the hero colour. Automotive layer response belongs to
+    // the vehicle material + renderer so stills, gameplay and offline renders agree.
+    entity.material={...entity.material,color:[.16,.175,.205,1]};
   }
   if(entity.id==='road'&&entity.environmental){
     entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00035};

@@ -132,7 +132,9 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
 
   assert.equal(byId.get('body').material.kind,'steel');
   const heroPaint=m3PartMaterial(byId.get('body'),[.2,.2,.2,1],false);
-  assert.ok(heroPaint.clearcoat>.7&&heroPaint.clearcoatRoughness<.12,'hero paint should retain a strong generic dielectric clearcoat layer');
+  assert.ok(heroPaint.roughness>=.24&&heroPaint.roughness<=.34,'automotive base coat should be broad rather than mirror-like');
+  assert.ok(heroPaint.metalness>=.10&&heroPaint.metalness<=.25,'metallic automotive base should retain a controlled flake response');
+  assert.ok(heroPaint.clearcoat>.88&&heroPaint.clearcoatRoughness<.08,'hero paint should retain a smooth dielectric clearcoat over the rougher base');
   assert.equal(byId.get('windshield-front').material.kind,'glass');
   assert.equal(byId.get('mirror-left').material.kind,'mirror');
   assert.equal(byId.get('plastic-trim').material.kind,'plastic');

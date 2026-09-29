@@ -221,7 +221,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let clearcoatRoughness=select(.075,clamp(u.objectState.w,.02,1.0),u.objectState.w>=0.0);
   // Paint microflake stays procedural: no texture fetch, but it modulates both
   // the base coat and its roughness so the clearcoat catches fine metallic breakup.
-  let paintMicro=select(0.0,hash3(floor(in.worldPos*420.0))-.5,treatment>3.5&&treatment<4.5);
+  let paintMicro=select(0.0,hash3(floor(in.worldPos*420.0))-.5,treatment>3.5&&treatment<4.5&&materialKind>1.5&&materialKind<2.5);
   let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
   let upward=smoothstep(0.05,0.82,n.y);
 
@@ -372,9 +372,9 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   if(treatment>3.5&&treatment<4.5){
     // Sub-percent tonal variation keeps the flake visible only inside the
     // clearcoat highlight; it is intentionally below the level of a noisy paint texture.
-    albedo*=1.0+paintMicro*.010;
+    albedo*=1.0+paintMicro*.004;
   }
-  let automotivePaint=treatment>3.5&&treatment<4.5;
+  let automotivePaint=treatment>3.5&&treatment<4.5&&materialKind>1.5&&materialKind<2.5;
   // Two-scale procedural automotive finish. The broad component is the subtle
   // orange-peel of real clearcoat; the fine component breaks up pin-sharp probe
   // reflections without changing the underlying body geometry.
@@ -384,7 +384,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let peelY=noise3((in.worldPos+vec3<f32>(0,.006,0))*92.0)-peel;
     let peelZ=noise3((in.worldPos+vec3<f32>(0,0,.006))*92.0)-peel;
     let peelGrad=vec3<f32>(peelX,peelY,peelZ);
-    n=normalize(n+(peelGrad-n*dot(peelGrad,n))*.006);
+    n=normalize(n+(peelGrad-n*dot(peelGrad,n))*.0025);
   }
   let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
   roughness=clamp(sqrt(roughness*roughness+min(.06,normalVariance*.04)),.08,1.0);
@@ -439,7 +439,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   }
   // Filter the coat normal distribution too; a sharp second lobe must not
   // bypass the base layer's anti-aliasing on curved/subpixel panel edges.
-  let paintCoatFloor=select(.0,.105,automotivePaint);
+  let paintCoatFloor=select(.0,.055,automotivePaint);
   let coatRough=clamp(max(paintCoatFloor,sqrt(clearcoatRoughness*clearcoatRoughness+min(.06,normalVariance*.04))),.08,1.0);
   let coatViewF=clearcoat*(.04+.96*pow(1.0-nv,5.0));
   let coatLightF=clearcoat*(.04+.96*pow(1.0-vh,5.0));
@@ -480,8 +480,10 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec;
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(environmentMap)-1u)).rgb;
     if(f.params.y>.5){
-      let coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),coatRough*f32(textureNumLevels(localProbeMap)-1u)).rgb;
-      let coatProbeWeight=f.params.y*select(1.0,.48,automotivePaint);
+      var coatLocal=vec3<f32>(0.0);
+      let coatProbeWeight=f.params.y*select(1.0,.42,automotivePaint);
+      let coatProbeLod=max(coatRough*f32(textureNumLevels(localProbeMap)-1u),select(0.0,.65,automotivePaint));
+      coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),coatProbeLod).rgb;
       coatEnvironment=mix(coatEnvironment,coatLocal,coatProbeWeight);
     }
     // Same split-sum BRDF fit as the base, evaluated at the coat roughness.
