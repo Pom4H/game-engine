@@ -70,7 +70,10 @@ fn deformationAt(worldXZ:vec2<f32>)->vec4<f32>{
  let uv=clamp((worldXZ-u.fieldFrame.xy)/max(u.fieldFrame.zw,vec2<f32>(.0001))+.5,vec2<f32>(0),vec2<f32>(1));
  let p=clamp(uv*vec2<f32>(dims)-.5,vec2<f32>(0),vec2<f32>(dims-1));
  let i0=vec2<i32>(floor(p));let i1=min(i0+vec2<i32>(1),dims-1);let t=fract(p);
- let a=textureLoad(deformationTexture,i0,0),b=textureLoad(deformationTexture,vec2<i32>(i1.x,i0.y),0),c=textureLoad(deformationTexture,vec2<i32>(i0.x,i1.y),0),d=textureLoad(deformationTexture,i1,0);
+ let a=textureLoad(deformationTexture,i0,0);
+ let b=textureLoad(deformationTexture,vec2<i32>(i1.x,i0.y),0);
+ let c=textureLoad(deformationTexture,vec2<i32>(i0.x,i1.y),0);
+ let d=textureLoad(deformationTexture,i1,0);
  return mix(mix(a,b,t.x),mix(c,d,t.x),t.y);
 }
 fn displaceWorld(world:vec4<f32>)->vec4<f32>{var w=world;if(u.fieldSize.z>.5){w.y+=deformationAt(w.xz).x;}return w;}
@@ -215,9 +218,12 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   var n=geometricNormal;
   let deformation=deformationAt(in.worldPos.xz);
   if(u.fieldSize.z>.5){
-    let sx=max(u.fieldFrame.z/max(u.fieldSize.x,1.0),.001),sz=max(u.fieldFrame.w/max(u.fieldSize.y,1.0),.001);
-    let hx0=deformationAt(in.worldPos.xz-vec2<f32>(sx,0)).x,hx1=deformationAt(in.worldPos.xz+vec2<f32>(sx,0)).x;
-    let hz0=deformationAt(in.worldPos.xz-vec2<f32>(0,sz)).x,hz1=deformationAt(in.worldPos.xz+vec2<f32>(0,sz)).x;
+    let sx=max(u.fieldFrame.z/max(u.fieldSize.x,1.0),.001);
+    let sz=max(u.fieldFrame.w/max(u.fieldSize.y,1.0),.001);
+    let hx0=deformationAt(in.worldPos.xz-vec2<f32>(sx,0)).x;
+    let hx1=deformationAt(in.worldPos.xz+vec2<f32>(sx,0)).x;
+    let hz0=deformationAt(in.worldPos.xz-vec2<f32>(0,sz)).x;
+    let hz1=deformationAt(in.worldPos.xz+vec2<f32>(0,sz)).x;
     let fieldNormal=normalize(vec3<f32>((hx0-hx1)/(2.0*sx),1.0,(hz0-hz1)/(2.0*sz)));
     let influence=clamp(smoothstep(.00015,.0025,abs(deformation.x))+deformation.y*.28+deformation.z*.12,0.0,.92);
     n=normalize(mix(n,fieldNormal,influence));
