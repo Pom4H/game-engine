@@ -6,7 +6,7 @@ const {spec}=makeCity('street');
 // This is an authored camera/weather setup only; the car, materials, snow, wet road,
 // lighting, reflections and post-processing are production engine systems.
 spec.environment={
-  temperatureC:-1.5,
+  temperatureC:-.35,
   humidity:.46,
   groundMoisture:.42,
   precipitation:'rare',
@@ -59,7 +59,7 @@ spec.entities=spec.entities.filter(entity=>{
   return true;
 });
 spec.entities.push(
-  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.025,.028,.034,1],roughness:.69},environmental:{surfaceUse:'road',snowDepthM:0,iceDepthM:0,waterDepthM:.00045}},
+  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.043,.045,.048,1],roughness:.78},environmental:{surfaceUse:'road',snowDepthM:.0048,iceDepthM:.00018,waterDepthM:.0016}},
   {id:'hero-bank-near',position:[-13,.18,-4.18],mesh:{kind:'snowdrift',size:[62,.48,1.08],seed:4617,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
   {id:'hero-bank-far',position:[-13,.18,4.12],mesh:{kind:'snowdrift',size:[62,.56,1.22],seed:9121,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
 );
@@ -71,8 +71,8 @@ for(const entity of spec.entities){
     entity.material={...entity.material,color:[.16,.175,.205,1]};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:0,iceDepthM:0,waterDepthM:.00035};
-    entity.material={...entity.material,color:[.014,.016,.020,1],roughness:.72};
+    entity.environmental={...entity.environmental,snowDepthM:.0038,iceDepthM:.00014,waterDepthM:.00125};
+    entity.material={...entity.material,color:[.040,.042,.045,1],roughness:.80};
   }
 }
 

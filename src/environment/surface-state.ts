@@ -132,9 +132,14 @@ export class SurfaceEnvironmentSystem {
         const authored=entity.material.surface,snowDepthM=entity.environmental?.snowDepthM??0,waterDepthM=entity.environmental?.waterDepthM??0,iceDepthM=entity.environmental?.iceDepthM??0;
         const snowFactor=Math.min(1,snowDepthM/.025),iceFactor=Math.min(1,iceDepthM/.003),waterFactor=Math.min(1,waterDepthM/.003);
         const phaseFriction=Math.max(.16,1-snowFactor*.42-iceFactor*.72-waterFactor*.12);
+        // A loaded scene is already a physical state. A snow+water mixture must
+        // therefore read as slush even before the first simulation tick; paused
+        // editors, deterministic frame renders and replay seeks all use this path.
+        const initialWetRatio=waterDepthM/(waterDepthM+snowDepthM+.002);
+        const initialSlush=Math.max(0,Math.min(1,snowDepthM>.0005?initialWetRatio*1.45:0));
         this.surfaces.set(entity.id,{
           id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM,waterDepthM,iceDepthM,
-          slush:0,wetness:Math.max(authored.wetness,waterFactor),moss:authored.moss,dirt:authored.dirt,wear:authored.wear,roughness:authored.roughness,acousticDamping:authored.acousticDamping,darkening:authored.darkening,
+          slush:initialSlush,wetness:Math.max(authored.wetness,waterFactor,initialSlush*.72),moss:authored.moss,dirt:Math.max(authored.dirt,use==='road'?initialSlush*.12:0),wear:authored.wear,roughness:authored.roughness,acousticDamping:authored.acousticDamping,darkening:authored.darkening,
           trafficHeatC:0,trackMelt:0,puddle:Math.max(0,Math.min(1,waterDepthM/.006)),frictionScale:Math.max(.08,Math.min(1.18,authored.frictionScale*phaseFriction)),
         });
       }

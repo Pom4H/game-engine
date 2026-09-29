@@ -298,20 +298,38 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     albedo=mix(albedo,mossColor,mossMask*u.surface.x);
   }
 
-  // Asphalt is synthesized from aggregate and binder. Traffic only reveals tracks
-  // after the physics/environment system has accumulated trackMelt.
+  // Asphalt is a phase mixture, not a black material. Fresh melt water darkens
+  // aggregate, dirty snow becomes slurry, and repeated traffic clears wet ruts
+  // while pushing coarse slush toward their shoulders.
+  var roadTrack=track;
+  var roadSlurry=0.0;
+  var slushRidge=0.0;
   if(materialKind>4.5 && materialKind<5.5){
     let aggregate=noise3(in.worldPos*37.0+seed);
     let grainAA=1.0-smoothstep(.6,2.0,max(length(dpdx(in.worldPos)),length(dpdy(in.worldPos)))*37.0);
-    // Aggregate contrast disappears continuously below a pixel instead of
-    // becoming the regular high-frequency bands of a distant water surface.
-    albedo*=mix(.93,.66+aggregate*.58,grainAA);
-    let mineral=noise3(in.worldPos*95.0);albedo=mix(albedo,albedo*1.7,smoothstep(.68,.9,mineral)*.26*grainAA);
+    albedo*=mix(.94,.70+aggregate*.46,grainAA);
+    let mineral=noise3(in.worldPos*95.0);albedo=mix(albedo,albedo*1.55,smoothstep(.72,.91,mineral)*.18*grainAA);
     let scale=vec3<f32>(27,27,27);let gravel=noise3(in.worldPos*scale);
     let gradient=vec3<f32>(noise3(in.worldPos*scale+vec3<f32>(.12,0,0))-gravel,0,noise3(in.worldPos*scale+vec3<f32>(0,0,.12))-gravel);
-    n=normalize(n+gradient*.55*grainAA);
+    n=normalize(n+gradient*.42*grainAA);
 
-    albedo=mix(albedo,albedo*0.48,track*(0.35+slush*.35));
+    let phaseWet=clamp(slush*.95+waterDepth/.0035*.42,0.0,1.0);
+    let laneWarp=(noise3(in.worldPos*vec3<f32>(.055,.02,.18)+seed*4.0)-.5)*.10;
+    let historicalRut=tyreTracks(in.worldPos.z+laneWarp)*smoothstep(.035,.22,phaseWet);
+    roadTrack=max(track,historicalRut*.72);
+    let shoulderBand=smoothstep(.10,.48,historicalRut)*(1.0-smoothstep(.58,.94,historicalRut));
+    slushRidge=shoulderBand*slush*(.52+.48*noise3(in.worldPos*vec3<f32>(1.7,.1,5.2)+seed*7.0));
+    roadSlurry=clamp(slush*(.36+.42*(1.0-roadTrack))+slushRidge*.72,0.0,1.0);
+
+    let slurryColor=mix(vec3<f32>(.34,.35,.35),vec3<f32>(.16,.135,.105),clamp(u.weather.x*1.5+.22,0.0,1.0));
+    albedo=mix(albedo,slurryColor,roadSlurry*.66);
+    // Cleared ruts expose saturated asphalt; shoulders retain granular brown-grey mush.
+    albedo=mix(albedo,albedo*.50,roadTrack*(.50+.28*phaseWet));
+    albedo=mix(albedo,slurryColor*.86,slushRidge*.42);
+    n=normalize(mix(n,geometricNormal,roadTrack*.42));
+    let ridgeNoise=noise3(in.worldPos*vec3<f32>(8,.2,18)+seed*11.0)-.5;
+    n=normalize(n+vec3<f32>(ridgeNoise*.05,0,ridgeNoise*.08)*slushRidge);
+    track=roadTrack;
   }
 
   // Snow accumulation is derived from mass balance. Road tracks expose wet/slushy
@@ -412,13 +430,17 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     // A damp film changes roughness before it fills every depression as a
     // mirror. Scale subpixel puddle coverage by the available water volume.
     waterCoverage=smoothstep(.64,.80,hollows+fill*.50)*smoothstep(.00015,.0012,waterDepth)*sqrt(fill);
+    // Tyre channels retain melt water even when the surrounding aggregate has drained.
+    let rutWater=roadTrack*smoothstep(.00012,.0011,waterDepth)*(.42+.58*fill);
+    waterCoverage=max(waterCoverage,rutWater);
     let aggregate=noise3(in.worldPos*37.0+seed);
     let mineralRoughness=clamp(max(roughness,.60)+(aggregate-.5)*.24,.50,.93);
-    roughness=mix(mineralRoughness,.21+noise3(in.worldPos*3.0)*.045,waterCoverage);
-    albedo*=mix(1.0,.75,waterCoverage);
+    roughness=mix(mineralRoughness,.18+noise3(in.worldPos*3.0)*.04,waterCoverage);
+    roughness=mix(roughness,max(roughness,.82),slushRidge*.60);
+    albedo*=mix(1.0,.73,waterCoverage);
     // Millimetres of water level out the gravel; its normals must not turn the
     // planar reflection into waves across the entire road.
-    n=normalize(mix(n,geometricNormal,waterCoverage*.94));
+    n=normalize(mix(n,geometricNormal,waterCoverage*.95));
   }
   let metal=select(u.pbr.y,mappedMetalness,mappedMetalness>=0.0);let base=pow(max(albedo,vec3<f32>(0)),vec3<f32>(2.2));
   let nv=max(dot(n,viewDir),.001);let nl=max(dot(n,light),0.0);let nh=max(dot(n,halfDir),0.0);let vh=max(dot(viewDir,halfDir),0.0);

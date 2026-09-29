@@ -163,6 +163,17 @@ test('weather timeline moves from freezing night to thawing day',()=>{
   assert.ok(day.temperatureC>3.9);assert.equal(day.snowfall,'none');assert.ok(day.sunlight>.8);
 });
 
+test('snow and meltwater initialize as slush before the first simulation tick',()=>{
+  const scene=new Scene({
+    version:1,ground:-100,environment:{temperatureC:-.35,snowfall:'none',sunlight:.8},
+    entities:[{id:'road',position:[0,-.05,0],mesh:{kind:'box',size:[20,.1,7]},material:{kind:'asphalt'},environmental:{surfaceUse:'road',snowDepthM:.0048,waterDepthM:.0016,iceDepthM:.00018}}],
+  });
+  const state=scene.surfaces.sample('road',0,0);
+  assert.ok(state.slush>.20,{slush:state.slush});
+  assert.ok(state.wetness>.5,{wetness:state.wetness});
+  assert.ok(state.puddle>.15,{puddle:state.puddle});
+});
+
 test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{
   const scene=new Scene({
     version:1,ground:-100,
