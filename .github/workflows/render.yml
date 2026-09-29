@@ -12,9 +12,6 @@ on:
       - 'bun.lock'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -62,7 +59,10 @@ jobs:
             if($_.Length -lt 1000){ throw "Suspiciously small PNG: $($_.Name)" }
             Write-Host "PNG $($_.Name) $($_.Length) bytes"
           }
-      - name: Publish latest renders
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: node tools/publish-release.mjs render-latest artifacts/render34.png artifacts/render35.png artifacts/render36.png artifacts/render37.png artifacts/render-hud.json
+      - name: Save latest renders locally
+        shell: powershell
+        run: |
+          $target = Join-Path $env:USERPROFILE "game-engine-renders\\render-latest"
+          New-Item -ItemType Directory -Force $target | Out-Null
+          Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png,artifacts/render-hud.json $target -Force
+          Write-Host "Saved latest renders to $target"
