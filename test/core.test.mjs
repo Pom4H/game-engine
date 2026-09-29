@@ -172,6 +172,9 @@ test('snow and meltwater initialize as slush before the first simulation tick',(
   assert.ok(state.slush>.20,{slush:state.slush});
   assert.ok(state.wetness>.5,{wetness:state.wetness});
   assert.ok(state.puddle>.15,{puddle:state.puddle});
+  const slushVisuals=[...scene.entities.keys()].filter(id=>id.startsWith('__surface:slush:road:'));
+  assert.ok(slushVisuals.length>=1,'loaded road slush should have engine-owned ridge geometry before the first tick');
+  assert.ok(slushVisuals.every(id=>scene.entities.get(id)?.mesh?.kind==='snowdrift'));
 });
 
 test('traffic turns road snow into dirty slush while sidewalk keeps snow',()=>{

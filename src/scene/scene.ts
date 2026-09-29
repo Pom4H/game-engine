@@ -232,11 +232,44 @@ export class Scene {
   private syncSurfaceVisuals():void{
     const keep=new Set<string>();
     for(const [surfaceId,state] of this.surfaces.surfaces){
-      if(state.use!=='curb'&&state.use!=='sidewalk')continue;
       const source=this.entities.get(surfaceId);if(!source?.mesh)continue;
       const dimensions=meshDimensions(source.mesh,source.scale),longAxis:0|2=dimensions[0]>=dimensions[2]?0:2,crossAxis:0|2=longAxis===0?2:0;
-      const longSize=dimensions[longAxis],crossSize=dimensions[crossAxis],count=Math.max(1,Math.min(256,Math.ceil(longSize/6)));
-      const top=source.position[1]+dimensions[1]/2;
+      const longSize=dimensions[longAxis],crossSize=dimensions[crossAxis],top=source.position[1]+dimensions[1]/2;
+
+      // Slush has volume. On a road, wheel traffic and meltwater push the snow/water
+      // mixture into low continuous ridges. Keep this as render geometry derived from
+      // physical surface state instead of painting a flat brown stripe in the shader.
+      if(state.use==='road'&&state.slush>.08&&longSize>1&&crossSize>.8){
+        const lanes=Math.max(1,Math.min(4,Math.round(crossSize/3.4)));
+        const height=Math.round(Math.min(.055,.008+state.slush*.045)*1000)/1000;
+        const width=Math.max(.18,Math.min(.46,crossSize/(lanes*8.5)));
+        const offsets:number[]=[];
+        for(let lane=0;lane<lanes;lane++)offsets.push(-crossSize/2+(lane+.5)*crossSize/lanes);
+        for(let boundary=1;boundary<lanes;boundary++)offsets.push(-crossSize/2+boundary*crossSize/lanes);
+        const yaw=source.rotation[1],c=Math.cos(yaw),s=Math.sin(yaw);
+        for(let ridge=0;ridge<offsets.length;ridge++){
+          const key=`slush:${surfaceId}:${ridge}`;keep.add(key);
+          const localX=longAxis===0?0:offsets[ridge]!,localZ=longAxis===0?offsets[ridge]!:0;
+          const position:MutableVec3=[source.position[0]+c*localX+s*localZ,top+.001,source.position[2]-s*localX+c*localZ];
+          const rotation:MutableVec3=[0,yaw+(longAxis===0?0:-Math.PI/2),0];
+          const size:MutableVec3=[longSize,height,width];
+          const seed=(this.spec.seed??1)^hashString(surfaceId)^Math.imul(ridge+1,0x45d9f3b);
+          const owned=this.surfaceVisuals.get(key),previous=owned&&this.entities.get(owned.entity.id)===owned.entity?owned.entity:undefined;
+          if(previous?.mesh?.kind==='snowdrift'&&previous.mesh.size[1]===height&&previous.mesh.size[0]===longSize&&previous.mesh.size[2]===width&&previous.position.every((v,i)=>v===position[i])&&previous.rotation.every((v,i)=>v===rotation[i]))continue;
+          let id=previous?.id;
+          if(previous)this.remove(previous.id);
+          else{
+            const preferred=`__surface:slush:${surfaceId}:${ridge}`,base=preferred.length<=140?preferred:`__surface:slush:${hashString(surfaceId).toString(36)}:${ridge}`;
+            id=base;while(this.entities.has(id))id=`${base}:${this.surfaceVisualSequence++}`;
+          }
+          const dirt=Math.max(0,Math.min(1,state.dirt)),color:[number,number,number,number]=[.31-.09*dirt,.305-.10*dirt,.285-.11*dirt,1];
+          const entity=this.add({id:id!,position,rotation,mesh:{kind:'snowdrift',size,seed,segments:Math.max(20,Math.min(96,Math.ceil(longSize/1.6))),continuous:true,offset:source.position[longAxis]},material:{kind:'snow',color,roughness:.91}});
+          this.surfaceVisuals.set(key,{source:surfaceId,entity});
+        }
+      }
+
+      if(state.use!=='curb'&&state.use!=='sidewalk')continue;
+      const count=Math.max(1,Math.min(256,Math.ceil(longSize/6)));
       for(let i=0;i<count;i++){
         const key=`${surfaceId}:${i}`,height=Math.round(Math.min(1.45,state.snowDepthM*(state.use==='curb'?4.2:1.25))*50)/50;
         if(height<.02)continue;keep.add(key);

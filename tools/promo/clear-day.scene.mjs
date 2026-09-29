@@ -52,7 +52,7 @@ spec.rendering.reflectionProbe={
 // This is visual LOD, not a different material/lighting path.
 spec.entities=spec.entities.filter(entity=>{
   const id=entity.id;
-  if(id.startsWith('batch:plough-grit-')||id.startsWith('batch:walk-grain-')||id.startsWith('batch:centre-slush-'))return false;
+  if(id.startsWith('batch:plough-grit-')||id.startsWith('batch:walk-grain-'))return false;
   // Replace near-road batched snow dressing with two coherent high-resolution
   // banks; the distant roof/window snow stays untouched.
   if(id.startsWith('batch:')&&entity.material?.kind==='snow'&&Math.abs(entity.position?.[2]??99)<8.6)return false;
