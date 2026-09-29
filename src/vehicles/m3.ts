@@ -292,14 +292,14 @@ export function m3PartMaterial(part:ParametricVehiclePart,paint:Color=[.10,.11,.
   if(part.id.startsWith('hood-roundel-blue-'))return{...base,color:[.015,.19,.58,1]};
   if(part.id.startsWith('hood-roundel-white-'))return{...base,color:[.86,.89,.93,1]};
   if(part.id==='hood-roundel-ring')return{...base,color:[.012,.015,.020,1]};
-  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.115,metalness:.045,clearcoat:.90,clearcoatRoughness:.045};
+  if(part.role==='paint')return{...base,color:paint,finish:'polished',treatment:'painted',roughness:.23,metalness:.015,clearcoat:.82,clearcoatRoughness:.085};
   if(part.role==='glass')return{...base,color:[.13,.18,.23,.20],roughness:.055};
   if(part.id.startsWith('interior-seat-')||part.id.startsWith('interior-headrest-'))return{...base,color:[.065,.070,.075,1],roughness:.92,metalness:0};
   if(part.id==='interior-dashboard'||part.id==='interior-console'||part.id==='interior-rear-bench')return{...base,color:[.030,.033,.036,1],roughness:.70,metalness:0};
   if(part.role==='tire')return{...base,color:[.018,.019,.020,1]};
   if(part.role==='rim')return{...base,color:[.34,.36,.39,1],roughness:.19,metalness:.94};
   if(part.role==='light')return{...base,color:[.54,.68,.86,1],emissive:lightsOn?[.34,.46,.70]:[.012,.016,.022],roughness:.11};
-  if(part.role==='tail')return{...base,color:[.34,.012,.008,1],emissive:lightsOn?[.7,.015,.006]:[.018,.001,.001]};
+  if(part.role==='tail')return{...base,color:[.16,.008,.006,1],roughness:.09,metalness:0,clearcoat:.88,clearcoatRoughness:.045,emissive:lightsOn?[.14,.0025,.001]:[.003,.0003,.0002]};
   if(part.role==='metal')return{...base,color:[.22,.24,.27,1],roughness:.24,metalness:.88};
   return{...base,color:[.026,.029,.032,1]};
 }
