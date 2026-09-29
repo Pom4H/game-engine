@@ -16,6 +16,9 @@ on:
       - 'bun.lock'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: winter-promo-${{ github.ref }}
   cancel-in-progress: true
@@ -63,10 +66,7 @@ jobs:
           $size = (Get-Item $video).Length
           if ($size -lt 1000000) { throw "Promo MP4 suspiciously small: $size bytes" }
           Write-Host "Winter promo: $size bytes"
-      - uses: actions/upload-artifact@v7
-        continue-on-error: true
-        with:
-          name: game-engine-winter-promo-hq
-          path: artifacts/promo-v3/
-          if-no-files-found: error
-          retention-days: 7
+      - name: Publish latest winter promo
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node tools/publish-release.mjs render-latest artifacts/promo-v3/game-engine-winter-promo-1080p.mp4
