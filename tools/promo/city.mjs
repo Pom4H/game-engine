@@ -40,8 +40,8 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  function lamp(id,x,z,night=false){
   cylinder(id+'-foot',[x,.32,z],.16,.6,C.metal);cylinder(id+'-pole',[x,2.65,z],.052,5.1,C.metal);
   cylinder(id+'-collar',[x,4.88,z],.085,.10,C.metal);
-  const lightColor=[1,.61,.265],brightness=night?8:6;
-  cylinder(id+'-glow',[x,5.08,z],.145,.38,[1,.75,.4,1],{light:{kind:'point',color:lightColor,intensity:brightness*3.2,range:13},material:{emissive:lightColor.map(v=>v*brightness),roughness:.35}});
+  const lightColor=[1,.61,.265],brightness=night?8:.025;
+  cylinder(id+'-glow',[x,5.08,z],.145,.38,[1,.75,.4,1],{light:{kind:'point',color:lightColor,intensity:night?brightness*3.2:0,range:13},material:{emissive:lightColor.map(v=>v*brightness),roughness:.35}});
   for(let a=0;a<4;a++){const angle=a*Math.PI/2;cylinder(id+'-bar'+a,[x+Math.cos(angle)*.16,5.07,z+Math.sin(angle)*.16],.017,.45,C.metal);}
   add(id+'-cap',[x,5.36,z],{kind:'cylinder',radius:.29,topRadius:.035,height:.18,segments:24},C.metal);
   bank(id+'-cap-snow',[x,5.45,z],[.55,.07,.55],32);
@@ -59,6 +59,15 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   // The ground floor is a genuine recessed volume. Window dressing has real parallax.
   box(id+'-upper-mass',[x,(height+3.12)/2,z],[width,height-3.12,depth],color,{material:{pattern,roughness:.94,ageYears:35}});
   box(id+'-rear-mass',[x,1.57,z+sign*.86],[width,3.14,depth-1.72],color,{material:{pattern,roughness:.95}});
+  // Real projecting corner pilasters break the single flat facade plane and
+  // give the shadow map centimetre-scale geometry to describe.
+  for(const side of [-1,1]){
+    box(id+'-corner-pilaster'+side,[x+side*(width/2-.10),(height+3.18)/2,face-sign*.10],[.22,height-3.08,.26],trim,{material:{roughness:.82,ageYears:28}});
+    for(let floor=0;floor<Math.floor((height-3.2)/2.82);floor++){
+      const yy=3.42+floor*2.82;
+      box(id+'-corner-cap'+side+'-'+floor,[x+side*(width/2-.10),yy,face-sign*.16],[.29,.12,.39],[.53,.52,.48,1],{material:{roughness:.78}});
+    }
+  }
   box(id+'-cornice',[x,height-.04,z],[width+.42,.25,depth+.42],trim);
   box(id+'-cornice-shadow',[x,height-.22,front-sign*.07],[width+.20,.12,.29],[.39,.38,.34,1]);
   box(id+'-frieze',[x,height-.43,front-sign*.07],[width+.24,.18,.35],trim);
@@ -73,9 +82,15 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   for(let floor=0;floor<floors;floor++)for(let col=0;col<cols;col++){
    const wx=x+(col-(cols-1)/2)*(width/(cols+.4)),wy=4.59+floor*2.82,w=1.12,h=1.69,wid=id+'-w'+floor+'-'+col;
    const lit=random()<.48,glass=lit?[.30,.25,.19,1]:[.10,.14,.18,1];
-   box(wid+'-recess',[wx,wy,face-sign*.045],[w+.19,h+.19,.065],[.07,.08,.08,1]);
+   box(wid+'-recess',[wx,wy,face-sign*.045],[w+.19,h+.19,.065],[.055,.062,.066,1],{material:{roughness:.98}});
    box(wid+'-glass',[wx,wy,face-sign*.09],[w,h,.025],glass,{material:{pattern:'window',metalness:.12,roughness:.20,emissive:lit?[.11,.052,.018]:[0,0,0]}});
-   for(const side of [-1,1])box(wid+'-jamb'+side,[wx+side*(w/2+.055),wy,face-sign*.15],[.095,h+.20,.17],trim);
+   const reveal=[.33,.32,.30,1],revealDepth=.24;
+   for(const side of [-1,1]){
+     box(wid+'-reveal-side'+side,[wx+side*(w/2+.015),wy,face-sign*.095],[.055,h+.06,revealDepth],reveal,{material:{roughness:.90}});
+     box(wid+'-jamb'+side,[wx+side*(w/2+.055),wy,face-sign*.15],[.095,h+.20,.17],trim);
+   }
+   box(wid+'-reveal-top',[wx,wy+h/2+.018,face-sign*.095],[w+.06,.052,revealDepth],reveal,{material:{roughness:.90}});
+   box(wid+'-reveal-bottom',[wx,wy-h/2-.018,face-sign*.095],[w+.06,.052,revealDepth],reveal,{material:{roughness:.90}});
    box(wid+'-lintel',[wx,wy+h/2+.075,face-sign*.13],[w+.32,.13,.16],trim);
    box(wid+'-sill',[wx,wy-h/2-.055,face-sign*.24],[w+.38,.115,.39],trim);
    snowcap(wid+'-snow',[wx,wy-h/2+.005,face-sign*.25],w+.43,.43,.12);
@@ -139,7 +154,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   box(id+'-fascia',[sx,3.20,face-sign*.24],[sw+.28,.43,.31],shop,{material:{label:['ПЕКАРНЯ','КОФЕ И КНИГИ','АПТЕКА','МАСТЕРСКАЯ'][shopKind],roughness:.61}});
   box(id+'-fascia-cap',[sx,3.45,face-sign*.27],[sw+.40,.075,.45],shop);
   snowcap(id+'-awning-snow',[sx,3.495,face-sign*.30],sw+.47,.55,.17);
-  add(id+'-store-light',[sx,2.25,front+sign*.72],{kind:'sphere',radius:.012,segments:8},[0,0,0,0],{light:{kind:'point',color:warm,intensity:kind==='courtyard'?5.8:5.2,range:6.8}});
+  add(id+'-store-light',[sx,2.25,front+sign*.72],{kind:'sphere',radius:.012,segments:8},[0,0,0,0],{light:{kind:'point',color:warm,intensity:kind==='courtyard'?5.8:1.8,range:5.2}});
   // Door recessed between masonry piers, with brass furniture and a warm transom.
   box(id+'-doorframe',[doorx,1.36,face-sign*.08],[doorw+.17,2.7,.19],trim);
   box(id+'-door',[doorx,1.29,face-sign*.20],[doorw,2.48,.08],[.15,.102,.065,1],{material:{roughness:.54}});

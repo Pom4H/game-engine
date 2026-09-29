@@ -16,13 +16,15 @@ spec.environment={
   clock:{startHour:11.8,hoursPerSecond:0},
 };
 spec.rendering={
-  sunDirection:[.42,.80,-.42],
-  sunColor:[1,.955,.88],
-  sunIntensity:3.35,
-  skyColor:[.33,.50,.72],
-  fogDensity:.00038,
-  exposure:1.02,
-  shadowExtent:30,
+  // Raking winter sun: enough lateral component for window reveals/cornices to
+  // cast readable shadows instead of flattening the facade into a texture sheet.
+  sunDirection:[-.58,.63,.36],
+  sunColor:[1,.95,.86],
+  sunIntensity:2.75,
+  skyColor:[.27,.39,.55],
+  fogDensity:.00042,
+  exposure:.97,
+  shadowExtent:28,
 };
 spec.camera={
   position:[-15.15,1.06,-4.10],
