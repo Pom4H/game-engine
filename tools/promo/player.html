@@ -9,7 +9,7 @@ try{
    while(scene.tick<Math.max(1,desired)){
     scene.step();events.push(...scene.drainEvents());footEvents.push(...scene.contacts.drainFootsteps());
    }
-   const car=scene.entities.get('passing-Body-CarPaint').position,person=scene.animation.pose('walker').position;
+   const car=scene.entities.get('passing-body').position,person=scene.animation.pose('walker').position;
    const u=ease(Math.min(1,t/shot.duration)),base=shot.follow==='car'?car:shot.follow==='person'?person:[0,0,0];
    scene.camera={position:lerp(shot.from,shot.to,u).map((v,i)=>v+base[i]),target:lerp(shot.lookFrom,shot.lookTo,u).map((v,i)=>v+base[i]),fov:shot.fov,focusDistance:shot.focus??20,aperture:shot.aperture??0};
    document.getElementById('title').textContent=shot.title;document.getElementById('brand').textContent=shot.note??'GAME ENGINE / WINTER / LIVE ENGINE CAPTURE';document.getElementById('type').style.opacity=String(Math.min(1,t/.8,Math.max(0,(4.3-t)/1.3))*.92);const end=document.getElementById('end');end.style.display=shot.end&&t>shot.duration-3?'flex':'none';end.style.opacity=String(Math.min(1,Math.max(0,(t-shot.duration+3)/1.5)));telemetry.push({t,worldTime:scene.time,camera:scene.camera.position,target:scene.camera.target,car:[car[0],.65,car[2]],speedMps:Math.hypot(...(scene.entities.get(scene.spec.surfaceContacts?.wheels?.[0]?.entityId)?.body?.velocity??[0,0,0])),person,footprints:scene.contacts.footprints.snapshot().length,puddle:scene.contacts.wetness,snowfallRate:scene.environment.snowfallRate});
