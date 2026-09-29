@@ -318,14 +318,14 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let historicalRut=tyreTracks(in.worldPos.z+laneWarp)*smoothstep(.035,.22,phaseWet);
     roadTrack=max(track,historicalRut*.72);
     let shoulderBand=smoothstep(.10,.48,historicalRut)*(1.0-smoothstep(.58,.94,historicalRut));
-    slushRidge=shoulderBand*slush*(.52+.48*noise3(in.worldPos*vec3<f32>(1.7,.1,5.2)+seed*7.0));
+    slushRidge=shoulderBand*slush*(.72+.55*noise3(in.worldPos*vec3<f32>(1.7,.1,5.2)+seed*7.0));
     roadSlurry=clamp(slush*(.36+.42*(1.0-roadTrack))+slushRidge*.72,0.0,1.0);
 
     let slurryColor=mix(vec3<f32>(.34,.35,.35),vec3<f32>(.16,.135,.105),clamp(u.weather.x*1.5+.22,0.0,1.0));
     albedo=mix(albedo,slurryColor,roadSlurry*.66);
     // Cleared ruts expose saturated asphalt; shoulders retain granular brown-grey mush.
     albedo=mix(albedo,albedo*.50,roadTrack*(.50+.28*phaseWet));
-    albedo=mix(albedo,slurryColor*.86,slushRidge*.42);
+    albedo=mix(albedo,slurryColor*.92,slushRidge*.72);
     n=normalize(mix(n,geometricNormal,roadTrack*.42));
     let ridgeNoise=noise3(in.worldPos*vec3<f32>(8,.2,18)+seed*11.0)-.5;
     n=normalize(n+vec3<f32>(ridgeNoise*.05,0,ridgeNoise*.08)*slushRidge);
@@ -575,7 +575,8 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     for(var k=0;k<6;k++){let a=f32(k)*1.0472;reflection+=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple+vec2<f32>(cos(a),sin(a))*blur,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.12;}
     let icePatch=smoothstep(.58,.77,noise3(in.worldPos*vec3<f32>(.35,.1,1.1)))*clamp(u.surfacePhase.w/.002,0.0,1.0);
     let fres=.02+.96*pow(1.0-nv,5.0);
-    color=mix(color,reflection,fres*max(waterCoverage,icePatch*.45));
+    let roadReflection=max(waterCoverage*(1.0-roadSlurry*.72),icePatch*.45);
+    color=mix(color,reflection,fres*roadReflection);
   }
   let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
   color=mix(color,f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027,clamp(fog,0.0,.96));
