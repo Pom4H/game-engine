@@ -9,6 +9,14 @@ export function freezePrimitive(primitive:Primitive):Primitive{
  const freeze=(value:unknown):void=>{if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}};
  freeze(primitive);primitiveKeys.set(primitive,JSON.stringify(primitive));return primitive;
 }
+export function surfaceGridPrimitive(size:readonly[number,number,number],segmentsX:number,segmentsZ:number):Primitive{
+  const nx=Math.max(1,Math.min(512,Math.round(segmentsX))),nz=Math.max(1,Math.min(256,Math.round(segmentsZ))),positions:number[]=[],normals:number[]=[],indices:number[]=[],y=size[1]/2;
+  for(let iz=0;iz<=nz;iz++)for(let ix=0;ix<=nx;ix++){positions.push((ix/nx-.5)*size[0],y,(iz/nz-.5)*size[2]);normals.push(0,1,0);}
+  const row=nx+1;
+  for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const a=iz*row+ix,b=a+1,c=a+row,d=c+1;indices.push(a,c,b,b,c,d);}
+  return{kind:'triangle-mesh',positions,normals,indices};
+}
+
 export function primitiveMesh(primitive:Primitive):MeshData{
   if(primitive.kind==='triangle-mesh')return pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined);
   if(primitive.kind==='torus')return torusMesh(primitive.radius,primitive.tube,primitive.segments??40);

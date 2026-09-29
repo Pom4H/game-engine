@@ -1,10 +1,11 @@
 import {AnimationSystem} from '../animation/locomotion.js';
 import {SurfaceContactSystem} from '../environment/surface-contacts.js';
-import {freezePrimitive} from '../procedural/mesh.js';
+import {freezePrimitive,surfaceGridPrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
 import type {SimulationTier} from '../core/kernel.js';
 import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
 import {SurfaceEnvironmentSystem} from '../environment/surface-state.js';
+import {surfaceFieldResolution} from '../environment/deformable-surface.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
 import {deriveSurfaceState,effectiveFriction,type SurfaceState} from '../materials/surface.js';
 import {evaluateFracture,type FractureDecision} from '../materials/fracture.js';
@@ -103,10 +104,15 @@ export class Scene {
   add(spec:EntitySpec):RuntimeEntity{
     spec=validateEntity(spec);
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
-    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?freezePrimitive(structuredClone(spec.mesh)):undefined,renderMesh=spec.renderMesh?freezePrimitive(structuredClone(spec.renderMesh)):undefined;
+    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?freezePrimitive(structuredClone(spec.mesh)):undefined;
+    const scale:MutableVec3=[...(spec.scale??[1,1,1])];
+    let renderMesh=spec.renderMesh?freezePrimitive(structuredClone(spec.renderMesh)):undefined;
+    if(!renderMesh&&spec.environmental?.surfaceUse==='road'&&mesh?.kind==='box'){
+      const size=mesh.size??[1,1,1],[nx,nz]=surfaceFieldResolution([size[0]*scale[0],size[2]*scale[2]]);
+      renderMesh=freezePrimitive(surfaceGridPrimitive(size,nx,nz));
+    }
     const surface=deriveSurfaceState(profile,spec.material??{},this.environment);
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
-    const scale:MutableVec3=[...(spec.scale??[1,1,1])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
     const shouldCollide=spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle;
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
@@ -235,38 +241,6 @@ export class Scene {
       const source=this.entities.get(surfaceId);if(!source?.mesh)continue;
       const dimensions=meshDimensions(source.mesh,source.scale),longAxis:0|2=dimensions[0]>=dimensions[2]?0:2,crossAxis:0|2=longAxis===0?2:0;
       const longSize=dimensions[longAxis],crossSize=dimensions[crossAxis],top=source.position[1]+dimensions[1]/2;
-
-      // Slush has volume. On a road, wheel traffic and meltwater push the snow/water
-      // mixture into low continuous ridges. Keep this as render geometry derived from
-      // physical surface state instead of painting a flat brown stripe in the shader.
-      if(state.use==='road'&&state.slush>.08&&longSize>1&&crossSize>.8){
-        const lanes=Math.max(1,Math.min(4,Math.round(crossSize/3.4)));
-        const height=Math.round(Math.min(.07,.014+state.slush*.070)*1000)/1000;
-        const width=Math.max(.24,Math.min(.58,crossSize/(lanes*7.2)));
-        const offsets:number[]=[];
-        for(let lane=0;lane<lanes;lane++)offsets.push(-crossSize/2+(lane+.5)*crossSize/lanes);
-        for(let boundary=1;boundary<lanes;boundary++)offsets.push(-crossSize/2+boundary*crossSize/lanes);
-        const yaw=source.rotation[1],c=Math.cos(yaw),s=Math.sin(yaw);
-        for(let ridge=0;ridge<offsets.length;ridge++){
-          const key=`slush:${surfaceId}:${ridge}`;keep.add(key);
-          const localX=longAxis===0?0:offsets[ridge]!,localZ=longAxis===0?offsets[ridge]!:0;
-          const position:MutableVec3=[source.position[0]+c*localX+s*localZ,top+.001,source.position[2]-s*localX+c*localZ];
-          const rotation:MutableVec3=[0,yaw+(longAxis===0?0:-Math.PI/2),0];
-          const size:MutableVec3=[longSize,height,width];
-          const seed=(this.spec.seed??1)^hashString(surfaceId)^Math.imul(ridge+1,0x45d9f3b);
-          const owned=this.surfaceVisuals.get(key),previous=owned&&this.entities.get(owned.entity.id)===owned.entity?owned.entity:undefined;
-          if(previous?.mesh?.kind==='snowdrift'&&previous.mesh.size[1]===height&&previous.mesh.size[0]===longSize&&previous.mesh.size[2]===width&&previous.position.every((v,i)=>v===position[i])&&previous.rotation.every((v,i)=>v===rotation[i]))continue;
-          let id=previous?.id;
-          if(previous)this.remove(previous.id);
-          else{
-            const preferred=`__surface:slush:${surfaceId}:${ridge}`,base=preferred.length<=140?preferred:`__surface:slush:${hashString(surfaceId).toString(36)}:${ridge}`;
-            id=base;while(this.entities.has(id))id=`${base}:${this.surfaceVisualSequence++}`;
-          }
-          const dirt=Math.max(0,Math.min(1,state.dirt+state.slush*.35)),color:[number,number,number,number]=[.34-.12*dirt,.325-.13*dirt,.29-.14*dirt,1];
-          const entity=this.add({id:id!,position,rotation,mesh:{kind:'snowdrift',size,seed,segments:Math.max(20,Math.min(96,Math.ceil(longSize/1.6))),continuous:true,offset:source.position[longAxis]},material:{kind:'snow',color,roughness:.91}});
-          this.surfaceVisuals.set(key,{source:surfaceId,entity});
-        }
-      }
 
       if(state.use!=='curb'&&state.use!=='sidewalk')continue;
       const count=Math.max(1,Math.min(256,Math.ceil(longSize/6)));

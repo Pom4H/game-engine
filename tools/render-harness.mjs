@@ -166,9 +166,10 @@ try{
   const results=[];
   for(const view of views){
     if(!view?.name||!view?.output||!view?.camera)throw new Error('Invalid view entry: '+JSON.stringify(view));
-    const cameraJson=JSON.stringify(view.camera);
+    const cameraJson=JSON.stringify(view.camera),time=Number(view.time??0);
+    if(!Number.isFinite(time)||time<0)throw new Error('Invalid view time for '+view.name);
     const result=await send('Runtime.evaluate',{
-      expression:`(async()=>{window.__GAME_ENGINE__.setCamera(${cameraJson});await window.__GAME_ENGINE__.flush();window.__GAME_ENGINE__.render();await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()`,
+      expression:`(async()=>{window.__GAME_ENGINE__.setCamera(${cameraJson});window.__GAME_ENGINE__.seek(${time});await window.__GAME_ENGINE__.flush();window.__GAME_ENGINE__.render();await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()`,
       awaitPromise:true,returnByValue:true
     });
     const inspection=result.result?.value;

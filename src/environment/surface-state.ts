@@ -7,6 +7,7 @@ import type {EnvironmentState} from './types.js';
 import type {RuntimeEntity} from '../scene/scene.js';
 import type {SurfaceUse} from '../scene/types.js';
 import {deriveSurfaceState} from '../materials/surface.js';
+import {DeformableSurfaceField,surfaceFieldResolution} from './deformable-surface.js';
 
 export interface SurfaceEnvironmentState {
   readonly id:string;
@@ -39,7 +40,7 @@ export interface BodyEnvironmentState {
   directionZ:number;
 }
 
-export interface SurfaceEnvironmentField {readonly center:readonly[number,number];readonly size:readonly[number,number];readonly nx:number;readonly nz:number;readonly cells:SurfaceEnvironmentState[]}
+export interface SurfaceEnvironmentField {readonly center:readonly[number,number];readonly size:readonly[number,number];readonly nx:number;readonly nz:number;readonly cells:SurfaceEnvironmentState[];readonly deformation:DeformableSurfaceField}
 export interface SurfaceContactWork {
   readonly sourceId:string;
   readonly surfaceId:string;
@@ -81,6 +82,7 @@ export class SurfaceEnvironmentSystem {
       const entity=entities.get(id);if(!entity)continue;
       const field=this.fields.get(id)!;
       for(const cell of field.cells)this.stepSurface(cell,entity,dt,worldSeconds,environment);
+      field.deformation.relax(dt,state.slush);
       for(const key of ['temperatureC','snowDepthM','waterDepthM','iceDepthM','slush','wetness','moss','dirt','wear','roughness','acousticDamping','darkening','trafficHeatC','puddle','frictionScale'] as const)state[key]=field.cells.reduce((sum,cell)=>sum+cell[key],0)/field.cells.length;
       state.trackMelt=Math.max(...field.cells.map(cell=>cell.trackMelt));
     }
@@ -116,6 +118,11 @@ export class SurfaceEnvironmentSystem {
       surface.dirt=Math.min(1,surface.dirt+work.speedMps*work.durationSeconds*.0008*wet);
     }
     const bodyState=this.bodies.get(work.sourceId),sample=this.sample(work.surfaceId,work.x,work.z);
+    if(sample){
+      const looseDepth=sample.snowDepthM+sample.waterDepthM*.35+sample.slush*.012;
+      const loadScale=Math.min(1.35,work.normalLoadN/3600),depth=Math.min(work.radiusM*.18,looseDepth*.95)*Math.min(1,.28+.72*loadScale);
+      if(depth>.00015)field.deformation.stamp({x:work.x,z:work.z,radiusM:Math.max(.06,work.radiusM),depthM:depth,compaction:Math.min(1,.25+loadScale*.55),shear:Math.min(1,(work.slipSpeedMps+work.speedMps*.035)/5),displacementRatio:.78});
+    }
     if(bodyState&&sample){
       const spray=Math.min(1,(sample.slush+sample.puddle)*work.speedMps/8);
       bodyState.rearSnow=Math.min(1,bodyState.rearSnow+spray*work.durationSeconds*.13);
@@ -144,8 +151,8 @@ export class SurfaceEnvironmentSystem {
         });
       }
       if(use&&!this.fields.has(entity.id)){
-        const half=horizontalHalf(entity),size=[half[0]*2,half[1]*2] as const,nx=Math.min(64,Math.max(1,Math.ceil(size[0]/.5))),nz=Math.min(64,Math.max(1,Math.ceil(size[1]/.5)));
-        this.fields.set(entity.id,{center:[entity.position[0],entity.position[2]],size,nx,nz,cells:Array.from({length:nx*nz},()=>({...this.surfaces.get(entity.id)!}))});
+        const half=horizontalHalf(entity),size=[half[0]*2,half[1]*2] as const,[nx,nz]=surfaceFieldResolution(size),center=[entity.position[0],entity.position[2]] as const;
+        this.fields.set(entity.id,{center,size,nx,nz,cells:Array.from({length:nx*nz},()=>({...this.surfaces.get(entity.id)!})),deformation:new DeformableSurfaceField(center,size,nx,nz)});
       }
       if((entity.body?.invMass||entity.body?.kinematic)&&!this.bodies.has(entity.id)){
         this.bodies.set(entity.id,{id:entity.id,snowCoverage:0,rearSnow:0,wetness:0,roadDirt:0,directionX:1,directionZ:0});
@@ -179,6 +186,9 @@ export class SurfaceEnvironmentSystem {
         surface.trackMelt=Math.min(1,surface.trackMelt+Math.min(1,workPerCell/85_000)*.12);
         surface.dirt=Math.min(1,surface.dirt+dt*speed*.0008*(surface.waterDepthM>0||surface.snowDepthM>0?1:.1));
         }
+        const looseDepth=surface.snowDepthM+surface.waterDepthM*.35+surface.slush*.012;
+        const depth=Math.min(Math.max(half[0],half[1])*.12,looseDepth*.8);
+        if(depth>.00015)field.deformation.stamp({x:bodyEntity.position[0],z:bodyEntity.position[2],radiusM:Math.max(.12,Math.min(half[0],half[1])*.7),depthM:depth,compaction:.55,shear:Math.min(1,speed/10),displacementRatio:.74});
         const spray=Math.min(1,(surface.slush+surface.puddle)*speed/8);
         bodyState.rearSnow=Math.min(1,bodyState.rearSnow+spray*dt*.13);
         bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*dt*.09);

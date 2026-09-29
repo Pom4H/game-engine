@@ -64,7 +64,10 @@ spec.entities.push(
   {id:'hero-bank-far',position:[-13,.18,4.12],mesh:{kind:'snowdrift',size:[62,.56,1.22],seed:9121,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
 );
 for(const entity of spec.entities){
-  if(entity.id.startsWith('passing-contact')&&entity.body)entity.body={...entity.body,velocity:[0,0,0]};
+  if(entity.id.startsWith('passing-contact')&&entity.body){
+    entity.position=[entity.position[0]-4.2,entity.position[1],entity.position[2]];
+    entity.body={...entity.body,velocity:[2.65,0,0]};
+  }
   if(entity.id.startsWith('passing-')&&entity.material?.treatment==='painted'){
     // The scene chooses only the hero colour. Automotive layer response belongs to
     // the vehicle material + renderer so stills, gameplay and offline renders agree.

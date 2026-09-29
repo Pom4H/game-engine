@@ -22,7 +22,7 @@ const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean}
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
-interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
+interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
 const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`
@@ -52,6 +52,7 @@ struct U {
 @group(0) @binding(5) var surfaceSampler:sampler;
 @group(0) @binding(6) var normalTexture:texture_2d<f32>;
 @group(0) @binding(7) var ormTexture:texture_2d<f32>;
+@group(0) @binding(8) var deformationTexture:texture_2d<f32>;
 @group(1) @binding(0) var<uniform> f:Frame;
 @group(1) @binding(1) var shadowMap:texture_depth_2d;
 @group(1) @binding(2) var shadowSampler:sampler_comparison;
@@ -63,11 +64,21 @@ struct U {
 @group(1) @binding(10) var localProbeMap:texture_cube<f32>;
 @group(1) @binding(11) var dynamicShadowMap:texture_depth_2d;
 @group(1) @binding(12) var opaqueScene:texture_2d<f32>;
-@vertex fn shadowVS(@location(0) position:vec3<f32>)->@builtin(position) vec4<f32>{return f.lightVP*u.model*vec4<f32>(position,1);}
+fn deformationAt(worldXZ:vec2<f32>)->vec4<f32>{
+ if(u.fieldSize.z<.5){return vec4<f32>(0);}
+ let dims=max(vec2<i32>(1),vec2<i32>(u.fieldSize.xy));
+ let uv=clamp((worldXZ-u.fieldFrame.xy)/max(u.fieldFrame.zw,vec2<f32>(.0001))+.5,vec2<f32>(0),vec2<f32>(1));
+ let p=clamp(uv*vec2<f32>(dims)-.5,vec2<f32>(0),vec2<f32>(dims-1));
+ let i0=vec2<i32>(floor(p));let i1=min(i0+vec2<i32>(1),dims-1);let t=fract(p);
+ let a=textureLoad(deformationTexture,i0,0),b=textureLoad(deformationTexture,vec2<i32>(i1.x,i0.y),0),c=textureLoad(deformationTexture,vec2<i32>(i0.x,i1.y),0),d=textureLoad(deformationTexture,i1,0);
+ return mix(mix(a,b,t.x),mix(c,d,t.x),t.y);
+}
+fn displaceWorld(world:vec4<f32>)->vec4<f32>{var w=world;if(u.fieldSize.z>.5){w.y+=deformationAt(w.xz).x;}return w;}
+@vertex fn shadowVS(@location(0) position:vec3<f32>)->@builtin(position) vec4<f32>{return f.lightVP*displaceWorld(u.model*vec4<f32>(position,1));}
 @vertex fn shadowVSInstanced(
  @location(0) position:vec3<f32>,
  @location(2) m0:vec4<f32>,@location(3) m1:vec4<f32>,@location(4) m2:vec4<f32>,@location(5) m3:vec4<f32>
-)->@builtin(position) vec4<f32>{return f.lightVP*mat4x4<f32>(m0,m1,m2,m3)*vec4<f32>(position,1);}
+ )->@builtin(position) vec4<f32>{return f.lightVP*displaceWorld(mat4x4<f32>(m0,m1,m2,m3)*vec4<f32>(position,1));}
 fn shadowAt(p:vec3<f32>,n:vec3<f32>)->f32{
  let clip=f.lightVP*vec4<f32>(p+n*.003,1);let uv=clip.xy*.5*vec2<f32>(1,-1)+.5;
  if(any(uv<vec2<f32>(0))||any(uv>vec2<f32>(1))||clip.z>1.0||clip.z<0.0){return 1.0;}
@@ -127,8 +138,8 @@ fn tyreTracks(z:f32)->f32{
 
 @vertex fn vs(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>, @location(6) vertexColor:vec4<f32>) -> VOut {
   var out: VOut;out.reflected=0u;out.vertexColor=vertexColor;
-  let world=u.model*vec4<f32>(position,1.0);
-  out.position=f.viewVP*world;let previous=f.previousVP*u.prevModel*vec4<f32>(position,1.0);
+  let world=displaceWorld(u.model*vec4<f32>(position,1.0));
+  out.position=f.viewVP*world;let previous=f.previousVP*displaceWorld(u.prevModel*vec4<f32>(position,1.0));
   let currentNdc=out.position.xy/max(abs(out.position.w),.00001);let previousNdc=previous.xy/max(abs(previous.w),.00001);
   out.velocity=vec2<f32>((currentNdc.x-previousNdc.x)*.5,(previousNdc.y-currentNdc.y)*.5);
   out.worldPos=world.xyz;out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);
@@ -138,7 +149,7 @@ fn tyreTracks(z:f32)->f32{
 }
 
 @vertex fn reflectionVS(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>,@location(6) vertexColor:vec4<f32>)->VOut{
- var out:VOut;out.vertexColor=vertexColor;let world=u.model*vec4<f32>(position,1);out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
+ var out:VOut;out.vertexColor=vertexColor;let world=displaceWorld(u.model*vec4<f32>(position,1));out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
 }
 
 fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,roughness:f32,base:vec3<f32>,f0:vec3<f32>,metal:f32,coat:f32,coatRoughness:f32)->vec3<f32>{
@@ -202,6 +213,15 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
 
   let geometricNormal=normalize(in.normal);
   var n=geometricNormal;
+  let deformation=deformationAt(in.worldPos.xz);
+  if(u.fieldSize.z>.5){
+    let sx=max(u.fieldFrame.z/max(u.fieldSize.x,1.0),.001),sz=max(u.fieldFrame.w/max(u.fieldSize.y,1.0),.001);
+    let hx0=deformationAt(in.worldPos.xz-vec2<f32>(sx,0)).x,hx1=deformationAt(in.worldPos.xz+vec2<f32>(sx,0)).x;
+    let hz0=deformationAt(in.worldPos.xz-vec2<f32>(0,sz)).x,hz1=deformationAt(in.worldPos.xz+vec2<f32>(0,sz)).x;
+    let fieldNormal=normalize(vec3<f32>((hx0-hx1)/(2.0*sx),1.0,(hz0-hz1)/(2.0*sz)));
+    let influence=clamp(smoothstep(.00015,.0025,abs(deformation.x))+deformation.y*.28+deformation.z*.12,0.0,.92);
+    n=normalize(mix(n,fieldNormal,influence));
+  }
   let eye=select(f.eye.xyz,vec3<f32>(f.eye.x,.03-f.eye.y,f.eye.z),in.reflected==1u);
   let viewDir=normalize(eye-in.worldPos);
   let sunlight=f.environment.y;
@@ -401,7 +421,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let wetness=clamp(u.surface.y+u.motion.w+waterDepth/0.006+puddleMask*.5,0.0,1.0);
   albedo*=1.0-u.surface.w-wetness*.24;
 
-  var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.006,.08,1.0);
+  var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.006-deformation.y*.10+deformation.z*.07,.08,1.0);
   if(treatment>3.5&&treatment<4.5){
     // Sub-percent tonal variation keeps the flake visible only inside the
     // clearcoat highlight; it is intentionally below the level of a noisy paint texture.
@@ -698,7 +718,7 @@ export class WebGPURenderer implements Renderer{
     // The reflection plane clip uses discard. Keep it out of the main material
     // pipeline so opaque geometry can use early depth rejection on tile GPUs.
     const module=device.createShaderModule({code:materialShader()}),reflectionModule=device.createShaderModule({code:REFLECTION_LOD_SHADER}),geometryVertexBuffer={arrayStride:24,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'}]},colorVertexBuffer={arrayStride:4,attributes:[{shaderLocation:6,offset:0,format:'unorm8x4'}]},vertex={module,entryPoint:'vs',buffers:[geometryVertexBuffer,colorVertexBuffer]};
-    const objectLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'unfilterable-float'}},{binding:2,visibility:2,texture:{sampleType:'float'}},{binding:3,visibility:2,sampler:{type:'filtering'}},{binding:4,visibility:2,texture:{sampleType:'float'}},{binding:5,visibility:2,sampler:{type:'filtering'}},{binding:6,visibility:2,texture:{sampleType:'float'}},{binding:7,visibility:2,texture:{sampleType:'float'}}]});
+    const objectLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'unfilterable-float'}},{binding:2,visibility:2,texture:{sampleType:'float'}},{binding:3,visibility:2,sampler:{type:'filtering'}},{binding:4,visibility:2,texture:{sampleType:'float'}},{binding:5,visibility:2,sampler:{type:'filtering'}},{binding:6,visibility:2,texture:{sampleType:'float'}},{binding:7,visibility:2,texture:{sampleType:'float'}},{binding:8,visibility:3,texture:{sampleType:'unfilterable-float'}}]});
     const frameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
@@ -1195,7 +1215,14 @@ export class WebGPURenderer implements Renderer{
     const texture=entity.material.texture,normalReady=!!(texture?.normalUrl&&this.surfaceTextures.get(texture.normalUrl)),ormReady=!!(texture?.ormUrl&&this.surfaceTextures.get(texture.ormUrl));
     uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture?.url&&this.surfaceTextures.get(texture.url)?1:0],76);
     uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],80);
-    if(field){const pixels=new Float32Array(object.width*object.height*4);field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);this.profiler.addUpload(pixels.byteLength,'surface');}
+    if(field){
+      const pixels=new Float32Array(object.width*object.height*4),deformationPixels=new Float32Array(object.width*object.height*4);
+      field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));
+      field.deformation.cells.forEach((cell,i)=>deformationPixels.set([cell.displacementM,cell.compaction,cell.shear,cell.history],i*4));
+      this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);
+      this.device.queue.writeTexture({texture:object.deformationTexture},deformationPixels,{bytesPerRow:object.width*16},[object.width,object.height]);
+      this.profiler.addUpload(pixels.byteLength+deformationPixels.byteLength,'surface');
+    }
     this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');object.uniformReady=true;object.lastModel=new Float32Array(model);object.lastPrevModel=new Float32Array(previousModel);
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean,withColor=true):void{const mesh=this.mesh(renderPrimitive(entity)!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);if(withColor)pass.setVertexBuffer(1,mesh.color);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
@@ -1233,7 +1260,7 @@ export class WebGPURenderer implements Renderer{
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);
     if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
-    for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();this.objects.delete(id);}
+    for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}this.objects.delete(id);}
     for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id)){this.modelCache.delete(id);this.cullCache.delete(id);}
     for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.color.destroy();m.index.destroy();this.meshes.delete(key);}
     return true;
@@ -1249,14 +1276,14 @@ export class WebGPURenderer implements Renderer{
     const ormTexture=textureSpec?.ormUrl?this.surfaceTextures.get(textureSpec.ormUrl):undefined;
     const materialKey=textureSpec?[materialTexture&&textureSpec.url?textureSpec.url:'',normalTexture?textureSpec.normalUrl:'',ormTexture?textureSpec.ormUrl:''].join('|'):undefined;
     const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===label&&existing.materialKey===materialKey)return existing;
-    if(existing){existing.uniform.destroy();if(existing.owned!==false)existing.texture.destroy();}
-    const uniform=this.device.createBuffer({size:336,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
+    if(existing){existing.uniform.destroy();if(existing.owned!==false){existing.texture.destroy();existing.deformationTexture.destroy();}}
+    const uniform=this.device.createBuffer({size:336,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField,deformationTexture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
     const fallback=this.gpu.emptyLabel;
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
       {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},
       {binding:4,resource:(materialTexture??fallback).createView()},{binding:5,resource:this.gpu.surfaceSampler},
-      {binding:6,resource:(normalTexture??fallback).createView()},{binding:7,resource:(ormTexture??fallback).createView()},
-    ]}),object={uniform,bind,texture,width,height,owned:width>0,label,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
+      {binding:6,resource:(normalTexture??fallback).createView()},{binding:7,resource:(ormTexture??fallback).createView()},{binding:8,resource:deformationTexture.createView()},
+    ]}),object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
     const shared=this.renderFrame?.objectsById.get(entity.id),base=primitiveBaseScale(renderPrimitive(entity)),matrix=shared?.model??renderModel(entity);
