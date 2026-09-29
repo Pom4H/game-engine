@@ -53,7 +53,7 @@ export class DeformableSurfaceField {
     for(let iz=minZ;iz<=maxZ;iz++)for(let ix=minX;ix<=maxX;ix++){
       const cx=this.center[0]+((ix+.5)/this.nx-.5)*this.size[0],cz=this.center[1]+((iz+.5)/this.nz-.5)*this.size[1],q=Math.hypot(cx-x,cz-z)/radiusM,index=iz*this.nx+ix;
       const depressionWeight=q<1.18?Math.pow(Math.max(0,1-(q/1.18)**2),2):0;
-      const rimWeight=q>.55&&q<1.82?Math.exp(-((q-1.18)/.28)**2):0;
+      const rimWeight=q>.55&&q<1.82?Math.exp(-(((q-1.18)/.28)**2)):0;
       if(depressionWeight>0){depression.push({index,weight:depressionWeight});maxDepression=Math.max(maxDepression,depressionWeight);}
       if(rimWeight>.001){rim.push({index,weight:rimWeight});sumRim+=rimWeight;}
     }
