@@ -66,3 +66,9 @@ jobs:
           New-Item -ItemType Directory -Force $target | Out-Null
           Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png,artifacts/render-hud.json $target -Force
           Write-Host "Saved latest renders to $target"
+      - name: Emit render35 preview
+        shell: powershell
+        run: |
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/render35.png -vf "scale=960:-2" -q:v 5 artifacts/render35-preview.jpg
+          $b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("artifacts/render35-preview.jpg"))
+          Write-Host "RENDER35_PREVIEW_BASE64=$b64"
