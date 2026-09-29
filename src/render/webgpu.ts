@@ -226,15 +226,26 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let upward=smoothstep(0.05,0.82,n.y);
 
   if(u.pbr.z>.5&&u.pbr.z<1.5&&u.texture.w<.5){
+    // Meter-scale masonry with restrained mortar, per-brick variation and
+    // sub-centimetre surface breakup. The previous high-contrast normals made
+    // whole facades read like stylised blocks at medium distance.
     let horizontal=select(in.worldPos.x,in.worldPos.z,abs(n.x)>abs(n.z));
-    let row=floor(in.worldPos.y/.09);let uv=vec2<f32>(horizontal/.26+fract(row*.5),in.worldPos.y/.09);
-    let cell=fract(uv);let edge=min(cell,1.0-cell);let aa=max(fwidth(uv.x),fwidth(uv.y))*.6;let seam=1.0-smoothstep(.035-aa,.035+aa,min(edge.x,edge.y));
-    albedo*=.79+hash3(vec3<f32>(floor(uv),u.weather.z*100.0))*.27;
-    albedo=mix(albedo,vec3<f32>(.40,.39,.37),seam*.50);
+    let row=floor(in.worldPos.y/.074);
+    let uv=vec2<f32>(horizontal/.255+fract(row*.5),in.worldPos.y/.074);
+    let cell=fract(uv);let edge=min(cell,1.0-cell);
+    let aa=max(fwidth(uv.x),fwidth(uv.y))*.7;
+    let seam=1.0-smoothstep(.022-aa,.045+aa,min(edge.x,edge.y));
+    let brickId=floor(uv);
+    let brickTone=hash3(vec3<f32>(brickId,u.weather.z*100.0))-.5;
+    let weather=noise3(in.worldPos*vec3<f32>(.34,.055,.34)+seed*2.0)-.5;
+    albedo*=1.0+brickTone*.10+weather*.07;
+    albedo=mix(albedo,vec3<f32>(.34,.33,.31),seam*.32);
     let tangent=select(vec3<f32>(1,0,0),vec3<f32>(0,0,1),abs(n.x)>abs(n.z));
-    let bevel=(smoothstep(vec2<f32>(.025),vec2<f32>(.075),edge)-smoothstep(vec2<f32>(.075),vec2<f32>(.14),edge))*(vec2<f32>(1)-2.0*step(vec2<f32>(.5),cell));
-    let clay=noise3(in.worldPos*39.0);n=normalize(n+tangent*bevel.x*.20+vec3<f32>(0,bevel.y*.18,0)+tangent*(clay-.5)*.06);
-    albedo*=.93+noise3(in.worldPos*21.0)*.10;
+    let bevel=(smoothstep(vec2<f32>(.018),vec2<f32>(.055),edge)-smoothstep(vec2<f32>(.055),vec2<f32>(.11),edge))*(vec2<f32>(1)-2.0*step(vec2<f32>(.5),cell));
+    let clay=noise3(in.worldPos*52.0);
+    n=normalize(n+tangent*bevel.x*.055+vec3<f32>(0,bevel.y*.045,0)+tangent*(clay-.5)*.014);
+    let ageStreak=noise3(in.worldPos*vec3<f32>(1.1,.055,1.1)+seed*8.0);
+    albedo*=.965+ageStreak*.045;
   }
   if(materialKind>5.5&&materialKind<6.5){
     let dirty=(1.0-smoothstep(.03,.42,in.worldPos.y))*(.55+.45*noise3(in.worldPos*vec3<f32>(2.7,3.0,5.0)));let crystals=noise3(in.worldPos*22.0);
@@ -255,8 +266,12 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     albedo*=.85+noise3(in.worldPos*2.0)*.1;
   }
   if(u.pbr.z>1.5&&u.pbr.z<2.5){
-    let mineral=noise3(in.worldPos*5.0+seed);let streak=noise3(in.worldPos*vec3<f32>(3.4,.19,3.4)+seed);
-    albedo*=.87+mineral*.065+streak*.07;
+    let mineral=noise3(in.worldPos*7.5+seed)-.5;
+    let weather=noise3(in.worldPos*vec3<f32>(.75,.08,.75)+seed*3.0)-.5;
+    let fine=noise3(in.worldPos*46.0+seed*9.0)-.5;
+    albedo*=.965+mineral*.055+weather*.065+fine*.018;
+    let tangent=select(vec3<f32>(1,0,0),vec3<f32>(0,0,1),abs(n.x)>abs(n.z));
+    n=normalize(n+tangent*fine*.012);
   }
   if(u.pbr.z>4.5){
     let weave=noise3(in.worldPos*210.0);let folds=noise3(in.worldPos*vec3<f32>(17,31,19));

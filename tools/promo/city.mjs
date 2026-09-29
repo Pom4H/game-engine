@@ -72,9 +72,9 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   const cols=Math.max(3,Math.floor(width/2.4)),floors=Math.floor((height-3.2)/2.82);
   for(let floor=0;floor<floors;floor++)for(let col=0;col<cols;col++){
    const wx=x+(col-(cols-1)/2)*(width/(cols+.4)),wy=4.59+floor*2.82,w=1.12,h=1.69,wid=id+'-w'+floor+'-'+col;
-   const lit=random()<.48,glass=lit?[.53,.40,.24,1]:[.12,.16,.20,1];
+   const lit=random()<.48,glass=lit?[.30,.25,.19,1]:[.10,.14,.18,1];
    box(wid+'-recess',[wx,wy,face-sign*.045],[w+.19,h+.19,.065],[.07,.08,.08,1]);
-   box(wid+'-glass',[wx,wy,face-sign*.09],[w,h,.025],glass,{material:{pattern:'window',metalness:.12,roughness:.20,emissive:lit?[.32,.16,.048]:[0,0,0]}});
+   box(wid+'-glass',[wx,wy,face-sign*.09],[w,h,.025],glass,{material:{pattern:'window',metalness:.12,roughness:.20,emissive:lit?[.11,.052,.018]:[0,0,0]}});
    for(const side of [-1,1])box(wid+'-jamb'+side,[wx+side*(w/2+.055),wy,face-sign*.15],[.095,h+.20,.17],trim);
    box(wid+'-lintel',[wx,wy+h/2+.075,face-sign*.13],[w+.32,.13,.16],trim);
    box(wid+'-sill',[wx,wy-h/2-.055,face-sign*.24],[w+.38,.115,.39],trim);
@@ -172,7 +172,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
   box('snow-verge-'+sign,[10,.04,sign*7.25],[180,.12,1.6],C.snow,{material:{kind:'snow'}});
   for(let i=0;i<8;i++){
    const x=-57+i*17+(sign>0?3:0),height=11.6+(i%3)*2.8,width=14+(i%2)*1.2;
-   const palettes=[[.46,.265,.17,1],[.53,.49,.40,1],[.40,.45,.45,1],[.44,.25,.17,1],[.54,.46,.34,1]];
+   const palettes=[[.36,.30,.26,1],[.46,.44,.40,1],[.35,.39,.40,1],[.38,.31,.27,1],[.45,.40,.34,1]];
    building(`b${sign}-${i}`,x,sign*13.2,width,height,9.8,sign,palettes[(i+(sign>0?2:0))%5],i%3===1?'plaster':'brick');
   }
   for(let i=0;i<8;i++)lamp(`lamp${sign}-${i}`,-51+i*20,sign*5.95,kind==='courtyard');
@@ -237,7 +237,7 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  rod('clock-minute',[98.85,16.9,0],[98.85,16.9,.74],.037);rod('clock-hour',[98.84,16.9,0],[98.84,16.56,-.42],.05);
  box('cross-street',[91,-.075,0],[9,.15,50],[.16,.17,.18,1],{material:{kind:'asphalt',roughness:.68},environmental:{surfaceUse:'road',snowDepthM:.015,iceDepthM:.0008}});
  const snowTexture={url:'/assets/snow-granular.png',sizeM:1.2,bumpStrength:.4,albedoStrength:.45};for(const e of entities){if(e.material?.kind==='snow')e.material.texture=snowTexture;if(e.environmental?.snowDepthM)e.environmental.snowMaterial={texture:snowTexture};}
- for(const e of entities)if(e.material?.pattern==='brick'){e.material.texture={url:'/assets/brick-weathered.png',sizeM:1.55,bumpStrength:.40,albedoStrength:1};e.material.color=[.88,.82,.76,1];}
+ for(const e of entities)if(e.material?.pattern==='brick'){e.material.color=[.78,.72,.66,1];}
  const spec={version:1,seed:20260920,ground:-100,environment:{temperatureC:-6,humidity:.76,groundMoisture:.36,precipitation:'rare',snowfall:'moderate',sunlight:.24,wind:[.7,0,.2],clock:{startHour:17.3,hoursPerSecond:0}},rendering:{sunDirection:[-.65,.32,-.5],sunColor:[.70,.79,1],sunIntensity:1.8,skyColor:[.19,.24,.32],fogDensity:.0045,exposure:1.12,shadowExtent:35},camera:{position:[-29,1.45,5.8],target:[-2,2.6,-2.5],fov:47},entities};
  if(kind==='courtyard'){spec.environment.sunlight=.12;spec.environment.snowfall='moderate';spec.rendering={sunDirection:[-.4,.5,-.3],sunColor:[.48,.63,1],sunIntensity:.70,skyColor:[.14,.20,.29],fogDensity:.006,exposure:1.10,shadowExtent:35};}
  spec.animation={walkers:[pedestrianAnimation()],vehicles:[{id:'passing',velocity:[CAR.speed,0,0],parts:motions.map(({id,origin,wheel,radius})=>({id,origin,wheel,radius}))}]};
