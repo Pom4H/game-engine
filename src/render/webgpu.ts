@@ -368,7 +368,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let wetness=clamp(u.surface.y+u.motion.w+waterDepth/0.006+puddleMask*.5,0.0,1.0);
   albedo*=1.0-u.surface.w-wetness*.24;
 
-  var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.018,.08,1.0);
+  var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.006,.08,1.0);
   if(treatment>3.5&&treatment<4.5){
     // Sub-percent tonal variation keeps the flake visible only inside the
     // clearcoat highlight; it is intentionally below the level of a noisy paint texture.
@@ -384,7 +384,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let peelY=noise3((in.worldPos+vec3<f32>(0,.006,0))*92.0)-peel;
     let peelZ=noise3((in.worldPos+vec3<f32>(0,0,.006))*92.0)-peel;
     let peelGrad=vec3<f32>(peelX,peelY,peelZ);
-    n=normalize(n+(peelGrad-n*dot(peelGrad,n))*.035);
+    n=normalize(n+(peelGrad-n*dot(peelGrad,n))*.006);
   }
   let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
   roughness=clamp(sqrt(roughness*roughness+min(.06,normalVariance*.04)),.08,1.0);
@@ -454,9 +454,9 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let sideReflection=smoothstep(.30,.82,abs(n.z));
   // Parallax correction fixes placement; roughness still needs a wider probe
   // footprint so painted panels do not read like a magnifying mirror.
-  let paintProbeScale=select(1.0,.58,automotivePaint);
+  let paintProbeScale=select(1.0,.42,automotivePaint);
   let localProbeWeight=f.params.y*(1.0-smoothstep(.035,.28,roughness))*.68*mix(1.0,1.16,sideReflection)*paintProbeScale;
-  let localProbeLod=roughness*f32(textureNumLevels(localProbeMap)-1u)*.72;
+  let localProbeLod=roughness*f32(textureNumLevels(localProbeMap)-1u)*select(.72,.95,automotivePaint);
   var localProbe=fallbackEnvironment;
   let glassLike=materialKind>.5&&materialKind<1.5;
   if(f.params.y>.5&&(localProbeWeight>.001||clearcoat>0.0||glassLike)){
@@ -481,7 +481,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(environmentMap)-1u)).rgb;
     if(f.params.y>.5){
       let coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),coatRough*f32(textureNumLevels(localProbeMap)-1u)).rgb;
-      let coatProbeWeight=f.params.y*select(1.0,.62,automotivePaint);
+      let coatProbeWeight=f.params.y*select(1.0,.48,automotivePaint);
       coatEnvironment=mix(coatEnvironment,coatLocal,coatProbeWeight);
     }
     // Same split-sum BRDF fit as the base, evaluated at the coat roughness.
