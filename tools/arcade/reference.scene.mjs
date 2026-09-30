@@ -9,7 +9,7 @@ const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap(
 const additions=[];
 const warmGlass={kind:'default',color:[.16,.145,.125,.20],metalness:.02,roughness:.10,emissive:[.30,.25,.20]};
 const darkWood={kind:'default',color:[.075,.045,.03,1],roughness:.72,ageYears:80,texture:materialMap('wood',.55,.58)};
-const agedWall={kind:'default',color:[.22,.205,.185,1],roughness:.98,ageYears:125,texture:materialMap('plaster',.40,.98)};
+const agedWall={kind:'default',color:[.245,.235,.215,1],roughness:.985,ageYears:135,texture:materialMap('plaster',.34,1.0)};
 
 const start=-2.5,bay=3.55,count=9,r=bay/2+.025,rise=1.12;
 for(let i=0;i<count;i++){
@@ -28,23 +28,32 @@ const entities=authoredEntities.filter(e=>
 ).map(e=>{
  if(e.id==='upper-building')return {...e,material:agedWall};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
- if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
+ if(/^shop-\d+-upper-glass/.test(e.id)){
+   const m=e.id.match(/^shop-(\d+)-/),i=Number(m?.[1]??0),on=[.06,.18,.04,.12,.05,.16,.03,.09,.02][i]??.04;
+   return {...e,material:{...warmGlass,emissive:[on,on*.78,on*.55]}};
+ }
  if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
- if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.40,.35,.29,.30],emissive:[.014,.007,.0025],roughness:.99}};
- if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.14,.125,.105,1],emissive:[.035,.030,.025]}};
- if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.82,.68],intensity:4.8,range:4.2}};
- if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
+ if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.60,.59,.56,.42],emissive:[.012,.011,.010],roughness:.995}};
+ if(/^shop-\d+-room-back/.test(e.id)){
+   const m=e.id.match(/^shop-(\d+)-/),i=Number(m?.[1]??0),on=[.08,.16,.28,.12,.24,.10,.18,.08,.05][i]??.08;
+   return {...e,material:{...e.material,color:[.11,.105,.095,1],emissive:[on,on*.84,on*.68]}};
+ }
+ if(/^shop-\d+-inside-light/.test(e.id)){
+   const m=e.id.match(/^shop-(\d+)-/),i=Number(m?.[1]??0),level=[.5,.9,1.6,.7,1.3,.6,1.0,.45,.25][i]??.5;
+   return {...e,light:{...e.light,color:[1,.86,.76],intensity:level,range:3.4}};
+ }
+ if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.30,.29,.265,1],roughness:.98,emissive:[.004,.004,.003]}};
  if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.88,.74],intensity:30,range:10.5}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.92,.80,1],emissive:[14,11,8]}};
  if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.0025,snowDepthM:.030,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
  if(!light)return e;
- const lit=Number(light[1])<2?.08:1;
+ const lit=[.08,.18,.55,.32,.48,.22,.36,.15,.08][Number(light[1])]??.18;
  const color=[1,.80,.66];
  return {...e,position:[e.position[0],3.06,-3.50],mesh:{kind:'sphere',radius:.045,segments:16},
-   material:{kind:'default',color:[1,.84,.72,1],roughness:.5,emissive:color.map(v=>v*3.5*lit)},
-   light:{...e.light,color,intensity:6.2*lit,range:4.8}};
+   material:{kind:'default',color:[1,.90,.82,1],roughness:.55,emissive:color.map(v=>v*2.2*lit)},
+   light:{...e.light,color,intensity:4.4*lit,range:4.2}};
 });
 // The practical has two causal scales: a compact photometric lamp and a
 // low-intensity wide source that only supplies the broad snow/fog bounce seen
@@ -227,6 +236,15 @@ for(const [i,x] of [-22,-10].entries()){
  }
 }
 
+// Long-lived winter grime and accumulated ledges break the CG-clean facade.
+for(let i=0;i<count;i++){
+ const x=-(start+bay*(i+.5));
+ box(`facade-sill-snow-${i}`,[x,4.48,-.35],[1.48,.045,.28],snow);
+ for(const sx of [-.75,.15,.92]){
+   box(`facade-streak-${i}-${sx}`,[x+sx,5.72,-.338],[.025,2.50,.018],
+     {kind:'default',color:[.085,.082,.078,.72],roughness:1});
+ }
+}
 const finalEntities=[...entities,...additions].filter(e=>!/^(window-bounce|awning-face-fill|interior-lamp-light)/.test(e.id));
 export const authoredEntityCount=buildingEntityCount+finalEntities.length;
 export default {...base,
