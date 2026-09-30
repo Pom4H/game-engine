@@ -3,7 +3,7 @@
 import base,{authoredEntityCount as buildingEntityCount} from './scene.mjs';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
-const canvas={kind:'default',color:[.31,.235,.17,1],roughness:.91,ageYears:65,emissive:[.018,.011,.006],texture:materialMap('plaster',.85,.72)};
+const canvas={kind:'default',color:[.31,.235,.17,1],roughness:.91,ageYears:65,emissive:[.065,.036,.018],texture:materialMap('plaster',.85,.72)};
 const snow={kind:'snow',color:[.80,.81,.80,1],roughness:.94,texture:materialMap('snow',.42,.35)};
 const additions=[];
 const start=-2.5,bay=3.55,count=9,r=bay/2+.025,rise=1.12;
@@ -12,7 +12,7 @@ for(let i=0;i<count;i++){
  const points=Array.from({length:65},(_,j)=>{const a=j/64*Math.PI;return[r*Math.cos(a),rise*Math.sin(a)];});
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
-const entities=base.entities.map(e=>{
+const entities=base.entities.filter(e=>!/^chimney-0(?:$|-)/.test(e.id)&&e.id!=='distant-building').map(e=>{
  if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.72,.43],intensity:58,range:18}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.78,.48,1],emissive:[24,13,5]}};
  if(e.id==='street-base')return {...e,material:{...e.material,color:[.055,.058,.06,1],roughness:.24},environmental:{surfaceUse:'road',waterDepthM:.0035,snowDepthM:.014,iceDepthM:.0004}};
