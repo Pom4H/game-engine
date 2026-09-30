@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,resolveEnvironmentAt,material,validateScene} from '../dist/index.js';
+import {FixedClock,SpatialHash,EngineKernel,Scene,encodeScene,decodeScene,renderAudio,fracturePlate,deriveSurfaceState,resolveEnvironment,resolveEnvironmentAt,environmentHistorySteps,material,validateScene} from '../dist/index.js';
 
 test('fixed clock keeps delayed time as bounded debt',()=>{
   const clock=new FixedClock(10,100,4);let steps=0;clock.reset(0);
@@ -161,6 +161,48 @@ test('weather timeline moves from freezing night to thawing day',()=>{
   assert.equal(night.temperatureC,-10);assert.equal(night.snowfall,'heavy');assert.equal(night.sunlight,0);
   assert.ok(Math.abs(morning.temperatureC)<1e-6);assert.equal(morning.snowfall,'moderate');assert.ok(morning.sunlight>.1);
   assert.ok(day.temperatureC>3.9);assert.equal(day.snowfall,'none');assert.ok(day.sunlight>.8);
+});
+
+test('finite weather history integrates before t=0 with adaptive phase steps',()=>{
+  const environment={
+    temperatureC:-3,snowfall:'none',clock:{startHour:12,hoursPerSecond:0},
+    history:[
+      {hoursAgo:48,temperatureC:-10,snowfall:'moderate',sunlight:.05},
+      {hoursAgo:45,snowfall:'none'},
+      {hoursAgo:10,temperatureC:.8,sunlight:.55},
+      {hoursAgo:6,temperatureC:-6,sunlight:.03},
+    ],
+  };
+  const steps=environmentHistorySteps(environment);
+  assert.ok(steps.length>20);
+  assert.ok(steps.some(step=>step.durationSeconds===600),'snowfall/freeze-thaw intervals should refine to ten-minute steps');
+  assert.ok(Math.abs(steps.reduce((sum,step)=>sum+step.durationSeconds,0)-48*3600)<1e-6);
+  assert.ok(steps[0].hoursAgo>steps.at(-1).hoursAgo);
+  assert.throws(()=>validateScene({version:1,environment:{history:[{hoursAgo:24},{hoursAgo:24}]},entities:[]}),/duplicated/);
+});
+
+test('weather history emerges as layered snowpack rather than authored snow type',()=>{
+  const scene=new Scene({
+    version:1,ground:-100,
+    environment:{
+      temperatureC:-3,snowfall:'none',sunlight:.15,humidity:.72,clock:{startHour:8,hoursPerSecond:0},
+      history:[
+        {hoursAgo:36,temperatureC:-9,snowfall:'moderate',sunlight:.04,wind:[2.5,0,.4]},
+        {hoursAgo:33.5,snowfall:'none',temperatureC:-7},
+        {hoursAgo:12,temperatureC:.65,sunlight:.42},
+        {hoursAgo:8,temperatureC:-7,sunlight:.02},
+        {hoursAgo:3,temperatureC:-8,snowfall:'light',wind:[1.2,0,.2]},
+        {hoursAgo:1.5,snowfall:'none'},
+      ],
+    },
+    entities:[{id:'snow-ground',position:[0,-.05,0],mesh:{kind:'box',size:[6,.1,4]},material:{kind:'concrete'},environmental:{surfaceUse:'sidewalk'}}],
+  });
+  const pack=scene.surfaces.surface('snow-ground').snowpack;
+  assert.ok(pack.layers.length>=2,`expected old+fresh layers, got ${JSON.stringify(pack)}`);
+  assert.ok(pack.freshness>.35,'recent snowfall should remain optically fresh');
+  assert.ok(pack.grainSizeMm>.2,'older layer metamorphism should increase aggregate grain size');
+  assert.ok(pack.crust>0,'thaw followed by refreeze should leave a measurable crust signal');
+  assert.ok(['fresh-dry','wind-packed','settled','compacted','wet','slush','crust','granular','dirty-road'].includes(pack.classification));
 });
 
 test('snow and meltwater initialize as slush before the first simulation tick',()=>{
