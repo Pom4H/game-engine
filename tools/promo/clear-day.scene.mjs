@@ -82,9 +82,9 @@ spec.entities=spec.entities.filter(entity=>{
 });
 spec.entities.push(
   {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.043,.045,.048,1],roughness:.78},environmental:{surfaceUse:'road',snowDepthM:0,iceDepthM:0,waterDepthM:0}},
-  {id:'hero-bank-near',position:[-13,.18,-4.18],mesh:{kind:'snowdrift',size:[62,.48,1.08],seed:4617,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
-  {id:'hero-bank-far',position:[-13,.18,4.12],mesh:{kind:'snowdrift',size:[62,.56,1.22],seed:9121,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
 );
+// No authored hero snowbanks: the curb/sidewalk snow geometry now comes only
+// from the prewarmed weather history and the general surface visual system.
 for(const entity of spec.entities){
   if(entity.id.startsWith('passing-contact')&&entity.body){
     entity.position=[entity.position[0]-4.2,entity.position[1],entity.position[2]];
