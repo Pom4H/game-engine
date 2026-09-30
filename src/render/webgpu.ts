@@ -389,7 +389,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   // screen-space micro-normal derivative, avoiding the smooth plaster look of
   // large snow banks without adding geometry or scene-specific knowledge.
   if(materialKind>5.5&&materialKind<6.5){
-    let macroScale=mix(7.2,3.0,snowGrain),grainScale=mix(118.0,24.0,snowGrain);
+    let macroScale=mix(7.2,3.0,snowGrain);let grainScale=mix(118.0,24.0,snowGrain);
     let snowMacro=noise3(in.worldPos*macroScale+seed*7.1);
     let snowCrystal=noise3(in.worldPos*grainScale+seed*19.7);
     let wetDarken=1.0-snowLiquid*.18-snowCrust*.045;
