@@ -56,5 +56,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $tag = 'snowy-arcade-' + $env:GITHUB_SHA.Substring(0,7)
-          node tools/publish-release.mjs $tag artifacts/snowy-arcade.png artifacts/snowy-arcade-motion.png artifacts/arcade-preview.jpg artifacts/arcade-evidence.json artifacts/unit-tests.log
+          node tools/arcade/publish.mjs $tag
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
