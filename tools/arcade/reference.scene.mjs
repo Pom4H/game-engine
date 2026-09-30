@@ -3,8 +3,8 @@
 import base,{authoredEntityCount as buildingEntityCount} from './scene.mjs';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
-const canvas={kind:'default',color:[.145,.105,.075,1],roughness:.93,ageYears:75,texture:materialMap('plaster',.68,.82)};
-const snow={kind:'snow',color:[.80,.81,.80,1],roughness:.94,texture:materialMap('snow',.42,.35)};
+const canvas={kind:'default',color:[.22,.16,.115,1],roughness:.94,ageYears:75,texture:materialMap('plaster',.62,.88)};
+const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap('snow',.34,.42)};
 const additions=[];
 const warmGlass={kind:'default',color:[.22,.15,.09,.22],metalness:.02,roughness:.12,emissive:[.52,.29,.12]};
 const darkWood={kind:'default',color:[.075,.045,.03,1],roughness:.72,ageYears:80,texture:materialMap('wood',.55,.58)};
@@ -37,6 +37,11 @@ const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-
    material:{kind:'default',color:[1,.84,.72,1],roughness:.5,emissive:color.map(v=>v*3.5*lit)},
    light:{...e.light,color,intensity:8.5*lit,range:4.6}};
 });
+// The practical has two causal scales: a compact photometric lamp and a
+// low-intensity wide source that only supplies the broad snow/fog bounce seen
+// around real street lamps. Both remain ordinary point lights.
+additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:5.8,range:15.5}});
+
 // One physical snowpack, one engine-owned surface projection. The previous
 // independent microrelief sheet could overlap the snow and disagree with it.
 additions.push({
@@ -97,6 +102,6 @@ for(let i=0;i<24;i++){
 
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
- environment:{...base.environment,snowfall:'heavy',humidity:.94,wind:[.46,0,.14]},
- rendering:{...base.rendering,skyColor:[.024,.028,.034],fogDensity:.012,sunIntensity:.25,exposure:1.08},
+ environment:{...base.environment,snowfall:'moderate',humidity:.93,wind:[.38,0,.12]},
+ rendering:{...base.rendering,skyColor:[.024,.029,.038],fogDensity:.0115,sunDirection:[-.34,.72,-.49],sunColor:[.48,.58,.72],sunIntensity:.36,exposure:1.10},
  entities:[...entities,...additions]};
