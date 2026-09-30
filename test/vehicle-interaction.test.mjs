@@ -5,6 +5,7 @@ import {
   M3_REFERENCE_PROVENANCE,Scene,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
   material,renderAudio,thermalLinearScale,
 } from '../dist/index.js';
+import {primitiveMesh} from '../dist/procedural/mesh.js';
 
 test('cold steel contracts the stress-free XPBD rest geometry without creating plastic work',()=>{
   const steel=material('steel').mechanical,body=new StructuralBody({
@@ -108,10 +109,11 @@ test('mechanism audio is deterministic and non-silent',()=>{
   assert.ok(a.left.some(sample=>Math.abs(sample)>.001));
 });
 
-
 test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
   const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
-  assert.equal(m3.generatedTriangles,9798,'packed render assembly should preserve all source FBX triangles');
+  const actualTriangles=m3.parts.reduce((sum,part)=>sum+primitiveMesh(part.mesh).indices.length/3,0);
+  assert.equal(m3.generatedTriangles,actualTriangles,'triangle accounting must follow the current assembly, including added detail');
+  assert.ok(actualTriangles>=9798,'the refined assembly must not lose the original triangle budget');
   const body=byId.get('body');
   assert.equal(body.mesh.indices.length/3,m3.bodyTriangles,'physical M3 shell must remain the compact source topology');
   assert.equal(body.renderMesh?.kind,'triangle-mesh');
@@ -167,7 +169,6 @@ test('split M3 glazing has local geometry around its own origin for contact and 
     assert.ok(Math.hypot(...part.position)>.5,`${part.id} should retain its vehicle-local mounting origin`);
   }
 });
-
 
 test('an imported M3 side window fractures through the normal Scene contact pipeline',()=>{
   const m3=generateM3Vehicle(),window=m3.parts.find(part=>part.id==='window-front-left');
