@@ -248,7 +248,11 @@ export class Scene {
       if(state.use!=='curb'&&state.use!=='sidewalk')continue;
       const count=Math.max(1,Math.min(256,Math.ceil(longSize/6)));
       for(let i=0;i<count;i++){
-        const key=`${surfaceId}:${i}`,height=Math.round(Math.min(1.45,state.snowDepthM*(state.use==='curb'?4.2:1.25))*50)/50;
+        // Weather integration already concentrates deposition on curbs/sidewalks.
+        // Geometry must represent that physical depth, not multiply the drift a
+        // second time (the old 4.2x curb factor produced metre-high snow walls).
+        const driftProfile=state.use==='curb'?1.55:1.12;
+        const key=`${surfaceId}:${i}`,height=Math.round(Math.min(.90,state.snowDepthM*driftProfile)*50)/50;
         if(height<.02)continue;keep.add(key);
         const longitudinal=longSize/count,cross=state.use==='curb'?Math.max(.7,crossSize*4.8):crossSize;
         const position:MutableVec3=[...source.position];position[longAxis]+=-longSize/2+(i+.5)*longSize/count;position[1]=state.use==='curb'?source.position[1]-dimensions[1]/2+.003:top-.015;
