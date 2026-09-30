@@ -1,6 +1,14 @@
 name: CI
 
 on:
+  push:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'bun.lock'
+      - 'tsconfig*.json'
+      - '.github/workflows/ci.yml'
   pull_request:
     paths:
       - 'src/**'
