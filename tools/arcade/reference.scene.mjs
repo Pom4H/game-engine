@@ -40,7 +40,7 @@ const entities=base.entities.filter(e=>!/^batch:(roof-seam|roof-snow-seam|dormer
 // The practical has two causal scales: a compact photometric lamp and a
 // low-intensity wide source that only supplies the broad snow/fog bounce seen
 // around real street lamps. Both remain ordinary point lights.
-additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:5.8,range:15.5}});
+additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:8.4,range:18.0}});
 
 // One physical snowpack, one engine-owned surface projection. The previous
 // independent microrelief sheet could overlap the snow and disagree with it.
@@ -100,9 +100,36 @@ for(let i=0;i<24;i++){
 
 // Wind-blown foreground clumps break the pavement into wet and packed-snow
 // regions without hiding the reflections.
-for(let i=0;i<42;i++){
+for(let i=0;i<68;i++){
  const t=(i*37%101)/101,z=-5.2-(i*53%89)/89*8.6,x=-18+t*43;
- additions.push({id:`road-scatter-${i}`,position:[x,-.002,z],mesh:{kind:'snowdrift',size:[.42+(i%5)*.10,.035+(i%3)*.014,.32+(i%4)*.08],seed:14000+i*83,segments:14},material:snow});
+ additions.push({id:`road-scatter-${i}`,position:[x,-.002,z],mesh:{kind:'snowdrift',size:[.48+(i%5)*.12,.045+(i%3)*.018,.36+(i%4)*.10],seed:14000+i*83,segments:14},material:snow});
+}
+
+
+// Continuous snow shells over the arched canopies. Unlike the old beads these
+// preserve the canopy silhouette and add low-frequency accumulation depth.
+for(let i=0;i<count;i++){
+ const cx=-(start+bay*(i+.5)),positions=[],normals=[],indices=[],nu=52,nv=12;
+ for(let v=0;v<=nv;v++)for(let u=0;u<=nu;u++){
+   const fu=u/nu,fv=v/nv,a=(.035+fu*.93)*Math.PI;
+   const lump=.018*Math.sin(fu*10.5+i*.7)+.010*Math.sin(fu*27.0+fv*5.0+i);
+   const front=.018*Math.exp(-fv*7.0)*(1+.5*Math.sin(fu*19.0+i));
+   const h=.070+lump+front;
+   const cs=Math.cos(a),sn=Math.sin(a);
+   positions.push(cx+cs*(r+h),3.19+sn*(rise+h*.72),-2.92+fv*2.78);
+   const l=Math.hypot(cs,sn)||1;normals.push(cs/l,sn/l,.05);
+   if(u<nu&&v<nv){const q=v*(nu+1)+u,b=q+nu+1;indices.push(q,b,q+1,q+1,b,b+1);}
+ }
+ additions.push({id:`awning-snow-shell-${i}`,position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:snow});
+}
+// Interior practicals create small pools of warm light and depth behind glass.
+for(let i=0;i<6;i++){
+ const x=-(start+bay*(i+.5));
+ for(let k=0;k<2;k++){
+   const px=x+(k?-.52:.52),py=1.45+k*.34,pz=.48;
+   sphere(`interior-lamp-bulb-${i}-${k}`,[px,py,pz],.045,{kind:'default',color:[1,.72,.42,1],roughness:.4,emissive:[4.5,2.2,.7]});
+   additions.push({id:`interior-lamp-light-${i}-${k}`,position:[px,py,pz],light:{kind:'point',color:[1,.60,.32],intensity:1.35,range:2.4}});
+ }
 }
 
 // Wetness/reflections remain properties of the actual road surface, not rectangular cards.
@@ -158,5 +185,5 @@ for(const [i,x] of [].entries()){
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.97,wind:[.28,0,.10]},
- rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.017,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.26,exposure:1.14},
+ rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.018,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.31,exposure:1.14},
  entities:[...entities,...additions]};
