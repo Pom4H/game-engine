@@ -40,7 +40,7 @@ const entities=base.entities.filter(e=>!/^batch:(roof-seam|roof-snow-seam|dormer
 // The practical has two causal scales: a compact photometric lamp and a
 // low-intensity wide source that only supplies the broad snow/fog bounce seen
 // around real street lamps. Both remain ordinary point lights.
-additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:11.5,range:20.0}});
+additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:16.0,range:10.5}});
 
 // One physical snowpack, one engine-owned surface projection. The previous
 // independent microrelief sheet could overlap the snow and disagree with it.
@@ -134,6 +134,14 @@ for(let i=0;i<7;i++){
  }
 }
 
+
+// A weak front-facing practical per bay reveals the aged canvas texture without
+// flattening the facade. It approximates light spilling from the pendant below.
+for(let i=0;i<8;i++){
+ const x=-(start+bay*(i+.5));
+ additions.push({id:`awning-face-fill-${i}`,position:[x,3.55,-3.45],light:{kind:'point',color:[1,.58,.32],intensity:1.45,range:2.7}});
+}
+
 // Continuous snow shells over the arched canopies. Unlike the old beads these
 // preserve the canopy silhouette and add low-frequency accumulation depth.
 for(let i=0;i<count;i++){
@@ -142,7 +150,7 @@ for(let i=0;i<count;i++){
    const fu=u/nu,fv=v/nv,a=(.035+fu*.93)*Math.PI;
    const lump=.018*Math.sin(fu*10.5+i*.7)+.010*Math.sin(fu*27.0+fv*5.0+i);
    const front=.018*Math.exp(-fv*7.0)*(1+.5*Math.sin(fu*19.0+i));
-   const h=.070+lump+front;
+   const h=.085+lump*1.20+front*1.35;
    const cs=Math.cos(a),sn=Math.sin(a);
    positions.push(cx+cs*(r+h),3.19+sn*(rise+h*.72),-2.92+fv*2.78);
    const l=Math.hypot(cs,sn)||1;normals.push(cs/l,sn/l,.05);
@@ -213,5 +221,5 @@ for(const [i,x] of [].entries()){
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.97,wind:[.28,0,.10]},
- rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.018,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.46,exposure:1.12},
+ rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.019,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.46,exposure:1.12},
  entities:[...entities,...additions]};
