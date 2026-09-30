@@ -114,7 +114,7 @@ for(let b=0;b<count;b++){
  surface(id+'-canopy-lining',[x,3.19,0],72,10,(u,v)=>[(r-.055)*Math.cos(u*Math.PI),(ry-.055)*Math.sin(u*Math.PI),-2.83+v*2.85],{...P.wood,color:[.18,.13,.09,1]},true);
  surface(id+'-canopy-snow',[x,3.19,0],96,24,(u,v)=>{
   const a=(.035+u*.93)*Math.PI;
-  const h=.042+.024*Math.sin(u*43+v*7)*Math.sin(v*35+u*13)+.018*Math.sin(u*111+v*80);
+  const broad=.016*Math.sin(u*11.7+v*2.8)+.010*Math.sin(u*27.3-v*7.1)+.006*Math.cos(v*15.6+u*5.2);\n  const lip=Math.exp(-v*10.0)*(.020+.018*(.5+.5*Math.sin(u*23.0+1.7)));\n  const h=.058+broad+lip;
   return[(r+h)*Math.cos(a),(ry+h)*Math.sin(a),-2.86+v*2.87];
  },P.snow);
  const archFace=Array.from({length:65},(_,i)=>{const a=i/64*Math.PI;return[r*Math.cos(a),ry*Math.sin(a)];});
