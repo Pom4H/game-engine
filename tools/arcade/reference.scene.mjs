@@ -3,12 +3,12 @@
 import base,{authoredEntityCount as buildingEntityCount} from './scene.mjs';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
-const canvas={kind:'default',color:[.18,.12,.082,1],roughness:.96,ageYears:88,texture:materialMap('plaster',.46,.98)};
+const canvas={kind:'default',color:[.30,.205,.135,1],roughness:.88,ageYears:88,texture:materialMap('plaster',.42,1.0)};
 const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap('snow',.34,.42)};
 const additions=[];
 const warmGlass={kind:'default',color:[.22,.15,.09,.22],metalness:.02,roughness:.12,emissive:[.52,.29,.12]};
 const darkWood={kind:'default',color:[.075,.045,.03,1],roughness:.72,ageYears:80,texture:materialMap('wood',.55,.58)};
-const agedWall={kind:'default',color:[.32,.285,.235,1],roughness:.98,ageYears:110,texture:materialMap('plaster',.52,.94)};
+const agedWall={kind:'default',color:[.39,.34,.275,1],roughness:.97,ageYears:110,texture:materialMap('plaster',.46,.98)};
 
 const start=-2.5,bay=3.55,count=9,r=bay/2+.025,rise=1.12;
 for(let i=0;i<count;i++){
@@ -21,13 +21,13 @@ const entities=base.entities.filter(e=>!/^batch:(roof-seam|roof-snow-seam|dormer
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
  if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
- if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.42,.37,.31,.48],emissive:[.018,.009,.003],roughness:.99}};
+ if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.40,.35,.29,.30],emissive:[.014,.007,.0025],roughness:.99}};
  if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.115,.073,.045,1],emissive:[.055,.025,.008]}};
  if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.64,.36],intensity:6.2,range:4.5}};
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
  if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.58,.28],intensity:36,range:9.8}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
- if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.008,snowDepthM:.012,iceDepthM:.0005}};
+ if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.012,snowDepthM:.012,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
  if(!light)return e;
@@ -35,7 +35,7 @@ const entities=base.entities.filter(e=>!/^batch:(roof-seam|roof-snow-seam|dormer
  const color=[1,.72,.46];
  return {...e,position:[e.position[0],3.06,-3.50],mesh:{kind:'sphere',radius:.045,segments:16},
    material:{kind:'default',color:[1,.84,.72,1],roughness:.5,emissive:color.map(v=>v*3.5*lit)},
-   light:{...e.light,color,intensity:8.5*lit,range:4.6}};
+   light:{...e.light,color,intensity:10.5*lit,range:5.1}};
 });
 // The practical has two causal scales: a compact photometric lamp and a
 // low-intensity wide source that only supplies the broad snow/fog bounce seen
@@ -185,5 +185,5 @@ for(const [i,x] of [].entries()){
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.97,wind:[.28,0,.10]},
- rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.018,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.31,exposure:1.14},
+ rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.018,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.46,exposure:1.12},
  entities:[...entities,...additions]};
