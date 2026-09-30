@@ -3,12 +3,12 @@
 import base,{authoredEntityCount as buildingEntityCount} from './scene.mjs';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
-const canvas={kind:'default',color:[.23,.17,.12,1],roughness:.94,ageYears:75,emissive:[.018,.010,.005],texture:materialMap('plaster',.58,.92)};
+const canvas={kind:'default',color:[.18,.12,.082,1],roughness:.96,ageYears:88,texture:materialMap('plaster',.46,.98)};
 const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap('snow',.34,.42)};
 const additions=[];
 const warmGlass={kind:'default',color:[.22,.15,.09,.22],metalness:.02,roughness:.12,emissive:[.52,.29,.12]};
 const darkWood={kind:'default',color:[.075,.045,.03,1],roughness:.72,ageYears:80,texture:materialMap('wood',.55,.58)};
-const agedWall={kind:'default',color:[.27,.225,.18,1],roughness:.97,ageYears:95,texture:materialMap('plaster',.62,.82)};
+const agedWall={kind:'default',color:[.32,.285,.235,1],roughness:.98,ageYears:110,texture:materialMap('plaster',.52,.94)};
 
 const start=-2.5,bay=3.55,count=9,r=bay/2+.025,rise=1.12;
 for(let i=0;i<count;i++){
@@ -21,11 +21,11 @@ const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
  if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
- if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.50,.45,.38,.64],emissive:[.030,.014,.005],roughness:.98}};
- if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.16,.105,.07,1],emissive:[.035,.016,.006]}};
- if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.67,.40],intensity:4.6,range:4.0}};
+ if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.42,.37,.31,.48],emissive:[.018,.009,.003],roughness:.99}};
+ if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.115,.073,.045,1],emissive:[.055,.025,.008]}};
+ if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.64,.36],intensity:6.2,range:4.5}};
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
- if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.61,.32],intensity:42,range:8.5}};
+ if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.58,.28],intensity:36,range:9.8}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
  if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.008,snowDepthM:.012,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
@@ -157,6 +157,6 @@ for(const [i,x] of [].entries()){
 
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
- environment:{...base.environment,snowfall:'moderate',humidity:.93,wind:[.38,0,.12]},
- rendering:{...base.rendering,skyColor:[.032,.037,.047],fogDensity:.014,sunDirection:[-.34,.72,-.49],sunColor:[.48,.58,.72],sunIntensity:.42,exposure:1.16},
+ environment:{...base.environment,snowfall:'moderate',humidity:.97,wind:[.28,0,.10]},
+ rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.017,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.26,exposure:1.14},
  entities:[...entities,...additions]};
