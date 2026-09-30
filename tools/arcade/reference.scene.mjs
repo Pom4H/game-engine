@@ -36,7 +36,7 @@ const entities=authoredEntities.filter(e=>
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
  if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.58,.28],intensity:36,range:9.8}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
- if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.012,snowDepthM:.012,iceDepthM:.0005}};
+ if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.020,snowDepthM:.010,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
  if(!light)return e;
@@ -49,7 +49,7 @@ const entities=authoredEntities.filter(e=>
 // The practical has two causal scales: a compact photometric lamp and a
 // low-intensity wide source that only supplies the broad snow/fog bounce seen
 // around real street lamps. Both remain ordinary point lights.
-additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:16.0,range:10.5}});
+additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:10.5,range:12.5}});
 
 // One physical snowpack, one engine-owned surface projection. The previous
 // independent microrelief sheet could overlap the snow and disagree with it.
@@ -120,7 +120,7 @@ for(let i=0;i<104;i++){
 // lights placed at the actual windows, not screen-space glow cards.
 for(let i=0;i<7;i++){
  const x=-(start+bay*(i+.5));
- additions.push({id:`window-bounce-${i}`,position:[x,.42,-1.35],light:{kind:'point',color:[1,.53,.28],intensity:2.2,range:3.8}});
+ additions.push({id:`window-bounce-${i}`,position:[x,.42,-1.35],light:{kind:'point',color:[1,.53,.28],intensity:3.1,range:5.0}});
 }
 // Architectural depth around the upper windows: lintels, pilaster caps and
 // recessed panels catch the cold directional light and stop the facade reading
@@ -148,7 +148,7 @@ for(let i=0;i<7;i++){
 // flattening the facade. It approximates light spilling from the pendant below.
 for(let i=0;i<8;i++){
  const x=-(start+bay*(i+.5));
- additions.push({id:`awning-face-fill-${i}`,position:[x,3.55,-3.45],light:{kind:'point',color:[1,.58,.32],intensity:1.45,range:2.7}});
+ additions.push({id:`awning-face-fill-${i}`,position:[x,3.55,-3.45],light:{kind:'point',color:[1,.58,.32],intensity:.72,range:2.7}});
 }
 
 // Continuous snow shells over the arched canopies. Unlike the old beads these
@@ -159,7 +159,7 @@ for(let i=0;i<count;i++){
    const fu=u/nu,fv=v/nv,a=(.035+fu*.93)*Math.PI;
    const lump=.018*Math.sin(fu*10.5+i*.7)+.010*Math.sin(fu*27.0+fv*5.0+i);
    const front=.018*Math.exp(-fv*7.0)*(1+.5*Math.sin(fu*19.0+i));
-   const h=.085+lump*1.20+front*1.35;
+   const h=.125+lump*1.65+front*1.75;
    const cs=Math.cos(a),sn=Math.sin(a);
    positions.push(cx+cs*(r+h),3.19+sn*(rise+h*.72),-2.92+fv*2.78);
    const l=Math.hypot(cs,sn)||1;normals.push(cs/l,sn/l,.05);
@@ -184,7 +184,7 @@ for(let i=0;i<6;i++){
 // front/rear surfaces could cross the hero camera near-plane and create the
 // giant black wedge visible in previous captures.
 {
- const x0=-29.55,x1=-.85,zEave=-.18,zRidge=2.15,yEave=7.82,yRidge=10.35;
+ const x0=-29.55,x1=2.55,zEave=-.18,zRidge=2.15,yEave=7.82,yRidge=10.35;
  const positions=[x0,yEave,zEave,x1,yEave,zEave,x1,yRidge,zRidge,x0,yRidge,zRidge];
  const dx=x1-x0,dy=yRidge-yEave,dz=zRidge-zEave;
  const nx=0,ny=-dz,nz=dy,l=Math.hypot(ny,nz),n=[nx,ny/l,nz/l];
@@ -216,7 +216,7 @@ for(const [i,x] of [-22,-10].entries()){
 // Replace the malformed original rear roof with a single coherent mansard back
 // plane. It shares the building axis and cannot cross the camera near plane.
 {
- const x0=-29.55,x1=-.85,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
+ const x0=-29.55,x1=2.55,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
  const positions=[x0,y0,z0,x1,y0,z0,x1,y1,z1,x0,y1,z1];
  const n=[0,.88,.47],normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
  additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
@@ -230,5 +230,5 @@ for(const [i,x] of [-22,-10].entries()){
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.97,wind:[.28,0,.10]},
- rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.019,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.46,exposure:1.12},
+ rendering:{...base.rendering,skyColor:[.018,.022,.030],fogDensity:.0155,sunDirection:[-.28,.76,-.46],sunColor:[.44,.54,.70],sunIntensity:.72,exposure:1.08},
  entities:batchStaticScenery([...entities,...additions],()=>true,9)};
