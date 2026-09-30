@@ -1,3 +1,5 @@
+import {LIGHT_GRID_WGSL} from './light-grid.js';
+import {FOG_WGSL} from './fog.js';
 /** Camera/exposure controls and lighting are independent of simulation cadence. */
 export const FRAME_WGSL=`
 struct Frame {
