@@ -1163,6 +1163,28 @@ export class WebGPURenderer implements Renderer{
     const radiance=buildSceneRadianceProbe(scene,origin,128);
     const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
     const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
+    // Diffuse IBL must integrate the whole incident hemisphere. Sampling one
+    // high cubemap mip along the surface normal loses bright ground/snow bounce
+    // on vertical panels and makes coated objects unnaturally dark. Project the
+    // same synthetic world-radiance representation into irradiance SH whenever
+    // that cached representation changes; this stays off the per-frame hot path.
+    const sampleSynthetic=(dir:Vec3):readonly[number,number,number]=>{
+      const up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
+      const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
+      const t=Math.sqrt(up);let base:[number,number,number]=down>0?[mix(horizon[0],ground[0],down),mix(horizon[1],ground[1],down),mix(horizon[2],ground[2],down)]:[mix(horizon[0],zenith[0],t),mix(horizon[1],zenith[1],t),mix(horizon[2],zenith[2],t)];
+      const horizontal=Math.pow(Math.max(0,1-Math.abs(dir[1])),3),urbanMix=horizontal*.28;
+      base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
+      let pr=0,pg=0,pb=0,total=0;
+      for(const proxy of proxies){
+        const alignment=V3.dot(dir,proxy.dir);if(alignment<=proxy.threshold)continue;
+        const q=(alignment-proxy.threshold)/Math.max(1e-5,1-proxy.threshold),weight=Math.pow(q,5.5)*proxy.strength;
+        pr+=proxy.color[0]*weight;pg+=proxy.color[1]*weight;pb+=proxy.color[2]*weight;total+=weight;
+      }
+      if(total>.001){const amount=Math.min(.86,total/(.58+total));base=[mix(base[0],pr/total,amount),mix(base[1],pg/total,amount),mix(base[2],pb/total,amount)];}
+      const sunDot=Math.max(0,dir[0]*sun[0]+dir[1]*sun[1]+dir[2]*sun[2]),sunLobe=Math.pow(sunDot,900)*intensity;
+      return[base[0]+sunColor[0]*sunLobe,base[1]+sunColor[1]*sunLobe,base[2]+sunColor[2]*sunLobe];
+    };
+    this.environmentIrradiance.set(buildDiffuseIrradianceSH(sampleSynthetic,512));
     this.environmentKey=causeKey;this.environmentUpdates++;
     const levels=9;
     for(let mip=0;mip<levels;mip++){
