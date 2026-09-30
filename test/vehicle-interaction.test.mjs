@@ -3,9 +3,8 @@ import assert from 'node:assert/strict';
 import {
   DoorHinge,ElasticPlasticPanelResponse,FourCornerSuspension,M3InteractionRig,
   M3_REFERENCE_PROVENANCE,Scene,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
-  material,renderAudio,thermalLinearScale,
+  m3FbxParts,material,renderAudio,thermalLinearScale,
 } from '../dist/index.js';
-import {primitiveMesh} from '../dist/procedural/mesh.js';
 
 test('cold steel contracts the stress-free XPBD rest geometry without creating plastic work',()=>{
   const steel=material('steel').mechanical,body=new StructuralBody({
@@ -109,11 +108,22 @@ test('mechanism audio is deterministic and non-silent',()=>{
   assert.ok(a.left.some(sample=>Math.abs(sample)>.001));
 });
 
+
 test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
   const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
-  const actualTriangles=m3.parts.reduce((sum,part)=>sum+primitiveMesh(part.mesh).indices.length/3,0);
-  assert.equal(m3.generatedTriangles,actualTriangles,'triangle accounting must follow the current assembly, including added detail');
-  assert.ok(actualTriangles>=9798,'the refined assembly must not lose the original triangle budget');
+  const sources=m3FbxParts();
+  // Provenance describes the source file; assembly accounting describes decoded
+  // part instances. Check the actual source meshes rather than equating these
+  // two different counts or replacing the old magic number with another one.
+  assert.equal(M3_REFERENCE_PROVENANCE.highFidelity.sourceTriangles,9798);
+  assert.equal(byId.size,m3.parts.length,'assembly part IDs must be unique');
+  for(const source of sources){
+    const part=byId.get(source.id);
+    assert.ok(part,`missing decoded FBX part ${source.id}`);
+    assert.deepEqual(part.mesh,source.mesh,`assembly must not substitute ${source.id}`);
+    assert.deepEqual(part.position,source.center,`assembly must preserve ${source.id} mounting`);
+  }
+  assert.equal(m3.generatedTriangles,m3.bodyTriangles+sources.reduce((sum,p)=>sum+p.mesh.indices.length/3,0),'count every decoded FBX part instance');
   const body=byId.get('body');
   assert.equal(body.mesh.indices.length/3,m3.bodyTriangles,'physical M3 shell must remain the compact source topology');
   assert.equal(body.renderMesh?.kind,'triangle-mesh');
@@ -129,8 +139,8 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
     assert.equal(byId.has('interior-'+id),false,`interior-${id} must not be an opaque coplanar duplicate of glazing`);
   }
   const grilleInlays=m3.parts.filter(part=>part.id.startsWith('grille-inlay-'));
-  assert.equal(grilleInlays.length,12,'two FBX kidney openings should receive six recessed vertical inlays each');
-  assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40),'grille inlays must stay within the source fascia envelope');
+  assert.equal(grilleInlays.length,22,'two FBX kidney openings receive eleven horizontal inlays each');
+  assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40&&part.mesh.size[2]>part.mesh.size[1]),'horizontal grille inlays must stay within the source fascia envelope');
 
   assert.equal(byId.get('body').material.kind,'steel');
   const heroPaint=m3PartMaterial(byId.get('body'),[.2,.2,.2,1],false);
@@ -169,6 +179,7 @@ test('split M3 glazing has local geometry around its own origin for contact and 
     assert.ok(Math.hypot(...part.position)>.5,`${part.id} should retain its vehicle-local mounting origin`);
   }
 });
+
 
 test('an imported M3 side window fractures through the normal Scene contact pipeline',()=>{
   const m3=generateM3Vehicle(),window=m3.parts.find(part=>part.id==='window-front-left');
