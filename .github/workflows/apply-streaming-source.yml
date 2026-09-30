@@ -7,20 +7,18 @@ permissions:
   contents: write
 concurrency:
   group: apply-reviewed-streaming-source
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   apply:
     if: github.repository == 'Pom4H/game-engine' && github.ref == 'refs/heads/product/unified-engine'
-    runs-on: self-hosted
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 2
       - name: Verify exact source payload, apply scoped edits and remove transfer helpers
-        shell: powershell
+        shell: bash
         run: |
-          @'
+          node <<'NODE'
           const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),zlib=require('node:zlib'),{execFileSync}=require('node:child_process');
           const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
           if(process.env.GITHUB_REF!=='refs/heads/product/unified-engine')throw Error('Wrong branch');
@@ -52,6 +50,4 @@ jobs:
           git('commit','-m','perf(thegame): prepared mesh streaming, bounded GPU uploads and whole-run frame health');
           git('push','origin','HEAD:refs/heads/product/unified-engine');
           console.log('SOURCE_COMMIT '+git('rev-parse','HEAD'));console.log(git('show','--stat','--oneline','HEAD'));
-          '@ | Set-Content -Encoding utf8 .git/apply-streaming.cjs
-          node .git/apply-streaming.cjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          NODE
