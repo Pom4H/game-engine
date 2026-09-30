@@ -135,7 +135,7 @@ for(let i=0;i<5;i++){
  additions.push({id:`hero-dormer-gable-${i}`,position:[x,10.45,.31],mesh:{kind:'polygon-prism',axis:2,points:pts,thickness:1.34},material:{kind:'default',color:[.050,.055,.060,1],metalness:.18,roughness:.80}});
  additions.push({id:`hero-dormer-snow-${i}`,position:[x,10.53,.12],mesh:{kind:'snowdrift',size:[1.76,.055,.66],seed:41000+i*131,segments:18},material:snow});
 }
-for(const [i,x] of [-22,-10].entries()){
+for(const [i,x] of [].entries()){
  box(`hero-chimney-${i}`,[x,11.25,3.7],[.72,1.86,.76],{kind:'default',color:[.085,.072,.062,1],roughness:.95,texture:materialMap('stone',.62,.50)});
  box(`hero-chimney-cap-${i}`,[x,12.20,3.7],[.94,.14,.98],{kind:'concrete',color:[.14,.13,.12,1],roughness:.94});
  additions.push({id:`hero-chimney-snow-${i}`,position:[x,12.30,3.7],mesh:{kind:'snowdrift',size:[1.0,.06,1.04],seed:43000+i*173,segments:16},material:snow});
