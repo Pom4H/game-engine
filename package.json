@@ -20,12 +20,10 @@
     "./games/chess": "./dist/games/chess.js",
     "./games/chess/project": "./dist/games/chess-project.js",
     "./games/car-ball/project": "./dist/games/car-ball-project.js",
+    "./games/thegame/project": "./dist/games/thegame/project.js",
     "./trace": "./dist/core/runtime-timeline.js"
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -41,14 +39,11 @@
     "docs:qa": "node tools/docs/qa.mjs",
     "arena": "node tools/arena.mjs",
     "cli": "bun tools/engine.mjs",
-    "product:qa": "node tools/product/qa.mjs"
+    "product:qa": "node tools/product/qa.mjs",
+    "thegame": "bun tools/thegame/server.mjs",
+    "thegame:qa": "node tools/thegame/qa.mjs"
   },
-  "devDependencies": {
-    "@types/node": "^24.0.0",
-    "typescript": "^7.0.2"
-  },
-  "engines": {
-    "node": ">=22"
-  },
+  "devDependencies": {"@types/node": "^24.0.0", "typescript": "^7.0.2"},
+  "engines": {"node": ">=22"},
   "packageManager": "bun@1.4.2"
 }

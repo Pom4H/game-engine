@@ -42,6 +42,8 @@ jobs:
           if (-not $chrome) {throw "Native Chrome is required"}
           "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Real game and two-way product acceptance
-        env:
-          PRODUCT_PREVIEW: '1'
         run: node tools/product/qa.mjs
+      - name: Two native clients in the open world with real delayed network relay
+        env:
+          THEGAME_PREVIEW: '1'
+        run: node tools/thegame/qa.mjs

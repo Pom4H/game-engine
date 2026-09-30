@@ -1,8 +1,8 @@
 /* Killable authoring worker; not a hostile-code sandbox. Network access is denied by CSP.
  * Analyze does not execute source. Only an explicit Apply sends a compile request. */
 importScripts('./vendor/typescript.js','./compile.cjs','./bindings.cjs');
-const modules={chess:['@rom4/game-engine/games/chess/project','../engine/games/chess-project.js','chess'],arena:['@rom4/game-engine/games/car-ball/project','../engine/games/car-ball-project.js','car-ball']};
-const metadata={fen:{label:'Исходная позиция · FEN',shape:'text',maxLength:120},historyLimit:{label:'Лимит ходов в истории',shape:'number',min:1,max:16384,step:1},gravity:{label:'Гравитация',shape:'number',min:1,max:30,step:.1,unit:'м/с²'},matchSeconds:{label:'Длительность матча',shape:'number',min:10,max:300,step:1,unit:'с'},kickoffSeconds:{label:'Подготовка старта',shape:'number',min:0,max:10,step:.1,unit:'с'}};
+const modules={thegame:['@rom4/game-engine/games/thegame/project','../engine/games/thegame/project.js','thegame'],chess:['@rom4/game-engine/games/chess/project','../engine/games/chess-project.js','chess'],arena:['@rom4/game-engine/games/car-ball/project','../engine/games/car-ball-project.js','car-ball']};
+const metadata={seed:{label:'Seed общего мира',shape:'number',min:0,max:4294967295,step:1},walkSpeed:{label:'Ходьба',shape:'number',min:1,max:8,step:.05},runSpeed:{label:'Бег',shape:'number',min:1,max:12,step:.1},jumpSpeed:{label:'Прыжок',shape:'number',min:2,max:10,step:.1},viewRadius:{label:'Радиус чанков',shape:'number',min:1,max:4,step:1},exposure:{label:'Экспозиция',shape:'number',min:.5,max:2,step:.05},fen:{label:'Исходная позиция · FEN',shape:'text',maxLength:120},historyLimit:{label:'Лимит ходов в истории',shape:'number',min:1,max:16384,step:1},gravity:{label:'Гравитация',shape:'number',min:1,max:30,step:.1,unit:'м/с²'},matchSeconds:{label:'Длительность матча',shape:'number',min:10,max:300,step:1,unit:'с'},kickoffSeconds:{label:'Подготовка старта',shape:'number',min:0,max:10,step:.1,unit:'с'}};
 self.onmessage=async({data})=>{
  try{
   if(typeof data.source!=='string'||data.source.length>64000)throw Error('Максимум 64 000 символов');
