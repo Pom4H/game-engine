@@ -3,7 +3,7 @@
 import base,{authoredEntityCount as buildingEntityCount} from './scene.mjs';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
-const canvas={kind:'default',color:[.22,.16,.115,1],roughness:.94,ageYears:75,texture:materialMap('plaster',.62,.88)};
+const canvas={kind:'default',color:[.23,.17,.12,1],roughness:.94,ageYears:75,emissive:[.018,.010,.005],texture:materialMap('plaster',.58,.92)};
 const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap('snow',.34,.42)};
 const additions=[];
 const warmGlass={kind:'default',color:[.22,.15,.09,.22],metalness:.02,roughness:.12,emissive:[.52,.29,.12]};
@@ -21,13 +21,13 @@ const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
  if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
- if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.52,.47,.40,.78],emissive:[.040,.020,.008],roughness:.98}};
+ if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.50,.45,.38,.64],emissive:[.030,.014,.005],roughness:.98}};
  if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.16,.105,.07,1],emissive:[.035,.016,.006]}};
  if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.67,.40],intensity:4.6,range:4.0}};
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
  if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.61,.32],intensity:42,range:8.5}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
- if(e.id==='street-base')return {...e,material:{...e.material,color:[.038,.041,.044,1],roughness:.18},environmental:{surfaceUse:'road',waterDepthM:.0045,snowDepthM:.008,iceDepthM:.0005}};
+ if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.006,snowDepthM:.008,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
  if(!light)return e;
@@ -106,6 +106,21 @@ for(let i=0;i<42;i++){
 }
 
 // Wetness/reflections remain properties of the actual road surface, not rectangular cards.
+
+
+// Replace the malformed original rear roof with a single coherent mansard back
+// plane. It shares the building axis and cannot cross the camera near plane.
+{
+ const x0=-29.55,x1=2.65,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
+ const positions=[x0,y0,z0,x1,y0,z0,x1,y1,z1,x0,y1,z1];
+ const n=[0,.88,.47],normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
+ additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
+ // broken snow bands catch cold moonlight without making a white roof sheet
+ for(let i=0;i<11;i++){
+   const x=-27+i*2.8;
+   additions.push({id:`roof-snow-patch-${i}`,position:[x,9.95-(i%3)*.10,2.55+(i%3)*.30],mesh:{kind:'snowdrift',size:[2.6,.055,.72],seed:22000+i*111,segments:18},material:snow});
+ }
+}
 
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
