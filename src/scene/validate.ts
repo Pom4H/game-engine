@@ -58,6 +58,21 @@ export function validateScene(value:unknown):SceneSpec{
         if(frame.wind!==undefined){if(!Array.isArray(frame.wind))throw new TypeError(`environment.weather[${index}].wind must be a vec3`);finiteVec3(frame.wind as number[],`environment.weather[${index}].wind`);}
       }
     }
+    if(environment.history!==undefined){
+      if(!Array.isArray(environment.history)||environment.history.length>512)throw new TypeError('environment.history must be an array of at most 512 entries');
+      const hours=new Set<number>();
+      for(const [index,raw] of environment.history.entries()){
+        if(!raw||typeof raw!=='object')throw new TypeError(`environment.history[${index}] must be an object`);
+        const frame=raw as Record<string,unknown>,path=`environment.history[${index}]`;
+        if(typeof frame.hoursAgo!=='number'||!Number.isFinite(frame.hoursAgo)||frame.hoursAgo<=0||frame.hoursAgo>8760)throw new TypeError(`${path}.hoursAgo must be within (0,8760]`);
+        if(hours.has(frame.hoursAgo))throw new TypeError(`${path}.hoursAgo is duplicated`);hours.add(frame.hoursAgo);
+        if(frame.temperatureC!==undefined&&(typeof frame.temperatureC!=='number'||!Number.isFinite(frame.temperatureC)))throw new TypeError(`${path}.temperatureC must be finite`);
+        for(const key of ['sunlight','humidity','groundMoisture'])if(frame[key]!==undefined&&(typeof frame[key]!=='number'||!Number.isFinite(frame[key])||Number(frame[key])<0||Number(frame[key])>1))throw new TypeError(`${path}.${key} must be within 0..1`);
+        if(frame.precipitation!==undefined&&!['arid','rare','occasional','frequent'].includes(String(frame.precipitation)))throw new TypeError(`${path}.precipitation is unknown`);
+        if(frame.snowfall!==undefined&&!['none','light','moderate','heavy'].includes(String(frame.snowfall)))throw new TypeError(`${path}.snowfall is unknown`);
+        if(frame.wind!==undefined){if(!Array.isArray(frame.wind))throw new TypeError(`${path}.wind must be a vec3`);finiteVec3(frame.wind as number[],`${path}.wind`);}
+      }
+    }
   }
   if(scene.camera!==undefined){
     const camera=object(scene.camera,'camera');optionalNumber(camera,'fov','camera',1,179);optionalNumber(camera,'focusDistance','camera',.05);optionalNumber(camera,'aperture','camera',0,20);
