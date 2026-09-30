@@ -11,8 +11,8 @@ concurrency:
 jobs:
   apply:
     if: github.repository == 'Pom4H/game-engine' && github.ref == 'refs/heads/product/unified-engine'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - name: Verify exact source payload, apply scoped edits and remove transfer helpers
@@ -51,3 +51,51 @@ jobs:
           git('push','origin','HEAD:refs/heads/product/unified-engine');
           console.log('SOURCE_COMMIT '+git('rev-parse','HEAD'));console.log(git('show','--stat','--oneline','HEAD'));
           NODE
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install and compile the committed integration source
+        shell: cmd
+        run: bun install --frozen-lockfile && npm install --prefix tools/docs --ignore-scripts --no-audit --no-fund && bun run typecheck && bun run build
+      - name: Complete engine and editor regressions
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force artifacts/product | Out-Null
+          cmd /c "node --test --test-reporter=tap test/*.test.mjs test/dsl-playground.mjs > artifacts/product/tests.log 2>&1"
+          $result = $LASTEXITCODE
+          Get-Content artifacts/product/tests.log -Tail 18
+          Select-String -Path artifacts/product/tests.log -Pattern '^not ok' -Context 0,30 | ForEach-Object { $_.Line; $_.Context.PostContext }
+          exit $result
+      - name: Build product and locate native Chrome
+        shell: powershell
+        run: |
+          node tools/docs/build.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $chrome=@("$env:ProgramFiles\Google\Chrome\Application\chrome.exe","${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe","$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe") | Where-Object {Test-Path $_} | Select-Object -First 1
+          if (-not $chrome) {throw 'Native Chrome required'}
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Existing games and source editor acceptance
+        shell: powershell
+        run: |
+          cmd /c "node tools/product/qa.mjs > artifacts/product/browser.log 2>&1"
+          $result=$LASTEXITCODE
+          Get-Content artifacts/product/browser.log -Head 24
+          if ($result -ne 0) {Get-Content artifacts/product/browser.log -Tail 60}
+          exit $result
+      - name: Real two-client traversal, whole-run 60 Hz budgets and rendered evidence
+        shell: cmd
+        env:
+          THEGAME_PREVIEW: '1'
+        run: node tools/thegame/qa.mjs
+      - name: Preserve compact evidence when artifact storage is available
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: thegame-streaming-evidence
+          retention-days: 1
+          if-no-files-found: ignore
+          path: |
+            artifacts/thegame/*.json
+            artifacts/thegame/*.png
+            artifacts/product/tests.log
