@@ -1,6 +1,7 @@
 import {spawnSync} from 'node:child_process';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {brotliCompressSync,constants} from 'node:zlib';
 import assert from 'node:assert/strict';
 import scene,{authoredEntityCount,quality} from './scene.mjs';
 import {prepareArcadeTextures} from './textures.mjs';
@@ -34,15 +35,20 @@ for(const view of hud.views){
 const evidence={commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,runner:process.env.RUNNER_NAME,authoredEntityCount,batchedEntities:scene.entities.length,sourceTriangles,appliedQuality:{native:[width,height],warmupFrames:hud.warmupFrames},hud};
 await writeFile('artifacts/arcade-evidence.json',JSON.stringify(evidence,null,2));
 run('ffmpeg',['-y','-hide_banner','-loglevel','error','-i','artifacts/snowy-arcade.png','-vf','scale=1280:-2:flags=lanczos','-q:v','3','artifacts/arcade-preview.jpg']);
-// The inline thumbnail has a bounded transport budget. Original PNG and the
-// 1280px high-quality preview remain unchanged private release assets.
+// Bound only the inline thumbnail. Native PNG and high-quality release JPEG
+// are preserved independently; chunk hashes detect errors in log transport.
 let thumbnail;
 for(const quantizer of [8,12,18,24,31]){
  run('ffmpeg',['-y','-hide_banner','-loglevel','error','-i','artifacts/snowy-arcade.png','-vf','scale=640:-2:flags=lanczos','-q:v',String(quantizer),'artifacts/arcade-inspection.jpg']);
  thumbnail=await readFile('artifacts/arcade-inspection.jpg');
  if(thumbnail.byteLength<=12000)break;
 }
-console.log('ARCADE_PREVIEW_JPEG='+thumbnail.toString('base64'));
-console.log('ARCADE_PREVIEW_SHA256='+createHash('sha256').update(thumbnail).digest('hex'));
+const digest=(value)=>createHash('sha256').update(value).digest('hex');
+const transport=brotliCompressSync(thumbnail,{params:{[constants.BROTLI_PARAM_QUALITY]:9}}).toString('base64');
+for(let offset=0;offset<transport.length;offset+=512){
+ const chunk=transport.slice(offset,offset+512);
+ console.log('REVIEW_CHUNK='+JSON.stringify({index:offset/512,hash:digest(chunk).slice(0,8),data:chunk}));
+}
+console.log('REVIEW_IMAGE='+JSON.stringify({encoding:'brotli-base64',mime:'image/jpeg',bytes:thumbnail.byteLength,sha256:digest(thumbnail)}));
 const r=hud.views[0].renderer;
 console.log('ARCADE_EVIDENCE='+JSON.stringify({...evidence,hud:undefined,adapter:hud.adapter,renderer:{backend:r.backend,width:r.width,height:r.height,drawCalls:r.drawCalls,triangles:r.triangles,errors:r.errors,pointLights:r.pointLights,materialTextures:r.materialTextures,lightOverflow:r.lightOverflow,reflectionProbe:r.reflectionProbe},profile:{cpu:r.profile?.cpuTotal,gpu:r.profile?.gpuTotal,snowInstances:r.profile?.latestGpu?.work?.snowInstances}}));
