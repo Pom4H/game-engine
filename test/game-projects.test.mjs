@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFile,mkdtemp,rm,writeFile} from 'node:fs/promises';import {createRequire} from 'node:module';import {execFileSync} from 'node:child_process';import {tmpdir} from 'node:os';import {join} from 'node:path';import {Worker} from 'node:worker_threads';
 import * as chess from '../dist/games/chess-project.js';import * as arena from '../dist/games/car-ball-project.js';import {CarBallArena} from '../dist/examples/car-ball.js';
-const require=createRequire(import.meta.url),ts=require('typescript'),{compileSource}=require('../tools/shared/compile.cjs'),bindings=require('../tools/shared/bindings.cjs');
+const require=createRequire(import.meta.url),ts=createRequire(new URL('../tools/docs/package.json',import.meta.url))('typescript'),{compileSource}=require('../tools/shared/compile.cjs'),bindings=require('../tools/shared/bindings.cjs');
 const compile=(source,api,name)=>compileSource(ts,{...api,validateProgram:p=>p.check()},source,name);
 test('both authored projects compile through the SAME source compiler and exact public imports',async()=>{
  for(const [game,api,name] of [['chess',chess,'chess'],['car-ball',arena,'car-ball']]){const source=await readFile(new URL('../examples/'+game+'/project.ts',import.meta.url),'utf8'),p=compile(source,api,'@rom4/game-engine/games/'+name+'/project');assert.equal(p.check().modules.length,1);const runtime=p.start();assert.ok(runtime.inspect().length);runtime.dispose();}
