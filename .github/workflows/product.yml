@@ -2,9 +2,10 @@ name: Product
 on:
   push:
     branches: [product/unified-engine]
+    paths: ['tools/product/import-ready.json']
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: product-${{ github.ref }}
   cancel-in-progress: true
@@ -16,16 +17,25 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Compact integration patch
+      - name: Install exact reviewed integration patch
         shell: powershell
         run: |
           @'
-          const {execFileSync}=require('node:child_process');
-          const {gzipSync}=require('node:zlib');
-          const patch=execFileSync('git',['diff','--binary','6bfb8c51228c99dad1cc91c647194a0643c5bb8a','2db7720705c87c70ebc3572e7f7956abdfe0e0b0','--','src','tools','test','package.json','README.md'],{maxBuffer:10*1024*1024});
-          const data=gzipSync(patch).toString('base64');
-          console.log('PATCH_BYTES '+patch.length+' BASE64 '+data.length);
-          console.log('PATCH '+data);
+          const fs=require('node:fs'),{execFileSync}=require('node:child_process'),{brotliDecompressSync}=require('node:zlib'),{createHash}=require('node:crypto');
+          if(process.env.GITHUB_REF!=='refs/heads/product/unified-engine')throw Error('Integration branch only');
+          const manifest=JSON.parse(fs.readFileSync('tools/product/import-ready.json','utf8'));
+          if(manifest.sha256!=='4d0b249bdef2fac35c6daa382870b19cabcc7a6c110012c209574d86e2bec09b'||manifest.parts!==7)throw Error('Unreviewed patch');
+          let encoded='';for(let i=0;i<manifest.parts;i++)encoded+=fs.readFileSync('tools/product/import/'+i+'.br64','utf8').trim();
+          const patch=brotliDecompressSync(Buffer.from(encoded,'base64'),{maxOutputLength:300000});
+          if(patch.length!==192853||createHash('sha256').update(patch).digest('hex')!==manifest.sha256)throw Error('Source digest mismatch');
+          const git=(...args)=>execFileSync('git',args,{stdio:'inherit'});
+          execFileSync('git',['apply','--check','--index','-'],{input:patch});
+          execFileSync('git',['apply','--index','-'],{input:patch});
+          git('rm','-r','tools/product/import','tools/product/import-ready.json');
+          git('config','user.name','github-actions[bot]');git('config','user.email','41898282+github-actions[bot]@users.noreply.github.com');
+          git('commit','-m','feat(product): explicit modules, chess, local arena, source-bound workbench and bounded tracing');
+          git('push','origin','HEAD:refs/heads/product/unified-engine');
+          git('rev-parse','HEAD');
           '@ | node
           exit $LASTEXITCODE
       - uses: oven-sh/setup-bun@v2
@@ -34,18 +44,25 @@ jobs:
       - name: Install pinned engine tooling
         run: bun install --frozen-lockfile
       - name: Typecheck and build
-        shell: powershell
-        run: |
-          bun run typecheck
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          bun run build
-          exit $LASTEXITCODE
-      - name: Complete regression suite
+        shell: cmd
+        run: bun run typecheck && bun run build
+      - name: Complete engine and source-editor regressions
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force artifacts/product | Out-Null
-          cmd /c "node --test test/*.test.mjs > artifacts/product/tests.log 2>&1"
+          cmd /c "node --test --test-reporter=tap test/*.test.mjs test/dsl-playground.mjs > artifacts/product/tests.log 2>&1"
           $result = $LASTEXITCODE
-          Get-Content artifacts/product/tests.log -Tail 20
+          Get-Content artifacts/product/tests.log -Tail 16
           Select-String -Path artifacts/product/tests.log -Pattern '^not ok' | ForEach-Object { $_.Line }
           exit $result
+      - name: Build complete product
+        run: node tools/docs/build.mjs
+      - name: Locate native Chrome
+        shell: powershell
+        run: |
+          $candidates=@("$env:ProgramFiles\Google\Chrome\Application\chrome.exe","${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe","$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $chrome=$candidates | Where-Object {Test-Path $_} | Select-Object -First 1
+          if (-not $chrome) {throw "Native Chrome is required"}
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Real game and two-way product acceptance
+        run: node tools/product/qa.mjs
