@@ -78,6 +78,8 @@ export class Scene {
   private generatedSequence=0;
   private surfaceVisualSequence=0;
   private readonly surfaceVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
+  /** Render projections keep a stable link to the authoritative physical surface. */
+  private readonly surfaceVisualSources=new Map<string,string>();
   private renderMoverRevision=-1;
   private renderMovers:ReadonlySet<string>=new Set<string>();
 
@@ -152,10 +154,15 @@ export class Scene {
     // Only exact owned objects are removed; an authored replacement under a
     // formerly generated ID must survive source deletion and weather cleanup.
     for(const [key,visual] of this.surfaceVisuals){
-      if(visual.source===id){this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
-      else if(visual.entity.id===id)this.surfaceVisuals.delete(key);
+      if(visual.source===id){this.surfaceVisuals.delete(key);this.surfaceVisualSources.delete(visual.entity.id);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
+      else if(visual.entity.id===id){this.surfaceVisuals.delete(key);this.surfaceVisualSources.delete(visual.entity.id);}
     }
     this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
+  }
+  /** Physical state projected onto an authored surface or one of its generated visuals. */
+  surfaceStateForRender(entityId:string){
+    const source=this.surfaceVisualSources.get(entityId)??entityId;
+    return this.surfaces.surface(source);
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,tier:SimulationTier='detailed'):void{
@@ -272,11 +279,11 @@ export class Scene {
           1,
         ],snowRoughness=Math.max(.42,Math.min(.97,.94-pack.freshness*.02-wet*.28-crust*.24+aged*.025));
         const entity=this.add({id:id!,position,rotation:longAxis===0?[0,0,0]:[0,-Math.PI/2,0],mesh:{kind:'snowdrift',size,seed,continuous:true,offset:position[longAxis]},material:{color:snowColor,roughness:snowRoughness,...source.environmental?.snowMaterial,kind:'snow'}});
-        this.surfaceVisuals.set(key,{source:surfaceId,entity});
+        this.surfaceVisuals.set(key,{source:surfaceId,entity});this.surfaceVisualSources.set(entity.id,surfaceId);
       }
     }
     for(const [key,visual] of this.surfaceVisuals)if(!keep.has(key)){
-      this.surfaceVisuals.delete(key);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);
+      this.surfaceVisuals.delete(key);this.surfaceVisualSources.delete(visual.entity.id);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);
     }
   }
 
