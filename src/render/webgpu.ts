@@ -43,6 +43,7 @@ struct U {
   emission:vec4<f32>,
   texture:vec4<f32>, // size metres, bump amount, albedo blend, enabled
   detail:vec4<f32>,  // normal strength, normal enabled, ORM strength, ORM enabled
+  snowpack:vec4<f32>, // freshness, liquid fraction, crust, normalized grain size
 }
 @group(0) @binding(0) var<uniform> u: U;
 @group(0) @binding(1) var fieldTexture: texture_2d<f32>;
@@ -250,6 +251,11 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let paintMicro=select(0.0,hash3(floor(in.worldPos*420.0))-.5,treatment>3.5&&treatment<4.5&&materialKind>1.5&&materialKind<2.5);
   let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
   let upward=smoothstep(0.05,0.82,n.y);
+  let snowHistory=max(max(u.snowpack.x,u.snowpack.y),max(u.snowpack.z,u.snowpack.w));
+  let snowFresh=select(.45,u.snowpack.x,snowHistory>.0001);
+  let snowLiquid=select(.03,u.snowpack.y,snowHistory>.0001);
+  let snowCrust=select(.02,u.snowpack.z,snowHistory>.0001);
+  let snowGrain=select(.20,u.snowpack.w,snowHistory>.0001);
 
   if(u.pbr.z>.5&&u.pbr.z<1.5&&u.texture.w<.5){
     // Meter-scale masonry with restrained mortar, per-brick variation and
@@ -369,8 +375,13 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     if(surfaceUse>.5 && surfaceUse<1.5){snowMask*=1.0-track*.96;}
     if(surfaceUse>2.5 && surfaceUse<3.5){snowMask=clamp(snowMask+snowBase*.38,0.0,1.0);}
     let slushColor=mix(vec3<f32>(0.48,0.5,0.5),vec3<f32>(0.22,0.19,0.16),clamp(u.weather.x+u.motion.z,0.0,1.0));
+    let settledColor=mix(vec3<f32>(.82,.875,.92),vec3<f32>(.95,.975,1.0),snowFresh);
+    settledColor=mix(settledColor,vec3<f32>(.64,.67,.69),snowLiquid*.62);
+    settledColor=mix(settledColor,vec3<f32>(.78,.85,.91),snowCrust*.38);
+    let historyPatch=fbm(in.worldPos*mix(7.0,2.2,snowGrain)+seed*13.0)-.5;
+    settledColor*=1.0+historyPatch*mix(.045,.11,snowGrain)*(1.0-snowLiquid*.45);
     albedo=mix(albedo,slushColor,snowMask*slush*.52);
-    albedo=mix(albedo,vec3<f32>(0.89,0.93,0.97),snowMask*(1.0-slush*.55));
+    albedo=mix(albedo,settledColor,snowMask*(1.0-slush*.55));
   }
 
   // Bulk snow needs scale separation even when no authored texture is present.
@@ -378,12 +389,15 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   // screen-space micro-normal derivative, avoiding the smooth plaster look of
   // large snow banks without adding geometry or scene-specific knowledge.
   if(materialKind>5.5&&materialKind<6.5){
-    let snowMacro=noise3(in.worldPos*5.2+seed*7.1);
-    let snowGrain=noise3(in.worldPos*82.0+seed*19.7);
-    albedo*=.91+snowMacro*.085+snowGrain*.035;
+    let macroScale=mix(7.2,3.0,snowGrain),grainScale=mix(118.0,24.0,snowGrain);
+    let snowMacro=noise3(in.worldPos*macroScale+seed*7.1);
+    let snowCrystal=noise3(in.worldPos*grainScale+seed*19.7);
+    let wetDarken=1.0-snowLiquid*.18-snowCrust*.045;
+    albedo*=wetDarken*(.91+snowMacro*.085+snowCrystal*mix(.045,.018,snowLiquid));
     let tx=normalize(dpdx(in.worldPos)+vec3<f32>(.000001,0,0));
     let ty=normalize(dpdy(in.worldPos)+vec3<f32>(0,.000001,0));
-    n=normalize(n+(tx*dpdx(snowGrain)+ty*dpdy(snowGrain))*.24);
+    let relief=mix(.34,.075,clamp(snowLiquid*.72+snowCrust*.58,0.0,1.0))*mix(.72,1.18,snowFresh);
+    n=normalize(n+(tx*dpdx(snowCrystal)+ty*dpdy(snowCrystal))*relief);
   }
 
   // Moving bodies accumulate fresh snow on upward and rear-facing surfaces.
@@ -447,6 +461,9 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   }
   let ndx=dpdx(n);let ndy=dpdy(n);let normalVariance=max(dot(ndx,ndx),dot(ndy,ndy));
   roughness=clamp(sqrt(roughness*roughness+min(.06,normalVariance*.04)),.08,1.0);
+  let historySnowRoughness=clamp(.95-snowLiquid*.34-snowCrust*.30-snowGrain*.035,.38,.97);
+  if(snowMask>.001){roughness=mix(roughness,historySnowRoughness,snowMask*(1.0-slush*.42));}
+  if(materialKind>5.5&&materialKind<6.5){roughness=mix(roughness,historySnowRoughness,.72);}
   var waterCoverage=1.0;
   if(materialKind>4.5&&materialKind<5.5){
     let hollows=noise3(in.worldPos*vec3<f32>(1.4,.1,2.3))*.78+noise3(in.worldPos*vec3<f32>(7.5,.1,9.3))*.22;
@@ -646,7 +663,7 @@ override MATERIAL_CLASS:i32=-1;
 struct U {
   model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
   surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
-  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
+  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>,snowpack:vec4<f32>
 }
 @group(0) @binding(0) var<uniform> u:U;
 @group(1) @binding(0) var<uniform> f:Frame;
@@ -672,7 +689,7 @@ const PROBE_SHADER=`
 struct U {
   model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
   surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
-  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>
+  fieldFrame:vec4<f32>,fieldSize:vec4<f32>,pbr:vec4<f32>,emission:vec4<f32>,texture:vec4<f32>,detail:vec4<f32>,snowpack:vec4<f32>
 }
 struct P {vp:mat4x4<f32>,sun:vec4<f32>,sunColor:vec4<f32>,sky:vec4<f32>}
 @group(0) @binding(0) var<uniform> u:U;
@@ -1237,7 +1254,7 @@ export class WebGPURenderer implements Renderer{
     const surfaceState=this.lastScene?.surfaces.surface(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
     if(!dynamic&&object.uniformReady&&!modelChanged&&!previousChanged)return;
-    const uniform=new Float32Array(84);
+    const uniform=new Float32Array(88);
     uniform.set(model,0);uniform.set(previousModel,16);uniform.set(entity.material.color,32);uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
     uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],52);uniform.set([surfaceUseCode(entity.environmental?.surfaceUse),treatmentCode(entity.material.treatment),entity.material.clearcoat??-1,entity.material.clearcoatRoughness??-1],56);
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],60);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],64);
@@ -1245,6 +1262,8 @@ export class WebGPURenderer implements Renderer{
     const texture=entity.material.texture,normalReady=!!(texture?.normalUrl&&this.surfaceTextures.get(texture.normalUrl)),ormReady=!!(texture?.ormUrl&&this.surfaceTextures.get(texture.ormUrl));
     uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture?.url&&this.surfaceTextures.get(texture.url)?1:0],76);
     uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],80);
+    const snowpack=surfaceState?.snowpack;
+    uniform.set([snowpack?.freshness??0,snowpack?.liquidFraction??0,snowpack?.crust??0,Math.min(1,(snowpack?.grainSizeMm??0)/4.5)],84);
     if(field){
       const pixels=new Float32Array(object.width*object.height*4),deformationPixels=new Float32Array(object.width*object.height*4);
       field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));
@@ -1307,7 +1326,7 @@ export class WebGPURenderer implements Renderer{
     const materialKey=textureSpec?[materialTexture&&textureSpec.url?textureSpec.url:'',normalTexture?textureSpec.normalUrl:'',ormTexture?textureSpec.ormUrl:''].join('|'):undefined;
     const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===label&&existing.materialKey===materialKey)return existing;
     if(existing){existing.uniform.destroy();if(existing.owned!==false){existing.texture.destroy();existing.deformationTexture.destroy();}}
-    const uniform=this.device.createBuffer({size:336,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField,deformationTexture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
+    const uniform=this.device.createBuffer({size:352,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField,deformationTexture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
     const fallback=this.gpu.emptyLabel;
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
       {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},
