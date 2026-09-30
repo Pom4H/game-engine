@@ -28,7 +28,9 @@ fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);r
  let clouds=noise(q)*.55+noise(q*2.1)*.29+noise(q*4.2)*.16;
  let cloudDrive=smoothstep(.48,.88,humidity)*(1.0-.55*sunlight);
  let cloudOpacity=cloudDrive*smoothstep(.50,.84,clouds)*smoothstep(.02,.35,ray.y)*.38;
- color=mix(color,mix(f.sky.rgb*1.18,vec3<f32>(.82,.86,.90),haze*.55),cloudOpacity);
+ // Cloud radiance follows incident light rather than a fixed white term.
+ let cloudRadiance=f.sky.rgb*(1.45+.25*haze)+f.sunColor.rgb*f.sun.w*.10;
+ color=mix(color,cloudRadiance,cloudOpacity);
  color+=f.sky.rgb*(.035+.055*haze)*pow(1.0-max(ray.y,0.0),5.0);
  return vec4<f32>(color,1);
 }`;

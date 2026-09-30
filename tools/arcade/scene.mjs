@@ -2,20 +2,22 @@
 // All materials, lighting, snowfall and depth fog are rendered by game-engine.
 import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 
-export const camera={position:[16.6,3.1,-18.4],target:[-5.2,4.6,.4],fov:43,aperture:0};
+export const camera={position:[7.2707,2.35,-8.8992],target:[-5.7446,2.35,6.2854],intrinsics:{fx:638.8486,fy:638.8486,cx:640,cy:526.8103,width:1280,height:720},aperture:0};
 export const quality={output:[1920,1080],internal:[3840,2160],warmupFrames:24};
 const P={
- wall:{kind:'default',color:[.24,.215,.18,1],pattern:'plaster',roughness:.96,ageYears:95},
+ wall:{kind:'default',color:[.36,.315,.265,1],pattern:'plaster',roughness:.96,ageYears:45},
  side:{kind:'default',color:[.16,.145,.12,1],pattern:'brick',roughness:.96,ageYears:95},
- wood:{kind:'default',color:[.10,.065,.047,1],pattern:'plaster',roughness:.78,ageYears:65},
+ wood:{kind:'default',color:[.18,.112,.072,1],pattern:'plaster',roughness:.78,ageYears:35},
  trim:{kind:'default',color:[.25,.22,.175,1],roughness:.83,ageYears:70},
  iron:{kind:'default',color:[.06,.066,.065,1],metalness:.72,roughness:.52,ageYears:55},
- roof:{kind:'default',color:[.10,.108,.106,1],metalness:.45,roughness:.73,ageYears:60},
+ roof:{kind:'default',color:[.16,.164,.158,1],metalness:.45,roughness:.73,ageYears:60},
  snow:{kind:'snow',color:[.76,.79,.78,1],roughness:.92},
  stone:{kind:'concrete',color:[.22,.215,.20,1],roughness:.86,ageYears:100},
  brass:{kind:'default',color:[.48,.31,.12,1],metalness:.75,roughness:.4},
 };
-const warm=[1,.77,.55];
+const detail=(name,sizeM,albedoStrength=.42)=>({url:'/tools/arcade/assets/'+name+'.png',normalUrl:'/tools/arcade/assets/'+name+'-normal.png',ormUrl:'/tools/arcade/assets/'+name+'-orm.png',sizeM,albedoStrength,normalStrength:.65,ormStrength:.55,bumpStrength:.22});
+P.wall.texture=detail('plaster',2.9);P.side.texture=detail('plaster',2.9);P.wood.texture=detail('wood',1.9,.38);P.trim.texture=detail('plaster',2.9,.25);P.roof.texture=detail('stone',1.8,.32);P.snow.texture=detail('snow',1.2,.30);P.stone.texture=detail('stone',1.35,.44);
+const warm=[1,.85,.71];
 let seed=93281;
 const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
 const entities=[];
@@ -65,14 +67,14 @@ function capital(id,x,z){
   }
  }
 }
-const start=-8.2,bay=3.55,count=10,length=bay*count,end=start+length;
+const start=-2.5,bay=3.55,count=9,length=bay*count,end=start+length;
 const center=(start+end)/2;
 box('upper-building',[center,5.43,4.35],[length,4.52,8.7],P.wall);
 box('rear-building',[center,1.53,5.2],[length,3.06,6.9],P.side);
 box('left-wall',[start-.08,3.90,4.3],[.35,7.8,8.6],P.side);
 for(const [y,h,w,z]of [[.22,.44,.28,-.09],[3.20,.16,.34,-.14],[6.37,.11,.30,-.13],[7.55,.18,.42,-.17],[7.75,.20,.56,-.18]])box('continuous-cornice-'+y,[center,y,z],[length+w,h,w],y<1?P.stone:P.trim);
 for(let b=0;b<count;b++){
- const x=start+bay*(b+.5),id='shop-'+b,w=bay-.42,glow=b<2?.10:1;
+ const x=start+bay*(b+.5),id='shop-'+b,w=bay-.42,glow=1;
  for(const side of [-1,1]){
   const xx=x+side*bay/2;
   box(id+'-pier'+side,[xx,1.68,.28],[.23,3.04,.75],P.wood);
@@ -82,7 +84,7 @@ for(let b=0;b<count;b++){
  box(id+'-room-floor',[x,.26,.82],[w,.1,1.8],P.wood);
  box(id+'-ceiling',[x,3.02,.83],[w,.1,1.8],{...P.wall,color:[.50,.43,.31,1]});
  for(const s of [-1,1])box(id+'-room-side'+s,[x+s*w/2,1.64,.86],[.10,2.9,1.8],P.wood);
- const curt={kind:'default',pattern:'fabric',color:[.71,.66,.55,1],roughness:.98,emissive:[.31,.245,.175].map(v=>v*glow)};
+ const curt={kind:'default',texture:detail('lace',.75,.38),pattern:'fabric',color:[.71,.66,.55,1],roughness:.98,emissive:[.31,.245,.175].map(v=>v*glow)};
  for(const side of [-1,1])surface(id+'-curtain'+side,[x,0,0],44,32,(u,v)=>{
   const xx=side*(.27+u*(w*.5-.25));
   return[xx,.64+v*2.15+.025*Math.cos(u*30),.37+.07*Math.cos(u*Math.PI*14)*(1-.25*v)+.09*(1-v)**2];
@@ -115,7 +117,9 @@ for(let b=0;b<count;b++){
   const h=.042+.024*Math.sin(u*43+v*7)*Math.sin(v*35+u*13)+.018*Math.sin(u*111+v*80);
   return[(r+h)*Math.cos(a),(ry+h)*Math.sin(a),-2.86+v*2.87];
  },P.snow);
- archRib(id+'-front-rib',x,-2.87,r,ry,3.19);
+ const archFace=Array.from({length:65},(_,i)=>{const a=i/64*Math.PI;return[r*Math.cos(a),ry*Math.sin(a)];});
+ add(id+'-arch-face',[x,3.19,-2.875],{kind:'polygon-prism',points:archFace,axis:2,thickness:.045},{...P.wall,color:[.29,.22,.175,1]});
+ archRib(id+'-front-rib',x,-2.91,r,ry,3.19);
  capital(id+'-column',x-bay/2,-2.86);
  for(let j=0;j<15;j++){
   const a=(j+.4)/15*Math.PI,xx=x+r*Math.cos(a),yy=3.19+ry*Math.sin(a),h=.04+random()*.14;
@@ -132,7 +136,7 @@ for(let b=0;b<count;b++){
  for(const s of [-1,1])box(id+'-upper-pilaster'+s,[x+s*bay*.46,5.15,-.12],[.16,1.93,.15],P.trim);
 }
 capital('end-column',end,-2.86);
-const signs=[[-3.0,7.00,8.6,'МАГАЗИНЪ ПОЗНЯКОВА.'],[8.3,6.98,9.0,'ШЕЛКОВЫЯ И ШЕРСТЯНЫЯ ТОВАРЫ'],[19.7,7.0,7.9,'МАНУФАКТУРА']];
+const signs=[[2.7,7.00,8.6,'МАГАЗИНЪ ПОЗНЯКОВА.'],[14.0,6.98,9.0,'ШЕЛКОВЫЯ И ШЕРСТЯНЫЯ ТОВАРЫ'],[25.4,7.0,7.9,'МАНУФАКТУРА']];
 for(const [i,[x,y,w,text]]of signs.entries()){
  box('sign-'+i,[x,y,-.13],[w,.92,.055],{...P.wall,color:[.35,.31,.24,1],label:text});
  for(const s of [-1,1])box('sign-frame-'+i+'-'+s,[x,y+s*.49,-.17],[w+.12,.047,.09],P.trim);
@@ -162,7 +166,7 @@ for(const [i,x]of [-6.1,6.5,20.9].entries()){
 }
 cyl('downpipe',[start+.13,3.87,-.23],.054,7.75,P.iron);
 for(let y=.7;y<7.8;y+=1.6)cyl('pipe-collar-'+y,[start+.13,y,-.23],.075,.065);
-const lamp=[-11.4,0,-4.55],lx=lamp[0],lz=lamp[2];
+const lamp=[-6.7116,0,-.4714],lx=lamp[0],lz=lamp[2];
 box('lamp-base',[lx,.09,lz],[.44,.18,.44],P.iron);
 cyl('lamp-plinth',[lx,.34,lz],.16,.5,P.iron,.115);
 cyl('lamp-post',[lx,1.86,lz],.072,2.77,P.iron,.044,28);
@@ -176,7 +180,7 @@ for(let a=0;a<4;a++){
 add('lamp-top',[lx,4.07,lz],{kind:'cylinder',radius:.385,topRadius:.06,height:.25,segments:4},P.iron,{rotation:[0,Math.PI/4,0]});
 sphere('lamp-finial',[lx,4.25,lz],.059,P.iron,[.7,1.5,.7]);
 snow('lamp-cap-snow',[lx,4.18,lz],[.49,.025,.49],12);
-light('lamp-light',[lx,3.65,lz],24,15,[1,.87,.68]);
+light('lamp-light',[lx,3.65,lz],38,19,[1,.92,.80]);
 box('street-base',[8,-.19,-11],[110,.28,54],{kind:'asphalt',color:[.12,.12,.115,1],roughness:.78});
 box('walk',[center,.035,-1.55],[length+2,.07,3.6],P.stone,{environmental:{surfaceUse:'sidewalk',snowDepthM:.007,waterDepthM:.00012}});
 box('curb',[center,.08,-3.5],[length+2,.16,.29],P.stone,{environmental:{surfaceUse:'curb',snowDepthM:.029}});
@@ -185,8 +189,8 @@ for(let iz=0;iz<36;iz++)for(let ix=0;ix<158;ix++){
  const x=-22+ix*.37+(iz%2)*.185,z=-3.8-iz*.29;
  box('sett-'+ix+'-'+iz,[x,-.065+(random()-.5)*.016,z],[.345,.095,.258],settMaterials[(ix*7+iz*11+Math.floor(random()*7))%7],{rotation:[0,(random()-.5)*.055,0]});
 }
-for(let i=0;i<85;i++){
- const x=-21+random()*72,z=-4-random()*15;
+for(let i=0;i<360;i++){
+ const x=-18+random()*58,z=-4-random()*14;
  snow('street-snow-'+i,[x,-.023,z],[.55+random()*2.2,.014+random()*.052,.30+random()*1.3],16);
 }
 for(let i=0;i<75;i++){
@@ -199,6 +203,27 @@ for(let i=0;i<18;i++){
  add('wet-patch-'+i,[x,-.011,z],{kind:'polygon-prism',points,thickness:.002,axis:1},{kind:'asphalt',color:[.08,.087,.09,1],roughness:.16},{environmental:{surfaceUse:'road',waterDepthM:.003}});
 }
 box('distant-building',[38,5.6,4.8],[18,11.2,10],P.side);
+// A side porch wraps around the building corner ahead of the main facade.
+const sideZ=3.30,sideRadius=2.24,sideRise=1.23;
+surface('side-canopy',[start,3.19,sideZ],72,20,(u,v)=>[-2.88+v*2.9,sideRise*Math.sin(u*Math.PI),-sideRadius*Math.cos(u*Math.PI)],P.roof);
+surface('side-canopy-snow',[start,3.19,sideZ],96,32,(u,v)=>{
+ const a=(.025+.95*u)*Math.PI,h=.046+.022*Math.sin(u*49+v*17)*Math.sin(v*46);
+ return[-2.9+v*2.91,(sideRise+h)*Math.sin(a),-(sideRadius+h)*Math.cos(a)];
+},P.snow);
+const sideProfile=Array.from({length:65},(_,i)=>{const a=i/64*Math.PI;return[sideRise*Math.sin(a),-sideRadius*Math.cos(a)];});
+add('side-canopy-face',[start-2.89,3.19,sideZ],{kind:'polygon-prism',axis:0,points:sideProfile,thickness:.05},{...P.wall,color:[.22,.20,.17,1]});
+for(const z of [sideZ-sideRadius,sideZ+sideRadius])capital('side-column-'+z,start-2.89,z);
+for(let i=0;i<64;i++){
+ const a=i/64*Math.PI,b=(i+1)/64*Math.PI;
+ rod('side-arch-trim-'+i,[start-2.94,3.19+sideRise*Math.sin(a),sideZ-sideRadius*Math.cos(a)],[start-2.94,3.19+sideRise*Math.sin(b),sideZ-sideRadius*Math.cos(b)],.027);
+}
+box('side-window-dark',[start-.275,1.73,sideZ],[.03,2.70,3.61],{kind:'default',pattern:'window',color:[.072,.068,.057,1],roughness:.35,emissive:[.006,.005,.003]});
+for(const z of [sideZ-1.88,sideZ-.64,sideZ+.64,sideZ+1.88])box('side-window-jamb-'+z,[start-.33,1.70,z],[.17,3.0,.09]);
+for(const y of [.26,.49,2.68,3.0])box('side-window-crossbar-'+y,[start-.34,y,sideZ],[.18,.085,3.86]);
+box('side-walk',[start-1.55,.035,4.35],[3.6,.07,10.6],P.stone,{environmental:{surfaceUse:'sidewalk',snowDepthM:.012}});
+box('side-curb',[start-3.46,.07,4.35],[.22,.14,10.6],P.stone);
+for(let i=0;i<20;i++)snow('side-curb-snow-'+i,[start-3.38,.06,-.8+i*.53],[.47,.09+random()*.05,.67],14);
+
 // Facade authoring coordinates run from the nearest bay toward the distant bay.
 // Convert them to engine -X so the arcade recedes to screen-right. Reflected
 // triangle meshes get corrected winding/normals rather than negative scales.
@@ -216,6 +241,6 @@ export default {
  version:1,seed:20260930,ground:-.3,gravity:[0,-9.81,0],camera,
  clearColor:[.018,.021,.025,1],
  environment:{temperatureC:-3.8,humidity:.91,groundMoisture:.38,precipitation:'rare',snowfall:'light',sunlight:0,wind:[.26,0,.08],clock:{startHour:23,hoursPerSecond:0}},
- rendering:{sunDirection:[-.48,.68,-.31],sunColor:[.64,.70,.80],sunIntensity:.10,skyColor:[.022,.025,.029],fogDensity:.028,exposure:1.08,shadowExtent:48,reflectionProbe:{position:[1,1.1,-3.8],radius:55,facesPerFrame:6,boxHalfExtents:[28,8,18]}},
+ rendering:{sunDirection:[-.48,.68,-.31],sunColor:[.64,.70,.80],sunIntensity:.22,skyColor:[.047,.049,.051],fogDensity:.038,exposure:1.08,shadowExtent:48,reflectionProbe:{position:[1,1.1,-3.8],radius:55,facesPerFrame:6,boxHalfExtents:[28,8,18]}},
  entities:batchStaticScenery(entities,()=>true,9),
 };

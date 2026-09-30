@@ -11,20 +11,42 @@ concurrency:
 jobs:
   render:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 10
+    timeout-minutes: 20
     defaults:
       run:
         shell: powershell
     steps:
       - uses: actions/checkout@v7
-      - name: Prepare immutable source blobs
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Build and regression tests
+        run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          bun run test *> artifacts/unit-tests.log
+          $code = $LASTEXITCODE
+          Get-Content artifacts/unit-tests.log -Tail 24
+          if ($code -ne 0) { exit $code }
+      - name: Locate hardware Chrome
+        run: |
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw 'Chrome not found on GPU worker' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Render and validate actual WebGPU frames
+        run: node tools/arcade/capture.mjs
+      - name: Preserve full-resolution frames locally
+        run: |
+          $target = Join-Path $env:USERPROFILE 'game-engine-renders\snowy-arcade'
+          New-Item -ItemType Directory -Force $target | Out-Null
+          Copy-Item artifacts/snowy-arcade*.png,artifacts/arcade-preview.jpg,artifacts/arcade-evidence.json $target -Force
+      - name: Publish private render evidence
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $path = 'tools/arcade/prepare-upgrade.mjs'
-          $text = [IO.File]::ReadAllText((Join-Path $PWD $path))
-          $before = '"FRAME_WGSL+LIGHT_GRID_WGSL+`","FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`"'
-          $after = '"const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`","const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`"'
-          if (-not $text.Contains($before)) { throw 'Missing material-shader anchor' }
-          [IO.File]::WriteAllText((Join-Path $PWD $path), $text.Replace($before, $after), (New-Object Text.UTF8Encoding $false))
-          node tools/arcade/prepare-upgrade.mjs
+          $tag = 'snowy-arcade-' + $env:GITHUB_SHA.Substring(0,7)
+          node tools/publish-release.mjs $tag artifacts/snowy-arcade.png artifacts/snowy-arcade-motion.png artifacts/arcade-preview.jpg artifacts/arcade-evidence.json artifacts/unit-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
