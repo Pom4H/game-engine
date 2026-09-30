@@ -20,10 +20,12 @@ const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-
  if(e.id==='upper-building')return {...e,material:agedWall};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
- if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.10,.11,.10,.14],roughness:.06}};
- if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.63,.34],intensity:34,range:14}};
+ if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
+ if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.57,.52,.45,1],emissive:[.085,.045,.018],roughness:.98}};
+ if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.17,.12,.085,1],emissive:[.055,.025,.009]}};
+ if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.62,.34],intensity:25,range:11}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
- if(e.id==='street-base')return {...e,material:{...e.material,color:[.055,.058,.06,1],roughness:.24},environmental:{surfaceUse:'road',waterDepthM:.0035,snowDepthM:.014,iceDepthM:.0004}};
+ if(e.id==='street-base')return {...e,material:{...e.material,color:[.038,.041,.044,1],roughness:.18},environmental:{surfaceUse:'road',waterDepthM:.0045,snowDepthM:.008,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
  if(!light)return e;
@@ -57,15 +59,8 @@ for(let i=0;i<count;i++){
  // subtle wall relief catches grazing moonlight
  for(let k=0;k<3;k++)box(`hero-relief-${i}-${k}`,[x+(k-1)*.48,6.95,-.29],[.16,.46,.05],{...agedWall,color:[.26,.21,.16,1]});
 }
-// Snow-loaded awnings need a broken silhouette, not a smooth white cap.
-for(let i=0;i<count;i++){
- const x=-(start+bay*(i+.5));
- for(let k=0;k<9;k++){
-   const a=(k+.5)/9*Math.PI;
-   const px=x+Math.cos(a)*(r+.04),py=3.19+Math.sin(a)*(rise+.08);
-   sphere(`awning-snow-lump-${i}-${k}`,[px,py,-2.93],.14+((i*7+k*3)%5)*.018,snow,[1.35,.55,.85]);
- }
-}
+// Canopy snow comes from the continuous engine-owned snow surface. Spherical
+// bead detail was removed because it read as decoration rather than accumulated snow.
 // Warm display objects near the glass give the shop windows depth and specular breakup.
 for(let i=0;i<Math.min(count,7);i++){
  const x=-(start+bay*(i+.5));
@@ -75,14 +70,10 @@ for(let i=0;i<Math.min(count,7);i++){
    sphere(`window-display-${i}-${k}`,[xx,.86+(k%2)*.10,-.40],.085+(k%3)*.012,{kind:'default',color:[.52,.42,.30,1],roughness:.38,emissive:[.06,.028,.01]});
  }
 }
-// Wet cobble patches create the long warm reflections visible in the reference.
-for(let i=0;i<18;i++){
- const x=-14+i*1.55;
- box(`wet-reflection-${i}`,[x,-.005,-5.9-(i%4)*1.15],[.72,.012,2.1],{kind:'asphalt',color:[.035,.038,.041,1],roughness:.08},{environmental:{surfaceUse:'road',waterDepthM:.005,snowDepthM:.002}});
-}
+// Wetness/reflections remain properties of the actual road surface, not rectangular cards.
 
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'heavy',humidity:.94,wind:[.46,0,.14]},
- rendering:{...base.rendering,skyColor:[.018,.021,.027],fogDensity:.013,sunIntensity:.22,exposure:1.08},
+ rendering:{...base.rendering,skyColor:[.018,.021,.027],fogDensity:.0105,sunIntensity:.16,exposure:1.03},
  entities:[...entities,...additions]};
