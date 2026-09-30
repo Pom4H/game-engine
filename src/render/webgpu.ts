@@ -543,11 +543,13 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     color+=f.sunColor.rgb*f.sun.w*nl*shadow*coatSpec;
     var coatEnvironment=textureSampleLevel(environmentMap,reflectionSampler,reflectionDir,coatRough*f32(textureNumLevels(environmentMap)-1u)).rgb;
     if(f.params.y>.5){
-      var coatLocal=vec3<f32>(0.0);
-      let coatProbeWeight=f.params.y*select(1.0,.42,automotivePaint);
+      // Probe convolution owns clearcoat blur. Do not dim reflected radiance to
+      // make glossy paint look rougher: that destroys the energy in automotive
+      // highlights and makes coated surfaces read as matte. The roughness-selected
+      // mip controls footprint while the completed local probe retains its energy.
       let coatProbeLod=max(coatRough*f32(textureNumLevels(localProbeMap)-1u),select(0.0,.65,automotivePaint));
-      coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),coatProbeLod).rgb;
-      coatEnvironment=mix(coatEnvironment,coatLocal,coatProbeWeight);
+      let coatLocal=textureSampleLevel(localProbeMap,reflectionSampler,parallaxProbeDirection(in.worldPos,reflectionDir),coatProbeLod).rgb;
+      coatEnvironment=mix(coatEnvironment,coatLocal,f.params.y);
     }
     // Same split-sum BRDF fit as the base, evaluated at the coat roughness.
     let coatR=coatRough*envC0+envC1;
