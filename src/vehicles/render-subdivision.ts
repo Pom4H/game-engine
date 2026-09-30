@@ -156,7 +156,7 @@ export function smoothCoincidentNormals(mesh:TriangleMesh,creaseDegrees=52,posit
     const a=position(mesh,ia),b=position(mesh,ib),c=position(mesh,ic);
     const abx=b[0]-a[0],aby=b[1]-a[1],abz=b[2]-a[2],acx=c[0]-a[0],acy=c[1]-a[1],acz=c[2]-a[2];
     const cx=aby*acz-abz*acy,cy=abz*acx-abx*acz,cz=abx*acy-aby*acx,area=.5*Math.hypot(cx,cy,cz);
-    areaWeight[ia]+=area;areaWeight[ib]+=area;areaWeight[ic]+=area;
+    areaWeight[ia]=(areaWeight[ia]??0)+area;areaWeight[ib]=(areaWeight[ib]??0)+area;areaWeight[ic]=(areaWeight[ic]??0)+area;
   }
   const out=[...mesh.normals];
   for(const items of buckets.values()){
