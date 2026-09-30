@@ -24,10 +24,10 @@ jobs:
           const fs=require('node:fs'),{execFileSync}=require('node:child_process'),{brotliDecompressSync}=require('node:zlib'),{createHash}=require('node:crypto');
           if(process.env.GITHUB_REF!=='refs/heads/product/unified-engine')throw Error('Integration branch only');
           const manifest=JSON.parse(fs.readFileSync('tools/product/import-ready.json','utf8'));
-          if(manifest.sha256!=='4d0b249bdef2fac35c6daa382870b19cabcc7a6c110012c209574d86e2bec09b'||manifest.parts!==7)throw Error('Unreviewed patch');
+          if(manifest.sha256!=='5052606ae66ec427885952540100315f8a4810e464a89ca9a2461cbee76d85d3'||manifest.parts!==7)throw Error('Unreviewed patch');
           let encoded='';for(let i=0;i<manifest.parts;i++)encoded+=fs.readFileSync('tools/product/import/'+i+'.br64','utf8').trim();
           const patch=brotliDecompressSync(Buffer.from(encoded,'base64'),{maxOutputLength:300000});
-          if(patch.length!==192853||createHash('sha256').update(patch).digest('hex')!==manifest.sha256)throw Error('Source digest mismatch');
+          if(patch.length!==193030||createHash('sha256').update(patch).digest('hex')!==manifest.sha256)throw Error('Source digest mismatch');
           const git=(...args)=>execFileSync('git',args,{stdio:'inherit'});
           execFileSync('git',['apply','--check','--index','-'],{input:patch});
           execFileSync('git',['apply','--index','-'],{input:patch});
