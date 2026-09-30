@@ -112,7 +112,7 @@ for(let i=0;i<42;i++){
 // front/rear surfaces could cross the hero camera near-plane and create the
 // giant black wedge visible in previous captures.
 {
- const x0=-29.55,x1=2.65,zEave=-.18,zRidge=2.15,yEave=7.82,yRidge=10.35;
+ const x0=-29.55,x1=-.85,zEave=-.18,zRidge=2.15,yEave=7.82,yRidge=10.35;
  const positions=[x0,yEave,zEave,x1,yEave,zEave,x1,yRidge,zRidge,x0,yRidge,zRidge];
  const dx=x1-x0,dy=yRidge-yEave,dz=zRidge-zEave;
  const nx=0,ny=-dz,nz=dy,l=Math.hypot(ny,nz),n=[nx,ny/l,nz/l];
@@ -144,7 +144,7 @@ for(const [i,x] of [-22,-10].entries()){
 // Replace the malformed original rear roof with a single coherent mansard back
 // plane. It shares the building axis and cannot cross the camera near plane.
 {
- const x0=-29.55,x1=2.65,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
+ const x0=-29.55,x1=-.85,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
  const positions=[x0,y0,z0,x1,y0,z0,x1,y1,z1,x0,y1,z1];
  const n=[0,.88,.47],normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
  additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
