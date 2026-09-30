@@ -3,7 +3,7 @@
 import base,{authoredEntityCount as buildingEntityCount} from './scene.mjs';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
-const canvas={kind:'default',color:[.31,.235,.17,1],roughness:.91,ageYears:65,emissive:[.065,.036,.018],texture:materialMap('plaster',.85,.72)};
+const canvas={kind:'default',color:[.145,.105,.075,1],roughness:.93,ageYears:75,texture:materialMap('plaster',.68,.82)};
 const snow={kind:'snow',color:[.80,.81,.80,1],roughness:.94,texture:materialMap('snow',.42,.35)};
 const additions=[];
 const warmGlass={kind:'default',color:[.22,.15,.09,.22],metalness:.02,roughness:.12,emissive:[.52,.29,.12]};
@@ -22,8 +22,10 @@ const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
  if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
  if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.57,.52,.45,1],emissive:[.085,.045,.018],roughness:.98}};
- if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.17,.12,.085,1],emissive:[.055,.025,.009]}};
- if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.62,.34],intensity:25,range:11}};
+ if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.16,.105,.07,1],emissive:[.035,.016,.006]}};
+ if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.67,.40],intensity:3.2,range:3.5}};
+ if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
+ if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.61,.32],intensity:42,range:8.5}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
  if(e.id==='street-base')return {...e,material:{...e.material,color:[.038,.041,.044,1],roughness:.18},environmental:{surfaceUse:'road',waterDepthM:.0045,snowDepthM:.008,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
@@ -40,7 +42,7 @@ const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-
 additions.push({
  id:'snow-covered-street',position:[-8,-.065,-12],mesh:{kind:'box',size:[70,.10,20]},
  material:{kind:'concrete',color:[.18,.175,.16,1],roughness:.9,texture:materialMap('stone',1.5,.45)},
- environmental:{surfaceUse:'generic',snowDepthM:.035,waterDepthM:.00015,iceDepthM:.0002,snowMaterial:snow},
+ environmental:{surfaceUse:'generic',snowDepthM:.045,waterDepthM:.00015,iceDepthM:.0002,snowMaterial:snow},
 });
 
 const box=(id,position,size,material,extra={})=>additions.push({id,position,mesh:{kind:'box',size},material,...extra});
@@ -70,10 +72,31 @@ for(let i=0;i<Math.min(count,7);i++){
    sphere(`window-display-${i}-${k}`,[xx,.86+(k%2)*.10,-.40],.085+(k%3)*.012,{kind:'default',color:[.52,.42,.30,1],roughness:.38,emissive:[.06,.028,.01]});
  }
 }
+// Continuous snow lip on the awning edge: a narrow triangle strip, not beads.
+for(let i=0;i<count;i++){
+ const x=-(start+bay*(i+.5)),positions=[],normals=[],indices=[],steps=56;
+ for(let k=0;k<=steps;k++){
+   const a=k/steps*Math.PI,cs=Math.cos(a),sn=Math.sin(a);
+   for(const d of [0,.11]){
+     const rr=r+.055-d*.22,yy=3.19+(rise+.075-d*.18)*sn;
+     positions.push(x+rr*cs,yy,-2.945-d);
+     normals.push(cs*.45,sn,.08);
+   }
+   if(k<steps){const q=k*2;indices.push(q,q+2,q+1,q+1,q+2,q+3);}
+ }
+ additions.push({id:`awning-snow-rim-${i}`,position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:snow});
+}
+// Irregular roadside accumulation keeps the wet centre visible while breaking
+// the perfectly clean curb silhouette.
+for(let i=0;i<24;i++){
+ const x=-17+i*1.25,seed=9100+i*97;
+ additions.push({id:`road-snowbank-${i}`,position:[x,.015,-4.4-(i%3)*.12],mesh:{kind:'snowdrift',size:[1.05,.14,.62],seed,segments:20},material:snow});
+}
+
 // Wetness/reflections remain properties of the actual road surface, not rectangular cards.
 
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'heavy',humidity:.94,wind:[.46,0,.14]},
- rendering:{...base.rendering,skyColor:[.018,.021,.027],fogDensity:.0105,sunIntensity:.16,exposure:1.03},
+ rendering:{...base.rendering,skyColor:[.024,.028,.034],fogDensity:.012,sunIntensity:.25,exposure:1.08},
  entities:[...entities,...additions]};
