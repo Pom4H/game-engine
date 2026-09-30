@@ -1,6 +1,7 @@
 // Camera and architecture are reusable SceneSpec data. This shot authors
 // physical lighting and surface state; every pixel comes from the engine.
-import base,{authoredEntityCount as buildingEntityCount} from './scene.mjs';
+import base,{authoredEntityCount as buildingEntityCount,authoredEntities} from './scene.mjs';
+import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
 const canvas={kind:'default',color:[.30,.205,.135,1],roughness:.88,ageYears:88,texture:materialMap('plaster',.42,1.0)};
@@ -16,7 +17,15 @@ for(let i=0;i<count;i++){
  const points=Array.from({length:65},(_,j)=>{const a=j/64*Math.PI;return[r*Math.cos(a),rise*Math.sin(a)];});
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
-const entities=base.entities.filter(e=>!/^batch:(roof-seam|roof-snow-seam|dormer-|chimney)/.test(e.id)&&!/^chimney-/.test(e.id)&&e.id!=='distant-building'&&e.id!=='roof-top'&&e.id!=='front-mansard'&&!/^roof-(seam|snow-seam)/.test(e.id)&&e.id!=='eaves-snow'&&!/^dormer-/.test(e.id)&&!/^shop-\d+-arch-face$/.test(e.id)&&!/^side-(canopy|column|arch-trim|window)/.test(e.id)).map(e=>{
+const entities=authoredEntities.filter(e=>
+ !/^chimney-/.test(e.id)&&
+ e.id!=='distant-building'&&
+ e.id!=='roof-top'&&e.id!=='front-mansard'&&
+ !/^roof-(seam|snow-seam)/.test(e.id)&&e.id!=='eaves-snow'&&
+ !/^dormer-/.test(e.id)&&
+ !/^shop-\d+-arch-face$/.test(e.id)&&
+ !/^side-(canopy|column|arch-trim|window)/.test(e.id)
+).map(e=>{
  if(e.id==='upper-building')return {...e,material:agedWall};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
@@ -180,7 +189,7 @@ for(let i=0;i<6;i++){
  const dx=x1-x0,dy=yRidge-yEave,dz=zRidge-zEave;
  const nx=0,ny=-dz,nz=dy,l=Math.hypot(ny,nz),n=[nx,ny/l,nz/l];
  const normals=[...n,...n,...n,...n],indices=[0,1,2,0,2,3];
- false&&additions.push({id:'hero-front-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.050,.055,.060,1],metalness:.22,roughness:.78,texture:materialMap('stone',1.0,.34)}});
+ additions.push({id:'hero-front-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.050,.055,.060,1],metalness:.22,roughness:.78,texture:materialMap('stone',1.0,.34)}});
  for(let i=0;i<14;i++){
    const x=-28+i*2.25;
    additions.push({id:`front-roof-snow-${i}`,position:[x,8.03+(i%3)*.05,.02+(i%3)*.12],mesh:{kind:'snowdrift',size:[2.15,.045,.62],seed:31000+i*137,segments:18},material:snow});
@@ -198,7 +207,7 @@ for(let i=0;i<5;i++){
  additions.push({id:`hero-dormer-gable-${i}`,position:[x,10.45,.31],mesh:{kind:'polygon-prism',axis:2,points:pts,thickness:1.34},material:{kind:'default',color:[.050,.055,.060,1],metalness:.18,roughness:.80}});
  additions.push({id:`hero-dormer-snow-${i}`,position:[x,10.53,.12],mesh:{kind:'snowdrift',size:[1.76,.055,.66],seed:41000+i*131,segments:18},material:snow});
 }
-for(const [i,x] of [].entries()){
+for(const [i,x] of [-22,-10].entries()){
  box(`hero-chimney-${i}`,[x,11.25,3.7],[.72,1.86,.76],{kind:'default',color:[.085,.072,.062,1],roughness:.95,texture:materialMap('stone',.62,.50)});
  box(`hero-chimney-cap-${i}`,[x,12.20,3.7],[.94,.14,.98],{kind:'concrete',color:[.14,.13,.12,1],roughness:.94});
  additions.push({id:`hero-chimney-snow-${i}`,position:[x,12.30,3.7],mesh:{kind:'snowdrift',size:[1.0,.06,1.04],seed:43000+i*173,segments:16},material:snow});
@@ -210,7 +219,7 @@ for(const [i,x] of [].entries()){
  const x0=-29.55,x1=-.85,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
  const positions=[x0,y0,z0,x1,y0,z0,x1,y1,z1,x0,y1,z1];
  const n=[0,.88,.47],normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
- false&&additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
+ additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
  // broken snow bands catch cold moonlight without making a white roof sheet
  for(let i=0;i<11;i++){
    const x=-27+i*2.8;
@@ -222,4 +231,4 @@ export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.97,wind:[.28,0,.10]},
  rendering:{...base.rendering,skyColor:[.013,.016,.021],fogDensity:.019,sunDirection:[-.28,.76,-.46],sunColor:[.38,.46,.60],sunIntensity:.46,exposure:1.12},
- entities:[...entities,...additions]};
+ entities:batchStaticScenery([...entities,...additions],()=>true,9)};

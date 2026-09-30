@@ -238,6 +238,7 @@ for(const e of entities){
   for(let i=0;i<e.mesh.indices.length;i+=3){const t=e.mesh.indices[i+1];e.mesh.indices[i+1]=e.mesh.indices[i+2];e.mesh.indices[i+2]=t;}
  }
 }
+export const authoredEntities=entities;
 export const authoredEntityCount=entities.length;
 export default {
  version:1,seed:20260930,ground:-.3,gravity:[0,-9.81,0],camera,
