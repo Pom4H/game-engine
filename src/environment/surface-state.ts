@@ -9,6 +9,28 @@ import type {SurfaceUse} from '../scene/types.js';
 import {deriveSurfaceState} from '../materials/surface.js';
 import {DeformableSurfaceField,surfaceFieldResolution} from './deformable-surface.js';
 
+export type SnowDiagnosticClass='fresh-dry'|'wind-packed'|'settled'|'compacted'|'wet'|'slush'|'crust'|'granular'|'dirty-road';
+export interface SnowLayerState {
+  depthM:number;
+  ageSeconds:number;
+  densityKgM3:number;
+  liquidFraction:number;
+  iceFraction:number;
+  grainSizeMm:number;
+  windPacked:number;
+}
+export interface SnowpackState {
+  readonly layers:SnowLayerState[];
+  freshness:number;
+  densityKgM3:number;
+  liquidFraction:number;
+  iceFraction:number;
+  grainSizeMm:number;
+  crust:number;
+  windPacked:number;
+  classification:SnowDiagnosticClass;
+}
+
 export interface SurfaceEnvironmentState {
   readonly id:string;
   readonly use:SurfaceUse;
@@ -28,6 +50,8 @@ export interface SurfaceEnvironmentState {
   trackMelt:number;
   puddle:number;
   frictionScale:number;
+  /** Compact vertical history; diagnostic class never drives physics. */
+  snowpack:SnowpackState;
 }
 
 export interface BodyEnvironmentState {
@@ -75,16 +99,39 @@ export class SurfaceEnvironmentSystem {
     this.ensureStates(environment,entities);
   }
 
+  /**
+   * Integrate finite pre-t=0 weather history on one representative state per
+   * surface, then fan it out to the spatial field. Historical weather is spatially
+   * uniform until contacts begin, so this is O(surfaces × history), not O(cells).
+   */
+  prewarm(steps:readonly {durationSeconds:number;environment:EnvironmentState}[],entities:ReadonlyMap<string,RuntimeEntity>):void{
+    if(!steps.length)return;
+    for(const step of steps){
+      for(const [id,state] of this.surfaces){
+        const entity=entities.get(id);if(!entity)continue;
+        this.stepSnowpack(state,step.durationSeconds,step.environment);
+        this.stepSurface(state,entity,0,step.durationSeconds,step.environment);
+        this.reconcileSnowpack(state);
+      }
+    }
+    for(const [id,state] of this.surfaces){
+      const field=this.fields.get(id);if(!field)continue;
+      for(const cell of field.cells)copySurfaceState(state,cell);
+    }
+  }
+
   step(dt:number,worldSeconds:number,environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
     this.reconcile(environment,entities);
     this.applyTraffic(dt,entities);
     for(const [id,state] of this.surfaces){
       const entity=entities.get(id);if(!entity)continue;
       const field=this.fields.get(id)!;
+      this.stepSnowpack(state,worldSeconds,environment);
       for(const cell of field.cells)this.stepSurface(cell,entity,dt,worldSeconds,environment);
       field.deformation.relax(dt,state.slush);
-      for(const key of ['temperatureC','snowDepthM','waterDepthM','iceDepthM','slush','wetness','moss','dirt','wear','roughness','acousticDamping','darkening','trafficHeatC','puddle','frictionScale'] as const)state[key]=field.cells.reduce((sum,cell)=>sum+cell[key],0)/field.cells.length;
+      for(const key of SURFACE_AVERAGE_KEYS)state[key]=field.cells.reduce((sum,cell)=>sum+cell[key],0)/field.cells.length;
       state.trackMelt=Math.max(...field.cells.map(cell=>cell.trackMelt));
+      this.reconcileSnowpack(state);
     }
     for(const [id,state] of this.bodies){
       const entity=entities.get(id);if(!entity?.body||( !entity.body.invMass&&!entity.body.kinematic)){this.bodies.delete(id);continue;}
@@ -144,10 +191,11 @@ export class SurfaceEnvironmentSystem {
         // editors, deterministic frame renders and replay seeks all use this path.
         const initialWetRatio=waterDepthM/(waterDepthM+snowDepthM+.002);
         const initialSlush=Math.max(0,Math.min(1,snowDepthM>.0005?initialWetRatio*1.45:0));
+        const snowpack=createSnowpack(snowDepthM,waterDepthM,iceDepthM,environment.temperatureC,use);
         this.surfaces.set(entity.id,{
           id:entity.id,use,temperatureC:environment.temperatureC,snowDepthM,waterDepthM,iceDepthM,
           slush:initialSlush,wetness:Math.max(authored.wetness,waterFactor,initialSlush*.72),moss:authored.moss,dirt:Math.max(authored.dirt,use==='road'?initialSlush*.12:0),wear:authored.wear,roughness:authored.roughness,acousticDamping:authored.acousticDamping,darkening:authored.darkening,
-          trafficHeatC:0,trackMelt:0,puddle:Math.max(0,Math.min(1,waterDepthM/.006)),frictionScale:Math.max(.08,Math.min(1.18,authored.frictionScale*phaseFriction)),
+          trafficHeatC:0,trackMelt:0,puddle:Math.max(0,Math.min(1,waterDepthM/.006)),frictionScale:Math.max(.08,Math.min(1.18,authored.frictionScale*phaseFriction)),snowpack,
         });
       }
       if(use&&!this.fields.has(entity.id)){
@@ -195,6 +243,61 @@ export class SurfaceEnvironmentSystem {
         bodyState.wetness=Math.min(1,bodyState.wetness+spray*dt*.15);
       }
     }
+  }
+
+  private stepSnowpack(state:SurfaceEnvironmentState,worldSeconds:number,environment:EnvironmentState):void{
+    const pack=state.snowpack,use=state.use,wind=Math.hypot(environment.wind[0],environment.wind[2]);
+    for(const layer of pack.layers){
+      layer.ageSeconds+=worldSeconds;
+      const warm=Math.max(0,environment.temperatureC+1.5),hours=worldSeconds/3600;
+      layer.grainSizeMm=Math.min(4.5,layer.grainSizeMm+hours*(.004+.010*warm)*(1+layer.liquidFraction*.8));
+      layer.densityKgM3=Math.min(560,layer.densityKgM3+hours*(.35+.45*warm+Math.min(10,wind)*.09));
+      layer.windPacked=Math.min(1,Math.max(layer.windPacked,wind/14)*(Math.exp(-worldSeconds/432000)));
+      if(environment.temperatureC>.15){
+        const wet=Math.min(.72-layer.liquidFraction,hours*environment.temperatureC*.012);if(wet>0)layer.liquidFraction+=wet;
+        const thaw=Math.min(layer.iceFraction,hours*environment.temperatureC*.018);layer.iceFraction-=thaw;layer.liquidFraction=Math.min(.8,layer.liquidFraction+thaw*.65);
+      }else if(environment.temperatureC<-.35&&layer.liquidFraction>0){
+        const freeze=Math.min(layer.liquidFraction,hours*Math.abs(environment.temperatureC)*.018);layer.liquidFraction-=freeze;layer.iceFraction=Math.min(1,layer.iceFraction+freeze*.9);
+      }
+    }
+    const drift=use==='curb'?1.9:use==='sidewalk'?1.2:use==='road'?.78:1;
+    const windDeposit=1+Math.min(.55,wind/12)*(use==='curb'?.8:use==='sidewalk'?.25:-.08);
+    const coldSnow=environment.temperatureC<=1.2?1:Math.max(0,1-(environment.temperatureC-1.2)/2.5);
+    const deposited=environment.snowfallRate*worldSeconds*drift*windDeposit*coldSnow;
+    if(deposited>.00005){
+      const warmFresh=Math.max(0,Math.min(1,(environment.temperatureC+12)/13)),density=70+warmFresh*75+Math.min(10,wind)*5;
+      const fresh:SnowLayerState={depthM:deposited,ageSeconds:0,densityKgM3:density,liquidFraction:Math.max(0,environment.temperatureC)*.04,iceFraction:0,grainSizeMm:.18+warmFresh*.18,windPacked:Math.min(1,wind/12)};
+      const top=pack.layers[0];
+      if(top&&top.ageSeconds<1800&&Math.abs(top.densityKgM3-density)<45)mergeLayerInto(top,fresh);
+      else pack.layers.unshift(fresh);
+      while(pack.layers.length>4){const older=pack.layers.pop()!,target=pack.layers.at(-1)!;mergeLayerInto(target,older);}
+    }
+  }
+
+  private reconcileSnowpack(state:SurfaceEnvironmentState):void{
+    const pack=state.snowpack,target=Math.max(0,state.snowDepthM);
+    let total=pack.layers.reduce((sum,layer)=>sum+layer.depthM,0);
+    if(target<total-.000001){
+      let remove=total-target;
+      for(let i=0;i<pack.layers.length&&remove>0;){
+        const layer=pack.layers[i]!,take=Math.min(layer.depthM,remove);layer.depthM-=take;remove-=take;
+        if(layer.depthM<1e-6)pack.layers.splice(i,1);else i++;
+      }
+    }else if(target>total+.000001){
+      const delta=target-total,top=pack.layers[0];
+      if(top)top.depthM+=delta;else pack.layers.push({depthM:delta,ageSeconds:0,densityKgM3:120,liquidFraction:0,iceFraction:0,grainSizeMm:.28,windPacked:0});
+    }
+    total=pack.layers.reduce((sum,layer)=>sum+layer.depthM,0);
+    const weighted=(selector:(layer:SnowLayerState)=>number,fallback=0)=>total>1e-9?pack.layers.reduce((sum,layer)=>sum+selector(layer)*layer.depthM,0)/total:fallback;
+    const top=pack.layers[0];
+    pack.freshness=top?Math.exp(-top.ageSeconds/21600)*Math.max(0,1-top.liquidFraction*.7-top.iceFraction*.55):0;
+    pack.densityKgM3=weighted(layer=>layer.densityKgM3,0);
+    pack.liquidFraction=weighted(layer=>layer.liquidFraction,0);
+    pack.iceFraction=weighted(layer=>layer.iceFraction,0);
+    pack.grainSizeMm=weighted(layer=>layer.grainSizeMm,.25);
+    pack.windPacked=weighted(layer=>layer.windPacked,0);
+    pack.crust=Math.max(0,...pack.layers.map(layer=>layer.iceFraction*Math.min(1,.35+layer.densityKgM3/420)));
+    pack.classification=classifySnowpack(pack,state);
   }
 
   private stepSurface(state:SurfaceEnvironmentState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState):void{
@@ -278,6 +381,38 @@ export class SurfaceEnvironmentSystem {
     }
     state.wetness*=Math.exp(-worldSeconds/2600);
   }
+}
+
+const SURFACE_AVERAGE_KEYS=['temperatureC','snowDepthM','waterDepthM','iceDepthM','slush','wetness','moss','dirt','wear','roughness','acousticDamping','darkening','trafficHeatC','puddle','frictionScale'] as const;
+
+function createSnowpack(snowDepthM:number,waterDepthM:number,iceDepthM:number,temperatureC:number,use:SurfaceUse):SnowpackState{
+  const liquid=waterDepthM/(waterDepthM+snowDepthM+.002),ice=Math.min(1,iceDepthM/.004),layers:SnowLayerState[]=snowDepthM>.00001?[{depthM:snowDepthM,ageSeconds:43200,densityKgM3:use==='road'?260:210,liquidFraction:Math.min(.7,liquid),iceFraction:ice,grainSizeMm:temperatureC>-1?1.05:.72,windPacked:0}]:[];
+  const pack:SnowpackState={layers,freshness:0,densityKgM3:0,liquidFraction:0,iceFraction:0,grainSizeMm:.25,crust:0,windPacked:0,classification:'settled'};
+  const dummy={use,snowDepthM,waterDepthM,iceDepthM,slush:Math.min(1,liquid),dirt:0} as Pick<SurfaceEnvironmentState,'use'|'snowDepthM'|'waterDepthM'|'iceDepthM'|'slush'|'dirt'>;
+  updateSnowpackSummary(pack,dummy);return pack;
+}
+function mergeLayerInto(target:SnowLayerState,source:SnowLayerState):void{
+  const total=target.depthM+source.depthM;if(total<=0)return;
+  const mix=(a:number,b:number)=>(a*target.depthM+b*source.depthM)/total;
+  target.ageSeconds=mix(target.ageSeconds,source.ageSeconds);target.densityKgM3=mix(target.densityKgM3,source.densityKgM3);target.liquidFraction=mix(target.liquidFraction,source.liquidFraction);target.iceFraction=mix(target.iceFraction,source.iceFraction);target.grainSizeMm=mix(target.grainSizeMm,source.grainSizeMm);target.windPacked=mix(target.windPacked,source.windPacked);target.depthM=total;
+}
+function updateSnowpackSummary(pack:SnowpackState,state:Pick<SurfaceEnvironmentState,'use'|'snowDepthM'|'waterDepthM'|'iceDepthM'|'slush'|'dirt'>):void{
+  const total=pack.layers.reduce((sum,layer)=>sum+layer.depthM,0),weighted=(selector:(layer:SnowLayerState)=>number,fallback=0)=>total>1e-9?pack.layers.reduce((sum,layer)=>sum+selector(layer)*layer.depthM,0)/total:fallback,top=pack.layers[0];
+  pack.freshness=top?Math.exp(-top.ageSeconds/21600)*Math.max(0,1-top.liquidFraction*.7-top.iceFraction*.55):0;pack.densityKgM3=weighted(layer=>layer.densityKgM3);pack.liquidFraction=weighted(layer=>layer.liquidFraction);pack.iceFraction=weighted(layer=>layer.iceFraction);pack.grainSizeMm=weighted(layer=>layer.grainSizeMm,.25);pack.windPacked=weighted(layer=>layer.windPacked);pack.crust=Math.max(0,...pack.layers.map(layer=>layer.iceFraction*Math.min(1,.35+layer.densityKgM3/420)));pack.classification=classifySnowpack(pack,state);
+}
+function classifySnowpack(pack:SnowpackState,state:Pick<SurfaceEnvironmentState,'use'|'snowDepthM'|'waterDepthM'|'iceDepthM'|'slush'|'dirt'>):SnowDiagnosticClass{
+  if(state.use==='road'&&state.dirt>.18&&(state.slush>.12||pack.liquidFraction>.15))return'dirty-road';
+  if(state.slush>.35)return'slush';
+  if(pack.crust>.34||pack.iceFraction>.28)return'crust';
+  if(pack.liquidFraction>.20)return'wet';
+  if(pack.freshness>.58&&pack.densityKgM3<180)return'fresh-dry';
+  if(pack.windPacked>.48)return'wind-packed';
+  if(pack.densityKgM3>390)return'compacted';
+  if(pack.grainSizeMm>1.35)return'granular';
+  return'settled';
+}
+function copySurfaceState(source:SurfaceEnvironmentState,target:SurfaceEnvironmentState):void{
+  for(const key of SURFACE_AVERAGE_KEYS)target[key]=source[key];target.trackMelt=source.trackMelt;target.snowpack=source.snowpack;
 }
 
 function containsXZ(entity:RuntimeEntity,x:number,z:number):boolean{
