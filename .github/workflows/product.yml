@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    runs-on: [self-hosted, Windows]
+    runs-on: self-hosted
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -34,7 +34,12 @@ jobs:
       - name: Install pinned engine tooling
         run: bun install --frozen-lockfile
       - name: Typecheck and build
-        run: bun run typecheck && bun run build
+        shell: powershell
+        run: |
+          bun run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          exit $LASTEXITCODE
       - name: Complete regression suite
         shell: powershell
         run: |
