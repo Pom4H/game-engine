@@ -19,7 +19,13 @@ fn pointFogIntegral(source:PointSource,origin:vec3<f32>,ray:vec3<f32>,rayLength:
  let integral=(atan((end-along)/softDistance)-atan((begin-along)/softDistance))/softDistance;
  let rangeWeight=pow(max(0.0,1.0-sqrt(perpendicular2)/radius),2.0);
  let transmittance=exp(-density*clamp(along,begin,end));
- return source.color.rgb*source.color.w*integral*rangeWeight*transmittance*density*.07161972;
+ let axial=clamp(along/max(rayLength,.001),0.0,1.0);
+ let core=exp(-perpendicular2/max(.08,radius*radius*.010));
+ // Dense near-emitter aureole + a broader halo. Both are radiance from the
+ // actual point emitter, so the glow stays causal and disappears with it.
+ let aureole=core*2.25+pow(rangeWeight,.42)*.42;
+ return source.color.rgb*source.color.w*integral*rangeWeight*transmittance*density*.07161972
+      +source.color.rgb*source.color.w*aureole*transmittance*density*.012*(1.0-axial*.18);
 }
 fn pointFog(origin:vec3<f32>,position:vec3<f32>,density:f32)->vec3<f32>{
  if(density<=.00001){return vec3<f32>(0);}
