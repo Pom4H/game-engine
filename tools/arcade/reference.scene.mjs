@@ -16,7 +16,7 @@ for(let i=0;i<count;i++){
  const points=Array.from({length:65},(_,j)=>{const a=j/64*Math.PI;return[r*Math.cos(a),rise*Math.sin(a)];});
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
-const entities=base.entities.filter(e=>!/^chimney-0(?:$|-)/.test(e.id)&&e.id!=='distant-building').map(e=>{
+const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-building').map(e=>{
  if(e.id==='upper-building')return {...e,material:agedWall};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
@@ -82,4 +82,7 @@ for(let i=0;i<18;i++){
 }
 
 export const authoredEntityCount=buildingEntityCount+additions.length;
-export default {...base,rendering:{...base.rendering,skyColor:[.014,.016,.020],fogDensity:.016,sunIntensity:.18,exposure:1.10},entities:[...entities,...additions]};
+export default {...base,
+ environment:{...base.environment,snowfall:'heavy',humidity:.94,wind:[.46,0,.14]},
+ rendering:{...base.rendering,skyColor:[.018,.021,.027],fogDensity:.013,sunIntensity:.22,exposure:1.08},
+ entities:[...entities,...additions]};
