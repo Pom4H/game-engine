@@ -1235,7 +1235,7 @@ export class WebGPURenderer implements Renderer{
   }
 
   private needsPrepare(entity:RuntimeEntity,model:Mat4):boolean{
-    const scene=this.lastScene,field=scene?.surfaces.field?.(entity.id),surfaceState=scene?.surfaces.surface(entity.id),body=scene?.surfaces.body(entity.id);
+    const scene=this.lastScene,field=scene?.surfaces.field?.(entity.id),surfaceState=scene?.surfaceStateForRender(entity.id),body=scene?.surfaces.body(entity.id);
     if(field||surfaceState||body)return true;
     const object=this.objects.get(entity.id);
     if(!object?.uniformReady)return true;
@@ -1251,7 +1251,7 @@ export class WebGPURenderer implements Renderer{
   private prepare(entity:RuntimeEntity,model:Mat4=this.model(entity)):void{
     const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture);
     this.mesh(renderPrimitive(entity)!);
-    const surfaceState=this.lastScene?.surfaces.surface(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
+    const surfaceState=this.lastScene?.surfaceStateForRender(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
     if(!dynamic&&object.uniformReady&&!modelChanged&&!previousChanged)return;
     const uniform=new Float32Array(88);
