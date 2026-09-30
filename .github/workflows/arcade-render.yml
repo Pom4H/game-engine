@@ -43,7 +43,7 @@ jobs:
           if not exist artifacts mkdir artifacts
           bun run test > artifacts/unit-tests.log 2>&1
           set TEST_EXIT=%errorlevel%
-          type artifacts\unit-tests.log
+          powershell -NoProfile -Command "Get-Content artifacts/unit-tests.log -Tail 20"
           exit /b %TEST_EXIT%
       - name: Preserve full-resolution frames locally
         if: always() && steps.frames.outcome == 'success'
@@ -58,4 +58,6 @@ jobs:
         run: |
           $tag = 'snowy-arcade-' + $env:GITHUB_SHA.Substring(0,7)
           node tools/publish-release.mjs $tag artifacts/snowy-arcade.png artifacts/snowy-arcade-motion.png artifacts/arcade-preview.jpg artifacts/arcade-evidence.json artifacts/unit-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/arcade/publish-review.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

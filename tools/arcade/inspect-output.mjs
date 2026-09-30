@@ -14,13 +14,8 @@ for(let i=0;i<pixels.length;i+=3){const l=Math.round(pixels[i]*.2126+pixels[i+1]
 const summary={width,height,pngBytes:png.length,pngSha256:createHash('sha256').update(png).digest('hex'),meanLuma:sum/(width*height),lumaStd:Math.sqrt(squares/(width*height)-(sum/(width*height))**2),meanHorizontalRedEdge:edges/(width*height),usedLumaLevels:hist.filter(Boolean).length};
 await writeFile('artifacts/pixel-inspection.json',JSON.stringify(summary,null,2));
 console.log('PIXEL_INSPECTION='+JSON.stringify(summary));
-// Lossless native-pixel crop of the nearest illuminated shop. No resampling,
-// grading or generated detail: distinguish actual renderer blur from preview loss.
-const crop=[512,320,Math.floor(width*.42),Math.floor(height*.62)];
+const cropWidth=Math.min(512,width),cropHeight=Math.min(320,height);
+const crop=[cropWidth,cropHeight,Math.min(width-cropWidth,Math.floor(width*.42)),Math.min(height-cropHeight,Math.floor(height*.62))];
 ffmpeg(['-vf',`crop=${crop.join(':')}`,'-c:v','libwebp','-lossless','1','-compression_level','6','artifacts/native-crop.webp']);
-console.log('NATIVE_CROP_WEBP='+(await readFile('artifacts/native-crop.webp')).toString('base64'));
 ffmpeg(['-vf','scale=960:-2:flags=lanczos','-c:v','libwebp','-lossless','1','artifacts/lossless-review.webp']);
-const review=await readFile('artifacts/lossless-review.webp');
-console.log('LOSSLESS_REVIEW_BYTES='+review.length);
-console.log('LOSSLESS_REVIEW_SHA256='+createHash('sha256').update(review).digest('hex'));
-console.log('LOSSLESS_REVIEW_WEBP='+review.toString('base64'));
+console.log('Lossless native crop and review saved. Read review evidence instead of extracting image bytes from CI logs.');
