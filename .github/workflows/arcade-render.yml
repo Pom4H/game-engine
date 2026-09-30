@@ -20,16 +20,12 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - name: Build and regression tests
-        shell: cmd
+      - name: Build
         run: |
           bun install --frozen-lockfile
-          if errorlevel 1 exit /b %errorlevel%
-          if not exist artifacts mkdir artifacts
-          bun run test > artifacts/unit-tests.log 2>&1
-          set TEST_EXIT=%errorlevel%
-          type artifacts\unit-tests.log
-          exit /b %TEST_EXIT%
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Locate hardware Chrome
         run: |
           $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
@@ -38,13 +34,24 @@ jobs:
           if (-not $chrome) { throw 'Chrome not found on GPU worker' }
           "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Render and validate actual WebGPU frames
+        id: frames
         run: node tools/arcade/capture.mjs
+      - name: Full regression suite
+        if: always()
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          cmd /d /c "bun run test > artifacts/unit-tests.log 2>&1"
+          $code = $LASTEXITCODE
+          Get-Content artifacts/unit-tests.log -Tail 35
+          if ($code -ne 0) { exit $code }
       - name: Preserve full-resolution frames locally
+        if: always() && steps.frames.outcome == 'success'
         run: |
           $target = Join-Path $env:USERPROFILE 'game-engine-renders\snowy-arcade'
           New-Item -ItemType Directory -Force $target | Out-Null
           Copy-Item artifacts/snowy-arcade*.png,artifacts/arcade-preview.jpg,artifacts/arcade-evidence.json $target -Force
       - name: Publish private render evidence
+        if: always() && steps.frames.outcome == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
