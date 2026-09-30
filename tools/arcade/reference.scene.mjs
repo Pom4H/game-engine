@@ -16,7 +16,7 @@ for(let i=0;i<count;i++){
  const points=Array.from({length:65},(_,j)=>{const a=j/64*Math.PI;return[r*Math.cos(a),rise*Math.sin(a)];});
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
-const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-building'&&e.id!=='roof-top'&&e.id!=='front-mansard'&&!/^shop-\d+-arch-face$/.test(e.id)&&!/^dormer-0-/.test(e.id)&&!/^side-(canopy|column|arch-trim|window)/.test(e.id)).map(e=>{
+const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-building'&&e.id!=='roof-top'&&e.id!=='front-mansard'&&!/^roof-(seam|snow-seam)/.test(e.id)&&e.id!=='eaves-snow'&&!/^dormer-/.test(e.id)&&!/^shop-\d+-arch-face$/.test(e.id)&&!/^side-(canopy|column|arch-trim|window)/.test(e.id)).map(e=>{
  if(e.id==='upper-building')return {...e,material:agedWall};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
@@ -123,6 +123,24 @@ for(let i=0;i<42;i++){
    additions.push({id:`front-roof-snow-${i}`,position:[x,8.03+(i%3)*.05,.02+(i%3)*.12],mesh:{kind:'snowdrift',size:[2.15,.045,.62],seed:31000+i*137,segments:18},material:snow});
  }
 }
+// Hero dormers are rebuilt on top of the coherent mansard instead of keeping
+// the old roof-relative geometry.
+for(let i=0;i<5;i++){
+ const x=-25.5+i*6.0,z=.88;
+ box(`hero-dormer-body-${i}`,[x,9.65,z],[1.34,1.58,1.20],{kind:'default',color:[.060,.052,.047,1],roughness:.86,texture:materialMap('wood',.7,.42)});
+ box(`hero-dormer-glass-${i}`,[x,9.63,.255],[.72,.90,.025],{...warmGlass,emissive:[.12,.055,.022]});
+ box(`hero-dormer-frame-v-${i}`,[x,9.63,.20],[.055,.98,.09],darkWood);
+ box(`hero-dormer-frame-h-${i}`,[x,9.68,.19],[.80,.055,.09],darkWood);
+ const pts=[[-.84,0],[.84,0],[0,.66]];
+ additions.push({id:`hero-dormer-gable-${i}`,position:[x,10.45,.31],mesh:{kind:'polygon-prism',axis:2,points:pts,thickness:1.34},material:{kind:'default',color:[.050,.055,.060,1],metalness:.18,roughness:.80}});
+ additions.push({id:`hero-dormer-snow-${i}`,position:[x,10.53,.12],mesh:{kind:'snowdrift',size:[1.76,.055,.66],seed:41000+i*131,segments:18},material:snow});
+}
+for(const [i,x] of [-22,-10,1].entries()){
+ box(`hero-chimney-${i}`,[x,11.25,3.7],[.72,1.86,.76],{kind:'default',color:[.085,.072,.062,1],roughness:.95,texture:materialMap('stone',.62,.50)});
+ box(`hero-chimney-cap-${i}`,[x,12.20,3.7],[.94,.14,.98],{kind:'concrete',color:[.14,.13,.12,1],roughness:.94});
+ additions.push({id:`hero-chimney-snow-${i}`,position:[x,12.30,3.7],mesh:{kind:'snowdrift',size:[1.0,.06,1.04],seed:43000+i*173,segments:16},material:snow});
+}
+
 // Replace the malformed original rear roof with a single coherent mansard back
 // plane. It shares the building axis and cannot cross the camera near plane.
 {
