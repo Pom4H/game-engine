@@ -143,18 +143,30 @@ export function subdivideSmoothTriangleMesh(mesh:TriangleMesh,plan=buildSmoothSu
 export function smoothCoincidentNormals(mesh:TriangleMesh,creaseDegrees=52,positionEpsilonM=1e-5):TriangleMesh{
   if(!Number.isFinite(creaseDegrees)||creaseDegrees<=0||creaseDegrees>=90)throw new RangeError('creaseDegrees must be in (0,90)');
   const cosine=Math.cos(creaseDegrees*Math.PI/180),count=mesh.positions.length/3;
-  const buckets=new Map<string,number[]>();
+  const buckets=new Map<string,number[]>(),areaWeight=new Float64Array(count);
   const key=(i:number)=>`${Math.round(mesh.positions[i*3]!/positionEpsilonM)},${Math.round(mesh.positions[i*3+1]!/positionEpsilonM)},${Math.round(mesh.positions[i*3+2]!/positionEpsilonM)}`;
   for(let i=0;i<count;i++){const k=key(i),items=buckets.get(k);if(items)items.push(i);else buckets.set(k,[i]);}
+  // Imported/render-subdivided meshes may duplicate a point many more times on a
+  // dense patch than on the adjacent broad panel. Counting those duplicates would
+  // bias the shared shading normal toward tessellation density. Weight each indexed
+  // corner by its incident geometric triangle area instead, so normals describe the
+  // surface itself and remain stable as render tessellation changes.
+  for(let i=0;i<mesh.indices.length;i+=3){
+    const ia=mesh.indices[i]!,ib=mesh.indices[i+1]!,ic=mesh.indices[i+2]!;
+    const a=position(mesh,ia),b=position(mesh,ib),c=position(mesh,ic);
+    const abx=b[0]-a[0],aby=b[1]-a[1],abz=b[2]-a[2],acx=c[0]-a[0],acy=c[1]-a[1],acz=c[2]-a[2];
+    const cx=aby*acz-abz*acy,cy=abz*acx-abx*acz,cz=abx*acy-aby*acx,area=.5*Math.hypot(cx,cy,cz);
+    areaWeight[ia]+=area;areaWeight[ib]+=area;areaWeight[ic]+=area;
+  }
   const out=[...mesh.normals];
   for(const items of buckets.values()){
     if(items.length<2)continue;
     const clusters:{members:number[];sum:[number,number,number]}[]=[];
     for(const index of items){
-      const n=normal(mesh,index);let best:-1|number=-1,bestDot=cosine;
+      const n=normal(mesh,index),w=areaWeight[index]||1;let best:-1|number=-1,bestDot=cosine;
       for(let i=0;i<clusters.length;i++){const s=clusters[i]!.sum,l=Math.hypot(...s)||1,d=(n[0]*s[0]+n[1]*s[1]+n[2]*s[2])/l;if(d>bestDot){bestDot=d;best=i;}}
-      if(best<0)clusters.push({members:[index],sum:[n[0],n[1],n[2]]});
-      else{const cluster=clusters[best]!;cluster.members.push(index);cluster.sum[0]+=n[0];cluster.sum[1]+=n[1];cluster.sum[2]+=n[2];}
+      if(best<0)clusters.push({members:[index],sum:[n[0]*w,n[1]*w,n[2]*w]});
+      else{const cluster=clusters[best]!;cluster.members.push(index);cluster.sum[0]+=n[0]*w;cluster.sum[1]+=n[1]*w;cluster.sum[2]+=n[2]*w;}
     }
     for(const cluster of clusters){const n=normalize(cluster.sum);for(const index of cluster.members)out.splice(index*3,3,n[0],n[1],n[2]);}
   }
