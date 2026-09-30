@@ -42,7 +42,13 @@ jobs:
           if (-not $chrome) {throw "Native Chrome is required"}
           "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Real game and two-way product acceptance
-        run: node tools/product/qa.mjs
+        shell: powershell
+        run: |
+          cmd /c "node tools/product/qa.mjs > artifacts/product/browser.log 2>&1"
+          $result = $LASTEXITCODE
+          Get-Content artifacts/product/browser.log -Head 24
+          if ($result -ne 0) { Get-Content artifacts/product/browser.log -Tail 60 }
+          exit $result
       - name: Two native clients in the open world with real delayed network relay
         env:
           THEGAME_PREVIEW: '1'
