@@ -1,0 +1,39 @@
+name: World Streaming CI
+
+on:
+  push:
+    paths:
+      - 'src/world/**'
+      - 'test/infinite-world.test.mjs'
+      - 'docs/INFINITE_WORLD.md'
+      - 'src/index.ts'
+      - '.github/workflows/world-streaming-ci.yml'
+  pull_request:
+    paths:
+      - 'src/world/**'
+      - 'test/infinite-world.test.mjs'
+      - 'docs/INFINITE_WORLD.md'
+      - 'src/index.ts'
+      - '.github/workflows/world-streaming-ci.yml'
+
+concurrency:
+  group: world-streaming-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Build
+        run: bun run build
+      - name: Infinite-world tests
+        run: node --test test/infinite-world.test.mjs
