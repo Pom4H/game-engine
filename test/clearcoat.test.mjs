@@ -11,7 +11,7 @@ test('local probe convolution covers every roughness level and face exactly once
   const levels=plan.filter(p=>p.face===face);assert.equal(levels.at(-1).roughness,1);
   levels.forEach((p,i)=>{assert.equal(p.mip,i+1);assert.ok(p.roughness>0&&p.roughness<=1);});
  }
- assert.equal(PROBE_FILTER_SAMPLES,32);
+ assert.equal(PROBE_FILTER_SAMPLES,64);
 });
 test('probe filter normalizes radiance and reads only the captured level',()=>{
  assert.match(PROBE_FILTER_SHADER,/sum\/max\(total/);
