@@ -1,0 +1,62 @@
+{
+  "source": "70a0456e32b5d2940b28323b00745163eda2e01d",
+  "run": "36746766875",
+  "runner": "NUCBOX_M6ULTRA",
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "pixels": {
+    "width": 3840,
+    "height": 2160,
+    "pngBytes": 4735466,
+    "pngSha256": "19acd29568276e6d634d3bd5801f57303d91389157b96071cdfcfe356047075a",
+    "meanLuma": 49.574241054205245,
+    "lumaStd": 35.254287843827434,
+    "meanHorizontalRedEdge": 0.7711929735725309,
+    "usedLumaLevels": 256
+  },
+  "renderer": {
+    "backend": "webgpu",
+    "width": 3840,
+    "height": 2160,
+    "triangles": 436364,
+    "drawCalls": 240,
+    "pointLights": 19,
+    "materialTextures": 15,
+    "errors": []
+  },
+  "gpu": {
+    "meanMs": 54.48505692307692,
+    "p50Ms": 54.425000000000004,
+    "p95Ms": 54.987120000000004,
+    "maxMs": 56.10964
+  },
+  "cpu": {
+    "meanMs": 3.2769230764645796,
+    "p50Ms": 3.300000011920929,
+    "p95Ms": 3.6000000089406967,
+    "maxMs": 3.7999999970197678
+  },
+  "tests": {
+    "total": null,
+    "pass": null,
+    "fail": null
+  },
+  "provenance": "Untouched native engine canvas; review.webp is Lanczos-downsampled lossless WebP, native-crop.webp is a lossless pixel crop. Neither contains generated image detail.",
+  "assets": [
+    {
+      "name": "review.webp",
+      "bytes": 216452,
+      "sha256": "c8b97fe62372fbfdf2694ef0edbdd47f91d34b792365a8752479123b31d493e5"
+    },
+    {
+      "name": "native-crop.webp",
+      "bytes": 93324,
+      "sha256": "1509e874306c745c85be8cb6d00d0d2cfbcba70a0b2e720ccd28452e96ed772a"
+    }
+  ]
+}
