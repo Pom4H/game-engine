@@ -375,7 +375,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     if(surfaceUse>.5 && surfaceUse<1.5){snowMask*=1.0-track*.96;}
     if(surfaceUse>2.5 && surfaceUse<3.5){snowMask=clamp(snowMask+snowBase*.38,0.0,1.0);}
     let slushColor=mix(vec3<f32>(0.48,0.5,0.5),vec3<f32>(0.22,0.19,0.16),clamp(u.weather.x+u.motion.z,0.0,1.0));
-    let settledColor=mix(vec3<f32>(.82,.875,.92),vec3<f32>(.95,.975,1.0),snowFresh);
+    var settledColor=mix(vec3<f32>(.82,.875,.92),vec3<f32>(.95,.975,1.0),snowFresh);
     settledColor=mix(settledColor,vec3<f32>(.64,.67,.69),snowLiquid*.62);
     settledColor=mix(settledColor,vec3<f32>(.78,.85,.91),snowCrust*.38);
     let historyPatch=fbm(in.worldPos*mix(7.0,2.2,snowGrain)+seed*13.0)-.5;
