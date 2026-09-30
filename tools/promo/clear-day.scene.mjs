@@ -14,6 +14,16 @@ spec.environment={
   sunlight:1,
   wind:[.35,0,.08],
   clock:{startHour:11.8,hoursPerSecond:0},
+  // The visible snowpack is a consequence of three days of weather rather than
+  // a hand-picked "snow type": snowfall -> partial thaw -> refreeze -> fresh cap.
+  history:[
+    {hoursAgo:72,temperatureC:-11,snowfall:'moderate',sunlight:.08,humidity:.84,wind:[3.2,0,.6]},
+    {hoursAgo:69.5,temperatureC:-9,snowfall:'none',sunlight:.12,humidity:.72,wind:[1.4,0,.2]},
+    {hoursAgo:24,temperatureC:.8,sunlight:.48,humidity:.61,wind:[.7,0,.1]},
+    {hoursAgo:17,temperatureC:-5.5,sunlight:.04,humidity:.70,wind:[.9,0,.1]},
+    {hoursAgo:4,temperatureC:-6.5,snowfall:'light',sunlight:.03,humidity:.82,wind:[1.8,0,.3]},
+    {hoursAgo:2.5,temperatureC:-5.2,snowfall:'none',sunlight:.06,humidity:.74,wind:[.8,0,.1]},
+  ],
 };
 spec.rendering={
   // Raking winter sun: enough lateral component for window reveals/cornices to
@@ -50,6 +60,18 @@ spec.rendering.reflectionProbe={
 // Hero daylight shot keeps the physically meaningful snow banks but drops the
 // thousands of sub-pixel dressing grains generated for the moving winter demo.
 // This is visual LOD, not a different material/lighting path.
+// In a history-driven scene, authored phase depths are the state at the start of
+// that history. Keep only a thin old base layer; the rest is derived by prewarm.
+for(const entity of spec.entities){
+  if(!entity.environmental?.surfaceUse)continue;
+  const use=entity.environmental.surfaceUse;
+  entity.environmental={
+    ...entity.environmental,
+    snowDepthM:use==='curb'?.022:use==='road'?0:.008,
+    waterDepthM:0,
+    iceDepthM:0,
+  };
+}
 spec.entities=spec.entities.filter(entity=>{
   const id=entity.id;
   if(id.startsWith('batch:plough-grit-')||id.startsWith('batch:walk-grain-'))return false;
@@ -59,7 +81,7 @@ spec.entities=spec.entities.filter(entity=>{
   return true;
 });
 spec.entities.push(
-  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.043,.045,.048,1],roughness:.78},environmental:{surfaceUse:'road',snowDepthM:.0062,iceDepthM:.00018,waterDepthM:.00105}},
+  {id:'hero-road-skin',position:[10,.006,0],mesh:{kind:'box',size:[180,.008,7.10]},material:{kind:'asphalt',color:[.043,.045,.048,1],roughness:.78},environmental:{surfaceUse:'road',snowDepthM:0,iceDepthM:0,waterDepthM:0}},
   {id:'hero-bank-near',position:[-13,.18,-4.18],mesh:{kind:'snowdrift',size:[62,.48,1.08],seed:4617,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
   {id:'hero-bank-far',position:[-13,.18,4.12],mesh:{kind:'snowdrift',size:[62,.56,1.22],seed:9121,segments:72,continuous:true},material:{kind:'snow',color:[.92,.945,.97,1],roughness:.93}},
 );
@@ -74,7 +96,6 @@ for(const entity of spec.entities){
     entity.material={...entity.material,color:[.16,.175,.205,1]};
   }
   if(entity.id==='road'&&entity.environmental){
-    entity.environmental={...entity.environmental,snowDepthM:.0052,iceDepthM:.00014,waterDepthM:.0009};
     entity.material={...entity.material,color:[.040,.042,.045,1],roughness:.80};
   }
 }
