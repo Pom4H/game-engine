@@ -33,7 +33,9 @@ for(const view of hud.views){
 const evidence={commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,runner:process.env.RUNNER_NAME,authoredEntityCount,batchedEntities:scene.entities.length,sourceTriangles,appliedQuality:{native:[width,height],warmupFrames:hud.warmupFrames},hud};
 await writeFile('artifacts/arcade-evidence.json',JSON.stringify(evidence,null,2));
 run('ffmpeg',['-y','-hide_banner','-loglevel','error','-i','artifacts/snowy-arcade.png','-vf','scale=1280:-2:flags=lanczos','-q:v','3','artifacts/arcade-preview.jpg']);
-run('ffmpeg',['-y','-hide_banner','-loglevel','error','-i','artifacts/snowy-arcade.png','-vf','scale=960:-2:flags=lanczos','-c:v','libwebp','-quality','78','artifacts/arcade-inspection.webp']);
-console.log('ARCADE_PREVIEW_WEBP='+(await readFile('artifacts/arcade-inspection.webp')).toString('base64'));
+// JPEG is explicit here: a severely quantized WebP obscured texture and shape
+// during review. The native canvas PNG remains the authoritative evidence.
+run('ffmpeg',['-y','-hide_banner','-loglevel','error','-i','artifacts/snowy-arcade.png','-vf','scale=640:-2:flags=lanczos','-q:v','2','artifacts/arcade-inspection.jpg']);
+console.log('ARCADE_PREVIEW_JPEG='+(await readFile('artifacts/arcade-inspection.jpg')).toString('base64'));
 const r=hud.views[0].renderer;
 console.log('ARCADE_EVIDENCE='+JSON.stringify({...evidence,hud:undefined,adapter:hud.adapter,renderer:{backend:r.backend,width:r.width,height:r.height,drawCalls:r.drawCalls,triangles:r.triangles,errors:r.errors,pointLights:r.pointLights,materialTextures:r.materialTextures,lightOverflow:r.lightOverflow,reflectionProbe:r.reflectionProbe},profile:{cpu:r.profile?.cpuTotal,gpu:r.profile?.gpuTotal,snowInstances:r.profile?.latestGpu?.work?.snowInstances}}));

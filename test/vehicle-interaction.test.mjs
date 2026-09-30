@@ -5,7 +5,7 @@ import {
   M3_REFERENCE_PROVENANCE,Scene,StructuralBody,generateM3Vehicle,m3PartBody,m3PartMaterial,
   material,renderAudio,thermalLinearScale,
 } from '../dist/index.js';
-import {primitiveMesh} from '../dist/procedural/mesh.js';
+import {m3FbxParts} from '../dist/vehicles/m3-fbx-parts.js';
 
 test('cold steel contracts the stress-free XPBD rest geometry without creating plastic work',()=>{
   const steel=material('steel').mechanical,body=new StructuralBody({
@@ -111,9 +111,14 @@ test('mechanism audio is deterministic and non-silent',()=>{
 
 test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
   const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
-  const actualTriangles=m3.parts.reduce((sum,part)=>sum+primitiveMesh(part.mesh).indices.length/3,0);
-  assert.equal(m3.generatedTriangles,actualTriangles,'triangle accounting must follow the current assembly, including added detail');
-  assert.ok(actualTriangles>=9798,'the refined assembly must not lose the original triangle budget');
+  const sourceParts=m3FbxParts();
+  const sourceTriangles=m3.bodyTriangles+sourceParts.reduce((sum,part)=>sum+part.mesh.indices.length/3,0);
+  assert.equal(m3.generatedTriangles,sourceTriangles,'source accounting must follow the current packed geometry, not a stale FBX total');
+  for(const source of sourceParts){
+    const assembled=byId.get(source.id);
+    assert.ok(assembled,`missing packed source part ${source.id}`);
+    assert.deepEqual(assembled.mesh.indices,source.mesh.indices,`source triangles changed for ${source.id}`);
+  }
   const body=byId.get('body');
   assert.equal(body.mesh.indices.length/3,m3.bodyTriangles,'physical M3 shell must remain the compact source topology');
   assert.equal(body.renderMesh?.kind,'triangle-mesh');
@@ -129,8 +134,8 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
     assert.equal(byId.has('interior-'+id),false,`interior-${id} must not be an opaque coplanar duplicate of glazing`);
   }
   const grilleInlays=m3.parts.filter(part=>part.id.startsWith('grille-inlay-'));
-  assert.equal(grilleInlays.length,12,'two FBX kidney openings should receive six recessed vertical inlays each');
-  assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40),'grille inlays must stay within the source fascia envelope');
+  assert.equal(grilleInlays.length,22,'two kidney openings should receive eleven horizontal aero slats each');
+  assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40&&part.mesh.size[2]>part.mesh.size[1]),'horizontal grille slats must stay within the source fascia envelope');
 
   assert.equal(byId.get('body').material.kind,'steel');
   const heroPaint=m3PartMaterial(byId.get('body'),[.2,.2,.2,1],false);
