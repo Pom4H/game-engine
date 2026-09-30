@@ -227,8 +227,9 @@ for(const [i,x] of [-22,-10].entries()){
  }
 }
 
-export const authoredEntityCount=buildingEntityCount+additions.length;
+const finalEntities=[...entities,...additions].filter(e=>!/^(window-bounce|awning-face-fill|interior-lamp-light)/.test(e.id));
+export const authoredEntityCount=buildingEntityCount+finalEntities.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.97,wind:[.28,0,.10]},
- rendering:{...base.rendering,skyColor:[.018,.022,.030],fogDensity:.0155,sunDirection:[-.28,.76,-.46],sunColor:[.44,.54,.70],sunIntensity:.72,exposure:1.08},
- entities:batchStaticScenery([...entities,...additions],()=>true,9)};
+ rendering:{...base.rendering,skyColor:[.018,.022,.030],fogDensity:.0155,sunDirection:[-.28,.76,-.46],sunColor:[.44,.54,.70],sunIntensity:.82,exposure:1.10},
+ entities:batchStaticScenery(finalEntities,()=>true,9)};
