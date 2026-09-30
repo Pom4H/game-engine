@@ -1,7 +1,7 @@
 name: Snowy Arcade GPU
 on:
   push:
-    branches: [render/snowy-arcade]
+    branches: [render/snowy-arcade, render/snowy-arcade-fidelity]
   workflow_dispatch:
 permissions:
   contents: write
@@ -38,16 +38,17 @@ jobs:
         run: node tools/arcade/capture.mjs
       - name: Full regression suite
         if: always()
+        shell: cmd
         run: |
-          New-Item -ItemType Directory -Force artifacts | Out-Null
-          cmd /d /c "bun run test > artifacts/unit-tests.log 2>&1"
-          $code = $LASTEXITCODE
-          Get-Content artifacts/unit-tests.log -Tail 35
-          if ($code -ne 0) { exit $code }
+          if not exist artifacts mkdir artifacts
+          bun run test > artifacts/unit-tests.log 2>&1
+          set TEST_EXIT=%errorlevel%
+          type artifacts\unit-tests.log
+          exit /b %TEST_EXIT%
       - name: Preserve full-resolution frames locally
         if: always() && steps.frames.outcome == 'success'
         run: |
-          $target = Join-Path $env:USERPROFILE 'game-engine-renders\snowy-arcade'
+          $target = Join-Path $env:USERPROFILE 'game-engine-renders\snowy-arcade-fidelity'
           New-Item -ItemType Directory -Force $target | Out-Null
           Copy-Item artifacts/snowy-arcade*.png,artifacts/arcade-preview.jpg,artifacts/arcade-evidence.json $target -Force
       - name: Publish private render evidence
