@@ -40,7 +40,7 @@ const entities=base.entities.filter(e=>!/^batch:(roof-seam|roof-snow-seam|dormer
 // The practical has two causal scales: a compact photometric lamp and a
 // low-intensity wide source that only supplies the broad snow/fog bounce seen
 // around real street lamps. Both remain ordinary point lights.
-additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:8.4,range:18.0}});
+additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:11.5,range:20.0}});
 
 // One physical snowpack, one engine-owned surface projection. The previous
 // independent microrelief sheet could overlap the snow and disagree with it.
@@ -100,11 +100,39 @@ for(let i=0;i<24;i++){
 
 // Wind-blown foreground clumps break the pavement into wet and packed-snow
 // regions without hiding the reflections.
-for(let i=0;i<68;i++){
+for(let i=0;i<104;i++){
  const t=(i*37%101)/101,z=-5.2-(i*53%89)/89*8.6,x=-18+t*43;
- additions.push({id:`road-scatter-${i}`,position:[x,-.002,z],mesh:{kind:'snowdrift',size:[.48+(i%5)*.12,.045+(i%3)*.018,.36+(i%4)*.10],seed:14000+i*83,segments:14},material:snow});
+ additions.push({id:`road-scatter-${i}`,position:[x,-.002,z],mesh:{kind:'snowdrift',size:[.52+(i%5)*.14,.05+(i%3)*.022,.40+(i%4)*.12],seed:14000+i*83,segments:14},material:snow});
 }
 
+
+
+// Warm bounce from the shopfronts onto wet cobbles. These are low-energy point
+// lights placed at the actual windows, not screen-space glow cards.
+for(let i=0;i<7;i++){
+ const x=-(start+bay*(i+.5));
+ additions.push({id:`window-bounce-${i}`,position:[x,.42,-1.35],light:{kind:'point',color:[1,.53,.28],intensity:2.2,range:3.8}});
+}
+// Architectural depth around the upper windows: lintels, pilaster caps and
+// recessed panels catch the cold directional light and stop the facade reading
+// like one flat wall.
+for(let i=0;i<count;i++){
+ const x=-(start+bay*(i+.5));
+ for(const sx of [-1,1]){
+   box(`hero-cap-${i}-${sx}`,[x+sx*(bay*.47),6.55,-.31],[.30,.16,.30],{...agedWall,color:[.36,.30,.24,1]});
+   box(`hero-base-${i}-${sx}`,[x+sx*(bay*.47),4.02,-.30],[.28,.14,.28],{...agedWall,color:[.30,.25,.20,1]});
+ }
+ box(`hero-panel-top-${i}`,[x,7.18,-.28],[bay-.34,.11,.18],{...agedWall,color:[.29,.24,.19,1]});
+ box(`hero-panel-inset-${i}`,[x,6.92,-.315],[bay-.62,.36,.045],{kind:'default',color:[.18,.145,.11,1],roughness:.96,texture:materialMap('plaster',.34,.90)});
+}
+// Fine icicles hang only from the front edge where melt/refreeze is plausible.
+for(let i=0;i<7;i++){
+ const x=-(start+bay*(i+.5));
+ for(let k=0;k<7;k++){
+   const a=(k+.5)/7*Math.PI,px=x+Math.cos(a)*(r+.05),py=3.19+Math.sin(a)*(rise+.075),h=.05+((i*11+k*7)%6)*.018;
+   additions.push({id:`hero-icicle-${i}-${k}`,position:[px,py-h*.5,-3.01],mesh:{kind:'cylinder',radius:.006,topRadius:.0015,height:h,segments:8},material:{kind:'default',color:[.62,.69,.72,.75],roughness:.18,metalness:.02}});
+ }
+}
 
 // Continuous snow shells over the arched canopies. Unlike the old beads these
 // preserve the canopy silhouette and add low-frequency accumulation depth.
