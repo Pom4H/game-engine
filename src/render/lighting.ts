@@ -94,7 +94,7 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
  return vec4<f32>(mix(current,previous,weight),1);
 }
 `;
-export const EFFECTS_SHADER=FRAME_WGSL+`
+export const EFFECTS_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`
 @group(0) @binding(0) var hdr:texture_2d<f32>;
 @group(0) @binding(1) var normals:texture_2d<f32>;
 @group(0) @binding(2) var depth:texture_depth_2d;
