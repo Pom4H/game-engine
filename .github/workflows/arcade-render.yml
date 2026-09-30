@@ -21,14 +21,15 @@ jobs:
         with:
           bun-version: 1.4.2
       - name: Build and regression tests
+        shell: cmd
         run: |
           bun install --frozen-lockfile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          New-Item -ItemType Directory -Force artifacts | Out-Null
-          bun run test *> artifacts/unit-tests.log
-          $code = $LASTEXITCODE
-          Get-Content artifacts/unit-tests.log -Tail 24
-          if ($code -ne 0) { exit $code }
+          if errorlevel 1 exit /b %errorlevel%
+          if not exist artifacts mkdir artifacts
+          bun run test > artifacts/unit-tests.log 2>&1
+          set TEST_EXIT=%errorlevel%
+          type artifacts\unit-tests.log
+          exit /b %TEST_EXIT%
       - name: Locate hardware Chrome
         run: |
           $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
