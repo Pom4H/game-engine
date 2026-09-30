@@ -117,7 +117,7 @@ for(let i=0;i<42;i++){
  const dx=x1-x0,dy=yRidge-yEave,dz=zRidge-zEave;
  const nx=0,ny=-dz,nz=dy,l=Math.hypot(ny,nz),n=[nx,ny/l,nz/l];
  const normals=[...n,...n,...n,...n],indices=[0,1,2,0,2,3];
- additions.push({id:'hero-front-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.050,.055,.060,1],metalness:.22,roughness:.78,texture:materialMap('stone',1.0,.34)}});
+ false&&additions.push({id:'hero-front-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.050,.055,.060,1],metalness:.22,roughness:.78,texture:materialMap('stone',1.0,.34)}});
  for(let i=0;i<14;i++){
    const x=-28+i*2.25;
    additions.push({id:`front-roof-snow-${i}`,position:[x,8.03+(i%3)*.05,.02+(i%3)*.12],mesh:{kind:'snowdrift',size:[2.15,.045,.62],seed:31000+i*137,segments:18},material:snow});
@@ -147,7 +147,7 @@ for(const [i,x] of [].entries()){
  const x0=-29.55,x1=-.85,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
  const positions=[x0,y0,z0,x1,y0,z0,x1,y1,z1,x0,y1,z1];
  const n=[0,.88,.47],normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
- additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
+ false&&additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
  // broken snow bands catch cold moonlight without making a white roof sheet
  for(let i=0;i<11;i++){
    const x=-27+i*2.8;
