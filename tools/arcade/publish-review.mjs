@@ -1,7 +1,8 @@
-// Small, immutable review evidence stays in this same private repository.
+// Small immutable review evidence stays in this same private repository.
 // Full-resolution captures remain release assets; no source branch is rewritten.
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 const {GITHUB_TOKEN:token,GITHUB_REPOSITORY:repo,GITHUB_SHA:source,GITHUB_RUN_ID:run}=process.env;
 if(!token||!repo||!source||!run)throw new Error('GitHub evidence context is missing');
 const api=`https://api.github.com/repos/${repo}`;
@@ -13,13 +14,21 @@ const post=async(path,data)=>{
 const evidence=JSON.parse(await readFile('artifacts/arcade-evidence.json','utf8'));
 const pixels=JSON.parse(await readFile('artifacts/pixel-inspection.json','utf8'));
 const tests=await readFile('artifacts/unit-tests.log','utf8');
-const count=key=>{const m=tests.match(new RegExp('# '+key+' (\\d+)'));return m?Number(m[1]):null;};
+const count=key=>{const matches=[...tests.matchAll(new RegExp('\\b'+key+'\\s+(\\d+)','g'))];return matches.length?Number(matches.at(-1)[1]):null;};
 const r=evidence.hud.views[0].renderer;
 const manifest={source,run,runner:evidence.runner,adapter:evidence.hud.adapter,pixels,
  renderer:{backend:r.backend,width:r.width,height:r.height,triangles:r.triangles,drawCalls:r.drawCalls,pointLights:r.pointLights,materialTextures:r.materialTextures,errors:r.errors},
  gpu:r.profile?.gpuTotal,cpu:r.profile?.cpuTotal,tests:{total:count('tests'),pass:count('pass'),fail:count('fail')},
- provenance:'Untouched native engine canvas; review.webp is Lanczos-downsampled lossless WebP, native-crop.webp is a lossless pixel crop. Neither contains generated image detail.'};
-const assets=[['review.webp',await readFile('artifacts/lossless-review.webp')],['native-crop.webp',await readFile('artifacts/native-crop.webp')]];
+ provenance:'Untouched native engine canvas; review.webp is Lanczos-downsampled lossless WebP, native-crop.webp is a lossless pixel crop. quick.webp is a compact lossy composition preview. None contains generated image detail.'};
+let quick;
+for(const quality of [62,45,30,18]){
+ const result=spawnSync('ffmpeg',['-y','-hide_banner','-loglevel','error','-i','artifacts/snowy-arcade.png','-vf','scale=640:-2:flags=lanczos','-c:v','libwebp','-quality',String(quality),'artifacts/quick.webp'],{windowsHide:true});
+ if(result.status!==0)throw new Error('Cannot create compact preview');
+ quick=await readFile('artifacts/quick.webp');
+ manifest.quick={width:640,height:360,quality};
+ if(quick.length<=10000)break;
+}
+const assets=[['quick.webp',quick],['review.webp',await readFile('artifacts/lossless-review.webp')],['native-crop.webp',await readFile('artifacts/native-crop.webp')]];
 manifest.assets=assets.map(([name,bytes])=>({name,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')}));
 assets.push(['manifest.json',Buffer.from(JSON.stringify(manifest,null,2))]);
 const tree=[];
