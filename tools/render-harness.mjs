@@ -12,9 +12,12 @@ const [sceneFile,viewsFile,widthArg='1280',heightArg='720']=process.argv.slice(2
 if(!sceneFile||!viewsFile)throw new Error('usage: node tools/render-harness.mjs <scene.mjs> <views.mjs> [width] [height]');
 const width=Number(widthArg),height=Number(heightArg);
 if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1)throw new Error('invalid render size');
+const warmupFrames=Number(process.env.RENDER_WARMUP_FRAMES??0);
+if(!Number.isSafeInteger(warmupFrames)||warmupFrames<0||warmupFrames>512)throw new RangeError('RENDER_WARMUP_FRAMES must be in [0, 512]');
+const profiling=process.env.RENDER_PROFILING==='1',requireHardware=process.env.RENDER_REQUIRE_HARDWARE==='1';
 const scenePath=resolve(sceneFile);
 const viewsPath=resolve(viewsFile);
-const sceneUrl='/tools/'+scenePath.slice(resolve('tools').length+1).replaceAll('\\\\','/').replaceAll('\\','/');
+const sceneUrl='/tools/'+scenePath.slice(resolve('tools').length+1).replaceAll('\\','/');
 const views=(await import(pathToFileURL(viewsPath).href)).default;
 if(!Array.isArray(views)||views.length===0)throw new Error('views module must export a non-empty default array');
 
@@ -26,10 +29,19 @@ try{
   const {default:scene}=await import(sceneUrl);
   const {BrowserRuntime}=await import('/dist/runtime/browser.js');
   const canvas=document.getElementById('c');
-  canvas.width=innerWidth;
-  canvas.height=innerHeight;
-  const runtime=await BrowserRuntime.create(canvas,scene,{autoplay:false,audio:false,exposeBridge:true});
-  globalThis.__RENDER_HARNESS__={runtime};
+  canvas.width=${width};canvas.height=${height};
+  // Probe the same adapter preference used by WebGPURenderer; never silently
+  // count SwiftShader/lavapipe as a successful hardware-rendering CI run.
+  let adapterInfo=null;
+  if(${requireHardware}){
+    const adapter=await navigator.gpu?.requestAdapter({powerPreference:'high-performance'});
+    if(!adapter)throw new Error('Hardware adapter unavailable');
+    const info=adapter.info??await adapter.requestAdapterInfo?.()??{};
+    adapterInfo={vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,isFallbackAdapter:adapter.isFallbackAdapter??info.isFallbackAdapter??false};
+    if(adapterInfo.isFallbackAdapter||/swiftshader|lavapipe|llvmpipe|software|microsoft basic render/i.test(JSON.stringify(adapterInfo)))throw new Error('Software adapter rejected: '+JSON.stringify(adapterInfo));
+  }
+  const runtime=await BrowserRuntime.create(canvas,scene,{autoplay:false,audio:false,exposeBridge:true,resolution:[${width},${height}],profiling:${profiling}});
+  globalThis.__RENDER_HARNESS__={runtime,adapterInfo};
   document.documentElement.dataset.engineReady='1';
 }catch(error){
   window.__ENGINE_ERROR__=error?.stack??String(error);
@@ -161,6 +173,7 @@ try{
     expression:'(async()=>{window.__GAME_ENGINE__.pause();window.__GAME_ENGINE__.seek(0);await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()',
     awaitPromise:true,returnByValue:true
   });
+  const adapterResult=await send('Runtime.evaluate',{expression:'window.__RENDER_HARNESS__.adapterInfo',returnByValue:true});
 
   await mkdir(resolve('artifacts'),{recursive:true});
   const results=[];
@@ -169,12 +182,14 @@ try{
     const cameraJson=JSON.stringify(view.camera),time=Number(view.time??0);
     if(!Number.isFinite(time)||time<0)throw new Error('Invalid view time for '+view.name);
     const result=await send('Runtime.evaluate',{
-      expression:`(async()=>{window.__GAME_ENGINE__.setCamera(${cameraJson});window.__GAME_ENGINE__.seek(${time});await window.__GAME_ENGINE__.flush();window.__GAME_ENGINE__.render();await window.__GAME_ENGINE__.flush();return window.__GAME_ENGINE__.inspect()})()`,
+      expression:`(async()=>{const bridge=window.__GAME_ENGINE__;bridge.setCamera(${cameraJson});bridge.seek(${time});await bridge.flush();bridge.resetProfile();for(let i=0;i<${warmupFrames};i++){bridge.render();await bridge.drain();}bridge.render();await bridge.flush();return bridge.inspect()})()`,
       awaitPromise:true,returnByValue:true
     });
+    if(result.exceptionDetails)throw new Error('Render failed: '+JSON.stringify(result.exceptionDetails));
     const inspection=result.result?.value;
     const renderer=inspection?.renderer;
     if((renderer?.drawCalls??0)<=0&&(renderer?.triangles??0)<=0)throw new Error('Renderer produced no geometry for '+view.name+': '+JSON.stringify(renderer));
+    if(renderer.errors?.length)throw new Error('Renderer errors: '+JSON.stringify(renderer.errors));
 
     const shot=await send('Runtime.evaluate',{
       expression:'document.getElementById(\'c\').toDataURL(\'image/png\').split(\',\')[1]',
@@ -185,11 +200,11 @@ try{
     const output=resolve(view.output);
     await mkdir(join(output,'..'),{recursive:true});
     await writeFile(output,Buffer.from(encoded,'base64'));
-    results.push({name:view.name,output,renderer,camera:view.camera});
+    results.push({name:view.name,output,renderer,camera:view.camera,time:inspection.time,environment:inspection.environment});
     console.log(JSON.stringify(results.at(-1),null,2));
   }
 
-  const hud={resolution:[width,height],views:results.map(({name,output,renderer,camera})=>({name,output,renderer,camera}))};
+  const hud={resolution:[width,height],warmupFrames,adapter:adapterResult.result?.value,views:results};
   await writeFile(resolve('artifacts/render-hud.json'),JSON.stringify(hud,null,2));
   console.log(JSON.stringify({views:results.length,outputs:results.map(result=>result.output),hud:'artifacts/render-hud.json'},null,2));
 }finally{
