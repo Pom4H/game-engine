@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Шахматы — ROM4 Engine</title><link rel="icon" href="data:,"><link rel="stylesheet" href="../../product/style.css"><link rel="stylesheet" href="../../shared/workbench.css"><link rel="stylesheet" href="./style.css"></head>
+<body><header class="nav"><a class="wordmark" href="../../">R4<span>ENGINE</span></a><nav><a href="../">Игры</a><a href="../../modules/">Модули</a><a href="../../docs/">Редактор</a></nav><button id="source-toggle" class="quiet">&lt;/&gt; Исходник</button></header>
+<main class="chess-layout"><section class="table"><div class="match-title"><div><a class="back" href="../">← Все игры</a><h1>Шахматы<span>01</span></h1></div><span class="tag">EVENT-DRIVEN</span></div>
+<div class="player"><span class="avatar dark-avatar">♚</span><div><b>Чёрные</b><small>Локальная партия</small></div><span id="black-material"></span></div>
+<div class="board-wrap"><div id="board" class="board" role="grid" aria-label="Шахматная доска"></div></div>
+<div class="player"><span class="avatar">♔</span><div><b>Белые</b><small>Один экран, два игрока</small></div><span id="white-material"></span></div>
+<div class="board-actions"><button id="undo-move">↶ Отменить ход</button><button id="flip">↻ Повернуть</button><button id="restart">Новая партия</button></div></section>
+<aside class="match-panel"><div class="turn"><span id="turn-dot"></span><div><small>СОСТОЯНИЕ ПАРТИИ</small><h2 id="state" aria-live="polite">Подготовка…</h2></div></div>
+<div class="panel-section"><div class="section-label">ВЫБРАННАЯ ФИГУРА <span id="square-name">—</span></div><div id="piece-view" class="piece-view"><span class="piece-large">♘</span><div><h3>Выбери фигуру</h3><p>Доступные ходы и состояние клетки — из правил игры.</p></div></div></div>
+<div class="panel-section moves-section"><div class="section-label">ИСТОРИЯ ХОДОВ <span id="move-count">0</span></div><ol id="moves" class="moves" aria-label="История ходов"></ol><button id="claim" hidden>Заявить ничью</button></div>
+<details class="panel-section"><summary>Что исполняется</summary><dl class="facts"><dt>Модуль</dt><dd>chess</dd><dt>Расчёт</dt><dd>По действию игрока</dd><dt>Физика / GPU</dt><dd>Не подключены</dd><dt>Идентичность</dt><dd>64 клетки</dd></dl><button id="to-source">Позицию → в исходник</button><p class="muted">Это явное изменение начальной позиции. Обычный ход не переписывает проект.</p></details>
+<p id="game-error" role="alert" hidden></p></aside>
+<section id="workbench" class="workbench" hidden aria-label="Код и параметры игры"></section>
+</main><dialog id="promotion"><h2>Превращение пешки</h2><div id="promotion-options"></div><button id="cancel-promotion">Отмена</button></dialog>
+<script type="module" src="./app.mjs"></script></body></html>

@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Car / Ball · game-engine</title><link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="../../shared/recording.css"></head>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Car / Ball · game-engine</title><link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="../../shared/recording.css"><link rel="stylesheet" href="../../shared/workbench.css"></head>
 <body>
 <canvas id="arena" tabindex="0" aria-label="Сетевая автомобильная арена"></canvas>
-<header><a href="../">game-engine <span>/ car-ball</span></a><span id="connection">Подключение</span><button id="join">Войти в матч</button></header>
+<header><a href="../">game-engine <span>/ car-ball</span></a><span id="connection">Подключение</span><button id="source-toggle" hidden>Код ↔ параметры</button><button id="join">Войти в матч</button></header>
 <div class="scoreboard"><strong id="blue">0</strong><div><b id="clock">5:00</b><small id="phase">ОЖИДАНИЕ</small></div><strong id="orange">0</strong></div>
 <div id="error" role="alert" hidden></div>
 <aside id="boost"><b>100</b><span>BOOST</span><meter min="0" max="100" value="100"></meter></aside>
@@ -16,4 +16,5 @@
 
 </section>
 <nav class="touch" aria-label="Сенсорное управление"><div class="direction"><button data-drive="forward">▲</button><button data-drive="left">◀</button><button data-drive="reverse">▼</button><button data-drive="right">▶</button></div><div><button data-drive="camera">Камера</button><button data-drive="slide">Дрифт</button><button data-drive="jump">Прыжок</button><button data-drive="boost">Буст</button></div></nav>
+<section id="project-drawer" hidden aria-label="Исходник арены"><div class="drawer-head"><b>CAR / BALL · project.ts</b><button id="source-close">Вернуться к игре</button></div><p>Физика приостановлена. Применение конфигурации начинает новый локальный матч. Сетевые комнаты не изменяются.</p><div id="project-editor"></div></section>
 <script type="module" src="./app.mjs"></script></body></html>

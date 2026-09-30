@@ -2,14 +2,14 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {EXAMPLES,LEGACY_PENDING} from '../tools/docs/examples.mjs';
-import {SourceDocument,rebaseBindings} from '../tools/docs/document.mjs';
+import {SourceDocument,rebaseBindings} from '../tools/shared/document.mjs';
 import {CompilerClient} from '../tools/docs/compiler-client.mjs';
 import * as api from '../dist/dsl/index.js';
 import {installProgram,programVehicles} from '../dist/dsl/runtime.js';
 import {planProgramEdit,applyLiveProgram} from '../dist/dsl/edits.js';
 import {Scene} from '../dist/scene/scene.js';
 const require=createRequire(new URL('../tools/docs/package.json',import.meta.url));
-const ts=require('typescript'),{compileSource}=require('./compile.cjs'),{analyze,editsFor,applyEdits}=require('./bindings.cjs');
+const ts=require('typescript'),{compileSource}=require('../shared/compile.cjs'),{analyze,editsFor,applyEdits}=require('../shared/bindings.cjs');
 const compile=source=>compileSource(ts,api,source);
 const change=(source,key,value)=>{const b=analyze(ts,source).bindings.find(b=>b.key===key);assert.ok(b,key);return applyEdits(source,editsFor(source,b,value));};
 for(const example of EXAMPLES)test(`DSL example ${example.id}: real Scene/Vehicle install, step and disposal`,()=>{

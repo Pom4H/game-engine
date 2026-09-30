@@ -20,7 +20,8 @@
   at:{label:'Положение детали',shape:'vector',unit:'м'},mountAt:{label:'Крепление',shape:'vector',unit:'м'},root:{label:'Начало маршрута',shape:'vector',unit:'м'},modelOriginM:{label:'Начало модели',shape:'vector',unit:'м'},
  };
  const groups={camera:'Камера',render:'Рендер',material:'Покрытие',input:'Управление',environment:'Среда',mechanics:'Конструкция',scene:'Сцена'};
- function analyze(ts,source){
+ function analyze(ts,source,extension={}){
+  const metadata={...meta,...extension};
   const file=ts.createSourceFile('scene.ts',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
   // A checker resolves lexical scope, including shadowed constants. No regex symbol lookup.
   const host={getSourceFile:n=>n==='scene.ts'?file:undefined,getDefaultLibFileName:()=>'',writeFile(){},getCurrentDirectory:()=>'',getDirectories:()=>[],fileExists:n=>n==='scene.ts',readFile:n=>n==='scene.ts'?source:undefined,getCanonicalFileName:n=>n,useCaseSensitiveFileNames:()=>true,getNewLine:()=> '\n'};
@@ -56,7 +57,7 @@
    return null;
   }
   function add(node,config,ctx,key){
-   const v=resolve(node),at=node.getStart(file),editable=!!v&&config.shape!==undefined&&(config.shape===v.shape||(config.shape==='color'&&v.shape==='vector'&&v.value.length>=3));
+   const v=resolve(node),at=node.getStart(file),editable=!!v&&config.shape!==undefined&&(config.shape===v.shape||(config.shape==='text'&&v.shape==='select')||(config.shape==='color'&&v.shape==='vector'&&v.value.length>=3));
    const start=v?.start??at,end=v?.end??node.end;
    const rangeKey=start+':'+end;
    if(seen.has(rangeKey)){seen.get(rangeKey).uses++;return;}
@@ -68,8 +69,8 @@
   function visit(n){
    if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)&&n.initializer&&n.name.text==='wingsEnabled')add(n.initializer,meta.wingsEnabled,{group:'mechanics',where:'vehicle',path:''},'wingsEnabled');
    if(ts.isPropertyAssignment(n)&&propName(n.name)==='kind'&&context(n).group==='material')add(n.initializer,choices('Материал',['steel','aluminum','glass','rubber','wood','concrete','asphalt','plastic','snow','ice']),context(n),'kind');
-   if((ts.isPropertyAssignment(n)||ts.isShorthandPropertyAssignment(n))&&meta[propName(n.name)]){
-    const key=propName(n.name),config=meta[key],node=ts.isPropertyAssignment(n)?n.initializer:n.name;
+   if((ts.isPropertyAssignment(n)||ts.isShorthandPropertyAssignment(n))&&metadata[propName(n.name)]){
+    const key=propName(n.name),config=metadata[key],node=ts.isPropertyAssignment(n)?n.initializer:n.name;
     add(node,config,context(n),key);
    }
    if(ts.isCallExpression(n)&&n.expression.getText(file)==='orbit'){
@@ -93,7 +94,8 @@
   const literal=(v,shape)=>{
    if(shape==='number'){if(!Number.isFinite(v))throw new TypeError('Expected finite number');return String(Number(v.toPrecision(12)));}
    if(shape==='boolean'){if(typeof v!=='boolean')throw new TypeError('Expected boolean');return String(v);}
-   if(typeof v!=='string'||!binding.options?.includes(v))throw new TypeError('Unknown enum value');
+   if(typeof v!=='string'||(shape!=='text'&&!binding.options?.includes(v)))throw new TypeError('Unknown text/enum value');
+   if(shape==='text'&&(v.length>(binding.maxLength??4096)||/[\r\n\u0000-\u001f]/.test(v)))throw new TypeError('Text must be a bounded single line');
    const quote=binding.raw[0]==="'"?"'":'"';return quote+v.replaceAll('\\','\\\\').replaceAll(quote,'\\'+quote)+quote;
   };
   if(binding.elements){

@@ -22,11 +22,14 @@ test('probe filter normalizes radiance and reads only the captured level',()=>{
 test('coat roughness blurs local radiance rather than suppressing it',()=>{
  assert.doesNotMatch(source,/coatProbeWeight|reflectionDir,\.35\)/);
  assert.match(source,/reflectionDir,coatRough\*f32\(textureNumLevels\(environmentMap\)-1u\)/);
- assert.match(source,/reflectionDir,coatRough\*f32\(textureNumLevels\(localProbeMap\)-1u\)/);
+ assert.match(source,/parallaxProbeDirection\(in\.worldPos,reflectionDir\),coatRough\*f32\(textureNumLevels\(localProbeMap\)-1u\)/);
  assert.match(source,/coatEnvironment=mix\(coatEnvironment,coatLocal,f.params.y\)/);
 });
 test('coat applies the same normal-variance floor as base roughness',()=>{
- assert.match(source,/coatRough=clamp\(sqrt\(clearcoatRoughness\*clearcoatRoughness\+min\(\.22,normalVariance\*\.18\)\),\.08,1\.0\)/);
+ const base=source.match(/roughness=clamp\(sqrt\(roughness\*roughness\+min\(([^,]+),normalVariance\*([^\)]+)\)\),([^,]+),([^\)]+)\)/);
+ const coat=source.match(/coatRough=clamp\(sqrt\(clearcoatRoughness\*clearcoatRoughness\+min\(([^,]+),normalVariance\*([^\)]+)\)\),([^,]+),([^\)]+)\)/);
+ assert.ok(base&&coat,'both layers must apply geometric normal-variance filtering');assert.deepEqual(coat.slice(1),base.slice(1),'coating must use the same filter, with its OWN material roughness');
+ const [cap,gain,floor,ceiling]=coat.slice(1).map(Number);assert.ok(cap>0&&gain>0&&floor>0&&ceiling===1);
  assert.match(source,/let coatA2=pow\(coatRough,4\.0\)/);
 });
 test('coat direct and indirect light attenuate the base without emissive gains',()=>{

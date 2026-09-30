@@ -15,7 +15,12 @@
     "./dsl/runtime": "./dist/dsl/runtime.js",
     "./network": "./dist/network/index.js",
     "./examples/car-ball": "./dist/examples/car-ball.js",
-    "./vehicles/arcade": "./dist/vehicles/arcade.js"
+    "./vehicles/arcade": "./dist/vehicles/arcade.js",
+    "./project": "./dist/core/project.js",
+    "./games/chess": "./dist/games/chess.js",
+    "./games/chess/project": "./dist/games/chess-project.js",
+    "./games/car-ball/project": "./dist/games/car-ball-project.js",
+    "./trace": "./dist/core/runtime-timeline.js"
   },
   "files": [
     "dist",
@@ -34,7 +39,9 @@
     "docs:serve": "node tools/docs/server.mjs",
     "docs:test": "tsc -p tsconfig.build.json && node --test test/dsl-playground.mjs",
     "docs:qa": "node tools/docs/qa.mjs",
-    "arena": "node tools/arena.mjs"
+    "arena": "node tools/arena.mjs",
+    "cli": "bun tools/engine.mjs",
+    "product:qa": "node tools/product/qa.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

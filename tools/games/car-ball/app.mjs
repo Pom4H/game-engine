@@ -1,3 +1,5 @@
+import {LocalArena} from '../../shared/local-arena.mjs';
+import {workbench} from '../../shared/workbench.mjs';
 import {consoleSession,mountConsole} from '../../shared/console.mjs';
 import {mountRecording} from '../../shared/recording-ui.mjs';
 import {CarBallView,arenaOffset as offset} from '../../engine/examples/car-ball-view.js';
@@ -7,16 +9,20 @@ import {ArcadeControls} from '../../engine/runtime/arcade-controls.js';
 import {WebGPURenderer} from '../../engine/render/webgpu.js';
 const $=id=>document.getElementById(id),canvas=$('arena'),controls=new ArcadeControls(canvas),view=new CarBallView();
 let renderer,worker,replica,token='',seat=-1,epoch=0,sequence=0,serial=0,arrived=0,replay=null,inflight=false,pendingGpu=0,frames=0,dropped=0,disposed=false,lastUI=0,transportMode='connecting',lastPing=0,pinging=false;
+const localMode=new URLSearchParams(location.search).get('mode')==='local';
+let local,workbenchUI,joinGeneration=0;
 const camera=[-24,4,7],target=[0,1,0];
 function fail(error){$('error').hidden=false;$('error').textContent=String(error.message??error);}
-async function request(action,data={}){const r=await fetch('/arena-network/'+action,{method:'POST',headers:{'content-type':'application/json','x-debug-token':token},body:JSON.stringify({...data,epoch})});const result=await r.json();if(!r.ok)throw Error(result.error??'Server error');return result;}
-async function join(){
+async function request(action,data={}){if(localMode){if(!local)throw Error('Local authority is not ready');return local.request(action,{...data,epoch});}const r=await fetch('/arena-network/'+action,{method:'POST',headers:{'content-type':'application/json','x-debug-token':token},body:JSON.stringify({...data,epoch})});const result=await r.json();if(!r.ok)throw Error(result.error??'Server error');return result;}
+async function join(definition,preset,signal){
+ const attempt=++joinGeneration;
  $('join').disabled=true;
  try{
-  if(token)await request('leave').catch(()=>{});
-  const ready=await request('join');token=ready.token;seat=ready.seat;epoch=ready.epoch;sequence=ready.sequence;controls.setSerial(ready.jumpSerial);transportMode=ready.transport?.mode??'sse';
+  let ready;
+  if(localMode){const next=new LocalArena();try{ready=await next.request('join',{definition,preset,epoch:attempt});if(disposed||signal?.aborted||attempt!==joinGeneration)throw new DOMException('Superseded installation','AbortError');}catch(error){next.dispose();throw error;}local?.dispose();local=next;}
+  else{if(token)await request('leave').catch(()=>{});ready=await request('join');}token=ready.token;seat=ready.seat;epoch=ready.epoch;sequence=ready.sequence;controls.setSerial(ready.jumpSerial);transportMode=ready.transport?.mode??'sse';
   replica=new Replica(arenaProjection,epoch,600,16_000_000,transportMode==='webtransport'?.035:.065);replica.receive(ready.frame,performance.now()/1000);arrived=performance.now();replay=null;
-  worker?.terminate();worker=new Worker(new URL('../../shared/network-worker.js',import.meta.url),{type:'module'});const current=++serial;
+  if(!localMode)worker?.terminate();worker=localMode?local.worker:new Worker(new URL('../../shared/network-worker.js',import.meta.url),{type:'module'});const current=++serial;
   worker.onmessage=({data})=>{
    if(data.serial!==current)return;
    try{
@@ -30,20 +36,20 @@ async function join(){
    }catch(error){fail(error);worker.postMessage({kind:'ack',serial:current});}
   };
   worker.postMessage({kind:'connect',arena:true,token,transport:ready.transport,serial:current});
-  $('driver').textContent=seat<0?'Зритель':seat===0?'Синяя команда':'Оранжевая команда';$('restart').disabled=seat!==0;
+  $('driver').textContent=localMode?'Локальная тренировка':seat<0?'Зритель':seat===0?'Синяя команда':'Оранжевая команда';$('restart').disabled=seat!==0;
   controls.active=seat>=0;$('join').textContent='Переподключиться';$('error').hidden=true;canvas.focus();
- }catch(error){fail('Не удалось войти. Запуск: ARENA=1 bun dev\n'+error.message);}finally{$('join').disabled=false;}
+ }catch(error){if(error.name==='AbortError')throw error;fail((localMode?'Не удалось запустить локальную арену. ':'Не удалось войти. Запуск: bun run arena\n')+error.message);throw error;}finally{$('join').disabled=false;}
 }
-$('join').onclick=join;
+$('join').onclick=()=>void join().catch(()=>{});
 const timer=setInterval(()=>{
  if(!token||disposed)return;
  if(seat>=0){
   const input={sequence:++sequence,controls:controls.sample()};
-  if(transportMode==='webtransport')worker.postMessage({kind:'input',serial,epoch,...input});
+  if(transportMode==='webtransport'||localMode)worker.postMessage({kind:'input',serial,epoch,...input});
   else if(!inflight){inflight=true;void request('input',input).catch(error=>{$('connection').textContent=error.message;}).finally(()=>{inflight=false;});}
  }
  // Reliable keepalive must NEVER stall the independent datagram input cadence.
- if(!pinging&&performance.now()-lastPing>1000){lastPing=performance.now();pinging=true;void request('ping').catch(()=>{}).finally(()=>{pinging=false;});}
+ if(!localMode&&!pinging&&performance.now()-lastPing>1000){lastPing=performance.now();pinging=true;void request('ping').catch(()=>{}).finally(()=>{pinging=false;});}
 },1000/60);
 function live(){replay=null;controls.active=seat>=0;view.scene.cutPresentation();}
 $('live').onclick=live;
@@ -53,6 +59,7 @@ const session=consoleSession({sources:{scene:()=>inspect(),ball:()=>position('ba
  live:()=>{live();return 'LIVE';},
  replay:tail=>{const time=Number(tail);if(!tail||!Number.isFinite(time)||time<0)throw Error('replay <seconds>');replay=time;controls.clear();controls.active=false;view.scene.cutPresentation();return 'Replay '+time;},
  record:tail=>recording.command(tail),
+ trace:async tail=>{if(!localMode)throw Error('Trace recording belongs to the local authority; remote room unchanged');if(tail&&!['on','off','show'].includes(tail))throw Error('trace on | off | show');const result=await request('trace',tail==='on'||tail==='off'?{enabled:tail==='on'}:{});return JSON.stringify(result,null,2);},
 }});
 const terminal=mountConsole({panel:$('console'),toggle:$('diagnostics'),session,onOpen:()=>{controls.clear();terminal.refresh(session.sample());}});
 const recording=mountRecording({host:$('recording-panel'),canvas,runtime:()=>({renderer}),metadata:()=>({serverTick:replica?.latest()?.tick,renderTick:view.scene.tick,epoch,seat}),download:(name,text)=>download(new Blob([text],{type:'application/json'}),name)});
@@ -79,14 +86,24 @@ function draw(now){
   lastUI=now;const state=replica.inspect();$('blue').textContent=Math.round(v[offset.score]);$('orange').textContent=Math.round(v[offset.score+1]);const seconds=Math.ceil(v[offset.remaining]);$('clock').textContent=`${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
   $('phase').textContent=replay!==null?'ПОВТОР':['СТАРТ','МАТЧ','ГОЛ','КОНЕЦ'][v[offset.phase]];
   const boost=v[offset.boost+Math.max(0,seat)];$('boost').querySelector('b').textContent=Math.round(boost);$('boost').querySelector('meter').value=boost;
-  $('connection').textContent=now-arrived>1000?'НЕТ СВЕЖИХ ПАКЕТОВ':`${transportMode==='webtransport'?'UDP / QUIC':'SSE'} · tick ${state.latestTick} · ${controls.ballCamera?'BALL CAM':'CAR CAM'}`;
+  $('connection').textContent=now-arrived>1000?'НЕТ СВЕЖИХ ПАКЕТОВ':`${localMode?'LOCAL WORKER':transportMode==='webtransport'?'UDP / QUIC':'SSE'} · tick ${state.latestTick} · ${controls.ballCamera?'BALL CAM':'CAR CAM'}`;
   const slider=$('replay');slider.min=state.oldest;slider.max=state.newest;if(document.activeElement!==slider)slider.value=replay??sample.time;
   if(!$('console').hidden){$('metrics').textContent=`server tick ${state.latestTick} | render ${sample.fromTick} → ${sample.toTick} | alpha ${sample.alpha.toFixed(3)}\n${state.frames} snapshots | ${(state.payloadBytes/1024).toFixed(0)} KiB | renderer ${renderer.inspect().backend} | GPU in-flight ${pendingGpu}\nclient physics steps ${view.scene.physics.steps} | bodies ${view.scene.physics.bodies.size} | ball vertices ${view.ballMesh.positions.length/3}`;
    terminal.refresh(session.sample());}
  }
 }
-globalThis.__ARENA__={inspect,get recording(){return recording;},get terminal(){return terminal;},get view(){return view;},get replica(){return replica;},get controls(){return controls;},get renderer(){return renderer;},request,join,seek:time=>{replay=time;controls.clear();controls.active=false;view.scene.cutPresentation();},live};
-window.addEventListener('pagehide',()=>{disposed=true;clearInterval(timer);worker?.terminate();controls.dispose();terminal.dispose();recording.dispose();view.dispose();renderer?.dispose();if(token)void fetch('/arena-network/leave',{method:'POST',headers:{'x-debug-token':token,'content-type':'application/json'},body:'{}',keepalive:true});});
+globalThis.__ARENA__={inspect,get recording(){return recording;},get terminal(){return terminal;},get view(){return view;},get replica(){return replica;},get controls(){return controls;},get renderer(){return renderer;},request,join, get workbench(){return workbenchUI;},seek:time=>{replay=time;controls.clear();controls.active=false;view.scene.cutPresentation();},live};
+window.addEventListener('pagehide',()=>{disposed=true;clearInterval(timer);local?.dispose();workbenchUI?.dispose();worker?.terminate();controls.dispose();terminal.dispose();recording.dispose();view.dispose();renderer?.dispose();if(token&&!localMode)void fetch('/arena-network/leave',{method:'POST',headers:{'x-debug-token':token,'content-type':'application/json'},body:'{}',keepalive:true});});
 function resize(){const scale=Math.min(1,1280/innerWidth,720/innerHeight);renderer?.setResolution(Math.max(1,Math.round(innerWidth*scale)),Math.max(1,Math.round(innerHeight*scale)));}
 window.addEventListener('resize',resize);
-try{if(!isSecureContext)throw Error('WebGPU требует HTTPS или localhost. Открой арену через защищённый адрес.');renderer=await WebGPURenderer.create(canvas,{profiling:true});resize();requestAnimationFrame(draw);await join();}catch(error){fail(error);}
+try{if(!isSecureContext)throw Error('WebGPU требует HTTPS или localhost. Открой арену через защищённый адрес.');renderer=await WebGPURenderer.create(canvas,{profiling:true});resize();requestAnimationFrame(draw);await join();
+ if(localMode){
+  const source=await fetch('./project.ts').then(r=>{if(!r.ok)throw Error('Project source is missing');return r.text();});
+  workbenchUI=workbench({host:$('project-editor'),game:'arena',source,onApply:async(definition,preset,options)=>{await join(definition,preset,options?.signal);if(!$('project-drawer').hidden){controls.active=false;await request('pause',{paused:true});}}});
+  $('source-toggle').hidden=false;
+ }
+}catch(error){fail(error);}
+
+$('source-toggle').onclick=()=>{const opening=$('project-drawer').hidden;$('project-drawer').hidden=!opening;controls.clear();controls.active=!opening&&seat>=0;if(local)void request('pause',{paused:opening}).catch(fail);};
+$('source-close').onclick=()=>{if(!$('project-drawer').hidden)$('source-toggle').click();};
+document.addEventListener('visibilitychange',()=>{controls.clear();if(local)void request('pause',{paused:document.hidden||!$('project-drawer').hidden}).catch(fail);});

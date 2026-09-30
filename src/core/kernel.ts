@@ -5,7 +5,7 @@ export const ENGINE_PHASES: readonly EnginePhase[] = ['input','plan','simulate',
 export type SimulationTier = 'detailed' | 'active' | 'aggregate' | 'dormant';
 export const SIMULATION_TIERS: readonly SimulationTier[] = ['detailed','active','aggregate','dormant'];
 export interface ModuleFrame {readonly tick:number;readonly deltaSeconds:number;readonly tier:SimulationTier;readonly phase:EnginePhase}
-export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly string[];readonly writes:readonly string[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[];readonly context?:'none'}
+export interface ModuleDescription {readonly id:string;readonly phase:EnginePhase;readonly rateHz:number;readonly reads:readonly string[];readonly writes:readonly string[];readonly tiers?:readonly SimulationTier[];readonly after?:readonly string[];readonly context?:'none';/** Pure projections only; clocks/physics remain cadence-driven. */readonly incremental?:boolean}
 export interface EngineModule<Context,Command> extends ModuleDescription {readonly run:(context:Readonly<Context>,frame:ModuleFrame)=>readonly Command[]|void}
 export interface ModuleBatch {readonly phase:EnginePhase;readonly modules:readonly ModuleDescription[]}
 export interface KernelRunOptions<Context,Command>{
@@ -87,22 +87,51 @@ function snapshot<T>(context:T):Readonly<T>{
     Object.freeze(value);
   };freeze(value);return value;
 }
+interface VersionCell {value:number}
+interface IncrementalRecord {reads:VersionCell[];writes:VersionCell[];seen:Float64Array;pending:Float64Array;initialized:boolean;wildcard:boolean}
 export class EngineKernel<Context,Command>{
   readonly scheduler:ModuleScheduler;private readonly modules=new Map<string,EngineModule<Context,Command>>();
+  private versions:Map<string,VersionCell>|undefined;
+  private readonly prepared=new Map<string,IncrementalRecord>();
+  private readonly anyVersion:VersionCell={value:0};private readonly wildcardVersion:VersionCell={value:0};
+  private prepareIncremental():void {
+    if(![...this.modules.values()].some(m=>m.incremental))return;
+    this.versions=new Map();this.prepared.clear();
+    const cell=(key:string)=>{let c=this.versions!.get(key);if(!c)this.versions!.set(key,c={value:0});return c;};
+    for(const module of this.modules.values()){
+      const reads=module.reads.includes('*')?[this.anyVersion]:[this.wildcardVersion,...module.reads.map(cell)];
+      this.prepared.set(module.id,{reads,writes:module.writes.filter(k=>k!=='*').map(cell),wildcard:module.writes.includes('*'),seen:new Float64Array(reads.length),pending:new Float64Array(reads.length),initialized:false});
+    }
+  }
+  /** Unknown channels do not grow a cache. Wildcard readers still observe any external change. */
+  invalidate(...resources:string[]):this {
+    if(!this.versions||!resources.length)return this;
+    this.anyVersion.value++;for(const key of resources){if(key==='*')this.wildcardVersion.value++;else{const c=this.versions.get(key);if(c)c.value++;}}return this;
+  }
+  private due(module:ModuleDescription):boolean {
+    if(!module.incremental)return true;const record=this.prepared.get(module.id)!;
+    if(!record.initialized)return true;
+    for(let i=0;i<record.reads.length;i++)if(record.reads[i]!.value!==record.seen[i])return true;
+    return false;
+  }
   constructor(tickRate=60,capacity=64){this.scheduler=new ModuleScheduler(tickRate,capacity);}
-  use(module:EngineModule<Context,Command>):this{if(typeof module.run!=='function')throw new TypeError('Kernel modules require a synchronous implementation');this.scheduler.use(module);this.modules.set(module.id,Object.freeze({...stable(module),run:module.run}));return this;}
+  use(module:EngineModule<Context,Command>):this{if(typeof module.run!=='function')throw new TypeError('Kernel modules require a synchronous implementation');this.scheduler.use(module);this.modules.set(module.id,Object.freeze({...stable(module),run:module.run}));this.prepareIncremental();return this;}
   run(tick:number,context:Readonly<Context>,tier:SimulationTier='detailed',options:KernelRunOptions<Context,Command>={}):Command[]{
     const dt=options.deltaSeconds??1/this.scheduler.tickRate;if(!Number.isFinite(dt)||dt<=0)throw new RangeError('Kernel delta must be positive and finite');
     const commands:Command[]=[];let current=context;
     const profiler=options.profiler?.enabled?options.profiler:undefined;
     const plan=profiler?profiler.measure('kernel:plan',()=>this.scheduler.plan(tick,tier)):this.scheduler.plan(tick,tier);
     for(const batch of plan){
-      const view=batch.modules.every(m=>m.context==='none')?Object.freeze({}) as Readonly<Context>:profiler?profiler.measure('kernel:read',()=>snapshot(options.read?.()??current)):snapshot(options.read?.()??current),pending:Command[]=[];
-      for(const description of batch.modules){const module=this.modules.get(description.id)!;if(!module)throw new TypeError(`No implementation: ${description.id}`);
+      const active=this.versions?batch.modules.filter(m=>this.due(m)):batch.modules;if(!active.length)continue;
+      const view=active.every(m=>m.context==='none')?Object.freeze({}) as Readonly<Context>:profiler?profiler.measure('kernel:read',()=>snapshot(options.read?.()??current)):snapshot(options.read?.()??current),pending:Command[]=[];
+      for(const description of active){const module=this.modules.get(description.id)!;if(!module)throw new TypeError(`No implementation: ${description.id}`);
+        if(module.incremental){const record=this.prepared.get(module.id)!;for(let i=0;i<record.reads.length;i++)record.pending[i]=record.reads[i]!.value;}
         const frame=Object.freeze({tick,deltaSeconds:dt*this.scheduler.tickRate/module.rateHz,tier,phase:module.phase});options.onModule?.(description,frame);
         const result=profiler?profiler.measure(`module:${module.id}`,()=>module.run(view,frame)):module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);
       }
       if(pending.length){commands.push(...pending);if(options.commit)current=profiler?profiler.measure('kernel:commit',()=>options.commit!(pending,view,batch.phase)):options.commit(pending,view,batch.phase);}
+      // No version/seen update before a successful batch commit. Failed work is retryable.
+      if(this.versions)for(const module of active){const record=this.prepared.get(module.id)!;if(module.incremental){record.seen.set(record.pending);record.initialized=true;}if(module.writes.length){this.anyVersion.value++;if(record.wildcard)this.wildcardVersion.value++;for(const cell of record.writes)cell.value++;}}
     }
     return commands;
   }

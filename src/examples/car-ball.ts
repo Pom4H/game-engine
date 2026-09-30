@@ -61,8 +61,16 @@ const blueprint=(id:string)=>vehicle(id,{chassis:{massKg:300*CAR_SCALE**3,sizeM:
  }))),});
 /** Executable game recipe. Browser-independent authoritative state, no network/GPU I/O.
  * Car mass integrates only in PhysicsWorld; the ball mass only in StructuralBody. */
+export interface CarBallConfig {readonly gravity:number;readonly matchSeconds:number;readonly kickoffSeconds:number;}
+export function carBallConfig(input:Partial<CarBallConfig>={}):CarBallConfig {
+ const value={gravity:16,matchSeconds:300,kickoffSeconds:1.5,...input};
+ for(const key of Object.keys(input))if(!['gravity','matchSeconds','kickoffSeconds'].includes(key))throw new TypeError(`Unknown arena parameter ${key}`);
+ if(!Number.isFinite(value.gravity)||value.gravity<1||value.gravity>30||!Number.isSafeInteger(value.matchSeconds)||value.matchSeconds<10||value.matchSeconds>300||!Number.isFinite(value.kickoffSeconds)||value.kickoffSeconds<0||value.kickoffSeconds>10)throw new RangeError('Invalid arena configuration');
+ return Object.freeze(value);
+}
 export class CarBallArena {
- readonly world=new PhysicsWorld([0,-16,0],0);
+ readonly config:CarBallConfig;
+ readonly world:PhysicsWorld;
  readonly cars:[ArcadeVehicle,ArcadeVehicle];
  ball=new StructuralBody(BALL.definition);
  readonly contacts:StructuralRigidContacts;
@@ -70,7 +78,9 @@ export class CarBallArena {
  private readonly orientation=[new Float64Array(4),new Float64Array(4)];
  private readonly inputTicks=[-1e9,-1e9];
  tick=0;time=0;generation=0;remaining=300;phase=0;private countdown=1.5;private overtime=false;
- constructor(){
+ constructor(input:Partial<CarBallConfig>={}){
+  this.config=carBallConfig(input);this.world=new PhysicsWorld([0,-this.config.gravity,0],0);
+  this.remaining=this.config.matchSeconds;this.countdown=this.config.kickoffSeconds;
   const boundaries=arenaBoxes.map(box=>new RigidBody({id:box.id,position:box.position,rotation:box.rotation??[0,0,0],shape:{kind:'box',half:box.size.map(n=>n/2) as unknown as Vec3},restitution:.75,friction:.45}));
   // The implicit ground owns rigid floor contact. The nodal solver uses its matching box.
   for(const b of boundaries)if(b.id!=='floor')this.world.add(b);

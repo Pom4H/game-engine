@@ -1,3 +1,4 @@
+import type {RuntimeTimeline} from './runtime-timeline.js';
 /** CPU wall-time sampling at synchronous execution boundaries, never inside a solver.
  * RU: Измеряется время исполнения на границах; часы не участвуют в симуляции. */
 export interface QuantumStats {readonly meanMs:number;readonly p50Ms:number;readonly p95Ms:number;readonly maxMs:number}
@@ -14,15 +15,15 @@ export interface CpuScopeSnapshot {
 }
 export interface CpuProfileSnapshot {readonly enabled:boolean;readonly capacity:number;readonly scopes:readonly CpuScopeSnapshot[];readonly droppedScopes:number}
 interface Scope {id:string;calls:number;failures:number;count:number;cursor:number;total:number;selfTotal:number;inclusive:Float64Array;self:Float64Array}
-export interface CpuProfilerOptions {enabled?:boolean;capacity?:number;maxScopes?:number;now?:()=>number}
+export interface CpuProfilerOptions {enabled?:boolean;capacity?:number;maxScopes?:number;now?:()=>number;timeline?:RuntimeTimeline}
 /** Bounded per-operation windows; each sample is one call, NOT one render frame.
  * Nested inclusive samples overlap. Use self time to avoid counting child work twice.
  * Promise lifetimes, GPU execution and worker time need their own execution-side adapter. */
 export class CpuProfiler {
   readonly enabled:boolean;readonly capacity:number;private readonly maxScopes:number;private readonly now:()=>number;
-  private readonly scopes=new Map<string,Scope>();private childMs=0;private depth=0;private droppedScopes=0;
+  private readonly scopes=new Map<string,Scope>();private childMs=0;private depth=0;private droppedScopes=0;private readonly timeline:RuntimeTimeline|undefined;private traceParent=0;
   constructor(options:CpuProfilerOptions={}){
-    this.enabled=options.enabled??false;this.capacity=options.capacity??256;this.maxScopes=options.maxScopes??128;this.now=options.now??(()=>performance.now());
+    this.timeline=options.timeline?.enabled?options.timeline:undefined;this.enabled=options.enabled??false;this.capacity=options.capacity??256;this.maxScopes=options.maxScopes??128;this.now=options.now??(()=>performance.now());
     if(!Number.isSafeInteger(this.capacity)||this.capacity<1||this.capacity>4096||!Number.isSafeInteger(this.maxScopes)||this.maxScopes<1||this.maxScopes>1024)throw new RangeError('Invalid CPU profiler budget');
   }
   measure<T>(id:string,run:()=>T):T{
@@ -33,10 +34,10 @@ export class CpuProfiler {
       scope={id,calls:0,failures:0,count:0,cursor:0,total:0,selfTotal:0,inclusive:new Float64Array(this.capacity),self:new Float64Array(this.capacity)};
       this.scopes.set(id,scope);
     }
-    const parentChildMs=this.childMs,start=this.now();this.childMs=0;this.depth++;let completed=false;
+    const parentChildMs=this.childMs,start=this.now(),parentTrace=this.traceParent;const span=this.timeline?.begin({owner:'CpuProfiler',kind:'cpu',name:id,at:start,...(parentTrace?{cause:parentTrace}:{})})??0;this.traceParent=span;this.childMs=0;this.depth++;let completed=false;
     try{const result=run();completed=true;return result;}
     finally{
-      const elapsed=Math.max(0,this.now()-start),self=Math.max(0,elapsed-this.childMs);this.childMs=parentChildMs+elapsed;this.depth--;
+      const elapsed=Math.max(0,this.now()-start);this.timeline?.end(span,start+elapsed,!completed);this.traceParent=parentTrace;const self=Math.max(0,elapsed-this.childMs);this.childMs=parentChildMs+elapsed;this.depth--;
       scope.inclusive[scope.cursor]=elapsed;scope.self[scope.cursor]=self;scope.cursor=(scope.cursor+1)%this.capacity;
       scope.count=Math.min(this.capacity,scope.count+1);scope.calls++;if(!completed)scope.failures++;scope.total+=elapsed;scope.selfTotal+=self;
       if(!this.depth)this.childMs=0;

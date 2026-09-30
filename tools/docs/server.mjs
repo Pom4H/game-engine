@@ -9,7 +9,7 @@ const useDatagrams=process.env.ARENA_TRANSPORT!=='sse';
 const arena=process.env.ARENA==='1'?(await import('./network-host.mjs')).debugNetworkHost({arena:true,publicOrigin:process.env.ARENA_PUBLIC_ORIGIN,datagrams:useDatagrams}):null;
 let quic=null;
 if(arena&&useDatagrams){quic=await (await import('../transport/server.mjs')).startArenaQuic(arena,{port:Number(process.env.ARENA_QUIC_PORT??4433),url:process.env.ARENA_QUIC_URL,certPath:process.env.ARENA_TLS_CERT,keyPath:process.env.ARENA_TLS_KEY});arena.configureTransport(quic);}
-const home=arena?'/games/':'/docs/',serve=staticSite(root,{home,connectOrigins:quic?[new URL(quic.config.url).origin]:[]});
+const home=arena?'/games/':'/',serve=staticSite(root,{home,connectOrigins:quic?[new URL(quic.config.url).origin]:[]});
 const server=createServer(async(req,res)=>{
  if(network&&await network.handle(req,res))return;
  if(arena&&await arena.handle(req,res))return;

@@ -31,7 +31,7 @@ test('one built site serves games separately, with shared modules and no old are
   for(const path of ['/games/','/games/car-ball/','/docs/']){const r=await fetch(url+path);assert.equal(r.status,200,path);assert.match(r.headers.get('content-type'),/text\/html/);}
   for(const path of ['/games','/games/car-ball','/docs']){const r=await fetch(url+path+'?test=1',{redirect:'manual'});assert.equal(r.status,308);assert.equal(r.headers.get('location'),path+'/?test=1');}
   assert.match(await(await fetch(url+'/docs/')).text(),/\.\.\/games\/car-ball\//);
-  assert.match(await(await fetch(url+'/games/')).text(),/\.\/car-ball\//);
+  assert.match(await(await fetch(url+'/games/')).text(),/games\/car-ball\//);
   for(const path of ['/docs/arena.html','/docs/arena.mjs','/docs/arena.css','/docs/engine/index.js','/games/no-such-game/','/.git/config','/engine/%2e%2e%2fsite.mjs','/engine/%5c..%5csite.mjs','/shared/%00x','/serve.mjs'])assert.equal((await fetch(url+path)).status,404,path);
   await assert.rejects(access(join(directory,'docs/arena.html')));await assert.rejects(access(join(directory,'docs/engine')));
   assert.match((await fetch(url+'/docs/compiler-worker.js')).headers.get('content-security-policy'),/connect-src 'none'/);
@@ -51,7 +51,7 @@ test('one built site serves games separately, with shared modules and no old are
    hosts.push(await childHost('tools/docs/server.mjs',{DOCS_OUT:directory,ARENA:'1',ARENA_TRANSPORT:'sse'}));
    hosts.push(await childHost(join(directory,'serve.mjs'),{}));
    assert.equal((await fetch(hosts[0].url+'/',{redirect:'manual'})).headers.get('location'),'/games/');
-   assert.equal((await fetch(hosts[1].url+'/',{redirect:'manual'})).headers.get('location'),'/docs/');
+   assert.equal((await fetch(hosts[1].url+'/',{redirect:'manual'})).status,200);
    for(const path of ['/docs/','/games/','/games/car-ball/','/shared/network-worker.js']){
     const results=await Promise.all(hosts.map(async h=>{const r=await fetch(h.url+path);assert.equal(r.status,200,path);return r.text();}));assert.equal(results[0],results[1],path);
    }

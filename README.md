@@ -29,3 +29,20 @@ First two connections drive; subsequent viewers spectate. The same branch includ
 the DSL editor, the Ё console, recorded renderer filmstrip and structural networking.
 See [game controls, networking and limits](docs/car-ball.md) and
 [structural projection API](docs/structural-network.md).
+
+## Product integration
+
+The integration product adds `/`, `/modules/`, `/games/chess/` and an explicit
+`/games/car-ball/?mode=local` mode over the existing engine, editor and arena.
+
+```sh
+bun run build
+node tools/docs/build.mjs
+bun cli serve
+```
+
+Authoring examples: `examples/chess/project.ts`, `examples/car-ball/project.ts`.
+`bun cli check <project.ts>` validates configuration without starting module factories.
+The same AST editor utilities are shared by games and `/docs/`.
+See [product scope, validation and remaining integration](docs/product.md).
+The full `thegame` migration and Meshwork/YouTube output are **not implemented here**.

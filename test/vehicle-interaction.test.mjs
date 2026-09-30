@@ -109,9 +109,10 @@ test('mechanism audio is deterministic and non-silent',()=>{
 });
 
 
-test('M3 render assembly preserves original FBX parts while keeping semantic engine materials',()=>{
+test('M3 assembly keeps its current packed topology and separate original-source provenance',()=>{
   const m3=generateM3Vehicle(),byId=new Map(m3.parts.map(part=>[part.id,part]));
-  assert.equal(m3.generatedTriangles,9798,'packed render assembly should preserve all source FBX triangles');
+  assert.equal(M3_REFERENCE_PROVENANCE.highFidelity.sourceTriangles,9798,'original input provenance is not the instantiated assembly count');
+  assert.equal(m3.generatedTriangles,11922,'lock the current packed assembly topology; do not silently equate it to input provenance');
   const body=byId.get('body');
   assert.equal(body.mesh.indices.length/3,m3.bodyTriangles,'physical M3 shell must remain the compact source topology');
   assert.equal(body.renderMesh?.kind,'triangle-mesh');
@@ -127,7 +128,8 @@ test('M3 render assembly preserves original FBX parts while keeping semantic eng
     assert.equal(byId.has('interior-'+id),false,`interior-${id} must not be an opaque coplanar duplicate of glazing`);
   }
   const grilleInlays=m3.parts.filter(part=>part.id.startsWith('grille-inlay-'));
-  assert.equal(grilleInlays.length,12,'two FBX kidney openings should receive six recessed vertical inlays each');
+  assert.equal(grilleInlays.length,22,'current authored grille has eleven horizontal slats per opening');
+  assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.mesh.size[2]>part.mesh.size[1]),'slats remain horizontal, not the superseded vertical recipe');
   assert.ok(grilleInlays.every(part=>part.mesh.kind==='box'&&part.position[0]<2.40),'grille inlays must stay within the source fascia envelope');
 
   assert.equal(byId.get('body').material.kind,'steel');
