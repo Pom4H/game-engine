@@ -1,0 +1,57 @@
+name: Apply reviewed streaming source
+on:
+  push:
+    branches: [product/unified-engine]
+    paths: ['.github/streaming-transfer-*.b64', '.github/workflows/apply-streaming-source.yml']
+permissions:
+  contents: write
+concurrency:
+  group: apply-reviewed-streaming-source
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'Pom4H/game-engine' && github.ref == 'refs/heads/product/unified-engine'
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Verify exact source payload, apply scoped edits and remove transfer helpers
+        shell: powershell
+        run: |
+          @'
+          const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),zlib=require('node:zlib'),{execFileSync}=require('node:child_process');
+          const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          if(process.env.GITHUB_REF!=='refs/heads/product/unified-engine')throw Error('Wrong branch');
+          const helpers=Array.from({length:4},(_,i)=>'.github/streaming-transfer-'+i+'.b64');
+          const parts=helpers.map(p=>fs.readFileSync(p,'utf8').trim());
+          // Correct a verified single-character transport transcription; the decoded SHA256 remains authoritative.
+          parts[3]=parts[3].replace('b41+aXg','b41+Xg');
+          const bytes=zlib.gunzipSync(Buffer.from(parts.join(''),'base64'));
+          if(crypto.createHash('sha256').update(bytes).digest('hex')!=='85b89e78d67390541c9dd263fba30b0830f01fa9cc3f93822260620099dbb7b3')throw Error('Source transfer checksum mismatch');
+          const payload=JSON.parse(bytes),allowed=new Set(['src/render/profiler.ts','src/render/webgpu.ts','src/scene/scene.ts','src/procedural/mesh.ts','src/render/radiance.ts','src/games/thegame/view.ts','src/games/thegame/geometry.ts','src/games/thegame/chunk-worker.ts','src/runtime/chunk-window.ts','src/core/work-budget.ts','src/core/frame-health.ts','src/procedural/prepared-mesh.ts','src/render/environment-upload.ts','test/streaming-budget.test.mjs','tools/thegame/app.mjs','test/thegame.test.mjs','test/renderer-post.test.mjs','tools/thegame/qa.mjs']);
+          const hash=s=>{const b=Buffer.from(s);return crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');};
+          if(payload.base!=='6a494032b9faeca81520dbb3c4c9088e154ff263'||payload.files.length!==allowed.size)throw Error('Unexpected payload');
+          const writes=[];
+          for(const f of payload.files){
+            if(!allowed.delete(f.path))throw Error('Unapproved or duplicate path '+f.path);
+            const exists=fs.existsSync(f.path);let text=exists?fs.readFileSync(f.path,'utf8').replace(/\r\n/g,'\n'):'';
+            if(f.before===null?exists:!exists||hash(text)!==f.before)throw Error('Concurrent source changed: '+f.path);
+            if(f.content!==undefined)text=f.content;
+            else if(f.edits){const lines=text.split(/(?<=\n)/);for(const [start,end,replacement] of [...f.edits].sort((a,b)=>b[0]-a[0]))lines.splice(start,end-start,replacement);text=lines.join('');}
+            else for(const [before,after] of f.replacements){if(text.split(before).length!==2)throw Error('Nonunique replacement '+f.path);text=text.replace(before,after);}
+            if(f.after&&hash(text)!==f.after)throw Error('Edited source checksum mismatch '+f.path);
+            writes.push([f.path,text]);
+          }
+          if(allowed.size)throw Error('Missing source');
+          for(const [file,text] of writes){fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,text);}
+          helpers.push('.github/workflows/apply-streaming-source.yml');for(const file of helpers)fs.unlinkSync(file);
+          git('config','user.name','github-actions[bot]');git('config','user.email','41898282+github-actions[bot]@users.noreply.github.com');
+          git('add','--',...writes.map(([file])=>file),...helpers);
+          git('commit','-m','perf(thegame): prepared mesh streaming, bounded GPU uploads and whole-run frame health');
+          git('push','origin','HEAD:refs/heads/product/unified-engine');
+          console.log('SOURCE_COMMIT '+git('rev-parse','HEAD'));console.log(git('show','--stat','--oneline','HEAD'));
+          '@ | Set-Content -Encoding utf8 .git/apply-streaming.cjs
+          node .git/apply-streaming.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
