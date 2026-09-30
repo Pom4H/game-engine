@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: snowy-arcade-${{ github.ref }}
@@ -30,10 +30,6 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           bun run build
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Source snapshot for offline inspection
-        run: |
-          New-Item -ItemType Directory -Force artifacts | Out-Null
-          git archive --format=zip --output=artifacts/engine-source.zip HEAD
       - name: Locate hardware Chrome
         run: |
           $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
@@ -41,17 +37,17 @@ jobs:
           if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
           if (-not $chrome) { throw 'Chrome not found on GPU worker' }
           "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-      - name: Render reference scene
+      - name: Render and validate actual WebGPU frames
+        run: node tools/arcade/capture.mjs
+      - name: Preserve full-resolution frames locally
         run: |
-          if (Test-Path tools/arcade/capture.mjs) {
-            node tools/arcade/capture.mjs
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-      - name: Preserve evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: snowy-arcade-${{ github.sha }}
-          path: artifacts/
-          retention-days: 3
-          if-no-files-found: error
+          $target = Join-Path $env:USERPROFILE 'game-engine-renders\snowy-arcade'
+          New-Item -ItemType Directory -Force $target | Out-Null
+          Copy-Item artifacts/snowy-arcade*.png,artifacts/arcade-preview.jpg,artifacts/arcade-evidence.json $target -Force
+      - name: Publish private render evidence
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = 'snowy-arcade-' + $env:GITHUB_SHA.Substring(0,7)
+          node tools/publish-release.mjs $tag artifacts/snowy-arcade.png artifacts/snowy-arcade-motion.png artifacts/arcade-preview.jpg artifacts/arcade-evidence.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
