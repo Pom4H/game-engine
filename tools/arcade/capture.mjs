@@ -2,6 +2,7 @@ import {spawnSync} from 'node:child_process';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import scene,{authoredEntityCount,quality} from './reference.scene.mjs';
+import views from './views.mjs';
 import {prepareArcadeTextures} from './textures.mjs';
 const width=Number(process.env.ARCADE_WIDTH??quality.internal[0]),height=Math.round(width*9/16);
 assert(Number.isInteger(width)&&width>=640&&width<=3840,'Invalid capture width');
@@ -16,6 +17,12 @@ for(const e of scene.entities){
   sourceTriangles+=e.mesh.indices.length/3;
  }
 }
+const cam=views[0].camera;
+const sub=(a,b)=>a.map((v,i)=>v-b[i]),dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],norm=a=>{const l=Math.hypot(...a)||1;return a.map(v=>v/l);};
+const forward=norm(sub(cam.target,cam.position)),right=norm(cross(forward,[0,1,0])),up=cross(right,forward),tan=Math.tan((cam.fov??45)*Math.PI/360),aspect=16/9;
+const suspects=[];
+for(const e of scene.entities){if(!e.mesh)continue;const d=sub(e.position,cam.position),z=dot(d,forward);if(z<=.1)continue;const sx=.5+.5*dot(d,right)/(z*tan*aspect),sy=.5-.5*dot(d,up)/(z*tan);if(sx<.28&&sy<.18)suspects.push({id:e.id,position:e.position,screen:[+sx.toFixed(3),+sy.toFixed(3)],z:+z.toFixed(2),mesh:e.mesh.kind});}
+console.log('TOP_LEFT_SUSPECTS='+JSON.stringify(suspects));
 await mkdir('artifacts',{recursive:true});
 const run=(command,args,env={})=>{
  const result=spawnSync(command,args,{encoding:'utf8',maxBuffer:32*1024*1024,windowsHide:true,env:{...process.env,...env}});
