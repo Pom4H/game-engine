@@ -16,21 +16,16 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Export compact source delta for offline integration
+      - name: Compact integration patch
         shell: powershell
         run: |
           @'
           const {execFileSync}=require('node:child_process');
           const {gzipSync}=require('node:zlib');
-          const base='6bfb8c51228c99dad1cc91c647194a0643c5bb8a';
-          for(const ref of ['HEAD','origin/main','origin/refactor/causal-runtime']){
-            const git=(...a)=>execFileSync('git',a,{encoding:'utf8',maxBuffer:20*1024*1024});
-            const names=git('diff','--name-only',base,ref,'--','src','tools','test','docs','package.json','README.md').trim().split('\n').filter(Boolean);
-            const files={};for(const name of names){try{files[name]=git('show',ref+':'+name);}catch{files[name]=null;}}
-            const data=Buffer.from(gzipSync(JSON.stringify({base,ref,commit:git('rev-parse',ref).trim(),files}))).toString('base64');
-            console.log('SOURCE_DELTA '+ref+' '+data.length);
-            for(let i=0;i<data.length;i+=6000)console.log('DELTA '+ref+' '+i+' '+data.slice(i,i+6000));
-          }
+          const patch=execFileSync('git',['diff','--binary','6bfb8c51228c99dad1cc91c647194a0643c5bb8a','2db7720705c87c70ebc3572e7f7956abdfe0e0b0','--','src','tools','test','package.json','README.md'],{maxBuffer:10*1024*1024});
+          const data=gzipSync(patch).toString('base64');
+          console.log('PATCH_BYTES '+patch.length+' BASE64 '+data.length);
+          console.log('PATCH '+data);
           '@ | node
           exit $LASTEXITCODE
       - uses: oven-sh/setup-bun@v2
@@ -48,5 +43,9 @@ jobs:
       - name: Complete regression suite
         shell: powershell
         run: |
-          node --test test/*.test.mjs
-          exit $LASTEXITCODE
+          New-Item -ItemType Directory -Force artifacts/product | Out-Null
+          cmd /c "node --test test/*.test.mjs > artifacts/product/tests.log 2>&1"
+          $result = $LASTEXITCODE
+          Get-Content artifacts/product/tests.log -Tail 20
+          Select-String -Path artifacts/product/tests.log -Pattern '^not ok' | ForEach-Object { $_.Line }
+          exit $result
