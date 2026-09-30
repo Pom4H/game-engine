@@ -16,7 +16,7 @@ for(let i=0;i<count;i++){
  const points=Array.from({length:65},(_,j)=>{const a=j/64*Math.PI;return[r*Math.cos(a),rise*Math.sin(a)];});
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
-const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-building'&&e.id!=='roof-top'&&e.id!=='front-mansard'&&!/^roof-(seam|snow-seam)/.test(e.id)&&e.id!=='eaves-snow'&&!/^dormer-/.test(e.id)&&!/^shop-\d+-arch-face$/.test(e.id)&&!/^side-(canopy|column|arch-trim|window)/.test(e.id)).map(e=>{
+const entities=base.entities.filter(e=>!/^batch:(roof-seam|roof-snow-seam|dormer-|chimney)/.test(e.id)&&!/^chimney-/.test(e.id)&&e.id!=='distant-building'&&e.id!=='roof-top'&&e.id!=='front-mansard'&&!/^roof-(seam|snow-seam)/.test(e.id)&&e.id!=='eaves-snow'&&!/^dormer-/.test(e.id)&&!/^shop-\d+-arch-face$/.test(e.id)&&!/^side-(canopy|column|arch-trim|window)/.test(e.id)).map(e=>{
  if(e.id==='upper-building')return {...e,material:agedWall};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
