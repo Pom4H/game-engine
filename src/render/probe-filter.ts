@@ -1,6 +1,6 @@
 /** Cached GGX convolution of the actual local capture, never a roughness fade to sky. */
 export const PROBE_MIP_LEVELS=8;
-export const PROBE_FILTER_SAMPLES=32;
+export const PROBE_FILTER_SAMPLES=64;
 export function probeFilterPlan():readonly {face:number;mip:number;roughness:number}[]{
   return Array.from({length:PROBE_MIP_LEVELS-1},(_,index)=>index+1)
     .flatMap(mip=>Array.from({length:6},(_,face)=>({face,mip,roughness:mip/(PROBE_MIP_LEVELS-1)})));
