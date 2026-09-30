@@ -3,7 +3,7 @@ import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive,surfaceGridPrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
 import type {SimulationTier} from '../core/kernel.js';
-import {environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
+import {environmentHistorySteps,environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
 import {SurfaceEnvironmentSystem} from '../environment/surface-state.js';
 import {surfaceFieldResolution} from '../environment/deformable-surface.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
@@ -92,6 +92,9 @@ export class Scene {
     // Initial environmental facts exist before the first scheduled surface tick.
     // Cadence controls evolution, not whether authored physical state exists.
     this.surfaces.reconcile(this.environment,this.entities);
+    // Weather before t=0 is a first-class cause. Integrate it once at load time
+    // with adaptive environment steps; no physics/animation time is consumed.
+    this.surfaces.prewarm(environmentHistorySteps(this.spec.environment),this.entities);
     this.contacts=new SurfaceContactSystem(this);
     this.syncSurfaceVisuals();
     for(const {surfaceId,...options} of this.spec.surfaceContacts?.snow??[])this.contacts.addSnowSurface(surfaceId,options);
@@ -258,7 +261,13 @@ export class Scene {
           const preferred=`__surface:snowdrift:${surfaceId}:${i}`,base=preferred.length<=140?preferred:`__surface:snowdrift:${hashString(surfaceId).toString(36)}:${i}`;
           id=base;while(this.entities.has(id))id=`${base}:${this.surfaceVisualSequence++}`;
         }
-        const entity=this.add({id:id!,position,rotation:longAxis===0?[0,0,0]:[0,-Math.PI/2,0],mesh:{kind:'snowdrift',size,seed,continuous:true,offset:position[longAxis]},material:{roughness:.88,...source.environmental?.snowMaterial,kind:'snow'}});
+        const pack=state.snowpack,wet=Math.max(pack.liquidFraction,state.slush*.65),crust=pack.crust,aged=Math.min(1,pack.grainSizeMm/2.2),snowColor:[number,number,number,number]=[
+          .93-state.dirt*.22-wet*.08,
+          .955-state.dirt*.19-wet*.07,
+          .98-state.dirt*.14-wet*.04,
+          1,
+        ],snowRoughness=Math.max(.42,Math.min(.97,.94-pack.freshness*.02-wet*.28-crust*.24+aged*.025));
+        const entity=this.add({id:id!,position,rotation:longAxis===0?[0,0,0]:[0,-Math.PI/2,0],mesh:{kind:'snowdrift',size,seed,continuous:true,offset:position[longAxis]},material:{color:snowColor,roughness:snowRoughness,...source.environmental?.snowMaterial,kind:'snow'}});
         this.surfaceVisuals.set(key,{source:surfaceId,entity});
       }
     }
