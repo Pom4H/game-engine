@@ -1,0 +1,57 @@
+name: Snowy Arcade GPU
+
+on:
+  push:
+    branches: [render/snowy-arcade]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: snowy-arcade-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: self-hosted
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Build
+        run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Source snapshot for offline inspection
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          git archive --format=zip --output=artifacts/engine-source.zip HEAD
+      - name: Locate hardware Chrome
+        run: |
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw 'Chrome not found on GPU worker' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Render reference scene
+        run: |
+          if (Test-Path tools/arcade/capture.mjs) {
+            node tools/arcade/capture.mjs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snowy-arcade-${{ github.sha }}
+          path: artifacts/
+          retention-days: 3
+          if-no-files-found: error
