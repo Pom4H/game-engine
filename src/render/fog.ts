@@ -24,8 +24,8 @@ fn pointFogIntegral(source:PointSource,origin:vec3<f32>,ray:vec3<f32>,rayLength:
  // Dense near-emitter aureole + a broader halo. Both are radiance from the
  // actual point emitter, so the glow stays causal and disappears with it.
  let aureole=core*2.25+pow(rangeWeight,.42)*.42;
- return source.color.rgb*source.color.w*integral*rangeWeight*transmittance*density*.085
-      +source.color.rgb*source.color.w*aureole*transmittance*density*.020*(1.0-axial*.18);
+ return source.color.rgb*source.color.w*integral*rangeWeight*transmittance*density*.10
+      +source.color.rgb*source.color.w*aureole*transmittance*density*.035*(1.0-axial*.18);
 }
 fn pointFog(origin:vec3<f32>,position:vec3<f32>,density:f32)->vec3<f32>{
  if(density<=.00001){return vec3<f32>(0);}
