@@ -27,7 +27,7 @@ const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
  if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.61,.32],intensity:42,range:8.5}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
- if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.006,snowDepthM:.008,iceDepthM:.0005}};
+ if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.008,snowDepthM:.012,iceDepthM:.0005}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
  if(!light)return e;
@@ -135,7 +135,7 @@ for(let i=0;i<5;i++){
  additions.push({id:`hero-dormer-gable-${i}`,position:[x,10.45,.31],mesh:{kind:'polygon-prism',axis:2,points:pts,thickness:1.34},material:{kind:'default',color:[.050,.055,.060,1],metalness:.18,roughness:.80}});
  additions.push({id:`hero-dormer-snow-${i}`,position:[x,10.53,.12],mesh:{kind:'snowdrift',size:[1.76,.055,.66],seed:41000+i*131,segments:18},material:snow});
 }
-for(const [i,x] of [-22,-10,1].entries()){
+for(const [i,x] of [-22,-10].entries()){
  box(`hero-chimney-${i}`,[x,11.25,3.7],[.72,1.86,.76],{kind:'default',color:[.085,.072,.062,1],roughness:.95,texture:materialMap('stone',.62,.50)});
  box(`hero-chimney-cap-${i}`,[x,12.20,3.7],[.94,.14,.98],{kind:'concrete',color:[.14,.13,.12,1],roughness:.94});
  additions.push({id:`hero-chimney-snow-${i}`,position:[x,12.30,3.7],mesh:{kind:'snowdrift',size:[1.0,.06,1.04],seed:43000+i*173,segments:16},material:snow});
@@ -158,5 +158,5 @@ for(const [i,x] of [-22,-10,1].entries()){
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.93,wind:[.38,0,.12]},
- rendering:{...base.rendering,skyColor:[.032,.037,.047],fogDensity:.0125,sunDirection:[-.34,.72,-.49],sunColor:[.48,.58,.72],sunIntensity:.42,exposure:1.16},
+ rendering:{...base.rendering,skyColor:[.032,.037,.047],fogDensity:.014,sunDirection:[-.34,.72,-.49],sunColor:[.48,.58,.72],sunIntensity:.42,exposure:1.16},
  entities:[...entities,...additions]};
