@@ -1,0 +1,50 @@
+name: Product
+on:
+  push:
+    branches: [product/unified-engine]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: product-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Reproducible source for integration and offline verification
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force artifacts/product | Out-Null
+          git bundle create artifacts/product/source.bundle --all
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git rev-parse HEAD | Out-File artifacts/product/commit.txt -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: product-source
+          path: artifacts/product/source.bundle
+          retention-days: 3
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install pinned engine tooling
+        run: bun install --frozen-lockfile
+      - name: Typecheck and build
+        run: bun run typecheck && bun run build
+      - name: Complete regression suite
+        shell: powershell
+        run: |
+          node --test test/*.test.mjs 2>&1 | Tee-Object artifacts/product/tests.log
+          exit $LASTEXITCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: product-verification
+          path: |
+            artifacts/product/commit.txt
+            artifacts/product/tests.log
+          retention-days: 14
