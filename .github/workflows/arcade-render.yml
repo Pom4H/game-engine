@@ -10,17 +10,21 @@ concurrency:
   cancel-in-progress: true
 jobs:
   render:
-    runs-on: self-hosted
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 10
     defaults:
       run:
         shell: powershell
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
       - name: Prepare immutable source blobs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node tools/arcade/prepare-upgrade.mjs
+        run: |
+          $path = 'tools/arcade/prepare-upgrade.mjs'
+          $text = [IO.File]::ReadAllText((Join-Path $PWD $path))
+          $before = '"FRAME_WGSL+LIGHT_GRID_WGSL+`","FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`"'
+          $after = '"const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`","const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`"'
+          if (-not $text.Contains($before)) { throw 'Missing material-shader anchor' }
+          [IO.File]::WriteAllText((Join-Path $PWD $path), $text.Replace($before, $after), (New-Object Text.UTF8Encoding $false))
+          node tools/arcade/prepare-upgrade.mjs
