@@ -8,7 +8,7 @@ const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap(
 const additions=[];
 const warmGlass={kind:'default',color:[.22,.15,.09,.22],metalness:.02,roughness:.12,emissive:[.52,.29,.12]};
 const darkWood={kind:'default',color:[.075,.045,.03,1],roughness:.72,ageYears:80,texture:materialMap('wood',.55,.58)};
-const agedWall={kind:'default',color:[.19,.15,.12,1],roughness:.97,ageYears:95,texture:materialMap('plaster',.7,.76)};
+const agedWall={kind:'default',color:[.27,.225,.18,1],roughness:.97,ageYears:95,texture:materialMap('plaster',.62,.82)};
 
 const start=-2.5,bay=3.55,count=9,r=bay/2+.025,rise=1.12;
 for(let i=0;i<count;i++){
@@ -16,14 +16,14 @@ for(let i=0;i<count;i++){
  const points=Array.from({length:65},(_,j)=>{const a=j/64*Math.PI;return[r*Math.cos(a),rise*Math.sin(a)];});
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
-const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-building').map(e=>{
+const entities=base.entities.filter(e=>!/^chimney-/.test(e.id)&&e.id!=='distant-building'&&!/^shop-\d+-arch-face$/.test(e.id)&&!/^dormer-0-/.test(e.id)).map(e=>{
  if(e.id==='upper-building')return {...e,material:agedWall};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id))return {...e,material:{...warmGlass,emissive:[.10,.055,.022]}};
  if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
- if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.57,.52,.45,1],emissive:[.085,.045,.018],roughness:.98}};
+ if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.52,.47,.40,.78],emissive:[.040,.020,.008],roughness:.98}};
  if(/^shop-\d+-room-back/.test(e.id))return {...e,material:{...e.material,color:[.16,.105,.07,1],emissive:[.035,.016,.006]}};
- if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.67,.40],intensity:3.2,range:3.5}};
+ if(/^shop-\d+-inside-light/.test(e.id))return {...e,light:{...e.light,color:[1,.67,.40],intensity:4.6,range:4.0}};
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.26,.22,.17,1],roughness:.96,emissive:[.012,.009,.006]}};
  if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.61,.32],intensity:42,range:8.5}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.82,.54,1],emissive:[18,9,3.8]}};
@@ -98,10 +98,17 @@ for(let i=0;i<24;i++){
  additions.push({id:`road-snowbank-${i}`,position:[x,.015,-4.4-(i%3)*.12],mesh:{kind:'snowdrift',size:[1.05,.14,.62],seed,segments:20},material:snow});
 }
 
+// Wind-blown foreground clumps break the pavement into wet and packed-snow
+// regions without hiding the reflections.
+for(let i=0;i<42;i++){
+ const t=(i*37%101)/101,z=-5.2-(i*53%89)/89*8.6,x=-18+t*43;
+ additions.push({id:`road-scatter-${i}`,position:[x,-.002,z],mesh:{kind:'snowdrift',size:[.42+(i%5)*.10,.035+(i%3)*.014,.32+(i%4)*.08],seed:14000+i*83,segments:14},material:snow});
+}
+
 // Wetness/reflections remain properties of the actual road surface, not rectangular cards.
 
 export const authoredEntityCount=buildingEntityCount+additions.length;
 export default {...base,
  environment:{...base.environment,snowfall:'moderate',humidity:.93,wind:[.38,0,.12]},
- rendering:{...base.rendering,skyColor:[.024,.029,.038],fogDensity:.0115,sunDirection:[-.34,.72,-.49],sunColor:[.48,.58,.72],sunIntensity:.36,exposure:1.10},
+ rendering:{...base.rendering,skyColor:[.032,.037,.047],fogDensity:.0125,sunDirection:[-.34,.72,-.49],sunColor:[.48,.58,.72],sunIntensity:.42,exposure:1.16},
  entities:[...entities,...additions]};
