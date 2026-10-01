@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {PhysicsWorld} from '../dist/physics/world.js';
 import {Scene} from '../dist/scene/scene.js';
 import {spawnVehicle} from '../dist/vehicles/scene-vehicle.js';
+import {project} from '../dist/core/project.js';
+import {helicopter} from '../dist/games/helicopter-project.js';
 import {Vehicle,vehicle,rotor} from '../dist/vehicles/vehicle.js';
 import {
  lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL,
@@ -123,6 +125,16 @@ test('scene rotor presentation consumes physical spin instead of a second animat
  assert.notDeepEqual([...visual.rotation],before);
  assert.equal(scene.physics.bodies.size,1);
  handle.dispose();assert.equal(scene.physics.bodies.size,0);assert.equal(scene.entities.size,0);
+});
+
+test('helicopter is an ordinary public project module with inspectable rotors',()=>{
+ const definition=project({id:'helicopter-demo',modules:{flight:helicopter({altitude:25})}});
+ const checked=definition.check();assert.equal(checked.modules[0].id,'helicopter');
+ const live=definition.start(),game=live.values.flight;
+ for(let i=0;i<240;i++)game.step();
+ const views=live.inspect();assert.deepEqual(views.map(view=>view.kind),['vehicle','rotor','rotor']);
+ assert.equal(game.world.bodies.size,1);assert.ok(views[1].data.rpm>100);
+ live.dispose();assert.equal(game.world.bodies.size,0);
 });
 
 test('rotor validation rejects impossible geometry and controls stay bounded',()=>{
