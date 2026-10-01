@@ -6,7 +6,8 @@ struct Frame {
  viewVP:mat4x4<f32>, previousVP:mat4x4<f32>, environment:vec4<f32>, projection:vec4<f32>,
  irradiance0:vec4<f32>, irradiance1:vec4<f32>, irradiance2:vec4<f32>, irradiance3:vec4<f32>, irradiance4:vec4<f32>,
  irradiance5:vec4<f32>, irradiance6:vec4<f32>, irradiance7:vec4<f32>, irradiance8:vec4<f32>,
- localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>
+ localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>,
+ fogVolume:array<vec4<f32>,8>
 }
 `;
 export const SKY_SHADER=FRAME_WGSL+`
@@ -103,7 +104,6 @@ export const EFFECTS_SHADER=FRAME_WGSL+`
 struct FogPointSource { position:vec4<f32>, color:vec4<f32> }
 struct FogLightGrid { bounds:vec4<f32>, sources:array<FogPointSource,256> }
 @group(0) @binding(7) var<storage,read> fogLights:FogLightGrid;
-@group(0) @binding(8) var<storage,read> fogVolumes:array<vec4<f32>>;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
 fn linearDepth(d:f32)->f32{return 500.0/(10000.0-d*9999.95);}
@@ -119,7 +119,7 @@ fn localLightFog(ray:vec3<f32>,maxDistance:f32)->vec3<f32>{
  if(f.params.x<.5||f.sky.w<.00005){return vec3<f32>(0);}
  let fogStrength=clamp(f.sky.w*85.0,0.0,1.0);var scatter=vec3<f32>(0);
  for(var li=0u;li<8u;li++){
-  let source=fogLights.sources[li];let volume=fogVolumes[li];let surfaceRange=source.position.w;
+  let source=fogLights.sources[li];let volume=f.fogVolume[li];let surfaceRange=source.position.w;
   let range=surfaceRange*max(.25,volume.w);if(range<=.05||source.color.w<=0.0){continue;}
   let delta=source.position.xyz-f.eye.xyz;let along=dot(delta,ray);
   let perpendicular2=max(dot(delta,delta)-along*along,0.0);let radius2=range*range;
