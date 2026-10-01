@@ -2,13 +2,14 @@ name: TheGame region shard
 
 on:
   push:
-    branches: [feat/thegame-region-shard, feat/thegame-seamless-crowd]
+    branches: [feat/thegame-region-shard, feat/thegame-seamless-crowd, feat/thegame-npc-authority]
     paths:
       - 'src/games/thegame/**'
       - 'src/network/**'
       - 'tools/thegame/**'
       - 'test/thegame-region*.test.mjs'
       - 'test/thegame-crowd.test.mjs'
+      - 'test/thegame-npc-authority.test.mjs'
       - 'test/thegame.test.mjs'
       - 'test/authority-shard.test.mjs'
       - 'test/network-projection.test.mjs'
@@ -47,4 +48,4 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/authority-shard.test.mjs test/network-projection.test.mjs test/thegame-region.test.mjs test/thegame-region-host.test.mjs test/thegame-crowd.test.mjs test/thegame.test.mjs
+      - run: node --test test/authority-shard.test.mjs test/network-projection.test.mjs test/thegame-region.test.mjs test/thegame-region-host.test.mjs test/thegame-crowd.test.mjs test/thegame-npc-authority.test.mjs test/thegame.test.mjs

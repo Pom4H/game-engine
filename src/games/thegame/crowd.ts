@@ -60,6 +60,13 @@ function candidate(
  return{id:`crowd:${cx}:${cz}:${slot}`,data:{position:[x,ground,z],yaw,phase,speed,kind:2}};
 }
 
+export function ambientPersonAt(world:OpenWorld,id:string,tick:number):AmbientPerson|undefined{
+ const match=/^crowd:(-?\d+):(-?\d+):(\d+)$/.exec(id);if(!match)return;
+ const cx=Number(match[1]),cz=Number(match[2]),slot=Number(match[3]);
+ if(!Number.isSafeInteger(cx)||!Number.isSafeInteger(cz)||!Number.isSafeInteger(slot)||slot<0||slot>=SLOT_THRESHOLDS.length)return;
+ return candidate(world,cx,cz,slot,tick);
+}
+
 /** Refines aggregate population into bounded, stable presentation residents around one player.
  * Meshwork counts override local estimates, but IDs/trajectories are derived from the same
  * global cell coordinates. Losing the distributed source therefore changes density, not identity. */
