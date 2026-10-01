@@ -101,3 +101,35 @@ adapter.
 
 This also means the existing 256 m simulation-location grid does not need to match
 the 128 m render-tile grid. They answer different questions.
+
+
+## Migration manifest
+
+Source branch: `world/infinite-altitude-streaming`, source head
+`c0bb5f1c9363fba3a5481d0fe0b256bdd7f98a3a`.
+
+Ported onto `product/unified-engine` without changing existing simulation/render
+ownership:
+
+- `src/world/tiles.ts`
+- `src/world/visibility.ts`
+- `src/world/infinite-world.ts`
+- public exports from `src/index.ts`
+- `test/infinite-world.test.mjs`
+
+The old branch also changed renderer, scene, environment, snow, M3 and promo files.
+Those diffs are intentionally **not** applied as part of the world-core migration.
+The unified branch has newer causal runtime, rendering, vehicle deformation,
+structural physics, audio and networking work; overwriting those files would be
+a regression risk rather than a merge.
+
+Before this port may merge, CI runs both the complete repository check and
+explicit preservation gates for:
+
+- structural/soft-body and vehicle physics;
+- browser/procedural audio;
+- network projections, buffers, structure and TheGame authority;
+- altitude-aware visibility and bounded world residency.
+
+Future pieces from the source branch must be ported by behavior/invariant, not by
+blind file replacement.
