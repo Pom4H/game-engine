@@ -5,6 +5,7 @@ import {CpuProfiler} from '../../core/profiling.js';
 import {RuntimeTimeline} from '../../core/runtime-timeline.js';
 import {OpenWorld,WORLD_REVISION,WORLD_LIMIT} from './world.js';
 import {materializeCrowd} from './crowd.js';
+import {NearbyNpcAuthority} from './npc-authority.js';
 export interface ThegameConfig extends CharacterTuning {readonly seed:number;readonly viewRadius:number;readonly exposure:number}
 export function thegameConfig(raw:Partial<ThegameConfig>={}):Readonly<ThegameConfig>{
  const c={seed:29,walkSpeed:3.35,runSpeed:6.8,gravity:16,jumpSpeed:5.4,viewRadius:3,exposure:1,...raw};
@@ -48,12 +49,12 @@ export function readSelf(raw:unknown):SelfState{
 /** Authoritative on-foot subset. Message handlers validate/enqueue; only step() moves actors.
  * Fixed 60 Hz, one input/peer/tick, independently bounded world, queues and publication. */
 export class ThegameAuthority {
- readonly config:Readonly<ThegameConfig>;readonly world:OpenWorld;readonly peers=new Map<string,Peer>();readonly timeline:RuntimeTimeline;readonly profiler:CpuProfiler;
+ readonly config:Readonly<ThegameConfig>;readonly world:OpenWorld;readonly peers=new Map<string,Peer>();readonly timeline:RuntimeTimeline;readonly profiler:CpuProfiler;readonly npcs:NearbyNpcAuthority;
  tick=0;private sequence=0;readonly epoch:number;
  readonly stats={joins:0,leaves:0,inputs:0,rejected:0,published:0};
  constructor(config:Partial<ThegameConfig>={},epoch=1,profile=false){
   this.config=thegameConfig(config);if(!Number.isSafeInteger(epoch)||epoch<1)throw new RangeError('Invalid world epoch');this.epoch=epoch;
-  this.world=new OpenWorld(this.config.seed);this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
+  this.world=new OpenWorld(this.config.seed);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
  }
  join(id:string,name='Игрок',saved?:{state:CharacterState;discovered:number}):Peer{
   if(this.peers.size>=32||this.peers.has(id)||!/^p[0-9a-z]{1,16}$/.test(id))throw new RangeError('Room capacity or identity');
@@ -83,16 +84,22 @@ export class ThegameAuthority {
    if(command){peer.ack=command.seq;peer.starved=0;}else peer.starved++;
    for(let i=0;i<LANDMARKS.length;i++){const point=LANDMARKS[i]!;if(Math.hypot(peer.state.x-point.x,peer.state.z-point.z)<8)peer.discovered|=1<<i;}
   }
+  this.npcs.refresh(this.peers.values(),this.tick);this.npcs.step(this.tick);
  }
+ setPopulation(population:readonly Frame[]):void{this.npcs.setPopulation(population);}
  snapshot(id:string,population:readonly Frame[]=[]):WorldSnapshot{
   const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
   const rows:{id:string;data:{position:readonly [number,number,number];yaw:number;phase:number;speed:number;kind:number}}[]=[];
   for(const other of this.peers.values())if(other!==peer&&Math.hypot(other.state.x-peer.state.x,other.state.z-peer.state.z)<512){const p=other.state;rows.push({id:other.id,data:{position:[p.x,p.y,p.z],yaw:p.yaw,phase:p.phase,speed:p.speed,kind:0}});}
+  rows.push(...this.npcs.rowsAround(peer.state,512,Math.max(0,peopleProjection.maxEntities-rows.length)));
   const crowdBudget=Math.max(0,Math.min(24,peopleProjection.maxEntities-rows.length));
-  rows.push(...materializeCrowd(this.world,population,peer.state,this.tick,crowdBudget));
+  for(const person of materializeCrowd(this.world,population,peer.state,this.tick,crowdBudget)){
+   if(this.npcs.has(person.id))continue;
+   rows.push(person);if(rows.length>=peopleProjection.maxEntities)break;
+  }
   const frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time:this.tick/60,paused:false},rows);this.stats.published++;
   return {type:'state',world:worldSignature(this.config),frame,self:{ack:peer.ack,state:{...peer.state},discovered:peer.discovered},players:this.peers.size};
  }
- inspect(){return {tick:this.tick,players:this.peers.size,queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
- dispose():void{this.peers.clear();this.world.dispose();this.timeline.clear();}
+ inspect(){return {tick:this.tick,players:this.peers.size,queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),npcs:this.npcs.inspect(),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
+ dispose():void{this.peers.clear();this.npcs.dispose();this.world.dispose();this.timeline.clear();}
 }
