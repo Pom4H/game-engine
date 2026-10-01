@@ -18,7 +18,6 @@ test('proving ground is a valid engine scene with every authored test zone',()=>
  }
  assert.ok(releasePhysicsRequirements.length>=20);
  assert.ok(!ids.some(id=>/npc|player|mission|economy|quest/i.test(id)),'proving ground must remain engine-only');
- scene.dispose();
 });
 
 test('straight is real collision geometry, not a render-only road',()=>{
@@ -34,7 +33,6 @@ test('straight is real collision geometry, not a render-only road',()=>{
  assert.equal(roadContact,true);
  assert.ok(probe.position[1]>.25&&probe.position[1]<.8,probe.position);
  assert.ok(probe.position.every(Number.isFinite));
- scene.dispose();
 });
 
 test('obstacle lane produces an actual rigid-body impact',()=>{
@@ -52,7 +50,6 @@ test('obstacle lane produces an actual rigid-body impact',()=>{
  assert.equal(obstacleContact,true);
  assert.ok(maxImpulse>0,maxImpulse);
  assert.ok(probe.position.every(Number.isFinite));
- scene.dispose();
 });
 
 test('jump ramp converts forward speed into height through contact geometry',()=>{
@@ -70,7 +67,6 @@ test('jump ramp converts forward speed into height through contact geometry',()=
  assert.equal(rampContact,true);
  assert.ok(maxY>2.5,maxY);
  assert.equal(airborneAfterRamp,true);
- scene.dispose();
 });
 
 test('surface station exposes distinct physical surface state',()=>{
@@ -85,14 +81,12 @@ test('surface station exposes distinct physical surface state',()=>{
  const wetSample=scene.surfaces.sample('surface-wet-asphalt',41,-96);
  assert.ok(drySample&&wetSample);
  assert.notEqual(drySample.frictionScale,wetSample.frictionScale);
- scene.dispose();
 });
 
 test('water volume is deliberately non-solid until fluid physics owns it',()=>{
  const scene=new Scene(spec),water=scene.entities.get('water-volume');
  assert.ok(water);
  assert.equal(water.body,undefined,'water must never be faked with a solid collision plane');
- scene.dispose();
 });
 
 test('loop and hill are composed from ordinary physical segments',()=>{
@@ -104,5 +98,4 @@ test('loop and hill are composed from ordinary physical segments',()=>{
  assert.ok(loop.every(e=>e.body&&e.body.invMass===0));
  assert.ok(hill.every(e=>e.body&&e.body.invMass===0));
  assert.ok(loop.some(e=>Math.abs(e.rotation[0])>1));
- scene.dispose();
 });
