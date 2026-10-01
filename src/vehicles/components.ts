@@ -1,6 +1,7 @@
 import type {Vec3} from '../math.js';
 import {finiteVec3} from '../math.js';
 import {validateCondition,type ConditionSpec} from './condition.js';
+import {validateDrivetrainSpec,type DrivetrainSpec} from './drivetrain.js';
 
 interface PartSpec {readonly id:string;readonly at:Vec3;readonly massKg:number;readonly condition?:ConditionSpec;/** Optional chassis-local structural mount; defaults to at. */readonly mountAt?:Vec3;}
 export interface ShaftSpec {readonly id:string;readonly maxPowerW:number;readonly efficiency?:number;}
@@ -32,6 +33,7 @@ export interface VehicleSpec {
   readonly id:string;
   readonly chassis:{readonly massKg:number;readonly sizeM:Vec3;readonly dragAreaM2?:number};
   readonly shafts?:readonly ShaftSpec[];
+  readonly drivetrain?:DrivetrainSpec;
   readonly parts:readonly VehicleComponent[];
 }
 export interface CompiledComponent {
@@ -112,6 +114,7 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
     mass+=p.massKg;cx+=p.massKg*center[0];cy+=p.massKg*center[1];cz+=p.massKg*center[2];
     centers.push(center);diagonals.push(diag);parts.push({source:p,arm:p.at,inertia,area,slope,induced,chord,normal});
   }
+  if(source.drivetrain){validateDrivetrainSpec(source.drivetrain);for(const output of source.drivetrain.differential.outputs){const part=source.parts.find(p=>p.id===output);if(!part||part.kind!=='wheel')throw new RangeError(`Drivetrain output ${output} must reference a wheel`);}}
   const com:Vec3=[cx/mass,cy/mass,cz/mass];
   const I=[chassisMass*(size[1]**2+size[2]**2)/12+chassisMass*(com[1]**2+com[2]**2),chassisMass*(size[0]**2+size[2]**2)/12+chassisMass*(com[0]**2+com[2]**2),chassisMass*(size[0]**2+size[1]**2)/12+chassisMass*(com[0]**2+com[1]**2)];
   const shifted=parts.map((part,i)=>{
