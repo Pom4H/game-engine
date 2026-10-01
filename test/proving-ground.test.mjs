@@ -162,3 +162,23 @@ test('rotorcraft uses the same Vehicle body above the proving ground',()=>{
  assert.equal(scene.physics.bodies.get(heli.body.id),heli.body);
  heli.dispose();
 });
+
+
+test('wet asphalt reduces the actual tyre force limit on the surface station',()=>{
+ const sample=(x,id)=>{
+  const scene=new Scene(spec);
+  scene.physics.wheelSupport=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
+  const car=new Vehicle(scene.physics,roadCar(id),{position:[x,1.2,-96],rotation:[0,-Math.PI/2,0]});
+  for(let i=0;i<180;i++)scene.physics.step(dt);
+  const wheelState=car.part('rear.left');
+  assert.equal(wheelState.contact,true,`${id} rear wheel must contact the authored pad`);
+  const out={surface:wheelState.surfaceFriction,effective:wheelState.effectiveGrip,tyre:wheelState.tyreGrip,support:wheelState.supportId};
+  car.dispose();return out;
+ };
+ const dry=sample(-1,'surface.dry'),wet=sample(41,'surface.wet');
+ assert.equal(dry.support,'surface-asphalt');
+ assert.equal(wet.support,'surface-wet-asphalt');
+ assert.equal(dry.tyre,wet.tyre,'same tyre must retain the same authored tyre grip');
+ assert.ok(wet.surface<dry.surface,{dry,wet});
+ assert.ok(wet.effective<dry.effective,{dry,wet});
+});
