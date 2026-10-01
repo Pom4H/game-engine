@@ -2,7 +2,7 @@ name: TheGame transit migration preservation
 
 on:
   push:
-    branches: [feat/thegame-public-transit, feat/thegame-transit-materialization, feat/thegame-visible-transit-passengers]
+    branches: [feat/thegame-public-transit, feat/thegame-transit-materialization, feat/thegame-visible-transit-passengers, feat/thegame-transit-boarding]
     paths:
       - 'src/games/thegame/**'
       - 'src/index.ts'
