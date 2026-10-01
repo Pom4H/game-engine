@@ -87,6 +87,8 @@ test('water volume is deliberately non-solid until fluid physics owns it',()=>{
  const scene=new Scene(spec),water=scene.entities.get('water-volume');
  assert.ok(water);
  assert.equal(water.body,undefined,'water must never be faked with a solid collision plane');
+ assert.equal(scene.fluids.size,1);
+ assert.equal(scene.fluids.sampleXZ(12,-27)?.id,'water.basin');
 });
 
 test('loop and hill are composed from ordinary physical segments',()=>{
@@ -300,4 +302,31 @@ test('split-mu braking generates unequal tyre grip and yaw without controller ma
  assert.ok(Math.abs(leftGrip-rightGrip)>.08,{leftGrip,rightGrip});
  assert.ok(maxYaw>.02,maxYaw);
  car.dispose();
+});
+
+
+test('sealed hull floats in the proving-ground basin from displaced volume',()=>{
+ const scene=new Scene(spec),body=scene.physics.add(new RigidBody({
+  id:'probe-float',position:[12,-.25,-27],mass:900,shape:{kind:'box',half:[1.2,.55,.8]},
+  material:material('steel'),fluid:{enclosedVolumeM3:2.8,leakAreaM2:0}
+ }));
+ const start=body.position[1];
+ for(let i=0;i<360;i++)scene.physics.step(dt);
+ assert.ok(body.position[1]>start+.15,{start,end:body.position[1],v:body.velocity});
+ assert.equal(body.floodedVolumeM3,0);
+});
+
+test('leaking hull accumulates flood mass and loses buoyancy margin',()=>{
+ const scene=new Scene(spec);
+ const sealed=scene.physics.add(new RigidBody({
+  id:'probe-sealed',position:[8,-.35,-27],mass:900,shape:{kind:'box',half:[1.2,.55,.8]},
+  material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:0}
+ }));
+ const leaking=scene.physics.add(new RigidBody({
+  id:'probe-leaking',position:[16,-.35,-27],mass:900,shape:{kind:'box',half:[1.2,.55,.8]},
+  material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:.035}
+ }));
+ for(let i=0;i<900;i++)scene.physics.step(dt);
+ assert.ok(leaking.floodedVolumeM3>.15,leaking.floodedVolumeM3);
+ assert.ok(leaking.position[1]<sealed.position[1]-.12,{sealed:sealed.position,leaking:leaking.position,flooded:leaking.floodedVolumeM3});
 });
