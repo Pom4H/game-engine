@@ -197,7 +197,7 @@ test('brake endurance heats the wheel brakes and reduces available braking perfo
   parts:base.parts.map(p=>p.kind==='wheel'?{...p,brakeThermal:thermal}:p),
  });
  const car=new Vehicle(scene.physics,bp,{
-  position:[-28,1.2,-72],rotation:[0,-Math.PI/2,0],velocity:[0,0,31]
+  position:[-28,1.2,-100],rotation:[0,-Math.PI/2,0],velocity:[0,0,40]
  });
  car.setAir({densityKgM3:1.225,wind:[0,0,0],temperatureC:20});
  car.setControls({brake:1,throttle:0});
@@ -209,8 +209,8 @@ test('brake endurance heats the wheel brakes and reduces available braking perfo
   }
  }
  assert.ok(maxBrakePower>10000,JSON.stringify({maxBrakePower,hottest,minPerformance,velocity:car.body.velocity,wheelOmega:car.part('front.left').angularSpeed,contact:car.part('front.left').contact,support:car.part('front.left').supportId}));
- assert.ok(hottest>80,{hottest,minPerformance});
- assert.ok(minPerformance<.95,{hottest,minPerformance});
+ assert.ok(hottest>80,JSON.stringify({hottest,minPerformance,maxBrakePower,velocity:car.body.velocity}));
+ assert.ok(minPerformance<.95,JSON.stringify({hottest,minPerformance,maxBrakePower}));
  assert.ok(car.body.velocity[2]<8,{velocity:car.body.velocity,hottest,minPerformance});
  car.dispose();
 });
