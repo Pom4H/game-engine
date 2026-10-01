@@ -2,11 +2,13 @@ import {fileURLToPath} from 'node:url';
 import {resolve,extname,sep} from 'node:path';
 import {realpath,stat,readFile} from 'node:fs/promises';
 import {createThegameHost} from './host.mjs';
+import {createMeshworkPopulationMirror} from './meshwork-population.mjs';
 import definition from '../../examples/thegame/project.ts';
 if(typeof Bun==='undefined')throw Error('Run with Bun: bun tools/thegame/server.mjs');
 const root=resolve(process.env.THEGAME_SITE??fileURLToPath(new URL('../../.site',import.meta.url)));
 const config=definition.check(process.env.THEGAME_PRESET).modules[0].config;
-const host=createThegameHost(config,{profile:process.env.THEGAME_PROFILE==='1'});
+const populationMirror=process.env.MESHWORK_BROKER?createMeshworkPopulationMirror(process.env.MESHWORK_BROKER):null;
+const host=createThegameHost(config,{profile:process.env.THEGAME_PROFILE==='1',population:()=>populationMirror?.snapshot()??[]});
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.cjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.ts':'text/plain; charset=utf-8','.png':'image/png','.webp':'image/webp'};
 const directory=await realpath(root),extraOrigins=(process.env.THEGAME_ORIGINS??'').split(',').map(v=>v.trim()).filter(Boolean);
 const server=Bun.serve({hostname:process.env.HOST??'0.0.0.0',port:Number(process.env.PORT??4173),
@@ -17,7 +19,7 @@ const server=Bun.serve({hostname:process.env.HOST??'0.0.0.0',port:Number(process
    if(server.pendingWebSockets>=32)return new Response('Room full',{status:503});
    return server.upgrade(req)?undefined:new Response('WebSocket required',{status:426});
   }
-  if(url.pathname==='/thegame/health')return Response.json(host.inspect(),{headers:{'cache-control':'no-store'}});
+  if(url.pathname==='/thegame/health')return Response.json({...host.inspect(),meshwork:populationMirror?.inspect()??null},{headers:{'cache-control':'no-store'}});
   if(req.method!=='GET'&&req.method!=='HEAD')return new Response('Method not allowed',{status:405});
   try{
    const path=decodeURIComponent(url.pathname);if(path.includes('\\')||path.includes('\0')||path.split('/').some(p=>p.startsWith('.')))throw Error('Path');
@@ -32,6 +34,6 @@ const server=Bun.serve({hostname:process.env.HOST??'0.0.0.0',port:Number(process
  websocket:{maxPayloadLength:8192,idleTimeout:10,backpressureLimit:65_536,closeOnBackpressureLimit:true,perMessageDeflate:false,open:ws=>host.open(ws),message:(ws,text)=>host.message(ws,text),drain:ws=>host.drain(ws),close:ws=>host.close(ws)},
 });
 const timer=setInterval(()=>host.advance(),4);
-function stop(){clearInterval(timer);host.dispose();server.stop(true);}
+function stop(){clearInterval(timer);populationMirror?.dispose();host.dispose();server.stop(true);}
 process.once('SIGINT',stop);process.once('SIGTERM',stop);
 console.log(`Thegame: http://127.0.0.1:${server.port}/games/thegame/ — share this host's address with other players.`);
