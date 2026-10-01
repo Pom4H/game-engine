@@ -15,6 +15,7 @@ export const provingGroundZones=Object.freeze([
   {id:'rough',label:'Рельеф',domains:['suspension','tyre','ground-clearance','structural']},
   {id:'handling',label:'Извилистая трасса',domains:['steering','tyre','load-transfer','aero']},
   {id:'hill',label:'Горка',domains:['drivetrain','brake','tyre','thermal']},
+  {id:'brake-endurance',label:'Тормозной endurance-стенд',domains:['wheel','tyre','brake','thermal']},
   {id:'wind-tunnel',label:'Аэродинамический туннель',domains:['aero','wind','drag']},
   {id:'crosswind',label:'Боковой ветер',domains:['aero','wind-field','yaw-response']},
   {id:'soft-ground',label:'Мягкий грунт',domains:['soil','sinkage','traction','wheel']},
