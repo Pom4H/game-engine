@@ -64,3 +64,41 @@ export function residentIntent(seed:number,id:string,tick:number,stepSeconds=1/6
  else {activity='home';destination=profile.home;}
  return Object.freeze({activity,destination,speed,meaningful:true});
 }
+
+export interface ResidentPose {
+ readonly position:readonly[number,number];
+ readonly yaw:number;
+ readonly speed:number;
+ readonly phase:number;
+ readonly intent:ResidentIntent;
+}
+
+const mix=(a:number,b:number,t:number)=>a+(b-a)*Math.max(0,Math.min(1,t));
+const segment=(from:readonly[number,number],to:readonly[number,number],t:number)=>{
+ const x=mix(from[0],to[0],t),z=mix(from[1],to[1],t),dx=to[0]-from[0],dz=to[1]-from[1];
+ return{position:[x,z] as const,yaw:Math.atan2(dx,dz)};
+};
+export function residentPose(seed:number,id:string,tick:number):ResidentPose{
+ const profile=residentProfile(seed,id),intent=residentIntent(seed,id,tick),seconds=tick/60;
+ const hour=((seconds/3600)+profile.shiftOffsetHours+24)%24;
+ let from=profile.home,to=profile.home,t=0;
+ if(hour>=7&&hour<9){from=profile.home;to=profile.work;t=progress(hour,7,9);}
+ else if(hour>=9&&hour<12){from=to=profile.work;}
+ else if(hour>=12&&hour<12.25){from=profile.work;to=profile.leisure;t=progress(hour,12,12.25);}
+ else if(hour>=12.25&&hour<12.75){from=to=profile.leisure;}
+ else if(hour>=12.75&&hour<13){from=profile.leisure;to=profile.work;t=progress(hour,12.75,13);}
+ else if(hour>=13&&hour<17){from=to=profile.work;}
+ else if(hour>=17&&hour<19){from=profile.work;to=profile.home;t=progress(hour,17,19);}
+ else if(hour>=19&&hour<19.25){from=profile.home;to=profile.leisure;t=progress(hour,19,19.25);}
+ else if(hour>=19.25&&hour<21.75){from=to=profile.leisure;}
+ else if(hour>=21.75&&hour<22){from=profile.leisure;to=profile.home;t=progress(hour,21.75,22);}
+ const pose=segment(from,to,t),moving=from!==to;
+ const speed=moving?Math.max(.7,intent.speed):0;
+ return Object.freeze({
+  position:pose.position,
+  yaw:pose.yaw,
+  speed,
+  phase:(seconds*Math.max(.25,speed)*5+hash01(...Object.values(parseResidentId(id)!),seed))%(Math.PI*2000),
+  intent,
+ });
+}
