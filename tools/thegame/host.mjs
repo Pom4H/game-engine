@@ -5,7 +5,7 @@ import {FixedClock} from '../../dist/core/fixed-clock.js';
 import {LatestStateOutbox} from '../../dist/network/projection.js';
 /** Platform adapter: Bun owns sockets, the engine owns simulation. Tests use the same host. */
 export function createThegameHost(config,{profile=false,now=()=>performance.now(),epoch=Date.now()}={}){
- const game=new ThegameAuthority(config,epoch,profile),clock=new FixedClock(1000/60,100,4),sockets=new Map(),sessions=new Map();
+ const game=new ThegameAuthority(config,epoch,profile),clock=new FixedClock(1000/60,250,12),sockets=new Map(),sessions=new Map();
  let identities=0;const stats={bytes:0,messages:0,replaced:0,backpressure:0,timeouts:0};
  function send(socket,data){const c=sockets.get(socket);if(!c)return;const text=typeof data==='string'?data:JSON.stringify(data);const result=socket.send(text);stats.bytes+=Buffer.byteLength(text);stats.messages++;if(result===-1){c.blocked=true;c.blockedAt=now();stats.backpressure++;}else if(result===0)socket.close(1011,'Connection unavailable');}
  function flush(socket){const c=sockets.get(socket);if(!c||c.blocked)return;const next=c.outbox.take();if(next!==undefined)send(socket,next);}
@@ -41,10 +41,13 @@ export function createThegameHost(config,{profile=false,now=()=>performance.now(
   advance(at=now()){
    for(const [socket,c] of sockets)if(at-c.last>(c.id?5000:3000)||c.blocked&&at-c.blockedAt>2000){stats.timeouts++;socket.close(1013,'Connection stalled');close(socket);}
    for(const [key,s] of sessions)if(!s.active&&s.expires<=at)sessions.delete(key);
-   return clock.advance(at,()=>{
-    game.step();if(game.tick%3!==0)return;
+   const before=game.tick,steps=clock.advance(at,()=>game.step());
+   // Catch up bounded simulation debt, but publish only the newest state once.
+   // Scheduler jitter therefore cannot turn into a catch-up packet burst.
+   if(steps&&Math.floor(game.tick/3)>Math.floor(before/3)){
     for(const [socket,c] of sockets)if(c.id){if(c.outbox.size)stats.replaced++;c.outbox.offer(game.snapshot(c.id));flush(socket);}
-   });
+   }
+   return steps;
   },
   inspect(){return {...game.inspect(),transport:{...stats,sockets:sockets.size,sessions:sessions.size,unsent:[...sockets.values()].reduce((n,c)=>n+c.outbox.size,0)},droppedSimulationMs:clock.droppedMs};},
   dispose(){for(const socket of sockets.keys()){socket.close(1001,'Server shutdown');close(socket);}sessions.clear();game.dispose();},
