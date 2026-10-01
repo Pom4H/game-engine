@@ -353,3 +353,35 @@ test('leaking hull accumulates flood mass and loses buoyancy margin',()=>{
  assert.ok(leaking.floodedVolumeM3>.25,leaking.floodedVolumeM3);
  assert.ok(leaking.position[1]<sealed.position[1]-.08,JSON.stringify({sealed:sealed.position,leaking:leaking.position,flooded:leaking.floodedVolumeM3}));
 });
+
+
+test('crosswind corridor changes aerodynamic force only inside its spatial air volume',()=>{
+ const scene=new Scene(spec);
+ assert.equal(scene.wind.size,1);
+ const make=(id,position)=>{
+  const bp=vehicle(id,{chassis:{massKg:900,sizeM:[4.2,1.8,1.9],dragAreaM2:3.2},parts:[
+   wing('side.panel',{at:[-1.4,.45,0],massKg:12,spanM:2.2,chordM:1.3,chord:[0,0,1],normal:[1,0,0],zeroLiftRad:0,dragCoefficient:.08,stallRad:.30}),
+  ]});
+  const v=new Vehicle(scene.physics,bp,{position});v.evaluate(dt);return v;
+ };
+ const inside=make('crosswind.inside',[100,3.2,32]),outside=make('crosswind.outside',[100,3.2,70]);
+ const insideForce=Math.hypot(...inside.force),outsideForce=Math.hypot(...outside.force);
+ assert.ok(insideForce>outsideForce*5,{insideForce,outsideForce,inside:[...inside.force],outside:[...outside.force]});
+ assert.ok(Math.abs(inside.force[0])>100,{force:[...inside.force]});
+ inside.dispose();outside.dispose();
+});
+
+test('washboard excites repeated suspension oscillation instead of one scripted bump',()=>{
+ const scene=new Scene(spec);
+ scene.physics.wheelSupport=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
+ const car=new Vehicle(scene.physics,roadCar('proving.car.washboard'),{
+  position:[-88,1.15,-24],rotation:[0,-Math.PI/2,0],velocity:[0,0,10]
+ });
+ const samples=[];
+ for(let i=0;i<300;i++){scene.physics.step(dt);samples.push(car.part('front.left').compressionM);}
+ const usable=samples.slice(20),lo=Math.min(...usable),hi=Math.max(...usable);
+ let peaks=0;for(let i=1;i<usable.length-1;i++)if(usable[i]>usable[i-1]&&usable[i]>=usable[i+1]&&usable[i]>lo+.012)peaks++;
+ assert.ok(hi-lo>.035,{lo,hi,peaks});
+ assert.ok(peaks>=4,{lo,hi,peaks});
+ car.dispose();
+});
