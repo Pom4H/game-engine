@@ -10,6 +10,8 @@ on:
       - 'src/index.ts'
       - 'test/helicopter-physics.test.mjs'
       - 'tools/helicopter-flight-exam.mjs'
+      - 'tools/helicopter-flight-replay.mjs'
+      - 'tools/helicopter-replay.scene.mjs'
       - '.github/workflows/helicopter-physics.yml'
   pull_request:
     paths:
@@ -19,6 +21,8 @@ on:
       - 'src/index.ts'
       - 'test/helicopter-physics.test.mjs'
       - 'tools/helicopter-flight-exam.mjs'
+      - 'tools/helicopter-flight-replay.mjs'
+      - 'tools/helicopter-replay.scene.mjs'
       - '.github/workflows/helicopter-physics.yml'
 
 permissions:
@@ -57,3 +61,48 @@ jobs:
       - name: Preserve audio and network
         run: node --test test/browser-audio.test.mjs test/network-projection.test.mjs test/network-structure.test.mjs
       - run: bun run check
+
+  replay:
+    needs: check
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Locate Chrome and ffmpeg
+        shell: powershell
+        run: |
+          $candidates = @(
+            "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+            "$env:ProgramFiles(x86)\Google\Chrome\Application\chrome.exe",
+            "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe",
+            "$env:ProgramFiles\Chromium\Application\chrome.exe",
+            "$env:ProgramFiles\Chromium\chromium.exe"
+          )
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { $chrome = (Get-Command chromium.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw "Chrome/Chromium not found" }
+          $ffmpeg = (Get-Command ffmpeg.exe -ErrorAction SilentlyContinue).Source
+          if (-not $ffmpeg) { throw "ffmpeg not found" }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FFMPEG_PATH=$ffmpeg" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - uses: actions/download-artifact@v7
+        with:
+          name: helicopter-flight-exam
+          path: artifacts/helicopter-flight-exam
+      - name: Render recorded flight replay
+        run: node tools/helicopter-flight-replay.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: helicopter-flight-replay
+          path: |
+            artifacts/helicopter-flight-exam/replay-*.mp4
+            artifacts/helicopter-flight-exam/replay.json
+          if-no-files-found: error
+          retention-days: 14
