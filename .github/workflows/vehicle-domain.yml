@@ -31,6 +31,7 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
+      - run: bun install --cwd tools/docs --frozen-lockfile
       - name: Typecheck and build
         run: bun run typecheck && bun run build
       - name: Vehicle domain regression gates
@@ -67,6 +68,7 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
+      - run: bun install --cwd tools/docs --frozen-lockfile
       - name: Untouched base regression suite
         run: |
           git rev-parse HEAD
