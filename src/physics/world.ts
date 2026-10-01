@@ -1,7 +1,10 @@
+import {advanceRotation} from './rotation.js';
+import {groundSupport,type WheelSupport} from './wheel-support.js';
 import {SpatialHash} from '../core/spatial-hash.js';
 import {material,type PhysicalMaterial} from '../materials/catalog.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
+import {PhysicsCauseTrace,physicsCause,type PhysicsBodyState,type PhysicsCauseManifestWriter,type PhysicsCauseRef,type PhysicsCauseWriter} from './cause-trace.js';
 
 export type CollisionShape = {kind:'sphere';radius:number}|{kind:'box';half:Vec3};
 export interface RigidBodyOptions {
@@ -106,32 +109,70 @@ export interface Contact {
   readonly normalEnergy:number;
   readonly mode:'resolve'|'penetrate';
 }
+/** One force owner per body. Wrenches are world-space and already summed over its parts.
+ * evaluate() runs once per substep, before any dynamic body consumes the wrenches. */
+export interface PhysicsForceDriver {
+  readonly maxStepSeconds:number;
+  readonly force:Vec3;
+  readonly torque:Vec3;
+  /** Optional proof-mode writer. A driver that changes its wrench without recording
+   * matching contributions will fail closure in PhysicsCauseTrace. */
+  evaluate(dt:number,causes?:PhysicsCauseWriter):void;
+  /** Stable physical causes must be declared before this body first evaluates. */
+  declareCauses?(manifest:PhysicsCauseManifestWriter):void;
+}
 export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodies:number;sleeping:number}
 
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
+  wheelSupport:WheelSupport;
+  private readonly rotationScratch=new Float64Array(4);
   surfaceFrictionAt?:(body:RigidBody,point:Vec3)=>number;
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
+  private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
+  private causeTrace:PhysicsCauseTrace|undefined;
+  private readonly gravityCauses=new Map<string,PhysicsCauseRef>();
   readonly index:SpatialHash<RigidBody>;
-  steps=0;substeps=0;
+  steps=0;substeps=0;time=0;
   constructor(
     readonly gravity:Vec3=[0,-9.81,0],
     readonly ground=0,
     cellSize=8,
     readonly groundMaterial:PhysicalMaterial=material('concrete'),
-  ){this.index=new SpatialHash<RigidBody>(cellSize);}
+  ){this.index=new SpatialHash<RigidBody>(cellSize);this.wheelSupport=groundSupport(ground);}
 
-  add(body:RigidBody):RigidBody{if(this.bodies.has(body.id))throw new TypeError(`Duplicate body ${body.id}`);this.bodies.set(body.id,body);return body;}
-  remove(id:string):boolean{return this.bodies.delete(id);}
-  clear():void{this.bodies.clear();this.index.clear();this.contacts.length=0;this.steps=0;this.substeps=0;}
+  add(body:RigidBody):RigidBody{if(this.bodies.has(body.id))throw new TypeError(`Duplicate body ${body.id}`);this.bodies.set(body.id,body);if(this.causeTrace)this.declareBodyCauses(body,this.causeTrace);return body;}
+  /** Enable complete force provenance. Existing bodies/drivers are registered immediately;
+   * every later driver wrench must close exactly against recorded contributions. */
+  traceCauses(options:{readonly runId?:string;readonly maxRecords?:number}={}):PhysicsCauseTrace{
+    if(this.causeTrace)throw new Error('Physics cause trace is already enabled');
+    const trace=new PhysicsCauseTrace(options);this.causeTrace=trace;
+    for(const body of this.bodies.values())this.declareBodyCauses(body,trace);
+    for(const driver of this.forceDrivers.values())driver.declareCauses?.(trace);
+    return trace;
+  }
+  stopCauseTrace(trace?:PhysicsCauseTrace):void{if(trace&&this.causeTrace!==trace)throw new TypeError('Physics cause trace does not belong to this world');this.causeTrace=undefined;}
+  private declareBodyCauses(body:RigidBody,trace:PhysicsCauseTrace):void{
+    trace.component({componentId:body.id,bodyId:body.id,kind:'body'});
+    const cause=this.gravityCauses.get(body.id)??physicsCause(body.id,'gravity.v1','gravity',['force']);this.gravityCauses.set(body.id,cause);trace.law(body.id,cause);
+  }
+  drive(body:RigidBody,driver:PhysicsForceDriver):()=>void{
+    if(this.bodies.get(body.id)!==body||!body.invMass||this.forceDrivers.has(body))throw new TypeError('Force driver requires one owned dynamic body');
+    if(typeof driver.evaluate!=='function')throw new TypeError('Force driver requires evaluate');
+    if(!Number.isFinite(driver.maxStepSeconds)||driver.maxStepSeconds<.001||driver.maxStepSeconds>.25)throw new RangeError('Force step must be within .001.. .25 s');
+    this.forceDrivers.set(body,driver);if(this.causeTrace)driver.declareCauses?.(this.causeTrace);
+    return()=>{if(this.forceDrivers.get(body)===driver)this.forceDrivers.delete(body);};
+  }
+  remove(id:string):boolean{const body=this.bodies.get(id);if(body)this.forceDrivers.delete(body);this.gravityCauses.delete(id);return this.bodies.delete(id);}
+  clear():void{this.forceDrivers.clear();this.bodies.clear();this.index.clear();this.contacts.length=0;this.gravityCauses.clear();this.causeTrace=undefined;this.steps=0;this.substeps=0;this.time=0;}
 
   step(dt:number,contactModel?:ContactModel):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Physics dt must be in (0, 0.25]');
     this.contacts.length=0;
     const substeps=this.adaptiveSubsteps(dt),subDt=dt/substeps;
-    for(let substep=0;substep<substeps;substep++)this.stepSubstep(subDt,contactModel);
-    this.steps++;this.substeps+=substeps;
+    for(let substep=0;substep<substeps;substep++)this.stepSubstep(subDt,contactModel,substep,this.time+substep*subDt);
+    this.steps++;this.substeps+=substeps;this.time+=dt;
   }
 
   private adaptiveSubsteps(dt:number):number{
@@ -142,20 +183,41 @@ export class PhysicsWorld {
       const feature=body.shape.kind==='sphere'?body.shape.radius*1.5:Math.max(.025,Math.min(...boxHalf(body))*1.5);
       required=Math.max(required,Math.ceil(travel/Math.max(.015,feature)));
     }
-    return Math.max(1,Math.min(12,required));
+    let forceSteps=1;
+    for(const driver of this.forceDrivers.values())forceSteps=Math.max(forceSteps,Math.ceil(dt/driver.maxStepSeconds));
+    return Math.max(forceSteps,Math.max(1,Math.min(12,required)));
   }
 
-  private stepSubstep(dt:number,contactModel?:ContactModel):void{
+  private stepSubstep(dt:number,contactModel:ContactModel|undefined,substep:number,simTime:number):void{
+    const trace=this.causeTrace,before=trace?new Map<RigidBody,PhysicsBodyState>():undefined;
+    trace?.beginSubstep(this.steps,substep,simTime);
+    if(trace)for(const body of this.bodies.values())if(body.invMass&&!body.sleeping)before!.set(body,this.traceState(body));
+    for(const [body,driver] of this.forceDrivers)driver.evaluate(dt,trace?.writer(body.id));
+    for(const [body,driver] of this.forceDrivers){
+      const f=driver.force,t=driver.torque;
+      if(!Number.isFinite(f[0]+f[1]+f[2]+t[0]+t[1]+t[2]))throw new RangeError('Non-finite force-driver wrench');
+      if(body.sleeping)continue;
+      body.velocity[0]+=f[0]*body.invMass*dt;body.velocity[1]+=f[1]*body.invMass*dt;body.velocity[2]+=f[2]*body.invMass*dt;
+      if(t[0]!==0||t[1]!==0||t[2]!==0){const dw=applyInvInertiaWorld(body,t);body.angularVelocity[0]+=dw[0]*dt;body.angularVelocity[1]+=dw[1]*dt;body.angularVelocity[2]+=dw[2]*dt;}
+    }
     for(const body of this.bodies.values())if(body.kinematic){
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
-      body.rotation[0]+=body.angularVelocity[0]*dt;body.rotation[1]+=body.angularVelocity[1]*dt;body.rotation[2]+=body.angularVelocity[2]*dt;
+      advanceRotation(body.rotation,body.angularVelocity,dt,this.rotationScratch);
     }
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping){
       body.supportedThisStep=false;
+      let wrenchId='';
+      if(trace){
+        const gravity:Vec3=[body.mass*this.gravity[0],body.mass*this.gravity[1],body.mass*this.gravity[2]],writer=trace.writer(body.id),cause=this.gravityCauses.get(body.id)!;
+        writer.contribute(cause,{kind:'gravity-field',id:'world.gravity'},{forceN:gravity});
+        const driver=this.forceDrivers.get(body),force:Vec3=driver?[driver.force[0]+gravity[0],driver.force[1]+gravity[1],driver.force[2]+gravity[2]]:gravity,torque:Vec3=driver?driver.torque:[0,0,0];
+        wrenchId=trace.wrench(body.id,force,torque);
+      }
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
       const airAngular=Math.exp(-.08*dt);body.angularVelocity[0]*=airAngular;body.angularVelocity[1]*=airAngular;body.angularVelocity[2]*=airAngular;
-      body.rotation[0]+=body.angularVelocity[0]*dt;body.rotation[1]+=body.angularVelocity[1]*dt;body.rotation[2]+=body.angularVelocity[2]*dt;
+      advanceRotation(body.rotation,body.angularVelocity,dt,this.rotationScratch);
+      if(trace)trace.stateMutation(body.id,wrenchId,before!.get(body)!,this.traceState(body),dt);
       this.resolveGround(body,dt);
     }
     this.rebuildIndex();
@@ -177,7 +239,9 @@ export class PhysicsWorld {
       }
     }
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=Math.max(0,body.sleepTimer-dt*.35);
+    trace?.endSubstep();
   }
+  private traceState(body:RigidBody):PhysicsBodyState{return{positionM:[...body.position],rotationRad:[...body.rotation],velocityMps:[...body.velocity],angularVelocityRadps:[...body.angularVelocity]};}
 
   get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length};}
 
@@ -416,7 +480,7 @@ function rotationBasis(rotation:Vec3):readonly[Vec3,Vec3,Vec3]{
 }
 function rotateLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[b[0][0]*v[0]+b[1][0]*v[1]+b[2][0]*v[2],b[0][1]*v[0]+b[1][1]*v[1]+b[2][1]*v[2],b[0][2]*v[0]+b[1][2]*v[1]+b[2][2]*v[2]];}
 function rotateWorldToLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[V3.dot(v,b[0]),V3.dot(v,b[1]),V3.dot(v,b[2])];}
-function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[local[0]*body.invInertiaLocal[0],local[1]*body.invInertiaLocal[1],local[2]*body.invInertiaLocal[2]];return rotateLocal(body.rotation,scaled);}
+export function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[local[0]*body.invInertiaLocal[0],local[1]*body.invInertiaLocal[1],local[2]*body.invInertiaLocal[2]];return rotateLocal(body.rotation,scaled);}
 function groundSupportVector(body:RigidBody):MutableVec3{return groundContactManifold(body).points[0]??[0,groundContactManifold(body).lowest,0];}
 function groundContactManifold(body:RigidBody):{lowest:number;points:MutableVec3[]}{
   if(body.shape.kind==='sphere')return{lowest:-body.shape.radius,points:[[0,-body.shape.radius,0]]};
