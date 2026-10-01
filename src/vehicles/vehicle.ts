@@ -21,7 +21,8 @@ export interface PartSample {
   readonly contact:boolean;readonly contactNormal:Vec3;readonly supportId:string;readonly fixedSupport:boolean;readonly loadN:number;readonly liftN:number;readonly dragN:number;readonly alphaRad:number;readonly stall:number;
   readonly angularSpeed:number;readonly spinRad:number;readonly compressionM:number;readonly permanentSetM:number;
   readonly plasticWorkJ:number;readonly slipPowerW:number;readonly dissipatedJ:number;readonly wear:number;readonly fatigue:number;readonly failed:boolean;
-  readonly temperatureRiseK:number;readonly effectiveRadiusM:number;readonly effectiveGrip:number;readonly treadDepthM:number;readonly reactionTorqueNm:number;readonly powerW:number;readonly collectiveRad:number;readonly derivedBuilds:number;
+  readonly temperatureRiseK:number;readonly effectiveRadiusM:number;readonly effectiveGrip:number;readonly treadDepthM:number;readonly reactionTorqueNm:number;readonly powerW:number;readonly shaftPowerW:number;readonly collectiveRad:number;readonly derivedBuilds:number;
+  readonly groundEffect:number;readonly vortexRing:number;readonly retreatingStall:number;readonly flapPitchRad:number;readonly flapRollRad:number;readonly leadLagRad:number;readonly bladesAttached:number;readonly rotorStrikeCount:number;
 }
 interface PartRuntime {
   readonly compiled:CompiledComponent;readonly condition:PartCondition;
@@ -31,9 +32,10 @@ interface PartRuntime {
   readonly wheelSolve:WheelContactResult;readonly support:WheelHit;readonly down:MutableVec3;contact:boolean;
   revision:number;control:number;control2:number;control3:number;radius:number;tread:number;grip:number;liftScale:number;omega:number;spin:number;longForce:number;sideForce:number;
   load:number;lift:number;drag:number;alpha:number;stall:number;compression:number;permanent:number;plasticWork:number;
-  slipPower:number;reactionTorque:number;power:number;derivedBuilds:number;
+  slipPower:number;reactionTorque:number;power:number;shaftPower:number;groundEffect:number;vortexRing:number;retreatingStall:number;flapPitch:number;flapRoll:number;leadLag:number;bladesAttached:number;rotorStrikeCount:number;derivedBuilds:number;
 }
 const clamp=(x:number,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const smoothstep=(x:number)=>{const u=clamp(x);return u*u*(3-2*u);};
 const dot=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 const normalize=(out:MutableVec3,x:number,y:number,z:number)=>{const length=Math.hypot(x,y,z);if(length<1e-12){out[0]=out[1]=out[2]=0;return 0;}out[0]=x/length;out[1]=y/length;out[2]=z/length;return length;};
 const ZERO:Vec3=[0,0,0];
@@ -62,9 +64,10 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly ownsBody:boolean;
   private readonly dragForce:MutableVec3=[0,0,0];
   private readonly referenceFrame:ForceFrame|undefined;
+  private readonly shaftRemaining=new Map<string,number>();
   /** Optional reaction for a non-rigid support returned by world.wheelSupport. */
   supportReaction:((hit:WheelHit,force:Vec3,dt:number)=>void)|undefined;
-  readonly diagnostics={steps:0,supportQueries:0,aeroEvaluations:0,rotorEvaluations:0,wheelSolves:0};
+  readonly diagnostics={steps:0,supportQueries:0,aeroEvaluations:0,rotorEvaluations:0,rotorStrikes:0,wheelSolves:0};
   constructor(readonly world:PhysicsWorld,readonly blueprint:VehicleBlueprint,pose:VehiclePose={},options:{reuseDerived?:boolean;body?:RigidBody}={}) {
     const position=pose.position??ZERO,rotation=pose.rotation??ZERO,velocity=pose.velocity??ZERO,angular=pose.angularVelocity??ZERO;
     for(const v of [position,rotation,velocity,angular])finiteVec3(v,'Vehicle pose');
@@ -80,7 +83,7 @@ export class Vehicle implements PhysicsForceDriver {
     this.parts=blueprint.parts.map(compiled=>{
       const mount=compiled.source.mountAt,com=blueprint.centerOfMass;
       const anchor:Vec3=mount?[mount[0]-com[0],mount[1]-com[1],mount[2]-com[2]]:compiled.arm;
-      const part:PartRuntime={compiled,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),force:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:wheelHit(),down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,control2:NaN,control3:NaN,radius:0,tread:0,grip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,slipPower:0,reactionTorque:0,power:0,derivedBuilds:0};
+      const part:PartRuntime={compiled,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),force:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:wheelHit(),down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,control2:NaN,control3:NaN,radius:0,tread:0,grip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,slipPower:0,reactionTorque:0,power:0,shaftPower:0,groundEffect:1,vortexRing:0,retreatingStall:0,flapPitch:0,flapRoll:0,leadLag:0,bladesAttached:compiled.source.kind==='rotor'?compiled.source.blades:0,rotorStrikeCount:0,derivedBuilds:0};
       if(compiled.source.kind==='wheel')part.omega=dot(this.body.velocity,[this.frame.basis[0]!,this.frame.basis[1]!,this.frame.basis[2]!])/compiled.source.radiusM;
       this.byId.set(compiled.source.id,part);return part;
     });
@@ -118,7 +121,8 @@ export class Vehicle implements PhysicsForceDriver {
       get angularSpeed(){return p.omega;},get spinRad(){return p.spin;},get compressionM(){return p.compression;},get permanentSetM(){return p.permanent;},get plasticWorkJ(){return p.plasticWork;},
       get slipPowerW(){return p.slipPower;},get dissipatedJ(){return c.dissipatedJ;},get wear(){return c.wear;},get fatigue(){return c.fatigue;},get failed(){return c.failed;},
       get temperatureRiseK(){return c.temperatureRiseK;},get effectiveRadiusM(){return p.radius;},get effectiveGrip(){return p.grip;},
-      get treadDepthM(){return p.tread;},get reactionTorqueNm(){return p.reactionTorque;},get powerW(){return p.power;},get collectiveRad(){return p.alpha;},get derivedBuilds(){return p.derivedBuilds;},
+      get treadDepthM(){return p.tread;},get reactionTorqueNm(){return p.reactionTorque;},get powerW(){return p.power;},get shaftPowerW(){return p.shaftPower;},get collectiveRad(){return p.alpha;},get derivedBuilds(){return p.derivedBuilds;},
+      get groundEffect(){return p.groundEffect;},get vortexRing(){return p.vortexRing;},get retreatingStall(){return p.retreatingStall;},get flapPitchRad(){return p.flapPitch;},get flapRollRad(){return p.flapRoll;},get leadLagRad(){return p.leadLag;},get bladesAttached(){return p.bladesAttached;},get rotorStrikeCount(){return p.rotorStrikeCount;},
     });
     this.views.set(id,view);return view;
   }
@@ -129,12 +133,13 @@ export class Vehicle implements PhysicsForceDriver {
     if(!Number.isFinite(dt)||dt<=0||dt>this.maxStepSeconds+1e-12)throw new RangeError('Vehicle forces require <=1/120 s substeps');
     this.frame.clear();if(!this.referenceFrame)this.frame.update(this.body.rotation);this.diagnostics.steps++;
     const b=this.body,air=this.air;
+    this.shaftRemaining.clear();for(const shaft of this.blueprint.source.shafts??[])this.shaftRemaining.set(shaft.id,shaft.maxPowerW*(shaft.efficiency??1)*clamp(this.controls.throttle));
     const vx=b.velocity[0]-air.wind[0],vy=b.velocity[1]-air.wind[1],vz=b.velocity[2]-air.wind[2];
     const speed=Math.hypot(vx,vy,vz),drag=-.5*air.densityKgM3*(this.blueprint.source.chassis.dragAreaM2??0)*speed;
     this.dragForce[0]=drag*vx;this.dragForce[1]=drag*vy;this.dragForce[2]=drag*vz;this.frame.add(this.dragForce,ZERO);
     for(const p of this.parts){
       const frame=this.referenceFrame??this.frame;if(this.referenceFrame)frame.update(b.rotation);
-      const s=p.compiled.source;p.force.fill(0);p.load=p.lift=p.drag=p.alpha=p.stall=p.slipPower=p.reactionTorque=p.power=0;
+      const s=p.compiled.source;p.force.fill(0);p.load=p.lift=p.drag=p.alpha=p.stall=p.slipPower=p.reactionTorque=p.power=p.shaftPower=0;p.groundEffect=1;p.vortexRing=p.retreatingStall=0;
       this.derive(p);
       frame.rotate(p.localArm,p.arm);
       for(let k=0;k<3;k++)p.point[k]=b.position[k]!+p.arm[k]!;
@@ -173,11 +178,7 @@ export class Vehicle implements PhysicsForceDriver {
     p.liftScale=c.failed||!p.attachment.valid?0:1-c.wear*.35;
     const ch=p.compiled.chord,n=p.compiled.normal;
     if(s.kind==='rotor'){
-      const rx=ch[1]*n[2]-ch[2]*n[1],ry=ch[2]*n[0]-ch[0]*n[2],rz=ch[0]*n[1]-ch[1]*n[0];
-      const tp=Math.tan(control2),tr=Math.tan(control3);
-      normalize(p.localNormal,n[0]+ch[0]*tp+rx*tr,n[1]+ch[1]*tp+ry*tr,n[2]+ch[2]*tp+rz*tr);
-      const along=ch[0]*p.localNormal[0]+ch[1]*p.localNormal[1]+ch[2]*p.localNormal[2];
-      normalize(p.localChord,ch[0]-p.localNormal[0]*along,ch[1]-p.localNormal[1]*along,ch[2]-p.localNormal[2]*along);
+      p.localNormal.splice(0,3,...n);p.localChord.splice(0,3,...ch);
     }else{
       const angle=s.kind==='wing'?(s.incidenceRad??0)+control:control,co=Math.cos(angle),si=Math.sin(angle);
       for(let k=0;k<3;k++){p.localChord[k]=ch[k]!*co+n[k]!*si;p.localNormal[k]=n[k]!*co-ch[k]!*si;}
@@ -187,25 +188,65 @@ export class Vehicle implements PhysicsForceDriver {
   }
   private rotorForces(p:PartRuntime,s:RotorSpec,frame:ForceFrame,dt:number):void {
     this.diagnostics.rotorEvaluations++;
+    const baseN=p.compiled.normal,baseC=p.compiled.chord,direction=s.direction??1;
+    const flapK=1-Math.exp(-dt/(s.flapTimeSeconds??.08)),lagK=1-Math.exp(-dt/(s.leadLagTimeSeconds??.12));
+    p.flapPitch+=(p.control2-p.flapPitch)*flapK;p.flapRoll+=(p.control3-p.flapRoll)*flapK;
+    const lagTarget=direction*(p.control3-p.control2)*.5;p.leadLag+=(lagTarget-p.leadLag)*lagK;
+    const rx=baseC[1]*baseN[2]-baseC[2]*baseN[1],ry=baseC[2]*baseN[0]-baseC[0]*baseN[2],rz=baseC[0]*baseN[1]-baseC[1]*baseN[0];
+    const tp=Math.tan(p.flapPitch+p.leadLag*.12),tr=Math.tan(p.flapRoll-p.leadLag*.12);
+    normalize(p.localNormal,baseN[0]+baseC[0]*tp+rx*tr,baseN[1]+baseC[1]*tp+ry*tr,baseN[2]+baseC[2]*tp+rz*tr);
+    const along=baseC[0]*p.localNormal[0]+baseC[1]*p.localNormal[1]+baseC[2]*p.localNormal[2];
+    normalize(p.localChord,baseC[0]-p.localNormal[0]*along,baseC[1]-p.localNormal[1]*along,baseC[2]-p.localNormal[2]*along);
+    if(this.deformation){p.attachment.direction(p.localChord,p.localChord);p.attachment.direction(p.localNormal,p.localNormal);}
     frame.rotate(p.localNormal,p.normal);frame.rotate(p.localChord,p.chord);
     const air=this.air,v=p.velocity,n=p.normal;
     const rvx=v[0]-air.wind[0],rvy=v[1]-air.wind[1],rvz=v[2]-air.wind[2];
     const axial=rvx*n[0]+rvy*n[1]+rvz*n[2],v2=rvx*rvx+rvy*rvy+rvz*rvz,transverse=Math.sqrt(Math.max(0,v2-axial*axial));
     const nominal=s.governorRpm*Math.PI/30,throttle=clamp(this.controls.throttle,0,1),descent=Math.max(0,-axial);
     const autoFraction=throttle<.05?clamp(descent/14,0,.72):0,target=nominal*Math.max(throttle,autoFraction);
-    const response=1-Math.exp(-dt/(s.spoolSeconds??1.5));p.omega+=(target-p.omega)*response;p.spin+=(s.direction??1)*p.omega*dt;
+    const response=1-Math.exp(-dt/(s.spoolSeconds??1.5));p.omega+=(target-p.omega)*response;p.spin+=direction*p.omega*dt;
     p.alpha=p.control;
-    if(air.densityKgM3<=0||Math.abs(p.omega)<1e-6||p.liftScale<=0)return;
-    const radius=s.radiusM,tip=Math.abs(p.omega)*radius,solidity=p.compiled.induced,ct=solidity*p.compiled.slope*p.control/6;
+    if(air.densityKgM3<=0||Math.abs(p.omega)<1e-6||p.liftScale<=0||p.bladesAttached<=0)return;
+    const radius=s.radiusM,tip=Math.abs(p.omega)*radius,solidity=p.compiled.induced*(p.bladesAttached/s.blades),ct=solidity*p.compiled.slope*p.control/6;
+    if(Math.abs(n[1])>.65){
+      p.down[0]=-n[0];p.down[1]=-n[1];p.down[2]=-n[2];this.diagnostics.supportQueries++;
+      if(this.world.wheelSupport(p.point,p.down,radius*3,p.support,this.body)){
+        const h=p.support.distance;if(h>0&&h<radius*2){const q=1-h/(radius*2);p.groundEffect=1+.22*q*q;}
+      }
+    }
+    const crx=p.chord[1]*n[2]-p.chord[2]*n[1],cry=p.chord[2]*n[0]-p.chord[0]*n[2],crz=p.chord[0]*n[1]-p.chord[1]*n[0];
+    if(tip>20&&p.bladesAttached>0){
+      for(let i=0;i<p.bladesAttached;i++){
+        const a=p.spin+i*Math.PI*2/s.blades,co=Math.cos(a),si=Math.sin(a);
+        p.down[0]=p.chord[0]*co+crx*si;p.down[1]=p.chord[1]*co+cry*si;p.down[2]=p.chord[2]*co+crz*si;this.diagnostics.supportQueries++;
+        if(this.world.wheelSupport(p.point,p.down,radius,p.support,this.body)&&p.support.distance<radius*.985){
+          p.bladesAttached--;p.rotorStrikeCount++;this.diagnostics.rotorStrikes++;p.omega*=.78;break;
+        }
+      }
+      if(p.bladesAttached<=0)return;
+    }
     const translational=1+.12*clamp(transverse/Math.max(1,tip*.08),0,1);
-    const raw=ct*air.densityKgM3*p.compiled.area*tip*tip*translational*p.liftScale;
-    const profile=(solidity*(s.profileDragCoefficient??.011)/8)*air.densityKgM3*p.compiled.area*tip*tip*tip;
-    const induced=Math.abs(raw)>0?Math.abs(raw)**1.5/Math.sqrt(Math.max(1e-9,2*air.densityKgM3*p.compiled.area))/translational:0;
-    const flowPower=.5*air.densityKgM3*p.compiled.area*descent**3*.55,available=s.maxPowerW*throttle+flowPower;
+    const raw0=ct*air.densityKgM3*p.compiled.area*tip*tip*translational*p.liftScale*p.groundEffect;
+    const inducedVelocity=Math.sqrt(Math.abs(raw0)/Math.max(1e-9,2*air.densityKgM3*p.compiled.area));
+    if(inducedVelocity>.2){
+      const enter=smoothstep((descent-.45*inducedVelocity)/Math.max(.1,.65*inducedVelocity));
+      const leave=1-smoothstep((descent-2.2*inducedVelocity)/Math.max(.1,.7*inducedVelocity));
+      const lateral=1-smoothstep(transverse/Math.max(.1,1.4*inducedVelocity));p.vortexRing=clamp(enter*leave*lateral);
+    }
+    const mu=transverse/Math.max(1,tip),stallStart=Math.max(.2,.42-Math.abs(p.control)*.5);
+    p.retreatingStall=smoothstep((mu-stallStart)/.18);
+    const aeroScale=(1-.46*p.vortexRing)*(1-.34*p.retreatingStall),raw=raw0*aeroScale;
+    const profile=(solidity*(s.profileDragCoefficient??.011)/8)*air.densityKgM3*p.compiled.area*tip*tip*tip*(1+.75*p.retreatingStall);
+    const induced=Math.abs(raw)>0?Math.abs(raw)**1.5/Math.sqrt(Math.max(1e-9,2*air.densityKgM3*p.compiled.area))/translational/Math.sqrt(p.groundEffect):0;
+    const flowPower=.5*air.densityKgM3*p.compiled.area*descent**3*.55;
+    const shaftRemaining=s.shaft===undefined?s.maxPowerW*throttle:(this.shaftRemaining.get(s.shaft)??0);
+    const shaftAvailable=Math.min(s.maxPowerW*throttle,shaftRemaining),available=shaftAvailable+flowPower;
     let scale=1;if(profile+induced>available){const usable=Math.max(0,available-profile);scale=induced>0?clamp((usable/induced)**(2/3),0,1):0;}
-    const thrust=raw*scale,power=Math.min(available,profile+induced*scale**1.5);
-    p.load=Math.abs(thrust);p.lift=thrust;p.power=power;p.reactionTorque=-(s.direction??1)*power/Math.max(1,Math.abs(p.omega));
+    const thrust=raw*scale,power=Math.min(available,profile+induced*scale**1.5),flowUsed=Math.min(flowPower,power);
+    p.shaftPower=Math.max(0,power-flowUsed);if(s.shaft!==undefined)this.shaftRemaining.set(s.shaft,Math.max(0,shaftRemaining-p.shaftPower));
+    p.load=Math.abs(thrust);p.lift=thrust;p.power=power;p.reactionTorque=-direction*power/Math.max(1,Math.abs(p.omega));
     p.force[0]=n[0]*thrust;p.force[1]=n[1]*thrust;p.force[2]=n[2]*thrust;
+    if(p.retreatingStall>0){const moment=direction*thrust*radius*.06*p.retreatingStall;this.torque[0]!+=p.chord[0]*moment;this.torque[1]!+=p.chord[1]*moment;this.torque[2]!+=p.chord[2]*moment;}
   }
   /** Finite-wing polar from thegame flight/aerodynamics.ts, evaluated on any assembly part. */
   private aerodynamics(p:PartRuntime,s:WingSpec,frame:ForceFrame):void {
