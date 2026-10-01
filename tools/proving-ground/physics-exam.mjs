@@ -14,6 +14,7 @@ const implemented=new Map([
  // animation helper or historical branch does not count as physics support.
  ['wheel',typeof engine.Vehicle==='function'&&typeof engine.wheel==='function'],
  ['tyre',typeof engine.solveWheelContact==='function'],
+ ['wet-grip',typeof engine.Vehicle==='function'&&typeof engine.SurfaceEnvironmentSystem==='function'],
  ['suspension',typeof engine.Vehicle==='function'],
  ['steering',typeof engine.Vehicle==='function'],
  ['drivetrain',typeof engine.engine==='function'||typeof engine.Powertrain==='function'],
@@ -30,19 +31,20 @@ const implemented=new Map([
  ['sealing',typeof engine.FluidWorld==='function'&&typeof engine.StructuralBody==='function'],
  ['thermal',false],
  ['ground-clearance',typeof engine.Vehicle==='function'],
- ['cause-provenance',typeof engine.PhysicsCauseTrace==='function'],
- ['energy-accounting',typeof engine.PhysicsCauseTrace==='function'],
- ['momentum-accounting',typeof engine.PhysicsCauseTrace==='function'],
+ // Trace exists, but release proof remains blocked until contact damping/sleep corrections are causal too.
+ ['cause-provenance',false],
+ ['energy-accounting',false],
+ ['momentum-accounting',false],
 ]);
 
 for(const requirement of releasePhysicsRequirements)if(!implemented.has(requirement))implemented.set(requirement,false);
-const requirements=releasePhysicsRequirements.map(id=>({id,status:implemented.get(id)?'implemented':'missing'}));
+const requirements=releasePhysicsRequirements.map(id=>({id,status:implemented.get(id)?'available':'missing'}));
 const zones=provingGroundZones.map(zone=>({
  ...zone,
  status:zone.domains.every(id=>implemented.get(id))?'ready':'blocked',
  missing:zone.domains.filter(id=>!implemented.get(id)),
 }));
-const missing=requirements.filter(r=>r.status!=='implemented').map(r=>r.id);
+const missing=requirements.filter(r=>r.status!=='available').map(r=>r.id);
 const report={
  schema:'game-engine-proving-ground/1',
  generatedAt:new Date().toISOString(),
@@ -54,6 +56,7 @@ const report={
   'Historical branches do not count: only exports reachable from current main are inspected.',
   'Thegame behavior is not a reality oracle.',
   'A release requires all proving-ground domains plus external/reality validation where applicable.',
+  'Cause/energy/momentum remain blocked until every contact/damping/sleep state change is attributed and closure-tested.',
  ],
 };
 await mkdir('artifacts/proving-ground',{recursive:true});
