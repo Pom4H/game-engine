@@ -139,6 +139,75 @@ for(let i=0;i<4;i++){
  torus(`tunnel-fan-ring-${i}`,[x,4.6,-32],2.35,.18,S,[0,0,Math.PI/2]);
 }
 
+// 12. Split-μ lane: left wheels see a wet low-friction half, right wheels dry asphalt.
+// The seam is a physical boundary, not a controller hint.
+topBox('split-mu-wet',[-96.0,0,-54],[4.0,.16,42],{...A,color:[.045,.052,.058,1],clearcoat:.32,clearcoatRoughness:.18},{
+ body:{},environmental:{surfaceUse:'road',waterDepthM:.006}
+});
+topBox('split-mu-dry',[-92.0,0,-54],[4.0,.16,42],A,{body:{},environmental:{surfaceUse:'road'}});
+for(const z of [-72,-62,-52,-42,-32])box(`split-mu-seam-${z}`,[-94,.012,z],[.08,.02,5.5],P);
+
+// 13. Banked / off-camber lane. Each slab is a real oriented collision body.
+// Positive bank assists a turn; the second half reverses sign and deliberately hurts it.
+for(let i=0;i<12;i++){
+ const z=54+i*3.5,bank=(i<6?1:-1)*(6+i%3*3)*Math.PI/180;
+ box(`banked-${i}`,[-96,-.12,z],[8,.24,3.7],A,{rotation:[0,0,bank],body:{}});
+}
+
+// 14. Washboard: high-frequency vertical road excitation for wheel-hop/damper validation.
+topBox('washboard-base',[-88,0,-12],[8,.16,30],A,{body:{}});
+for(let i=0;i<26;i++){
+ const z=-25+i*1.08,h=.035+.025*(.5+.5*Math.sin(i*.91));
+ box(`washboard-crest-${i}`,[-88,h/2+.002,z],[8,h,.28],C,{body:{}});
+}
+
+// 15. Three bump families: stepped rounded approximation, square curb, and asymmetric crest.
+topBox('bumps-base',[-76,0,-12],[8,.16,30],A,{body:{}});
+const bumpProfiles=[
+ {id:'rounded',z:-20,heights:[.03,.08,.14,.18,.14,.08,.03]},
+ {id:'square',z:-10,heights:[.16,.16,.16]},
+ {id:'asymmetric',z:1,heights:[.03,.06,.10,.15,.20,.12,.05]},
+];
+for(const profile of bumpProfiles)for(let i=0;i<profile.heights.length;i++){
+ const h=profile.heights[i],z=profile.z+(i-(profile.heights.length-1)/2)*.34;
+ box(`bumps-${profile.id}-${i}`,[-76,h/2+.005,z],[8,h,.36],R,{body:{}});
+}
+
+// 16. Pothole lane: depressed physical slabs create actual loss/recovery of support.
+for(let i=0;i<18;i++){
+ const z=-96+i*2.1,depression=i===5?-.20:i===11?-.32:i===14?-.14:0;
+ topBox(`potholes-${i}`,[91,depression,z],[7.5,.18,2.16],i%4===0?C:A,{body:{}});
+}
+
+// 17. Diagonal articulation course. Left/right wheel tracks deliberately disagree in height.
+const articulationZ=[-42,-34,-26,-18,-10,-2,6];
+const leftY=[0,.18,.42,.12,-.26,-.05,.20],rightY=[0,-.14,-.38,-.08,.30,.06,-.16];
+for(let i=0;i<articulationZ.length-1;i++){
+ roadStrip(`articulation-left-${i}`,[[84,leftY[i],articulationZ[i]],[84,leftY[i+1],articulationZ[i+1]]],2.5,A,{thickness:.18});
+ roadStrip(`articulation-right-${i}`,[[88,rightY[i],articulationZ[i]],[88,rightY[i+1],articulationZ[i+1]]],2.5,A,{thickness:.18});
+}
+
+// 18. Crosswind corridor. Geometry marks the measurement volume now; spatial wind
+// remains a blocked physics requirement until a wind-field primitive owns it.
+topBox('crosswind-road',[100,0,32],[9,.16,42],A,{body:{}});
+for(let i=0;i<7;i++){
+ const z=14+i*6;
+ for(const side of [-1,1])box(`crosswind-pylon-${i}-${side>0?'r':'l'}`,[100+side*5.2,3.2,z],[.28,6.4,.28],S);
+ box(`crosswind-beam-${i}`,[100,6.3,z],[10.7,.24,.24],S);
+}
+
+// 19. Soft-ground pad is intentionally visual/non-rigid until soil mechanics exist.
+// Treating it as a low-friction rigid slab would give a false green release signal.
+topBox('soft-ground-visual',[97,0,-112],[20,.10,16],{kind:'default',color:[.27,.19,.11,1],roughness:1});
+for(let i=0;i<8;i++)box(`soft-ground-rut-${i}`,[90+i*2.2,.012,-112+(i%2?.7:-.7)],[1.2,.018,12],{kind:'default',color:[.19,.13,.08,1],roughness:1});
+
+// 20. Water depth markers extend the existing basin into a measurable gradient.
+// They are visual only; fluid/buoyancy remains blocked until the solver owns the volume.
+for(let i=0;i<5;i++){
+ const depth=.25+i*.35,x=2+i*5;
+ box(`water-depth-marker-${i}`,[x,-depth/2-.02,-27],[.10,depth,.10],P);
+}
+
 // Service roads bind all stations into one coherent facility.
 roadStrip('service-north',[[-58,0,85],[-18,0,90],[22,0,91],[55,0,100],[73,0,115]],6.5,A);
 roadStrip('service-south',[[-58,0,-12],[-35,0,-5],[-5,0,-4],[25,0,-7],[50,0,-13],[70,0,-15]],6.5,A);
