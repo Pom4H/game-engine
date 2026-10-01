@@ -43,7 +43,7 @@ export function cityLamps(cx:number,cz:number):readonly CityLamp[]{
  for(let row=0;row<2;row++)for(let col=0;col<4;col++){
   // 32 m longitudinal spacing puts useful pools of light between intersections;
   // still <=192 resident city lights at the default 7x7 view.
-  const poleX=ox+col*32+9,poleZ=oz+row*64+9;
+  const poleX=ox+col*32+9,poleZ=oz+row*64+6.5;
   out.push({id:`lamp:${cx}:${cz}:${row}:${col}`,poleX,poleZ,x:poleX,y:5.34,z:poleZ-1.75});
  }
  return out;
