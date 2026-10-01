@@ -6,7 +6,8 @@ import {RuntimeTimeline} from '../../core/runtime-timeline.js';
 import {OpenWorld,WORLD_REVISION,WORLD_LIMIT} from './world.js';
 import {materializeCrowd} from './crowd.js';
 import {NearbyNpcAuthority} from './npc-authority.js';
-import {TransitAuthority} from './transit.js';
+import {TransitAuthority,type TransitMode} from './transit.js';
+import {TransitVehicleAuthority,type TransitSeatPose} from './transit-vehicle.js';
 import type {ResidentJob,ResidentActivity,CommuteMode} from './resident-life.js';
 export interface ThegameConfig extends CharacterTuning {readonly seed:number;readonly viewRadius:number;readonly exposure:number}
 export function thegameConfig(raw:Partial<ThegameConfig>={}):Readonly<ThegameConfig>{
@@ -25,10 +26,11 @@ export const LANDMARKS=Object.freeze([
  {id:'shore',name:'Побережье',x:800,z:80},
 ]);
 export const peopleProjection=projection('thegame/people/1',{position:vector3('linear',-WORLD_LIMIT,WORLD_LIMIT),yaw:scalar('angle',-Math.PI*2,Math.PI*2),phase:scalar('angle',0,Math.PI*2000+1),speed:scalar('linear',0,40),kind:scalar('step',0,2)},{maxEntities:48,maxBytes:32_768});
-export interface Peer {readonly id:string;readonly residentId:string;readonly name:string;state:CharacterState;ack:number;received:number;readonly inputs:SequencedInput<CharacterInput>[];discovered:number;starved:number}
-export interface SelfState {readonly ack:number;readonly state:CharacterState;readonly discovered:number}
-export interface ResidentSelf {readonly id:string;readonly job:ResidentJob;readonly activity:ResidentActivity;readonly commute:CommuteMode;readonly possessions:number}
-export interface WorldSnapshot {readonly type:'state';readonly world:string;readonly frame:Frame;readonly self:SelfState;readonly players:number}
+export interface TransitSeat {readonly serviceId:string;readonly routeId:string;readonly mode:TransitMode}
+export interface Peer {readonly id:string;readonly residentId:string;readonly name:string;state:CharacterState;seat?:TransitSeat;ack:number;received:number;readonly inputs:SequencedInput<CharacterInput>[];discovered:number;starved:number}
+export interface SelfState {readonly ack:number;readonly state:CharacterState;readonly discovered:number;readonly seat?:TransitSeat}
+export interface ResidentSelf {readonly id:string;readonly job:ResidentJob;readonly activity:ResidentActivity;readonly commute:CommuteMode;readonly possessions:number;readonly transit?:TransitSeat}
+export interface WorldSnapshot {readonly type:'state';readonly world:string;readonly frame:Frame;readonly transitFrame:Frame;readonly self:SelfState;readonly players:number}
 const object=(raw:unknown):Record<string,unknown>=>{if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new TypeError('Expected object');return raw as Record<string,unknown>;};
 const number=(n:unknown,min:number,max:number):n is number=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
 export function readCharacterInput(raw:unknown):CharacterInput{
@@ -47,31 +49,55 @@ export function readSelf(raw:unknown):SelfState{
  // Enumerate motor fields. Unexpected server properties never become executable state.
  const initial=characterState(p.x as number,p.y as number,p.z as number);
  for(const key of Object.keys(initial) as (keyof CharacterState)[])Object.assign(initial,{[key]:p[key]});
- return {ack:self.ack,state:initial,discovered:self.discovered};
+ let seat:TransitSeat|undefined;
+ if(self.seat!==undefined){
+  const rawSeat=object(self.seat);
+  if(typeof rawSeat.serviceId!=='string'||typeof rawSeat.routeId!=='string'||!['bus','tram','metro'].includes(String(rawSeat.mode)))throw new TypeError('Invalid transit seat');
+  seat={serviceId:rawSeat.serviceId,routeId:rawSeat.routeId,mode:rawSeat.mode as TransitMode};
+ }
+ return {ack:self.ack,state:initial,discovered:self.discovered,...(seat?{seat}:{})};
 }
 /** Authoritative on-foot subset. Message handlers validate/enqueue; only step() moves actors.
  * Fixed 60 Hz, one input/peer/tick, independently bounded world, queues and publication. */
 export class ThegameAuthority {
- readonly config:Readonly<ThegameConfig>;readonly world:OpenWorld;readonly peers=new Map<string,Peer>();readonly timeline:RuntimeTimeline;readonly profiler:CpuProfiler;readonly npcs:NearbyNpcAuthority;readonly transit:TransitAuthority;
- tick=0;private sequence=0;readonly epoch:number;
+ readonly config:Readonly<ThegameConfig>;readonly world:OpenWorld;readonly peers=new Map<string,Peer>();readonly timeline:RuntimeTimeline;readonly profiler:CpuProfiler;readonly npcs:NearbyNpcAuthority;readonly transit:TransitAuthority;readonly transitVehicles:TransitVehicleAuthority;
+ tick=0;private sequence=0;private transitSequence=0;readonly epoch:number;
  readonly stats={joins:0,leaves:0,inputs:0,rejected:0,published:0};
  constructor(config:Partial<ThegameConfig>={},epoch=1,profile=false){
   this.config=thegameConfig(config);if(!Number.isSafeInteger(epoch)||epoch<1)throw new RangeError('Invalid world epoch');this.epoch=epoch;
-  this.world=new OpenWorld(this.config.seed);this.transit=new TransitAuthority();this.npcs=new NearbyNpcAuthority(this.world,this.config);this.npcs.setUnavailable(this.transit.ownedResidentIds());this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
+  this.world=new OpenWorld(this.config.seed);this.transit=new TransitAuthority();this.transit.step(0);this.transitVehicles=new TransitVehicleAuthority(this.transit);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.npcs.setUnavailable(this.transit.ownedResidentIds());this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
+ }
+ private seatedPossession(residentId:string):{possession:ReturnType<NearbyNpcAuthority['possessExternal']> extends infer R?Exclude<R,undefined>:never;seat:TransitSeat}|undefined{
+  const passenger=this.transit.passenger(residentId);if(passenger?.state!=='riding'||!passenger.serviceId)return;
+  const service=this.transit.serviceForPassenger(residentId,this.tick/60);if(!service)return;
+  const pose=this.transitVehicles.seatPose(service.id,this.tick/60);if(!pose)return;
+  const state=characterState(pose.position[0],pose.position[1],pose.position[2],pose.yaw);
+  state.lookYaw=pose.yaw;state.vx=Math.sin(pose.yaw)*pose.speed;state.vz=Math.cos(pose.yaw)*pose.speed;state.vy=0;state.speed=pose.speed;state.grounded=true;
+  const possession=this.npcs.possessExternal(residentId,state,this.tick);if(!possession)return;
+  return{possession,seat:{serviceId:service.id,routeId:service.routeId,mode:service.mode}};
  }
  join(id:string,name='Игрок',saved?:{state:CharacterState;discovered:number;residentId?:string}):Peer{
   if(this.peers.size>=32||this.peers.has(id)||!/^p[0-9a-z]{1,16}$/.test(id))throw new RangeError('Room capacity or identity');
-  let possession;
+  let possession,seat:TransitSeat|undefined;
   if(saved?.residentId){
-   const validated=readSelf({ack:0,state:saved.state,discovered:saved.discovered});
-   possession=this.npcs.reclaim(saved.residentId,validated.state,this.tick);
+   const seated=this.seatedPossession(saved.residentId);
+   if(seated){possession=seated.possession;seat=seated.seat;}
+   else{
+    const validated=readSelf({ack:0,state:saved.state,discovered:saved.discovered});
+    possession=this.npcs.reclaim(saved.residentId,validated.state,this.tick);
+   }
+  }
+  if(!possession){
+   const excluded=new Set([...this.peers.values()].map(peer=>peer.residentId));
+   const rider=this.transit.ridingCandidate(excluded);
+   if(rider){const seated=this.seatedPossession(rider.residentId);if(seated){possession=seated.possession;seat=seated.seat;}}
   }
   if(!possession){
    const spawn=this.world.spawn(this.stats.joins%32);
    possession=this.npcs.acquire(spawn,this.tick);
   }
   if(!possession)throw new Error('No resident available for player possession');
-  const peer:Peer={id,residentId:possession.id,name:name.replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,24)||'Игрок',state:possession.state,ack:0,received:0,inputs:[],discovered:saved?.discovered??0,starved:0};
+  const peer:Peer={id,residentId:possession.id,name:name.replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,24)||'Игрок',state:possession.state,...(seat?{seat}:{}),ack:0,received:0,inputs:[],discovered:saved?.discovered??0,starved:0};
   this.peers.set(id,peer);this.stats.joins++;return peer;
  }
  leave(id:string):void{
@@ -90,22 +116,33 @@ export class ThegameAuthority {
  }
  step():void{if(this.profiler.enabled)this.profiler.measure('thegame:authority',()=>this.advance());else this.advance();}
  private advance():void{
-  this.tick++;
+  this.tick++;const time=this.tick/60;
+  if(this.tick%6===0){this.transit.step(time);this.npcs.setUnavailable(this.transit.ownedResidentIds());}
+  this.transitVehicles.step(time,this.peers.values(),1/60);
   for(const peer of this.peers.values()){
    const command=peer.inputs.shift();
+   if(peer.seat){
+    const service=this.transit.serviceForPassenger(peer.residentId,time),pose=service?this.transitVehicles.seatPose(service.id,time):undefined;
+    if(service&&pose){
+     peer.state.x=pose.position[0];peer.state.y=pose.position[1];peer.state.z=pose.position[2];peer.state.yaw=pose.yaw;peer.state.lookYaw=pose.yaw;
+     peer.state.vx=Math.sin(pose.yaw)*pose.speed;peer.state.vy=0;peer.state.vz=Math.cos(pose.yaw)*pose.speed;peer.state.speed=pose.speed;peer.state.grounded=true;peer.state.phase=(peer.state.phase+pose.speed/60)% (Math.PI*2000);
+     if(command){peer.ack=command.seq;peer.starved=0;}else peer.starved++;
+     continue;
+    }
+    peer.seat=undefined;const ground=this.world.ground(peer.state.x,peer.state.z);peer.state.y=ground.y;peer.state.vx=peer.state.vy=peer.state.vz=peer.state.speed=0;peer.state.grounded=true;
+   }
    // Missing controls cannot keep walking forever. Gravity/inertia still have real authority.
    stepCharacter(peer.state,command?.input??idleCharacterInput(peer.state.lookYaw),this.world,1/60,this.config);
    if(command){peer.ack=command.seq;peer.starved=0;}else peer.starved++;
    for(let i=0;i<LANDMARKS.length;i++){const point=LANDMARKS[i]!;if(Math.hypot(peer.state.x-point.x,peer.state.z-point.z)<8)peer.discovered|=1<<i;}
   }
   this.npcs.refresh(this.peers.values(),this.tick);this.npcs.step(this.tick);
-  if(this.tick%6===0){this.transit.step(this.tick/60);this.npcs.setUnavailable(this.transit.ownedResidentIds());}
  }
  setPopulation(population:readonly Frame[]):void{this.npcs.setPopulation(population);}
  resident(id:string):ResidentSelf{
   const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
   const profile=this.npcs.profile(peer.residentId),intent=this.npcs.intent(peer.residentId,this.tick),memory=this.npcs.memory(peer.residentId);
-  return{id:peer.residentId,job:profile.job,activity:intent.activity,commute:profile.commute,possessions:memory?.possessions??1};
+  return{id:peer.residentId,job:profile.job,activity:intent.activity,commute:profile.commute,possessions:memory?.possessions??1,...(peer.seat?{transit:peer.seat}:{})};
  }
  snapshot(id:string,population:readonly Frame[]=[]):WorldSnapshot{
   const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
@@ -117,9 +154,10 @@ export class ThegameAuthority {
    if(this.npcs.has(person.id)||this.transit.hasResident(person.id))continue;
    rows.push(person);if(rows.length>=peopleProjection.maxEntities)break;
   }
-  const frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time:this.tick/60,paused:false},rows);this.stats.published++;
-  return {type:'state',world:worldSignature(this.config),frame,self:{ack:peer.ack,state:{...peer.state},discovered:peer.discovered},players:this.peers.size};
+  const time=this.tick/60,frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time,paused:false},rows);
+  const transitFrame=this.transitVehicles.frame({epoch:this.epoch,sequence:++this.transitSequence,tick:this.tick,time,paused:false},peer.state,time);this.stats.published++;
+  return {type:'state',world:worldSignature(this.config),frame,transitFrame,self:{ack:peer.ack,state:{...peer.state},discovered:peer.discovered,...(peer.seat?{seat:peer.seat}:{})},players:this.peers.size};
  }
- inspect(){return {tick:this.tick,players:this.peers.size,residents:[...this.peers.values()].map(p=>p.residentId),queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),npcs:this.npcs.inspect(),transit:this.transit.snapshot(this.tick/60),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
- dispose():void{this.peers.clear();this.npcs.dispose();this.world.dispose();this.timeline.clear();}
+ inspect(){return {tick:this.tick,players:this.peers.size,residents:[...this.peers.values()].map(p=>({id:p.residentId,seat:p.seat})),queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),npcs:this.npcs.inspect(),transit:this.transit.snapshot(this.tick/60),transitVehicles:this.transitVehicles.inspect(),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
+ dispose():void{this.peers.clear();this.transitVehicles.dispose();this.npcs.dispose();this.world.dispose();this.timeline.clear();}
 }
