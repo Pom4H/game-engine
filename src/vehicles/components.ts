@@ -2,13 +2,14 @@ import type {Vec3} from '../math.js';
 import {finiteVec3} from '../math.js';
 import {validateCondition,type ConditionSpec} from './condition.js';
 import {validateDrivetrainSpec,type DrivetrainSpec} from './drivetrain.js';
+import {validateThermalSpec,type ThermalSpec} from '../physics/thermal.js';
 
 interface PartSpec {readonly id:string;readonly at:Vec3;readonly massKg:number;readonly condition?:ConditionSpec;/** Optional chassis-local structural mount; defaults to at. */readonly mountAt?:Vec3;}
 export interface ShaftSpec {readonly id:string;readonly maxPowerW:number;readonly efficiency?:number;}
 export interface WheelSpec extends PartSpec {
   readonly kind:'wheel';readonly radiusM:number;readonly widthM:number;
   readonly suspension:{readonly restM:number;readonly travelM:number;readonly springNPerM:number;readonly damperNsPerM:number;readonly yieldForceN?:number};
-  readonly driveTorqueNm?:number;readonly drivePowerW?:number;readonly brakeTorqueNm?:number;readonly steerRad?:number;
+  readonly driveTorqueNm?:number;readonly drivePowerW?:number;readonly brakeTorqueNm?:number;readonly brakeThermal?:ThermalSpec;readonly steerRad?:number;
   readonly grip?:number;readonly wornGripFraction?:number;readonly treadDepthM?:number;
 }
 export interface WingSpec extends PartSpec {
@@ -75,7 +76,7 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
       const s=p.suspension;check(s.restM,'Suspension rest',.0001,100);check(s.travelM,'Suspension travel',.0001,s.restM);
       check(s.springNPerM,'Spring stiffness',1e-6,1e9);check(s.damperNsPerM,'Damper',0,1e8);
       if(s.yieldForceN!==undefined)check(s.yieldForceN,'Yield force',1e-6);
-      for(const n of [p.driveTorqueNm??0,p.brakeTorqueNm??0,p.drivePowerW??0])check(n,'Power/torque');
+      for(const n of [p.driveTorqueNm??0,p.brakeTorqueNm??0,p.drivePowerW??0])check(n,'Power/torque');if(p.brakeThermal)validateThermalSpec(p.brakeThermal);
       check(p.steerRad??0,'Steering lock',0,1.4);check(p.grip??1.1,'Grip',0,5);check(p.wornGripFraction??.65,'Worn grip',0,1);
       const depth=p.treadDepthM??Math.min(.008,p.radiusM*.03);check(depth,'Tread depth',0,p.radiusM);if(depth>=p.radiusM)throw new RangeError('Tread cannot consume the entire radius');
       center=[p.at[0],p.at[1]-s.restM,p.at[2]];inertia=.5*p.massKg*p.radiusM*p.radiusM;
