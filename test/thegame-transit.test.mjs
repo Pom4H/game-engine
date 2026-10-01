@@ -31,38 +31,43 @@ test('dwell opens doors and run closes them without teleporting service identity
  assert.ok(running.position.every(Number.isFinite));assert.ok(Number.isFinite(running.yaw));
 });
 
-test('real resident identity waits, boards, rides and alights on schedule',()=>{
+test('real resident identity walks through boarding, rides, then alights through the same door',()=>{
  const transit=new TransitAuthority({seedDemand:false}),route=THEGAME_TRANSIT_ROUTES[0],origin=route.stops[0],destination=route.stops[1],resident='crowd:-3:-1:2';
  const trip=transit.plan(resident,[origin.position[0],origin.position[2]],[destination.position[0],destination.position[2]]);
  assert.ok(trip);assert.equal(trip.residentId,resident);assert.equal(trip.state,'waiting');
- // B01:0 starts at stop 0 in dwell.
  transit.step(0);
- assert.equal(transit.passenger(resident)?.state,'riding');
+ assert.equal(transit.passenger(resident)?.state,'boarding');
  assert.equal(transit.passenger(resident)?.serviceId,'B01:0');
+ const midway=transit.passengerPose(resident,.6);assert.ok(midway);assert.equal(midway.state,'boarding');assert.ok(midway.progress>.4&&midway.progress<.6);
+ transit.step(.6);assert.equal(transit.passenger(resident)?.state,'boarding');
+ transit.step(1.2);assert.equal(transit.passenger(resident)?.state,'riding');assert.equal(transit.snapshot(1.2).boarded,1);
+
  let arrival=-1;
- for(let t=1;t<route.cycleSeconds;t++){
+ for(let t=2;t<route.cycleSeconds;t++){
   const state=transit.services(t).find(v=>v.id==='B01:0');
   if(state?.phase==='dwell'&&state.currentStop===1){arrival=t;break;}
  }
  assert.ok(arrival>0);
- transit.step(arrival);
+ transit.step(arrival);assert.equal(transit.passenger(resident)?.state,'alighting');
+ const exit=transit.passengerPose(resident,arrival+.5);assert.ok(exit);assert.equal(exit.state,'alighting');assert.ok(exit.progress>.4&&exit.progress<.6);
+ transit.step(arrival+1);
  assert.equal(transit.passenger(resident),undefined);
- const snapshot=transit.snapshot(arrival);
+ const snapshot=transit.snapshot(arrival+1);
  assert.equal(snapshot.boarded,1);assert.equal(snapshot.alighted,1);assert.equal(snapshot.riding,0);
 });
 
-test('capacity is authoritative and excess residents remain physically waiting',()=>{
+test('capacity includes boarding/alighting reservations and never overbooks a service',()=>{
  const transit=new TransitAuthority({seedDemand:false}),route=THEGAME_TRANSIT_ROUTES[0],origin=route.stops[0],destination=route.stops[1];
  for(let i=0;i<route.capacity+7;i++){
   const id=`crowd:-3:-1:${i}`;
   const trip=transit.plan(id,[origin.position[0],origin.position[2]],[destination.position[0],destination.position[2]]);
   assert.ok(trip);
  }
- transit.step(0);
- const snapshot=transit.snapshot(0);
- assert.equal(snapshot.fleet.find(v=>v.id==='B01:0').passengers,route.capacity);
- assert.equal(snapshot.waiting,7);
- assert.equal(snapshot.riding,route.capacity);
+ for(let tenth=0;tenth<=135;tenth++)transit.step(tenth/10);
+ const snapshot=transit.snapshot(13.5),service=snapshot.fleet.find(v=>v.id==='B01:0');
+ assert.ok(service);assert.ok(service.passengers<=route.capacity);
+ assert.ok(snapshot.waiting>0);
+ assert.equal(snapshot.waiting+snapshot.boarding+snapshot.riding+snapshot.alighting,route.capacity+7);
 });
 
 test('default world starts with deterministic real resident demand owned by transit',()=>{
@@ -73,7 +78,9 @@ test('default world starts with deterministic real resident demand owned by tran
  assert.ok(owned.length>0);
  assert.ok(owned.every(id=>id.startsWith('crowd:')));
  transit.step(0);
- const after=transit.snapshot(0);
+ const boarding=transit.snapshot(0);assert.ok(boarding.boarding>0);assert.equal(boarding.boarded,0);
+ transit.step(1.2);
+ const after=transit.snapshot(1.2);
  assert.ok(after.riding>0);
  assert.ok(after.boarded>0);
 });
