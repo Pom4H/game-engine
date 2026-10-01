@@ -6,7 +6,8 @@
   "private": true,
   "exports": {
     ".": "./dist/index.js",
-    "./browser": "./dist/browser.js"
+    "./browser": "./dist/browser.js",
+    "./network": "./dist/network/index.js"
   },
   "files": [
     "dist",
