@@ -1,7 +1,11 @@
 export {FixedClock} from './core/fixed-clock.js';
 export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
 export {EngineKernel,ModuleScheduler,ENGINE_PHASES,SIMULATION_TIERS,type EngineModule,type EnginePhase,type ModuleDescription,type ModuleFrame,type SimulationTier} from './core/kernel.js';
-export {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type PhysicsStats,type RigidBodyOptions} from './physics/world.js';
+export {PhysicsWorld,RigidBody,applyInvInertiaWorld,type PhysicsForceDriver,type CollisionShape,type Contact,type PhysicsStats,type RigidBodyOptions} from './physics/world.js';
+export {PhysicsCauseTrace,physicsCause,PHYSICS_CAUSE_TRACE_SCHEMA,PHYSICS_CAUSE_TRACE_VERSION,type PhysicsCauseRef,type PhysicsCauseWriter,type PhysicsCauseManifestWriter,type PhysicsTraceRecord,type PhysicsSourceKind,type PhysicsComponentKind,type PhysicsLawKind,type PhysicsEffectKind} from './physics/cause-trace.js';
+export {ForceFrame} from './physics/force-frame.js';
+export {solveWheelContact,type WheelContactResult} from './physics/wheel-contact.js';
+export {bodyWheelSupport,groundSupport,wheelHit,rayTriangles,type WheelSupport,type WheelHit} from './physics/wheel-support.js';
 export {PlasticDeformationSystem,type DeformableBodySpec,type SceneDeformationSpec,type PlasticDent} from './physics/deformation.js';
 export {StructuralBody,type StructuralDefinition,type StructuralNodeSpec,type StructuralConstraintSpec,type StructuralDistanceSpec,type StructuralVolumeSpec,type StructuralStats,type BakedStructuralState} from './physics/structure.js';
 export {bindStructuralSkin,applyStructuralSkin,type StructuralSkinBinding} from './physics/structural-skin.js';
@@ -65,6 +69,10 @@ export {analyzeWGSL,buildRenderAtomReport,type ShaderOperationAtoms,type ShaderE
 export {detailedRoadWheelMeshes,detailedPassengerWheelMeshes,type RoadWheelGeometrySpec} from './vehicles/passenger-wheel.js';
 export {compileVehicle,type VehicleDefinition,type VehicleFamily,type VehicleReferenceProvenance,type ThreeBoxVehicleDefinition,type CompiledVehicleGeometry} from './vehicles/framework.js';
 export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type DoubleCabPickupVehicleDefinition} from './vehicles/pickup.js';
+
+export {Vehicle,vehicle,wheel,wing,rotor,PartCondition,type VehicleControls,type VehicleAir,type VehiclePose,type PartSample,type VehicleBlueprint,type VehicleSpec,type WheelSpec,type WingSpec,type RotorSpec,type ConditionSpec} from './vehicles/vehicle.js';
+export {lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL,LIGHT_HELICOPTER_MAIN_RPM,LIGHT_HELICOPTER_TAIL_RPM} from './vehicles/helicopter.js';
+
 
 
 export {worldTileKey,worldTileSize,worldTileBounds,worldTileAt,worldTileChildren,distanceToWorldTile,type WorldTileId,type WorldTileBounds,type WorldTileDemand} from './world/tiles.js';
