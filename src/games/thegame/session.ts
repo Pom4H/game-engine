@@ -67,10 +67,23 @@ export class ThegameAuthority {
   this.config=thegameConfig(config);if(!Number.isSafeInteger(epoch)||epoch<1)throw new RangeError('Invalid world epoch');this.epoch=epoch;
   this.world=new OpenWorld(this.config.seed);this.transit=new TransitAuthority();this.transit.step(0);this.transitVehicles=new TransitVehicleAuthority(this.transit);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.npcs.setUnavailable(this.transit.ownedResidentIds());this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
  }
- private seatedPossession(residentId:string):{possession:ResidentPossession;seat:TransitSeat}|undefined{
-  const passenger=this.transit.passenger(residentId);if(passenger?.state!=='riding'||!passenger.serviceId)return;
-  const service=this.transit.serviceForPassenger(residentId,this.tick/60);if(!service)return;
-  const pose=this.transitVehicles.seatPose(service.id,this.tick/60);if(!pose)return;
+ private transitPossession(residentId:string):{possession:ResidentPossession;seat?:TransitSeat}|undefined{
+  const passenger=this.transit.passenger(residentId);if(!passenger)return;
+  const time=this.tick/60;
+  if(passenger.state==='waiting'){
+   const pose=this.transit.passengerPose(residentId,time);if(!pose)return;
+   this.transit.cancel(residentId);this.npcs.setUnavailable(this.transit.ownedResidentIds());
+   const state=characterState(pose.position[0],pose.position[1],pose.position[2],pose.yaw);
+   state.lookYaw=pose.yaw;const possession=this.npcs.possessExternal(residentId,state,this.tick);if(!possession)return;
+   return{possession};
+  }
+  if(!passenger.serviceId)return;
+  const service=this.transit.serviceForTransitResident(residentId,time);if(!service)return;
+  const physical=this.transitVehicles.servicePose(service.id,time);
+  const pose=passenger.state==='riding'
+   ?this.transitVehicles.seatPose(service.id,time)
+   :this.transit.passengerPose(residentId,time,physical?{position:physical.position,yaw:physical.yaw,speed:physical.speed}:undefined);
+  if(!pose)return;
   const state=characterState(pose.position[0],pose.position[1],pose.position[2],pose.yaw);
   state.lookYaw=pose.yaw;state.vx=Math.sin(pose.yaw)*pose.speed;state.vz=Math.cos(pose.yaw)*pose.speed;state.vy=0;state.speed=pose.speed;state.grounded=true;
   const possession=this.npcs.possessExternal(residentId,state,this.tick);if(!possession)return;
@@ -80,8 +93,8 @@ export class ThegameAuthority {
   if(this.peers.size>=32||this.peers.has(id)||!/^p[0-9a-z]{1,16}$/.test(id))throw new RangeError('Room capacity or identity');
   let possession,seat:TransitSeat|undefined;
   if(saved?.residentId){
-   const seated=this.seatedPossession(saved.residentId);
-   if(seated){possession=seated.possession;seat=seated.seat;}
+   const transit=this.transitPossession(saved.residentId);
+   if(transit){possession=transit.possession;seat=transit.seat;}
    else{
     const validated=readSelf({ack:0,state:saved.state,discovered:saved.discovered});
     possession=this.npcs.reclaim(saved.residentId,validated.state,this.tick);
