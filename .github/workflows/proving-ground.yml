@@ -10,6 +10,7 @@ on:
       - 'src/vehicles/**'
       - 'src/materials/**'
       - 'src/environment/**'
+      - 'src/scene/**'
       - '.github/workflows/proving-ground.yml'
   workflow_dispatch:
     inputs:
