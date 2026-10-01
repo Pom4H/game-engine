@@ -12,7 +12,7 @@ test('thegame world is deterministic and has exact continuous triangle seams, pr
   for(const p of c.props)assert.ok(Math.abs(p.y-a.ground(p.x,p.z).y)<1e-9);assert.deepEqual(c,b.chunk(cx,cz));
  }
  const kinds=new Set();for(let z=-3000;z<=3000;z+=300)for(let x=-3000;x<=3000;x+=300)kinds.add(climateAt(29,x,z).biome);assert.ok(kinds.size>=7);
- const lamps=cityLamps(-1,-1);assert.equal(lamps.length,8);assert.equal(new Set(lamps.map(l=>l.id)).size,4);assert.equal(cityLamps(4,0).length,0);
+ const lamps=cityLamps(-1,-1);assert.equal(lamps.length,8);assert.equal(new Set(lamps.map(l=>l.id)).size,8);assert.equal(cityLamps(4,0).length,0);
  for(let i=-100;i<100;i++)a.ground(i*128+7,i*37);assert.equal(a.inspect().chunks,8);assert.ok(a.stats.evicted>100);assert.throws(()=>a.chunk(Infinity,0));
 });
 test('rendered terrain triangles agree with collision, road/prop geometry stays chunk-local',()=>{
