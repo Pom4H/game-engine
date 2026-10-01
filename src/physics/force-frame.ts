@@ -1,4 +1,5 @@
 import type {MutableVec3, Vec3} from '../math.js';
+import type {PhysicsCauseRef,PhysicsCauseWriter,PhysicsSourceKind} from './cause-trace.js';
 
 /** The same Euler basis as PhysicsWorld/compose, in f64. One evaluation per body/substep. */
 export class ForceFrame {
@@ -22,12 +23,24 @@ export class ForceFrame {
     out[1] = b[1]!*x+b[4]!*y+b[7]!*z;
     out[2] = b[2]!*x+b[5]!*y+b[8]!*z;
   }
-  /** Force and COM-relative lever arm, both world-space. Does not integrate a second body. */
+  /** Force and COM-relative lever arm, both world-space. Does not integrate a second body.
+   * Compatibility primitive; traced physics should use contribute() so provenance is mandatory. */
   add(force: Vec3, arm: Vec3): void {
     const f = this.force, t = this.torque;
     f[0] += force[0]; f[1] += force[1]; f[2] += force[2];
     t[0] += arm[1]*force[2]-arm[2]*force[1];
     t[1] += arm[2]*force[0]-arm[0]*force[2];
     t[2] += arm[0]*force[1]-arm[1]*force[0];
+  }
+  /** One physical effect enters both the resultant wrench and the optional cause graph.
+   * cause is a stable compile-time descriptor; writer exists only in proof/trace runs. */
+  contribute(force:Vec3,arm:Vec3,cause:PhysicsCauseRef,writer?:PhysicsCauseWriter,sourceKind:PhysicsSourceKind='internal',sourceId='internal',directTorque?:Vec3,pointWorldM?:Vec3,powerW?:number):void {
+    const tx=arm[1]*force[2]-arm[2]*force[1]+(directTorque?.[0]??0);
+    const ty=arm[2]*force[0]-arm[0]*force[2]+(directTorque?.[1]??0);
+    const tz=arm[0]*force[1]-arm[1]*force[0]+(directTorque?.[2]??0);
+    const f=this.force,t=this.torque;f[0]+=force[0];f[1]+=force[1];f[2]+=force[2];t[0]+=tx;t[1]+=ty;t[2]+=tz;
+    if(writer&&(force[0]!==0||force[1]!==0||force[2]!==0||tx!==0||ty!==0||tz!==0)){
+      writer.contribute(cause,{kind:sourceKind,id:sourceId},{forceN:force,torqueNm:[tx,ty,tz],...(pointWorldM?{pointWorldM}:{}),...(powerW!==undefined?{powerW}:{})});
+    }
   }
 }
