@@ -24,15 +24,13 @@ export function readThegameRegionSpec(raw:unknown):Readonly<ThegameRegionSpec>{
  if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new TypeError('Expected region object');
  const r=raw as Record<string,unknown>;
  if(Object.keys(r).some(key=>!['seed','x','z','sizeM','population','cellM','stepSeconds'].includes(key)))throw new TypeError('Unknown region field');
- const spec={
-  seed:r.seed??29,x:r.x??0,z:r.z??0,sizeM:r.sizeM??2048,
-  population:r.population??4096,cellM:r.cellM??128,stepSeconds:r.stepSeconds??1,
- };
- if(!integer(spec.seed,0,0xffffffff)||!integer(spec.x,-4096,4096)||!integer(spec.z,-4096,4096)||
-    !integer(spec.sizeM,256,8192)||!integer(spec.population,0,200_000)||!integer(spec.cellM,32,512)||
-    !finite(spec.stepSeconds)||spec.stepSeconds<.1||spec.stepSeconds>60)throw new RangeError('Invalid region configuration');
- if(spec.sizeM%spec.cellM!==0)throw new RangeError('Region size must be divisible by population cell size');
- return Object.freeze(spec);
+ const seed=r.seed??29,x=r.x??0,z=r.z??0,sizeM=r.sizeM??2048;
+ const population=r.population??4096,cellM=r.cellM??128,stepSeconds=r.stepSeconds??1;
+ if(!integer(seed,0,0xffffffff)||!integer(x,-4096,4096)||!integer(z,-4096,4096)||
+    !integer(sizeM,256,8192)||!integer(population,0,200_000)||!integer(cellM,32,512)||
+    !finite(stepSeconds)||stepSeconds<.1||stepSeconds>60)throw new RangeError('Invalid region configuration');
+ if(sizeM%cellM!==0)throw new RangeError('Region size must be divisible by population cell size');
+ return Object.freeze({seed,x,z,sizeM,population,cellM,stepSeconds});
 }
 
 const smooth=(a:number,b:number,t:number)=>a+(b-a)*(t*t*(3-2*t));
