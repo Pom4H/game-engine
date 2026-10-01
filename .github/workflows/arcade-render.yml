@@ -1,7 +1,28 @@
 name: Snowy Arcade GPU
 on:
   push:
-    branches: [render/snowy-arcade, render/snowy-arcade-fidelity]
+    branches: [render/snowy-arcade, render/snowy-arcade-fidelity, codex/snowy-arcade-fhd-snow]
+    paths:
+      - 'src/render/**'
+      - 'src/scene/**'
+      - 'tools/arcade/**'
+      - 'tools/render-harness.mjs'
+      - 'test/arcade-motion-light.test.mjs'
+      - 'test/height-fog.test.mjs'
+      - 'test/label-color.test.mjs'
+      - 'test/snowy-arcade.test.mjs'
+      - '.github/workflows/arcade-render.yml'
+  pull_request:
+    paths:
+      - 'src/render/**'
+      - 'src/scene/**'
+      - 'tools/arcade/**'
+      - 'tools/render-harness.mjs'
+      - 'test/arcade-motion-light.test.mjs'
+      - 'test/height-fog.test.mjs'
+      - 'test/label-color.test.mjs'
+      - 'test/snowy-arcade.test.mjs'
+      - '.github/workflows/arcade-render.yml'
   workflow_dispatch:
 permissions:
   contents: write
@@ -52,7 +73,7 @@ jobs:
           New-Item -ItemType Directory -Force $target | Out-Null
           Copy-Item artifacts/snowy-arcade*.png,artifacts/arcade-preview.jpg,artifacts/arcade-evidence.json $target -Force
       - name: Publish private render evidence
-        if: always() && steps.frames.outcome == 'success'
+        if: always() && steps.frames.outcome == 'success' && github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
