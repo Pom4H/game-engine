@@ -1,7 +1,7 @@
 import {hash32} from './world.js';
 
 export type TransitMode='bus'|'tram'|'metro';
-export type TransitPassengerState='waiting'|'riding';
+export type TransitPassengerState='waiting'|'boarding'|'riding'|'alighting';
 export type TransitServicePhase='run'|'dwell';
 
 export interface TransitStop {
@@ -31,6 +31,8 @@ export interface TransitPassenger {
  readonly destinationStop:string;
  state:TransitPassengerState;
  serviceId?:string;
+ transitionStarted?:number;
+ transitionStop?:string;
 }
 export interface TransitPassengerPose {
  readonly residentId:string;
@@ -40,6 +42,7 @@ export interface TransitPassengerPose {
  readonly position:readonly[number,number,number];
  readonly yaw:number;
  readonly speed:number;
+ readonly progress:number;
 }
 export interface TransitServicePose {
  readonly position:readonly[number,number,number];
@@ -63,6 +66,8 @@ export interface TransitServiceState {
 
 const START_HOUR_SECONDS=8*3600;
 const SERVICE_COUNT=2;
+const BOARD_SECONDS=1.2;
+const ALIGHT_SECONDS=1.0;
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
 const dist=(a:readonly[number,number,number],b:readonly[number,number,number])=>Math.hypot(a[0]-b[0],a[2]-b[2]);
 const wrap=(v:number,n:number)=>((v%n)+n)%n;
@@ -128,7 +133,6 @@ export function transitServiceTime(seconds:number):string{
 
 export class TransitAuthority {
  private readonly passengers=new Map<string,TransitPassenger>();
- private readonly lastDwell=new Map<string,string>();
  private boarded=0;
  private alighted=0;
  readonly routes=THEGAME_TRANSIT_ROUTES;
@@ -182,7 +186,12 @@ export class TransitAuthority {
  }
 
  private onboard(serviceId:string):number{
-  let n=0;for(const passenger of this.passengers.values())if(passenger.state==='riding'&&passenger.serviceId===serviceId)n++;return n;
+  let n=0;
+  for(const passenger of this.passengers.values())if(
+   passenger.serviceId===serviceId&&
+   (passenger.state==='boarding'||passenger.state==='riding'||passenger.state==='alighting')
+  )n++;
+  return n;
  }
  private waiting(stopId:string,routeId:string):TransitPassenger[]{
   return [...this.passengers.values()].filter(p=>p.state==='waiting'&&p.originStop===stopId&&p.routeId===routeId).sort((a,b)=>a.residentId.localeCompare(b.residentId));
@@ -223,6 +232,10 @@ export class TransitAuthority {
   const passenger=this.passengers.get(residentId);if(passenger?.state!=='riding'||!passenger.serviceId)return;
   return this.services(timeSeconds).find(service=>service.id===passenger.serviceId);
  }
+ serviceForTransitResident(residentId:string,timeSeconds:number):TransitServiceState|undefined{
+  const passenger=this.passengers.get(residentId);if(!passenger?.serviceId)return;
+  return this.services(timeSeconds).find(service=>service.id===passenger.serviceId);
+ }
  passengersState():readonly Readonly<TransitPassenger>[]{
   return Object.freeze([...this.passengers.values()].sort((a,b)=>a.residentId.localeCompare(b.residentId)).map(p=>Object.freeze({...p})));
  }
@@ -234,38 +247,78 @@ export class TransitAuthority {
   const passenger=this.passengers.get(residentId);if(!passenger)return;
   const route=routeById.get(passenger.routeId);if(!route)return;
   const ordinal=this.residentOrdinal(residentId);
-  if(passenger.state==='waiting'){
-   const stop=stopById.get(passenger.originStop);if(!stop)return;
+  const waitingPose=(stopId:string)=>{
+   const stop=stopById.get(stopId);if(!stop)return;
    const next=route.stops[(stop.index+1)%route.stops.length]!,dx=next.position[0]-stop.position[0],dz=next.position[2]-stop.position[2],yaw=Math.atan2(dx,dz);
    const forwardX=Math.sin(yaw),forwardZ=Math.cos(yaw),rightX=Math.cos(yaw),rightZ=-Math.sin(yaw);
    const along=(ordinal%5-2)*.72,lateral=2.9+(ordinal%3)*.18;
-   return{residentId,state:'waiting',routeId:route.id,position:[stop.position[0]+forwardX*along+rightX*lateral,stop.position[1],stop.position[2]+forwardZ*along+rightZ*lateral],yaw,speed:0};
+   return{position:[stop.position[0]+forwardX*along+rightX*lateral,stop.position[1],stop.position[2]+forwardZ*along+rightZ*lateral] as const,yaw};
+  };
+  if(passenger.state==='waiting'){
+   const pose=waitingPose(passenger.originStop);if(!pose)return;
+   return{residentId,state:'waiting',routeId:route.id,position:pose.position,yaw:pose.yaw,speed:0,progress:0};
   }
   if(!passenger.serviceId)return;
   const service=this.services(timeSeconds).find(value=>value.id===passenger.serviceId);if(!service)return;
   const base=servicePose??{position:service.position,yaw:service.yaw,speed:service.phase==='run'?route.cruiseMps:0};
   const side=ordinal&1?1:-1,row=Math.floor((ordinal%24)/2),lateral=side*(route.mode==='metro'?.82:.68),longitudinal=(route.mode==='metro'?5.4:route.mode==='tram'?4.2:3.7)-row*.58;
   const forwardX=Math.sin(base.yaw),forwardZ=Math.cos(base.yaw),rightX=Math.cos(base.yaw),rightZ=-Math.sin(base.yaw);
-  const y=base.position[1]+(route.mode==='metro'?1.15:1.35);
-  return{residentId,state:'riding',routeId:route.id,serviceId:service.id,position:[base.position[0]+rightX*lateral+forwardX*longitudinal,y,base.position[2]+rightZ*lateral+forwardZ*longitudinal],yaw:base.yaw,speed:base.speed};
+  const cabinY=base.position[1]+(route.mode==='metro'?1.15:1.35);
+  const seat=[base.position[0]+rightX*lateral+forwardX*longitudinal,cabinY,base.position[2]+rightZ*lateral+forwardZ*longitudinal] as const;
+  if(passenger.state==='riding')return{residentId,state:'riding',routeId:route.id,serviceId:service.id,position:seat,yaw:base.yaw,speed:base.speed,progress:1};
+
+  const width=route.mode==='metro'?2.7:route.mode==='tram'?2.45:2.5,length=route.mode==='metro'?15:route.mode==='tram'?12.5:10.8;
+  const door=[base.position[0]-rightX*(width/2+.55)+forwardX*(length*.18-.55),base.position[1]+.08,base.position[2]-rightZ*(width/2+.55)+forwardZ*(length*.18-.55)] as const;
+  const stopId=passenger.transitionStop??(passenger.state==='boarding'?passenger.originStop:passenger.destinationStop);
+  const platform=waitingPose(stopId);if(!platform)return;
+  const duration=passenger.state==='boarding'?BOARD_SECONDS:ALIGHT_SECONDS;
+  const progress=clamp((timeSeconds-(passenger.transitionStarted??timeSeconds))/duration,0,1);
+  const interpolate=(a:readonly[number,number,number],b:readonly[number,number,number],t:number):readonly[number,number,number]=>[mix(a[0],b[0],t),mix(a[1],b[1],t),mix(a[2],b[2],t)];
+  if(passenger.state==='boarding'){
+   const position=progress<.58?interpolate(platform.position,door,progress/.58):interpolate(door,seat,(progress-.58)/.42);
+   return{residentId,state:'boarding',routeId:route.id,serviceId:service.id,position,yaw:base.yaw,speed:progress<.58?1:0,progress};
+  }
+  const position=progress<.42?interpolate(seat,door,progress/.42):interpolate(door,platform.position,(progress-.42)/.58);
+  return{residentId,state:'alighting',routeId:route.id,serviceId:service.id,position,yaw:base.yaw,speed:progress>.42?1:0,progress};
  }
 
  step(timeSeconds:number):void{
+  if(!Number.isFinite(timeSeconds)||timeSeconds<0)throw new RangeError('Invalid transit clock');
   for(const service of this.services(timeSeconds)){
    if(service.phase!=='dwell')continue;
-   const key=`${service.id}:${service.currentStop}:${Math.floor(timeSeconds)}`;
-   if(this.lastDwell.get(service.id)===key)continue;
-   this.lastDwell.set(service.id,key);
    const route=routeById.get(service.routeId)!,stop=route.stops[service.currentStop]!;
-   for(const passenger of [...this.passengers.values()]){
-    if(passenger.state==='riding'&&passenger.serviceId===service.id&&passenger.destinationStop===stop.id){
+   const transitions=[...this.passengers.values()]
+    .filter(p=>p.serviceId===service.id&&(p.state==='boarding'||p.state==='alighting'))
+    .sort((a,b)=>a.residentId.localeCompare(b.residentId));
+   let active=false;
+   for(const passenger of transitions){
+    const duration=passenger.state==='boarding'?BOARD_SECONDS:ALIGHT_SECONDS;
+    if(timeSeconds-(passenger.transitionStarted??timeSeconds)+1e-9<duration){active=true;continue;}
+    if(passenger.state==='boarding'){
+     passenger.state='riding';delete passenger.transitionStarted;delete passenger.transitionStop;this.boarded++;
+    }else{
      this.passengers.delete(passenger.residentId);this.alighted++;
     }
    }
-   let free=route.capacity-this.onboard(service.id);
-   if(free<=0)continue;
-   for(const passenger of this.waiting(stop.id,route.id).slice(0,free)){
-    passenger.state='riding';passenger.serviceId=service.id;this.boarded++;free--;
+   if(active||[...this.passengers.values()].some(p=>p.serviceId===service.id&&(p.state==='boarding'||p.state==='alighting')))continue;
+
+   const leaving=[...this.passengers.values()]
+    .filter(p=>p.state==='riding'&&p.serviceId===service.id&&p.destinationStop===stop.id)
+    .sort((a,b)=>a.residentId.localeCompare(b.residentId))[0];
+   const call=schedules.get(route.id)![service.currentStop]!;
+   const dwellRemaining=call.departure-service.scheduledSeconds;
+   if(leaving){
+    if(dwellRemaining>=ALIGHT_SECONDS+.05){
+     leaving.state='alighting';leaving.transitionStarted=timeSeconds;leaving.transitionStop=stop.id;
+    }
+    continue;
+   }
+
+
+   if(route.capacity-this.onboard(service.id)<=0||dwellRemaining<BOARD_SECONDS+.05)continue;
+   const waiting=this.waiting(stop.id,route.id)[0];
+   if(waiting){
+    waiting.state='boarding';waiting.serviceId=service.id;waiting.transitionStarted=timeSeconds;waiting.transitionStop=stop.id;
    }
   }
  }
@@ -275,7 +328,9 @@ export class TransitAuthority {
    routes:this.routes.map(route=>({id:route.id,mode:route.mode,name:route.name,capacity:route.capacity,headway:route.headwaySeconds,stops:route.stops.map(stop=>({id:stop.id,name:stop.name}))})),
    fleet:this.services(timeSeconds).map(service=>({...service})),
    waiting:[...this.passengers.values()].filter(p=>p.state==='waiting').length,
+   boarding:[...this.passengers.values()].filter(p=>p.state==='boarding').length,
    riding:[...this.passengers.values()].filter(p=>p.state==='riding').length,
+   alighting:[...this.passengers.values()].filter(p=>p.state==='alighting').length,
    boarded:this.boarded,alighted:this.alighted,
    serviceTime:transitServiceTime(timeSeconds),
   });

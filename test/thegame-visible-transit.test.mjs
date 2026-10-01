@@ -12,7 +12,7 @@ test('waiting transit residents have stable world poses at stops',()=>{
 });
 
 test('riding resident pose follows the promoted service transform without changing identity',()=>{
- const transit=new TransitAuthority();transit.step(0);
+ const transit=new TransitAuthority();transit.step(0);transit.step(1.2);
  const rider=transit.ridingCandidate();assert.ok(rider?.serviceId);
  const service=transit.serviceForPassenger(rider.residentId,0);assert.ok(service);
  const coarse=transit.passengerPose(rider.residentId,0);assert.ok(coarse);

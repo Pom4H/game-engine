@@ -5,7 +5,9 @@ import {TransitAuthority} from '../dist/games/thegame/transit.js';
 import {TransitVehicleAuthority,transitVehicleProjection} from '../dist/games/thegame/transit-vehicle.js';
 import {ThegameAuthority} from '../dist/games/thegame/session.js';
 function joinKnownRider(game,id='p1'){
- const rider=game.transit.ridingCandidate();assert.ok(rider);
+ let rider=game.transit.ridingCandidate();
+ for(let i=0;!rider&&i<120;i++){game.step();rider=game.transit.ridingCandidate();}
+ assert.ok(rider);
  const service=game.transit.serviceForPassenger(rider.residentId,game.tick/60);assert.ok(service);
  const state=characterState(service.position[0],service.position[1],service.position[2],service.yaw);
  return game.join(id,'Passenger',{state,discovered:0,residentId:rider.residentId});
@@ -41,6 +43,20 @@ test('rail services stay route-authoritative instead of pretending to use road t
  assert.equal(row.values[6],2); // metro mode
  assert.equal(row.values[8],0); // not physical until rail contact exists
  vehicles.dispose();
+});
+
+test('persistent resident can enter while physically boarding without identity replacement',()=>{
+ const game=new ThegameAuthority({},50);
+ const boarding=game.transit.passengersState().find(p=>p.state==='boarding'&&p.serviceId?.startsWith('B'));
+ assert.ok(boarding);
+ const pose=game.transit.passengerPose(boarding.residentId,game.tick/60);assert.ok(pose);
+ const state=characterState(pose.position[0],pose.position[1],pose.position[2],pose.yaw);
+ const peer=game.join('p1','Boarding',{state,discovered:0,residentId:boarding.residentId});
+ assert.equal(peer.residentId,boarding.residentId);assert.equal(peer.seat?.serviceId,boarding.serviceId);
+ for(let i=0;i<80;i++)game.step();
+ assert.equal(game.transit.passenger(peer.residentId)?.state,'riding');
+ assert.equal(peer.seat?.serviceId,boarding.serviceId);
+ game.dispose();
 });
 
 test('known resident enters the world already riding the same living bus service',()=>{
