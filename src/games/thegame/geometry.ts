@@ -39,7 +39,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  // over a solid building shell, no thousands of individual draw calls for windows.
  const windows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.19,metalness:.25,clearcoat:.65,clearcoatRoughness:.13});
  const litWindows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.17,clearcoat:.45,emissive:[.42,.20,.08]});
- const snow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.97});
+ const snow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.97,pattern:'plaster'});
  const metal=new Mesh({kind:'steel',color:[1,1,1,1],roughness:.42,metalness:.65});
  const lampGlow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.12,emissive:[9.0,5.4,2.4]});
  const ground=(x:number,z:number,offset=0):Point=>[x-ox,world.ground(x,z).y+offset,z-oz];
