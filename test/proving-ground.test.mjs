@@ -501,7 +501,7 @@ test('ballistic mechanical accounting stays within integrator error and matches 
   before.linearMomentumNs[2]+body.mass*world.gravity[2]*t,
  ];
  assert.ok(Math.hypot(after.linearMomentumNs[0]-expected[0],after.linearMomentumNs[1]-expected[1],after.linearMomentumNs[2]-expected[2])<1e-7,{before,after,expected});
- assert.ok(Math.hypot(after.angularMomentumNms[0]-before.angularMomentumNms[0],after.angularMomentumNms[1]-before.angularMomentumNms[1],after.angularMomentumNms[2]-before.angularMomentumNms[2])<1e-8,{before,after});
+ assert.ok(Math.hypot(after.spinAngularMomentumNms[0]-before.spinAngularMomentumNms[0],after.spinAngularMomentumNms[1]-before.spinAngularMomentumNms[1],after.spinAngularMomentumNms[2]-before.spinAngularMomentumNms[2])<1e-8,{before,after});
  assert.ok(Math.abs(after.mechanicalJ-before.mechanicalJ)/before.mechanicalJ<.002,{before:before.mechanicalJ,after:after.mechanicalJ});
 });
 
