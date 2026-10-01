@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,wheelHit,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
+import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,soilWheelSupport,wheelHit,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
 const speed=b=>Math.hypot(...b.velocity);
@@ -422,4 +422,49 @@ test('washboard excites repeated suspension oscillation instead of one scripted 
  assert.ok(hi-lo>.035,{lo,hi,peaks});
  assert.ok(peaks>=4,{lo,hi,peaks});
  car.dispose();
+});
+
+
+test('soft ground forms persistent ruts and changes wheel contact physics',()=>{
+ const scene=new Scene(spec);
+ scene.physics.wheelSupport=soilWheelSupport(bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground),scene.soil);
+ const car=new Vehicle(scene.physics,roadCar('proving.car.soil'),{
+  position:[97,1.2,-118],rotation:[0,-Math.PI/2,0]
+ });
+ car.setAir({densityKgM3:1.225,wind:[0,0,0],temperatureC:18});
+ car.setControls({throttle:.65,brake:0});
+ let maxSinkage=0,maxCompaction=0,maxResistance=0,soilContact=false;
+ for(let i=0;i<300;i++){
+  scene.physics.step(dt);
+  for(const id of ['front.left','front.right','rear.left','rear.right']){
+   const p=car.part(id);soilContact ||= p.supportId==='soft-ground';
+   maxSinkage=Math.max(maxSinkage,p.soilSinkageM);maxCompaction=Math.max(maxCompaction,p.soilCompaction);maxResistance=Math.max(maxResistance,p.soilRollingResistanceN);
+  }
+ }
+ assert.equal(soilContact,true);
+ assert.ok(maxSinkage>.025,{maxSinkage,maxCompaction,maxResistance,position:car.body.position});
+ assert.ok(maxCompaction>.02,{maxSinkage,maxCompaction});
+ assert.ok(maxResistance>80,{maxResistance});
+ const rut=scene.soil.sample(97,-112);
+ assert.ok(rut&&rut.sinkageM>0&&rut.compaction>0,rut);
+ car.dispose();
+});
+
+test('same vehicle accelerates less on deformable soil than on rigid asphalt',()=>{
+ const run=(kind)=>{
+  const scene=new Scene(spec);
+  scene.physics.wheelSupport=kind==='soil'
+   ?soilWheelSupport(bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground),scene.soil)
+   :bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
+  const pose=kind==='soil'?{position:[97,1.2,-118],rotation:[0,-Math.PI/2,0]}:{position:[-28,1.2,-82],rotation:[0,-Math.PI/2,0]};
+  const car=new Vehicle(scene.physics,roadCar(`proving.car.${kind}`),pose);
+  car.setAir({densityKgM3:1.225,wind:[0,0,0],temperatureC:18});car.setControls({throttle:.65});
+  for(let i=0;i<180;i++)scene.physics.step(dt);
+  const out={speed:Math.abs(car.body.velocity[2]),soil:car.part('rear.left').soilSinkageM,grip:car.part('rear.left').effectiveGrip,resistance:car.part('rear.left').soilRollingResistanceN};
+  car.dispose();return out;
+ };
+ const asphalt=run('asphalt'),soil=run('soil');
+ assert.ok(soil.soil>.015,soil);
+ assert.ok(soil.resistance>0,soil);
+ assert.ok(soil.speed<asphalt.speed*.9,{asphalt,soil});
 });
