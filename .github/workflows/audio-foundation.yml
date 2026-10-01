@@ -1,0 +1,34 @@
+name: Audio foundation
+on:
+  push:
+    paths:
+      - 'src/audio/**'
+      - 'src/scene/events.ts'
+      - 'test/audio-foundation.test.mjs'
+      - 'docs/AUDIO_FOUNDATION.md'
+      - '.github/workflows/audio-foundation.yml'
+  pull_request:
+    paths:
+      - 'src/audio/**'
+      - 'src/scene/events.ts'
+      - 'test/audio-foundation.test.mjs'
+      - 'docs/AUDIO_FOUNDATION.md'
+      - '.github/workflows/audio-foundation.yml'
+
+concurrency:
+  group: audio-foundation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/audio-foundation.test.mjs
