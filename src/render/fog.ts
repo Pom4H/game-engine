@@ -3,7 +3,45 @@
  * HG phase: https://pbr-book.org/4ed/Volume_Scattering/Phase_Functions
  * Bounded approximation; does not trace volumetric scene shadows.
  */
-export const FOG_WGSL=`
+import type {Vec3} from '../math.js';
+
+/** Exact column through an exponential ground layer, including its flat base. */
+export function fogOpticalDepth(origin:Vec3,position:Vec3,density:number,falloff=0,baseHeight=0):number{
+ const distance=Math.hypot(...position.map((v,k)=>v-origin[k]!));
+ if(falloff<=1e-5)return distance*density;
+ const low=Math.min(origin[1],position[1])-baseHeight,high=Math.max(origin[1],position[1])-baseHeight,delta=high-low;
+ if(delta<.0001)return distance*density*Math.exp(-Math.max(0,low)*falloff);
+ const below=Math.max(0,Math.min(1,-low/delta)),a=Math.max(0,low),b=Math.max(0,high);
+ return distance*density*(below+Math.exp(-a*falloff)*(-Math.expm1(-(b-a)*falloff))/(falloff*delta));
+}
+export function fogViewOpticalDepth(origin:Vec3,position:Vec3,density:number,falloff=0,baseHeight=0,start=0,ramp=0):number{
+ const distance=Math.hypot(...position.map((v,k)=>v-origin[k]!)),after=Math.max(0,distance-start);
+ const integral=ramp<=.0001?after:after<ramp?after*after/(2*ramp):after-ramp*.5;
+ return fogOpticalDepth(origin,position,density,falloff,baseHeight)*integral/Math.max(distance,.0001);
+}
+export const FOG_MEDIUM_WGSL=`
+fn fogRampAverage(distance:f32,start:f32,ramp:f32)->f32{
+ let after=max(0.0,distance-start);
+ if(ramp<=.0001){return after/max(distance,.0001);}
+ let integral=select(after*after/(2.0*ramp),after-ramp*.5,after>=ramp);
+ return integral/max(distance,.0001);
+}
+fn fogOpticalDepth(origin:vec3<f32>,position:vec3<f32>,density:f32)->f32{
+ let distance=length(position-origin);let falloff=f.fogMedium.x;
+ if(falloff<=.00001){return distance*density;}
+ let low=min(origin.y,position.y)-f.fogColor.w;let high=max(origin.y,position.y)-f.fogColor.w;let delta=high-low;
+ if(delta<.0001){return distance*density*exp(-max(0.0,low)*falloff);}
+ let below=clamp(-low/delta,0.0,1.0);let a=max(0.0,low);let b=max(0.0,high);
+ return distance*density*(below+exp(-a*falloff)*(1.0-exp(-(b-a)*falloff))/(falloff*delta));
+}
+fn fogLocalDensity(position:vec3<f32>,density:f32)->f32{
+ return density*exp(-max(0.0,position.y-f.fogColor.w)*f.fogMedium.x);
+}
+fn fogViewDepth(origin:vec3<f32>,position:vec3<f32>,density:f32)->f32{
+ return fogOpticalDepth(origin,position,density)*fogRampAverage(length(position-origin),f.fogMedium.z,f.fogMedium.w);
+}
+`;
+export const FOG_WGSL=FOG_MEDIUM_WGSL+`
 fn pointFogIntegral(source:PointSource,origin:vec3<f32>,ray:vec3<f32>,rayLength:f32,density:f32)->vec3<f32>{
  let radius=source.position.w;let delta=source.position.xyz-origin;let along=dot(delta,ray);
  let perpendicular2=max(0.0,dot(delta,delta)-along*along);
@@ -22,9 +60,12 @@ fn pointFogIntegral(source:PointSource,origin:vec3<f32>,ray:vec3<f32>,rayLength:
   let cosine=dot(fromLight/max(distance,.0001),-ray);let g=.45;
   let denominator=max(.001,1.0+g*g-2.0*g*cosine);
   let phase=(1.0-g*g)/(12.5663706*denominator*sqrt(denominator));
-  sum+=emissionWeight(source,fromLight)*rangeWeight*exp(-density*(t+distance))*phase;
+  let samplePosition=origin+ray*t;
+  let attenuation=exp(-fogViewDepth(origin,samplePosition,density)-fogOpticalDepth(source.position.xyz,samplePosition,density));
+  let ramp=clamp((t-f.fogMedium.z)/max(f.fogMedium.w,.0001),0.0,1.0);
+  sum+=emissionWeight(source,fromLight)*rangeWeight*attenuation*phase*fogLocalDensity(samplePosition,density)*ramp;
  }
- return source.color.rgb*source.color.w*density*.78*(b-a)/core*sum/f32(count);
+ return source.color.rgb*source.color.w*.78*(b-a)/core*sum/f32(count);
 }
 fn pointFog(origin:vec3<f32>,position:vec3<f32>,density:f32)->vec3<f32>{
  if(density<=.00001){return vec3<f32>(0);}

@@ -65,7 +65,16 @@
     ]
   },
   "rendering": {
-    "fogDensity": 0.075,
+    "fogDensity": 0.32,
+    "fogColor": [
+      0.095,
+      0.112,
+      0.13
+    ],
+    "fogHeightFalloff": 0.25,
+    "fogBaseHeight": 0,
+    "fogStartDistance": 2,
+    "fogRampDistance": 16,
     "sunIntensity": 0.18,
     "reflectionFacesPerFrame": 1
   },
@@ -86,20 +95,20 @@
         "fov": 44.5,
         "aperture": 0
       },
-      "pngSha256": "2f42f652ad596e7e10af2991d184524396857a6600136c340dd189c201a1f6f5",
+      "pngSha256": "5c29e6277dc38d61dc248f0f06e25a597c5eacf94c74ba87a1e89088766893ba",
       "renderer": {
         "backend": "webgpu",
-        "triangles": 400116,
-        "drawCalls": 345,
+        "triangles": 399716,
+        "drawCalls": 359,
         "pointLights": 23,
         "lightOverflow": 0,
         "materialTextures": 15,
         "errors": [],
         "gpu": {
-          "meanMs": 17.366078846153844,
-          "p50Ms": 17.130860000000002,
-          "p95Ms": 18.3536,
-          "maxMs": 19.763759999999998
+          "meanMs": 18.230131153846152,
+          "p50Ms": 17.958720000000003,
+          "p95Ms": 19.511150000000004,
+          "maxMs": 21.070760000000003
         }
       }
     },
@@ -119,20 +128,20 @@
         "fov": 44.5,
         "aperture": 0
       },
-      "pngSha256": "1ab6feb6ef78e67909a6b2e984a7a1f6d3d672a6640b5b125267d3a9aeb2b888",
+      "pngSha256": "5d12c8a8b30f9d3fd9200348cd5714433b44bd14e91c31d0790159b154875171",
       "renderer": {
         "backend": "webgpu",
-        "triangles": 329012,
-        "drawCalls": 281,
+        "triangles": 329180,
+        "drawCalls": 290,
         "pointLights": 23,
         "lightOverflow": 0,
         "materialTextures": 15,
         "errors": [],
         "gpu": {
-          "meanMs": 20.703137692307692,
-          "p50Ms": 20.17008,
-          "p95Ms": 22.084490000000002,
-          "maxMs": 28.810429999999997
+          "meanMs": 23.333726153846154,
+          "p50Ms": 22.90982,
+          "p95Ms": 24.546069999999997,
+          "maxMs": 29.51785
         }
       }
     },
@@ -152,20 +161,20 @@
         "fov": 44.5,
         "aperture": 0
       },
-      "pngSha256": "8bde102e2f36ab9f401e207ab6f36b924cebaa64004f148af2b658ad07f0a1f5",
+      "pngSha256": "9d2d67a2d3b0de7792f7fdd1ad13bbf8ff7b97d819eccc374076dfe9e2c62cbe",
       "renderer": {
         "backend": "webgpu",
-        "triangles": 242228,
-        "drawCalls": 179,
+        "triangles": 242340,
+        "drawCalls": 185,
         "pointLights": 23,
         "lightOverflow": 0,
         "materialTextures": 15,
         "errors": [],
         "gpu": {
-          "meanMs": 17.94805192307692,
-          "p50Ms": 17.263890000000004,
-          "p95Ms": 20.987430000000003,
-          "maxMs": 25.625039999999995
+          "meanMs": 19.091408076923074,
+          "p50Ms": 18.26716,
+          "p95Ms": 21.951640000000005,
+          "maxMs": 27.363720000000004
         }
       }
     },
@@ -185,20 +194,20 @@
         "fov": 44.5,
         "aperture": 0
       },
-      "pngSha256": "461d313c0467d1c5681bd8b13bce32e592b7e8f3dc924f2a7b0762d02c2e6583",
+      "pngSha256": "f2a5af8dbb99141c0575799e760c0a26e4ee570cb7ecb823d7215f4dec0e53fa",
       "renderer": {
         "backend": "webgpu",
-        "triangles": 331296,
-        "drawCalls": 284,
+        "triangles": 331464,
+        "drawCalls": 293,
         "pointLights": 23,
         "lightOverflow": 0,
         "materialTextures": 15,
         "errors": [],
         "gpu": {
-          "meanMs": 20.812915,
-          "p50Ms": 20.13108,
-          "p95Ms": 22.6461,
-          "maxMs": 26.91552
+          "meanMs": 21.638413076923083,
+          "p50Ms": 20.816670000000002,
+          "p95Ms": 23.519669999999994,
+          "maxMs": 29.360310000000002
         }
       }
     }
@@ -215,35 +224,35 @@
     ]
   },
   "distributedVideo": {
-    "sceneHash": "e60db17b32d9f75acec6e592a105f72453c4953436b96d33970a6dc4f8d1ee7e",
+    "sceneHash": "c0af7b942cb922e7226019ae8b6b152d75ab5857dfc3525827bb9639a9393941",
     "resolution": [
       1280,
       720
     ],
     "probes": [
       {
-        "workerId": "62d7d115-94a5-401c-8ae8-67a4ef96d0b4",
+        "workerId": "f21283cf-75fe-4d42-9103-82fa047f926a",
         "startFrame": 0,
-        "renderMs": 12548.69999999553,
+        "renderMs": 11765.5,
         "codec": "h264",
         "frames": "12",
         "firstPts": "0.000000",
-        "pixelDeviation": 16.088824084334636
+        "pixelDeviation": 22.03203758045801
       },
       {
-        "workerId": "ed1a22de-ef8b-4b61-ba5d-6fa967cdbf62",
+        "workerId": "3c5a4cd5-2eb9-4566-8dd0-0737a54b002a",
         "startFrame": 12,
-        "renderMs": 15422.39999999851,
+        "renderMs": 14764.39999999851,
         "codec": "h264",
         "frames": "12",
         "firstPts": "0.200000",
-        "pixelDeviation": 15.927716756933796
+        "pixelDeviation": 22.04313340595448
       }
     ],
     "playback": {
       "width": 1280,
       "height": 720,
-      "time": 0.329037,
+      "time": 0.304824,
       "error": ""
     },
     "environment": "Two isolated native desktop Chrome contexts, not physical iPads"

@@ -1,5 +1,5 @@
 import {LIGHT_GRID_WGSL} from './light-grid.js';
-import {FOG_WGSL} from './fog.js';
+import {FOG_WGSL,FOG_MEDIUM_WGSL} from './fog.js';
 /** Camera/exposure controls and lighting are independent of simulation cadence. */
 export const FRAME_WGSL=`
 struct Frame {
@@ -8,10 +8,10 @@ struct Frame {
  viewVP:mat4x4<f32>, previousVP:mat4x4<f32>, environment:vec4<f32>, projection:vec4<f32>,
  irradiance0:vec4<f32>, irradiance1:vec4<f32>, irradiance2:vec4<f32>, irradiance3:vec4<f32>, irradiance4:vec4<f32>,
  irradiance5:vec4<f32>, irradiance6:vec4<f32>, irradiance7:vec4<f32>, irradiance8:vec4<f32>,
- localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>
+ localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>, fogColor:vec4<f32>, fogMedium:vec4<f32>
 }
 `;
-export const SKY_SHADER=FRAME_WGSL+`
+export const SKY_SHADER=FRAME_WGSL+FOG_MEDIUM_WGSL+`
 @group(0) @binding(0) var<uniform> f:Frame;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out {let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,.999999,1.0);o.uv=p;return o;}
@@ -35,6 +35,7 @@ fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);r
  let cloudRadiance=f.sky.rgb*(1.42+.22*haze)+f.sunColor.rgb*f.sun.w*(.11+.20*edge);
  color=mix(color,cloudRadiance,cloudOpacity);
  color+=f.sky.rgb*(.035+.055*haze)*pow(1.0-max(ray.y,0.0),5.0);
+ if(f.fogMedium.y>.5){color=mix(color,f.fogColor.rgb,1.0-exp(-fogViewDepth(f.eye.xyz,f.eye.xyz+ray*80.0,f.sky.w)));}
  return vec4<f32>(color,1);
 }`;
 /** Threshold/downsample followed by two separable Gaussian passes. Sampling a

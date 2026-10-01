@@ -3,7 +3,7 @@
 import base,{authoredEntities} from './scene.mjs';
 import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 import {canopySnow} from './snow-canopy.mjs';
-import {cobbledRoad,streetLantern,lanternEmission} from './street.mjs';
+import {cobbledRoad,streetLantern} from './street.mjs';
 export {quality} from './scene.mjs';
 export const camera={position:[9.8,2.55,-11.7],target:[-6.4,4.05,1.75],fov:44.5,aperture:0};
 export const cameraRail={durationSeconds:90,keyframes:[
@@ -27,7 +27,7 @@ for(let i=0;i<count;i++){
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
 const entities=authoredEntities.filter(e=>
- !/^sett-|^wet-patch-/.test(e.id)&&
+ !/^sett-|^wet-patch-|^lamp-/.test(e.id)&&
  !/^shop-\d+-(canopy-snow|icicle)/.test(e.id)&&
  !/^street-snow-/.test(e.id)&&
  !/^chimney-/.test(e.id)&&
@@ -55,8 +55,6 @@ const entities=authoredEntities.filter(e=>
    return {...e,light:{...e.light,color:[1,.86,.76],intensity:level,range:3.4}};
  }
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.30,.29,.265,1],roughness:.98,emissive:[.004,.004,.003]}};
- if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.76,.48],intensity:30,range:10.5,emission:lanternEmission}};
- if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.92,.80,1],emissive:[14,11,8]}};
  if(e.id==='street-base')return {...e,material:{...e.material,color:[.06,.063,.066,1],roughness:.78}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
@@ -68,6 +66,7 @@ const entities=authoredEntities.filter(e=>
    light:{...e.light,color,intensity:4.4*lit,range:4.2}};
 });
 // The housing profile supplies the fog pattern; no second halo light.
+additions.push(...streetLantern('hero-lantern',6.7116,-.4714));
 for(const [i,x,z] of [[0,-4,-3.95],[1,-15,-3.95],[2,-27,-3.95],[3,10.6,-17.5]])additions.push(...streetLantern('street-lantern-'+i,x,z));
 const cobble={kind:'default',color:[.21,.225,.235,1],roughness:.43,clearcoat:.18,clearcoatRoughness:.18,texture:materialMap('stone',.65,.24)};
 additions.push({id:'cobbled-main-road',position:[0,0,0],mesh:cobbledRoad(-33,13,-13,-3.8),material:cobble});
@@ -231,5 +230,5 @@ export const authoredEntityCount=finalEntities.length;
 export default {...base,
  camera,cameraRail,
  environment:{...base.environment,snowfall:'light',humidity:.985,wind:[.18,0,.06]},
- rendering:{...base.rendering,skyColor:[.020,.022,.025],fogDensity:.075,sunDirection:[-.28,.76,-.46],sunColor:[.46,.49,.53],sunIntensity:.18,exposure:.96,reflectionProbe:{...base.rendering.reflectionProbe,facesPerFrame:1}},
+ rendering:{...base.rendering,skyColor:[.020,.022,.025],fogDensity:.32,fogColor:[.095,.112,.13],fogHeightFalloff:.25,fogBaseHeight:0,fogStartDistance:2,fogRampDistance:16,sunDirection:[-.28,.76,-.46],sunColor:[.46,.49,.53],sunIntensity:.18,exposure:.96,reflectionProbe:{...base.rendering.reflectionProbe,facesPerFrame:1}},
  entities:batchStaticScenery(finalEntities,()=>true,9)};

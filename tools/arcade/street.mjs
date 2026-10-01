@@ -19,22 +19,24 @@ export function cobbledRoad(x0,x1,z0,z1,seed=311,exclude=()=>false){
  return {kind:'triangle-mesh',positions,normals,indices,colors};
 }
 
-export const lanternEmission={axis:[0,-1,0],innerAngle:1.17,outerAngle:1.70,panelCount:4,panelRotation:Math.PI/4,frameWidth:.075};
+export const lanternEmission={axis:[0,-1,0],innerAngle:1.17,outerAngle:1.70,panelCount:4,panelRotation:0,frameWidth:.075,boxHalfSize:[.24,.32,.24],frameWidthM:.018};
 export function streetLantern(id,x,z){
  const entities=[],iron={kind:'default',color:[.045,.049,.052,1],metalness:.72,roughness:.44};
  const add=(suffix,position,mesh,material=iron,extra={})=>entities.push({id:id+'-'+suffix,position,mesh,material,...extra});
  add('base',[x,.085,z],{kind:'box',size:[.38,.17,.38]});
  add('post',[x,1.76,z],{kind:'cylinder',radius:.064,topRadius:.038,height:3.3,segments:12});
  add('collar',[x,3.35,z],{kind:'cylinder',radius:.115,height:.08,segments:12});
- add('glass',[x,3.70,z],{kind:'cylinder',radius:.20,topRadius:.27,height:.62,segments:4},
-  {kind:'default',color:[.72,.65,.48,.13],roughness:.13},{rotation:[0,Math.PI/4,0]});
- add('bulb',[x,3.70,z],{kind:'sphere',radius:.065,segments:12},{kind:'default',color:[1,.88,.68,1],emissive:[10,6.8,3.8],roughness:.3});
+ const glass={kind:'default',color:[1,.78,.47,.32],roughness:.16,emissive:[1.4,.80,.32]};
+ for(const [side,dx,dz,size] of [['east',.24,0,[.008,.64,.48]],['west',-.24,0,[.008,.64,.48]],['north',0,.24,[.48,.64,.008]],['south',0,-.24,[.48,.64,.008]]])add('glass-'+side,[x+dx,3.70,z+dz],{kind:'box',size},glass);
+ add('bulb',[x,3.70,z],{kind:'sphere',radius:.044,segments:12},{kind:'default',color:[1,.88,.68,1],emissive:[6,3.5,1.4],roughness:.3},{scale:[.72,1.45,.72]});
  for(let i=0;i<4;i++){
-  const a=Math.PI/4+i*Math.PI/2,dx=Math.cos(a)*.23,dz=Math.sin(a)*.23;
+  const a=Math.PI/4+i*Math.PI/2,dx=Math.cos(a)*.3394,dz=Math.sin(a)*.3394;
   add('rib-'+i,[x+dx,3.70,z+dz],{kind:'cylinder',radius:.015,height:.65,segments:6});
  }
- add('cap',[x,4.09,z],{kind:'cylinder',radius:.34,topRadius:.045,height:.20,segments:4},iron,{rotation:[0,Math.PI/4,0]});
- add('cap-snow',[x,4.15,z],{kind:'snowdrift',size:[.44,.035,.44],seed:Math.round((x+40)*91),segments:10},{kind:'snow',color:[.88,.90,.91,1],roughness:.96});
+ add('bottom',[x,3.35,z],{kind:'box',size:[.56,.06,.56]});
+ add('cap',[x,4.055,z],{kind:'box',size:[.62,.07,.62]});
+ add('roof',[x,4.18,z],{kind:'cylinder',radius:.46,topRadius:.045,height:.18,segments:4},iron,{rotation:[0,Math.PI/4,0]});
+ add('cap-snow',[x,4.29,z],{kind:'snowdrift',size:[.58,.035,.58],seed:Math.round((x+40)*91),segments:10},{kind:'snow',color:[.88,.90,.91,1],roughness:.96});
  entities.push({id:id+'-light',position:[x,3.70,z],light:{kind:'point',color:[1,.70,.40],intensity:23,range:10,emission:lanternEmission}});
  return entities;
 }

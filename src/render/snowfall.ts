@@ -39,13 +39,14 @@ fn corner(q:vec2<f32>,i:u32,t:f32)->vec2<f32>{let a=t*.45+hash1(i*47u)*6.2831853
  out.uv=q;out.alpha=(.38+hash1(i*3u)*.5)*smoothstep(.3,1.4,distance)*(1.0-smoothstep(21.0,26.0,max(abs(world.x-s.camera.x),abs(world.z-s.camera.z))));
  var incident=f.sky.rgb*1.8+f.sunColor.rgb*f.sun.w*.12;let cell=lightCell(world);
  if(cell!=0xffffffffu){for(var k=0u;k<lightCells[cell];k++){let source=lightGrid.sources[lightCells[cell+1u+k]];let delta=world-source.position.xyz;let d=length(delta);incident+=source.color.rgb*source.color.w*pow(max(0.0,1.0-d/source.position.w),2.0)*emissionWeight(source,delta)/max(1.0,d*d*.4);}}
- out.tone=incident*(.77+hash1(i*7u)*.23)*exp(-f.sky.w*distance);return out;
+ let transmittance=exp(-fogViewDepth(s.camera.xyz,world,f.sky.w));
+ out.tone=mix(vec3<f32>(.86,.92,1)*incident*(.77+hash1(i*7u)*.23),f.fogColor.rgb,1.0-transmittance);return out;
 }
 struct F {@location(0) color:vec4<f32>,@location(3) velocity:vec4<f32>}
 @fragment fn fs(in:O)->F{
  let r=length(in.uv);let lobes=.84+.06*cos(atan2(in.uv.y,in.uv.x)*6.0);let alpha=in.alpha*(1.0-smoothstep(.15,lobes,r));
  if(alpha<.005){discard;}
  let now=in.currentClip.xy/max(in.currentClip.w,.001);let before=in.previousClip.xy/max(in.previousClip.w,.001);
- var out:F;out.color=vec4<f32>(vec3<f32>(.86,.92,1)*in.tone,alpha);out.velocity=vec4<f32>((now-before)*vec2<f32>(.5,-.5),0,alpha);return out;
+ var out:F;out.color=vec4<f32>(in.tone,alpha);out.velocity=vec4<f32>((now-before)*vec2<f32>(.5,-.5),0,alpha);return out;
 }
 `;

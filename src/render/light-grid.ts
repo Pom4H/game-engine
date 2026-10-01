@@ -8,12 +8,20 @@ export const LIGHT_GRID_SIDE=32;
 export const LIGHT_GRID_CELL=8;
 export const LIGHTS_PER_CELL=16;
 export const MAX_RENDER_LIGHTS=256;
-export const LIGHT_SOURCE_FLOATS=16;
+export const LIGHT_SOURCE_FLOATS=20;
 export interface RenderLight {position:Vec3;light?:LightSpec}
 const smooth=(a:number,b:number,x:number)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 /** The cap blocks upward emission; ribs attenuate rays between glass panes. */
 export function lightEmissionWeight(profile:LightEmissionSpec|undefined,fromLight:Vec3):number{
  if(!profile)return 1;
+ if(profile.boxHalfSize){
+  const [hx,hy,hz]=profile.boxHalfSize,a=profile.panelRotation??0,c=Math.cos(a),s=Math.sin(a);
+  const x=c*fromLight[0]+s*fromLight[2],y=fromLight[1],z=-s*fromLight[0]+c*fromLight[2];
+  const tx=hx/Math.max(Math.abs(x),1e-8),ty=hy/Math.max(Math.abs(y),1e-8),tz=hz/Math.max(Math.abs(z),1e-8),t=Math.min(tx,tz);
+  if(ty<=t)return 0;
+  const gap=Math.min(hy-Math.abs(y*t),tx<tz?hz-Math.abs(z*t):hx-Math.abs(x*t)),width=profile.frameWidthM??.015;
+  return width>0?smooth(width*.5,width*1.5,gap):1;
+ }
  const axis=V3.normalize(profile.axis),direction=V3.normalize(fromLight);
  const polar=smooth(Math.cos(profile.outerAngle),Math.cos(profile.innerAngle),V3.dot(axis,direction));
  const count=profile.panelCount??0,width=profile.frameWidth??0;
@@ -37,6 +45,7 @@ export function buildLightGrid(sources:readonly RenderLight[],eye:Vec3):{lights:
  selected.forEach(({s},index)=>{
   const l=s.light!,range=l.range??12,p=l.emission,offset=4+index*LIGHT_SOURCE_FLOATS;lights.set([...s.position,range,...(l.color??[1,.78,.5]),l.intensity??1],offset);
   if(p){lights.set([...V3.normalize(p.axis),Math.cos(p.outerAngle)],offset+8);lights.set([Math.cos(p.innerAngle),p.panelCount??0,p.panelRotation??0,p.frameWidth??0],offset+12);}
+  if(p?.boxHalfSize)lights.set([...p.boxHalfSize,p.frameWidthM??.015],offset+16);
   const minX=Math.max(0,Math.floor((s.position[0]-range-originX)/LIGHT_GRID_CELL)),maxX=Math.min(LIGHT_GRID_SIDE-1,Math.floor((s.position[0]+range-originX)/LIGHT_GRID_CELL));
   const minZ=Math.max(0,Math.floor((s.position[2]-range-originZ)/LIGHT_GRID_CELL)),maxZ=Math.min(LIGHT_GRID_SIDE-1,Math.floor((s.position[2]+range-originZ)/LIGHT_GRID_CELL));
   for(let z=minZ;z<=maxZ;z++)for(let x=minX;x<=maxX;x++){
@@ -51,11 +60,20 @@ export function buildLightGrid(sources:readonly RenderLight[],eye:Vec3):{lights:
  return{lights,cells,count:selected.length,overflow};
 }
 export const LIGHT_GRID_WGSL=`
-struct PointSource { position:vec4<f32>, color:vec4<f32>, axis:vec4<f32>, shape:vec4<f32> }
+struct PointSource { position:vec4<f32>, color:vec4<f32>, axis:vec4<f32>, shape:vec4<f32>, housing:vec4<f32> }
 struct LightGrid { bounds:vec4<f32>, sources:array<PointSource,256> }
 @group(1) @binding(5) var<storage,read> lightGrid:LightGrid;
 @group(1) @binding(6) var<storage,read> lightCells:array<u32>;
 fn emissionWeight(source:PointSource,fromLight:vec3<f32>)->f32{
+ if(source.housing.x>0.0){
+  let c=cos(source.shape.z);let s=sin(source.shape.z);
+  let local=vec3<f32>(c*fromLight.x+s*fromLight.z,fromLight.y,-s*fromLight.x+c*fromLight.z);
+  let hit=source.housing.xyz/max(abs(local),vec3<f32>(.00000001));let t=min(hit.x,hit.z);
+  if(hit.y<=t){return 0.0;}
+  let gap=min(source.housing.y-abs(local.y*t),select(source.housing.x-abs(local.x*t),source.housing.z-abs(local.z*t),hit.x<hit.z));
+  if(source.housing.w<=0.0){return 1.0;}
+  return smoothstep(source.housing.w*.5,source.housing.w*1.5,gap);
+ }
  if(dot(source.axis.xyz,source.axis.xyz)<.5){return 1.0;}
  let direction=fromLight/max(length(fromLight),.0001);
  let polar=smoothstep(source.axis.w,source.shape.x,dot(source.axis.xyz,direction));

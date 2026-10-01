@@ -71,6 +71,8 @@ export interface LightEmissionSpec {
   axis:Vec3; innerAngle:number; outerAngle:number;
   /** Opaque vertical ribs between glass panels; rotation and width in radians. */
   panelCount?:number; panelRotation?:number; frameWidth?:number;
+  /** Rectangular glass enclosure centred on the emitter; top/bottom are opaque. */
+  boxHalfSize?:Vec3; frameWidthM?:number;
 }
 export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number; emission?:LightEmissionSpec }
 export interface CameraIntrinsicsSpec {
@@ -124,6 +126,12 @@ export interface ReflectionProbeSpec {
 export interface RenderingSpec {
   sunDirection?:Vec3; sunColor?:Vec3; skyColor?:Vec3;
   sunIntensity?:number; fogDensity?:number; exposure?:number; shadowExtent?:number;
+  /** In-scattered ambient radiance, independent of the sky background. */
+  fogColor?:Vec3;
+  /** Height-dependent extinction above fogBaseHeight; zero is homogeneous. */
+  fogHeightFalloff?:number; fogBaseHeight?:number;
+  /** Clear near zone, then a linear extinction ramp along the viewing ray. */
+  fogStartDistance?:number; fogRampDistance?:number;
   reflectionProbe?:ReflectionProbeSpec;
   /** Measured HDR environment. When present it replaces the synthetic distant-radiance proxy. */
   environmentRadiance?:EnvironmentRadianceSpec;

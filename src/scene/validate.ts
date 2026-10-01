@@ -97,7 +97,9 @@ export function validateScene(value:unknown):SceneSpec{
   if(scene.rendering!==undefined){
     const r=object(scene.rendering,'rendering');
     if(r.sunDirection!==undefined){vector(r.sunDirection,3,'rendering.sunDirection');if(Math.hypot(...r.sunDirection as number[])<1e-8)throw new TypeError('rendering.sunDirection must be nonzero');}
-    for(const key of ['sunColor','skyColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);
+    for(const key of ['sunColor','skyColor','fogColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);
+    optionalNumber(r,'fogHeightFalloff','rendering',0);optionalNumber(r,'fogBaseHeight','rendering');
+    optionalNumber(r,'fogStartDistance','rendering',0);optionalNumber(r,'fogRampDistance','rendering',0);
     for(const key of ['sunIntensity','fogDensity','exposure'])optionalNumber(r,key,'rendering',0);
     optionalNumber(r,'shadowExtent','rendering',.1,10000);
     if(r.environmentRadiance!==undefined){
@@ -269,6 +271,8 @@ export function validateEntity(value:unknown):EntitySpec{
       number(p.innerAngle,`${path}.innerAngle`,0,Math.PI);number(p.outerAngle,`${path}.outerAngle`,Number.MIN_VALUE,Math.PI);if(Number(p.innerAngle)>=Number(p.outerAngle))throw new TypeError(`${path} angles must increase`);
       optionalNumber(p,'panelCount',path,0,16);if(p.panelCount!==undefined&&!Number.isInteger(p.panelCount))throw new TypeError(`${path}.panelCount must be integer`);
       optionalNumber(p,'panelRotation',path);optionalNumber(p,'frameWidth',path,0,.5);
+      if(p.boxHalfSize!==undefined)vector(p.boxHalfSize,3,`${path}.boxHalfSize`,.001,10);
+      optionalNumber(p,'frameWidthM',path,0,.2);
     }
   }
   return structuredClone(value) as EntitySpec;

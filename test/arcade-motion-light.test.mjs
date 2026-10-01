@@ -25,9 +25,14 @@ test('camera rail is continuous at the loop seam and deterministic across segmen
 test('lantern housing suppresses roof spill and casts four rib sectors without changing point lights',()=>{
  assert.equal(lightEmissionWeight(undefined,[0,1,0]),1);
  assert.equal(lightEmissionWeight(lanternEmission,[0,1,0]),0);
- assert.equal(lightEmissionWeight(lanternEmission,[0,-1,0]),1);
+ assert.equal(lightEmissionWeight(lanternEmission,[0,-1,0]),0);
  const pane=lightEmissionWeight(lanternEmission,[1,0,0]),rib=lightEmissionWeight(lanternEmission,[1,0,1]);
  assert.ok(pane>.1&&rib<.001);
+ assert.equal(pane,1);
+ assert.equal(lightEmissionWeight(lanternEmission,[1,2,0]),0);
+ assert.equal(lightEmissionWeight(lanternEmission,[1,-2,0]),0);
+ assert.ok(lightEmissionWeight(lanternEmission,[1,1,0])>.9);
+ assert.equal(lightEmissionWeight({...lanternEmission,panelRotation:Math.PI/4},[1,0,1]),1);
  assert.ok(Math.abs(pane-lightEmissionWeight(lanternEmission,[0,0,1]))<1e-8);
  const grid=buildLightGrid([{position:[0,3,0],light:{kind:'point',intensity:10,range:8,emission:lanternEmission}},{position:[1,3,0],light:{kind:'point',intensity:1,range:8}}],[0,2,0]);
  assert.equal(grid.lights.length,4+256*LIGHT_SOURCE_FLOATS);
@@ -35,6 +40,8 @@ test('lantern housing suppresses roof spill and casts four rib sectors without c
  assert.deepEqual([...grid.lights.slice(4+LIGHT_SOURCE_FLOATS+8,4+LIGHT_SOURCE_FLOATS+16)],[0,0,0,0,0,0,0,0]);
  assert.throws(()=>validateScene({version:1,entities:[{id:'bad',light:{kind:'point',emission:{...lanternEmission,axis:[0,0,0]}}}]}),TypeError);
  assert.equal(referenceEntities.filter(e=>/^street-lantern-\d+-light$/.test(e.id)).length,4);
+ assert.equal(referenceEntities.filter(e=>/^(street-lantern-\d+|hero-lantern)-glass-/.test(e.id)).length,20);
+ assert.equal(referenceEntities.filter(e=>/^(street-lantern-\d+|hero-lantern)-(cap|bottom)$/.test(e.id)).length,10);
  assert.ok(!referenceEntities.some(e=>e.id==='lamp-aureole'));
  assert.equal(scene.rendering.reflectionProbe.facesPerFrame,1);
 });
