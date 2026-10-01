@@ -40,9 +40,9 @@ function identity(value:string,label:string):void{
 function previousSequence(input:unknown,epoch:number,tick:number):number{
  if(input===undefined)return 0;
  if(!input||typeof input!=='object')throw new TypeError('Invalid shard publication');
- const frame=input as Partial<Frame>;
- if(frame.epoch!==epoch||frame.tick!==tick||!Number.isSafeInteger(frame.sequence)||frame.sequence!<0)throw new TypeError('Shard publication does not match resume fence');
- return frame.sequence;
+ const frame=input as Partial<Frame>,sequence=frame.sequence;
+ if(frame.epoch!==epoch||frame.tick!==tick||typeof sequence!=='number'||!Number.isSafeInteger(sequence)||sequence<0)throw new TypeError('Shard publication does not match resume fence');
+ return sequence;
 }
 
 /** Transport-neutral adapter between a Meshwork shard lease and AuthoritySession.
