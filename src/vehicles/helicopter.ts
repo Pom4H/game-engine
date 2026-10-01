@@ -1,6 +1,7 @@
 import {rotor,vehicle,wing,type VehicleBlueprint} from './vehicle.js';
 
 export const LIGHT_HELICOPTER_HOVER_COLLECTIVE=.29;
+export const LIGHT_HELICOPTER_HOVER_ROLL=-.62;
 export const LIGHT_HELICOPTER_MAIN_RPM=400;
 export const LIGHT_HELICOPTER_TAIL_RPM=2000;
 
