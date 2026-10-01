@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PhysicsWorld} from '../dist/physics/world.js';
+import {Scene} from '../dist/scene/scene.js';
+import {spawnVehicle} from '../dist/vehicles/scene-vehicle.js';
 import {Vehicle,vehicle,rotor} from '../dist/vehicles/vehicle.js';
 import {
  lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL,
@@ -108,6 +110,19 @@ test('failed rotor loses thrust but remains attached mass and does not create a 
  heli.evaluate(1/120);
  assert.equal(heli.part('main').liftN,0);assert.equal(heli.body.mass,mass);assert.equal(world.bodies.size,1);
  heli.dispose();
+});
+
+test('scene rotor presentation consumes physical spin instead of a second animation clock',()=>{
+ const scene=new Scene({version:1,entities:[]}),bp=lightHelicopter('scene-heli');
+ const handle=spawnVehicle(scene,bp,{parts:[]},{modelOriginM:[0,0,0],damage:false,position:[0,30,0]});
+ const visual=scene.entities.get('scene-heli/main.rotor');assert.ok(visual);assert.equal(visual.body,undefined);
+ const before=[...visual.rotation],spin=handle.vehicle.part('main.rotor').spinRad;
+ handle.vehicle.setControls({throttle:1,collective:.2});
+ for(let i=0;i<120;i++)scene.step(1/120);
+ assert.notEqual(handle.vehicle.part('main.rotor').spinRad,spin);
+ assert.notDeepEqual([...visual.rotation],before);
+ assert.equal(scene.physics.bodies.size,1);
+ handle.dispose();assert.equal(scene.physics.bodies.size,0);assert.equal(scene.entities.size,0);
 });
 
 test('rotor validation rejects impossible geometry and controls stay bounded',()=>{
