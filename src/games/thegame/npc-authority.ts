@@ -60,6 +60,7 @@ export class NearbyNpcAuthority {
  private readonly active=new Map<string,AuthoritativeNpc>();
  private readonly possessed=new Set<string>();
  private readonly memories=new Map<string,ResidentMemory>();
+ private unavailable=new Set<string>();
  private population:readonly Frame[]=[];
  private nextRefreshTick=0;
  private promotions=0;
@@ -76,6 +77,10 @@ export class NearbyNpcAuthority {
  setPopulation(frames:readonly Frame[]):void{
   if(!Array.isArray(frames)||frames.length>64)throw new RangeError('Population frame budget exceeded');
   this.population=Object.freeze(frames.map(frame=>populationProjection.read(frame)));
+ }
+ setUnavailable(ids:Iterable<string>):void{
+  this.unavailable=new Set(ids);
+  for(const id of this.unavailable)this.active.delete(id);
  }
 
  private remember(id:string,tick:number,kind:'possess'|'release'):ResidentMemory{
@@ -99,14 +104,14 @@ export class NearbyNpcAuthority {
  acquire(around:Readonly<{x:number;z:number}>,tick:number):ResidentPossession|undefined{
   if(!Number.isSafeInteger(tick)||tick<0)throw new RangeError('Invalid possession tick');
   for(const person of materializeCrowd(this.world,this.population,around,tick,48)){
-   if(this.possessed.has(person.id))continue;
+   if(this.possessed.has(person.id)||this.unavailable.has(person.id))continue;
    const npc=this.active.get(person.id);if(npc)this.active.delete(person.id);
    return this.possession(person.id,npc?.state??stateFrom(person),tick);
   }
  }
 
  reclaim(id:string,fallback:CharacterState|undefined,tick:number):ResidentPossession|undefined{
-  if(this.possessed.has(id))return;
+  if(this.possessed.has(id)||this.unavailable.has(id))return;
   const npc=this.active.get(id);if(npc)this.active.delete(id);
   const ambient=ambientPersonAt(this.world,id,tick);
   const state=npc?.state??(fallback?copyState(fallback):ambient?stateFrom(ambient):undefined);
@@ -117,7 +122,7 @@ export class NearbyNpcAuthority {
  release(id:string,state:CharacterState,tick:number):void{
   if(!this.possessed.delete(id))return;
   this.releases++;this.remember(id,tick,'release');
-  if(this.active.size>=MAX_ACTIVE)return;
+  if(this.unavailable.has(id)||this.active.size>=MAX_ACTIVE)return;
   this.active.set(id,{id,state:copyState(state),intent:residentIntent(this.world.seed,id,tick),promotedAt:tick,sourceTick:tick});
  }
 
@@ -135,7 +140,7 @@ export class NearbyNpcAuthority {
   const candidates=new Map<string,{person:AmbientPerson;distance:number}>();
   for(const player of players){
    for(const person of materializeCrowd(this.world,this.population,player.state,tick,24)){
-    if(this.possessed.has(person.id))continue;
+    if(this.possessed.has(person.id)||this.unavailable.has(person.id))continue;
     const d=distance(player.state,{x:person.data.position[0],z:person.data.position[2]});
     const previous=candidates.get(person.id);if(!previous||d<previous.distance)candidates.set(person.id,{person,distance:d});
    }
@@ -160,7 +165,7 @@ export class NearbyNpcAuthority {
    .sort((a,b)=>a.distance-b.distance||a.person.id.localeCompare(b.person.id));
 
   for(const candidate of ordered){
-   if(this.active.has(candidate.person.id)||this.possessed.has(candidate.person.id)||this.active.size>=MAX_ACTIVE)continue;
+   if(this.active.has(candidate.person.id)||this.possessed.has(candidate.person.id)||this.unavailable.has(candidate.person.id)||this.active.size>=MAX_ACTIVE)continue;
    this.active.set(candidate.person.id,{
     id:candidate.person.id,state:stateFrom(candidate.person),
     intent:residentIntent(this.world.seed,candidate.person.id,tick),promotedAt:tick,sourceTick:tick,
@@ -201,5 +206,5 @@ export class NearbyNpcAuthority {
   promotions:this.promotions,demotions:this.demotions,forcedDemotions:this.forcedDemotions,
   possessions:this.possessions,releases:this.releases,refreshes:this.refreshes,populationFrames:this.population.length,
  };}
- dispose():void{this.active.clear();this.possessed.clear();this.memories.clear();this.population=[];}
+ dispose():void{this.active.clear();this.possessed.clear();this.memories.clear();this.unavailable.clear();this.population=[];}
 }
