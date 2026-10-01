@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {Scene,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
+import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
 const speed=b=>Math.hypot(...b.velocity);
@@ -181,4 +181,33 @@ test('wet asphalt reduces the actual tyre force limit on the surface station',()
  assert.equal(dry.tyre,wet.tyre,'same tyre must retain the same authored tyre grip');
  assert.ok(wet.surface<dry.surface,{dry,wet});
  assert.ok(wet.effective<dry.effective,{dry,wet});
+});
+
+
+test('contact solver emits causal impulse/correction records before final state mutation',()=>{
+ const world=new PhysicsWorld([0,-9.81,0],-100);
+ const floor=world.add(new RigidBody({id:'trace.floor',position:[0,-.1,0],shape:{kind:'box',half:[5,.1,5]},material:material('concrete')}));
+ const body=world.add(new RigidBody({id:'trace.body',position:[0,.55,0],velocity:[0,-3,0],mass:100,shape:{kind:'box',half:[.5,.5,.5]},material:material('steel')}));
+ const trace=world.traceCauses({runId:'proving-contact'});
+ for(let i=0;i<24;i++)world.step(dt);
+ const records=trace.snapshot(),contactRecords=records.filter(r=>r.type==='physics.contribution'&&r.body_id===body.id&&r.law_id==='contact-solver.v1');
+ assert.ok(contactRecords.some(r=>r.effect?.impulse_Ns),'normal/friction impulse must be attributed');
+ assert.ok(contactRecords.some(r=>r.effect?.position_correction_m),'penetration correction must be attributed');
+ const mutation=[...records].reverse().find(r=>r.type==='physics.state-mutation'&&r.body_id===body.id&&Array.isArray(r.contact_contribution_ids)&&r.contact_contribution_ids.length);
+ assert.ok(mutation,'final body mutation must reference contact causes from the same substep');
+ assert.equal(records.some(r=>r.type==='physics.contribution'&&r.body_id===floor.id),false,'static support is a source, not a second state writer');
+ world.stopCauseTrace(trace);
+});
+
+test('isolated body-body collision conserves linear momentum and does not create kinetic energy',()=>{
+ const world=new PhysicsWorld([0,0,0],-100),a=world.add(new RigidBody({id:'momentum.a',position:[-1.1,10,0],velocity:[8,0,0],mass:800,shape:{kind:'box',half:[.5,.5,.5]},material:material('steel'),restitution:.25,friction:0}));
+ const b=world.add(new RigidBody({id:'momentum.b',position:[1.1,10,0],velocity:[-2,0,0],mass:1200,shape:{kind:'box',half:[.5,.5,.5]},material:material('steel'),restitution:.25,friction:0}));
+ const momentum=()=>[a.mass*a.velocity[0]+b.mass*b.velocity[0],a.mass*a.velocity[1]+b.mass*b.velocity[1],a.mass*a.velocity[2]+b.mass*b.velocity[2]];
+ const energy=()=>.5*a.mass*a.velocity.reduce((s,v)=>s+v*v,0)+.5*b.mass*b.velocity.reduce((s,v)=>s+v*v,0);
+ const p0=momentum(),e0=energy();
+ for(let i=0;i<30;i++)world.step(dt);
+ const p1=momentum(),e1=energy();
+ assert.ok(Math.hypot(p1[0]-p0[0],p1[1]-p0[1],p1[2]-p0[2])<1e-8,{p0,p1});
+ assert.ok(e1<=e0+1e-7,{e0,e1});
+ assert.ok(world.contacts.some(c=>c.a===a.id&&c.b===b.id||c.a===b.id&&c.b===a.id),'fixture must actually collide');
 });
