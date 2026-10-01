@@ -322,6 +322,7 @@ export class Vehicle implements PhysicsForceDriver {
     const relaxation=1-Math.exp(-Math.max(1,Math.abs(longitudinal))*dt/.25);
     p.surfaceFriction=Math.max(0,this.world.wheelFrictionAt?.(p.support.id,p.support.body,p.support.point)??(p.support.body?.friction??this.world.groundMaterial.friction));
     p.effectiveGrip=Math.sqrt(Math.max(0,p.grip*p.surfaceFriction));
+    const omegaBefore=p.omega;
     solveWheelContact(p.wheelSolve,dt,radius,p.compiled.inertia,p.omega,longitudinal,-lateral/Math.max(1.25,Math.abs(longitudinal)),p.load*p.effectiveGrip*(1-.75*slide),torque/radius,brake/radius,inv,p.longForce,p.sideForce,relaxation,12,9.5);
     this.diagnostics.wheelSolves++;const solved=p.wheelSolve;p.omega=solved.speed;p.longForce=solved.force;p.sideForce=solved.sideForce;
     p.force[0]=fx*solved.force+rx*solved.sideForce+normal[0]*p.load;p.force[1]=fy*solved.force+ry*solved.sideForce+normal[1]*p.load;p.force[2]=fz*solved.force+rz*solved.sideForce+normal[2]*p.load;
@@ -334,7 +335,10 @@ export class Vehicle implements PhysicsForceDriver {
     this.supportReaction?.(p.support,p.force,dt);
     const slip=p.omega*radius-(longitudinal+solved.force*dt*inv);
     p.slipPower=Math.max(0,solved.force*slip-solved.sideForce*lateral);
-    p.brakePower=Math.abs(solved.brake*radius*p.omega);p.brakeThermal?.addHeat(p.brakePower*dt);
+    // Brake work must survive a zero-speed crossing inside this substep. Using only
+    // post-solve omega loses all heat when the implicit brake solve lands exactly at rest.
+    const brakeTorqueApplied=Math.abs(solved.brake*radius),meanAbsOmega=(Math.abs(omegaBefore)+Math.abs(p.omega))*.5;
+    p.brakePower=brakeTorqueApplied*meanAbsOmega;p.brakeThermal?.addHeat(p.brakePower*dt);
     p.condition.consumeWork(p.slipPower*dt);
   }
 }
