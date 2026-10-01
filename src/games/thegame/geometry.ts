@@ -53,11 +53,18 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    mesh.quad(oa,ob,ib,ia,color);
   }
  };
- const awning=(mesh:Mesh,x:number,y:number,z:number,width:number,depth:number,rise:number,color:RGB)=>{
+ const awning=(mesh:Mesh,x:number,y:number,z:number,width:number,depth:number,rise:number,color:RGB,sign=1)=>{
   const n=8,h=width/2;
   for(let i=0;i<n;i++){
-   const a=i*Math.PI/(2*n),b=(i+1)*Math.PI/(2*n),ya=y+Math.cos(a)*rise,yb=y+Math.cos(b)*rise,za=z+Math.sin(a)*depth,zb=z+Math.sin(b)*depth;
+   const a=i*Math.PI/(2*n),b=(i+1)*Math.PI/(2*n),ya=y+Math.cos(a)*rise,yb=y+Math.cos(b)*rise,za=z+sign*Math.sin(a)*depth,zb=z+sign*Math.sin(b)*depth;
    mesh.quad([x-ox-h,ya,za-oz],[x-ox+h,ya,za-oz],[x-ox+h,yb,zb-oz],[x-ox-h,yb,zb-oz],color);
+  }
+ };
+ const awningX=(mesh:Mesh,x:number,y:number,z:number,width:number,depth:number,rise:number,color:RGB,sign=1)=>{
+  const n=8,h=width/2;
+  for(let i=0;i<n;i++){
+   const a=i*Math.PI/(2*n),b=(i+1)*Math.PI/(2*n),ya=y+Math.cos(a)*rise,yb=y+Math.cos(b)*rise,xa=x+sign*Math.sin(a)*depth,xb=x+sign*Math.sin(b)*depth;
+   mesh.quad([xa-ox,ya,z-oz-h],[xa-ox,ya,z-oz+h],[xb-ox,yb,z-oz+h],[xb-ox,yb,z-oz-h],color);
   }
  };
  for(let z=0;z<16;z++)for(let x=0;x<16;x++){
@@ -78,7 +85,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    rect(asphalt,x,oz+64,12,128,[.055,.060,.065]);rect(asphalt,ox+64,z,128,12,[.055,.060,.065]);
    // Irregular sidewalk snow is render-only and batched; road authority stays dry/unchanged.
    for(let t=8;t<128;t+=16){
-    const depth=8+hash01(cx,cz,n*100+t,world.seed)*7,tone=.58+hash01(cx,cz,n*100+t+1,world.seed)*.12;
+    const depth=8+hash01(cx,cz,n*100+t,world.seed)*7,tone=.42+hash01(cx,cz,n*100+t+1,world.seed)*.10;
     if(hash01(cx,cz,n*100+t+2,world.seed)>.18){rect(snow,x-8,oz+t,2.4,depth,[tone,tone+.02,tone+.03],.055);rect(snow,x+8,oz+t,2.4,depth,[tone,tone+.02,tone+.03],.055);}
     if(hash01(cx,cz,n*100+t+3,world.seed)>.32){rect(snow,ox+t,z-8,depth,2.4,[tone,tone+.02,tone+.03],.055);rect(snow,ox+t,z+8,depth,2.4,[tone,tone+.02,tone+.03],.055);}
    }
@@ -146,7 +153,25 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
     awning(details,bx,p.y+2.48,front+.32,bayWidth,1.72,.55,[.22,.13,.11]);
     awning(snow,bx,p.y+2.54,front+.31,bayWidth+.05,1.74,.56,[.66,.67,.67]);
    }
-   box(snow,p.x,canopyY+.13,front+canopyDepth/2,canopyWidth,.07,canopyDepth,[.64,.65,.65]);
+   box(snow,p.x,canopyY+.13,front+canopyDepth/2,canopyWidth,.07,canopyDepth,[.58,.59,.60]);
+   // Every road-facing side gets a ground-floor shop rhythm. This is visual
+   // projection only; the one authoritative building box remains unchanged.
+   const back=p.z-p.depth/2,backWidth=p.width*.78;
+   for(let bay=-1;bay<=1;bay++){
+    const bx=p.x+bay*backWidth/3,bayWidth=Math.min(5,backWidth*.26);
+    awning(details,bx,p.y+2.46,back-.30,bayWidth,1.55,.52,[.19,.11,.10],-1);
+    awning(snow,bx,p.y+2.52,back-.29,bayWidth+.05,1.57,.53,[.57,.58,.59],-1);
+    box(details,bx,p.y+3.55,back-.18,bayWidth*.90,.42,.10,[.11,.085,.075]);
+   }
+   for(const side of [-1,1] as const){
+    const faceX=p.x+side*p.width/2,sideWidth=p.depth*.78;
+    for(let bay=-1;bay<=1;bay++){
+     const bz=p.z+bay*sideWidth/3,bayWidth=Math.min(5,sideWidth*.26);
+     awningX(details,faceX+side*.30,p.y+2.46,bz,bayWidth,1.55,.52,[.19,.11,.10],side);
+     awningX(snow,faceX+side*.29,p.y+2.52,bz,bayWidth+.05,1.57,.53,[.57,.58,.59],side);
+     box(details,faceX+side*.18,p.y+3.55,bz,.10,.42,bayWidth*.90,[.11,.085,.075]);
+    }
+   }
    box(metal,p.x,p.y+1.3,p.z+p.depth/2+.04,2,2.6,.08,[.10,.12,.12]);
    box(trim,p.x,p.y+2.8,p.z+p.depth/2+.35,3,.18,.7,[.55,.53,.46]);
    const floors=Math.min(8,Math.floor(p.height/3.5));
