@@ -4,9 +4,9 @@ export const PHYSICS_CAUSE_TRACE_SCHEMA='cause-trace' as const;
 export const PHYSICS_CAUSE_TRACE_VERSION='1.0' as const;
 
 export type PhysicsComponentKind='body'|'wheel'|'wing'|'rotor'|'shaft'|'other';
-export type PhysicsLawKind='gravity'|'aerodynamics'|'wheel-contact'|'rotor-aerodynamics'|'constraint'|'collision'|'other';
+export type PhysicsLawKind='gravity'|'aerodynamics'|'fluid'|'wheel-contact'|'rotor-aerodynamics'|'constraint'|'collision'|'other';
 export type PhysicsEffectKind='force'|'torque'|'impulse'|'position-correction'|'power';
-export type PhysicsSourceKind='gravity-field'|'air'|'surface'|'body'|'shaft'|'constraint'|'internal';
+export type PhysicsSourceKind='gravity-field'|'air'|'fluid'|'surface'|'body'|'shaft'|'constraint'|'internal';
 
 export interface PhysicsCauseRef {
  readonly componentId:string;
