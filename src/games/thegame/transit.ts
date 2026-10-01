@@ -119,6 +119,27 @@ export class TransitAuthority {
  private alighted=0;
  readonly routes=THEGAME_TRANSIT_ROUTES;
 
+ constructor(options:{seedDemand?:boolean}={}){
+  if(options.seedDemand!==false)this.seedDemand();
+ }
+
+ private queue(residentId:string,route:TransitRoute,origin:TransitStop,destination:TransitStop):TransitPassenger{
+  const passenger:TransitPassenger={residentId,routeId:route.id,originStop:origin.id,destinationStop:destination.id,state:'waiting'};
+  this.passengers.set(residentId,passenger);return passenger;
+ }
+
+ private seedDemand():void{
+  const used=new Set<string>();
+  for(const route of this.routes)for(const origin of route.stops){
+   const destination=route.stops[(origin.index+1+hash32(origin.index,route.id.charCodeAt(0),route.id.charCodeAt(1),29)%Math.max(1,route.stops.length-1))%route.stops.length]!;
+   const cx=Math.floor(origin.position[0]/128),cz=Math.floor(origin.position[2]/128);
+   for(let slot=0;slot<4;slot++){
+    const id=`crowd:${cx}:${cz}:${slot}`;
+    if(used.has(id))continue;used.add(id);this.queue(id,route,origin,destination);break;
+   }
+  }
+ }
+
  private service(route:TransitRoute,slot:number,timeSeconds:number):TransitServiceState{
   const id=`${route.id}:${slot}`,offset=slot*route.headwaySeconds;
   const local=wrap(timeSeconds+offset,route.cycleSeconds),schedule=schedules.get(route.id)!;
@@ -167,12 +188,13 @@ export class TransitAuthority {
    }
   }
   if(!best||best.cost>900)return;
-  const passenger:TransitPassenger={residentId,routeId:best.route.id,originStop:best.origin.id,destinationStop:best.destination.id,state:'waiting'};
-  this.passengers.set(residentId,passenger);return passenger;
+  return this.queue(residentId,best.route,best.origin,best.destination);
  }
 
  cancel(residentId:string):void{this.passengers.delete(residentId);}
  passenger(residentId:string):Readonly<TransitPassenger>|undefined{const p=this.passengers.get(residentId);return p?Object.freeze({...p}):undefined;}
+ hasResident(residentId:string):boolean{return this.passengers.has(residentId);}
+ ownedResidentIds():ReadonlySet<string>{return new Set(this.passengers.keys());}
 
  step(timeSeconds:number):void{
   for(const service of this.services(timeSeconds)){
