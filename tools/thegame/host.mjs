@@ -5,7 +5,7 @@ import {FixedClock} from '../../dist/core/fixed-clock.js';
 import {LatestStateOutbox} from '../../dist/network/projection.js';
 /** Platform adapter: Bun owns sockets, the engine owns simulation. Tests use the same host. */
 export function createThegameHost(config,{profile=false,now=()=>performance.now(),epoch=Date.now()}={}){
- const game=new ThegameAuthority(config,epoch,profile),clock=new FixedClock(1000/60,250,12),sockets=new Map(),sessions=new Map();
+ const game=new ThegameAuthority(config,epoch,profile),clock=new FixedClock(1000/60,2000,12),sockets=new Map(),sessions=new Map();
  let identities=0;const stats={bytes:0,messages:0,replaced:0,backpressure:0,timeouts:0};
  function send(socket,data){const c=sockets.get(socket);if(!c)return;const text=typeof data==='string'?data:JSON.stringify(data);const result=socket.send(text);stats.bytes+=Buffer.byteLength(text);stats.messages++;if(result===-1){c.blocked=true;c.blockedAt=now();stats.backpressure++;}else if(result===0)socket.close(1011,'Connection unavailable');}
  function flush(socket){const c=sockets.get(socket);if(!c||c.blocked)return;const next=c.outbox.take();if(next!==undefined)send(socket,next);}
