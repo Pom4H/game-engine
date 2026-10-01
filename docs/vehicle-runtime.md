@@ -46,6 +46,61 @@ The surface rotates into the local relative airflow and the ordinary aerodynamic
 solver produces its lift/drag. A moving car in still air and a stationary car in the
 opposite wind therefore produce the same spoiler force; co-moving air produces none.
 
+## Cause graph / proof mode
+
+Physics provenance is opt-in and does not allocate records in normal runs:
+
+```ts
+const trace = world.traceCauses({runId: 'winged-car-ci'});
+
+// Existing and later attached drivers declare stable components/laws automatically.
+// Every force/torque produced while tracing must close against those contributions.
+world.step(1 / 120);
+
+await writeFile('trace.jsonl', trace.toJSONL());
+console.log(trace.proof);
+world.stopCauseTrace(trace);
+```
+
+A custom force driver gets the same small API. It declares causes once, then writes a
+matching contribution whenever it changes its public wrench:
+
+```ts
+const thrust = physicsCause('thruster', 'constant-thrust.v1', 'other', ['force', 'torque']);
+
+const driver = {
+  maxStepSeconds: 1 / 120,
+  force: [4, 0, 0],
+  torque: [0, 0, 0],
+
+  declareCauses(manifest) {
+    manifest.component({componentId: 'thruster', bodyId: body.id, kind: 'other', parentComponentId: body.id});
+    manifest.law(body.id, thrust);
+  },
+
+  evaluate(_dt, causes) {
+    causes?.contribute(thrust, {kind: 'internal', id: 'demo.thruster'}, {
+      forceN: this.force,
+      torqueNm: this.torque,
+    });
+  },
+};
+```
+
+Proof mode is intentionally strict: once a body first evaluates, its component/law
+manifest is sealed. If the driver's resulting wrench differs from the sum of recorded
+contributions by more than numerical tolerance, the substep throws instead of
+producing an incomplete trace. `PhysicsWorld.integrate` is recorded as the state
+writer. JSONL uses `cause-trace` schema version `1.0`; component IDs are scoped by
+`body_id`, so multiple identical assemblies may keep local IDs such as
+`front.left` and `wing.left`.
+
+The CI liftoff proof starts tracing immediately before wing deflection. It requires all
+manifest records to precede the first traced substep, verifies exact wrench closure,
+then checks that the first airborne frames remove `wheel-contact.v1` contributions
+without adding any new law. The only recorded state writer remains
+`PhysicsWorld.integrate`.
+
 ## Ownership and reuse
 
 * `vehicle()` compiles an immutable source snapshot: total mass, COM, diagonal
