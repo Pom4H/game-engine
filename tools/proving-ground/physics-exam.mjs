@@ -37,7 +37,7 @@ const implemented=new Map([
  ['buoyancy',typeof engine.FluidField==='function'&&typeof engine.PhysicsWorld==='function'],
  ['drag',(typeof engine.FluidField==='function'&&typeof engine.PhysicsWorld==='function')||typeof engine.wing==='function'],
  ['sealing',typeof engine.FluidField==='function'&&typeof engine.RigidBody?.prototype?.setLeakArea==='function'],
- ['thermal',false],
+ ['thermal',typeof engine.ThermalMass==='function'],
  ['soil',false],
  ['sinkage',false],
  ['traction',false],
