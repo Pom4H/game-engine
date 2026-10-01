@@ -2,7 +2,7 @@ name: TheGame region shard
 
 on:
   push:
-    branches: [feat/thegame-region-shard, feat/thegame-seamless-crowd]
+    branches: [feat/thegame-region-shard, feat/thegame-seamless-crowd, feat/thegame-npc-authority]
     paths:
       - 'src/games/thegame/**'
       - 'src/network/**'
