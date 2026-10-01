@@ -15,6 +15,7 @@ import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
+import {FluidField} from '../physics/fluid.js';
 import type {EngineEvent} from './events.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
@@ -57,6 +58,7 @@ export class Scene {
   readonly physics:PhysicsWorld;
   readonly deformation=new PlasticDeformationSystem();
   readonly surfaces=new SurfaceEnvironmentSystem();
+  readonly fluids:FluidField;
   /** @deprecated Use surfaces. Kept only while PR tooling/examples migrate. */
   get winter(){return this.surfaces;}
   readonly animation=new AnimationSystem();
@@ -90,6 +92,7 @@ export class Scene {
     this.spec=validateScene(input);
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
+    this.fluids=new FluidField(this.spec.fluids??[]);this.physics.fluidAt=body=>this.fluids.sampleXZ(body.position[0],body.position[2]);
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.physics.wheelFrictionAt=(supportId,body,point)=>{
       if(!body)return this.physics.groundMaterial.friction;
@@ -136,6 +139,7 @@ export class Scene {
       ...(spec.body?.angularVelocity?{angularVelocity:spec.body.angularVelocity}:{}),
       ...(spec.body?.restitution!==undefined?{restitution:spec.body.restitution}:{}),
       friction:spec.body?.friction??effectiveFriction(profile,surface),
+      ...(spec.body?.fluid?{fluid:spec.body.fluid}:{}),
     })):undefined;
     if(body){position=body.position;rotation=body.rotation;}
     const runtime:RuntimeEntity={
