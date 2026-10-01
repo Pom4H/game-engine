@@ -5,6 +5,7 @@ import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
 import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
 import {validateWindVolume,type WindVolumeSpec} from '../physics/wind.js';
+import {validateSoilVolume,type SoilVolumeSpec} from '../physics/soil.js';
 
 export function validateScene(value:unknown):SceneSpec{
   if(!value||typeof value!=='object')throw new TypeError('Scene must be an object');
@@ -40,6 +41,13 @@ export function validateScene(value:unknown):SceneSpec{
     for(const [index,raw] of volumes.entries()){
       if(!raw||typeof raw!=='object')throw new TypeError(`windVolumes[${index}] must be an object`);
       validateWindVolume(raw as WindVolumeSpec);const id=(raw as WindVolumeSpec).id;if(windIds.has(id))throw new TypeError(`Duplicate wind volume ${id}`);windIds.add(id);
+    }
+  }
+  if(scene.soilVolumes!==undefined){
+    const volumes=boundedArray(scene.soilVolumes,'soilVolumes',128),ids=new Set<string>();
+    for(const [index,raw] of volumes.entries()){
+      if(!raw||typeof raw!=='object')throw new TypeError(`soilVolumes[${index}] must be an object`);
+      validateSoilVolume(raw as SoilVolumeSpec);const id=(raw as SoilVolumeSpec).id;if(ids.has(id))throw new TypeError(`Duplicate soil ${id}`);ids.add(id);
     }
   }
   validateBindings(scene,scene.entities as EntitySpec[]);
