@@ -206,7 +206,9 @@ test('brake endurance accumulates heat across repeated physical stops and produc
  for(let cycle=0;cycle<6;cycle++){
   car.setControls({brake:0,throttle:1});
   assert.equal(runUntil(()=>car.body.velocity[2]>24),true,'failed to accelerate on endurance runway');
-  car.setControls({throttle:0,brake:1});
+  // Modulated braking keeps the wheel rolling; a locked wheel correctly dumps most
+  // vehicle energy into tyre-road slip instead of the brake thermal mass.
+  car.setControls({throttle:0,brake:.25});
   assert.equal(runUntil(()=>Math.abs(car.body.velocity[2])<1.2),true,'failed thermal stop');
   totalStops++;
  }
