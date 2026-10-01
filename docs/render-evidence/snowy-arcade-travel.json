@@ -1,0 +1,359 @@
+{
+  "resolution": [
+    1280,
+    720
+  ],
+  "warmupFrames": 24,
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "cameraRail": {
+    "durationSeconds": 90,
+    "keyframes": [
+      {
+        "position": [
+          9.8,
+          2.55,
+          -11.7
+        ],
+        "target": [
+          -6.4,
+          4.05,
+          1.75
+        ]
+      },
+      {
+        "position": [
+          -1,
+          2.45,
+          -11.2
+        ],
+        "target": [
+          -15,
+          4,
+          1.3
+        ]
+      },
+      {
+        "position": [
+          -11,
+          2.7,
+          -10.5
+        ],
+        "target": [
+          -26,
+          4.2,
+          1
+        ]
+      },
+      {
+        "position": [
+          -1,
+          2.6,
+          -12.4
+        ],
+        "target": [
+          -15,
+          4.1,
+          1.5
+        ]
+      }
+    ]
+  },
+  "rendering": {
+    "sunDirection": [
+      -0.28,
+      0.76,
+      -0.46
+    ],
+    "sunColor": [
+      0.46,
+      0.49,
+      0.53
+    ],
+    "sunIntensity": 0.18,
+    "skyColor": [
+      0.02,
+      0.022,
+      0.025
+    ],
+    "fogDensity": 0.2,
+    "exposure": 0.96,
+    "shadowExtent": 48,
+    "fogColor": [
+      0.095,
+      0.112,
+      0.13
+    ],
+    "fogHeightFalloff": 0.42,
+    "fogBaseHeight": 0,
+    "fogStartDistance": 2,
+    "fogRampDistance": 16,
+    "reflectionFacesPerFrame": 1
+  },
+  "captures": [
+    {
+      "time": 0,
+      "camera": {
+        "position": [
+          9.8,
+          2.55,
+          -11.7
+        ],
+        "target": [
+          -6.4,
+          4.05,
+          1.75
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "0b757ce29e622b39393f70e832b02d7e9ed82f9351a12948d298dd3739852d76",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 399168,
+        "drawCalls": 347,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 19.538023461538458,
+          "p50Ms": 19.378280000000004,
+          "p95Ms": 20.234679999999997,
+          "maxMs": 20.34112
+        }
+      }
+    },
+    {
+      "time": 20.000000000000146,
+      "camera": {
+        "position": [
+          0.2834019204389602,
+          2.4460219478737995,
+          -11.263237311385458
+        ],
+        "target": [
+          -13.84471879286694,
+          3.994581618655692,
+          1.3472565157750342
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "97cb8142aa4997ef3bc3889d30be8c180e5b8714684461d6aba9d37048e1ba74",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 315920,
+        "drawCalls": 271,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 21.692102307692306,
+          "p50Ms": 21.10388,
+          "p95Ms": 22.99824,
+          "maxMs": 28.566560000000003
+        }
+      }
+    },
+    {
+      "time": 44.99999999999873,
+      "camera": {
+        "position": [
+          -11,
+          2.7,
+          -10.5
+        ],
+        "target": [
+          -26,
+          4.2,
+          1
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "c5e07b990934d14ee296f7b77af8548d65b04e4ea31dc30b816931f34f9cf291",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 236528,
+        "drawCalls": 173,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 19.52979884615385,
+          "p50Ms": 18.916680000000007,
+          "p95Ms": 21.73201,
+          "maxMs": 26.741750000000007
+        }
+      }
+    },
+    {
+      "time": 69.99999999999731,
+      "camera": {
+        "position": [
+          0.2834019204389582,
+          2.5925240054869683,
+          -12.43525377229081
+        ],
+        "target": [
+          -13.84471879286694,
+          4.092249657064471,
+          1.5425925925925927
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "8d7ffaa667e64512257ed9b54214ced2821da658aad7a806142769b40c92932f",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 318204,
+        "drawCalls": 274,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 21.89482423076923,
+          "p50Ms": 21.337959999999995,
+          "p95Ms": 22.758840000000003,
+          "maxMs": 28.5566
+        }
+      }
+    }
+  ],
+  "previews": {
+    "resolution": [
+      1280,
+      720
+    ],
+    "encoding": "lossless WebP",
+    "files": [
+      "snowy-arcade-travel-start.webp",
+      "snowy-arcade-travel-far.webp"
+    ]
+  },
+  "distributedVideo": {
+    "scene": "snowy-arcade-fidelity",
+    "sceneHash": "ebeae06d97aafee53596ea68cba31087190ca446a9c8ce4e49df4337ea14c42e",
+    "resolution": [
+      1280,
+      720
+    ],
+    "probes": [
+      {
+        "workerId": "7b995d5b-91e7-4720-a4df-a7f77c086206",
+        "startFrame": 1080,
+        "renderMs": 22414.29999999702,
+        "codec": "h264",
+        "frames": "120",
+        "firstPts": "18.000000",
+        "audio": {
+          "codec": "aac",
+          "channels": 2,
+          "sampleRate": "48000",
+          "firstPts": "18.005333",
+          "rms": 0.023687874673933452
+        },
+        "pixelDeviation": 41.347738399237315
+      },
+      {
+        "workerId": "192659fd-b12d-4345-a268-412a2f072546",
+        "startFrame": 1200,
+        "renderMs": 25558.39999999851,
+        "codec": "h264",
+        "frames": "120",
+        "firstPts": "20.000000",
+        "audio": {
+          "codec": "aac",
+          "channels": 2,
+          "sampleRate": "48000",
+          "firstPts": "20.010667",
+          "rms": 0.02217743422452196
+        },
+        "pixelDeviation": 42.34060692564966
+      },
+      {
+        "workerId": "192659fd-b12d-4345-a268-412a2f072546",
+        "startFrame": 1320,
+        "renderMs": 7133.70000000298,
+        "codec": "h264",
+        "frames": "120",
+        "firstPts": "22.000000",
+        "audio": {
+          "codec": "aac",
+          "channels": 2,
+          "sampleRate": "48000",
+          "firstPts": "22.016000",
+          "rms": 0.01322371439883113
+        },
+        "pixelDeviation": 43.76024309438506
+      },
+      {
+        "workerId": "7b995d5b-91e7-4720-a4df-a7f77c086206",
+        "startFrame": 1440,
+        "renderMs": 8390.30000000447,
+        "codec": "h264",
+        "frames": "120",
+        "firstPts": "24.000000",
+        "audio": {
+          "codec": "aac",
+          "channels": 2,
+          "sampleRate": "48000",
+          "firstPts": "24.000000",
+          "rms": 0.008535139932798936
+        },
+        "pixelDeviation": 42.0278005992814
+      }
+    ],
+    "playback": {
+      "width": 1280,
+      "height": 720,
+      "time": 6.060438,
+      "sourceTime": 24.060438,
+      "error": "",
+      "paused": false,
+      "readyState": 4,
+      "duration": 8.005333,
+      "buffered": [
+        [
+          0,
+          7.999999
+        ]
+      ]
+    },
+    "liveChat": true,
+    "environment": "Two isolated native desktop Chrome contexts, not physical iPads"
+  },
+  "limitations": [
+    "Desktop GPU evidence; physical iPad throughput is not measured.",
+    "Fog uses bounded single-scattering quadrature with a lantern emission profile; it does not trace volumetric shadows from surrounding geometry."
+  ],
+  "audio": {
+    "horses": 1,
+    "wheels": 4,
+    "passTimes": [
+      12,
+      58
+    ],
+    "passSeconds": 15,
+    "loopSeconds": 90,
+    "sampleRate": 48000,
+    "channels": 2,
+    "actors": "Acoustic only; always behind the moving listener",
+    "waveform": "Absolute sample indices; independent ranges match the continuous render"
+  },
+  "architecture": [
+    "Closed deep mansard and side dormers/chimneys",
+    "Roof seams and upward-facing exterior normals",
+    "Aged plaster and dark painted Cyrillic signs",
+    "Backlit floral lace shop curtains"
+  ]
+}

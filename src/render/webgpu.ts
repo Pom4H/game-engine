@@ -3,7 +3,8 @@ import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filt
 import {buildDirectionalProxyTiles} from './proxy-tiles.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
-import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
+import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL,LIGHT_SOURCE_FLOATS} from './light-grid.js';
+import {FOG_WGSL,FOG_MEDIUM_WGSL} from './fog.js';
 import {FRAME_WGSL,SKY_SHADER,EFFECTS_SHADER,PRESENT_SHADER,BLOOM_SHADER,TAA_SHADER} from './lighting.js';
 import {V3,compose,lookAt,multiply4,perspective,type Mat4,type Vec3} from '../math.js';
 import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
@@ -16,8 +17,10 @@ import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
 import {buildRenderFrame,renderPrimitive,renderModel,primitiveBaseScale,type RenderFrameIR} from './frame.js';
 import {buildDiffuseIrradianceSH} from './irradiance.js';
+import {SNOWFALL_WGSL,snowfallUniform} from './snowfall.js';
 
 type GPUAny=any;
+const labelKey=(text:string,color?:Vec3)=>JSON.stringify([text,color??[226/255,217/255,188/255]]);
 const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean}
@@ -25,7 +28,7 @@ interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;coun
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
-const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+`
+const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`
 override MATERIAL_CLASS:i32=-1;
 struct U {
   model: mat4x4<f32>,
@@ -164,7 +167,7 @@ fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,r
  let d=a2/(3.14159*pow(nh*nh*(a2-1.0)+1.0,2.0));let k=pow(r+1.0,2.0)/8.0;
  let g=nv/(nv*(1.0-k)+k)*nl/(nl*(1.0-k)+k);
  let fr=f0+(1.0-f0)*pow(1.0-max(dot(viewDir,h),0.0),5.0);
- let atten=pow(max(0.0,1.0-pow(dist/source.position.w,4.0)),2.0)/(1.0+dist*dist*.18);
+ let atten=pow(max(0.0,1.0-pow(dist/source.position.w,4.0)),2.0)/(1.0+dist*dist*.18)*emissionWeight(source,-delta);
  if(coat<=0.0){return (base*(1.0-fr)*(1.0-metal)/3.14159+d*g*fr/max(4.0*nv*nl,.001))*source.color.rgb*source.color.w*atten*nl;}
  let coatF=coat*(.04+.96*pow(1.0-max(dot(viewDir,h),0.0),5.0));
  let cr=max(coatRoughness,.08+.18/max(dist,1.0));let ca2=pow(cr,4.0);
@@ -613,7 +616,9 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   if(materialKind>4.5&&materialKind<5.5){color*=mix(.52,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
 
   if(f.params.x>.5){let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal,clearcoat,coatRough);}}}
-  color+=u.emission.rgb;
+  // Backlit fabric transmits its dyed weave. Constant emission alone erases
+  // the cloth texture and turns every lit curtain into a featureless panel.
+  color+=u.emission.rgb*select(vec3<f32>(1),clamp(albedo,vec3<f32>(.05),vec3<f32>(1)),u.pbr.z>4.5);
   if(materialKind>4.5&&materialKind<5.5&&n.y>.8&&in.reflected==0u){
     let p=f.reflectionVP*vec4<f32>(in.worldPos,1);let uv=p.xy/p.w*vec2<f32>(.5,-.5)+.5;
     let ripple=vec2<f32>(noise3(in.worldPos*vec3<f32>(7,1,3))-.5,noise3(in.worldPos*vec3<f32>(3,1,9)+9.0)-.5)*.000075;let blur=vec2<f32>(.0011,.0021)*(roughness+.2);var reflection=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.28;
@@ -623,8 +628,9 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let roadReflection=max(waterCoverage*(1.0-roadSlurry*.72),icePatch*.45);
     color=mix(color,reflection,fres*roadReflection);
   }
-  let fog=1.0-exp(-distance(eye,in.worldPos)*f.sky.w);
-  color=mix(color,f.sky.rgb*1.22+f.sunColor.rgb*f.sun.w*.027,clamp(fog,0.0,.96));
+  let fog=1.0-exp(-fogViewDepth(eye,in.worldPos,f.sky.w));
+  color=mix(color,f.fogColor.rgb,clamp(fog,0.0,1.0));
+  color+=pointFog(eye,in.worldPos,f.sky.w);
   let grazing=pow(1.0-nv,5.0);
   let screenReflectance=environmentFresnel*pow(1.0-coatViewF,2.0)+vec3<f32>(coatViewF);
   // Pack independent SSR roughness in reflectance.a; normal.a stays the base
@@ -633,30 +639,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let glassOpacity=mix(clamp(u.color.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(.5+.5*screenRoughness,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
-const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
-@group(1) @binding(0) var<uniform> f:Frame;
-struct S {vp:mat4x4<f32>,camera:vec4<f32>,params:vec4<f32>,right:vec4<f32>,up:vec4<f32>}
-@group(0) @binding(0) var<uniform> s:S;
-struct O {@builtin(position) position:vec4<f32>,@location(0) alpha:f32,@location(1) uv:vec2<f32>,@location(2) tone:vec3<f32>}
-fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
-@vertex fn vs(@builtin(vertex_index) vertex:u32,@builtin(instance_index) instance:u32)->O{
- let i=f32(instance)+1.0;let rx=hash1(i*12.9898);let rz=hash1(i*78.233);let ry=hash1(i*31.731);let t=s.params.x;
- // Wrapping moves only the far boundary. Inside the volume flakes stay in world
- // space as the camera travels, with individual fall speed and lateral flutter.
- let wx=rx*52.0+s.params.z*t*.32+sin(t*.8+i)*.17;let wz=rz*52.0+s.params.w*t*.32+cos(t*.63+i*1.7)*.15;
- let world=vec3<f32>(s.camera.x+fract((wx-s.camera.x+26.0)/52.0)*52.0-26.0,fract(ry-t*(.024+hash1(i*5.17)*.025))*20.0,s.camera.z+fract((wz-s.camera.z+26.0)/52.0)*52.0-26.0);
- var corners=array<vec2<f32>,6>(vec2<f32>(-1,-1),vec2<f32>(1,-1),vec2<f32>(1,1),vec2<f32>(-1,-1),vec2<f32>(1,1),vec2<f32>(-1,1));let q=corners[vertex];
- let distance=length(world-s.camera.xyz);let size=.008+pow(hash1(i*9.13),3.0)*.022;
- let angle=t*.45+i;let local=vec2<f32>(q.x*cos(angle)-q.y*sin(angle),q.x*sin(angle)+q.y*cos(angle));
- var out:O;out.position=s.vp*vec4<f32>(world+(s.right.xyz*local.x+s.up.xyz*local.y)*size,1);
- out.uv=q;out.alpha=(.38+hash1(i*3.77)*.5)*smoothstep(.3,1.4,distance)*(1.0-smoothstep(21.0,26.0,max(abs(world.x-s.camera.x),abs(world.z-s.camera.z))));var incident=f.sky.rgb*2.0+vec3<f32>(.08);let cell=lightCell(world);
- if(cell!=0xffffffffu){for(var k=0u;k<lightCells[cell];k++){let source=lightGrid.sources[lightCells[cell+1u+k]];let d=length(world-source.position.xyz);incident+=source.color.rgb*source.color.w*pow(max(0.0,1.0-d/source.position.w),2.0)/max(1.0,d*d*.4);}}
- out.tone=incident*(.77+hash1(i*6.8)*.23);return out;
-}
-@fragment fn fs(in:O)->@location(0) vec4<f32>{
- let r=length(in.uv);let lobes=.84+.06*cos(atan2(in.uv.y,in.uv.x)*6.0);let fade=1.0-smoothstep(.15,lobes,r);return vec4<f32>(vec3<f32>(.86,.92,1)*in.tone,in.alpha*fade);
-}
-`;
+const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+FOG_MEDIUM_WGSL+SNOWFALL_WGSL;
 
 const REFLECTION_LOD_SHADER=FRAME_WGSL+`
 override MATERIAL_CLASS:i32=-1;
@@ -747,8 +730,8 @@ export class WebGPURenderer implements Renderer{
     const frameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
-    const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*8)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
-    const frame=device.createBuffer({size:608,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
+    const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*LIGHT_SOURCE_FLOATS)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
+    const frame=device.createBuffer({size:640,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
@@ -806,13 +789,20 @@ export class WebGPURenderer implements Renderer{
     const makeBloom=(entryPoint:string)=>device.createRenderPipeline({layout:bloomPipelineLayout,vertex:{module:bloomModule,entryPoint:'vs'},fragment:{module:bloomModule,entryPoint,targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
     const bloomDown=makeBloom('downsample'),bloomHorizontal=makeBloom('horizontal'),bloomVertical=makeBloom('vertical');
     const snowModule=device.createShaderModule({code:SNOW_SHADER}),snowLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:1,buffer:{type:'uniform'}}]});
-    const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout,lightLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
-    const snowUniform=device.createBuffer({size:128,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
+    const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout,lightLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',blend}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
+    const snowUniform=device.createBuffer({size:176,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
     const probeFrames=Array.from({length:6},(_,face)=>device.createBuffer({label:`reflection probe frame ${face}`,size:112,usage:0x40|0x08}));
     const probeFrameBinds=probeFrames.map(buffer=>device.createBindGroup({layout:probeFrameLayout,entries:[{binding:0,resource:{buffer}}]}));
     for(const shader of [module,reflectionModule,probeModule,probeFilterModule,skyModule,effectsModule,taaModule,presentModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
     return new WebGPURenderer(canvas,device,context,format,{probeFilter,probeFilterPasses,localProbeMap,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,sky,effects,taa,taaParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
   }
+  private timelineFrame:number|null=null;
+  /** Align temporal sampling when separate workers render ranges of one timeline. */
+  setTimelineFrame(frame:number):void{
+    if(!Number.isSafeInteger(frame)||frame<0)throw new RangeError('Timeline frame must be a non-negative integer');
+    this.timelineFrame=frame;
+  }
+  resetTemporalHistory():void{this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;this.previousModels.clear();}
   setResolution(width:number,height:number):void{
     if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');
     this.fixedResolution=[width,height];this.resize();
@@ -877,19 +867,21 @@ export class WebGPURenderer implements Renderer{
     void lightGrid;
     this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene,reflectionProbe?.position??scene.camera.target,!!reflectionProbe));
     const frameState=this.profiler.measure('frame',()=>{
-      const cameraUp=camera.up??[0,1,0],cameraView=lookAt(camera.position,camera.target,cameraUp),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
+      const cameraUp=camera.up??[0,1,0],cameraView=lookAt(camera.position,camera.target,cameraUp),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(this.timelineFrame??frameId),projection=new Float32Array(baseProjection);
       projection[8]=projection[8]!-2*jitter[0]/this.canvas.width;projection[9]=projection[9]!+2*jitter[1]/this.canvas.height;
       const vp=multiply4(projection,cameraView);
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
       const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
       lightVP[12]=Math.round(lightVP[12]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;lightVP[13]=Math.round(lightVP[13]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;
-      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(V3.cross(forward,cameraUp)),up=V3.normalize(V3.cross(right,forward)),frame=new Float32Array(152);
+      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(V3.cross(forward,cameraUp)),up=V3.normalize(V3.cross(right,forward)),frame=new Float32Array(160);
       const reflectionVP=multiply4(baseProjection,lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[cameraUp[0],-cameraUp[1],cameraUp[2]]));
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
       const [projectionX,projectionY,projectionOffsetX,projectionOffsetY]=projectionInfo.ray,tanY=1/projectionY,aspectLike=projectionY/projectionX;
       frame.set([...(settings.skyColor??[.26,.34,.47]),settings.fogDensity??.0025],24);frame.set([...camera.position,0],28);frame.set([...forward,tanY],32);frame.set([...right,aspectLike],36);frame.set([...up,scene.time],40);frame.set([this.pointLights>0?1:0,reflectionProbe&&this.localProbeMask===63?1:0,camera.focusDistance??20,camera.aperture??0],44);
       frame.set(reflectionVP,48);
       frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);frame.set([projectionX,projectionY,projectionOffsetX,projectionOffsetY],100);frame.set(this.environmentIrradiance,104);if(this.localProbePosition&&this.localProbeBounds){frame.set([...this.localProbePosition,1],140);frame.set([...this.localProbeBounds.min,1],144);frame.set([...this.localProbeBounds.max,1],148);}else{frame.fill(0,140,152);}
+      const fogColor=settings.fogColor??(settings.skyColor??[.26,.34,.47]).map((v,i)=>v*1.22+(settings.sunColor??[1,.87,.72])[i]!*(settings.sunIntensity??scene.environment.sunlight*3)*.027);
+      frame.set([...fogColor,settings.fogBaseHeight??0],152);frame.set([settings.fogHeightFalloff??0,settings.fogColor?1:0,settings.fogStartDistance??0,settings.fogRampDistance??0],156);
       this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength,'frame');
       return{vp,cullVP,reflectionVP,settings,lightVP,right,up,frame};
     });
@@ -1030,7 +1022,14 @@ export class WebGPURenderer implements Renderer{
       pass.setPipeline(this.gpu.transparent);for(const e of culled.cameraTransparent)if(e.material.kind!=='glass')this.draw(pass,e,true);
       this.profiler.endOcclusion(pass,query);
       const intensity=Math.min(1,scene.environment.snowfallRate/2.2e-5);query=this.profiler.beginOcclusion(pass,'snow');
-      if(intensity>.001){const snow=new Float32Array(32);snow.set(vp);snow.set([...camera.position,1],16);snow.set([scene.time,intensity,scene.environment.wind[0],scene.environment.wind[2]],20);snow.set([...right,0],24);snow.set([...up,0],28);this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);this.profiler.addUpload(snow.byteLength,'snow');pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.setBindGroup(1,this.gpu.transparentLightBind);snowInstances=Math.round(24000*intensity);pass.draw(6,snowInstances);}this.profiler.endOcclusion(pass,query);pass.end();
+      if(intensity>.001){
+        const current={camera:camera.position,right,up,time:scene.time};
+        const previousForward=V3.normalize(V3.sub(this.previousTarget??camera.target,this.previousCamera??camera.position));
+        const previousRight=V3.normalize(V3.cross(previousForward,camera.up??[0,1,0])),previousUp=V3.normalize(V3.cross(previousRight,previousForward));
+        const previous=this.historyValid&&this.previousCamera&&Number.isFinite(this.lastRenderTime)?{camera:this.previousCamera,right:previousRight,up:previousUp,time:this.lastRenderTime}:current;
+        const snow=snowfallUniform(vp,current,intensity,scene.environment.wind,scene.spec.seed??1,previous);
+        this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);this.profiler.addUpload(snow.byteLength,'snow');pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.setBindGroup(1,this.gpu.transparentLightBind);snowInstances=Math.round(24000*intensity);pass.draw(6,snowInstances);
+      }this.profiler.endOcclusion(pass,query);pass.end();
     });
     this.profiler.measure('encode.bloom',()=>{
       const stages=[['bloom.downsample',this.bloomA,this.gpu.bloomDown,this.bloomDownBind],['bloom.horizontal',this.bloomB,this.gpu.bloomHorizontal,this.bloomHorizontalBind],['bloom.vertical',this.bloomA,this.gpu.bloomVertical,this.bloomVerticalBind]] as const;
@@ -1244,12 +1243,12 @@ export class WebGPURenderer implements Renderer{
     const normalTexture=texture?.normalUrl?this.surfaceTextures.get(texture.normalUrl):undefined;
     const ormTexture=texture?.ormUrl?this.surfaceTextures.get(texture.ormUrl):undefined;
     const materialKey=texture?[materialTexture&&texture.url?texture.url:'',normalTexture?texture.normalUrl:'',ormTexture?texture.ormUrl:''].join('|'):undefined;
-    if(object.width!==0||object.height!==0||object.label!==(entity.material.label??'')||object.materialKey!==materialKey)return true;
+    if(object.width!==0||object.height!==0||object.label!==labelKey(entity.material.label??'',entity.material.labelColor)||object.materialKey!==materialKey)return true;
     const previousModel=this.previousModels.get(entity.id)??model;
     return !matrixEqual(object.lastModel,model)||!matrixEqual(object.lastPrevModel,previousModel);
   }
   private prepare(entity:RuntimeEntity,model:Mat4=this.model(entity)):void{
-    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture);
+    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture,entity.material.labelColor);
     this.mesh(renderPrimitive(entity)!);
     const surfaceState=this.lastScene?.surfaceStateForRender(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
@@ -1308,31 +1307,32 @@ export class WebGPURenderer implements Renderer{
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);
-    if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
+    if(this.labels){const labels=new Set(live.map(e=>labelKey(e.material?.label??'',e.material?.labelColor)));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}this.objects.delete(id);}
     for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id)){this.modelCache.delete(id);this.cullCache.delete(id);}
     for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.color.destroy();m.index.destroy();this.meshes.delete(key);}
     return true;
   }
-  private label(text:string):GPUAny{
-    if(!text)return this.gpu.emptyLabel;const cached=this.labels.get(text);if(cached)return cached;
-    const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle='#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
-    const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);this.labels.set(text,texture);return texture;
+  private label(text:string,color?:Vec3):GPUAny{
+    if(!text)return this.gpu.emptyLabel;const key=labelKey(text,color),cached=this.labels.get(key);if(cached)return cached;
+    const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle=color?`rgb(${color.map(v=>Math.round(v*255)).join(',')})`:'#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
+    const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);this.labels.set(key,texture);return texture;
   }
-  private object(id:string,width:number,height:number,label:string,textureSpec?:SurfaceTextureSpec):GPUObject{
+  private object(id:string,width:number,height:number,label:string,textureSpec?:SurfaceTextureSpec,labelColor?:Vec3):GPUObject{
     const materialTexture=textureSpec?.url?this.surfaceTextures.get(textureSpec.url):undefined;
     const normalTexture=textureSpec?.normalUrl?this.surfaceTextures.get(textureSpec.normalUrl):undefined;
     const ormTexture=textureSpec?.ormUrl?this.surfaceTextures.get(textureSpec.ormUrl):undefined;
     const materialKey=textureSpec?[materialTexture&&textureSpec.url?textureSpec.url:'',normalTexture?textureSpec.normalUrl:'',ormTexture?textureSpec.ormUrl:''].join('|'):undefined;
-    const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===label&&existing.materialKey===materialKey)return existing;
+    const letteringKey=labelKey(label,labelColor);
+    const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===letteringKey&&existing.materialKey===materialKey)return existing;
     if(existing){existing.uniform.destroy();if(existing.owned!==false){existing.texture.destroy();existing.deformationTexture.destroy();}}
     const uniform=this.device.createBuffer({size:352,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField,deformationTexture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
     const fallback=this.gpu.emptyLabel;
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
-      {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},
+      {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label,labelColor).createView()},{binding:3,resource:this.gpu.sampler},
       {binding:4,resource:(materialTexture??fallback).createView()},{binding:5,resource:this.gpu.surfaceSampler},
       {binding:6,resource:(normalTexture??fallback).createView()},{binding:7,resource:(ormTexture??fallback).createView()},{binding:8,resource:deformationTexture.createView()},
-    ]}),object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
+    ]}),object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label:letteringKey,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
     const shared=this.renderFrame?.objectsById.get(entity.id),base=primitiveBaseScale(renderPrimitive(entity)),matrix=shared?.model??renderModel(entity);
@@ -1419,6 +1419,7 @@ function lightGridCauseKey(lights:readonly RuntimeEntity[],eye:Vec3):string{
   for(const entity of lights){
     const light=entity.light!;
     values.push(entity.id,entity.position[0],entity.position[1],entity.position[2],light.range??12,light.intensity??1,...(light.color??[1,.78,.5]));
+    if(light.emission){const p=light.emission;values.push(...p.axis,p.innerAngle,p.outerAngle,p.panelCount??0,p.panelRotation??0,p.frameWidth??0,...(p.boxHalfSize??[0,0,0]),p.frameWidthM??.015);}
   }
   return values.join(':');
 }

@@ -1,3 +1,5 @@
+import {LIGHT_GRID_WGSL} from './light-grid.js';
+import {FOG_WGSL,FOG_MEDIUM_WGSL} from './fog.js';
 /** Camera/exposure controls and lighting are independent of simulation cadence. */
 export const FRAME_WGSL=`
 struct Frame {
@@ -6,10 +8,10 @@ struct Frame {
  viewVP:mat4x4<f32>, previousVP:mat4x4<f32>, environment:vec4<f32>, projection:vec4<f32>,
  irradiance0:vec4<f32>, irradiance1:vec4<f32>, irradiance2:vec4<f32>, irradiance3:vec4<f32>, irradiance4:vec4<f32>,
  irradiance5:vec4<f32>, irradiance6:vec4<f32>, irradiance7:vec4<f32>, irradiance8:vec4<f32>,
- localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>
+ localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>, fogColor:vec4<f32>, fogMedium:vec4<f32>
 }
 `;
-export const SKY_SHADER=FRAME_WGSL+`
+export const SKY_SHADER=FRAME_WGSL+FOG_MEDIUM_WGSL+`
 @group(0) @binding(0) var<uniform> f:Frame;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out {let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,.999999,1.0);o.uv=p;return o;}
@@ -25,11 +27,21 @@ fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);r
  var color=mix(horizon,zenith,pow(max(ray.y,0.0),.58));
  let sun=max(dot(ray,f.sun.xyz),0.0);color+=f.sunColor.rgb*f.sun.w*(pow(sun,150.0)*.070+smoothstep(.99980,.99995,sun)*1.55);
  let q=ray.xz/max(.10,ray.y)*.8+vec2<f32>(f.up.w*.001,0);
- let clouds=noise(q)*.55+noise(q*2.1)*.29+noise(q*4.2)*.16;
+ let clouds=noise(q)*.52+noise(q*2.1)*.28+noise(q*4.2)*.14+noise(q*9.4)*.06;
  let cloudDrive=smoothstep(.48,.88,humidity)*(1.0-.55*sunlight);
- let cloudOpacity=cloudDrive*smoothstep(.50,.84,clouds)*smoothstep(.02,.35,ray.y)*.38;
- color=mix(color,mix(f.sky.rgb*1.18,vec3<f32>(.82,.86,.90),haze*.55),cloudOpacity);
+ let cloudOpacity=cloudDrive*smoothstep(.38,.70,clouds)*smoothstep(.0,.18,ray.y)*mix(.82,.48,sunlight);
+ // Cloud radiance follows incident light rather than a fixed white term.
+ let edge=smoothstep(.50,.72,clouds)-smoothstep(.72,.88,clouds);
+ // Night clouds absorb the sky glow; only their rims scatter moonlight.
+ let cloudRadiance=f.sky.rgb*(mix(.16,1.42,sunlight)+.22*haze*sunlight)+f.sunColor.rgb*f.sun.w*mix(.01+.055*edge,.11+.20*edge,sunlight);
+ color=mix(color,cloudRadiance,cloudOpacity);
  color+=f.sky.rgb*(.035+.055*haze)*pow(1.0-max(ray.y,0.0),5.0);
+ if(f.fogMedium.y>.5){
+  // Overcast regions also reduce the ambient illumination of the sky haze.
+  // Keeping that radiance constant would erase the dark cloud silhouettes.
+  let skyHaze=f.fogColor.rgb*(1.0-cloudOpacity*.72*(1.0-sunlight));
+  color=mix(color,skyHaze,1.0-exp(-fogViewDepth(f.eye.xyz,f.eye.xyz+ray*80.0,f.sky.w)));
+ }
  return vec4<f32>(color,1);
 }`;
 /** Threshold/downsample followed by two separable Gaussian passes. Sampling a
@@ -50,7 +62,7 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 }
 fn gaussian(uv:vec2<f32>,axis:vec2<f32>)->vec4<f32>{
  let texel=axis/vec2<f32>(textureDimensions(source));var sum=vec3<f32>(0);var total=0.0;
- for(var k=-8;k<=8;k++){let x=f32(k);let weight=exp(-x*x/20.48);sum+=textureSampleLevel(source,imageSampler,uv+texel*x,0).rgb*weight;total+=weight;}
+ for(var k=-18;k<=18;k++){let x=f32(k);let weight=exp(-x*x/72.0);sum+=textureSampleLevel(source,imageSampler,uv+texel*x,0).rgb*weight;total+=weight;}
  return vec4<f32>(sum/total,1);
 }
 @fragment fn horizontal(in:Out)->@location(0) vec4<f32>{return gaussian(in.uv,vec2<f32>(1,0));}
@@ -92,7 +104,7 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
  return vec4<f32>(mix(current,previous,weight),1);
 }
 `;
-export const EFFECTS_SHADER=FRAME_WGSL+`
+export const EFFECTS_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`
 @group(0) @binding(0) var hdr:texture_2d<f32>;
 @group(0) @binding(1) var normals:texture_2d<f32>;
 @group(0) @binding(2) var depth:texture_depth_2d;
@@ -126,7 +138,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let backgroundZ=linearDepth(d);
   let backgroundCoc=min(6.0,abs(backgroundZ-f.params.z)/max(backgroundZ,.1)*f.params.w);
   if(backgroundCoc<=.15){
-   let background=textureSampleLevel(hdr,linearSampler,uv,0).rgb+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28;
+   let background=textureSampleLevel(hdr,linearSampler,uv,0).rgb+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.46;
    return vec4<f32>(background,1);
   }
  }
@@ -222,7 +234,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
    }
   }
  }
- color+=textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28;
+ color+=textureSampleLevel(bloom,linearSampler,uv,0).rgb*.46;
  return vec4<f32>(color,1);
 }`;
 

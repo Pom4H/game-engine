@@ -2,12 +2,14 @@ import {deflateSync} from 'node:zlib';
 import {compose,lookAt,multiply4,V3,type Mat4, type Vec3} from '../math.js';
 import type {MeshData} from '../procedural/mesh.js';
 import {buildRenderFrame,renderPrimitive,type RenderObjectIR} from './frame.js';
-import type {CameraSpec,Color} from '../scene/types.js';
+import type {CameraSpec,Color,LightEmissionSpec} from '../scene/types.js';
+import {lightEmissionWeight} from './light-grid.js';
+import {fogViewOpticalDepth} from './fog.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats,LinearPixelSample} from './types.js';
 
 type ProjectedVertex={x:number;y:number;z:number;invW:number;world:Vec3;normal:Vec3;color:Color};
-type Light={position:Vec3;color:Vec3;intensity:number;range:number};
+type Light={position:Vec3;color:Vec3;intensity:number;range:number;emission:LightEmissionSpec|undefined};
 
 const clamp=(v:number,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const rgb=(v:number)=>Math.round(clamp(v)*255);
@@ -32,12 +34,15 @@ export interface CpuRendererOptions{width?:number;height?:number;near?:number;fa
 export class CpuRenderer implements Renderer{
  private width:number;private height:number;private readonly near:number;private readonly far:number;
  private rgba:Uint8Array;private depth:Float32Array;private errors:string[]=[];private drawCalls=0;private triangles=0;private meshes=0;private pointLights=0;
+ private fogColor:Vec3|undefined;private fogHeightFalloff=0;private fogBaseHeight=0;private fogStartDistance=0;private fogRampDistance=0;
  constructor(options:CpuRendererOptions={}){this.width=options.width??640;this.height=options.height??360;this.near=options.near??.05;this.far=options.far??10000;this.rgba=new Uint8Array(this.width*this.height*4);this.depth=new Float32Array(this.width*this.height);this.resize();}
  setResolution(width:number,height:number):void{if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');this.width=width;this.height=height;this.rgba=new Uint8Array(width*height*4);this.depth=new Float32Array(width*height);}
  resize():void{this.depth.fill(1);for(let i=0;i<this.rgba.length;i+=4){this.rgba[i]=0;this.rgba[i+1]=0;this.rgba[i+2]=0;this.rgba[i+3]=255;}}
  render(scene:Scene,camera:CameraSpec=scene.camera):void{
   this.errors=[];this.drawCalls=0;this.triangles=0;this.meshes=0;
   const clear=scene.spec.clearColor??[0,0,0,1],env=scene.spec.rendering??{};
+  this.fogColor=env.fogColor;this.fogHeightFalloff=env.fogHeightFalloff??0;this.fogBaseHeight=env.fogBaseHeight??0;
+  this.fogStartDistance=env.fogStartDistance??0;this.fogRampDistance=env.fogRampDistance??0;
   const sky=env.skyColor??[.12,.16,.22];this.depth.fill(1);
   for(let y=0;y<this.height;y++){const t=y/Math.max(1,this.height-1),c=add3(mul3(sky,.72+.28*(1-t)),mul3([.04,.05,.07],t));for(let x=0;x<this.width;x++){const i=(y*this.width+x)*4;this.rgba[i]=rgb(c[0]);this.rgba[i+1]=rgb(c[1]);this.rgba[i+2]=rgb(c[2]);this.rgba[i+3]=rgb(clear[3]);}}
   const view=lookAt(camera.position,camera.target,camera.up??[0,1,0]);
@@ -47,7 +52,7 @@ export class CpuRenderer implements Renderer{
   const proj=new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,this.far*nf,-1,0,0,this.near*this.far*nf,0]);
   const vp=multiply4(proj,view);
   const lights:Light[]=[];
-  for(const e of scene.entities.values())if(e.light)lights.push({position:[...e.position],color:[...(e.light.color??[1,1,1])],intensity:e.light.intensity??1,range:e.light.range??10});
+  for(const e of scene.entities.values())if(e.light)lights.push({position:[...e.position],color:[...(e.light.color??[1,1,1])],intensity:e.light.intensity??1,range:e.light.range??10,emission:e.light.emission});
   this.pointLights=lights.length;
   const sunDir=V3.normalize(env.sunDirection??[-.45,-1,-.3]),sun=V3.normalize([-sunDir[0],-sunDir[1],-sunDir[2]]),sunColor=env.sunColor??[1,.93,.82],sunIntensity=env.sunIntensity??1,exposure=env.exposure??1,fog=env.fogDensity??0;
   const frame=buildRenderFrame(scene,camera,{includeMeshes:true});for(const object of frame.objects){const mesh=object.mesh;if(!mesh)continue;try{this.meshes++;this.drawCalls++;this.triangles+=mesh.indices.length/3;this.rasterMesh({...object,mesh},camera,vp,lights,sun,sunColor,sunIntensity,exposure,fog);}catch(error){this.errors.push(error instanceof Error?error.message:String(error));}}
@@ -75,8 +80,8 @@ export class CpuRenderer implements Renderer{
    let color:Vec3=mul3(albedo,.035*(1-metal));
    const ndl=Math.max(0,V3.dot(n,sun));const h=V3.normalize(V3.add(sun,viewDir));const spec=Math.pow(Math.max(0,V3.dot(n,h)),Math.max(2,2+(1-rough)*120));
    color=add3(color,add3(mul3(albedo,ndl*sunIntensity*(1-metal)),mul3(sunColor,spec*(.04+metal*.96)*sunIntensity)));
-   for(const light of lights){const delta=V3.sub(light.position,world),dist=V3.length(delta);if(dist>=light.range)continue;const l=mul3(delta,1/Math.max(dist,1e-6)),ln=Math.max(0,V3.dot(n,l)),atten=Math.pow(Math.max(0,1-dist/light.range),2)/(1+dist*dist*.18),lh=V3.normalize(V3.add(l,viewDir)),ls=Math.pow(Math.max(0,V3.dot(n,lh)),Math.max(2,2+(1-rough)*100));color=add3(color,mul3([albedo[0]*light.color[0],albedo[1]*light.color[1],albedo[2]*light.color[2]],ln*light.intensity*atten*(1-metal)));color=add3(color,mul3(light.color,ls*light.intensity*atten*(.03+metal*.9)));}
-   color=add3(color,emissive);const distance=V3.length(V3.sub(camera.position,world));if(fog>0){const f=Math.exp(-fog*distance);const fogColor:Vec3=[.12,.15,.19];color=add3(mul3(color,f),mul3(fogColor,1-f));}
+   for(const light of lights){const delta=V3.sub(light.position,world),dist=V3.length(delta);if(dist>=light.range)continue;const l=mul3(delta,1/Math.max(dist,1e-6)),ln=Math.max(0,V3.dot(n,l)),atten=Math.pow(Math.max(0,1-dist/light.range),2)/(1+dist*dist*.18)*lightEmissionWeight(light.emission,V3.sub(world,light.position)),lh=V3.normalize(V3.add(l,viewDir)),ls=Math.pow(Math.max(0,V3.dot(n,lh)),Math.max(2,2+(1-rough)*100));color=add3(color,mul3([albedo[0]*light.color[0],albedo[1]*light.color[1],albedo[2]*light.color[2]],ln*light.intensity*atten*(1-metal)));color=add3(color,mul3(light.color,ls*light.intensity*atten*(.03+metal*.9)));}
+   color=add3(color,entity.material.pattern==='fabric'?[emissive[0]*base[0],emissive[1]*base[1],emissive[2]*base[2]]:emissive);const distance=V3.length(V3.sub(camera.position,world));if(fog>0){const f=Math.exp(-fogViewOpticalDepth(camera.position,world,fog,this.fogHeightFalloff,this.fogBaseHeight,this.fogStartDistance,this.fogRampDistance));const fogColor:Vec3=this.fogColor??[.12,.15,.19];color=add3(mul3(color,f),mul3(fogColor,1-f));}
    color=mul3(color,exposure);const i=di*4;this.rgba[i]=rgb(srgb(color[0]/(1+Math.max(0,color[0]))));this.rgba[i+1]=rgb(srgb(color[1]/(1+Math.max(0,color[1]))));this.rgba[i+2]=rgb(srgb(color[2]/(1+Math.max(0,color[2]))));this.rgba[i+3]=255;
   }
  }

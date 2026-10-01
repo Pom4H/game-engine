@@ -19,14 +19,18 @@ test('probe filter normalizes radiance and reads only the captured level',()=>{
  assert.match(source,/baseMipLevel:capture.mip,mipLevelCount:1/);
  assert.match(source,/mipmapFilter:'linear'/);
 });
-test('coat roughness blurs local radiance rather than suppressing it',()=>{
+test('coat roughness blurs parallax-corrected local radiance rather than suppressing it',()=>{
  assert.doesNotMatch(source,/coatProbeWeight|reflectionDir,\.35\)/);
  assert.match(source,/reflectionDir,coatRough\*f32\(textureNumLevels\(environmentMap\)-1u\)/);
- assert.match(source,/reflectionDir,coatRough\*f32\(textureNumLevels\(localProbeMap\)-1u\)/);
+ assert.match(source,/coatProbeLod=max\(coatRough\*f32\(textureNumLevels\(localProbeMap\)-1u\),select\(0\.0,\.65,automotivePaint\)\)/);
+ assert.match(source,/textureSampleLevel\(localProbeMap,reflectionSampler,parallaxProbeDirection\(in.worldPos,reflectionDir\),coatProbeLod\)/);
  assert.match(source,/coatEnvironment=mix\(coatEnvironment,coatLocal,f.params.y\)/);
 });
-test('coat applies the same normal-variance floor as base roughness',()=>{
- assert.match(source,/coatRough=clamp\(sqrt\(clearcoatRoughness\*clearcoatRoughness\+min\(\.22,normalVariance\*\.18\)\),\.08,1\.0\)/);
+test('coat filters normal variance independently of the rougher base lobe',()=>{
+ // Main already uses a narrower coat variance kernel and a paint floor. The
+ // old literal regex described the pre-refinement shader, not this contract.
+ assert.match(source,/paintCoatFloor=select\(\.0,\.055,automotivePaint\)/);
+ assert.match(source,/coatRough=clamp\(max\(paintCoatFloor,sqrt\(clearcoatRoughness\*clearcoatRoughness\+min\(\.06,normalVariance\*\.04\)\)\),\.08,1\.0\)/);
  assert.match(source,/let coatA2=pow\(coatRough,4\.0\)/);
 });
 test('coat direct and indirect light attenuate the base without emissive gains',()=>{
