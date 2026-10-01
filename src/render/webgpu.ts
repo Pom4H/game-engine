@@ -8,7 +8,7 @@ import {cubeDirection,float16,type EnvironmentMip} from './environment-bake.js';
 import {EnvironmentBaker} from './environment-jobs.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
-import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
+import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_SOURCE_FLOATS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
 import {FRAME_WGSL,SKY_SHADER,EFFECTS_SHADER,PRESENT_SHADER,BLOOM_SHADER,TAA_SHADER} from './lighting.js';
 import {V3,compose,lookAt,multiply4,perspective,type Mat4,type Vec3} from '../math.js';
 import {primitiveKey,primitiveMesh} from '../procedural/mesh.js';
@@ -662,7 +662,7 @@ export class WebGPURenderer implements Renderer{
     const frameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
-    const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*8)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
+    const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*LIGHT_SOURCE_FLOATS)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
     const frame=device.createBuffer({size:608,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
@@ -1339,7 +1339,7 @@ function lightGridCauseKey(lights:readonly RuntimeEntity[],eye:Vec3):string{
   const values:(string|number)[]=[Math.floor(eye[0]/LIGHT_GRID_CELL),Math.floor(eye[2]/LIGHT_GRID_CELL),lights.length];
   for(const entity of lights){
     const light=entity.light!;
-    values.push(entity.id,entity.position[0],entity.position[1],entity.position[2],light.range??12,light.intensity??1,...(light.color??[1,.78,.5]));
+    values.push(entity.id,entity.position[0],entity.position[1],entity.position[2],light.range??12,light.intensity??1,...(light.color??[1,.78,.5]),light.volumetric?.profile??'isotropic',light.volumetric?.yaw??0,light.volumetric?.strength??1,light.volumetric?.rangeScale??1);
   }
   return values.join(':');
 }
