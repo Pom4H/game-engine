@@ -59,7 +59,6 @@ export class Scene {
   readonly fluids:FluidField;
   readonly deformation=new PlasticDeformationSystem();
   readonly surfaces=new SurfaceEnvironmentSystem();
-  readonly fluids:FluidField;
   /** @deprecated Use surfaces. Kept only while PR tooling/examples migrate. */
   get winter(){return this.surfaces;}
   readonly animation=new AnimationSystem();
