@@ -16,6 +16,7 @@ import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
 import {FluidField} from '../physics/fluid.js';
+import {WindField} from '../physics/wind.js';
 import type {EngineEvent} from './events.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
@@ -57,6 +58,7 @@ export class Scene {
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
   readonly fluids:FluidField;
+  readonly wind:WindField;
   readonly deformation=new PlasticDeformationSystem();
   readonly surfaces=new SurfaceEnvironmentSystem();
   /** @deprecated Use surfaces. Kept only while PR tooling/examples migrate. */
@@ -93,6 +95,7 @@ export class Scene {
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
     this.fluids=new FluidField(this.spec.fluids??[]);this.physics.fluidAt=body=>this.fluids.sampleXZ(body.position[0],body.position[2]);
+    this.wind=new WindField(this.spec.windVolumes??[]);this.physics.airAt=point=>this.wind.sample(point,this.environment.wind,1.225);
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.physics.wheelFrictionAt=(supportId,body,point)=>{
       if(!body)return this.physics.groundMaterial.friction;
