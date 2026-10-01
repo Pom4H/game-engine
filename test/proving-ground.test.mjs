@@ -165,6 +165,8 @@ test('engine clutch gearbox and differential pull a backward-rolling car forward
  const car=new Vehicle(scene.physics,roadCar('proving.car.drivetrain',[],provingDrivetrain),{
   position:[-28,1.2,-64],rotation:[0,-Math.PI/2,0],velocity:[0,0,-4]
  });
+ // This fixture isolates drivetrain causality; atmosphere is tested separately in the wind stations.
+ car.setAir({densityKgM3:1.225,wind:[0,0,0],temperatureC:18});
  car.setGear(1);
  const start=car.body.velocity[2];let crossed=false,maxOutput=0;
  for(let i=0;i<720;i++){
