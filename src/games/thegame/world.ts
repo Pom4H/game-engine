@@ -2,7 +2,7 @@ import type {CharacterWorld} from '../../runtime/character-motor.js';
 /** Reduced, explicitly new world revision of thegame, not a compatible legacy save.
  * Hash, noise, climate blending, hub dimensions and highway curves come from
  * Pom4H/thegame biomes.ts c6a4516b665b and shared/math.ts 87384a931250. */
-export const WORLD_REVISION='thegame-lite/1';
+export const WORLD_REVISION='thegame-lite/2';
 export const CHUNK_SIZE=128,TERRAIN_STEP=8,SEA_LEVEL=-.35,WORLD_LIMIT=1_000_000;
 export type Biome='city'|'suburbs'|'grassland'|'forest'|'mountains'|'desert'|'coast'|'ocean';
 export const BIOME_NAMES:Record<Biome,string>={city:'Город',suburbs:'Пригороды',grassland:'Поля',forest:'Лес',mountains:'Горы',desert:'Сухие земли',coast:'Побережье',ocean:'Океан'};
@@ -71,8 +71,10 @@ export class OpenWorld implements CharacterWorld {
   for(let dz=0;dz<2;dz++)for(let dx=0;dx<2;dx++){
    const gx=cx*2+dx,gz=cz*2+dz,x=gx*64+32,z=gz*64+32,r=Math.max(Math.abs(x),Math.abs(z));
    if(r>=640||r>=384&&hash01(gx,gz,2,this.seed)<.65||roadDistance(this.seed,x,z)<22)continue;
-   const urban=r<384,width=urban?26+hash01(gx,gz,3,this.seed)*12:14,depth=urban?26+hash01(gx,gz,4,this.seed)*12:14;
-   const h=urban?9+Math.floor(hash01(gx,gz,5,this.seed)*7)*3.5:5;
+   // Dense inner-city blocks form a continuous street wall while retaining a narrow
+   // canonical sidewalk outside the 12 m road. One physical building remains one prop.
+   const urban=r<384,width=urban?48+hash01(gx,gz,3,this.seed)*2:14,depth=urban?48+hash01(gx,gz,4,this.seed)*2:14;
+   const h=urban?14+Math.floor(hash01(gx,gz,5,this.seed)*5)*3.4:5;
    const color=([[.76,.69,.56],[.63,.68,.66],[.72,.47,.35],[.78,.77,.68]] as const)[hash32(gx,gz,6,this.seed)%4]!;
    props.push({id:`building:${gx}:${gz}`,kind:'building',x,y:heightAt(x,z),z,width,depth,height:h,color});
   }
