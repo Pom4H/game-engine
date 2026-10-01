@@ -128,11 +128,14 @@ export class PhysicsWorld {
   wheelSupport:WheelSupport;
   private readonly rotationScratch=new Float64Array(4);
   surfaceFrictionAt?:(body:RigidBody,point:Vec3)=>number;
+  /** Effective road/surface friction coefficient seen by tyre contact. */
+  wheelFrictionAt?:(supportId:string,body:RigidBody|null,point:Vec3)=>number;
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
   private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
   private causeTrace:PhysicsCauseTrace|undefined;
   private readonly gravityCauses=new Map<string,PhysicsCauseRef>();
+  private readonly contactCauses=new Map<string,PhysicsCauseRef>();
   readonly index:SpatialHash<RigidBody>;
   steps=0;substeps=0;time=0;
   constructor(
@@ -156,6 +159,7 @@ export class PhysicsWorld {
   private declareBodyCauses(body:RigidBody,trace:PhysicsCauseTrace):void{
     trace.component({componentId:body.id,bodyId:body.id,kind:'body'});
     const cause=this.gravityCauses.get(body.id)??physicsCause(body.id,'gravity.v1','gravity',['force']);this.gravityCauses.set(body.id,cause);trace.law(body.id,cause);
+    const contact=this.contactCauses.get(body.id)??physicsCause(body.id,'contact-solver.v1','collision',['impulse','position-correction']);this.contactCauses.set(body.id,contact);trace.law(body.id,contact);
   }
   drive(body:RigidBody,driver:PhysicsForceDriver):()=>void{
     if(this.bodies.get(body.id)!==body||!body.invMass||this.forceDrivers.has(body))throw new TypeError('Force driver requires one owned dynamic body');
@@ -164,8 +168,8 @@ export class PhysicsWorld {
     this.forceDrivers.set(body,driver);if(this.causeTrace)driver.declareCauses?.(this.causeTrace);
     return()=>{if(this.forceDrivers.get(body)===driver)this.forceDrivers.delete(body);};
   }
-  remove(id:string):boolean{const body=this.bodies.get(id);if(body)this.forceDrivers.delete(body);this.gravityCauses.delete(id);return this.bodies.delete(id);}
-  clear():void{this.forceDrivers.clear();this.bodies.clear();this.index.clear();this.contacts.length=0;this.gravityCauses.clear();this.causeTrace=undefined;this.steps=0;this.substeps=0;this.time=0;}
+  remove(id:string):boolean{const body=this.bodies.get(id);if(body)this.forceDrivers.delete(body);this.gravityCauses.delete(id);this.contactCauses.delete(id);return this.bodies.delete(id);}
+  clear():void{this.forceDrivers.clear();this.bodies.clear();this.index.clear();this.contacts.length=0;this.gravityCauses.clear();this.contactCauses.clear();this.causeTrace=undefined;this.steps=0;this.substeps=0;this.time=0;}
 
   step(dt:number,contactModel?:ContactModel):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Physics dt must be in (0, 0.25]');
@@ -189,7 +193,7 @@ export class PhysicsWorld {
   }
 
   private stepSubstep(dt:number,contactModel:ContactModel|undefined,substep:number,simTime:number):void{
-    const trace=this.causeTrace,before=trace?new Map<RigidBody,PhysicsBodyState>():undefined;
+    const trace=this.causeTrace,before=trace?new Map<RigidBody,PhysicsBodyState>():undefined,wrenchIds=trace?new Map<RigidBody,string>():undefined;
     trace?.beginSubstep(this.steps,substep,simTime);
     if(trace)for(const body of this.bodies.values())if(body.invMass&&!body.sleeping)before!.set(body,this.traceState(body));
     for(const [body,driver] of this.forceDrivers)driver.evaluate(dt,trace?.writer(body.id));
@@ -211,13 +215,12 @@ export class PhysicsWorld {
         const gravity:Vec3=[body.mass*this.gravity[0],body.mass*this.gravity[1],body.mass*this.gravity[2]],writer=trace.writer(body.id),cause=this.gravityCauses.get(body.id)!;
         writer.contribute(cause,{kind:'gravity-field',id:'world.gravity'},{forceN:gravity});
         const driver=this.forceDrivers.get(body),force:Vec3=driver?[driver.force[0]+gravity[0],driver.force[1]+gravity[1],driver.force[2]+gravity[2]]:gravity,torque:Vec3=driver?driver.torque:[0,0,0];
-        wrenchId=trace.wrench(body.id,force,torque);
+        wrenchId=trace.wrench(body.id,force,torque);wrenchIds!.set(body,wrenchId);
       }
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
-      const airAngular=Math.exp(-.08*dt);body.angularVelocity[0]*=airAngular;body.angularVelocity[1]*=airAngular;body.angularVelocity[2]*=airAngular;
+      // No global angular damping: aerodynamic damping must come from authored physical surfaces.
       advanceRotation(body.rotation,body.angularVelocity,dt,this.rotationScratch);
-      if(trace)trace.stateMutation(body.id,wrenchId,before!.get(body)!,this.traceState(body),dt);
       this.resolveGround(body,dt);
     }
     this.rebuildIndex();
@@ -239,6 +242,7 @@ export class PhysicsWorld {
       }
     }
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=Math.max(0,body.sleepTimer-dt*.35);
+    if(trace)for(const [body,state] of before!)trace.stateMutation(body.id,wrenchIds!.get(body)??'',state,this.traceState(body),dt);
     trace?.endSubstep();
   }
   private traceState(body:RigidBody):PhysicsBodyState{return{positionM:[...body.position],rotationRad:[...body.rotation],velocityMps:[...body.velocity],angularVelocityRadps:[...body.angularVelocity]};}
@@ -295,7 +299,7 @@ export class PhysicsWorld {
     const predictedBottom=bottom+Math.min(0,minPointVelocityY)*dt;
     if(bottom>surfaceY+slop&&predictedBottom>surfaceY+slop)return false;
     body.supportedThisStep=true;
-    const penetration=Math.max(0,surfaceY-bottom);if(penetration>0)body.position[1]+=penetration;
+    const penetration=Math.max(0,surfaceY-bottom);if(penetration>0){this.tracePositionCorrection(body,[0,penetration,0],[body.position[0],surfaceY,body.position[2]],'surface',surfaceId);body.position[1]+=penetration;}
     const normal:Vec3=[0,1,0],mu=Math.sqrt(body.friction*surfaceFriction);
     let totalImpulse=0,maxApproach=0,totalEnergy=0;
 
@@ -308,14 +312,14 @@ export class PhysicsWorld {
         if(contactVelocity[1]<0){
           const restitution=iteration===0&&approach>.55?Math.min(body.restitution,surfaceRestitution):0;
           const rn=V3.cross(r,normal),angular=V3.dot(normal,V3.cross(applyInvInertiaWorld(body,rn),r)),denom=body.invMass+angular;
-          if(denom>1e-10){const j=-(1+restitution)*contactVelocity[1]/denom;this.applyImpulseAtPoint(body,normal,j,r);totalImpulse+=Math.max(0,j);}
+          if(denom>1e-10){const j=-(1+restitution)*contactVelocity[1]/denom;this.applyImpulseAtPoint(body,normal,j,r,'surface',surfaceId);totalImpulse+=Math.max(0,j);}
         }
         const post=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),tangentRaw:Vec3=[post[0],0,post[2]],tangentSpeed=V3.length(tangentRaw);
         if(tangentSpeed>1e-6){
           const tangent=V3.scale(tangentRaw,1/tangentSpeed),rt=V3.cross(r,tangent),angular=V3.dot(tangent,V3.cross(applyInvInertiaWorld(body,rt),r)),denom=body.invMass+angular;
           if(denom>1e-10){
             const share=body.mass*Math.abs(this.gravity[1])*dt/manifold.points.length,supportImpulse=Math.max(share,totalImpulse/Math.max(1,manifold.points.length)),wanted=-tangentSpeed/denom,jt=Math.max(-mu*supportImpulse,Math.min(mu*supportImpulse,wanted));
-            this.applyImpulseAtPoint(body,tangent,jt,r);
+            this.applyImpulseAtPoint(body,tangent,jt,r,'surface',surfaceId);
           }
         }
       }
@@ -355,8 +359,8 @@ export class PhysicsWorld {
   private resolvePair(contact:ContactCandidate):void{
     const {a,b,normal,point,penetration,approachSpeed,effectiveMass}=contact,inv=a.invMass+b.invMass;if(inv<=0)return;
     const slop=.0005,correction=Math.max(0,penetration-slop)*.8/inv;
-    if(a.invMass){a.position[0]-=normal[0]*correction*a.invMass;a.position[1]-=normal[1]*correction*a.invMass;a.position[2]-=normal[2]*correction*a.invMass;}
-    if(b.invMass){b.position[0]+=normal[0]*correction*b.invMass;b.position[1]+=normal[1]*correction*b.invMass;b.position[2]+=normal[2]*correction*b.invMass;}
+    if(a.invMass){const d:Vec3=[-normal[0]*correction*a.invMass,-normal[1]*correction*a.invMass,-normal[2]*correction*a.invMass];this.tracePositionCorrection(a,d,point,'body',b.id);a.position[0]+=d[0];a.position[1]+=d[1];a.position[2]+=d[2];}
+    if(b.invMass){const d:Vec3=[normal[0]*correction*b.invMass,normal[1]*correction*b.invMass,normal[2]*correction*b.invMass];this.tracePositionCorrection(b,d,point,'body',a.id);b.position[0]+=d[0];b.position[1]+=d[1];b.position[2]+=d[2];}
     let impulse=0;
     if(approachSpeed>0&&effectiveMass>0){
       const restitution=Math.min(a.restitution,b.restitution),j=(1+restitution)*approachSpeed*effectiveMass;impulse=j;
@@ -372,16 +376,21 @@ export class PhysicsWorld {
     this.pushContact(contact,impulse,'resolve');
   }
 
-  private applyImpulseAtPoint(body:RigidBody,direction:Vec3,j:number,r:Vec3):void{
+  private tracePositionCorrection(body:RigidBody,delta:Vec3,point:Vec3,sourceKind:'surface'|'body',sourceId:string):void{
+    const trace=this.causeTrace;if(!trace||!body.invMass)return;
+    trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:sourceKind,id:sourceId},{positionCorrectionM:delta,pointWorldM:point});
+  }
+  private applyImpulseAtPoint(body:RigidBody,direction:Vec3,j:number,r:Vec3,sourceKind:'surface'|'body',sourceId:string):void{
     if(!body.invMass||j===0)return;body.wake();
-    const impulse:Vec3=[direction[0]*j,direction[1]*j,direction[2]*j];
+    const impulse:Vec3=[direction[0]*j,direction[1]*j,direction[2]*j],point:Vec3=[body.position[0]+r[0],body.position[1]+r[1],body.position[2]+r[2]];
+    const trace=this.causeTrace;if(trace)trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:sourceKind,id:sourceId},{impulseNs:impulse,pointWorldM:point});
     body.velocity[0]+=impulse[0]*body.invMass;body.velocity[1]+=impulse[1]*body.invMass;body.velocity[2]+=impulse[2]*body.invMass;
     const dw=applyInvInertiaWorld(body,V3.cross(r,impulse));body.angularVelocity[0]+=dw[0];body.angularVelocity[1]+=dw[1];body.angularVelocity[2]+=dw[2];
   }
   private applyPairImpulseAtPoint(a:RigidBody,b:RigidBody,direction:Vec3,j:number,point:Vec3):void{
     if(j===0)return;
-    if(a.invMass)this.applyImpulseAtPoint(a,direction,-j,V3.sub(point,a.position));
-    if(b.invMass)this.applyImpulseAtPoint(b,direction,j,V3.sub(point,b.position));
+    if(a.invMass)this.applyImpulseAtPoint(a,direction,-j,V3.sub(point,a.position),'body',b.id);
+    if(b.invMass)this.applyImpulseAtPoint(b,direction,j,V3.sub(point,b.position),'body',a.id);
   }
   private pushContact(contact:ContactCandidate,impulse:number,mode:'resolve'|'penetrate'):void{
     this.contacts.push({a:contact.a.id,b:contact.b.id,normal:contact.normal,point:contact.point,penetration:contact.penetration,impulse,normalSpeed:contact.approachSpeed,normalEnergy:contact.normalEnergy,mode});
