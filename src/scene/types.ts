@@ -6,6 +6,7 @@ import type {EnvironmentSpec} from '../environment/types.js';
 import type {MaterialFinish,MaterialTreatment} from '../materials/surface.js';
 import type {SceneDeformationSpec} from '../physics/deformation.js';
 import type {FluidVolumeSpec} from '../physics/fluid.js';
+import type {WindVolumeSpec} from '../physics/wind.js';
 
 export type Color = readonly [number,number,number,number];
 export type Primitive =
@@ -166,6 +167,8 @@ export interface SceneSpec {
   deformation?:SceneDeformationSpec;
   /** Finite physical fluid volumes; rendering remains an ordinary entity/material concern. */
   fluids?:readonly FluidVolumeSpec[];
+  /** Spatial air-flow volumes for wind tunnels, gust corridors and wake experiments. */
+  windVolumes?:readonly WindVolumeSpec[];
   rendering?:RenderingSpec;
   version:1;
   seed?:number;
