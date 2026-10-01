@@ -118,6 +118,11 @@ export class NearbyNpcAuthority {
   if(!state)return;
   return this.possession(id,state,tick);
  }
+ possessExternal(id:string,state:CharacterState,tick:number):ResidentPossession|undefined{
+  if(this.possessed.has(id))return;
+  const npc=this.active.get(id);if(npc)this.active.delete(id);
+  return this.possession(id,copyState(state),tick);
+ }
 
  release(id:string,state:CharacterState,tick:number):void{
   if(!this.possessed.delete(id))return;

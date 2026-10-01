@@ -195,6 +195,20 @@ export class TransitAuthority {
  passenger(residentId:string):Readonly<TransitPassenger>|undefined{const p=this.passengers.get(residentId);return p?Object.freeze({...p}):undefined;}
  hasResident(residentId:string):boolean{return this.passengers.has(residentId);}
  ownedResidentIds():ReadonlySet<string>{return new Set(this.passengers.keys());}
+ ridingCandidate(excluded:ReadonlySet<string>=new Set()):Readonly<TransitPassenger>|undefined{
+  const priority:Record<TransitMode,number>={bus:0,tram:1,metro:2};
+  const found=[...this.passengers.values()]
+   .filter(p=>p.state==='riding'&&p.serviceId&&!excluded.has(p.residentId))
+   .sort((a,b)=>{
+    const am=routeById.get(a.routeId)?.mode??'metro',bm=routeById.get(b.routeId)?.mode??'metro';
+    return priority[am]-priority[bm]||a.residentId.localeCompare(b.residentId);
+   })[0];
+  return found?Object.freeze({...found}):undefined;
+ }
+ serviceForPassenger(residentId:string,timeSeconds:number):TransitServiceState|undefined{
+  const passenger=this.passengers.get(residentId);if(passenger?.state!=='riding'||!passenger.serviceId)return;
+  return this.services(timeSeconds).find(service=>service.id===passenger.serviceId);
+ }
 
  step(timeSeconds:number):void{
   for(const service of this.services(timeSeconds)){

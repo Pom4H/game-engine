@@ -70,3 +70,4 @@ export {worldTileKey,worldTileSize,worldTileBounds,worldTileAt,worldTileChildren
 export {VisibilityInterest,DEFAULT_VISIBILITY_INTEREST,geometricHorizonDistance,type VisibilityObserver,type VisibilityInterestConfig,type VisibilityPlan} from './world/visibility.js';
 export {InfiniteWorld,type InfiniteWorldTileState,type InfiniteWorldHooks,type InfiniteWorldOptions,type InfiniteWorldStats} from './world/infinite-world.js';
 export {TransitAuthority,THEGAME_TRANSIT_ROUTES,transitServiceTime,type TransitMode,type TransitRoute,type TransitStop,type TransitPassenger,type TransitPassengerState,type TransitServiceState,type TransitServicePhase} from './games/thegame/transit.js';
+export {TransitVehicleAuthority,transitVehicleProjection,type TransitSeatPose} from './games/thegame/transit-vehicle.js';
