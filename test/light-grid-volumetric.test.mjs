@@ -6,7 +6,8 @@ test('light grid carries surface and volumetric fixture data in aligned bounded 
  const lantern={position:[4,5,6],light:{kind:'point',color:[1,.84,.69],intensity:8,range:12,volumetric:{profile:'lantern-4pane',yaw:.4,strength:1.45,rangeScale:1.5}}};
  const plain={position:[30,5,0],light:{kind:'point',color:[1,1,1],intensity:1,range:4}};
  const grid=buildLightGrid([plain,lantern],[0,1.7,0]);
- assert.equal(grid.lights.length,4+MAX_RENDER_LIGHTS*8);\n assert.equal(grid.volumes.length,MAX_RENDER_LIGHTS*FOG_VOLUME_FLOATS);
+ assert.equal(grid.lights.length,4+MAX_RENDER_LIGHTS*8);
+ assert.equal(grid.volumes.length,MAX_RENDER_LIGHTS*FOG_VOLUME_FLOATS);
  assert.equal(grid.count,2);
  const o=4;
  assert.deepEqual(Array.from(grid.lights.slice(o,o+4)),[4,5,6,12]);
