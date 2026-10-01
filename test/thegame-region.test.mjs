@@ -25,7 +25,7 @@ test('distant population is deterministic, reconstructable from tick and bounded
 test('region shard migrates to another worker from tick without resident heap',()=>{
  const firstWorld=new ThegameRegionAuthority(spec,0);
  const first=new AuthorityShardLease('worker-a',assignment(),firstWorld,populationProjection,{stepSeconds:.1});
- first.advance(10);
+ first.advance(8);first.advance(2);
  const published=first.publish();
  assert.equal(published.tick,10);
  assert.equal(published.output.sequence,1);
