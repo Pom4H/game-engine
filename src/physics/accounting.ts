@@ -32,6 +32,16 @@ const toWorld=(rotation:Vec3,v:Vec3):Vec3=>{const b=basis(rotation);return[
  b[0][2]*v[0]+b[1][2]*v[1]+b[2][2]*v[2],
 ];};
 
+export function rigidBodyMechanicalEnergyJ(body:RigidBody,gravity:Vec3=[0,0,0]):number{
+ if(!(body.mass>0)||body.kinematic)return 0;
+ const v=body.velocity,wLocal=toLocal(body.rotation,body.angularVelocity),iLocal:Vec3=[
+  body.invInertiaLocal[0]>0?1/body.invInertiaLocal[0]:0,
+  body.invInertiaLocal[1]>0?1/body.invInertiaLocal[1]:0,
+  body.invInertiaLocal[2]>0?1/body.invInertiaLocal[2]:0,
+ ],spinLocal:Vec3=[iLocal[0]*wLocal[0],iLocal[1]*wLocal[1],iLocal[2]*wLocal[2]];
+ return .5*body.mass*dot(v,v)+.5*dot(wLocal,spinLocal)-body.mass*dot(gravity,body.position);
+}
+
 /** Read-only SI accounting over dynamic rigid bodies. Kinematic bodies are excluded
  * because their controller is an external momentum/energy source. */
 export function physicsAccounting(bodies:Iterable<RigidBody>,gravity:Vec3=[0,0,0],origin:Vec3=[0,0,0]):PhysicsAccountingState{
