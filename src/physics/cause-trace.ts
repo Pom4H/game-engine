@@ -5,7 +5,7 @@ export const PHYSICS_CAUSE_TRACE_VERSION='1.0' as const;
 
 export type PhysicsComponentKind='body'|'wheel'|'wing'|'rotor'|'shaft'|'other';
 export type PhysicsLawKind='gravity'|'aerodynamics'|'wheel-contact'|'rotor-aerodynamics'|'constraint'|'collision'|'other';
-export type PhysicsEffectKind='force'|'torque'|'impulse'|'power';
+export type PhysicsEffectKind='force'|'torque'|'impulse'|'position-correction'|'power';
 export type PhysicsSourceKind='gravity-field'|'air'|'surface'|'body'|'shaft'|'constraint'|'internal';
 
 export interface PhysicsCauseRef {
@@ -19,6 +19,7 @@ export interface PhysicsContributionEffect {
  readonly forceN?:Vec3;
  readonly torqueNm?:Vec3;
  readonly impulseNs?:Vec3;
+ readonly positionCorrectionM?:Vec3;
  readonly pointWorldM?:Vec3;
  readonly powerW?:number;
  readonly inputsHash?:string;
@@ -55,7 +56,7 @@ interface ComponentDefinition {readonly componentId:string;readonly bodyId:strin
 interface LawDefinition {readonly bodyId:string;readonly cause:PhysicsCauseRef}
 interface ActiveFrame {
  readonly tick:number;readonly substep:number;readonly simTime:number;
- readonly sums:Map<string,{force:[number,number,number];torque:[number,number,number];ids:string[]}>;
+ readonly sums:Map<string,{force:[number,number,number];torque:[number,number,number];ids:string[];contactIds:string[]}>;
  readonly writers:Map<string,PhysicsCauseWriter>;readonly activeLawKeys:Set<string>;
 }
 
@@ -139,19 +140,19 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
   if(!law||law.bodyId!==bodyId)throw new Error(`Undeclared physics cause ${cause.componentId}/${cause.lawId}`);
   if(!source.id||source.id.length>256)throw new TypeError('Invalid physics source');
   const force=effect.forceN??[0,0,0],torque=effect.torqueNm??[0,0,0];finiteVec(force,'force');finiteVec(torque,'torque');
-  if(effect.impulseNs)finiteVec(effect.impulseNs,'impulse');if(effect.pointWorldM)finiteVec(effect.pointWorldM,'point');
+  if(effect.impulseNs)finiteVec(effect.impulseNs,'impulse');if(effect.positionCorrectionM)finiteVec(effect.positionCorrectionM,'position correction');if(effect.pointWorldM)finiteVec(effect.pointWorldM,'point');
   if(effect.powerW!==undefined&&!Number.isFinite(effect.powerW))throw new TypeError('Invalid physics power');
   if(effect.inputsHash!==undefined&&(!effect.inputsHash||effect.inputsHash.length>256))throw new TypeError('Invalid physics input hash');
-  const sum=frame.sums.get(bodyId)??{force:[0,0,0] as [number,number,number],torque:[0,0,0] as [number,number,number],ids:[]};
+  const sum=frame.sums.get(bodyId)??{force:[0,0,0] as [number,number,number],torque:[0,0,0] as [number,number,number],ids:[],contactIds:[]};
   if(!frame.sums.has(bodyId))frame.sums.set(bodyId,sum);
   for(let k=0;k<3;k++){sum.force[k]!+=force[k]!;sum.torque[k]!+=torque[k]!;}
-  const contributionId=`${frame.tick}.${frame.substep}/${cause.componentId}/${cause.lawId}/${sum.ids.length}`;sum.ids.push(contributionId);frame.activeLawKeys.add(`${cause.componentId}\0${cause.lawId}`);
-  this.append('physics.contribution',{contribution_id:contributionId,body_id:bodyId,component_id:cause.componentId,law_id:cause.lawId,source:{kind:source.kind,id:source.id},effect:{...(effect.forceN?{force_N:cloneVec(effect.forceN)}:{}),...(effect.torqueNm?{torque_Nm:cloneVec(effect.torqueNm)}:{}),...(effect.impulseNs?{impulse_Ns:cloneVec(effect.impulseNs)}:{}),...(effect.pointWorldM?{point_world_m:cloneVec(effect.pointWorldM)}:{}),...(effect.powerW!==undefined?{power_W:effect.powerW}:{}),...(effect.inputsHash!==undefined?{inputs_hash:effect.inputsHash}:{})}});
+  const contributionId=`${frame.tick}.${frame.substep}/${cause.componentId}/${cause.lawId}/${sum.ids.length}`;sum.ids.push(contributionId);if(effect.impulseNs||effect.positionCorrectionM)sum.contactIds.push(contributionId);frame.activeLawKeys.add(`${cause.componentId}\0${cause.lawId}`);
+  this.append('physics.contribution',{contribution_id:contributionId,body_id:bodyId,component_id:cause.componentId,law_id:cause.lawId,source:{kind:source.kind,id:source.id},effect:{...(effect.forceN?{force_N:cloneVec(effect.forceN)}:{}),...(effect.torqueNm?{torque_Nm:cloneVec(effect.torqueNm)}:{}),...(effect.impulseNs?{impulse_Ns:cloneVec(effect.impulseNs)}:{}),...(effect.positionCorrectionM?{position_correction_m:cloneVec(effect.positionCorrectionM)}:{}),...(effect.pointWorldM?{point_world_m:cloneVec(effect.pointWorldM)}:{}),...(effect.powerW!==undefined?{power_W:effect.powerW}:{}),...(effect.inputsHash!==undefined?{inputs_hash:effect.inputsHash}:{})}});
   return contributionId;
  }
  wrench(bodyId:string,force:Vec3,torque:Vec3):string{
   const frame=this.frame;if(!frame)throw new Error('Physics wrench requires an active substep');finiteVec(force,'wrench force');finiteVec(torque,'wrench torque');
-  const sum=frame.sums.get(bodyId)??{force:[0,0,0] as [number,number,number],torque:[0,0,0] as [number,number,number],ids:[]};
+  const sum=frame.sums.get(bodyId)??{force:[0,0,0] as [number,number,number],torque:[0,0,0] as [number,number,number],ids:[],contactIds:[]};
   const df:[number,number,number]=[force[0]-sum.force[0],force[1]-sum.force[1],force[2]-sum.force[2]],dt:[number,number,number]=[torque[0]-sum.torque[0],torque[1]-sum.torque[1],torque[2]-sum.torque[2]];
   const forceResidual=magnitude(df),torqueResidual=magnitude(dt);this.maxForceResidual=Math.max(this.maxForceResidual,forceResidual);this.maxTorqueResidual=Math.max(this.maxTorqueResidual,torqueResidual);
   if(forceResidual>1e-9||torqueResidual>1e-9)throw new Error(`Unattributed physics wrench on ${bodyId}: force residual ${forceResidual}, torque residual ${torqueResidual}`);
@@ -163,7 +164,8 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
   if(!this.frame)throw new Error('Physics state mutation requires an active substep');
   if(!Number.isFinite(dt)||dt<=0)throw new TypeError('Invalid physics integration dt');
   for(const [label,state] of [['before',before],['after',after]] as const)for(const [key,value] of Object.entries(state))finiteVec(value as Vec3,`${label}.${key}`);
-  this.append('physics.state-mutation',{mutation_id:`${this.frame.tick}.${this.frame.substep}/${bodyId}/integrate`,body_id:bodyId,writer_id:'PhysicsWorld.integrate',wrench_id:wrenchId,dt_s:dt,before:{position_m:cloneVec(before.positionM),rotation_rad:cloneVec(before.rotationRad),velocity_m_s:cloneVec(before.velocityMps),angular_velocity_rad_s:cloneVec(before.angularVelocityRadps)},after:{position_m:cloneVec(after.positionM),rotation_rad:cloneVec(after.rotationRad),velocity_m_s:cloneVec(after.velocityMps),angular_velocity_rad_s:cloneVec(after.angularVelocityRadps)}});
+  const contactIds=this.frame.sums.get(bodyId)?.contactIds??[];
+  this.append('physics.state-mutation',{mutation_id:`${this.frame.tick}.${this.frame.substep}/${bodyId}/integrate`,body_id:bodyId,writer_id:'PhysicsWorld.integrate',wrench_id:wrenchId,contact_contribution_ids:[...contactIds],dt_s:dt,before:{position_m:cloneVec(before.positionM),rotation_rad:cloneVec(before.rotationRad),velocity_m_s:cloneVec(before.velocityMps),angular_velocity_rad_s:cloneVec(before.angularVelocityRadps)},after:{position_m:cloneVec(after.positionM),rotation_rad:cloneVec(after.rotationRad),velocity_m_s:cloneVec(after.velocityMps),angular_velocity_rad_s:cloneVec(after.angularVelocityRadps)}});
  }
  endSubstep():void{
   const frame=this.frame;if(!frame)throw new Error('No physics trace substep is open');
