@@ -8,13 +8,14 @@ import {solveWheelContact,type WheelContactResult} from '../physics/wheel-contac
 import {physicsCause,type PhysicsCauseManifestWriter,type PhysicsCauseRef,type PhysicsCauseWriter,type PhysicsSourceKind} from '../physics/cause-trace.js';
 import {PartCondition} from './condition.js';
 import {Drivetrain,type DrivetrainState} from './drivetrain.js';
+import {ThermalMass} from '../physics/thermal.js';
 import type {CompiledComponent,RotorSpec,VehicleBlueprint,WingSpec,WheelSpec} from './components.js';
 export {vehicle,wheel,wing,rotor,type RotorSpec,type VehicleBlueprint,type VehicleSpec,type WingSpec,type WheelSpec} from './components.js';
 export {PartCondition,type ConditionSpec} from './condition.js';
 export type {DeformationField} from '../physics/deformation-field.js';
 
 export interface VehicleControls {readonly handbrake?:number;readonly throttle?:number;readonly clutch?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;readonly spoiler?:number;readonly collective?:number;readonly yaw?:number;}
-export interface VehicleAir {readonly densityKgM3:number;readonly wind:Vec3;}
+export interface VehicleAir {readonly densityKgM3:number;readonly wind:Vec3;readonly temperatureC?:number;}
 export interface VehiclePose {readonly position?:Vec3;readonly rotation?:Vec3;readonly velocity?:Vec3;readonly angularVelocity?:Vec3;}
 export interface PartSample {
   readonly id:string;readonly kind:'wheel'|'wing'|'rotor';readonly force:Vec3;readonly point:Vec3;
@@ -23,17 +24,17 @@ export interface PartSample {
   readonly contact:boolean;readonly contactNormal:Vec3;readonly supportId:string;readonly fixedSupport:boolean;readonly loadN:number;readonly liftN:number;readonly dragN:number;readonly alphaRad:number;readonly stall:number;
   readonly angularSpeed:number;readonly spinRad:number;readonly compressionM:number;readonly permanentSetM:number;
   readonly plasticWorkJ:number;readonly slipPowerW:number;readonly dissipatedJ:number;readonly wear:number;readonly fatigue:number;readonly failed:boolean;
-  readonly temperatureRiseK:number;readonly effectiveRadiusM:number;readonly tyreGrip:number;readonly surfaceFriction:number;readonly effectiveGrip:number;readonly treadDepthM:number;readonly reactionTorqueNm:number;readonly powerW:number;readonly shaftPowerW:number;readonly collectiveRad:number;readonly derivedBuilds:number;
+  readonly temperatureRiseK:number;readonly brakeTemperatureC:number;readonly brakePerformance:number;readonly brakePowerW:number;readonly effectiveRadiusM:number;readonly tyreGrip:number;readonly surfaceFriction:number;readonly effectiveGrip:number;readonly treadDepthM:number;readonly reactionTorqueNm:number;readonly powerW:number;readonly shaftPowerW:number;readonly collectiveRad:number;readonly derivedBuilds:number;
   readonly groundEffect:number;readonly vortexRing:number;readonly retreatingStall:number;readonly flapPitchRad:number;readonly flapRollRad:number;readonly leadLagRad:number;readonly bladesAttached:number;readonly rotorStrikeCount:number;
 }
 interface PartRuntime {
-  readonly compiled:CompiledComponent;readonly condition:PartCondition;readonly cause:PhysicsCauseRef;
+  readonly compiled:CompiledComponent;readonly condition:PartCondition;readonly cause:PhysicsCauseRef;readonly brakeThermal:ThermalMass|undefined;
   readonly attachment:DeformationAttachment;readonly localArm:MutableVec3;
   readonly force:MutableVec3;readonly torqueContribution:MutableVec3;readonly point:MutableVec3;readonly arm:MutableVec3;readonly velocity:MutableVec3;
   readonly chord:MutableVec3;readonly normal:MutableVec3;readonly localChord:MutableVec3;readonly localNormal:MutableVec3;
   readonly wheelSolve:WheelContactResult;readonly support:WheelHit;readonly down:MutableVec3;contact:boolean;
   revision:number;control:number;control2:number;control3:number;radius:number;tread:number;grip:number;surfaceFriction:number;effectiveGrip:number;liftScale:number;omega:number;spin:number;longForce:number;sideForce:number;
-  load:number;lift:number;drag:number;alpha:number;stall:number;compression:number;permanent:number;plasticWork:number;
+  load:number;lift:number;drag:number;alpha:number;stall:number;compression:number;permanent:number;plasticWork:number;brakePower:number;
   slipPower:number;reactionTorque:number;power:number;shaftPower:number;groundEffect:number;vortexRing:number;retreatingStall:number;flapPitch:number;flapRoll:number;leadLag:number;bladesAttached:number;rotorStrikeCount:number;derivedBuilds:number;
 }
 const clamp=(x:number,a=0,b=1)=>Math.max(a,Math.min(b,x));
@@ -59,7 +60,7 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly byId=new Map<string,PartRuntime>();
   private readonly views=new Map<string,PartSample>();
   private readonly controls={handbrake:0,throttle:0,clutch:0,brake:0,steer:0,pitch:0,roll:0,flap:0,spoiler:0,collective:0,yaw:0};
-  private air:VehicleAir={densityKgM3:1.225,wind:[0,0,0]};
+  private air:VehicleAir={densityKgM3:1.225,wind:[0,0,0],temperatureC:20};
   private readonly unbind:()=>void;
   private disposed=false;
   private deformation:DeformationField|undefined;
@@ -88,7 +89,7 @@ export class Vehicle implements PhysicsForceDriver {
       const mount=compiled.source.mountAt,com=blueprint.centerOfMass;
       const anchor:Vec3=mount?[mount[0]-com[0],mount[1]-com[1],mount[2]-com[2]]:compiled.arm;
       const source=compiled.source,cause=source.kind==='wheel'?physicsCause(source.id,'wheel-contact.v1','wheel-contact',['force','torque']):source.kind==='wing'?physicsCause(source.id,'finite-wing.v1','aerodynamics',['force','torque','power']):physicsCause(source.id,'actuator-disk.v2','rotor-aerodynamics',['force','torque','power']);
-      const part:PartRuntime={compiled,cause,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),force:[0,0,0],torqueContribution:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:wheelHit(),down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,control2:NaN,control3:NaN,radius:0,tread:0,grip:0,surfaceFriction:0,effectiveGrip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,slipPower:0,reactionTorque:0,power:0,shaftPower:0,groundEffect:1,vortexRing:0,retreatingStall:0,flapPitch:0,flapRoll:0,leadLag:0,bladesAttached:compiled.source.kind==='rotor'?compiled.source.blades:0,rotorStrikeCount:0,derivedBuilds:0};
+      const part:PartRuntime={compiled,cause,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),brakeThermal:compiled.source.kind==='wheel'&&compiled.source.brakeThermal?new ThermalMass(compiled.source.brakeThermal):undefined,force:[0,0,0],torqueContribution:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:wheelHit(),down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,control2:NaN,control3:NaN,radius:0,tread:0,grip:0,surfaceFriction:0,effectiveGrip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,brakePower:0,slipPower:0,reactionTorque:0,power:0,shaftPower:0,groundEffect:1,vortexRing:0,retreatingStall:0,flapPitch:0,flapRoll:0,leadLag:0,bladesAttached:compiled.source.kind==='rotor'?compiled.source.blades:0,rotorStrikeCount:0,derivedBuilds:0};
       if(compiled.source.kind==='wheel')part.omega=dot(this.body.velocity,[this.frame.basis[0]!,this.frame.basis[1]!,this.frame.basis[2]!])/compiled.source.radiusM;
       this.byId.set(compiled.source.id,part);return part;
     });
@@ -119,7 +120,8 @@ export class Vehicle implements PhysicsForceDriver {
   get drivetrainState():DrivetrainState|undefined{return this.drivetrain?.state;}
   setAir(air:VehicleAir):void {
     finiteVec3(air.wind,'Wind');if(!Number.isFinite(air.densityKgM3)||air.densityKgM3<0||air.densityKgM3>100)throw new RangeError('Invalid air density');
-    this.air={densityKgM3:air.densityKgM3,wind:[...air.wind]};this.body.wake();
+    if(air.temperatureC!==undefined&&!Number.isFinite(air.temperatureC))throw new RangeError('Invalid air temperature');
+    this.air={densityKgM3:air.densityKgM3,wind:[...air.wind],temperatureC:air.temperatureC??this.air.temperatureC??20};this.body.wake();
   }
   /** Borrowed read-only live view, shared by presentation/audio/HUD. No allocations after first read.
    * Use structuredClone(view) explicitly when recording history. Reading never advances physics. */
@@ -132,7 +134,7 @@ export class Vehicle implements PhysicsForceDriver {
       get contact(){return p.contact;},contactNormal:viewVector(p.support.normal),get supportId(){return p.contact?p.support.id:'';},get fixedSupport(){return p.contact&&p.support.triangle<0&&!p.support.body?.invMass&&!p.support.body?.kinematic;},get loadN(){return p.load;},get liftN(){return p.lift;},get dragN(){return p.drag;},get alphaRad(){return p.alpha;},get stall(){return p.stall;},
       get angularSpeed(){return p.omega;},get spinRad(){return p.spin;},get compressionM(){return p.compression;},get permanentSetM(){return p.permanent;},get plasticWorkJ(){return p.plasticWork;},
       get slipPowerW(){return p.slipPower;},get dissipatedJ(){return c.dissipatedJ;},get wear(){return c.wear;},get fatigue(){return c.fatigue;},get failed(){return c.failed;},
-      get temperatureRiseK(){return c.temperatureRiseK;},get effectiveRadiusM(){return p.radius;},get tyreGrip(){return p.grip;},get surfaceFriction(){return p.surfaceFriction;},get effectiveGrip(){return p.effectiveGrip;},
+      get temperatureRiseK(){return c.temperatureRiseK;},get brakeTemperatureC(){return p.brakeThermal?.temperatureC??20;},get brakePerformance(){return p.brakeThermal?.performance??1;},get brakePowerW(){return p.brakePower;},get effectiveRadiusM(){return p.radius;},get tyreGrip(){return p.grip;},get surfaceFriction(){return p.surfaceFriction;},get effectiveGrip(){return p.effectiveGrip;},
       get treadDepthM(){return p.tread;},get reactionTorqueNm(){return p.reactionTorque;},get powerW(){return p.power;},get shaftPowerW(){return p.shaftPower;},get collectiveRad(){return p.alpha;},get derivedBuilds(){return p.derivedBuilds;},
       get groundEffect(){return p.groundEffect;},get vortexRing(){return p.vortexRing;},get retreatingStall(){return p.retreatingStall;},get flapPitchRad(){return p.flapPitch;},get flapRollRad(){return p.flapRoll;},get leadLagRad(){return p.leadLag;},get bladesAttached(){return p.bladesAttached;},get rotorStrikeCount(){return p.rotorStrikeCount;},
     });
@@ -144,15 +146,15 @@ export class Vehicle implements PhysicsForceDriver {
     if(this.disposed)throw new Error('Vehicle disposed');
     if(!Number.isFinite(dt)||dt<=0||dt>this.maxStepSeconds+1e-12)throw new RangeError('Vehicle forces require <=1/120 s substeps');
     this.frame.clear();if(!this.referenceFrame)this.frame.update(this.body.rotation);this.diagnostics.steps++;
-    const b=this.body,air=this.air;
-    if(this.drivetrain)this.drivetrain.step(dt,{throttle:Math.max(0,this.controls.throttle),clutch:this.controls.clutch,wheelOmega:id=>this.byId.get(id)?.omega??0,wheelInertia:id=>this.byId.get(id)?.compiled.inertia??1});
+    const b=this.body,air=this.air,relativeAirSpeed=Math.hypot(b.velocity[0]-air.wind[0],b.velocity[1]-air.wind[1],b.velocity[2]-air.wind[2]);
+    if(this.drivetrain)this.drivetrain.step(dt,{throttle:Math.max(0,this.controls.throttle),clutch:this.controls.clutch,wheelOmega:id=>this.byId.get(id)?.omega??0,wheelInertia:id=>this.byId.get(id)?.compiled.inertia??1,ambientTemperatureC:air.temperatureC??20,airSpeedMps:relativeAirSpeed});
     this.shaftRemaining.clear();for(const shaft of this.blueprint.source.shafts??[])this.shaftRemaining.set(shaft.id,shaft.maxPowerW*(shaft.efficiency??1)*clamp(this.controls.throttle));
     const vx=b.velocity[0]-air.wind[0],vy=b.velocity[1]-air.wind[1],vz=b.velocity[2]-air.wind[2];
     const speed=Math.hypot(vx,vy,vz),drag=-.5*air.densityKgM3*(this.blueprint.source.chassis.dragAreaM2??0)*speed;
     this.dragForce[0]=drag*vx;this.dragForce[1]=drag*vy;this.dragForce[2]=drag*vz;this.frame.contribute(this.dragForce,ZERO,this.chassisDragCause,causes,'air','environment.air');
     for(const p of this.parts){
       const frame=this.referenceFrame??this.frame;if(this.referenceFrame)frame.update(b.rotation);
-      const s=p.compiled.source;p.force.fill(0);p.torqueContribution.fill(0);p.load=p.lift=p.drag=p.alpha=p.stall=p.slipPower=p.reactionTorque=p.power=p.shaftPower=0;p.groundEffect=1;p.vortexRing=p.retreatingStall=0;
+      const s=p.compiled.source;p.force.fill(0);p.torqueContribution.fill(0);p.load=p.lift=p.drag=p.alpha=p.stall=p.brakePower=p.slipPower=p.reactionTorque=p.power=p.shaftPower=0;p.groundEffect=1;p.vortexRing=p.retreatingStall=0;
       this.derive(p);
       frame.rotate(p.localArm,p.arm);
       for(let k=0;k<3;k++)p.point[k]=b.position[k]!+p.arm[k]!;
@@ -284,8 +286,9 @@ export class Vehicle implements PhysicsForceDriver {
     frame.rotate(p.localChord,p.chord);frame.rotate(p.localNormal,p.normal);
     const b=frame.basis,susp=s.suspension,radius=p.radius;
     const motor=this.drivetrain?this.drivetrain.torqueFor(s.id):this.controls.throttle*(s.driveTorqueNm??0),torque=this.drivetrain||s.drivePowerW===undefined?motor:Math.sign(motor)*Math.min(Math.abs(motor),s.drivePowerW/Math.max(1,Math.abs(p.omega)));
-    const slide=s.at[0]<0?this.controls.handbrake:0;
-    const brake=Math.max(this.controls.brake,slide)*(s.brakeTorqueNm??0);
+    const slide=s.at[0]<0?this.controls.handbrake:0,airSpeed=Math.hypot(this.body.velocity[0]-this.air.wind[0],this.body.velocity[1]-this.air.wind[1],this.body.velocity[2]-this.air.wind[2]);
+    p.brakeThermal?.step(dt,this.air.temperatureC??20,airSpeed);
+    const brake=Math.max(this.controls.brake,slide)*(s.brakeTorqueNm??0)*(p.brakeThermal?.performance??1);
     for(let k=0;k<3;k++)p.down[k]=-p.normal[k]!;
     const hit=this.world.wheelSupport(p.point,p.down,susp.restM+radius/.15,p.support,this.body),normal=p.support.normal;
     const alignment=hit?dot(normal,p.normal):0;
@@ -329,6 +332,7 @@ export class Vehicle implements PhysicsForceDriver {
     this.supportReaction?.(p.support,p.force,dt);
     const slip=p.omega*radius-(longitudinal+solved.force*dt*inv);
     p.slipPower=Math.max(0,solved.force*slip-solved.sideForce*lateral);
+    p.brakePower=Math.abs(solved.brake*radius*p.omega);p.brakeThermal?.addHeat(p.brakePower*dt);
     p.condition.consumeWork(p.slipPower*dt);
   }
 }
