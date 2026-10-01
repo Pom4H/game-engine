@@ -123,7 +123,7 @@ for(let lane=0;lane<4;lane++)for(let i=0;i<10;i++){
 // 10. Water basin. It is intentionally not a solid collision plane: later fluid
 // physics must own buoyancy/drag/sealing instead of faking water with ground contact.
 cyl('water-basin',[12,-1.1,-27],20,2.0,B);
-cyl('water-volume',[12,-.22,-27],18.7,.44,W);
+cyl('water-volume',[12,-1.0,-27],18.7,2.0,W);
 torus('water-rim',[12,.02,-27],20,.55,B);
 roadStrip('water-entry',[[-28,0,-10],[-12,0,-10],[0,0,-18],[4,-.7,-24]],7,A,{guard:true});
 roadStrip('water-exit',[[20,-.7,-24],[28,0,-17],[38,0,-12]],7,A,{guard:true});
@@ -235,6 +235,7 @@ export default {
  clearColor:[.42,.58,.72,1],
  camera,
  environment:{temperatureC:18,sunlight:.82,humidity:.48,wind:[1.5,0,.3],precipitation:'arid'},
+ fluids:[{id:'water.basin',center:[12,-1,-27],shape:'cylinder',radiusM:18.7,depthM:2,densityKgM3:997,dragCoefficient:.92}],
  rendering:{sunDirection:[-.45,.72,-.31],sunColor:[1,.93,.84],skyColor:[.35,.52,.70],sunIntensity:1.0,exposure:1.05,shadowExtent:190,fogDensity:.0025},
  fluids:[{id:'water-basin-fluid',shape:'cylinder',center:[12,-1.05,-27],radiusM:18.7,depthM:2.1,densityKgM3:998.2,velocity:[0,0,0],dragCoefficient:.9}],
  entities
