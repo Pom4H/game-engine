@@ -7,6 +7,8 @@ export interface PhysicsAccountingState {
  readonly linearMomentumNs:Vec3;
  /** Total angular momentum about the requested origin: orbital + spin. */
  readonly angularMomentumNms:Vec3;
+ readonly orbitalAngularMomentumNms:Vec3;
+ readonly spinAngularMomentumNms:Vec3;
  readonly translationalKineticJ:number;
  readonly rotationalKineticJ:number;
  readonly kineticJ:number;
@@ -34,7 +36,7 @@ const toWorld=(rotation:Vec3,v:Vec3):Vec3=>{const b=basis(rotation);return[
  * because their controller is an external momentum/energy source. */
 export function physicsAccounting(bodies:Iterable<RigidBody>,gravity:Vec3=[0,0,0],origin:Vec3=[0,0,0]):PhysicsAccountingState{
  if(!gravity.every(Number.isFinite)||!origin.every(Number.isFinite))throw new TypeError('Accounting vectors must be finite');
- let mass=0,cx=0,cy=0,cz=0,px=0,py=0,pz=0,lx=0,ly=0,lz=0,trans=0,rot=0,potential=0;
+ let mass=0,cx=0,cy=0,cz=0,px=0,py=0,pz=0,olx=0,oly=0,olz=0,slx=0,sly=0,slz=0,trans=0,rot=0,potential=0;
  for(const body of bodies){
   if(!(body.mass>0)||body.kinematic)continue;
   const m=body.mass,r:Vec3=[body.position[0]-origin[0],body.position[1]-origin[1],body.position[2]-origin[2]],v=body.velocity,p:Vec3=[m*v[0],m*v[1],m*v[2]];
@@ -44,9 +46,10 @@ export function physicsAccounting(bodies:Iterable<RigidBody>,gravity:Vec3=[0,0,0
    body.invInertiaLocal[1]>0?1/body.invInertiaLocal[1]:0,
    body.invInertiaLocal[2]>0?1/body.invInertiaLocal[2]:0,
   ],spinLocal:Vec3=[iLocal[0]*wLocal[0],iLocal[1]*wLocal[1],iLocal[2]*wLocal[2]],spin=toWorld(body.rotation,spinLocal);
-  lx+=orbital[0]+spin[0];ly+=orbital[1]+spin[1];lz+=orbital[2]+spin[2];
+  olx+=orbital[0];oly+=orbital[1];olz+=orbital[2];slx+=spin[0];sly+=spin[1];slz+=spin[2];
   trans+=.5*m*dot(v,v);rot+=.5*dot(wLocal,spinLocal);potential-=m*dot(gravity,body.position);
  }
  const com:Vec3=mass>0?[cx/mass,cy/mass,cz/mass]:[0,0,0],kinetic=trans+rot;
- return Object.freeze({massKg:mass,centerOfMassM:Object.freeze(com) as Vec3,linearMomentumNs:Object.freeze([px,py,pz]) as Vec3,angularMomentumNms:Object.freeze([lx,ly,lz]) as Vec3,translationalKineticJ:trans,rotationalKineticJ:rot,kineticJ:kinetic,gravitationalPotentialJ:potential,mechanicalJ:kinetic+potential});
+ const orbital:Vec3=[olx,oly,olz],spin:Vec3=[slx,sly,slz],total:Vec3=[olx+slx,oly+sly,olz+slz];
+ return Object.freeze({massKg:mass,centerOfMassM:Object.freeze(com) as Vec3,linearMomentumNs:Object.freeze([px,py,pz]) as Vec3,angularMomentumNms:Object.freeze(total) as Vec3,orbitalAngularMomentumNms:Object.freeze(orbital) as Vec3,spinAngularMomentumNms:Object.freeze(spin) as Vec3,translationalKineticJ:trans,rotationalKineticJ:rot,kineticJ:kinetic,gravitationalPotentialJ:potential,mechanicalJ:kinetic+potential});
 }
