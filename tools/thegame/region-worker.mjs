@@ -29,13 +29,14 @@ function start(assignment){
  const spec=readThegameRegionSpec(assignment.shard.input);
  const world=new ThegameRegionAuthority(spec,assignment.resumeTick);
  const lease=new AuthorityShardLease(workerId,assignment,world,populationProjection,{stepSeconds:spec.stepSeconds});
- active={assignment,spec,world,lease,stepTimer:undefined,heartbeatTimer:undefined};
+ const publishEvery=Math.max(1,Math.round(1/spec.stepSeconds));
+ active={assignment,spec,world,lease,publishEvery,stepTimer:undefined,heartbeatTimer:undefined};
  send(lease.publish());
  active.heartbeatTimer=setInterval(()=>{try{send(lease.heartbeat());}catch(error){fail(error);}},4000);
  active.stepTimer=setInterval(()=>{
-  try{lease.advance();send(lease.publish());}
+  try{lease.advance();if(world.tick%publishEvery===0)send(lease.publish());}
   catch(error){fail(error);}
- },Math.max(100,spec.stepSeconds*1000));
+ },Math.max(10,spec.stepSeconds*1000));
  console.log(`world.region.v1 ${assignment.shard.id} epoch=${assignment.shard.epoch} tick=${assignment.resumeTick} population=${spec.population}`);
 }
 function connect(){
