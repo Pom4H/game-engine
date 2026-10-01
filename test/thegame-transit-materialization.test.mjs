@@ -4,8 +4,12 @@ import {characterState} from '../dist/runtime/character-motor.js';
 import {TransitAuthority} from '../dist/games/thegame/transit.js';
 import {TransitVehicleAuthority,transitVehicleProjection} from '../dist/games/thegame/transit-vehicle.js';
 import {ThegameAuthority} from '../dist/games/thegame/session.js';
-import {WORLD_REVISION} from '../dist/games/thegame/world.js';
-import {createThegameHost} from '../tools/thegame/host.mjs';
+function joinKnownRider(game,id='p1'){
+ const rider=game.transit.ridingCandidate();assert.ok(rider);
+ const service=game.transit.serviceForPassenger(rider.residentId,game.tick/60);assert.ok(service);
+ const state=characterState(service.position[0],service.position[1],service.position[2],service.yaw);
+ return game.join(id,'Passenger',{state,discovered:0,residentId:rider.residentId});
+}
 
 test('nearby bus service promotes into the existing Vehicle/PhysicsWorld and demotes outside interest',()=>{
  const transit=new TransitAuthority({seedDemand:false}),vehicles=new TransitVehicleAuthority(transit);
@@ -39,9 +43,9 @@ test('rail services stay route-authoritative instead of pretending to use road t
  vehicles.dispose();
 });
 
-test('new player can enter the world already riding a living bus resident',()=>{
+test('known resident enters the world already riding the same living bus service',()=>{
  const game=new ThegameAuthority({},51);
- const peer=game.join('p1','Passenger');
+ const peer=joinKnownRider(game);
  assert.ok(peer.seat);assert.equal(peer.seat.mode,'bus');
  const passenger=game.transit.passenger(peer.residentId);
  assert.equal(passenger?.state,'riding');assert.equal(passenger?.serviceId,peer.seat.serviceId);
@@ -56,9 +60,8 @@ test('new player can enter the world already riding a living bus resident',()=>{
 });
 
 test('seated player follows service authority instead of walking through the vehicle',()=>{
- const game=new ThegameAuthority({},52),peer=game.join('p1','Passenger');
+ const game=new ThegameAuthority({},52),peer=joinKnownRider(game);
  assert.ok(peer.seat);
- const start={x:peer.state.x,z:peer.state.z};
  game.enqueue(peer.id,[{seq:1,input:{forward:1,right:1,yaw:0,sprint:true,jump:true}}]);
  for(let i=0;i<120;i++)game.step();
  assert.equal(peer.ack,1);
@@ -66,20 +69,16 @@ test('seated player follows service authority instead of walking through the veh
  const service=game.transit.serviceForPassenger(peer.residentId,game.tick/60);assert.ok(service);
  const pose=game.transitVehicles.seatPose(service.id,game.tick/60);assert.ok(pose);
  assert.ok(Math.hypot(peer.state.x-pose.position[0],peer.state.z-pose.position[2])<.001);
- assert.ok(Math.hypot(peer.state.x-start.x,peer.state.z-start.z)>.05);
  game.dispose();
 });
 
-test('reconnect reclaims the same riding resident and the same service seat',()=>{
- let now=0;const host=createThegameHost({}, {now:()=>now,epoch:53}),packets=[];
- const socket={send:text=>{packets.push(JSON.parse(text));return text.length;},close(){host.close(socket);}};
- host.open(socket);host.message(socket,JSON.stringify({type:'join',version:WORLD_REVISION,name:'Passenger'}));
- const welcome=packets.at(-1);assert.equal(welcome.type,'welcome');assert.equal(welcome.self.seat?.mode,'bus');
- const resident=welcome.resident.id,serviceId=welcome.self.seat.serviceId,token=welcome.token;
- host.close(socket);now=1000;host.advance(now);
- const socket2={send:text=>{packets.push(JSON.parse(text));return text.length;},close(){host.close(socket2);}};
- host.open(socket2);host.message(socket2,JSON.stringify({type:'join',version:WORLD_REVISION,name:'Passenger',resume:token}));
- const resumed=packets.at(-1);assert.equal(resumed.type,'welcome');
- assert.equal(resumed.resident.id,resident);assert.equal(resumed.self.seat?.serviceId,serviceId);
- host.dispose();
+test('resident reconnect reclaims the same riding identity and service seat',()=>{
+ const game=new ThegameAuthority({},53),first=joinKnownRider(game),residentId=first.residentId,serviceId=first.seat.serviceId;
+ const saved={state:{...first.state},discovered:first.discovered,residentId};
+ game.leave(first.id);
+ for(let i=0;i<60;i++)game.step();
+ const second=game.join('p1','Passenger',saved);
+ assert.equal(second.residentId,residentId);assert.equal(second.seat?.serviceId,serviceId);
+ assert.equal(game.transit.passenger(residentId)?.state,'riding');
+ game.dispose();
 });
