@@ -468,3 +468,20 @@ test('same vehicle accelerates less on deformable soil than on rigid asphalt',()
  assert.ok(soil.resistance>0,soil);
  assert.ok(soil.speed<asphalt.speed*.9,{asphalt,soil});
 });
+
+
+test('solver rolling-rest and sleep-rest are explicit causal records',()=>{
+ const world=new PhysicsWorld([0,-9.81,0],0);
+ const body=world.add(new RigidBody({
+  id:'trace.settle',position:[0,.5,0],velocity:[.035,0,.018],angularVelocity:[.08,.05,.06],
+  mass:120,shape:{kind:'box',half:[.5,.5,.5]},material:material('steel'),friction:.8,restitution:0
+ }));
+ const trace=world.traceCauses({runId:'settle-provenance'});
+ for(let i=0;i<240&&!body.sleeping;i++)world.step(dt);
+ const records=trace.snapshot(),corrections=records.filter(r=>r.type==='physics.contribution'&&r.body_id===body.id&&r.law_id==='contact-solver.v1');
+ assert.ok(corrections.some(r=>r.source?.id==='solver.rolling-rest'&&r.effect?.angular_velocity_correction_rad_s),'rolling stabilization must be attributed');
+ assert.equal(body.sleeping,true,'fixture must actually enter sleep');
+ assert.ok(corrections.some(r=>r.source?.id==='solver.sleep-rest'&&(r.effect?.velocity_correction_m_s||r.effect?.angular_velocity_correction_rad_s)),'sleep clamp must be attributed');
+ assert.deepEqual(new Set(records.filter(r=>r.type==='physics.state-mutation'&&r.body_id===body.id).map(r=>r.writer_id)),new Set(['PhysicsWorld.integrate']));
+ world.stopCauseTrace(trace);
+});
