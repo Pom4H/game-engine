@@ -2,11 +2,10 @@ name: Helicopter physics
 
 on:
   push:
-    branches: [feat/helicopter-physics]
+    branches: [feat/rotor-dynamics]
     paths:
       - 'src/vehicles/**'
       - 'src/physics/**'
-      - 'src/audio/rotor.ts'
       - 'src/audio/rotor.ts'
       - 'src/index.ts'
       - 'test/helicopter-physics.test.mjs'
@@ -16,6 +15,7 @@ on:
     paths:
       - 'src/vehicles/**'
       - 'src/physics/**'
+      - 'src/audio/rotor.ts'
       - 'src/index.ts'
       - 'test/helicopter-physics.test.mjs'
       - 'tools/helicopter-flight-exam.mjs'
