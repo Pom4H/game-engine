@@ -177,7 +177,7 @@ export class PhysicsWorld {
   private declareBodyCauses(body:RigidBody,trace:PhysicsCauseTrace):void{
     trace.component({componentId:body.id,bodyId:body.id,kind:'body'});
     const cause=this.gravityCauses.get(body.id)??physicsCause(body.id,'gravity.v1','gravity',['force']);this.gravityCauses.set(body.id,cause);trace.law(body.id,cause);
-    const contact=this.contactCauses.get(body.id)??physicsCause(body.id,'contact-solver.v1','collision',['impulse','position-correction']);this.contactCauses.set(body.id,contact);trace.law(body.id,contact);
+    const contact=this.contactCauses.get(body.id)??physicsCause(body.id,'contact-solver.v1','collision',['impulse','position-correction','velocity-correction','angular-velocity-correction']);this.contactCauses.set(body.id,contact);trace.law(body.id,contact);
     const fluid=this.fluidCauses.get(body.id)??physicsCause(body.id,'fluid.v1','fluid',['force']);this.fluidCauses.set(body.id,fluid);trace.law(body.id,fluid);
   }
   drive(body:RigidBody,driver:PhysicsForceDriver):()=>void{
@@ -362,15 +362,19 @@ export class PhysicsWorld {
     // Contact-patch rolling resistance dissipates the tiny residual tumbling
     // that a finite rigid solver otherwise preserves indefinitely.
     const contactScale=Math.min(1,(body.mass*Math.abs(this.gravity[1])*dt+totalImpulse)/Math.max(.001,body.mass*.1));
-    const angularDecay=Math.exp(-(2.4+7.5*mu)*dt*contactScale*Math.sqrt(manifold.points.length));
+    const angularDecay=Math.exp(-(2.4+7.5*mu)*dt*contactScale*Math.sqrt(manifold.points.length)),beforeAngular:[number,number,number]=[...body.angularVelocity];
     body.angularVelocity[0]*=angularDecay;body.angularVelocity[1]*=angularDecay;body.angularVelocity[2]*=angularDecay;
+    this.traceStateCorrection(body,[0,0,0],[body.angularVelocity[0]-beforeAngular[0],body.angularVelocity[1]-beforeAngular[1],body.angularVelocity[2]-beforeAngular[2]],'solver.rolling-rest');
 
     const linear=V3.length(body.velocity),angularSpeed=V3.length(body.angularVelocity);
     let residualNormal=0;
     for(const r of manifold.points){const velocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r));residualNormal=Math.max(residualNormal,Math.abs(velocity[1]));}
     if(linear<.075&&angularSpeed<.16&&residualNormal<.055){
       body.sleepTimer+=dt;
-      if(body.sleepTimer>.24){body.velocity=[0,0,0];body.angularVelocity=[0,0,0];body.sleeping=true;}
+      if(body.sleepTimer>.24){
+        const dv:Vec3=[-body.velocity[0],-body.velocity[1],-body.velocity[2]],dw:Vec3=[-body.angularVelocity[0],-body.angularVelocity[1],-body.angularVelocity[2]];
+        this.traceStateCorrection(body,dv,dw,'solver.sleep-rest');body.velocity=[0,0,0];body.angularVelocity=[0,0,0];body.sleeping=true;
+      }
     }else if(!body.sleeping){
       const restingJitter=linear<.22&&angularSpeed<.7&&residualNormal<.22;
       body.sleepTimer=restingJitter?Math.max(0,body.sleepTimer-dt*.2):0;
@@ -410,6 +414,11 @@ export class PhysicsWorld {
     this.pushContact(contact,impulse,'resolve');
   }
 
+  private traceStateCorrection(body:RigidBody,velocityDelta:Vec3,angularDelta:Vec3,sourceId:string):void{
+    const trace=this.causeTrace;if(!trace||!body.invMass)return;
+    if(Math.hypot(...velocityDelta)+Math.hypot(...angularDelta)<=1e-15)return;
+    trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:'constraint',id:sourceId},{...(Math.hypot(...velocityDelta)>0?{velocityCorrectionMps:velocityDelta}:{}),...(Math.hypot(...angularDelta)>0?{angularVelocityCorrectionRadps:angularDelta}:{})});
+  }
   private tracePositionCorrection(body:RigidBody,delta:Vec3,point:Vec3,sourceKind:'surface'|'body',sourceId:string):void{
     const trace=this.causeTrace;if(!trace||!body.invMass)return;
     trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:sourceKind,id:sourceId},{positionCorrectionM:delta,pointWorldM:point});
