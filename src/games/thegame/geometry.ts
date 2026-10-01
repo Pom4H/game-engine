@@ -38,7 +38,8 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  // Opaque coated facade panels keep reflection and early depth. No fake transparency
  // over a solid building shell, no thousands of individual draw calls for windows.
  const windows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.19,metalness:.25,clearcoat:.65,clearcoatRoughness:.13});
- const litWindows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.17,clearcoat:.45,emissive:[.72,.36,.16]});
+ const litWindows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.17,clearcoat:.45,emissive:[.42,.20,.08]});
+ const snow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.97});
  const metal=new Mesh({kind:'steel',color:[1,1,1,1],roughness:.42,metalness:.65});
  const lampGlow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.12,emissive:[9.0,5.4,2.4]});
  const ground=(x:number,z:number,offset=0):Point=>[x-ox,world.ground(x,z).y+offset,z-oz];
@@ -50,6 +51,13 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    const oa:Point=[x-ox+Math.cos(a)*r,y+Math.sin(a)*r,z-oz],ob:Point=[x-ox+Math.cos(b)*r,y+Math.sin(b)*r,z-oz];
    const ib:Point=[x-ox+Math.cos(b)*ri,y+Math.sin(b)*ri,z-oz+.015],ia:Point=[x-ox+Math.cos(a)*ri,y+Math.sin(a)*ri,z-oz+.015];
    mesh.quad(oa,ob,ib,ia,color);
+  }
+ };
+ const awning=(mesh:Mesh,x:number,y:number,z:number,width:number,depth:number,rise:number,color:RGB)=>{
+  const n=8,h=width/2;
+  for(let i=0;i<n;i++){
+   const a=i*Math.PI/(2*n),b=(i+1)*Math.PI/(2*n),ya=y+Math.cos(a)*rise,yb=y+Math.cos(b)*rise,za=z+Math.sin(a)*depth,zb=z+Math.sin(b)*depth;
+   mesh.quad([x-ox-h,ya,za-oz],[x-ox+h,ya,za-oz],[x-ox+h,yb,zb-oz],[x-ox-h,yb,zb-oz],color);
   }
  };
  for(let z=0;z<16;z++)for(let x=0;x<16;x++){
@@ -67,7 +75,13 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
   for(let n=0;n<=2;n++){
    const x=ox+n*64,z=oz+n*64;
    rect(trim,x,oz+64,20,128,[.34,.33,.31],.012);rect(trim,ox+64,z,128,20,[.34,.33,.31],.012);
-   rect(asphalt,x,oz+64,12,128,[.16,.18,.18]);rect(asphalt,ox+64,z,128,12,[.16,.18,.18]);
+   rect(asphalt,x,oz+64,12,128,[.055,.060,.065]);rect(asphalt,ox+64,z,128,12,[.055,.060,.065]);
+   // Irregular sidewalk snow is render-only and batched; road authority stays dry/unchanged.
+   for(let t=8;t<128;t+=16){
+    const depth=8+hash01(cx,cz,n*100+t,world.seed)*7,tone=.58+hash01(cx,cz,n*100+t+1,world.seed)*.12;
+    if(hash01(cx,cz,n*100+t+2,world.seed)>.18){rect(snow,x-8,oz+t,2.4,depth,[tone,tone+.02,tone+.03],.055);rect(snow,x+8,oz+t,2.4,depth,[tone,tone+.02,tone+.03],.055);}
+    if(hash01(cx,cz,n*100+t+3,world.seed)>.32){rect(snow,ox+t,z-8,depth,2.4,[tone,tone+.02,tone+.03],.055);rect(snow,ox+t,z+8,depth,2.4,[tone,tone+.02,tone+.03],.055);}
+   }
    for(let t=6;t<128;t+=12)if(t%64>12&&t%64<52){rect(details,x,oz+t,.14,5,[.87,.77,.49],.045);rect(details,ox+t,z,5,.14,[.87,.77,.49],.045);}
    // Crosswalks and kerb lines lie on the canonical surface and add no obstacles.
    for(let crossing=0;crossing<2;crossing++)for(let k=-4;k<=4;k++){
@@ -92,7 +106,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  }
  for(const p of chunk.props){
   if(p.kind==='building'){
-   const wall:RGB=[p.color[0]*.52,p.color[1]*.50,p.color[2]*.48];
+   const wall:RGB=[p.color[0]*.42,p.color[1]*.40,p.color[2]*.38];
    box(masonry,p.x,p.y+p.height/2,p.z,p.width,p.height,p.depth,wall);
    box(trim,p.x,p.y+.40,p.z,p.width+.10,.8,p.depth+.10,[.36,.36,.32]);
    // Recessed roof, cornice and four parapets give the silhouette actual depth.
@@ -108,6 +122,14 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    metal.quad([ridge,roofTop,zF],[ridge,roofTop,zB],[xR,roofBase,zB],[xR,roofBase,zF],roofColor);
    masonry.triangle([xL,roofBase,zF],[ridge,roofTop,zF],[xR,roofBase,zF],wall);
    masonry.triangle([xR,roofBase,zB],[ridge,roofTop,zB],[xL,roofBase,zB],wall);
+   const snowTone:RGB=[.64,.66,.67],so=.055;
+   snow.quad([xL,roofBase+so,zF],[xL,roofBase+so,zB],[ridge,roofTop+so,zB],[ridge,roofTop+so,zF],snowTone);
+   snow.quad([ridge,roofTop+so,zF],[ridge,roofTop+so,zB],[xR,roofBase+so,zB],[xR,roofBase+so,zF],snowTone);
+   for(let chimney=0;chimney<2;chimney++){
+    const side=chimney?1:-1,cz0=p.z+(chimney?.18:-.20)*p.depth;
+    box(masonry,p.x+side*p.width*.18,roofBase+1.45,cz0,.72,2.6,.72,[.22,.20,.18]);
+    box(snow,p.x+side*p.width*.18,roofBase+2.79,cz0,.82,.08,.82,[.69,.70,.70]);
+   }
    // Covered frontage evokes the old-city arcade in the visual target while
    // remaining render-only; authoritative collision stays the original building.
    const front=p.z+p.depth/2,canopyWidth=p.width*.82,canopyDepth=2.15,canopyY=p.y+3.15;
@@ -116,12 +138,15 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    // Shallow masonry arch bands and pilasters read as a covered arcade but stay
    // in the same material batch and never change authoritative collision.
    for(let bay=-1;bay<=1;bay++){
-    const bx=p.x+bay*canopyWidth/3;
+    const bx=p.x+bay*canopyWidth/3,bayWidth=Math.min(5.2,canopyWidth*.26);
     archBand(trim,bx,p.y+1.7,front+canopyDepth+.025,1.22,.16,[.39,.37,.33]);
     box(trim,bx-canopyWidth/6,p.y+p.height/2,front+.10,.16,Math.max(3,p.height-.5),.16,[.37,.35,.32]);
     box(trim,bx+canopyWidth/6,p.y+p.height/2,front+.10,.16,Math.max(3,p.height-.5),.16,[.37,.35,.32]);
     box(trim,bx,p.y+3.62,front+.18,Math.min(4.8,canopyWidth*.25),.48,.10,[.18,.17,.16]);
+    awning(details,bx,p.y+2.48,front+.32,bayWidth,1.72,.55,[.22,.13,.11]);
+    awning(snow,bx,p.y+2.54,front+.31,bayWidth+.05,1.74,.56,[.66,.67,.67]);
    }
+   box(snow,p.x,canopyY+.13,front+canopyDepth/2,canopyWidth,.07,canopyDepth,[.64,.65,.65]);
    box(metal,p.x,p.y+1.3,p.z+p.depth/2+.04,2,2.6,.08,[.10,.12,.12]);
    box(trim,p.x,p.y+2.8,p.z+p.depth/2+.35,3,.18,.7,[.55,.53,.46]);
    const floors=Math.min(8,Math.floor(p.height/3.5));
@@ -129,7 +154,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    // geometry as well; dozens of windows do not add a draw call each.
    for(let row=0;row<floors;row++)for(let col=-2;col<=2;col++)for(const side of [-1,1]){
     const y=p.y+2+row*3.5,w=1.1,h=.94;
-    const lit=hash01(cx*4+row,cz*13+col,side,world.seed)>.45;
+    const lit=hash01(cx*4+row,cz*13+col,side,world.seed)>.74;
     const glass:RGB=lit?[.48,.34,.23]:[.075,.11,.13];
     for(const axis of [0,2] as const){
      const center:Point=axis===2?[p.x-ox+col*p.width/6,y,p.z-oz+side*(p.depth/2+.03)]:[p.x-ox+side*(p.width/2+.03),y,p.z-oz+col*p.depth/6];
@@ -150,7 +175,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
   }
  }
  for(const point of LANDMARKS)if(Math.floor(point.x/128)===cx&&Math.floor(point.z/128)===cz){const y=Math.max(SEA_LEVEL,world.ground(point.x,point.z).y);box(details,point.x,y+.14,point.z,2.4,.28,2.4,[.96,.65,.22]);box(metal,point.x,y+3,point.z,.18,6,.18,[.65,.51,.23]);details.append({kind:'torus',radius:1,tube:.13,segments:20},[point.x-ox,y+4,point.z-oz],[1,.73,.29]);}
- const batches=[['terrain',terrain],['masonry',masonry],['trim',trim],['asphalt',asphalt],['details',details],['windows',windows],['lit-windows',litWindows],['metal',metal],['lamp-glow',lampGlow]] as const;
+ const batches=[['terrain',terrain],['masonry',masonry],['trim',trim],['asphalt',asphalt],['details',details],['windows',windows],['lit-windows',litWindows],['metal',metal],['lamp-glow',lampGlow],['snow',snow]] as const;
  const result:EntitySpec[]=batches.filter(([,mesh])=>mesh.indices.length>0).map(([name,mesh])=>mesh.entity(`chunk:${chunk.key}/${name}`));
  if(chunk.heights.some(y=>y<SEA_LEVEL))result.push({id:`chunk:${chunk.key}/water`,collision:'none',position:[64,SEA_LEVEL,64],mesh:{kind:'plane',size:[128,128]},material:{kind:'plastic',color:[.12,.28,.32,1],roughness:.18,metalness:.15,clearcoat:.5}});
  return result;
