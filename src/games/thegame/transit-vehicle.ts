@@ -120,6 +120,10 @@ export class TransitVehicleAuthority{
   return{position:[b.position[0],b.position[1],b.position[2]],yaw,speed:Math.hypot(b.velocity[0],b.velocity[2]),physical:true};
  }
 
+ servicePose(serviceId:string,timeSeconds:number){
+  const service=this.transit.services(timeSeconds).find(value=>value.id===serviceId);if(!service)return;
+  return this.state(service);
+ }
  seatPose(serviceId:string,timeSeconds:number):TransitSeatPose|undefined{
   const service=this.transit.services(timeSeconds).find(value=>value.id===serviceId);if(!service)return;
   const state=this.state(service);

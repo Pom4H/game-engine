@@ -32,6 +32,20 @@ export interface TransitPassenger {
  state:TransitPassengerState;
  serviceId?:string;
 }
+export interface TransitPassengerPose {
+ readonly residentId:string;
+ readonly state:TransitPassengerState;
+ readonly routeId:string;
+ readonly serviceId?:string;
+ readonly position:readonly[number,number,number];
+ readonly yaw:number;
+ readonly speed:number;
+}
+export interface TransitServicePose {
+ readonly position:readonly[number,number,number];
+ readonly yaw:number;
+ readonly speed:number;
+}
 export interface TransitServiceState {
  readonly id:string;
  readonly routeId:string;
@@ -208,6 +222,32 @@ export class TransitAuthority {
  serviceForPassenger(residentId:string,timeSeconds:number):TransitServiceState|undefined{
   const passenger=this.passengers.get(residentId);if(passenger?.state!=='riding'||!passenger.serviceId)return;
   return this.services(timeSeconds).find(service=>service.id===passenger.serviceId);
+ }
+ passengersState():readonly Readonly<TransitPassenger>[]{
+  return Object.freeze([...this.passengers.values()].sort((a,b)=>a.residentId.localeCompare(b.residentId)).map(p=>Object.freeze({...p})));
+ }
+ private residentOrdinal(id:string):number{
+  const match=/^crowd:(-?\d+):(-?\d+):(\d+)$/.exec(id);
+  return match?hash32(Number(match[1]),Number(match[2]),Number(match[3]),29):hash32(id.length,id.charCodeAt(0)||0,id.charCodeAt(id.length-1)||0,29);
+ }
+ passengerPose(residentId:string,timeSeconds:number,servicePose?:TransitServicePose):TransitPassengerPose|undefined{
+  const passenger=this.passengers.get(residentId);if(!passenger)return;
+  const route=routeById.get(passenger.routeId);if(!route)return;
+  const ordinal=this.residentOrdinal(residentId);
+  if(passenger.state==='waiting'){
+   const stop=stopById.get(passenger.originStop);if(!stop)return;
+   const next=route.stops[(stop.index+1)%route.stops.length]!,dx=next.position[0]-stop.position[0],dz=next.position[2]-stop.position[2],yaw=Math.atan2(dx,dz);
+   const forwardX=Math.sin(yaw),forwardZ=Math.cos(yaw),rightX=Math.cos(yaw),rightZ=-Math.sin(yaw);
+   const along=(ordinal%5-2)*.72,lateral=2.9+(ordinal%3)*.18;
+   return{residentId,state:'waiting',routeId:route.id,position:[stop.position[0]+forwardX*along+rightX*lateral,stop.position[1],stop.position[2]+forwardZ*along+rightZ*lateral],yaw,speed:0};
+  }
+  if(!passenger.serviceId)return;
+  const service=this.services(timeSeconds).find(value=>value.id===passenger.serviceId);if(!service)return;
+  const base=servicePose??{position:service.position,yaw:service.yaw,speed:service.phase==='run'?route.cruiseMps:0};
+  const side=ordinal&1?1:-1,row=Math.floor((ordinal%24)/2),lateral=side*(route.mode==='metro'?.82:.68),longitudinal=(route.mode==='metro'?5.4:route.mode==='tram'?4.2:3.7)-row*.58;
+  const forwardX=Math.sin(base.yaw),forwardZ=Math.cos(base.yaw),rightX=Math.cos(base.yaw),rightZ=-Math.sin(base.yaw);
+  const y=base.position[1]+(route.mode==='metro'?1.15:1.35);
+  return{residentId,state:'riding',routeId:route.id,serviceId:service.id,position:[base.position[0]+rightX*lateral+forwardX*longitudinal,y,base.position[2]+rightZ*lateral+forwardZ*longitudinal],yaw:base.yaw,speed:base.speed};
  }
 
  step(timeSeconds:number):void{

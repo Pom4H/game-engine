@@ -141,15 +141,27 @@ export class ThegameAuthority {
  }
  snapshot(id:string,population:readonly Frame[]=[]):WorldSnapshot{
   const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
-  const rows:{id:string;data:{position:readonly [number,number,number];yaw:number;phase:number;speed:number;kind:number}}[]=[];
+  const time=this.tick/60,rows:{id:string;data:{position:readonly [number,number,number];yaw:number;phase:number;speed:number;kind:number}}[]=[];
+  const playerResidents=new Set([...this.peers.values()].map(value=>value.residentId));
   for(const other of this.peers.values())if(other!==peer&&Math.hypot(other.state.x-peer.state.x,other.state.z-peer.state.z)<512){const p=other.state;rows.push({id:other.residentId,data:{position:[p.x,p.y,p.z],yaw:p.yaw,phase:p.phase,speed:p.speed,kind:0}});}
+  const transitRows:{distance:number;id:string;data:{position:readonly[number,number,number];yaw:number;phase:number;speed:number;kind:number}}[]=[];
+  for(const passenger of this.transit.passengersState()){
+   if(playerResidents.has(passenger.residentId))continue;
+   const service=passenger.state==='riding'?this.transit.serviceForPassenger(passenger.residentId,time):undefined;
+   const promoted=service?this.transitVehicles.servicePose(service.id,time):undefined;
+   const pose=this.transit.passengerPose(passenger.residentId,time,promoted?{position:promoted.position,yaw:promoted.yaw,speed:promoted.speed}:undefined);
+   if(!pose)continue;const d=Math.hypot(pose.position[0]-peer.state.x,pose.position[2]-peer.state.z);if(d>512)continue;
+   transitRows.push({distance:d,id:passenger.residentId,data:{position:pose.position,yaw:pose.yaw,phase:0,speed:0,kind:1}});
+  }
+  transitRows.sort((a,b)=>a.distance-b.distance||a.id.localeCompare(b.id));
+  for(const row of transitRows.slice(0,Math.min(4,peopleProjection.maxEntities-rows.length)))rows.push({id:row.id,data:row.data});
   rows.push(...this.npcs.rowsAround(peer.state,512,Math.max(0,peopleProjection.maxEntities-rows.length)));
   const crowdBudget=Math.max(0,Math.min(24,peopleProjection.maxEntities-rows.length));
   for(const person of materializeCrowd(this.world,population,peer.state,this.tick,crowdBudget)){
    if(this.npcs.has(person.id)||this.transit.hasResident(person.id))continue;
    rows.push(person);if(rows.length>=peopleProjection.maxEntities)break;
   }
-  const time=this.tick/60,frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time,paused:false},rows);
+  const frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time,paused:false},rows);
   const transitFrame=this.transitVehicles.frame({epoch:this.epoch,sequence:++this.transitSequence,tick:this.tick,time,paused:false},peer.state,time);this.stats.published++;
   return {type:'state',world:worldSignature(this.config),frame,transitFrame,self:{ack:peer.ack,state:{...peer.state},discovered:peer.discovered,...(peer.seat?{seat:peer.seat}:{})},players:this.peers.size};
  }
