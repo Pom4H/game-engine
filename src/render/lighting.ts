@@ -137,7 +137,7 @@ fn localLightFog(ray:vec3<f32>,maxDistance:f32)->vec3<f32>{
    // approach produces the characteristic butterfly/cross in visible fog.
    let closest=f.eye.xyz+ray*clamp(along,enter,leave);
    let fromLamp=closest-source.position.xyz;let len=max(length(fromLamp),.0001);let d=fromLamp/len;
-   let cy=cos(source.volume.y),sy=sin(source.volume.y);
+   let cy=cos(source.volume.y);let sy=sin(source.volume.y);
    let local=vec3<f32>(cy*d.x+sy*d.z,d.y,-sy*d.x+cy*d.z);
    let horizontal=max(length(local.xz),.0001);
    let paneAxis=abs(abs(local.x)-abs(local.z))/horizontal;
