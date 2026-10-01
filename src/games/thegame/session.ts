@@ -57,7 +57,7 @@ export class ThegameAuthority {
  readonly stats={joins:0,leaves:0,inputs:0,rejected:0,published:0};
  constructor(config:Partial<ThegameConfig>={},epoch=1,profile=false){
   this.config=thegameConfig(config);if(!Number.isSafeInteger(epoch)||epoch<1)throw new RangeError('Invalid world epoch');this.epoch=epoch;
-  this.world=new OpenWorld(this.config.seed);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.transit=new TransitAuthority();this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
+  this.world=new OpenWorld(this.config.seed);this.transit=new TransitAuthority();this.npcs=new NearbyNpcAuthority(this.world,this.config);this.npcs.setUnavailable(this.transit.ownedResidentIds());this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
  }
  join(id:string,name='Игрок',saved?:{state:CharacterState;discovered:number;residentId?:string}):Peer{
   if(this.peers.size>=32||this.peers.has(id)||!/^p[0-9a-z]{1,16}$/.test(id))throw new RangeError('Room capacity or identity');
@@ -99,7 +99,7 @@ export class ThegameAuthority {
    for(let i=0;i<LANDMARKS.length;i++){const point=LANDMARKS[i]!;if(Math.hypot(peer.state.x-point.x,peer.state.z-point.z)<8)peer.discovered|=1<<i;}
   }
   this.npcs.refresh(this.peers.values(),this.tick);this.npcs.step(this.tick);
-  if(this.tick%6===0)this.transit.step(this.tick/60);
+  if(this.tick%6===0){this.transit.step(this.tick/60);this.npcs.setUnavailable(this.transit.ownedResidentIds());}
  }
  setPopulation(population:readonly Frame[]):void{this.npcs.setPopulation(population);}
  resident(id:string):ResidentSelf{
@@ -114,7 +114,7 @@ export class ThegameAuthority {
   rows.push(...this.npcs.rowsAround(peer.state,512,Math.max(0,peopleProjection.maxEntities-rows.length)));
   const crowdBudget=Math.max(0,Math.min(24,peopleProjection.maxEntities-rows.length));
   for(const person of materializeCrowd(this.world,population,peer.state,this.tick,crowdBudget)){
-   if(this.npcs.has(person.id))continue;
+   if(this.npcs.has(person.id)||this.transit.hasResident(person.id))continue;
    rows.push(person);if(rows.length>=peopleProjection.maxEntities)break;
   }
   const frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time:this.tick/60,paused:false},rows);this.stats.published++;
