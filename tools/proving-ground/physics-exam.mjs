@@ -17,7 +17,7 @@ const implemented=new Map([
  ['wet-grip',typeof engine.Vehicle==='function'&&typeof engine.SurfaceEnvironmentSystem==='function'],
  ['suspension',typeof engine.Vehicle==='function'],
  ['steering',typeof engine.Vehicle==='function'],
- ['drivetrain',typeof engine.engine==='function'||typeof engine.Powertrain==='function'],
+ ['drivetrain',typeof engine.Drivetrain==='function'],
  ['brake',typeof engine.Vehicle==='function'],
  ['load-transfer',typeof engine.Vehicle==='function'],
  ['aero',typeof engine.wing==='function'],
