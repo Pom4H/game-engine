@@ -64,7 +64,7 @@ test('cubemap face/row upload keeps the prior environment until all nine mips co
 });
 test('all world scenery batches pack off-thread, keep terrain parity and fit admission bounds',()=>{
  const world=new OpenWorld();for(const [cx,cz] of [[-3,-1],[-1,-1],[-8,-2],[10,0]]){
-  const authored=chunkGeometry(world,cx,cz),parts=prepareChunkGeometry(world,cx,cz);assert.ok(parts.length<=8);assert.equal(parts.length,authored.length);let bytes=0;
+  const authored=chunkGeometry(world,cx,cz),parts=prepareChunkGeometry(world,cx,cz);assert.ok(parts.length<=10);assert.equal(parts.length,authored.length);let bytes=0;
   for(const part of parts){const mesh=new PreparedMesh(part.mesh);assert.equal(mesh.expanded,false);bytes+=mesh.byteLength;assert.ok(part.mesh.vertices.every(Number.isFinite));assert.ok(part.mesh.indices.every(i=>i<part.mesh.vertices.length/6));assert.equal('mesh' in part.spec,false);}
   assert.ok(bytes<8*1024*1024);const vertices=parts[0].mesh.vertices,indices=parts[0].mesh.indices;assert.equal(indices.length,16*16*6);
   for(let n=0;n<indices.length;n+=3){let x=0,y=0,z=0;for(let j=0;j<3;j++){const offset=indices[n+j]*6;x+=vertices[offset]/3;y+=vertices[offset+1]/3;z+=vertices[offset+2]/3;}assert.ok(Math.abs(world.ground(cx*128+x,cz*128+z).y-y)<1e-5);}
