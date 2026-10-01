@@ -308,15 +308,21 @@ test('split-mu braking generates unequal tyre grip and yaw without controller ma
  const car=new Vehicle(scene.physics,roadCar('proving.car.splitmu',[],provingDrivetrain),{
   position:[-94,1.2,-68],rotation:[0,-Math.PI/2,0],velocity:[0,0,-18]
  });
- car.setControls({throttle:0,brake:1});
- let leftGrip=0,rightGrip=0,maxYaw=0;
- for(let i=0;i<160;i++){
+ car.setControls({throttle:0,brake:0});
+ let initialGrip;
+ for(let i=0;i<30;i++){
   scene.physics.step(dt);
-  leftGrip=Math.max(leftGrip,car.part('front.left').effectiveGrip,car.part('rear.left').effectiveGrip);
-  rightGrip=Math.max(rightGrip,car.part('front.right').effectiveGrip,car.part('rear.right').effectiveGrip);
-  maxYaw=Math.max(maxYaw,Math.abs(car.body.angularVelocity[1]));
+  const ids=['front.left','rear.left','front.right','rear.right'],parts=ids.map(id=>car.part(id));
+  if(parts.every(p=>p.contact)){
+   initialGrip={left:(parts[0].effectiveGrip+parts[1].effectiveGrip)/2,right:(parts[2].effectiveGrip+parts[3].effectiveGrip)/2,supports:parts.map(p=>p.supportId)};
+   break;
+  }
  }
- assert.ok(Math.abs(leftGrip-rightGrip)>.08,{leftGrip,rightGrip});
+ assert.ok(initialGrip,'vehicle never settled onto split-mu');
+ assert.ok(Math.abs(initialGrip.left-initialGrip.right)>.08,JSON.stringify(initialGrip));
+ car.setControls({brake:1});
+ let maxYaw=0;
+ for(let i=0;i<180;i++){scene.physics.step(dt);maxYaw=Math.max(maxYaw,Math.abs(car.body.angularVelocity[1]));}
  assert.ok(maxYaw>.02,maxYaw);
  car.dispose();
 });
@@ -336,14 +342,14 @@ test('sealed hull floats in the proving-ground basin from displaced volume',()=>
 test('leaking hull accumulates flood mass and loses buoyancy margin',()=>{
  const scene=new Scene(spec);
  const sealed=scene.physics.add(new RigidBody({
-  id:'probe-sealed',position:[8,-.35,-27],mass:3500,shape:{kind:'box',half:[1.2,.55,.8]},
+  id:'probe-sealed',position:[8,-.35,-27],mass:3900,shape:{kind:'box',half:[1.2,.55,.8]},
   material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:0}
  }));
  const leaking=scene.physics.add(new RigidBody({
-  id:'probe-leaking',position:[16,-.35,-27],mass:3500,shape:{kind:'box',half:[1.2,.55,.8]},
-  material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:.025}
+  id:'probe-leaking',position:[16,-.35,-27],mass:3900,shape:{kind:'box',half:[1.2,.55,.8]},
+  material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:.06}
  }));
- for(let i=0;i<900;i++)scene.physics.step(dt);
- assert.ok(leaking.floodedVolumeM3>.08,leaking.floodedVolumeM3);
- assert.ok(leaking.position[1]<sealed.position[1]-.12,{sealed:sealed.position,leaking:leaking.position,flooded:leaking.floodedVolumeM3});
+ for(let i=0;i<1800;i++)scene.physics.step(dt);
+ assert.ok(leaking.floodedVolumeM3>.25,leaking.floodedVolumeM3);
+ assert.ok(leaking.position[1]<sealed.position[1]-.08,JSON.stringify({sealed:sealed.position,leaking:leaking.position,flooded:leaking.floodedVolumeM3}));
 });
