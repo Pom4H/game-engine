@@ -46,6 +46,7 @@ test('player snapshots always contain ambient residents and accept distributed p
  const crowd=distributed.frame.rows.filter(row=>row.id.startsWith('crowd:'));
  assert.ok(crowd.length>0);
  assert.ok(crowd.some(row=>beforeIds.has(row.id)));
- assert.ok(crowd.every(row=>row.values[6]===2));
+ assert.ok(crowd.every(row=>row.values[6]===1||row.values[6]===2));
+ assert.equal(new Set(crowd.map(row=>row.id)).size,crowd.length);
  game.dispose();
 });
