@@ -19,7 +19,7 @@ export {Scene,type RuntimeEntity} from './scene/scene.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
 export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from './scene/url.js';
-export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,Primitive,MaterialSpec,CameraSpec,RenderingSpec,ReflectionProbeSpec,Color} from './scene/types.js';
+export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,Primitive,MaterialSpec,CameraSpec,CameraRailSpec,LightSpec,LightEmissionSpec,RenderingSpec,ReflectionProbeSpec,Color} from './scene/types.js';
 export {primitiveMesh,primitiveKey,surfaceGridPrimitive,type MeshData} from './procedural/mesh.js';
 export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/cloth.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';

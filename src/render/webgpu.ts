@@ -3,7 +3,7 @@ import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filt
 import {buildDirectionalProxyTiles} from './proxy-tiles.js';
 import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
-import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL} from './light-grid.js';
+import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL,LIGHT_SOURCE_FLOATS} from './light-grid.js';
 import {FOG_WGSL} from './fog.js';
 import {FRAME_WGSL,SKY_SHADER,EFFECTS_SHADER,PRESENT_SHADER,BLOOM_SHADER,TAA_SHADER} from './lighting.js';
 import {V3,compose,lookAt,multiply4,perspective,type Mat4,type Vec3} from '../math.js';
@@ -166,7 +166,7 @@ fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,r
  let d=a2/(3.14159*pow(nh*nh*(a2-1.0)+1.0,2.0));let k=pow(r+1.0,2.0)/8.0;
  let g=nv/(nv*(1.0-k)+k)*nl/(nl*(1.0-k)+k);
  let fr=f0+(1.0-f0)*pow(1.0-max(dot(viewDir,h),0.0),5.0);
- let atten=pow(max(0.0,1.0-pow(dist/source.position.w,4.0)),2.0)/(1.0+dist*dist*.18);
+ let atten=pow(max(0.0,1.0-pow(dist/source.position.w,4.0)),2.0)/(1.0+dist*dist*.18)*emissionWeight(source,-delta);
  if(coat<=0.0){return (base*(1.0-fr)*(1.0-metal)/3.14159+d*g*fr/max(4.0*nv*nl,.001))*source.color.rgb*source.color.w*atten*nl;}
  let coatF=coat*(.04+.96*pow(1.0-max(dot(viewDir,h),0.0),5.0));
  let cr=max(coatRoughness,.08+.18/max(dist,1.0));let ca2=pow(cr,4.0);
@@ -727,7 +727,7 @@ export class WebGPURenderer implements Renderer{
     const frameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
-    const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*8)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
+    const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*LIGHT_SOURCE_FLOATS)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
     const frame=device.createBuffer({size:608,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
@@ -1413,6 +1413,7 @@ function lightGridCauseKey(lights:readonly RuntimeEntity[],eye:Vec3):string{
   for(const entity of lights){
     const light=entity.light!;
     values.push(entity.id,entity.position[0],entity.position[1],entity.position[2],light.range??12,light.intensity??1,...(light.color??[1,.78,.5]));
+    if(light.emission){const p=light.emission;values.push(...p.axis,p.innerAngle,p.outerAngle,p.panelCount??0,p.panelRotation??0,p.frameWidth??0);}
   }
   return values.join(':');
 }

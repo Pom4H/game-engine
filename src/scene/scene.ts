@@ -19,6 +19,7 @@ import type {EngineEvent} from './events.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
+import {cameraOnRail} from './camera-rail.js';
 import {SceneSystemRuntime} from './system-runtime.js';
 
 export interface RuntimeMaterial {
@@ -72,6 +73,7 @@ export class Scene {
   /** Shader-only authoring changes; does not invalidate geometry, shadows, probes or culling. */
   appearanceRevision=0;
   camera:CameraSpec;
+  private cameraRailEnabled=true;
   private eventSequence=0;
   private readonly eventQueue:EngineEvent[]=[];
   private readonly impactCooldown=new Map<string,number>();
@@ -89,6 +91,7 @@ export class Scene {
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
+    if(this.spec.cameraRail)this.camera=cameraOnRail(this.camera,this.spec.cameraRail,0);
     for(const entity of this.spec.entities)this.add(entity);
     for(const spec of this.spec.deformation?.bodies??[])this.deformation.attach(spec,this.entities);
     // Initial environmental facts exist before the first scheduled surface tick.
@@ -210,7 +213,7 @@ export class Scene {
       .use('events',({at})=>{this.emitContactEvents(at);})
       .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
       .use('cleanup',({at})=>{this.cleanupGenerated(at);})
-      .use('clock',({at})=>{this.time=at;this.tick++;});
+      .use('clock',({at})=>{this.time=at;this.tick++;if(this.cameraRailEnabled&&this.spec.cameraRail)this.camera=cameraOnRail(this.camera,this.spec.cameraRail,at);});
   }
 
   snapshot():SceneSnapshot{
@@ -220,7 +223,7 @@ export class Scene {
     }))};
   }
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
-  setCamera(camera:CameraSpec):void{this.camera=structuredClone(camera);}
+  setCamera(camera:CameraSpec):void{this.cameraRailEnabled=false;this.camera=structuredClone(camera);}
   patchAppearance(patch:AppearancePatch):void{
     let appearanceChanged=false,structureChanged=false;
     if(patch.rendering){

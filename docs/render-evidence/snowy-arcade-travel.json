@@ -1,0 +1,255 @@
+{
+  "resolution": [
+    1280,
+    720
+  ],
+  "warmupFrames": 24,
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "cameraRail": {
+    "durationSeconds": 90,
+    "keyframes": [
+      {
+        "position": [
+          9.8,
+          2.55,
+          -11.7
+        ],
+        "target": [
+          -6.4,
+          4.05,
+          1.75
+        ]
+      },
+      {
+        "position": [
+          -1,
+          2.45,
+          -11.2
+        ],
+        "target": [
+          -15,
+          4,
+          1.3
+        ]
+      },
+      {
+        "position": [
+          -11,
+          2.7,
+          -10.5
+        ],
+        "target": [
+          -26,
+          4.2,
+          1
+        ]
+      },
+      {
+        "position": [
+          -1,
+          2.6,
+          -12.4
+        ],
+        "target": [
+          -15,
+          4.1,
+          1.5
+        ]
+      }
+    ]
+  },
+  "rendering": {
+    "fogDensity": 0.075,
+    "sunIntensity": 0.18,
+    "reflectionFacesPerFrame": 1
+  },
+  "captures": [
+    {
+      "time": 0,
+      "camera": {
+        "position": [
+          9.8,
+          2.55,
+          -11.7
+        ],
+        "target": [
+          -6.4,
+          4.05,
+          1.75
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "2f42f652ad596e7e10af2991d184524396857a6600136c340dd189c201a1f6f5",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 400116,
+        "drawCalls": 345,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 17.366078846153844,
+          "p50Ms": 17.130860000000002,
+          "p95Ms": 18.3536,
+          "maxMs": 19.763759999999998
+        }
+      }
+    },
+    {
+      "time": 20.000000000000146,
+      "camera": {
+        "position": [
+          0.2834019204389602,
+          2.4460219478737995,
+          -11.263237311385458
+        ],
+        "target": [
+          -13.84471879286694,
+          3.994581618655692,
+          1.3472565157750342
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "1ab6feb6ef78e67909a6b2e984a7a1f6d3d672a6640b5b125267d3a9aeb2b888",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 329012,
+        "drawCalls": 281,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 20.703137692307692,
+          "p50Ms": 20.17008,
+          "p95Ms": 22.084490000000002,
+          "maxMs": 28.810429999999997
+        }
+      }
+    },
+    {
+      "time": 44.99999999999873,
+      "camera": {
+        "position": [
+          -11,
+          2.7,
+          -10.5
+        ],
+        "target": [
+          -26,
+          4.2,
+          1
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "8bde102e2f36ab9f401e207ab6f36b924cebaa64004f148af2b658ad07f0a1f5",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 242228,
+        "drawCalls": 179,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 17.94805192307692,
+          "p50Ms": 17.263890000000004,
+          "p95Ms": 20.987430000000003,
+          "maxMs": 25.625039999999995
+        }
+      }
+    },
+    {
+      "time": 69.99999999999731,
+      "camera": {
+        "position": [
+          0.2834019204389582,
+          2.5925240054869683,
+          -12.43525377229081
+        ],
+        "target": [
+          -13.84471879286694,
+          4.092249657064471,
+          1.5425925925925927
+        ],
+        "fov": 44.5,
+        "aperture": 0
+      },
+      "pngSha256": "461d313c0467d1c5681bd8b13bce32e592b7e8f3dc924f2a7b0762d02c2e6583",
+      "renderer": {
+        "backend": "webgpu",
+        "triangles": 331296,
+        "drawCalls": 284,
+        "pointLights": 23,
+        "lightOverflow": 0,
+        "materialTextures": 15,
+        "errors": [],
+        "gpu": {
+          "meanMs": 20.812915,
+          "p50Ms": 20.13108,
+          "p95Ms": 22.6461,
+          "maxMs": 26.91552
+        }
+      }
+    }
+  ],
+  "previews": {
+    "resolution": [
+      1280,
+      720
+    ],
+    "encoding": "lossless WebP",
+    "files": [
+      "snowy-arcade-travel-start.webp",
+      "snowy-arcade-travel-far.webp"
+    ]
+  },
+  "distributedVideo": {
+    "sceneHash": "e60db17b32d9f75acec6e592a105f72453c4953436b96d33970a6dc4f8d1ee7e",
+    "resolution": [
+      1280,
+      720
+    ],
+    "probes": [
+      {
+        "workerId": "62d7d115-94a5-401c-8ae8-67a4ef96d0b4",
+        "startFrame": 0,
+        "renderMs": 12548.69999999553,
+        "codec": "h264",
+        "frames": "12",
+        "firstPts": "0.000000",
+        "pixelDeviation": 16.088824084334636
+      },
+      {
+        "workerId": "ed1a22de-ef8b-4b61-ba5d-6fa967cdbf62",
+        "startFrame": 12,
+        "renderMs": 15422.39999999851,
+        "codec": "h264",
+        "frames": "12",
+        "firstPts": "0.200000",
+        "pixelDeviation": 15.927716756933796
+      }
+    ],
+    "playback": {
+      "width": 1280,
+      "height": 720,
+      "time": 0.329037,
+      "error": ""
+    },
+    "environment": "Two isolated native desktop Chrome contexts, not physical iPads"
+  },
+  "limitations": [
+    "Desktop GPU evidence; physical iPad throughput is not measured.",
+    "Fog uses bounded single-scattering quadrature with a lantern emission profile; it does not trace volumetric shadows from surrounding geometry."
+  ]
+}

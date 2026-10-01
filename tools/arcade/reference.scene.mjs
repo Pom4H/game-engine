@@ -3,7 +3,15 @@
 import base,{authoredEntities} from './scene.mjs';
 import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 import {canopySnow} from './snow-canopy.mjs';
-export {camera,quality} from './scene.mjs';
+import {cobbledRoad,streetLantern,lanternEmission} from './street.mjs';
+export {quality} from './scene.mjs';
+export const camera={position:[9.8,2.55,-11.7],target:[-6.4,4.05,1.75],fov:44.5,aperture:0};
+export const cameraRail={durationSeconds:90,keyframes:[
+ {position:camera.position,target:camera.target},
+ {position:[-1,2.45,-11.2],target:[-15,4,1.3]},
+ {position:[-11,2.7,-10.5],target:[-26,4.2,1]},
+ {position:[-1,2.6,-12.4],target:[-15,4.1,1.5]},
+]};
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
 const canvas={kind:'default',color:[.19,.17,.15,1],roughness:.94,ageYears:105,texture:materialMap('plaster',.36,.92)};
 const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap('snow',.34,.42)};
@@ -19,6 +27,7 @@ for(let i=0;i<count;i++){
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
 const entities=authoredEntities.filter(e=>
+ !/^sett-|^wet-patch-/.test(e.id)&&
  !/^shop-\d+-(canopy-snow|icicle)/.test(e.id)&&
  !/^street-snow-/.test(e.id)&&
  !/^chimney-/.test(e.id)&&
@@ -46,9 +55,9 @@ const entities=authoredEntities.filter(e=>
    return {...e,light:{...e.light,color:[1,.86,.76],intensity:level,range:3.4}};
  }
  if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.30,.29,.265,1],roughness:.98,emissive:[.004,.004,.003]}};
- if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.88,.74],intensity:30,range:10.5}};
+ if(e.id==='lamp-light')return {...e,light:{...e.light,color:[1,.76,.48],intensity:30,range:10.5,emission:lanternEmission}};
  if(e.id==='lamp-flame')return {...e,material:{...e.material,color:[1,.92,.80,1],emissive:[14,11,8]}};
- if(e.id==='street-base')return {...e,material:{...e.material,color:[.032,.035,.038,1],roughness:.10},environmental:{surfaceUse:'road',waterDepthM:.0025,snowDepthM:.030,iceDepthM:.0005}};
+ if(e.id==='street-base')return {...e,material:{...e.material,color:[.06,.063,.066,1],roughness:.78}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
  if(!light)return e;
@@ -58,17 +67,18 @@ const entities=authoredEntities.filter(e=>
    material:{kind:'default',color:[1,.90,.82,1],roughness:.55,emissive:color.map(v=>v*2.2*lit)},
    light:{...e.light,color,intensity:4.4*lit,range:4.2}};
 });
-// The practical has two causal scales: a compact photometric lamp and a
-// low-intensity wide source that only supplies the broad snow/fog bounce seen
-// around real street lamps. Both remain ordinary point lights.
-additions.push({id:'lamp-aureole',position:[6.7116,3.63,-.4714],light:{kind:'point',color:[1,.60,.30],intensity:8.5,range:13.5}});
+// The housing profile supplies the fog pattern; no second halo light.
+for(const [i,x,z] of [[0,-4,-3.95],[1,-15,-3.95],[2,-27,-3.95],[3,10.6,-17.5]])additions.push(...streetLantern('street-lantern-'+i,x,z));
+const cobble={kind:'default',color:[.21,.225,.235,1],roughness:.43,clearcoat:.18,clearcoatRoughness:.18,texture:materialMap('stone',.65,.24)};
+additions.push({id:'cobbled-main-road',position:[0,0,0],mesh:cobbledRoad(-33,13,-13,-3.8),material:cobble});
+additions.push({id:'cobbled-cross-road',position:[0,0,0],mesh:cobbledRoad(4.8,12,-24,1.5,710,(x,z)=>z>-13.15&&z<-3.65),material:cobble});
 
 // One physical snowpack, one engine-owned surface projection. The previous
 // independent microrelief sheet could overlap the snow and disagree with it.
 additions.push({
  id:'snow-covered-street',position:[-8,-.065,-12],mesh:{kind:'box',size:[70,.10,20]},
  material:{kind:'concrete',color:[.18,.175,.16,1],roughness:.9,texture:materialMap('stone',1.5,.45)},
- environmental:{surfaceUse:'generic',snowDepthM:.045,waterDepthM:.00015,iceDepthM:.0002,snowMaterial:snow},
+ environmental:{surfaceUse:'generic',snowDepthM:.009,waterDepthM:.00015,iceDepthM:.0002,snowMaterial:snow},
 });
 
 const box=(id,position,size,material,extra={})=>additions.push({id,position,mesh:{kind:'box',size},material,...extra});
@@ -219,6 +229,7 @@ const finalEntities=[...entities,...additions].filter(e=>!/^(window-bounce|awnin
 export const referenceEntities=finalEntities;
 export const authoredEntityCount=finalEntities.length;
 export default {...base,
+ camera,cameraRail,
  environment:{...base.environment,snowfall:'light',humidity:.985,wind:[.18,0,.06]},
- rendering:{...base.rendering,skyColor:[.026,.028,.030],fogDensity:.026,sunDirection:[-.28,.76,-.46],sunColor:[.46,.49,.53],sunIntensity:.34,exposure:.96},
+ rendering:{...base.rendering,skyColor:[.020,.022,.025],fogDensity:.075,sunDirection:[-.28,.76,-.46],sunColor:[.46,.49,.53],sunIntensity:.18,exposure:.96,reflectionProbe:{...base.rendering.reflectionProbe,facesPerFrame:1}},
  entities:batchStaticScenery(finalEntities,()=>true,9)};

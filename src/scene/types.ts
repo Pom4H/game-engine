@@ -66,7 +66,13 @@ export interface EntitySpec {
   light?:LightSpec;
   body?:BodySpec;
 }
-export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number }
+export interface LightEmissionSpec {
+  /** World-space optical axis; angles are radians from this axis. */
+  axis:Vec3; innerAngle:number; outerAngle:number;
+  /** Opaque vertical ribs between glass panels; rotation and width in radians. */
+  panelCount?:number; panelRotation?:number; frameWidth?:number;
+}
+export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number; emission?:LightEmissionSpec }
 export interface CameraIntrinsicsSpec {
   /** Focal lengths in pixels of the calibration image. */
   fx:number; fy:number;
@@ -84,6 +90,11 @@ export interface CameraSpec {
   /** Exact pinhole calibration for measured/real-world captures. */
   intrinsics?:CameraIntrinsicsSpec;
   focusDistance?:number; aperture?:number;
+}
+export interface CameraRailSpec {
+  /** Closed Catmull–Rom dolly, evaluated at absolute simulation time. */
+  durationSeconds:number;
+  keyframes:readonly {position:Vec3;target:Vec3}[];
 }
 export interface EnvironmentRadianceSpec {
   /** Equirectangular measured radiance, RGB half-float pixels in row-major order. */
@@ -150,6 +161,7 @@ export interface SceneSpec {
   clearColor?:Color;
   environment?:EnvironmentSpec;
   camera?:CameraSpec;
+  cameraRail?:CameraRailSpec;
   entities:readonly EntitySpec[];
 }
 export interface SceneSnapshot {

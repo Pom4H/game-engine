@@ -38,7 +38,7 @@ fn corner(q:vec2<f32>,i:u32,t:f32)->vec2<f32>{let a=t*.45+hash1(i*47u)*6.2831853
  if(length(before-world)>5.0){out.previousClip=out.currentClip;}
  out.uv=q;out.alpha=(.38+hash1(i*3u)*.5)*smoothstep(.3,1.4,distance)*(1.0-smoothstep(21.0,26.0,max(abs(world.x-s.camera.x),abs(world.z-s.camera.z))));
  var incident=f.sky.rgb*1.8+f.sunColor.rgb*f.sun.w*.12;let cell=lightCell(world);
- if(cell!=0xffffffffu){for(var k=0u;k<lightCells[cell];k++){let source=lightGrid.sources[lightCells[cell+1u+k]];let d=length(world-source.position.xyz);incident+=source.color.rgb*source.color.w*pow(max(0.0,1.0-d/source.position.w),2.0)/max(1.0,d*d*.4);}}
+ if(cell!=0xffffffffu){for(var k=0u;k<lightCells[cell];k++){let source=lightGrid.sources[lightCells[cell+1u+k]];let delta=world-source.position.xyz;let d=length(delta);incident+=source.color.rgb*source.color.w*pow(max(0.0,1.0-d/source.position.w),2.0)*emissionWeight(source,delta)/max(1.0,d*d*.4);}}
  out.tone=incident*(.77+hash1(i*7u)*.23)*exp(-f.sky.w*distance);return out;
 }
 struct F {@location(0) color:vec4<f32>,@location(3) velocity:vec4<f32>}
