@@ -69,3 +69,4 @@ export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type Doub
 export {worldTileKey,worldTileSize,worldTileBounds,worldTileAt,worldTileChildren,distanceToWorldTile,type WorldTileId,type WorldTileBounds,type WorldTileDemand} from './world/tiles.js';
 export {VisibilityInterest,DEFAULT_VISIBILITY_INTEREST,geometricHorizonDistance,type VisibilityObserver,type VisibilityInterestConfig,type VisibilityPlan} from './world/visibility.js';
 export {InfiniteWorld,type InfiniteWorldTileState,type InfiniteWorldHooks,type InfiniteWorldOptions,type InfiniteWorldStats} from './world/infinite-world.js';
+export {TransitAuthority,THEGAME_TRANSIT_ROUTES,transitServiceTime,type TransitMode,type TransitRoute,type TransitStop,type TransitPassenger,type TransitPassengerState,type TransitServiceState,type TransitServicePhase} from './games/thegame/transit.js';

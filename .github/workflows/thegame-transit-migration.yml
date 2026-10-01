@@ -1,0 +1,57 @@
+name: TheGame transit migration preservation
+
+on:
+  push:
+    branches: [feat/thegame-public-transit]
+    paths:
+      - 'src/games/thegame/**'
+      - 'src/index.ts'
+      - 'docs/THEGAME_TRANSIT_MIGRATION.md'
+      - 'test/thegame-transit.test.mjs'
+      - '.github/workflows/thegame-transit-migration.yml'
+  pull_request:
+    paths:
+      - 'src/games/thegame/**'
+      - 'src/index.ts'
+      - 'docs/THEGAME_TRANSIT_MIGRATION.md'
+      - 'test/thegame-transit.test.mjs'
+      - '.github/workflows/thegame-transit-migration.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thegame-transit-migration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun install --cwd tools/docs --frozen-lockfile
+      - run: bun run check
+
+  preservation-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Public transit
+        run: node --test test/thegame-transit.test.mjs test/thegame-resident-possession.test.mjs test/thegame.test.mjs
+      - name: Soft-body and vehicle physics
+        run: node --test test/vehicle-interaction.test.mjs test/vehicle-runtime.test.mjs test/vehicle-scene.test.mjs test/contact-laws.test.mjs
+      - name: Audio
+        run: node --test test/browser-audio.test.mjs
+      - name: Network and authority
+        run: node --test test/network-buffer.test.mjs test/network-projection.test.mjs test/network-structure.test.mjs test/arena-network.test.mjs test/thegame-region.test.mjs test/thegame-region-host.test.mjs
