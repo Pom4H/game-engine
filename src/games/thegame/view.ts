@@ -23,7 +23,7 @@ export class ThegameView {
  readonly stats={frames:0,rebases:0,chunkPreparationMs:0,maxChunkAdmissionMs:0,maxAdmissionBytes:0,maxAdmissionOperations:0,admissionDeferrals:0,expandedMeshes:0};error='';radius:number;
  constructor(readonly renderer:WebGPURenderer,readonly world:OpenWorld,config:ThegameConfig){
   this.radius=config.viewRadius;
-  this.scene=new Scene({version:1,seed:config.seed,environment:{temperatureC:-3,sunlight:.035,humidity:.96,groundMoisture:.76,precipitation:'occasional',snowfall:'light'},rendering:{sunDirection:[-.58,.16,-.32],sunIntensity:.055,sunColor:[.58,.61,.66],skyColor:[.018,.021,.026],fogDensity:.023,shadowExtent:95,exposure:config.exposure},entities:[]});
+  this.scene=new Scene({version:1,seed:config.seed,environment:{temperatureC:-3,sunlight:.035,humidity:.98,groundMoisture:.76,precipitation:'occasional',snowfall:'light'},rendering:{sunDirection:[-.58,.16,-.32],sunIntensity:.055,sunColor:[.58,.61,.66],skyColor:[.032,.034,.037],fogDensity:.040,shadowExtent:95,exposure:config.exposure},entities:[]});
   this.chunks=new ChunkWindow((_,value)=>{
    for(const entity of value.installed)this.scene.remove(entity.id);
    for(const part of value.parts)this.renderer.releasePreparedMesh(part.mesh);
