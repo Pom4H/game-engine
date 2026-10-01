@@ -15,7 +15,15 @@ export interface WingSpec extends PartSpec {
   readonly dragCoefficient?:number;readonly efficiency?:number;readonly stallRad?:number;readonly stallWidthRad?:number;
   readonly control?:'pitch'|'roll'|'flap';readonly controlGainRad?:number;
 }
-export type VehicleComponent=WheelSpec|WingSpec;
+export interface RotorSpec extends PartSpec {
+  readonly kind:'rotor';readonly radiusM:number;readonly bladeChordM:number;readonly blades:number;
+  readonly axis?:Vec3;readonly forward?:Vec3;readonly direction?:-1|1;
+  readonly governorRpm:number;readonly maxPowerW:number;readonly spoolSeconds?:number;
+  readonly collectiveControl?:'collective'|'yaw';readonly collectiveTrimRad?:number;readonly collectiveGainRad?:number;
+  readonly cyclicPitchGainRad?:number;readonly cyclicRollGainRad?:number;
+  readonly liftSlope?:number;readonly profileDragCoefficient?:number;
+}
+export type VehicleComponent=WheelSpec|WingSpec|RotorSpec;
 export interface VehicleSpec {
   readonly id:string;
   readonly chassis:{readonly massKg:number;readonly sizeM:Vec3;readonly dragAreaM2?:number};
@@ -36,6 +44,8 @@ const freeze=<T>(value:T):T=>{if(value&&typeof value==='object'){for(const child
 export const wheel=(id:string,spec:Omit<WheelSpec,'id'|'kind'>):WheelSpec=>({kind:'wheel',id,...spec});
 /** RU: Несущая поверхность; не флаг полёта. EN: Lifting surface, not a flight-mode flag. */
 export const wing=(id:string,spec:Omit<WingSpec,'id'|'kind'>):WingSpec=>({kind:'wing',id,...spec});
+/** RU: Вращающийся несущий диск. EN: Rotating actuator disk, not a helicopter mode. */
+export const rotor=(id:string,spec:Omit<RotorSpec,'id'|'kind'>):RotorSpec=>({kind:'rotor',id,...spec});
 
 /** Compile construction once. Frames: +X forward, +Y up, +Z right; metres and SI forces.
  * Attached part masses are included ONCE. Inertia uses a diagonal lumped-body approximation. */
@@ -74,6 +84,21 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
       const span:Vec3=[chord[1]*normal[2]-chord[2]*normal[1],chord[2]*normal[0]-chord[0]*normal[2],chord[0]*normal[1]-chord[1]*normal[0]];
       const variance=[0,1,2].map(k=>(p.chordM*p.chordM*chord[k]!**2+p.spanM*p.spanM*span[k]!**2)/12);
       diag=[p.massKg*(variance[1]!+variance[2]!),p.massKg*(variance[0]!+variance[2]!),p.massKg*(variance[0]!+variance[1]!)];
+    }else if(p.kind==='rotor'){
+      check(p.radiusM,'Rotor radius',.05,100);check(p.bladeChordM,'Rotor blade chord',.005,p.radiusM);
+      if(!Number.isSafeInteger(p.blades)||p.blades<1||p.blades>16)throw new RangeError('Rotor blade count');
+      check(p.governorRpm,'Rotor governor RPM',10,10000);check(p.maxPowerW,'Rotor power',1,1e8);check(p.spoolSeconds??1.5,'Rotor spool time',.05,120);
+      check(p.collectiveTrimRad??0,'Rotor collective trim',-.7,.7);check(p.collectiveGainRad??.12,'Rotor collective gain',-.7,.7);
+      check(p.cyclicPitchGainRad??0,'Rotor cyclic pitch',0,.7);check(p.cyclicRollGainRad??0,'Rotor cyclic roll',0,.7);
+      check(p.liftSlope??5.7,'Rotor lift slope',.1,10);check(p.profileDragCoefficient??.011,'Rotor profile drag',0,1);
+      if((p.direction??1)!==1&&(p.direction??1)!==-1)throw new RangeError('Rotor direction');
+      if(p.collectiveControl!==undefined&&!['collective','yaw'].includes(p.collectiveControl))throw new RangeError('Unknown rotor collective control');
+      normal=unit(p.axis??normal);chord=unit(p.forward??chord);
+      if(Math.abs(chord[0]*normal[0]+chord[1]*normal[1]+chord[2]*normal[2])>1e-8)throw new RangeError('Rotor forward and axis must be perpendicular');
+      area=Math.PI*p.radiusM*p.radiusM;slope=p.liftSlope??5.7;induced=p.blades*p.bladeChordM/(Math.PI*p.radiusM);
+      inertia=.5*p.massKg*p.radiusM*p.radiusM;
+      const transverse=.25*p.massKg*p.radiusM*p.radiusM,delta=inertia-transverse;
+      diag=[transverse+delta*normal[0]**2,transverse+delta*normal[1]**2,transverse+delta*normal[2]**2];
     }else throw new RangeError('Unsupported vehicle part');
     mass+=p.massKg;cx+=p.massKg*center[0];cy+=p.massKg*center[1];cz+=p.massKg*center[2];
     centers.push(center);diagonals.push(diag);parts.push({source:p,arm:p.at,inertia,area,slope,induced,chord,normal});
