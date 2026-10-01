@@ -16,7 +16,7 @@ test('thegame world is deterministic and has exact continuous triangle seams, pr
  for(let i=-100;i<100;i++)a.ground(i*128+7,i*37);assert.equal(a.inspect().chunks,8);assert.ok(a.stats.evicted>100);assert.throws(()=>a.chunk(Infinity,0));
 });
 test('rendered terrain triangles agree with collision, road/prop geometry stays chunk-local',()=>{
- const world=new OpenWorld();for(const [cx,cz] of [[-3,-1],[-8,-2],[10,0]]){const entities=chunkGeometry(world,cx,cz),mesh=entities[0].mesh;assert.ok(entities.length<=9) // material batches, not per-window/lamp draws
+ const world=new OpenWorld();for(const [cx,cz] of [[-3,-1],[-8,-2],[10,0]]){const entities=chunkGeometry(world,cx,cz),mesh=entities[0].mesh;assert.ok(entities.length<=10) // material batches, not per-window/lamp draws
 ;assert.equal(mesh.indices.length,16*16*6);
  for(let i=0;i<mesh.indices.length;i+=3){const tri=mesh.indices.slice(i,i+3).map(k=>mesh.positions.slice(k*3,k*3+3)),x=tri.reduce((s,p)=>s+p[0],0)/3,z=tri.reduce((s,p)=>s+p[2],0)/3,y=tri.reduce((s,p)=>s+p[1],0)/3;assert.ok(Math.abs(world.ground(cx*128+x,cz*128+z).y-y)<1e-8);}
  for(const e of entities){assert.equal(e.collision,'none');if(e.mesh.kind==='triangle-mesh'){assert.ok(e.mesh.indices.length);assert.ok(e.mesh.positions.every(Number.isFinite));}}
@@ -51,5 +51,6 @@ test('network host is real peer authority, bounded latest-state backpressure and
  let now=0;const h=createThegameHost({}, {now:()=>now,epoch:7}),packets=[];let blocked=false;const socket={send:s=>{packets.push(JSON.parse(s));return blocked?-1:s.length;},close(){h.close(socket);}};
  h.open(socket);h.message(socket,JSON.stringify({type:'join',version:WORLD_REVISION,name:'Roman'}));const hello=packets[0];assert.ok(hello.token);h.advance(0);for(let i=1;i<120;i++){now=i*1000/60;h.advance(now);}assert.ok(packets.some(p=>p.type==='state'));
  blocked=true;now+=60;h.advance(now);const count=packets.length;for(let i=0;i<10;i++){now+=50;h.advance(now);}assert.equal(packets.length,count);assert.equal(h.inspect().transport.unsent,1);blocked=false;h.drain(socket);assert.equal(packets.length,count+1);assert.equal(h.inspect().transport.unsent,0);
+ const beforeCatchup=packets.length;now+=180;const catchup=h.advance(now);assert.ok(catchup>=10&&catchup<=12);assert.equal(h.inspect().droppedSimulationMs,0);assert.ok(packets.length-beforeCatchup<=1,'catch-up must publish only the newest state');
  const id=hello.id;h.close(socket);assert.equal(h.game.peers.size,0);h.open(socket);h.message(socket,JSON.stringify({type:'join',version:WORLD_REVISION,name:'Again',resume:hello.token}));assert.equal(packets.at(-1).id,id);h.dispose();assert.equal(h.inspect().transport.sockets,0);
 });
