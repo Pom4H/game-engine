@@ -9,7 +9,7 @@ export function createThegameHost(config,{profile=false,now=()=>performance.now(
  let identities=0;const stats={bytes:0,messages:0,replaced:0,backpressure:0,timeouts:0,populationErrors:0};
  function send(socket,data){const c=sockets.get(socket);if(!c)return;const text=typeof data==='string'?data:JSON.stringify(data);const result=socket.send(text);stats.bytes+=Buffer.byteLength(text);stats.messages++;if(result===-1){c.blocked=true;c.blockedAt=now();stats.backpressure++;}else if(result===0)socket.close(1011,'Connection unavailable');}
  function flush(socket){const c=sockets.get(socket);if(!c||c.blocked)return;const next=c.outbox.take();if(next!==undefined)send(socket,next);}
- function close(socket){const c=sockets.get(socket);if(!c)return;sockets.delete(socket);if(c.id){const peer=game.peers.get(c.id),session=sessions.get(c.token);if(peer&&session){session.state={...peer.state};session.discovered=peer.discovered;session.active=false;session.expires=now()+30_000;}game.leave(c.id);}c.outbox.clear();}
+ function close(socket){const c=sockets.get(socket);if(!c)return;sockets.delete(socket);if(c.id){const peer=game.peers.get(c.id),session=sessions.get(c.token);if(peer&&session){session.state={...peer.state};session.discovered=peer.discovered;session.residentId=peer.residentId;session.active=false;session.expires=now()+30_000;}game.leave(c.id);}c.outbox.clear();}
  return {
   game,stats,
   open(socket){if(sockets.size>=32){socket.close(1013,'Room full');return;}sockets.set(socket,{id:null,token:null,last:now(),bucket:120,bucketAt:now(),blocked:false,blockedAt:0,outbox:new LatestStateOutbox()});},
@@ -26,8 +26,8 @@ export function createThegameHost(config,{profile=false,now=()=>performance.now(
      const peer=game.join(c.id,data.name,saved??undefined);
      for(const [key,s] of sessions)if(!s.active&&s.expires<=at)sessions.delete(key);
      if(sessions.size>=64){const unused=[...sessions].find(([,s])=>!s.active);if(unused)sessions.delete(unused[0]);else throw Error('Session capacity');}
-     sessions.set(c.token,{id:c.id,active:true,expires:Infinity,state:{...peer.state},discovered:peer.discovered});
-     send(socket,{type:'welcome',version:WORLD_REVISION,world:worldSignature(game.config),config:game.config,epoch:game.epoch,id:c.id,token:c.token,self:{ack:0,state:peer.state,discovered:peer.discovered}});
+     sessions.set(c.token,{id:c.id,residentId:peer.residentId,active:true,expires:Infinity,state:{...peer.state},discovered:peer.discovered});
+     send(socket,{type:'welcome',version:WORLD_REVISION,world:worldSignature(game.config),config:game.config,epoch:game.epoch,id:c.id,token:c.token,resident:game.resident(c.id),self:{ack:0,state:peer.state,discovered:peer.discovered}});
     }else if(data.type==='input'){
      if(!c.id)throw Error('Join first');game.enqueue(c.id,data.items);
     }else if(data.type==='ping'){
