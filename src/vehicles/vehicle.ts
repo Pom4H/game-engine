@@ -11,7 +11,7 @@ export {vehicle,wheel,wing,rotor,type RotorSpec,type VehicleBlueprint,type Vehic
 export {PartCondition,type ConditionSpec} from './condition.js';
 export type {DeformationField} from '../physics/deformation-field.js';
 
-export interface VehicleControls {readonly handbrake?:number;readonly throttle?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;readonly collective?:number;readonly yaw?:number;}
+export interface VehicleControls {readonly handbrake?:number;readonly throttle?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;readonly spoiler?:number;readonly collective?:number;readonly yaw?:number;}
 export interface VehicleAir {readonly densityKgM3:number;readonly wind:Vec3;}
 export interface VehiclePose {readonly position?:Vec3;readonly rotation?:Vec3;readonly velocity?:Vec3;readonly angularVelocity?:Vec3;}
 export interface PartSample {
@@ -56,7 +56,7 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly parts:PartRuntime[];
   private readonly byId=new Map<string,PartRuntime>();
   private readonly views=new Map<string,PartSample>();
-  private readonly controls={handbrake:0,throttle:0,brake:0,steer:0,pitch:0,roll:0,flap:0,collective:0,yaw:0};
+  private readonly controls={handbrake:0,throttle:0,brake:0,steer:0,pitch:0,roll:0,flap:0,spoiler:0,collective:0,yaw:0};
   private air:VehicleAir={densityKgM3:1.225,wind:[0,0,0]};
   private readonly unbind:()=>void;
   private disposed=false;
@@ -102,7 +102,7 @@ export class Vehicle implements PhysicsForceDriver {
   get deformationBuilds():number{return this.parts.reduce((n,p)=>n+p.attachment.builds,0);}
   get deformationSamples():number{return this.parts.reduce((n,p)=>n+p.attachment.samples,0);}
   setControls(input:VehicleControls):void {
-    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'||key==='handbrake'||key==='collective'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
+    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'||key==='handbrake'||key==='collective'||key==='spoiler'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
     Object.assign(this.controls,input);if(Object.values(input).some(v=>v!==0))this.body.wake();
   }
   setAir(air:VehicleAir):void {
