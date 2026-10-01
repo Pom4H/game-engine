@@ -3,6 +3,7 @@ import {finiteVec3} from '../math.js';
 import {validateCondition,type ConditionSpec} from './condition.js';
 
 interface PartSpec {readonly id:string;readonly at:Vec3;readonly massKg:number;readonly condition?:ConditionSpec;/** Optional chassis-local structural mount; defaults to at. */readonly mountAt?:Vec3;}
+export interface ShaftSpec {readonly id:string;readonly maxPowerW:number;readonly efficiency?:number;}
 export interface WheelSpec extends PartSpec {
   readonly kind:'wheel';readonly radiusM:number;readonly widthM:number;
   readonly suspension:{readonly restM:number;readonly travelM:number;readonly springNPerM:number;readonly damperNsPerM:number;readonly yieldForceN?:number};
@@ -22,11 +23,14 @@ export interface RotorSpec extends PartSpec {
   readonly collectiveControl?:'collective'|'yaw';readonly collectiveTrimRad?:number;readonly collectiveGainRad?:number;
   readonly cyclicPitchGainRad?:number;readonly cyclicRollGainRad?:number;
   readonly liftSlope?:number;readonly profileDragCoefficient?:number;
+  /** Shared engine/gearbox budget. Multiple rotors may consume the same shaft. */readonly shaft?:string;
+  readonly flapTimeSeconds?:number;readonly leadLagTimeSeconds?:number;
 }
 export type VehicleComponent=WheelSpec|WingSpec|RotorSpec;
 export interface VehicleSpec {
   readonly id:string;
   readonly chassis:{readonly massKg:number;readonly sizeM:Vec3;readonly dragAreaM2?:number};
+  readonly shafts?:readonly ShaftSpec[];
   readonly parts:readonly VehicleComponent[];
 }
 export interface CompiledComponent {
@@ -55,6 +59,8 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
   const size=source.chassis.sizeM;finiteVec3(size,'Chassis size');for(const n of size)check(n,'Chassis size',.001,1000);
   const chassisMass=check(source.chassis.massKg,'Chassis mass',1e-6,1e8);
   check(source.chassis.dragAreaM2??0,'Drag area');
+  const shafts=new Set<string>();
+  for(const shaft of source.shafts??[]){if(!shaft.id||shaft.id.length>180||shafts.has(shaft.id))throw new RangeError('Shafts require unique stable IDs');shafts.add(shaft.id);check(shaft.maxPowerW,'Shaft power',1,1e9);check(shaft.efficiency??1,'Shaft efficiency',.01,1);}
   const ids=new Set<string>(),parts:CompiledComponent[]=[],centers:Vec3[]=[],diagonals:Vec3[]=[];
   let mass=chassisMass,cx=0,cy=0,cz=0;
   for(const p of source.parts){
@@ -90,6 +96,8 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
       check(p.governorRpm,'Rotor governor RPM',10,10000);check(p.maxPowerW,'Rotor power',1,1e8);check(p.spoolSeconds??1.5,'Rotor spool time',.05,120);
       check(p.collectiveTrimRad??0,'Rotor collective trim',-.7,.7);check(p.collectiveGainRad??.12,'Rotor collective gain',-.7,.7);
       check(p.cyclicPitchGainRad??0,'Rotor cyclic pitch',0,.7);check(p.cyclicRollGainRad??0,'Rotor cyclic roll',0,.7);
+      check(p.flapTimeSeconds??.08,'Rotor flap response',.005,5);check(p.leadLagTimeSeconds??.12,'Rotor lead-lag response',.005,5);
+      if(p.shaft!==undefined&&!shafts.has(p.shaft))throw new RangeError(`Unknown rotor shaft ${p.shaft}`);
       check(p.liftSlope??5.7,'Rotor lift slope',.1,10);check(p.profileDragCoefficient??.011,'Rotor profile drag',0,1);
       if((p.direction??1)!==1&&(p.direction??1)!==-1)throw new RangeError('Rotor direction');
       if(p.collectiveControl!==undefined&&!['collective','yaw'].includes(p.collectiveControl))throw new RangeError('Unknown rotor collective control');
