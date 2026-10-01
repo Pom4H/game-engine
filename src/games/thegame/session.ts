@@ -117,7 +117,13 @@ export class ThegameAuthority {
   for(const peer of this.peers.values()){
    const command=peer.inputs.shift();
    if(peer.seat){
-    const service=this.transit.serviceForPassenger(peer.residentId,time),pose=service?this.transitVehicles.seatPose(service.id,time):undefined;
+    const passenger=this.transit.passenger(peer.residentId),service=this.transit.serviceForTransitResident(peer.residentId,time);
+    const servicePose=service?this.transitVehicles.servicePose(service.id,time):undefined;
+    const transition=passenger&&passenger.state!=='riding'
+     ?this.transit.passengerPose(peer.residentId,time,servicePose?{position:servicePose.position,yaw:servicePose.yaw,speed:servicePose.speed}:undefined)
+     :undefined;
+    const seatPose=service&&passenger?.state==='riding'?this.transitVehicles.seatPose(service.id,time):undefined;
+    const pose=transition??seatPose;
     if(service&&pose){
      peer.state.x=pose.position[0];peer.state.y=pose.position[1];peer.state.z=pose.position[2];peer.state.yaw=pose.yaw;peer.state.lookYaw=pose.yaw;
      peer.state.vx=Math.sin(pose.yaw)*pose.speed;peer.state.vy=0;peer.state.vz=Math.cos(pose.yaw)*pose.speed;peer.state.speed=pose.speed;peer.state.grounded=true;peer.state.phase=(peer.state.phase+pose.speed/60)% (Math.PI*2000);
@@ -147,7 +153,7 @@ export class ThegameAuthority {
   const transitRows:{distance:number;id:string;data:{position:readonly[number,number,number];yaw:number;phase:number;speed:number;kind:number}}[]=[];
   for(const passenger of this.transit.passengersState()){
    if(playerResidents.has(passenger.residentId))continue;
-   const service=passenger.state==='riding'?this.transit.serviceForPassenger(passenger.residentId,time):undefined;
+   const service=this.transit.serviceForTransitResident(passenger.residentId,time);
    const promoted=service?this.transitVehicles.servicePose(service.id,time):undefined;
    const pose=this.transit.passengerPose(passenger.residentId,time,promoted?{position:promoted.position,yaw:promoted.yaw,speed:promoted.speed}:undefined);
    if(!pose)continue;const d=Math.hypot(pose.position[0]-peer.state.x,pose.position[2]-peer.state.z);if(d>512)continue;
