@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {Scene,RigidBody,material} from '../dist/index.js';
+import {Scene,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
 const speed=b=>Math.hypot(...b.velocity);
@@ -98,4 +98,67 @@ test('loop and hill are composed from ordinary physical segments',()=>{
  assert.ok(loop.every(e=>e.body&&e.body.invMass===0));
  assert.ok(hill.every(e=>e.body&&e.body.invMass===0));
  assert.ok(loop.some(e=>Math.abs(e.rotation[0])>1));
+});
+
+
+const roadCar=(id,extraParts=[])=>vehicle(id,{
+ chassis:{massKg:1450,sizeM:[4.6,1.3,1.9],dragAreaM2:.72},
+ parts:[
+  wheel('front.left',{at:[1.35,-.45,-.78],massKg:20,radiusM:.34,widthM:.24,suspension:{restM:.45,travelM:.24,springNPerM:36000,damperNsPerM:3200},steerRad:.55,brakeTorqueNm:3200,grip:1.08}),
+  wheel('front.right',{at:[1.35,-.45,.78],massKg:20,radiusM:.34,widthM:.24,suspension:{restM:.45,travelM:.24,springNPerM:36000,damperNsPerM:3200},steerRad:.55,brakeTorqueNm:3200,grip:1.08}),
+  wheel('rear.left',{at:[-1.35,-.45,-.78],massKg:20,radiusM:.34,widthM:.24,suspension:{restM:.45,travelM:.24,springNPerM:36000,damperNsPerM:3200},driveTorqueNm:1500,drivePowerW:90000,brakeTorqueNm:3000,grip:1.08}),
+  wheel('rear.right',{at:[-1.35,-.45,.78],massKg:20,radiusM:.34,widthM:.24,suspension:{restM:.45,travelM:.24,springNPerM:36000,damperNsPerM:3200},driveTorqueNm:1500,drivePowerW:90000,brakeTorqueNm:3000,grip:1.08}),
+  ...extraParts,
+ ]
+});
+
+test('wheel vehicle reverses direction on the straight from torque, without a stop gate',()=>{
+ const scene=new Scene(spec);
+ scene.physics.wheelSupport=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
+ const car=new Vehicle(scene.physics,roadCar('proving.car.reverse'),{
+  position:[-28,1.2,-48],rotation:[0,-Math.PI/2,0],velocity:[0,0,-7]
+ });
+ const start=car.body.velocity[2];
+ car.setControls({throttle:1,brake:0});
+ let crossed=false,loaded=false;
+ for(let i=0;i<600;i++){
+  scene.physics.step(dt);
+  loaded ||= ['front.left','front.right','rear.left','rear.right'].some(id=>car.part(id).loadN>500);
+  if(car.body.velocity[2]>0){crossed=true;break;}
+ }
+ assert.equal(loaded,true,'wheels must be physically supported by the proving-ground road');
+ assert.ok(car.body.velocity[2]>start+2,{start,end:car.body.velocity[2]});
+ assert.equal(crossed,true,'forward drive torque must pass continuously through zero speed');
+ assert.ok(car.part('rear.left').angularSpeed>0);
+ car.dispose();
+});
+
+test('wind-tunnel wing force depends on relative air velocity, not a vehicle mode',()=>{
+ const make=(id,velocity,wind)=>{
+  const scene=new Scene(spec),bp=vehicle(id,{chassis:{massKg:800,sizeM:[4,1.2,1.7],dragAreaM2:0},parts:[
+   wing('test.wing',{at:[0,.35,0],massKg:20,spanM:6,chordM:1.4,incidenceRad:.14,zeroLiftRad:0,dragCoefficient:.03,stallRad:.32}),
+  ]});
+  const v=new Vehicle(scene.physics,bp,{position:[70,4.5,-32],velocity});
+  v.setAir({densityKgM3:1.225,wind});v.evaluate(dt);
+  return{v,force:[...v.force],part:{lift:v.part('test.wing').liftN,drag:v.part('test.wing').dragN}};
+ };
+ const moving=make('tunnel.moving',[45,0,0],[0,0,0]),windy=make('tunnel.windy',[0,0,0],[-45,0,0]),coflow=make('tunnel.coflow',[45,0,0],[45,0,0]);
+ assert.deepEqual(moving.force,windy.force);
+ assert.ok(moving.part.lift>1000,moving.part);
+ assert.ok(moving.part.drag>0,moving.part);
+ assert.ok(Math.hypot(...coflow.force)<1e-9,coflow.force);
+ moving.v.dispose();windy.v.dispose();coflow.v.dispose();
+});
+
+test('rotorcraft uses the same Vehicle body above the proving ground',()=>{
+ const scene=new Scene(spec),bp=lightHelicopter('proving.helicopter'),heli=new Vehicle(scene.physics,bp,{position:[-72,35,42]});
+ heli.setControls({throttle:1,collective:LIGHT_HELICOPTER_HOVER_COLLECTIVE,roll:LIGHT_HELICOPTER_HOVER_ROLL});
+ for(let i=0;i<720;i++)heli.evaluate(dt);
+ const main=heli.part('main.rotor'),tail=heli.part('tail.rotor');
+ assert.equal(main.kind,'rotor');assert.equal(tail.kind,'rotor');
+ assert.ok(main.angularSpeed>35,main.angularSpeed);
+ assert.ok(main.liftN>bp.massKg*9.81*.72,{lift:main.liftN,weight:bp.massKg*9.81});
+ assert.ok(main.powerW>100000,main.powerW);
+ assert.equal(scene.physics.bodies.get(heli.body.id),heli.body);
+ heli.dispose();
 });
