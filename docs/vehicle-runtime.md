@@ -37,8 +37,14 @@ mass is counted. Their finite-wing polar responds to local relative velocity,
 including angular point velocity and wind, then feeds the SAME rigid integrator.
 Lift is perpendicular to local flow; drag does nonpositive work against that flow.
 Low speed, zero air density or spanwise flow cannot manufacture lift.
-Attached wheels provide no airborne thrust. The runway experiment is therefore a
-brief takeoff/glide after wing deflection, not a demonstration of sustained flight.
+Attached wheels provide no airborne thrust. A wheeled body with enough authored
+lifting area can therefore take off and glide without changing runtime class.
+
+A spoiler is the same `wing()` primitive with `control: 'spoiler'` and an authored
+hinge direction through `controlGainRad`. The runtime does not inject "downforce".
+The surface rotates into the local relative airflow and the ordinary aerodynamic
+solver produces its lift/drag. A moving car in still air and a stationary car in the
+opposite wind therefore produce the same spoiler force; co-moving air produces none.
 
 ## Ownership and reuse
 
@@ -123,7 +129,8 @@ substeps are unchanged. Timings include PhysicsWorld but not renderer/network/au
 Small timing gains are not a universal speedup or a FPS promise.
 
 `node --test test/vehicle-runtime.test.mjs` covers lift, drag work, wind, stall,
-asymmetric moments, powered takeoff, overload, permanent set, work-driven wear,
+asymmetric moments, powered takeoff, ballistic-vs-winged glide, wind-driven spoilers,
+overload, permanent set, work-driven wear,
 fatigue sampling, state isolation, live views, driver ownership and cached parity.
 The workflow preserves source/dist, raw samples and full test logs with the exact SHA.
 The three inherited full-suite failures remain red and are not weakened.
