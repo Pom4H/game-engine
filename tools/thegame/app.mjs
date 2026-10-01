@@ -11,7 +11,7 @@ import {FrameHealth} from '../../engine/core/frame-health.js';
 import {workbench} from '../../shared/workbench.mjs';
 const $=s=>document.querySelector(s),canvas=$('#world'),loading=$('#loading'),text=$('#loading-text'),clock=new FixedClock(1000/60,80,4),network=new Worker(new URL('./network-worker.mjs',import.meta.url),{type:'module'});
 const store={get(key){try{return sessionStorage.getItem(key);}catch{return null;}},set(key,value){try{sessionStorage.setItem(key,value);}catch{}}};
-$('#name').value=store.get('thegame:name')??'Игрок';let token=store.get('thegame:resume'),renderer,view,world,replay,replica,config,id,wb,previous,authoritative,status='idle',sent=0,pump=false,net={},yaw=Math.PI/2,pitch=.28,override=null,lastFrame=0,lastHud=0,lastPacketTick=-1,discovered=0,players=0,connectedAt=0,nextRetry=Infinity,failures=0,paused=false,stopped=false,ready=false,startup=performance.now();
+$('#name').value=store.get('thegame:name')??'Игрок';let token=store.get('thegame:resume'),renderer,view,world,replay,replica,config,id,wb,previous,authoritative,status='idle',sent=0,pump=false,net={},yaw=Math.PI/2,pitch=.16,override=null,lastFrame=0,lastHud=0,lastPacketTick=-1,discovered=0,players=0,connectedAt=0,nextRetry=Infinity,failures=0,paused=false,stopped=false,ready=false,startup=performance.now();
 let corrections=[0,0,0],lastDraw=null;const keys=new Set(),touch=new Set(),metrics={frames:[],prediction:[],correction:[],inputToMotion:[],travel:0,maxFrameMs:0,networkResets:0,startupMs:0};let pendingInputAt=0;
 const bounded=(array,value)=>{if(array.length>=1200)array.shift();array.push(value);};
 const frameHealth=new FrameHealth(),submittedHealth=new FrameHealth();let lastSubmittedAt=0,healthStartedAt=0;const longFrames=[];
