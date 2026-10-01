@@ -10,3 +10,6 @@ export {populationCells,populationProjection} from './population.js';
 export {StructuralProjection} from './structure.js';
 export type {StructuralSource,StructuralView} from './structure.js';
 export {SnapshotDatagram,DatagramOutbox} from './datagram.js';
+
+export {AuthorityShardLease} from './shard-authority.js';
+export type {MeshworkShardAssignment,MeshworkShardRevoke,MeshworkShardHeartbeat,MeshworkShardPublication} from './shard-authority.js';
