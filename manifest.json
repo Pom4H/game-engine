@@ -1,0 +1,72 @@
+{
+  "source": "50486039e7ddfaeb59a9c3fa741bd3c0c00fea7a",
+  "run": "36778421757",
+  "runner": "NUCBOX_M6ULTRA",
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "pixels": {
+    "width": 3840,
+    "height": 2160,
+    "pngBytes": 4971061,
+    "pngSha256": "7872ab257c05ddac84f249f08232a1ec79ec3417d776b1ead7957c1071453904",
+    "meanLuma": 49.25416943962191,
+    "lumaStd": 29.842767737431135,
+    "meanHorizontalRedEdge": 0.4601027199074074,
+    "usedLumaLevels": 256
+  },
+  "renderer": {
+    "backend": "webgpu",
+    "width": 3840,
+    "height": 2160,
+    "triangles": 754782,
+    "drawCalls": 444,
+    "pointLights": 20,
+    "materialTextures": 15,
+    "errors": []
+  },
+  "gpu": {
+    "meanMs": 82.77741576923077,
+    "p50Ms": 81.14959,
+    "p95Ms": 89.49642,
+    "maxMs": 92.3562
+  },
+  "cpu": {
+    "meanMs": 8.561538461595774,
+    "p50Ms": 8.300000000745058,
+    "p95Ms": 9.699999999254942,
+    "maxMs": 11.300000000745058
+  },
+  "tests": {
+    "total": 86,
+    "pass": 86,
+    "fail": 0
+  },
+  "provenance": "Untouched native engine canvas; review.webp is Lanczos-downsampled lossless WebP, native-crop.webp is a lossless pixel crop. quick.webp is a compact lossy composition preview. None contains generated image detail.",
+  "quick": {
+    "width": 640,
+    "height": 360,
+    "quality": 62
+  },
+  "assets": [
+    {
+      "name": "quick.webp",
+      "bytes": 1464,
+      "sha256": "2bd82b77434f6dcd5561b188aff8ef77f2d31ec8bf1594cf8d2d882bf75f556f"
+    },
+    {
+      "name": "review.webp",
+      "bytes": 236674,
+      "sha256": "21acedb0be336e7dec834dee71ac8bf0d9ecf8ffc819be1cdaea7ef6b7d344fa"
+    },
+    {
+      "name": "native-crop.webp",
+      "bytes": 52846,
+      "sha256": "2719c39b2d0819ea788ff64ef5ff7d16267c5a09ccc90954717966deb5f8c878"
+    }
+  ]
+}
