@@ -67,12 +67,16 @@ export class ThegameView {
   const color=mode===2?[.18,.47,.78,1] as const:mode===1?[.72,.28,.12,1] as const:[.10,.49,.44,1] as const;
   const body=this.scene.add({id:`transit/${id}/body`,collision:'none',mesh:{kind:'box',size:dimensions},position:[0,0,0],material:{kind:'steel',color,roughness:.62}});
   const glass=this.scene.add({id:`transit/${id}/glass`,collision:'none',mesh:{kind:'box',size:[dimensions[0]*.88,dimensions[1]*.38,dimensions[2]*.84]},position:[0,dimensions[1]*.24,0],material:{kind:'glass',color:[.16,.23,.25,.82],roughness:.09,metalness:.02}});
-  visual={mode,entities:[body,glass]};this.transit.set(id,visual);return visual;
+  const door=this.scene.add({id:`transit/${id}/door`,collision:'none',mesh:{kind:'box',size:[.08,1.8,1.25]},position:[0,0,0],material:{kind:'steel',color,roughness:.58}});
+  visual={mode,entities:[body,glass,door]};this.transit.set(id,visual);return visual;
  }
- private poseTransit(id:string,x:number,y:number,z:number,yaw:number,mode:number):void{
-  const visual=this.transitVisual(id,mode),body=visual.entities[0]!,glass=visual.entities[1]!,height=mode===2?3.0:mode===1?2.7:2.6;
+ private poseTransit(id:string,x:number,y:number,z:number,yaw:number,mode:number,doors:number):void{
+  const visual=this.transitVisual(id,mode),body=visual.entities[0]!,glass=visual.entities[1]!,door=visual.entities[2]!;
+  const width=mode===2?2.7:mode===1?2.45:2.5,height=mode===2?3.0:mode===1?2.7:2.6,length=mode===2?15:mode===1?12.5:10.8;
   body.position.splice(0,3,x-this.originX,y,z-this.originZ);body.rotation.splice(0,3,0,yaw,0);
   glass.position.splice(0,3,x-this.originX,y+height*.24,z-this.originZ);glass.rotation.splice(0,3,0,yaw,0);
+  const rightX=Math.cos(yaw),rightZ=-Math.sin(yaw),forwardX=Math.sin(yaw),forwardZ=Math.cos(yaw),side=-(width/2+.06),along=length*.18-Math.max(0,Math.min(1,doors))*.95;
+  door.position.splice(0,3,x-this.originX+rightX*side+forwardX*along,y-.05,z-this.originZ+rightZ*side+forwardZ*along);door.rotation.splice(0,3,0,yaw,0);
  }
  private admit(ticket:ChunkTicket,value:Prepared):boolean{
   if(!this.renderer.submissionAvailable)return false;
@@ -111,7 +115,7 @@ export class ThegameView {
   for(const row of remote?.rows??[]){const v=row.values;this.activeActors.add(row.id);this.pose(row.id,v[0]!,v[1]!,v[2]!,v[3]!,v[4]!,v[5]!,v[6]!);}
   for(const [id,actor] of this.actors)if(!this.activeActors.has(id)){actor.release();for(const e of actor.entities)this.scene.remove(e.id);this.actors.delete(id);}
   this.activeTransit.clear();
-  for(const row of transit?.rows??[]){const v=row.values;this.activeTransit.add(row.id);this.poseTransit(row.id,v[0]!,v[1]!,v[2]!,v[3]!,v[6]!);}
+  for(const row of transit?.rows??[]){const v=row.values;this.activeTransit.add(row.id);this.poseTransit(row.id,v[0]!,v[1]!,v[2]!,v[3]!,v[6]!,v[5]!);}
   for(const [id,visual] of this.transit)if(!this.activeTransit.has(id)){for(const e of visual.entities)this.scene.remove(e.id);this.transit.delete(id);}
   const target:[number,number,number]=[self.x-this.originX,self.y+1.3,self.z-this.originZ],distance=6.5,dx=-Math.sin(yaw)*Math.cos(pitch),dz=-Math.cos(yaw)*Math.cos(pitch),dy=Math.sin(pitch);let reach=distance;
   for(let d=.6;d<=distance;d+=.3){const x=self.x+dx*d,y=self.y+1.3+dy*d,z=self.z+dz*d;if(this.world.blocked(x,y,z,.2,.15)||this.world.ground(x,z).y+.2>y){reach=Math.max(.5,d-.3);break;}}
