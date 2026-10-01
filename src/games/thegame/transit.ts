@@ -315,7 +315,6 @@ export class TransitAuthority {
    }
 
 
-   const dwellRemaining=call.departure-service.scheduledSeconds;
    if(route.capacity-this.onboard(service.id)<=0||dwellRemaining<BOARD_SECONDS+.05)continue;
    const waiting=this.waiting(stop.id,route.id)[0];
    if(waiting){
