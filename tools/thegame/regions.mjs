@@ -23,7 +23,7 @@ const found=new Map(existing.filter(s=>s?.shard?.capability===THEGAME_REGION_CAP
 let created=0;
 for(let z=-radius;z<=radius;z++)for(let x=-radius;x<=radius;x++){
  const k=key(x,z);if(found.has(k))continue;
- const input={seed,x,z,sizeM,population,cellM:128,stepSeconds:1};
+ const input={seed,x,z,sizeM,population,cellM:128,stepSeconds:.1};
  const result=await fetch(new URL('/shards',base),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({capability:THEGAME_REGION_CAPABILITY,input,startTick:0,affinityKey:`thegame:${seed}:${x}:${z}`})});
  if(!result.ok)throw Error(`Create region ${x}:${z}: `+await result.text());
  created++;
