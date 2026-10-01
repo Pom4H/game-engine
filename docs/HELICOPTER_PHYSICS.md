@@ -49,18 +49,24 @@ CI verifies:
 - rotor presentation reads the same physical `spinRad`, never a second animation clock;
 - the helicopter runs as an ordinary public project module.
 
-## Deliberately not faked yet
+## Rotor dynamics now covered
 
-These need additional physical causes rather than tuning constants:
+The rotor remains an ordinary `Vehicle` component, but its state now includes:
 
-- blade flapping / lead-lag dynamics;
-- ground effect;
-- vortex-ring state and settling-with-power;
-- retreating-blade stall / advancing-blade compressibility;
-- shared engine/gearbox power allocation between rotors;
-- rotor strikes and blade separation;
-- rotor-specific acoustic synthesis.
+- first-order flap and lead-lag response, so cyclic cannot teleport the thrust vector;
+- ground-effect gain derived from actual rotor-to-surface clearance rays;
+- a bounded VRS/settling-with-power inflow loss in steep low-speed descent;
+- retreating-blade stall from advance ratio and collective, including an asymmetric hub moment;
+- named shared shafts/gearboxes whose aggregate powered draw cannot exceed the authored budget;
+- rotor clearance rays that can shed aerodynamic blades after a strike;
+- deterministic blade-pass acoustic synthesis driven by RPM, blade count, loading, VRS and stall.
 
-The point of the helicopter fixture is to make those omissions measurable. A future change that
-improves helicopter behavior must still pass the car/soft-body/contact/audio/network regression
-gates.
+The strike model currently removes a blade from the rotor's aerodynamic state but deliberately does
+not spawn a free rigid-body blade fragment or mutate the parent rigid body's mass/inertia. That is
+the remaining separation step; it needs an explicit mass-transfer operation rather than silently
+breaking the single-body invariant.
+
+Advancing-blade compressibility is also still separate from the retreating-stall approximation and
+should be added from local tip Mach rather than hidden inside a tuning constant.
+
+Every change still passes the car/soft-body/contact/audio/network regression gates.
