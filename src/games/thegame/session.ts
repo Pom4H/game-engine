@@ -4,6 +4,7 @@ import {characterState,stepCharacter,idleCharacterInput,type CharacterInput,type
 import {CpuProfiler} from '../../core/profiling.js';
 import {RuntimeTimeline} from '../../core/runtime-timeline.js';
 import {OpenWorld,WORLD_REVISION,WORLD_LIMIT} from './world.js';
+import {materializeCrowd} from './crowd.js';
 export interface ThegameConfig extends CharacterTuning {readonly seed:number;readonly viewRadius:number;readonly exposure:number}
 export function thegameConfig(raw:Partial<ThegameConfig>={}):Readonly<ThegameConfig>{
  const c={seed:29,walkSpeed:3.35,runSpeed:6.8,gravity:16,jumpSpeed:5.4,viewRadius:3,exposure:1,...raw};
@@ -20,7 +21,7 @@ export const LANDMARKS=Object.freeze([
  {id:'ridge',name:'Горная гряда',x:-1200,z:-800},
  {id:'shore',name:'Побережье',x:800,z:80},
 ]);
-export const peopleProjection=projection('thegame/people/1',{position:vector3('linear',-WORLD_LIMIT,WORLD_LIMIT),yaw:scalar('angle',-Math.PI*2,Math.PI*2),phase:scalar('angle',0,Math.PI*2000+1),speed:scalar('linear',0,40),kind:scalar('step',0,1)},{maxEntities:48,maxBytes:32_768});
+export const peopleProjection=projection('thegame/people/1',{position:vector3('linear',-WORLD_LIMIT,WORLD_LIMIT),yaw:scalar('angle',-Math.PI*2,Math.PI*2),phase:scalar('angle',0,Math.PI*2000+1),speed:scalar('linear',0,40),kind:scalar('step',0,2)},{maxEntities:48,maxBytes:32_768});
 export interface Peer {readonly id:string;readonly name:string;state:CharacterState;ack:number;received:number;readonly inputs:SequencedInput<CharacterInput>[];discovered:number;starved:number}
 export interface SelfState {readonly ack:number;readonly state:CharacterState;readonly discovered:number}
 export interface WorldSnapshot {readonly type:'state';readonly world:string;readonly frame:Frame;readonly self:SelfState;readonly players:number}
@@ -83,12 +84,12 @@ export class ThegameAuthority {
    for(let i=0;i<LANDMARKS.length;i++){const point=LANDMARKS[i]!;if(Math.hypot(peer.state.x-point.x,peer.state.z-point.z)<8)peer.discovered|=1<<i;}
   }
  }
- snapshot(id:string):WorldSnapshot{
+ snapshot(id:string,population:readonly Frame[]=[]):WorldSnapshot{
   const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
   const rows:{id:string;data:{position:readonly [number,number,number];yaw:number;phase:number;speed:number;kind:number}}[]=[];
   for(const other of this.peers.values())if(other!==peer&&Math.hypot(other.state.x-peer.state.x,other.state.z-peer.state.z)<512){const p=other.state;rows.push({id:other.id,data:{position:[p.x,p.y,p.z],yaw:p.yaw,phase:p.phase,speed:p.speed,kind:0}});}
-  // Lite residents are authoritative street walkers, not independent client simulations.
-  for(let i=0;i<8;i++){const t=(this.tick/60*1.3+i*91)%1400,forward=t<700,x=-375+(forward?t:1400-t),z=-73-(i%2)*2;if(Math.hypot(x-peer.state.x,z-peer.state.z)>512)continue;rows.push({id:'npc'+i,data:{position:[x,0,z],yaw:forward?Math.PI/2:-Math.PI/2,phase:(this.tick/60*1.3*6)%(Math.PI*2000),speed:1.3,kind:1}});}
+  const crowdBudget=Math.max(0,Math.min(24,peopleProjection.maxEntities-rows.length));
+  rows.push(...materializeCrowd(this.world,population,peer.state,this.tick,crowdBudget));
   const frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time:this.tick/60,paused:false},rows);this.stats.published++;
   return {type:'state',world:worldSignature(this.config),frame,self:{ack:peer.ack,state:{...peer.state},discovered:peer.discovered},players:this.peers.size};
  }
