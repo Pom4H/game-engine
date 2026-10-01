@@ -210,8 +210,8 @@ for(let i=0;i<5;i++){
 
 // 21. Brake endurance strip. Long enough for repeated physical acceleration / braking
 // in both directions without teleporting the vehicle or resetting thermal state.
-roadStrip('brake-endurance-road',[[-106,0,-102],[-106,0,102]],8,A,{physical:true});
-for(const z of [-90,-60,-30,0,30,60,90])box(`brake-endurance-mark-${z}`,[-106,.009,z],[.10,.018,4.8],P);
+roadStrip('brake-endurance-road',[[-150,0,-420],[-150,0,420]],30,A,{physical:true});
+for(const z of [-400,-300,-200,-100,0,100,200,300,400])box(`brake-endurance-mark-${z}`,[-150,.009,z],[.10,.018,18],P);
 
 // Service roads bind all stations into one coherent facility.
 roadStrip('service-north',[[-58,0,85],[-18,0,90],[22,0,91],[55,0,100],[73,0,115]],6.5,A);
@@ -229,7 +229,7 @@ export const provingGroundMeta=Object.freeze({
  name:'Engine Proving Ground',
  reference:'diagnostics-and-durability',
  zones:provingGroundZones,
- boundsM:[220,220],
+ boundsM:[360,860],
 });
 export const camera={position:[128,96,-150],target:[0,6,20],fov:47,aperture:0};
 export default {
