@@ -1,3 +1,4 @@
+import {PreparedMesh} from '../procedural/prepared-mesh.js';
 import {CpuProfiler} from '../core/profiling.js';
 import {AnimationSystem} from '../animation/system.js';
 import {SurfaceContactSystem} from '../environment/surface-contacts.js';
@@ -147,6 +148,13 @@ export class Scene {
     };
     this.entities.set(spec.id,runtime);this.renderStructureRevision++;
     return runtime;
+  }
+
+  /** Trusted worker-owned render resource. Metadata follows the normal validator;
+   * large immutable buffers do not enter authoring clone/freeze/JSON paths. */
+  addPrepared(spec:Omit<EntitySpec,'mesh'|'renderMesh'|'body'>,mesh:PreparedMesh):RuntimeEntity{
+    if(!(mesh instanceof PreparedMesh)||'mesh' in spec||'renderMesh' in spec||'body' in spec)throw new TypeError('Expected render metadata and prepared geometry');
+    const entity=this.add({...spec,collision:'none'});entity.renderMesh=mesh;return entity;
   }
 
   /** Register once; sync after the existing world/contacts/deformation pipeline. */

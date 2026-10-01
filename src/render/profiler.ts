@@ -149,7 +149,7 @@ export class RenderProfiler {
   }
   reset():void{this.generation++;this.cpuHistory.length=0;this.gpuHistory.length=0;this.frame=0;this.cpuQuanta={};this.work=emptyWork();this.atoms=undefined;this.latestRaster=undefined;this.active=null;this.activeOcclusion=null;}
 
-  inspect():RenderProfileSnapshot{
+  inspect(detailed=true):RenderProfileSnapshot{
     const latestCpu=this.cpuHistory.at(-1),latestGpu=this.gpuHistory.at(-1);
     const aggregate=(history:readonly RenderFrameTiming[],names:readonly string[])=>Object.fromEntries(names.map(name=>[name,stats(history.map(frame=>frame.quanta[name]??0))]));
     return Object.freeze({
@@ -158,9 +158,9 @@ export class RenderProfiler {
       ...(latestCpu?{latestCpu}:{}),...(latestGpu?{latestGpu}:{}),
       ...(this.cpuHistory.length?{cpuTotal:stats(this.cpuHistory.map(x=>x.totalMs))}:{}),
       ...(this.gpuHistory.length?{gpuTotal:stats(this.gpuHistory.map(x=>x.totalMs))}:{}),
-      cpu:Object.freeze(aggregate(this.cpuHistory,RENDER_CPU_QUANTA)),
-      gpu:Object.freeze(aggregate(this.gpuHistory,RENDER_GPU_QUANTA)),
-      ...(this.atoms?{atoms:this.atoms}:{}),...(this.latestRaster?{rasterSamples:this.latestRaster}:{}),
+      cpu:Object.freeze(detailed?aggregate(this.cpuHistory,RENDER_CPU_QUANTA):{}),
+      gpu:Object.freeze(detailed?aggregate(this.gpuHistory,RENDER_GPU_QUANTA):{}),
+      ...(detailed&&this.atoms?{atoms:this.atoms}:{}),...(this.latestRaster?{rasterSamples:this.latestRaster}:{}),
     });
   }
   dispose():void{this.generation++;this.listeners.clear();this.querySet?.destroy?.();this.occlusionQuerySet?.destroy?.();for(const slot of this.slots){try{slot.read.unmap();}catch{}slot.resolve.destroy();slot.read.destroy();}for(const slot of this.occlusionSlots){try{slot.read.unmap();}catch{}slot.resolve.destroy();slot.read.destroy();}this.slots.length=0;this.occlusionSlots.length=0;}

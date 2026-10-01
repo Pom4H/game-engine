@@ -1,6 +1,6 @@
 export interface ChunkTicket {readonly key:string;readonly x:number;readonly z:number;readonly serial:number}
-/** A bounded spatial working set: one active preparation, one ready result, no job backlog.
- * The caller owns workers and GPU resources. Admission happens only at its render boundary. */
+/** One active preparation and one ready result. GPU admission may span frames;
+ * a chunk is resident only after install returns true (or void for old callers). */
 export class ChunkWindow<T> {
  private desired:ChunkTicket[]=[];private wanted=new Set<string>();private resident=new Map<string,T>();
  private active:ChunkTicket|undefined;private ready:{ticket:ChunkTicket;value:T}|undefined;private serial=0;private center='';
@@ -19,13 +19,14 @@ export class ChunkWindow<T> {
   this.active={...next,serial:++this.serial};this.stats.requests++;return this.active;
  }
  prepared(ticket:ChunkTicket,value:T):boolean{
-  if(ticket.serial!==this.active?.serial){this.stats.stale++;return false;}
+  if(ticket.serial!==this.active?.serial||ticket.key!==this.active.key||ticket.x!==this.active.x||ticket.z!==this.active.z){this.release(ticket.key,value);this.stats.stale++;return false;}
   this.active=undefined;if(!this.wanted.has(ticket.key)){this.release(ticket.key,value);this.stats.stale++;return false;}
   this.ready={ticket,value};return true;
  }
- /** The previous frame never sees a partially installed chunk. Failed installs stay retryable. */
- admit(install:(ticket:ChunkTicket,value:T)=>void):boolean{
-  if(!this.ready)return false;const {ticket,value}=this.ready;install(ticket,value);this.resident.set(ticket.key,value);this.ready=undefined;this.stats.admitted++;return true;
+ admit(install:(ticket:ChunkTicket,value:T)=>boolean|void):boolean{
+  if(!this.ready)return false;const {ticket,value}=this.ready;
+  if(install(ticket,value)===false)return false;
+  this.resident.set(ticket.key,value);this.ready=undefined;this.stats.admitted++;return true;
  }
  has(key:string):boolean{return this.resident.has(key);}
  inspect(){return {resident:this.resident.size,desired:this.desired.length,active:this.active?1:0,ready:this.ready?1:0,...this.stats};}

@@ -7,12 +7,20 @@ import {InputReplay} from '../../engine/network/input-replay.js';
 import {Replica} from '../../engine/network/playback.js';
 import {FixedClock} from '../../engine/core/fixed-clock.js';
 import {timingStats} from '../../engine/core/profiling.js';
+import {FrameHealth} from '../../engine/core/frame-health.js';
 import {workbench} from '../../shared/workbench.mjs';
 const $=s=>document.querySelector(s),canvas=$('#world'),loading=$('#loading'),text=$('#loading-text'),clock=new FixedClock(1000/60,80,4),network=new Worker(new URL('./network-worker.mjs',import.meta.url),{type:'module'});
 const store={get(key){try{return sessionStorage.getItem(key);}catch{return null;}},set(key,value){try{sessionStorage.setItem(key,value);}catch{}}};
 $('#name').value=store.get('thegame:name')??'Игрок';let token=store.get('thegame:resume'),renderer,view,world,replay,replica,config,id,wb,previous,authoritative,status='idle',sent=0,pump=false,net={},yaw=Math.PI/2,pitch=.28,override=null,lastFrame=0,lastHud=0,lastPacketTick=-1,discovered=0,players=0,connectedAt=0,nextRetry=Infinity,failures=0,paused=false,stopped=false,ready=false,startup=performance.now();
 let corrections=[0,0,0],lastDraw=null;const keys=new Set(),touch=new Set(),metrics={frames:[],prediction:[],correction:[],inputToMotion:[],travel:0,maxFrameMs:0,networkResets:0,startupMs:0};let pendingInputAt=0;
 const bounded=(array,value)=>{if(array.length>=1200)array.shift();array.push(value);};
+const frameHealth=new FrameHealth(),submittedHealth=new FrameHealth();let lastSubmittedAt=0,healthStartedAt=0;const longFrames=[];
+let longFrameObserver;
+if(globalThis.PerformanceObserver?.supportedEntryTypes?.includes('long-animation-frame')){
+ longFrameObserver=new PerformanceObserver(list=>{for(const entry of list.getEntries())if(entry.startTime>=healthStartedAt){
+  if(longFrames.length>=32)longFrames.shift();longFrames.push({start:entry.startTime,duration:entry.duration,blocking:entry.blockingDuration,scripts:entry.scripts?.slice(0,8).map(script=>({duration:script.duration,function:script.sourceFunctionName,source:script.sourceURL?.split('?')[0].split('/').slice(-2).join('/')}))});
+ }});longFrameObserver.observe({type:'long-animation-frame',buffered:false});
+}
 function connect(){if(stopped||document.hidden)return;token=store.get('thegame:resume');status='connecting';sent=0;connectedAt=performance.now();nextRetry=Infinity;ready=false;loading.hidden=false;text.textContent='Подключаемся к общему серверу…';store.set('thegame:name',$('#name').value);network.postMessage({type:'connect',url:new URL('/thegame/socket',location.href).href.replace(/^http/,'ws'),name:$('#name').value.slice(0,24),resume:token});}
 function close(reason){status='closed';keys.clear();touch.clear();override=null;ready=false;text.textContent=reason;loading.hidden=false;network.postMessage({type:'close'});nextRetry=performance.now()+Math.min(6000,1000*++failures);}
 function welcome(packet){
@@ -52,7 +60,7 @@ function hud(now,pose,sample){
  if(!$('#mini').hidden){const ctx=$('#map').getContext('2d'),scale=.45;ctx.fillStyle='#1b373d';ctx.fillRect(0,0,224,224);ctx.save();ctx.translate(112,112);ctx.scale(scale,scale);ctx.translate(-pose.x,-pose.z);ctx.lineWidth=12;ctx.strokeStyle='#647974';ctx.beginPath();for(let i=-384;i<=384;i+=64){ctx.moveTo(i,-384);ctx.lineTo(i,384);ctx.moveTo(-384,i);ctx.lineTo(384,i);}ctx.stroke();for(const point of LANDMARKS){ctx.fillStyle='#ebbb66';ctx.fillRect(point.x-5,point.z-5,10,10);}for(const row of sample?.rows??[]){ctx.fillStyle=row.values[6]?'#96a79b':'#b8e4ef';ctx.beginPath();ctx.arc(row.values[0],row.values[2],5,0,7);ctx.fill();}ctx.restore();ctx.save();ctx.translate(112,112);ctx.rotate(Math.PI-yaw);ctx.fillStyle='#f4d283';ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(-5,6);ctx.lineTo(5,6);ctx.closePath();ctx.fill();ctx.restore();}
  if(!$('#stats').hidden)$('#stats').textContent=JSON.stringify(inspect(),null,2);
 }
-function inspect(){const v=view?.inspect();return {ready,status,id,players,position:replay?{...replay.state}:null,authoritative,ack:replay?.ack,sequence:replay?.latestSequence,pending:replay?.pending,others:replica?.sample.rows.map(r=>({id:r.id,x:r.values[0],z:r.values[2],kind:r.values[6]})),network:{rtt:net.rtt,age:net.age,bytes:net.bytes,buffered:net.buffered,replaced:net.replaced,...replica?.inspect()},frameMs:timingStats(metrics.frames),maxFrameMs:metrics.maxFrameMs,predictionMs:timingStats(metrics.prediction),correctionM:timingStats(metrics.correction),inputToMotionMs:timingStats(metrics.inputToMotion),travel:metrics.travel,startupMs:metrics.startupMs,droppedClockMs:clock.droppedMs,world:world?.inspect(),view:v};}
+function inspect(){const v=view?.inspect();return {ready,status,id,players,position:replay?{...replay.state}:null,authoritative,ack:replay?.ack,sequence:replay?.latestSequence,pending:replay?.pending,others:replica?.sample.rows.map(r=>({id:r.id,x:r.values[0],z:r.values[2],kind:r.values[6]})),network:{rtt:net.rtt,age:net.age,bytes:net.bytes,buffered:net.buffered,replaced:net.replaced,...replica?.inspect()},frameMs:timingStats(metrics.frames),wholeRun:frameHealth.inspect(),submittedFrames:submittedHealth.inspect(),longFrames:[...longFrames],maxFrameMs:metrics.maxFrameMs,predictionMs:timingStats(metrics.prediction),correctionM:timingStats(metrics.correction),inputToMotionMs:timingStats(metrics.inputToMotion),travel:metrics.travel,startupMs:metrics.startupMs,droppedClockMs:clock.droppedMs,world:world?.inspect(),view:v};}
 function frame(now){if(stopped)return;requestAnimationFrame(frame);const dt=lastFrame?Math.max(0,now-lastFrame):0;lastFrame=now;
  if(paused){clock.reset(now);return;}if(status==='connecting'&&now-connectedAt>7000)close('Сервер недоступен. Запусти bun run thegame на компьютере или сервере.');if(status==='closed'&&now>=nextRetry)connect();
  if(!pump){pump=true;network.postMessage({type:'pump',sent,items:status==='connected'&&ready?replay?.after(sent)??[]:[]});}
@@ -61,15 +69,16 @@ function frame(now){if(stopped)return;requestAnimationFrame(frame);const dt=last
  if(status==='connected'&&net.age>1500){close('Сервер перестал отвечать. Состояние остановлено до восстановления связи.');return;}
  if(!ready){clock.reset(now);if(view.ready&&status==='connected'){ready=true;loading.hidden=true;metrics.startupMs=now-startup;renderer.resetProfile();lastDraw=null;}else text.textContent=`Готовим кварталы: ${view.chunks.inspect().resident} / 9`;}
  if(ready&&status==='connected'){
-  bounded(metrics.frames,dt);metrics.maxFrameMs=Math.max(metrics.maxFrameMs,dt);
+  bounded(metrics.frames,dt);frameHealth.record(dt);metrics.maxFrameMs=Math.max(metrics.maxFrameMs,dt);
   const start=performance.now();clock.advance(now,()=>{previous={...replay.state};const controls=editing()?idleCharacterInput(yaw):input();if(!replay.push(controls))close('Очередь ввода заполнена. Синхронизируем соединение.');});bounded(metrics.prediction,performance.now()-start);
  }else clock.reset(now);
  const p=replay.state,alpha=Math.max(0,Math.min(1,1-clock.delay/(1000/60))),pose={...p};for(const [i,key] of ['x','y','z'].entries()){corrections[i]*=Math.exp(-dt/90);pose[key]=previous[key]+(p[key]-previous[key])*alpha+corrections[i];}
  if(world.blocked(pose.x,pose.y,pose.z,1.8,.29)){corrections=[0,0,0];pose.x=p.x;pose.y=p.y;pose.z=p.z;}
- const sample=replica.present(now/1000);view.frame(pose,sample,yaw,pitch,now);
+ const sample=replica.present(now/1000),beforeSubmission=view.stats.frames;view.frame(pose,sample,yaw,pitch,now);
+ if(ready&&view.stats.frames>beforeSubmission){if(lastSubmittedAt)submittedHealth.record(now-lastSubmittedAt);lastSubmittedAt=now;}
  if(ready&&lastDraw){const distance=Math.hypot(pose.x-lastDraw.x,pose.z-lastDraw.z);metrics.travel+=distance;if(pendingInputAt&&distance>.0001){bounded(metrics.inputToMotion,now-pendingInputAt);pendingInputAt=0;}}lastDraw={x:pose.x,z:pose.z};
  if(now-lastHud>200){lastHud=now;hud(now,pose,sample);}
 }
-globalThis.__THEGAME__={inspect,get source(){return wb?.source;},get workbench(){return wb;},setInput(value){override=readCharacterInput(value);yaw=override.yaw;pendingInputAt=performance.now();},clearInput(){override=null;keys.clear();},resetMetrics(){metrics.frames=[];metrics.prediction=[];metrics.correction=[];metrics.inputToMotion=[];metrics.travel=0;metrics.maxFrameMs=0;renderer?.resetProfile();},disconnect(){close('Переподключение');},query(){return {landmarks:LANDMARKS,revision:WORLD_REVISION};}};
-addEventListener('pagehide',()=>{stopped=true;network.terminate();wb?.dispose();view?.dispose();world?.dispose();},{once:true});
+globalThis.__THEGAME__={inspect,get source(){return wb?.source;},get workbench(){return wb;},setInput(value){override=readCharacterInput(value);yaw=override.yaw;pendingInputAt=performance.now();},clearInput(){override=null;keys.clear();},resetMetrics(){frameHealth.reset();submittedHealth.reset();longFrames.length=0;healthStartedAt=performance.now();lastSubmittedAt=0;metrics.frames=[];metrics.prediction=[];metrics.correction=[];metrics.inputToMotion=[];metrics.travel=0;metrics.maxFrameMs=0;renderer?.resetProfile();},disconnect(){close('Переподключение');},query(){return {landmarks:LANDMARKS,revision:WORLD_REVISION};}};
+addEventListener('pagehide',()=>{stopped=true;longFrameObserver?.disconnect();network.terminate();wb?.dispose();view?.dispose();world?.dispose();},{once:true});
 requestAnimationFrame(frame);connect();

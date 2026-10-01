@@ -1,3 +1,4 @@
+import {PreparedMesh} from '../procedural/prepared-mesh.js';
 import type {Vec3} from '../math.js';
 import {V3} from '../math.js';
 import type {Primitive} from '../scene/types.js';
@@ -34,7 +35,7 @@ export function buildSceneRadianceProbe(scene:Scene,origin:Vec3=scene.camera.tar
   const background:[number,number,number]=[0,0,0],ground:[number,number,number]=[0,0,0];let backgroundWeight=0,groundWeight=0;
 
   for(const entity of scene.entities.values()){
-    if(entity.material.color[3]<.98)continue;
+    if(entity.presentationVisible===false||entity.material.color[3]<.98)continue;
     const primitive=entity.renderMesh??entity.mesh;if(!primitive)continue;
     const radius=primitiveRadius(primitive,entity.scale);
     if(radius<.08)continue;
@@ -93,6 +94,7 @@ export function buildSceneRadianceProbe(scene:Scene,origin:Vec3=scene.camera.tar
 
 function primitiveRadius(primitive:Primitive,scale:Vec3):number{
   const sx=Math.abs(scale[0]),sy=Math.abs(scale[1]),sz=Math.abs(scale[2]);
+  if(primitive instanceof PreparedMesh){const h=primitive.bounds.half;return Math.hypot(h[0]*sx,h[1]*sy,h[2]*sz);}
   if(primitive.kind==='sphere')return (primitive.radius??1)*Math.max(sx,sy,sz);
   if(primitive.kind==='torus')return (primitive.radius+primitive.tube)*Math.max(sx,sy,sz);
   if(primitive.kind==='cylinder')return Math.hypot(primitive.radius*Math.max(sx,sz),primitive.height*.5*sy);

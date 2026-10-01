@@ -15,7 +15,8 @@ test('thegame world is deterministic and has exact continuous triangle seams, pr
  for(let i=-100;i<100;i++)a.ground(i*128+7,i*37);assert.equal(a.inspect().chunks,8);assert.ok(a.stats.evicted>100);assert.throws(()=>a.chunk(Infinity,0));
 });
 test('rendered terrain triangles agree with collision, road/prop geometry stays chunk-local',()=>{
- const world=new OpenWorld();for(const [cx,cz] of [[-3,-1],[-8,-2],[10,0]]){const entities=chunkGeometry(world,cx,cz),mesh=entities[0].mesh;assert.ok(entities.length<=3);assert.equal(mesh.indices.length,16*16*6);
+ const world=new OpenWorld();for(const [cx,cz] of [[-3,-1],[-8,-2],[10,0]]){const entities=chunkGeometry(world,cx,cz),mesh=entities[0].mesh;assert.ok(entities.length<=8) // material batches, not per-window draws
+;assert.equal(mesh.indices.length,16*16*6);
  for(let i=0;i<mesh.indices.length;i+=3){const tri=mesh.indices.slice(i,i+3).map(k=>mesh.positions.slice(k*3,k*3+3)),x=tri.reduce((s,p)=>s+p[0],0)/3,z=tri.reduce((s,p)=>s+p[2],0)/3,y=tri.reduce((s,p)=>s+p[1],0)/3;assert.ok(Math.abs(world.ground(cx*128+x,cz*128+z).y-y)<1e-8);}
  for(const e of entities){assert.equal(e.collision,'none');if(e.mesh.kind==='triangle-mesh'){assert.ok(e.mesh.indices.length);assert.ok(e.mesh.positions.every(Number.isFinite));}}
  }

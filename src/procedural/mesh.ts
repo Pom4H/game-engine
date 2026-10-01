@@ -1,9 +1,10 @@
+import {PreparedMesh} from './prepared-mesh.js';
 import {DynamicMesh} from './dynamic-mesh.js';
 import type {Primitive} from '../scene/types.js';
 
 export interface MeshData {vertices:Float32Array;colors:Uint8Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
 const primitiveKeys=new WeakMap<Primitive,string>();
-export function primitiveKey(primitive:Primitive):string{return primitive instanceof DynamicMesh?primitive.key:primitiveKeys.get(primitive)??JSON.stringify(primitive);}
+export function primitiveKey(primitive:Primitive):string{return primitive instanceof DynamicMesh||primitive instanceof PreparedMesh?primitive.key:primitiveKeys.get(primitive)??JSON.stringify(primitive);}
 /** Called only on the scene's owned geometry copy. A shallow user freeze is not
  * sufficient for caching: nested authoring arrays could still change. */
 export function freezePrimitive(primitive:Primitive):Primitive{
@@ -11,6 +12,7 @@ export function freezePrimitive(primitive:Primitive):Primitive{
  freeze(primitive);primitiveKeys.set(primitive,JSON.stringify(primitive));return primitive;
 }
 export function primitiveMesh(primitive:Primitive):MeshData{
+  if(primitive instanceof PreparedMesh)return primitive.data;
   if(primitive.kind==='triangle-mesh')return pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined);
   if(primitive.kind==='torus')return torusMesh(primitive.radius,primitive.tube,primitive.segments??40);
   if(primitive.kind==='cylinder')return cylinderMesh(primitive.radius,primitive.height,primitive.topRadius??primitive.radius,Math.round(primitive.segments??20));
