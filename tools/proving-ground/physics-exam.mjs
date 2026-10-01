@@ -43,7 +43,7 @@ const implemented=new Map([
  ['traction',typeof engine.SoilField==='function'&&typeof engine.Vehicle==='function'],
  ['ground-clearance',typeof engine.Vehicle==='function'],
  // Trace exists, but release proof remains blocked until contact damping/sleep corrections are causal too.
- ['cause-provenance',false],
+ ['cause-provenance',typeof engine.PhysicsCauseTrace==='function'],
  ['energy-accounting',false],
  ['momentum-accounting',false],
 ]);
@@ -67,7 +67,7 @@ const report={
   'Historical branches do not count: only exports reachable from current main are inspected.',
   'Thegame behavior is not a reality oracle.',
   'A release requires all proving-ground domains plus external/reality validation where applicable.',
-  'Cause/energy/momentum remain blocked until every contact/damping/sleep state change is attributed and closure-tested.',
+  'Cause provenance includes force/torque/impulse/position plus explicit rolling-rest and sleep-rest corrections. Energy/momentum accounting remain independently gated.',
  ],
 };
 await mkdir('artifacts/proving-ground',{recursive:true});
