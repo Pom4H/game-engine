@@ -1,0 +1,94 @@
+name: Proving Ground
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/proving-ground/**'
+      - 'test/proving-ground.test.mjs'
+      - 'src/physics/**'
+      - 'src/vehicles/**'
+      - 'src/materials/**'
+      - 'src/environment/**'
+      - '.github/workflows/proving-ground.yml'
+  workflow_dispatch:
+    inputs:
+      release_gate:
+        description: Fail unless every proving-ground physics domain is implemented
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: proving-ground-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  physics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Proving-ground core tests
+        run: node --test test/proving-ground.test.mjs
+      - name: Physics coverage report
+        env:
+          PROVING_GROUND_RELEASE_GATE: ${{ github.event_name == 'workflow_dispatch' && inputs.release_gate && '1' || '0' }}
+        run: node tools/proving-ground/physics-exam.mjs
+      - name: Upload physics report
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: proving-ground-physics
+          path: artifacts/proving-ground/physics-report.json
+          retention-days: 14
+
+  render:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Locate hardware Chrome
+        run: |
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw 'Chrome not found on GPU worker' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Render proving ground
+        env:
+          RENDER_REQUIRE_HARDWARE: '1'
+          RENDER_PROFILING: '1'
+          RENDER_WARMUP_FRAMES: '12'
+        run: node tools/render-harness.mjs tools/proving-ground/scene.mjs tools/proving-ground/views.mjs 1600 900
+      - name: Preserve captures on runner
+        if: always()
+        run: |
+          $target = Join-Path $env:USERPROFILE 'game-engine-renders\proving-ground'
+          New-Item -ItemType Directory -Force $target | Out-Null
+          Copy-Item artifacts/proving-ground-*.png,artifacts/render-hud.json $target -Force -ErrorAction SilentlyContinue
+      - name: Upload render evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: proving-ground-render
+          path: |
+            artifacts/proving-ground-*.png
+            artifacts/render-hud.json
+          retention-days: 14
