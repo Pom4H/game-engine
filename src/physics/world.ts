@@ -6,6 +6,7 @@ import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsCauseTrace,physicsCause,type PhysicsBodyState,type PhysicsCauseManifestWriter,type PhysicsCauseRef,type PhysicsCauseWriter} from './cause-trace.js';
 import type {FluidSample} from './fluid.js';
+import type {AirSample} from './wind.js';
 
 export type CollisionShape = {kind:'sphere';radius:number}|{kind:'box';half:Vec3};
 export interface RigidBodyOptions {
@@ -141,6 +142,8 @@ export class PhysicsWorld {
   wheelFrictionAt?:(supportId:string,body:RigidBody|null,point:Vec3)=>number;
   /** Fluid field lookup is spatial; world owns the resulting forces. */
   fluidAt?:(body:RigidBody)=>FluidSample|undefined;
+  /** Spatial air state sampled by aerodynamic force owners. */
+  airAt?:(point:Vec3)=>AirSample;
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
   private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
