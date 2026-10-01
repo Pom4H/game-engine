@@ -13,7 +13,7 @@ test('proving ground is a valid engine scene with every authored test zone',()=>
  assert.equal(new Set(provingGroundZones.map(z=>z.id)).size,provingGroundZones.length);
  assert.ok(scene.entities.size>180,scene.entities.size);
  const ids=[...scene.entities.keys()];
- for(const prefix of ['straight-','obstacle-','surface-','split-mu-','circle-','banked-','ramp-','loop-','handling-','hill-','rough-','washboard-','bumps-','potholes-','articulation-','water-','tunnel-','crosswind-','soft-ground-']){
+ for(const prefix of ['straight-','obstacle-','surface-','split-mu-','circle-','banked-','ramp-','loop-','handling-','hill-','brake-endurance-','rough-','washboard-','bumps-','potholes-','articulation-','water-','tunnel-','crosswind-','soft-ground-']){
   assert.ok(ids.some(id=>id.startsWith(prefix)),`missing zone prefix ${prefix}`);
  }
  assert.ok(releasePhysicsRequirements.length>=20);
@@ -185,33 +185,45 @@ test('engine clutch gearbox and differential pull a backward-rolling car forward
  car.dispose();
 });
 
-test('brake endurance heats the wheel brakes and reduces available braking performance',()=>{
+test('brake endurance accumulates heat across physical back-and-forth stops and produces fade',()=>{
  const scene=new Scene(spec);
  scene.physics.wheelSupport=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
  const base=structuredClone(roadCar('thermal.base').source),thermal={
-  heatCapacityJPerK:240,coolingWPerK:5,airflowCoolingWPerKPerMps:.35,
-  initialTemperatureC:20,fadeStartC:75,fadeEndC:165,minPerformanceFraction:.38,
+  // Effective rotor+pad thermal mass per corner; one normal stop must not fade it.
+  heatCapacityJPerK:3000,coolingWPerK:18,airflowCoolingWPerKPerMps:2.2,
+  initialTemperatureC:20,fadeStartC:150,fadeEndC:500,minPerformanceFraction:.42,
  };
  const bp=vehicle('proving.car.thermal',{
   chassis:base.chassis,
   parts:base.parts.map(p=>p.kind==='wheel'?{...p,brakeThermal:thermal}:p),
  });
- const car=new Vehicle(scene.physics,bp,{
-  position:[-28,1.2,-100],rotation:[0,-Math.PI/2,0],velocity:[0,0,40]
- });
+ const car=new Vehicle(scene.physics,bp,{position:[-106,1.2,-82],rotation:[0,-Math.PI/2,0]});
  car.setAir({densityKgM3:1.225,wind:[0,0,0],temperatureC:20});
- car.setControls({brake:1,throttle:0});
- let hottest=20,minPerformance=1,maxBrakePower=0;
- for(let i=0;i<420;i++){
-  scene.physics.step(dt);
+ let hottest=20,minPerformance=1,maxBrakePower=0,totalStops=0;
+ const observe=()=>{
   for(const id of ['front.left','front.right','rear.left','rear.right']){
    const p=car.part(id);hottest=Math.max(hottest,p.brakeTemperatureC);minPerformance=Math.min(minPerformance,p.brakePerformance);maxBrakePower=Math.max(maxBrakePower,p.brakePowerW);
   }
+ };
+ const runUntil=(predicate,maxTicks=1200)=>{
+  for(let i=0;i<maxTicks;i++){scene.physics.step(dt);observe();if(predicate())return true;}return false;
+ };
+ for(let cycle=0;cycle<3;cycle++){
+  car.setControls({brake:0,throttle:1});
+  assert.equal(runUntil(()=>car.body.velocity[2]>24),true,'failed to accelerate forward on endurance strip');
+  car.setControls({throttle:0,brake:1});
+  assert.equal(runUntil(()=>Math.abs(car.body.velocity[2])<1.2),true,'failed forward thermal stop');totalStops++;
+
+  car.setControls({brake:0,throttle:-1});
+  assert.equal(runUntil(()=>car.body.velocity[2]<-24),true,'failed to accelerate backward on endurance strip');
+  car.setControls({throttle:0,brake:1});
+  assert.equal(runUntil(()=>Math.abs(car.body.velocity[2])<1.2),true,'failed reverse thermal stop');totalStops++;
  }
- assert.ok(maxBrakePower>10000,JSON.stringify({maxBrakePower,hottest,minPerformance,velocity:car.body.velocity,wheelOmega:car.part('front.left').angularSpeed,contact:car.part('front.left').contact,support:car.part('front.left').supportId}));
- assert.ok(hottest>80,JSON.stringify({hottest,minPerformance,maxBrakePower,velocity:car.body.velocity}));
- assert.ok(minPerformance<.95,JSON.stringify({hottest,minPerformance,maxBrakePower}));
- assert.ok(car.body.velocity[2]<8,{velocity:car.body.velocity,hottest,minPerformance});
+ assert.equal(totalStops,6);
+ assert.ok(maxBrakePower>50000,JSON.stringify({maxBrakePower,hottest,minPerformance}));
+ assert.ok(hottest>150,JSON.stringify({hottest,minPerformance,maxBrakePower,position:car.body.position}));
+ assert.ok(minPerformance<.98,JSON.stringify({hottest,minPerformance,maxBrakePower}));
+ assert.ok(car.body.position[2]>-103&&car.body.position[2]<103,JSON.stringify(car.body.position));
  car.dispose();
 });
 
