@@ -195,6 +195,16 @@ export class TransitAuthority {
  passenger(residentId:string):Readonly<TransitPassenger>|undefined{const p=this.passengers.get(residentId);return p?Object.freeze({...p}):undefined;}
  hasResident(residentId:string):boolean{return this.passengers.has(residentId);}
  ownedResidentIds():ReadonlySet<string>{return new Set(this.passengers.keys());}
+ ridingCandidate(excluded:ReadonlySet<string>=new Set()):Readonly<TransitPassenger>|undefined{
+  const found=[...this.passengers.values()]
+   .filter(p=>p.state==='riding'&&p.serviceId&&!excluded.has(p.residentId))
+   .sort((a,b)=>a.residentId.localeCompare(b.residentId))[0];
+  return found?Object.freeze({...found}):undefined;
+ }
+ serviceForPassenger(residentId:string,timeSeconds:number):TransitServiceState|undefined{
+  const passenger=this.passengers.get(residentId);if(passenger?.state!=='riding'||!passenger.serviceId)return;
+  return this.services(timeSeconds).find(service=>service.id===passenger.serviceId);
+ }
 
  step(timeSeconds:number):void{
   for(const service of this.services(timeSeconds)){
