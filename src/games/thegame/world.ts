@@ -35,6 +35,17 @@ export function roadDistance(seed:number,x:number,z:number):number{
  if(Math.max(Math.abs(x),Math.abs(z))<384)return Math.min(Math.abs(x-Math.round(x/64)*64),Math.abs(z-Math.round(z/64)*64));
  let best=Infinity;for(const axis of ['e','n'] as const){const base=Math.round(axis==='e'?z/1536:(x+256)/1536);for(let k=base-1;k<=base+1;k++){const p=roadCenter(seed,axis,k,axis==='e'?x:z);best=Math.min(best,Math.hypot(x-p.x,z-p.z));}}return best;
 }
+export interface CityLamp {readonly id:string;readonly poleX:number;readonly poleZ:number;readonly x:number;readonly y:number;readonly z:number}
+/** One semantic placement feeds both fixture geometry and light entities. */
+export function cityLamps(cx:number,cz:number):readonly CityLamp[]{
+ if(cx<-3||cx>=3||cz<-3||cz>=3)return [];
+ const ox=cx*CHUNK_SIZE,oz=cz*CHUNK_SIZE,out:CityLamp[]=[];
+ for(let row=0;row<2;row++)for(let col=0;col<2;col++){
+  const poleX=ox+col*64+9,poleZ=oz+row*64+9;
+  out.push({id:`lamp:${cx}:${cz}:${row}:${col}`,poleX,poleZ,x:poleX,y:5.34,z:poleZ-1.75});
+ }
+ return out;
+}
 export interface WorldProp{readonly id:string;readonly kind:'building'|'tree';readonly x:number;readonly y:number;readonly z:number;readonly width:number;readonly depth:number;readonly height:number;readonly color:RGB}
 export interface WorldChunk{readonly x:number;readonly z:number;readonly key:string;readonly heights:Float64Array;readonly props:readonly WorldProp[]}
 /** CPU residency is capped independently of render residency and peer count. */

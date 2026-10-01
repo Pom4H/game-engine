@@ -2,7 +2,7 @@ import {primitiveMesh,type MeshData} from '../../procedural/mesh.js';
 import {meshBounds} from '../../render/visibility.js';
 import type {PreparedMeshPacket} from '../../procedural/prepared-mesh.js';
 import type {EntitySpec,MaterialSpec,Primitive} from '../../scene/types.js';
-import {OpenWorld,climateAt,roadCenter,SEA_LEVEL,hash01,type RGB} from './world.js';
+import {OpenWorld,climateAt,roadCenter,cityLamps,SEA_LEVEL,hash01,type RGB} from './world.js';
 import {LANDMARKS} from './session.js';
 type Point=readonly [number,number,number];
 const primitives=new Map<string,MeshData>();
@@ -39,6 +39,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  // over a solid building shell, no thousands of individual draw calls for windows.
  const windows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.19,metalness:.25,clearcoat:.65,clearcoatRoughness:.13});
  const metal=new Mesh({kind:'steel',color:[1,1,1,1],roughness:.42,metalness:.65});
+ const lampGlow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.12,emissive:[9.0,5.4,2.4]});
  const ground=(x:number,z:number,offset=0):Point=>[x-ox,world.ground(x,z).y+offset,z-oz];
  const box=(mesh:Mesh,x:number,y:number,z:number,sx:number,sy:number,sz:number,color:RGB)=>mesh.append({kind:'box',size:[1,1,1]},[x-ox,y,z-oz],color,[sx,sy,sz]);
  for(let z=0;z<16;z++)for(let x=0;x<16;x++){
@@ -64,10 +65,12 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
     rect(details,ox+crossing*64+10,z+k,3,.55,[.78,.77,.68],.05);
    }
   }
-  for(let z=0;z<2;z++)for(let x=0;x<2;x++){
-   const px=ox+x*64+9,pz=oz+z*64+9;
-   metal.append({kind:'cylinder',radius:1,height:1,segments:8},[px-ox,2.7,pz-oz],[.19,.21,.2],[.1,5.4,.1]);
-   box(metal,px,5.45,pz-1,.16,.14,2.2,[.19,.21,.2]);box(details,px,5.34,pz-1.75,.48,.10,.7,[1,.86,.59]);
+  for(const lamp of cityLamps(cx,cz)){
+   metal.append({kind:'cylinder',radius:1,height:1,segments:10},[lamp.poleX-ox,2.7,lamp.poleZ-oz],[.16,.18,.18],[.09,5.4,.09]);
+   box(metal,lamp.poleX,5.45,lamp.poleZ-1,.14,.13,2.15,[.16,.18,.18]);
+   box(metal,lamp.x,lamp.y,lamp.z,.62,.62,.62,[.12,.13,.12]);
+   box(lampGlow,lamp.x,lamp.y,lamp.z,.43,.43,.43,[1,.82,.55]);
+   box(metal,lamp.x,lamp.y+.39,lamp.z,.52,.09,.52,[.12,.13,.12]);
   }
  }else{
   for(const axis of ['e','n'] as const){const base=Math.round(axis==='e'?(oz+64)/1536:(ox+320)/1536),start=axis==='e'?ox:oz;
@@ -115,7 +118,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
   }
  }
  for(const point of LANDMARKS)if(Math.floor(point.x/128)===cx&&Math.floor(point.z/128)===cz){const y=Math.max(SEA_LEVEL,world.ground(point.x,point.z).y);box(details,point.x,y+.14,point.z,2.4,.28,2.4,[.96,.65,.22]);box(metal,point.x,y+3,point.z,.18,6,.18,[.65,.51,.23]);details.append({kind:'torus',radius:1,tube:.13,segments:20},[point.x-ox,y+4,point.z-oz],[1,.73,.29]);}
- const batches=[['terrain',terrain],['masonry',masonry],['trim',trim],['asphalt',asphalt],['details',details],['windows',windows],['metal',metal]] as const;
+ const batches=[['terrain',terrain],['masonry',masonry],['trim',trim],['asphalt',asphalt],['details',details],['windows',windows],['metal',metal],['lamp-glow',lampGlow]] as const;
  const result:EntitySpec[]=batches.filter(([,mesh])=>mesh.indices.length>0).map(([name,mesh])=>mesh.entity(`chunk:${chunk.key}/${name}`));
  if(chunk.heights.some(y=>y<SEA_LEVEL))result.push({id:`chunk:${chunk.key}/water`,collision:'none',position:[64,SEA_LEVEL,64],mesh:{kind:'plane',size:[128,128]},material:{kind:'plastic',color:[.12,.28,.32,1],roughness:.18,metalness:.15,clearcoat:.5}});
  return result;

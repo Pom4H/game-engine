@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {OpenWorld,climateAt,WORLD_REVISION} from '../dist/games/thegame/world.js';
+import {OpenWorld,climateAt,cityLamps,WORLD_REVISION} from '../dist/games/thegame/world.js';
 import {chunkGeometry} from '../dist/games/thegame/geometry.js';
 import {ThegameAuthority,readCharacterInput,thegameConfig,worldSignature,peopleProjection} from '../dist/games/thegame/session.js';
 import {characterState,stepCharacter,idleCharacterInput} from '../dist/runtime/character-motor.js';
@@ -12,10 +12,11 @@ test('thegame world is deterministic and has exact continuous triangle seams, pr
   for(const p of c.props)assert.ok(Math.abs(p.y-a.ground(p.x,p.z).y)<1e-9);assert.deepEqual(c,b.chunk(cx,cz));
  }
  const kinds=new Set();for(let z=-3000;z<=3000;z+=300)for(let x=-3000;x<=3000;x+=300)kinds.add(climateAt(29,x,z).biome);assert.ok(kinds.size>=7);
+ const lamps=cityLamps(-1,-1);assert.equal(lamps.length,4);assert.equal(new Set(lamps.map(l=>l.id)).size,4);assert.equal(cityLamps(4,0).length,0);
  for(let i=-100;i<100;i++)a.ground(i*128+7,i*37);assert.equal(a.inspect().chunks,8);assert.ok(a.stats.evicted>100);assert.throws(()=>a.chunk(Infinity,0));
 });
 test('rendered terrain triangles agree with collision, road/prop geometry stays chunk-local',()=>{
- const world=new OpenWorld();for(const [cx,cz] of [[-3,-1],[-8,-2],[10,0]]){const entities=chunkGeometry(world,cx,cz),mesh=entities[0].mesh;assert.ok(entities.length<=8) // material batches, not per-window draws
+ const world=new OpenWorld();for(const [cx,cz] of [[-3,-1],[-8,-2],[10,0]]){const entities=chunkGeometry(world,cx,cz),mesh=entities[0].mesh;assert.ok(entities.length<=9) // material batches, not per-window/lamp draws
 ;assert.equal(mesh.indices.length,16*16*6);
  for(let i=0;i<mesh.indices.length;i+=3){const tri=mesh.indices.slice(i,i+3).map(k=>mesh.positions.slice(k*3,k*3+3)),x=tri.reduce((s,p)=>s+p[0],0)/3,z=tri.reduce((s,p)=>s+p[2],0)/3,y=tri.reduce((s,p)=>s+p[1],0)/3;assert.ok(Math.abs(world.ground(cx*128+x,cz*128+z).y-y)<1e-8);}
  for(const e of entities){assert.equal(e.collision,'none');if(e.mesh.kind==='triangle-mesh'){assert.ok(e.mesh.indices.length);assert.ok(e.mesh.positions.every(Number.isFinite));}}

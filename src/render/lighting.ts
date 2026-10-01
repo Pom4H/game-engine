@@ -100,10 +100,38 @@ export const EFFECTS_SHADER=FRAME_WGSL+`
 @group(0) @binding(4) var<uniform> f:Frame;
 @group(0) @binding(5) var reflectance:texture_2d<f32>;
 @group(0) @binding(6) var bloom:texture_2d<f32>;
+struct FogPointSource { position:vec4<f32>, color:vec4<f32> }
+struct FogLightGrid { bounds:vec4<f32>, sources:array<FogPointSource,256> }
+@group(0) @binding(7) var<storage,read> fogLights:FogLightGrid;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
 fn linearDepth(d:f32)->f32{return 500.0/(10000.0-d*9999.95);}
 fn viewPos(uv:vec2<f32>,z:f32)->vec3<f32>{let ndc=vec2<f32>(uv.x*2.0-1.0,1.0-uv.y*2.0);return vec3<f32>((ndc.x-f.projection.z)/f.projection.x*z,(ndc.y-f.projection.w)/f.projection.y*z,-z);}
+fn worldRay(uv:vec2<f32>)->vec3<f32>{
+ let ndc=vec2<f32>(uv.x*2.0-1.0,1.0-uv.y*2.0);
+ return normalize(f.forward.xyz+f.right.xyz*((ndc.x-f.projection.z)/f.projection.x)+f.up.xyz*((ndc.y-f.projection.w)/f.projection.y));
+}
+// Analytic local-light fog: fixed eight ranked lights, no ray-march and no history.
+// Geometry depth clips the integration interval, so a wall in front of a lamp
+// prevents its halo leaking through that wall.
+fn localLightFog(ray:vec3<f32>,maxDistance:f32)->vec3<f32>{
+ if(f.params.x<.5||f.sky.w<.00005){return vec3<f32>(0);}
+ let fogStrength=clamp(f.sky.w*85.0,0.0,1.0);var scatter=vec3<f32>(0);
+ for(var li=0u;li<8u;li++){
+  let source=fogLights.sources[li];let range=source.position.w;if(range<=.05||source.color.w<=0.0){continue;}
+  let delta=source.position.xyz-f.eye.xyz;let along=dot(delta,ray);
+  let perpendicular2=max(dot(delta,delta)-along*along,0.0);let radius2=range*range;
+  if(perpendicular2>=radius2){continue;}
+  let halfChord=sqrt(max(radius2-perpendicular2,0.0));
+  let enter=max(0.0,along-halfChord);let leave=min(maxDistance,along+halfChord);
+  if(leave<=enter){continue;}
+  let chord=leave-enter;
+  let soft=1.0/pow(1.0+perpendicular2/max(.04,radius2*.035),2.0);
+  let cameraTransmittance=1.0/(1.0+enter*f.sky.w*.70);
+  scatter+=source.color.rgb*source.color.w*soft*(chord/max(range,.5))*fogStrength*cameraTransmittance*.018;
+ }
+ return scatter;
+}
 fn project(p:vec3<f32>)->vec2<f32>{let ndc=vec2<f32>(f.projection.x*p.x/max(-p.z,.0001)+f.projection.z,f.projection.y*p.y/max(-p.z,.0001)+f.projection.w);return vec2<f32>(ndc.x*.5+.5,.5-ndc.y*.5);}
 fn viewNormal(n:vec3<f32>)->vec3<f32>{return normalize(vec3<f32>(dot(n,f.right.xyz),dot(n,f.up.xyz),-dot(n,f.forward.xyz)));}
 fn depthSpan(pixel:vec2<i32>)->vec2<f32>{
@@ -119,6 +147,8 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
  let dims=vec2<i32>(textureDimensions(hdr));let size=vec2<f32>(dims);let uv=in.uv;let pixel=clamp(vec2<i32>(uv*size),vec2<i32>(0),dims-1);
  let d=textureLoad(depth,pixel,0);
+ let ray=worldRay(uv);let fogDistance=select(min(linearDepth(d),96.0),96.0,d>=.99999);
+ let volume=localLightFog(ray,fogDistance);
  // Background with a pinhole camera cannot contribute AO/GI/SSR and has zero
  // circle-of-confusion. Return the mathematically identical HDR+bloom result
  // before normal/depth-neighbour work; large sky regions become almost free.
@@ -126,7 +156,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let backgroundZ=linearDepth(d);
   let backgroundCoc=min(6.0,abs(backgroundZ-f.params.z)/max(backgroundZ,.1)*f.params.w);
   if(backgroundCoc<=.15){
-   let background=textureSampleLevel(hdr,linearSampler,uv,0).rgb+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28;
+   let background=textureSampleLevel(hdr,linearSampler,uv,0).rgb+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28+volume;
    return vec4<f32>(background,1);
   }
  }
@@ -222,7 +252,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
    }
   }
  }
- color+=textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28;
+ color+=textureSampleLevel(bloom,linearSampler,uv,0).rgb*.28+volume;
  return vec4<f32>(color,1);
 }`;
 

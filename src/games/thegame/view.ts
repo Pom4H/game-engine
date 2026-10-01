@@ -7,10 +7,10 @@ import {PreparedMesh} from '../../procedural/prepared-mesh.js';
 import {WorkBudget} from '../../core/work-budget.js';
 import type {Sample} from '../../network/playback.js';
 import type {CharacterState} from '../../runtime/character-motor.js';
-import {OpenWorld} from './world.js';
+import {OpenWorld,cityLamps} from './world.js';
 import type {ThegameConfig} from './session.js';
 import type {PreparedScenery} from './geometry.js';
-interface Prepared {parts:readonly {spec:PreparedScenery['spec'];mesh:PreparedMesh}[];cursor:number;installed:RuntimeEntity[]}
+interface Prepared {parts:readonly {spec:PreparedScenery['spec'];mesh:PreparedMesh}[];cursor:number;lightCursor:number;installed:RuntimeEntity[]}
 interface Actor {rig:WalkerSpec;entities:RuntimeEntity[];release:()=>void;stamp:string}
 /** Passive projection. Preparation, upload, publication and rendering have different
  * ownership boundaries. A delayed producer cannot force work into an input/frame tick. */
@@ -23,7 +23,7 @@ export class ThegameView {
  readonly stats={frames:0,rebases:0,chunkPreparationMs:0,maxChunkAdmissionMs:0,maxAdmissionBytes:0,maxAdmissionOperations:0,admissionDeferrals:0,expandedMeshes:0};error='';radius:number;
  constructor(readonly renderer:WebGPURenderer,readonly world:OpenWorld,config:ThegameConfig){
   this.radius=config.viewRadius;
-  this.scene=new Scene({version:1,seed:config.seed,environment:{temperatureC:20,sunlight:1,humidity:.15,groundMoisture:0,precipitation:'arid',snowfall:'none'},rendering:{sunDirection:[-.58,.42,-.32],sunIntensity:2.6,sunColor:[1,.83,.63],skyColor:[.35,.49,.65],fogDensity:.0025,shadowExtent:95,exposure:config.exposure},entities:[]});
+  this.scene=new Scene({version:1,seed:config.seed,environment:{temperatureC:7,sunlight:.08,humidity:.92,groundMoisture:.34,precipitation:'occasional',snowfall:'none'},rendering:{sunDirection:[-.58,.24,-.32],sunIntensity:.16,sunColor:[.52,.59,.70],skyColor:[.035,.050,.065],fogDensity:.016,shadowExtent:95,exposure:config.exposure},entities:[]});
   this.chunks=new ChunkWindow((_,value)=>{
    for(const entity of value.installed)this.scene.remove(entity.id);
    for(const part of value.parts)this.renderer.releasePreparedMesh(part.mesh);
@@ -36,7 +36,7 @@ export class ThegameView {
     if(!Array.isArray(data.parts)||data.parts.length<1||data.parts.length>8)throw new Error('Invalid chunk transfer');
     const parts=data.parts.map(part=>({spec:part.spec,mesh:new PreparedMesh(part.mesh)}));
     if(parts.reduce((n,p)=>n+p.mesh.byteLength,0)>8*1024*1024)throw new Error('Chunk transfer exceeds 8 MiB');
-    this.stats.chunkPreparationMs+=data.ms;this.chunks.prepared(data.ticket,{parts,cursor:0,installed:[]});
+    this.stats.chunkPreparationMs+=data.ms;this.chunks.prepared(data.ticket,{parts,cursor:0,lightCursor:0,installed:[]});
    }catch(error){this.error=String(error);}
   };
   this.worker.onerror=event=>{this.error=event.message;};
@@ -64,6 +64,13 @@ export class ThegameView {
    // Staging is not visible to rendering, probes, picking or gameplay. GPU data is
    // fully prepared first; a complete chunk becomes visible in one bounded commit.
    entity.presentationVisible=false;value.installed.push(entity);value.cursor++;
+  }
+  const lamps=cityLamps(ticket.x,ticket.z);
+  while(value.lightCursor<lamps.length){
+   if(!this.admission.claim())return false;
+   const lamp=lamps[value.lightCursor++]!;
+   const entity=this.scene.add({id:`chunk:${ticket.key}/${lamp.id}`,collision:'none',position:[lamp.x-this.originX,lamp.y,lamp.z-this.originZ],light:{kind:'point',color:[1,.68,.36],intensity:22,range:18}});
+   entity.presentationVisible=false;value.installed.push(entity);
   }
   if(!this.admission.claim())return false;
   for(const entity of value.installed)entity.presentationVisible=true;
