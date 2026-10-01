@@ -172,6 +172,36 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
      box(details,faceX+side*.18,p.y+3.55,bz,.10,.42,bayWidth*.90,[.11,.085,.075]);
     }
    }
+   // Recessed ground-floor glazing: warm interiors and dark bays provide the
+   // parallax/contrast missing from a painted facade. Still two shared material
+   // batches, so storefront count does not become draw-call count.
+   for(const side of [-1,1] as const)for(let bay=-1;bay<=1;bay++){
+    const bx=p.x+bay*canopyWidth/3,bw=Math.min(4.5,canopyWidth*.24),face=side>0?front:back;
+    const z=face+side*.055,lit=hash01(cx*31+bay,cz*17,side+9,world.seed)>.38;
+    const dark:RGB=[.028,.034,.036],glass:RGB=lit?[.30,.22,.15]:[.055,.075,.085];
+    details.quad([bx-ox-bw/2,p.y+.48,z-oz],[bx-ox+bw/2,p.y+.48,z-oz],[bx-ox+bw/2,p.y+2.40,z-oz],[bx-ox-bw/2,p.y+2.40,z-oz],dark);
+    const gz=z+side*.025;
+    (lit?litWindows:windows).quad([bx-ox-bw/2+.10,p.y+.55,gz-oz],[bx-ox+bw/2-.10,p.y+.55,gz-oz],[bx-ox+bw/2-.10,p.y+2.31,gz-oz],[bx-ox-bw/2+.10,p.y+2.31,gz-oz],glass);
+    for(const edge of [-1,1])box(trim,bx+edge*(bw/2-.04),p.y+1.43,z+side*.07,.09,1.90,.14,[.29,.28,.25]);
+    box(trim,bx,p.y+.50,z+side*.07,bw,.10,.14,[.29,.28,.25]);box(trim,bx,p.y+2.36,z+side*.07,bw,.10,.14,[.29,.28,.25]);
+    box(trim,bx,p.y+1.43,z+side*.075,.055,1.82,.15,[.24,.23,.21]);
+   }
+   for(const side of [-1,1] as const)for(let bay=-1;bay<=1;bay++){
+    const faceX=p.x+side*p.width/2,bz=p.z+bay*(p.depth*.78)/3,bw=Math.min(4.5,p.depth*.78*.24),x=faceX+side*.055;
+    const lit=hash01(cx*19+bay,cz*29,side+13,world.seed)>.38,dark:RGB=[.028,.034,.036],glass:RGB=lit?[.30,.22,.15]:[.055,.075,.085];
+    details.quad([x-ox,p.y+.48,bz-oz-bw/2],[x-ox,p.y+.48,bz-oz+bw/2],[x-ox,p.y+2.40,bz-oz+bw/2],[x-ox,p.y+2.40,bz-oz-bw/2],dark);
+    const gx=x+side*.025;
+    (lit?litWindows:windows).quad([gx-ox,p.y+.55,bz-oz-bw/2+.10],[gx-ox,p.y+.55,bz-oz+bw/2-.10],[gx-ox,p.y+2.31,bz-oz+bw/2-.10],[gx-ox,p.y+2.31,bz-oz-bw/2+.10],glass);
+    for(const edge of [-1,1])box(trim,x+side*.07,p.y+1.43,bz+edge*(bw/2-.04),.14,1.90,.09,[.29,.28,.25]);
+    box(trim,x+side*.07,p.y+.50,bz,.14,.10,bw,[.29,.28,.25]);box(trim,x+side*.07,p.y+2.36,bz,.14,.10,bw,[.29,.28,.25]);
+   }
+   // Continuous string courses, drainpipes and cornice shadows break the large
+   // wall mass into old-city scale without new runtime entities.
+   for(const y of [p.y+3.72,p.y+7.10]){
+    box(trim,p.x,y,p.z+p.depth/2+.08,p.width+.12,.10,.18,[.31,.30,.27]);
+    box(trim,p.x,y,p.z-p.depth/2-.08,p.width+.12,.10,.18,[.31,.30,.27]);
+   }
+   for(const side of [-1,1])metal.append({kind:'cylinder',radius:1,height:1,segments:8},[p.x-ox+side*(p.width/2-.22),p.y+p.height/2,p.z-oz+p.depth/2+.13],[.16,.17,.17],[.045,p.height,.045]);
    box(metal,p.x,p.y+1.3,p.z+p.depth/2+.04,2,2.6,.08,[.10,.12,.12]);
    box(trim,p.x,p.y+2.8,p.z+p.depth/2+.35,3,.18,.7,[.55,.53,.46]);
    const floors=Math.min(8,Math.floor(p.height/3.5));
@@ -185,9 +215,14 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
      const center:Point=axis===2?[p.x-ox+col*p.width/6,y,p.z-oz+side*(p.depth/2+.03)]:[p.x-ox+side*(p.width/2+.03),y,p.z-oz+col*p.depth/6];
      const point=(u:number,v:number,out=0):Point=>axis===2?[center[0]+u,center[1]+v,center[2]+side*out]:[center[0]+side*out,center[1]+v,center[2]+u];
      const quad=(mesh:Mesh,a:Point,b:Point,c:Point,d:Point,color:RGB)=>{if((axis===2?1:-1)===side)mesh.quad(a,b,c,d,color);else mesh.quad(d,c,b,a,color);};
+     // Dark backing plus reveals make the opening read as a recess instead of
+     // a decal. The actual glass stays slightly forward for stable depth ordering.
+     quad(details,point(-w-.10,-h-.10,-.055),point(w+.10,-h-.10,-.055),point(w+.10,h+.10,-.055),point(-w-.10,h+.10,-.055),[.025,.030,.032]);
      quad(lit?litWindows:windows,point(-w,-h),point(w,-h),point(w,h),point(-w,h),glass);
-     const panel=(u:number,v:number,a:number,b:number)=>quad(trim,point(u-a/2,v-b/2,.04),point(u+a/2,v-b/2,.04),point(u+a/2,v+b/2,.04),point(u-a/2,v+b/2,.04),[.64,.61,.54]);
-     panel(-w,0,.09,h*2+.12);panel(w,0,.09,h*2+.12);panel(0,-h,w*2+.15,.13);panel(0,h,w*2+.15,.09);panel(0,0,.055,h*2);panel(0,.25,w*2,.055);
+     const panel=(u:number,v:number,a:number,b:number)=>quad(trim,point(u-a/2,v-b/2,.04),point(u+a/2,v-b/2,.04),point(u+a/2,v+b/2,.04),point(u-a/2,v+b/2,.04),[.48,.46,.42]);
+     panel(-w,0,.11,h*2+.18);panel(w,0,.11,h*2+.18);panel(0,-h,w*2+.22,.15);panel(0,h,w*2+.22,.11);panel(0,0,.052,h*2);panel(0,.25,w*2,.052);
+     // Snow catches on projecting sills, a high-frequency cue present in the target.
+     quad(snow,point(-w-.16,-h+.07,.105),point(w+.16,-h+.07,.105),point(w+.12,-h+.02,.19),point(-w-.12,-h+.02,.19),[.59,.61,.62]);
     }
    }
   }else{
