@@ -1,0 +1,49 @@
+name: TheGame region shard
+
+on:
+  push:
+    branches: [feat/thegame-region-shard]
+    paths:
+      - 'src/games/thegame/**'
+      - 'src/network/**'
+      - 'tools/thegame/**'
+      - 'test/thegame-region*.test.mjs'
+      - 'test/thegame.test.mjs'
+      - 'test/authority-shard.test.mjs'
+      - 'test/network-projection.test.mjs'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/thegame-region-shard.yml'
+  pull_request:
+    paths:
+      - 'src/games/thegame/**'
+      - 'src/network/**'
+      - 'tools/thegame/**'
+      - 'test/thegame-region*.test.mjs'
+      - 'test/thegame.test.mjs'
+      - 'test/authority-shard.test.mjs'
+      - 'test/network-projection.test.mjs'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/thegame-region-shard.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thegame-region-shard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/authority-shard.test.mjs test/network-projection.test.mjs test/thegame-region.test.mjs test/thegame-region-host.test.mjs test/thegame.test.mjs

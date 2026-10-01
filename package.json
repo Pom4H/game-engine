@@ -23,7 +23,10 @@
     "./games/thegame/project": "./dist/games/thegame/project.js",
     "./trace": "./dist/core/runtime-timeline.js"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -41,9 +44,16 @@
     "cli": "bun tools/engine.mjs",
     "product:qa": "node tools/product/qa.mjs",
     "thegame": "bun tools/thegame/server.mjs",
-    "thegame:qa": "node tools/thegame/qa.mjs"
+    "thegame:qa": "node tools/thegame/qa.mjs",
+    "thegame:regions": "bun tools/thegame/regions.mjs",
+    "thegame:region-worker": "bun tools/thegame/region-worker.mjs"
   },
-  "devDependencies": {"@types/node": "^24.0.0", "typescript": "^7.0.2"},
-  "engines": {"node": ">=22"},
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "packageManager": "bun@1.4.2"
 }
