@@ -7,6 +7,7 @@ export type PhysicsComponentKind='body'|'wheel'|'wing'|'rotor'|'shaft'|'other';
 export type PhysicsLawKind='gravity'|'aerodynamics'|'fluid'|'wheel-contact'|'rotor-aerodynamics'|'constraint'|'collision'|'other';
 export type PhysicsEffectKind='force'|'torque'|'impulse'|'position-correction'|'velocity-correction'|'angular-velocity-correction'|'power';
 export type PhysicsSourceKind='gravity-field'|'air'|'fluid'|'surface'|'body'|'shaft'|'constraint'|'internal';
+export type PhysicsEnergyStage='force-driver'|'fluid'|'gravity-integrate'|'contacts-solver';
 
 export interface PhysicsCauseRef {
  readonly componentId:string;
@@ -59,7 +60,7 @@ interface LawDefinition {readonly bodyId:string;readonly cause:PhysicsCauseRef}
 interface ActiveFrame {
  readonly tick:number;readonly substep:number;readonly simTime:number;
  readonly sums:Map<string,{force:[number,number,number];torque:[number,number,number];ids:string[];contactIds:string[]}>;
- readonly writers:Map<string,PhysicsCauseWriter>;readonly activeLawKeys:Set<string>;
+ readonly writers:Map<string,PhysicsCauseWriter>;readonly activeLawKeys:Set<string>;readonly energySums:Map<string,number>;
 }
 
 const finiteVec=(value:Vec3,label:string):void=>{
@@ -84,7 +85,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
  private readonly laws=new Map<string,LawDefinition>();
  private readonly sealedBodies=new Set<string>();
  private frame:ActiveFrame|undefined;
- private maxForceResidual=0;private maxTorqueResidual=0;
+ private maxForceResidual=0;private maxTorqueResidual=0;private maxEnergyResidual=0;
  constructor(options:{readonly runId?:string;readonly maxRecords?:number}={}){
   this.runId=options.runId??'physics';
   this.maxRecords=options.maxRecords??100_000;
@@ -126,7 +127,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
  beginSubstep(tick:number,substep:number,simTime:number):void{
   if(this.frame)throw new Error('Physics trace substep already open');
   if(!Number.isSafeInteger(tick)||tick<0||!Number.isSafeInteger(substep)||substep<0||!Number.isFinite(simTime)||simTime<0)throw new TypeError('Invalid physics trace frame');
-  this.frame={tick,substep,simTime,sums:new Map(),writers:new Map(),activeLawKeys:new Set()};
+  this.frame={tick,substep,simTime,sums:new Map(),writers:new Map(),activeLawKeys:new Set(),energySums:new Map()};
   this.append('frame.begin',{});
  }
  writer(bodyId:string):PhysicsCauseWriter{
@@ -162,6 +163,23 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
   this.append('physics.wrench',{wrench_id:wrenchId,body_id:bodyId,contribution_ids:[...sum.ids],resultant:{force_N:cloneVec(force),torque_Nm:cloneVec(torque)},residual:{force_N:forceResidual,torque_Nm:torqueResidual}});
   return wrenchId;
  }
+ energy(bodyId:string,stage:PhysicsEnergyStage,deltaJ:number):void{
+  const frame=this.frame;if(!frame)throw new Error('Physics energy accounting requires an active substep');
+  if(!Number.isFinite(deltaJ))throw new TypeError('Invalid physics energy delta');
+  const sums=frame.sums.get(bodyId),ids=stage==='contacts-solver'?(sums?.contactIds??[]):(sums?.ids??[]);
+  const scale=Math.max(1,Math.abs(deltaJ));
+  if(Math.abs(deltaJ)>1e-10*scale&&!ids.length)throw new Error(`Unattributed physics energy on ${bodyId} during ${stage}: ${deltaJ} J`);
+  frame.energySums.set(bodyId,(frame.energySums.get(bodyId)??0)+deltaJ);
+  this.append('physics.energy',{body_id:bodyId,stage,delta_J:deltaJ,contribution_ids:[...ids]});
+ }
+ energyClosure(bodyId:string,beforeJ:number,afterJ:number):void{
+  const frame=this.frame;if(!frame)throw new Error('Physics energy closure requires an active substep');
+  if(!Number.isFinite(beforeJ)||!Number.isFinite(afterJ))throw new TypeError('Invalid physics energy closure');
+  const accounted=frame.energySums.get(bodyId)??0,actual=afterJ-beforeJ,residual=actual-accounted,tolerance=1e-9*Math.max(1,Math.abs(beforeJ),Math.abs(afterJ),Math.abs(accounted));
+  this.maxEnergyResidual=Math.max(this.maxEnergyResidual,Math.abs(residual));
+  if(Math.abs(residual)>tolerance)throw new Error(`Unattributed physics energy on ${bodyId}: residual ${residual} J`);
+  this.append('physics.energy-closure',{body_id:bodyId,before_J:beforeJ,after_J:afterJ,actual_delta_J:actual,accounted_delta_J:accounted,residual_J:residual,tolerance_J:tolerance});
+ }
  stateMutation(bodyId:string,wrenchId:string,before:PhysicsBodyState,after:PhysicsBodyState,dt:number):void{
   if(!this.frame)throw new Error('Physics state mutation requires an active substep');
   if(!Number.isFinite(dt)||dt<=0)throw new TypeError('Invalid physics integration dt');
@@ -177,6 +195,6 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
  snapshot():readonly PhysicsTraceRecord[]{return Object.freeze([...this.records]);}
  toJSONL():string{return this.records.map(record=>JSON.stringify(record)).join('\n')+'\n';}
  get proof(){
-  return Object.freeze({schema:PHYSICS_CAUSE_TRACE_SCHEMA,schemaVersion:PHYSICS_CAUSE_TRACE_VERSION,runId:this.runId,records:this.records.length,components:this.components.size,laws:this.laws.size,sealedBodies:this.sealedBodies.size,maxForceResidualN:this.maxForceResidual,maxTorqueResidualNm:this.maxTorqueResidual});
+  return Object.freeze({schema:PHYSICS_CAUSE_TRACE_SCHEMA,schemaVersion:PHYSICS_CAUSE_TRACE_VERSION,runId:this.runId,records:this.records.length,components:this.components.size,laws:this.laws.size,sealedBodies:this.sealedBodies.size,maxForceResidualN:this.maxForceResidual,maxTorqueResidualNm:this.maxTorqueResidual,maxEnergyResidualJ:this.maxEnergyResidual});
  }
 }
