@@ -31,8 +31,8 @@ class Mesh {
 export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  const chunk=world.chunk(cx,cz),ox=cx*128,oz=cz*128;
  const terrain=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.98,pattern:'plaster'});
- const masonry=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.86,pattern:'brick'});
- const trim=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.8,pattern:'plaster'});
+ const masonry=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.92,pattern:'brick',ageYears:55});
+ const trim=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.88,pattern:'plaster',ageYears:38});
  const asphalt=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.24,clearcoat:.72,clearcoatRoughness:.12});
  const details=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.86});
  // Opaque coated facade panels keep reflection and early depth. No fake transparency
@@ -97,11 +97,16 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    }
   }
   for(const lamp of cityLamps(cx,cz)){
-   metal.append({kind:'cylinder',radius:1,height:1,segments:10},[lamp.poleX-ox,2.7,lamp.poleZ-oz],[.16,.18,.18],[.09,5.4,.09]);
-   box(metal,lamp.poleX,5.45,lamp.poleZ-1,.14,.13,2.15,[.16,.18,.18]);
-   box(metal,lamp.x,lamp.y,lamp.z,.62,.62,.62,[.12,.13,.12]);
-   box(lampGlow,lamp.x,lamp.y,lamp.z,.43,.43,.43,[1,.82,.55]);
-   box(metal,lamp.x,lamp.y+.39,lamp.z,.52,.09,.52,[.12,.13,.12]);
+   // Historic four-pane lantern. Fixture geometry and semantic point light share
+   // the exact same position; the fog halo therefore originates inside the glass.
+   metal.append({kind:'cylinder',radius:1,height:1,segments:12},[lamp.poleX-ox,2.15,lamp.poleZ-oz],[.14,.15,.15],[.105,4.30,.105]);
+   metal.append({kind:'cylinder',radius:1,topRadius:.72,height:1,segments:12},[lamp.poleX-ox,.26,lamp.poleZ-oz],[.11,.12,.12],[.19,.52,.19]);
+   box(metal,lamp.x,lamp.y-.36,lamp.z,.60,.08,.60,[.10,.11,.11]);
+   box(lampGlow,lamp.x,lamp.y,lamp.z,.48,.62,.48,[.92,.88,.74]);
+   for(const sx of [-1,1])for(const sz of [-1,1])box(metal,lamp.x+sx*.245,lamp.y,lamp.z+sz*.245,.035,.70,.035,[.08,.09,.09]);
+   box(metal,lamp.x,lamp.y+.35,lamp.z,.62,.08,.62,[.09,.10,.10]);
+   metal.append({kind:'cylinder',radius:1,topRadius:.08,height:1,segments:12},[lamp.x-ox,lamp.y+.49,lamp.z-oz],[.09,.10,.10],[.42,.28,.42]);
+   box(snow,lamp.x,lamp.y+.66,lamp.z,.66,.055,.66,[.57,.59,.60]);
   }
  }else{
   for(const axis of ['e','n'] as const){const base=Math.round(axis==='e'?(oz+64)/1536:(ox+320)/1536),start=axis==='e'?ox:oz;
@@ -149,7 +154,14 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
     archBand(trim,bx,p.y+1.7,front+canopyDepth+.025,1.22,.16,[.39,.37,.33]);
     box(trim,bx-canopyWidth/6,p.y+p.height/2,front+.10,.16,Math.max(3,p.height-.5),.16,[.37,.35,.32]);
     box(trim,bx+canopyWidth/6,p.y+p.height/2,front+.10,.16,Math.max(3,p.height-.5),.16,[.37,.35,.32]);
-    box(trim,bx,p.y+3.62,front+.18,Math.min(4.8,canopyWidth*.25),.48,.10,[.18,.17,.16]);
+    const signWidth=Math.min(4.8,canopyWidth*.25);
+    box(trim,bx,p.y+3.62,front+.18,signWidth,.48,.10,[.14,.13,.12]);
+    // Tiny batched strokes suggest weathered shop lettering without allocating
+    // per-building label textures or draw calls.
+    for(let glyph=-3;glyph<=3;glyph++){
+     const h=.12+hash01(cx+glyph,cz+bay,71,world.seed)*.13;
+     box(details,bx+glyph*signWidth/8,p.y+3.62,front+.245,.055,h,.025,[.52,.48,.39]);
+    }
     awning(details,bx,p.y+2.48,front+.32,bayWidth,1.72,.55,[.22,.13,.11]);
     awning(snow,bx,p.y+2.54,front+.31,bayWidth+.05,1.74,.56,[.66,.67,.67]);
    }
@@ -162,6 +174,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
     awning(details,bx,p.y+2.46,back-.30,bayWidth,1.55,.52,[.19,.11,.10],-1);
     awning(snow,bx,p.y+2.52,back-.29,bayWidth+.05,1.57,.53,[.57,.58,.59],-1);
     box(details,bx,p.y+3.55,back-.18,bayWidth*.90,.42,.10,[.11,.085,.075]);
+    for(let glyph=-2;glyph<=2;glyph++)box(details,bx+glyph*bayWidth/6,p.y+3.55,back-.245,.045,.10+hash01(cx+glyph,cz+bay,79,world.seed)*.12,.025,[.48,.44,.36]);
    }
    for(const side of [-1,1] as const){
     const faceX=p.x+side*p.width/2,sideWidth=p.depth*.78;
@@ -170,6 +183,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
      awningX(details,faceX+side*.30,p.y+2.46,bz,bayWidth,1.55,.52,[.19,.11,.10],side);
      awningX(snow,faceX+side*.29,p.y+2.52,bz,bayWidth+.05,1.57,.53,[.57,.58,.59],side);
      box(details,faceX+side*.18,p.y+3.55,bz,.10,.42,bayWidth*.90,[.11,.085,.075]);
+     for(let glyph=-2;glyph<=2;glyph++)box(details,faceX+side*.245,p.y+3.55,bz+glyph*bayWidth/6,.025,.10+hash01(cx+glyph,cz+bay,83,world.seed)*.12,.045,[.48,.44,.36]);
     }
    }
    // Recessed ground-floor glazing: warm interiors and dark bays provide the
