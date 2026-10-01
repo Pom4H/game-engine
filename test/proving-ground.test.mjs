@@ -527,3 +527,25 @@ test('thermal mass closes its stored dissipated and rejected energy balance',()=
  const stored=(thermal.temperatureC-20)*1000,balance=thermal.dissipatedJ-thermal.rejectedJ;
  assert.ok(Math.abs(stored-balance)<1e-8,{stored,balance,dissipated:thermal.dissipatedJ,rejected:thermal.rejectedJ});
 });
+
+
+test('proof-mode energy ledger closes across vehicle soil contacts and fluid',()=>{
+ const scene=new Scene(spec);
+ scene.physics.wheelSupport=soilWheelSupport(bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground),scene.soil);
+ const car=new Vehicle(scene.physics,roadCar('energy.car'),{
+  position:[97,1.2,-118],rotation:[0,-Math.PI/2,0],velocity:[0,0,3]
+ });
+ car.setAir({densityKgM3:1.225,wind:[0,0,0],temperatureC:18});car.setControls({throttle:.35});
+ const floater=scene.physics.add(new RigidBody({
+  id:'energy.floater',position:[12,-.35,-27],velocity:[2,0,0],mass:900,
+  shape:{kind:'box',half:[.8,.45,.6]},material:material('steel'),fluid:{enclosedVolumeM3:1.4,leakAreaM2:.01}
+ }));
+ const trace=scene.physics.traceCauses({runId:'proving-energy',maxRecords:200000});
+ for(let i=0;i<120;i++)scene.physics.step(dt);
+ const records=trace.snapshot(),proof=trace.proof,stages=new Set(records.filter(r=>r.type==='physics.energy').map(r=>r.stage));
+ assert.ok(proof.maxEnergyResidualJ<1e-6,proof);
+ for(const stage of ['force-driver','fluid','gravity-integrate','contacts-solver'])assert.ok(stages.has(stage),{stage,stages:[...stages]});
+ assert.ok(records.some(r=>r.type==='physics.energy-closure'&&r.body_id===car.body.id));
+ assert.ok(records.some(r=>r.type==='physics.energy-closure'&&r.body_id===floater.id));
+ scene.physics.stopCauseTrace(trace);car.dispose();
+});
