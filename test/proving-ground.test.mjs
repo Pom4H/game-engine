@@ -101,8 +101,15 @@ test('loop and hill are composed from ordinary physical segments',()=>{
 });
 
 
-const roadCar=(id,extraParts=[])=>vehicle(id,{
+const provingDrivetrain={
+ engine:{idleRpm:850,stallRpm:420,redlineRpm:6500,inertiaKgM2:.24,dragTorqueNm:18,torqueCurve:[{rpm:0,torqueNm:170},{rpm:1200,torqueNm:250},{rpm:3500,torqueNm:330},{rpm:6000,torqueNm:255},{rpm:6500,torqueNm:0}]},
+ clutch:{maxTorqueNm:520,stiffnessNmPerRadS:14},
+ gearbox:{forwardRatios:[3.55,2.15,1.52,1.16,.92,.75],reverseRatio:3.3,finalDrive:3.62,efficiency:.94},
+ differential:{outputs:['rear.left','rear.right'],lockFraction:.18,preloadNm:35,couplingNmPerRadS:12},
+};
+const roadCar=(id,extraParts=[],drivetrain)=>vehicle(id,{
  chassis:{massKg:1450,sizeM:[4.6,1.3,1.9],dragAreaM2:.72},
+ ...(drivetrain?{drivetrain}:{}),
  parts:[
   wheel('front.left',{at:[1.35,-.45,-.78],massKg:20,radiusM:.34,widthM:.24,suspension:{restM:.45,travelM:.24,springNPerM:36000,damperNsPerM:3200},steerRad:.55,brakeTorqueNm:3200,grip:1.08}),
   wheel('front.right',{at:[1.35,-.45,.78],massKg:20,radiusM:.34,widthM:.24,suspension:{restM:.45,travelM:.24,springNPerM:36000,damperNsPerM:3200},steerRad:.55,brakeTorqueNm:3200,grip:1.08}),
@@ -129,6 +136,30 @@ test('wheel vehicle reverses direction on the straight from torque, without a st
  assert.equal(loaded,true,'wheels must be physically supported by the proving-ground road');
  assert.ok(car.body.velocity[2]>start+2,{start,end:car.body.velocity[2]});
  assert.equal(crossed,true,'forward drive torque must pass continuously through zero speed');
+ assert.ok(car.part('rear.left').angularSpeed>0);
+ car.dispose();
+});
+
+test('engine clutch gearbox and differential pull a backward-rolling car forward without a stop gate',()=>{
+ const scene=new Scene(spec);
+ scene.physics.wheelSupport=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
+ const car=new Vehicle(scene.physics,roadCar('proving.car.drivetrain',[],provingDrivetrain),{
+  position:[-28,1.2,-64],rotation:[0,-Math.PI/2,0],velocity:[0,0,-4]
+ });
+ car.setGear(1);
+ const start=car.body.velocity[2];let crossed=false,maxOutput=0;
+ for(let i=0;i<720;i++){
+  car.setControls({throttle:1,clutch:Math.min(1,(i+1)/120)});
+  scene.physics.step(dt);
+  maxOutput=Math.max(maxOutput,Math.abs(car.drivetrainState?.outputTorqueNm??0));
+  if(car.body.velocity[2]>0)crossed=true;
+ }
+ const state=car.drivetrainState;
+ assert.ok(state&&Number.isFinite(state.engineRpm),state);
+ assert.ok(maxOutput>500,maxOutput);
+ assert.ok(state.clutchDissipatedJ>0,state);
+ assert.equal(crossed,true,{start,end:car.body.velocity[2],state});
+ assert.ok(car.body.velocity[2]>5,{start,end:car.body.velocity[2],state});
  assert.ok(car.part('rear.left').angularSpeed>0);
  car.dispose();
 });
