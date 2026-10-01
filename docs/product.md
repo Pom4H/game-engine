@@ -1,5 +1,10 @@
 # Integrated product slice
 
+> **Engine-first freeze:** this branch is not currently a gameplay-integration target.
+> Existing Chess, Car/Ball and Thegame-lite routes are retained only as engine
+> regression/stress harnesses. New gameplay waits for the rendering, networking,
+> audio and physics gates in [ENGINE_FIRST.md](ENGINE_FIRST.md).
+
 Base: `codex/adaptive-core` at `2db7720705c87c70ebc3572e7f7956abdfe0e0b0`.
 This change keeps that branch's Vehicle, source editor, native QUIC room, passive
 presentation, dynamic mesh upload and common console/recorder. It is not a wholesale
@@ -93,6 +98,19 @@ algorithm was changed to make those tests pass:
   remain. This corrects test scope; it is NOT renewed proof of full original FBX parity
   or visual approval of the current M3. The original FBX was not re-imported here.
 
+## Current development order
+
+The active product order is now:
+
+1. rendering quality, determinism, streaming and frame-budget evidence;
+2. generic authoritative networking, replay, backpressure and impairment testing;
+3. physically/semantically driven audio with deterministic offline regression;
+4. unified physics with complete cause provenance and reality-oriented validation;
+5. only then new game code.
+
+Existing game routes must not receive new gameplay systems during this phase. They may
+change only when an engine subsystem needs a reproducible acceptance fixture.
+
 ## Evidence and remaining work
 
 Run `bun run check`, `bun run docs:test`, `node tools/product/qa.mjs`. The browser test
@@ -103,8 +121,7 @@ GitHub artifact storage quota must not determine test success. Source is ordinar
 The website's initial arena card comes from native run 36387640678 / source 6bfb8c5,
 not a new render or a synthetic recreation. It is illustrative, not current acceptance.
 
-Remaining: all of main's newer render/environment work; reconciliation of the complete
-#29 renderer/memory/Gantt branch; selectable built-in Scene systems; a unique live view
-for every engine entity; full thegame city/population/economy/police/save parity; Meshwork
-leases/streaming workers and the YouTube output adapter. `/games/thegame/` exposes that
-migration status instead of advertising a substitute toy city as the migrated game.
+Remaining in the active phase: render/environment quality and regression evidence; reconciliation of the complete
+#29 renderer/memory/Gantt work where it strengthens the engine; generic network impairment/replay/backpressure validation;
+audio causality/regression; unified physics provenance, contacts and real-world validation; selectable built-in Scene systems;
+and a unique live view for every engine entity. Full Thegame/gameplay parity is intentionally deferred until these gates pass.
