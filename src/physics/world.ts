@@ -7,6 +7,7 @@ import {V3} from '../math.js';
 import {PhysicsCauseTrace,physicsCause,type PhysicsBodyState,type PhysicsCauseManifestWriter,type PhysicsCauseRef,type PhysicsCauseWriter} from './cause-trace.js';
 import type {FluidSample} from './fluid.js';
 import type {AirSample} from './wind.js';
+import type {SoilContactInput,SoilContactResult} from './soil.js';
 
 export type CollisionShape = {kind:'sphere';radius:number}|{kind:'box';half:Vec3};
 export interface RigidBodyOptions {
@@ -144,6 +145,8 @@ export class PhysicsWorld {
   fluidAt?:(body:RigidBody)=>FluidSample|undefined;
   /** Spatial air state sampled by aerodynamic force owners. */
   airAt?:(point:Vec3)=>AirSample;
+  /** Deformable bearing response sampled by wheel contact owners. */
+  soilContactAt?:(point:Vec3,input:SoilContactInput)=>SoilContactResult|undefined;
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
   private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
