@@ -2,7 +2,7 @@ import type {CharacterWorld} from '../../runtime/character-motor.js';
 /** Reduced, explicitly new world revision of thegame, not a compatible legacy save.
  * Hash, noise, climate blending, hub dimensions and highway curves come from
  * Pom4H/thegame biomes.ts c6a4516b665b and shared/math.ts 87384a931250. */
-export const WORLD_REVISION='thegame-lite/2';
+export const WORLD_REVISION='thegame-lite/3';
 export const CHUNK_SIZE=128,TERRAIN_STEP=8,SEA_LEVEL=-.35,WORLD_LIMIT=1_000_000;
 export type Biome='city'|'suburbs'|'grassland'|'forest'|'mountains'|'desert'|'coast'|'ocean';
 export const BIOME_NAMES:Record<Biome,string>={city:'Город',suburbs:'Пригороды',grassland:'Поля',forest:'Лес',mountains:'Горы',desert:'Сухие земли',coast:'Побережье',ocean:'Океан'};
