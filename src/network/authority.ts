@@ -11,10 +11,12 @@ export interface AuthorityAdapter{
 /** Called at a physical-tick boundary. Transport stays outside the authoritative worker.
  * An epoch fences resets; every mutation is permission-checked and compares the paused tick. */
 export class AuthoritySession{
- paused=true;private sequence=0;readonly history:Replica;publications=0;
+ paused=true;private sequence:number;readonly history:Replica;publications=0;
  constructor(readonly world:AuthorityAdapter,readonly projection:Projection,readonly epoch:number,
-  private readonly authorize:(peer:string,action:DebugAction)=>boolean=()=>false,readonly stepSeconds=1/60){
-  if(!Number.isFinite(stepSeconds)||stepSeconds<=0||stepSeconds>.1)throw new RangeError('Invalid authority step');this.history=new Replica(projection,epoch,600,32_000_000,0);
+  private readonly authorize:(peer:string,action:DebugAction)=>boolean=()=>false,readonly stepSeconds=1/60,initialSequence=0){
+  if(!Number.isFinite(stepSeconds)||stepSeconds<=0||stepSeconds>.1)throw new RangeError('Invalid authority step');
+  if(!Number.isSafeInteger(initialSequence)||initialSequence<0)throw new RangeError('Invalid authority sequence');
+  this.sequence=initialSequence;this.history=new Replica(projection,epoch,600,32_000_000,0);
  }
  advance(count=1):number{if(!Number.isSafeInteger(count)||count<1||count>8)throw new RangeError('Advance 1..8 bounded ticks');let n=0;while(!this.paused&&n<count){this.world.step(this.stepSeconds);n++;}return n;}
  publish():Publication{
