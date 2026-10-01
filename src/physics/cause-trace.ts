@@ -56,7 +56,7 @@ interface LawDefinition {readonly bodyId:string;readonly cause:PhysicsCauseRef}
 interface ActiveFrame {
  readonly tick:number;readonly substep:number;readonly simTime:number;
  readonly sums:Map<string,{force:[number,number,number];torque:[number,number,number];ids:string[]}>;
- readonly writers:Map<string,PhysicsCauseWriter>;
+ readonly writers:Map<string,PhysicsCauseWriter>;readonly activeLawKeys:Set<string>;
 }
 
 const finiteVec=(value:Vec3,label:string):void=>{
@@ -123,7 +123,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
  beginSubstep(tick:number,substep:number,simTime:number):void{
   if(this.frame)throw new Error('Physics trace substep already open');
   if(!Number.isSafeInteger(tick)||tick<0||!Number.isSafeInteger(substep)||substep<0||!Number.isFinite(simTime)||simTime<0)throw new TypeError('Invalid physics trace frame');
-  this.frame={tick,substep,simTime,sums:new Map(),writers:new Map()};
+  this.frame={tick,substep,simTime,sums:new Map(),writers:new Map(),activeLawKeys:new Set()};
   this.append('frame.begin',{});
  }
  writer(bodyId:string):PhysicsCauseWriter{
@@ -145,7 +145,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
   const sum=frame.sums.get(bodyId)??{force:[0,0,0] as [number,number,number],torque:[0,0,0] as [number,number,number],ids:[]};
   if(!frame.sums.has(bodyId))frame.sums.set(bodyId,sum);
   for(let k=0;k<3;k++){sum.force[k]!+=force[k]!;sum.torque[k]!+=torque[k]!;}
-  const contributionId=`${frame.tick}.${frame.substep}/${cause.componentId}/${cause.lawId}/${sum.ids.length}`;sum.ids.push(contributionId);
+  const contributionId=`${frame.tick}.${frame.substep}/${cause.componentId}/${cause.lawId}/${sum.ids.length}`;sum.ids.push(contributionId);frame.activeLawKeys.add(`${cause.componentId}\0${cause.lawId}`);
   this.append('physics.contribution',{contribution_id:contributionId,body_id:bodyId,component_id:cause.componentId,law_id:cause.lawId,source:{kind:source.kind,id:source.id},effect:{...(effect.forceN?{force_N:cloneVec(effect.forceN)}:{}),...(effect.torqueNm?{torque_Nm:cloneVec(effect.torqueNm)}:{}),...(effect.impulseNs?{impulse_Ns:cloneVec(effect.impulseNs)}:{}),...(effect.pointWorldM?{point_world_m:cloneVec(effect.pointWorldM)}:{}),...(effect.powerW!==undefined?{power_W:effect.powerW}:{}),...(effect.inputsHash!==undefined?{inputs_hash:effect.inputsHash}:{})}});
   return contributionId;
  }
@@ -167,12 +167,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
  }
  endSubstep():void{
   const frame=this.frame;if(!frame)throw new Error('No physics trace substep is open');
-  const activeLawKeys=new Set<string>();
-  for(const record of this.records){
-   if(record.type!=='physics.contribution'||record.tick!==frame.tick||record.substep!==frame.substep)continue;
-   activeLawKeys.add(`${String(record.component_id)}\0${String(record.law_id)}`);
-  }
-  this.append('frame.end',{active_laws:[...activeLawKeys].sort(),writers:[...frame.writers.keys()].sort()});
+  this.append('frame.end',{active_laws:[...frame.activeLawKeys].sort(),writers:[...frame.writers.keys()].sort()});
   this.frame=undefined;
  }
  snapshot():readonly PhysicsTraceRecord[]{return Object.freeze([...this.records]);}
