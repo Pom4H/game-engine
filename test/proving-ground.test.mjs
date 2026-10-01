@@ -208,7 +208,7 @@ test('brake endurance heats the wheel brakes and reduces available braking perfo
    const p=car.part(id);hottest=Math.max(hottest,p.brakeTemperatureC);minPerformance=Math.min(minPerformance,p.brakePerformance);maxBrakePower=Math.max(maxBrakePower,p.brakePowerW);
   }
  }
- assert.ok(maxBrakePower>10000,maxBrakePower);
+ assert.ok(maxBrakePower>10000,JSON.stringify({maxBrakePower,hottest,minPerformance,velocity:car.body.velocity,wheelOmega:car.part('front.left').angularSpeed,contact:car.part('front.left').contact,support:car.part('front.left').supportId}));
  assert.ok(hottest>80,{hottest,minPerformance});
  assert.ok(minPerformance<.95,{hottest,minPerformance});
  assert.ok(car.body.velocity[2]<8,{velocity:car.body.velocity,hottest,minPerformance});
