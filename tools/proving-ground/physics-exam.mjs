@@ -38,9 +38,9 @@ const implemented=new Map([
  ['drag',(typeof engine.FluidField==='function'&&typeof engine.PhysicsWorld==='function')||typeof engine.wing==='function'],
  ['sealing',typeof engine.FluidField==='function'&&typeof engine.RigidBody?.prototype?.setLeakArea==='function'],
  ['thermal',typeof engine.ThermalMass==='function'],
- ['soil',false],
- ['sinkage',false],
- ['traction',false],
+ ['soil',typeof engine.SoilField==='function'],
+ ['sinkage',typeof engine.SoilField==='function'],
+ ['traction',typeof engine.SoilField==='function'&&typeof engine.Vehicle==='function'],
  ['ground-clearance',typeof engine.Vehicle==='function'],
  // Trace exists, but release proof remains blocked until contact damping/sleep corrections are causal too.
  ['cause-provenance',false],
