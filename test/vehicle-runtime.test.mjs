@@ -52,6 +52,52 @@ test('wind affects wing force through relative velocity rather than a speed/alti
  b.car.setAir({densityKgM3:1.225,wind:[-60,0,0]});a.car.evaluate(1/120);b.car.evaluate(1/120);assert.deepEqual(a.car.force,b.car.force);
 });
 
+test('a wheel vehicle with attached wings glides after wheel power is removed',()=>{
+ const make=(id,wings)=>{
+  const world=new PhysicsWorld([0,-9.81,0],-100),base=carBlueprint({id,wings,incidenceRad:.10});
+  return {world,car:new Vehicle(world,base,{position:[0,80,0],velocity:[48,-2,0]})};
+ };
+ const road=make('road-ballistic',false),glider=make('road-glider',true);
+ run(road,3);run(glider,3);
+ assert.ok(glider.car.body.position[1]>road.car.body.position[1]+5,{road:road.car.body.position,glider:glider.car.body.position});
+ assert.ok(glider.car.body.position[0]>20);
+ assert.equal(glider.world.bodies.size,1);
+ road.car.dispose();glider.car.dispose();
+});
+
+test('spoiler is an ordinary hinged aero surface driven only by relative airflow',()=>{
+ const blueprint=vehicle('spoiler-car',{chassis:{massKg:1200,sizeM:[4.6,1.3,1.9],dragAreaM2:0},parts:[
+  wing('rear.spoiler',{at:[-1.7,.55,0],massKg:8,spanM:1.6,chordM:.35,incidenceRad:0,zeroLiftRad:0,
+   dragCoefficient:.03,stallRad:.30,stallWidthRad:.18,control:'spoiler',controlGainRad:-.75}),
+ ]});
+ const force=(id,velocity,wind)=>{
+  const world=new PhysicsWorld([0,0,0],-100),car=new Vehicle(world,vehicle(id,{...structuredClone(blueprint.source),id:undefined}),{position:[0,10,0],velocity});
+  car.setAir({densityKgM3:1.225,wind});car.setControls({spoiler:1});car.evaluate(1/120);
+  const p=structuredClone(car.part('rear.spoiler'));car.dispose();return p;
+ };
+ const moving=force('spoiler-moving',[50,0,0],[0,0,0]);
+ const windy=force('spoiler-windy',[0,0,0],[-50,0,0]);
+ const coflow=force('spoiler-coflow',[50,0,0],[50,0,0]);
+ assert.deepEqual(moving.force,windy.force,'same relative airflow must produce the same spoiler force');
+ assert.ok(moving.liftN<0,'deployed rear spoiler must create downforce for this authored hinge direction');
+ assert.ok(moving.dragN>100);
+ near(coflow.liftN,0);near(coflow.dragN,0);
+});
+
+test('spoiler deployment changes aero force without changing vehicle kind or integration path',()=>{
+ const bp=vehicle('surface-control',{chassis:{massKg:900,sizeM:[4,1.2,1.8],dragAreaM2:.6},parts:[
+  wheel('wheel',{at:[0,0,0],massKg:20,radiusM:.34,widthM:.25,suspension:{restM:.4,travelM:.2,springNPerM:30000,damperNsPerM:2500}}),
+  wing('spoiler',{at:[-1.5,.5,0],massKg:6,spanM:1.5,chordM:.3,zeroLiftRad:0,control:'spoiler',controlGainRad:-.7}),
+ ]});
+ const world=new PhysicsWorld([0,0,0],-100),car=new Vehicle(world,bp,{position:[0,10,0],velocity:[55,0,0]});
+ car.setControls({spoiler:0});car.evaluate(1/120);const clean=structuredClone(car.part('spoiler'));
+ car.setControls({spoiler:1});car.evaluate(1/120);const deployed=structuredClone(car.part('spoiler'));
+ assert.equal(world.bodies.size,1);assert.equal(car.part('wheel').kind,'wheel');assert.equal(car.part('spoiler').kind,'wing');
+ assert.ok(deployed.dragN>clean.dragN);assert.ok(deployed.force[1]<clean.force[1]);
+ assert.throws(()=>car.setControls({spoiler:-.01}));
+ car.dispose();
+});
+
 test('overloaded wing loses lifting capability next substep, retains drag and attached mass',()=>{
  const f=wingFixture([surface('wing',[0,0,0],{condition:{failureLoadN:1000}})]),mass=f.car.body.mass;
  f.car.evaluate(1/120);assert.equal(f.car.part('wing').failed,true);
