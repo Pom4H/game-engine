@@ -96,19 +96,19 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
  component(input:{readonly componentId:string;readonly bodyId:string;readonly kind:PhysicsComponentKind;readonly parentComponentId?:string}):void{
   if(!input.componentId||!input.bodyId||input.componentId.length>180||input.bodyId.length>180)throw new TypeError('Invalid physics component');
   if(this.sealedBodies.has(input.bodyId))throw new Error(`Physics cause manifest for ${input.bodyId} is sealed`);
-  const previous=this.components.get(input.componentId);
+  const componentKey=`${input.bodyId}\0${input.componentId}`,previous=this.components.get(componentKey);
   if(previous){
    if(previous.bodyId!==input.bodyId||previous.kind!==input.kind||previous.parentComponentId!==input.parentComponentId)throw new TypeError(`Conflicting physics component ${input.componentId}`);
    return;
   }
   const definition:ComponentDefinition={componentId:input.componentId,bodyId:input.bodyId,kind:input.kind,...(input.parentComponentId!==undefined?{parentComponentId:input.parentComponentId}:{})};
-  this.components.set(input.componentId,definition);
+  this.components.set(componentKey,definition);
   this.append('manifest.component',{component_id:input.componentId,body_id:input.bodyId,kind:input.kind,...(input.parentComponentId!==undefined?{parent_component_id:input.parentComponentId}:{})});
  }
  law(bodyId:string,cause:PhysicsCauseRef):void{
-  const component=this.components.get(cause.componentId);if(!component||component.bodyId!==bodyId)throw new TypeError(`Physics law ${cause.lawId} requires a declared component`);
+  const component=this.components.get(`${bodyId}\0${cause.componentId}`);if(!component)throw new TypeError(`Physics law ${cause.lawId} requires a declared component`);
   if(this.sealedBodies.has(bodyId))throw new Error(`Physics cause manifest for ${bodyId} is sealed`);
-  const key=`${cause.componentId}\0${cause.lawId}`,previous=this.laws.get(key);
+  const key=`${bodyId}\0${cause.componentId}\0${cause.lawId}`,previous=this.laws.get(key);
   if(previous){
    if(previous.bodyId!==bodyId||previous.cause.lawKind!==cause.lawKind||!sameArray(previous.cause.effectKinds,cause.effectKinds))throw new TypeError(`Conflicting physics law ${cause.lawId}`);
    return;
@@ -117,7 +117,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
   this.append('manifest.law',{body_id:bodyId,component_id:cause.componentId,law_id:cause.lawId,law_kind:cause.lawKind,effect_kinds:[...cause.effectKinds]});
  }
  sealBody(bodyId:string):void{
-  if(!this.components.has(bodyId))throw new TypeError(`Body component ${bodyId} is not declared`);
+  if(!this.components.has(`${bodyId}\0${bodyId}`))throw new TypeError(`Body component ${bodyId} is not declared`);
   this.sealedBodies.add(bodyId);
  }
  beginSubstep(tick:number,substep:number,simTime:number):void{
@@ -135,7 +135,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
  }
  private contribute(bodyId:string,cause:PhysicsCauseRef,source:PhysicsSourceRef,effect:PhysicsContributionEffect):string{
   const frame=this.frame;if(!frame)throw new Error('Physics contribution requires an active substep');
-  const law=this.laws.get(`${cause.componentId}\0${cause.lawId}`);
+  const law=this.laws.get(`${bodyId}\0${cause.componentId}\0${cause.lawId}`);
   if(!law||law.bodyId!==bodyId)throw new Error(`Undeclared physics cause ${cause.componentId}/${cause.lawId}`);
   if(!source.id||source.id.length>256)throw new TypeError('Invalid physics source');
   const force=effect.forceN??[0,0,0],torque=effect.torqueNm??[0,0,0];finiteVec(force,'force');finiteVec(torque,'torque');
