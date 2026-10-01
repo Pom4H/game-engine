@@ -45,6 +45,20 @@ test('rail services stay route-authoritative instead of pretending to use road t
  vehicles.dispose();
 });
 
+test('persistent resident can enter while physically boarding without identity replacement',()=>{
+ const game=new ThegameAuthority({},50);
+ const boarding=game.transit.passengersState().find(p=>p.state==='boarding'&&p.serviceId?.startsWith('B'));
+ assert.ok(boarding);
+ const pose=game.transit.passengerPose(boarding.residentId,game.tick/60);assert.ok(pose);
+ const state=characterState(pose.position[0],pose.position[1],pose.position[2],pose.yaw);
+ const peer=game.join('p1','Boarding',{state,discovered:0,residentId:boarding.residentId});
+ assert.equal(peer.residentId,boarding.residentId);assert.equal(peer.seat?.serviceId,boarding.serviceId);
+ for(let i=0;i<80;i++)game.step();
+ assert.equal(game.transit.passenger(peer.residentId)?.state,'riding');
+ assert.equal(peer.seat?.serviceId,boarding.serviceId);
+ game.dispose();
+});
+
 test('known resident enters the world already riding the same living bus service',()=>{
  const game=new ThegameAuthority({},51);
  const peer=joinKnownRider(game);
