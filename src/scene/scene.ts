@@ -56,6 +56,7 @@ export class Scene {
   readonly spec:SceneSpec;
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
+  readonly fluids:FluidField;
   readonly deformation=new PlasticDeformationSystem();
   readonly surfaces=new SurfaceEnvironmentSystem();
   readonly fluids:FluidField;
