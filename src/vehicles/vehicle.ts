@@ -201,7 +201,7 @@ export class Vehicle implements PhysicsForceDriver {
     const raw=ct*air.densityKgM3*p.compiled.area*tip*tip*translational*p.liftScale;
     const profile=(solidity*(s.profileDragCoefficient??.011)/8)*air.densityKgM3*p.compiled.area*tip*tip*tip;
     const induced=Math.abs(raw)>0?Math.abs(raw)**1.5/Math.sqrt(Math.max(1e-9,2*air.densityKgM3*p.compiled.area))/translational:0;
-    const flowPower=.5*air.densityKgM3*p.compiled.area*descent**3*.35,available=s.maxPowerW*throttle+flowPower;
+    const flowPower=.5*air.densityKgM3*p.compiled.area*descent**3*.55,available=s.maxPowerW*throttle+flowPower;
     let scale=1;if(profile+induced>available){const usable=Math.max(0,available-profile);scale=induced>0?clamp((usable/induced)**(2/3),0,1):0;}
     const thrust=raw*scale,power=Math.min(available,profile+induced*scale**1.5);
     p.load=Math.abs(thrust);p.lift=thrust;p.power=power;p.reactionTorque=-(s.direction??1)*power/Math.max(1,Math.abs(p.omega));
