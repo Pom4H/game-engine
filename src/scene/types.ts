@@ -7,6 +7,7 @@ import type {MaterialFinish,MaterialTreatment} from '../materials/surface.js';
 import type {SceneDeformationSpec} from '../physics/deformation.js';
 import type {FluidVolumeSpec} from '../physics/fluid.js';
 import type {WindVolumeSpec} from '../physics/wind.js';
+import type {SoilVolumeSpec} from '../physics/soil.js';
 
 export type Color = readonly [number,number,number,number];
 export type Primitive =
@@ -169,6 +170,8 @@ export interface SceneSpec {
   fluids?:readonly FluidVolumeSpec[];
   /** Spatial air-flow volumes for wind tunnels, gust corridors and wake experiments. */
   windVolumes?:readonly WindVolumeSpec[];
+  /** Persistent deformable bearing fields for wheels/tracks. */
+  soilVolumes?:readonly SoilVolumeSpec[];
   rendering?:RenderingSpec;
   version:1;
   seed?:number;
