@@ -16,9 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Verify exact source payload, apply scoped edits and remove transfer helpers
-        shell: bash
+        shell: powershell
         run: |
-          node <<'NODE'
+          @'
           const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),zlib=require('node:zlib'),{execFileSync}=require('node:child_process');
           const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
           if(process.env.GITHUB_REF!=='refs/heads/product/unified-engine')throw Error('Wrong branch');
@@ -50,7 +50,11 @@ jobs:
           git('commit','-m','perf(thegame): prepared mesh streaming, bounded GPU uploads and whole-run frame health');
           git('push','origin','HEAD:refs/heads/product/unified-engine');
           console.log('SOURCE_COMMIT '+git('rev-parse','HEAD'));console.log(git('show','--stat','--oneline','HEAD'));
-          NODE
+          '@ | Set-Content -Path .github/apply-streaming-source.cjs -Encoding UTF8
+          node .github/apply-streaming-source.cjs
+          $result = $LASTEXITCODE
+          Remove-Item .github/apply-streaming-source.cjs -ErrorAction SilentlyContinue
+          exit $result
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
