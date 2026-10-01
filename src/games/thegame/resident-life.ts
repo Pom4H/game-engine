@@ -93,12 +93,12 @@ export function residentPose(seed:number,id:string,tick:number):ResidentPose{
  else if(hour>=19.25&&hour<21.75){from=to=profile.leisure;}
  else if(hour>=21.75&&hour<22){from=profile.leisure;to=profile.home;t=progress(hour,21.75,22);}
  const pose=segment(from,to,t),moving=from!==to;
- const speed=moving?Math.max(.7,intent.speed):0;
+ const speed=moving?Math.max(.7,Math.min(1.45,intent.speed)):0;
  return Object.freeze({
   position:pose.position,
   yaw:pose.yaw,
   speed,
-  phase:(seconds*Math.max(.25,speed)*5+hash01(...Object.values(parseResidentId(id)!),seed))%(Math.PI*2000),
+  phase:(()=>{const p=parseResidentId(id)!;return(seconds*Math.max(.25,speed)*5+hash01(p.cx,p.cz,p.slot,seed)*53)%(Math.PI*2000);})(),
   intent,
  });
 }
