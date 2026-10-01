@@ -27,7 +27,7 @@ export function createThegameHost(config,{profile=false,now=()=>performance.now(
      for(const [key,s] of sessions)if(!s.active&&s.expires<=at)sessions.delete(key);
      if(sessions.size>=64){const unused=[...sessions].find(([,s])=>!s.active);if(unused)sessions.delete(unused[0]);else throw Error('Session capacity');}
      sessions.set(c.token,{id:c.id,residentId:peer.residentId,active:true,expires:Infinity,state:{...peer.state},discovered:peer.discovered});
-     send(socket,{type:'welcome',version:WORLD_REVISION,world:worldSignature(game.config),config:game.config,epoch:game.epoch,id:c.id,token:c.token,resident:game.resident(c.id),self:{ack:0,state:peer.state,discovered:peer.discovered}});
+     send(socket,{type:'welcome',version:WORLD_REVISION,world:worldSignature(game.config),config:game.config,epoch:game.epoch,id:c.id,token:c.token,resident:game.resident(c.id),self:{ack:0,state:peer.state,discovered:peer.discovered,...(peer.seat?{seat:peer.seat}:{})}});
     }else if(data.type==='input'){
      if(!c.id)throw Error('Join first');game.enqueue(c.id,data.items);
     }else if(data.type==='ping'){
