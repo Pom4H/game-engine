@@ -14,7 +14,8 @@ export interface WingSpec extends PartSpec {
   readonly kind:'wing';readonly spanM:number;readonly chordM:number;
   readonly chord?:Vec3;readonly normal?:Vec3;readonly incidenceRad?:number;readonly zeroLiftRad?:number;
   readonly dragCoefficient?:number;readonly efficiency?:number;readonly stallRad?:number;readonly stallWidthRad?:number;
-  readonly control?:'pitch'|'roll'|'flap';readonly controlGainRad?:number;
+  /** Any hinged aerodynamic surface can bind to the same vehicle controls. A spoiler is not a special force: it is an ordinary surface deflected into the relative airflow. */
+  readonly control?:'pitch'|'roll'|'flap'|'spoiler';readonly controlGainRad?:number;
 }
 export interface RotorSpec extends PartSpec {
   readonly kind:'rotor';readonly radiusM:number;readonly bladeChordM:number;readonly blades:number;
@@ -85,7 +86,7 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
       check(p.dragCoefficient??.025,'Wing drag',0,10);check(p.efficiency??.8,'Efficiency',.01,1);
       check(p.stallRad??.26,'Stall angle',.001,Math.PI);check(p.stallWidthRad??.2,'Stall width',.001,Math.PI);
       check(p.controlGainRad??0,'Control gain',-1.4,1.4);
-      if(p.control!==undefined&&!['pitch','roll','flap'].includes(p.control))throw new RangeError('Unknown wing control');
+      if(p.control!==undefined&&!['pitch','roll','flap','spoiler'].includes(p.control))throw new RangeError('Unknown aerodynamic control');
       area=p.spanM*p.chordM;const aspect=p.spanM*p.spanM/area;slope=2*Math.PI*aspect/(aspect+2);induced=1/(Math.PI*aspect*(p.efficiency??.8));
       const span:Vec3=[chord[1]*normal[2]-chord[2]*normal[1],chord[2]*normal[0]-chord[0]*normal[2],chord[0]*normal[1]-chord[1]*normal[0]];
       const variance=[0,1,2].map(k=>(p.chordM*p.chordM*chord[k]!**2+p.spanM*p.spanM*span[k]!**2)/12);
