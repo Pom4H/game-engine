@@ -185,6 +185,36 @@ test('engine clutch gearbox and differential pull a backward-rolling car forward
  car.dispose();
 });
 
+test('brake endurance heats the wheel brakes and reduces available braking performance',()=>{
+ const scene=new Scene(spec);
+ scene.physics.wheelSupport=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
+ const base=structuredClone(roadCar('thermal.base').source),thermal={
+  heatCapacityJPerK:240,coolingWPerK:5,airflowCoolingWPerKPerMps:.35,
+  initialTemperatureC:20,fadeStartC:75,fadeEndC:165,minPerformanceFraction:.38,
+ };
+ const bp=vehicle('proving.car.thermal',{
+  chassis:base.chassis,
+  parts:base.parts.map(p=>p.kind==='wheel'?{...p,brakeThermal:thermal}:p),
+ });
+ const car=new Vehicle(scene.physics,bp,{
+  position:[-28,1.2,-72],rotation:[0,-Math.PI/2,0],velocity:[0,0,31]
+ });
+ car.setAir({densityKgM3:1.225,wind:[0,0,0],temperatureC:20});
+ car.setControls({brake:1,throttle:0});
+ let hottest=20,minPerformance=1,maxBrakePower=0;
+ for(let i=0;i<420;i++){
+  scene.physics.step(dt);
+  for(const id of ['front.left','front.right','rear.left','rear.right']){
+   const p=car.part(id);hottest=Math.max(hottest,p.brakeTemperatureC);minPerformance=Math.min(minPerformance,p.brakePerformance);maxBrakePower=Math.max(maxBrakePower,p.brakePowerW);
+  }
+ }
+ assert.ok(maxBrakePower>10000,maxBrakePower);
+ assert.ok(hottest>80,{hottest,minPerformance});
+ assert.ok(minPerformance<.95,{hottest,minPerformance});
+ assert.ok(car.body.velocity[2]<8,{velocity:car.body.velocity,hottest,minPerformance});
+ car.dispose();
+});
+
 test('wind-tunnel wing force depends on relative air velocity, not a vehicle mode',()=>{
  const make=(id,velocity,wind)=>{
   const scene=new Scene(spec),bp=vehicle(id,{chassis:{massKg:800,sizeM:[4,1.2,1.7],dragAreaM2:0},parts:[
