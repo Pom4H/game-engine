@@ -6,6 +6,7 @@ import {RuntimeTimeline} from '../../core/runtime-timeline.js';
 import {OpenWorld,WORLD_REVISION,WORLD_LIMIT} from './world.js';
 import {materializeCrowd} from './crowd.js';
 import {NearbyNpcAuthority} from './npc-authority.js';
+import {TransitAuthority} from './transit.js';
 import type {ResidentJob,ResidentActivity,CommuteMode} from './resident-life.js';
 export interface ThegameConfig extends CharacterTuning {readonly seed:number;readonly viewRadius:number;readonly exposure:number}
 export function thegameConfig(raw:Partial<ThegameConfig>={}):Readonly<ThegameConfig>{
@@ -51,12 +52,12 @@ export function readSelf(raw:unknown):SelfState{
 /** Authoritative on-foot subset. Message handlers validate/enqueue; only step() moves actors.
  * Fixed 60 Hz, one input/peer/tick, independently bounded world, queues and publication. */
 export class ThegameAuthority {
- readonly config:Readonly<ThegameConfig>;readonly world:OpenWorld;readonly peers=new Map<string,Peer>();readonly timeline:RuntimeTimeline;readonly profiler:CpuProfiler;readonly npcs:NearbyNpcAuthority;
+ readonly config:Readonly<ThegameConfig>;readonly world:OpenWorld;readonly peers=new Map<string,Peer>();readonly timeline:RuntimeTimeline;readonly profiler:CpuProfiler;readonly npcs:NearbyNpcAuthority;readonly transit:TransitAuthority;
  tick=0;private sequence=0;readonly epoch:number;
  readonly stats={joins:0,leaves:0,inputs:0,rejected:0,published:0};
  constructor(config:Partial<ThegameConfig>={},epoch=1,profile=false){
   this.config=thegameConfig(config);if(!Number.isSafeInteger(epoch)||epoch<1)throw new RangeError('Invalid world epoch');this.epoch=epoch;
-  this.world=new OpenWorld(this.config.seed);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
+  this.world=new OpenWorld(this.config.seed);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.transit=new TransitAuthority();this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
  }
  join(id:string,name='Игрок',saved?:{state:CharacterState;discovered:number;residentId?:string}):Peer{
   if(this.peers.size>=32||this.peers.has(id)||!/^p[0-9a-z]{1,16}$/.test(id))throw new RangeError('Room capacity or identity');
@@ -98,6 +99,7 @@ export class ThegameAuthority {
    for(let i=0;i<LANDMARKS.length;i++){const point=LANDMARKS[i]!;if(Math.hypot(peer.state.x-point.x,peer.state.z-point.z)<8)peer.discovered|=1<<i;}
   }
   this.npcs.refresh(this.peers.values(),this.tick);this.npcs.step(this.tick);
+  if(this.tick%6===0)this.transit.step(this.tick/60);
  }
  setPopulation(population:readonly Frame[]):void{this.npcs.setPopulation(population);}
  resident(id:string):ResidentSelf{
@@ -118,6 +120,6 @@ export class ThegameAuthority {
   const frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time:this.tick/60,paused:false},rows);this.stats.published++;
   return {type:'state',world:worldSignature(this.config),frame,self:{ack:peer.ack,state:{...peer.state},discovered:peer.discovered},players:this.peers.size};
  }
- inspect(){return {tick:this.tick,players:this.peers.size,residents:[...this.peers.values()].map(p=>p.residentId),queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),npcs:this.npcs.inspect(),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
+ inspect(){return {tick:this.tick,players:this.peers.size,residents:[...this.peers.values()].map(p=>p.residentId),queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),npcs:this.npcs.inspect(),transit:this.transit.snapshot(this.tick/60),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
  dispose():void{this.peers.clear();this.npcs.dispose();this.world.dispose();this.timeline.clear();}
 }
