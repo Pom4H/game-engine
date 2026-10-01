@@ -1,7 +1,7 @@
 import {primitiveMesh,type MeshData} from '../../procedural/mesh.js';
 import {meshBounds} from '../../render/visibility.js';
 import type {PreparedMeshPacket} from '../../procedural/prepared-mesh.js';
-import type {EntitySpec,MaterialSpec,Primitive} from '../../scene/types.js';
+import type {EntitySpec,EnvironmentalSpec,MaterialSpec,Primitive} from '../../scene/types.js';
 import {OpenWorld,climateAt,roadCenter,cityLamps,SEA_LEVEL,hash01,type RGB} from './world.js';
 import {LANDMARKS} from './session.js';
 type Point=readonly [number,number,number];
@@ -12,7 +12,7 @@ function unit(primitive:Primitive):MeshData{
 }
 class Mesh {
  positions:number[]=[];normals:number[]=[];colors:number[]=[];indices:number[]=[];
- constructor(readonly material:MaterialSpec={kind:'plastic',color:[1,1,1,1],roughness:.88}){}
+ constructor(readonly material:MaterialSpec={kind:'plastic',color:[1,1,1,1],roughness:.88},readonly environmental?:EnvironmentalSpec){}
  append(mesh:Primitive,p:Point,color:RGB,scale:Point=[1,1,1]):void{
   const m=unit(mesh),offset=this.positions.length/3;
   for(let i=0;i<m.vertices.length;i+=6){this.positions.push(p[0]+m.vertices[i]!*scale[0],p[1]+m.vertices[i+1]!*scale[1],p[2]+m.vertices[i+2]!*scale[2]);const nx=m.vertices[i+3]!/scale[0],ny=m.vertices[i+4]!/scale[1],nz=m.vertices[i+5]!/scale[2],l=Math.hypot(nx,ny,nz)||1;this.normals.push(nx/l,ny/l,nz/l);this.colors.push(...color,1);}
@@ -24,7 +24,7 @@ class Mesh {
   for(const p of [a,b,c]){this.positions.push(...p);this.normals.push(nx/l,ny/l,nz/l);this.colors.push(...color,1);}this.indices.push(offset,offset+1,offset+2);
  }
  quad(a:Point,b:Point,c:Point,d:Point,color:RGB):void{this.triangle(a,b,c,color);this.triangle(a,c,d,color);}
- entity(id:string):EntitySpec{return {id,collision:'none',mesh:{kind:'triangle-mesh',positions:this.positions,normals:this.normals,indices:this.indices,colors:this.colors},material:this.material};}
+ entity(id:string):EntitySpec{return {id,collision:'none',mesh:{kind:'triangle-mesh',positions:this.positions,normals:this.normals,indices:this.indices,colors:this.colors},material:this.material,...(this.environmental?{environmental:this.environmental}:{})};}
 }
 /** Scenery is a projection of the original collision records, never a second world.
  * Geometry/detail/material batches are built ONLY in the geometry worker. */
@@ -33,11 +33,12 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  const terrain=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.98,pattern:'plaster'});
  const masonry=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.86,pattern:'brick'});
  const trim=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.8,pattern:'plaster'});
- const asphalt=new Mesh({kind:'asphalt',color:[1,1,1,1],roughness:.68});
+ const asphalt=new Mesh({kind:'asphalt',color:[1,1,1,1],roughness:.42},{surfaceUse:'road',waterDepthM:.0012});
  const details=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.86});
  // Opaque coated facade panels keep reflection and early depth. No fake transparency
  // over a solid building shell, no thousands of individual draw calls for windows.
  const windows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.19,metalness:.25,clearcoat:.65,clearcoatRoughness:.13});
+ const litWindows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.17,clearcoat:.45,emissive:[1.65,.82,.30]});
  const metal=new Mesh({kind:'steel',color:[1,1,1,1],roughness:.42,metalness:.65});
  const lampGlow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.12,emissive:[9.0,5.4,2.4]});
  const ground=(x:number,z:number,offset=0):Point=>[x-ox,world.ground(x,z).y+offset,z-oz];
@@ -82,7 +83,8 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  }
  for(const p of chunk.props){
   if(p.kind==='building'){
-   box(masonry,p.x,p.y+p.height/2,p.z,p.width,p.height,p.depth,p.color);
+   const wall:RGB=[p.color[0]*.52,p.color[1]*.50,p.color[2]*.48];
+   box(masonry,p.x,p.y+p.height/2,p.z,p.width,p.height,p.depth,wall);
    box(trim,p.x,p.y+.40,p.z,p.width+.10,.8,p.depth+.10,[.36,.36,.32]);
    // Recessed roof, cornice and four parapets give the silhouette actual depth.
    box(asphalt,p.x,p.y+p.height+.04,p.z,p.width,.08,p.depth,[.20,.22,.21]);
@@ -97,13 +99,13 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    // geometry as well; dozens of windows do not add a draw call each.
    for(let row=0;row<floors;row++)for(let col=-2;col<=2;col++)for(const side of [-1,1]){
     const y=p.y+2+row*3.5,w=1.1,h=.94;
-    const lit=hash01(cx*4+row,cz*13+col,side,world.seed)>.65;
-    const glass:RGB=lit?[.46,.37,.24]:[.15,.23,.26];
+    const lit=hash01(cx*4+row,cz*13+col,side,world.seed)>.45;
+    const glass:RGB=lit?[.72,.48,.26]:[.09,.14,.16];
     for(const axis of [0,2] as const){
      const center:Point=axis===2?[p.x-ox+col*p.width/6,y,p.z-oz+side*(p.depth/2+.03)]:[p.x-ox+side*(p.width/2+.03),y,p.z-oz+col*p.depth/6];
      const point=(u:number,v:number,out=0):Point=>axis===2?[center[0]+u,center[1]+v,center[2]+side*out]:[center[0]+side*out,center[1]+v,center[2]+u];
      const quad=(mesh:Mesh,a:Point,b:Point,c:Point,d:Point,color:RGB)=>{if((axis===2?1:-1)===side)mesh.quad(a,b,c,d,color);else mesh.quad(d,c,b,a,color);};
-     quad(windows,point(-w,-h),point(w,-h),point(w,h),point(-w,h),glass);
+     quad(lit?litWindows:windows,point(-w,-h),point(w,-h),point(w,h),point(-w,h),glass);
      const panel=(u:number,v:number,a:number,b:number)=>quad(trim,point(u-a/2,v-b/2,.04),point(u+a/2,v-b/2,.04),point(u+a/2,v+b/2,.04),point(u-a/2,v+b/2,.04),[.64,.61,.54]);
      panel(-w,0,.09,h*2+.12);panel(w,0,.09,h*2+.12);panel(0,-h,w*2+.15,.13);panel(0,h,w*2+.15,.09);panel(0,0,.055,h*2);panel(0,.25,w*2,.055);
     }
@@ -118,7 +120,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
   }
  }
  for(const point of LANDMARKS)if(Math.floor(point.x/128)===cx&&Math.floor(point.z/128)===cz){const y=Math.max(SEA_LEVEL,world.ground(point.x,point.z).y);box(details,point.x,y+.14,point.z,2.4,.28,2.4,[.96,.65,.22]);box(metal,point.x,y+3,point.z,.18,6,.18,[.65,.51,.23]);details.append({kind:'torus',radius:1,tube:.13,segments:20},[point.x-ox,y+4,point.z-oz],[1,.73,.29]);}
- const batches=[['terrain',terrain],['masonry',masonry],['trim',trim],['asphalt',asphalt],['details',details],['windows',windows],['metal',metal],['lamp-glow',lampGlow]] as const;
+ const batches=[['terrain',terrain],['masonry',masonry],['trim',trim],['asphalt',asphalt],['details',details],['windows',windows],['lit-windows',litWindows],['metal',metal],['lamp-glow',lampGlow]] as const;
  const result:EntitySpec[]=batches.filter(([,mesh])=>mesh.indices.length>0).map(([name,mesh])=>mesh.entity(`chunk:${chunk.key}/${name}`));
  if(chunk.heights.some(y=>y<SEA_LEVEL))result.push({id:`chunk:${chunk.key}/water`,collision:'none',position:[64,SEA_LEVEL,64],mesh:{kind:'plane',size:[128,128]},material:{kind:'plastic',color:[.12,.28,.32,1],roughness:.18,metalness:.15,clearcoat:.5}});
  return result;
