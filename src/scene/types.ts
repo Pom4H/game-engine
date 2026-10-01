@@ -68,7 +68,20 @@ export interface EntitySpec {
   light?:LightSpec;
   body?:BodySpec;
 }
-export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number }
+export interface VolumetricLightSpec {
+  /** Angular transmission of the physical fixture through participating media. */
+  profile?:'isotropic'|'lantern-4pane';
+  /** Rotation of the fixture transmission pattern around world +Y, radians. */
+  yaw?:number;
+  /** Medium-only multiplier; does not make directly lit surfaces brighter. */
+  strength?:number;
+  /** Medium-only radius multiplier, useful when fog reveals an off-screen lamp. */
+  rangeScale?:number;
+}
+export interface LightSpec {
+  kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number;
+  volumetric?:VolumetricLightSpec;
+}
 export interface CameraIntrinsicsSpec {
   /** Focal lengths in pixels of the calibration image. */
   fx:number; fy:number;
