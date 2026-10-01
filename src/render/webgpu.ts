@@ -657,7 +657,11 @@ export class WebGPURenderer implements Renderer{
     try{
     // The reflection plane clip uses discard. Keep it out of the main material
     // pipeline so opaque geometry can use early depth rejection on tile GPUs.
-    const module=device.createShaderModule({code:materialShader()}),reflectionModule=device.createShaderModule({code:REFLECTION_LOD_SHADER}),geometryVertexBuffer={arrayStride:24,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'}]},colorVertexBuffer={arrayStride:4,attributes:[{shaderLocation:6,offset:0,format:'unorm8x4'}]},vertex={module,entryPoint:'vs',buffers:[geometryVertexBuffer,colorVertexBuffer]};
+    const module=device.createShaderModule({label:'material',code:materialShader()}),reflectionModule=device.createShaderModule({label:'reflection-lod',code:REFLECTION_LOD_SHADER});
+    // Validate the shared material module before any pipeline consumes it. Chrome
+    // otherwise reports only "Invalid ShaderModule due to a previous error".
+    {const info=await module.getCompilationInfo(),errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error('material WGSL: '+errors.map((m:any)=>m.message).join('\n'));}
+    const geometryVertexBuffer={arrayStride:24,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'}]},colorVertexBuffer={arrayStride:4,attributes:[{shaderLocation:6,offset:0,format:'unorm8x4'}]},vertex={module,entryPoint:'vs',buffers:[geometryVertexBuffer,colorVertexBuffer]};
     const objectLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'unfilterable-float'}},{binding:2,visibility:2,texture:{sampleType:'float'}},{binding:3,visibility:2,sampler:{type:'filtering'}},{binding:4,visibility:2,texture:{sampleType:'float'}},{binding:5,visibility:2,sampler:{type:'filtering'}},{binding:6,visibility:2,texture:{sampleType:'float'}},{binding:7,visibility:2,texture:{sampleType:'float'}}]});
     const frameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
