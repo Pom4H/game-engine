@@ -70,6 +70,7 @@ export {detailedRoadWheelMeshes,detailedPassengerWheelMeshes,type RoadWheelGeome
 export {compileVehicle,type VehicleDefinition,type VehicleFamily,type VehicleReferenceProvenance,type ThreeBoxVehicleDefinition,type CompiledVehicleGeometry} from './vehicles/framework.js';
 export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type DoubleCabPickupVehicleDefinition} from './vehicles/pickup.js';
 
+export {Drivetrain,torqueAtRpm,validateDrivetrainSpec,type DrivetrainSpec,type DrivetrainInput,type DrivetrainState,type CombustionEngineSpec,type ClutchSpec,type GearboxSpec,type DifferentialSpec,type TorqueCurvePoint} from './vehicles/drivetrain.js';
 export {Vehicle,vehicle,wheel,wing,rotor,PartCondition,type VehicleControls,type VehicleAir,type VehiclePose,type PartSample,type VehicleBlueprint,type VehicleSpec,type WheelSpec,type WingSpec,type RotorSpec,type ConditionSpec} from './vehicles/vehicle.js';
 export {lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL,LIGHT_HELICOPTER_MAIN_RPM,LIGHT_HELICOPTER_TAIL_RPM} from './vehicles/helicopter.js';
 
