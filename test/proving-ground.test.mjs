@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,soilWheelSupport,wheelHit,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
+import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,soilWheelSupport,wheelHit,physicsAccounting,ThermalMass,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
 const speed=b=>Math.hypot(...b.velocity);
@@ -484,4 +484,46 @@ test('solver rolling-rest and sleep-rest are explicit causal records',()=>{
  assert.ok(corrections.some(r=>r.source?.id==='solver.sleep-rest'&&(r.effect?.velocity_correction_m_s||r.effect?.angular_velocity_correction_rad_s)),'sleep clamp must be attributed');
  assert.deepEqual(new Set(records.filter(r=>r.type==='physics.state-mutation'&&r.body_id===body.id).map(r=>r.writer_id)),new Set(['PhysicsWorld.integrate']));
  world.stopCauseTrace(trace);
+});
+
+
+test('ballistic mechanical accounting stays within integrator error and matches external gravity impulse',()=>{
+ const world=new PhysicsWorld([0,-9.81,0],-1000),body=world.add(new RigidBody({
+  id:'account.ballistic',position:[0,100,0],velocity:[7,12,3],angularVelocity:[.3,.5,.2],
+  mass:100,shape:{kind:'sphere',radius:.5},material:material('steel'),friction:0,restitution:0
+ }));
+ const h=1/240,steps=960,t=steps*h,before=physicsAccounting(world.bodies.values(),world.gravity);
+ for(let i=0;i<steps;i++)world.step(h);
+ const after=physicsAccounting(world.bodies.values(),world.gravity);
+ const expected:[number,number,number]=[
+  before.linearMomentumNs[0]+body.mass*world.gravity[0]*t,
+  before.linearMomentumNs[1]+body.mass*world.gravity[1]*t,
+  before.linearMomentumNs[2]+body.mass*world.gravity[2]*t,
+ ];
+ assert.ok(Math.hypot(after.linearMomentumNs[0]-expected[0],after.linearMomentumNs[1]-expected[1],after.linearMomentumNs[2]-expected[2])<1e-7,{before,after,expected});
+ assert.ok(Math.hypot(after.angularMomentumNms[0]-before.angularMomentumNms[0],after.angularMomentumNms[1]-before.angularMomentumNms[1],after.angularMomentumNms[2]-before.angularMomentumNms[2])<1e-8,{before,after});
+ assert.ok(Math.abs(after.mechanicalJ-before.mechanicalJ)/before.mechanicalJ<.002,{before:before.mechanicalJ,after:after.mechanicalJ});
+});
+
+test('closed rigid collision conserves total linear and angular momentum',()=>{
+ const world=new PhysicsWorld([0,0,0],-1000);
+ world.add(new RigidBody({id:'account.a',position:[-1.1,4,0],velocity:[8,0,0],mass:800,shape:{kind:'sphere',radius:.5},material:material('steel'),friction:0,restitution:.35}));
+ world.add(new RigidBody({id:'account.b',position:[1.1,4,0],velocity:[-2,0,0],mass:1200,shape:{kind:'sphere',radius:.5},material:material('steel'),friction:0,restitution:.35}));
+ const before=physicsAccounting(world.bodies.values(),world.gravity);
+ let collided=false;for(let i=0;i<40;i++){world.step(dt);collided ||= world.contacts.length>0;}
+ const after=physicsAccounting(world.bodies.values(),world.gravity);
+ const dp=Math.hypot(after.linearMomentumNs[0]-before.linearMomentumNs[0],after.linearMomentumNs[1]-before.linearMomentumNs[1],after.linearMomentumNs[2]-before.linearMomentumNs[2]);
+ const dl=Math.hypot(after.angularMomentumNms[0]-before.angularMomentumNms[0],after.angularMomentumNms[1]-before.angularMomentumNms[1],after.angularMomentumNms[2]-before.angularMomentumNms[2]);
+ assert.equal(collided,true);
+ assert.ok(dp<1e-8,{before,after,dp});
+ assert.ok(dl<1e-8,{before,after,dl});
+ assert.ok(after.kineticJ<=before.kineticJ+1e-7,{before:before.kineticJ,after:after.kineticJ});
+});
+
+test('thermal mass closes its stored dissipated and rejected energy balance',()=>{
+ const thermal=new ThermalMass({heatCapacityJPerK:1000,coolingWPerK:20,initialTemperatureC:20});
+ thermal.addHeat(10000);
+ for(let i=0;i<100;i++)thermal.step(.1,20,0);
+ const stored=(thermal.temperatureC-20)*1000,balance=thermal.dissipatedJ-thermal.rejectedJ;
+ assert.ok(Math.abs(stored-balance)<1e-8,{stored,balance,dissipated:thermal.dissipatedJ,rejected:thermal.rejectedJ});
 });
