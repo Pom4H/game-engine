@@ -10,10 +10,11 @@ export const LIGHT_HELICOPTER_TAIL_RPM=2000;
 export function lightHelicopter(id='helicopter.light'):VehicleBlueprint{
  return vehicle(id,{
   chassis:{massKg:1100,sizeM:[6.4,2.0,1.75],dragAreaM2:2.7},
+  shafts:[{id:'main.gearbox',maxPowerW:650_000,efficiency:.97}],
   parts:[
    rotor('main.rotor',{
     at:[-.20,1.25,0],massKg:120,radiusM:5.2,bladeChordM:.32,blades:4,
-    governorRpm:LIGHT_HELICOPTER_MAIN_RPM,maxPowerW:600_000,spoolSeconds:1.2,
+    governorRpm:LIGHT_HELICOPTER_MAIN_RPM,maxPowerW:600_000,spoolSeconds:1.2,shaft:'main.gearbox',flapTimeSeconds:.07,leadLagTimeSeconds:.11,
     axis:[0,1,0],forward:[1,0,0],direction:1,
     collectiveControl:'collective',collectiveTrimRad:0,collectiveGainRad:.12,
     cyclicPitchGainRad:.13,cyclicRollGainRad:.13,liftSlope:5.7,profileDragCoefficient:.011,
@@ -21,7 +22,7 @@ export function lightHelicopter(id='helicopter.light'):VehicleBlueprint{
    }),
    rotor('tail.rotor',{
     at:[-5,1.25,0],massKg:20,radiusM:.95,bladeChordM:.16,blades:2,
-    governorRpm:LIGHT_HELICOPTER_TAIL_RPM,maxPowerW:55_000,spoolSeconds:.7,
+    governorRpm:LIGHT_HELICOPTER_TAIL_RPM,maxPowerW:55_000,spoolSeconds:.7,shaft:'main.gearbox',flapTimeSeconds:.04,leadLagTimeSeconds:.06,
     axis:[0,0,1],forward:[1,0,0],direction:-1,
     collectiveControl:'yaw',collectiveTrimRad:.078,collectiveGainRad:.05,
     liftSlope:5.7,profileDragCoefficient:.012,
