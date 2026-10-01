@@ -1,0 +1,56 @@
+name: Unified infinite world preservation
+
+on:
+  push:
+    branches: [feat/unified-infinite-world]
+    paths:
+      - 'src/world/**'
+      - 'src/index.ts'
+      - 'docs/INFINITE_WORLD.md'
+      - 'test/infinite-world.test.mjs'
+      - '.github/workflows/unified-infinite-world.yml'
+  pull_request:
+    paths:
+      - 'src/world/**'
+      - 'src/index.ts'
+      - 'docs/INFINITE_WORLD.md'
+      - 'test/infinite-world.test.mjs'
+      - '.github/workflows/unified-infinite-world.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unified-infinite-world-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+
+  preservation-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Soft-body and vehicle physics
+        run: node --test test/vehicle-interaction.test.mjs test/vehicle-runtime.test.mjs test/vehicle-scene.test.mjs test/contact-laws.test.mjs
+      - name: Audio
+        run: node --test test/browser-audio.test.mjs
+      - name: Network and authority
+        run: node --test test/network-buffer.test.mjs test/network-projection.test.mjs test/network-structure.test.mjs test/arena-network.test.mjs test/thegame.test.mjs test/thegame-region.test.mjs test/thegame-region-host.test.mjs test/thegame-crowd.test.mjs test/thegame-npc-authority.test.mjs test/thegame-resident-possession.test.mjs
+      - name: Altitude streaming
+        run: node --test test/infinite-world.test.mjs
