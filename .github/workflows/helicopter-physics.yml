@@ -6,6 +6,8 @@ on:
     paths:
       - 'src/vehicles/**'
       - 'src/physics/**'
+      - 'src/audio/rotor.ts'
+      - 'src/audio/rotor.ts'
       - 'src/index.ts'
       - 'test/helicopter-physics.test.mjs'
       - '.github/workflows/helicopter-physics.yml'
@@ -38,7 +40,7 @@ jobs:
       - run: bun run typecheck
       - run: bun run build
       - name: Helicopter / rotor stress
-        run: node --test test/helicopter-physics.test.mjs test/vehicle-runtime.test.mjs test/vehicle-scene.test.mjs
+        run: node --test test/helicopter-physics.test.mjs test/rotor-audio.test.mjs test/vehicle-runtime.test.mjs test/vehicle-scene.test.mjs
       - name: Preserve soft-body and contacts
         run: node --test test/vehicle-interaction.test.mjs test/contact-laws.test.mjs
       - name: Preserve audio and network
