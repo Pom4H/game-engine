@@ -10,6 +10,7 @@ on:
       - 'src/audio/rotor.ts'
       - 'src/index.ts'
       - 'test/helicopter-physics.test.mjs'
+      - 'tools/helicopter-flight-exam.mjs'
       - '.github/workflows/helicopter-physics.yml'
   pull_request:
     paths:
@@ -17,6 +18,7 @@ on:
       - 'src/physics/**'
       - 'src/index.ts'
       - 'test/helicopter-physics.test.mjs'
+      - 'tools/helicopter-flight-exam.mjs'
       - '.github/workflows/helicopter-physics.yml'
 
 permissions:
@@ -41,6 +43,15 @@ jobs:
       - run: bun run build
       - name: Helicopter / rotor stress
         run: node --test test/helicopter-physics.test.mjs test/rotor-audio.test.mjs test/vehicle-runtime.test.mjs test/vehicle-scene.test.mjs
+      - name: Black-box flight exam
+        run: node tools/helicopter-flight-exam.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: helicopter-flight-exam
+          path: artifacts/helicopter-flight-exam/
+          if-no-files-found: error
+          retention-days: 14
       - name: Preserve soft-body and contacts
         run: node --test test/vehicle-interaction.test.mjs test/contact-laws.test.mjs
       - name: Preserve audio and network
