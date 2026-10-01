@@ -91,6 +91,23 @@ test('water volume is deliberately non-solid until fluid physics owns it',()=>{
  assert.equal(scene.fluids.sampleXZ(12,-27)?.id,'water.basin');
 });
 
+test('water basin applies buoyancy drag and measurable hull flooding',()=>{
+ const scene=new Scene(spec);
+ assert.equal(scene.fluids.size,1);
+ const sealed=scene.add({id:'water.sealed',position:[8,-.55,-27],mesh:{kind:'box',size:[1.2,1.2,1.2]},material:{kind:'steel'},body:{mass:1100,friction:.2,fluid:{enclosedVolumeM3:1.4,leakAreaM2:0}}}).body;
+ const leaking=scene.add({id:'water.leaking',position:[16,-.55,-27],mesh:{kind:'box',size:[1.2,1.2,1.2]},material:{kind:'steel'},body:{mass:1100,friction:.2,fluid:{enclosedVolumeM3:1.4,leakAreaM2:.08}}}).body;
+ assert.ok(sealed&&leaking);
+ for(let i=0;i<1200;i++)scene.physics.step(dt);
+ assert.equal(sealed.floodedVolumeM3,0);
+ assert.ok(leaking.floodedVolumeM3>.65,leaking.floodedVolumeM3);
+ assert.ok(sealed.position[1]>leaking.position[1]+.35,{sealed:sealed.position,leaking:leaking.position,flooded:leaking.floodedVolumeM3});
+
+ const dragScene=new Scene(spec),drag=dragScene.add({id:'water.drag',position:[12,-.45,-27],mesh:{kind:'box',size:[1,1,1]},material:{kind:'steel'},body:{mass:900,velocity:[6,0,0]}}).body;
+ assert.ok(drag);const initial=drag.velocity[0];
+ for(let i=0;i<30;i++)dragScene.physics.step(dt);
+ assert.ok(drag.velocity[0]<initial-1,{initial,after:drag.velocity[0]});
+});
+
 test('loop and hill are composed from ordinary physical segments',()=>{
  const scene=new Scene(spec);
  const loop=[...scene.entities.values()].filter(e=>/^loop-\d+$/.test(e.id));
