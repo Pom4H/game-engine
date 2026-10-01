@@ -10,13 +10,13 @@ on:
       - 'src/index.ts'
       - 'docs/vehicle-runtime.md'
       - 'docs/HELICOPTER_PHYSICS.md'
-      - 'docs/vehicle-runtime.md'
-      - 'docs/HELICOPTER_PHYSICS.md'
       - 'test/vehicle-runtime.test.mjs'
+      - 'test/physics-cause-trace.test.mjs'
       - 'test/helicopter-physics.test.mjs'
       - 'test/rotor-audio.test.mjs'
       - 'test/vehicle-scene.test.mjs'
       - 'tools/vehicle-runtime-fixture.mjs'
+      - 'tools/vehicle-cause-proof.mjs'
       - 'tools/helicopter-flight-exam.mjs'
       - 'tools/helicopter-flight-replay.mjs'
       - 'tools/helicopter-replay.scene.mjs'
@@ -28,10 +28,12 @@ on:
       - 'src/audio/rotor.ts'
       - 'src/index.ts'
       - 'test/vehicle-runtime.test.mjs'
+      - 'test/physics-cause-trace.test.mjs'
       - 'test/helicopter-physics.test.mjs'
       - 'test/rotor-audio.test.mjs'
       - 'test/vehicle-scene.test.mjs'
       - 'tools/vehicle-runtime-fixture.mjs'
+      - 'tools/vehicle-cause-proof.mjs'
       - 'tools/helicopter-flight-exam.mjs'
       - 'tools/helicopter-flight-replay.mjs'
       - 'tools/helicopter-replay.scene.mjs'
@@ -59,7 +61,18 @@ jobs:
       - run: bun run build
 
       - name: One Vehicle solver — road, glide, wings, spoilers and rotors
-        run: node --test test/vehicle-runtime.test.mjs test/helicopter-physics.test.mjs test/rotor-audio.test.mjs test/vehicle-scene.test.mjs
+        run: node --test test/physics-cause-trace.test.mjs test/vehicle-runtime.test.mjs test/helicopter-physics.test.mjs test/rotor-audio.test.mjs test/vehicle-scene.test.mjs
+
+      - name: Cause graph proof — no hidden aircraft physics
+        run: node tools/vehicle-cause-proof.mjs
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: vehicle-physics-cause-proof
+          path: artifacts/vehicle-physics-proof/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Black-box helicopter flight scenario (diagnostic, not a reference-aircraft validation)
         continue-on-error: true
