@@ -196,8 +196,8 @@ for(let i=0;i<7;i++){
  box(`crosswind-beam-${i}`,[100,6.3,z],[10.7,.24,.24],S);
 }
 
-// 19. Soft-ground pad is intentionally visual/non-rigid until soil mechanics exist.
-// Treating it as a low-friction rigid slab would give a false green release signal.
+// 19. Soft-ground pad. Visual geometry stays non-rigid; SoilField owns bearing height,
+// rut persistence, shear traction and rolling resistance.
 topBox('soft-ground-visual',[97,0,-112],[20,.10,16],{kind:'default',color:[.27,.19,.11,1],roughness:1});
 for(let i=0;i<8;i++)box(`soft-ground-rut-${i}`,[90+i*2.2,.012,-112+(i%2?.7:-.7)],[1.2,.018,12],{kind:'default',color:[.19,.13,.08,1],roughness:1});
 
@@ -243,5 +243,6 @@ export default {
  rendering:{sunDirection:[-.45,.72,-.31],sunColor:[1,.93,.84],skyColor:[.35,.52,.70],sunIntensity:1.0,exposure:1.05,shadowExtent:190,fogDensity:.0025},
  fluids:[{id:'water-basin-fluid',shape:'cylinder',center:[12,-1.05,-27],radiusM:18.7,depthM:2.1,densityKgM3:998.2,velocity:[0,0,0],dragCoefficient:.9}],
  windVolumes:[{id:'crosswind.field',center:[100,3.2,32],sizeM:[14,7,44],wind:[18,0,0],densityKgM3:1.225,blendM:2.0}],
+ soilVolumes:[{id:'soft-ground',center:[97,0,-112],sizeM:[20,16],cells:[20,16],pressureScalePa:85000,sinkageExponent:.85,maxSinkageM:.30,cohesionPa:7000,frictionAngleDeg:27,compactionRatePerSecond:.55,rollingResistance:.055}],
  entities
 };
