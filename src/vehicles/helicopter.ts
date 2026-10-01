@@ -19,7 +19,7 @@ export function lightHelicopter(id='helicopter.light'):VehicleBlueprint{
     condition:{failureLoadN:55_000,fatigue:{enduranceRangeN:9_000,referenceRangeN:30_000,cyclesAtReference:2e7,exponent:4}},
    }),
    rotor('tail.rotor',{
-    at:[-5,.75,0],massKg:20,radiusM:.95,bladeChordM:.16,blades:2,
+    at:[-5,1.25,0],massKg:20,radiusM:.95,bladeChordM:.16,blades:2,
     governorRpm:LIGHT_HELICOPTER_TAIL_RPM,maxPowerW:55_000,spoolSeconds:.7,
     axis:[0,0,1],forward:[1,0,0],direction:-1,
     collectiveControl:'yaw',collectiveTrimRad:.078,collectiveGainRad:.05,
