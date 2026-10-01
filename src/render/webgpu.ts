@@ -719,7 +719,18 @@ export class WebGPURenderer implements Renderer{
     const skyModule=device.createShaderModule({code:SKY_SHADER}),sky=await device.createRenderPipelineAsync({layout:device.createPipelineLayout({bindGroupLayouts:[frameLayout]}),vertex:{module:skyModule,entryPoint:'vs'},fragment:{module:skyModule,entryPoint:'fs',targets:[{format:'rgba16float'},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'always'}});
     const effectsModule=device.createShaderModule({label:'effects',code:EFFECTS_SHADER});
     {const info=await effectsModule.getCompilationInfo(),errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error('effects WGSL: '+errors.map((m:any)=>m.message).join('\n'));}
-    const effects=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:effectsModule,entryPoint:'vs'},fragment:{module:effectsModule,entryPoint:'fs',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
+    const effectsLayout=device.createBindGroupLayout({label:'effects-layout',entries:[
+      {binding:0,visibility:2,texture:{sampleType:'float'}},
+      {binding:1,visibility:2,texture:{sampleType:'float'}},
+      {binding:2,visibility:2,texture:{sampleType:'depth'}},
+      {binding:3,visibility:2,sampler:{type:'filtering'}},
+      {binding:4,visibility:2,buffer:{type:'uniform'}},
+      {binding:5,visibility:2,texture:{sampleType:'float'}},
+      {binding:6,visibility:2,texture:{sampleType:'float'}},
+      {binding:7,visibility:2,buffer:{type:'read-only-storage'}},
+      {binding:8,visibility:2,buffer:{type:'read-only-storage'}},
+    ]});
+    const effects=await device.createRenderPipelineAsync({layout:device.createPipelineLayout({bindGroupLayouts:[effectsLayout]}),vertex:{module:effectsModule,entryPoint:'vs'},fragment:{module:effectsModule,entryPoint:'fs',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
     const taaModule=device.createShaderModule({code:TAA_SHADER}),taa=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:taaModule,entryPoint:'vs'},fragment:{module:taaModule,entryPoint:'fs',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
     const taaParams=device.createBuffer({size:16,usage:0x40|0x08});
     const presentModule=device.createShaderModule({code:PRESENT_SHADER}),present=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:presentModule,entryPoint:'vs'},fragment:{module:presentModule,entryPoint:'fs',targets:[{format}]},primitive:{topology:'triangle-list'}});
