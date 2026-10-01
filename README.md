@@ -15,3 +15,22 @@ The package exports simulation and scene APIs from `src/index.ts`, and `BrowserR
 A scene is validated data (`SceneSpec`). `Scene` can run without a browser for deterministic simulation. `PhysicsWorld` handles rigid contacts. Vehicle geometry comes from `compileVehicle` and the passenger, pickup, and M3 definitions. `AnimationSystem` owns walker and wheel transforms. `WalkWorld` supplies bounded static obstacle and camera queries; `BrowserRuntime.controlWalker(id, {world})` connects keyboard, pointer and touch input to an authored walker.
 
 Source code lives in `src/`; focused tests live in `test/`. Build output in `dist/` is generated and ignored.
+
+
+## Infinite world streaming
+
+The engine has a transport- and game-independent infinite-world boundary.
+VisibilityInterest turns one camera/observer into a bounded, non-overlapping
+quadtree of tile demands. Close terrain uses 128 m base tiles; distant terrain
+automatically becomes coarser. Altitude increases the apparent horizon, so an
+aircraft can see tens or hundreds of kilometres without asking the generator for
+millions of near-detail chunks.
+
+InfiniteWorld owns bounded asynchronous generation, residency, cancellation,
+installation and eviction. The application owns tile meaning.
+
+Render visibility is deliberately independent from physics and gameplay simulation
+interest. Seeing a mountain 100 km away does not activate its collision bodies,
+NPCs, economy or other detailed simulation.
+
+See docs/INFINITE_WORLD.md.
