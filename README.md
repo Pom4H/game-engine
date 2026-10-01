@@ -1,5 +1,9 @@
 # Game Engine Core
 
+> Development phase: **engine first**. Gameplay is frozen until rendering, networking,
+> audio and physics have explicit acceptance gates. Existing games remain only as
+> regression/stress harnesses. See [docs/ENGINE_FIRST.md](docs/ENGINE_FIRST.md).
+
 A single TypeScript package for deterministic scenes, WebGPU rendering, rigid and structural physics, procedural vehicles, synthesized audio, and character movement. It has no JavaScript runtime dependencies.
 
 ## Build and check
@@ -16,47 +20,21 @@ A scene is validated data (`SceneSpec`). `Scene` can run without a browser for d
 
 Source code lives in `src/`; focused tests live in `test/`. Build output in `dist/` is generated and ignored.
 
-## Thegame — multiplayer open world
+## Existing game harnesses — frozen
 
-The simplified on-foot migration uses this engine's renderer, humanoid animation,
-network projection, source workbench and shared authoritative/predicted character motor.
-City, suburbs and natural biomes stream as bounded 128 m chunks. Players can walk,
-sprint, jump, meet other players, and discover five marked places.
+Chess, Car/Ball and Thegame-lite already exercise useful engine boundaries, including
+headless logic, rigid/structural physics, WebGPU presentation and authoritative
+networking. They are retained for regression testing, but they are **not an active
+gameplay roadmap**.
 
-```sh
-bun install --frozen-lockfile
-npm install --prefix tools/docs --ignore-scripts
-bun run docs:build
-bun cli serve thegame
-```
+Until the engine-first gates pass, changes under these examples should only support
+rendering, networking, audio or physics verification. Do not add missions, progression,
+economy, combat, NPC gameplay, boarding or other game rules as substitutes for missing
+engine capability.
 
-`bun run thegame` starts the same server. Open
-`http://127.0.0.1:4173/games/thegame/` in two WebGPU browser windows.
-One Bun process serves both the client and WebSocket authority; the static site server
-alone is not multiplayer. Other devices need an HTTPS/WSS endpoint pointing to that
-process. No public server is provisioned by this repository change.
-
-WASD / arrows: move. Shift: run. Space: jump. Drag the scene: camera.
-M: map. Ё: measured diagnostics. Code ↔ world: edit the shared TypeScript source.
-`viewRadius` and `exposure` apply live; shared physics/seed require a server restart.
-
-This is `thegame-lite/1`, not a compatible loader for legacy saves. Vehicles, combat,
-police, economy and persistent saves remain outside the simplified version.
-See [scope, networking, deployment and acceptance](docs/thegame.md).
-
-## Car / Ball — same integration branch
-
-```sh
-bun install --frozen-lockfile
-npm install --prefix tools/docs --ignore-scripts
-bun run arena
-```
-
-Open `http://127.0.0.1:4173/games/car-ball/` in two WebGPU browser windows.
-First two connections drive; subsequent viewers spectate. The same branch includes
-the DSL editor, the Ё console, recorded renderer filmstrip and structural networking.
-See [game controls, networking and limits](docs/car-ball.md) and
-[structural projection API](docs/structural-network.md).
+Historical launch instructions and scope remain in their dedicated docs for reproducing
+existing tests. The development order is defined in
+[docs/ENGINE_FIRST.md](docs/ENGINE_FIRST.md).
 
 ## Product integration
 
