@@ -1,7 +1,7 @@
 import {primitiveMesh,type MeshData} from '../../procedural/mesh.js';
 import {meshBounds} from '../../render/visibility.js';
 import type {PreparedMeshPacket} from '../../procedural/prepared-mesh.js';
-import type {EntitySpec,EnvironmentalSpec,MaterialSpec,Primitive} from '../../scene/types.js';
+import type {EntitySpec,MaterialSpec,Primitive} from '../../scene/types.js';
 import {OpenWorld,climateAt,roadCenter,cityLamps,SEA_LEVEL,hash01,type RGB} from './world.js';
 import {LANDMARKS} from './session.js';
 type Point=readonly [number,number,number];
@@ -12,7 +12,7 @@ function unit(primitive:Primitive):MeshData{
 }
 class Mesh {
  positions:number[]=[];normals:number[]=[];colors:number[]=[];indices:number[]=[];
- constructor(readonly material:MaterialSpec={kind:'plastic',color:[1,1,1,1],roughness:.88},readonly environmental?:EnvironmentalSpec){}
+ constructor(readonly material:MaterialSpec={kind:'plastic',color:[1,1,1,1],roughness:.88}){}
  append(mesh:Primitive,p:Point,color:RGB,scale:Point=[1,1,1]):void{
   const m=unit(mesh),offset=this.positions.length/3;
   for(let i=0;i<m.vertices.length;i+=6){this.positions.push(p[0]+m.vertices[i]!*scale[0],p[1]+m.vertices[i+1]!*scale[1],p[2]+m.vertices[i+2]!*scale[2]);const nx=m.vertices[i+3]!/scale[0],ny=m.vertices[i+4]!/scale[1],nz=m.vertices[i+5]!/scale[2],l=Math.hypot(nx,ny,nz)||1;this.normals.push(nx/l,ny/l,nz/l);this.colors.push(...color,1);}
@@ -24,7 +24,7 @@ class Mesh {
   for(const p of [a,b,c]){this.positions.push(...p);this.normals.push(nx/l,ny/l,nz/l);this.colors.push(...color,1);}this.indices.push(offset,offset+1,offset+2);
  }
  quad(a:Point,b:Point,c:Point,d:Point,color:RGB):void{this.triangle(a,b,c,color);this.triangle(a,c,d,color);}
- entity(id:string):EntitySpec{return {id,collision:'none',mesh:{kind:'triangle-mesh',positions:this.positions,normals:this.normals,indices:this.indices,colors:this.colors},material:this.material,...(this.environmental?{environmental:this.environmental}:{})};}
+ entity(id:string):EntitySpec{return {id,collision:'none',mesh:{kind:'triangle-mesh',positions:this.positions,normals:this.normals,indices:this.indices,colors:this.colors},material:this.material};}
 }
 /** Scenery is a projection of the original collision records, never a second world.
  * Geometry/detail/material batches are built ONLY in the geometry worker. */
@@ -33,7 +33,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  const terrain=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.98,pattern:'plaster'});
  const masonry=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.86,pattern:'brick'});
  const trim=new Mesh({kind:'concrete',color:[1,1,1,1],roughness:.8,pattern:'plaster'});
- const asphalt=new Mesh({kind:'asphalt',color:[1,1,1,1],roughness:.42},{surfaceUse:'road',waterDepthM:.0012});
+ const asphalt=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.24,clearcoat:.72,clearcoatRoughness:.12});
  const details=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.86});
  // Opaque coated facade panels keep reflection and early depth. No fake transparency
  // over a solid building shell, no thousands of individual draw calls for windows.
