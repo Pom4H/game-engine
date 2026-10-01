@@ -9,6 +9,7 @@ const S={kind:'steel',color:[.30,.32,.34,1],metalness:.72,roughness:.45};
 const W={kind:'default',color:[.08,.28,.38,.42],roughness:.08,clearcoat:.35,clearcoatRoughness:.08};
 const R={kind:'rubber',color:[.08,.075,.07,1],roughness:.95};
 const P={kind:'default',color:[.70,.68,.62,1],roughness:.92};
+const B={kind:'default',color:[.36,.37,.38,1],roughness:.88};
 const entities=[];
 const add=e=>{entities.push(e);return e};
 const box=(id,position,size,material=A,extra={})=>add({id,position,mesh:{kind:'box',size},material,...extra});
@@ -121,9 +122,9 @@ for(let lane=0;lane<4;lane++)for(let i=0;i<10;i++){
 
 // 10. Water basin. It is intentionally not a solid collision plane: later fluid
 // physics must own buoyancy/drag/sealing instead of faking water with ground contact.
-cyl('water-basin',[12,-1.1,-27],20,2.0,C);
+cyl('water-basin',[12,-1.1,-27],20,2.0,B);
 cyl('water-volume',[12,-.22,-27],18.7,.44,W);
-torus('water-rim',[12,.02,-27],20,.55,C);
+torus('water-rim',[12,.02,-27],20,.55,B);
 roadStrip('water-entry',[[-28,0,-10],[-12,0,-10],[0,0,-18],[4,-.7,-24]],7,A,{guard:true});
 roadStrip('water-exit',[[20,-.7,-24],[28,0,-17],[38,0,-12]],7,A,{guard:true});
 
