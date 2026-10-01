@@ -12,13 +12,14 @@ import type {ThegameConfig} from './session.js';
 import type {PreparedScenery} from './geometry.js';
 interface Prepared {parts:readonly {spec:PreparedScenery['spec'];mesh:PreparedMesh}[];cursor:number;lightCursor:number;installed:RuntimeEntity[]}
 interface Actor {rig:WalkerSpec;entities:RuntimeEntity[];release:()=>void;stamp:string}
+interface TransitVisual {mode:number;entities:RuntimeEntity[]}
 /** Passive projection. Preparation, upload, publication and rendering have different
  * ownership boundaries. A delayed producer cannot force work into an input/frame tick. */
 export class ThegameView {
- readonly scene:Scene;readonly chunks:ChunkWindow<Prepared>;readonly actors=new Map<string,Actor>();
+ readonly scene:Scene;readonly chunks:ChunkWindow<Prepared>;readonly actors=new Map<string,Actor>();readonly transit=new Map<string,TransitVisual>();
  private worker:Worker;private originX=0;private originZ=0;private disposed=false;
  private readonly admission=new WorkBudget(128*1024,8,1);
- private readonly activeActors=new Set<string>();
+ private readonly activeActors=new Set<string>();private readonly activeTransit=new Set<string>();
  private readonly presentation={frameId:0,time:0,self:{x:0,y:0,z:0},camera:{position:[0,0,0],target:[0,0,0]}};
  readonly stats={frames:0,rebases:0,chunkPreparationMs:0,maxChunkAdmissionMs:0,maxAdmissionBytes:0,maxAdmissionOperations:0,admissionDeferrals:0,expandedMeshes:0};error='';radius:number;
  constructor(readonly renderer:WebGPURenderer,readonly world:OpenWorld,config:ThegameConfig){
@@ -60,6 +61,19 @@ export class ThegameView {
   const pose=sampleWalker({...actor.rig,root:[x-this.originX-Math.cos(heading)*travel,y,z-this.originZ+Math.sin(heading)*travel],heading,speed:walk,period},time);
   for(const transform of bindHumanoid(pose,actor.rig.bindings??[])){const entity=this.scene.entities.get(transform.entity)!;for(let i=0;i<3;i++){entity.position[i]=transform.position[i]!;entity.rotation[i]=transform.rotation[i]!;entity.scale[i]=transform.scale[i]!;}}
  }
+ private transitVisual(id:string,mode:number):TransitVisual{
+  let visual=this.transit.get(id);if(visual)return visual;
+  const dimensions=mode===2?[2.7,3.0,15] as const:mode===1?[2.45,2.7,12.5] as const:[2.5,2.6,10.8] as const;
+  const color=mode===2?[.18,.47,.78,1] as const:mode===1?[.72,.28,.12,1] as const:[.10,.49,.44,1] as const;
+  const body=this.scene.add({id:`transit/${id}/body`,collision:'none',mesh:{kind:'box',size:dimensions},position:[0,0,0],material:{kind:'steel',color,roughness:.62}});
+  const glass=this.scene.add({id:`transit/${id}/glass`,collision:'none',mesh:{kind:'box',size:[dimensions[0]*.88,dimensions[1]*.38,dimensions[2]*.84]},position:[0,dimensions[1]*.24,0],material:{kind:'glass',color:[.16,.23,.25,.82],roughness:.09,metalness:.02}});
+  visual={mode,entities:[body,glass]};this.transit.set(id,visual);return visual;
+ }
+ private poseTransit(id:string,x:number,y:number,z:number,yaw:number,mode:number):void{
+  const visual=this.transitVisual(id,mode),body=visual.entities[0]!,glass=visual.entities[1]!,height=mode===2?3.0:mode===1?2.7:2.6;
+  body.position.splice(0,3,x-this.originX,y,z-this.originZ);body.rotation.splice(0,3,0,yaw,0);
+  glass.position.splice(0,3,x-this.originX,y+height*.24,z-this.originZ);glass.rotation.splice(0,3,0,yaw,0);
+ }
  private admit(ticket:ChunkTicket,value:Prepared):boolean{
   if(!this.renderer.submissionAvailable)return false;
   while(value.cursor<value.parts.length){
@@ -84,7 +98,7 @@ export class ThegameView {
   this.scene.renderStructureRevision++;return true;
  }
  /** Rebase only transforms. Chunk geometry buffers and authoritative positions survive. */
- frame(self:CharacterState,remote:Sample|undefined,yaw:number,pitch:number,now:number,draw=true):void{
+ frame(self:CharacterState,remote:Sample|undefined,transit:Sample|undefined,yaw:number,pitch:number,now:number,draw=true):void{
   if(this.disposed)return;const cx=Math.floor(self.x/128),cz=Math.floor(self.z/128),ox=cx*128,oz=cz*128;
   if(ox!==this.originX||oz!==this.originZ){const dx=this.originX-ox,dz=this.originZ-oz;for(const entity of this.scene.entities.values()){entity.position[0]+=dx;entity.position[2]+=dz;}this.originX=ox;this.originZ=oz;this.scene.renderStructureRevision++;this.scene.cutPresentation();this.stats.rebases++;}
   this.chunks.want(cx,cz,this.radius);
@@ -96,6 +110,9 @@ export class ThegameView {
   this.pose('self',self.x,self.y,self.z,self.yaw,self.phase,self.speed,0);this.activeActors.clear();this.activeActors.add('self');
   for(const row of remote?.rows??[]){const v=row.values;this.activeActors.add(row.id);this.pose(row.id,v[0]!,v[1]!,v[2]!,v[3]!,v[4]!,v[5]!,v[6]!);}
   for(const [id,actor] of this.actors)if(!this.activeActors.has(id)){actor.release();for(const e of actor.entities)this.scene.remove(e.id);this.actors.delete(id);}
+  this.activeTransit.clear();
+  for(const row of transit?.rows??[]){const v=row.values;this.activeTransit.add(row.id);this.poseTransit(row.id,v[0]!,v[1]!,v[2]!,v[3]!,v[6]!);}
+  for(const [id,visual] of this.transit)if(!this.activeTransit.has(id)){for(const e of visual.entities)this.scene.remove(e.id);this.transit.delete(id);}
   const target:[number,number,number]=[self.x-this.originX,self.y+1.3,self.z-this.originZ],distance=6.5,dx=-Math.sin(yaw)*Math.cos(pitch),dz=-Math.cos(yaw)*Math.cos(pitch),dy=Math.sin(pitch);let reach=distance;
   for(let d=.6;d<=distance;d+=.3){const x=self.x+dx*d,y=self.y+1.3+dy*d,z=self.z+dz*d;if(this.world.blocked(x,y,z,.2,.15)||this.world.ground(x,z).y+.2>y){reach=Math.max(.5,d-.3);break;}}
   this.scene.camera={position:[target[0]+dx*reach,target[1]+dy*reach,target[2]+dz*reach],target,fov:56,aperture:0,focusDistance:reach};this.scene.time=remote?.time??now/1000;
@@ -106,6 +123,6 @@ export class ThegameView {
   }
  }
  get ready():boolean{return this.chunks.inspect().resident>=9&&this.renderer.environmentReady;}
- inspect(detailed=false){return {...this.stats,chunks:this.chunks.inspect(),admission:{maxBytes:this.admission.maxBytes,maxOperations:this.admission.maxOperations,deadlineMs:this.admission.milliseconds,overruns:this.admission.overruns},submission:this.renderer.throughput(),presented:{...this.presentation,self:{...this.presentation.self},camera:{position:[...this.presentation.camera.position],target:[...this.presentation.camera.target]}},actors:this.actors.size,origin:[this.originX,this.originZ],clientPhysicsSteps:this.scene.tick,clientBodies:this.scene.physics.bodies.size,renderer:this.renderer.inspect(detailed),error:this.error||this.renderer.throughput().error};}
- dispose():void{if(this.disposed)return;this.disposed=true;this.worker.terminate();this.chunks.dispose();for(const a of this.actors.values())a.release();this.actors.clear();this.scene.dispose();this.renderer.dispose();}
+ inspect(detailed=false){return {...this.stats,chunks:this.chunks.inspect(),admission:{maxBytes:this.admission.maxBytes,maxOperations:this.admission.maxOperations,deadlineMs:this.admission.milliseconds,overruns:this.admission.overruns},submission:this.renderer.throughput(),presented:{...this.presentation,self:{...this.presentation.self},camera:{position:[...this.presentation.camera.position],target:[...this.presentation.camera.target]}},actors:this.actors.size,transit:this.transit.size,origin:[this.originX,this.originZ],clientPhysicsSteps:this.scene.tick,clientBodies:this.scene.physics.bodies.size,renderer:this.renderer.inspect(detailed),error:this.error||this.renderer.throughput().error};}
+ dispose():void{if(this.disposed)return;this.disposed=true;this.worker.terminate();this.chunks.dispose();for(const a of this.actors.values())a.release();this.actors.clear();for(const visual of this.transit.values())for(const e of visual.entities)this.scene.remove(e.id);this.transit.clear();this.scene.dispose();this.renderer.dispose();}
 }
