@@ -46,7 +46,7 @@ export function createThegameHost(config,{profile=false,now=()=>performance.now(
    // Scheduler jitter therefore cannot turn into a catch-up packet burst.
    if(steps&&Math.floor(game.tick/3)>Math.floor(before/3)){
     let populationFrames=[];try{const value=population();if(!Array.isArray(value)||value.length>64)throw Error('Population projection budget');populationFrames=value;}catch{stats.populationErrors++;}
-    for(const [socket,c] of sockets)if(c.id){if(c.outbox.size)stats.replaced++;const state=game.snapshot(c.id);c.outbox.offer(populationFrames.length?{...state,population:populationFrames}:state);flush(socket);}
+    for(const [socket,c] of sockets)if(c.id){if(c.outbox.size)stats.replaced++;const state=game.snapshot(c.id,populationFrames);c.outbox.offer(populationFrames.length?{...state,population:populationFrames}:state);flush(socket);}
    }
    return steps;
   },
