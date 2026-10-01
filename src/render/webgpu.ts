@@ -17,6 +17,7 @@ import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
 import {buildRenderFrame,renderPrimitive,renderModel,primitiveBaseScale,type RenderFrameIR} from './frame.js';
 import {buildDiffuseIrradianceSH} from './irradiance.js';
+import {SNOWFALL_WGSL,snowfallUniform} from './snowfall.js';
 
 type GPUAny=any;
 const SHADOW_MAP_SIZE=2048;
@@ -635,30 +636,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let glassOpacity=mix(clamp(u.color.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(.5+.5*screenRoughness,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
-const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+`
-@group(1) @binding(0) var<uniform> f:Frame;
-struct S {vp:mat4x4<f32>,camera:vec4<f32>,params:vec4<f32>,right:vec4<f32>,up:vec4<f32>}
-@group(0) @binding(0) var<uniform> s:S;
-struct O {@builtin(position) position:vec4<f32>,@location(0) alpha:f32,@location(1) uv:vec2<f32>,@location(2) tone:vec3<f32>}
-fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453123);}
-@vertex fn vs(@builtin(vertex_index) vertex:u32,@builtin(instance_index) instance:u32)->O{
- let i=f32(instance)+1.0;let rx=hash1(i*12.9898);let rz=hash1(i*78.233);let ry=hash1(i*31.731);let t=s.params.x;
- // Wrapping moves only the far boundary. Inside the volume flakes stay in world
- // space as the camera travels, with individual fall speed and lateral flutter.
- let wx=rx*52.0+s.params.z*t*.32+sin(t*.8+i)*.17;let wz=rz*52.0+s.params.w*t*.32+cos(t*.63+i*1.7)*.15;
- let world=vec3<f32>(s.camera.x+fract((wx-s.camera.x+26.0)/52.0)*52.0-26.0,fract(ry-t*(.024+hash1(i*5.17)*.025))*20.0,s.camera.z+fract((wz-s.camera.z+26.0)/52.0)*52.0-26.0);
- var corners=array<vec2<f32>,6>(vec2<f32>(-1,-1),vec2<f32>(1,-1),vec2<f32>(1,1),vec2<f32>(-1,-1),vec2<f32>(1,1),vec2<f32>(-1,1));let q=corners[vertex];
- let distance=length(world-s.camera.xyz);let size=.008+pow(hash1(i*9.13),3.0)*.022;
- let angle=t*.45+i;let local=vec2<f32>(q.x*cos(angle)-q.y*sin(angle),q.x*sin(angle)+q.y*cos(angle));
- var out:O;out.position=s.vp*vec4<f32>(world+(s.right.xyz*local.x+s.up.xyz*local.y)*size,1);
- out.uv=q;out.alpha=(.38+hash1(i*3.77)*.5)*smoothstep(.3,1.4,distance)*(1.0-smoothstep(21.0,26.0,max(abs(world.x-s.camera.x),abs(world.z-s.camera.z))));var incident=f.sky.rgb*2.0+vec3<f32>(.08);let cell=lightCell(world);
- if(cell!=0xffffffffu){for(var k=0u;k<lightCells[cell];k++){let source=lightGrid.sources[lightCells[cell+1u+k]];let d=length(world-source.position.xyz);incident+=source.color.rgb*source.color.w*pow(max(0.0,1.0-d/source.position.w),2.0)/max(1.0,d*d*.4);}}
- out.tone=incident*(.77+hash1(i*6.8)*.23);return out;
-}
-@fragment fn fs(in:O)->@location(0) vec4<f32>{
- let r=length(in.uv);let lobes=.84+.06*cos(atan2(in.uv.y,in.uv.x)*6.0);let fade=1.0-smoothstep(.15,lobes,r);return vec4<f32>(vec3<f32>(.86,.92,1)*in.tone,in.alpha*fade);
-}
-`;
+const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+SNOWFALL_WGSL;
 
 const REFLECTION_LOD_SHADER=FRAME_WGSL+`
 override MATERIAL_CLASS:i32=-1;
@@ -808,13 +786,20 @@ export class WebGPURenderer implements Renderer{
     const makeBloom=(entryPoint:string)=>device.createRenderPipeline({layout:bloomPipelineLayout,vertex:{module:bloomModule,entryPoint:'vs'},fragment:{module:bloomModule,entryPoint,targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
     const bloomDown=makeBloom('downsample'),bloomHorizontal=makeBloom('horizontal'),bloomVertical=makeBloom('vertical');
     const snowModule=device.createShaderModule({code:SNOW_SHADER}),snowLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:1,buffer:{type:'uniform'}}]});
-    const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout,lightLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
-    const snowUniform=device.createBuffer({size:128,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
+    const snow=device.createRenderPipeline({layout:device.createPipelineLayout({bindGroupLayouts:[snowLayout,lightLayout]}),vertex:{module:snowModule,entryPoint:'vs'},fragment:{module:snowModule,entryPoint:'fs',targets:[{format:'rgba16float',blend},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',blend}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
+    const snowUniform=device.createBuffer({size:176,usage:0x40|0x08}),snowBind=device.createBindGroup({layout:snowLayout,entries:[{binding:0,resource:{buffer:snowUniform}}]});
     const probeFrames=Array.from({length:6},(_,face)=>device.createBuffer({label:`reflection probe frame ${face}`,size:112,usage:0x40|0x08}));
     const probeFrameBinds=probeFrames.map(buffer=>device.createBindGroup({layout:probeFrameLayout,entries:[{binding:0,resource:{buffer}}]}));
     for(const shader of [module,reflectionModule,probeModule,probeFilterModule,skyModule,effectsModule,taaModule,presentModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
     return new WebGPURenderer(canvas,device,context,format,{probeFilter,probeFilterPasses,localProbeMap,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,sky,effects,taa,taaParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
   }
+  private timelineFrame:number|null=null;
+  /** Align temporal sampling when separate workers render ranges of one timeline. */
+  setTimelineFrame(frame:number):void{
+    if(!Number.isSafeInteger(frame)||frame<0)throw new RangeError('Timeline frame must be a non-negative integer');
+    this.timelineFrame=frame;
+  }
+  resetTemporalHistory():void{this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;this.previousModels.clear();}
   setResolution(width:number,height:number):void{
     if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');
     this.fixedResolution=[width,height];this.resize();
@@ -879,7 +864,7 @@ export class WebGPURenderer implements Renderer{
     void lightGrid;
     this.profiler.measure('environment',()=>this.updateEnvironmentMap(scene,reflectionProbe?.position??scene.camera.target,!!reflectionProbe));
     const frameState=this.profiler.measure('frame',()=>{
-      const cameraUp=camera.up??[0,1,0],cameraView=lookAt(camera.position,camera.target,cameraUp),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(frameId),projection=new Float32Array(baseProjection);
+      const cameraUp=camera.up??[0,1,0],cameraView=lookAt(camera.position,camera.target,cameraUp),projectionInfo=cameraProjection(camera,this.canvas.width,this.canvas.height),baseProjection=projectionInfo.matrix,cullVP=multiply4(baseProjection,cameraView),jitter=taaJitter(this.timelineFrame??frameId),projection=new Float32Array(baseProjection);
       projection[8]=projection[8]!-2*jitter[0]/this.canvas.width;projection[9]=projection[9]!+2*jitter[1]/this.canvas.height;
       const vp=multiply4(projection,cameraView);
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
@@ -1032,7 +1017,14 @@ export class WebGPURenderer implements Renderer{
       pass.setPipeline(this.gpu.transparent);for(const e of culled.cameraTransparent)if(e.material.kind!=='glass')this.draw(pass,e,true);
       this.profiler.endOcclusion(pass,query);
       const intensity=Math.min(1,scene.environment.snowfallRate/2.2e-5);query=this.profiler.beginOcclusion(pass,'snow');
-      if(intensity>.001){const snow=new Float32Array(32);snow.set(vp);snow.set([...camera.position,1],16);snow.set([scene.time,intensity,scene.environment.wind[0],scene.environment.wind[2]],20);snow.set([...right,0],24);snow.set([...up,0],28);this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);this.profiler.addUpload(snow.byteLength,'snow');pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.setBindGroup(1,this.gpu.transparentLightBind);snowInstances=Math.round(24000*intensity);pass.draw(6,snowInstances);}this.profiler.endOcclusion(pass,query);pass.end();
+      if(intensity>.001){
+        const current={camera:camera.position,right,up,time:scene.time};
+        const previousForward=V3.normalize(V3.sub(this.previousTarget??camera.target,this.previousCamera??camera.position));
+        const previousRight=V3.normalize(V3.cross(previousForward,camera.up??[0,1,0])),previousUp=V3.normalize(V3.cross(previousRight,previousForward));
+        const previous=this.historyValid&&this.previousCamera&&Number.isFinite(this.lastRenderTime)?{camera:this.previousCamera,right:previousRight,up:previousUp,time:this.lastRenderTime}:current;
+        const snow=snowfallUniform(vp,current,intensity,scene.environment.wind,scene.spec.seed??1,previous);
+        this.device.queue.writeBuffer(this.gpu.snowUniform,0,snow);this.profiler.addUpload(snow.byteLength,'snow');pass.setPipeline(this.gpu.snow);pass.setBindGroup(0,this.gpu.snowBind);pass.setBindGroup(1,this.gpu.transparentLightBind);snowInstances=Math.round(24000*intensity);pass.draw(6,snowInstances);
+      }this.profiler.endOcclusion(pass,query);pass.end();
     });
     this.profiler.measure('encode.bloom',()=>{
       const stages=[['bloom.downsample',this.bloomA,this.gpu.bloomDown,this.bloomDownBind],['bloom.horizontal',this.bloomB,this.gpu.bloomHorizontal,this.bloomHorizontalBind],['bloom.vertical',this.bloomA,this.gpu.bloomVertical,this.bloomVerticalBind]] as const;

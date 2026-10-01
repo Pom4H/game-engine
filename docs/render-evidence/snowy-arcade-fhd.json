@@ -1,0 +1,76 @@
+{
+  "provenance": "Native 1920x1080 WebGPU canvas, AMD RDNA-3 desktop; 24 warmup frames. Review images downsampled to 960x540, lossless WebP. No physical iPad throughput claim.",
+  "captures": {
+    "afterSha256": "90a33605704082058d9e201da38c4c19abdbd0ced857429976ae33fd0525f1a2",
+    "beforeSha256": "5c23862bc1e3e47db72679e831c0b9e89d7111003a9c0d4430c14f8b76e0f6ec"
+  },
+  "camera": {
+    "position": [
+      9.8,
+      2.55,
+      -11.7
+    ],
+    "target": [
+      -6.4,
+      4.05,
+      1.75
+    ],
+    "fov": 44.5,
+    "aperture": 0
+  },
+  "after": {
+    "materialTextures": 15,
+    "errors": [],
+    "triangles": 463786,
+    "drawCalls": 417
+  },
+  "before": {
+    "drawCalls": 444,
+    "triangles": 754782
+  },
+  "time": 2.9999999999999942,
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "tests": {
+    "pass": 89,
+    "fail": 0
+  },
+  "resolution": [
+    1920,
+    1080
+  ],
+  "distributedVideo": {
+    "environment": "Two isolated native desktop Chrome contexts, not physical iPads",
+    "resolution": [
+      1920,
+      1080
+    ],
+    "segments": [
+      {
+        "startFrame": 0,
+        "frames": 12,
+        "firstPts": 0,
+        "codec": "h264",
+        "pixelDeviation": 23.114680409926056
+      },
+      {
+        "startFrame": 12,
+        "frames": 12,
+        "firstPts": 0.2,
+        "codec": "h264",
+        "pixelDeviation": 22.474713166881468
+      }
+    ],
+    "playback": {
+      "width": 1920,
+      "height": 1080,
+      "time": 0.291429,
+      "error": ""
+    }
+  }
+}

@@ -1,7 +1,8 @@
 // Camera and architecture are reusable SceneSpec data. This shot authors
 // physical lighting and surface state; every pixel comes from the engine.
-import base,{authoredEntityCount as buildingEntityCount,authoredEntities} from './scene.mjs';
+import base,{authoredEntities} from './scene.mjs';
 import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
+import {canopySnow} from './snow-canopy.mjs';
 export {camera,quality} from './scene.mjs';
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
 const canvas={kind:'default',color:[.19,.17,.15,1],roughness:.94,ageYears:105,texture:materialMap('plaster',.36,.92)};
@@ -18,6 +19,8 @@ for(let i=0;i<count;i++){
  additions.push({id:`awning-fascia-${i}`,position:[x,3.19,-2.89],mesh:{kind:'polygon-prism',axis:2,points,thickness:.035},material:canvas});
 }
 const entities=authoredEntities.filter(e=>
+ !/^shop-\d+-(canopy-snow|icicle)/.test(e.id)&&
+ !/^street-snow-/.test(e.id)&&
  !/^chimney-/.test(e.id)&&
  e.id!=='distant-building'&&
  e.id!=='roof-top'&&e.id!=='front-mansard'&&
@@ -95,35 +98,12 @@ for(let i=0;i<Math.min(count,7);i++){
    sphere(`window-display-${i}-${k}`,[xx,.86+(k%2)*.10,-.40],.085+(k%3)*.012,{kind:'default',color:[.52,.42,.30,1],roughness:.38,emissive:[.06,.028,.01]});
  }
 }
-// Continuous snow lip on the awning edge: a narrow triangle strip, not beads.
-for(let i=0;i<count;i++){
- const x=-(start+bay*(i+.5)),positions=[],normals=[],indices=[],steps=56;
- for(let k=0;k<=steps;k++){
-   const a=k/steps*Math.PI,cs=Math.cos(a),sn=Math.sin(a);
-   for(const d of [0,.11]){
-     const rr=r+.055-d*.22,yy=3.19+(rise+.075-d*.18)*sn;
-     positions.push(x+rr*cs,yy,-2.945-d);
-     normals.push(cs*.45,sn,.08);
-   }
-   if(k<steps){const q=k*2;indices.push(q,q+2,q+1,q+1,q+2,q+3);}
- }
- additions.push({id:`awning-snow-rim-${i}`,position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:snow});
-}
 // Irregular roadside accumulation keeps the wet centre visible while breaking
 // the perfectly clean curb silhouette.
 for(let i=0;i<24;i++){
  const x=-17+i*1.25,seed=9100+i*97;
  additions.push({id:`road-snowbank-${i}`,position:[x,.015,-4.4-(i%3)*.12],mesh:{kind:'snowdrift',size:[1.05,.14,.62],seed,segments:20},material:snow});
 }
-
-// Wind-blown foreground clumps break the pavement into wet and packed-snow
-// regions without hiding the reflections.
-for(let i=0;i<104;i++){
- const t=(i*37%101)/101,z=-5.2-(i*53%89)/89*8.6,x=-18+t*43;
- additions.push({id:`road-scatter-${i}`,position:[x,-.002,z],mesh:{kind:'snowdrift',size:[.52+(i%5)*.14,.05+(i%3)*.022,.40+(i%4)*.12],seed:14000+i*83,segments:14},material:snow});
-}
-
-
 
 // Warm bounce from the shopfronts onto wet cobbles. These are low-energy point
 // lights placed at the actual windows, not screen-space glow cards.
@@ -160,21 +140,11 @@ for(let i=0;i<8;i++){
  additions.push({id:`awning-face-fill-${i}`,position:[x,3.55,-3.45],light:{kind:'point',color:[1,.58,.32],intensity:.72,range:2.7}});
 }
 
-// Continuous snow shells over the arched canopies. Unlike the old beads these
-// preserve the canopy silhouette and add low-frequency accumulation depth.
+// A single shell replaces the overlapping base coating and separate snow rim.
+// Deposition thins on steep sides and collects on the crown and exposed lip.
 for(let i=0;i<count;i++){
- const cx=-(start+bay*(i+.5)),positions=[],normals=[],indices=[],nu=52,nv=12;
- for(let v=0;v<=nv;v++)for(let u=0;u<=nu;u++){
-   const fu=u/nu,fv=v/nv,a=(.035+fu*.93)*Math.PI;
-   const lump=.018*Math.sin(fu*10.5+i*.7)+.010*Math.sin(fu*27.0+fv*5.0+i);
-   const front=.018*Math.exp(-fv*7.0)*(1+.5*Math.sin(fu*19.0+i));
-   const h=.125+lump*1.65+front*1.75;
-   const cs=Math.cos(a),sn=Math.sin(a);
-   positions.push(cx+cs*(r+h),3.19+sn*(rise+h*.72),-2.92+fv*2.78);
-   const l=Math.hypot(cs,sn)||1;normals.push(cs/l,sn/l,.05);
-   if(u<nu&&v<nv){const q=v*(nu+1)+u,b=q+nu+1;indices.push(q,b,q+1,q+1,b,b+1);}
- }
- additions.push({id:`awning-snow-shell-${i}`,position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:snow});
+ const cx=-(start+bay*(i+.5));
+ additions.push({id:`awning-snow-shell-${i}`,position:[0,0,0],mesh:canopySnow(cx,r,rise,i),material:snow});
 }
 // Interior practicals create small pools of warm light and depth behind glass.
 for(let i=0;i<6;i++){
@@ -246,7 +216,8 @@ for(let i=0;i<count;i++){
  }
 }
 const finalEntities=[...entities,...additions].filter(e=>!/^(window-bounce|awning-face-fill|interior-lamp-light)/.test(e.id));
-export const authoredEntityCount=buildingEntityCount+finalEntities.length;
+export const referenceEntities=finalEntities;
+export const authoredEntityCount=finalEntities.length;
 export default {...base,
  environment:{...base.environment,snowfall:'light',humidity:.985,wind:[.18,0,.06]},
  rendering:{...base.rendering,skyColor:[.026,.028,.030],fogDensity:.026,sunDirection:[-.28,.76,-.46],sunColor:[.46,.49,.53],sunIntensity:.34,exposure:.96},

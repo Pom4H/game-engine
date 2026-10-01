@@ -3,7 +3,7 @@
 import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 
 export const camera={position:[7.2707,2.35,-8.8992],target:[-5.7446,2.35,6.2854],intrinsics:{fx:638.8486,fy:638.8486,cx:640,cy:526.8103,width:1280,height:720},aperture:0};
-export const quality={output:[1920,1080],internal:[3840,2160],warmupFrames:24};
+export const quality={output:[1920,1080],internal:[1920,1080],warmupFrames:24};
 const P={
  wall:{kind:'default',color:[.36,.315,.265,1],pattern:'plaster',roughness:.96,ageYears:45},
  side:{kind:'default',color:[.16,.145,.12,1],pattern:'brick',roughness:.96,ageYears:95},
