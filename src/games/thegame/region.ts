@@ -28,7 +28,7 @@ export function readThegameRegionSpec(raw:unknown):Readonly<ThegameRegionSpec>{
  const population=r.population??4096,cellM=r.cellM??128,stepSeconds=r.stepSeconds??1;
  if(!integer(seed,0,0xffffffff)||!integer(x,-4096,4096)||!integer(z,-4096,4096)||
     !integer(sizeM,256,8192)||!integer(population,0,200_000)||!integer(cellM,32,512)||
-    !finite(stepSeconds)||stepSeconds<.1||stepSeconds>60)throw new RangeError('Invalid region configuration');
+    !finite(stepSeconds)||stepSeconds<.01||stepSeconds>.1)throw new RangeError('Invalid region configuration');
  if(sizeM%cellM!==0)throw new RangeError('Region size must be divisible by population cell size');
  return Object.freeze({seed,x,z,sizeM,population,cellM,stepSeconds});
 }
