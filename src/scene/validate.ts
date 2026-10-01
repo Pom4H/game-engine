@@ -3,6 +3,7 @@ import {SnowSurface,type SnowSurfaceOptions} from '../environment/snow-surface.j
 import {materialKinds} from '../materials/catalog.js';
 import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
+import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
 
 export function validateScene(value:unknown):SceneSpec{
   if(!value||typeof value!=='object')throw new TypeError('Scene must be an object');
@@ -24,6 +25,13 @@ export function validateScene(value:unknown):SceneSpec{
       if(material.finish!==undefined&&!['raw','rough','smooth','polished','weathered'].includes(String(material.finish)))throw new TypeError(`${entity.id}.material.finish is unknown`);
       if(material.treatment!==undefined&&!['none','sealed','biocide','galvanized','painted'].includes(String(material.treatment)))throw new TypeError(`${entity.id}.material.treatment is unknown`);
       if(material.ageYears!==undefined&&(typeof material.ageYears!=='number'||!Number.isFinite(material.ageYears)||material.ageYears<0))throw new TypeError(`${entity.id}.material.ageYears must be non-negative`);
+    }
+  }
+  if(scene.fluids!==undefined){
+    const fluids=boundedArray(scene.fluids,'fluids',128),fluidIds=new Set<string>();
+    for(const [index,raw] of fluids.entries()){
+      if(!raw||typeof raw!=='object')throw new TypeError(`fluids[${index}] must be an object`);
+      validateFluidVolume(raw as FluidVolumeSpec);const id=(raw as FluidVolumeSpec).id;if(fluidIds.has(id))throw new TypeError(`Duplicate fluid ${id}`);fluidIds.add(id);
     }
   }
   validateBindings(scene,scene.entities as EntitySpec[]);
@@ -264,7 +272,7 @@ export function validateEntity(value:unknown):EntitySpec{
   for(const key of ['position','rotation','scale'])if(e[key]!==undefined)vector(e[key],3,`${id}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
   if(e.mesh!==undefined)primitiveSpec(e.mesh,`${id}.mesh`);
   if(e.renderMesh!==undefined)primitiveSpec(e.renderMesh,`${id}.renderMesh`);
-  if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);}
+  if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);if(b.fluid!==undefined){const p=object(b.fluid,`${id}.body.fluid`);number(p.enclosedVolumeM3,`${id}.body.fluid.enclosedVolumeM3`,0,1e6);optionalNumber(p,'leakAreaM2',`${id}.body.fluid`,0,100);}}
   if(e.material!==undefined)materialSpec(e.material,`${id}.material`);
   if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);if(env.snowMaterial!==undefined)materialSpec(env.snowMaterial,`${id}.environmental.snowMaterial`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
   if(e.light!==undefined){const l=object(e.light,`${id}.light`);if(l.kind!=='point')throw new TypeError(`${id}.light.kind is unknown`);optionalNumber(l,'intensity',`${id}.light`,0);optionalNumber(l,'range',`${id}.light`,Number.MIN_VALUE);if(l.color!==undefined)vector(l.color,3,`${id}.light.color`,0,1);
