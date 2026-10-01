@@ -1,4 +1,4 @@
-import {mkdir} from 'node:fs/promises';
+import {mkdir,writeFile} from 'node:fs/promises';
 import * as engine from '../../dist/index.js';
 import {provingGroundZones,releasePhysicsRequirements} from './catalog.mjs';
 
@@ -57,7 +57,7 @@ const report={
  ],
 };
 await mkdir('artifacts/proving-ground',{recursive:true});
-await Bun.write('artifacts/proving-ground/physics-report.json',JSON.stringify(report,null,2));
+await writeFile('artifacts/proving-ground/physics-report.json',JSON.stringify(report,null,2));
 console.log(JSON.stringify(report,null,2));
 if(process.env.PROVING_GROUND_RELEASE_GATE==='1'&&!report.releaseReady){
  console.error('RELEASE BLOCKED: '+missing.join(', '));
