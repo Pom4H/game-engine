@@ -6,6 +6,7 @@ import {RuntimeTimeline} from '../../core/runtime-timeline.js';
 import {OpenWorld,WORLD_REVISION,WORLD_LIMIT} from './world.js';
 import {materializeCrowd} from './crowd.js';
 import {NearbyNpcAuthority} from './npc-authority.js';
+import type {ResidentJob,ResidentActivity,CommuteMode} from './resident-life.js';
 export interface ThegameConfig extends CharacterTuning {readonly seed:number;readonly viewRadius:number;readonly exposure:number}
 export function thegameConfig(raw:Partial<ThegameConfig>={}):Readonly<ThegameConfig>{
  const c={seed:29,walkSpeed:3.35,runSpeed:6.8,gravity:16,jumpSpeed:5.4,viewRadius:3,exposure:1,...raw};
@@ -23,8 +24,9 @@ export const LANDMARKS=Object.freeze([
  {id:'shore',name:'Побережье',x:800,z:80},
 ]);
 export const peopleProjection=projection('thegame/people/1',{position:vector3('linear',-WORLD_LIMIT,WORLD_LIMIT),yaw:scalar('angle',-Math.PI*2,Math.PI*2),phase:scalar('angle',0,Math.PI*2000+1),speed:scalar('linear',0,40),kind:scalar('step',0,2)},{maxEntities:48,maxBytes:32_768});
-export interface Peer {readonly id:string;readonly name:string;state:CharacterState;ack:number;received:number;readonly inputs:SequencedInput<CharacterInput>[];discovered:number;starved:number}
+export interface Peer {readonly id:string;readonly residentId:string;readonly name:string;state:CharacterState;ack:number;received:number;readonly inputs:SequencedInput<CharacterInput>[];discovered:number;starved:number}
 export interface SelfState {readonly ack:number;readonly state:CharacterState;readonly discovered:number}
+export interface ResidentSelf {readonly id:string;readonly job:ResidentJob;readonly activity:ResidentActivity;readonly commute:CommuteMode;readonly possessions:number}
 export interface WorldSnapshot {readonly type:'state';readonly world:string;readonly frame:Frame;readonly self:SelfState;readonly players:number}
 const object=(raw:unknown):Record<string,unknown>=>{if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new TypeError('Expected object');return raw as Record<string,unknown>;};
 const number=(n:unknown,min:number,max:number):n is number=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
@@ -56,14 +58,25 @@ export class ThegameAuthority {
   this.config=thegameConfig(config);if(!Number.isSafeInteger(epoch)||epoch<1)throw new RangeError('Invalid world epoch');this.epoch=epoch;
   this.world=new OpenWorld(this.config.seed);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
  }
- join(id:string,name='Игрок',saved?:{state:CharacterState;discovered:number}):Peer{
+ join(id:string,name='Игрок',saved?:{state:CharacterState;discovered:number;residentId?:string}):Peer{
   if(this.peers.size>=32||this.peers.has(id)||!/^p[0-9a-z]{1,16}$/.test(id))throw new RangeError('Room capacity or identity');
-  const s=this.world.spawn(this.stats.joins%32),p=characterState(s.x,s.y,s.z,Math.PI/2);
-  if(saved){const validated=readSelf({ack:0,state:saved.state,discovered:saved.discovered});if(!this.world.blocked(validated.state.x,validated.state.y,validated.state.z,1.8,.29))Object.assign(p,validated.state);}
-  const peer:Peer={id,name:name.replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,24)||'Игрок',state:p,ack:0,received:0,inputs:[],discovered:saved?.discovered??0,starved:0};
+  let possession;
+  if(saved?.residentId){
+   const validated=readSelf({ack:0,state:saved.state,discovered:saved.discovered});
+   possession=this.npcs.reclaim(saved.residentId,validated.state,this.tick);
+  }
+  if(!possession){
+   const spawn=this.world.spawn(this.stats.joins%32);
+   possession=this.npcs.acquire(spawn,this.tick);
+  }
+  if(!possession)throw new Error('No resident available for player possession');
+  const peer:Peer={id,residentId:possession.id,name:name.replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,24)||'Игрок',state:possession.state,ack:0,received:0,inputs:[],discovered:saved?.discovered??0,starved:0};
   this.peers.set(id,peer);this.stats.joins++;return peer;
  }
- leave(id:string):void{if(this.peers.delete(id))this.stats.leaves++;}
+ leave(id:string):void{
+  const peer=this.peers.get(id);if(!peer)return;
+  this.peers.delete(id);this.npcs.release(peer.residentId,peer.state,this.tick);this.stats.leaves++;
+ }
  enqueue(id:string,raw:unknown):void{
   const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
   try{
@@ -87,10 +100,15 @@ export class ThegameAuthority {
   this.npcs.refresh(this.peers.values(),this.tick);this.npcs.step(this.tick);
  }
  setPopulation(population:readonly Frame[]):void{this.npcs.setPopulation(population);}
+ resident(id:string):ResidentSelf{
+  const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
+  const profile=this.npcs.profile(peer.residentId),intent=this.npcs.intent(peer.residentId,this.tick),memory=this.npcs.memory(peer.residentId);
+  return{id:peer.residentId,job:profile.job,activity:intent.activity,commute:profile.commute,possessions:memory?.possessions??1};
+ }
  snapshot(id:string,population:readonly Frame[]=[]):WorldSnapshot{
   const peer=this.peers.get(id);if(!peer)throw new Error('Unknown player');
   const rows:{id:string;data:{position:readonly [number,number,number];yaw:number;phase:number;speed:number;kind:number}}[]=[];
-  for(const other of this.peers.values())if(other!==peer&&Math.hypot(other.state.x-peer.state.x,other.state.z-peer.state.z)<512){const p=other.state;rows.push({id:other.id,data:{position:[p.x,p.y,p.z],yaw:p.yaw,phase:p.phase,speed:p.speed,kind:0}});}
+  for(const other of this.peers.values())if(other!==peer&&Math.hypot(other.state.x-peer.state.x,other.state.z-peer.state.z)<512){const p=other.state;rows.push({id:other.residentId,data:{position:[p.x,p.y,p.z],yaw:p.yaw,phase:p.phase,speed:p.speed,kind:0}});}
   rows.push(...this.npcs.rowsAround(peer.state,512,Math.max(0,peopleProjection.maxEntities-rows.length)));
   const crowdBudget=Math.max(0,Math.min(24,peopleProjection.maxEntities-rows.length));
   for(const person of materializeCrowd(this.world,population,peer.state,this.tick,crowdBudget)){
@@ -100,6 +118,6 @@ export class ThegameAuthority {
   const frame=peopleProjection.capture({epoch:this.epoch,sequence:++this.sequence,tick:this.tick,time:this.tick/60,paused:false},rows);this.stats.published++;
   return {type:'state',world:worldSignature(this.config),frame,self:{ack:peer.ack,state:{...peer.state},discovered:peer.discovered},players:this.peers.size};
  }
- inspect(){return {tick:this.tick,players:this.peers.size,queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),npcs:this.npcs.inspect(),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
+ inspect(){return {tick:this.tick,players:this.peers.size,residents:[...this.peers.values()].map(p=>p.residentId),queued:[...this.peers.values()].reduce((n,p)=>n+p.inputs.length,0),world:this.world.inspect(),npcs:this.npcs.inspect(),stats:{...this.stats},profile:this.profiler.inspect(),trace:this.timeline.diagnostics};}
  dispose():void{this.peers.clear();this.npcs.dispose();this.world.dispose();this.timeline.clear();}
 }
