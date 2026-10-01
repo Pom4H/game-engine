@@ -5,9 +5,9 @@ import {CpuProfiler} from '../../core/profiling.js';
 import {RuntimeTimeline} from '../../core/runtime-timeline.js';
 import {OpenWorld,WORLD_REVISION,WORLD_LIMIT} from './world.js';
 import {materializeCrowd} from './crowd.js';
-import {NearbyNpcAuthority} from './npc-authority.js';
+import {NearbyNpcAuthority,type ResidentPossession} from './npc-authority.js';
 import {TransitAuthority,type TransitMode} from './transit.js';
-import {TransitVehicleAuthority,type TransitSeatPose} from './transit-vehicle.js';
+import {TransitVehicleAuthority} from './transit-vehicle.js';
 import type {ResidentJob,ResidentActivity,CommuteMode} from './resident-life.js';
 export interface ThegameConfig extends CharacterTuning {readonly seed:number;readonly viewRadius:number;readonly exposure:number}
 export function thegameConfig(raw:Partial<ThegameConfig>={}):Readonly<ThegameConfig>{
@@ -67,7 +67,7 @@ export class ThegameAuthority {
   this.config=thegameConfig(config);if(!Number.isSafeInteger(epoch)||epoch<1)throw new RangeError('Invalid world epoch');this.epoch=epoch;
   this.world=new OpenWorld(this.config.seed);this.transit=new TransitAuthority();this.transit.step(0);this.transitVehicles=new TransitVehicleAuthority(this.transit);this.npcs=new NearbyNpcAuthority(this.world,this.config);this.npcs.setUnavailable(this.transit.ownedResidentIds());this.timeline=new RuntimeTimeline({enabled:profile,capacity:512});this.profiler=new CpuProfiler({enabled:profile,capacity:512,maxScopes:8,timeline:this.timeline});
  }
- private seatedPossession(residentId:string):{possession:ReturnType<NearbyNpcAuthority['possessExternal']> extends infer R?Exclude<R,undefined>:never;seat:TransitSeat}|undefined{
+ private seatedPossession(residentId:string):{possession:ResidentPossession;seat:TransitSeat}|undefined{
   const passenger=this.transit.passenger(residentId);if(passenger?.state!=='riding'||!passenger.serviceId)return;
   const service=this.transit.serviceForPassenger(residentId,this.tick/60);if(!service)return;
   const pose=this.transitVehicles.seatPose(service.id,this.tick/60);if(!pose)return;
