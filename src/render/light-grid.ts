@@ -23,7 +23,7 @@ export function buildLightGrid(sources:readonly RenderLight[],eye:Vec3):{lights:
  const bins:Array<Array<{index:number;score:number}>>=Array.from({length:LIGHT_GRID_SIDE**2},()=>[]);
  selected.forEach(({s},index)=>{
   const l=s.light!,range=l.range??12,v=l.volumetric,profile=v?.profile==='lantern-4pane'?1:0;
-  const yaw=Number.isFinite(v?.yaw)?v!.yaw!:0,strength=Math.max(0,Math.min(8,v?.strength??1)),rangeScale=Math.max(.25,Math.min(4,v?.rangeScale??1));
+  const yaw=typeof v?.yaw==='number'&&Number.isFinite(v.yaw)?v.yaw:0,strength=Math.max(0,Math.min(8,v?.strength??1)),rangeScale=Math.max(.25,Math.min(4,v?.rangeScale??1));
   lights.set([...s.position,range,...(l.color??[1,.78,.5]),l.intensity??1,profile,yaw,strength,rangeScale],4+index*LIGHT_SOURCE_FLOATS);
   const minX=Math.max(0,Math.floor((s.position[0]-range-originX)/LIGHT_GRID_CELL)),maxX=Math.min(LIGHT_GRID_SIDE-1,Math.floor((s.position[0]+range-originX)/LIGHT_GRID_CELL));
   const minZ=Math.max(0,Math.floor((s.position[2]-range-originZ)/LIGHT_GRID_CELL)),maxZ=Math.min(LIGHT_GRID_SIDE-1,Math.floor((s.position[2]+range-originZ)/LIGHT_GRID_CELL));
