@@ -6,22 +6,22 @@ import {ForceFrame} from '../physics/force-frame.js';
 import {DeformationAttachment,type DeformationField} from '../physics/deformation-field.js';
 import {solveWheelContact,type WheelContactResult} from '../physics/wheel-contact.js';
 import {PartCondition} from './condition.js';
-import type {CompiledComponent,VehicleBlueprint,WingSpec,WheelSpec} from './components.js';
-export {vehicle,wheel,wing,type VehicleBlueprint,type VehicleSpec,type WingSpec,type WheelSpec} from './components.js';
+import type {CompiledComponent,RotorSpec,VehicleBlueprint,WingSpec,WheelSpec} from './components.js';
+export {vehicle,wheel,wing,rotor,type RotorSpec,type VehicleBlueprint,type VehicleSpec,type WingSpec,type WheelSpec} from './components.js';
 export {PartCondition,type ConditionSpec} from './condition.js';
 export type {DeformationField} from '../physics/deformation-field.js';
 
-export interface VehicleControls {readonly handbrake?:number;readonly throttle?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;}
+export interface VehicleControls {readonly handbrake?:number;readonly throttle?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;readonly collective?:number;readonly yaw?:number;}
 export interface VehicleAir {readonly densityKgM3:number;readonly wind:Vec3;}
 export interface VehiclePose {readonly position?:Vec3;readonly rotation?:Vec3;readonly velocity?:Vec3;readonly angularVelocity?:Vec3;}
 export interface PartSample {
-  readonly id:string;readonly kind:'wheel'|'wing';readonly force:Vec3;readonly point:Vec3;
+  readonly id:string;readonly kind:'wheel'|'wing'|'rotor';readonly force:Vec3;readonly point:Vec3;
   /** COM-local frame used by the most recent physical force evaluation. */
   readonly localPosition:Vec3;readonly localChord:Vec3;readonly localNormal:Vec3;readonly mountValid:boolean;
   readonly contact:boolean;readonly contactNormal:Vec3;readonly supportId:string;readonly fixedSupport:boolean;readonly loadN:number;readonly liftN:number;readonly dragN:number;readonly alphaRad:number;readonly stall:number;
   readonly angularSpeed:number;readonly spinRad:number;readonly compressionM:number;readonly permanentSetM:number;
   readonly plasticWorkJ:number;readonly slipPowerW:number;readonly dissipatedJ:number;readonly wear:number;readonly fatigue:number;readonly failed:boolean;
-  readonly temperatureRiseK:number;readonly effectiveRadiusM:number;readonly effectiveGrip:number;readonly treadDepthM:number;readonly derivedBuilds:number;
+  readonly temperatureRiseK:number;readonly effectiveRadiusM:number;readonly effectiveGrip:number;readonly treadDepthM:number;readonly reactionTorqueNm:number;readonly powerW:number;readonly collectiveRad:number;readonly derivedBuilds:number;
 }
 interface PartRuntime {
   readonly compiled:CompiledComponent;readonly condition:PartCondition;
@@ -29,12 +29,13 @@ interface PartRuntime {
   readonly force:MutableVec3;readonly point:MutableVec3;readonly arm:MutableVec3;readonly velocity:MutableVec3;
   readonly chord:MutableVec3;readonly normal:MutableVec3;readonly localChord:MutableVec3;readonly localNormal:MutableVec3;
   readonly wheelSolve:WheelContactResult;readonly support:WheelHit;readonly down:MutableVec3;contact:boolean;
-  revision:number;control:number;radius:number;tread:number;grip:number;liftScale:number;omega:number;spin:number;longForce:number;sideForce:number;
+  revision:number;control:number;control2:number;control3:number;radius:number;tread:number;grip:number;liftScale:number;omega:number;spin:number;longForce:number;sideForce:number;
   load:number;lift:number;drag:number;alpha:number;stall:number;compression:number;permanent:number;plasticWork:number;
-  slipPower:number;derivedBuilds:number;
+  slipPower:number;reactionTorque:number;power:number;derivedBuilds:number;
 }
 const clamp=(x:number,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const dot=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const normalize=(out:MutableVec3,x:number,y:number,z:number)=>{const length=Math.hypot(x,y,z);if(length<1e-12){out[0]=out[1]=out[2]=0;return 0;}out[0]=x/length;out[1]=y/length;out[2]=z/length;return length;};
 const ZERO:Vec3=[0,0,0];
 // Read-only borrowed vectors, without exposing writable simulation arrays.
 const viewVector=(v:MutableVec3):Vec3=>Object.freeze(Object.defineProperties([0,0,0],{
@@ -53,7 +54,7 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly parts:PartRuntime[];
   private readonly byId=new Map<string,PartRuntime>();
   private readonly views=new Map<string,PartSample>();
-  private readonly controls={handbrake:0,throttle:0,brake:0,steer:0,pitch:0,roll:0,flap:0};
+  private readonly controls={handbrake:0,throttle:0,brake:0,steer:0,pitch:0,roll:0,flap:0,collective:0,yaw:0};
   private air:VehicleAir={densityKgM3:1.225,wind:[0,0,0]};
   private readonly unbind:()=>void;
   private disposed=false;
@@ -63,7 +64,7 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly referenceFrame:ForceFrame|undefined;
   /** Optional reaction for a non-rigid support returned by world.wheelSupport. */
   supportReaction:((hit:WheelHit,force:Vec3,dt:number)=>void)|undefined;
-  readonly diagnostics={steps:0,supportQueries:0,aeroEvaluations:0,wheelSolves:0};
+  readonly diagnostics={steps:0,supportQueries:0,aeroEvaluations:0,rotorEvaluations:0,wheelSolves:0};
   constructor(readonly world:PhysicsWorld,readonly blueprint:VehicleBlueprint,pose:VehiclePose={},options:{reuseDerived?:boolean;body?:RigidBody}={}) {
     const position=pose.position??ZERO,rotation=pose.rotation??ZERO,velocity=pose.velocity??ZERO,angular=pose.angularVelocity??ZERO;
     for(const v of [position,rotation,velocity,angular])finiteVec3(v,'Vehicle pose');
@@ -79,7 +80,7 @@ export class Vehicle implements PhysicsForceDriver {
     this.parts=blueprint.parts.map(compiled=>{
       const mount=compiled.source.mountAt,com=blueprint.centerOfMass;
       const anchor:Vec3=mount?[mount[0]-com[0],mount[1]-com[1],mount[2]-com[2]]:compiled.arm;
-      const part:PartRuntime={compiled,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),force:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:wheelHit(),down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,radius:0,tread:0,grip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,slipPower:0,derivedBuilds:0};
+      const part:PartRuntime={compiled,attachment:new DeformationAttachment(anchor),localArm:[...compiled.arm],condition:new PartCondition(compiled.source.condition),force:[0,0,0],point:[0,0,0],arm:[0,0,0],velocity:[0,0,0],chord:[0,0,0],normal:[0,0,0],localChord:[0,0,0],localNormal:[0,0,0],support:wheelHit(),down:[0,-1,0],contact:false,wheelSolve:{force:0,sideForce:0,speed:0,slip:0,brake:0,targetForce:0,targetSide:0},revision:-1,control:NaN,control2:NaN,control3:NaN,radius:0,tread:0,grip:0,liftScale:1,omega:0,spin:0,longForce:0,sideForce:0,load:0,lift:0,drag:0,alpha:0,stall:0,compression:0,permanent:0,plasticWork:0,slipPower:0,reactionTorque:0,power:0,derivedBuilds:0};
       if(compiled.source.kind==='wheel')part.omega=dot(this.body.velocity,[this.frame.basis[0]!,this.frame.basis[1]!,this.frame.basis[2]!])/compiled.source.radiusM;
       this.byId.set(compiled.source.id,part);return part;
     });
@@ -98,7 +99,7 @@ export class Vehicle implements PhysicsForceDriver {
   get deformationBuilds():number{return this.parts.reduce((n,p)=>n+p.attachment.builds,0);}
   get deformationSamples():number{return this.parts.reduce((n,p)=>n+p.attachment.samples,0);}
   setControls(input:VehicleControls):void {
-    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'||key==='handbrake'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
+    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'||key==='handbrake'||key==='collective'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
     Object.assign(this.controls,input);if(Object.values(input).some(v=>v!==0))this.body.wake();
   }
   setAir(air:VehicleAir):void {
@@ -117,7 +118,7 @@ export class Vehicle implements PhysicsForceDriver {
       get angularSpeed(){return p.omega;},get spinRad(){return p.spin;},get compressionM(){return p.compression;},get permanentSetM(){return p.permanent;},get plasticWorkJ(){return p.plasticWork;},
       get slipPowerW(){return p.slipPower;},get dissipatedJ(){return c.dissipatedJ;},get wear(){return c.wear;},get fatigue(){return c.fatigue;},get failed(){return c.failed;},
       get temperatureRiseK(){return c.temperatureRiseK;},get effectiveRadiusM(){return p.radius;},get effectiveGrip(){return p.grip;},
-      get treadDepthM(){return p.tread;},get derivedBuilds(){return p.derivedBuilds;},
+      get treadDepthM(){return p.tread;},get reactionTorqueNm(){return p.reactionTorque;},get powerW(){return p.power;},get collectiveRad(){return p.alpha;},get derivedBuilds(){return p.derivedBuilds;},
     });
     this.views.set(id,view);return view;
   }
@@ -133,36 +134,78 @@ export class Vehicle implements PhysicsForceDriver {
     this.dragForce[0]=drag*vx;this.dragForce[1]=drag*vy;this.dragForce[2]=drag*vz;this.frame.add(this.dragForce,ZERO);
     for(const p of this.parts){
       const frame=this.referenceFrame??this.frame;if(this.referenceFrame)frame.update(b.rotation);
-      const s=p.compiled.source;p.force.fill(0);p.load=p.lift=p.drag=p.alpha=p.stall=p.slipPower=0;
+      const s=p.compiled.source;p.force.fill(0);p.load=p.lift=p.drag=p.alpha=p.stall=p.slipPower=p.reactionTorque=p.power=0;
       this.derive(p);
       frame.rotate(p.localArm,p.arm);
       for(let k=0;k<3;k++)p.point[k]=b.position[k]!+p.arm[k]!;
       const r=p.arm,w=b.angularVelocity,v=p.velocity;
       v[0]=b.velocity[0]+w[1]*r[2]-w[2]*r[1];v[1]=b.velocity[1]+w[2]*r[0]-w[0]*r[2];v[2]=b.velocity[2]+w[0]*r[1]-w[1]*r[0];
       if(s.kind==='wing')this.aerodynamics(p,s,frame);
+      else if(s.kind==='rotor')this.rotorForces(p,s,frame,dt);
       else {this.wheelForces(p,s,frame,dt);p.spin+=p.omega*dt;}
-      this.frame.add(p.force,p.arm);p.condition.observeLoad(s.kind==='wing'?p.lift:p.load);
+      this.frame.add(p.force,p.arm);
+      if(s.kind==='rotor'&&p.reactionTorque)for(let k=0;k<3;k++)this.torque[k]!+=p.normal[k]!*p.reactionTorque;
+      p.condition.observeLoad(s.kind==='wing'?Math.abs(p.lift):p.load);
     }
     // A sleeping supported body must react to changed wind or loss of support, too.
     if(b.sleeping&&(speed>.1||Math.hypot(...this.torque)>1||Math.hypot(this.force[0]+b.mass*this.world.gravity[0],this.force[1]+b.mass*this.world.gravity[1],this.force[2]+b.mass*this.world.gravity[2])>b.mass*.05))b.wake();
   }
   private derive(p:PartRuntime):void {
     const s=p.compiled.source,c=p.condition;
-    const control=s.kind==='wheel'?this.controls.steer*(s.steerRad??0):s.control?this.controls[s.control]*(s.controlGainRad??0):0;
+    let control=0,control2=0,control3=0;
+    if(s.kind==='wheel')control=this.controls.steer*(s.steerRad??0);
+    else if(s.kind==='wing')control=s.control?this.controls[s.control]*(s.controlGainRad??0):0;
+    else{
+      const input=s.collectiveControl==='yaw'?this.controls.yaw:this.controls.collective;
+      control=(s.collectiveTrimRad??0)+input*(s.collectiveGainRad??.12);
+      control2=this.controls.pitch*(s.cyclicPitchGainRad??0);
+      control3=this.controls.roll*(s.cyclicRollGainRad??0);
+    }
     const attachmentChanged=p.attachment.update(this.deformation,!this.referenceFrame);
     if(attachmentChanged){
       if(this.deformation)p.attachment.point(p.compiled.arm,p.localArm);
       else p.localArm.splice(0,3,...p.compiled.arm);
     }
-    if(!this.referenceFrame&&!attachmentChanged&&p.revision===c.revision&&p.control===control)return;
-    p.revision=c.revision;p.control=control;p.derivedBuilds++;
+    if(!this.referenceFrame&&!attachmentChanged&&p.revision===c.revision&&p.control===control&&p.control2===control2&&p.control3===control3)return;
+    p.revision=c.revision;p.control=control;p.control2=control2;p.control3=control3;p.derivedBuilds++;
     if(s.kind==='wheel'){const depth=s.treadDepthM??Math.min(.008,s.radiusM*.03);p.tread=depth*(1-c.wear);p.radius=s.radiusM-depth*c.wear;}
     p.grip=s.kind==='wheel'?(s.grip??1.1)*(1-c.wear*(1-(s.wornGripFraction??.65))):0;
     p.liftScale=c.failed||!p.attachment.valid?0:1-c.wear*.35;
-    const angle=s.kind==='wing'?(s.incidenceRad??0)+control:control,co=Math.cos(angle),si=Math.sin(angle),ch=p.compiled.chord,n=p.compiled.normal;
-    for(let k=0;k<3;k++){p.localChord[k]=ch[k]!*co+n[k]!*si;p.localNormal[k]=n[k]!*co-ch[k]!*si;}
-    if(s.kind==='wheel'){p.localChord[0]=co;p.localChord[1]=0;p.localChord[2]=si;p.localNormal[0]=0;p.localNormal[1]=1;p.localNormal[2]=0;}
+    const ch=p.compiled.chord,n=p.compiled.normal;
+    if(s.kind==='rotor'){
+      const rx=ch[1]*n[2]-ch[2]*n[1],ry=ch[2]*n[0]-ch[0]*n[2],rz=ch[0]*n[1]-ch[1]*n[0];
+      const tp=Math.tan(control2),tr=Math.tan(control3);
+      normalize(p.localNormal,n[0]+ch[0]*tp+rx*tr,n[1]+ch[1]*tp+ry*tr,n[2]+ch[2]*tp+rz*tr);
+      const along=ch[0]*p.localNormal[0]+ch[1]*p.localNormal[1]+ch[2]*p.localNormal[2];
+      normalize(p.localChord,ch[0]-p.localNormal[0]*along,ch[1]-p.localNormal[1]*along,ch[2]-p.localNormal[2]*along);
+    }else{
+      const angle=s.kind==='wing'?(s.incidenceRad??0)+control:control,co=Math.cos(angle),si=Math.sin(angle);
+      for(let k=0;k<3;k++){p.localChord[k]=ch[k]!*co+n[k]!*si;p.localNormal[k]=n[k]!*co-ch[k]!*si;}
+      if(s.kind==='wheel'){p.localChord[0]=co;p.localChord[1]=0;p.localChord[2]=si;p.localNormal[0]=0;p.localNormal[1]=1;p.localNormal[2]=0;}
+    }
     if(this.deformation){p.attachment.direction(p.localChord,p.localChord);p.attachment.direction(p.localNormal,p.localNormal);}
+  }
+  private rotorForces(p:PartRuntime,s:RotorSpec,frame:ForceFrame,dt:number):void {
+    this.diagnostics.rotorEvaluations++;
+    frame.rotate(p.localNormal,p.normal);frame.rotate(p.localChord,p.chord);
+    const air=this.air,v=p.velocity,n=p.normal;
+    const rvx=v[0]-air.wind[0],rvy=v[1]-air.wind[1],rvz=v[2]-air.wind[2];
+    const axial=rvx*n[0]+rvy*n[1]+rvz*n[2],v2=rvx*rvx+rvy*rvy+rvz*rvz,transverse=Math.sqrt(Math.max(0,v2-axial*axial));
+    const nominal=s.governorRpm*Math.PI/30,throttle=clamp(this.controls.throttle,0,1),descent=Math.max(0,-axial);
+    const autoFraction=throttle<.05?clamp(descent/14,0,.72):0,target=nominal*Math.max(throttle,autoFraction);
+    const response=1-Math.exp(-dt/(s.spoolSeconds??1.5));p.omega+=(target-p.omega)*response;p.spin+=(s.direction??1)*p.omega*dt;
+    p.alpha=p.control;
+    if(air.densityKgM3<=0||Math.abs(p.omega)<1e-6||p.liftScale<=0)return;
+    const radius=s.radiusM,tip=Math.abs(p.omega)*radius,solidity=p.compiled.induced,ct=solidity*p.compiled.slope*p.control/6;
+    const translational=1+.12*clamp(transverse/Math.max(1,tip*.08),0,1);
+    const raw=ct*air.densityKgM3*p.compiled.area*tip*tip*translational*p.liftScale;
+    const profile=(solidity*(s.profileDragCoefficient??.011)/8)*air.densityKgM3*p.compiled.area*tip*tip*tip;
+    const induced=Math.abs(raw)>0?Math.abs(raw)**1.5/Math.sqrt(Math.max(1e-9,2*air.densityKgM3*p.compiled.area))/translational:0;
+    const flowPower=.5*air.densityKgM3*p.compiled.area*descent**3*.35,available=s.maxPowerW*throttle+flowPower;
+    let scale=1;if(profile+induced>available){const usable=Math.max(0,available-profile);scale=induced>0?clamp((usable/induced)**(2/3),0,1):0;}
+    const thrust=raw*scale,power=Math.min(available,profile+induced*scale**1.5);
+    p.load=Math.abs(thrust);p.lift=thrust;p.power=power;p.reactionTorque=-(s.direction??1)*power/Math.max(1,Math.abs(p.omega));
+    p.force[0]=n[0]*thrust;p.force[1]=n[1]*thrust;p.force[2]=n[2]*thrust;
   }
   /** Finite-wing polar from thegame flight/aerodynamics.ts, evaluated on any assembly part. */
   private aerodynamics(p:PartRuntime,s:WingSpec,frame:ForceFrame):void {
