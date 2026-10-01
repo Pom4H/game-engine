@@ -22,6 +22,7 @@ export interface ResidentIntent {
 }
 
 const CELL_M=128;
+export const WORLD_START_HOUR=8;
 const jobs:readonly ResidentJob[]=['shop','office','maintenance','delivery','hospitality','services'];
 
 export function parseResidentId(id:string):{cx:number;cz:number;slot:number}|undefined{
@@ -50,7 +51,7 @@ const progress=(hour:number,a:number,b:number)=>Math.max(0,Math.min(1,(hour-a)/(
 export function residentIntent(seed:number,id:string,tick:number,stepSeconds=1/60):ResidentIntent{
  if(!Number.isSafeInteger(tick)||tick<0||!Number.isFinite(stepSeconds)||stepSeconds<=0)throw new RangeError('Invalid resident clock');
  const profile=residentProfile(seed,id);
- const hour=((tick*stepSeconds/3600)+profile.shiftOffsetHours+24)%24;
+ const hour=((tick*stepSeconds/3600)+WORLD_START_HOUR+profile.shiftOffsetHours+24)%24;
  let activity:ResidentActivity,destination:readonly[number,number],speed=0;
  if(hour<6){activity='sleep';destination=profile.home;}
  else if(hour<7){activity='breakfast';destination=profile.home;}
@@ -80,7 +81,7 @@ const segment=(from:readonly[number,number],to:readonly[number,number],t:number)
 };
 export function residentPose(seed:number,id:string,tick:number):ResidentPose{
  const profile=residentProfile(seed,id),intent=residentIntent(seed,id,tick),seconds=tick/60;
- const hour=((seconds/3600)+profile.shiftOffsetHours+24)%24;
+ const hour=((seconds/3600)+WORLD_START_HOUR+profile.shiftOffsetHours+24)%24;
  let from=profile.home,to=profile.home,t=0;
  if(hour>=7&&hour<9){from=profile.home;to=profile.work;t=progress(hour,7,9);}
  else if(hour>=9&&hour<12){from=to=profile.work;}
