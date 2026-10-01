@@ -71,3 +71,6 @@ export {VisibilityInterest,DEFAULT_VISIBILITY_INTEREST,geometricHorizonDistance,
 export {InfiniteWorld,type InfiniteWorldTileState,type InfiniteWorldHooks,type InfiniteWorldOptions,type InfiniteWorldStats} from './world/infinite-world.js';
 export {TransitAuthority,THEGAME_TRANSIT_ROUTES,transitServiceTime,type TransitMode,type TransitRoute,type TransitStop,type TransitPassenger,type TransitPassengerState,type TransitPassengerPose,type TransitServicePose,type TransitServiceState,type TransitServicePhase} from './games/thegame/transit.js';
 export {TransitVehicleAuthority,transitVehicleProjection,type TransitSeatPose} from './games/thegame/transit-vehicle.js';
+export {lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL,LIGHT_HELICOPTER_MAIN_RPM,LIGHT_HELICOPTER_TAIL_RPM} from './vehicles/helicopter.js';
+export {HelicopterSandbox,helicopterSandboxConfig,HELICOPTER_DT,type HelicopterSandboxConfig} from './examples/helicopter.js';
+export {helicopter} from './games/helicopter-project.js';

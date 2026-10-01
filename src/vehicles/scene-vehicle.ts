@@ -42,10 +42,16 @@ export function spawnVehicle(scene:Scene,blueprint:VehicleBlueprint,geometry:Com
       material:p.role==='paint'?{...p.material,...options.paint}:p.material??{}};
     return {spec,part:p};
   });
-  for(const p of blueprint.parts)if(p.source.kind==='wing')descriptions.push({
-    spec:{id:`${id}/${p.source.id}`,collision:'none',material:{kind:'aluminum',color:[.72,.76,.8,1],roughness:.3},mesh:{kind:'box',size:[1,.04,1]}},
-    part:{id:p.source.id,role:'paint',position:[0,0,0],mesh:{kind:'triangle-mesh',positions:[],normals:[],indices:[]},material:{}},
-  });
+  for(const p of blueprint.parts){
+    if(p.source.kind==='wing')descriptions.push({
+      spec:{id:`${id}/${p.source.id}`,collision:'none',material:{kind:'aluminum',color:[.72,.76,.8,1],roughness:.3},mesh:{kind:'box',size:[1,.04,1]}},
+      part:{id:p.source.id,role:'paint',position:[0,0,0],mesh:{kind:'triangle-mesh',positions:[],normals:[],indices:[]},material:{}},
+    });
+    else if(p.source.kind==='rotor')descriptions.push({
+      spec:{id:`${id}/${p.source.id}`,collision:'none',material:{kind:'aluminum',color:[.19,.21,.22,1],roughness:.24},mesh:{kind:'box',size:[p.source.radiusM*2,.026,p.source.bladeChordM]}},
+      part:{id:p.source.id,role:'paint',position:[0,0,0],mesh:{kind:'triangle-mesh',positions:[],normals:[],indices:[]},material:{}},
+    });
+  }
   // Fail before modifying the scene. Data-only render descriptions do not execute code.
   const ids=new Set<string>();for(const spec of [rootSpec,...descriptions.map(p=>p.spec)]){
     validateEntity(spec);if(ids.has(spec.id)||scene.entities.has(spec.id)||scene.physics.bodies.has(spec.id))throw new TypeError(`Duplicate vehicle scene id ${spec.id}`);ids.add(spec.id);
@@ -69,6 +75,7 @@ export function spawnVehicle(scene:Scene,blueprint:VehicleBlueprint,geometry:Com
         if(source?.kind!=='wheel')throw new TypeError(`Geometry wheel ${componentId} has no physical component`);
         visuals.push({entity:e,offset:local,part:runtime.part(componentId),radius:source.radiusM,tire:wheel[1]==='tire'});
       }else if(component?.kind==='wing')visuals.push({entity:e,offset:local,part:runtime.part(component.id),span:component.spanM,chord:component.chordM});
+      else if(component?.kind==='rotor')visuals.push({entity:e,offset:local,part:runtime.part(component.id)});
       else visuals.push({entity:e,offset:local});
     }
     const visualIds=Object.freeze(visuals.map(v=>v.entity.id)),scratch:MutableVec3=[0,0,0],worldBasis=new Float64Array(9);
@@ -91,6 +98,14 @@ export function spawnVehicle(scene:Scene,blueprint:VehicleBlueprint,geometry:Com
           }
           eulerFromBasis(worldBasis,e.rotation);
           if(v.tire){e.scale[0]=e.scale[1]=p.effectiveRadiusM/v.radius!;}
+        }else if(v.part?.kind==='rotor'){
+          const p=v.part,ch=p.localChord,n=p.localNormal,c=Math.cos(p.spinRad),s=Math.sin(p.spinRad);
+          const span:[number,number,number]=[ch[1]*n[2]-ch[2]*n[1],ch[2]*n[0]-ch[0]*n[2],ch[0]*n[1]-ch[1]*n[0]];
+          const blade:[number,number,number]=[ch[0]*c+span[0]*s,ch[1]*c+span[1]*s,ch[2]*c+span[2]*s];
+          const across:[number,number,number]=[blade[1]*n[2]-blade[2]*n[1],blade[2]*n[0]-blade[0]*n[2],blade[0]*n[1]-blade[1]*n[0]];
+          frame.rotate(p.localPosition,scratch);for(let k=0;k<3;k++)e.position[k]=body.position[k]!+scratch[k]!;
+          for(const [axis,local] of [blade,n,across].entries()){frame.rotate(local,scratch);worldBasis.set(scratch,axis*3);}
+          eulerFromBasis(worldBasis,e.rotation);
         }else if(v.part?.kind==='wing'){
           const p=v.part;let changed=!v.key;
           for(let k=0;k<9&&!changed;k++)changed=v.key![k]!==(k<3?p.localPosition[k]:k<6?p.localChord[k-3]:p.localNormal[k-6]);

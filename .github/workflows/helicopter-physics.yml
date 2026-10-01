@@ -1,0 +1,46 @@
+name: Helicopter physics
+
+on:
+  push:
+    branches: [feat/helicopter-physics]
+    paths:
+      - 'src/vehicles/**'
+      - 'src/physics/**'
+      - 'src/index.ts'
+      - 'test/helicopter-physics.test.mjs'
+      - '.github/workflows/helicopter-physics.yml'
+  pull_request:
+    paths:
+      - 'src/vehicles/**'
+      - 'src/physics/**'
+      - 'src/index.ts'
+      - 'test/helicopter-physics.test.mjs'
+      - '.github/workflows/helicopter-physics.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helicopter-physics-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun install --cwd tools/docs --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Helicopter / rotor stress
+        run: node --test test/helicopter-physics.test.mjs test/vehicle-runtime.test.mjs test/vehicle-scene.test.mjs
+      - name: Preserve soft-body and contacts
+        run: node --test test/vehicle-interaction.test.mjs test/contact-laws.test.mjs
+      - name: Preserve audio and network
+        run: node --test test/browser-audio.test.mjs test/network-projection.test.mjs test/network-structure.test.mjs
+      - run: bun run check
