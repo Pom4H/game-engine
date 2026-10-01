@@ -126,9 +126,12 @@ fn localLightFog(ray:vec3<f32>,maxDistance:f32)->vec3<f32>{
   let enter=max(0.0,along-halfChord);let leave=min(maxDistance,along+halfChord);
   if(leave<=enter){continue;}
   let chord=leave-enter;
-  let soft=1.0/pow(1.0+perpendicular2/max(.04,radius2*.035),2.0);
-  let cameraTransmittance=1.0/(1.0+enter*f.sky.w*.70);
-  scatter+=source.color.rgb*source.color.w*soft*(chord/max(range,.5))*fogStrength*cameraTransmittance*.018;
+  let soft=1.0/pow(1.0+perpendicular2/max(.04,radius2*.018),2.0);
+  let cameraTransmittance=1.0/(1.0+enter*f.sky.w*.35);
+  let fogTint=mix(vec3<f32>(1.0,.96,.90),source.color.rgb,.60);
+  // Surface light stays physically modest while the participating medium remains
+  // visibly illuminated. This is still one analytic pass, not a volumetric ray march.
+  scatter+=fogTint*source.color.w*soft*(chord/max(range,.5))*fogStrength*cameraTransmittance*.052;
  }
  return scatter;
 }
