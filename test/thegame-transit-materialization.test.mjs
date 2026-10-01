@@ -5,7 +5,9 @@ import {TransitAuthority} from '../dist/games/thegame/transit.js';
 import {TransitVehicleAuthority,transitVehicleProjection} from '../dist/games/thegame/transit-vehicle.js';
 import {ThegameAuthority} from '../dist/games/thegame/session.js';
 function joinKnownRider(game,id='p1'){
- const rider=game.transit.ridingCandidate();assert.ok(rider);
+ let rider=game.transit.ridingCandidate();
+ for(let i=0;!rider&&i<120;i++){game.step();rider=game.transit.ridingCandidate();}
+ assert.ok(rider);
  const service=game.transit.serviceForPassenger(rider.residentId,game.tick/60);assert.ok(service);
  const state=characterState(service.position[0],service.position[1],service.position[2],service.yaw);
  return game.join(id,'Passenger',{state,discovered:0,residentId:rider.residentId});
