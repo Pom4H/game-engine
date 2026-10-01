@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildLightGrid,FOG_VOLUME_FLOATS,MAX_RENDER_LIGHTS} from '../dist/render/light-grid.js';
 
-test('light grid carries physical volumetric fixture data without a second light list',()=>{
+test('light grid carries surface and volumetric fixture data in aligned bounded buffers',()=>{
  const lantern={position:[4,5,6],light:{kind:'point',color:[1,.84,.69],intensity:8,range:12,volumetric:{profile:'lantern-4pane',yaw:.4,strength:1.45,rangeScale:1.5}}};
  const plain={position:[30,5,0],light:{kind:'point',color:[1,1,1],intensity:1,range:4}};
  const grid=buildLightGrid([plain,lantern],[0,1.7,0]);
