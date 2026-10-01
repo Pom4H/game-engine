@@ -495,7 +495,7 @@ test('ballistic mechanical accounting stays within integrator error and matches 
  const h=1/240,steps=960,t=steps*h,before=physicsAccounting(world.bodies.values(),world.gravity);
  for(let i=0;i<steps;i++)world.step(h);
  const after=physicsAccounting(world.bodies.values(),world.gravity);
- const expected:[number,number,number]=[
+ const expected=[
   before.linearMomentumNs[0]+body.mass*world.gravity[0]*t,
   before.linearMomentumNs[1]+body.mass*world.gravity[1]*t,
   before.linearMomentumNs[2]+body.mass*world.gravity[2]*t,
