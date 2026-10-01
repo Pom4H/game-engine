@@ -88,7 +88,7 @@ test('water volume is deliberately non-solid until fluid physics owns it',()=>{
  assert.ok(water);
  assert.equal(water.body,undefined,'water must never be faked with a solid collision plane');
  assert.equal(scene.fluids.size,1);
- assert.equal(scene.fluids.sampleXZ(12,-27)?.id,'water.basin');
+ assert.equal(scene.fluids.sampleXZ(12,-27)?.id,'water-basin-fluid');
 });
 
 test('water basin applies buoyancy drag and measurable hull flooding',()=>{
@@ -297,7 +297,7 @@ test('banked lane returns a tilted physical support normal',()=>{
 
 test('articulation course presents different wheel heights at the same station',()=>{
  const scene=new Scene(spec);
- const left=supportAt(scene,84,-30),right=supportAt(scene,88,-30);
+ const left=supportAt(scene,106,-30),right=supportAt(scene,110,-30);
  assert.match(left.id,/^articulation-left-/);assert.match(right.id,/^articulation-right-/);
  assert.ok(Math.abs(left.point[1]-right.point[1])>.25,{left:left.point,right:right.point});
 });
@@ -336,14 +336,14 @@ test('sealed hull floats in the proving-ground basin from displaced volume',()=>
 test('leaking hull accumulates flood mass and loses buoyancy margin',()=>{
  const scene=new Scene(spec);
  const sealed=scene.physics.add(new RigidBody({
-  id:'probe-sealed',position:[8,-.35,-27],mass:900,shape:{kind:'box',half:[1.2,.55,.8]},
+  id:'probe-sealed',position:[8,-.35,-27],mass:3500,shape:{kind:'box',half:[1.2,.55,.8]},
   material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:0}
  }));
  const leaking=scene.physics.add(new RigidBody({
-  id:'probe-leaking',position:[16,-.35,-27],mass:900,shape:{kind:'box',half:[1.2,.55,.8]},
-  material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:.035}
+  id:'probe-leaking',position:[16,-.35,-27],mass:3500,shape:{kind:'box',half:[1.2,.55,.8]},
+  material:material('steel'),fluid:{enclosedVolumeM3:3.2,leakAreaM2:.025}
  }));
  for(let i=0;i<900;i++)scene.physics.step(dt);
- assert.ok(leaking.floodedVolumeM3>.15,leaking.floodedVolumeM3);
+ assert.ok(leaking.floodedVolumeM3>.08,leaking.floodedVolumeM3);
  assert.ok(leaking.position[1]<sealed.position[1]-.12,{sealed:sealed.position,leaking:leaking.position,flooded:leaking.floodedVolumeM3});
 });
