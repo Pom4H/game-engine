@@ -5,6 +5,7 @@ import {material,type PhysicalMaterial} from '../materials/catalog.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsCauseTrace,physicsCause,type PhysicsBodyState,type PhysicsCauseManifestWriter,type PhysicsCauseRef,type PhysicsCauseWriter} from './cause-trace.js';
+import type {FluidSample} from './fluid.js';
 
 export type CollisionShape = {kind:'sphere';radius:number}|{kind:'box';half:Vec3};
 export interface RigidBodyOptions {
@@ -19,6 +20,8 @@ export interface RigidBodyOptions {
   friction?:number;
   material?:PhysicalMaterial;
   shape:CollisionShape;
+  /** Optional internal hollow volume used only for flooding/sealing state. External buoyancy always follows collision volume. */
+  fluid?:{readonly enclosedVolumeM3:number;readonly leakAreaM2?:number};
 }
 export class RigidBody {
   readonly id:string;
@@ -45,6 +48,9 @@ export class RigidBody {
   readonly crushNegative:MutableVec3=[0,0,0];
   readonly collisionOffsetLocal:MutableVec3=[0,0,0];
   readonly collisionHalf:MutableVec3|undefined;
+  readonly enclosedVolumeM3:number;
+  leakAreaM2:number;
+  floodedVolumeM3=0;
   x:number;z:number;w:number;l:number;
 
   constructor(options:RigidBodyOptions){
@@ -64,12 +70,15 @@ export class RigidBody {
     this.restitution=Math.max(0,Math.min(1,options.restitution??this.material.restitution));
     this.friction=Math.max(0,options.friction??this.material.friction);
     this.shape=options.shape;
+    const enclosed=options.fluid?.enclosedVolumeM3??0,leak=options.fluid?.leakAreaM2??0;if(!Number.isFinite(enclosed)||enclosed<0||!Number.isFinite(leak)||leak<0)throw new RangeError('Invalid body fluid profile');
+    this.enclosedVolumeM3=enclosed;this.leakAreaM2=leak;
     this.collisionHalf=options.shape.kind==='box'?[...options.shape.half]:undefined;
     const r=shapeRadius(options.shape);
     this.x=this.position[0];this.z=this.position[2];this.w=r*2;this.l=r*2;
   }
   syncSpatial():void{this.x=this.position[0];this.z=this.position[2];}
   wake():void{if(this.sleeping){this.sleeping=false;this.sleepTimer=0;}}
+  setLeakArea(areaM2:number):void{if(!Number.isFinite(areaM2)||areaM2<0)throw new RangeError('Invalid leak area');this.leakAreaM2=areaM2;if(areaM2>0)this.wake();}
   applyLocalCrush(outwardNormal:Vec3,depth:number):void{
     if(this.shape.kind!=='box'||!this.collisionHalf||!Number.isFinite(depth)||depth<=0)return;
     const ax=Math.abs(outwardNormal[0]),ay=Math.abs(outwardNormal[1]),az=Math.abs(outwardNormal[2]),axis:0|1|2=ax>=ay&&ax>=az?0:ay>=az?1:2,sign=outwardNormal[axis]>=0?1:-1,base=this.shape.half[axis];
@@ -130,12 +139,15 @@ export class PhysicsWorld {
   surfaceFrictionAt?:(body:RigidBody,point:Vec3)=>number;
   /** Effective road/surface friction coefficient seen by tyre contact. */
   wheelFrictionAt?:(supportId:string,body:RigidBody|null,point:Vec3)=>number;
+  /** Fluid field lookup is spatial; world owns the resulting forces. */
+  fluidAt?:(body:RigidBody)=>FluidSample|undefined;
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
   private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
   private causeTrace:PhysicsCauseTrace|undefined;
   private readonly gravityCauses=new Map<string,PhysicsCauseRef>();
   private readonly contactCauses=new Map<string,PhysicsCauseRef>();
+  private readonly fluidCauses=new Map<string,PhysicsCauseRef>();
   readonly index:SpatialHash<RigidBody>;
   steps=0;substeps=0;time=0;
   constructor(
@@ -160,6 +172,7 @@ export class PhysicsWorld {
     trace.component({componentId:body.id,bodyId:body.id,kind:'body'});
     const cause=this.gravityCauses.get(body.id)??physicsCause(body.id,'gravity.v1','gravity',['force']);this.gravityCauses.set(body.id,cause);trace.law(body.id,cause);
     const contact=this.contactCauses.get(body.id)??physicsCause(body.id,'contact-solver.v1','collision',['impulse','position-correction']);this.contactCauses.set(body.id,contact);trace.law(body.id,contact);
+    const fluid=this.fluidCauses.get(body.id)??physicsCause(body.id,'fluid.v1','fluid',['force']);this.fluidCauses.set(body.id,fluid);trace.law(body.id,fluid);
   }
   drive(body:RigidBody,driver:PhysicsForceDriver):()=>void{
     if(this.bodies.get(body.id)!==body||!body.invMass||this.forceDrivers.has(body))throw new TypeError('Force driver requires one owned dynamic body');
@@ -168,8 +181,8 @@ export class PhysicsWorld {
     this.forceDrivers.set(body,driver);if(this.causeTrace)driver.declareCauses?.(this.causeTrace);
     return()=>{if(this.forceDrivers.get(body)===driver)this.forceDrivers.delete(body);};
   }
-  remove(id:string):boolean{const body=this.bodies.get(id);if(body)this.forceDrivers.delete(body);this.gravityCauses.delete(id);this.contactCauses.delete(id);return this.bodies.delete(id);}
-  clear():void{this.forceDrivers.clear();this.bodies.clear();this.index.clear();this.contacts.length=0;this.gravityCauses.clear();this.contactCauses.clear();this.causeTrace=undefined;this.steps=0;this.substeps=0;this.time=0;}
+  remove(id:string):boolean{const body=this.bodies.get(id);if(body)this.forceDrivers.delete(body);this.gravityCauses.delete(id);this.contactCauses.delete(id);this.fluidCauses.delete(id);return this.bodies.delete(id);}
+  clear():void{this.forceDrivers.clear();this.bodies.clear();this.index.clear();this.contacts.length=0;this.gravityCauses.clear();this.contactCauses.clear();this.fluidCauses.clear();this.causeTrace=undefined;this.steps=0;this.substeps=0;this.time=0;}
 
   step(dt:number,contactModel?:ContactModel):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Physics dt must be in (0, 0.25]');
@@ -212,10 +225,14 @@ export class PhysicsWorld {
       body.supportedThisStep=false;
       let wrenchId='';
       if(trace){
-        const gravity:Vec3=[body.mass*this.gravity[0],body.mass*this.gravity[1],body.mass*this.gravity[2]],writer=trace.writer(body.id),cause=this.gravityCauses.get(body.id)!;
+        const gravity:Vec3=[body.mass*this.gravity[0],body.mass*this.gravity[1],body.mass*this.gravity[2]],writer=trace.writer(body.id),cause=this.gravityCauses.get(body.id)!,fluid=this.fluidAt?.(body),fluidForce=this.fluidForce(body,fluid,dt);
         writer.contribute(cause,{kind:'gravity-field',id:'world.gravity'},{forceN:gravity});
-        const driver=this.forceDrivers.get(body),force:Vec3=driver?[driver.force[0]+gravity[0],driver.force[1]+gravity[1],driver.force[2]+gravity[2]]:gravity,torque:Vec3=driver?driver.torque:[0,0,0];
+        if(fluid&&(fluidForce[0]!==0||fluidForce[1]!==0||fluidForce[2]!==0))writer.contribute(this.fluidCauses.get(body.id)!,{kind:'fluid',id:fluid.id},{forceN:fluidForce});
+        const driver=this.forceDrivers.get(body),force:Vec3=driver?[driver.force[0]+gravity[0]+fluidForce[0],driver.force[1]+gravity[1]+fluidForce[1],driver.force[2]+gravity[2]+fluidForce[2]]:[gravity[0]+fluidForce[0],gravity[1]+fluidForce[1],gravity[2]+fluidForce[2]],torque:Vec3=driver?driver.torque:[0,0,0];
         wrenchId=trace.wrench(body.id,force,torque);wrenchIds!.set(body,wrenchId);
+        body.velocity[0]+=fluidForce[0]*body.invMass*dt;body.velocity[1]+=fluidForce[1]*body.invMass*dt;body.velocity[2]+=fluidForce[2]*body.invMass*dt;
+      }else{
+        const fluid=this.fluidAt?.(body),fluidForce=this.fluidForce(body,fluid,dt);body.velocity[0]+=fluidForce[0]*body.invMass*dt;body.velocity[1]+=fluidForce[1]*body.invMass*dt;body.velocity[2]+=fluidForce[2]*body.invMass*dt;
       }
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
@@ -244,6 +261,17 @@ export class PhysicsWorld {
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=Math.max(0,body.sleepTimer-dt*.35);
     if(trace)for(const [body,state] of before!)trace.stateMutation(body.id,wrenchIds!.get(body)??'',state,this.traceState(body),dt);
     trace?.endSubstep();
+  }
+  private fluidForce(body:RigidBody,fluid:FluidSample|undefined,dt:number):Vec3{
+    if(!fluid)return [0,0,0];
+    const info=submergedBody(body,fluid.bottomY,fluid.surfaceY);if(info.fraction<=0)return [0,0,0];
+    const rho=fluid.densityKgM3,g=Math.hypot(this.gravity[0],this.gravity[1],this.gravity[2]),buoyancyScale=rho*info.volume;
+    if(body.enclosedVolumeM3>0&&body.leakAreaM2>0&&body.floodedVolumeM3<body.enclosedVolumeM3&&g>0){
+      const head=Math.max(0,fluid.surfaceY-body.position[1]),flow=.62*body.leakAreaM2*Math.sqrt(2*g*head);
+      body.floodedVolumeM3=Math.min(body.enclosedVolumeM3,body.floodedVolumeM3+flow*dt*info.fraction);
+    }
+    const relative:Vec3=[body.velocity[0]-fluid.velocity[0],body.velocity[1]-fluid.velocity[1],body.velocity[2]-fluid.velocity[2]],speed=Math.hypot(...relative),area=projectedFluidArea(body,relative)*info.fraction,dragScale=speed>1e-9?.5*rho*fluid.dragCoefficient*area*speed:0,floodMass=rho*body.floodedVolumeM3;
+    return[-this.gravity[0]*buoyancyScale+this.gravity[0]*floodMass-relative[0]*dragScale,-this.gravity[1]*buoyancyScale+this.gravity[1]*floodMass-relative[1]*dragScale,-this.gravity[2]*buoyancyScale+this.gravity[2]*floodMass-relative[2]*dragScale];
   }
   private traceState(body:RigidBody):PhysicsBodyState{return{positionM:[...body.position],rotationRad:[...body.rotation],velocityMps:[...body.velocity],angularVelocityRadps:[...body.angularVelocity]};}
 
@@ -473,6 +501,22 @@ function supportPoint(body:RigidBody,direction:Vec3):MutableVec3{
   return point;
 }
 
+function submergedBody(body:RigidBody,bottomY:number,surfaceY:number):{fraction:number;volume:number}{
+  if(surfaceY<=bottomY)return{fraction:0,volume:0};
+  if(body.shape.kind==='sphere'){
+    const r=body.shape.radius,low=body.position[1]-r,high=body.position[1]+r,from=Math.max(low,bottomY),to=Math.min(high,surfaceY);if(to<=from)return{fraction:0,volume:0};
+    // Integrate spherical slices between clamped heights.
+    const primitive=(y:number)=>Math.PI*(r*r*y-y*y*y/3),a=from-body.position[1],b=to-body.position[1],volume=primitive(b)-primitive(a),total=4*Math.PI*r*r*r/3;
+    return{fraction:Math.max(0,Math.min(1,volume/total)),volume};
+  }
+  const h=boxHalf(body),basis=rotationBasis(body.rotation),vertical=Math.abs(basis[0][1])*h[0]+Math.abs(basis[1][1])*h[1]+Math.abs(basis[2][1])*h[2],low=body.position[1]-vertical,high=body.position[1]+vertical,overlap=Math.max(0,Math.min(high,surfaceY)-Math.max(low,bottomY)),fraction=vertical>1e-9?Math.min(1,overlap/(2*vertical)):0,total=8*h[0]*h[1]*h[2];
+  return{fraction,volume:total*fraction};
+}
+function projectedFluidArea(body:RigidBody,velocity:Vec3):number{
+  const speed=Math.hypot(...velocity);if(speed<1e-9)return 0;if(body.shape.kind==='sphere')return Math.PI*body.shape.radius*body.shape.radius;
+  const n:Vec3=[velocity[0]/speed,velocity[1]/speed,velocity[2]/speed],h=boxHalf(body),b=rotationBasis(body.rotation);
+  return Math.abs(V3.dot(n,b[0]))*4*h[1]*h[2]+Math.abs(V3.dot(n,b[1]))*4*h[0]*h[2]+Math.abs(V3.dot(n,b[2]))*4*h[0]*h[1];
+}
 function inverseInertiaLocal(shape:CollisionShape,mass:number):MutableVec3{
   if(!(mass>0))return[0,0,0];
   if(shape.kind==='sphere'){const i=.4*mass*shape.radius*shape.radius,inv=i>1e-12?1/i:0;return[inv,inv,inv];}
