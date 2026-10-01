@@ -19,7 +19,7 @@ test('ambient crowd exists without Meshwork and stays bounded',()=>{
 test('distributed counts refine density without changing stable cell identities',()=>{
  const world=new OpenWorld(29,32),self={x:0,z:0},tick=180;
  const fallback=materializeCrowd(world,[],self,tick,24);
- const positions=Array.from({length:20},(_,i)=>[8+(i%4),0,8+Math.floor(i/4)] as const);
+ const positions=Array.from({length:20},(_,i)=>[8+(i%4),0,8+Math.floor(i/4)]);
  const frame=populationCells({epoch:1,sequence:1,tick:18,time:1.8,paused:false},positions,128,16);
  const refined=materializeCrowd(world,[frame],self,tick,24);
  const fallbackCenter=fallback.filter(person=>person.id.startsWith('crowd:0:0:')).map(person=>person.id);
@@ -39,7 +39,7 @@ test('player snapshots always contain ambient residents and accept distributed p
  assert.ok(local.frame.rows.some(row=>row.id.startsWith('crowd:')));
  const beforeIds=new Set(local.frame.rows.filter(row=>row.id.startsWith('crowd:')).map(row=>row.id));
 
- const positions=Array.from({length:20},(_,i)=>[-344+(i%4),0,-64+Math.floor(i/4)] as const);
+ const positions=Array.from({length:20},(_,i)=>[-344+(i%4),0,-64+Math.floor(i/4)]);
  const population=populationCells({epoch:2,sequence:1,tick:10,time:1,paused:false},positions,128,16);
  game.step();
  const distributed=game.snapshot(peer.id,[population]);
