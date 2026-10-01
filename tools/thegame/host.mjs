@@ -4,9 +4,9 @@ import {WORLD_REVISION} from '../../dist/games/thegame/world.js';
 import {FixedClock} from '../../dist/core/fixed-clock.js';
 import {LatestStateOutbox} from '../../dist/network/projection.js';
 /** Platform adapter: Bun owns sockets, the engine owns simulation. Tests use the same host. */
-export function createThegameHost(config,{profile=false,now=()=>performance.now(),epoch=Date.now()}={}){
+export function createThegameHost(config,{profile=false,now=()=>performance.now(),epoch=Date.now(),population=()=>[]}={}){
  const game=new ThegameAuthority(config,epoch,profile),clock=new FixedClock(1000/60,2000,12),sockets=new Map(),sessions=new Map();
- let identities=0;const stats={bytes:0,messages:0,replaced:0,backpressure:0,timeouts:0};
+ let identities=0;const stats={bytes:0,messages:0,replaced:0,backpressure:0,timeouts:0,populationErrors:0};
  function send(socket,data){const c=sockets.get(socket);if(!c)return;const text=typeof data==='string'?data:JSON.stringify(data);const result=socket.send(text);stats.bytes+=Buffer.byteLength(text);stats.messages++;if(result===-1){c.blocked=true;c.blockedAt=now();stats.backpressure++;}else if(result===0)socket.close(1011,'Connection unavailable');}
  function flush(socket){const c=sockets.get(socket);if(!c||c.blocked)return;const next=c.outbox.take();if(next!==undefined)send(socket,next);}
  function close(socket){const c=sockets.get(socket);if(!c)return;sockets.delete(socket);if(c.id){const peer=game.peers.get(c.id),session=sessions.get(c.token);if(peer&&session){session.state={...peer.state};session.discovered=peer.discovered;session.active=false;session.expires=now()+30_000;}game.leave(c.id);}c.outbox.clear();}
@@ -45,7 +45,8 @@ export function createThegameHost(config,{profile=false,now=()=>performance.now(
    // Catch up bounded simulation debt, but publish only the newest state once.
    // Scheduler jitter therefore cannot turn into a catch-up packet burst.
    if(steps&&Math.floor(game.tick/3)>Math.floor(before/3)){
-    for(const [socket,c] of sockets)if(c.id){if(c.outbox.size)stats.replaced++;c.outbox.offer(game.snapshot(c.id));flush(socket);}
+    let populationFrames=[];try{const value=population();if(!Array.isArray(value)||value.length>64)throw Error('Population projection budget');populationFrames=value;}catch{stats.populationErrors++;}
+    for(const [socket,c] of sockets)if(c.id){if(c.outbox.size)stats.replaced++;const state=game.snapshot(c.id);c.outbox.offer(populationFrames.length?{...state,population:populationFrames}:state);flush(socket);}
    }
    return steps;
   },
