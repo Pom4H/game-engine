@@ -142,7 +142,7 @@ for(let i=0;i<4;i++){
 // 12. Split-μ lane: left wheels see a wet low-friction half, right wheels dry asphalt.
 // The seam is a physical boundary, not a controller hint.
 topBox('split-mu-wet',[-96.0,0,-54],[4.0,.16,42],{...A,color:[.045,.052,.058,1],clearcoat:.32,clearcoatRoughness:.18},{
- body:{},environmental:{surfaceUse:'road',waterDepthM:.006}
+ body:{},environmental:{surfaceUse:'road',waterDepthM:.0035,iceDepthM:.0024}
 });
 topBox('split-mu-dry',[-92.0,0,-54],[4.0,.16,42],A,{body:{},environmental:{surfaceUse:'road'}});
 for(const z of [-72,-62,-52,-42,-32])box(`split-mu-seam-${z}`,[-94,.012,z],[.08,.02,5.5],P);
@@ -183,8 +183,8 @@ for(let i=0;i<18;i++){
 const articulationZ=[-42,-34,-26,-18,-10,-2,6];
 const leftY=[0,.18,.42,.12,-.26,-.05,.20],rightY=[0,-.14,-.38,-.08,.30,.06,-.16];
 for(let i=0;i<articulationZ.length-1;i++){
- roadStrip(`articulation-left-${i}`,[[84,leftY[i],articulationZ[i]],[84,leftY[i+1],articulationZ[i+1]]],2.5,A,{thickness:.18});
- roadStrip(`articulation-right-${i}`,[[88,rightY[i],articulationZ[i]],[88,rightY[i+1],articulationZ[i+1]]],2.5,A,{thickness:.18});
+ roadStrip(`articulation-left-${i}`,[[106,leftY[i],articulationZ[i]],[106,leftY[i+1],articulationZ[i+1]]],2.5,A,{thickness:.18});
+ roadStrip(`articulation-right-${i}`,[[110,rightY[i],articulationZ[i]],[110,rightY[i+1],articulationZ[i+1]]],2.5,A,{thickness:.18});
 }
 
 // 18. Crosswind corridor. Geometry marks the measurement volume now; spatial wind
@@ -235,7 +235,6 @@ export default {
  clearColor:[.42,.58,.72,1],
  camera,
  environment:{temperatureC:18,sunlight:.82,humidity:.48,wind:[1.5,0,.3],precipitation:'arid'},
- fluids:[{id:'water.basin',center:[12,-1,-27],shape:'cylinder',radiusM:18.7,depthM:2,densityKgM3:997,dragCoefficient:.92}],
  rendering:{sunDirection:[-.45,.72,-.31],sunColor:[1,.93,.84],skyColor:[.35,.52,.70],sunIntensity:1.0,exposure:1.05,shadowExtent:190,fogDensity:.0025},
  fluids:[{id:'water-basin-fluid',shape:'cylinder',center:[12,-1.05,-27],radiusM:18.7,depthM:2.1,densityKgM3:998.2,velocity:[0,0,0],dragCoefficient:.9}],
  entities
