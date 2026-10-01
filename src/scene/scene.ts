@@ -91,6 +91,11 @@ export class Scene {
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
     this.physics.surfaceFrictionAt=(body,point)=>body.friction*(this.surfaces.sample(body.id,point[0],point[2])?.frictionScale??1);
+    this.physics.wheelFrictionAt=(supportId,body,point)=>{
+      if(!body)return this.physics.groundMaterial.friction;
+      const entity=this.entities.get(supportId),authoredScale=entity?.material.surface.frictionScale??1,currentScale=this.surfaces.sample(supportId,point[0],point[2])?.frictionScale??authoredScale;
+      return Math.max(.01,body.friction*currentScale/Math.max(.01,authoredScale));
+    };
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     if(this.spec.cameraRail)this.camera=cameraOnRail(this.camera,this.spec.cameraRail,0);
     for(const entity of this.spec.entities)this.add(entity);
