@@ -11,7 +11,7 @@ test('old public transport modes and capacities survive the unified migration',(
 });
 
 test('every route has two stable scheduled services and correct headway',()=>{
- const transit=new TransitAuthority(),fleet=transit.services(0);
+ const transit=new TransitAuthority({seedDemand:false}),fleet=transit.services(0);
  assert.equal(fleet.length,8);
  assert.equal(new Set(fleet.map(v=>v.id)).size,8);
  for(const route of THEGAME_TRANSIT_ROUTES){
@@ -23,7 +23,7 @@ test('every route has two stable scheduled services and correct headway',()=>{
 });
 
 test('dwell opens doors and run closes them without teleporting service identity',()=>{
- const transit=new TransitAuthority(),atZero=transit.services(0).find(v=>v.id==='B01:0');
+ const transit=new TransitAuthority({seedDemand:false}),atZero=transit.services(0).find(v=>v.id==='B01:0');
  assert.ok(atZero);assert.equal(atZero.phase,'dwell');assert.equal(atZero.doors,1);
  let running;
  for(let t=1;t<300;t++){const state=transit.services(t).find(v=>v.id==='B01:0');if(state?.phase==='run'){running=state;break;}}
@@ -32,7 +32,7 @@ test('dwell opens doors and run closes them without teleporting service identity
 });
 
 test('real resident identity waits, boards, rides and alights on schedule',()=>{
- const transit=new TransitAuthority(),route=THEGAME_TRANSIT_ROUTES[0],origin=route.stops[0],destination=route.stops[1],resident='crowd:-3:-1:2';
+ const transit=new TransitAuthority({seedDemand:false}),route=THEGAME_TRANSIT_ROUTES[0],origin=route.stops[0],destination=route.stops[1],resident='crowd:-3:-1:2';
  const trip=transit.plan(resident,[origin.position[0],origin.position[2]],[destination.position[0],destination.position[2]]);
  assert.ok(trip);assert.equal(trip.residentId,resident);assert.equal(trip.state,'waiting');
  // B01:0 starts at stop 0 in dwell.
@@ -52,7 +52,7 @@ test('real resident identity waits, boards, rides and alights on schedule',()=>{
 });
 
 test('capacity is authoritative and excess residents remain physically waiting',()=>{
- const transit=new TransitAuthority(),route=THEGAME_TRANSIT_ROUTES[0],origin=route.stops[0],destination=route.stops[1];
+ const transit=new TransitAuthority({seedDemand:false}),route=THEGAME_TRANSIT_ROUTES[0],origin=route.stops[0],destination=route.stops[1];
  for(let i=0;i<route.capacity+7;i++){
   const id=`crowd:-3:-1:${i}`;
   const trip=transit.plan(id,[origin.position[0],origin.position[2]],[destination.position[0],destination.position[2]]);
@@ -65,8 +65,21 @@ test('capacity is authoritative and excess residents remain physically waiting',
  assert.equal(snapshot.riding,route.capacity);
 });
 
+test('default world starts with deterministic real resident demand owned by transit',()=>{
+ const transit=new TransitAuthority();
+ const first=transit.snapshot(0);
+ assert.ok(first.waiting>0);
+ const owned=[...transit.ownedResidentIds()];
+ assert.ok(owned.length>0);
+ assert.ok(owned.every(id=>id.startsWith('crowd:')));
+ transit.step(0);
+ const after=transit.snapshot(0);
+ assert.ok(after.riding>0);
+ assert.ok(after.boarded>0);
+});
+
 test('service identity deterministically maps to future physical vehicle identity seed',()=>{
- const a=new TransitAuthority(),b=new TransitAuthority();
+ const a=new TransitAuthority({seedDemand:false}),b=new TransitAuthority({seedDemand:false});
  for(const id of ['B01:0','B01:1','T01:0','M01:1'])assert.equal(a.vehicleSeed(id),b.vehicleSeed(id));
  assert.notEqual(a.vehicleSeed('B01:0'),a.vehicleSeed('B01:1'));
 });
