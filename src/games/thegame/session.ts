@@ -129,7 +129,7 @@ export class ThegameAuthority {
      if(command){peer.ack=command.seq;peer.starved=0;}else peer.starved++;
      continue;
     }
-    peer.seat=undefined;const ground=this.world.ground(peer.state.x,peer.state.z);peer.state.y=ground.y;peer.state.vx=peer.state.vy=peer.state.vz=peer.state.speed=0;peer.state.grounded=true;
+    delete peer.seat;const ground=this.world.ground(peer.state.x,peer.state.z);peer.state.y=ground.y;peer.state.vx=peer.state.vy=peer.state.vz=peer.state.speed=0;peer.state.grounded=true;
    }
    // Missing controls cannot keep walking forever. Gravity/inertia still have real authority.
    stepCharacter(peer.state,command?.input??idleCharacterInput(peer.state.lookYaw),this.world,1/60,this.config);
