@@ -34,6 +34,7 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
+      - run: bun install --cwd tools/docs --frozen-lockfile
       - run: bun run check
 
   preservation-gates:
