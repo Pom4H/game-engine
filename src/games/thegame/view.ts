@@ -75,7 +75,7 @@ export class ThegameView {
   while(value.lightCursor<lamps.length){
    if(!this.admission.claim())return false;
    const lamp=lamps[value.lightCursor++]!;
-   const entity=this.scene.add({id:`chunk:${ticket.key}/${lamp.id}`,collision:'none',position:[lamp.x-this.originX,lamp.y,lamp.z-this.originZ],light:{kind:'point',color:[1,.84,.69],intensity:8,range:12}});
+   const entity=this.scene.add({id:`chunk:${ticket.key}/${lamp.id}`,collision:'none',position:[lamp.x-this.originX,lamp.y,lamp.z-this.originZ],light:{kind:'point',color:[1,.84,.69],intensity:8,range:12,volumetric:{profile:'lantern-4pane',yaw:0,strength:1.45,rangeScale:1.45}}});
    entity.presentationVisible=false;value.installed.push(entity);
   }
   if(!this.admission.claim())return false;
