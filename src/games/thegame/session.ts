@@ -88,11 +88,6 @@ export class ThegameAuthority {
    }
   }
   if(!possession){
-   const excluded=new Set([...this.peers.values()].map(peer=>peer.residentId));
-   const rider=this.transit.ridingCandidate(excluded);
-   if(rider){const seated=this.seatedPossession(rider.residentId);if(seated){possession=seated.possession;seat=seated.seat;}}
-  }
-  if(!possession){
    const spawn=this.world.spawn(this.stats.joins%32);
    possession=this.npcs.acquire(spawn,this.tick);
   }
