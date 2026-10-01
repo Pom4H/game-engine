@@ -61,6 +61,7 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly views=new Map<string,PartSample>();
   private readonly controls={handbrake:0,throttle:0,clutch:0,brake:0,steer:0,pitch:0,roll:0,flap:0,spoiler:0,collective:0,yaw:0};
   private air:VehicleAir={densityKgM3:1.225,wind:[0,0,0],temperatureC:20};
+  private airOverride=false;
   private readonly unbind:()=>void;
   private disposed=false;
   private deformation:DeformationField|undefined;
@@ -121,7 +122,7 @@ export class Vehicle implements PhysicsForceDriver {
   setAir(air:VehicleAir):void {
     finiteVec3(air.wind,'Wind');if(!Number.isFinite(air.densityKgM3)||air.densityKgM3<0||air.densityKgM3>100)throw new RangeError('Invalid air density');
     if(air.temperatureC!==undefined&&!Number.isFinite(air.temperatureC))throw new RangeError('Invalid air temperature');
-    this.air={densityKgM3:air.densityKgM3,wind:[...air.wind],temperatureC:air.temperatureC??this.air.temperatureC??20};this.body.wake();
+    this.air={densityKgM3:air.densityKgM3,wind:[...air.wind],temperatureC:air.temperatureC??this.air.temperatureC??20};this.airOverride=true;this.body.wake();
   }
   /** Borrowed read-only live view, shared by presentation/audio/HUD. No allocations after first read.
    * Use structuredClone(view) explicitly when recording history. Reading never advances physics. */
@@ -146,6 +147,7 @@ export class Vehicle implements PhysicsForceDriver {
     if(this.disposed)throw new Error('Vehicle disposed');
     if(!Number.isFinite(dt)||dt<=0||dt>this.maxStepSeconds+1e-12)throw new RangeError('Vehicle forces require <=1/120 s substeps');
     this.frame.clear();if(!this.referenceFrame)this.frame.update(this.body.rotation);this.diagnostics.steps++;
+    if(!this.airOverride&&this.world.airAt){const sampled=this.world.airAt(this.body.position);this.air={densityKgM3:sampled.densityKgM3,wind:[...sampled.wind],temperatureC:this.air.temperatureC??20};}
     const b=this.body,air=this.air,relativeAirSpeed=Math.hypot(b.velocity[0]-air.wind[0],b.velocity[1]-air.wind[1],b.velocity[2]-air.wind[2]);
     if(this.drivetrain)this.drivetrain.step(dt,{throttle:Math.max(0,this.controls.throttle),clutch:this.controls.clutch,wheelOmega:id=>this.byId.get(id)?.omega??0,wheelInertia:id=>this.byId.get(id)?.compiled.inertia??1,ambientTemperatureC:air.temperatureC??20,airSpeedMps:relativeAirSpeed});
     this.shaftRemaining.clear();for(const shaft of this.blueprint.source.shafts??[])this.shaftRemaining.set(shaft.id,shaft.maxPowerW*(shaft.efficiency??1)*clamp(this.controls.throttle));
