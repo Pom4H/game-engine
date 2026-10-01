@@ -1,3 +1,4 @@
+import {ThermalMass,validateThermalSpec,type ThermalSpec} from '../physics/thermal.js';
 const clamp=(x:number,a:number,b:number)=>Math.max(a,Math.min(b,x));
 const RPM_PER_RAD_S=60/(2*Math.PI);
 
@@ -14,6 +15,7 @@ export interface ClutchSpec {
  readonly maxTorqueNm:number;
  /** Linear torsional coupling before the friction limit, N m per rad/s of slip. */
  readonly stiffnessNmPerRadS:number;
+ readonly thermal?:ThermalSpec;
 }
 export interface GearboxSpec {
  readonly forwardRatios:readonly number[];
@@ -40,6 +42,8 @@ export interface DrivetrainInput {
  readonly clutch:number;
  readonly wheelOmega:(id:string)=>number;
  readonly wheelInertia:(id:string)=>number;
+ readonly ambientTemperatureC?:number;
+ readonly airSpeedMps?:number;
 }
 export interface DrivetrainState {
  readonly engineRpm:number;
@@ -48,6 +52,8 @@ export interface DrivetrainState {
  readonly clutchTorqueNm:number;
  readonly outputTorqueNm:number;
  readonly clutchDissipatedJ:number;
+ readonly clutchTemperatureC:number;
+ readonly clutchPerformance:number;
  readonly stalled:boolean;
 }
 
@@ -60,7 +66,7 @@ export function validateDrivetrainSpec(spec:DrivetrainSpec):void{
  positive(e.inertiaKgM2,'engine.inertiaKgM2');if(!Number.isFinite(e.dragTorqueNm??0)||(e.dragTorqueNm??0)<0)throw new RangeError('engine.dragTorqueNm');
  if(!Array.isArray(e.torqueCurve)||e.torqueCurve.length<2)throw new RangeError('engine.torqueCurve');
  let last=-Infinity;for(const p of e.torqueCurve){if(!Number.isFinite(p.rpm)||p.rpm<0||p.rpm<=last||!Number.isFinite(p.torqueNm)||p.torqueNm<0)throw new RangeError('engine.torqueCurve points');last=p.rpm;}
- positive(c.maxTorqueNm,'clutch.maxTorqueNm');positive(c.stiffnessNmPerRadS,'clutch.stiffnessNmPerRadS');
+ positive(c.maxTorqueNm,'clutch.maxTorqueNm');positive(c.stiffnessNmPerRadS,'clutch.stiffnessNmPerRadS');if(c.thermal)validateThermalSpec(c.thermal);
  if(!g.forwardRatios.length||g.forwardRatios.length>16||g.forwardRatios.some(x=>!Number.isFinite(x)||x<=0))throw new RangeError('gearbox.forwardRatios');
  positive(g.reverseRatio,'gearbox.reverseRatio');positive(g.finalDrive,'gearbox.finalDrive');
  if(!Number.isFinite(g.efficiency??.94)||(g.efficiency??.94)<=0||(g.efficiency??.94)>1)throw new RangeError('gearbox.efficiency');
@@ -81,12 +87,14 @@ export class Drivetrain {
  private engineOmega:number;
  private gearValue=1;
  private clutchHeat=0;
+ private readonly clutchThermal:ThermalMass|undefined;
  private readonly outputTorque=new Map<string,number>();
  private stateValue:DrivetrainState;
  constructor(readonly spec:DrivetrainSpec){
   validateDrivetrainSpec(spec);this.engineOmega=spec.engine.idleRpm/RPM_PER_RAD_S;
+  this.clutchThermal=spec.clutch.thermal?new ThermalMass(spec.clutch.thermal):undefined;
   for(const id of spec.differential.outputs)this.outputTorque.set(id,0);
-  this.stateValue=Object.freeze({engineRpm:spec.engine.idleRpm,gear:1,clutchSlipRadS:0,clutchTorqueNm:0,outputTorqueNm:0,clutchDissipatedJ:0,stalled:false});
+  this.stateValue=Object.freeze({engineRpm:spec.engine.idleRpm,gear:1,clutchSlipRadS:0,clutchTorqueNm:0,outputTorqueNm:0,clutchDissipatedJ:0,clutchTemperatureC:this.clutchThermal?.temperatureC??20,clutchPerformance:this.clutchThermal?.performance??1,stalled:false});
  }
  get gear():number{return this.gearValue;}
  setGear(value:number):void{
@@ -98,10 +106,11 @@ export class Drivetrain {
  step(dt:number,input:DrivetrainInput):DrivetrainState{
   if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('drivetrain dt');
   const throttle=clamp(input.throttle,0,1),engagement=clamp(input.clutch,0,1),g=this.spec.gearbox,e=this.spec.engine,c=this.spec.clutch,d=this.spec.differential;
+  this.clutchThermal?.step(dt,input.ambientTemperatureC??20,input.airSpeedMps??0);
   const ratio=this.gearValue>0?g.forwardRatios[this.gearValue-1]!*g.finalDrive:this.gearValue<0?-g.reverseRatio*g.finalDrive:0;
   let meanOmega=0;for(const id of d.outputs){const w=input.wheelOmega(id);if(!Number.isFinite(w))throw new TypeError('wheel omega');meanOmega+=w;}meanOmega/=d.outputs.length;
   const shaftOmega=ratio===0?0:meanOmega*ratio,slip=this.engineOmega-shaftOmega;
-  const clutchLimit=c.maxTorqueNm*engagement,clutchTorque=ratio===0?0:clamp(slip*c.stiffnessNmPerRadS,-clutchLimit,clutchLimit);
+  const clutchPerformance=this.clutchThermal?.performance??1,clutchLimit=c.maxTorqueNm*engagement*clutchPerformance,clutchTorque=ratio===0?0:clamp(slip*c.stiffnessNmPerRadS,-clutchLimit,clutchLimit);
   const rpm=Math.max(0,this.engineOmega*RPM_PER_RAD_S),stall=e.stallRpm??e.idleRpm*.55,combustion=rpm>=stall&&rpm<e.redlineRpm?torqueAtRpm(e,rpm)*throttle:0;
   const drag=(e.dragTorqueNm??0)*(this.engineOmega===0?0:Math.sign(this.engineOmega));
   this.engineOmega=Math.max(0,this.engineOmega+(combustion-drag-clutchTorque)*dt/e.inertiaKgM2);
@@ -114,9 +123,9 @@ export class Drivetrain {
    const limit=(d.preloadNm??0)+Math.abs(total)*(d.lockFraction??0)*.5,stop=Math.abs(delta)/(dt*(1/ia+1/ib)),transfer=Math.sign(delta)*Math.min(limit,Math.abs(delta)*(d.couplingNmPerRadS??12),stop);
    this.outputTorque.set(a!,this.outputTorque.get(a!)!-transfer);this.outputTorque.set(b!,this.outputTorque.get(b!)!+transfer);
   }
-  this.clutchHeat+=Math.abs(clutchTorque*slip)*dt;
+  const clutchWork=Math.abs(clutchTorque*slip)*dt;this.clutchHeat+=clutchWork;this.clutchThermal?.addHeat(clutchWork);
   const engineRpm=this.engineOmega*RPM_PER_RAD_S;
-  this.stateValue=Object.freeze({engineRpm,gear:this.gearValue,clutchSlipRadS:slip,clutchTorqueNm:clutchTorque,outputTorqueNm:total,clutchDissipatedJ:this.clutchHeat,stalled:engineRpm<stall});
+  this.stateValue=Object.freeze({engineRpm,gear:this.gearValue,clutchSlipRadS:slip,clutchTorqueNm:clutchTorque,outputTorqueNm:total,clutchDissipatedJ:this.clutchHeat,clutchTemperatureC:this.clutchThermal?.temperatureC??(input.ambientTemperatureC??20),clutchPerformance:this.clutchThermal?.performance??1,stalled:engineRpm<stall});
   return this.stateValue;
  }
 }
