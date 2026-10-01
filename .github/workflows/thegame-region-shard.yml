@@ -2,7 +2,7 @@ name: TheGame region shard
 
 on:
   push:
-    branches: [feat/thegame-region-shard, feat/thegame-seamless-crowd, feat/thegame-npc-authority, feat/thegame-resident-possession]
+    branches: [feat/thegame-region-shard, feat/thegame-seamless-crowd, feat/thegame-npc-authority, feat/thegame-resident-possession, feat/thegame-public-transit]
     paths:
       - 'src/games/thegame/**'
       - 'src/network/**'
@@ -11,6 +11,7 @@ on:
       - 'test/thegame-crowd.test.mjs'
       - 'test/thegame-npc-authority.test.mjs'
       - 'test/thegame-resident-possession.test.mjs'
+      - 'test/thegame-transit.test.mjs'
       - 'test/thegame.test.mjs'
       - 'test/authority-shard.test.mjs'
       - 'test/network-projection.test.mjs'
@@ -49,4 +50,4 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/authority-shard.test.mjs test/network-projection.test.mjs test/thegame-region.test.mjs test/thegame-region-host.test.mjs test/thegame-crowd.test.mjs test/thegame-npc-authority.test.mjs test/thegame-resident-possession.test.mjs test/thegame.test.mjs
+      - run: node --test test/authority-shard.test.mjs test/network-projection.test.mjs test/thegame-region.test.mjs test/thegame-region-host.test.mjs test/thegame-crowd.test.mjs test/thegame-npc-authority.test.mjs test/thegame-resident-possession.test.mjs test/thegame-transit.test.mjs test/thegame.test.mjs
