@@ -5,6 +5,7 @@ import type {MaterialKind} from '../materials/catalog.js';
 import type {EnvironmentSpec} from '../environment/types.js';
 import type {MaterialFinish,MaterialTreatment} from '../materials/surface.js';
 import type {SceneDeformationSpec} from '../physics/deformation.js';
+import type {FluidVolumeSpec} from '../physics/fluid.js';
 
 export type Color = readonly [number,number,number,number];
 export type Primitive =
@@ -51,6 +52,8 @@ export interface BodySpec {
   shape?:'auto'|'box'|'sphere';
   /** Explicit collision envelope for body-only proxies. */
   collisionSize?:Vec3;
+  /** Hollow internal volume used for water ingress. External buoyancy follows collision geometry. */
+  fluid?:{readonly enclosedVolumeM3:number;readonly leakAreaM2?:number};
 }
 export interface EntitySpec {
   id:string;
@@ -161,6 +164,8 @@ export interface SceneSpec {
   surfaceContacts?:SceneSurfaceContactsSpec;
   /** Persistent plastic deformation groups driven by physics contacts. */
   deformation?:SceneDeformationSpec;
+  /** Finite physical fluid volumes; rendering remains an ordinary entity/material concern. */
+  fluids?:readonly FluidVolumeSpec[];
   rendering?:RenderingSpec;
   version:1;
   seed?:number;
