@@ -28,6 +28,7 @@ export type {Vec3,MutableVec3,Mat4} from './math.js';
 export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
 export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
+export {renderRotorSound,type RotorAcousticState} from './audio/rotor.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
 
 export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type PlateFragment,type Vec2} from './materials/glass-fracture.js';
