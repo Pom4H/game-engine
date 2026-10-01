@@ -89,10 +89,22 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    // Recessed roof, cornice and four parapets give the silhouette actual depth.
    box(asphalt,p.x,p.y+p.height+.04,p.z,p.width,.08,p.depth,[.20,.22,.21]);
    for(const side of [-1,1]){
-    box(trim,p.x,p.y+p.height+.3,p.z+side*p.depth/2,p.width+.35,.6,.34,[.55,.52,.45]);
-    box(trim,p.x+side*p.width/2,p.y+p.height+.3,p.z,.34,.6,p.depth+.35,[.55,.52,.45]);
+    box(trim,p.x,p.y+p.height+.3,p.z+side*p.depth/2,p.width+.35,.6,.34,[.43,.42,.38]);
+    box(trim,p.x+side*p.width/2,p.y+p.height+.3,p.z,.34,.6,p.depth+.35,[.43,.42,.38]);
    }
-   box(metal,p.x,p.y+1.3,p.z+p.depth/2+.04,2,2.6,.08,[.12,.16,.16]);
+   // Batched pitched roof: silhouette depth without one draw call per building.
+   const xL=p.x-ox-p.width/2,xR=p.x-ox+p.width/2,zF=p.z-oz-p.depth/2,zB=p.z-oz+p.depth/2;
+   const roofBase=p.y+p.height+.58,roofTop=roofBase+Math.min(3.6,Math.max(1.7,p.width*.105)),ridge=p.x-ox,roofColor:RGB=[.13,.14,.14];
+   metal.quad([xL,roofBase,zF],[xL,roofBase,zB],[ridge,roofTop,zB],[ridge,roofTop,zF],roofColor);
+   metal.quad([ridge,roofTop,zF],[ridge,roofTop,zB],[xR,roofBase,zB],[xR,roofBase,zF],roofColor);
+   masonry.triangle([xL,roofBase,zF],[ridge,roofTop,zF],[xR,roofBase,zF],wall);
+   masonry.triangle([xR,roofBase,zB],[ridge,roofTop,zB],[xL,roofBase,zB],wall);
+   // Covered frontage evokes the old-city arcade in the visual target while
+   // remaining render-only; authoritative collision stays the original building.
+   const front=p.z+p.depth/2,canopyWidth=p.width*.82,canopyDepth=2.15,canopyY=p.y+3.15;
+   box(trim,p.x,canopyY,front+canopyDepth/2,canopyWidth,.18,canopyDepth,[.31,.30,.28]);
+   for(let col=-2;col<=2;col++)box(metal,p.x+col*canopyWidth/4,p.y+1.55,front+canopyDepth-.18,.13,3.1,.13,[.12,.13,.13]);
+   box(metal,p.x,p.y+1.3,p.z+p.depth/2+.04,2,2.6,.08,[.10,.12,.12]);
    box(trim,p.x,p.y+2.8,p.z+p.depth/2+.35,3,.18,.7,[.55,.53,.46]);
    const floors=Math.min(8,Math.floor(p.height/3.5));
    // Windows are planes (2 triangles), not six-sided boxes. Frames are batch
