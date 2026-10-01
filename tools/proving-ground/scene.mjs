@@ -208,6 +208,11 @@ for(let i=0;i<5;i++){
  box(`water-depth-marker-${i}`,[x,-depth/2-.02,-27],[.10,depth,.10],P);
 }
 
+// 21. Brake endurance strip. Long enough for repeated physical acceleration / braking
+// in both directions without teleporting the vehicle or resetting thermal state.
+roadStrip('brake-endurance-road',[[-106,0,-102],[-106,0,102]],8,A,{physical:true});
+for(const z of [-90,-60,-30,0,30,60,90])box(`brake-endurance-mark-${z}`,[-106,.009,z],[.10,.018,4.8],P);
+
 // Service roads bind all stations into one coherent facility.
 roadStrip('service-north',[[-58,0,85],[-18,0,90],[22,0,91],[55,0,100],[73,0,115]],6.5,A);
 roadStrip('service-south',[[-58,0,-12],[-35,0,-5],[-5,0,-4],[25,0,-7],[50,0,-13],[70,0,-15]],6.5,A);
