@@ -2,13 +2,14 @@ name: TheGame transit migration preservation
 
 on:
   push:
-    branches: [feat/thegame-public-transit, feat/thegame-transit-materialization]
+    branches: [feat/thegame-public-transit, feat/thegame-transit-materialization, feat/thegame-visible-transit-passengers]
     paths:
       - 'src/games/thegame/**'
       - 'src/index.ts'
       - 'docs/THEGAME_TRANSIT_MIGRATION.md'
       - 'test/thegame-transit.test.mjs'
       - 'test/thegame-transit-materialization.test.mjs'
+      - 'test/thegame-visible-transit.test.mjs'
       - '.github/workflows/thegame-transit-migration.yml'
   pull_request:
     paths:
@@ -49,7 +50,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run build
       - name: Public transit
-        run: node --test test/thegame-transit.test.mjs test/thegame-transit-materialization.test.mjs test/thegame-resident-possession.test.mjs test/thegame.test.mjs
+        run: node --test test/thegame-transit.test.mjs test/thegame-transit-materialization.test.mjs test/thegame-visible-transit.test.mjs test/thegame-resident-possession.test.mjs test/thegame.test.mjs
       - name: Soft-body and vehicle physics
         run: node --test test/vehicle-interaction.test.mjs test/vehicle-runtime.test.mjs test/vehicle-scene.test.mjs test/contact-laws.test.mjs
       - name: Audio
