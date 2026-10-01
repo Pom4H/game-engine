@@ -38,11 +38,20 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  // Opaque coated facade panels keep reflection and early depth. No fake transparency
  // over a solid building shell, no thousands of individual draw calls for windows.
  const windows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.19,metalness:.25,clearcoat:.65,clearcoatRoughness:.13});
- const litWindows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.17,clearcoat:.45,emissive:[1.65,.82,.30]});
+ const litWindows=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.17,clearcoat:.45,emissive:[.72,.36,.16]});
  const metal=new Mesh({kind:'steel',color:[1,1,1,1],roughness:.42,metalness:.65});
  const lampGlow=new Mesh({kind:'plastic',color:[1,1,1,1],roughness:.12,emissive:[9.0,5.4,2.4]});
  const ground=(x:number,z:number,offset=0):Point=>[x-ox,world.ground(x,z).y+offset,z-oz];
  const box=(mesh:Mesh,x:number,y:number,z:number,sx:number,sy:number,sz:number,color:RGB)=>mesh.append({kind:'box',size:[1,1,1]},[x-ox,y,z-oz],color,[sx,sy,sz]);
+ const archBand=(mesh:Mesh,x:number,y:number,z:number,r:number,t:number,color:RGB)=>{
+  const n=10,ri=Math.max(.05,r-t);
+  for(let i=0;i<n;i++){
+   const a=i*Math.PI/n,b=(i+1)*Math.PI/n;
+   const oa:Point=[x-ox+Math.cos(a)*r,y+Math.sin(a)*r,z-oz],ob:Point=[x-ox+Math.cos(b)*r,y+Math.sin(b)*r,z-oz];
+   const ib:Point=[x-ox+Math.cos(b)*ri,y+Math.sin(b)*ri,z-oz+.015],ia:Point=[x-ox+Math.cos(a)*ri,y+Math.sin(a)*ri,z-oz+.015];
+   mesh.quad(oa,ob,ib,ia,color);
+  }
+ };
  for(let z=0;z<16;z++)for(let x=0;x<16;x++){
   const a:Point=[x*8,chunk.heights[z*17+x]!,z*8],b:Point=[x*8+8,chunk.heights[z*17+x+1]!,z*8],c:Point=[x*8,chunk.heights[(z+1)*17+x]!,z*8+8],d:Point=[x*8+8,chunk.heights[(z+1)*17+x+1]!,z*8+8];
   const climate=climateAt(world.seed,ox+x*8+4,oz+z*8+4),color:RGB=climate.biome==='city'?[.32,.37,.26]:climate.color;
@@ -57,13 +66,13 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
  if(cx>=-3&&cx<3&&cz>=-3&&cz<3){
   for(let n=0;n<=2;n++){
    const x=ox+n*64,z=oz+n*64;
-   rect(trim,x,oz+64,20,128,[.58,.56,.5],.012);rect(trim,ox+64,z,128,20,[.58,.56,.5],.012);
+   rect(trim,x,oz+64,20,128,[.34,.33,.31],.012);rect(trim,ox+64,z,128,20,[.34,.33,.31],.012);
    rect(asphalt,x,oz+64,12,128,[.16,.18,.18]);rect(asphalt,ox+64,z,128,12,[.16,.18,.18]);
    for(let t=6;t<128;t+=12)if(t%64>12&&t%64<52){rect(details,x,oz+t,.14,5,[.87,.77,.49],.045);rect(details,ox+t,z,5,.14,[.87,.77,.49],.045);}
    // Crosswalks and kerb lines lie on the canonical surface and add no obstacles.
    for(let crossing=0;crossing<2;crossing++)for(let k=-4;k<=4;k++){
-    rect(details,x+k,oz+crossing*64+10,.55,3,[.78,.77,.68],.05);
-    rect(details,ox+crossing*64+10,z+k,3,.55,[.78,.77,.68],.05);
+    rect(details,x+k,oz+crossing*64+10,.55,3,[.56,.55,.50],.05);
+    rect(details,ox+crossing*64+10,z+k,3,.55,[.56,.55,.50],.05);
    }
   }
   for(const lamp of cityLamps(cx,cz)){
@@ -104,6 +113,15 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    const front=p.z+p.depth/2,canopyWidth=p.width*.82,canopyDepth=2.15,canopyY=p.y+3.15;
    box(trim,p.x,canopyY,front+canopyDepth/2,canopyWidth,.18,canopyDepth,[.31,.30,.28]);
    for(let col=-2;col<=2;col++)box(metal,p.x+col*canopyWidth/4,p.y+1.55,front+canopyDepth-.18,.13,3.1,.13,[.12,.13,.13]);
+   // Shallow masonry arch bands and pilasters read as a covered arcade but stay
+   // in the same material batch and never change authoritative collision.
+   for(let bay=-1;bay<=1;bay++){
+    const bx=p.x+bay*canopyWidth/3;
+    archBand(trim,bx,p.y+1.7,front+canopyDepth+.025,1.22,.16,[.39,.37,.33]);
+    box(trim,bx-canopyWidth/6,p.y+p.height/2,front+.10,.16,Math.max(3,p.height-.5),.16,[.37,.35,.32]);
+    box(trim,bx+canopyWidth/6,p.y+p.height/2,front+.10,.16,Math.max(3,p.height-.5),.16,[.37,.35,.32]);
+    box(trim,bx,p.y+3.62,front+.18,Math.min(4.8,canopyWidth*.25),.48,.10,[.18,.17,.16]);
+   }
    box(metal,p.x,p.y+1.3,p.z+p.depth/2+.04,2,2.6,.08,[.10,.12,.12]);
    box(trim,p.x,p.y+2.8,p.z+p.depth/2+.35,3,.18,.7,[.55,.53,.46]);
    const floors=Math.min(8,Math.floor(p.height/3.5));
@@ -112,7 +130,7 @@ export function chunkGeometry(world:OpenWorld,cx:number,cz:number):EntitySpec[]{
    for(let row=0;row<floors;row++)for(let col=-2;col<=2;col++)for(const side of [-1,1]){
     const y=p.y+2+row*3.5,w=1.1,h=.94;
     const lit=hash01(cx*4+row,cz*13+col,side,world.seed)>.45;
-    const glass:RGB=lit?[.72,.48,.26]:[.09,.14,.16];
+    const glass:RGB=lit?[.48,.34,.23]:[.075,.11,.13];
     for(const axis of [0,2] as const){
      const center:Point=axis===2?[p.x-ox+col*p.width/6,y,p.z-oz+side*(p.depth/2+.03)]:[p.x-ox+side*(p.width/2+.03),y,p.z-oz+col*p.depth/6];
      const point=(u:number,v:number,out=0):Point=>axis===2?[center[0]+u,center[1]+v,center[2]+side*out]:[center[0]+side*out,center[1]+v,center[2]+u];
