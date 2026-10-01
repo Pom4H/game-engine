@@ -130,7 +130,7 @@ export class PhysicsCauseTrace implements PhysicsCauseManifestWriter {
   const frame=this.frame;if(!frame)throw new Error('Physics contribution requires an active substep');
   this.sealBody(bodyId);
   const cached=frame.writers.get(bodyId);if(cached)return cached;
-  const writer:PhysicsCauseWriter=Object.freeze({bodyId,contribute:(cause,source,effect)=>this.contribute(bodyId,cause,source,effect)});
+  const writer:PhysicsCauseWriter=Object.freeze({bodyId,contribute:(cause:PhysicsCauseRef,source:PhysicsSourceRef,effect:PhysicsContributionEffect)=>this.contribute(bodyId,cause,source,effect)});
   frame.writers.set(bodyId,writer);return writer;
  }
  private contribute(bodyId:string,cause:PhysicsCauseRef,source:PhysicsSourceRef,effect:PhysicsContributionEffect):string{
