@@ -22,7 +22,7 @@ export function validateWindVolume(spec:WindVolumeSpec):void{
  if(spec.blendM!==undefined&&(!Number.isFinite(spec.blendM)||spec.blendM<0||spec.blendM>Math.min(...spec.sizeM)/2))throw new RangeError('Wind blend');
 }
 interface Compiled {readonly id:string;readonly center:Vec3;readonly half:Vec3;readonly wind:Vec3;readonly densityKgM3?:number;readonly blendM:number}
-const smooth=t=>{const x=Math.max(0,Math.min(1,t));return x*x*(3-2*x);};
+const smooth=(t:number)=>{const x=Math.max(0,Math.min(1,t));return x*x*(3-2*x);};
 
 /** Deterministic bounded spatial air field. Volumes blend in declaration order;
  * no turbulence noise or gameplay state is hidden here. */
