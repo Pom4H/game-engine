@@ -40,11 +40,12 @@ export interface CityLamp {readonly id:string;readonly poleX:number;readonly pol
 export function cityLamps(cx:number,cz:number):readonly CityLamp[]{
  if(cx<-3||cx>=3||cz<-3||cz>=3)return [];
  const ox=cx*CHUNK_SIZE,oz=cz*CHUNK_SIZE,out:CityLamp[]=[];
- for(let row=0;row<2;row++)for(let col=0;col<4;col++){
-  // 32 m longitudinal spacing puts useful pools of light between intersections;
-  // still <=192 resident city lights at the default 7x7 view.
-  const poleX=ox+col*32+9,poleZ=oz+row*64+6.5;
-  out.push({id:`lamp:${cx}:${cz}:${row}:${col}`,poleX,poleZ,x:poleX,y:4.78,z:poleZ});
+ // Paired pavement lamps: one can sit outside the camera frustum while its
+ // participating-media halo still enters the image, as in a real foggy street.
+ // Count stays at eight per chunk, so render/light-grid budgets do not grow.
+ for(let row=0;row<2;row++)for(const side of [-1,1] as const)for(let col=0;col<2;col++){
+  const poleX=ox+32+col*64,poleZ=oz+row*64+side*8.25;
+  out.push({id:`lamp:${cx}:${cz}:${row}:${side>0?'r':'l'}:${col}`,poleX,poleZ,x:poleX,y:4.78,z:poleZ});
  }
  return out;
 }
