@@ -76,16 +76,6 @@ export class NearbyNpcAuthority {
    }
   }
 
-  const ordered=[...candidates.values()]
-   .filter(candidate=>candidate.distance<=PROMOTE_RADIUS)
-   .sort((a,b)=>a.distance-b.distance||a.person.id.localeCompare(b.person.id));
-
-  for(const candidate of ordered){
-   if(this.active.has(candidate.person.id)||this.active.size>=MAX_ACTIVE)continue;
-   this.active.set(candidate.person.id,{id:candidate.person.id,state:stateFrom(candidate.person),promotedAt:tick,sourceTick:tick});
-   this.promotions++;
-  }
-
   for(const [id,npc] of [...this.active]){
    const nearest=this.nearest(players,npc.state);
    if(nearest<=DEMOTE_RADIUS)continue;
@@ -98,6 +88,16 @@ export class NearbyNpcAuthority {
    if(error<=COARSE_HANDOFF_ERROR||nearest>FORCE_DEMOTE_RADIUS){
     this.active.delete(id);this.demotions++;if(nearest>FORCE_DEMOTE_RADIUS)this.forcedDemotions++;
    }
+  }
+
+  const ordered=[...candidates.values()]
+   .filter(candidate=>candidate.distance<=PROMOTE_RADIUS)
+   .sort((a,b)=>a.distance-b.distance||a.person.id.localeCompare(b.person.id));
+
+  for(const candidate of ordered){
+   if(this.active.has(candidate.person.id)||this.active.size>=MAX_ACTIVE)continue;
+   this.active.set(candidate.person.id,{id:candidate.person.id,state:stateFrom(candidate.person),promotedAt:tick,sourceTick:tick});
+   this.promotions++;
   }
  }
 
