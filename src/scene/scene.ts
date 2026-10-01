@@ -24,6 +24,7 @@ import {SceneSystemRuntime} from './system-runtime.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
+  readonly labelColor?:Vec3;
   readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly clearcoat?:number;readonly clearcoatRoughness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';readonly finish?:import('../materials/surface.js').MaterialFinish;readonly ageYears?:number;readonly treatment?:import('../materials/surface.js').MaterialTreatment;
   readonly color:Color;
   readonly texture?:SurfaceTextureSpec;
@@ -231,7 +232,7 @@ export class Scene {
       this.spec.rendering={...(this.spec.rendering??{}),...structuredClone(patch.rendering)};
       // Exposure/fog are frame uniforms. Lighting/probe/shadow authoring may
       // change scene-derived caches and therefore takes the structural path.
-      if(keys.some(key=>key!=='exposure'&&key!=='fogDensity'))structureChanged=true;
+      if(keys.some(key=>!['exposure','fogDensity','fogColor','fogHeightFalloff','fogBaseHeight','fogStartDistance','fogRampDistance'].includes(key)))structureChanged=true;
       else appearanceChanged=true;
     }
     for(const rule of patch.materials??[]){

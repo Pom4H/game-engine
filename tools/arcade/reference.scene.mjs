@@ -5,20 +5,15 @@ import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 import {canopySnow} from './snow-canopy.mjs';
 import {cobbledRoad,streetLantern} from './street.mjs';
 export {quality} from './scene.mjs';
-export const camera={position:[9.8,2.55,-11.7],target:[-6.4,4.05,1.75],fov:44.5,aperture:0};
-export const cameraRail={durationSeconds:90,keyframes:[
- {position:camera.position,target:camera.target},
- {position:[-1,2.45,-11.2],target:[-15,4,1.3]},
- {position:[-11,2.7,-10.5],target:[-26,4.2,1]},
- {position:[-1,2.6,-12.4],target:[-15,4.1,1.5]},
-]};
+import {camera,cameraRail} from './camera.mjs';
+export {camera,cameraRail};
 const materialMap=(name,sizeM,blend=.45)=>({url:`/tools/arcade/assets/${name}.png`,normalUrl:`/tools/arcade/assets/${name}-normal.png`,ormUrl:`/tools/arcade/assets/${name}-orm.png`,sizeM,bumpStrength:.20,normalStrength:.8,albedoStrength:blend,ormStrength:.7});
-const canvas={kind:'default',color:[.19,.17,.15,1],roughness:.94,ageYears:105,texture:materialMap('plaster',.36,.92)};
+const canvas={kind:'default',color:[.55,.49,.43,1],roughness:.98,ageYears:105,texture:materialMap('plaster',1.3,.92)};
 const snow={kind:'snow',color:[.90,.91,.90,1],roughness:.96,texture:materialMap('snow',.34,.42)};
 const additions=[];
 const warmGlass={kind:'default',color:[.16,.145,.125,.20],metalness:.02,roughness:.10,emissive:[.30,.25,.20]};
 const darkWood={kind:'default',color:[.075,.045,.03,1],roughness:.72,ageYears:80,texture:materialMap('wood',.55,.58)};
-const agedWall={kind:'default',color:[.245,.235,.215,1],roughness:.985,ageYears:135,texture:materialMap('plaster',.34,1.0)};
+const agedWall={kind:'default',color:[.30,.285,.26,1],roughness:.985,ageYears:135,texture:materialMap('plaster',1.8,1.0)};
 
 const start=-2.5,bay=3.55,count=9,r=bay/2+.025,rise=1.12;
 for(let i=0;i<count;i++){
@@ -35,17 +30,20 @@ const entities=authoredEntities.filter(e=>
  e.id!=='roof-top'&&e.id!=='front-mansard'&&
  !/^roof-(seam|snow-seam)/.test(e.id)&&e.id!=='eaves-snow'&&
  !/^dormer-/.test(e.id)&&
- !/^shop-\d+-arch-face$/.test(e.id)&&
- !/^side-(canopy|column|arch-trim|window)/.test(e.id)
+ !/^shop-\d+-arch-face$/.test(e.id)
 ).map(e=>{
- if(e.id==='upper-building')return {...e,material:agedWall};
+ if(e.id==='upper-building')return {...e,position:[e.position[0],e.position[1],8.2],mesh:{...e.mesh,size:[e.mesh.size[0],e.mesh.size[1],16.4]},material:agedWall};
+ if(e.id==='left-wall')return {...e,position:[e.position[0],e.position[1],8.2],mesh:{...e.mesh,size:[e.mesh.size[0],e.mesh.size[1],16.4]}};
  if(/^shop-\d+-(pier|jamb|plinth|crossbar|mullion|raised-panel)/.test(e.id))return {...e,material:darkWood};
  if(/^shop-\d+-upper-glass/.test(e.id)){
    const m=e.id.match(/^shop-(\d+)-/),i=Number(m?.[1]??0),on=[.06,.18,.04,.12,.05,.16,.03,.09,.02][i]??.04;
-   return {...e,material:{...warmGlass,emissive:[on,on*.78,on*.55]}};
+   return {...e,material:{...warmGlass,emissive:[on*.12,on*.11,on*.10]}};
  }
  if(/^shop-\d+-glass/.test(e.id))return {...e,material:{...e.material,color:[.075,.085,.08,.13],roughness:.045}};
- if(/^shop-\d+-curtain/.test(e.id))return {...e,material:{...e.material,color:[.60,.59,.56,.42],emissive:[.012,.011,.010],roughness:.995}};
+ if(/^shop-\d+-curtain/.test(e.id)){
+   const i=Number(e.id.match(/^shop-(\d+)-/)[1]),glow=[1.30,1.10,1.35,.95,1.20,1.0,.88,.72,.48][i];
+   return {...e,material:{...e.material,texture:{...e.material.texture,sizeM:4.2,albedoStrength:1},color:[.72,.69,.65,1],emissive:[glow*1.8,glow*1.65,glow*1.5],roughness:.995}};
+ }
  if(/^shop-\d+-room-back/.test(e.id)){
    const m=e.id.match(/^shop-(\d+)-/),i=Number(m?.[1]??0),on=[.08,.16,.28,.12,.24,.10,.18,.08,.05][i]??.08;
    return {...e,material:{...e.material,color:[.11,.105,.095,1],emissive:[on,on*.84,on*.68]}};
@@ -54,7 +52,8 @@ const entities=authoredEntities.filter(e=>
    const m=e.id.match(/^shop-(\d+)-/),i=Number(m?.[1]??0),level=[.5,.9,1.6,.7,1.3,.6,1.0,.45,.25][i]??.5;
    return {...e,light:{...e.light,color:[1,.86,.76],intensity:level,range:3.4}};
  }
- if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...e.material,color:[.30,.29,.265,1],roughness:.98,emissive:[.004,.004,.003]}};
+ if(/^sign-|^side-sign-/.test(e.id))return {...e,material:{...agedWall,texture:{...agedWall.texture,albedoStrength:.40},color:[.52,.49,.43,1],label:e.material.label,labelColor:[.095,.08,.065],roughness:.98,emissive:[0,0,0]}};
+ if(/^side-canopy-face$/.test(e.id))return {...e,material:canvas};
  if(e.id==='street-base')return {...e,material:{...e.material,color:[.06,.063,.066,1],roughness:.78}};
  if(e.id==='distant-building')return {...e,material:{...e.material,color:[.09,.085,.078,1]}};
  const light=e.id.match(/^shop-(\d+)-canopy-light$/);
@@ -87,7 +86,7 @@ const sphere=(id,position,r,material,scale=[1,1,1])=>additions.push({id,position
 for(let i=0;i<count;i++){
  const x=-(start+bay*(i+.5));
  const lit=i<6?1:.45;
- box(`hero-upper-glass-${i}`,[x,5.43,-.205],[1.02,1.42,.025],{...warmGlass,emissive:[.17*lit,.075*lit,.025*lit]});
+ box(`hero-upper-glass-${i}`,[x,5.43,-.205],[1.02,1.42,.025],{...warmGlass,emissive:[.006*lit,.005*lit,.004*lit]});
  for(const sx of [-.57,.57])box(`hero-upper-jamb-${i}-${sx}`,[x+sx,5.42,-.27],[.10,1.72,.18],darkWood);
  box(`hero-upper-head-${i}`,[x,6.32,-.28],[1.34,.10,.20],darkWood);
  box(`hero-upper-sill-${i}`,[x,4.54,-.29],[1.40,.12,.24],darkWood);
@@ -146,7 +145,7 @@ for(let i=0;i<7;i++){
 // flattening the facade. It approximates light spilling from the pendant below.
 for(let i=0;i<8;i++){
  const x=-(start+bay*(i+.5));
- additions.push({id:`awning-face-fill-${i}`,position:[x,3.55,-3.45],light:{kind:'point',color:[1,.58,.32],intensity:.72,range:2.7}});
+ additions.push({id:`awning-face-fill-${i}`,position:[x,3.55,-3.45],light:{kind:'point',color:[1,.80,.68],intensity:1.2,range:2.7}});
 }
 
 // A single shell replaces the overlapping base coating and separate snow rim.
@@ -175,9 +174,10 @@ for(let i=0;i<6;i++){
  const x0=-29.55,x1=2.55,zEave=-.18,zRidge=2.15,yEave=7.82,yRidge=10.35;
  const positions=[x0,yEave,zEave,x1,yEave,zEave,x1,yRidge,zRidge,x0,yRidge,zRidge];
  const dx=x1-x0,dy=yRidge-yEave,dz=zRidge-zEave;
- const nx=0,ny=-dz,nz=dy,l=Math.hypot(ny,nz),n=[nx,ny/l,nz/l];
- const normals=[...n,...n,...n,...n],indices=[0,1,2,0,2,3];
+ const nx=0,ny=dz,nz=-dy,l=Math.hypot(ny,nz),n=[nx,ny/l,nz/l];
+ const normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
  additions.push({id:'hero-front-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.050,.055,.060,1],metalness:.22,roughness:.78,texture:materialMap('stone',1.0,.34)}});
+ for(let x=x0+.14;x<x1;x+=.29)box(`mansard-standing-seam-${x.toFixed(2)}`,[x,(yEave+yRidge)/2+.008,(zEave+zRidge)/2-.012],[.015,Math.hypot(dy,dz),.014],{kind:'default',color:[.075,.072,.069,1],metalness:.35,roughness:.78},{rotation:[Math.atan2(dz,dy),0,0]});
  for(let i=0;i<14;i++){
    const x=-28+i*2.25;
    additions.push({id:`front-roof-snow-${i}`,position:[x,8.03+(i%3)*.05,.02+(i%3)*.12],mesh:{kind:'snowdrift',size:[2.15,.045,.62],seed:31000+i*137,segments:18},material:snow});
@@ -188,7 +188,7 @@ for(let i=0;i<6;i++){
 for(let i=0;i<5;i++){
  const x=-25.5+i*6.0,z=.88;
  box(`hero-dormer-body-${i}`,[x,9.65,z],[1.34,1.58,1.20],{kind:'default',color:[.060,.052,.047,1],roughness:.86,texture:materialMap('wood',.7,.42)});
- box(`hero-dormer-glass-${i}`,[x,9.63,.255],[.72,.90,.025],{...warmGlass,emissive:[.12,.055,.022]});
+ box(`hero-dormer-glass-${i}`,[x,9.63,.255],[.72,.90,.025],{...warmGlass,emissive:[.001,.001,.001]});
  box(`hero-dormer-frame-v-${i}`,[x,9.63,.20],[.055,.98,.09],darkWood);
  box(`hero-dormer-frame-h-${i}`,[x,9.68,.19],[.80,.055,.09],darkWood);
  const pts=[[-.84,0],[.84,0],[0,.66]];
@@ -204,9 +204,9 @@ for(const [i,x] of [-22,-10].entries()){
 // Replace the malformed original rear roof with a single coherent mansard back
 // plane. It shares the building axis and cannot cross the camera near plane.
 {
- const x0=-29.55,x1=2.55,z0=2.12,z1=6.45,y0=10.34,y1=8.16;
+ const x0=-29.55,x1=2.55,z0=2.12,z1=16.45,y0=10.34,y1=8.16;
  const positions=[x0,y0,z0,x1,y0,z0,x1,y1,z1,x0,y1,z1];
- const n=[0,.88,.47],normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
+ const nl=Math.hypot(z1-z0,y0-y1),n=[0,(z1-z0)/nl,(y0-y1)/nl],normals=[...n,...n,...n,...n],indices=[0,2,1,0,3,2];
  additions.push({id:'hero-rear-roof',position:[0,0,0],mesh:{kind:'triangle-mesh',positions,normals,indices},material:{kind:'default',color:[.055,.060,.065,1],metalness:.25,roughness:.72,texture:materialMap('stone',1.2,.36)}});
  // broken snow bands catch cold moonlight without making a white roof sheet
  for(let i=0;i<11;i++){
@@ -214,6 +214,16 @@ for(const [i,x] of [-22,-10].entries()){
    additions.push({id:`roof-snow-patch-${i}`,position:[x,9.95-(i%3)*.10,2.55+(i%3)*.30],mesh:{kind:'snowdrift',size:[2.6,.055,.72],seed:22000+i*111,segments:18},material:snow});
  }
 }
+
+// Close the visible end of the mansard and continue the unlit roof mass behind
+// the side arcade. Side-facing dormers supply the reference's near silhouettes.
+additions.push({id:'hero-end-roof',position:[2.57,0,0],mesh:{kind:'polygon-prism',axis:0,points:[[7.82,-.18],[10.35,2.15],[8.16,16.45],[7.82,16.45]],thickness:.08},material:{...agedWall,color:[.10,.095,.09,1]}});
+for(const [i,z] of [7.2,13.2].entries()){
+ box(`side-roof-dormer-${i}`,[2.0,10.18,z],[1.2,1.5,1.34],{...darkWood,color:[.055,.052,.049,1]});
+ additions.push({id:`side-roof-dormer-gable-${i}`,position:[2.1,10.93,z],mesh:{kind:'polygon-prism',axis:0,points:[[0,-.82],[0,.82],[.62,0]],thickness:1.3},material:darkWood});
+ box(`side-roof-window-${i}`,[2.63,10.17,z],[.025,.9,.72],{...warmGlass,emissive:[.001,.001,.001]});
+}
+box('side-roof-chimney',[.4,11.25,11.5],[.76,1.8,.72],{...agedWall,color:[.08,.078,.075,1]});
 
 // Long-lived winter grime and accumulated ledges break the CG-clean facade.
 for(let i=0;i<count;i++){
@@ -224,11 +234,11 @@ for(let i=0;i<count;i++){
      {kind:'default',color:[.085,.082,.078,.72],roughness:1});
  }
 }
-const finalEntities=[...entities,...additions].filter(e=>!/^(window-bounce|awning-face-fill|interior-lamp-light)/.test(e.id));
+const finalEntities=[...entities,...additions].filter(e=>!/^(window-bounce|awning-face-fill|interior-lamp-light|window-display|hero-panel|hero-relief)/.test(e.id));
 export const referenceEntities=finalEntities;
 export const authoredEntityCount=finalEntities.length;
 export default {...base,
  camera,cameraRail,
  environment:{...base.environment,snowfall:'light',humidity:.985,wind:[.18,0,.06]},
- rendering:{...base.rendering,skyColor:[.020,.022,.025],fogDensity:.32,fogColor:[.095,.112,.13],fogHeightFalloff:.25,fogBaseHeight:0,fogStartDistance:2,fogRampDistance:16,sunDirection:[-.28,.76,-.46],sunColor:[.46,.49,.53],sunIntensity:.18,exposure:.96,reflectionProbe:{...base.rendering.reflectionProbe,facesPerFrame:1}},
+ rendering:{...base.rendering,skyColor:[.020,.022,.025],fogDensity:.20,fogColor:[.095,.112,.13],fogHeightFalloff:.42,fogBaseHeight:0,fogStartDistance:2,fogRampDistance:16,sunDirection:[-.28,.76,-.46],sunColor:[.46,.49,.53],sunIntensity:.18,exposure:.96,reflectionProbe:{...base.rendering.reflectionProbe,facesPerFrame:1}},
  entities:batchStaticScenery(finalEntities,()=>true,9)};

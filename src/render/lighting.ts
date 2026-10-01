@@ -27,15 +27,21 @@ fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);r
  var color=mix(horizon,zenith,pow(max(ray.y,0.0),.58));
  let sun=max(dot(ray,f.sun.xyz),0.0);color+=f.sunColor.rgb*f.sun.w*(pow(sun,150.0)*.070+smoothstep(.99980,.99995,sun)*1.55);
  let q=ray.xz/max(.10,ray.y)*.8+vec2<f32>(f.up.w*.001,0);
- let clouds=noise(q)*.55+noise(q*2.1)*.29+noise(q*4.2)*.16;
+ let clouds=noise(q)*.52+noise(q*2.1)*.28+noise(q*4.2)*.14+noise(q*9.4)*.06;
  let cloudDrive=smoothstep(.48,.88,humidity)*(1.0-.55*sunlight);
- let cloudOpacity=cloudDrive*smoothstep(.44,.73,clouds)*smoothstep(.0,.18,ray.y)*.48;
+ let cloudOpacity=cloudDrive*smoothstep(.38,.70,clouds)*smoothstep(.0,.18,ray.y)*mix(.82,.48,sunlight);
  // Cloud radiance follows incident light rather than a fixed white term.
  let edge=smoothstep(.50,.72,clouds)-smoothstep(.72,.88,clouds);
- let cloudRadiance=f.sky.rgb*(1.42+.22*haze)+f.sunColor.rgb*f.sun.w*(.11+.20*edge);
+ // Night clouds absorb the sky glow; only their rims scatter moonlight.
+ let cloudRadiance=f.sky.rgb*(mix(.16,1.42,sunlight)+.22*haze*sunlight)+f.sunColor.rgb*f.sun.w*mix(.01+.055*edge,.11+.20*edge,sunlight);
  color=mix(color,cloudRadiance,cloudOpacity);
  color+=f.sky.rgb*(.035+.055*haze)*pow(1.0-max(ray.y,0.0),5.0);
- if(f.fogMedium.y>.5){color=mix(color,f.fogColor.rgb,1.0-exp(-fogViewDepth(f.eye.xyz,f.eye.xyz+ray*80.0,f.sky.w)));}
+ if(f.fogMedium.y>.5){
+  // Overcast regions also reduce the ambient illumination of the sky haze.
+  // Keeping that radiance constant would erase the dark cloud silhouettes.
+  let skyHaze=f.fogColor.rgb*(1.0-cloudOpacity*.72*(1.0-sunlight));
+  color=mix(color,skyHaze,1.0-exp(-fogViewDepth(f.eye.xyz,f.eye.xyz+ray*80.0,f.sky.w)));
+ }
  return vec4<f32>(color,1);
 }`;
 /** Threshold/downsample followed by two separable Gaussian passes. Sampling a

@@ -228,6 +228,7 @@ function materialSpec(value:unknown,path:string):void{
   const m=object(value,path);
   if(m.texture!==undefined)surfaceTexture(m.texture,`${path}.texture`);
   if(m.label!==undefined&&(typeof m.label!=='string'||m.label.length>100))throw new TypeError(`${path}.label must be at most 100 characters`);
+  if(m.labelColor!==undefined)vector(m.labelColor,3,`${path}.labelColor`,0,1);
   optionalNumber(m,'roughness',path,0,1);optionalNumber(m,'metalness',path,0,1);optionalNumber(m,'clearcoat',path,0,1);optionalNumber(m,'clearcoatRoughness',path,.02,1);
   choice(m.pattern,['plain','brick','plaster','rubber','window','fabric'],`${path}.pattern`);
   if(m.emissive!==undefined)vector(m.emissive,3,`${path}.emissive`,0,50);

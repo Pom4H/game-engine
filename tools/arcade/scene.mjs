@@ -206,7 +206,7 @@ for(let i=0;i<18;i++){
 }
 box('distant-building',[38,5.6,4.8],[18,11.2,10],P.side);
 // A side porch wraps around the building corner ahead of the main facade.
-const sideZ=3.30,sideRadius=2.24,sideRise=1.23;
+const sideZ=3.30,sideRadius=2.24,sideRise=2.30;
 surface('side-canopy',[start,3.19,sideZ],72,20,(u,v)=>[-2.88+v*2.9,sideRise*Math.sin(u*Math.PI),-sideRadius*Math.cos(u*Math.PI)],P.roof);
 surface('side-canopy-snow',[start,3.19,sideZ],96,32,(u,v)=>{
  const a=(.025+.95*u)*Math.PI,h=.046+.022*Math.sin(u*49+v*17)*Math.sin(v*46);

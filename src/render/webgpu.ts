@@ -20,6 +20,7 @@ import {buildDiffuseIrradianceSH} from './irradiance.js';
 import {SNOWFALL_WGSL,snowfallUniform} from './snowfall.js';
 
 type GPUAny=any;
+const labelKey=(text:string,color?:Vec3)=>JSON.stringify([text,color??[226/255,217/255,188/255]]);
 const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean}
@@ -615,7 +616,9 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   if(materialKind>4.5&&materialKind<5.5){color*=mix(.52,1.0,max(waterCoverage,clamp(u.surfacePhase.w/.0015,0.0,1.0)*.35));}
 
   if(f.params.x>.5){let bin=lightCell(in.worldPos);if(bin!=0xffffffffu){for(var j=0u;j<lightCells[bin];j++){color+=pointLight(lightGrid.sources[lightCells[bin+1u+j]],in.worldPos,n,viewDir,roughness,base,f0,metal,clearcoat,coatRough);}}}
-  color+=u.emission.rgb;
+  // Backlit fabric transmits its dyed weave. Constant emission alone erases
+  // the cloth texture and turns every lit curtain into a featureless panel.
+  color+=u.emission.rgb*select(vec3<f32>(1),clamp(albedo,vec3<f32>(.05),vec3<f32>(1)),u.pbr.z>4.5);
   if(materialKind>4.5&&materialKind<5.5&&n.y>.8&&in.reflected==0u){
     let p=f.reflectionVP*vec4<f32>(in.worldPos,1);let uv=p.xy/p.w*vec2<f32>(.5,-.5)+.5;
     let ripple=vec2<f32>(noise3(in.worldPos*vec3<f32>(7,1,3))-.5,noise3(in.worldPos*vec3<f32>(3,1,9)+9.0)-.5)*.000075;let blur=vec2<f32>(.0011,.0021)*(roughness+.2);var reflection=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.28;
@@ -1240,12 +1243,12 @@ export class WebGPURenderer implements Renderer{
     const normalTexture=texture?.normalUrl?this.surfaceTextures.get(texture.normalUrl):undefined;
     const ormTexture=texture?.ormUrl?this.surfaceTextures.get(texture.ormUrl):undefined;
     const materialKey=texture?[materialTexture&&texture.url?texture.url:'',normalTexture?texture.normalUrl:'',ormTexture?texture.ormUrl:''].join('|'):undefined;
-    if(object.width!==0||object.height!==0||object.label!==(entity.material.label??'')||object.materialKey!==materialKey)return true;
+    if(object.width!==0||object.height!==0||object.label!==labelKey(entity.material.label??'',entity.material.labelColor)||object.materialKey!==materialKey)return true;
     const previousModel=this.previousModels.get(entity.id)??model;
     return !matrixEqual(object.lastModel,model)||!matrixEqual(object.lastPrevModel,previousModel);
   }
   private prepare(entity:RuntimeEntity,model:Mat4=this.model(entity)):void{
-    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture);
+    const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture,entity.material.labelColor);
     this.mesh(renderPrimitive(entity)!);
     const surfaceState=this.lastScene?.surfaceStateForRender(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
@@ -1304,31 +1307,32 @@ export class WebGPURenderer implements Renderer{
     this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl].filter((url):url is string=>!!url):[];})));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);
-    if(this.labels){const labels=new Set(live.map(e=>e.material?.label));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
+    if(this.labels){const labels=new Set(live.map(e=>labelKey(e.material?.label??'',e.material?.labelColor)));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
     for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}this.objects.delete(id);}
     for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id)){this.modelCache.delete(id);this.cullCache.delete(id);}
     for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.color.destroy();m.index.destroy();this.meshes.delete(key);}
     return true;
   }
-  private label(text:string):GPUAny{
-    if(!text)return this.gpu.emptyLabel;const cached=this.labels.get(text);if(cached)return cached;
-    const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle='#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
-    const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);this.labels.set(text,texture);return texture;
+  private label(text:string,color?:Vec3):GPUAny{
+    if(!text)return this.gpu.emptyLabel;const key=labelKey(text,color),cached=this.labels.get(key);if(cached)return cached;
+    const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle=color?`rgb(${color.map(v=>Math.round(v*255)).join(',')})`:'#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
+    const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);this.labels.set(key,texture);return texture;
   }
-  private object(id:string,width:number,height:number,label:string,textureSpec?:SurfaceTextureSpec):GPUObject{
+  private object(id:string,width:number,height:number,label:string,textureSpec?:SurfaceTextureSpec,labelColor?:Vec3):GPUObject{
     const materialTexture=textureSpec?.url?this.surfaceTextures.get(textureSpec.url):undefined;
     const normalTexture=textureSpec?.normalUrl?this.surfaceTextures.get(textureSpec.normalUrl):undefined;
     const ormTexture=textureSpec?.ormUrl?this.surfaceTextures.get(textureSpec.ormUrl):undefined;
     const materialKey=textureSpec?[materialTexture&&textureSpec.url?textureSpec.url:'',normalTexture?textureSpec.normalUrl:'',ormTexture?textureSpec.ormUrl:''].join('|'):undefined;
-    const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===label&&existing.materialKey===materialKey)return existing;
+    const letteringKey=labelKey(label,labelColor);
+    const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===letteringKey&&existing.materialKey===materialKey)return existing;
     if(existing){existing.uniform.destroy();if(existing.owned!==false){existing.texture.destroy();existing.deformationTexture.destroy();}}
     const uniform=this.device.createBuffer({size:352,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField,deformationTexture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
     const fallback=this.gpu.emptyLabel;
     const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
-      {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label).createView()},{binding:3,resource:this.gpu.sampler},
+      {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:this.label(label,labelColor).createView()},{binding:3,resource:this.gpu.sampler},
       {binding:4,resource:(materialTexture??fallback).createView()},{binding:5,resource:this.gpu.surfaceSampler},
       {binding:6,resource:(normalTexture??fallback).createView()},{binding:7,resource:(ormTexture??fallback).createView()},{binding:8,resource:deformationTexture.createView()},
-    ]}),object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
+    ]}),object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label:letteringKey,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
     const shared=this.renderFrame?.objectsById.get(entity.id),base=primitiveBaseScale(renderPrimitive(entity)),matrix=shared?.model??renderModel(entity);

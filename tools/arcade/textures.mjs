@@ -32,13 +32,22 @@ function sample(kind,u,v,x,y){
   return[value*1.01,value,value*.94,.4*f+.045*g-pits,.76+.20*g,0];
  }
  if(kind==='lace'){
-  const a=Math.cos(u*Math.PI*32),b=Math.cos(v*Math.PI*32),flower=Math.pow(Math.abs(a*b),3);
-  const threads=Math.max(Math.cos(u*Math.PI*256),Math.cos(v*Math.PI*256)),value=.50+.29*flower+.08*threads+.025*g;
-  return[value,value*.97,value*.9,flower*.05+threads*.008,.92,0];
+  const row=Math.floor(v*4),px=wrap(u*4+(row%2)*.5,1)-.5,py=wrap(v*4,1)-.5;
+  const radius=Math.hypot(px,py),angle=Math.atan2(py,px);
+  const petals=Math.exp(-Math.pow((radius-(.19+.065*Math.cos(angle*6)))/.027,2));
+  const heart=Math.exp(-Math.pow((radius-.070)/.014,2));
+  const stem=Math.exp(-Math.pow((px-.11*Math.sin(py*8))/.014,2));
+  const leaf=Math.exp(-Math.pow((Math.pow((px-.22)/.075,2)+Math.pow((py+.16)/.13,2)-1)/.25,2));
+  const flower=Math.min(1,petals+heart+stem*.72+leaf*.8);
+  const threads=Math.max(Math.cos(u*Math.PI*256),Math.cos(v*Math.PI*256)),value=.82-.50*flower+.025*threads+.015*g;
+  return[value,value*.98,value*.94,flower*.045+threads*.008,.96,0];
  }
  const hairline=Math.exp(-Math.abs(Math.sin(u*Math.PI*22+noise(u*8,v*8,8,81)*5+v*Math.PI*14))*70)*.07;
- const pits=Math.max(0,.12-g)*1.5,stain=Math.max(0,.40-broad)*.55,value=.55+.30*f-stain-hairline-pits;
- return[value*1.01,value*.97,value*.91,.40*f+.035*g-hairline-pits,.87+.11*g,0];
+ const pits=Math.max(0,.12-g)*1.5,stain=Math.max(0,.48-broad)*.9;
+ const flake=noise(u*32,v*32,32,116),missing=Math.max(0,.40-flake)*.8;
+ const edge=Math.exp(-Math.pow((flake-.40)/.035,2))*.06;
+ const value=.60+.28*f-stain-hairline-pits-missing+edge;
+ return[value*1.015,value*.98,value*.925,.32*f+.035*g-hairline-pits-missing*.15+edge*.3,.89+.09*g,0];
 }
 async function png(path,rgb){
  const ppm=path+'.ppm';await writeFile(ppm,Buffer.concat([Buffer.from(`P6\n${N} ${N}\n255\n`),rgb]));
@@ -46,9 +55,9 @@ async function png(path,rgb){
  if(r.error||r.status!==0)throw r.error??new Error(r.stderr);
  await rm(ppm);
 }
-export async function prepareArcadeTextures(){
+export async function prepareArcadeTextures(kinds=['plaster','wood','stone','snow','lace']){
  const root='tools/arcade/assets';await mkdir(root,{recursive:true});
- for(const kind of ['plaster','wood','stone','snow','lace']){
+ for(const kind of kinds){
   const albedo=Buffer.alloc(N*N*3),normal=Buffer.alloc(N*N*3),orm=Buffer.alloc(N*N*3),height=new Float32Array(N*N);
   for(let y=0;y<N;y++)for(let x=0;x<N;x++){
    const i=y*N+x,j=i*3,s=sample(kind,x/N,y/N,x,y);
