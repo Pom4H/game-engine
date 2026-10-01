@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildLightGrid,LIGHT_SOURCE_FLOATS,MAX_RENDER_LIGHTS} from '../dist/render/light-grid.js';
+import {buildLightGrid,FOG_VOLUME_FLOATS,MAX_RENDER_LIGHTS} from '../dist/render/light-grid.js';
 
 test('light grid carries physical volumetric fixture data without a second light list',()=>{
  const lantern={position:[4,5,6],light:{kind:'point',color:[1,.84,.69],intensity:8,range:12,volumetric:{profile:'lantern-4pane',yaw:.4,strength:1.45,rangeScale:1.5}}};
  const plain={position:[30,5,0],light:{kind:'point',color:[1,1,1],intensity:1,range:4}};
  const grid=buildLightGrid([plain,lantern],[0,1.7,0]);
- assert.equal(grid.lights.length,4+MAX_RENDER_LIGHTS*LIGHT_SOURCE_FLOATS);
+ assert.equal(grid.lights.length,4+MAX_RENDER_LIGHTS*8);\n assert.equal(grid.volumes.length,MAX_RENDER_LIGHTS*FOG_VOLUME_FLOATS);
  assert.equal(grid.count,2);
  const o=4;
  assert.deepEqual(Array.from(grid.lights.slice(o,o+4)),[4,5,6,12]);
@@ -14,10 +14,10 @@ test('light grid carries physical volumetric fixture data without a second light
  assert.ok(Math.abs(grid.lights[o+5]-.84)<1e-5);
  assert.ok(Math.abs(grid.lights[o+6]-.69)<1e-5);
  assert.equal(grid.lights[o+7],8);
- assert.equal(grid.lights[o+8],1);
- assert.ok(Math.abs(grid.lights[o+9]-.4)<1e-5);
- assert.ok(Math.abs(grid.lights[o+10]-1.45)<1e-5);
- assert.ok(Math.abs(grid.lights[o+11]-1.5)<1e-6);
+ assert.equal(grid.volumes[0],1);
+ assert.ok(Math.abs(grid.volumes[1]-.4)<1e-5);
+ assert.ok(Math.abs(grid.volumes[2]-1.45)<1e-5);
+ assert.ok(Math.abs(grid.volumes[3]-1.5)<1e-6);
 });
 
 test('medium range participates in ranking so nearby off-frustum fog lights are not starved',()=>{
