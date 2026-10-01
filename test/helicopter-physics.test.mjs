@@ -59,6 +59,30 @@ test('trimmed helicopter can hover without scripted position hold',()=>{
  heli.dispose();
 });
 
+test('density altitude reduces rotor thrust at identical controls and RPM',()=>{
+ const make=(id,density)=>{
+  const world=new PhysicsWorld([0,0,0],-100),heli=new Vehicle(world,lightHelicopter(id),{position:[0,50,0]});
+  heli.setAir({densityKgM3:density,wind:[0,0,0]});
+  heli.setControls({throttle:1,collective:LIGHT_HELICOPTER_HOVER_COLLECTIVE});
+  spool(heli);return heli;
+ };
+ const sea=make('density-sea',1.225),high=make('density-high',.75);
+ assert.ok(high.part('main.rotor').liftN<sea.part('main.rotor').liftN*.72);
+ near(high.part('main.rotor').angularSpeed,sea.part('main.rotor').angularSpeed,.03);
+ sea.dispose();high.dispose();
+});
+
+test('translational lift comes from relative disk flow, including wind',()=>{
+ const make=(id,velocity=[0,0,0],wind=[0,0,0])=>{
+  const world=new PhysicsWorld([0,0,0],-100),heli=new Vehicle(world,lightHelicopter(id),{position:[0,50,0],velocity});
+  heli.setAir({densityKgM3:1.225,wind});heli.setControls({throttle:1,collective:.22});spool(heli);return heli;
+ };
+ const hover=make('etl-hover'),moving=make('etl-moving',[30,0,0]),wind=make('etl-wind',[0,0,0],[-30,0,0]);
+ assert.ok(moving.part('main.rotor').liftN>hover.part('main.rotor').liftN*1.06);
+ near(wind.part('main.rotor').liftN,moving.part('main.rotor').liftN,.02);
+ hover.dispose();moving.dispose();wind.dispose();
+});
+
 test('descending airflow preserves rotor energy better after engine cut (autorotation)',()=>{
  const make=(id,descending)=>{
   const world=new PhysicsWorld([0,0,0],-100),heli=new Vehicle(world,lightHelicopter(id),{position:[0,100,0],velocity:[0,descending?-12:0,0]});
