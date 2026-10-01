@@ -23,7 +23,7 @@ export class ThegameView {
  readonly stats={frames:0,rebases:0,chunkPreparationMs:0,maxChunkAdmissionMs:0,maxAdmissionBytes:0,maxAdmissionOperations:0,admissionDeferrals:0,expandedMeshes:0};error='';radius:number;
  constructor(readonly renderer:WebGPURenderer,readonly world:OpenWorld,config:ThegameConfig){
   this.radius=config.viewRadius;
-  this.scene=new Scene({version:1,seed:config.seed,environment:{temperatureC:5,sunlight:.06,humidity:.94,groundMoisture:.72,precipitation:'occasional',snowfall:'none'},rendering:{sunDirection:[-.58,.20,-.32],sunIntensity:.12,sunColor:[.62,.65,.70],skyColor:[.050,.052,.056],fogDensity:.019,shadowExtent:95,exposure:config.exposure},entities:[]});
+  this.scene=new Scene({version:1,seed:config.seed,environment:{temperatureC:-3,sunlight:.035,humidity:.96,groundMoisture:.76,precipitation:'occasional',snowfall:'light'},rendering:{sunDirection:[-.58,.16,-.32],sunIntensity:.055,sunColor:[.58,.61,.66],skyColor:[.018,.021,.026],fogDensity:.023,shadowExtent:95,exposure:config.exposure},entities:[]});
   this.chunks=new ChunkWindow((_,value)=>{
    for(const entity of value.installed)this.scene.remove(entity.id);
    for(const part of value.parts)this.renderer.releasePreparedMesh(part.mesh);
@@ -44,7 +44,13 @@ export class ThegameView {
  configure(config:ThegameConfig):void{this.radius=config.viewRadius;this.scene.patchAppearance({rendering:{exposure:config.exposure}});}
  private actor(id:string,kind:number):Actor{
   let actor=this.actors.get(id);if(actor)return actor;
-  const figure=humanoid('actor:'+id,{root:[0,0,0],speed:0,heightScale:1.1}),entities=figure.entities.map(spec=>this.scene.add({...spec,material:{...spec.material,color:spec.id.endsWith('head')?[.74,.51,.35,1]:spec.id.includes('shin')||spec.id.includes('thigh')?[.16,.23,.26,1]:kind===1?[.71,.54,.27,1]:[.20,.52,.66,1]}}));
+  const figure=humanoid('actor:'+id,{root:[0,0,0],speed:0,heightScale:1.1}),entities=figure.entities.map(spec=>{
+   const limb=spec.id.includes('-thigh')||spec.id.includes('-shin')||spec.id.includes('-arm')||spec.id.includes('-forearm');
+   const radius=spec.id.includes('-arm')||spec.id.includes('-forearm')?.045:.058;
+   const mesh=spec.id.endsWith('/head')?{kind:'sphere' as const,radius:.115,segments:12}:limb?{kind:'cylinder' as const,radius,height:1,segments:10}:spec.mesh;
+   const color=spec.id.endsWith('head')?[.58,.38,.28,1] as const:spec.id.includes('shin')||spec.id.includes('thigh')?[.10,.13,.15,1] as const:kind===1?[.33,.27,.20,1] as const:[.12,.22,.28,1] as const;
+   return this.scene.add({...spec,mesh,material:{...spec.material,color,roughness:.74}});
+  });
   actor={rig:figure.rig,entities,release:this.scene.trackPresentation(entities.map(e=>e.id)),stamp:''};this.actors.set(id,actor);return actor;
  }
  private pose(id:string,x:number,y:number,z:number,yaw:number,phase:number,speed:number,kind:number):void{
@@ -69,7 +75,7 @@ export class ThegameView {
   while(value.lightCursor<lamps.length){
    if(!this.admission.claim())return false;
    const lamp=lamps[value.lightCursor++]!;
-   const entity=this.scene.add({id:`chunk:${ticket.key}/${lamp.id}`,collision:'none',position:[lamp.x-this.originX,lamp.y,lamp.z-this.originZ],light:{kind:'point',color:[1,.68,.36],intensity:22,range:18}});
+   const entity=this.scene.add({id:`chunk:${ticket.key}/${lamp.id}`,collision:'none',position:[lamp.x-this.originX,lamp.y,lamp.z-this.originZ],light:{kind:'point',color:[1,.84,.69],intensity:8,range:12}});
    entity.presentationVisible=false;value.installed.push(entity);
   }
   if(!this.admission.claim())return false;
@@ -92,7 +98,7 @@ export class ThegameView {
   for(const [id,actor] of this.actors)if(!this.activeActors.has(id)){actor.release();for(const e of actor.entities)this.scene.remove(e.id);this.actors.delete(id);}
   const target:[number,number,number]=[self.x-this.originX,self.y+1.3,self.z-this.originZ],distance=6.5,dx=-Math.sin(yaw)*Math.cos(pitch),dz=-Math.cos(yaw)*Math.cos(pitch),dy=Math.sin(pitch);let reach=distance;
   for(let d=.6;d<=distance;d+=.3){const x=self.x+dx*d,y=self.y+1.3+dy*d,z=self.z+dz*d;if(this.world.blocked(x,y,z,.2,.15)||this.world.ground(x,z).y+.2>y){reach=Math.max(.5,d-.3);break;}}
-  this.scene.camera={position:[target[0]+dx*reach,target[1]+dy*reach,target[2]+dz*reach],target,fov:62,aperture:0,focusDistance:reach};this.scene.time=remote?.time??now/1000;
+  this.scene.camera={position:[target[0]+dx*reach,target[1]+dy*reach,target[2]+dz*reach],target,fov:56,aperture:0,focusDistance:reach};this.scene.time=remote?.time??now/1000;
   if(draw&&this.renderer.render(this.scene)){
    this.stats.frames++;this.presentation.frameId=this.stats.frames;this.presentation.time=this.scene.time;
    this.presentation.self.x=self.x;this.presentation.self.y=self.y;this.presentation.self.z=self.z;
