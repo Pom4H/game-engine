@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
+import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,wheelHit,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
 const speed=b=>Math.hypot(...b.velocity);
@@ -13,7 +13,7 @@ test('proving ground is a valid engine scene with every authored test zone',()=>
  assert.equal(new Set(provingGroundZones.map(z=>z.id)).size,provingGroundZones.length);
  assert.ok(scene.entities.size>180,scene.entities.size);
  const ids=[...scene.entities.keys()];
- for(const prefix of ['straight-','obstacle-','surface-','circle-','ramp-','loop-','handling-','hill-','rough-','water-','tunnel-']){
+ for(const prefix of ['straight-','obstacle-','surface-','split-mu-','circle-','banked-','ramp-','loop-','handling-','hill-','rough-','washboard-','bumps-','potholes-','articulation-','water-','tunnel-','crosswind-','soft-ground-']){
   assert.ok(ids.some(id=>id.startsWith(prefix)),`missing zone prefix ${prefix}`);
  }
  assert.ok(releasePhysicsRequirements.length>=20);
@@ -241,4 +241,63 @@ test('isolated body-body collision conserves linear momentum and does not create
  assert.ok(Math.hypot(p1[0]-p0[0],p1[1]-p0[1],p1[2]-p0[2])<1e-8,{p0,p1});
  assert.ok(e1<=e0+1e-7,{e0,e1});
  assert.equal(collided,true,'fixture must actually collide');
+});
+
+
+const supportAt=(scene,x,z,y=3)=>{
+ const cast=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground),hit=wheelHit();
+ assert.equal(cast([x,y,z],[0,-1,0],8,hit),true,`no support at ${x},${z}`);
+ return hit;
+};
+
+test('split-mu lane exposes different physical tyre friction on each half',()=>{
+ const scene=new Scene(spec);
+ const wet=supportAt(scene,-96.8,-54),dry=supportAt(scene,-91.2,-54);
+ assert.equal(wet.id,'split-mu-wet');assert.equal(dry.id,'split-mu-dry');
+ const wetMu=scene.physics.wheelFrictionAt(wet.id,wet.body,wet.point);
+ const dryMu=scene.physics.wheelFrictionAt(dry.id,dry.body,dry.point);
+ assert.ok(wetMu<dryMu,{wetMu,dryMu});
+ assert.ok(wetMu>0&&dryMu>0);
+});
+
+test('washboard and potholes are visible to the same wheel-support solver as suspension',()=>{
+ const scene=new Scene(spec);
+ const crest=supportAt(scene,-88,-25),between=supportAt(scene,-88,-24.45);
+ assert.ok(crest.point[1]>between.point[1]+.01,{crest:crest.point,between:between.point});
+ const flat=supportAt(scene,91,-96+4*2.1),deep=supportAt(scene,91,-96+11*2.1);
+ assert.ok(flat.point[1]>deep.point[1]+.20,{flat:flat.point,deep:deep.point});
+ assert.match(deep.id,/^potholes-11$/);
+});
+
+test('banked lane returns a tilted physical support normal',()=>{
+ const scene=new Scene(spec),hit=supportAt(scene,-96,54);
+ assert.match(hit.id,/^banked-/);
+ assert.ok(Math.abs(hit.normal[0])>.07,hit.normal);
+ assert.ok(hit.normal[1]>.95,hit.normal);
+});
+
+test('articulation course presents different wheel heights at the same station',()=>{
+ const scene=new Scene(spec);
+ const left=supportAt(scene,84,-30),right=supportAt(scene,88,-30);
+ assert.match(left.id,/^articulation-left-/);assert.match(right.id,/^articulation-right-/);
+ assert.ok(Math.abs(left.point[1]-right.point[1])>.25,{left:left.point,right:right.point});
+});
+
+test('split-mu braking generates unequal tyre grip and yaw without controller magic',()=>{
+ const scene=new Scene(spec);
+ scene.physics.wheelSupport=bodyWheelSupport(scene.physics.bodies.values(),scene.physics.ground);
+ const car=new Vehicle(scene.physics,roadCar('proving.car.splitmu',[],provingDrivetrain),{
+  position:[-94,1.2,-68],rotation:[0,-Math.PI/2,0],velocity:[0,0,-18]
+ });
+ car.setControls({throttle:0,brake:1});
+ let leftGrip=0,rightGrip=0,maxYaw=0;
+ for(let i=0;i<160;i++){
+  scene.physics.step(dt);
+  leftGrip=Math.max(leftGrip,car.part('front.left').effectiveGrip,car.part('rear.left').effectiveGrip);
+  rightGrip=Math.max(rightGrip,car.part('front.right').effectiveGrip,car.part('rear.right').effectiveGrip);
+  maxYaw=Math.max(maxYaw,Math.abs(car.body.angularVelocity[1]));
+ }
+ assert.ok(Math.abs(leftGrip-rightGrip)>.08,{leftGrip,rightGrip});
+ assert.ok(maxYaw>.02,maxYaw);
+ car.dispose();
 });
