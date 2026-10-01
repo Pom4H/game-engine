@@ -45,11 +45,11 @@ export class ThegameView {
  private actor(id:string,kind:number):Actor{
   let actor=this.actors.get(id);if(actor)return actor;
   const figure=humanoid('actor:'+id,{root:[0,0,0],speed:0,heightScale:1.1}),entities=figure.entities.map(spec=>{
-   const limb=spec.id.includes('-thigh')||spec.id.includes('-shin')||spec.id.includes('-arm')||spec.id.includes('-forearm');
+   const {mesh:baseMesh,...base}=spec,limb=spec.id.includes('-thigh')||spec.id.includes('-shin')||spec.id.includes('-arm')||spec.id.includes('-forearm');
    const radius=spec.id.includes('-arm')||spec.id.includes('-forearm')?.045:.058;
-   const mesh=spec.id.endsWith('/head')?{kind:'sphere' as const,radius:.115,segments:12}:limb?{kind:'cylinder' as const,radius,height:1,segments:10}:spec.mesh;
+   const mesh=spec.id.endsWith('/head')?{kind:'sphere' as const,radius:.115,segments:12}:limb?{kind:'cylinder' as const,radius,height:1,segments:10}:baseMesh;
    const color=spec.id.endsWith('head')?[.58,.38,.28,1] as const:spec.id.includes('shin')||spec.id.includes('thigh')?[.10,.13,.15,1] as const:kind===1?[.33,.27,.20,1] as const:[.12,.22,.28,1] as const;
-   return this.scene.add({...spec,mesh,material:{...spec.material,color,roughness:.74}});
+   return this.scene.add({...base,...(mesh?{mesh}:{}),material:{...spec.material,color,roughness:.74}});
   });
   actor={rig:figure.rig,entities,release:this.scene.trackPresentation(entities.map(e=>e.id)),stamp:''};this.actors.set(id,actor);return actor;
  }
