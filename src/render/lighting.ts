@@ -100,9 +100,10 @@ export const EFFECTS_SHADER=FRAME_WGSL+`
 @group(0) @binding(4) var<uniform> f:Frame;
 @group(0) @binding(5) var reflectance:texture_2d<f32>;
 @group(0) @binding(6) var bloom:texture_2d<f32>;
-struct FogPointSource { position:vec4<f32>, color:vec4<f32>, volume:vec4<f32> }
+struct FogPointSource { position:vec4<f32>, color:vec4<f32> }
 struct FogLightGrid { bounds:vec4<f32>, sources:array<FogPointSource,256> }
 @group(0) @binding(7) var<storage,read> fogLights:FogLightGrid;
+@group(0) @binding(8) var<storage,read> fogVolumes:array<vec4<f32>>;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
 fn linearDepth(d:f32)->f32{return 500.0/(10000.0-d*9999.95);}
@@ -118,8 +119,8 @@ fn localLightFog(ray:vec3<f32>,maxDistance:f32)->vec3<f32>{
  if(f.params.x<.5||f.sky.w<.00005){return vec3<f32>(0);}
  let fogStrength=clamp(f.sky.w*85.0,0.0,1.0);var scatter=vec3<f32>(0);
  for(var li=0u;li<8u;li++){
-  let source=fogLights.sources[li];let surfaceRange=source.position.w;
-  let range=surfaceRange*max(.25,source.volume.w);if(range<=.05||source.color.w<=0.0){continue;}
+  let source=fogLights.sources[li];let volume=fogVolumes[li];let surfaceRange=source.position.w;
+  let range=surfaceRange*max(.25,volume.w);if(range<=.05||source.color.w<=0.0){continue;}
   let delta=source.position.xyz-f.eye.xyz;let along=dot(delta,ray);
   let perpendicular2=max(dot(delta,delta)-along*along,0.0);let radius2=range*range;
   if(perpendicular2>=radius2){continue;}
@@ -131,13 +132,13 @@ fn localLightFog(ray:vec3<f32>,maxDistance:f32)->vec3<f32>{
   let cameraTransmittance=1.0/(1.0+enter*f.sky.w*.35);
   let fogTint=mix(vec3<f32>(1.0,.96,.90),source.color.rgb,.60);
   var fixtureTransmission=1.0;
-  if(source.volume.x>.5){
+  if(volume.x>.5){
    // Four glass faces transmit laterally; corner posts and cap/base occlude the
    // diagonals and vertical directions. Evaluating the direction at closest
    // approach produces the characteristic butterfly/cross in visible fog.
    let closest=f.eye.xyz+ray*clamp(along,enter,leave);
    let fromLamp=closest-source.position.xyz;let len=max(length(fromLamp),.0001);let d=fromLamp/len;
-   let cy=cos(source.volume.y);let sy=sin(source.volume.y);
+   let cy=cos(volume.y);let sy=sin(volume.y);
    let local=vec3<f32>(cy*d.x+sy*d.z,d.y,-sy*d.x+cy*d.z);
    let horizontal=max(length(local.xz),.0001);
    let paneAxis=abs(abs(local.x)-abs(local.z))/horizontal;
@@ -147,7 +148,7 @@ fn localLightFog(ray:vec3<f32>,maxDistance:f32)->vec3<f32>{
   }
   // Surface light stays modest; fixture profile and rangeScale affect only the
   // participating medium. Still one bounded analytic pass, never a ray march.
-  scatter+=fogTint*source.color.w*soft*(chord/max(range,.5))*fogStrength*cameraTransmittance*.052*source.volume.z*fixtureTransmission;
+  scatter+=fogTint*source.color.w*soft*(chord/max(range,.5))*fogStrength*cameraTransmittance*.052*volume.z*fixtureTransmission;
  }
  return scatter;
 }
