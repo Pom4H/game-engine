@@ -1,0 +1,120 @@
+name: Unified vehicle physics
+
+on:
+  push:
+    branches: [feat/rotor-dynamics]
+    paths:
+      - 'src/vehicles/**'
+      - 'src/physics/**'
+      - 'src/audio/rotor.ts'
+      - 'src/index.ts'
+      - 'test/vehicle-runtime.test.mjs'
+      - 'test/helicopter-physics.test.mjs'
+      - 'test/rotor-audio.test.mjs'
+      - 'test/vehicle-scene.test.mjs'
+      - 'tools/vehicle-runtime-fixture.mjs'
+      - 'tools/helicopter-flight-exam.mjs'
+      - 'tools/helicopter-flight-replay.mjs'
+      - 'tools/helicopter-replay.scene.mjs'
+      - '.github/workflows/vehicle-physics.yml'
+  pull_request:
+    paths:
+      - 'src/vehicles/**'
+      - 'src/physics/**'
+      - 'src/audio/rotor.ts'
+      - 'src/index.ts'
+      - 'test/vehicle-runtime.test.mjs'
+      - 'test/helicopter-physics.test.mjs'
+      - 'test/rotor-audio.test.mjs'
+      - 'test/vehicle-scene.test.mjs'
+      - 'tools/vehicle-runtime-fixture.mjs'
+      - 'tools/helicopter-flight-exam.mjs'
+      - 'tools/helicopter-flight-replay.mjs'
+      - 'tools/helicopter-replay.scene.mjs'
+      - '.github/workflows/vehicle-physics.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vehicle-physics-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  physics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun install --cwd tools/docs --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+
+      - name: One Vehicle solver — road, glide, wings, spoilers and rotors
+        run: node --test test/vehicle-runtime.test.mjs test/helicopter-physics.test.mjs test/rotor-audio.test.mjs test/vehicle-scene.test.mjs
+
+      - name: Black-box helicopter flight scenario
+        run: node tools/helicopter-flight-exam.mjs
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: vehicle-physics-flight-exam
+          path: artifacts/helicopter-flight-exam/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Preserve shared soft-body, contacts, audio and network
+        run: node --test test/vehicle-interaction.test.mjs test/contact-laws.test.mjs test/browser-audio.test.mjs test/network-projection.test.mjs test/network-structure.test.mjs
+
+      - name: Full regression suite
+        run: bun run check
+
+  replay:
+    needs: physics
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Locate Chrome and ffmpeg
+        shell: powershell
+        run: |
+          $candidates = @(
+            "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+            "$env:ProgramFiles(x86)\Google\Chrome\Application\chrome.exe",
+            "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe",
+            "$env:ProgramFiles\Chromium\Application\chrome.exe",
+            "$env:ProgramFiles\Chromium\chromium.exe"
+          )
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { $chrome = (Get-Command chromium.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw "Chrome/Chromium not found" }
+          $ffmpeg = (Get-Command ffmpeg.exe -ErrorAction SilentlyContinue).Source
+          if (-not $ffmpeg) { throw "ffmpeg not found" }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FFMPEG_PATH=$ffmpeg" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - uses: actions/download-artifact@v7
+        with:
+          name: vehicle-physics-flight-exam
+          path: artifacts/helicopter-flight-exam
+      - name: Render recorded flight replay
+        run: node tools/helicopter-flight-replay.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: vehicle-physics-replay
+          path: |
+            artifacts/helicopter-flight-exam/replay-*.mp4
+            artifacts/helicopter-flight-exam/replay.json
+          if-no-files-found: error
+          retention-days: 14
