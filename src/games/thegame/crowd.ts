@@ -1,6 +1,7 @@
 import type {Frame} from '../../network/projection.js';
 import {populationProjection} from '../../network/population.js';
-import {climateAt,hash01,hash32,OpenWorld,SEA_LEVEL} from './world.js';
+import {climateAt,OpenWorld,SEA_LEVEL} from './world.js';
+import {residentPose} from './resident-life.js';
 
 export interface AmbientPerson {
  readonly id:string;
@@ -40,24 +41,10 @@ function sourceCounts(frames:readonly Frame[]):Map<string,number>{
 function candidate(
  world:OpenWorld,cx:number,cz:number,slot:number,tick:number,
 ):AmbientPerson|undefined{
- const seed=world.seed,time=tick/60,urban=Math.max(Math.abs(cx*CELL_M+64),Math.abs(cz*CELL_M+64))<448;
- const a=hash01(cx,cz,slot*17+3,seed),b=hash01(cx,cz,slot*17+5,seed),c=hash01(cx,cz,slot*17+7,seed);
- const speed=.75+c*.9,phase=(time*speed+a*53)%(Math.PI*2000);
- let x:number,z:number,yaw:number;
- if(urban){
-  const horizontal=(hash32(cx,cz,slot,seed)&1)===0,side=(hash32(cx,cz,slot+101,seed)&1)?1:-1;
-  const centerX=cx*CELL_M+64,centerZ=cz*CELL_M+64,travel=((time*speed*1.7+a*CELL_M)%CELL_M)-CELL_M/2;
-  if(horizontal){x=centerX+travel;z=Math.round((centerZ+(b-.5)*48)/64)*64+side*8.25;yaw=travel>=0?Math.PI/2:-Math.PI/2;}
-  else{x=Math.round((centerX+(b-.5)*48)/64)*64+side*8.25;z=centerZ+travel;yaw=travel>=0?0:Math.PI;}
- }else{
-  const angle=a*Math.PI*2,turn=time*(.035+b*.025)+slot;
-  x=cx*CELL_M+64+Math.cos(angle)*28+Math.sin(turn)*12;
-  z=cz*CELL_M+64+Math.sin(angle)*28+Math.cos(turn*.93)*12;
-  yaw=Math.atan2(Math.sin(turn*.93),Math.cos(turn));
- }
- const ground=Math.max(SEA_LEVEL,world.ground(x,z).y);
+ const id=`crowd:${cx}:${cz}:${slot}`,pose=residentPose(world.seed,id,tick);
+ const x=pose.position[0],z=pose.position[1],ground=Math.max(SEA_LEVEL,world.ground(x,z).y);
  if(world.blocked(x,ground,z,1.8,.28))return;
- return{id:`crowd:${cx}:${cz}:${slot}`,data:{position:[x,ground,z],yaw,phase,speed,kind:2}};
+ return{id,data:{position:[x,ground,z],yaw:pose.yaw,phase:pose.phase,speed:pose.speed,kind:2}};
 }
 
 export function ambientPersonAt(world:OpenWorld,id:string,tick:number):AmbientPerson|undefined{
