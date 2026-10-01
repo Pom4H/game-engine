@@ -133,7 +133,6 @@ export function transitServiceTime(seconds:number):string{
 
 export class TransitAuthority {
  private readonly passengers=new Map<string,TransitPassenger>();
- private readonly lastDwell=new Map<string,string>();
  private boarded=0;
  private alighted=0;
  readonly routes=THEGAME_TRANSIT_ROUTES;
@@ -306,11 +305,18 @@ export class TransitAuthority {
    const leaving=[...this.passengers.values()]
     .filter(p=>p.state==='riding'&&p.serviceId===service.id&&p.destinationStop===stop.id)
     .sort((a,b)=>a.residentId.localeCompare(b.residentId))[0];
+   const call=schedules.get(route.id)![service.currentStop]!;
+   const dwellRemaining=call.departure-service.scheduledSeconds;
    if(leaving){
-    leaving.state='alighting';leaving.transitionStarted=timeSeconds;leaving.transitionStop=stop.id;continue;
+    if(dwellRemaining>=ALIGHT_SECONDS+.05){
+     leaving.state='alighting';leaving.transitionStarted=timeSeconds;leaving.transitionStop=stop.id;
+    }
+    continue;
    }
 
-   if(route.capacity-this.onboard(service.id)<=0)continue;
+
+   const dwellRemaining=call.departure-service.scheduledSeconds;
+   if(route.capacity-this.onboard(service.id)<=0||dwellRemaining<BOARD_SECONDS+.05)continue;
    const waiting=this.waiting(stop.id,route.id)[0];
    if(waiting){
     waiting.state='boarding';waiting.serviceId=service.id;waiting.transitionStarted=timeSeconds;waiting.transitionStop=stop.id;
