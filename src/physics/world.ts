@@ -152,6 +152,8 @@ export class PhysicsWorld {
   readonly contacts:Contact[]=[];
   private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
   private causeTrace:PhysicsCauseTrace|undefined;
+  /** Proof-mode only: analytically predicted contact/solver energy transfer for the active substep. */
+  private traceContactEnergy:Map<RigidBody,number>|undefined;
   private readonly gravityCauses=new Map<string,PhysicsCauseRef>();
   private readonly contactCauses=new Map<string,PhysicsCauseRef>();
   private readonly fluidCauses=new Map<string,PhysicsCauseRef>();
@@ -213,23 +215,20 @@ export class PhysicsWorld {
   }
 
   private stepSubstep(dt:number,contactModel:ContactModel|undefined,substep:number,simTime:number):void{
-    const trace=this.causeTrace,before=trace?new Map<RigidBody,PhysicsBodyState>():undefined,wrenchIds=trace?new Map<RigidBody,string>():undefined,energyInitial=trace?new Map<RigidBody,number>():undefined,energyLast=trace?new Map<RigidBody,number>():undefined;
-    trace?.beginSubstep(this.steps,substep,simTime);
+    const trace=this.causeTrace,before=trace?new Map<RigidBody,PhysicsBodyState>():undefined,wrenchIds=trace?new Map<RigidBody,string>():undefined,energyInitial=trace?new Map<RigidBody,number>():undefined;
+    trace?.beginSubstep(this.steps,substep,simTime);this.traceContactEnergy=trace?new Map():undefined;
     if(trace)for(const body of this.bodies.values())if(body.invMass){
-      before!.set(body,this.traceState(body));const energy=rigidBodyMechanicalEnergyJ(body,this.gravity);energyInitial!.set(body,energy);energyLast!.set(body,energy);
+      before!.set(body,this.traceState(body));energyInitial!.set(body,rigidBodyMechanicalEnergyJ(body,this.gravity));
     }
-    const accountEnergy=(body:RigidBody,stage:'force-driver'|'fluid'|'gravity-integrate'|'contacts-solver')=>{
-      if(!trace||!energyLast!.has(body))return;
-      const next=rigidBodyMechanicalEnergyJ(body,this.gravity),previous=energyLast!.get(body)!;trace.energy(body.id,stage,next-previous);energyLast!.set(body,next);
-    };
     for(const [body,driver] of this.forceDrivers)driver.evaluate(dt,trace?.writer(body.id));
     for(const [body,driver] of this.forceDrivers){
       const f=driver.force,t=driver.torque;
       if(!Number.isFinite(f[0]+f[1]+f[2]+t[0]+t[1]+t[2]))throw new RangeError('Non-finite force-driver wrench');
       if(body.sleeping)continue;
+      const driverWork=trace?this.forceKickEnergyJ(body,f,t,dt):0;
       body.velocity[0]+=f[0]*body.invMass*dt;body.velocity[1]+=f[1]*body.invMass*dt;body.velocity[2]+=f[2]*body.invMass*dt;
       if(t[0]!==0||t[1]!==0||t[2]!==0){const dw=applyInvInertiaWorld(body,t);body.angularVelocity[0]+=dw[0]*dt;body.angularVelocity[1]+=dw[1]*dt;body.angularVelocity[2]+=dw[2]*dt;}
-      accountEnergy(body,'force-driver');
+      trace?.energy(body.id,'force-driver',driverWork);
     }
     for(const body of this.bodies.values())if(body.kinematic){
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
@@ -238,22 +237,21 @@ export class PhysicsWorld {
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping){
       body.supportedThisStep=false;
       let wrenchId='';
+      const fluid=this.fluidAt?.(body),fluidForce=this.fluidForce(body,fluid,dt);
       if(trace){
-        const gravity:Vec3=[body.mass*this.gravity[0],body.mass*this.gravity[1],body.mass*this.gravity[2]],writer=trace.writer(body.id),cause=this.gravityCauses.get(body.id)!,fluid=this.fluidAt?.(body),fluidForce=this.fluidForce(body,fluid,dt);
+        const gravity:Vec3=[body.mass*this.gravity[0],body.mass*this.gravity[1],body.mass*this.gravity[2]],writer=trace.writer(body.id),cause=this.gravityCauses.get(body.id)!;
         writer.contribute(cause,{kind:'gravity-field',id:'world.gravity'},{forceN:gravity});
         if(fluid&&(fluidForce[0]!==0||fluidForce[1]!==0||fluidForce[2]!==0))writer.contribute(this.fluidCauses.get(body.id)!,{kind:'fluid',id:fluid.id},{forceN:fluidForce});
         const driver=this.forceDrivers.get(body),force:Vec3=driver?[driver.force[0]+gravity[0]+fluidForce[0],driver.force[1]+gravity[1]+fluidForce[1],driver.force[2]+gravity[2]+fluidForce[2]]:[gravity[0]+fluidForce[0],gravity[1]+fluidForce[1],gravity[2]+fluidForce[2]],torque:Vec3=driver?driver.torque:[0,0,0];
         wrenchId=trace.wrench(body.id,force,torque);wrenchIds!.set(body,wrenchId);
-        body.velocity[0]+=fluidForce[0]*body.invMass*dt;body.velocity[1]+=fluidForce[1]*body.invMass*dt;body.velocity[2]+=fluidForce[2]*body.invMass*dt;
-      }else{
-        const fluid=this.fluidAt?.(body),fluidForce=this.fluidForce(body,fluid,dt);body.velocity[0]+=fluidForce[0]*body.invMass*dt;body.velocity[1]+=fluidForce[1]*body.invMass*dt;body.velocity[2]+=fluidForce[2]*body.invMass*dt;
+        trace.energy(body.id,'fluid',this.forceKickEnergyJ(body,fluidForce,[0,0,0],dt));
       }
-      accountEnergy(body,'fluid');
+      body.velocity[0]+=fluidForce[0]*body.invMass*dt;body.velocity[1]+=fluidForce[1]*body.invMass*dt;body.velocity[2]+=fluidForce[2]*body.invMass*dt;
       body.velocity[0]+=this.gravity[0]*dt;body.velocity[1]+=this.gravity[1]*dt;body.velocity[2]+=this.gravity[2]*dt;
       body.position[0]+=body.velocity[0]*dt;body.position[1]+=body.velocity[1]*dt;body.position[2]+=body.velocity[2]*dt;
       // No global angular damping: aerodynamic damping must come from authored physical surfaces.
       advanceRotation(body.rotation,body.angularVelocity,dt,this.rotationScratch);
-      accountEnergy(body,'gravity-integrate');
+      if(trace)trace.energy(body.id,'gravity-integrate',-.5*body.mass*V3.dot(this.gravity,this.gravity)*dt*dt);
       this.resolveGround(body,dt);
     }
     this.rebuildIndex();
@@ -276,11 +274,11 @@ export class PhysicsWorld {
     }
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=Math.max(0,body.sleepTimer-dt*.35);
     if(trace)for(const [body,state] of before!){
-      accountEnergy(body,'contacts-solver');
-      const finalEnergy=energyLast!.get(body)!,initialEnergy=energyInitial!.get(body)!;trace.energyClosure(body.id,initialEnergy,finalEnergy);
+      trace.energy(body.id,'contacts-solver',this.traceContactEnergy?.get(body)??0);
+      trace.energyClosure(body.id,energyInitial!.get(body)!,rigidBodyMechanicalEnergyJ(body,this.gravity));
       trace.stateMutation(body.id,wrenchIds!.get(body)??'',state,this.traceState(body),dt);
     }
-    trace?.endSubstep();
+    this.traceContactEnergy=undefined;trace?.endSubstep();
   }
   private fluidForce(body:RigidBody,fluid:FluidSample|undefined,dt:number):Vec3{
     if(!fluid)return [0,0,0];
