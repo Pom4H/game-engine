@@ -497,7 +497,12 @@ test('ballistic stand matches the symplectic oracle, gravity impulse and predict
  const projectedScene=new Scene(spec),projectedBody=projectedScene.entities.get(e.sceneBodyId)?.body;
  assert.ok(projectedBody,'materialized experiment body must remain a physical Scene body');
  const causeTrace=projectedScene.physics.traceCauses({runId:`experiment:${e.id}`,maxRecords:50000});
+ const projectedSubstepsBefore=projectedScene.physics.substeps;
  for(let i=0;i<e.durationS*e.runtimeTickRate;i++)projectedScene.step(1/e.runtimeTickRate);
+ const projectedSubsteps=projectedScene.physics.substeps-projectedSubstepsBefore,expectedProjectedSubsteps=Math.round(e.durationS/e.scenePhysicsStepSeconds);
+ assert.equal(projectedSubsteps,expectedProjectedSubsteps,'shared proving-ground numerics must keep the declared physics substep');
+ const projectedExpected=e.symplecticPositionAt(e.durationS,e.scenePhysicsStepSeconds),projectedPositionError=Math.hypot(...projectedBody.position.map((v,i)=>v-projectedExpected[i]));
+ assert.ok(projectedPositionError<1e-8,{position:projectedBody.position,expected:projectedExpected,projectedPositionError});
  const observedCauses=assertExperimentCauseGraph(e,causeTrace.snapshot(),projectedBody.id);
  assert.deepEqual(observedCauses,['gravity.v1']);
  assert.equal(projectedScene.physics.contacts.some(c=>c.a===projectedBody.id||c.b===projectedBody.id),false,'vacuum free-fall experiment must remain contact-free');
@@ -554,9 +559,11 @@ test('elastic collision stand closes cause graph momentum energy and analytical 
 test('torque-free rotation stand preserves spin angular momentum and rotational energy with gravity as the only cause',()=>{
  const e=rotationFreeBodyExperiment,scene=new Scene(spec),body=scene.entities.get(e.sceneBodyId)?.body;
  assert.ok(body,'rotation experiment body must be materialized');
- const before=physicsAccounting([body],scene.physics.gravity),omega0=[...body.angularVelocity],trace=scene.physics.traceCauses({runId:`experiment:${e.id}`,maxRecords:50000});
+ const before=physicsAccounting([body],scene.physics.gravity),omega0=[...body.angularVelocity],trace=scene.physics.traceCauses({runId:`experiment:${e.id}`,maxRecords:50000}),substepsBefore=scene.physics.substeps;
  for(let i=0;i<e.durationS*e.runtimeTickRate;i++)scene.step(1/e.runtimeTickRate);
- const after=physicsAccounting([body],scene.physics.gravity),observed=assertExperimentCauseGraph(e,trace.snapshot(),body.id),expectedPosition=e.positionAt(e.durationS,1/e.runtimeTickRate);
+ const actualSubsteps=scene.physics.substeps-substepsBefore,expectedSubsteps=Math.round(e.durationS/e.scenePhysicsStepSeconds);
+ assert.equal(actualSubsteps,expectedSubsteps,'rotation oracle requires the declared shared physics substep');
+ const after=physicsAccounting([body],scene.physics.gravity),observed=assertExperimentCauseGraph(e,trace.snapshot(),body.id),expectedPosition=e.positionAt(e.durationS,e.scenePhysicsStepSeconds);
  assert.deepEqual(observed,['gravity.v1']);
  const norm=v=>Math.hypot(...v),sub=(a,b)=>a.map((v,i)=>v-b[i]),scale=Math.max(1,before.rotationalKineticJ,norm(before.spinAngularMomentumNms)),tol=8192*Number.EPSILON*scale*e.durationS*e.runtimeTickRate;
  assert.ok(norm(sub(body.angularVelocity,omega0))<=tol,{before:omega0,after:body.angularVelocity,tol});
