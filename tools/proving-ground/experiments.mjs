@@ -48,6 +48,11 @@ const continuous={kind:'default',color:[1,.56,.16,.72],roughness:.25,emissive:[.
 const neutral={kind:'default',color:[.62,.64,.66,1],roughness:.75};
 const sphere=(id,position,radius,material)=>({id,position,mesh:{kind:'sphere',radius,segments:32},material});
 const box=(id,position,size,material=neutral)=>({id,position,mesh:{kind:'box',size},material});
+const crosshair=(id,p,span,material)=>[
+ box(`${id}-x`,p,[span,.035,.035],material),
+ box(`${id}-y`,p,[.035,span,.035],material),
+ box(`${id}-z`,p,[.035,.035,span],material),
+];
 
 export function materializeExperimentScene(e=gravityFreeFallExperiment){
  const p0=e.body.initialPosition,dt=1/e.runtimeTickRate,pd=e.symplecticPositionAt(e.durationS,dt),pc=e.continuousPositionAt(e.durationS);
@@ -58,6 +63,12 @@ export function materializeExperimentScene(e=gravityFreeFallExperiment){
   sphere('experiment-gravity-free-fall-oracle-continuous',pc,e.body.radiusM*.62,continuous),
   box('experiment-gravity-free-fall-ruler',[pd[0]+2,(pd[1]+pc[1])/2,pd[2]],[.055,2.2,.055],steel),
  ];
+ const deltaY=Math.abs(pc[1]-pd[1]),deltaMidY=(pc[1]+pd[1])/2,bracketX=pd[0]+1.1;
+ entities.push(...crosshair('experiment-gravity-free-fall-crosshair-discrete',pd,1.25,discrete));
+ entities.push(...crosshair('experiment-gravity-free-fall-crosshair-continuous',pc,.92,continuous));
+ entities.push(box('experiment-gravity-free-fall-error-vector',[bracketX,deltaMidY,pd[2]],[.045,deltaY,.045],continuous));
+ entities.push(box('experiment-gravity-free-fall-error-lower',[bracketX,pd[1],pd[2]],[.65,.035,.035],discrete));
+ entities.push(box('experiment-gravity-free-fall-error-upper',[bracketX,pc[1],pd[2]],[.65,.035,.035],continuous));
  entities[0]={...entities[0],body:{mass:e.body.massKg,velocity:e.body.initialVelocity,angularVelocity:e.body.angularVelocity,restitution:0,friction:0}};
  for(let i=1;i<=8;i++){
   const t=e.durationS*i/8;
@@ -72,10 +83,18 @@ export function materializeExperimentScene(e=gravityFreeFallExperiment){
 }
 
 export const experimentSceneEntities=Object.freeze(materializeExperimentScene());
-export const experimentViews=Object.freeze([{
- name:'proving-ground-gravity-free-fall',
- output:'artifacts/proving-ground-gravity-free-fall.png',
- time:gravityFreeFallExperiment.durationS,
- camera:{position:[181,72,204],target:[135,44,156],fov:43,aperture:0},
-}]);
+export const experimentViews=Object.freeze([
+ {
+  name:'proving-ground-gravity-free-fall',
+  output:'artifacts/proving-ground-gravity-free-fall.png',
+  time:gravityFreeFallExperiment.durationS,
+  camera:{position:[181,72,204],target:[135,44,156],fov:43,aperture:0},
+ },
+ {
+  name:'proving-ground-gravity-free-fall-measurement',
+  output:'artifacts/proving-ground-gravity-free-fall-measurement.png',
+  time:gravityFreeFallExperiment.durationS,
+  camera:{position:[155,33.5,171],target:[148,29.35,162],fov:27,aperture:0},
+ }
+];
 export const provingGroundExperiments=Object.freeze([gravityFreeFallExperiment]);
