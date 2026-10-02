@@ -51,7 +51,7 @@ test('temporal placement rejects incompatible program identity',()=>{
   workers:[{workerId:'A',frameNsBudget:ms(10)}],
  }),/not temporally partitionable/);
  assert.throws(()=>compileTemporalMeshPlan({
-  program,stream:{...stream,renderProgramHash:'program:other'},epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(1000),firstOutputFrame:0n,totalOutputFrames:3,
+  program,graph,executionGraphRefHash:graphRef.hash,stream:{...stream,renderProgramHash:'program:other'},epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(1000),firstOutputFrame:0n,totalOutputFrames:3,
   workers:[{workerId:'A',frameNsBudget:ms(10)}],
  }),/hash mismatch/);
 });
