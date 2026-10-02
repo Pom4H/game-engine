@@ -1,11 +1,11 @@
 import {canonicalContent,contentHash,type ContentAddressedRepository,type ContentHash,type ContentRef,type PortableRenderFrame,type RenderProgramDescriptor,type ResourceManifest} from '../render-ir/index.js';
-import type {RenderSequenceCheckpoint} from '../execution/index.js';
+import type {ExecutionGraph,RenderSequenceCheckpoint} from '../execution/index.js';
 import type {MeshRenderSegmentResult,MeshRenderSegmentTask} from './protocol.js';
 
 export interface MeshContentEntry{readonly ref:ContentRef;readonly value:unknown}
 export interface MeshContentSource{fetch(hash:ContentHash):Promise<MeshContentEntry|undefined>}
 export interface MeshSegmentExecutionInput{
- readonly task:MeshRenderSegmentTask;readonly program:RenderProgramDescriptor;readonly checkpoint:RenderSequenceCheckpoint;
+ readonly task:MeshRenderSegmentTask;readonly program:RenderProgramDescriptor;readonly graph:ExecutionGraph;readonly checkpoint:RenderSequenceCheckpoint;
  readonly frames:readonly PortableRenderFrame[];readonly warmupFrames:readonly PortableRenderFrame[];readonly outputFrames:readonly PortableRenderFrame[];readonly inputHash:ContentHash;
 }
 export interface MeshSegmentExecutionOutput{readonly frameCount:number;readonly payload:unknown}
@@ -20,12 +20,15 @@ export class MeshWorkerRuntime{
   if(checkpoint.schema!==1)throw new TypeError('Unsupported render checkpoint');
   if(checkpoint.profileHash!==task.renderProfileHash||checkpoint.cameraHash!==task.cameraHash)throw new TypeError('Task/checkpoint identity mismatch');
   if(checkpoint.resourceManifestRef.hash!==task.resourceManifestHash)throw new TypeError('Task/resource manifest mismatch');
+  if(checkpoint.graphRef.hash!==task.executionGraphRefHash)throw new TypeError('Task/execution graph identity mismatch');
 
-  const [program,manifest]=await Promise.all([
+  const [program,graph,manifest]=await Promise.all([
    this.requireContent<RenderProgramDescriptor>(checkpoint.programRef.hash),
+   this.requireContent<ExecutionGraph>(checkpoint.graphRef.hash),
    this.requireContent<ResourceManifest>(task.resourceManifestHash),
   ]);
   if(program.programHash!==task.programHash||program.profileHash!==task.renderProfileHash)throw new TypeError('Task/program identity mismatch');
+  if(graph.programHash!==program.programHash||!graph.nodes.some(node=>node.operation==='render.sequence'))throw new TypeError('Execution graph/program mismatch');
   if(canonicalContent(manifest)!==canonicalContent(program.requiredResources))throw new TypeError('Program/resource manifest mismatch');
   await Promise.all(program.requiredResources.resources.map(ref=>this.requireContent(ref.hash)));
 
@@ -42,7 +45,7 @@ export class MeshWorkerRuntime{
   if(outputFrames.length!==task.outputFrames||outputFrames[0]?.frame!==task.firstOutputFrame)throw new RangeError('Checkpoint does not contain exact output range');
 
   const inputHash=contentHash({task,frameHashes:refs.map(ref=>ref.hash),programHash:program.programHash},'input');
-  const output=await this.executor.execute(Object.freeze({task,program,checkpoint,frames:Object.freeze(frames),warmupFrames,outputFrames,inputHash}));
+  const output=await this.executor.execute(Object.freeze({task,program,graph,checkpoint,frames:Object.freeze(frames),warmupFrames,outputFrames,inputHash}));
   if(!Number.isSafeInteger(output.frameCount)||output.frameCount!==task.outputFrames)throw new TypeError('Segment executor returned wrong frame count');
   const outputRef=this.store.put('segment',output.payload),finishedNs=this.clockNs();
   return Object.freeze({streamId:task.streamId,epoch:task.epoch,segment:task.segment,attempt:task.attempt,firstFrame:task.firstOutputFrame,frameCount:output.frameCount,inputHash,outputHash:outputRef.hash,finishedNs});
