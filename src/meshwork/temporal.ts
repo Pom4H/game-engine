@@ -3,45 +3,19 @@ import {defineSegmentTask,type MeshEpoch,type MeshRenderSegmentTask,type MeshStr
 
 const NS_PER_SECOND=1_000_000_000n;
 
-export interface MeshWorkerCalibration {
- readonly workerId:string;
- readonly frameNsBudget:bigint;
- readonly fixedNsBudget?:bigint;
-}
+export interface MeshWorkerCalibration {readonly workerId:string;readonly frameNsBudget:bigint;readonly fixedNsBudget?:bigint}
 export interface TemporalMeshPlanInput {
- readonly program:RenderProgramDescriptor;
- readonly stream:MeshStream;
- readonly epoch:MeshEpoch;
- readonly resourceManifestHash:ContentHash;
- readonly workers:readonly MeshWorkerCalibration[];
- readonly nowNs:bigint;
- readonly firstDisplayNs:bigint;
- readonly firstOutputFrame:bigint;
- readonly firstSegment?:bigint;
- readonly totalOutputFrames:number;
- readonly reserveRatio?:number;
- readonly guardNs?:bigint;
+ readonly program:RenderProgramDescriptor;readonly stream:MeshStream;readonly epoch:MeshEpoch;readonly resourceManifestHash:ContentHash;
+ readonly workers:readonly MeshWorkerCalibration[];readonly nowNs:bigint;readonly firstDisplayNs:bigint;readonly firstOutputFrame:bigint;
+ readonly firstSegment?:bigint;readonly totalOutputFrames:number;readonly reserveRatio?:number;readonly guardNs?:bigint;
 }
 export interface TemporalWorkerAssignment {
- readonly workerId:string;
- readonly task:MeshRenderSegmentTask;
- readonly outputOffset:number;
- readonly predictedDurationNs:bigint;
- readonly predictedFinishNs:bigint;
- readonly slackNs:bigint;
- readonly usefulFps:number;
+ readonly workerId:string;readonly task:MeshRenderSegmentTask;readonly outputOffset:number;readonly predictedDurationNs:bigint;
+ readonly predictedFinishNs:bigint;readonly slackNs:bigint;readonly usefulFps:number;
 }
 export interface TemporalMeshPlan {
- readonly targetFps:number;
- readonly warmupFrames:number;
- readonly reserveRatio:number;
- readonly singleBestFps:number;
- readonly meshCycleFps:number;
- readonly safeFps:number;
- readonly admitted:boolean;
- readonly allWorkersBelowTarget:boolean;
- readonly proofEligible:boolean;
- readonly assignments:readonly TemporalWorkerAssignment[];
+ readonly targetFps:number;readonly warmupFrames:number;readonly reserveRatio:number;readonly singleBestFps:number;readonly meshCycleFps:number;readonly safeFps:number;
+ readonly admitted:boolean;readonly allWorkersBelowTarget:boolean;readonly proofEligible:boolean;readonly assignments:readonly TemporalWorkerAssignment[];
 }
 
 const safeInt=(value:number,label:string,min=0)=>{if(!Number.isSafeInteger(value)||value<min)throw new RangeError(label+' must be a safe integer >= '+min);return value;};
@@ -53,17 +27,14 @@ function allocateCounts(total:number,workers:readonly MeshWorkerCalibration[]):M
  if(total<workers.length)throw new RangeError('totalOutputFrames must be >= worker count');
  const weights=workers.map(worker=>1/Number(worker.frameNsBudget)),sum=weights.reduce((a,b)=>a+b,0);
  const counts=new Map<string,number>(workers.map(worker=>[worker.workerId,1] as const)),remaining=total-workers.length;
- const ideals=weights.map(weight=>remaining*weight/sum),floors=ideals.map(Math.floor);
- let assigned=0;
+ const ideals=weights.map(weight=>remaining*weight/sum),floors=ideals.map(Math.floor);let assigned=0;
  for(let i=0;i<workers.length;i++){counts.set(workers[i]!.workerId,1+floors[i]!);assigned+=floors[i]!;}
  const order=workers.map((worker,i)=>({worker,i,remainder:ideals[i]!-floors[i]!})).sort((a,b)=>b.remainder-a.remainder||a.worker.workerId.localeCompare(b.worker.workerId));
  for(let i=0;i<remaining-assigned;i++){const worker=order[i%order.length]!.worker;counts.set(worker.workerId,counts.get(worker.workerId)!+1);}
  return counts;
 }
-
 export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMeshPlan{
- const fps=safeInt(input.stream.targetFps,'targetFps',1);
- const partition=input.program.partitionability;
+ const fps=safeInt(input.stream.targetFps,'targetFps',1),partition=input.program.partitionability;
  if(partition.kind!=='temporal')throw new TypeError('Render program is not temporally partitionable');
  if(input.stream.renderProgramHash!==input.program.programHash)throw new TypeError('Stream/program hash mismatch');
  if(input.epoch.streamId!==input.stream.streamId)throw new TypeError('Epoch belongs to another stream');
@@ -74,23 +45,15 @@ export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMes
  const guard=input.guardNs??0n;positiveNs(guard,'guardNs',true);
  if(input.firstDisplayNs<=input.nowNs+guard)throw new RangeError('First display deadline leaves no execution window');
  if(!input.workers.length)throw new RangeError('Temporal Meshwork requires at least one worker');
- const ids=new Set<string>();
- const workers=input.workers.map(worker=>{
+ const ids=new Set<string>(),workers=input.workers.map(worker=>{
   if(!worker.workerId||ids.has(worker.workerId))throw new TypeError('Workers require unique stable IDs');ids.add(worker.workerId);
-  positiveNs(worker.frameNsBudget,'frameNsBudget');positiveNs(worker.fixedNsBudget??0n,'fixedNsBudget',true);
-  return Object.freeze({...worker,fixedNsBudget:worker.fixedNsBudget??0n});
+  positiveNs(worker.frameNsBudget,'frameNsBudget');positiveNs(worker.fixedNsBudget??0n,'fixedNsBudget',true);return Object.freeze({...worker,fixedNsBudget:worker.fixedNsBudget??0n});
  });
  const counts=allocateCounts(input.totalOutputFrames,workers);
- const ordered=[...workers].sort((a,b)=>{
-  const da=segmentDuration(a,counts.get(a.workerId)!,partition.warmupFrames);
-  const db=segmentDuration(b,counts.get(b.workerId)!,partition.warmupFrames);
-  return da<db?-1:da>db?1:a.workerId.localeCompare(b.workerId);
- });
+ const ordered=[...workers].sort((a,b)=>{const da=segmentDuration(a,counts.get(a.workerId)!,partition.warmupFrames),db=segmentDuration(b,counts.get(b.workerId)!,partition.warmupFrames);return da<db?-1:da>db?1:a.workerId.localeCompare(b.workerId);});
  let offset=0;const assignments:TemporalWorkerAssignment[]=[];let maxDuration=0n;
  for(let i=0;i<ordered.length;i++){
-  const worker=ordered[i]!,count=counts.get(worker.workerId)!;
-  const displayOffsetNs=BigInt(offset)*NS_PER_SECOND/BigInt(fps);
-  const deadlineNs=input.firstDisplayNs+displayOffsetNs-guard;
+  const worker=ordered[i]!,count=counts.get(worker.workerId)!,displayOffsetNs=BigInt(offset)*NS_PER_SECOND/BigInt(fps),deadlineNs=input.firstDisplayNs+displayOffsetNs-guard;
   const duration=segmentDuration(worker,count,partition.warmupFrames),finish=input.nowNs+duration;
   const task=defineSegmentTask({
    streamId:input.stream.streamId,epoch:input.epoch.epoch,segment:(input.firstSegment??0n)+BigInt(i),attempt:0,
@@ -101,14 +64,12 @@ export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMes
   assignments.push(Object.freeze({workerId:worker.workerId,task,outputOffset:offset,predictedDurationNs:duration,predictedFinishNs:finish,slackNs:deadlineNs-finish,usefulFps:count/(Number(duration)/1e9)}));
   if(duration>maxDuration)maxDuration=duration;offset+=count;
  }
- const meshCycleFps=input.totalOutputFrames/(Number(maxDuration)/1e9),safeFps=meshCycleFps*reserve;
- const singleBestFps=Math.max(...workers.map(worker=>fpsFor(worker.frameNsBudget)));
- const allWorkersBelowTarget=workers.every(worker=>fpsFor(worker.frameNsBudget)<fps);
- const admitted=safeFps>=fps&&assignments.every(assignment=>assignment.slackNs>=0n);
- return Object.freeze({
-  targetFps:fps,warmupFrames:partition.warmupFrames,reserveRatio:reserve,
-  singleBestFps,meshCycleFps,safeFps,admitted,allWorkersBelowTarget,
-  proofEligible:workers.length>=3&&allWorkersBelowTarget&&admitted,
-  assignments:Object.freeze(assignments),
- });
+ const meshCycleFps=input.totalOutputFrames/(Number(maxDuration)/1e9),safeFps=meshCycleFps*reserve,singleBestFps=Math.max(...workers.map(worker=>fpsFor(worker.frameNsBudget)));
+ const allWorkersBelowTarget=workers.every(worker=>fpsFor(worker.frameNsBudget)<fps),admitted=safeFps>=fps&&assignments.every(assignment=>assignment.slackNs>=0n);
+ return Object.freeze({targetFps:fps,warmupFrames:partition.warmupFrames,reserveRatio:reserve,singleBestFps,meshCycleFps,safeFps,admitted,allWorkersBelowTarget,proofEligible:workers.length>=3&&allWorkersBelowTarget&&admitted,assignments:Object.freeze(assignments)});
+}
+export interface TemporalDepthCandidate{readonly depth:number;readonly plan:TemporalMeshPlan}
+export function selectHighestAdmittedTemporalPlan(candidates:readonly TemporalDepthCandidate[]):TemporalDepthCandidate|undefined{
+ const valid=candidates.filter(candidate=>{if(!Number.isSafeInteger(candidate.depth)||candidate.depth<0||candidate.depth>255)throw new RangeError('Temporal depth must be within 0..255');return candidate.plan.admitted;});
+ return [...valid].sort((a,b)=>b.depth-a.depth)[0];
 }
