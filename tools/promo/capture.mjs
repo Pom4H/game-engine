@@ -7,6 +7,8 @@ import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
 import {shots} from './shots.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),mode=process.argv[2]??'preview';
+const captureFps=Number(process.env.PROMO_CAPTURE_FPS??30),rangeStart=Number(process.env.PROMO_FRAME_START??0),rangeCount=process.env.PROMO_FRAME_COUNT===undefined?null:Number(process.env.PROMO_FRAME_COUNT),rangeWarmup=Number(process.env.PROMO_WARMUP_FRAMES??0),outputName=process.env.PROMO_OUTPUT_NAME??null;
+if(!Number.isSafeInteger(captureFps)||captureFps<1||captureFps>120||!Number.isSafeInteger(rangeStart)||rangeStart<0||rangeCount!==null&&(!Number.isSafeInteger(rangeCount)||rangeCount<1)||!Number.isSafeInteger(rangeWarmup)||rangeWarmup<0||rangeWarmup>512)throw new RangeError('Invalid promo frame-range capture options');
 
 if(!['preview','storyboard','all',...shots.map(s=>s.id)].includes(mode))throw new Error(`Unknown capture mode or shot: ${mode}`);
 if(process.argv[3]&&!shots.some(s=>s.id===process.argv[3]))throw new Error(`Unknown shot filter: ${process.argv[3]}`);
@@ -41,17 +43,20 @@ try{
    await evaluate(`await window.promo.frame(${clip.duration*.5});`);
    await writeFile(join(out,`${name}-layout.png`),await screenshot());const inspection=await evaluate('return window.promo.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));console.log('preview',name,JSON.stringify(inspection));continue;
   }
-  const path=join(out,`${name}-silent.mp4`),encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate','30','-i','pipe:0','-an',...videoCodec,'-movflags','+faststart',path],{stdio:['pipe','inherit','inherit']});
+  const totalFrames=Math.floor(clip.duration*captureFps),startFrame=Math.min(rangeStart,totalFrames),endFrame=rangeCount===null?totalFrames:Math.min(totalFrames,startFrame+rangeCount);
+  if(endFrame<=startFrame)throw new RangeError(`Empty capture range for ${name}: ${startFrame}..${endFrame}`);
+  for(let frame=Math.max(0,startFrame-rangeWarmup);frame<startFrame;frame++)await evaluate(`await window.promo.frame(${frame/captureFps});`);
+  const path=join(out,outputName??`${name}-silent.mp4`),encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(captureFps),'-i','pipe:0','-an',...videoCodec,'-movflags','+faststart',path],{stdio:['pipe','inherit','inherit']});
   const completed=once(encoder,'exit');
-  for(let frame=0;frame<clip.duration*30;frame++){
-   await evaluate(`await window.promo.frame(${frame/30});`);
+  for(let frame=startFrame;frame<endFrame;frame++){
+   await evaluate(`await window.promo.frame(${frame/captureFps});`);
    const png=await screenshot();if(!encoder.stdin.write(png))await once(encoder.stdin,'drain');
-   if(frame%90===0)console.log(name,`${frame}/${clip.duration*30}`);
+   if((frame-startFrame)%90===0)console.log(name,`${frame-startFrame}/${endFrame-startFrame}`);
   }
   encoder.stdin.end();const [code]=await completed;if(code!==0)throw new Error(`ffmpeg exit ${code}`);
   const inspection=await evaluate('return window.promo.inspect()');if(inspection.errors.length)throw new Error(JSON.stringify(inspection.errors));
   {await writeFile(join(out,`${name}-telemetry.json`),JSON.stringify(await evaluate('return window.promo.telemetry()')));await writeFile(join(out,`${name}-footsteps.json`),JSON.stringify(await evaluate('return window.promo.footsteps()')));await writeFile(join(out,`${name}-events.json`),JSON.stringify(await evaluate('return window.promo.events()')));await writeFile(join(out,`${name}-evidence.json`),JSON.stringify(inspection,null,2));}
-  console.log('recorded',name,JSON.stringify(inspection));
+  console.log('recorded',name,JSON.stringify({...inspection,captureRange:{fps:captureFps,startFrame,endFrame,warmupFrames:rangeWarmup,output:path}}));
  }
 }finally{
  socket?.close();for(const entry of pending.values())clearTimeout(entry.timer);child.kill();await Promise.race([once(child,'exit'),new Promise(r=>setTimeout(r,1000))]);server.closeAllConnections();await new Promise(r=>server.close(r));await rm(profile,{recursive:true,force:true});
