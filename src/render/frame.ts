@@ -43,6 +43,9 @@ function buildFrame(scene:Scene,camera:CameraSpec,primitiveFor:(entity:RuntimeEn
 export function buildRenderFrame(scene:Scene,camera:CameraSpec=scene.camera,options:{readonly includeMeshes?:boolean}={}):RenderFrameIR{
   return buildFrame(scene,camera,renderPrimitive,options.includeMeshes??false);
 }
-export function buildProxyRenderFrame(scene:Scene,camera:CameraSpec=scene.camera):RenderFrameIR{
-  return buildFrame(scene,camera,renderProxyPrimitive,false);
+export function buildProxyRenderFrame(scene:Scene,camera:CameraSpec=scene.camera,options:{readonly includeMeshes?:boolean}={}):RenderFrameIR{
+  return buildFrame(scene,camera,renderProxyPrimitive,options.includeMeshes??false);
+}
+export function buildDormantRenderFrame(scene:Scene,camera:CameraSpec=scene.camera):RenderFrameIR{
+  return{scene,camera,objects:Object.freeze([]),objectsById:new Map(),lights:Object.freeze([])};
 }
