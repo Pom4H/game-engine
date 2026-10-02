@@ -13,13 +13,13 @@ export interface ExecutionNode {
   readonly id:string;readonly operation:string;readonly inputs:readonly ExecutionResourceUse[];readonly outputs:readonly ContentRef[];
   readonly deterministic:boolean;readonly partitionability:RenderPartitionability|{readonly kind:'atomic'};readonly cost?:ExecutionCostHint;
 }
-export interface ExecutionGraph {readonly schema:1;readonly graphHash:ContentHash;readonly nodes:readonly ExecutionNode[]}
+export interface ExecutionGraph {readonly schema:1;readonly graphHash:ContentHash;readonly programHash:ContentHash;readonly nodes:readonly ExecutionNode[]}
 export type PlacementKind='local'|'mesh.temporal'|'mesh.spatial'|'mesh.samples';
 export interface PlacementProfile {readonly kind:PlacementKind;readonly deadlineNs?:bigint}
 export interface LocalProgramDescriptor {readonly graph:ExecutionGraph;readonly placement:'local'}
 
 export function defineExecutionGraph(graph:ExecutionGraph):ExecutionGraph{
-  if(graph.schema!==1||!graph.graphHash)throw new TypeError('Execution graph requires schema 1 and a stable hash');
+  if(graph.schema!==1||!graph.graphHash||!graph.programHash)throw new TypeError('Execution graph requires schema 1, a stable hash and a program hash');
   const ids=new Set<string>();for(const node of graph.nodes){if(!node.id||ids.has(node.id))throw new TypeError('Execution nodes require unique stable IDs');ids.add(node.id);if(!node.operation)throw new TypeError('Execution node requires an operation');}
   return deepFreeze(structuredClone(graph));
 }
@@ -31,10 +31,10 @@ export interface SceneRenderProjectionOptions{
 export interface ProjectedRenderFrame {readonly frame:PortableRenderFrame;readonly frameRef:ContentRef}
 export interface RenderSequenceCheckpoint {
   readonly schema:1;readonly firstFrame:bigint;readonly lastFrameExclusive:bigint;readonly frames:readonly ContentRef[];
-  readonly programRef:ContentRef;readonly resourceManifestRef:ContentRef;readonly profileHash:string;readonly cameraHash:string;
+  readonly programRef:ContentRef;readonly graphRef:ContentRef;readonly resourceManifestRef:ContentRef;readonly profileHash:string;readonly cameraHash:string;
 }
 export interface RenderSequenceBundle {
-  readonly program:RenderProgramDescriptor;readonly programRef:ContentRef;readonly manifest:ResourceManifest;readonly manifestRef:ContentRef;
+  readonly program:RenderProgramDescriptor;readonly programRef:ContentRef;readonly graph:ExecutionGraph;readonly graphRef:ContentRef;readonly manifest:ResourceManifest;readonly manifestRef:ContentRef;
   readonly checkpoint:RenderSequenceCheckpoint;readonly checkpointRef:ContentRef;readonly cameraHash:string;
 }
 
@@ -82,16 +82,17 @@ export function createRenderSequenceBundle(store:ContentAddressedRepository,fram
   const manifest=store.manifest(resourceRefs),manifestRef=store.put('manifest',manifest),cameraHash=contentHash(ordered.map(frame=>frame.camera),'camera');
   const partitionability={kind:'temporal' as const,warmupFrames:options.warmupFrames},programHash=contentHash({profileHash:options.profileHash,partitionability,resources:manifest.resources},'program');
   const program=defineRenderProgram({schema:1,programHash,profileHash:options.profileHash,partitionability,requiredResources:manifest}),programRef=store.put('program',program);
+  const graph=lowerRenderProgram(program),graphRef=store.put('graph',graph);
   const checkpoint:RenderSequenceCheckpoint=Object.freeze({
     schema:1,firstFrame:ordered[0]!.frame,lastFrameExclusive:ordered.at(-1)!.frame+1n,frames:Object.freeze(frameRefs),
-    programRef,resourceManifestRef:manifestRef,profileHash:options.profileHash,cameraHash,
+    programRef,graphRef,resourceManifestRef:manifestRef,profileHash:options.profileHash,cameraHash,
   });
   const checkpointRef=store.put('checkpoint',checkpoint);
-  return Object.freeze({program,programRef,manifest,manifestRef,checkpoint,checkpointRef,cameraHash});
+  return Object.freeze({program,programRef,graph,graphRef,manifest,manifestRef,checkpoint,checkpointRef,cameraHash});
 }
 export function lowerRenderProgram(program:RenderProgramDescriptor):ExecutionGraph{
   const graphHash=contentHash({operation:'render.sequence',programHash:program.programHash,profileHash:program.profileHash,partitionability:program.partitionability,resources:program.requiredResources.resources},'graph');
-  return defineExecutionGraph({schema:1,graphHash,nodes:[Object.freeze({
+  return defineExecutionGraph({schema:1,graphHash,programHash:program.programHash,nodes:[Object.freeze({
     id:'render.sequence',operation:'render.sequence',
     inputs:Object.freeze(program.requiredResources.resources.map(resource=>Object.freeze({resource,access:'read' as const}))),
     outputs:Object.freeze([]),deterministic:true,partitionability:program.partitionability,
