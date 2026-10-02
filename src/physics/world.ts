@@ -9,6 +9,8 @@ import {rigidBodyMechanicalEnergyJ} from './accounting.js';
 import type {FluidSample} from './fluid.js';
 import type {AirSample} from './wind.js';
 import type {SoilContactInput,SoilContactResult} from './soil.js';
+import {CollisionSolverFamily,type CollisionSolverPlugin,type CollisionSolverProgram} from './depth.js';
+import type {SimulationProfileInput} from '../core/depth.js';
 
 export type CollisionShape = {kind:'sphere';radius:number}|{kind:'box';half:Vec3};
 export interface RigidBodyOptions {
@@ -133,7 +135,7 @@ export interface PhysicsForceDriver {
   /** Stable physical causes must be declared before this body first evaluates. */
   declareCauses?(manifest:PhysicsCauseManifestWriter):void;
 }
-export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodies:number;sleeping:number}
+export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodies:number;sleeping:number;collisionSurfaceIterations:number}
 
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
@@ -151,6 +153,8 @@ export class PhysicsWorld {
   readonly bodies=new Map<string,RigidBody>();
   readonly contacts:Contact[]=[];
   private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
+  private readonly collisionFamily=new CollisionSolverFamily();
+  private collisionProgram:CollisionSolverProgram=this.collisionFamily.compile('detailed');
   private causeTrace:PhysicsCauseTrace|undefined;
   /** Proof-mode only: analytically predicted contact/solver energy transfer for the active substep. */
   private traceContactEnergy:Map<RigidBody,number>|undefined;
@@ -165,6 +169,10 @@ export class PhysicsWorld {
     cellSize=8,
     readonly groundMaterial:PhysicalMaterial=material('concrete'),
   ){this.index=new SpatialHash<RigidBody>(cellSize);this.wheelSupport=groundSupport(ground);}
+
+  setSimulationProfile(profile:SimulationProfileInput):void{this.collisionProgram=this.collisionFamily.compile(profile);}
+  useCollisionPlugin(plugin:CollisionSolverPlugin,profile:SimulationProfileInput='detailed'):this{this.collisionFamily.usePlugin(plugin);this.collisionProgram=this.collisionFamily.compile(profile);return this;}
+  get collisionSolver():CollisionSolverProgram{return this.collisionProgram;}
 
   add(body:RigidBody):RigidBody{if(this.bodies.has(body.id))throw new TypeError(`Duplicate body ${body.id}`);this.bodies.set(body.id,body);if(this.causeTrace)this.declareBodyCauses(body,this.causeTrace);return body;}
   /** Enable complete force provenance. Existing bodies/drivers are registered immediately;
@@ -293,7 +301,7 @@ export class PhysicsWorld {
   }
   private traceState(body:RigidBody):PhysicsBodyState{return{positionM:[...body.position],rotationRad:[...body.rotation],velocityMps:[...body.velocity],angularVelocityRadps:[...body.angularVelocity]};}
 
-  get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length};}
+  get stats():PhysicsStats{return{steps:this.steps,substeps:this.substeps,contacts:this.contacts.length,bodies:this.bodies.size,sleeping:[...this.bodies.values()].filter(body=>body.sleeping).length,collisionSurfaceIterations:this.collisionProgram.surfaceIterations};}
 
   private contactCandidate(a:RigidBody,b:RigidBody,hit:Hit):ContactCandidate{
     const ra=V3.sub(hit.point,a.position),rb=V3.sub(hit.point,b.position);
@@ -351,7 +359,7 @@ export class PhysicsWorld {
 
     // Sequential impulses over the whole edge/face manifold prevent a thin shard
     // from alternating forever between single-corner supports.
-    for(let iteration=0;iteration<3;iteration++){
+    for(let iteration=0;iteration<this.collisionProgram.surfaceIterations;iteration++){
       for(const r of manifold.points){
         const contactVelocity=V3.add(body.velocity,V3.cross(body.angularVelocity,r)),approach=Math.max(0,-contactVelocity[1]);
         maxApproach=Math.max(maxApproach,approach);if(iteration===0)totalEnergy+=.5*body.mass*approach*approach/manifold.points.length;
