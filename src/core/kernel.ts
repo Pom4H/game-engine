@@ -122,7 +122,7 @@ export class ModuleScheduler{
   for(const {description} of all){known.add(description.id);known.add(slotOf(description));}
   const candidateModules=all.filter(item=>!item.description.tiers||item.description.tiers.includes(simulationTierForDepth(profile.defaultDepth)));
   const selected=[...compileDepthVariants(profile,candidateModules.map(item=>({
-   id:item.description.id,slot:slotOf(item.description),depth:item.description.depth,value:item,
+   id:item.description.id,slot:slotOf(item.description),...(item.description.depth?{depth:item.description.depth}:{}),value:item,
   }))).selected.values()].map(entry=>entry.value);
   const byId=new Map(selected.map(item=>[item.description.id,item])),bySlot=new Map(selected.map(item=>[slotOf(item.description),item]));
   const allByReference=new Map<string,Registered[]>();
