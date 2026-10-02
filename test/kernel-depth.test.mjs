@@ -181,3 +181,31 @@ test('aggregate agents select a lower-cadence implementation in the same ownersh
  assert.ok(full.selectedModules.some(module=>module.id==='engine:animation'));
  assert.ok(!full.selectedModules.some(module=>module.id==='engine:animation.aggregate'));
 });
+
+
+test('collision depth controls manifold iterations while preserving non-penetration',()=>{
+ const make=collision=>{
+  const scene=new Scene({version:1,gravity:[0,-9.81,0],ground:0,entities:[
+   {id:'box',position:[0,2,0],mesh:{kind:'box',size:[1,1,1]},material:{kind:'steel'},body:{mass:10,restitution:0,friction:.8}},
+  ]});
+  scene.setSimulationProfile({defaultDepth:ENGINE_DEPTH.dormant,axes:{physics:ENGINE_DEPTH.active,collision}});
+  for(let i=0;i<180;i++)scene.step(1/60);
+  return scene;
+ };
+ const minimal=make(ENGINE_DEPTH.dormant),aggregate=make(ENGINE_DEPTH.aggregate),full=make(ENGINE_DEPTH.active);
+ assert.equal(minimal.physics.stats.collisionSurfaceIterations,1);
+ assert.equal(aggregate.physics.stats.collisionSurfaceIterations,2);
+ assert.equal(full.physics.stats.collisionSurfaceIterations,3);
+ for(const scene of [minimal,aggregate,full]){
+  const body=scene.entities.get('box').body;
+  assert.ok(body.position[1]>=.5-1e-6,{depth:scene.physics.stats.collisionSurfaceIterations,position:body.position});
+ }
+});
+
+test('collision depth inherits physics depth unless explicitly overridden',()=>{
+ const scene=new Scene({version:1,gravity:[0,0,0],entities:[]});
+ scene.setSimulationProfile({defaultDepth:0,axes:{physics:ENGINE_DEPTH.detailed}});
+ assert.equal(scene.physics.stats.collisionSurfaceIterations,3);
+ scene.setSimulationProfile({defaultDepth:0,axes:{physics:ENGINE_DEPTH.detailed,collision:ENGINE_DEPTH.aggregate}});
+ assert.equal(scene.physics.stats.collisionSurfaceIterations,2);
+});
