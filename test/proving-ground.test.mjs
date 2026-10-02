@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {assertExperimentCauseGraph,gravityFreeFallExperiment} from '../tools/proving-ground/experiments.mjs';
+import {assertExperimentCauseGraph,collisionElasticExperiment,gravityFreeFallExperiment,rotationFreeBodyExperiment} from '../tools/proving-ground/experiments.mjs';
 import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,soilWheelSupport,wheelHit,physicsAccounting,ThermalMass,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
@@ -529,6 +529,42 @@ test('ballistic stand matches the symplectic oracle, gravity impulse and predict
  const convergenceBudget=roundoff(coarse.steps+fine.steps,coarseError,fineError,coarse.measuredEnergyDefect,fine.measuredEnergyDefect);
  assert.ok(Math.abs(coarseError-2*fineError)<=convergenceBudget,{coarseError,fineError,convergenceBudget});
  assert.ok(Math.abs(coarse.measuredEnergyDefect-2*fine.measuredEnergyDefect)<=convergenceBudget,{coarse,fine,convergenceBudget});
+});
+
+
+test('elastic collision stand closes cause graph momentum energy and analytical velocities',()=>{
+ const e=collisionElasticExperiment,scene=new Scene(spec),a=scene.entities.get(e.sceneBodyIds[0])?.body,b=scene.entities.get(e.sceneBodyIds[1])?.body;
+ assert.ok(a&&b,'elastic collision bodies must be materialized Scene bodies');
+ const px0=a.mass*a.velocity[0]+b.mass*b.velocity[0],ke0=.5*a.mass*a.velocity[0]**2+.5*b.mass*b.velocity[0]**2;
+ const trace=scene.physics.traceCauses({runId:`experiment:${e.id}`,maxRecords:100000});
+ let collided=false;for(let i=0;i<e.durationS*e.runtimeTickRate;i++){scene.step(1/e.runtimeTickRate);collided ||= scene.physics.contacts.some(c=>c.a===a.id&&c.b===b.id||c.a===b.id&&c.b===a.id);}
+ assert.equal(collided,true,'elastic experiment must actually collide');
+ assert.deepEqual(assertExperimentCauseGraph(e,trace.snapshot(),a.id),['contact-solver.v1','gravity.v1']);
+ assert.deepEqual(assertExperimentCauseGraph(e,trace.snapshot(),b.id),['contact-solver.v1','gravity.v1']);
+ const px1=a.mass*a.velocity[0]+b.mass*b.velocity[0],ke1=.5*a.mass*a.velocity[0]**2+.5*b.mass*b.velocity[0]**2;
+ const scale=Math.max(1,Math.abs(px0),Math.abs(ke0)),tol=8192*Number.EPSILON*scale*e.runtimeTickRate;
+ assert.ok(Math.abs(px1-px0)<=tol,{px0,px1,tol});
+ assert.ok(Math.abs(ke1-ke0)<=tol,{ke0,ke1,tol});
+ assert.ok(Math.abs(a.velocity[0]-e.finalVelocityX[0])<=tol,{actual:a.velocity[0],expected:e.finalVelocityX[0],tol});
+ assert.ok(Math.abs(b.velocity[0]-e.finalVelocityX[1])<=tol,{actual:b.velocity[0],expected:e.finalVelocityX[1],tol});
+ assert.ok(Math.hypot(...a.angularVelocity)+Math.hypot(...b.angularVelocity)<=tol,{a:a.angularVelocity,b:b.angularVelocity,tol});
+ scene.physics.stopCauseTrace(trace);
+});
+
+test('torque-free rotation stand preserves spin angular momentum and rotational energy with gravity as the only cause',()=>{
+ const e=rotationFreeBodyExperiment,scene=new Scene(spec),body=scene.entities.get(e.sceneBodyId)?.body;
+ assert.ok(body,'rotation experiment body must be materialized');
+ const before=physicsAccounting([body],scene.physics.gravity),omega0=[...body.angularVelocity],trace=scene.physics.traceCauses({runId:`experiment:${e.id}`,maxRecords:50000});
+ for(let i=0;i<e.durationS*e.runtimeTickRate;i++)scene.step(1/e.runtimeTickRate);
+ const after=physicsAccounting([body],scene.physics.gravity),observed=assertExperimentCauseGraph(e,trace.snapshot(),body.id),expectedPosition=e.positionAt(e.durationS,1/e.runtimeTickRate);
+ assert.deepEqual(observed,['gravity.v1']);
+ const norm=v=>Math.hypot(...v),sub=(a,b)=>a.map((v,i)=>v-b[i]),scale=Math.max(1,before.rotationalKineticJ,norm(before.spinAngularMomentumNms)),tol=8192*Number.EPSILON*scale*e.durationS*e.runtimeTickRate;
+ assert.ok(norm(sub(body.angularVelocity,omega0))<=tol,{before:omega0,after:body.angularVelocity,tol});
+ assert.ok(norm(sub(after.spinAngularMomentumNms,before.spinAngularMomentumNms))<=tol,{before:before.spinAngularMomentumNms,after:after.spinAngularMomentumNms,tol});
+ assert.ok(Math.abs(after.rotationalKineticJ-before.rotationalKineticJ)<=tol,{before:before.rotationalKineticJ,after:after.rotationalKineticJ,tol});
+ assert.ok(norm(sub(body.position,expectedPosition))<=tol,{position:body.position,expectedPosition,tol});
+ assert.equal(scene.physics.contacts.some(c=>c.a===body.id||c.b===body.id),false,'torque-free body must remain contact-free');
+ scene.physics.stopCauseTrace(trace);
 });
 
 test('closed rigid collision conserves total linear and angular momentum',()=>{
