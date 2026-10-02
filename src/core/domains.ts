@@ -12,6 +12,7 @@ export const ENGINE_DOMAINS=Object.freeze({
  audio:'audio',
  render:'render',
 } as const);
+export type EngineDomain=typeof ENGINE_DOMAINS[keyof typeof ENGINE_DOMAINS];
 
 export const ENGINE_SLOTS=Object.freeze({
  clock:'core.clock',
@@ -25,3 +26,4 @@ export const ENGINE_SLOTS=Object.freeze({
  audioMix:'audio.mix',
  renderFrame:'render.frame',
 } as const);
+export type EngineSlot=typeof ENGINE_SLOTS[keyof typeof ENGINE_SLOTS];
