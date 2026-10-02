@@ -147,3 +147,37 @@ test('canonical domains are the exact built-in depth axes',()=>{
  assert.equal(ENGINE_DEPTH_AXES.economics,'economics');
  assert.equal(ENGINE_SLOTS.physicsStep,'physics.step');
 });
+
+
+test('aggregate destruction preserves fracture outcome without materializing debris',()=>{
+ const run=destruction=>{
+  const scene=new Scene({
+   version:1,gravity:[0,0,0],ground:-100,
+   entities:[
+    {id:'glass',position:[0,1,0],mesh:{kind:'box',size:[.01,1.4,1.2]},material:{kind:'glass'}},
+    {id:'ball',position:[-1,1,0],mesh:{kind:'sphere',radius:.11},material:{kind:'steel'},body:{mass:3.8,velocity:[30,0,0]}},
+   ],
+  });
+  scene.setSimulationProfile({defaultDepth:ENGINE_DEPTH.dormant,axes:{physics:ENGINE_DEPTH.active,destruction}});
+  const events=[];for(let i=0;i<30;i++){scene.step(1/60);events.push(...scene.drainEvents());}
+  return{scene,fracture:events.find(event=>event.type==='fracture'),shards:[...scene.entities.keys()].filter(id=>id.startsWith('glass:shard:'))};
+ };
+ const aggregate=run(ENGINE_DEPTH.aggregate),full=run(ENGINE_DEPTH.active);
+ assert.equal(aggregate.scene.entities.has('glass'),false,'aggregate LOD must preserve the broken/not-broken outcome');
+ assert.ok(aggregate.fracture,'aggregate LOD must preserve the fracture event');
+ assert.equal(aggregate.fracture.shardCount,0,'aggregate LOD must not materialize debris');
+ assert.equal(aggregate.shards.length,0);
+ assert.equal(full.scene.entities.has('glass'),false);
+ assert.ok(full.fracture&&full.fracture.shardCount>0,'full destruction must materialize fracture detail');
+ assert.ok(full.shards.length>=10);
+});
+
+test('aggregate agents select a lower-cadence implementation in the same ownership slot',()=>{
+ const scene=new Scene({version:1,gravity:[0,0,0],entities:[]});
+ const aggregate=scene.kernel.compile({defaultDepth:0,axes:{agents:ENGINE_DEPTH.aggregate}});
+ const full=scene.kernel.compile({defaultDepth:0,axes:{agents:ENGINE_DEPTH.active}});
+ assert.ok(aggregate.selectedModules.some(module=>module.id==='engine:animation.aggregate'));
+ assert.ok(!aggregate.selectedModules.some(module=>module.id==='engine:animation'));
+ assert.ok(full.selectedModules.some(module=>module.id==='engine:animation'));
+ assert.ok(!full.selectedModules.some(module=>module.id==='engine:animation.aggregate'));
+});
