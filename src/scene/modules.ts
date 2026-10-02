@@ -18,6 +18,7 @@ export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
   {action:'animation',id:'engine:animation',phase:'simulate',rateHz:60,reads:['surface-state'],writes:['entities','animation'],after:[],depth:{axis:ENGINE_DEPTH_AXES.agents,min:ENGINE_DEPTH.active}},
   // The stable slot is the future LOD/plugin seam: aggregate/full physics variants can
   // replace each other at compile time without changing downstream dependencies.
+  {action:'physics',id:'engine:physics.coarse',slot:'engine:physics',phase:'simulate',rateHz:30,reads:['surface-state','animation'],writes:['entities','contacts'],after:['engine:animation'],depth:{axis:ENGINE_DEPTH_AXES.physics,min:128,max:ENGINE_DEPTH.active-1}},
   {action:'physics',id:'engine:physics',slot:'engine:physics',phase:'simulate',rateHz:60,reads:['surface-state','animation'],writes:['entities','contacts'],after:['engine:animation'],depth:{axis:ENGINE_DEPTH_AXES.physics,min:ENGINE_DEPTH.active}},
   {action:'deformation',id:'engine:deformation',phase:'simulate',rateHz:60,reads:['contacts','entities'],writes:['entities','deformation'],after:['engine:physics'],depth:{axis:ENGINE_DEPTH_AXES.destruction,min:ENGINE_DEPTH.active}},
   {action:'surface-contacts',id:'engine:surface-contacts',phase:'commit',rateHz:60,reads:['surface-state','animation','contacts'],writes:['entities','surface-contacts'],after:[],depth:{axis:ENGINE_DEPTH_AXES.physics,min:ENGINE_DEPTH.detailed}},

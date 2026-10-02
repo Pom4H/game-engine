@@ -17,6 +17,7 @@ export const ENGINE_DEPTH_AXES=Object.freeze({
  physics:'physics',
  destruction:'destruction',
  agents:'agents',
+ economy:'economy',
  network:'network',
  audio:'audio',
  render:'render',
