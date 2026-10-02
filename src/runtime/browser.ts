@@ -28,7 +28,7 @@ export class BrowserRuntime {
   private publishedBridge:EngineBridge|null=null;
 
   private constructor(private readonly canvas:HTMLCanvasElement,scene:SceneSpec,renderer:Renderer,options:BrowserRuntimeOptions){
-    this.initial=structuredClone(scene);this.simulationProfile=simulationProfile(options.profile??'detailed');this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
+    this.initial=structuredClone(scene);this.simulationProfile=simulationProfile(options.profile??'detailed');this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);this.renderer=renderer;this.renderer.setSimulationProfile?.(this.simulationProfile);this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio(this.simulationProfile);
   }
 
   static async create(canvas:HTMLCanvasElement,scene:SceneSpec,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
@@ -80,7 +80,12 @@ export class BrowserRuntime {
     this.render();await this.renderer.flush();
   }
   setSimulationProfile(input:SimulationProfileInput):SimulationProfile{
-    this.simulationProfile=simulationProfile(input);this.scene.setSimulationProfile(this.simulationProfile);return this.simulationProfile;
+    const profile=simulationProfile(input);
+    this.scene.setSimulationProfile(profile);
+    this.renderer.setSimulationProfile?.(profile);
+    this.audio?.setSimulationProfile(profile);
+    this.simulationProfile=profile;
+    return profile;
   }
   patchAppearance(patch:AppearancePatch):void{this.pause();this.scene.patchAppearance(patch);}
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
