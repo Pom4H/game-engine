@@ -1,7 +1,9 @@
 import {mulberry32} from '../core/random.js';
 import type {EngineEvent} from '../scene/events.js';
 import type {CameraSpec} from '../scene/types.js';
-import {synthesizeEvent,type AudioChannels} from './synth.js';
+import type {AudioChannels} from './synth.js';
+import {AudioSynthFamily,type EventSynthesizer} from './depth.js';
+import type {SimulationProfileInput} from '../core/depth.js';
 import {renderFootsteps,type FootstepSound} from './footsteps.js';
 
 export interface AmbientAudioState {
@@ -14,23 +16,29 @@ export interface AmbientAudioState {
 interface Voice {readonly source:AudioBufferSourceNode;readonly gain:GainNode}
 export class ProceduralAudio {
  private context:AudioContext|null=null;private unlocked=false;private disposed=false;private ambient:AmbientGraph|null=null;
+ private readonly synthFamily=new AudioSynthFamily();private eventSynth:EventSynthesizer|undefined;
  private readonly voices=new Set<Voice>();private readonly maxVoices=48;
  private readonly unlockGesture=()=>{void this.unlock();};
- constructor(){
+ constructor(profile:SimulationProfileInput='detailed'){
+  this.eventSynth=this.synthFamily.compile(profile);
   addEventListener('pointerdown',this.unlockGesture,{once:true,capture:true});
   addEventListener('touchstart',this.unlockGesture,{once:true,capture:true,passive:true});
   addEventListener('keydown',this.unlockGesture,{once:true,capture:true});
  }
  async unlock():Promise<boolean>{
-  if(this.disposed)return false;
+  if(this.disposed||!this.eventSynth)return false;
   const context=this.ensure(),wasUnlocked=this.unlocked;this.ensureAmbient(context);
   // iOS/WebKit requires resume to happen directly from the user gesture.
   if(context.state!=='running')await context.resume();
   if(this.disposed||this.context!==context)return false;
   this.unlocked=context.state==='running';if(this.unlocked&&!wasUnlocked)this.confirmUnlocked(context);return this.unlocked;
  }
+ setSimulationProfile(profile:SimulationProfileInput):void{
+  const next=this.synthFamily.compile(profile),wasActive=this.eventSynth!==undefined;this.eventSynth=next;
+  if(wasActive&&!next)this.silence();
+ }
  updateAmbient(state:AmbientAudioState):void{
-  if(!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
+  if(!this.eventSynth||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
   const graph=this.ensureAmbient(context),now=context.currentTime,wind=clamp(state.windSpeed/12),snow=clamp(state.snowfall),traffic=clamp(state.trafficCount/5),speed=clamp(state.trafficSpeed/18),wet=clamp(state.contactWetness??state.roadWetness),slush=clamp(state.slush),rolling=traffic*speed;
   smooth(graph.windGain.gain,.010+wind*.10,now,.18);smooth(graph.windFilter.frequency,160+wind*260,now,.2);
   // Falling snow contributes very faint filtered air, never a high-pass hiss.
@@ -42,13 +50,13 @@ export class ProceduralAudio {
   smooth(graph.slushGain.gain,rolling*(wet*.095+slush*.035),now,.10);smooth(graph.slushFilter.frequency,950,now,.12);smooth(graph.slushSoft.frequency,700,now,.12);
  }
  play(events:readonly EngineEvent[]):void{
-  if(!events.length||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
-  for(const event of events){if(event.type==='impact'&&event.energy<.02)continue;this.playVoice(synthesizeEvent(event,context.sampleRate),.72,context.currentTime,0);}
+  const synth=this.eventSynth;if(!synth||!events.length||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
+  for(const event of events){if(event.type==='impact'&&event.energy<.02)continue;this.playVoice(synth(event,context.sampleRate),.72,context.currentTime,0);}
  }
  /** Live playback reuses the same synthesis and contact records as an offline
   * capture. Catch-up ticks start at the elapsed sample; old seek history is silent. */
  playFootsteps(events:readonly FootstepSound[],camera:CameraSpec,simulationTime:number):void{
-  if(!events.length||!this.unlocked||this.disposed)return;if(!Number.isFinite(simulationTime)||simulationTime<0)throw new RangeError('Invalid footstep simulation time');
+  if(!this.eventSynth||!events.length||!this.unlocked||this.disposed)return;if(!Number.isFinite(simulationTime)||simulationTime<0)throw new RangeError('Invalid footstep simulation time');
   const context=this.ensure();if(context.state!=='running')return;
   for(const event of events){const age=simulationTime-event.time;if(age>=.38||age<-.25)continue;
    const voice=renderFootsteps([{...event,time:0}],[{time:0,listener:camera.position,target:camera.target,vehicle:event.position,speedMps:0}],.38,context.sampleRate);
@@ -62,7 +70,14 @@ export class ProceduralAudio {
   const source=context.createBufferSource(),gain=context.createGain(),voice={source,gain};gain.gain.value=level;source.buffer=buffer;source.connect(gain).connect(context.destination);source.onended=()=>this.release(voice);this.voices.add(voice);source.start(when,offset);
  }
  private release(voice:Voice):void{if(!this.voices.delete(voice))return;voice.source.onended=null;voice.source.disconnect();voice.gain.disconnect();}
- inspect(){return{enabled:true,unlocked:this.unlocked,state:this.context?.state??'locked',ambient:this.ambient!==null,voices:this.voices.size};}
+ private silence():void{
+  for(const voice of [...this.voices]){try{voice.source.stop();}catch{}this.release(voice);}
+  const context=this.context,graph=this.ambient;if(!context||!graph)return;const now=context.currentTime;
+  for(const gain of [graph.windGain.gain,graph.snowGain.gain,graph.trafficGain.gain,graph.roadGain.gain,graph.slushGain.gain,graph.humGain.gain]){
+   gain.cancelScheduledValues(now);gain.setValueAtTime(0,now);
+  }
+ }
+ inspect(){return{enabled:this.eventSynth!==undefined,unlocked:this.unlocked,state:this.context?.state??'locked',ambient:this.ambient!==null,voices:this.voices.size};}
  dispose():void{
   if(this.disposed)return;this.disposed=true;this.unlocked=false;
   for(const event of ['pointerdown','touchstart','keydown'])removeEventListener(event,this.unlockGesture,true);
