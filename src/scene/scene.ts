@@ -187,6 +187,7 @@ export class Scene {
   setSimulationProfile(input:SimulationProfileInput):SimulationProfile{
     this.simulationProfile=simulationProfile(input);
     this.simulationProgram=this.kernel.compile(this.simulationProfile);
+    this.physics.setSimulationProfile(this.simulationProfile);
     return this.simulationProfile;
   }
   renderMoverIds():ReadonlySet<string>{
