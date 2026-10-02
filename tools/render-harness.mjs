@@ -182,11 +182,12 @@ try{
     const cameraJson=JSON.stringify(view.camera),time=Number(view.time??0);
     if(!Number.isFinite(time)||time<0)throw new Error('Invalid view time for '+view.name);
     const result=await send('Runtime.evaluate',{
-      expression:`(async()=>{const bridge=window.__GAME_ENGINE__;bridge.setCamera(${cameraJson});bridge.seek(${time});await bridge.flush();bridge.resetProfile();for(let i=0;i<${warmupFrames};i++){bridge.render();await bridge.drain();}bridge.render();await bridge.flush();return bridge.inspect()})()`,
+      expression:`(async()=>{const bridge=window.__GAME_ENGINE__;bridge.seek(${time});bridge.setCamera(${cameraJson});await bridge.flush();bridge.resetProfile();for(let i=0;i<${warmupFrames};i++){bridge.render();await bridge.drain();}bridge.render();await bridge.flush();return{inspection:bridge.inspect(),actualCamera:window.__RENDER_HARNESS__.runtime.scene.camera}})()`,
       awaitPromise:true,returnByValue:true
     });
     if(result.exceptionDetails)throw new Error('Render failed: '+JSON.stringify(result.exceptionDetails));
-    const inspection=result.result?.value;
+    const value=result.result?.value,inspection=value?.inspection,actualCamera=value?.actualCamera;
+    if(JSON.stringify(actualCamera)!==cameraJson)throw new Error('Proof camera diverged for '+view.name+': requested '+cameraJson+', actual '+JSON.stringify(actualCamera));
     const renderer=inspection?.renderer;
     if((renderer?.drawCalls??0)<=0&&(renderer?.triangles??0)<=0)throw new Error('Renderer produced no geometry for '+view.name+': '+JSON.stringify(renderer));
     if(renderer.errors?.length)throw new Error('Renderer errors: '+JSON.stringify(renderer.errors));
@@ -200,7 +201,7 @@ try{
     const output=resolve(view.output);
     await mkdir(join(output,'..'),{recursive:true});
     await writeFile(output,Buffer.from(encoded,'base64'));
-    results.push({name:view.name,output,renderer,camera:view.camera,time:inspection.time,environment:inspection.environment});
+    results.push({name:view.name,output,renderer,camera:actualCamera,time:inspection.time,environment:inspection.environment});
     console.log(JSON.stringify(results.at(-1),null,2));
   }
 
