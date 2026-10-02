@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
- AudioSynthFamily,ENGINE_DEPTH,ProjectionFamily,RenderFrameFamily,Scene,WorldGeneratorFamily,projection,scalar,
+ AudioSynthFamily,ENGINE_DEPTH,RenderFrameFamily,Scene,WorldGeneratorFamily,
 } from '../dist/index.js';
+import {ProjectionFamily,projection,scalar} from '../dist/network/index.js';
 
 test('render depth compiles proxy versus visual geometry once',()=>{
  const scene=new Scene({version:1,gravity:[0,0,0],entities:[{
