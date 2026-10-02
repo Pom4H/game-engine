@@ -11,6 +11,7 @@ on:
       - 'src/execution/**'
       - 'src/meshwork/**'
       - 'test/meshwork-boundaries.test.mjs'
+      - 'test/meshwork-temporal.test.mjs'
       - 'package.json'
       - 'src/runtime/browser.ts'
       - 'src/index.ts'
@@ -36,6 +37,7 @@ on:
       - 'src/execution/**'
       - 'src/meshwork/**'
       - 'test/meshwork-boundaries.test.mjs'
+      - 'test/meshwork-temporal.test.mjs'
       - 'package.json'
       - 'src/runtime/browser.ts'
       - 'src/index.ts'
@@ -65,4 +67,4 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/kernel-depth.test.mjs test/depth-families.test.mjs test/meshwork-boundaries.test.mjs
+      - run: node --test test/kernel-depth.test.mjs test/depth-families.test.mjs test/meshwork-boundaries.test.mjs test/meshwork-temporal.test.mjs

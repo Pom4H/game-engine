@@ -1,0 +1,77 @@
+name: Meshwork 3-worker proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_fps:
+        description: Target spectator FPS
+        required: true
+        default: '120'
+        type: choice
+        options: ['100','120']
+
+jobs:
+  calibrate:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        slot: [a,b,c]
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Locate hardware Chrome
+        run: |
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw 'Chrome not found on GPU worker' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Calibrate worker ${{ matrix.slot }}
+        env:
+          RENDER_REQUIRE_HARDWARE: '1'
+          RENDER_PROFILING: '1'
+          RENDER_WARMUP_FRAMES: '180'
+          MESHWORK_WORKER_SLOT: '${{ matrix.slot }}'
+        run: |
+          $env:MESHWORK_BENCH_STARTED_MS=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/meshwork/bench.views.mjs 1920 1080
+          node tools/meshwork/calibrate.mjs artifacts/render-hud.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meshwork-calibration-${{ matrix.slot }}
+          path: artifacts/meshwork/calibration.json
+          retention-days: 14
+
+  prove:
+    needs: calibrate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: meshwork-calibration-*
+          path: artifacts/meshwork/calibrations
+      - name: Prove aggregate throughput and deadlines
+        run: node tools/meshwork/prove-three-workers.mjs artifacts/meshwork/calibrations ${{ inputs.target_fps }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meshwork-three-worker-proof
+          path: artifacts/meshwork/three-worker-proof.json
+          retention-days: 30
