@@ -15,7 +15,9 @@ import {RenderProfiler} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
-import {buildRenderFrame,renderPrimitive,renderModel,primitiveBaseScale,type RenderFrameIR} from './frame.js';
+import {renderPrimitive,renderModel,primitiveBaseScale,type RenderFrameIR} from './frame.js';
+import {RenderFrameFamily,type RenderFrameBuilder} from './depth.js';
+import type {SimulationProfileInput} from '../core/depth.js';
 import {buildDiffuseIrradianceSH} from './irradiance.js';
 import {SNOWFALL_WGSL,snowfallUniform} from './snowfall.js';
 
@@ -697,6 +699,7 @@ export class WebGPURenderer implements Renderer{
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;private renderFrame:RenderFrameIR|null=null;
+  private readonly frameFamily=new RenderFrameFamily();private frameBuilder:RenderFrameBuilder=this.frameFamily.compile('detailed');
   private readonly materialLoads=new Map<string,Promise<void>>();private readonly failedMaterials=new Set<string>();private disposed=false;
   private pointLights=0;private lightOverflow=0;private lightGridKey='';private environmentKey='';private environmentUpdates=0;private readonly environmentInvalidations=new Map<string,number>();private environmentScene:Scene|null=null;private measuredRadianceSpec:EnvironmentRadianceSpec|null=null;private measuredRadiance:Float32Array|null=null;private readonly environmentIrradiance=new Float32Array(36);private collectedScene:Scene|null=null;private collectedRevision=-1;private collectedVisible:RuntimeEntity[]=[];private collectedOpaque:RuntimeEntity[]=[];private collectedTransparent:RuntimeEntity[]=[];
   private shadowValid=false;private shadowLightVP:Mat4|null=null;private readonly shadowState=new Map<string,{primitive:Primitive;model:Mat4}>();
@@ -803,6 +806,11 @@ export class WebGPURenderer implements Renderer{
     this.timelineFrame=frame;
   }
   resetTemporalHistory():void{this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;this.previousModels.clear();}
+  setSimulationProfile(profile:SimulationProfileInput):void{
+    this.frameBuilder=this.frameFamily.compile(profile);
+    this.renderFrame=null;this.collectedScene=null;this.collectedRevision=-1;this.staticCullRevision=-1;this.shadowValid=false;
+    this.cullCache.clear();this.modelCache.clear();
+  }
   setResolution(width:number,height:number):void{
     if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');
     this.fixedResolution=[width,height];this.resize();
@@ -828,7 +836,7 @@ export class WebGPURenderer implements Renderer{
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
-    this.renderFrame=buildRenderFrame(scene,camera);
+    this.renderFrame=this.frameBuilder(scene,camera);
     const appearanceChanged=this.appearanceScene!==scene||this.appearanceRevision!==scene.appearanceRevision;
     if(appearanceChanged){
       this.appearanceScene=scene;this.appearanceRevision=scene.appearanceRevision;
