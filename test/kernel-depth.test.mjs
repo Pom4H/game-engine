@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ENGINE_DEPTH,EngineKernel,Scene,simulationProfile} from '../dist/index.js';
+import {DepthVariantRegistry,ENGINE_DEPTH,ENGINE_DOMAINS,ENGINE_SLOTS,EngineKernel,Scene,simulationProfile} from '../dist/index.js';
 
 test('kernel compiles plugin variants and depth decisions out of the hot path',()=>{
  const calls=[],kernel=new EngineKernel(60);
@@ -84,4 +84,28 @@ test('legacy tiers normalize to stable depth profiles',()=>{
  assert.deepEqual(simulationProfile('aggregate'),{defaultDepth:64,axes:{}});
  assert.deepEqual(simulationProfile('active'),{defaultDepth:160,axes:{}});
  assert.deepEqual(simulationProfile('detailed'),{defaultDepth:255,axes:{}});
+});
+
+
+test('one depth variant compiler serves physics render audio network world and economics slots',()=>{
+ const registry=new DepthVariantRegistry();
+ registry.usePlugin({id:'fixture.multi-domain',variants:[
+  {id:'physics.aggregate',slot:ENGINE_SLOTS.physicsStep,depth:{axis:ENGINE_DOMAINS.physics,min:64,max:159},value:'physics-aggregate'},
+  {id:'physics.full',slot:ENGINE_SLOTS.physicsStep,depth:{axis:ENGINE_DOMAINS.physics,min:160},value:'physics-full'},
+  {id:'render.proxy',slot:ENGINE_SLOTS.renderFrame,depth:{axis:ENGINE_DOMAINS.render,min:64,max:159},value:'render-proxy'},
+  {id:'render.full',slot:ENGINE_SLOTS.renderFrame,depth:{axis:ENGINE_DOMAINS.render,min:160},value:'render-full'},
+  {id:'audio.events',slot:ENGINE_SLOTS.audioMix,depth:{axis:ENGINE_DOMAINS.audio,min:64},value:'audio-events'},
+  {id:'network.aggregate',slot:ENGINE_SLOTS.networkProject,depth:{axis:ENGINE_DOMAINS.network,min:64,max:159},value:'network-aggregate'},
+  {id:'network.full',slot:ENGINE_SLOTS.networkProject,depth:{axis:ENGINE_DOMAINS.network,min:160},value:'network-full'},
+  {id:'world.tiles',slot:ENGINE_SLOTS.worldMaterialize,depth:{axis:ENGINE_DOMAINS.world,min:64},value:'world-tiles'},
+  {id:'economics.aggregate',slot:ENGINE_SLOTS.economicsSimulate,depth:{axis:ENGINE_DOMAINS.economics,min:64},value:'economics-aggregate'},
+ ]});
+ const compiled=registry.compile({defaultDepth:0,axes:{physics:255,render:96,audio:64,network:160,world:64,economics:64}});
+ assert.equal(compiled.require(ENGINE_SLOTS.physicsStep),'physics-full');
+ assert.equal(compiled.require(ENGINE_SLOTS.renderFrame),'render-proxy');
+ assert.equal(compiled.require(ENGINE_SLOTS.audioMix),'audio-events');
+ assert.equal(compiled.require(ENGINE_SLOTS.networkProject),'network-full');
+ assert.equal(compiled.require(ENGINE_SLOTS.worldMaterialize),'world-tiles');
+ assert.equal(compiled.require(ENGINE_SLOTS.economicsSimulate),'economics-aggregate');
+ assert.equal(registry.compile({axes:{audio:64,economics:64,network:160,physics:255,render:96,world:64},defaultDepth:0}),compiled,'profile key must be canonical across axis insertion order');
 });

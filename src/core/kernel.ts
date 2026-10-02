@@ -2,6 +2,7 @@ import {
  ENGINE_DEPTH,simulationDepth,simulationProfile,simulationProfileKey,simulationTierForDepth,
  type EngineDepth,type SimulationProfile,type SimulationProfileInput,type SimulationTier,
 } from './depth.js';
+import {compileDepthVariants} from './variants.js';
 export {
  ENGINE_DEPTH,ENGINE_DEPTH_AXES,SIMULATION_TIERS,simulationDepth,simulationProfile,simulationProfileKey,simulationTierDepth,simulationTierForDepth,validateEngineDepth,
 } from './depth.js';
@@ -83,13 +84,6 @@ function stable(description:ModuleDescription):ModuleDescription{
   ...(description.depth?{depth:Object.freeze({...description.depth})}:{}),
  });
 }
-function eligible(description:ModuleDescription,profile:SimulationProfile):boolean{
- if(description.tiers&&!description.tiers.includes(simulationTierForDepth(profile.defaultDepth)))return false;
- if(!description.depth)return true;
- const depth=simulationDepth(profile,description.depth.axis);
- return depth>=minDepth(description)&&depth<=maxDepth(description);
-}
-
 /** Stable topological planning plus profile compilation. Variant/depth/plugin decisions happen
  * only here; KernelProgram executes direct module references with no LOD/plugin dispatch. */
 export class ModuleScheduler{
@@ -126,16 +120,10 @@ export class ModuleScheduler{
   if(cached){this.compileHits++;return cached;}
   const all=[...this.modules.values()],known=new Set<string>();
   for(const {description} of all){known.add(description.id);known.add(slotOf(description));}
-  const groups=new Map<string,Registered[]>();
-  for(const registered of all){const slot=slotOf(registered.description),group=groups.get(slot);if(group)group.push(registered);else groups.set(slot,[registered]);}
-  const selected:Registered[]=[];
-  for(const [slot,group] of groups){
-   const candidates=group.filter(item=>eligible(item.description,profile));
-   if(!candidates.length)continue;
-   candidates.sort((a,b)=>minDepth(b.description)-minDepth(a.description)||maxDepth(a.description)-maxDepth(b.description)||(a.description.id<b.description.id?-1:1));
-   if(candidates.length>1&&minDepth(candidates[0]!.description)===minDepth(candidates[1]!.description)&&maxDepth(candidates[0]!.description)===maxDepth(candidates[1]!.description))throw new TypeError(`Ambiguous module variants for slot ${slot}`);
-   selected.push(candidates[0]!);
-  }
+  const candidateModules=all.filter(item=>!item.description.tiers||item.description.tiers.includes(simulationTierForDepth(profile.defaultDepth)));
+  const selected=[...compileDepthVariants(profile,candidateModules.map(item=>({
+   id:item.description.id,slot:slotOf(item.description),depth:item.description.depth,value:item,
+  }))).selected.values()].map(entry=>entry.value);
   const byId=new Map(selected.map(item=>[item.description.id,item])),bySlot=new Map(selected.map(item=>[slotOf(item.description),item]));
   const allByReference=new Map<string,Registered[]>();
   for(const item of all)for(const reference of new Set([item.description.id,slotOf(item.description)])){
