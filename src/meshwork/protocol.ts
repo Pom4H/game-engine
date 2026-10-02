@@ -6,11 +6,24 @@ export interface MeshRenderSegmentTask {
  readonly streamId:string;readonly epoch:bigint;readonly segment:bigint;readonly attempt:number;readonly firstOutputFrame:bigint;readonly outputFrames:number;readonly warmupFrames:number;
  readonly programHash:ContentHash;readonly executionGraphRefHash:ContentHash;readonly checkpointHash:ContentHash;readonly resourceManifestHash:ContentHash;readonly cameraHash:ContentHash;readonly renderProfileHash:ContentHash;readonly deadlineNs:bigint;
 }
+export interface MeshSegmentTransportTelemetry {
+ readonly cacheHits:number;
+ readonly cacheMisses:number;
+ readonly fetchedBytes:number;
+ readonly fetchedBytesMeasured:boolean;
+ readonly hydrationNs:bigint;
+ readonly executionNs:bigint;
+ readonly outputBytes:number;
+ readonly outputBytesMeasured:boolean;
+ readonly encodeNs:bigint;
+ readonly uploadNs:bigint;
+}
 export interface MeshRenderSegmentResult {
  readonly streamId:string;readonly epoch:bigint;readonly segment:bigint;readonly attempt:number;readonly firstFrame:bigint;readonly frameCount:number;
  readonly inputHash:ContentHash;readonly outputHash:ContentHash;
  /** Worker-local monotonic telemetry only. Coordinator deadlines MUST use arrival time on coordinator clock. */
  readonly finishedNs:bigint;
+ readonly transport?:MeshSegmentTransportTelemetry;
 }
 export type MeshAttemptDecision='accept'|'stale-epoch'|'wrong-task'|'late'|'already-committed';
 

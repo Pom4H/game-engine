@@ -5,7 +5,9 @@ import {MemoryContentStore} from '../dist/render-ir/index.js';
 import {createRenderSequenceBundle,lowerRenderProgram,projectSceneRenderFrame} from '../dist/execution/index.js';
 import {MeshWorkerRuntime,TemporalRenderSession,decodeMeshWire,encodeMeshWire} from '../dist/meshwork/index.js';
 
-test('authority -> CAS transfer -> worker -> ordered assembler is complete',async()=>{
+const measuredTransport={source:'measured',ingressBytesPerSecond:500_000_000,egressBytesPerSecond:500_000_000,inputBytesPerFrameBudget:2_000,outputBytesPerFrameBudget:4_096,segmentInputBytesBudget:4_000,cacheWarm:true};
+
+test('authority -> CAS transfer -> worker -> ordered assembler records real transport accounting',async()=>{
  const scene=new Scene({version:1,gravity:[0,0,0],entities:[
   {id:'box',position:[0,0,0],mesh:{kind:'box',size:[1,1,1]},material:{kind:'steel'},body:{motion:'kinematic',mass:1,velocity:[.1,0,0]}},
   {id:'lamp',position:[2,3,1],mesh:{kind:'sphere',radius:.1},light:{kind:'point',intensity:15,range:20}},
@@ -20,29 +22,30 @@ test('authority -> CAS transfer -> worker -> ordered assembler is complete',asyn
  const session=new TemporalRenderSession({
   program:bundle.program,graph:bundle.graph,executionGraphRefHash:bundle.graphRef.hash,stream,epoch,resourceManifestHash:bundle.manifestRef.hash,
   workers:[
-   {workerId:'A',frameNsBudget:14_000_000n,fixedNsBudget:2_000_000n},
-   {workerId:'B',frameNsBudget:15_000_000n,fixedNsBudget:2_000_000n},
-   {workerId:'C',frameNsBudget:16_000_000n,fixedNsBudget:2_000_000n},
+   {workerId:'A',frameNsBudget:14_000_000n,fixedNsBudget:2_000_000n,transport:measuredTransport},
+   {workerId:'B',frameNsBudget:15_000_000n,fixedNsBudget:2_000_000n,transport:measuredTransport},
+   {workerId:'C',frameNsBudget:16_000_000n,fixedNsBudget:2_000_000n,transport:measuredTransport},
   ],
   nowNs:0n,firstDisplayNs:2_000_000_000n,firstOutputFrame:0n,totalOutputFrames:60,reserveRatio:.8,guardNs:100_000_000n,
  });
- assert.equal(session.plan.proofEligible,true,{safeFps:session.plan.safeFps,single:session.plan.singleBestFps});
+ assert.equal(session.plan.proofEligible,true,{safeFps:session.plan.safeFps,single:session.plan.singleBestFps,transport:session.plan.maxObservedTransportOverheadRatio});
 
- const source={async fetch(hash){const ref=authority.ref(hash);return ref?{ref,value:authority.require(hash)}:undefined;}};
- let clock=500_000_000n;
- const completed=[];
+ const source={async fetch(hash){const ref=authority.ref(hash);return ref?{ref,value:authority.require(hash),transferredBytes:256}:undefined;}};
+ let clock=0n;const now=()=>{clock+=1_000_000n;return clock;},completed=[];
  for(const workerId of ['A','B','C']){
   const workerStore=new MemoryContentStore();
-  const executor={execute:({outputFrames,inputHash})=>({frameCount:outputFrames.length,payload:{inputHash,frames:outputFrames.map(frame=>frame.frame.toString())}})};
-  const runtime=new MeshWorkerRuntime(workerId,workerStore,executor,source,()=>clock);
+  const executor={execute:({outputFrames,inputHash})=>({frameCount:outputFrames.length,payload:{inputHash,frames:outputFrames.map(frame=>frame.frame.toString())},encodedBytes:4_096,encodeNs:100_000n,uploadNs:200_000n})};
+  const runtime=new MeshWorkerRuntime(workerId,workerStore,executor,source,now);
   const lease=session.claim(workerId,0n,1_000_000_000n);assert.ok(lease,workerId);
   const task=decodeMeshWire(encodeMeshWire(lease.task));assert.equal(task.firstOutputFrame,lease.task.firstOutputFrame);
-  completed.push({lease,result:await runtime.execute(task),workerStore});
+  const result=await runtime.execute(task);
+  assert.ok(result.transport);assert.ok(result.transport.cacheMisses>0);assert.ok(result.transport.fetchedBytes>0);assert.equal(result.transport.fetchedBytesMeasured,true);
+  assert.equal(result.transport.outputBytes,4_096);assert.equal(result.transport.outputBytesMeasured,true);assert.equal(result.transport.encodeNs,100_000n);assert.equal(result.transport.uploadNs,200_000n);
+  completed.push({lease,result,workerStore});
  }
  const assembled=[];
  for(const item of completed.reverse()){const accepted=session.accept(item.lease,item.result,clock);assert.equal(accepted.decision,'accept');assembled.push(...accepted.ready);assert.ok(item.workerStore.has(item.result.outputHash));}
- assert.equal(assembled.length,3);assert.equal(session.leases.pending,0);assert.equal(session.assembler.nextOutputFrame,60n);
- assert.equal(assembled.reduce((sum,result)=>sum+result.frameCount,0),60);
+ assert.equal(assembled.length,3);assert.equal(session.leases.pending,0);assert.equal(session.assembler.nextOutputFrame,60n);assert.equal(assembled.reduce((sum,result)=>sum+result.frameCount,0),60);
 });
 
 test('worker rejects tampered content by recomputing its content hash',async()=>{
