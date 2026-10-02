@@ -3,6 +3,7 @@ name: World Streaming CI
 on:
   push:
     paths:
+      - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/world/**'
       - 'test/infinite-world.test.mjs'
@@ -11,6 +12,7 @@ on:
       - '.github/workflows/world-streaming-ci.yml'
   pull_request:
     paths:
+      - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/world/**'
       - 'test/infinite-world.test.mjs'

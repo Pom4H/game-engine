@@ -2,6 +2,7 @@ name: Engine architecture
 on:
   push:
     paths:
+      - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/scene/modules.ts'
       - 'src/scene/system-runtime.ts'
@@ -14,6 +15,7 @@ on:
       - '.github/workflows/architecture.yml'
   pull_request:
     paths:
+      - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/scene/modules.ts'
       - 'src/scene/system-runtime.ts'
