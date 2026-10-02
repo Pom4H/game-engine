@@ -90,3 +90,8 @@ export {VisibilityInterest,DEFAULT_VISIBILITY_INTEREST,geometricHorizonDistance,
 export {InfiniteWorld,type InfiniteWorldTileState,type InfiniteWorldHooks,type InfiniteWorldOptions,type InfiniteWorldStats} from './world/infinite-world.js';
 
 export {WorldGeneratorFamily,type WorldGenerator,type WorldGeneratorVariant,type WorldGeneratorPlugin} from './world/depth.js';
+
+export {Projection,Publication,LatestStateOutbox,projection,scalar,vector3,type Field,type Fields,type Values,type Stamp,type Row,type Frame} from './network/projection.js';
+export {ProjectionFamily,type ProjectionVariant,type ProjectionFamilyPlugin} from './network/depth.js';
+export {PlaybackClock,Replica,type Sample,type SampleRow} from './network/playback.js';
+export {AuthoritySession,type AuthorityAdapter,type DebugAction,type DebugRequest} from './network/authority.js';
