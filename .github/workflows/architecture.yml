@@ -2,6 +2,12 @@ name: Engine architecture
 on:
   push:
     paths:
+      - 'src/audio/browser.ts'
+      - 'src/render/webgpu.ts'
+      - 'src/render/cpu.ts'
+      - 'src/render/types.ts'
+      - 'src/render/frame.ts'
+      - 'src/runtime/browser.ts'
       - 'src/index.ts'
       - 'src/scene/scene.ts'
       - 'src/core/**'
@@ -16,6 +22,12 @@ on:
       - '.github/workflows/architecture.yml'
   pull_request:
     paths:
+      - 'src/audio/browser.ts'
+      - 'src/render/webgpu.ts'
+      - 'src/render/cpu.ts'
+      - 'src/render/types.ts'
+      - 'src/render/frame.ts'
+      - 'src/runtime/browser.ts'
       - 'src/index.ts'
       - 'src/scene/scene.ts'
       - 'src/core/**'
