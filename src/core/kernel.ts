@@ -178,7 +178,7 @@ export class ModuleScheduler{
    }
    flush();plans.push(Object.freeze(batches));
   }
-  const frozenPlans=Object.freeze(plans),schedule:Object.freeze({
+  const frozenPlans=Object.freeze(plans),schedule=Object.freeze({
    profile,cycleTicks,selectedModules:Object.freeze(order.map(item=>item.description)),
    plan:(tick:number)=>{if(!Number.isSafeInteger(tick)||tick<0)throw new RangeError('tick must be a non-negative safe integer');return frozenPlans[tick%cycleTicks]!;},
   }) as CompiledSchedule;
