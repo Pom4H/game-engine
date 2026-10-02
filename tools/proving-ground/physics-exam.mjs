@@ -1,6 +1,7 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import * as engine from '../../dist/index.js';
 import {provingGroundZones,releasePhysicsRequirements} from './catalog.mjs';
+import {provingGroundExperiments} from './experiments.mjs';
 
 const implemented=new Map([
  ['rigid-contact',typeof engine.PhysicsWorld==='function'],
@@ -42,7 +43,7 @@ const implemented=new Map([
  ['sinkage',typeof engine.SoilField==='function'],
  ['traction',typeof engine.SoilField==='function'&&typeof engine.Vehicle==='function'],
  ['ground-clearance',typeof engine.Vehicle==='function'],
- // Trace exists, but release proof remains blocked until contact damping/sleep corrections are causal too.
+ // Provenance and energy closure are behaviorally tested in proving-ground.test.mjs.
  ['cause-provenance',typeof engine.PhysicsCauseTrace==='function'],
  ['energy-accounting',typeof engine.PhysicsCauseTrace==='function'&&typeof engine.physicsAccounting==='function'],
  ['momentum-accounting',typeof engine.physicsAccounting==='function'],
@@ -61,6 +62,7 @@ const report={
  generatedAt:new Date().toISOString(),
  releaseReady:missing.length===0,
  requirements,
+ experiments:provingGroundExperiments.map(e=>({id:e.id,title:e.title,domain:e.domain,durationS:e.durationS,runtimeTickRate:e.runtimeTickRate,proof:e.proof})),
  zones,
  missing,
  notes:[

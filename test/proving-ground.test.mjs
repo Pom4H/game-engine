@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
+import {gravityFreeFallExperiment} from '../tools/proving-ground/experiments.mjs';
 import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,soilWheelSupport,wheelHit,physicsAccounting,ThermalMass,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
@@ -487,22 +488,39 @@ test('solver rolling-rest and sleep-rest are explicit causal records',()=>{
 });
 
 
-test('ballistic mechanical accounting stays within integrator error and matches external gravity impulse',()=>{
- const world=new PhysicsWorld([0,-9.81,0],-1000),body=world.add(new RigidBody({
-  id:'account.ballistic',position:[0,100,0],velocity:[7,12,3],angularVelocity:[.3,.5,.2],
-  mass:100,shape:{kind:'sphere',radius:.5},material:material('steel'),friction:0,restitution:0
- }));
- const h=1/240,steps=960,t=steps*h,before=physicsAccounting(world.bodies.values(),world.gravity);
- for(let i=0;i<steps;i++)world.step(h);
- const after=physicsAccounting(world.bodies.values(),world.gravity);
- const expected=[
-  before.linearMomentumNs[0]+body.mass*world.gravity[0]*t,
-  before.linearMomentumNs[1]+body.mass*world.gravity[1]*t,
-  before.linearMomentumNs[2]+body.mass*world.gravity[2]*t,
- ];
- assert.ok(Math.hypot(after.linearMomentumNs[0]-expected[0],after.linearMomentumNs[1]-expected[1],after.linearMomentumNs[2]-expected[2])<1e-7,{before,after,expected});
- assert.ok(Math.hypot(after.spinAngularMomentumNms[0]-before.spinAngularMomentumNms[0],after.spinAngularMomentumNms[1]-before.spinAngularMomentumNms[1],after.spinAngularMomentumNms[2]-before.spinAngularMomentumNms[2])<1e-8,{before,after});
- assert.ok(Math.abs(after.mechanicalJ-before.mechanicalJ)/before.mechanicalJ<.002,{before:before.mechanicalJ,after:after.mechanicalJ});
+test('ballistic stand matches the symplectic oracle, gravity impulse and predicted numerical energy defect',()=>{
+ const e=gravityFreeFallExperiment;
+ const authored=spec.entities.find(entity=>entity.id==='experiment-gravity-free-fall-body');
+ assert.ok(authored,'experiment must be materialized into the proving-ground scene');
+ assert.deepEqual(authored.position,e.body.initialPosition);
+ assert.deepEqual(authored.body.velocity,e.body.initialVelocity);
+ const norm=v=>Math.hypot(...v),sub=(a,b)=>a.map((v,i)=>v-b[i]);
+ const roundoff=(steps,...values)=>4096*Number.EPSILON*Math.max(1,...values.map(Math.abs))*Math.max(1,steps);
+ const run=tickRate=>{
+  const h=1/tickRate,steps=Math.round(e.durationS*tickRate),t=steps*h;
+  assert.equal(t,e.durationS,'experiment duration must be an integer number of fixed steps');
+  const world=new PhysicsWorld(e.gravity,-1000),body=world.add(new RigidBody({
+   id:`account.ballistic.${tickRate}`,position:e.body.initialPosition,velocity:e.body.initialVelocity,angularVelocity:e.body.angularVelocity,
+   mass:e.body.massKg,shape:{kind:'sphere',radius:e.body.radiusM},material:material('steel'),friction:0,restitution:0
+  }));
+  const before=physicsAccounting(world.bodies.values(),world.gravity);
+  for(let i=0;i<steps;i++)world.step(h);
+  const after=physicsAccounting(world.bodies.values(),world.gravity),expectedPosition=e.symplecticPositionAt(t,h),expectedMomentum=e.momentumAt(t);
+  const positionBudget=roundoff(steps,...expectedPosition,...body.position);
+  const momentumBudget=roundoff(steps,...expectedMomentum,...after.linearMomentumNs);
+  const spinBudget=roundoff(steps,...before.spinAngularMomentumNms,...after.spinAngularMomentumNms);
+  const measuredEnergyDefect=after.mechanicalJ-before.mechanicalJ,expectedEnergyDefect=e.symplecticEnergyDefectJ(t,h);
+  const energyBudget=roundoff(steps,before.mechanicalJ,after.mechanicalJ,expectedEnergyDefect);
+  assert.ok(norm(sub(body.position,expectedPosition))<=positionBudget,{tickRate,position:body.position,expectedPosition,positionBudget});
+  assert.ok(norm(sub(after.linearMomentumNs,expectedMomentum))<=momentumBudget,{tickRate,actual:after.linearMomentumNs,expectedMomentum,momentumBudget});
+  assert.ok(norm(sub(after.spinAngularMomentumNms,before.spinAngularMomentumNms))<=spinBudget,{tickRate,before,after,spinBudget});
+  assert.ok(Math.abs(measuredEnergyDefect-expectedEnergyDefect)<=energyBudget,{tickRate,measuredEnergyDefect,expectedEnergyDefect,energyBudget});
+  return{tickRate,steps,h,positionError:sub(body.position,e.continuousPositionAt(t)),measuredEnergyDefect,expectedEnergyDefect};
+ };
+ const coarse=run(60),fine=run(120),coarseError=norm(coarse.positionError),fineError=norm(fine.positionError);
+ const convergenceBudget=roundoff(coarse.steps+fine.steps,coarseError,fineError,coarse.measuredEnergyDefect,fine.measuredEnergyDefect);
+ assert.ok(Math.abs(coarseError-2*fineError)<=convergenceBudget,{coarseError,fineError,convergenceBudget});
+ assert.ok(Math.abs(coarse.measuredEnergyDefect-2*fine.measuredEnergyDefect)<=convergenceBudget,{coarse,fine,convergenceBudget});
 });
 
 test('closed rigid collision conserves total linear and angular momentum',()=>{

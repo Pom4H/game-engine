@@ -1,6 +1,7 @@
 // Engine proving ground. Geometry is deliberately simple and modular: every
 // physical obstacle/road section is an ordinary Scene entity, not gameplay code.
 import {provingGroundZones} from './catalog.mjs';
+import {provingGroundExperiments,experimentSceneEntities} from './experiments.mjs';
 
 const A={kind:'asphalt',color:[.055,.06,.065,1],roughness:.82};
 const C={kind:'concrete',color:[.42,.43,.44,1],roughness:.88};
@@ -225,10 +226,13 @@ for(const [id,p,s] of [
 box('control-tower',[43,12,118],[4.6,20,4.6],C);
 box('control-cab',[43,22.5,118],[8,5,8],{kind:'glass',color:[.18,.25,.28,.55],roughness:.1});
 
+entities.push(...experimentSceneEntities);
+
 export const provingGroundMeta=Object.freeze({
  name:'Engine Proving Ground',
  reference:'diagnostics-and-durability',
  zones:provingGroundZones,
+ experiments:provingGroundExperiments.map(({id,title,domain})=>({id,title,domain})),
  boundsM:[360,860],
 });
 export const camera={position:[128,96,-150],target:[0,6,20],fov:47,aperture:0};
