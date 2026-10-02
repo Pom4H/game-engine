@@ -2,6 +2,19 @@
 // Scene, tests, reports and render views are projections of the same descriptor.
 export const experiment=definition=>Object.freeze(definition);
 
+export const observedExperimentCauseLawIds=(records,bodyId)=>Object.freeze([...new Set(
+ records.filter(record=>record.type==='physics.contribution'&&record.body_id===bodyId).map(record=>record.law_id)
+)].sort());
+
+export function assertExperimentCauseGraph(definition,records,bodyId){
+ const observed=observedExperimentCauseLawIds(records,bodyId);
+ const expected=[...definition.environment.allowedCauseLawIds].sort();
+ if(observed.length!==expected.length||observed.some((law,index)=>law!==expected[index])){
+  throw new Error(`Experiment ${definition.id} cause graph diverged: expected [${expected.join(', ')}], observed [${observed.join(', ')}]`);
+ }
+ return observed;
+}
+
 const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
 const scale=(v,s)=>[v[0]*s,v[1]*s,v[2]*s];
 
@@ -26,11 +39,19 @@ export const gravityFreeFallExperiment=experiment({
  durationS,
  runtimeTickRate,
  gravity,
+ sceneBodyId:'experiment-gravity-free-fall-body',
+ environment:Object.freeze({
+  gravity,
+  atmosphere:'excluded',
+  fluids:'excluded',
+  contacts:'excluded',
+  allowedCauseLawIds:Object.freeze(['gravity.v1']),
+ }),
  body:Object.freeze({massKg,radiusM,initialPosition,initialVelocity,angularVelocity}),
  proof:Object.freeze({
   governingRelation:'v[n+1]=v[n]+g*dt; x[n+1]=x[n]+v[n+1]*dt',
   units:'x[m], v[m/s], g[m/s^2], p[kg*m/s], E[J]',
-  assumptions:Object.freeze(['constant uniform gravity','no contacts','no drag','no external torque']),
+  assumptions:Object.freeze(['constant uniform gravity','vacuum: atmosphere excluded','no fluids','no contacts','no external torque']),
   limitingCase:'dt -> 0 recovers x(t)=x0+v0*t+0.5*g*t^2',
   conservation:'linear momentum changes only by m*g*t; spin angular momentum is constant',
   numericalDissipation:'DeltaE=-0.5*m*|g|^2*t*dt; this is integrator defect, not physical dissipation',
@@ -57,7 +78,7 @@ const crosshair=(id,p,span,material)=>[
 export function materializeExperimentScene(e=gravityFreeFallExperiment){
  const p0=e.body.initialPosition,dt=1/e.runtimeTickRate,pd=e.symplecticPositionAt(e.durationS,dt),pc=e.continuousPositionAt(e.durationS);
  const entities=[
-  sphere('experiment-gravity-free-fall-body',p0,e.body.radiusM,measured),
+  sphere(e.sceneBodyId,p0,e.body.radiusM,measured),
   sphere('experiment-gravity-free-fall-start',p0,e.body.radiusM*1.18,{...neutral,color:[.75,.78,.82,.22]}),
   sphere('experiment-gravity-free-fall-oracle-discrete',pd,e.body.radiusM*.62,discrete),
   sphere('experiment-gravity-free-fall-oracle-continuous',pc,e.body.radiusM*.62,continuous),

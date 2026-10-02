@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {gravityFreeFallExperiment} from '../tools/proving-ground/experiments.mjs';
+import {assertExperimentCauseGraph,gravityFreeFallExperiment} from '../tools/proving-ground/experiments.mjs';
 import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,soilWheelSupport,wheelHit,physicsAccounting,ThermalMass,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
@@ -490,10 +490,18 @@ test('solver rolling-rest and sleep-rest are explicit causal records',()=>{
 
 test('ballistic stand matches the symplectic oracle, gravity impulse and predicted numerical energy defect',()=>{
  const e=gravityFreeFallExperiment;
- const authored=spec.entities.find(entity=>entity.id==='experiment-gravity-free-fall-body');
+ const authored=spec.entities.find(entity=>entity.id===e.sceneBodyId);
  assert.ok(authored,'experiment must be materialized into the proving-ground scene');
  assert.deepEqual(authored.position,e.body.initialPosition);
  assert.deepEqual(authored.body.velocity,e.body.initialVelocity);
+ const projectedScene=new Scene(spec),projectedBody=projectedScene.entities.get(e.sceneBodyId)?.body;
+ assert.ok(projectedBody,'materialized experiment body must remain a physical Scene body');
+ const causeTrace=projectedScene.physics.traceCauses({runId:`experiment:${e.id}`,maxRecords:50000});
+ for(let i=0;i<e.durationS*e.runtimeTickRate;i++)projectedScene.step(1/e.runtimeTickRate);
+ const observedCauses=assertExperimentCauseGraph(e,causeTrace.snapshot(),projectedBody.id);
+ assert.deepEqual(observedCauses,['gravity.v1']);
+ assert.equal(projectedScene.physics.contacts.some(c=>c.a===projectedBody.id||c.b===projectedBody.id),false,'vacuum free-fall experiment must remain contact-free');
+ projectedScene.physics.stopCauseTrace(causeTrace);
  const norm=v=>Math.hypot(...v),sub=(a,b)=>a.map((v,i)=>v-b[i]);
  const roundoff=(steps,...values)=>4096*Number.EPSILON*Math.max(1,...values.map(Math.abs))*Math.max(1,steps);
  const run=tickRate=>{

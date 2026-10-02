@@ -232,7 +232,7 @@ export const provingGroundMeta=Object.freeze({
  name:'Engine Proving Ground',
  reference:'diagnostics-and-durability',
  zones:provingGroundZones,
- experiments:provingGroundExperiments.map(({id,title,domain})=>({id,title,domain})),
+ experiments:provingGroundExperiments.map(({id,title,domain,environment})=>({id,title,domain,environment})),
  boundsM:[360,860],
 });
 export const camera={position:[128,96,-150],target:[0,6,20],fov:47,aperture:0};
@@ -241,10 +241,12 @@ export default {
  seed:20261001,
  gravity:[0,-9.81,0],
  ground:-2,
- clearColor:[.42,.58,.72,1],
+ clearColor:[.56,.70,.82,1],
  camera,
  environment:{temperatureC:18,sunlight:.82,humidity:.48,wind:[1.5,0,.3],precipitation:'arid'},
- rendering:{sunDirection:[-.45,.72,-.31],sunColor:[1,.93,.84],skyColor:[.35,.52,.70],sunIntensity:1.0,exposure:1.05,shadowExtent:190,fogDensity:.0025},
+ // Facility ambience must not masquerade as an experiment boundary condition. Physics
+ // experiments declare and gate their own allowed causes; this render stays visually neutral.
+ rendering:{sunDirection:[-.45,.72,-.31],sunColor:[1,.97,.92],skyColor:[.52,.70,.86],sunIntensity:1.0,exposure:1.05,shadowExtent:190,fogDensity:0},
  fluids:[{id:'water-basin-fluid',shape:'cylinder',center:[12,-1.05,-27],radiusM:18.7,depthM:2.1,densityKgM3:998.2,velocity:[0,0,0],dragCoefficient:.9}],
  windVolumes:[{id:'crosswind.field',center:[100,3.2,32],sizeM:[14,7,44],wind:[18,0,0],densityKgM3:1.225,blendM:2.0}],
  soilVolumes:[{id:'soft-ground',center:[97,0,-112],sizeM:[20,16],cells:[20,16],pressureScalePa:85000,sinkageExponent:.85,maxSinkageM:.30,cohesionPa:7000,frictionAngleDeg:27,compactionRatePerSecond:.55,rollingResistance:.055}],

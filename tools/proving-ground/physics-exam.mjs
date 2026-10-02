@@ -62,14 +62,15 @@ const report={
  generatedAt:new Date().toISOString(),
  releaseReady:missing.length===0,
  requirements,
- experiments:provingGroundExperiments.map(e=>({id:e.id,title:e.title,domain:e.domain,durationS:e.durationS,runtimeTickRate:e.runtimeTickRate,proof:e.proof})),
+ experiments:provingGroundExperiments.map(e=>({id:e.id,title:e.title,domain:e.domain,durationS:e.durationS,runtimeTickRate:e.runtimeTickRate,environment:e.environment,proof:e.proof})),
  zones,
  missing,
  notes:[
   'Historical branches do not count: only exports reachable from current main are inspected.',
   'Thegame behavior is not a reality oracle.',
   'A release requires all proving-ground domains plus external/reality validation where applicable.',
-  'Cause provenance and stage-level mechanical energy closure are behaviorally gated across vehicle, soil, fluid and contacts; momentum is independently checked on closed rigid-body systems.'
+  'Cause provenance and stage-level mechanical energy closure are behaviorally gated across vehicle, soil, fluid and contacts; momentum is independently checked on closed rigid-body systems.',
+  'Each materialized experiment has an explicit environment contract; observed physics contributions must exactly match its allowed cause graph.'
  ],
 };
 await mkdir('artifacts/proving-ground',{recursive:true});
