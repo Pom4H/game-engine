@@ -1,16 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {defineRenderProgram} from '../dist/render-ir/index.js';
+import {defineRenderProgram,MemoryContentStore} from '../dist/render-ir/index.js';
+import {lowerRenderProgram} from '../dist/execution/index.js';
 import {compileTemporalMeshPlan} from '../dist/meshwork/index.js';
 
 const ms=value=>BigInt(Math.round(value*1e6));
 const program=defineRenderProgram({schema:1,programHash:'program:proof',profileHash:'profile:cinematic',partitionability:{kind:'temporal',warmupFrames:4},requiredResources:{resources:[]}});
+const graph=lowerRenderProgram(program),graphStore=new MemoryContentStore(),graphRef=graphStore.put('graph',graph);
 const stream={streamId:'proof',targetFps:120,renderProgramHash:program.programHash};
 const epoch={streamId:'proof',epoch:7n,checkpointHash:'checkpoint:7',cameraHash:'camera:main',profileHash:program.profileHash};
 
 test('temporal compiler proves aggregate capacity without pretending a single worker reaches target',()=>{
  const plan=compileTemporalMeshPlan({
-  program,stream,epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(2000),firstOutputFrame:1000n,totalOutputFrames:96,reserveRatio:.8,guardNs:ms(100),
+  program,graph,executionGraphRefHash:graphRef.hash,stream,epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(2000),firstOutputFrame:1000n,totalOutputFrames:96,reserveRatio:.8,guardNs:ms(100),
   workers:[
    {workerId:'A',frameNsBudget:ms(1000/65),fixedNsBudget:ms(5)},
    {workerId:'B',frameNsBudget:ms(1000/60),fixedNsBudget:ms(5)},
@@ -33,7 +35,7 @@ test('temporal compiler proves aggregate capacity without pretending a single wo
 
 test('temporal compiler refuses to call insufficient aggregate throughput admitted',()=>{
  const plan=compileTemporalMeshPlan({
-  program,stream,epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(2000),firstOutputFrame:0n,totalOutputFrames:96,reserveRatio:.8,guardNs:ms(100),
+  program,graph,executionGraphRefHash:graphRef.hash,stream,epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(2000),firstOutputFrame:0n,totalOutputFrames:96,reserveRatio:.8,guardNs:ms(100),
   workers:[
    {workerId:'A',frameNsBudget:ms(1000/40),fixedNsBudget:ms(5)},
    {workerId:'B',frameNsBudget:ms(1000/35),fixedNsBudget:ms(5)},
@@ -45,7 +47,7 @@ test('temporal compiler refuses to call insufficient aggregate throughput admitt
 
 test('temporal placement rejects incompatible program identity',()=>{
  assert.throws(()=>compileTemporalMeshPlan({
-  program:{...program,partitionability:{kind:'atomic'}},stream,epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(1000),firstOutputFrame:0n,totalOutputFrames:3,
+  program:{...program,partitionability:{kind:'atomic'}},graph,executionGraphRefHash:graphRef.hash,stream,epoch,resourceManifestHash:'manifest:proof',nowNs:0n,firstDisplayNs:ms(1000),firstOutputFrame:0n,totalOutputFrames:3,
   workers:[{workerId:'A',frameNsBudget:ms(10)}],
  }),/not temporally partitionable/);
  assert.throws(()=>compileTemporalMeshPlan({
