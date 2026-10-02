@@ -26,6 +26,7 @@ const massKg=100;
 const radiusM=.45;
 const durationS=4;
 const runtimeTickRate=60;
+const sharedProofPhysicsStepSeconds=1/120;
 
 const continuousPositionAt=t=>add(add(initialPosition,scale(initialVelocity,t)),scale(gravity,.5*t*t));
 const symplecticPositionAt=(t,dt)=>add(add(initialPosition,scale(initialVelocity,t)),scale(gravity,.5*t*(t+dt)));
@@ -38,6 +39,7 @@ export const gravityFreeFallExperiment=experiment({
  domain:'ballistic',
  durationS,
  runtimeTickRate,
+ scenePhysicsStepSeconds:sharedProofPhysicsStepSeconds,
  gravity,
  sceneBodyId:'experiment-gravity-free-fall-body',
  environment:Object.freeze({
@@ -132,6 +134,7 @@ export const rotationFreeBodyExperiment=experiment({
  domain:'rotation',
  durationS:rotationDurationS,
  runtimeTickRate:rotationTickRate,
+ scenePhysicsStepSeconds:sharedProofPhysicsStepSeconds,
  gravity,
  sceneBodyId:'experiment-rotation-free-body',
  environment:Object.freeze({
@@ -230,7 +233,7 @@ const crosshair=(id,p,span,material)=>[
 ];
 
 export function materializeGravityExperimentScene(e=gravityFreeFallExperiment){
- const p0=e.body.initialPosition,dt=1/e.runtimeTickRate,pd=e.symplecticPositionAt(e.durationS,dt),pc=e.continuousPositionAt(e.durationS);
+ const p0=e.body.initialPosition,dt=e.scenePhysicsStepSeconds,pd=e.symplecticPositionAt(e.durationS,dt),pc=e.continuousPositionAt(e.durationS);
  const entities=[
   sphere(e.sceneBodyId,p0,e.body.radiusM,measured),
   sphere('experiment-gravity-free-fall-start',p0,e.body.radiusM*1.18,{...neutral,color:[.75,.78,.82,.22]}),
@@ -275,7 +278,7 @@ export function materializeCollisionExperimentScene(e=collisionElasticExperiment
 }
 
 export function materializeRotationExperimentScene(e=rotationFreeBodyExperiment){
- const dt=1/e.runtimeTickRate,pf=e.positionAt(e.durationS,dt),size=e.body.halfM*2;
+ const dt=e.scenePhysicsStepSeconds,pf=e.positionAt(e.durationS,dt),size=e.body.halfM*2;
  return[
   {id:e.sceneBodyId,position:e.body.initialPosition,mesh:{kind:'box',size:[size,size,size]},material:measured,body:{mass:e.body.massKg,velocity:e.body.initialVelocity,angularVelocity:e.body.angularVelocity,restitution:0,friction:0}},
   box('experiment-rotation-free-body-start',e.body.initialPosition,[size*1.06,size*1.06,size*1.06],{...neutral,color:[.75,.78,.82,.16]}),
