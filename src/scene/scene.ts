@@ -217,7 +217,7 @@ export class Scene {
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,profile?:SimulationProfileInput):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
-    const at=this.time+dt;this.lastExecution=[],program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);
+    const at=this.time+dt,program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);this.lastExecution=[];
     program.run(this.tick+1,{} as SceneModuleContext,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
