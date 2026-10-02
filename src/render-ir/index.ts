@@ -2,7 +2,7 @@
  * renderer backends, execution placement nor Meshwork. Local renderers do not
  * materialize these packets unless a caller explicitly asks for a portable job. */
 export type ContentHash=string;
-export type RenderResourceKind='mesh'|'texture'|'material'|'shader'|'environment'|'buffer'|'temporal'|'frame'|'checkpoint'|'program'|'manifest'|'segment';
+export type RenderResourceKind='mesh'|'texture'|'material'|'shader'|'environment'|'buffer'|'temporal'|'frame'|'checkpoint'|'program'|'graph'|'manifest'|'segment';
 
 export interface ContentRef {readonly kind:RenderResourceKind;readonly hash:ContentHash}
 export interface ResourceManifest {readonly resources:readonly ContentRef[]}
