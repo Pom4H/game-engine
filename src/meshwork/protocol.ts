@@ -4,7 +4,7 @@ export interface MeshStream {readonly streamId:string;readonly targetFps:number;
 export interface MeshEpoch {readonly streamId:string;readonly epoch:bigint;readonly checkpointHash:ContentHash;readonly cameraHash:ContentHash;readonly profileHash:ContentHash}
 export interface MeshRenderSegmentTask {
  readonly streamId:string;readonly epoch:bigint;readonly segment:bigint;readonly attempt:number;readonly firstOutputFrame:bigint;readonly outputFrames:number;readonly warmupFrames:number;
- readonly programHash:ContentHash;readonly checkpointHash:ContentHash;readonly resourceManifestHash:ContentHash;readonly cameraHash:ContentHash;readonly renderProfileHash:ContentHash;readonly deadlineNs:bigint;
+ readonly programHash:ContentHash;readonly executionGraphRefHash:ContentHash;readonly checkpointHash:ContentHash;readonly resourceManifestHash:ContentHash;readonly cameraHash:ContentHash;readonly renderProfileHash:ContentHash;readonly deadlineNs:bigint;
 }
 export interface MeshRenderSegmentResult {
  readonly streamId:string;readonly epoch:bigint;readonly segment:bigint;readonly attempt:number;readonly firstFrame:bigint;readonly frameCount:number;
