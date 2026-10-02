@@ -52,7 +52,7 @@ const segmentDuration=(worker:MeshWorkerCalibration,count:number,warmup:number)=
 function allocateCounts(total:number,workers:readonly MeshWorkerCalibration[]):Map<string,number>{
  if(total<workers.length)throw new RangeError('totalOutputFrames must be >= worker count');
  const weights=workers.map(worker=>1/Number(worker.frameNsBudget)),sum=weights.reduce((a,b)=>a+b,0);
- const counts=new Map(workers.map(worker=>[worker.workerId,1] as const)),remaining=total-workers.length;
+ const counts=new Map<string,number>(workers.map(worker=>[worker.workerId,1] as const)),remaining=total-workers.length;
  const ideals=weights.map(weight=>remaining*weight/sum),floors=ideals.map(Math.floor);
  let assigned=0;
  for(let i=0;i<workers.length;i++){counts.set(workers[i]!.workerId,1+floors[i]!);assigned+=floors[i]!;}
@@ -63,7 +63,8 @@ function allocateCounts(total:number,workers:readonly MeshWorkerCalibration[]):M
 
 export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMeshPlan{
  const fps=safeInt(input.stream.targetFps,'targetFps',1);
- if(input.program.partitionability.kind!=='temporal')throw new TypeError('Render program is not temporally partitionable');
+ const partition=input.program.partitionability;
+ if(partition.kind!=='temporal')throw new TypeError('Render program is not temporally partitionable');
  if(input.stream.renderProgramHash!==input.program.programHash)throw new TypeError('Stream/program hash mismatch');
  if(input.epoch.streamId!==input.stream.streamId)throw new TypeError('Epoch belongs to another stream');
  if(input.epoch.profileHash!==input.program.profileHash)throw new TypeError('Epoch/profile hash mismatch');
@@ -81,8 +82,8 @@ export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMes
  });
  const counts=allocateCounts(input.totalOutputFrames,workers);
  const ordered=[...workers].sort((a,b)=>{
-  const da=segmentDuration(a,counts.get(a.workerId)!,input.program.partitionability.warmupFrames);
-  const db=segmentDuration(b,counts.get(b.workerId)!,input.program.partitionability.warmupFrames);
+  const da=segmentDuration(a,counts.get(a.workerId)!,partition.warmupFrames);
+  const db=segmentDuration(b,counts.get(b.workerId)!,partition.warmupFrames);
   return da<db?-1:da>db?1:a.workerId.localeCompare(b.workerId);
  });
  let offset=0;const assignments:TemporalWorkerAssignment[]=[];let maxDuration=0n;
@@ -90,10 +91,10 @@ export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMes
   const worker=ordered[i]!,count=counts.get(worker.workerId)!;
   const displayOffsetNs=BigInt(offset)*NS_PER_SECOND/BigInt(fps);
   const deadlineNs=input.firstDisplayNs+displayOffsetNs-guard;
-  const duration=segmentDuration(worker,count,input.program.partitionability.warmupFrames),finish=input.nowNs+duration;
+  const duration=segmentDuration(worker,count,partition.warmupFrames),finish=input.nowNs+duration;
   const task=defineSegmentTask({
    streamId:input.stream.streamId,epoch:input.epoch.epoch,segment:(input.firstSegment??0n)+BigInt(i),attempt:0,
-   firstOutputFrame:input.firstOutputFrame+BigInt(offset),outputFrames:count,warmupFrames:input.program.partitionability.warmupFrames,
+   firstOutputFrame:input.firstOutputFrame+BigInt(offset),outputFrames:count,warmupFrames:partition.warmupFrames,
    programHash:input.program.programHash,checkpointHash:input.epoch.checkpointHash,resourceManifestHash:input.resourceManifestHash,
    cameraHash:input.epoch.cameraHash,renderProfileHash:input.epoch.profileHash,deadlineNs,
   });
@@ -105,7 +106,7 @@ export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMes
  const allWorkersBelowTarget=workers.every(worker=>fpsFor(worker.frameNsBudget)<fps);
  const admitted=safeFps>=fps&&assignments.every(assignment=>assignment.slackNs>=0n);
  return Object.freeze({
-  targetFps:fps,warmupFrames:input.program.partitionability.warmupFrames,reserveRatio:reserve,
+  targetFps:fps,warmupFrames:partition.warmupFrames,reserveRatio:reserve,
   singleBestFps,meshCycleFps,safeFps,admitted,allWorkersBelowTarget,
   proofEligible:workers.length>=3&&allWorkersBelowTarget&&admitted,
   assignments:Object.freeze(assignments),
