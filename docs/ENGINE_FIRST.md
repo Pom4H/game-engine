@@ -27,3 +27,7 @@ Rules:
 - old branches/PRs are archaeology only and must not become alternate sources of truth.
 
 The only source of truth for current engine behavior is `main`.
+
+## Loop Engineering
+
+Engine laws are derived from physics and invariants, never tuned merely to satisfy a fixture. Every proving-ground iteration should combine independent numerical and visual evidence when the phenomenon is spatially observable. See [LOOP_ENGINEERING.md](LOOP_ENGINEERING.md).
