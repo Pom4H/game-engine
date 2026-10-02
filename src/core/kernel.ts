@@ -167,7 +167,7 @@ export class ModuleScheduler{
    const a=chosen[i]!.description,b=chosen[j]!.description;
    if(a.phase===b.phase&&conflicts(a,b)&&!precedes(a.id,b.id)&&!precedes(b.id,a.id))throw new TypeError(`Ambiguous resource hazard: ${a.id} / ${b.id}; declare after`);
   }
-  const cycleTicks=order.reduce((cycle,item)=>lcm(cycle,item.periodTicks),1),plans:ModuleBatch[][]=[];
+  const cycleTicks=order.reduce((cycle,item)=>lcm(cycle,item.periodTicks),1),plans:(readonly ModuleBatch[])[]=[];
   for(let tick=0;tick<cycleTicks;tick++){
    const batches:ModuleBatch[]=[];let batch:ModuleDescription[]=[];
    const flush=()=>{if(batch.length)batches.push(Object.freeze({phase:batch[0]!.phase,modules:Object.freeze(batch)}));batch=[];};
