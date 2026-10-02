@@ -96,5 +96,5 @@ export const experimentViews=Object.freeze([
   time:gravityFreeFallExperiment.durationS,
   camera:{position:[155,33.5,171],target:[148,29.35,162],fov:27,aperture:0},
  }
-];
+]);
 export const provingGroundExperiments=Object.freeze([gravityFreeFallExperiment]);
