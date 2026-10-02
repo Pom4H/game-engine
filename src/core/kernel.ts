@@ -137,15 +137,27 @@ export class ModuleScheduler{
    selected.push(candidates[0]!);
   }
   const byId=new Map(selected.map(item=>[item.description.id,item])),bySlot=new Map(selected.map(item=>[slotOf(item.description),item]));
+  const allByReference=new Map<string,Registered[]>();
+  for(const item of all)for(const reference of new Set([item.description.id,slotOf(item.description)])){
+   const list=allByReference.get(reference);if(list)list.push(item);else allByReference.set(reference,[item]);
+  }
+  // Depth compilation contracts inactive nodes instead of deleting their ordering edges.
+  // If A -> B -> C and B is absent at this profile, A -> C remains. This keeps LOD
+  // selection from creating resource races while still allowing truly independent axes.
+  const resolvePredecessors=(reference:string,visiting:Set<string>):readonly string[]=>{
+   const active=byId.get(reference)??bySlot.get(reference);if(active)return[active.description.id];
+   const definitions=allByReference.get(reference);if(!definitions)throw new TypeError(`Unknown dependency ${reference}`);
+   if(visiting.has(reference))throw new TypeError('Module dependency cycle through inactive variants');
+   visiting.add(reference);const resolved=new Set<string>();
+   for(const definition of definitions)for(const parent of definition.description.after??[])for(const id of resolvePredecessors(parent,visiting))resolved.add(id);
+   visiting.delete(reference);return[...resolved];
+  };
   const chosen:SelectedRegistered[]=selected.map(item=>{
-   const dependencies:string[]=[];
-   for(const reference of item.description.after??[]){
-    const target=byId.get(reference)??bySlot.get(reference);
-    if(target){if(target.description.id!==item.description.id)dependencies.push(target.description.id);}
-    else if(!known.has(reference))throw new TypeError(`Module ${item.description.id}: unknown dependency ${reference}`);
-    // Known but inactive dependency is intentionally vacuous: independent depth axes stay independent.
+   const dependencies=new Set<string>();
+   for(const reference of item.description.after??[])for(const dependency of resolvePredecessors(reference,new Set([item.description.id]))){
+    if(dependency!==item.description.id)dependencies.add(dependency);
    }
-   return{...item,dependencies:Object.freeze(dependencies)};
+   return{...item,dependencies:Object.freeze([...dependencies])};
   });
   const byChosenId=new Map(chosen.map(item=>[item.description.id,item]));
   for(const item of chosen)for(const dependency of item.dependencies){
