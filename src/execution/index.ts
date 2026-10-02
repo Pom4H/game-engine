@@ -38,7 +38,11 @@ export interface RenderSequenceBundle {
   readonly checkpoint:RenderSequenceCheckpoint;readonly checkpointRef:ContentRef;readonly cameraHash:string;
 }
 
-const cameraData=(camera:CameraSpec):readonly number[]=>Object.freeze([...camera.position,...camera.target,camera.fov,camera.focusDistance??0,camera.aperture??0]);
+const cameraData=(camera:CameraSpec):readonly number[]=>Object.freeze([
+ ...camera.position,...camera.target,...(camera.up??[0,1,0]),
+ camera.fov??0,camera.focusDistance??0,camera.aperture??0,
+ ...(camera.intrinsics?[camera.intrinsics.fx,camera.intrinsics.fy,camera.intrinsics.cx,camera.intrinsics.cy,camera.intrinsics.width,camera.intrinsics.height]:[0,0,0,0,0,0]),
+]);
 const materialData=(entity:RuntimeEntity,store:ContentAddressedRepository,refs:ContentRef[])=>{
   const textureRef=entity.material.texture?store.put('texture',entity.material.texture):undefined;if(textureRef)refs.push(textureRef);
   return {
