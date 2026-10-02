@@ -109,3 +109,29 @@ test('one depth variant compiler serves physics render audio network world and e
  assert.equal(compiled.require(ENGINE_SLOTS.economicsSimulate),'economics-aggregate');
  assert.equal(registry.compile({axes:{audio:64,economics:64,network:160,physics:255,render:96,world:64},defaultDepth:0}),compiled,'profile key must be canonical across axis insertion order');
 });
+
+
+test('a physics plugin replaces the compiled physics slot without owning a second pose',()=>{
+ const scene=new Scene({version:1,gravity:[0,-9.81,0],ground:-100,entities:[
+  {id:'ball',position:[0,10,0],mesh:{kind:'sphere',radius:.5},body:{mass:1}},
+ ]});
+ let pluginSteps=0;
+ scene.usePlugin({
+  id:'fixture.physics-plugin',
+  systems:[{id:'fixture.physics-plugin.step',run:(host,frame)=>{pluginSteps++;host.physics.step(frame.dt);}}],
+  modules:[{
+   id:'fixture:physics:rocket-like',slot:'engine:physics',phase:'simulate',rateHz:60,
+   reads:['surface-state','animation'],writes:['entities','contacts'],after:['engine:animation'],
+   depth:{axis:'physics',min:200},context:'none',
+   run:(_context,frame)=>[{type:'system',action:'fixture.physics-plugin.step',deltaSeconds:frame.deltaSeconds}],
+  }],
+ });
+ const body=scene.entities.get('ball').body,identity=body;
+ scene.step(1/60,{defaultDepth:0,axes:{physics:220}});
+ assert.equal(pluginSteps,1);
+ assert.equal(scene.physics.steps,1);
+ assert.equal(scene.entities.get('ball').body,identity,'plugin must operate on the authoritative Scene body');
+ assert.ok(scene.lastExecution.includes('fixture:physics:rocket-like'));
+ assert.ok(!scene.lastExecution.includes('engine:physics'),'compiled slot must contain exactly one physics implementation');
+ assert.ok(body.position[1]<10);
+});

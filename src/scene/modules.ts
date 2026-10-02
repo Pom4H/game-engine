@@ -2,13 +2,16 @@ import {ENGINE_DEPTH,ENGINE_DEPTH_AXES,EngineKernel,type EngineModule,type Engin
 import type {EnvironmentState} from '../environment/types.js';
 import type {Vec3} from '../math.js';
 import type {EntitySpec,SceneSnapshot} from './types.js';
+import type {Scene} from './scene.js';
+import type {SystemFrame} from './system-runtime.js';
 
 export interface SceneModuleContext extends SceneSnapshot {readonly environment:EnvironmentState;readonly resources:ReadonlyMap<string,unknown>}
 export type SceneCommand={type:'spawn';entity:EntitySpec}|{type:'remove';id:string}|{type:'velocity';id:string;value:Vec3}|{type:'resource';key:string;value:unknown};
-export type SystemAction='weather'|'surfaces'|'animation'|'physics'|'deformation'|'surface-contacts'|'events'|'fracture'|'cleanup'|'clock';
+export type SystemAction=string;
 export type InternalCommand=SceneCommand|{type:'system';action:SystemAction;deltaSeconds:number};
 export type SceneModule=EngineModule<SceneModuleContext,SceneCommand>;
-export type ScenePlugin=EnginePlugin<SceneModuleContext,SceneCommand>;
+export interface ScenePluginSystem{readonly id:string;readonly run:(scene:Scene,frame:SystemFrame)=>void}
+export interface ScenePlugin extends EnginePlugin<SceneModuleContext,InternalCommand>{readonly systems?:readonly ScenePluginSystem[]}
 
 export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
  const kernel=new EngineKernel<SceneModuleContext,InternalCommand>();

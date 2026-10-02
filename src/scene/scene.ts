@@ -173,7 +173,13 @@ export class Scene {
   }
 
   use(module:SceneModule):this{this.kernel.use(module);return this;}
-  usePlugin(plugin:ScenePlugin):this{this.kernel.usePlugin(plugin);return this;}
+  usePlugin(plugin:ScenePlugin):this{
+    const systems=plugin.systems??[];
+    this.systemRuntime.assertAvailable(systems.map(system=>system.id));
+    this.kernel.usePlugin(plugin);
+    this.systemRuntime.useMany(systems.map(system=>({id:system.id,handler:frame=>system.run(this,frame)})));
+    return this;
+  }
   renderMoverIds():ReadonlySet<string>{
     if(this.renderMoverRevision===this.renderStructureRevision)return this.renderMovers;
     const ids=new Set<string>();

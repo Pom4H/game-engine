@@ -21,6 +21,8 @@ export const ENGINE_DEPTH_AXES=Object.freeze({
  network:'network',
  audio:'audio',
  render:'render',
+ collision:'collision',
+ economics:'economics',
 } as const);
 
 export interface SimulationProfile{

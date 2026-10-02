@@ -2,6 +2,7 @@ name: Audio foundation
 on:
   push:
     paths:
+      - 'src/core/**'
       - 'src/audio/**'
       - 'src/scene/events.ts'
       - 'test/audio-foundation.test.mjs'
@@ -9,6 +10,7 @@ on:
       - '.github/workflows/audio-foundation.yml'
   pull_request:
     paths:
+      - 'src/core/**'
       - 'src/audio/**'
       - 'src/scene/events.ts'
       - 'test/audio-foundation.test.mjs'
@@ -31,4 +33,4 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/audio-foundation.test.mjs
+      - run: node --test test/audio-foundation.test.mjs test/kernel-depth.test.mjs

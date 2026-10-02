@@ -5,6 +5,7 @@ export interface SystemFrame {
   readonly at:number;
 }
 export type SystemHandler=(frame:SystemFrame)=>void;
+export interface SystemRegistration{readonly id:string;readonly handler:SystemHandler}
 
 /** Runtime dispatch for built-in engine systems.
  * EngineKernel owns scheduling; this registry owns implementations. Scene only
@@ -13,9 +14,19 @@ export type SystemHandler=(frame:SystemFrame)=>void;
 export class SceneSystemRuntime {
   private readonly handlers=new Map<SystemAction,SystemHandler>();
 
-  use(action:SystemAction,handler:SystemHandler):this{
-    if(this.handlers.has(action))throw new TypeError(`System handler already registered: ${action}`);
-    this.handlers.set(action,handler);
+  assertAvailable(actions:readonly SystemAction[]):void{
+    const seen=new Set<string>();
+    for(const action of actions){
+      if(typeof action!=='string'||!action||action.length>180||seen.has(action))throw new TypeError('System handlers require distinct stable IDs');
+      if(this.handlers.has(action))throw new TypeError(`System handler already registered: ${action}`);
+      seen.add(action);
+    }
+  }
+  use(action:SystemAction,handler:SystemHandler):this{return this.useMany([{id:action,handler}]);}
+  useMany(registrations:readonly SystemRegistration[]):this{
+    this.assertAvailable(registrations.map(registration=>registration.id));
+    for(const registration of registrations)if(typeof registration.handler!=='function')throw new TypeError('System handler requires an implementation');
+    for(const registration of registrations)this.handlers.set(registration.id,registration.handler);
     return this;
   }
 
