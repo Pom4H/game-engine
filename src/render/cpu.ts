@@ -1,7 +1,9 @@
 import {deflateSync} from 'node:zlib';
 import {compose,lookAt,multiply4,V3,type Mat4, type Vec3} from '../math.js';
 import type {MeshData} from '../procedural/mesh.js';
-import {buildRenderFrame,renderPrimitive,type RenderObjectIR} from './frame.js';
+import {renderPrimitive,type RenderObjectIR} from './frame.js';
+import {RenderFrameFamily,type RenderFrameBuilder} from './depth.js';
+import type {SimulationProfileInput} from '../core/depth.js';
 import type {CameraSpec,Color,LightEmissionSpec} from '../scene/types.js';
 import {lightEmissionWeight} from './light-grid.js';
 import {fogViewOpticalDepth} from './fog.js';
@@ -35,6 +37,8 @@ export class CpuRenderer implements Renderer{
  private width:number;private height:number;private readonly near:number;private readonly far:number;
  private rgba:Uint8Array;private depth:Float32Array;private errors:string[]=[];private drawCalls=0;private triangles=0;private meshes=0;private pointLights=0;
  private fogColor:Vec3|undefined;private fogHeightFalloff=0;private fogBaseHeight=0;private fogStartDistance=0;private fogRampDistance=0;
+ private readonly frameFamily=new RenderFrameFamily();private frameBuilder:RenderFrameBuilder=this.frameFamily.compile('detailed');
+ setSimulationProfile(profile:SimulationProfileInput):void{this.frameBuilder=this.frameFamily.compile(profile);}
  constructor(options:CpuRendererOptions={}){this.width=options.width??640;this.height=options.height??360;this.near=options.near??.05;this.far=options.far??10000;this.rgba=new Uint8Array(this.width*this.height*4);this.depth=new Float32Array(this.width*this.height);this.resize();}
  setResolution(width:number,height:number):void{if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>4096||height>4096)throw new RangeError('Render dimensions must be integers in [1,4096]');this.width=width;this.height=height;this.rgba=new Uint8Array(width*height*4);this.depth=new Float32Array(width*height);}
  resize():void{this.depth.fill(1);for(let i=0;i<this.rgba.length;i+=4){this.rgba[i]=0;this.rgba[i+1]=0;this.rgba[i+2]=0;this.rgba[i+3]=255;}}
@@ -55,7 +59,7 @@ export class CpuRenderer implements Renderer{
   for(const e of scene.entities.values())if(e.light)lights.push({position:[...e.position],color:[...(e.light.color??[1,1,1])],intensity:e.light.intensity??1,range:e.light.range??10,emission:e.light.emission});
   this.pointLights=lights.length;
   const sunDir=V3.normalize(env.sunDirection??[-.45,-1,-.3]),sun=V3.normalize([-sunDir[0],-sunDir[1],-sunDir[2]]),sunColor=env.sunColor??[1,.93,.82],sunIntensity=env.sunIntensity??1,exposure=env.exposure??1,fog=env.fogDensity??0;
-  const frame=buildRenderFrame(scene,camera,{includeMeshes:true});for(const object of frame.objects){const mesh=object.mesh;if(!mesh)continue;try{this.meshes++;this.drawCalls++;this.triangles+=mesh.indices.length/3;this.rasterMesh({...object,mesh},camera,vp,lights,sun,sunColor,sunIntensity,exposure,fog);}catch(error){this.errors.push(error instanceof Error?error.message:String(error));}}
+  const frame=this.frameBuilder(scene,camera,{includeMeshes:true});for(const object of frame.objects){const mesh=object.mesh;if(!mesh)continue;try{this.meshes++;this.drawCalls++;this.triangles+=mesh.indices.length/3;this.rasterMesh({...object,mesh},camera,vp,lights,sun,sunColor,sunIntensity,exposure,fog);}catch(error){this.errors.push(error instanceof Error?error.message:String(error));}}
  }
  private rasterMesh(object:RenderObjectIR & {readonly mesh:MeshData},camera:CameraSpec,vp:Mat4,lights:Light[],sun:Vec3,sunColor:Vec3,sunIntensity:number,exposure:number,fog:number):void{
   const {entity,mesh,model}=object,mv=multiply4(vp,model),v=mesh.vertices,c=mesh.colors;
