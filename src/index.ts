@@ -4,6 +4,7 @@ export {EngineKernel,KernelProgram,ModuleScheduler,ENGINE_PHASES,ENGINE_DEPTH,EN
 export {DepthVariantRegistry,compileDepthVariants,type DepthRange,type DepthVariant,type DepthVariantPlugin,type CompiledDepthVariant,type CompiledDepthVariants} from './core/variants.js';
 export {ENGINE_DOMAINS,ENGINE_SLOTS,type EngineDomain,type EngineSlot} from './core/domains.js';
 export {PhysicsWorld,RigidBody,applyInvInertiaWorld,type PhysicsForceDriver,type CollisionShape,type Contact,type PhysicsStats,type RigidBodyOptions} from './physics/world.js';
+export {CollisionSolverFamily,type CollisionSolverProgram,type CollisionSolverPlugin} from './physics/depth.js';
 export {PhysicsCauseTrace,physicsCause,PHYSICS_CAUSE_TRACE_SCHEMA,PHYSICS_CAUSE_TRACE_VERSION,type PhysicsCauseRef,type PhysicsCauseWriter,type PhysicsCauseManifestWriter,type PhysicsTraceRecord,type PhysicsSourceKind,type PhysicsComponentKind,type PhysicsLawKind,type PhysicsEffectKind} from './physics/cause-trace.js';
 export {ForceFrame} from './physics/force-frame.js';
 export {physicsAccounting,rigidBodyMechanicalEnergyJ,type PhysicsAccountingState} from './physics/accounting.js';
