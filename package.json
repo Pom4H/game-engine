@@ -7,7 +7,10 @@
   "exports": {
     ".": "./dist/index.js",
     "./browser": "./dist/browser.js",
-    "./network": "./dist/network/index.js"
+    "./network": "./dist/network/index.js",
+    "./render-ir": "./dist/render-ir/index.js",
+    "./execution": "./dist/execution/index.js",
+    "./meshwork": "./dist/meshwork/index.js"
   },
   "files": [
     "dist",
