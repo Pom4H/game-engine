@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'tools/proving-ground/**'
+      - 'tools/render-harness.mjs'
       - 'test/proving-ground.test.mjs'
       - 'src/physics/**'
       - 'src/vehicles/**'
