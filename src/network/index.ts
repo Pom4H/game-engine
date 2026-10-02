@@ -4,3 +4,6 @@ export {PlaybackClock,Replica} from './playback.js';
 export type {Sample,SampleRow} from './playback.js';
 export {AuthoritySession} from './authority.js';
 export type {AuthorityAdapter,DebugAction,DebugRequest} from './authority.js';
+
+export {ProjectionFamily} from './depth.js';
+export type {ProjectionVariant,ProjectionFamilyPlugin} from './depth.js';

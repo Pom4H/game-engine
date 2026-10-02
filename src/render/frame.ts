@@ -18,6 +18,7 @@ export interface RenderFrameIR{
   readonly lights:readonly RuntimeEntity[];
 }
 export function renderPrimitive(entity:RuntimeEntity):Primitive|undefined{return entity.renderMesh??entity.mesh;}
+export function renderProxyPrimitive(entity:RuntimeEntity):Primitive|undefined{return entity.mesh;}
 export function primitiveBaseScale(primitive:Primitive|undefined):readonly [number,number,number]{
   if(!primitive)return[1,1,1];
   if(primitive.kind==='box'||primitive.kind==='shard'){const s=primitive.size??[1,1,1];return[s[0],s[1],s[2]];}
@@ -29,12 +30,19 @@ export function renderModel(entity:RuntimeEntity):Mat4{
   const primitive=renderPrimitive(entity),base=primitiveBaseScale(primitive);
   return compose(entity.position,entity.rotation,[entity.scale[0]*base[0],entity.scale[1]*base[1],entity.scale[2]*base[2]]);
 }
-export function buildRenderFrame(scene:Scene,camera:CameraSpec=scene.camera,options:{readonly includeMeshes?:boolean}={}):RenderFrameIR{
+function buildFrame(scene:Scene,camera:CameraSpec,primitiveFor:(entity:RuntimeEntity)=>Primitive|undefined,includeMeshes=false):RenderFrameIR{
   const objects:RenderObjectIR[]=[],lights:RuntimeEntity[]=[];
   for(const entity of scene.entities.values()){
     if(entity.light)lights.push(entity);
-    const primitive=renderPrimitive(entity);if(!primitive)continue;
-    objects.push({entity,primitive,...(options.includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model:renderModel(entity)});
+    const primitive=primitiveFor(entity);if(!primitive)continue;
+    const base=primitiveBaseScale(primitive),model=primitive===renderPrimitive(entity)?renderModel(entity):compose(entity.position,entity.rotation,[entity.scale[0]*base[0],entity.scale[1]*base[1],entity.scale[2]*base[2]]);
+    objects.push({entity,primitive,...(includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model});
   }
   return{scene,camera,objects,objectsById:new Map(objects.map(object=>[object.entity.id,object] as const)),lights};
+}
+export function buildRenderFrame(scene:Scene,camera:CameraSpec=scene.camera,options:{readonly includeMeshes?:boolean}={}):RenderFrameIR{
+  return buildFrame(scene,camera,renderPrimitive,options.includeMeshes??false);
+}
+export function buildProxyRenderFrame(scene:Scene,camera:CameraSpec=scene.camera):RenderFrameIR{
+  return buildFrame(scene,camera,renderProxyPrimitive,false);
 }

@@ -1,0 +1,42 @@
+name: Engine architecture
+on:
+  push:
+    paths:
+      - 'src/core/**'
+      - 'src/scene/modules.ts'
+      - 'src/scene/system-runtime.ts'
+      - 'src/render/depth.ts'
+      - 'src/audio/depth.ts'
+      - 'src/network/depth.ts'
+      - 'src/world/depth.ts'
+      - 'test/kernel-depth.test.mjs'
+      - 'test/depth-families.test.mjs'
+      - '.github/workflows/architecture.yml'
+  pull_request:
+    paths:
+      - 'src/core/**'
+      - 'src/scene/modules.ts'
+      - 'src/scene/system-runtime.ts'
+      - 'src/render/depth.ts'
+      - 'src/audio/depth.ts'
+      - 'src/network/depth.ts'
+      - 'src/world/depth.ts'
+      - 'test/kernel-depth.test.mjs'
+      - 'test/depth-families.test.mjs'
+      - '.github/workflows/architecture.yml'
+concurrency:
+  group: architecture-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/kernel-depth.test.mjs test/depth-families.test.mjs

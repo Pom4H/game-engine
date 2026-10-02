@@ -45,6 +45,8 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build
         run: bun run build
+      - name: Depth architecture tests
+        run: node --test test/kernel-depth.test.mjs test/depth-families.test.mjs
       - name: Render promo views
         shell: powershell
         run: |
