@@ -8,6 +8,7 @@ on:
       - 'src/execution/**'
       - 'src/meshwork/**'
       - 'tools/meshwork/**'
+      - 'tools/promo/capture.mjs'
       - 'tools/render-harness.mjs'
       - 'test/meshwork-*.test.mjs'
       - '.github/workflows/meshwork-gpu.yml'
@@ -58,4 +59,69 @@ jobs:
             artifacts/meshwork/calibration.json
             artifacts/meshwork/worker.png
             artifacts/render-hud.json
+          retention-days: 14
+      - name: Capture continuous reference
+        run: |
+          New-Item -ItemType Directory -Force artifacts/meshwork-consistency | Out-Null
+          $env:PROMO_CAPTURE_FPS='30'
+          $env:PROMO_FRAME_START='0'
+          $env:PROMO_FRAME_COUNT='120'
+          $env:PROMO_WARMUP_FRAMES='0'
+          $env:PROMO_OUTPUT_NAME='reference.mp4'
+          node tools/promo/capture.mjs m3
+      - name: Capture isolated temporal segments
+        run: |
+          $env:PROMO_CAPTURE_FPS='30'
+          $env:PROMO_FRAME_COUNT='30'
+          $env:PROMO_WARMUP_FRAMES='12'
+          foreach ($i in 0..3) {
+            $env:PROMO_FRAME_START=[string]($i*30)
+            if ($i -eq 0) { $env:PROMO_WARMUP_FRAMES='0' } else { $env:PROMO_WARMUP_FRAMES='12' }
+            $env:PROMO_OUTPUT_NAME="segment-$i.mp4"
+            node tools/promo/capture.mjs m3
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Assemble visual consistency proof
+        run: |
+          $out='artifacts/meshwork-consistency'
+          Copy-Item artifacts/promo-v3/reference.mp4 "$out/reference.mp4" -Force
+          @"
+          ffconcat version 1.0
+          file '../promo-v3/segment-0.mp4'
+          file '../promo-v3/segment-1.mp4'
+          file '../promo-v3/segment-2.mp4'
+          file '../promo-v3/segment-3.mp4'
+          "@ | Set-Content "$out/segments.ffconcat" -Encoding ascii
+          ffmpeg -y -hide_banner -loglevel error -f concat -safe 0 -i "$out/segments.ffconcat" -c copy "$out/mesh-segmented.mp4"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $filter="[0:v]scale=960:540[left];[1:v]scale=960:540,drawbox=x=0:y=0:w=iw:h=10:color=red@0.95:t=fill:enable='between(n,29,32)+between(n,59,62)+between(n,89,92)'[right];[left][right]hstack=inputs=2[v]"
+          ffmpeg -y -hide_banner -loglevel error -i "$out/reference.mp4" -i "$out/mesh-segmented.mp4" -filter_complex $filter -map "[v]" -an -c:v mpeg4 -q:v 2 -pix_fmt yuv420p -movflags +faststart "$out/meshwork-consistency.mp4"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ffmpeg -hide_banner -i "$out/reference.mp4" -i "$out/mesh-segmented.mp4" -lavfi "ssim=stats_file=$out/ssim.log" -f null - 2> "$out/ssim-summary.txt"
+          $evidence=[ordered]@{
+            commit=$env:GITHUB_SHA
+            runner=$env:RUNNER_NAME
+            fps=30
+            frames=120
+            segmentFrames=30
+            warmupFrames=12
+            boundaries=@(30,60,90)
+            left='continuous single-renderer reference'
+            right='four isolated renderer sessions stitched as temporal Meshwork segments'
+            redBar='worker boundary marker on mesh side'
+          }
+          $evidence | ConvertTo-Json -Depth 6 | Set-Content "$out/evidence.json" -Encoding utf8
+          Get-Item "$out/meshwork-consistency.mp4" | Format-List Name,Length
+      - name: Upload visual consistency video
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meshwork-visual-consistency
+          path: |
+            artifacts/meshwork-consistency/meshwork-consistency.mp4
+            artifacts/meshwork-consistency/reference.mp4
+            artifacts/meshwork-consistency/mesh-segmented.mp4
+            artifacts/meshwork-consistency/evidence.json
+            artifacts/meshwork-consistency/ssim.log
+            artifacts/meshwork-consistency/ssim-summary.txt
           retention-days: 14
