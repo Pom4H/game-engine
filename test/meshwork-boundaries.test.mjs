@@ -21,11 +21,11 @@ test('portable render IR has no Scene/backend/placement imports',()=>{
 });
 test('placement is outside render semantics and local execution remains synchronous metadata',()=>{
  const program=defineRenderProgram({schema:1,programHash:'program:abc',profileHash:'profile:full',partitionability:{kind:'temporal',warmupFrames:4},requiredResources:{resources:[]}});
- const graph=defineExecutionGraph({schema:1,graphHash:'graph:abc',nodes:[{id:'render.final',operation:'render.final',inputs:[],outputs:[],deterministic:true,partitionability:program.partitionability}]});
+ const graph=defineExecutionGraph({schema:1,graphHash:'graph:abc',programHash:program.programHash,nodes:[{id:'render.final',operation:'render.final',inputs:[],outputs:[],deterministic:true,partitionability:program.partitionability}]});
  const local=localProgram(graph);assert.equal(local.placement,'local');assert.equal(local.graph,graph);assert.equal('then' in local,false,'local program boundary must not be Promise-like');
 });
 test('worker-local finish time never decides a coordinator deadline',()=>{
- const task=defineSegmentTask({streamId:'stream',epoch:4n,segment:9n,attempt:1,firstOutputFrame:100n,outputFrames:24,warmupFrames:4,programHash:'program:1',checkpointHash:'checkpoint:1',resourceManifestHash:'manifest:1',cameraHash:'camera:1',renderProfileHash:'profile:1',deadlineNs:1000n});
+ const task=defineSegmentTask({streamId:'stream',epoch:4n,segment:9n,attempt:1,firstOutputFrame:100n,outputFrames:24,warmupFrames:4,programHash:'program:1',executionGraphRefHash:'graph-ref:1',checkpointHash:'checkpoint:1',resourceManifestHash:'manifest:1',cameraHash:'camera:1',renderProfileHash:'profile:1',deadlineNs:1000n});
  const result={streamId:'stream',epoch:4n,segment:9n,attempt:1,firstFrame:100n,frameCount:24,inputHash:'input:1',outputHash:'output:1',finishedNs:99_999_999n};
  assert.equal(decideSegmentResult(task,result,4n,false),'accept');assert.equal(decideSegmentResult(task,result,5n,false),'stale-epoch');assert.equal(decideSegmentResult(task,result,4n,true),'already-committed');assert.equal(decideSegmentResult(task,{...result,attempt:2},4n,false),'wrong-task');
 });
