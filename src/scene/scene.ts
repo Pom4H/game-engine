@@ -258,6 +258,7 @@ export class Scene {
       .use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
       .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
       .use('events',({at})=>{this.emitContactEvents(at);})
+      .use('fracture-aggregate',({at})=>{for(const fracture of this.pendingFractures.values())this.fractureAggregate(fracture,at);})
       .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
       .use('cleanup',({at})=>{this.cleanupGenerated(at);})
       .use('clock',({at})=>{this.time=at;this.tick++;if(this.cameraRailEnabled&&this.spec.cameraRail)this.camera=cameraOnRail(this.camera,this.spec.cameraRail,at);});
@@ -355,6 +356,16 @@ export class Scene {
         energy:contact.normalEnergy,impulse:contact.impulse,speed:contact.normalSpeed,size:Math.max(.02,Math.min(characteristicSize(a),b?characteristicSize(b):characteristicSize(a))),
       });
     }
+  }
+
+  private fractureAggregate(fracture:FractureDecision,at:number):void{
+    const entity=this.entities.get(fracture.body.id);if(!entity)return;
+    const size=characteristicSize(fracture.body);
+    this.remove(entity.id);
+    this.pushEvent({
+      type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
+      energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:0,size,
+    });
   }
 
   private fracture(fracture:FractureDecision,at:number):void{
