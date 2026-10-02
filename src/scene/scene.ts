@@ -2,7 +2,6 @@ import {AnimationSystem} from '../animation/locomotion.js';
 import {SurfaceContactSystem} from '../environment/surface-contacts.js';
 import {freezePrimitive,surfaceGridPrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
-import type {SimulationTier} from '../core/kernel.js';
 import {environmentHistorySteps,environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
 import {SurfaceEnvironmentSystem} from '../environment/surface-state.js';
 import {surfaceFieldResolution} from '../environment/deformable-surface.js';
@@ -20,8 +19,9 @@ import {WindField} from '../physics/wind.js';
 import {SoilField} from '../physics/soil.js';
 import {Vehicle,vehicle as compileVehicle} from '../vehicles/vehicle.js';
 import type {EngineEvent} from './events.js';
+import type {SimulationProfileInput} from '../core/kernel.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
-import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
+import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext,type ScenePlugin} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
 import {cameraOnRail} from './camera-rail.js';
 import {SceneSystemRuntime} from './system-runtime.js';
@@ -173,6 +173,7 @@ export class Scene {
   }
 
   use(module:SceneModule):this{this.kernel.use(module);return this;}
+  usePlugin(plugin:ScenePlugin):this{this.kernel.usePlugin(plugin);return this;}
   renderMoverIds():ReadonlySet<string>{
     if(this.renderMoverRevision===this.renderStructureRevision)return this.renderMovers;
     const ids=new Set<string>();
@@ -199,10 +200,10 @@ export class Scene {
     return this.surfaces.surface(source);
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
-  step(dt=1/60,tier:SimulationTier='detailed'):void{
+  step(dt=1/60,profile:SimulationProfileInput='detailed'):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
     const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,{} as SceneModuleContext,tier,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+    this.kernel.run(this.tick+1,{} as SceneModuleContext,profile,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});

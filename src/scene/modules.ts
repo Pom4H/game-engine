@@ -1,4 +1,4 @@
-import {EngineKernel,type EngineModule,type SimulationTier} from '../core/kernel.js';
+import {ENGINE_DEPTH,ENGINE_DEPTH_AXES,EngineKernel,type EngineModule,type EnginePlugin} from '../core/kernel.js';
 import type {EnvironmentState} from '../environment/types.js';
 import type {Vec3} from '../math.js';
 import type {EntitySpec,SceneSnapshot} from './types.js';
@@ -7,34 +7,30 @@ export interface SceneModuleContext extends SceneSnapshot {readonly environment:
 export type SceneCommand={type:'spawn';entity:EntitySpec}|{type:'remove';id:string}|{type:'velocity';id:string;value:Vec3}|{type:'resource';key:string;value:unknown};
 export type SystemAction='weather'|'surfaces'|'animation'|'physics'|'deformation'|'surface-contacts'|'events'|'fracture'|'cleanup'|'clock';
 export type InternalCommand=SceneCommand|{type:'system';action:SystemAction;deltaSeconds:number};
-
-const ALL_TIERS:readonly SimulationTier[]=['detailed','active','aggregate','dormant'];
-const ACTIVE_TIERS:readonly SimulationTier[]=['detailed','active'];
-const SURFACE_TIERS:readonly SimulationTier[]=['detailed','active','aggregate'];
-const DETAILED_TIERS:readonly SimulationTier[]=['detailed'];
+export type SceneModule=EngineModule<SceneModuleContext,SceneCommand>;
+export type ScenePlugin=EnginePlugin<SceneModuleContext,SceneCommand>;
 
 export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
-  const kernel=new EngineKernel<SceneModuleContext,InternalCommand>();
-  const definitions=[
-    {action:'weather',phase:'input',rateHz:10,reads:[],writes:['environment'],after:[],tiers:ALL_TIERS},
-    {action:'surfaces',phase:'input',rateHz:30,reads:['environment','entities'],writes:['surface-state'],after:['weather'],tiers:SURFACE_TIERS},
-    {action:'animation',phase:'simulate',rateHz:60,reads:['surface-state'],writes:['entities','animation'],after:[],tiers:ACTIVE_TIERS},
-    {action:'physics',phase:'simulate',rateHz:60,reads:['surface-state','animation'],writes:['entities','contacts'],after:['animation'],tiers:ACTIVE_TIERS},
-    {action:'deformation',phase:'simulate',rateHz:60,reads:['contacts','entities'],writes:['entities','deformation'],after:['physics'],tiers:ACTIVE_TIERS},
-    {action:'surface-contacts',phase:'commit',rateHz:60,reads:['surface-state','animation','contacts'],writes:['entities','surface-contacts'],after:[],tiers:DETAILED_TIERS},
-    {action:'events',phase:'commit',rateHz:60,reads:['contacts'],writes:['events'],after:['surface-contacts'],tiers:ACTIVE_TIERS},
-    {action:'fracture',phase:'commit',rateHz:60,reads:['contacts'],writes:['entities','events'],after:['events'],tiers:ACTIVE_TIERS},
-    {action:'cleanup',phase:'commit',rateHz:10,reads:[],writes:['entities'],after:['fracture'],tiers:ALL_TIERS},
-    {action:'clock',phase:'commit',rateHz:60,reads:[],writes:['time'],after:['cleanup'],tiers:ALL_TIERS},
-  ] as const;
-  for(const definition of definitions){
-    const {action,phase,rateHz,reads,writes,after,tiers}=definition;
-    kernel.use({
-      id:`engine:${action}`,phase,rateHz,context:'none',reads,writes,tiers,
-      after:after.map(id=>`engine:${id}`),
-      run:(_context,frame)=>[{type:'system',action,deltaSeconds:frame.deltaSeconds}],
-    });
-  }
-  return kernel;
+ const kernel=new EngineKernel<SceneModuleContext,InternalCommand>();
+ const definitions=[
+  {action:'weather',id:'engine:weather',phase:'input',rateHz:10,reads:[],writes:['environment'],after:[],depth:{axis:ENGINE_DEPTH_AXES.world,min:ENGINE_DEPTH.dormant}},
+  {action:'surfaces',id:'engine:surfaces',phase:'input',rateHz:30,reads:['environment','entities'],writes:['surface-state'],after:['engine:weather'],depth:{axis:ENGINE_DEPTH_AXES.world,min:ENGINE_DEPTH.aggregate}},
+  {action:'animation',id:'engine:animation',phase:'simulate',rateHz:60,reads:['surface-state'],writes:['entities','animation'],after:[],depth:{axis:ENGINE_DEPTH_AXES.agents,min:ENGINE_DEPTH.active}},
+  // The stable slot is the future LOD/plugin seam: aggregate/full physics variants can
+  // replace each other at compile time without changing downstream dependencies.
+  {action:'physics',id:'engine:physics',slot:'engine:physics',phase:'simulate',rateHz:60,reads:['surface-state','animation'],writes:['entities','contacts'],after:['engine:animation'],depth:{axis:ENGINE_DEPTH_AXES.physics,min:ENGINE_DEPTH.active}},
+  {action:'deformation',id:'engine:deformation',phase:'simulate',rateHz:60,reads:['contacts','entities'],writes:['entities','deformation'],after:['engine:physics'],depth:{axis:ENGINE_DEPTH_AXES.destruction,min:ENGINE_DEPTH.active}},
+  {action:'surface-contacts',id:'engine:surface-contacts',phase:'commit',rateHz:60,reads:['surface-state','animation','contacts'],writes:['entities','surface-contacts'],after:[],depth:{axis:ENGINE_DEPTH_AXES.physics,min:ENGINE_DEPTH.detailed}},
+  {action:'events',id:'engine:events',phase:'commit',rateHz:60,reads:['contacts'],writes:['events'],after:['engine:surface-contacts'],depth:{axis:ENGINE_DEPTH_AXES.physics,min:ENGINE_DEPTH.active}},
+  {action:'fracture',id:'engine:fracture',phase:'commit',rateHz:60,reads:['contacts'],writes:['entities','events'],after:['engine:events'],depth:{axis:ENGINE_DEPTH_AXES.destruction,min:ENGINE_DEPTH.active}},
+  {action:'cleanup',id:'engine:cleanup',phase:'commit',rateHz:10,reads:[],writes:['entities'],after:['engine:fracture'],depth:{axis:ENGINE_DEPTH_AXES.world,min:ENGINE_DEPTH.dormant}},
+  {action:'clock',id:'engine:clock',phase:'commit',rateHz:60,reads:[],writes:['time'],after:['engine:cleanup'],depth:{axis:ENGINE_DEPTH_AXES.core,min:ENGINE_DEPTH.dormant}},
+ ] as const;
+ const modules=definitions.map(definition=>({
+  ...definition,
+  context:'none' as const,
+  run:(_context:Readonly<SceneModuleContext>,frame:{readonly deltaSeconds:number})=>[{type:'system' as const,action:definition.action,deltaSeconds:frame.deltaSeconds}],
+ }));
+ kernel.usePlugin({id:'engine.scene.builtin',modules});
+ return kernel;
 }
-export type SceneModule=EngineModule<SceneModuleContext,SceneCommand>;

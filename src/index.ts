@@ -1,6 +1,6 @@
 export {FixedClock} from './core/fixed-clock.js';
 export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
-export {EngineKernel,ModuleScheduler,ENGINE_PHASES,SIMULATION_TIERS,type EngineModule,type EnginePhase,type ModuleDescription,type ModuleFrame,type SimulationTier} from './core/kernel.js';
+export {EngineKernel,KernelProgram,ModuleScheduler,ENGINE_PHASES,ENGINE_DEPTH,ENGINE_DEPTH_AXES,SIMULATION_TIERS,simulationDepth,simulationProfile,simulationProfileKey,simulationTierDepth,simulationTierForDepth,validateEngineDepth,type EngineModule,type EnginePlugin,type EnginePhase,type ModuleDescription,type ModuleDepthRequirement,type ModuleFrame,type EngineDepth,type SimulationProfile,type SimulationProfileInput,type SimulationProfileSpec,type SimulationTier} from './core/kernel.js';
 export {PhysicsWorld,RigidBody,applyInvInertiaWorld,type PhysicsForceDriver,type CollisionShape,type Contact,type PhysicsStats,type RigidBodyOptions} from './physics/world.js';
 export {PhysicsCauseTrace,physicsCause,PHYSICS_CAUSE_TRACE_SCHEMA,PHYSICS_CAUSE_TRACE_VERSION,type PhysicsCauseRef,type PhysicsCauseWriter,type PhysicsCauseManifestWriter,type PhysicsTraceRecord,type PhysicsSourceKind,type PhysicsComponentKind,type PhysicsLawKind,type PhysicsEffectKind} from './physics/cause-trace.js';
 export {ForceFrame} from './physics/force-frame.js';
@@ -45,7 +45,7 @@ export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTr
 export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironmentState,type SurfaceEnvironmentField,type SurfaceContactWork,type SnowpackState,type SnowLayerState,type SnowDiagnosticClass} from './environment/surface-state.js';
 export {DeformableSurfaceField,surfaceFieldResolution,type DeformableSurfaceCell,type DeformableSurfaceStamp} from './environment/deformable-surface.js';
 
-export type {SceneModule,SceneModuleContext,SceneCommand} from './scene/modules.js';
+export type {SceneModule,ScenePlugin,SceneModuleContext,SceneCommand} from './scene/modules.js';
 export {SceneSystemRuntime,type SystemFrame,type SystemHandler} from './scene/system-runtime.js';
 export {renderAmbience,type AmbienceFrame,type AmbienceOptions} from './audio/ambience.js';
 export {batchStaticScenery} from './procedural/static-batch.js';
