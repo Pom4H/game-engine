@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
- AudioSynthFamily,ENGINE_DEPTH,RenderFrameFamily,Scene,WorldGeneratorFamily,
+ AudioSynthFamily,CpuRenderer,ENGINE_DEPTH,RenderFrameFamily,Scene,WorldGeneratorFamily,
 } from '../dist/index.js';
 import {ProjectionFamily,projection,scalar} from '../dist/network/index.js';
 
@@ -42,4 +42,19 @@ test('world generator family gives InfiniteWorld a direct depth-selected generat
  const demand={id:{lod:0,x:0,z:0},key:'0:0:0',bounds:{minX:0,minZ:0,maxX:10,maxZ:10},sizeM:10,distanceM:0,priority:1},signal=new AbortController().signal;
  assert.deepEqual(await coarse(demand,signal),{kind:'coarse',key:'0:0:0'});
  assert.deepEqual(await full(demand,signal),{kind:'full',key:'0:0:0'});
+});
+
+
+test('cpu renderer executes the compiled render projection without a frame-time depth branch',()=>{
+ const scene=new Scene({version:1,gravity:[0,0,0],entities:[{
+  id:'subject',mesh:{kind:'box',size:[1,1,1]},renderMesh:{kind:'sphere',radius:3},material:{kind:'steel'}
+ }]});
+ const camera={position:[4,3,5],target:[0,0,0],fov:50},renderer=new CpuRenderer({width:64,height:64});
+ renderer.setSimulationProfile({defaultDepth:0,axes:{render:0}});renderer.render(scene,camera);
+ assert.equal(renderer.inspect().drawCalls,0,'dormant render depth must compile to an empty projection');
+ renderer.setSimulationProfile({defaultDepth:0,axes:{render:96}});renderer.render(scene,camera);
+ const proxy=renderer.inspect();assert.ok(proxy.drawCalls>0&&proxy.triangles===12,{proxy});
+ renderer.setSimulationProfile({defaultDepth:0,axes:{render:255}});renderer.render(scene,camera);
+ const full=renderer.inspect();assert.ok(full.triangles>proxy.triangles,{proxy,full});
+ renderer.dispose();
 });
