@@ -4,16 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/**'
-      - 'tools/promo/shots.mjs'
-      - 'tools/promo/player.html'
-      - 'tools/promo/capture.mjs'
-      - 'tools/promo/assemble.mjs'
-      - 'tools/promo/city.mjs'
-      - 'tools/promo/actors.mjs'
+      - 'src/render/**'
+      - 'src/scene/**'
+      - 'src/audio/**'
+      - 'tools/promo/**'
       - '.github/workflows/winter-promo.yml'
-      - 'package.json'
-      - 'bun.lock'
   workflow_dispatch:
 
 concurrency:
