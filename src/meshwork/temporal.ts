@@ -1,11 +1,12 @@
 import type {ContentHash,RenderProgramDescriptor} from '../render-ir/index.js';
+import type {ExecutionGraph} from '../execution/index.js';
 import {defineSegmentTask,type MeshEpoch,type MeshRenderSegmentTask,type MeshStream} from './protocol.js';
 
 const NS_PER_SECOND=1_000_000_000n;
 
 export interface MeshWorkerCalibration {readonly workerId:string;readonly frameNsBudget:bigint;readonly fixedNsBudget?:bigint}
 export interface TemporalMeshPlanInput {
- readonly program:RenderProgramDescriptor;readonly stream:MeshStream;readonly epoch:MeshEpoch;readonly resourceManifestHash:ContentHash;
+ readonly program:RenderProgramDescriptor;readonly graph:ExecutionGraph;readonly executionGraphRefHash:ContentHash;readonly stream:MeshStream;readonly epoch:MeshEpoch;readonly resourceManifestHash:ContentHash;
  readonly workers:readonly MeshWorkerCalibration[];readonly nowNs:bigint;readonly firstDisplayNs:bigint;readonly firstOutputFrame:bigint;
  readonly firstSegment?:bigint;readonly totalOutputFrames:number;readonly reserveRatio?:number;readonly guardNs?:bigint;
 }
@@ -36,6 +37,9 @@ function allocateCounts(total:number,workers:readonly MeshWorkerCalibration[]):M
 export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMeshPlan{
  const fps=safeInt(input.stream.targetFps,'targetFps',1),partition=input.program.partitionability;
  if(partition.kind!=='temporal')throw new TypeError('Render program is not temporally partitionable');
+ if(input.graph.programHash!==input.program.programHash)throw new TypeError('Execution graph/program hash mismatch');
+ const renderNode=input.graph.nodes.find(node=>node.operation==='render.sequence');
+ if(!renderNode||renderNode.partitionability.kind!=='temporal'||renderNode.partitionability.warmupFrames!==partition.warmupFrames)throw new TypeError('Execution graph/render partition mismatch');
  if(input.stream.renderProgramHash!==input.program.programHash)throw new TypeError('Stream/program hash mismatch');
  if(input.epoch.streamId!==input.stream.streamId)throw new TypeError('Epoch belongs to another stream');
  if(input.epoch.profileHash!==input.program.profileHash)throw new TypeError('Epoch/profile hash mismatch');
@@ -58,7 +62,7 @@ export function compileTemporalMeshPlan(input:TemporalMeshPlanInput):TemporalMes
   const task=defineSegmentTask({
    streamId:input.stream.streamId,epoch:input.epoch.epoch,segment:(input.firstSegment??0n)+BigInt(i),attempt:0,
    firstOutputFrame:input.firstOutputFrame+BigInt(offset),outputFrames:count,warmupFrames:partition.warmupFrames,
-   programHash:input.program.programHash,checkpointHash:input.epoch.checkpointHash,resourceManifestHash:input.resourceManifestHash,
+   programHash:input.program.programHash,executionGraphRefHash:input.executionGraphRefHash,checkpointHash:input.epoch.checkpointHash,resourceManifestHash:input.resourceManifestHash,
    cameraHash:input.epoch.cameraHash,renderProfileHash:input.epoch.profileHash,deadlineNs,
   });
   assignments.push(Object.freeze({workerId:worker.workerId,task,outputOffset:offset,predictedDurationNs:duration,predictedFinishNs:finish,slackNs:deadlineNs-finish,usefulFps:count/(Number(duration)/1e9)}));
