@@ -374,9 +374,11 @@ export class PhysicsWorld {
     // Contact-patch rolling resistance dissipates the tiny residual tumbling
     // that a finite rigid solver otherwise preserves indefinitely.
     const contactScale=Math.min(1,(body.mass*Math.abs(this.gravity[1])*dt+totalImpulse)/Math.max(.001,body.mass*.1));
-    const angularDecay=Math.exp(-(2.4+7.5*mu)*dt*contactScale*Math.sqrt(manifold.points.length)),beforeAngular:[number,number,number]=[...body.angularVelocity];
-    body.angularVelocity[0]*=angularDecay;body.angularVelocity[1]*=angularDecay;body.angularVelocity[2]*=angularDecay;
-    this.traceStateCorrection(body,[0,0,0],[body.angularVelocity[0]-beforeAngular[0],body.angularVelocity[1]-beforeAngular[1],body.angularVelocity[2]-beforeAngular[2]],'solver.rolling-rest');
+    const angularDecay=Math.exp(-(2.4+7.5*mu)*dt*contactScale*Math.sqrt(manifold.points.length)),angularDelta:Vec3=[
+      body.angularVelocity[0]*(angularDecay-1),body.angularVelocity[1]*(angularDecay-1),body.angularVelocity[2]*(angularDecay-1),
+    ];
+    this.traceStateCorrection(body,[0,0,0],angularDelta,'solver.rolling-rest');
+    body.angularVelocity[0]+=angularDelta[0];body.angularVelocity[1]+=angularDelta[1];body.angularVelocity[2]+=angularDelta[2];
 
     const linear=V3.length(body.velocity),angularSpeed=V3.length(body.angularVelocity);
     let residualNormal=0;
@@ -426,21 +428,44 @@ export class PhysicsWorld {
     this.pushContact(contact,impulse,'resolve');
   }
 
+  private addTraceContactEnergy(body:RigidBody,deltaJ:number):void{
+    if(!this.traceContactEnergy||!Number.isFinite(deltaJ)||!body.invMass)return;
+    this.traceContactEnergy.set(body,(this.traceContactEnergy.get(body)??0)+deltaJ);
+  }
+  /** Exact kinetic work of a constant force/torque velocity kick at fixed orientation. */
+  private forceKickEnergyJ(body:RigidBody,force:Vec3,torque:Vec3,dt:number):number{
+    if(!body.invMass)return 0;
+    const invTorque=applyInvInertiaWorld(body,torque);
+    return V3.dot(force,body.velocity)*dt+.5*V3.dot(force,force)*body.invMass*dt*dt
+      +V3.dot(torque,body.angularVelocity)*dt+.5*V3.dot(torque,invTorque)*dt*dt;
+  }
+  /** Exact kinetic-energy change implied by explicit Δv/Δω at fixed orientation. */
+  private stateCorrectionEnergyJ(body:RigidBody,velocityDelta:Vec3,angularDelta:Vec3):number{
+    const linear=body.mass*V3.dot(body.velocity,velocityDelta)+.5*body.mass*V3.dot(velocityDelta,velocityDelta);
+    const angularMomentum=applyInertiaWorld(body,body.angularVelocity),deltaMomentum=applyInertiaWorld(body,angularDelta);
+    return linear+V3.dot(angularMomentum,angularDelta)+.5*V3.dot(deltaMomentum,angularDelta);
+  }
   private traceStateCorrection(body:RigidBody,velocityDelta:Vec3,angularDelta:Vec3,sourceId:string):void{
     const trace=this.causeTrace;if(!trace||!body.invMass)return;
     if(Math.hypot(...velocityDelta)+Math.hypot(...angularDelta)<=1e-15)return;
+    this.addTraceContactEnergy(body,this.stateCorrectionEnergyJ(body,velocityDelta,angularDelta));
     trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:'constraint',id:sourceId},{...(Math.hypot(...velocityDelta)>0?{velocityCorrectionMps:velocityDelta}:{}),...(Math.hypot(...angularDelta)>0?{angularVelocityCorrectionRadps:angularDelta}:{})});
   }
   private tracePositionCorrection(body:RigidBody,delta:Vec3,point:Vec3,sourceKind:'surface'|'body',sourceId:string):void{
     const trace=this.causeTrace;if(!trace||!body.invMass)return;
+    this.addTraceContactEnergy(body,-body.mass*V3.dot(this.gravity,delta));
     trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:sourceKind,id:sourceId},{positionCorrectionM:delta,pointWorldM:point});
   }
   private applyImpulseAtPoint(body:RigidBody,direction:Vec3,j:number,r:Vec3,sourceKind:'surface'|'body',sourceId:string):void{
     if(!body.invMass||j===0)return;body.wake();
-    const impulse:Vec3=[direction[0]*j,direction[1]*j,direction[2]*j],point:Vec3=[body.position[0]+r[0],body.position[1]+r[1],body.position[2]+r[2]];
-    const trace=this.causeTrace;if(trace)trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:sourceKind,id:sourceId},{impulseNs:impulse,pointWorldM:point});
+    const impulse:Vec3=[direction[0]*j,direction[1]*j,direction[2]*j],angularImpulse=V3.cross(r,impulse),dw=applyInvInertiaWorld(body,angularImpulse),point:Vec3=[body.position[0]+r[0],body.position[1]+r[1],body.position[2]+r[2]];
+    const trace=this.causeTrace;if(trace){
+      const deltaK=V3.dot(impulse,body.velocity)+.5*V3.dot(impulse,impulse)*body.invMass+V3.dot(angularImpulse,body.angularVelocity)+.5*V3.dot(angularImpulse,dw);
+      this.addTraceContactEnergy(body,deltaK);
+      trace.writer(body.id).contribute(this.contactCauses.get(body.id)!,{kind:sourceKind,id:sourceId},{impulseNs:impulse,pointWorldM:point});
+    }
     body.velocity[0]+=impulse[0]*body.invMass;body.velocity[1]+=impulse[1]*body.invMass;body.velocity[2]+=impulse[2]*body.invMass;
-    const dw=applyInvInertiaWorld(body,V3.cross(r,impulse));body.angularVelocity[0]+=dw[0];body.angularVelocity[1]+=dw[1];body.angularVelocity[2]+=dw[2];
+    body.angularVelocity[0]+=dw[0];body.angularVelocity[1]+=dw[1];body.angularVelocity[2]+=dw[2];
   }
   private applyPairImpulseAtPoint(a:RigidBody,b:RigidBody,direction:Vec3,j:number,point:Vec3):void{
     if(j===0)return;
@@ -561,6 +586,13 @@ function rotationBasis(rotation:Vec3):readonly[Vec3,Vec3,Vec3]{
 function rotateLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[b[0][0]*v[0]+b[1][0]*v[1]+b[2][0]*v[2],b[0][1]*v[0]+b[1][1]*v[1]+b[2][1]*v[2],b[0][2]*v[0]+b[1][2]*v[1]+b[2][2]*v[2]];}
 function rotateWorldToLocal(rotation:Vec3,v:Vec3):MutableVec3{const b=rotationBasis(rotation);return[V3.dot(v,b[0]),V3.dot(v,b[1]),V3.dot(v,b[2])];}
 export function applyInvInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[local[0]*body.invInertiaLocal[0],local[1]*body.invInertiaLocal[1],local[2]*body.invInertiaLocal[2]];return rotateLocal(body.rotation,scaled);}
+function applyInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{
+  const local=rotateWorldToLocal(body.rotation,v),scaled:Vec3=[
+    body.invInertiaLocal[0]>0?local[0]/body.invInertiaLocal[0]:0,
+    body.invInertiaLocal[1]>0?local[1]/body.invInertiaLocal[1]:0,
+    body.invInertiaLocal[2]>0?local[2]/body.invInertiaLocal[2]:0,
+  ];return rotateLocal(body.rotation,scaled);
+}
 function groundSupportVector(body:RigidBody):MutableVec3{return groundContactManifold(body).points[0]??[0,groundContactManifold(body).lowest,0];}
 function groundContactManifold(body:RigidBody):{lowest:number;points:MutableVec3[]}{
   if(body.shape.kind==='sphere')return{lowest:-body.shape.radius,points:[[0,-body.shape.radius,0]]};
