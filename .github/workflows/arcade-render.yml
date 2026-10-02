@@ -15,6 +15,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+# GPU evidence is intentionally serialized; proving-ground owns the physics release camera gate.
 concurrency:
   group: snowy-arcade-${{ github.ref }}
   cancel-in-progress: true
