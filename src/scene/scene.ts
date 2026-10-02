@@ -19,7 +19,7 @@ import {WindField} from '../physics/wind.js';
 import {SoilField} from '../physics/soil.js';
 import {Vehicle,vehicle as compileVehicle} from '../vehicles/vehicle.js';
 import type {EngineEvent} from './events.js';
-import type {SimulationProfileInput} from '../core/kernel.js';
+import {simulationProfile,type KernelProgram,type SimulationProfile,type SimulationProfileInput} from '../core/kernel.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext,type ScenePlugin} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
@@ -69,6 +69,8 @@ export class Scene {
   readonly animation=new AnimationSystem();
   readonly contacts:SurfaceContactSystem;
   readonly kernel=sceneKernel();
+  private simulationProfile:SimulationProfile=simulationProfile('detailed');
+  private simulationProgram:KernelProgram<SceneModuleContext,InternalCommand>=this.kernel.compile(this.simulationProfile);
   readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
   /** Scene-owned force-driver assemblies keyed by their authoritative entity/body id. */
@@ -172,13 +174,20 @@ export class Scene {
     return runtime;
   }
 
-  use(module:SceneModule):this{this.kernel.use(module);return this;}
+  use(module:SceneModule):this{this.kernel.use(module);this.simulationProgram=this.kernel.compile(this.simulationProfile);return this;}
   usePlugin(plugin:ScenePlugin):this{
     const systems=plugin.systems??[];
     this.systemRuntime.assertAvailable(systems.map(system=>system.id));
     this.kernel.usePlugin(plugin);
     this.systemRuntime.useMany(systems.map(system=>({id:system.id,handler:frame=>system.run(this,frame)})));
+    this.simulationProgram=this.kernel.compile(this.simulationProfile);
     return this;
+  }
+  get profile():SimulationProfile{return this.simulationProfile;}
+  setSimulationProfile(input:SimulationProfileInput):SimulationProfile{
+    this.simulationProfile=simulationProfile(input);
+    this.simulationProgram=this.kernel.compile(this.simulationProfile);
+    return this.simulationProfile;
   }
   renderMoverIds():ReadonlySet<string>{
     if(this.renderMoverRevision===this.renderStructureRevision)return this.renderMovers;
@@ -206,10 +215,10 @@ export class Scene {
     return this.surfaces.surface(source);
   }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
-  step(dt=1/60,profile:SimulationProfileInput='detailed'):void{
+  step(dt=1/60,profile?:SimulationProfileInput):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
-    const at=this.time+dt;this.lastExecution=[];
-    this.kernel.run(this.tick+1,{} as SceneModuleContext,profile,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+    const at=this.time+dt;this.lastExecution=[],program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);
+    program.run(this.tick+1,{} as SceneModuleContext,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;
     }});

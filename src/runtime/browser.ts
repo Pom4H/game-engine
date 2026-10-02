@@ -3,13 +3,14 @@ import {V3} from '../math.js';
 import type {FootstepSound} from '../audio/footsteps.js';
 import {ProceduralAudio,type AmbientAudioState} from '../audio/browser.js';
 import {FixedClock} from '../core/fixed-clock.js';
+import {simulationProfile,type SimulationProfile,type SimulationProfileInput} from '../core/kernel.js';
 import {Scene} from '../scene/scene.js';
 import type {EngineEvent} from '../scene/events.js';
 import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
-export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean}
+export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean;profile?:SimulationProfileInput}
 
 export class BrowserRuntime {
   scene:Scene;
@@ -18,6 +19,7 @@ export class BrowserRuntime {
   readonly stepSeconds:number;
   readonly audio:ProceduralAudio|null;
   private initial:SceneSpec;
+  private simulationProfile:SimulationProfile;
   private controls:WalkerControls|null=null;
   private readonly clock:FixedClock;
   private running=false;
@@ -26,7 +28,7 @@ export class BrowserRuntime {
   private publishedBridge:EngineBridge|null=null;
 
   private constructor(private readonly canvas:HTMLCanvasElement,scene:SceneSpec,renderer:Renderer,options:BrowserRuntimeOptions){
-    this.initial=structuredClone(scene);this.scene=new Scene(this.initial);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
+    this.initial=structuredClone(scene);this.simulationProfile=simulationProfile(options.profile??'detailed');this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);this.renderer=renderer;this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio();
   }
 
   static async create(canvas:HTMLCanvasElement,scene:SceneSpec,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
@@ -68,14 +70,17 @@ export class BrowserRuntime {
     for(let i=0;i<remaining;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);this.scene.drainEvents();this.scene.contacts.drainFootsteps();}
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
-  reset():void{this.scene=new Scene(this.initial);this.render();}
+  reset():void{this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);this.render();}
   async replaceScene(scene:SceneSpec):Promise<void>{
     this.pause();
     this.controls?.dispose();this.controls=null;
     this.initial=structuredClone(scene);
-    this.scene=new Scene(this.initial);
+    this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);
     await this.renderer.prepareMaterials?.(this.scene);
     this.render();await this.renderer.flush();
+  }
+  setSimulationProfile(input:SimulationProfileInput):SimulationProfile{
+    this.simulationProfile=simulationProfile(input);this.scene.setSimulationProfile(this.simulationProfile);return this.simulationProfile;
   }
   patchAppearance(patch:AppearancePatch):void{this.pause();this.scene.patchAppearance(patch);}
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
@@ -86,7 +91,7 @@ export class BrowserRuntime {
   profile(){return this.renderer.profile?.()??this.renderer.inspect().profile;}
   resetProfile():void{this.renderer.resetProfile?.();}
   snapshot(){return this.scene.snapshot();}
-  inspect(){return{time:this.scene.time,tick:this.scene.tick,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
+  inspect(){return{time:this.scene.time,tick:this.scene.tick,simulationProfile:this.simulationProfile,environment:this.scene.environment,surfaces:{surfaces:[...this.scene.surfaces.surfaces.values()].map(state=>({...state})),bodies:[...this.scene.surfaces.bodies.values()].map(state=>({...state}))},physics:this.scene.physics.stats,renderer:this.renderer.inspect(),audio:this.audio?.inspect()??{enabled:false}};}
   async capture(type='image/png',quality?:number):Promise<Blob>{this.render();await this.renderer.flush();return await new Promise<Blob>((resolve,reject)=>this.canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Canvas capture failed')),type,quality));}
   dispose():void{if(this.disposed)return;this.pause();this.disposed=true;this.controls?.dispose();this.audio?.dispose();this.renderer.dispose();if(this.publishedBridge&&(globalThis as any).__GAME_ENGINE__===this.publishedBridge)delete (globalThis as any).__GAME_ENGINE__;this.publishedBridge=null;}
 
@@ -114,7 +119,7 @@ export class BrowserRuntime {
     };
   }
 
-  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),replaceScene:scene=>this.replaceScene(scene),patchAppearance:patch=>this.patchAppearance(patch),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),dispose:()=>this.dispose(),inspect:()=>this.inspect()};}
+  bridge():EngineBridge{return{snapshot:()=>this.snapshot(),probeLinear:(points,stage)=>this.probeLinear(points,stage),pause:()=>this.pause(),resume:()=>this.resume(),step:(count=1)=>this.step(count),seek:seconds=>this.seek(seconds),replaceScene:scene=>this.replaceScene(scene),setSimulationProfile:profile=>this.setSimulationProfile(profile),patchAppearance:patch=>this.patchAppearance(patch),setCamera:camera=>this.setCamera(camera),render:()=>this.render(),profile:()=>this.profile(),resetProfile:()=>this.resetProfile(),drain:()=>this.drain(),flush:()=>this.flush(),dispose:()=>this.dispose(),inspect:()=>this.inspect()};}
   private frame=(now:number)=>{
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];

@@ -1,3 +1,4 @@
+import {ENGINE_DOMAINS} from './domains.js';
 export type SimulationTier='detailed'|'active'|'aggregate'|'dormant';
 export const SIMULATION_TIERS:readonly SimulationTier[]=Object.freeze(['detailed','active','aggregate','dormant']);
 
@@ -10,20 +11,8 @@ export const ENGINE_DEPTH=Object.freeze({
  detailed:255,
 } as const);
 
-/** Built-in axes are conventions, not a closed enum: plugins may introduce stable axes. */
-export const ENGINE_DEPTH_AXES=Object.freeze({
- core:'core',
- world:'world',
- physics:'physics',
- destruction:'destruction',
- agents:'agents',
- economy:'economy',
- network:'network',
- audio:'audio',
- render:'render',
- collision:'collision',
- economics:'economics',
-} as const);
+/** Compatibility name for the canonical domain axes. Plugins may still add stable custom axes. */
+export const ENGINE_DEPTH_AXES=ENGINE_DOMAINS;
 
 export interface SimulationProfile{
  readonly defaultDepth:EngineDepth;

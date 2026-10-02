@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DepthVariantRegistry,ENGINE_DEPTH,ENGINE_DOMAINS,ENGINE_SLOTS,EngineKernel,Scene,simulationProfile} from '../dist/index.js';
+import {DepthVariantRegistry,ENGINE_DEPTH,ENGINE_DEPTH_AXES,ENGINE_DOMAINS,ENGINE_SLOTS,EngineKernel,Scene,simulationProfile} from '../dist/index.js';
 
 test('kernel compiles plugin variants and depth decisions out of the hot path',()=>{
  const calls=[],kernel=new EngineKernel(60);
@@ -55,8 +55,13 @@ test('physics depth selects a lower-cadence solver variant without a hot-path br
   {id:'ball',position:[0,10,0],mesh:{kind:'sphere',radius:.5},body:{mass:1}},
  ]});
  const coarse=make(),full=make(),ticks=60;
- for(let i=0;i<ticks;i++)coarse.step(1/60,{defaultDepth:ENGINE_DEPTH.dormant,axes:{physics:128}});
- for(let i=0;i<ticks;i++)full.step(1/60,{defaultDepth:ENGINE_DEPTH.dormant,axes:{physics:ENGINE_DEPTH.active}});
+ coarse.setSimulationProfile({defaultDepth:ENGINE_DEPTH.dormant,axes:{physics:128}});
+ full.setSimulationProfile({defaultDepth:ENGINE_DEPTH.dormant,axes:{physics:ENGINE_DEPTH.active}});
+ const coarseBuilds=coarse.kernel.diagnostics.compileBuilds,fullBuilds=full.kernel.diagnostics.compileBuilds;
+ for(let i=0;i<ticks;i++)coarse.step(1/60);
+ for(let i=0;i<ticks;i++)full.step(1/60);
+ assert.equal(coarse.kernel.diagnostics.compileBuilds,coarseBuilds,'steady-state stepping must execute the precompiled program directly');
+ assert.equal(full.kernel.diagnostics.compileBuilds,fullBuilds,'steady-state stepping must execute the precompiled program directly');
  assert.equal(coarse.physics.steps,30,'coarse slot variant must execute at 30 Hz');
  assert.equal(full.physics.steps,60,'full slot variant must execute at 60 Hz');
  assert.ok(coarse.lastExecution.includes('engine:physics.coarse'));
@@ -120,8 +125,8 @@ test('a physics plugin replaces the compiled physics slot without owning a secon
   id:'fixture.physics-plugin',
   systems:[{id:'fixture.physics-plugin.step',run:(host,frame)=>{pluginSteps++;host.physics.step(frame.dt);}}],
   modules:[{
-   id:'fixture:physics:rocket-like',slot:'engine:physics',phase:'simulate',rateHz:60,
-   reads:['surface-state','animation'],writes:['entities','contacts'],after:['engine:animation'],
+   id:'fixture:physics:rocket-like',slot:ENGINE_SLOTS.physicsStep,phase:'simulate',rateHz:60,
+   reads:['surface-state','animation'],writes:['entities','contacts'],after:[ENGINE_SLOTS.agentsSimulate],
    depth:{axis:'physics',min:200},context:'none',
    run:(_context,frame)=>[{type:'system',action:'fixture.physics-plugin.step',deltaSeconds:frame.deltaSeconds}],
   }],
@@ -134,4 +139,11 @@ test('a physics plugin replaces the compiled physics slot without owning a secon
  assert.ok(scene.lastExecution.includes('fixture:physics:rocket-like'));
  assert.ok(!scene.lastExecution.includes('engine:physics'),'compiled slot must contain exactly one physics implementation');
  assert.ok(body.position[1]<10);
+});
+
+
+test('canonical domains are the exact built-in depth axes',()=>{
+ assert.equal(ENGINE_DEPTH_AXES,ENGINE_DOMAINS);
+ assert.equal(ENGINE_DEPTH_AXES.economics,'economics');
+ assert.equal(ENGINE_SLOTS.physicsStep,'physics.step');
 });
