@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import {readdir,readFile,writeFile,mkdir} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
-import {defineRenderProgram} from '../../dist/render-ir/index.js';
+import {defineRenderProgram,MemoryContentStore} from '../../dist/render-ir/index.js';
+import {lowerRenderProgram} from '../../dist/execution/index.js';
 import {compileTemporalMeshPlan} from '../../dist/meshwork/index.js';
 
 const root=resolve(process.argv[2]??'artifacts/meshwork/calibrations');
@@ -37,6 +38,7 @@ const program=defineRenderProgram({
   partitionability:{kind:'temporal',warmupFrames:4},
   requiredResources:{resources:[]},
 });
+const graph=lowerRenderProgram(program),graphStore=new MemoryContentStore(),graphRef=graphStore.put('graph',graph);
 const stream={streamId:'gpu-proof',targetFps:target,renderProgramHash:program.programHash};
 const epoch={streamId:'gpu-proof',epoch:1n,checkpointHash:'checkpoint:gpu-proof',cameraHash:'camera:gpu-proof',profileHash:program.profileHash};
 
@@ -44,7 +46,7 @@ let plan=null,error=null;
 if(unique.length>=3){
   try{
     plan=compileTemporalMeshPlan({
-      program,stream,epoch,
+      program,graph,executionGraphRefHash:graphRef.hash,stream,epoch,
       resourceManifestHash:'manifest:gpu-proof',
       nowNs:0n,
       firstDisplayNs:2_000_000_000n,
