@@ -345,8 +345,8 @@ export const experimentViews=Object.freeze([
  {
   name:'proving-ground-aero-rotor',
   output:'artifacts/proving-ground-aero-rotor.png',
-  time:aeroRotorExperiment.durationS,
-  camera:{position:[202,48,134],target:[190,42,120],fov:31,aperture:0},
+  time:1.2,
+  camera:{position:[198,43,129],target:[190,39,120],fov:25,aperture:0},
  }
 ]);
 export const provingGroundExperiments=Object.freeze([gravityFreeFallExperiment,collisionElasticExperiment,rotationFreeBodyExperiment,aeroRotorExperiment]);
