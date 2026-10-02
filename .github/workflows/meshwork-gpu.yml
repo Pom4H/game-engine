@@ -97,7 +97,8 @@ jobs:
           $filter="[0:v]scale=960:540[left];[1:v]scale=960:540,drawbox=x=0:y=0:w=iw:h=10:color=red@0.95:t=fill:enable='between(n,29,32)+between(n,59,62)+between(n,89,92)'[right];[left][right]hstack=inputs=2[v]"
           ffmpeg -y -hide_banner -loglevel error -i "$out/reference.mp4" -i "$out/mesh-segmented.mp4" -filter_complex $filter -map "[v]" -an -c:v mpeg4 -q:v 2 -pix_fmt yuv420p -movflags +faststart "$out/meshwork-consistency.mp4"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          ffmpeg -hide_banner -i "$out/reference.mp4" -i "$out/mesh-segmented.mp4" -lavfi "ssim=stats_file=$out/ssim.log" -f null - 2> "$out/ssim-summary.txt"
+          $ssim=Start-Process -FilePath ffmpeg -ArgumentList @('-hide_banner','-i',"$out/reference.mp4",'-i',"$out/mesh-segmented.mp4",'-lavfi',"ssim=stats_file=$out/ssim.log",'-f','null','-') -NoNewWindow -Wait -PassThru -RedirectStandardError "$out/ssim-summary.txt"
+          if ($ssim.ExitCode -ne 0) { exit $ssim.ExitCode }
           $evidence=[ordered]@{
             commit=$env:GITHUB_SHA
             runner=$env:RUNNER_NAME
