@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {MeshLeasePool,OrderedSegmentAssembler} from '../dist/meshwork/index.js';
 
-const base={streamId:'s',epoch:2n,segment:0n,attempt:0,firstOutputFrame:0n,outputFrames:2,warmupFrames:0,programHash:'program:x',checkpointHash:'checkpoint:x',resourceManifestHash:'manifest:x',cameraHash:'camera:x',renderProfileHash:'profile:x',deadlineNs:10_000n};
+const base={streamId:'s',epoch:2n,segment:0n,attempt:0,firstOutputFrame:0n,outputFrames:2,warmupFrames:0,programHash:'program:x',executionGraphRefHash:'graph-ref:x',checkpointHash:'checkpoint:x',resourceManifestHash:'manifest:x',cameraHash:'camera:x',renderProfileHash:'profile:x',deadlineNs:10_000n};
 test('lease heartbeat extends ownership, expiry creates a new attempt, stale lease cannot commit',()=>{
  const pool=new MeshLeasePool(2n).add(base,'A'),old=pool.claim('A',0n,100n);assert.ok(old);
  const renewed=pool.heartbeat(old,50n,200n);assert.equal(renewed.expiresNs,250n);assert.equal(pool.expire(251n),1);
