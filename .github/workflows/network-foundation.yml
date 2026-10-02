@@ -2,6 +2,7 @@ name: Network foundation
 on:
   push:
     paths:
+      - 'src/index.ts'
       - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/network/**'
@@ -11,6 +12,7 @@ on:
       - '.github/workflows/network-foundation.yml'
   pull_request:
     paths:
+      - 'src/index.ts'
       - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/network/**'

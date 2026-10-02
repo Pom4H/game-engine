@@ -2,6 +2,7 @@ name: Audio foundation
 on:
   push:
     paths:
+      - 'src/index.ts'
       - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/audio/**'
@@ -11,6 +12,7 @@ on:
       - '.github/workflows/audio-foundation.yml'
   pull_request:
     paths:
+      - 'src/index.ts'
       - 'src/scene/scene.ts'
       - 'src/core/**'
       - 'src/audio/**'
