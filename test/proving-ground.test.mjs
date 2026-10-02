@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import spec,{provingGroundMeta} from '../tools/proving-ground/scene.mjs';
 import {provingGroundZones,releasePhysicsRequirements} from '../tools/proving-ground/catalog.mjs';
-import {assertExperimentCauseGraph,collisionElasticExperiment,gravityFreeFallExperiment,rotationFreeBodyExperiment} from '../tools/proving-ground/experiments.mjs';
+import {aeroRotorExperiment,assertExperimentCauseGraph,collisionElasticExperiment,gravityFreeFallExperiment,rotationFreeBodyExperiment} from '../tools/proving-ground/experiments.mjs';
 import {Scene,PhysicsWorld,RigidBody,material,Vehicle,vehicle,wheel,wing,bodyWheelSupport,soilWheelSupport,wheelHit,physicsAccounting,ThermalMass,lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL} from '../dist/index.js';
 
 const dt=1/120;
@@ -565,6 +565,43 @@ test('torque-free rotation stand preserves spin angular momentum and rotational 
  assert.ok(norm(sub(body.position,expectedPosition))<=tol,{position:body.position,expectedPosition,tol});
  assert.equal(scene.physics.contacts.some(c=>c.a===body.id||c.b===body.id),false,'torque-free body must remain contact-free');
  scene.physics.stopCauseTrace(trace);
+});
+
+test('actuator-disk force-balance matches the independent rotor oracle before body integration',()=>{
+ const e=aeroRotorExperiment,world=new PhysicsWorld([0,0,0],-1000),rig=new Vehicle(world,vehicle(e.sceneBodyId,e.vehicle),{position:e.position});
+ rig.setAir(e.environment.atmosphere);rig.setControls(e.controls);
+ const h=1/e.forceTickRate;for(let i=0;i<e.forceBalanceSteps;i++)rig.evaluate(h);
+ const expected=e.forceBalanceOracle(e.forceBalanceSteps,h),part=rig.part('proof.rotor');
+ const scale=Math.max(1,expected.thrust,expected.power,Math.abs(expected.reactionTorque)),tol=16384*Number.EPSILON*scale*e.forceBalanceSteps;
+ assert.ok(Math.abs(part.angularSpeed-expected.omega)<=tol,{actual:part.angularSpeed,expected:expected.omega,tol});
+ assert.ok(Math.abs(part.collectiveRad-expected.collective)<=tol,{actual:part.collectiveRad,expected:expected.collective,tol});
+ assert.ok(Math.abs(part.liftN-expected.thrust)<=tol,{actual:part.liftN,expected:expected.thrust,tol});
+ assert.ok(Math.abs(part.powerW-expected.power)<=tol,{actual:part.powerW,expected:expected.power,tol});
+ assert.ok(Math.abs(part.reactionTorqueNm-expected.reactionTorque)<=tol,{actual:part.reactionTorqueNm,expected:expected.reactionTorque,tol});
+ assert.ok(Math.abs(rig.force[0])<=tol&&Math.abs(rig.force[2])<=tol&&Math.abs(rig.force[1]-expected.thrust)<=tol,{force:[...rig.force],expected:expected.thrust,tol});
+ assert.ok(part.powerW<=e.vehicle.parts[0].maxPowerW+tol,{power:part.powerW,max:e.vehicle.parts[0].maxPowerW});
+ rig.dispose();
+});
+
+test('aero rotor is a Scene-owned force driver with an exact active cause graph and closed energy ledger',()=>{
+ const e=aeroRotorExperiment,scene=new Scene(spec),entity=scene.entities.get(e.sceneBodyId),rig=scene.assemblies.get(e.sceneBodyId);
+ assert.ok(entity?.body&&rig,'rotor experiment must materialize one Scene body and one adopted assembly');
+ assert.equal(rig.body,entity.body,'Vehicle must adopt the authoritative Scene body instead of integrating another pose');
+ const trace=scene.physics.traceCauses({runId:`experiment:${e.id}`,maxRecords:150000});
+ for(let i=0;i<e.durationS*e.runtimeTickRate;i++)scene.step(1/e.runtimeTickRate);
+ const records=trace.snapshot(),part=rig.part('proof.rotor'),observed=assertExperimentCauseGraph(e,records,rig.body.id);
+ assert.deepEqual(observed,['actuator-disk.v2','gravity.v1']);
+ const rotorRecords=records.filter(r=>r.type==='physics.contribution'&&r.body_id===rig.body.id&&r.law_id==='actuator-disk.v2');
+ assert.ok(rotorRecords.length>0,'rotor must contribute a real causal wrench');
+ assert.ok(rotorRecords.every(r=>r.source?.kind==='air'&&r.source?.id==='environment.air'),'rotor cause must be sourced only from the authored atmosphere');
+ assert.ok(part.angularSpeed>20,{omega:part.angularSpeed});
+ assert.ok(part.liftN>0&&part.powerW>0,{lift:part.liftN,power:part.powerW});
+ assert.ok(trace.proof.maxEnergyResidualJ<1e-6,trace.proof);
+ assert.equal(scene.physics.contacts.some(c=>c.a===rig.body.id||c.b===rig.body.id),false,'rotor proof rig must remain contact-free');
+ scene.physics.stopCauseTrace(trace);
+ scene.remove(e.sceneBodyId);
+ assert.equal(scene.assemblies.has(e.sceneBodyId),false,'removing the entity must dispose the adopted force driver');
+ assert.equal(scene.physics.bodies.has(e.sceneBodyId),false,'removing the entity must remove its authoritative body');
 });
 
 test('closed rigid collision conserves total linear and angular momentum',()=>{

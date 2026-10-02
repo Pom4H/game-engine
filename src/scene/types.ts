@@ -8,6 +8,7 @@ import type {SceneDeformationSpec} from '../physics/deformation.js';
 import type {FluidVolumeSpec} from '../physics/fluid.js';
 import type {WindVolumeSpec} from '../physics/wind.js';
 import type {SoilVolumeSpec} from '../physics/soil.js';
+import type {VehicleAir,VehicleControls,VehicleSpec} from '../vehicles/vehicle.js';
 
 export type Color = readonly [number,number,number,number];
 export type Primitive =
@@ -159,6 +160,14 @@ export interface SceneSurfaceContactsSpec {
   readonly snow?:readonly (SnowContactSurfaceOptions & {readonly surfaceId:string})[];
   readonly wheels?:readonly {readonly entityId:string;readonly radius?:number;readonly lateral?:Vec3}[];
 }
+export interface SceneVehicleAssemblySpec {
+  /** Existing authored Scene entity/body that owns the pose and collision shape. */
+  readonly entityId:string;
+  /** Ordinary Vehicle composition; Scene only owns its lifetime and force-driver binding. */
+  readonly vehicle:Omit<VehicleSpec,'id'>;
+  readonly controls?:VehicleControls;
+  readonly air?:VehicleAir;
+}
 export interface SceneSpec {
   /** Declarative rig/routes restored by Scene construction, URL loading and reset. */
   animation?:SceneAnimationSpec;
@@ -166,6 +175,8 @@ export interface SceneSpec {
   surfaceContacts?:SceneSurfaceContactsSpec;
   /** Persistent plastic deformation groups driven by physics contacts. */
   deformation?:SceneDeformationSpec;
+  /** Declarative physics assemblies adopt existing Scene bodies; no second pose/integrator. */
+  vehicleAssemblies?:readonly SceneVehicleAssemblySpec[];
   /** Finite physical fluid volumes; rendering remains an ordinary entity/material concern. */
   fluids?:readonly FluidVolumeSpec[];
   /** Spatial air-flow volumes for wind tunnels, gust corridors and wake experiments. */

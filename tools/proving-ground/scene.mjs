@@ -1,7 +1,7 @@
 // Engine proving ground. Geometry is deliberately simple and modular: every
 // physical obstacle/road section is an ordinary Scene entity, not gameplay code.
 import {provingGroundZones} from './catalog.mjs';
-import {provingGroundExperiments,experimentSceneEntities} from './experiments.mjs';
+import {provingGroundExperiments,experimentSceneEntities,experimentVehicleAssemblies} from './experiments.mjs';
 
 const A={kind:'asphalt',color:[.055,.06,.065,1],roughness:.82};
 const C={kind:'concrete',color:[.42,.43,.44,1],roughness:.88};
@@ -250,5 +250,6 @@ export default {
  fluids:[{id:'water-basin-fluid',shape:'cylinder',center:[12,-1.05,-27],radiusM:18.7,depthM:2.1,densityKgM3:998.2,velocity:[0,0,0],dragCoefficient:.9}],
  windVolumes:[{id:'crosswind.field',center:[100,3.2,32],sizeM:[14,7,44],wind:[18,0,0],densityKgM3:1.225,blendM:2.0}],
  soilVolumes:[{id:'soft-ground',center:[97,0,-112],sizeM:[20,16],cells:[20,16],pressureScalePa:85000,sinkageExponent:.85,maxSinkageM:.30,cohesionPa:7000,frictionAngleDeg:27,compactionRatePerSecond:.55,rollingResistance:.055}],
+ vehicleAssemblies:experimentVehicleAssemblies,
  entities
 };

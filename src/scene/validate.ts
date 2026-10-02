@@ -6,6 +6,7 @@ import type {SceneSpec,EntitySpec} from './types.js';
 import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
 import {validateWindVolume,type WindVolumeSpec} from '../physics/wind.js';
 import {validateSoilVolume,type SoilVolumeSpec} from '../physics/soil.js';
+import {vehicle as compileVehicle,type VehicleSpec} from '../vehicles/vehicle.js';
 
 export function validateScene(value:unknown):SceneSpec{
   if(!value||typeof value!=='object')throw new TypeError('Scene must be an object');
@@ -50,7 +51,29 @@ export function validateScene(value:unknown):SceneSpec{
       validateSoilVolume(raw as SoilVolumeSpec);const id=(raw as SoilVolumeSpec).id;if(ids.has(id))throw new TypeError(`Duplicate soil ${id}`);ids.add(id);
     }
   }
-  validateBindings(scene,scene.entities as EntitySpec[]);
+  if(scene.vehicleAssemblies!==undefined){
+    const assemblies=boundedArray(scene.vehicleAssemblies,'vehicleAssemblies',128),used=new Set<string>(),entities=scene.entities as EntitySpec[];
+    for(const [index,raw] of assemblies.entries()){
+      const path=`vehicleAssemblies[${index}]`,assembly=object(raw,path),entityId=stableId(assembly.entityId,`${path}.entityId`);
+      if(used.has(entityId))throw new TypeError(`${path} duplicates assembly ${entityId}`);used.add(entityId);
+      const entity=entities.find(candidate=>candidate.id===entityId);if(!entity?.body)throw new TypeError(`${path} requires entity ${entityId} with body`);
+      const authored=object(assembly.vehicle,`${path}.vehicle`),blueprint=compileVehicle(entityId,authored as unknown as Omit<VehicleSpec,'id'>);
+      if(entity.body.mass!==blueprint.massKg)throw new TypeError(`${path} body.mass must equal compiled assembly mass ${blueprint.massKg}`);
+      if(JSON.stringify(entity.body.collisionSize)!==JSON.stringify(blueprint.source.chassis.sizeM))throw new TypeError(`${path} body.collisionSize must equal chassis.sizeM`);
+      if(assembly.air!==undefined){
+        const air=object(assembly.air,`${path}.air`);number(air.densityKgM3,`${path}.air.densityKgM3`,0,100);vector(air.wind,3,`${path}.air.wind`);
+        optionalNumber(air,'temperatureC',`${path}.air`);
+      }
+      if(assembly.controls!==undefined){
+        const controls=object(assembly.controls,`${path}.controls`),unipolar=new Set(['brake','handbrake','collective','spoiler','clutch']);
+        for(const [key,value] of Object.entries(controls)){
+          if(!['handbrake','throttle','clutch','brake','steer','pitch','roll','flap','spoiler','collective','yaw'].includes(key))throw new TypeError(`${path}.controls.${key} is unknown`);
+          number(value,`${path}.controls.${key}`,unipolar.has(key)?0:-1,1);
+        }
+      }
+    }
+  }
+    validateBindings(scene,scene.entities as EntitySpec[]);
   if(scene.seed!==undefined&&(!Number.isSafeInteger(scene.seed)))throw new TypeError('seed must be a safe integer');
   optionalNumber(scene,'ground','scene');
   if(scene.clearColor!==undefined)vector(scene.clearColor,4,'clearColor',0,1);

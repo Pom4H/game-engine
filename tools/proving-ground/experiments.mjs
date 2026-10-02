@@ -154,6 +154,68 @@ export const rotationFreeBodyExperiment=experiment({
 });
 
 
+const rotorRigPosition=Object.freeze([190,45,120]);
+const rotorRigVehicle=Object.freeze({
+ chassis:{massKg:520,sizeM:[1.6,.5,1.6],dragAreaM2:0},
+ parts:[{
+  kind:'rotor',id:'proof.rotor',at:[0,0,0],massKg:80,
+  radiusM:3,bladeChordM:.25,blades:3,axis:[0,1,0],forward:[1,0,0],direction:1,
+  governorRpm:550,maxPowerW:150000,spoolSeconds:1,
+  collectiveControl:'collective',collectiveTrimRad:0,collectiveGainRad:.12,
+  cyclicPitchGainRad:0,cyclicRollGainRad:0,liftSlope:5.7,profileDragCoefficient:.011,
+ }]
+});
+const rotorRigControls=Object.freeze({throttle:1,collective:.8});
+const rotorRigAir=Object.freeze({densityKgM3:1.225,wind:Object.freeze([0,0,0]),temperatureC:15});
+const rotorRigMassKg=600;
+const rotorForceTickRate=120;
+const rotorForceBalanceSteps=240;
+const rotorForceBalanceOracle=(steps=rotorForceBalanceSteps,dt=1/rotorForceTickRate)=>{
+ const rotor=rotorRigVehicle.parts[0],rho=rotorRigAir.densityKgM3,area=Math.PI*rotor.radiusM**2;
+ const target=rotor.governorRpm*Math.PI/30*rotorRigControls.throttle;
+ const omega=target*(1-Math.exp(-steps*dt/rotor.spoolSeconds));
+ const collective=rotor.collectiveTrimRad+rotorRigControls.collective*rotor.collectiveGainRad;
+ const solidity=rotor.blades*rotor.bladeChordM/(Math.PI*rotor.radiusM),ct=solidity*rotor.liftSlope*collective/6,tip=omega*rotor.radiusM;
+ const raw=ct*rho*area*tip*tip,profile=(solidity*rotor.profileDragCoefficient/8)*rho*area*tip**3;
+ const induced=Math.abs(raw)>0?Math.abs(raw)**1.5/Math.sqrt(2*rho*area):0,available=rotor.maxPowerW*rotorRigControls.throttle;
+ const usable=Math.max(0,available-profile),powerScale=profile+induced>available&&induced>0?Math.max(0,Math.min(1,(usable/induced)**(2/3))):1;
+ const thrust=raw*powerScale,power=Math.min(available,profile+induced*powerScale**1.5),reactionTorque=-rotor.direction*power/Math.max(1,Math.abs(omega));
+ return Object.freeze({omega,collective,area,solidity,raw,profile,induced,powerScale,thrust,power,reactionTorque});
+};
+
+export const aeroRotorExperiment=experiment({
+ id:'aero.rotor',
+ title:'Actuator-disk rotor / scene-owned force driver',
+ domain:'aero-rotor',
+ durationS:2.4,
+ runtimeTickRate:60,
+ forceTickRate:rotorForceTickRate,
+ forceBalanceSteps:rotorForceBalanceSteps,
+ gravity,
+ sceneBodyId:'experiment-aero-rotor',
+ position:rotorRigPosition,
+ massKg:rotorRigMassKg,
+ vehicle:rotorRigVehicle,
+ controls:rotorRigControls,
+ environment:Object.freeze({
+  gravity,
+  atmosphere:rotorRigAir,
+  fluids:'excluded',
+  contacts:'excluded',
+  allowedCauseLawIds:Object.freeze(['actuator-disk.v2','gravity.v1']),
+ }),
+ forceBalanceOracle:rotorForceBalanceOracle,
+ proof:Object.freeze({
+  governingRelation:'T=Ct*rho*A*(omega*R)^2 with induced/profile power limited by authored shaft power; Q=-P/omega',
+  units:'rho[kg/m^3], omega[rad/s], T[N], P[W], Q[N*m]',
+  assumptions:Object.freeze(['uniform authored atmosphere','single centered horizontal rotor','no chassis drag','no contacts','no ground effect in force-balance stage']),
+  limitingCase:'rho->0 or omega->0 yields zero thrust; P cannot exceed maxPowerW',
+  conservation:'Scene body is the sole pose owner; rotor contributes one causal wrench through actuator-disk.v2',
+  numericalDissipation:'mechanical energy changes must close through the existing causal energy ledger',
+ }),
+});
+
+
 const steel={kind:'steel',color:[.62,.66,.72,1],metalness:.72,roughness:.28};
 const measured={kind:'steel',color:[.25,.62,1,1],metalness:.65,roughness:.24,emissive:[.04,.12,.24]};
 const discrete={kind:'default',color:[.20,1,.48,.72],roughness:.25,emissive:[.08,.55,.18]};
@@ -224,10 +286,33 @@ export function materializeRotationExperimentScene(e=rotationFreeBodyExperiment)
  ];
 }
 
+export function materializeRotorExperimentScene(e=aeroRotorExperiment){
+ const chassis=e.vehicle.chassis.sizeM,rotor=e.vehicle.parts[0];
+ return[
+  {
+   id:e.sceneBodyId,position:e.position,
+   mesh:{kind:'box',size:chassis},
+   renderMesh:{kind:'cylinder',radius:rotor.radiusM,height:.14,segments:64},
+   material:measured,
+   body:{mass:e.massKg,collisionSize:chassis,restitution:0,friction:0},
+  },
+  {id:'experiment-aero-rotor-start-ring',position:e.position,mesh:{kind:'torus',radius:rotor.radiusM,tube:.045,segments:64},material:{...neutral,color:[.75,.78,.82,.28]}},
+  box('experiment-aero-rotor-axis',[e.position[0],e.position[1]+2.2,e.position[2]],[.07,4.4,.07],continuous),
+ ];
+}
+
+export const experimentVehicleAssemblies=Object.freeze([{
+ entityId:aeroRotorExperiment.sceneBodyId,
+ vehicle:aeroRotorExperiment.vehicle,
+ controls:aeroRotorExperiment.controls,
+ air:aeroRotorExperiment.environment.atmosphere,
+}]);
+
 export const experimentSceneEntities=Object.freeze([
  ...materializeGravityExperimentScene(),
  ...materializeCollisionExperimentScene(),
  ...materializeRotationExperimentScene(),
+ ...materializeRotorExperimentScene(),
 ]);
 export const experimentViews=Object.freeze([
  {
@@ -253,6 +338,12 @@ export const experimentViews=Object.freeze([
   output:'artifacts/proving-ground-rotation-free-body.png',
   time:rotationFreeBodyExperiment.durationS,
   camera:{position:[177,25,150],target:[165,18,135],fov:30,aperture:0},
+ },
+ {
+  name:'proving-ground-aero-rotor',
+  output:'artifacts/proving-ground-aero-rotor.png',
+  time:aeroRotorExperiment.durationS,
+  camera:{position:[202,48,134],target:[190,42,120],fov:31,aperture:0},
  }
 ]);
-export const provingGroundExperiments=Object.freeze([gravityFreeFallExperiment,collisionElasticExperiment,rotationFreeBodyExperiment]);
+export const provingGroundExperiments=Object.freeze([gravityFreeFallExperiment,collisionElasticExperiment,rotationFreeBodyExperiment,aeroRotorExperiment]);

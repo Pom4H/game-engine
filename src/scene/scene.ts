@@ -18,6 +18,7 @@ import {PlasticDeformationSystem} from '../physics/deformation.js';
 import {FluidField} from '../physics/fluid.js';
 import {WindField} from '../physics/wind.js';
 import {SoilField} from '../physics/soil.js';
+import {Vehicle,vehicle as compileVehicle} from '../vehicles/vehicle.js';
 import type {EngineEvent} from './events.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext} from './modules.js';
@@ -70,6 +71,8 @@ export class Scene {
   readonly kernel=sceneKernel();
   readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
+  /** Scene-owned force-driver assemblies keyed by their authoritative entity/body id. */
+  readonly assemblies=new Map<string,Vehicle>();
   lastExecution:string[]=[];
   private pendingFractures=new Map<string,FractureDecision>();
   environment:EnvironmentState;
@@ -108,6 +111,16 @@ export class Scene {
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     if(this.spec.cameraRail)this.camera=cameraOnRail(this.camera,this.spec.cameraRail,0);
     for(const entity of this.spec.entities)this.add(entity);
+    for(const assembly of this.spec.vehicleAssemblies??[]){
+      const entity=this.entities.get(assembly.entityId);
+      if(!entity?.body)throw new TypeError(`Vehicle assembly ${assembly.entityId} requires an authored Scene body`);
+      const blueprint=compileVehicle(assembly.entityId,assembly.vehicle),runtime=new Vehicle(this.physics,blueprint,{}, {body:entity.body});
+      try{
+        if(assembly.air)runtime.setAir(assembly.air);
+        if(assembly.controls)runtime.setControls(assembly.controls);
+        this.assemblies.set(assembly.entityId,runtime);
+      }catch(error){runtime.dispose();throw error;}
+    }
     for(const spec of this.spec.deformation?.bodies??[])this.deformation.attach(spec,this.entities);
     // Initial environmental facts exist before the first scheduled surface tick.
     // Cadence controls evolution, not whether authored physical state exists.
@@ -176,7 +189,9 @@ export class Scene {
       if(visual.source===id){this.surfaceVisuals.delete(key);this.surfaceVisualSources.delete(visual.entity.id);if(this.entities.get(visual.entity.id)===visual.entity)this.remove(visual.entity.id);}
       else if(visual.entity.id===id){this.surfaceVisuals.delete(key);this.surfaceVisualSources.delete(visual.entity.id);}
     }
-    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
+    this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);
+    const assembly=this.assemblies.get(id);if(assembly){assembly.dispose();this.assemblies.delete(id);}
+    this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
   }
   /** Physical state projected onto an authored surface or one of its generated visuals. */
   surfaceStateForRender(entityId:string){
