@@ -473,7 +473,7 @@ class BranchedVocalNetwork {
     // labiodental constriction, not by a free-standing frication oscillator.
     const oralAreas=o.areas;
     let minArea=Infinity,minIndex=o.sections-2;
-    for(let i=Math.max(1,o.sections-6);i<o.sections-1;i++)if(oralAreas[i]!<minArea){minArea=oralAreas[i]!;minIndex=i;}
+    for(let i=1;i<o.sections-1;i++)if(oralAreas[i]!<minArea){minArea=oralAreas[i]!;minIndex=i;}
     const aperture=Math.max(.02,minArea);
     const contraction=clamp((.55-aperture)/.53,0,1);
     const jetVelocity=glottalFlow/Math.max(.035,aperture);
