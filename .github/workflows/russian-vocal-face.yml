@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'src/audio/vocal-tract.ts'
+      - 'src/audio/vocal-source.ts'
       - 'src/audio/russian-vocal.ts'
       - 'tools/vocal-face-demo/capture-russian-cpu.mjs'
       - 'test/russian-vocal.test.mjs'
