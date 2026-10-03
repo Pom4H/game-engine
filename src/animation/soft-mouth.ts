@@ -53,18 +53,18 @@ function ellipseNormal(theta:number,rx:number,ry:number):readonly[number,number]
 }
 
 function restPoint(theta:number,radial:number,depth:number):Vec3{
-  const rx=.22,ry=.045,[nx,ny]=ellipseNormal(theta,rx,ry);
+  const rx=.22,ry=.024,[nx,ny]=ellipseNormal(theta,rx,ry);
   return[
     rx*Math.cos(theta)+nx*radial,
     1.365+ry*Math.sin(theta)+ny*radial,
-    .585+depth,
+    .605+depth,
   ];
 }
 
 function buildDefinition():{definition:StructuralDefinition;meta:readonly CageMeta[]}{
   const nodes:{position:Vec3;mass:number}[]=[],meta:CageMeta[]=[];
   const cross:readonly (readonly[number,number])[]=[
-    [.014,.018],[-.014,.018],[-.014,-.018],[.014,-.018],
+    [.014,.016],[-.014,.016],[-.014,-.016],[.014,-.016],
   ];
   for(let slice=0;slice<CAGE_SLICES;slice++){
     const theta=slice/CAGE_SLICES*Math.PI*2;
@@ -123,12 +123,12 @@ function buildDefinition():{definition:StructuralDefinition;meta:readonly CageMe
 
 function surfaceTemplate():SurfaceTemplate{
   const positions:number[]=[],normals:number[]=[],indices:number[]=[];
-  const rx=.22,ry=.045;
+  const rx=.22,ry=.024;
   for(let s=0;s<RENDER_SLICES;s++){
     const theta=s/RENDER_SLICES*Math.PI*2,[nx,ny]=ellipseNormal(theta,rx,ry);
     for(let c=0;c<RENDER_CROSS;c++){
-      const phi=c/RENDER_CROSS*Math.PI*2,radial=.014*Math.cos(phi),depth=.018*Math.sin(phi);
-      positions.push(rx*Math.cos(theta)+nx*radial,1.365+ry*Math.sin(theta)+ny*radial,.585+depth);
+      const phi=c/RENDER_CROSS*Math.PI*2,radial=.014*Math.cos(phi),depth=.016*Math.sin(phi);
+      positions.push(rx*Math.cos(theta)+nx*radial,1.365+ry*Math.sin(theta)+ny*radial,.605+depth);
       normals.push(nx*Math.cos(phi),ny*Math.cos(phi),Math.sin(phi));
     }
   }
@@ -216,10 +216,10 @@ export class SoftMouthRig{
     const rx=.22*(1-.24*a.lipRound-.065*a.labiodental);
     const ry=.014+.071*a.jawOpen*(1-a.lipClosure);
     const centerY=1.365-pose.jawDropM*.28-lower*pose.jawDropM*.30;
-    const centerZ=.585+.064*a.lipRound+.012*a.labiodental+lower*.010*a.jawOpen;
+    const centerZ=.605+.058*a.lipRound+.010*a.labiodental+lower*.008*a.jawOpen;
     const [nx,ny]=ellipseNormal(meta.theta,Math.max(.12,rx),Math.max(.01,ry));
     let y=centerY+ry*Math.sin(meta.theta)+ny*meta.radial;
-    let z=centerZ+meta.depth*(1+.22*a.lipRound);
+    let z=centerZ+meta.depth*(1+.18*a.lipRound);
     if(lower&&a.labiodental>.01){y+=.032*a.labiodental;z+=.010*a.labiodental;}
     return[
       rx*Math.cos(meta.theta)+nx*meta.radial,
