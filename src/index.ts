@@ -8,7 +8,7 @@ export {CollisionSolverFamily,type CollisionSolverProgram,type CollisionSolverPl
 export {PhysicsCauseTrace,physicsCause,PHYSICS_CAUSE_TRACE_SCHEMA,PHYSICS_CAUSE_TRACE_VERSION,type PhysicsCauseRef,type PhysicsCauseWriter,type PhysicsCauseManifestWriter,type PhysicsTraceRecord,type PhysicsSourceKind,type PhysicsComponentKind,type PhysicsLawKind,type PhysicsEffectKind} from './physics/cause-trace.js';
 export {ForceFrame} from './physics/force-frame.js';
 export {physicsAccounting,rigidBodyMechanicalEnergyJ,type PhysicsAccountingState} from './physics/accounting.js';
-export {ThermalMass,validateThermalSpec,type ThermalSpec} from './physics/thermal.js';
+export {ThermalMass,validateThermalSpec,type ThermalSpec} from './physics/thermal.js';\nexport {AcousticWaveField,pressurePatchLoad,applyPressureLoad,type AcousticWaveFieldSpec,type AcousticWaveStepStats,type BlastInjection,type PressurePatch,type PressurePatchLoad,type StructuralImpulseSink} from './physics/wave-field.js';
 export {solveWheelContact,type WheelContactResult} from './physics/wheel-contact.js';
 export {bodyWheelSupport,groundSupport,wheelHit,rayTriangles,type WheelSupport,type WheelHit} from './physics/wheel-support.js';
 export {FluidField,validateFluidVolume,type FluidVolumeSpec,type FluidSample} from './physics/fluid.js';
