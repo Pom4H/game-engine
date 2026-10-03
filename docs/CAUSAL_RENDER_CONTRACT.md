@@ -19,7 +19,7 @@ CausalRenderObservation
 2. `mesh` remains physical/collision geometry. `renderMesh` is a visual representation only. Portable observations carry references to both.
 3. Surface identity is stable across frames. Temporal reconstruction should follow the surface/entity identity plus physical motion instead of inferring identity only from pixels.
 4. Geometry and motion use SI units: metres, seconds and radians. World is right-handed with +Y up. Radiance crossing the boundary is scene-linear.
-5. Dynamic material causes that affect appearance (water, snow, ice, dirt, wear and body deposition) cross this boundary as named physical state, not shader-specific packed channels.
+5. Dynamic material causes that affect appearance (water, snow, ice, dirt, wear and body deposition) cross this boundary as named physical state, not shader-specific packed channels. Spatial ruts/compaction/shear and local snow/water state cross as a content-addressed `surface-field` resource.
 6. Render depth, Meshwork placement and accelerator selection remain outside the semantic observation. A renderer may choose mesh, height field, SDF, procedural or learned representations without changing the cause.
 7. Learned inference must never block the authoritative simulation tick. Missed inference deadlines fall back to an older valid decision or deterministic implementation.
 8. Training samples are keyed by content-addressed observation/frame resources. A contract-version change invalidates only samples whose semantics changed.

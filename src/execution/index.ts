@@ -2,7 +2,7 @@ import {renderModel,renderPrimitive} from '../render/frame.js';
 import type {CameraSpec} from '../scene/types.js';
 import type {RuntimeEntity,Scene} from '../scene/scene.js';
 import {
-  CAUSAL_RENDER_CONTRACT_VERSION,contentHash,defineCausalRenderObservation,defineRenderFrame,defineRenderProgram,
+  CAUSAL_RENDER_CONTRACT_VERSION,contentHash,defineCausalRenderObservation,defineCausalSurfaceField,defineRenderFrame,defineRenderProgram,
   type CausalSurfaceObservation,type ContentAddressedRepository,type ContentHash,type ContentRef,type PortableRenderFrame,type RenderPartitionability,type RenderProgramDescriptor,type ResourceManifest,type TemporalInputs,
 } from '../render-ir/index.js';
 
@@ -63,18 +63,30 @@ export function projectSceneRenderFrame(scene:Scene,store:ContentAddressedReposi
     const physicalGeometry=entity.mesh?store.put('mesh',entity.mesh):undefined,visualGeometry=store.put('mesh',primitive),material=store.put('material',materialData(entity,store,refs)),transform=Object.freeze(Array.from(renderModel(entity)));
     if(physicalGeometry)refs.push(physicalGeometry);refs.push(visualGeometry,material);
     objects.push(Object.freeze({id:entity.id,mesh:visualGeometry,material,transform}));
-    const surface=scene.surfaces.surfaces.get(entity.id),bodySurface=scene.surfaces.bodies.get(entity.id),body=entity.body;
+    const surface=scene.surfaces.surfaces.get(entity.id),bodySurface=scene.surfaces.bodies.get(entity.id),field=scene.surfaces.fields.get(entity.id),body=entity.body;
+    const fieldRef=field?store.put('surface-field',defineCausalSurfaceField({
+      schema:1,centerM:Object.freeze([...field.center] as [number,number]),sizeM:Object.freeze([...field.size] as [number,number]),nx:field.nx,nz:field.nz,
+      cells:Object.freeze(field.cells.map((cell,index)=>{
+        const deformation=field.deformation.cells[index]!;
+        return Object.freeze({
+          temperatureC:cell.temperatureC,snowDepthM:cell.snowDepthM,waterDepthM:cell.waterDepthM,iceDepthM:cell.iceDepthM,slush:cell.slush,wetness:cell.wetness,
+          dirt:cell.dirt,wear:cell.wear,trackMelt:cell.trackMelt,puddle:cell.puddle,frictionScale:cell.frictionScale,
+          displacementM:deformation.displacementM,compaction:deformation.compaction,shear:deformation.shear,history:deformation.history,
+        });
+      })),
+    })):undefined;
+    if(fieldRef)refs.push(fieldRef);
     surfaces.push(Object.freeze({
       identity:Object.freeze({entityId:entity.id,surfaceId:entity.id}),
-      ...(physicalGeometry?{physicalGeometry}:{}),visualGeometry,material,transform,
+      ...(physicalGeometry?{physicalGeometry}:{}),visualGeometry,material,...(fieldRef?{field:fieldRef}:{}),transform,
       linearVelocityMps:Object.freeze(body?[...body.velocity] as [number,number,number]:[0,0,0] as [number,number,number]),
       angularVelocityRadps:Object.freeze(body?[...body.angularVelocity] as [number,number,number]:[0,0,0] as [number,number,number]),
       ...(surface?{surface:Object.freeze({
-        temperatureC:surface.temperatureC,wetness:surface.wetness,snowDepthM:surface.snowDepthM,waterDepthM:surface.waterDepthM,iceDepthM:surface.iceDepthM,slush:surface.slush,
+        use:surface.use,temperatureC:surface.temperatureC,wetness:surface.wetness,snowDepthM:surface.snowDepthM,waterDepthM:surface.waterDepthM,iceDepthM:surface.iceDepthM,slush:surface.slush,
         dirt:surface.dirt,wear:surface.wear,trackMelt:surface.trackMelt,puddle:surface.puddle,snowFreshness:surface.snowpack.freshness,
         snowLiquidFraction:surface.snowpack.liquidFraction,snowIceFraction:surface.snowpack.iceFraction,snowGrainSizeMm:surface.snowpack.grainSizeMm,snowCrust:surface.snowpack.crust,
       })}:{}),
-      ...(bodySurface?{bodySurface:Object.freeze({snowCoverage:bodySurface.snowCoverage,rearSnow:bodySurface.rearSnow,wetness:bodySurface.wetness,roadDirt:bodySurface.roadDirt})}:{}),
+      ...(bodySurface?{bodySurface:Object.freeze({snowCoverage:bodySurface.snowCoverage,rearSnow:bodySurface.rearSnow,wetness:bodySurface.wetness,roadDirt:bodySurface.roadDirt,directionX:bodySurface.directionX,directionZ:bodySurface.directionZ})}:{}),
     }));
   }
   const environment=store.put('environment',{state:scene.environment,rendering:scene.spec.rendering??null,clearColor:scene.spec.clearColor??null});refs.push(environment);

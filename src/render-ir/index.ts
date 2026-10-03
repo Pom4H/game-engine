@@ -2,7 +2,7 @@
  * renderer backends, execution placement nor Meshwork. Local renderers do not
  * materialize these packets unless a caller explicitly asks for a portable job. */
 export type ContentHash=string;
-export type RenderResourceKind='mesh'|'texture'|'material'|'shader'|'environment'|'observation'|'buffer'|'temporal'|'frame'|'checkpoint'|'program'|'graph'|'manifest'|'segment';
+export type RenderResourceKind='mesh'|'texture'|'material'|'shader'|'environment'|'observation'|'surface-field'|'buffer'|'temporal'|'frame'|'checkpoint'|'program'|'graph'|'manifest'|'segment';
 
 export interface ContentRef {readonly kind:RenderResourceKind;readonly hash:ContentHash}
 export interface ResourceManifest {readonly resources:readonly ContentRef[]}
@@ -23,6 +23,7 @@ export interface CausalSurfaceIdentity {
   readonly partId?:string;
 }
 export interface CausalSurfaceEnvironment {
+  readonly use:'generic'|'road'|'sidewalk'|'curb';
   readonly temperatureC:number;
   readonly wetness:number;
   readonly snowDepthM:number;
@@ -44,6 +45,39 @@ export interface CausalBodySurfaceState {
   readonly rearSnow:number;
   readonly wetness:number;
   readonly roadDirt:number;
+  readonly directionX:number;
+  readonly directionZ:number;
+}
+export interface CausalSurfaceFieldCell {
+  readonly temperatureC:number;
+  readonly snowDepthM:number;
+  readonly waterDepthM:number;
+  readonly iceDepthM:number;
+  readonly slush:number;
+  readonly wetness:number;
+  readonly dirt:number;
+  readonly wear:number;
+  readonly trackMelt:number;
+  readonly puddle:number;
+  readonly frictionScale:number;
+  readonly displacementM:number;
+  readonly compaction:number;
+  readonly shear:number;
+  readonly history:number;
+}
+export interface CausalSurfaceField {
+  readonly schema:1;
+  readonly centerM:readonly [number,number];
+  readonly sizeM:readonly [number,number];
+  readonly nx:number;
+  readonly nz:number;
+  readonly cells:readonly CausalSurfaceFieldCell[];
+}
+export function defineCausalSurfaceField(value:CausalSurfaceField):CausalSurfaceField{
+  if(value.schema!==1||value.centerM.length!==2||value.sizeM.length!==2||value.centerM.some(v=>!Number.isFinite(v))||value.sizeM.some(v=>!Number.isFinite(v)||v<=0))throw new TypeError('Invalid causal surface field bounds');
+  if(!Number.isSafeInteger(value.nx)||!Number.isSafeInteger(value.nz)||value.nx<1||value.nz<1||value.cells.length!==value.nx*value.nz)throw new RangeError('Invalid causal surface field dimensions');
+  for(const cell of value.cells)if(Object.values(cell).some(component=>typeof component!=='number'||!Number.isFinite(component)))throw new TypeError('Causal surface field cells must be finite');
+  return deepFreeze(structuredClone(value));
 }
 export interface CausalSurfaceObservation {
   readonly identity:CausalSurfaceIdentity;
@@ -52,6 +86,8 @@ export interface CausalSurfaceObservation {
   /** Geometry used to bound/query visible surface detail for this projection. */
   readonly visualGeometry:ContentRef;
   readonly material:ContentRef;
+  /** Persistent local surface state such as ruts, snow redistribution and compaction. */
+  readonly field?:ContentRef;
   /** Column-major world transform; translation metres, rotation radians upstream. */
   readonly transform:readonly number[];
   readonly linearVelocityMps:readonly [number,number,number];
@@ -85,7 +121,7 @@ export function defineCausalRenderObservation(value:CausalRenderObservation):Cau
     const identity=surface.identity,key=identity.entityId+'\0'+identity.surfaceId+'\0'+(identity.partId??'');
     if(!identity.entityId||!identity.surfaceId||ids.has(key))throw new TypeError('Causal surfaces require stable unique identities');
     ids.add(key);finiteMat4(surface.transform,'surface.transform');finite3(surface.linearVelocityMps,'surface.linearVelocityMps');finite3(surface.angularVelocityRadps,'surface.angularVelocityRadps');
-    if(surface.visualGeometry.kind!=='mesh'||surface.physicalGeometry&&surface.physicalGeometry.kind!=='mesh'||surface.material.kind!=='material')throw new TypeError('Causal surface resource kinds do not match their semantics');
+    if(surface.visualGeometry.kind!=='mesh'||surface.physicalGeometry&&surface.physicalGeometry.kind!=='mesh'||surface.material.kind!=='material'||surface.field&&surface.field.kind!=='surface-field')throw new TypeError('Causal surface resource kinds do not match their semantics');
     for(const state of [surface.surface,surface.bodySurface])if(state&&Object.values(state).some(component=>typeof component!=='number'||!Number.isFinite(component)))throw new TypeError('Causal surface state must be finite');
   }
   if(value.environment&&value.environment.kind!=='environment')throw new TypeError('Causal environment must reference an environment resource');

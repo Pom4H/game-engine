@@ -22,7 +22,10 @@ test('scene projection preserves authoritative physics separately from visual ge
  assert.equal(surface.visualGeometry.hash,frame.objects[0].mesh.hash);
  assert.notEqual(surface.physicalGeometry.hash,surface.visualGeometry.hash,'physics and render geometry must remain distinct when renderMesh is authored');
  assert.deepEqual(surface.linearVelocityMps,[3,0,1]);assert.deepEqual(surface.angularVelocityRadps,[0,.2,0]);
- assert.equal(surface.surface.snowDepthM,.03);assert.equal(surface.surface.waterDepthM,.002);
+ assert.equal(surface.surface.use,'road');assert.equal(surface.surface.snowDepthM,.03);assert.equal(surface.surface.waterDepthM,.002);
+ assert.equal(surface.field.kind,'surface-field');assert.ok(frame.resources.resources.some(ref=>ref.hash===surface.field.hash));
+ const field=store.require(surface.field.hash);assert.equal(field.cells.length,field.nx*field.nz);assert.equal(field.cells[0].snowDepthM,.03);assert.equal(field.cells[0].waterDepthM,.002);
+ assert.equal(field.cells[0].displacementM,0);assert.equal(surface.bodySurface.directionX,1);assert.equal(surface.bodySurface.directionZ,0);
 });
 
 test('causal render contract rejects invalid semantic resources and non-finite motion',()=>{
