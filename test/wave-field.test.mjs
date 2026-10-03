@@ -73,3 +73,46 @@ test('acoustic step exposes linear work and rejects unstable dt',()=>{
   assert.equal(stats.courant,.5);
   assert.throws(()=>wave.step(.58),/CFL/);
 });
+
+
+test('scene collision geometry becomes acoustic boundary and a rotated door opens propagation',()=>{
+  const scene=new (await import('../dist/index.js')).Scene({
+    version:1,
+    ground:-100,
+    entities:[
+      {id:'wall-a',position:[6,2.5,1],mesh:{kind:'box',size:[.2,5,2]},body:{mass:0}},
+      {id:'wall-b',position:[6,2.5,5.5],mesh:{kind:'box',size:[.2,5,3]},body:{mass:0}},
+      {id:'door',position:[6,2.5,3],mesh:{kind:'box',size:[.2,5,2]},body:{mass:0}},
+    ],
+  });
+  const {syncSceneAcousticBoundaries}=await import('../dist/index.js');
+  const wave=new AcousticWaveField({size:[24,10,14],cellSizeM:.5,waveSpeedMps:10,densityKgM3:1});
+  const closed=syncSceneAcousticBoundaries(wave,scene.entities.values());
+  assert.equal(closed.bodyObstacles,3);
+  wave.injectBlast({position:[3,2.5,3],acousticEnergyJ:1,radiusM:.7});
+  for(let i=0;i<36;i++)wave.step(.025);
+  assert.equal(wave.pressureAt([9,2.5,3]),0);
+
+  wave.clearWaveState();
+  scene.entities.get('door').rotation[1]=Math.PI/2;
+  const opened=syncSceneAcousticBoundaries(wave,scene.entities.values());
+  assert.equal(opened.bodyObstacles,3);
+  wave.injectBlast({position:[3,2.5,3],acousticEnergyJ:1,radiusM:.7});
+  let transmitted=0;
+  for(let i=0;i<36;i++){wave.step(.025);transmitted=Math.max(transmitted,Math.abs(wave.pressureAt([9,2.5,3])));}
+  assert.ok(transmitted>1e-6);
+});
+
+test('renderMesh never changes acoustic boundary ownership',async()=>{
+  const {Scene,syncSceneAcousticBoundaries}=await import('../dist/index.js');
+  const wave=new AcousticWaveField({size:[8,8,8],cellSizeM:.5,waveSpeedMps:1,densityKgM3:1});
+  const sceneA=new Scene({version:1,ground:-100,entities:[{
+    id:'wall',position:[2,2,2],mesh:{kind:'box',size:[1,2,3]},renderMesh:{kind:'sphere',radius:20},
+  }]});
+  const a=syncSceneAcousticBoundaries(wave,sceneA.entities.values()).solidCells;
+  const sceneB=new Scene({version:1,ground:-100,entities:[{
+    id:'wall',position:[2,2,2],mesh:{kind:'box',size:[1,2,3]},renderMesh:{kind:'sphere',radius:.1},
+  }]});
+  const b=syncSceneAcousticBoundaries(wave,sceneB.entities.values()).solidCells;
+  assert.equal(a,b);
+});

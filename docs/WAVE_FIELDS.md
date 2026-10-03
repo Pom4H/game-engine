@@ -83,3 +83,29 @@ loading outside the unresolved detonation core. Close to the source, a nonlinear
 compressible-flow or empirical blast model may later provide boundary/source
 conditions to the same pressure-load contract without changing structural
 ownership.
+
+
+## Geometry -> boundary conditions
+
+`syncSceneAcousticBoundaries()` rebuilds hard boundaries directly from the
+authoritative scene state.
+
+Ownership is deliberately identical to collision ownership:
+
+- if an entity owns a `RigidBody`, its current collision shape is the source;
+- box collision uses the current `collisionHalf` and `collisionOffsetLocal`, so
+  permanent crush changes the acoustic obstacle;
+- body-less entities use their physical `mesh` as a triangle shell;
+- `renderMesh` is never consulted;
+- micro-debris is below this field's spatial tier and is not voxelized.
+
+This means a door changing rotation, a wall being removed, or a collision envelope
+being permanently crushed changes subsequent propagation after the next boundary
+sync. Fracture does not need an acoustic callback: topology already changes the
+authoritative scene, and the next projection observes that state.
+
+Box/body occupancy is conservative against the grid cell volume. Triangle meshes
+use triangle-vs-AABB SAT, so thin physical surfaces still occupy acoustic cells
+instead of leaking merely because no cell centre lies exactly on the surface.
+
+The projection is intentionally rebuildable. It owns no second scene truth.

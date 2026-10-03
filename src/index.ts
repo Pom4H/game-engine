@@ -29,6 +29,7 @@ export {decodePackedShell,type PackedShell} from './vehicles/packed-shell.js';
 export {encodePackedMesh,decodePackedMesh,type PackedMesh} from './assets/packed-mesh.js';
 export {ElasticPlasticPanelResponse,FourCornerSuspension,DoorHinge,M3InteractionRig,type PanelImpactInput,type PanelImpactResult,type SuspensionPose,type VehicleInteractionImpact,type VehicleInteractionState} from './vehicles/interaction-physics.js';
 export {Scene,type RuntimeEntity} from './scene/scene.js';
+export {syncSceneAcousticBoundaries,type SceneAcousticBoundaryStats} from './scene/acoustic-boundary.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
 export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from './scene/url.js';

@@ -94,6 +94,10 @@ export class AcousticWaveField {
   }
 
   get maxStableDt():number{return this.cellSizeM*CFL_3D/this.waveSpeedMps;}
+  get solidCellCount():number{return this.solidCount;}
+
+  /** Rebuildable geometry projection. Wave state is preserved in cells that become fluid. */
+  clearSolidCells():void{this.solid.fill(0);this.solidCount=0;}
 
   cellCenter(x:number,y:number,z:number):Vec3{
     this.validateCell(x,y,z);
