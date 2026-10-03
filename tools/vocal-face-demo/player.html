@@ -17,7 +17,7 @@ try{
   const rig=new VocalFaceRig(runtime.scene),score=iAmAliveArticulatorScore(),renderer=runtime.renderer;
   window.vocalFace={
     async frame(time,frameIndex){
-      const sample=sampleArticulatorScore(score,time),pose=rig.apply(sample.articulators);
+      const sample=sampleArticulatorScore(score,time),pose=rig.step(sample.articulators,1/30);
       if(renderer.setTimelineFrame)renderer.setTimelineFrame(frameIndex);
       renderer.render(runtime.scene,runtime.scene.camera);
       await renderer.flush();
