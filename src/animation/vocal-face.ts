@@ -84,7 +84,7 @@ export function vocalFaceSceneSpec():SceneSpec{
   };
 }
 
-const TMJ_PIVOT:Vec3=[0,1.47,.24];
+const TMJ_PIVOT:Vec3=[0,1.52,-.05];
 const JAW_CENTER_REST:Vec3=[0,1.34,.035];
 const LOWER_TEETH_REST:Vec3=[0,1.326,.563];
 const UPPER_TEETH_BOTTOM_Y=1.385-.055/2;
