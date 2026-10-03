@@ -108,7 +108,7 @@ export class PressureDrivenVocalFolds {
     const normalizedFlow=flow/flowScale;
     const pressureGate=clamp((pressure-70)/180,0,1);
     const derivative=normalizedFlow-this.previousFlow;
-    const targetSource=((derivative*.88)+normalizedFlow*.075)*pressureGate;
+    const targetSource=((derivative*.88)+normalizedFlow*.075)*pressureGate*adduction;
     const sourceAlpha=1-Math.exp(-2*Math.PI*3200/this.sampleRate);
     this.sourceState+=sourceAlpha*(targetSource-this.sourceState);
     const source=clamp(this.sourceState,-1.6,1.6);
