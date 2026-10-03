@@ -18,6 +18,7 @@ export interface VocalFacePose {
   readonly jawAngleRad:number;
   readonly toothClearanceM:number;
   readonly lipGapM:number;
+  readonly lipGapVelocityMps:number;
   readonly lipWidthM:number;
   readonly lipProtrusionM:number;
   readonly tonguePosition:Vec3;
@@ -129,6 +130,13 @@ export class VocalFaceRig {
   private jawAngle=0;
   private jawAngularVelocity=0;
   private jawInitialized=false;
+  private lipGap=.04;
+  private lipGapVelocity=0;
+  private lipWidth=.44;
+  private lipWidthVelocity=0;
+  private lipProtrusion=0;
+  private lipProtrusionVelocity=0;
+  private lipsInitialized=false;
 
   constructor(readonly scene:Scene){
     this.jaw=requireEntity(scene,VOCAL_FACE_IDS.jaw);
@@ -146,7 +154,7 @@ export class VocalFaceRig {
     return .12*clamp01(a.jawOpen);
   }
 
-  private applyPose(a:VocalArticulators,jawAngle:number):VocalFacePose{
+  private applyPose(a:VocalArticulators,jawAngle:number,lipState?:{gap:number;width:number;protrusion:number;gapVelocity:number}):VocalFacePose{
     const forward=.014*clamp01(a.jawOpen);
     // Enforce a hard anatomical invariant at the incisors. If a future score
     // asks for an impossible closure, increase opening rather than interpenetrate.
@@ -159,9 +167,12 @@ export class VocalFaceRig {
     const jawDrop=JAW_CENTER_REST[1]-jawCenter[1];
 
     const closure=1-a.lipClosure;
-    const lipGap=.006+.145*a.jawOpen*closure;
-    const lipWidth=.47*(1-.31*a.lipRound-.08*a.labiodental);
-    const protrusion=.588+.075*a.lipRound+.018*a.labiodental;
+    const targetLipGap=.006+.145*a.jawOpen*closure;
+    const targetLipWidth=.47*(1-.31*a.lipRound-.08*a.labiodental);
+    const targetProtrusion=.075*a.lipRound+.018*a.labiodental;
+    const lipGap=lipState?.gap??targetLipGap;
+    const lipWidth=lipState?.width??targetLipWidth;
+    const protrusion=.588+(lipState?.protrusion??targetProtrusion);
 
     this.jaw.position[0]=jawCenter[0];this.jaw.position[1]=jawCenter[1];this.jaw.position[2]=jawCenter[2];
     this.jaw.rotation[0]=angle;
@@ -197,7 +208,7 @@ export class VocalFaceRig {
 
     return Object.freeze({
       jawDropM:jawDrop,jawAngleRad:angle,toothClearanceM:toothClearance,
-      lipGapM:lipGap,lipWidthM:lipWidth,lipProtrusionM:protrusion-.588,
+      lipGapM:lipGap,lipGapVelocityMps:lipState?.gapVelocity??0,lipWidthM:lipWidth,lipProtrusionM:protrusion-.588,
       tonguePosition:Object.freeze([0,tongueY,tongueZ]) as Vec3,
       tongueScale:Object.freeze([...this.tongue.scale]) as Vec3,
     });
@@ -214,18 +225,36 @@ export class VocalFaceRig {
    * filters those commands and keeps the lower teeth rigidly on the mandible. */
   step(a:VocalArticulators,dt:number):VocalFacePose{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Vocal face dt must be within (0, .25]');
-    const target=this.targetJawAngle(a);
-    if(!this.jawInitialized){this.jawAngle=target;this.jawAngularVelocity=0;this.jawInitialized=true;}
-    const omega=2*Math.PI*5.2,zeta=1;
+    const targetJaw=this.targetJawAngle(a);
+    const targetLipGap=.006+.145*a.jawOpen*(1-a.lipClosure);
+    const targetLipWidth=.47*(1-.31*a.lipRound-.08*a.labiodental);
+    const targetLipProtrusion=.075*a.lipRound+.018*a.labiodental;
+    if(!this.jawInitialized){this.jawAngle=targetJaw;this.jawAngularVelocity=0;this.jawInitialized=true;}
+    if(!this.lipsInitialized){
+      this.lipGap=targetLipGap;this.lipWidth=targetLipWidth;this.lipProtrusion=targetLipProtrusion;
+      this.lipGapVelocity=0;this.lipWidthVelocity=0;this.lipProtrusionVelocity=0;this.lipsInitialized=true;
+    }
+    const jawOmega=2*Math.PI*5.2,lipOmega=2*Math.PI*7.0,zeta=1;
+    const maxGapSpeed=.22,maxWidthSpeed=.30,maxProtrusionSpeed=.18;
     let remaining=dt;
     while(remaining>1e-9){
       const h=Math.min(remaining,1/240);
-      const acceleration=omega*omega*(target-this.jawAngle)-2*zeta*omega*this.jawAngularVelocity;
-      this.jawAngularVelocity+=acceleration*h;
+      const jawAcceleration=jawOmega*jawOmega*(targetJaw-this.jawAngle)-2*zeta*jawOmega*this.jawAngularVelocity;
+      this.jawAngularVelocity+=jawAcceleration*h;
       this.jawAngle+=this.jawAngularVelocity*h;
+
+      const stepSoft=(value:number,velocity:number,target:number,maxSpeed:number):readonly[number,number]=>{
+        const acceleration=lipOmega*lipOmega*(target-value)-2*zeta*lipOmega*velocity;
+        let nextVelocity=velocity+acceleration*h;
+        nextVelocity=Math.max(-maxSpeed,Math.min(maxSpeed,nextVelocity));
+        return[value+nextVelocity*h,nextVelocity] as const;
+      };
+      [this.lipGap,this.lipGapVelocity]=stepSoft(this.lipGap,this.lipGapVelocity,targetLipGap,maxGapSpeed);
+      [this.lipWidth,this.lipWidthVelocity]=stepSoft(this.lipWidth,this.lipWidthVelocity,targetLipWidth,maxWidthSpeed);
+      [this.lipProtrusion,this.lipProtrusionVelocity]=stepSoft(this.lipProtrusion,this.lipProtrusionVelocity,targetLipProtrusion,maxProtrusionSpeed);
       remaining-=h;
     }
-    return this.applyPose(a,this.jawAngle);
+    return this.applyPose(a,this.jawAngle,{gap:this.lipGap,width:this.lipWidth,protrusion:this.lipProtrusion,gapVelocity:this.lipGapVelocity});
   }
 
 }
