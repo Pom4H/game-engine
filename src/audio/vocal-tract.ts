@@ -33,6 +33,14 @@ export interface ArticulatorGesture {
   readonly gain?:number;
 }
 
+export interface SampledArticulatorScore {
+  readonly articulators:VocalArticulators;
+  readonly voiced:number;
+  readonly frication:number;
+  readonly pitchHz:number;
+  readonly gain:number;
+}
+
 export interface VocalGesture {
   readonly startS:number;
   readonly endS:number;
@@ -362,6 +370,23 @@ export function renderArticulatedVocalTract(
     articulatorGestures:articulated,
   });
   return{audio:{left,right,sampleRate},diagnostics};
+}
+
+export function sampleArticulatorScore(gestures:readonly ArticulatorGesture[],timeS:number):SampledArticulatorScore{
+  if(!gestures.length)throw new RangeError('Articulator score must contain gestures');
+  if(!Number.isFinite(timeS)||timeS<0)throw new RangeError('Articulator sample time must be non-negative');
+  let index=0;
+  while(index<gestures.length-1&&timeS>=gestures[index]!.endS)index++;
+  const gesture=gestures[index]!,duration=Math.max(1e-9,gesture.endS-gesture.startS);
+  const u=clamp((timeS-gesture.startS)/duration,0,1);
+  const articulators=interpolateArticulators(gesture.from,gesture.to??gesture.from,u);
+  return Object.freeze({
+    articulators,
+    voiced:gesture.voiced??1,
+    frication:gesture.frication??articulators.labiodental*.72,
+    pitchHz:gesture.pitchHz??120,
+    gain:gesture.gain??1,
+  });
 }
 
 export function synthesizeIAmAlive(options:VocalTractRenderOptions={}):VocalTractRender{

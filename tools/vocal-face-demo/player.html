@@ -1,0 +1,30 @@
+<!doctype html>
+<html><body style="margin:0;overflow:hidden;background:#05070a"><canvas id="c"></canvas>
+<script type="module">
+try{
+  const modules=await Promise.all([
+    import('/dist/runtime/browser.js'),
+    import('/dist/animation/vocal-face.js'),
+    import('/dist/audio/vocal-tract.js')
+  ]);
+  const BrowserRuntime=modules[0].BrowserRuntime;
+  const VocalFaceRig=modules[1].VocalFaceRig;
+  const vocalFaceSceneSpec=modules[1].vocalFaceSceneSpec;
+  const iAmAliveArticulatorScore=modules[2].iAmAliveArticulatorScore;
+  const sampleArticulatorScore=modules[2].sampleArticulatorScore;
+  const canvas=document.getElementById('c');canvas.width=1280;canvas.height=720;
+  const runtime=await BrowserRuntime.create(canvas,vocalFaceSceneSpec(),{autoplay:false,audio:false,exposeBridge:false,resolution:[1280,720]});
+  const rig=new VocalFaceRig(runtime.scene),score=iAmAliveArticulatorScore(),renderer=runtime.renderer;
+  window.vocalFace={
+    async frame(time,frameIndex){
+      const sample=sampleArticulatorScore(score,time),pose=rig.apply(sample.articulators);
+      if(renderer.setTimelineFrame)renderer.setTimelineFrame(frameIndex);
+      renderer.render(runtime.scene,runtime.scene.camera);
+      await renderer.flush();
+      return {time,pose,articulators:sample.articulators,renderer:renderer.inspect()};
+    },
+    inspect(){return renderer.inspect();}
+  };
+  document.documentElement.dataset.ready='1';
+}catch(error){window.__FACE_ERROR__=error?.stack??String(error);throw error;}
+</script></body></html>

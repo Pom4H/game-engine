@@ -1,0 +1,137 @@
+import type {VocalArticulators} from '../audio/vocal-tract.js';
+import type {Vec3} from '../math.js';
+import {Scene,type RuntimeEntity} from '../scene/scene.js';
+import type {EntitySpec,SceneSpec} from '../scene/types.js';
+
+export const VOCAL_FACE_IDS=Object.freeze({
+  jaw:'vocal-face-jaw',
+  mouth:'vocal-face-mouth',
+  upperLip:'vocal-face-upper-lip',
+  lowerLip:'vocal-face-lower-lip',
+  tongue:'vocal-face-tongue',
+  lowerTeeth:'vocal-face-lower-teeth',
+});
+
+export interface VocalFacePose {
+  readonly jawDropM:number;
+  readonly lipGapM:number;
+  readonly lipWidthM:number;
+  readonly lipProtrusionM:number;
+  readonly tonguePosition:Vec3;
+  readonly tongueScale:Vec3;
+}
+
+const skin:[number,number,number,number]=[.62,.39,.30,1];
+const skinLight:[number,number,number,number]=[.72,.48,.38,1];
+const lip:[number,number,number,number]=[.42,.09,.11,1];
+const tongueColor:[number,number,number,number]=[.62,.17,.20,1];
+const white:[number,number,number,number]=[.92,.94,.96,1];
+const iris:[number,number,number,number]=[.10,.24,.29,1];
+const black:[number,number,number,number]=[.008,.009,.012,1];
+
+const kinematic=(size:Vec3)=>({mass:0,motion:'kinematic' as const,shape:'box' as const,collisionSize:size});
+
+export function vocalFaceSceneSpec():SceneSpec{
+  const entities:EntitySpec[]=[
+    {id:'vocal-face-shoulders',position:[0,.48,-.03],mesh:{kind:'sphere',radius:.5},scale:[1.9,.52,.78],material:{kind:'default',color:skin,roughness:.64}},
+    {id:'vocal-face-neck',position:[0,.88,-.04],mesh:{kind:'cylinder',radius:.23,height:.72,segments:32},material:{kind:'default',color:skin,roughness:.62}},
+    {id:'vocal-face-head',position:[0,1.68,0],mesh:{kind:'sphere',radius:.5},scale:[1.08,1.42,.94],material:{kind:'default',color:skin,roughness:.58}},
+    {id:VOCAL_FACE_IDS.jaw,position:[0,1.34,.035],mesh:{kind:'sphere',radius:.5},scale:[.83,.58,.78],material:{kind:'default',color:skin,roughness:.58},body:kinematic([.83,.58,.78])},
+    {id:'vocal-face-left-ear',position:[-.56,1.69,-.01],mesh:{kind:'sphere',radius:.5},scale:[.16,.29,.12],material:{kind:'default',color:skinLight,roughness:.62}},
+    {id:'vocal-face-right-ear',position:[.56,1.69,-.01],mesh:{kind:'sphere',radius:.5},scale:[.16,.29,.12],material:{kind:'default',color:skinLight,roughness:.62}},
+    {id:'vocal-face-left-eye',position:[-.225,1.87,.455],mesh:{kind:'sphere',radius:.5},scale:[.25,.135,.085],material:{kind:'default',color:white,roughness:.18}},
+    {id:'vocal-face-right-eye',position:[.225,1.87,.455],mesh:{kind:'sphere',radius:.5},scale:[.25,.135,.085],material:{kind:'default',color:white,roughness:.18}},
+    {id:'vocal-face-left-iris',position:[-.225,1.87,.505],mesh:{kind:'sphere',radius:.5},scale:[.092,.092,.030],material:{kind:'default',color:iris,roughness:.16}},
+    {id:'vocal-face-right-iris',position:[.225,1.87,.505],mesh:{kind:'sphere',radius:.5},scale:[.092,.092,.030],material:{kind:'default',color:iris,roughness:.16}},
+    {id:'vocal-face-left-pupil',position:[-.225,1.87,.525],mesh:{kind:'sphere',radius:.5},scale:[.043,.043,.018],material:{kind:'default',color:black,roughness:.08}},
+    {id:'vocal-face-right-pupil',position:[.225,1.87,.525],mesh:{kind:'sphere',radius:.5},scale:[.043,.043,.018],material:{kind:'default',color:black,roughness:.08}},
+    {id:'vocal-face-left-brow',position:[-.23,2.01,.485],rotation:[0,0,-.08],mesh:{kind:'box',size:[.30,.045,.035]},material:{kind:'default',color:[.09,.05,.035,1],roughness:.78}},
+    {id:'vocal-face-right-brow',position:[.23,2.01,.485],rotation:[0,0,.08],mesh:{kind:'box',size:[.30,.045,.035]},material:{kind:'default',color:[.09,.05,.035,1],roughness:.78}},
+    {id:'vocal-face-nose',position:[0,1.66,.52],rotation:[Math.PI/2,0,0],mesh:{kind:'cylinder',radius:.095,height:.30,topRadius:.055,segments:28},material:{kind:'default',color:skinLight,roughness:.56}},
+    {id:'vocal-face-nose-tip',position:[0,1.58,.60],mesh:{kind:'sphere',radius:.5},scale:[.20,.14,.15],material:{kind:'default',color:skinLight,roughness:.56}},
+    {id:VOCAL_FACE_IDS.mouth,position:[0,1.36,.525],mesh:{kind:'sphere',radius:.5},scale:[.46,.055,.055],material:{kind:'default',color:black,roughness:.86},body:kinematic([.46,.20,.08])},
+    {id:'vocal-face-upper-teeth',position:[0,1.385,.566],mesh:{kind:'box',size:[.33,.055,.028]},material:{kind:'default',color:white,roughness:.20}},
+    {id:VOCAL_FACE_IDS.lowerTeeth,position:[0,1.335,.563],mesh:{kind:'box',size:[.32,.050,.026]},material:{kind:'default',color:white,roughness:.20},body:kinematic([.32,.05,.03])},
+    {id:VOCAL_FACE_IDS.tongue,position:[0,1.29,.548],mesh:{kind:'sphere',radius:.5},scale:[.31,.075,.22],material:{kind:'default',color:tongueColor,roughness:.72},body:kinematic([.31,.12,.22])},
+    {id:VOCAL_FACE_IDS.upperLip,position:[0,1.405,.588],mesh:{kind:'sphere',radius:.5},scale:[.47,.078,.070],material:{kind:'default',color:lip,roughness:.48},body:kinematic([.47,.10,.08])},
+    {id:VOCAL_FACE_IDS.lowerLip,position:[0,1.325,.590],mesh:{kind:'sphere',radius:.5},scale:[.47,.085,.075],material:{kind:'default',color:lip,roughness:.48},body:kinematic([.47,.11,.08])},
+    {id:'vocal-face-key-light',position:[1.9,3.0,2.5],light:{kind:'point',color:[1,.72,.58],intensity:18,range:8}},
+    {id:'vocal-face-fill-light',position:[-2.0,2.2,1.8],light:{kind:'point',color:[.48,.65,1],intensity:8,range:7}},
+  ];
+  return{
+    version:1,
+    gravity:[0,0,0],
+    ground:-100,
+    clearColor:[.018,.022,.030,1],
+    camera:{position:[0,1.64,3.25],target:[0,1.60,.25],fov:28,focusDistance:3.0,aperture:.025},
+    rendering:{sunDirection:[-.45,.55,.55],sunColor:[1,.83,.72],sunIntensity:1.1,skyColor:[.035,.045,.065],fogDensity:0,exposure:1.08,shadowExtent:6},
+    entities,
+  };
+}
+
+function requireEntity(scene:Scene,id:string):RuntimeEntity{
+  const entity=scene.entities.get(id);if(!entity)throw new TypeError('Missing vocal face entity '+id);return entity;
+}
+
+export class VocalFaceRig {
+  private readonly jaw:RuntimeEntity;
+  private readonly mouth:RuntimeEntity;
+  private readonly upperLip:RuntimeEntity;
+  private readonly lowerLip:RuntimeEntity;
+  private readonly tongue:RuntimeEntity;
+  private readonly lowerTeeth:RuntimeEntity;
+
+  constructor(readonly scene:Scene){
+    this.jaw=requireEntity(scene,VOCAL_FACE_IDS.jaw);
+    this.mouth=requireEntity(scene,VOCAL_FACE_IDS.mouth);
+    this.upperLip=requireEntity(scene,VOCAL_FACE_IDS.upperLip);
+    this.lowerLip=requireEntity(scene,VOCAL_FACE_IDS.lowerLip);
+    this.tongue=requireEntity(scene,VOCAL_FACE_IDS.tongue);
+    this.lowerTeeth=requireEntity(scene,VOCAL_FACE_IDS.lowerTeeth);
+  }
+
+  apply(a:VocalArticulators):VocalFacePose{
+    const jawDrop=.015+.145*a.jawOpen;
+    const closure=1-a.lipClosure;
+    const lipGap=.006+.145*a.jawOpen*closure;
+    const lipWidth=.47*(1-.31*a.lipRound-.08*a.labiodental);
+    const protrusion=.588+.075*a.lipRound+.018*a.labiodental;
+
+    this.jaw.position[1]=1.34-jawDrop*.55;
+    this.jaw.position[2]=.035+jawDrop*.10;
+    this.jaw.rotation[0]=-.16*a.jawOpen;
+    this.mouth.position[1]=1.365-jawDrop*.18;
+    this.mouth.position[2]=.535+.018*a.lipRound;
+    this.mouth.scale[0]=Math.max(.19,lipWidth*.95);
+    this.mouth.scale[1]=Math.max(.018,.035+lipGap*1.25);
+    this.mouth.scale[2]=.060+.018*a.lipRound;
+
+    const centerY=1.37-jawDrop*.16;
+    const upperY=centerY+lipGap*.50;
+    let lowerY=centerY-lipGap*.50-jawDrop*.08;
+    if(a.labiodental>0)lowerY+=.055*a.labiodental;
+    this.upperLip.position[0]=0;this.upperLip.position[1]=upperY;this.upperLip.position[2]=protrusion;
+    this.lowerLip.position[0]=0;this.lowerLip.position[1]=lowerY;this.lowerLip.position[2]=protrusion+.006*a.labiodental;
+    for(const entity of [this.upperLip,this.lowerLip]){
+      entity.scale[0]=lipWidth;
+      entity.scale[1]=.070+.040*a.lipRound+.018*a.lipClosure;
+      entity.scale[2]=.070+.042*a.lipRound;
+    }
+
+    this.lowerTeeth.position[1]=1.335-jawDrop*.70;
+    this.lowerTeeth.position[2]=.563+.012*a.labiodental;
+    const tongueZ=.438+.145*a.tonguePosition+.035*a.tongueTip;
+    const tongueY=1.235-jawDrop*.30+.125*a.tongueHeight+.060*a.tongueTip;
+    this.tongue.position[0]=0;this.tongue.position[1]=tongueY;this.tongue.position[2]=tongueZ;
+    this.tongue.rotation[0]=-.18*a.tongueTip;
+    this.tongue.scale[0]=.31-.045*a.tongueHeight;
+    this.tongue.scale[1]=.060+.055*a.tongueHeight;
+    this.tongue.scale[2]=.22-.035*a.tonguePosition;
+
+    return Object.freeze({
+      jawDropM:jawDrop,lipGapM:lipGap,lipWidthM:lipWidth,lipProtrusionM:protrusion-.588,
+      tonguePosition:Object.freeze([0,tongueY,tongueZ]) as Vec3,
+      tongueScale:Object.freeze([...this.tongue.scale]) as Vec3,
+    });
+  }
+}

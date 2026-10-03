@@ -41,7 +41,7 @@ export type {Vec3,MutableVec3,Mat4} from './math.js';
 export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
 export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
-export {synthesizeIAmAlive,renderVocalTract,renderArticulatedVocalTract,vocalAreaFunction,articulatorAreaFunction,interpolateArticulators,VOCAL_ARTICULATOR_PRESETS,iAmAliveVocalScore,iAmAliveArticulatorScore,type VocalArticulation,type VocalArticulators,type VocalGesture,type ArticulatorGesture,type VocalTractRenderOptions,type VocalTractDiagnostics,type VocalTractRender} from './audio/vocal-tract.js';
+export {synthesizeIAmAlive,renderVocalTract,renderArticulatedVocalTract,vocalAreaFunction,articulatorAreaFunction,interpolateArticulators,sampleArticulatorScore,VOCAL_ARTICULATOR_PRESETS,iAmAliveVocalScore,iAmAliveArticulatorScore,type VocalArticulation,type VocalArticulators,type VocalGesture,type ArticulatorGesture,type SampledArticulatorScore,type VocalTractRenderOptions,type VocalTractDiagnostics,type VocalTractRender} from './audio/vocal-tract.js';
 export {traceAcousticTransfer,renderAcousticTransfer,renderAcousticTrajectory,connectAcousticWebAudio,type AcousticArrival,type AcousticLateField,type AcousticTransferObservation,type AcousticTransferTraceOptions,type AcousticRenderOptions,type AcousticTransferKeyframe,type AcousticTrajectoryRenderOptions,type AcousticWebAudioGraph} from './audio/acoustic-transfer.js';
 export {AudioSynthFamily,type EventSynthesizer,type AudioSynthPlugin} from './audio/depth.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
@@ -61,6 +61,7 @@ export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/
 
 export {renderFootsteps,type FootstepSound} from './audio/footsteps.js';
 
+export {VocalFaceRig,vocalFaceSceneSpec,VOCAL_FACE_IDS,type VocalFacePose} from './animation/vocal-face.js';
 export {AnimationSystem,sampleWalker,bindHumanoid,solveTwoBone} from './animation/locomotion.js';
 export type {WalkerSpec,HumanoidJoint,HumanoidBinding,HumanoidPose,RigTransform,VehiclePart,VehicleMotionSpec,GroundSampler} from './animation/locomotion.js';
 export {SurfaceContactSystem,surfaceContains,surfaceElevation} from './environment/surface-contacts.js';
