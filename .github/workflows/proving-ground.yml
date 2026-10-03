@@ -7,6 +7,7 @@ on:
       - 'tools/proving-ground/**'
       - 'tools/render-harness.mjs'
       - 'test/proving-ground.test.mjs'
+      - 'test/wave-field.test.mjs'
       - 'src/physics/**'
       - 'src/vehicles/**'
       - 'src/materials/**'
@@ -39,7 +40,7 @@ jobs:
       - run: bun run typecheck
       - run: bun run build
       - name: Kernel depth and proving-ground tests
-        run: node --test test/kernel-depth.test.mjs test/proving-ground.test.mjs
+        run: node --test test/kernel-depth.test.mjs test/proving-ground.test.mjs test/wave-field.test.mjs
       - name: Physics coverage report
         env:
           PROVING_GROUND_RELEASE_GATE: ${{ github.event_name == 'workflow_dispatch' && inputs.release_gate && '1' || '0' }}
