@@ -1,3 +1,40 @@
+export interface BreathSupportControl {
+  /** Respiratory muscle target pressure; opera can sustain substantially more than speech. */
+  readonly targetPressurePa:number;
+  /** Previous-cycle glottal flow loading the lungs. */
+  readonly glottalFlowM3S:number;
+}
+
+export interface BreathSupportSample {
+  readonly pressurePa:number;
+  readonly pressureVelocityPaS:number;
+}
+
+/** Low-frequency pressure reservoir representing diaphragm/intercostal support.
+ * Muscle activation sets an equilibrium pressure; glottal flow unloads it.
+ * The state cannot jump at syllable/note boundaries. */
+export class DiaphragmBreathSupport {
+  private pressurePa=0;
+  private velocityPaS=0;
+  maxPressurePa=0;
+
+  constructor(readonly sampleRate:number){
+    if(!Number.isSafeInteger(sampleRate)||sampleRate<8_000||sampleRate>384_000)throw new RangeError('Breath-support sample rate must be 8k..384k');
+  }
+
+  step(control:BreathSupportControl):BreathSupportSample{
+    const dt=1/this.sampleRate,target=clamp(control.targetPressurePa,0,2200);
+    const flowDrop=clamp(control.glottalFlowM3S*320_000,0,380);
+    const equilibrium=Math.max(0,target-flowDrop);
+    const omega=2*Math.PI*3.2,zeta=.9;
+    const acceleration=omega*omega*(equilibrium-this.pressurePa)-2*zeta*omega*this.velocityPaS;
+    this.velocityPaS+=acceleration*dt;
+    this.pressurePa=clamp(this.pressurePa+this.velocityPaS*dt,0,2300);
+    this.maxPressurePa=Math.max(this.maxPressurePa,this.pressurePa);
+    return Object.freeze({pressurePa:this.pressurePa,pressureVelocityPaS:this.velocityPaS});
+  }
+}
+
 export interface VocalFoldControl {
   /** Neuromuscular adduction: 0 abducted/breathing, 1 tightly approximated. */
   readonly adduction:number;
