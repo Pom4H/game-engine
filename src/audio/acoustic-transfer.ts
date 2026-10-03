@@ -51,6 +51,16 @@ export interface AcousticRenderOptions {
   readonly level?:number;
 }
 
+export interface AcousticTransferKeyframe {
+  readonly time:number;
+  readonly transfer:AcousticTransferObservation;
+}
+
+export interface AcousticTrajectoryRenderOptions extends AcousticRenderOptions {
+  /** Seconds over which neighbouring transfer snapshots overlap. Defaults to the full keyframe interval. */
+  readonly crossfadeS?:number;
+}
+
 const clamp=(value:number,min=0,max=1)=>Math.max(min,Math.min(max,value));
 
 /**
@@ -240,6 +250,57 @@ function mixLate(left:Float32Array,right:Float32Array,mono:Float32Array,sampleRa
   // the diffuse tail back into a point source.
   const pan=clamp(V3.dot(transfer.direct.direction,rightAxis),-1,1)*.18,lg=Math.sqrt((1-pan)*.5),rg=Math.sqrt((1+pan)*.5);
   for(let i=0;i<left.length;i++){left[i]=left[i]!*lg*Math.SQRT2;right[i]=right[i]!*rg*Math.SQRT2;}
+}
+
+/**
+ * Render one continuous source through a low-rate sequence of acoustic transfer
+ * snapshots. Each snapshot renders the same dry signal, then a partition-of-unity
+ * envelope crossfades the projections. No wave field is stepped at audio rate.
+ *
+ * This is the offline/replay equivalent of smoothing WebAudio parameters while a
+ * source moves between rooms or through a doorway.
+ */
+export function renderAcousticTrajectory(
+  source:AudioChannels,
+  keyframes:readonly AcousticTransferKeyframe[],
+  options:AcousticTrajectoryRenderOptions={},
+):AudioChannels{
+  if(!keyframes.length)throw new RangeError('Acoustic trajectory requires at least one keyframe');
+  for(let i=0;i<keyframes.length;i++){
+    const frame=keyframes[i]!;
+    if(!Number.isFinite(frame.time)||frame.time<0||(i>0&&frame.time<=keyframes[i-1]!.time))throw new RangeError('Acoustic trajectory keyframes must be finite and strictly ordered');
+  }
+  const sourceDuration=Math.max(source.left.length,source.right.length)/source.sampleRate;
+  const requested=options.outputDurationS??Math.max(
+    sourceDuration,
+    ...keyframes.map(frame=>sourceDuration+frame.transfer.direct.delayS+Math.min(4,frame.transfer.late.rt60S)),
+  );
+  if(!Number.isFinite(requested)||requested<=0||requested>3600)throw new RangeError('Invalid acoustic trajectory output duration');
+  const count=Math.max(1,Math.ceil(requested*source.sampleRate)),left=new Float32Array(count),right=new Float32Array(count);
+  const crossfade=options.crossfadeS;
+  if(crossfade!==undefined&&(!Number.isFinite(crossfade)||crossfade<=0))throw new RangeError('Acoustic trajectory crossfade must be positive');
+
+  for(let frameIndex=0;frameIndex<keyframes.length;frameIndex++){
+    const frame=keyframes[frameIndex]!,wet=renderAcousticTransfer(source,frame.transfer,{...options,outputDurationS:requested});
+    const previous=keyframes[frameIndex-1],next=keyframes[frameIndex+1];
+    const leftEdge=previous?frame.time-(crossfade??(frame.time-previous.time)):0;
+    const rightEdge=next?frame.time+(crossfade??(next.time-frame.time)):requested;
+    for(let i=0;i<count;i++){
+      const time=i/source.sampleRate;
+      let weight=1;
+      if(previous&&time<frame.time)weight=clamp((time-leftEdge)/Math.max(1e-9,frame.time-leftEdge));
+      else if(next&&time>frame.time)weight=clamp((rightEdge-time)/Math.max(1e-9,rightEdge-frame.time));
+      else if(!previous&&next&&time>frame.time)weight=clamp((rightEdge-time)/Math.max(1e-9,rightEdge-frame.time));
+      else if(previous&&!next&&time<frame.time)weight=clamp((time-leftEdge)/Math.max(1e-9,frame.time-leftEdge));
+      if(weight<=0)continue;
+      left[i]=left[i]!+wet.left[i]!*weight;
+      right[i]=right[i]!+wet.right[i]!*weight;
+    }
+  }
+  // Neighbouring triangular envelopes sum to ~1; a final soft limit only protects
+  // unusual reflection/reverb overlap, not normalizes away physical gain changes.
+  for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*0.96);right[i]=Math.tanh(right[i]!*0.96);}
+  return{left,right,sampleRate:source.sampleRate};
 }
 
 export interface AcousticWebAudioGraph {

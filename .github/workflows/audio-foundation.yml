@@ -7,6 +7,7 @@ on:
       - 'src/core/**'
       - 'src/audio/**'
       - 'tools/acoustic-demo.mjs'
+      - 'tools/car-garage-audio-demo.mjs'
       - 'test/acoustic-transfer.test.mjs'
       - 'src/scene/acoustic-boundary.ts'
       - 'src/physics/wave-field.ts'
@@ -44,8 +45,14 @@ jobs:
       - run: bun run build
       - run: node --test test/audio-foundation.test.mjs test/acoustic-transfer.test.mjs test/browser-audio.test.mjs test/kernel-depth.test.mjs
       - run: node tools/acoustic-demo.mjs
+      - run: node tools/car-garage-audio-demo.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: acoustic-door-demo
           path: artifacts/acoustic-demo
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: car-garage-audio-demo
+          path: artifacts/car-garage-audio
           retention-days: 14
