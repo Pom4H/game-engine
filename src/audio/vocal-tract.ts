@@ -1,4 +1,5 @@
 import {mulberry32} from '../core/random.js';
+import {CompliantVelopharyngealValve,PressureDrivenVocalFolds} from './vocal-source.js';
 import type {AudioChannels} from './synth.js';
 
 export type VocalArticulation='silence'|'a'|'i'|'ae'|'schwa'|'l'|'m'|'v';
@@ -404,6 +405,9 @@ class BranchedVocalNetwork {
   readonly nasal:AcousticTube;
   private readonly mouthRadiator=new ApertureRadiator();
   private readonly noseRadiator=new ApertureRadiator();
+  private readonly velopharyngeal:CompliantVelopharyngealValve;
+  private readonly nasalBase:Float64Array;
+  private velumControl=0;
   maxBranchEnergyResidual=0;
 
   constructor(readonly sections:number,readonly sampleRate:number){
@@ -413,23 +417,30 @@ class BranchedVocalNetwork {
     const sectionLength=SPEED_OF_SOUND_MPS/sampleRate;
     const nasalSections=Math.max(12,Math.round(.12/sectionLength));
     this.nasal=new AcousticTube(nasalSections,.9965);
-    this.nasal.areas.set(nasalAreaFunction(nasalSections));
+    this.nasalBase=nasalAreaFunction(nasalSections);
+    this.nasal.areas.set(this.nasalBase);
+    this.velopharyngeal=new CompliantVelopharyngealValve(sampleRate);
   }
 
   setGeometry(fullArea:Float64Array,velumOpen:number):void{
     const p=this.pharynx.sections,o=this.oral.sections;
     for(let i=0;i<p;i++)this.pharynx.areas[i]=fullArea[Math.min(fullArea.length-1,i)]!;
     for(let i=0;i<o;i++)this.oral.areas[i]=fullArea[Math.min(fullArea.length-1,p+i)]!;
-    const base=nasalAreaFunction(this.nasal.sections);
-    const portArea=.004+1.10*clamp(velumOpen,0,1)**1.6;
-    for(let i=0;i<this.nasal.sections;i++){
-      const t=clamp(i/4,0,1);
-      this.nasal.areas[i]=portArea+(base[i]!-portArea)*t;
-    }
+    this.velumControl=clamp(velumOpen,0,1);
+  }
+
+  get supraglottalPressurePa():number{
+    return clamp(this.pharynx.leftIncoming().incoming*420,-600,600);
   }
 
   step(glottalSource:number,glottalFlow:number,state:VocalArticulators,rng:()=>number):number{
     const p=this.pharynx,o=this.oral,n=this.nasal;
+    const pressureDelta=(p.rightIncoming().incoming-n.leftIncoming().incoming)*360;
+    const portArea=this.velopharyngeal.step({muscleOpen:this.velumControl,pressureDeltaPa:pressureDelta});
+    for(let i=0;i<n.sections;i++){
+      const t=clamp(i/4,0,1);
+      n.areas[i]=portArea+(this.nasalBase[i]!-portArea)*t;
+    }
     p.beginStep();o.beginStep();n.beginStep();
 
     // Glottis: flow source plus compliant subglottal reflection.
@@ -489,10 +500,10 @@ export function renderArticulatedVocalTract(
   if(!Number.isInteger(sections)||sections<12||sections>96)throw new RangeError('Vocal tract sections must be 12..96');
   const duration=gestures.at(-1)?.endS??0;if(duration<=0)throw new RangeError('Articulator score must contain gestures');
   const count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
-  const network=new BranchedVocalNetwork(sections,sampleRate);
+  const network=new BranchedVocalNetwork(sections,sampleRate),folds=new PressureDrivenVocalFolds(sampleRate);
   const current=new Float64Array(articulatorAreaFunction(gestures[0]!.from,sections)),target=new Float64Array(sections),rng=mulberry32(options.seed??0xA11CE),transition=options.transitionS??.014;
   const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAttack=1-Math.exp(-1/(sampleRate*.007)),scalarRelease=1-Math.exp(-1/(sampleRate*.003));
-  let gestureIndex=0,phase=0,previousFlow=0,voicedState=0,gainState=0,pitchState=120,peak=0,minArea=Infinity,maxArea=0;
+  let gestureIndex=0,voicedState=0,gainState=0,pitchState=120,peak=0,minArea=Infinity,maxArea=0;
   for(let sample=0;sample<count;sample++){
     const time=sample/sampleRate;while(gestureIndex<gestures.length-1&&time>=gestures[gestureIndex]!.endS)gestureIndex++;
     const gesture=gestures[gestureIndex]!,u=clamp((time-gesture.startS)/(gesture.endS-gesture.startS),0,1),state=interpolateArticulators(gesture.from,gesture.to??gesture.from,u);
@@ -504,15 +515,14 @@ export function renderArticulatedVocalTract(
     voicedState+=(voicedTarget<voicedState?scalarRelease:scalarAttack)*(voicedTarget-voicedState);
     gainState+=(gainTarget<gainState?scalarRelease:scalarAttack)*(gainTarget-gainState);
     pitchState+=scalarAttack*(pitchTarget-pitchState);
-    phase+=pitchState/sampleRate;if(phase>=1)phase-=Math.floor(phase);
-
-    // Smooth glottal flow pulse. The tract receives both flow and its time
-    // derivative; no white aspiration is injected into silence.
-    const oq=.62,flow=phase<oq?Math.sin(Math.PI*phase/oq)**2:0;
-    const drivenFlow=flow*voicedState*gainState;
-    const derivative=drivenFlow-previousFlow;previousFlow=drivenFlow;
-    const glottalSource=derivative*.82+drivenFlow*.095;
-    const sampleOut=network.step(glottalSource,drivenFlow,state,rng)*4.1;
+    const fold=folds.step({
+      adduction:voicedState,
+      tensionHz:pitchState,
+      lungPressurePa:gainState*900,
+      supraglottalPressurePa:network.supraglottalPressurePa,
+    });
+    const flowNormalized=fold.flowM3S/.00020;
+    const sampleOut=network.step(fold.source,flowNormalized,state,rng)*4.1;
     peak=Math.max(peak,Math.abs(sampleOut));left[sample]=sampleOut;right[sample]=sampleOut;
   }
 
