@@ -50,3 +50,12 @@ test('articulator geometry continuously changes tube area',()=>{
   assert.notDeepEqual(A,M);assert.notDeepEqual(M,I);
   assert.ok(M.every(v=>v>0&&Number.isFinite(v)));
 });
+
+
+test('final silence has no frication hiss and output is audibly strong',()=>{
+  const result=synthesizeIAmAlive({sampleRate:48000,seed:11}),audio=result.audio.left,rate=result.audio.sampleRate;
+  const rms=(from,to)=>{let e=0,n=0;for(let i=Math.floor(from*rate);i<Math.floor(to*rate);i++){e+=audio[i]**2;n++;}return Math.sqrt(e/Math.max(1,n));};
+  const voiced=rms(.15,1.65),tail=rms(1.84,1.98);
+  assert.ok(voiced>.06, 'voice RMS should not be quiet');
+  assert.ok(tail<voiced*.015, 'silent tail must not hiss after /v/');
+});

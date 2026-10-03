@@ -153,7 +153,7 @@ export const VOCAL_ARTICULATOR_PRESETS:Readonly<Record<VocalArticulation,VocalAr
   schwa:Object.freeze({jawOpen:.45,tonguePosition:.50,tongueHeight:.42,tongueTip:0,lipRound:.02,lipClosure:0,velumOpen:0,labiodental:0}),
   l:Object.freeze({jawOpen:.45,tonguePosition:.72,tongueHeight:.58,tongueTip:.82,lipRound:0,lipClosure:0,velumOpen:0,labiodental:0}),
   m:Object.freeze({jawOpen:.18,tonguePosition:.45,tongueHeight:.35,tongueTip:0,lipRound:.08,lipClosure:.99,velumOpen:1,labiodental:0}),
-  v:Object.freeze({jawOpen:.20,tonguePosition:.48,tongueHeight:.34,tongueTip:0,lipRound:.03,lipClosure:.18,velumOpen:0,labiodental:.92}),
+  v:Object.freeze({jawOpen:.20,tonguePosition:.48,tongueHeight:.34,tongueTip:0,lipRound:.03,lipClosure:.18,velumOpen:0,labiodental:.86}),
 });
 
 export function articulatorAreaFunction(state:VocalArticulators,sections=24):Float64Array{
@@ -235,8 +235,8 @@ function defaultIAmAliveScore():readonly VocalGesture[]{
     {startS:1.00,endS:1.16,from:'l',voiced:.9,pitchHz:121,gain:.78},
     {startS:1.16,endS:1.39,from:'a',to:'i',voiced:1,pitchHz:127,gain:1},
     {startS:1.39,endS:1.61,from:'i',voiced:1,pitchHz:133,gain:.94},
-    {startS:1.61,endS:1.76,from:'v',voiced:.72,frication:.78,pitchHz:129,gain:.74},
-    {startS:1.76,endS:2.00,from:'silence',voiced:0,gain:0},
+    {startS:1.61,endS:1.72,from:'v',voiced:.94,frication:.28,pitchHz:129,gain:.82},
+    {startS:1.72,endS:2.00,from:'silence',voiced:0,frication:0,gain:0},
   ]);
 }
 
@@ -338,7 +338,7 @@ export function renderArticulatedVocalTract(
   const oral=new TubeWaveguide(sections,.9975,-.82,.72),nasalSections=Math.max(12,Math.round(sections*.92)),nasal=new TubeWaveguide(nasalSections,.996,-.78,.62);
   nasal.areas.set(nasalAreaFunction(nasalSections));
   const current=new Float64Array(articulatorAreaFunction(gestures[0]!.from,sections)),target=new Float64Array(sections),rng=mulberry32(options.seed??0xA11CE),transition=options.transitionS??.014;
-  const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAlpha=1-Math.exp(-1/(sampleRate*.008));
+  const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAlpha=1-Math.exp(-1/(sampleRate*.008)),fricAttackAlpha=1-Math.exp(-1/(sampleRate*.006)),fricReleaseAlpha=1-Math.exp(-1/(sampleRate*.0018));
   let gestureIndex=0,phase=0,previousFlow=0,voicedState=0,nasalState=0,fricationState=0,gainState=0,pitchState=120,aspirationState=0,peak=0,minArea=Infinity,maxArea=0;
   for(let sample=0;sample<count;sample++){
     const time=sample/sampleRate;while(gestureIndex<gestures.length-1&&time>=gestures[gestureIndex]!.endS)gestureIndex++;
@@ -346,15 +346,18 @@ export function renderArticulatedVocalTract(
     target.set(articulatorAreaFunction(state,sections));
     for(let i=0;i<sections;i++){current[i]=current[i]!+(target[i]!-current[i]!)*areaAlpha;oral.areas[i]=current[i]!;minArea=Math.min(minArea,current[i]!);maxArea=Math.max(maxArea,current[i]!);}
     const voicedTarget=gesture.voiced??1,nasalTarget=state.velumOpen,fricTarget=gesture.frication??state.labiodental*.72,gainTarget=gesture.gain??1,pitchTarget=gesture.pitchHz??120;
-    voicedState+=scalarAlpha*(voicedTarget-voicedState);nasalState+=scalarAlpha*(nasalTarget-nasalState);fricationState+=scalarAlpha*(fricTarget-fricationState);gainState+=scalarAlpha*(gainTarget-gainState);pitchState+=scalarAlpha*(pitchTarget-pitchState);aspirationState+=scalarAlpha*((voicedState>0?.012:.002)-aspirationState);
+    voicedState+=scalarAlpha*(voicedTarget-voicedState);nasalState+=scalarAlpha*(nasalTarget-nasalState);fricationState+=(fricTarget<fricationState?fricReleaseAlpha:fricAttackAlpha)*(fricTarget-fricationState);gainState+=scalarAlpha*(gainTarget-gainState);pitchState+=scalarAlpha*(pitchTarget-pitchState);aspirationState+=scalarAlpha*((voicedState>.02?.0045:.0006)-aspirationState);
     phase+=pitchState/sampleRate;if(phase>=1)phase-=Math.floor(phase);
     const oq=.64,flow=phase<oq?Math.sin(Math.PI*phase/oq)**2:0,derivative=flow-previousFlow;previousFlow=flow;
-    const glottal=(derivative*.92+flow*.055+(rng()*2-1)*aspirationState)*voicedState*gainState;
-    const oralOut=oral.step(glottal*(1-.42*nasalState),(rng()*2-1)*fricationState*gainState*.16,Math.floor(sections*.90));
-    const nasalOut=nasal.step(glottal*nasalState*.72,0,0),sampleOut=(oralOut+nasalOut*.72)*3.5;
+    const glottal=(derivative*.84+flow*.085+(rng()*2-1)*aspirationState)*voicedState*gainState;
+    const oralShare=Math.max(.06,1-.92*nasalState);
+    const oralOut=oral.step(glottal*oralShare,(rng()*2-1)*fricationState*gainState*.085,Math.floor(sections*.90));
+    const nasalOut=nasal.step(glottal*nasalState*1.08,0,0),sampleOut=(oralOut+nasalOut*1.12)*3.7;
     peak=Math.max(peak,Math.abs(sampleOut));left[sample]=sampleOut;right[sample]=sampleOut;
   }
-  const normalize=peak>1e-9?.88/peak:1;for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.2);right[i]=left[i]!;}
+  let rawEnergy=0;for(let i=0;i<count;i++)rawEnergy+=left[i]!*left[i]!;const rawRms=Math.sqrt(rawEnergy/Math.max(1,count));
+  const peakGain=peak>1e-9?.96/peak:1,rmsGain=rawRms>1e-9?.18/rawRms:1,normalize=Math.min(peakGain,rmsGain*1.35);
+  for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.32);right[i]=left[i]!;}
   const sectionLengthM=tractLengthM/sections;
   const articulated=Object.freeze(gestures.map(g=>Object.freeze({
     ...g,

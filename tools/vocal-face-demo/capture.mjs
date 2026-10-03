@@ -72,7 +72,7 @@ try{
   const wav=join(out,'voice-temp.wav');
   await writeFile(wav,wavBytes(voice.audio));
   const mp4=join(out,'i-am-alive-face.mp4');
-  const mux=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-i',videoSilent,'-i',wav,'-c:v','copy','-c:a','aac','-b:a','192k','-shortest','-movflags','+faststart',mp4],{stdio:'inherit'});
+  const mux=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-i',videoSilent,'-i',wav,'-c:v','copy','-af','volume=4dB','-c:a','aac','-b:a','192k','-shortest','-movflags','+faststart',mp4],{stdio:'inherit'});
   const muxExit=await once(mux,'exit');
   if(muxExit[0]!==0)throw new Error('Mux failed: '+muxExit[0]);
   await Promise.all([unlink(wav),unlink(videoSilent)]);

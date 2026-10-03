@@ -22,3 +22,9 @@ test('face and voice sample the same continuous articulator score',()=>{
   assert.ok(pose.lipGapM>0);
   assert.ok(pose.tonguePosition[2]>.43);
 });
+
+
+test('face has an explicit nose bridge wings and nostrils',()=>{
+  const scene=new Scene(vocalFaceSceneSpec());
+  for(const id of ['vocal-face-nose-bridge','vocal-face-nose-dorsum','vocal-face-nose-tip','vocal-face-nose-left-ala','vocal-face-nose-right-ala','vocal-face-left-nostril','vocal-face-right-nostril'])assert.ok(scene.entities.has(id),id);
+});
