@@ -27,6 +27,7 @@ export class PressureDrivenVocalFolds {
   private displacementM=0;
   private velocityMps=0;
   private previousFlow=0;
+  private sourceState=0;
   readonly airDensityKgM3=1.225;
   readonly foldLengthM=.014;
   readonly dischargeCoefficient=.68;
@@ -68,7 +69,12 @@ export class PressureDrivenVocalFolds {
     const flow=pressure>0?this.dischargeCoefficient*area*Math.sqrt(2*pressure/this.airDensityKgM3):0;
     const flowScale=.00020;
     const normalizedFlow=flow/flowScale;
-    const source=(normalizedFlow-this.previousFlow)*.88+normalizedFlow*.075;
+    const pressureGate=clamp((pressure-70)/180,0,1);
+    const derivative=normalizedFlow-this.previousFlow;
+    const targetSource=((derivative*.88)+normalizedFlow*.075)*pressureGate;
+    const sourceAlpha=1-Math.exp(-2*Math.PI*3200/this.sampleRate);
+    this.sourceState+=sourceAlpha*(targetSource-this.sourceState);
+    const source=clamp(this.sourceState,-1.6,1.6);
     this.previousFlow=normalizedFlow;
     this.maxGapM=Math.max(this.maxGapM,gap);
     this.maxFlowM3S=Math.max(this.maxFlowM3S,flow);
