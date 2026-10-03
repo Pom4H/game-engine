@@ -153,7 +153,7 @@ function computeNormals(positions:Float64Array,indices:readonly number[],out:Flo
   }
   for(let i=0;i<out.length;i+=3){
     const l=Math.hypot(out[i]!,out[i+1]!,out[i+2]!)||1;
-    out[i]/=l;out[i+1]/=l;out[i+2]/=l;
+    out[i]=out[i]!/l;out[i+1]=out[i+1]!/l;out[i+2]=out[i+2]!/l;
   }
 }
 
