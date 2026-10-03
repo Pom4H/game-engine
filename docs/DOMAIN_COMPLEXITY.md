@@ -30,6 +30,7 @@ execution / presentation
 | Наблюдение | `CausalRenderObservation`, content-addressed surface state |
 | Рендер | `src/render/**`, `src/render-ir/**` |
 | Сеть / authority | `src/network/causal-authority.ts`, projections/playback |
+| Хранение | `src/content/**`, `src/storage/**`, checkpoints / mutation log / scope heads |
 | Исполнение | `src/execution/**`, `src/meshwork/**` |
 | Доказательства | `test/**`, proving grounds, CI, Reality Gap |
 
@@ -38,8 +39,9 @@ execution / presentation
 - Renderer не создаёт физическую причину.
 - Сетевой пакет не становится состоянием мира.
 - Worker не мутирует authority напрямую.
+- Репликация байтов не создаёт вторую истину: mutable только `ScopeHead`, остальное immutable CAS.
 - NPU decision не блокирует authoritative tick.
 - `renderMesh` не подменяет collision/physical geometry.
 - LOD/depth меняет представление или частоту вычисления, но не смысл причины.
 
-Связанные документы: [Causal render contract](./CAUSAL_RENDER_CONTRACT.md), [Server authority](./SERVER_AUTHORITY.md), [Infinite world](./INFINITE_WORLD.md), [Physics energy accounting](./PHYSICS_ENERGY_ACCOUNTING.md).
+Связанные документы: [Causal render contract](./CAUSAL_RENDER_CONTRACT.md), [Server authority](./SERVER_AUTHORITY.md), [Distributed causal storage](./CAUSAL_STORAGE.md), [Infinite world](./INFINITE_WORLD.md), [Physics energy accounting](./PHYSICS_ENERGY_ACCOUNTING.md).

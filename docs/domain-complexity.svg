@@ -112,7 +112,7 @@
 <rect x="965" y="460" width="155" height="25" rx="7" fill="#0d2233" stroke="#16c8ef" stroke-opacity=".35"/>
 <text x="973" y="478" class="t">Reality Gap</text>
 <line x1="1227.5" y1="235" x2="1227.5" y2="270" stroke="#ff5d76" stroke-width="2"/>
-<rect x="1140" y="270" width="175" height="260" rx="16" fill="#0b1725" stroke="#ff5d76" stroke-width="1.5"/>
+<rect x="1140" y="270" width="175" height="290" rx="16" fill="#0b1725" stroke="#ff5d76" stroke-width="1.5"/>
 <text x="1227.5" y="301" text-anchor="middle" class="h" fill="#ff5d76">Сеть</text>
 <text x="1227.5" y="323" text-anchor="middle" class="h" fill="#ff5d76">и authority</text>
 <rect x="1150" y="327" width="155" height="25" rx="7" fill="#0d2233" stroke="#ff5d76" stroke-opacity=".35"/>
@@ -127,6 +127,8 @@
 <text x="1158" y="465" class="t">Projection / replication</text>
 <rect x="1150" y="477" width="155" height="25" rx="7" fill="#0d2233" stroke="#ff5d76" stroke-opacity=".35"/>
 <text x="1158" y="495" class="t">Handoff workers</text>
+<rect x="1150" y="507" width="155" height="25" rx="7" fill="#0d2233" stroke="#ff5d76" stroke-opacity=".35"/>
+<text x="1158" y="525" class="t">Checkpoint / restore</text>
 <line x1="1412.5" y1="235" x2="1412.5" y2="270" stroke="#7f83ff" stroke-width="2"/>
 <rect x="1325" y="270" width="175" height="260" rx="16" fill="#0b1725" stroke="#7f83ff" stroke-width="1.5"/>
 <text x="1412.5" y="301" text-anchor="middle" class="h" fill="#7f83ff">Исполнение</text>

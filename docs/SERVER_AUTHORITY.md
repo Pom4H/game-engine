@@ -92,3 +92,8 @@ advance authoritative tick
 ```
 
 Rendering, neural inference, world generation, aggregate NPC decisions and even scoped physics may move to workers. The server keeps ordering, ownership, invariants and the causal ledger.
+
+
+## Persistence
+
+Authority handoff is only complete when the target has restored the same causal revision. The immutable checkpoint/log storage contract is defined in [Distributed causal storage](./CAUSAL_STORAGE.md).
