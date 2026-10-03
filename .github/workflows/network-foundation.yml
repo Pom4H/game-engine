@@ -7,7 +7,9 @@ on:
       - 'src/core/**'
       - 'src/network/**'
       - 'test/network-foundation.test.mjs'
+      - 'test/authority-ledger.test.mjs'
       - 'docs/NETWORK_FOUNDATION.md'
+      - 'docs/SERVER_AUTHORITY.md'
       - 'package.json'
       - '.github/workflows/network-foundation.yml'
   pull_request:
@@ -37,4 +39,4 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/network-foundation.test.mjs test/kernel-depth.test.mjs
+      - run: node --test test/network-foundation.test.mjs test/authority-ledger.test.mjs test/kernel-depth.test.mjs

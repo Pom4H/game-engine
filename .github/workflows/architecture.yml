@@ -15,7 +15,7 @@ on:
       - 'test/meshwork-temporal.test.mjs'
       - 'test/meshwork-execution.test.mjs'
       - 'test/meshwork-spine.test.mjs'
-      - 'test/meshwork-coordinator.test.mjs test/authority-ledger.test.mjs'
+      - 'test/meshwork-coordinator.test.mjs'
       - 'package.json'
       - 'src/runtime/browser.ts'
       - 'src/index.ts'
@@ -56,10 +56,11 @@ on:
       - 'src/scene/system-runtime.ts'
       - 'src/render/depth.ts'
       - 'src/audio/depth.ts'
-      - 'src/network/depth.ts'
+      - 'src/network/**'
       - 'src/world/depth.ts'
       - 'test/kernel-depth.test.mjs'
       - 'test/depth-families.test.mjs'
+      - 'test/authority-ledger.test.mjs'
       - '.github/workflows/architecture.yml'
 concurrency:
   group: architecture-${{ github.ref }}
@@ -76,4 +77,4 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/kernel-depth.test.mjs test/depth-families.test.mjs test/causal-render-contract.test.mjs test/meshwork-boundaries.test.mjs test/meshwork-temporal.test.mjs test/meshwork-execution.test.mjs test/meshwork-spine.test.mjs test/meshwork-coordinator.test.mjs
+      - run: node --test test/kernel-depth.test.mjs test/depth-families.test.mjs test/causal-render-contract.test.mjs test/authority-ledger.test.mjs test/meshwork-boundaries.test.mjs test/meshwork-temporal.test.mjs test/meshwork-execution.test.mjs test/meshwork-spine.test.mjs test/meshwork-coordinator.test.mjs

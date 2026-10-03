@@ -1,3 +1,5 @@
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CausalAuthority} from '../dist/network/index.js';
@@ -50,4 +52,10 @@ test('proposal deadlines use authority clock and ledger is bounded causal eviden
  for(let i=0;i<5;i++){grant=authority.grant(grant.scope);authority.commit(proposal(grant,'p:'+i,i,{observedTick:tick,evidence:['worker:result:'+i]}),adapter);}
  const ledger=authority.ledger();assert.equal(ledger.length,4);assert.ok(ledger[0].sequence>1);assert.equal(ledger.at(-1).kind,'commit');
  assert.equal(authority.inspect().ledgerRecords,4);
+});
+
+
+test('authority core does not depend on execution placement or Meshwork',()=>{
+ const source=readFileSync(resolve(process.cwd(),'src/network/causal-authority.ts'),'utf8');
+ assert.doesNotMatch(source,/from\s+['"][^'"]*(meshwork|execution)/i);
 });

@@ -60,11 +60,11 @@ export class CausalAuthority{
  private readonly scopes=new Map<string,ScopeState>();
  private readonly ring:(AuthorityRecord|undefined)[];
  private ringStart=0;private ringCount=0;private sequence=0;
- private readonly recentProposalIds=new Set<string>();private readonly recentProposalOrder:string[]=[];
+ private readonly recentProposalIds=new Set<string>();private readonly proposalRing:(string|undefined)[];private proposalStart=0;private proposalCount=0;
  private accepted=0;private rejected=0;private handoffs=0;
  constructor(readonly clock:AuthorityClock,readonly maxScopes=8192,readonly maxLedgerRecords=65536){
   if(!clock||!Number.isSafeInteger(maxScopes)||maxScopes<1||maxScopes>1_000_000||!Number.isSafeInteger(maxLedgerRecords)||maxLedgerRecords<1||maxLedgerRecords>1_000_000)throw new RangeError('Invalid causal authority capacity');
-  this.ring=Array<AuthorityRecord|undefined>(maxLedgerRecords);
+  this.ring=Array<AuthorityRecord|undefined>(maxLedgerRecords);this.proposalRing=Array<string|undefined>(maxLedgerRecords);
   this.readClock();
  }
  claim(scope:AuthorityScope,ownerId:string):AuthorityGrant{
@@ -102,7 +102,7 @@ export class CausalAuthority{
   if(state.revision===Number.MAX_SAFE_INTEGER)throw new RangeError('Authority revision exhausted');
   const previousRevision=state.revision;state.revision++;this.accepted++;
   this.rememberProposal(proposal.proposalId);
-  const record:Object.freeze extends never?never:AuthorityCommitRecord=Object.freeze({
+  const record:AuthorityCommitRecord=Object.freeze({
    kind:'commit',sequence:++this.sequence,scope:state.scope,ownerId:state.ownerId,epoch:state.epoch,previousRevision,revision:state.revision,
    proposalId:proposal.proposalId,action:proposal.action,observedTick:proposal.observedTick,tick:at.tick,time:at.time,evidence:validateEvidence(proposal.evidence),
   });
@@ -138,7 +138,9 @@ export class CausalAuthority{
   this.ring[this.ringStart]=record;this.ringStart=(this.ringStart+1)%this.maxLedgerRecords;
  }
  private rememberProposal(id:string):void{
-  this.recentProposalIds.add(id);this.recentProposalOrder.push(id);
-  while(this.recentProposalOrder.length>this.maxLedgerRecords){const old=this.recentProposalOrder.shift()!;this.recentProposalIds.delete(old);}
+  this.recentProposalIds.add(id);
+  if(this.proposalCount<this.maxLedgerRecords){this.proposalRing[(this.proposalStart+this.proposalCount)%this.maxLedgerRecords]=id;this.proposalCount++;return;}
+  const old=this.proposalRing[this.proposalStart];if(old!==undefined)this.recentProposalIds.delete(old);
+  this.proposalRing[this.proposalStart]=id;this.proposalStart=(this.proposalStart+1)%this.maxLedgerRecords;
  }
 }
