@@ -1,0 +1,37 @@
+name: Vocal Face CPU Proof
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/audio/vocal-tract.ts'
+      - 'src/animation/vocal-face.ts'
+      - 'tools/vocal-face-demo/capture-cpu.mjs'
+      - '.github/workflows/vocal-face-cpu-proof.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vocal-face-cpu-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: ffmpeg -version
+      - run: node tools/vocal-face-demo/capture-cpu.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vocal-face-cpu-mp4
+          path: |
+            artifacts/vocal-face-cpu/i-am-alive-face.mp4
+            artifacts/vocal-face-cpu/poster.png
+            artifacts/vocal-face-cpu/evidence.json
+          retention-days: 14
