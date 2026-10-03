@@ -187,9 +187,9 @@ export function articulatorAreaFunction(state:VocalArticulators,sections=24):Flo
     area-=1.15*state.lipRound*GAUSS(x,.94,.09);
     if(x>.84){
       const lipT=clamp((x-.84)/.16,0,1);
-      const lipCap=.025+(1-state.lipClosure)*4.5+(1-lipT)*4.0;
+      const lipCap=.025+(1-state.lipClosure)*4.5+(1-lipT)**3*4.0;
       area=Math.min(area,lipCap);
-      const dentalCap=.055+(1-state.labiodental)*3.8+(1-lipT)*3.2;
+      const dentalCap=.055+(1-state.labiodental)*3.8+(1-lipT)**3*3.2;
       area=Math.min(area,dentalCap);
     }
 
@@ -517,8 +517,8 @@ export function renderArticulatedVocalTract(
   }
 
   let rawEnergy=0;for(let i=0;i<count;i++)rawEnergy+=left[i]!*left[i]!;
-  const rawRms=Math.sqrt(rawEnergy/Math.max(1,count)),peakGain=peak>1e-9?.97/peak:1,rmsGain=rawRms>1e-9?.20/rawRms:1,normalize=Math.min(peakGain,rmsGain*1.5);
-  for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.28);right[i]=left[i]!;}
+  const rawRms=Math.sqrt(rawEnergy/Math.max(1,count)),normalize=rawRms>1e-9?.22/rawRms:1;
+  for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.34);right[i]=left[i]!;}
   const sectionLengthM=tractLengthM/sections;
   const articulated=Object.freeze(gestures.map(g=>Object.freeze({...g,from:Object.freeze({...g.from}),...(g.to?{to:Object.freeze({...g.to})}:{})})));
   const diagnostics:VocalTractDiagnostics=Object.freeze({
