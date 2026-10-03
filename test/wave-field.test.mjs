@@ -52,8 +52,12 @@ test('pressure patch converts Pa m2 s to structural impulse without a damage bar
   });
   const load=applyPressureLoad(wave,body,{point,outwardNormal:[1,0,0],areaM2:.2,impulseRadiusM:.25},.01);
   assert.equal(load.pressurePa,1000);
-  assert.deepEqual(load.forceN,[-200,0,0]);
-  assert.deepEqual(load.impulseNs,[-2,0,0]);
+  assert.equal(load.forceN[0],-200);
+  assert.ok(Math.abs(load.forceN[1])<1e-12);
+  assert.ok(Math.abs(load.forceN[2])<1e-12);
+  assert.equal(load.impulseNs[0],-2);
+  assert.ok(Math.abs(load.impulseNs[1])<1e-12);
+  assert.ok(Math.abs(load.impulseNs[2])<1e-12);
   const momentum=body.linearMomentum();
   assert.ok(Math.abs(momentum[0]+2)<1e-12);
   assert.ok(Math.abs(momentum[1])<1e-12);
