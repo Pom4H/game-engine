@@ -59,3 +59,31 @@ test('final silence has no frication hiss and output is audibly strong',()=>{
   assert.ok(voiced>.06, 'voice RMS should not be quiet');
   assert.ok(tail<voiced*.015, 'silent tail must not hiss after /v/');
 });
+
+
+test('three-port junction conserves wave power for arbitrary areas',async()=>{
+  const {scatterThreePort}=await import('../dist/index.js');
+  const incoming=[.7,-.2,.15],areas=[2.4,1.1,.35],result=scatterThreePort(incoming,areas);
+  assert.ok(Math.abs(result.energyResidual)<1e-12);
+});
+
+test('bilabial closure constricts only the mouth end, not the whole throat',()=>{
+  const m=articulatorAreaFunction(VOCAL_ARTICULATOR_PRESETS.m,24);
+  assert.ok(m[4]>.35,'pharynx must remain open during /m/');
+  assert.ok(m[10]>.35,'oral cavity must remain open behind closed lips');
+  assert.ok(m.at(-1)<.15,'closure belongs at the lips');
+});
+
+test('silence relaxes the mouth instead of slamming the aperture shut',()=>{
+  const s=VOCAL_ARTICULATOR_PRESETS.silence;
+  assert.ok(s.lipClosure<.2);
+  const area=articulatorAreaFunction(s,24);
+  assert.ok(area.at(-1)>.5);
+});
+
+test('release after final v has no broadband pressure burst',()=>{
+  const {audio}=synthesizeIAmAlive({sampleRate:48000,seed:17}),x=audio.left,fs=audio.sampleRate;
+  const derivativeRms=(a,b)=>{let e=0,n=0,prev=x[Math.max(0,Math.floor(a*fs)-1)]??0;for(let i=Math.floor(a*fs);i<Math.floor(b*fs);i++){const d=x[i]-prev;prev=x[i];e+=d*d;n++;}return Math.sqrt(e/Math.max(1,n));};
+  const v=derivativeRms(1.61,1.72),release=derivativeRms(1.76,1.90);
+  assert.ok(release<v*.18,'release must decay instead of producing a hiss/puff transient');
+});

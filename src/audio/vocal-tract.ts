@@ -146,7 +146,7 @@ class TubeWaveguide {
 const GAUSS=(x:number,c:number,w:number)=>Math.exp(-(((x-c)/w)**2));
 
 export const VOCAL_ARTICULATOR_PRESETS:Readonly<Record<VocalArticulation,VocalArticulators>>=Object.freeze({
-  silence:Object.freeze({jawOpen:.05,tonguePosition:.50,tongueHeight:.25,tongueTip:0,lipRound:0,lipClosure:.92,velumOpen:0,labiodental:0}),
+  silence:Object.freeze({jawOpen:.14,tonguePosition:.50,tongueHeight:.30,tongueTip:0,lipRound:0,lipClosure:.06,velumOpen:0,labiodental:0}),
   a:Object.freeze({jawOpen:.92,tonguePosition:.18,tongueHeight:.18,tongueTip:0,lipRound:.02,lipClosure:0,velumOpen:0,labiodental:0}),
   i:Object.freeze({jawOpen:.28,tonguePosition:.82,tongueHeight:.92,tongueTip:.08,lipRound:0,lipClosure:0,velumOpen:0,labiodental:0}),
   ae:Object.freeze({jawOpen:.72,tonguePosition:.64,tongueHeight:.46,tongueTip:.04,lipRound:0,lipClosure:0,velumOpen:0,labiodental:0}),
@@ -185,8 +185,13 @@ export function articulatorAreaFunction(state:VocalArticulators,sections=24):Flo
     // Lip rounding lengthens/narrows the terminal aperture; closure and
     // labiodental contact are separate physical constrictions.
     area-=1.15*state.lipRound*GAUSS(x,.94,.09);
-    area=Math.min(area, .035+(1-state.lipClosure)*4.5);
-    area=Math.min(area, .07+(1-state.labiodental)*3.8+(1-x)*.55);
+    if(x>.84){
+      const lipT=clamp((x-.84)/.16,0,1);
+      const lipCap=.025+(1-state.lipClosure)*4.5+(1-lipT)*4.0;
+      area=Math.min(area,lipCap);
+      const dentalCap=.055+(1-state.labiodental)*3.8+(1-lipT)*3.2;
+      area=Math.min(area,dentalCap);
+    }
 
     out[i]=clamp(area,.025,7);
   }
@@ -252,8 +257,9 @@ function defaultIAmAliveArticulatorScore():readonly ArticulatorGesture[]{
     {startS:1.00,endS:1.16,from:p.l,voiced:.9,pitchHz:121,gain:.78},
     {startS:1.16,endS:1.39,from:p.a,to:p.i,voiced:1,pitchHz:127,gain:1},
     {startS:1.39,endS:1.61,from:p.i,voiced:1,pitchHz:133,gain:.94},
-    {startS:1.61,endS:1.76,from:p.v,voiced:.72,frication:.78,pitchHz:129,gain:.74},
-    {startS:1.76,endS:2.00,from:p.silence,voiced:0,gain:0},
+    {startS:1.61,endS:1.72,from:p.v,voiced:.94,pitchHz:129,gain:.82},
+    {startS:1.72,endS:1.84,from:p.v,to:p.silence,voiced:0,frication:0,gain:0},
+    {startS:1.84,endS:2.00,from:p.silence,voiced:0,frication:0,gain:0},
   ]);
 }
 
@@ -318,12 +324,159 @@ export function renderVocalTract(
   };
 }
 
+
+interface TubeBoundaryState {readonly incoming:number;readonly area:number}
+
+class AcousticTube {
+  readonly areas:Float64Array;
+  readonly forward:Float64Array;
+  readonly backward:Float64Array;
+  private readonly nextForward:Float64Array;
+  private readonly nextBackward:Float64Array;
+  maxAbsReflection=0;
+
+  constructor(readonly sections:number,readonly wallLoss:number){
+    this.areas=new Float64Array(sections);
+    this.forward=new Float64Array(sections);
+    this.backward=new Float64Array(sections);
+    this.nextForward=new Float64Array(sections);
+    this.nextBackward=new Float64Array(sections);
+  }
+
+  beginStep():void{
+    this.nextForward.fill(0);this.nextBackward.fill(0);
+    for(let i=0;i<this.sections-1;i++){
+      const left=Math.max(.005,this.areas[i]!),right=Math.max(.005,this.areas[i+1]!);
+      const r=(left-right)/(left+right);
+      this.maxAbsReflection=Math.max(this.maxAbsReflection,Math.abs(r));
+      const fromLeft=this.forward[i]!,fromRight=this.backward[i+1]!;
+      this.nextBackward[i]=(r*fromLeft+(1-r)*fromRight)*this.wallLoss;
+      this.nextForward[i+1]=((1+r)*fromLeft-r*fromRight)*this.wallLoss;
+    }
+  }
+  leftIncoming():TubeBoundaryState{return{incoming:this.backward[0]!,area:Math.max(.005,this.areas[0]!)};}
+  rightIncoming():TubeBoundaryState{const i=this.sections-1;return{incoming:this.forward[i]!,area:Math.max(.005,this.areas[i]!)};}
+  setLeftOutgoing(value:number):void{this.nextForward[0]=value*this.wallLoss;}
+  setRightOutgoing(value:number):void{this.nextBackward[this.sections-1]=value*this.wallLoss;}
+  inject(section:number,value:number):void{
+    const k=Math.max(1,Math.min(this.sections-2,section));
+    this.nextForward[k]=this.nextForward[k]!+value*.5;
+    this.nextBackward[k]=this.nextBackward[k]!+value*.5;
+  }
+  commit():void{this.forward.set(this.nextForward);this.backward.set(this.nextBackward);}
+}
+
+class ApertureRadiator {
+  private previous=0;
+  radiate(incoming:number,areaCm2:number):{reflected:number;output:number}{
+    const radiusScale=Math.sqrt(Math.max(.005,areaCm2));
+    const reflection=-clamp(.92-.12*radiusScale,.55,.91);
+    const pressure=(1+reflection)*incoming;
+    const output=(pressure-this.previous)*.74+pressure*.26;
+    this.previous=pressure;
+    return{reflected:reflection*incoming,output};
+  }
+}
+
+export interface ThreePortScatterResult {
+  readonly commonPressure:number;
+  readonly outgoing:readonly [number,number,number];
+  readonly energyResidual:number;
+}
+
+/** Lossless pressure-wave scattering at a three-way acoustic junction.
+ * Characteristic admittance is proportional to cross-sectional area. */
+export function scatterThreePort(
+  incoming:readonly [number,number,number],
+  areas:readonly [number,number,number],
+):ThreePortScatterResult{
+  const y0=Math.max(1e-6,areas[0]),y1=Math.max(1e-6,areas[1]),y2=Math.max(1e-6,areas[2]),sum=y0+y1+y2;
+  const common=2*(y0*incoming[0]+y1*incoming[1]+y2*incoming[2])/sum;
+  const outgoing:[number,number,number]=[common-incoming[0],common-incoming[1],common-incoming[2]];
+  const before=y0*incoming[0]**2+y1*incoming[1]**2+y2*incoming[2]**2;
+  const after=y0*outgoing[0]**2+y1*outgoing[1]**2+y2*outgoing[2]**2;
+  return Object.freeze({commonPressure:common,outgoing:Object.freeze(outgoing),energyResidual:after-before});
+}
+
+class BranchedVocalNetwork {
+  readonly pharynx:AcousticTube;
+  readonly oral:AcousticTube;
+  readonly nasal:AcousticTube;
+  private readonly mouthRadiator=new ApertureRadiator();
+  private readonly noseRadiator=new ApertureRadiator();
+  maxBranchEnergyResidual=0;
+
+  constructor(readonly sections:number,readonly sampleRate:number){
+    const pharynxSections=Math.max(5,Math.round(sections*.38));
+    this.pharynx=new AcousticTube(pharynxSections,.9982);
+    this.oral=new AcousticTube(Math.max(7,sections-pharynxSections),.9975);
+    const sectionLength=SPEED_OF_SOUND_MPS/sampleRate;
+    const nasalSections=Math.max(12,Math.round(.12/sectionLength));
+    this.nasal=new AcousticTube(nasalSections,.9965);
+    this.nasal.areas.set(nasalAreaFunction(nasalSections));
+  }
+
+  setGeometry(fullArea:Float64Array,velumOpen:number):void{
+    const p=this.pharynx.sections,o=this.oral.sections;
+    for(let i=0;i<p;i++)this.pharynx.areas[i]=fullArea[Math.min(fullArea.length-1,i)]!;
+    for(let i=0;i<o;i++)this.oral.areas[i]=fullArea[Math.min(fullArea.length-1,p+i)]!;
+    const base=nasalAreaFunction(this.nasal.sections);
+    const portArea=.004+1.10*clamp(velumOpen,0,1)**1.6;
+    for(let i=0;i<this.nasal.sections;i++){
+      const t=clamp(i/4,0,1);
+      this.nasal.areas[i]=portArea+(base[i]!-portArea)*t;
+    }
+  }
+
+  step(glottalSource:number,glottalFlow:number,state:VocalArticulators,rng:()=>number):number{
+    const p=this.pharynx,o=this.oral,n=this.nasal;
+    p.beginStep();o.beginStep();n.beginStep();
+
+    // Glottis: flow source plus compliant subglottal reflection.
+    const glottalIncoming=p.leftIncoming().incoming;
+    p.setLeftOutgoing(glottalSource+.68*glottalIncoming);
+
+    // True velopharyngeal three-port junction: pharynx -> oral + nasal.
+    const pi=p.rightIncoming(),oi=o.leftIncoming(),ni=n.leftIncoming();
+    const branch=scatterThreePort(
+      [pi.incoming,oi.incoming,ni.incoming],
+      [pi.area,oi.area,ni.area],
+    );
+    this.maxBranchEnergyResidual=Math.max(this.maxBranchEnergyResidual,Math.abs(branch.energyResidual));
+    p.setRightOutgoing(branch.outgoing[0]);
+    o.setLeftOutgoing(branch.outgoing[1]);
+    n.setLeftOutgoing(branch.outgoing[2]);
+
+    // Turbulence is generated by jet flow through the actual terminal
+    // labiodental constriction, not by a free-standing frication oscillator.
+    const oralAreas=o.areas;
+    let minArea=Infinity,minIndex=o.sections-2;
+    for(let i=Math.max(1,o.sections-6);i<o.sections-1;i++)if(oralAreas[i]!<minArea){minArea=oralAreas[i]!;minIndex=i;}
+    const aperture=Math.max(.02,minArea);
+    const contraction=clamp((.55-aperture)/.53,0,1);
+    const jetVelocity=glottalFlow/Math.max(.035,aperture);
+    const reynoldsProxy=Math.abs(jetVelocity)*state.labiodental*contraction;
+    const turbulence=(rng()*2-1)*Math.max(0,reynoldsProxy-.08)*.035;
+    if(Math.abs(turbulence)>1e-12)o.inject(minIndex,turbulence);
+
+    const mouth=o.rightIncoming(),mouthRad=this.mouthRadiator.radiate(mouth.incoming,mouth.area);
+    o.setRightOutgoing(mouthRad.reflected);
+    const nose=n.rightIncoming(),noseRad=this.noseRadiator.radiate(nose.incoming,nose.area);
+    n.setRightOutgoing(noseRad.reflected);
+
+    p.commit();o.commit();n.commit();
+    return mouthRad.output+noseRad.output*.88;
+  }
+
+  get maxAbsReflection():number{return Math.max(this.pharynx.maxAbsReflection,this.oral.maxAbsReflection,this.nasal.maxAbsReflection);}
+}
+
 export function renderArticulatedVocalTract(
   gestures:readonly ArticulatorGesture[],
   options:VocalTractRenderOptions={},
   phrase='custom',
 ):VocalTractRender{
-  const proxy:VocalGesture[]=gestures.map((g,index)=>({
+  const proxy:VocalGesture[]=gestures.map(g=>({
     startS:g.startS,endS:g.endS,from:'schwa',
     ...(g.voiced!==undefined?{voiced:g.voiced}:{}),
     ...(g.frication!==undefined?{frication:g.frication}:{}),
@@ -333,41 +486,45 @@ export function renderArticulatedVocalTract(
   const sampleRate=options.sampleRate??48_000,tractLengthM=options.tractLengthM??.1715;
   if(!Number.isSafeInteger(sampleRate)||sampleRate<16_000||sampleRate>192_000)throw new RangeError('Vocal sample rate must be 16k..192k');
   const idealSections=Math.round(tractLengthM/(SPEED_OF_SOUND_MPS/sampleRate)),sections=options.sections??idealSections;
+  if(!Number.isInteger(sections)||sections<12||sections>96)throw new RangeError('Vocal tract sections must be 12..96');
   const duration=gestures.at(-1)?.endS??0;if(duration<=0)throw new RangeError('Articulator score must contain gestures');
   const count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
-  const oral=new TubeWaveguide(sections,.9975,-.82,.72),nasalSections=Math.max(12,Math.round(sections*.92)),nasal=new TubeWaveguide(nasalSections,.996,-.78,.62);
-  nasal.areas.set(nasalAreaFunction(nasalSections));
+  const network=new BranchedVocalNetwork(sections,sampleRate);
   const current=new Float64Array(articulatorAreaFunction(gestures[0]!.from,sections)),target=new Float64Array(sections),rng=mulberry32(options.seed??0xA11CE),transition=options.transitionS??.014;
-  const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAlpha=1-Math.exp(-1/(sampleRate*.008)),fricAttackAlpha=1-Math.exp(-1/(sampleRate*.006)),fricReleaseAlpha=1-Math.exp(-1/(sampleRate*.0018));
-  let gestureIndex=0,phase=0,previousFlow=0,voicedState=0,nasalState=0,fricationState=0,gainState=0,pitchState=120,aspirationState=0,peak=0,minArea=Infinity,maxArea=0;
+  const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAttack=1-Math.exp(-1/(sampleRate*.007)),scalarRelease=1-Math.exp(-1/(sampleRate*.003));
+  let gestureIndex=0,phase=0,previousFlow=0,voicedState=0,gainState=0,pitchState=120,peak=0,minArea=Infinity,maxArea=0;
   for(let sample=0;sample<count;sample++){
     const time=sample/sampleRate;while(gestureIndex<gestures.length-1&&time>=gestures[gestureIndex]!.endS)gestureIndex++;
     const gesture=gestures[gestureIndex]!,u=clamp((time-gesture.startS)/(gesture.endS-gesture.startS),0,1),state=interpolateArticulators(gesture.from,gesture.to??gesture.from,u);
     target.set(articulatorAreaFunction(state,sections));
-    for(let i=0;i<sections;i++){current[i]=current[i]!+(target[i]!-current[i]!)*areaAlpha;oral.areas[i]=current[i]!;minArea=Math.min(minArea,current[i]!);maxArea=Math.max(maxArea,current[i]!);}
-    const voicedTarget=gesture.voiced??1,nasalTarget=state.velumOpen,fricTarget=gesture.frication??state.labiodental*.72,gainTarget=gesture.gain??1,pitchTarget=gesture.pitchHz??120;
-    voicedState+=scalarAlpha*(voicedTarget-voicedState);nasalState+=scalarAlpha*(nasalTarget-nasalState);fricationState+=(fricTarget<fricationState?fricReleaseAlpha:fricAttackAlpha)*(fricTarget-fricationState);gainState+=scalarAlpha*(gainTarget-gainState);pitchState+=scalarAlpha*(pitchTarget-pitchState);aspirationState+=scalarAlpha*((voicedState>.02?.0045:.0006)-aspirationState);
+    for(let i=0;i<sections;i++){current[i]=current[i]!+(target[i]!-current[i]!)*areaAlpha;minArea=Math.min(minArea,current[i]!);maxArea=Math.max(maxArea,current[i]!);}
+    network.setGeometry(current,state.velumOpen);
+
+    const voicedTarget=gesture.voiced??1,gainTarget=gesture.gain??1,pitchTarget=gesture.pitchHz??120;
+    voicedState+=(voicedTarget<voicedState?scalarRelease:scalarAttack)*(voicedTarget-voicedState);
+    gainState+=(gainTarget<gainState?scalarRelease:scalarAttack)*(gainTarget-gainState);
+    pitchState+=scalarAttack*(pitchTarget-pitchState);
     phase+=pitchState/sampleRate;if(phase>=1)phase-=Math.floor(phase);
-    const oq=.64,flow=phase<oq?Math.sin(Math.PI*phase/oq)**2:0,derivative=flow-previousFlow;previousFlow=flow;
-    const glottal=(derivative*.84+flow*.085+(rng()*2-1)*aspirationState)*voicedState*gainState;
-    const oralShare=Math.max(.06,1-.92*nasalState);
-    const oralOut=oral.step(glottal*oralShare,(rng()*2-1)*fricationState*gainState*.085,Math.floor(sections*.90));
-    const nasalOut=nasal.step(glottal*nasalState*1.08,0,0),sampleOut=(oralOut+nasalOut*1.12)*3.7;
+
+    // Smooth glottal flow pulse. The tract receives both flow and its time
+    // derivative; no white aspiration is injected into silence.
+    const oq=.62,flow=phase<oq?Math.sin(Math.PI*phase/oq)**2:0;
+    const drivenFlow=flow*voicedState*gainState;
+    const derivative=drivenFlow-previousFlow;previousFlow=drivenFlow;
+    const glottalSource=derivative*.82+drivenFlow*.095;
+    const sampleOut=network.step(glottalSource,drivenFlow,state,rng)*4.1;
     peak=Math.max(peak,Math.abs(sampleOut));left[sample]=sampleOut;right[sample]=sampleOut;
   }
-  let rawEnergy=0;for(let i=0;i<count;i++)rawEnergy+=left[i]!*left[i]!;const rawRms=Math.sqrt(rawEnergy/Math.max(1,count));
-  const peakGain=peak>1e-9?.96/peak:1,rmsGain=rawRms>1e-9?.18/rawRms:1,normalize=Math.min(peakGain,rmsGain*1.35);
-  for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.32);right[i]=left[i]!;}
+
+  let rawEnergy=0;for(let i=0;i<count;i++)rawEnergy+=left[i]!*left[i]!;
+  const rawRms=Math.sqrt(rawEnergy/Math.max(1,count)),peakGain=peak>1e-9?.97/peak:1,rmsGain=rawRms>1e-9?.20/rawRms:1,normalize=Math.min(peakGain,rmsGain*1.5);
+  for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.28);right[i]=left[i]!;}
   const sectionLengthM=tractLengthM/sections;
-  const articulated=Object.freeze(gestures.map(g=>Object.freeze({
-    ...g,
-    from:Object.freeze({...g.from}),
-    ...(g.to?{to:Object.freeze({...g.to})}:{}),
-  })));
+  const articulated=Object.freeze(gestures.map(g=>Object.freeze({...g,from:Object.freeze({...g.from}),...(g.to?{to:Object.freeze({...g.to})}:{})})));
   const diagnostics:VocalTractDiagnostics=Object.freeze({
     phrase,durationS:duration,sampleRate,sections,tractLengthM,sectionLengthM,
     propagationDelayPerSectionS:sectionLengthM/SPEED_OF_SOUND_MPS,
-    maxAbsReflection:Math.max(oral.maxAbsReflection,nasal.maxAbsReflection),
+    maxAbsReflection:network.maxAbsReflection,
     minAreaCm2:minArea,maxAreaCm2:maxArea,
     gestures:Object.freeze(proxy.map(g=>Object.freeze(g))),
     articulatorGestures:articulated,
