@@ -22,7 +22,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/vocal-tract.test.mjs test/russian-vocal.test.mjs test/vocal-face.test.mjs
+      - run: node --test test/vocal-source.test.mjs test/vocal-tract.test.mjs test/russian-vocal.test.mjs test/vocal-face.test.mjs
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: node tools/vocal-face-demo/capture-russian-cpu.mjs
       - uses: actions/upload-artifact@v4
