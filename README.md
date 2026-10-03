@@ -4,6 +4,10 @@
 
 A single TypeScript package for deterministic scenes, WebGPU rendering, rigid and structural physics, procedural vehicles, synthesized audio, and character movement. It has no JavaScript runtime dependencies.
 
+[![Domain complexity map](docs/domain-complexity.svg)](docs/DOMAIN_COMPLEXITY.md)
+
+The architecture is organized around one causal source of truth. See [the domain complexity map](docs/DOMAIN_COMPLEXITY.md), the [causal render contract](docs/CAUSAL_RENDER_CONTRACT.md), and [server authority](docs/SERVER_AUTHORITY.md).
+
 ## Build and check
 
 ```sh
