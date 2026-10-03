@@ -41,6 +41,7 @@ export type {Vec3,MutableVec3,Mat4} from './math.js';
 export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
 export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
+export {synthesizeIAmAlive,renderVocalTract,vocalAreaFunction,iAmAliveVocalScore,type VocalArticulation,type VocalGesture,type VocalTractRenderOptions,type VocalTractDiagnostics,type VocalTractRender} from './audio/vocal-tract.js';
 export {traceAcousticTransfer,renderAcousticTransfer,renderAcousticTrajectory,connectAcousticWebAudio,type AcousticArrival,type AcousticLateField,type AcousticTransferObservation,type AcousticTransferTraceOptions,type AcousticRenderOptions,type AcousticTransferKeyframe,type AcousticTrajectoryRenderOptions,type AcousticWebAudioGraph} from './audio/acoustic-transfer.js';
 export {AudioSynthFamily,type EventSynthesizer,type AudioSynthPlugin} from './audio/depth.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
