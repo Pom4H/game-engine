@@ -3,6 +3,36 @@ import type {AudioChannels} from './synth.js';
 
 export type VocalArticulation='silence'|'a'|'i'|'ae'|'schwa'|'l'|'m'|'v';
 
+export interface VocalArticulators {
+  /** 0 closed .. 1 maximally open. */
+  readonly jawOpen:number;
+  /** 0 back/pharyngeal .. 1 front/alveolar. */
+  readonly tonguePosition:number;
+  /** 0 low .. 1 high toward palate. */
+  readonly tongueHeight:number;
+  /** 0 relaxed .. 1 strong tongue-tip constriction near alveolar ridge. */
+  readonly tongueTip:number;
+  /** 0 spread/neutral .. 1 rounded/protruded lips. */
+  readonly lipRound:number;
+  /** 0 open lips .. 1 bilabial closure. */
+  readonly lipClosure:number;
+  /** 0 closed velopharyngeal port .. 1 open nasal coupling. */
+  readonly velumOpen:number;
+  /** 0 none .. 1 lower-lip/upper-teeth constriction. */
+  readonly labiodental:number;
+}
+
+export interface ArticulatorGesture {
+  readonly startS:number;
+  readonly endS:number;
+  readonly from:VocalArticulators;
+  readonly to?:VocalArticulators;
+  readonly voiced?:number;
+  readonly frication?:number;
+  readonly pitchHz?:number;
+  readonly gain?:number;
+}
+
 export interface VocalGesture {
   readonly startS:number;
   readonly endS:number;
@@ -35,6 +65,7 @@ export interface VocalTractDiagnostics {
   readonly minAreaCm2:number;
   readonly maxAreaCm2:number;
   readonly gestures:readonly VocalGesture[];
+  readonly articulatorGestures?:readonly ArticulatorGesture[];
 }
 
 export interface VocalTractRender {
@@ -106,33 +137,70 @@ class TubeWaveguide {
 
 const GAUSS=(x:number,c:number,w:number)=>Math.exp(-(((x-c)/w)**2));
 
-export function vocalAreaFunction(kind:VocalArticulation,sections=24):Float64Array{
+export const VOCAL_ARTICULATOR_PRESETS:Readonly<Record<VocalArticulation,VocalArticulators>>=Object.freeze({
+  silence:Object.freeze({jawOpen:.05,tonguePosition:.50,tongueHeight:.25,tongueTip:0,lipRound:0,lipClosure:.92,velumOpen:0,labiodental:0}),
+  a:Object.freeze({jawOpen:.92,tonguePosition:.18,tongueHeight:.18,tongueTip:0,lipRound:.02,lipClosure:0,velumOpen:0,labiodental:0}),
+  i:Object.freeze({jawOpen:.28,tonguePosition:.82,tongueHeight:.92,tongueTip:.08,lipRound:0,lipClosure:0,velumOpen:0,labiodental:0}),
+  ae:Object.freeze({jawOpen:.72,tonguePosition:.64,tongueHeight:.46,tongueTip:.04,lipRound:0,lipClosure:0,velumOpen:0,labiodental:0}),
+  schwa:Object.freeze({jawOpen:.45,tonguePosition:.50,tongueHeight:.42,tongueTip:0,lipRound:.02,lipClosure:0,velumOpen:0,labiodental:0}),
+  l:Object.freeze({jawOpen:.45,tonguePosition:.72,tongueHeight:.58,tongueTip:.82,lipRound:0,lipClosure:0,velumOpen:0,labiodental:0}),
+  m:Object.freeze({jawOpen:.18,tonguePosition:.45,tongueHeight:.35,tongueTip:0,lipRound:.08,lipClosure:.99,velumOpen:1,labiodental:0}),
+  v:Object.freeze({jawOpen:.20,tonguePosition:.48,tongueHeight:.34,tongueTip:0,lipRound:.03,lipClosure:.18,velumOpen:0,labiodental:.92}),
+});
+
+export function articulatorAreaFunction(state:VocalArticulators,sections=24):Float64Array{
   if(!Number.isInteger(sections)||sections<12||sections>96)throw new RangeError('Vocal tract sections must be 12..96');
+  for(const [key,value] of Object.entries(state))if(!Number.isFinite(value)||value<0||value>1)throw new RangeError(`Vocal articulator ${key} must be within 0..1`);
   const out=new Float64Array(sections);
+  const tongueCenter=.25+.52*state.tonguePosition;
+  const tongueWidth=.11+.12*(1-state.tongueHeight);
+  const tongueDepth=.45+2.45*state.tongueHeight;
   for(let i=0;i<sections;i++){
     const x=(i+.5)/sections;
-    let area=2.5+1.1*x;
-    area*=.45+.55*Math.min(1,x/.12);
-    if(kind==='a'){
-      area-=1.65*GAUSS(x,.28,.15);area+=1.5*GAUSS(x,.82,.23);area+=.7*x;
-    }else if(kind==='i'){
-      area+=1.7*GAUSS(x,.28,.22);area-=2.45*GAUSS(x,.72,.105);area-=.45*GAUSS(x,.93,.09);
-    }else if(kind==='ae'){
-      area-=1.25*GAUSS(x,.38,.17);area+=1.15*GAUSS(x,.78,.22);area+=.35*x;
-    }else if(kind==='schwa'){
-      area-=.35*GAUSS(x,.52,.24);area+=.2*GAUSS(x,.82,.20);
-    }else if(kind==='l'){
-      area+=.65*GAUSS(x,.34,.20);area-=2.15*GAUSS(x,.78,.09);area+=.35*GAUSS(x,.96,.06);
-    }else if(kind==='m'){
-      area-=.35*GAUSS(x,.45,.24);area=Math.min(area, x>.86?.035+(1-x)*.18:area);
-    }else if(kind==='v'){
-      area+=.25*GAUSS(x,.45,.23);area=Math.min(area,x>.88?.07+(1-x)*.35:area);
-    }else if(kind==='silence'){
-      area=2.7;
-    }
+    // Baseline tube opens with the jaw and slowly widens toward the lips.
+    let area=.72+3.25*state.jawOpen+1.05*x;
+    area*=.42+.58*Math.min(1,x/.12);
+
+    // Tongue body subtracts oral volume at a location determined by front/back
+    // position. Jaw opening counteracts part of that constriction.
+    area-=tongueDepth*(1-.28*state.jawOpen)*GAUSS(x,tongueCenter,tongueWidth);
+
+    // A low/back tongue also narrows the pharynx, which is what gives /a/-like
+    // shapes their strong first resonance without specifying a formant frequency.
+    const pharyngeal=(1-state.tonguePosition)*(1-state.tongueHeight);
+    area-=1.25*pharyngeal*GAUSS(x,.22,.13);
+
+    // Tongue tip produces an alveolar constriction. 1-D cannot model lateral
+    // channels explicitly, so /l/ retains a small non-zero bypass area.
+    area-=2.75*state.tongueTip*GAUSS(x,.79,.055);
+
+    // Lip rounding lengthens/narrows the terminal aperture; closure and
+    // labiodental contact are separate physical constrictions.
+    area-=1.15*state.lipRound*GAUSS(x,.94,.09);
+    area=Math.min(area, .035+(1-state.lipClosure)*4.5);
+    area=Math.min(area, .07+(1-state.labiodental)*3.8+(1-x)*.55);
+
     out[i]=clamp(area,.025,7);
   }
   return out;
+}
+
+export function vocalAreaFunction(kind:VocalArticulation,sections=24):Float64Array{
+  return articulatorAreaFunction(VOCAL_ARTICULATOR_PRESETS[kind],sections);
+}
+
+export function interpolateArticulators(a:VocalArticulators,b:VocalArticulators,t:number):VocalArticulators{
+  const u=clamp(t,0,1);
+  return Object.freeze({
+    jawOpen:a.jawOpen+(b.jawOpen-a.jawOpen)*u,
+    tonguePosition:a.tonguePosition+(b.tonguePosition-a.tonguePosition)*u,
+    tongueHeight:a.tongueHeight+(b.tongueHeight-a.tongueHeight)*u,
+    tongueTip:a.tongueTip+(b.tongueTip-a.tongueTip)*u,
+    lipRound:a.lipRound+(b.lipRound-a.lipRound)*u,
+    lipClosure:a.lipClosure+(b.lipClosure-a.lipClosure)*u,
+    velumOpen:a.velumOpen+(b.velumOpen-a.velumOpen)*u,
+    labiodental:a.labiodental+(b.labiodental-a.labiodental)*u,
+  });
 }
 
 function nasalAreaFunction(sections:number):Float64Array{
@@ -161,6 +229,23 @@ function defaultIAmAliveScore():readonly VocalGesture[]{
     {startS:1.39,endS:1.61,from:'i',voiced:1,pitchHz:133,gain:.94},
     {startS:1.61,endS:1.76,from:'v',voiced:.72,frication:.78,pitchHz:129,gain:.74},
     {startS:1.76,endS:2.00,from:'silence',voiced:0,gain:0},
+  ]);
+}
+
+function defaultIAmAliveArticulatorScore():readonly ArticulatorGesture[]{
+  const p=VOCAL_ARTICULATOR_PRESETS;
+  return Object.freeze([
+    {startS:0,endS:.08,from:p.silence,voiced:0,gain:0},
+    {startS:.08,endS:.27,from:p.a,to:p.i,voiced:1,pitchHz:124,gain:.86},
+    {startS:.27,endS:.43,from:p.i,voiced:1,pitchHz:126,gain:.82},
+    {startS:.43,endS:.68,from:p.ae,voiced:1,pitchHz:121,gain:.92},
+    {startS:.68,endS:.84,from:p.m,voiced:.9,pitchHz:119,gain:.78},
+    {startS:.84,endS:1.00,from:p.schwa,voiced:.82,pitchHz:118,gain:.66},
+    {startS:1.00,endS:1.16,from:p.l,voiced:.9,pitchHz:121,gain:.78},
+    {startS:1.16,endS:1.39,from:p.a,to:p.i,voiced:1,pitchHz:127,gain:1},
+    {startS:1.39,endS:1.61,from:p.i,voiced:1,pitchHz:133,gain:.94},
+    {startS:1.61,endS:1.76,from:p.v,voiced:.72,frication:.78,pitchHz:129,gain:.74},
+    {startS:1.76,endS:2.00,from:p.silence,voiced:0,gain:0},
   ]);
 }
 
@@ -225,8 +310,50 @@ export function renderVocalTract(
   };
 }
 
+export function renderArticulatedVocalTract(
+  gestures:readonly ArticulatorGesture[],
+  options:VocalTractRenderOptions={},
+  phrase='custom',
+):VocalTractRender{
+  const proxy:VocalGesture[]=gestures.map((g,index)=>({
+    startS:g.startS,endS:g.endS,from:'schwa',
+    ...(g.voiced!==undefined?{voiced:g.voiced}:{}),
+    ...(g.frication!==undefined?{frication:g.frication}:{}),
+    ...(g.pitchHz!==undefined?{pitchHz:g.pitchHz}:{}),
+    ...(g.gain!==undefined?{gain:g.gain}:{}),
+  }));
+  const sampleRate=options.sampleRate??48_000,tractLengthM=options.tractLengthM??.1715;
+  if(!Number.isSafeInteger(sampleRate)||sampleRate<16_000||sampleRate>192_000)throw new RangeError('Vocal sample rate must be 16k..192k');
+  const idealSections=Math.round(tractLengthM/(SPEED_OF_SOUND_MPS/sampleRate)),sections=options.sections??idealSections;
+  const duration=gestures.at(-1)?.endS??0;if(duration<=0)throw new RangeError('Articulator score must contain gestures');
+  const count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
+  const oral=new TubeWaveguide(sections,.9975,-.82,.72),nasalSections=Math.max(12,Math.round(sections*.92)),nasal=new TubeWaveguide(nasalSections,.996,-.78,.62);
+  nasal.areas.set(nasalAreaFunction(nasalSections));
+  const current=new Float64Array(articulatorAreaFunction(gestures[0]!.from,sections)),target=new Float64Array(sections),rng=mulberry32(options.seed??0xA11CE),transition=options.transitionS??.014;
+  const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAlpha=1-Math.exp(-1/(sampleRate*.008));
+  let gestureIndex=0,phase=0,previousFlow=0,voicedState=0,nasalState=0,fricationState=0,gainState=0,pitchState=120,aspirationState=0,peak=0,minArea=Infinity,maxArea=0;
+  for(let sample=0;sample<count;sample++){
+    const time=sample/sampleRate;while(gestureIndex<gestures.length-1&&time>=gestures[gestureIndex]!.endS)gestureIndex++;
+    const gesture=gestures[gestureIndex]!,u=clamp((time-gesture.startS)/(gesture.endS-gesture.startS),0,1),state=interpolateArticulators(gesture.from,gesture.to??gesture.from,u);
+    target.set(articulatorAreaFunction(state,sections));
+    for(let i=0;i<sections;i++){current[i]=current[i]!+(target[i]!-current[i]!)*areaAlpha;oral.areas[i]=current[i]!;minArea=Math.min(minArea,current[i]!);maxArea=Math.max(maxArea,current[i]!);}
+    const voicedTarget=gesture.voiced??1,nasalTarget=state.velumOpen,fricTarget=gesture.frication??state.labiodental*.72,gainTarget=gesture.gain??1,pitchTarget=gesture.pitchHz??120;
+    voicedState+=scalarAlpha*(voicedTarget-voicedState);nasalState+=scalarAlpha*(nasalTarget-nasalState);fricationState+=scalarAlpha*(fricTarget-fricationState);gainState+=scalarAlpha*(gainTarget-gainState);pitchState+=scalarAlpha*(pitchTarget-pitchState);aspirationState+=scalarAlpha*((voicedState>0?.012:.002)-aspirationState);
+    phase+=pitchState/sampleRate;if(phase>=1)phase-=Math.floor(phase);
+    const oq=.64,flow=phase<oq?Math.sin(Math.PI*phase/oq)**2:0,derivative=flow-previousFlow;previousFlow=flow;
+    const glottal=(derivative*.92+flow*.055+(rng()*2-1)*aspirationState)*voicedState*gainState;
+    const oralOut=oral.step(glottal*(1-.42*nasalState),(rng()*2-1)*fricationState*gainState*.16,Math.floor(sections*.90));
+    const nasalOut=nasal.step(glottal*nasalState*.72,0,0),sampleOut=(oralOut+nasalOut*.72)*3.5;
+    peak=Math.max(peak,Math.abs(sampleOut));left[sample]=sampleOut;right[sample]=sampleOut;
+  }
+  const normalize=peak>1e-9?.88/peak:1;for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.2);right[i]=left[i]!;}
+  const sectionLengthM=tractLengthM/sections;
+  return{audio:{left,right,sampleRate},diagnostics:Object.freeze({phrase,durationS:duration,sampleRate,sections,tractLengthM,sectionLengthM,propagationDelayPerSectionS:sectionLengthM/SPEED_OF_SOUND_MPS,maxAbsReflection:Math.max(oral.maxAbsReflection,nasal.maxAbsReflection),minAreaCm2:minArea,maxAreaCm2:maxArea,gestures:Object.freeze(proxy.map(g=>Object.freeze(g))),articulatorGestures:Object.freeze(gestures.map(g=>Object.freeze({...g,from:Object.freeze({...g.from}),...(g.to?{to:Object.freeze({...g.to})}:{})}))})};
+}
+
 export function synthesizeIAmAlive(options:VocalTractRenderOptions={}):VocalTractRender{
-  return renderVocalTract(defaultIAmAliveScore(),options,'I am alive!');
+  return renderArticulatedVocalTract(defaultIAmAliveArticulatorScore(),options,'I am alive!');
 }
 
 export function iAmAliveVocalScore():readonly VocalGesture[]{return defaultIAmAliveScore();}
+export function iAmAliveArticulatorScore():readonly ArticulatorGesture[]{return defaultIAmAliveArticulatorScore();}

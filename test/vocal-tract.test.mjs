@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {synthesizeIAmAlive,vocalAreaFunction,iAmAliveVocalScore} from '../dist/index.js';
+import {synthesizeIAmAlive,vocalAreaFunction,articulatorAreaFunction,VOCAL_ARTICULATOR_PRESETS,iAmAliveVocalScore,iAmAliveArticulatorScore} from '../dist/index.js';
 
 const energy=data=>data.reduce((sum,v)=>sum+v*v,0);
 
@@ -32,4 +32,21 @@ test('phrase score includes nasal and fricative physics instead of spelling-to-a
   assert.ok(score.some(g=>g.from==='m'&&g.nasal===1));
   assert.ok(score.some(g=>g.from==='v'&&g.frication>0));
   assert.ok(score.some(g=>g.from==='a'&&g.to==='i'));
+});
+
+
+test('I am alive primary score is articulator motion, not a phoneme area lookup',()=>{
+  const score=iAmAliveArticulatorScore();
+  assert.ok(score.length>=10);
+  assert.ok(score.some(g=>g.from.velumOpen===1));
+  assert.ok(score.some(g=>g.from.labiodental>.8));
+  assert.ok(score.some(g=>g.to&&g.from.tonguePosition<g.to.tonguePosition));
+});
+
+test('articulator geometry continuously changes tube area',()=>{
+  const a=VOCAL_ARTICULATOR_PRESETS.a,i=VOCAL_ARTICULATOR_PRESETS.i;
+  const mid={};for(const key of Object.keys(a))mid[key]=(a[key]+i[key])*.5;
+  const A=articulatorAreaFunction(a),M=articulatorAreaFunction(mid),I=articulatorAreaFunction(i);
+  assert.notDeepEqual(A,M);assert.notDeepEqual(M,I);
+  assert.ok(M.every(v=>v>0&&Number.isFinite(v)));
 });
