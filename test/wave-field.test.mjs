@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {AcousticWaveField,applyPressureLoad,material,StructuralBody} from '../dist/index.js';
+import {AcousticWaveField,applyPressureLoad,material,StructuralBody,Scene,syncSceneAcousticBoundaries} from '../dist/index.js';
 
 const field=(size=[9,3,3])=>new AcousticWaveField({
   size,
@@ -76,7 +76,7 @@ test('acoustic step exposes linear work and rejects unstable dt',()=>{
 
 
 test('scene collision geometry becomes acoustic boundary and a rotated door opens propagation',()=>{
-  const scene=new (await import('../dist/index.js')).Scene({
+  const scene=new Scene({
     version:1,
     ground:-100,
     entities:[
@@ -85,7 +85,6 @@ test('scene collision geometry becomes acoustic boundary and a rotated door open
       {id:'door',position:[6,2.5,3],mesh:{kind:'box',size:[.2,5,2]},body:{mass:0}},
     ],
   });
-  const {syncSceneAcousticBoundaries}=await import('../dist/index.js');
   const wave=new AcousticWaveField({size:[24,10,14],cellSizeM:.5,waveSpeedMps:10,densityKgM3:1});
   const closed=syncSceneAcousticBoundaries(wave,scene.entities.values());
   assert.equal(closed.bodyObstacles,3);
@@ -103,8 +102,7 @@ test('scene collision geometry becomes acoustic boundary and a rotated door open
   assert.ok(transmitted>1e-6);
 });
 
-test('renderMesh never changes acoustic boundary ownership',async()=>{
-  const {Scene,syncSceneAcousticBoundaries}=await import('../dist/index.js');
+test('renderMesh never changes acoustic boundary ownership',()=>{
   const wave=new AcousticWaveField({size:[8,8,8],cellSizeM:.5,waveSpeedMps:1,densityKgM3:1});
   const sceneA=new Scene({version:1,ground:-100,entities:[{
     id:'wall',position:[2,2,2],mesh:{kind:'box',size:[1,2,3]},renderMesh:{kind:'sphere',radius:20},
