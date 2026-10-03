@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync,statSync} from 'node:fs';
 import {join,relative,resolve} from 'node:path';
-import {contentRef,defineRenderFrame,defineRenderProgram} from '../dist/render-ir/index.js';
+import {CAUSAL_RENDER_CONTRACT_VERSION,contentRef,defineCausalRenderObservation,defineRenderFrame,defineRenderProgram} from '../dist/render-ir/index.js';
 import {defineExecutionGraph,localProgram} from '../dist/execution/index.js';
 import {decideSegmentResult,defineSegmentTask} from '../dist/meshwork/index.js';
 
@@ -16,13 +16,16 @@ test('render and engine hot-path packages cannot import Meshwork',()=>{
 });
 test('portable render IR has no Scene/backend/placement imports',()=>{
  const source=readFileSync(resolve(ROOT,'render-ir/index.ts'),'utf8');assert.doesNotMatch(source,/from\s+['"][^'"]*(scene|render\/|meshwork|execution)/i);
- const frame=defineRenderFrame({schema:1,simulationTick:7n,frame:12n,camera:[1,0,0,0],objects:[{id:'box',mesh:contentRef('mesh','mesh:1'),material:contentRef('material','mat:1'),transform:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}],lights:[],resources:{resources:[]},temporal:{},determinism:{epoch:2n,frame:12n,stochasticSequence:99n}});
+ const observation=contentRef('observation','observation:1');
+ const frame=defineRenderFrame({schema:1,simulationTick:7n,frame:12n,camera:[1,0,0,0],objects:[{id:'box',mesh:contentRef('mesh','mesh:1'),material:contentRef('material','mat:1'),transform:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}],lights:[],observation,resources:{resources:[observation]},temporal:{},determinism:{epoch:2n,frame:12n,stochasticSequence:99n}});
  assert.ok(Object.isFrozen(frame)&&Object.isFrozen(frame.objects));
+ const contract=defineCausalRenderObservation({schema:1,contractVersion:CAUSAL_RENDER_CONTRACT_VERSION,simulationTick:7n,simulationTimeSeconds:1,world:{handedness:'right',up:'+Y',positionUnit:'m',timeUnit:'s',angleUnit:'rad',radiance:'scene-linear'},surfaces:[]});
+ assert.ok(Object.isFrozen(contract));
 });
 test('placement is outside render semantics and local execution remains synchronous metadata',()=>{
  const program=defineRenderProgram({schema:1,programHash:'program:abc',profileHash:'profile:full',partitionability:{kind:'temporal',warmupFrames:4},requiredResources:{resources:[]}});
  const graph=defineExecutionGraph({schema:1,graphHash:'graph:abc',programHash:program.programHash,nodes:[{id:'render.final',operation:'render.final',inputs:[],outputs:[],deterministic:true,partitionability:program.partitionability}]});
- const local=localProgram(graph);assert.equal(local.placement,'local');assert.equal(local.graph,graph);assert.equal('then' in local,false,'local program boundary must not be Promise-like');
+ const local=localProgram(graph),npu=localProgram(graph,'npu');assert.equal(local.placement,'local');assert.equal(local.accelerator,'cpu');assert.equal(npu.accelerator,'npu');assert.equal(local.graph,graph);assert.equal('then' in local,false,'local program boundary must not be Promise-like');
 });
 test('worker-local finish time never decides a coordinator deadline',()=>{
  const task=defineSegmentTask({streamId:'stream',epoch:4n,segment:9n,attempt:1,firstOutputFrame:100n,outputFrames:24,warmupFrames:4,programHash:'program:1',executionGraphRefHash:'graph-ref:1',checkpointHash:'checkpoint:1',resourceManifestHash:'manifest:1',cameraHash:'camera:1',renderProfileHash:'profile:1',deadlineNs:1000n});

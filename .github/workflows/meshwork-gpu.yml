@@ -32,7 +32,31 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: node --test test/meshwork-boundaries.test.mjs test/meshwork-temporal.test.mjs
+      - run: node --test test/causal-render-contract.test.mjs test/meshwork-boundaries.test.mjs test/meshwork-temporal.test.mjs
+      - name: Inventory NPU accelerator
+        run: |
+          New-Item -ItemType Directory -Force artifacts/hardware | Out-Null
+          $all = Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue
+          $npu = @($all | Where-Object {
+            $_.Class -match 'ComputeAccelerator' -or
+            $_.FriendlyName -match 'NPU|Neural|Ryzen AI|Compute Accelerator|XDNA|Vitis'
+          })
+          $report=[ordered]@{
+            commit=$env:GITHUB_SHA
+            runner=$env:RUNNER_NAME
+            found=$npu.Count
+            devices=@($npu | Select-Object Class,FriendlyName,InstanceId,Status)
+          }
+          $report | ConvertTo-Json -Depth 6 | Set-Content artifacts/hardware/npu.json -Encoding utf8
+          Get-Content artifacts/hardware/npu.json
+          if ($npu.Count -lt 1) { throw 'No NPU/ComputeAccelerator device detected on the hardware runner' }
+      - name: Upload accelerator inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hardware-accelerators
+          path: artifacts/hardware/npu.json
+          retention-days: 14
       - name: Locate hardware Chrome
         run: |
           $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")

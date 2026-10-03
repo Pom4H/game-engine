@@ -6,6 +6,11 @@ import type {Primitive} from '../scene/types.js';
 
 export interface RenderObjectIR{
   readonly entity:RuntimeEntity;
+  /** Stable current surface identity; future part-level surfaces refine this without changing entity identity. */
+  readonly surfaceId:string;
+  /** Authoritative physical source. Render-only entities may omit it. */
+  readonly physicalPrimitive?:Primitive;
+  /** Selected visible representation for the compiled render depth. */
   readonly primitive:Primitive;
   readonly mesh?:MeshData;
   readonly model:Mat4;
@@ -36,7 +41,7 @@ function buildFrame(scene:Scene,camera:CameraSpec,primitiveFor:(entity:RuntimeEn
     if(entity.light)lights.push(entity);
     const primitive=primitiveFor(entity);if(!primitive)continue;
     const base=primitiveBaseScale(primitive),model=primitive===renderPrimitive(entity)?renderModel(entity):compose(entity.position,entity.rotation,[entity.scale[0]*base[0],entity.scale[1]*base[1],entity.scale[2]*base[2]]);
-    objects.push({entity,primitive,...(includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model});
+    objects.push({entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,...(includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model});
   }
   return{scene,camera,objects,objectsById:new Map(objects.map(object=>[object.entity.id,object] as const)),lights};
 }

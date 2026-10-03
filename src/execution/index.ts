@@ -2,28 +2,29 @@ import {renderModel,renderPrimitive} from '../render/frame.js';
 import type {CameraSpec} from '../scene/types.js';
 import type {RuntimeEntity,Scene} from '../scene/scene.js';
 import {
-  contentHash,defineRenderFrame,defineRenderProgram,
-  type ContentAddressedRepository,type ContentHash,type ContentRef,type PortableRenderFrame,type RenderPartitionability,type RenderProgramDescriptor,type ResourceManifest,type TemporalInputs,
+  CAUSAL_RENDER_CONTRACT_VERSION,contentHash,defineCausalRenderObservation,defineRenderFrame,defineRenderProgram,
+  type CausalSurfaceObservation,type ContentAddressedRepository,type ContentHash,type ContentRef,type PortableRenderFrame,type RenderPartitionability,type RenderProgramDescriptor,type ResourceManifest,type TemporalInputs,
 } from '../render-ir/index.js';
 
 export type ExecutionResourceAccess='read'|'write';
 export interface ExecutionResourceUse {readonly resource:ContentRef;readonly access:ExecutionResourceAccess}
-export interface ExecutionCostHint {readonly cpuMicros?:number;readonly gpuMicros?:number;readonly bytesRead?:number;readonly bytesWritten?:number}
+export interface ExecutionCostHint {readonly cpuMicros?:number;readonly gpuMicros?:number;readonly npuMicros?:number;readonly bytesRead?:number;readonly bytesWritten?:number}
 export interface ExecutionNode {
   readonly id:string;readonly operation:string;readonly inputs:readonly ExecutionResourceUse[];readonly outputs:readonly ContentRef[];
   readonly deterministic:boolean;readonly partitionability:RenderPartitionability|{readonly kind:'atomic'};readonly cost?:ExecutionCostHint;
 }
 export interface ExecutionGraph {readonly schema:1;readonly graphHash:ContentHash;readonly programHash:ContentHash;readonly nodes:readonly ExecutionNode[]}
 export type PlacementKind='local'|'mesh.temporal'|'mesh.spatial'|'mesh.samples';
-export interface PlacementProfile {readonly kind:PlacementKind;readonly deadlineNs?:bigint}
-export interface LocalProgramDescriptor {readonly graph:ExecutionGraph;readonly placement:'local'}
+export type ExecutionAccelerator='cpu'|'gpu'|'npu';
+export interface PlacementProfile {readonly kind:PlacementKind;readonly accelerator?:ExecutionAccelerator;readonly deadlineNs?:bigint}
+export interface LocalProgramDescriptor {readonly graph:ExecutionGraph;readonly placement:'local';readonly accelerator:ExecutionAccelerator}
 
 export function defineExecutionGraph(graph:ExecutionGraph):ExecutionGraph{
   if(graph.schema!==1||!graph.graphHash||!graph.programHash)throw new TypeError('Execution graph requires schema 1, a stable hash and a program hash');
   const ids=new Set<string>();for(const node of graph.nodes){if(!node.id||ids.has(node.id))throw new TypeError('Execution nodes require unique stable IDs');ids.add(node.id);if(!node.operation)throw new TypeError('Execution node requires an operation');}
   return deepFreeze(structuredClone(graph));
 }
-export function localProgram(graph:ExecutionGraph):LocalProgramDescriptor{return Object.freeze({graph,placement:'local'});}
+export function localProgram(graph:ExecutionGraph,accelerator:ExecutionAccelerator='cpu'):LocalProgramDescriptor{return Object.freeze({graph,placement:'local',accelerator});}
 
 export interface SceneRenderProjectionOptions{
   readonly epoch:bigint;readonly frame:bigint;readonly stochasticSequence?:bigint;readonly camera?:CameraSpec;readonly temporal?:TemporalInputs;
@@ -55,16 +56,35 @@ const materialData=(entity:RuntimeEntity,store:ContentAddressedRepository,refs:C
 
 export function projectSceneRenderFrame(scene:Scene,store:ContentAddressedRepository,options:SceneRenderProjectionOptions):ProjectedRenderFrame{
   if(options.epoch<0n||options.frame<0n)throw new RangeError('Render frame identity must be non-negative');
-  const camera=options.camera??scene.camera,objects=[],lights=[],refs:ContentRef[]=[];
+  const camera=options.camera??scene.camera,objects=[],lights=[],refs:ContentRef[]=[],surfaces:CausalSurfaceObservation[]=[];
   for(const entity of [...scene.entities.values()].sort((a,b)=>a.id.localeCompare(b.id))){
     if(entity.light){const light=entity.light,color=light.color??[1,1,1];lights.push(Object.freeze({id:entity.id,kind:'point' as const,state:Object.freeze([...entity.position,...color,light.intensity??1,light.range??10])}));}
     const primitive=renderPrimitive(entity);if(!primitive)continue;
-    const mesh=store.put('mesh',primitive),material=store.put('material',materialData(entity,store,refs));refs.push(mesh,material);
-    objects.push(Object.freeze({id:entity.id,mesh,material,transform:Object.freeze(Array.from(renderModel(entity)))}));
+    const physicalGeometry=entity.mesh?store.put('mesh',entity.mesh):undefined,visualGeometry=store.put('mesh',primitive),material=store.put('material',materialData(entity,store,refs)),transform=Object.freeze(Array.from(renderModel(entity)));
+    if(physicalGeometry)refs.push(physicalGeometry);refs.push(visualGeometry,material);
+    objects.push(Object.freeze({id:entity.id,mesh:visualGeometry,material,transform}));
+    const surface=scene.surfaces.surfaces.get(entity.id),bodySurface=scene.surfaces.bodies.get(entity.id),body=entity.body;
+    surfaces.push(Object.freeze({
+      identity:Object.freeze({entityId:entity.id,surfaceId:entity.id}),
+      ...(physicalGeometry?{physicalGeometry}:{}),visualGeometry,material,transform,
+      linearVelocityMps:Object.freeze(body?[...body.velocity] as [number,number,number]:[0,0,0] as [number,number,number]),
+      angularVelocityRadps:Object.freeze(body?[...body.angularVelocity] as [number,number,number]:[0,0,0] as [number,number,number]),
+      ...(surface?{surface:Object.freeze({
+        temperatureC:surface.temperatureC,wetness:surface.wetness,snowDepthM:surface.snowDepthM,waterDepthM:surface.waterDepthM,iceDepthM:surface.iceDepthM,slush:surface.slush,
+        dirt:surface.dirt,wear:surface.wear,trackMelt:surface.trackMelt,puddle:surface.puddle,snowFreshness:surface.snowpack.freshness,
+        snowLiquidFraction:surface.snowpack.liquidFraction,snowIceFraction:surface.snowpack.iceFraction,snowGrainSizeMm:surface.snowpack.grainSizeMm,snowCrust:surface.snowpack.crust,
+      })}:{}),
+      ...(bodySurface?{bodySurface:Object.freeze({snowCoverage:bodySurface.snowCoverage,rearSnow:bodySurface.rearSnow,wetness:bodySurface.wetness,roadDirt:bodySurface.roadDirt})}:{}),
+    }));
   }
   const environment=store.put('environment',{state:scene.environment,rendering:scene.spec.rendering??null,clearColor:scene.spec.clearColor??null});refs.push(environment);
+  const observation=store.put('observation',defineCausalRenderObservation({
+    schema:1,contractVersion:CAUSAL_RENDER_CONTRACT_VERSION,simulationTick:BigInt(scene.tick),simulationTimeSeconds:scene.time,
+    world:Object.freeze({handedness:'right' as const,up:'+Y' as const,positionUnit:'m' as const,timeUnit:'s' as const,angleUnit:'rad' as const,radiance:'scene-linear' as const}),
+    surfaces:Object.freeze(surfaces),environment,
+  }));refs.push(observation);
   const frame=defineRenderFrame({
-    schema:1,simulationTick:BigInt(scene.tick),frame:options.frame,camera:cameraData(camera),objects:Object.freeze(objects),lights:Object.freeze(lights),environment,
+    schema:1,simulationTick:BigInt(scene.tick),frame:options.frame,camera:cameraData(camera),objects:Object.freeze(objects),lights:Object.freeze(lights),environment,observation,
     resources:store.manifest(refs),temporal:options.temporal??Object.freeze({}),
     determinism:Object.freeze({epoch:options.epoch,frame:options.frame,stochasticSequence:options.stochasticSequence??options.frame}),
   });
