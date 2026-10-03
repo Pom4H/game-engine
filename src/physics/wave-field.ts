@@ -131,11 +131,21 @@ export class AcousticWaveField {
 
   pressureAt(point:Vec3):number{
     if(!point.every(Number.isFinite))throw new TypeError('Pressure sample point must be finite');
-    const h=this.cellSizeM,o=this.origin;
-    const x=Math.floor((point[0]-o[0])/h),y=Math.floor((point[1]-o[1])/h),z=Math.floor((point[2]-o[2])/h);
-    if(x<0||y<0||z<0||x>=this.nx||y>=this.ny||z>=this.nz)return 0;
-    const i=this.pIndex(x,y,z);
+    const cell=this.cellAt(point);if(!cell)return 0;
+    const [x,y,z]=cell,i=this.pIndex(x,y,z);
     return this.solid[i]?0:this.pressurePa[i]!;
+  }
+
+  /** Cell-centred medium velocity reconstructed from the six staggered faces. */
+  velocityAt(point:Vec3):Vec3{
+    if(!point.every(Number.isFinite))throw new TypeError('Velocity sample point must be finite');
+    const cell=this.cellAt(point);if(!cell)return[0,0,0];
+    const [x,y,z]=cell,i=this.pIndex(x,y,z);if(this.solid[i])return[0,0,0];
+    return[
+      .5*(this.velocityXMps[this.vxIndex(x,y,z)]!+this.velocityXMps[this.vxIndex(x+1,y,z)]!),
+      .5*(this.velocityYMps[this.vyIndex(x,y,z)]!+this.velocityYMps[this.vyIndex(x,y+1,z)]!),
+      .5*(this.velocityZMps[this.vzIndex(x,y,z)]!+this.velocityZMps[this.vzIndex(x,y,z+1)]!),
+    ];
   }
 
   /** Compression energy currently stored in pressure, excluding medium kinetic energy. */
@@ -247,6 +257,11 @@ export class AcousticWaveField {
     }
   }
 
+  private cellAt(point:Vec3):readonly[number,number,number]|undefined{
+    const h=this.cellSizeM,o=this.origin;
+    const x=Math.floor((point[0]-o[0])/h),y=Math.floor((point[1]-o[1])/h),z=Math.floor((point[2]-o[2])/h);
+    return x<0||y<0||z<0||x>=this.nx||y>=this.ny||z>=this.nz?undefined:[x,y,z];
+  }
   private validateCell(x:number,y:number,z:number):void{
     if(!Number.isInteger(x)||!Number.isInteger(y)||!Number.isInteger(z)||x<0||y<0||z<0||x>=this.nx||y>=this.ny||z>=this.nz)throw new RangeError('Acoustic cell index out of range');
   }
