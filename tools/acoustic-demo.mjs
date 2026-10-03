@@ -21,7 +21,7 @@ function transfer(open){
 const closed=transfer(false),open=transfer(true);
 const dry=synthesizeEvent({type:'impact',id:9001,time:0,point:source,normal:[1,0,0],a:'demo-source',b:'ground',materialA:'steel',materialB:'default',energy:480,impulse:38,speed:14,size:.9},48_000);
 const openAudio=renderAcousticTransfer(dry,open,{outputDurationS:1.4}),closedAudio=renderAcousticTransfer(dry,closed,{outputDurationS:1.4});
-const peak=a=>Math.max(...a.left.map(Math.abs),...a.right.map(Math.abs));
+const peak=a=>{let p=0;for(const channel of [a.left,a.right])for(const sample of channel)p=Math.max(p,Math.abs(sample));return p;};
 const openPeak=peak(openAudio),scale=openPeak>1e-9?.92/openPeak:1;
 for(const audio of [openAudio,closedAudio])for(const channel of [audio.left,audio.right])for(let i=0;i<channel.length;i++)channel[i]*=scale;
 await writeFile(`${out}/door-open.wav`,wavBytes(openAudio));await writeFile(`${out}/door-closed.wav`,wavBytes(closedAudio));
