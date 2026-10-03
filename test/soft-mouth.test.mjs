@@ -36,7 +36,7 @@ test('soft mouth stays finite, unbroken and outside teeth through dialogue artic
   for(let t=0;t<=duration+1e-9;t+=dt){
     const sample=sampleArticulatorScore(score,Math.min(t,duration)),state=rig.step(sample.articulators,dt).mouth;
     maxPen=Math.max(maxPen,state.maxContactPenetrationM);maxKinetic=Math.max(maxKinetic,state.kineticEnergyJ);
-    assert.equal(state.brokenConstraints,0,'broken soft-mouth constraint at t='+t.toFixed(4)+'s jaw='+sample.articulators.jawOpen.toFixed(3)+' closure='+sample.articulators.lipClosure.toFixed(3)+' round='+sample.articulators.lipRound.toFixed(3));
+    if(state.brokenConstraints){const broken=[];for(let i=0;i<rig.mouth.structure.broken.length;i++)if(rig.mouth.structure.broken[i])broken.push(rig.mouth.structure.definition.constraints[i]?.kind+'#'+i);assert.fail('broken soft-mouth constraints '+broken.join(',')+' at t='+t.toFixed(4)+'s jaw='+sample.articulators.jawOpen.toFixed(3)+' closure='+sample.articulators.lipClosure.toFixed(3)+' round='+sample.articulators.lipRound.toFixed(3));}
     assert.ok(Number.isFinite(state.mouthGapM));
   }
   assert.ok(maxPen<.008,'tooth contact projection allowed excessive penetration: '+maxPen);
