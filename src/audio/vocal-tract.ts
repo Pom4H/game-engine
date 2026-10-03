@@ -284,7 +284,7 @@ export function renderVocalTract(
   const sampleRate=options.sampleRate??48_000,tractLengthM=options.tractLengthM??.1715;
   if(!Number.isSafeInteger(sampleRate)||sampleRate<16_000||sampleRate>192_000)throw new RangeError('Vocal sample rate must be 16k..192k');
   if(!Number.isFinite(tractLengthM)||tractLengthM<.12||tractLengthM>.24)throw new RangeError('Vocal tract length must be 0.12..0.24 m');
-  const idealSections=Math.round(tractLengthM/(SPEED_OF_SOUND_MPS/sampleRate)),sections=options.sections??idealSections;
+  const idealSections=Math.max(12,Math.round(tractLengthM/(SPEED_OF_SOUND_MPS/sampleRate))),sections=options.sections??idealSections;
   if(!Number.isInteger(sections)||sections<12||sections>96)throw new RangeError('Vocal tract sections must be 12..96');
   for(let i=0;i<gestures.length;i++){
     const g=gestures[i]!;
@@ -507,7 +507,7 @@ export function renderArticulatedVocalTract(
   }));
   const sampleRate=options.sampleRate??48_000,tractLengthM=options.tractLengthM??.1715;
   if(!Number.isSafeInteger(sampleRate)||sampleRate<16_000||sampleRate>192_000)throw new RangeError('Vocal sample rate must be 16k..192k');
-  const idealSections=Math.round(tractLengthM/(SPEED_OF_SOUND_MPS/sampleRate)),sections=options.sections??idealSections;
+  const idealSections=Math.max(12,Math.round(tractLengthM/(SPEED_OF_SOUND_MPS/sampleRate))),sections=options.sections??idealSections;
   if(!Number.isInteger(sections)||sections<12||sections>96)throw new RangeError('Vocal tract sections must be 12..96');
   const duration=gestures.at(-1)?.endS??0;if(duration<=0)throw new RangeError('Articulator score must contain gestures');
   const count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
