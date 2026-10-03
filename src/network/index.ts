@@ -7,3 +7,6 @@ export type {AuthorityAdapter,DebugAction,DebugRequest} from './authority.js';
 
 export {ProjectionFamily} from './depth.js';
 export type {ProjectionVariant,ProjectionFamilyPlugin} from './depth.js';
+
+export {CausalAuthority} from './causal-authority.js';
+export type {AuthorityClock,AuthorityScope,AuthorityGrant,AuthorityProposal,AuthorityCommitContext,AuthorityCommitAdapter,AuthorityCommitDecision,AuthorityClaimRecord,AuthorityHandoffRecord,AuthorityCommitRecord,AuthorityRecord,AuthorityCommitResult,CausalAuthorityStats} from './causal-authority.js';

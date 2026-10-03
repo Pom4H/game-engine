@@ -15,7 +15,7 @@ on:
       - 'test/meshwork-temporal.test.mjs'
       - 'test/meshwork-execution.test.mjs'
       - 'test/meshwork-spine.test.mjs'
-      - 'test/meshwork-coordinator.test.mjs'
+      - 'test/meshwork-coordinator.test.mjs test/authority-ledger.test.mjs'
       - 'package.json'
       - 'src/runtime/browser.ts'
       - 'src/index.ts'
@@ -25,10 +25,11 @@ on:
       - 'src/scene/system-runtime.ts'
       - 'src/render/depth.ts'
       - 'src/audio/depth.ts'
-      - 'src/network/depth.ts'
+      - 'src/network/**'
       - 'src/world/depth.ts'
       - 'test/kernel-depth.test.mjs'
       - 'test/depth-families.test.mjs'
+      - 'test/authority-ledger.test.mjs'
       - '.github/workflows/architecture.yml'
   pull_request:
     paths:

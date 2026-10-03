@@ -96,3 +96,5 @@ export {Projection,Publication,LatestStateOutbox,projection,scalar,vector3,type 
 export {ProjectionFamily,type ProjectionVariant,type ProjectionFamilyPlugin} from './network/depth.js';
 export {PlaybackClock,Replica,type Sample,type SampleRow} from './network/playback.js';
 export {AuthoritySession,type AuthorityAdapter,type DebugAction,type DebugRequest} from './network/authority.js';
+
+export {CausalAuthority,type AuthorityClock,type AuthorityScope,type AuthorityGrant,type AuthorityProposal,type AuthorityCommitContext,type AuthorityCommitAdapter,type AuthorityCommitDecision,type AuthorityRecord,type AuthorityCommitResult,type CausalAuthorityStats} from './network/causal-authority.js';
