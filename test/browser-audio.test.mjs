@@ -6,8 +6,8 @@ import {WebGPURenderer} from '../dist/render/webgpu.js';
 function parameter(value=0){return{value,setTargetAtTime(v){this.value=v;},setValueAtTime(v){this.value=v;},exponentialRampToValueAtTime(v){this.value=v;}};}
 function webAudio(t){
  const original={AudioContext:globalThis.AudioContext,addEventListener:globalThis.addEventListener,removeEventListener:globalThis.removeEventListener},listeners=new Map(),contexts=[];
- class Node {constructor(){this.gain=parameter();this.frequency=parameter();this.pan=parameter();this.Q=parameter();this.links=[];this.starts=[];this.stops=0;this.disconnects=0;this.onended=null;this.loop=false;}connect(n){this.links.push(n);return n;}disconnect(){this.disconnects++;}start(...args){this.starts.push(args);}stop(){this.stops++;}}
- class Context {constructor(){this.state='running';this.currentTime=10;this.sampleRate=8000;this.destination={};this.sources=[];this.filters=[];this.panners=[];this.closed=0;contexts.push(this);}createGain(){return new Node();}createBiquadFilter(){const n=new Node();this.filters.push(n);return n;}createStereoPanner(){const n=new Node();this.panners.push(n);return n;}createOscillator(){return new Node();}createBufferSource(){const n=new Node();this.sources.push(n);return n;}createBuffer(channels,count,rate){const data=Array.from({length:channels},()=>new Float32Array(count));return{sampleRate:rate,getChannelData(i){return data[i];}};}async resume(){this.state='running';}async close(){this.closed++;this.state='closed';}}
+ class Node {constructor(){this.gain=parameter();this.frequency=parameter();this.pan=parameter();this.Q=parameter();this.delayTime=parameter();this.links=[];this.starts=[];this.stops=0;this.disconnects=0;this.onended=null;this.loop=false;}connect(n){this.links.push(n);return n;}disconnect(){this.disconnects++;}start(...args){this.starts.push(args);}stop(){this.stops++;}}
+ class Context {constructor(){this.state='running';this.currentTime=10;this.sampleRate=8000;this.destination={};this.sources=[];this.filters=[];this.panners=[];this.delays=[];this.closed=0;contexts.push(this);}createGain(){return new Node();}createDelay(){const n=new Node();this.delays.push(n);return n;}createBiquadFilter(){const n=new Node();this.filters.push(n);return n;}createStereoPanner(){const n=new Node();this.panners.push(n);return n;}createOscillator(){return new Node();}createBufferSource(){const n=new Node();this.sources.push(n);return n;}createBuffer(channels,count,rate){const data=Array.from({length:channels},()=>new Float32Array(count));return{sampleRate:rate,getChannelData(i){return data[i];}};}async resume(){this.state='running';}async close(){this.closed++;this.state='closed';}}
  globalThis.AudioContext=Context;globalThis.addEventListener=(type,fn)=>listeners.set(type,fn);globalThis.removeEventListener=(type,fn)=>{if(listeners.get(type)===fn)listeners.delete(type);};
  t.after(()=>Object.assign(globalThis,original));return{contexts,listeners};
 }
@@ -60,4 +60,16 @@ test('disposing one BrowserRuntime never removes a newer runtime bridge and rele
  const b=await BrowserRuntime.create({},{version:1,entities:[]},{audio:false,autoplay:false}),second=globalThis.__GAME_ENGINE__;assert.notEqual(first,second);
  a.dispose();a.dispose();assert.equal(globalThis.__GAME_ENGINE__,second);assert.equal(renderers[0].disposals,1);
  b.dispose();assert.equal(globalThis.__GAME_ENGINE__,undefined);assert.equal(renderers[1].disposals,1);
+});
+
+
+test('control-rate acoustic transfer builds WebAudio delay/filter/reflection/reverb graph without wave stepping',async t=>{
+ const mock=webAudio(t),audio=new ProceduralAudio();await audio.unlock();const context=mock.contexts[0],before=context.sources.length;
+ const channels={left:new Float32Array([.3,.1,0,0]),right:new Float32Array([.3,.1,0,0]),sampleRate:8000};
+ const transfer={direct:{delayS:.025,gain:.7,direction:[-1,0,0],lowpassHz:4200},reflections:[{delayS:.051,gain:.2,direction:[.4,0,-.9],lowpassHz:2800}],late:{gain:.12,rt60S:.8,damping:.35,diffusion:.7},diagnostics:{geometricDelayS:.02,sourcePeakPressurePa:1,emptyFieldPeakPressurePa:1,listenerPeakPressurePa:.7,extraDelayS:.005,sampleDtS:.001,samples:100}};
+ audio.playAcoustic(channels,transfer,[1,0,0],.8);
+ assert.equal(context.sources.length,before+1);assert.ok(context.delays.length>=6);
+ assert.ok(context.delays.some(d=>Math.abs(d.delayTime.value-.025)<1e-9));assert.ok(context.delays.some(d=>Math.abs(d.delayTime.value-.051)<1e-9));
+ assert.ok(context.filters.some(f=>f.frequency.value===4200));assert.ok(context.filters.some(f=>f.frequency.value===2800));
+ const voice=context.sources.at(-1);voice.onended();assert.equal(audio.inspect().voices,0);audio.dispose();
 });

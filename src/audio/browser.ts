@@ -5,6 +5,8 @@ import type {AudioChannels} from './synth.js';
 import {AudioSynthFamily,type EventSynthesizer} from './depth.js';
 import type {SimulationProfileInput} from '../core/depth.js';
 import {renderFootsteps,type FootstepSound} from './footsteps.js';
+import {connectAcousticWebAudio,type AcousticTransferObservation,type AcousticWebAudioGraph} from './acoustic-transfer.js';
+import type {Vec3} from '../math.js';
 
 export interface AmbientAudioState {
  windSpeed:number;snowfall:number;trafficCount:number;trafficSpeed:number;roadWetness:number;slush:number;
@@ -13,7 +15,7 @@ export interface AmbientAudioState {
  /** Listener-space attenuation and stereo pan, evaluated by BrowserRuntime. */
  trafficGain?:number;trafficPan?:number;
 }
-interface Voice {readonly source:AudioBufferSourceNode;readonly gain:GainNode}
+interface Voice {readonly source:AudioBufferSourceNode;readonly gain:GainNode;readonly acoustic?:AcousticWebAudioGraph}
 export class ProceduralAudio {
  private context:AudioContext|null=null;private unlocked=false;private disposed=false;private ambient:AmbientGraph|null=null;
  private readonly synthFamily=new AudioSynthFamily();private eventSynth:EventSynthesizer|undefined;
@@ -53,6 +55,13 @@ export class ProceduralAudio {
   const synth=this.eventSynth;if(!synth||!events.length||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
   for(const event of events){if(event.type==='impact'&&event.energy<.02)continue;this.playVoice(synth(event,context.sampleRate),.72,context.currentTime,0);}
  }
+ /** Play an already-synthesized voice through a control-rate acoustic transfer.
+  * The wave solver has finished before this call; WebAudio only renders delays,
+  * filtering, early taps and the feedback tail at sample rate. */
+ playAcoustic(channels:AudioChannels,transfer:AcousticTransferObservation,listenerRight:Vec3=[1,0,0],level=.72):void{
+  if(!this.eventSynth||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
+  this.playAcousticVoice(channels,transfer,listenerRight,level,context.currentTime,0);
+ }
  /** Live playback reuses the same synthesis and contact records as an offline
   * capture. Catch-up ticks start at the elapsed sample; old seek history is silent. */
  playFootsteps(events:readonly FootstepSound[],camera:CameraSpec,simulationTime:number):void{
@@ -67,9 +76,16 @@ export class ProceduralAudio {
   const context=this.context!;if(offset>=channels.left.length/channels.sampleRate)return;
   while(this.voices.size>=this.maxVoices){const oldest=this.voices.values().next().value!;oldest.source.stop();this.release(oldest);}
   const buffer=context.createBuffer(2,channels.left.length,channels.sampleRate);buffer.getChannelData(0).set(channels.left);buffer.getChannelData(1).set(channels.right);
-  const source=context.createBufferSource(),gain=context.createGain(),voice={source,gain};gain.gain.value=level;source.buffer=buffer;source.connect(gain).connect(context.destination);source.onended=()=>this.release(voice);this.voices.add(voice);source.start(when,offset);
+  const source=context.createBufferSource(),gain=context.createGain(),voice:Voice={source,gain};gain.gain.value=level;source.buffer=buffer;source.connect(gain).connect(context.destination);source.onended=()=>this.release(voice);this.voices.add(voice);source.start(when,offset);
  }
- private release(voice:Voice):void{if(!this.voices.delete(voice))return;voice.source.onended=null;voice.source.disconnect();voice.gain.disconnect();}
+ private playAcousticVoice(channels:AudioChannels,transfer:AcousticTransferObservation,listenerRight:Vec3,level:number,when:number,offset:number):void{
+  const context=this.context!;if(offset>=channels.left.length/channels.sampleRate)return;
+  while(this.voices.size>=this.maxVoices){const oldest=this.voices.values().next().value!;oldest.source.stop();this.release(oldest);}
+  const buffer=context.createBuffer(2,channels.left.length,channels.sampleRate);buffer.getChannelData(0).set(channels.left);buffer.getChannelData(1).set(channels.right);
+  const source=context.createBufferSource(),gain=context.createGain();gain.gain.value=1;source.buffer=buffer;source.connect(gain);
+  const acoustic=connectAcousticWebAudio(context,gain,context.destination,transfer,{listenerRight,level}),voice:Voice={source,gain,acoustic};source.onended=()=>this.release(voice);this.voices.add(voice);source.start(when,offset);
+ }
+ private release(voice:Voice):void{if(!this.voices.delete(voice))return;voice.source.onended=null;voice.source.disconnect();voice.gain.disconnect();voice.acoustic?.disconnect();}
  private silence():void{
   for(const voice of [...this.voices]){try{voice.source.stop();}catch{}this.release(voice);}
   const context=this.context,graph=this.ambient;if(!context||!graph)return;const now=context.currentTime;

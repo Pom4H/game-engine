@@ -14,9 +14,9 @@ const frame=[
 ];
 function transfer(open){
   const scene=new Scene({version:1,ground:-100,entities:[...frame,{id:'door',position:[6,2.25,3],rotation:[0,open?Math.PI/2:0,0],mesh:{kind:'box',size:[.25,2.5,1.5]},body:{mass:0}}]});
-  const field=new AcousticWaveField({size:[24,10,12],origin:[0,0,0],cellSizeM:.5,waveSpeedMps:343,densityKgM3:1.225,velocityDampingPerSecond:3});
+  const field=new AcousticWaveField({size:[24,10,12],origin:[0,0,0],cellSizeM:.5,waveSpeedMps:343,densityKgM3:1.225,velocityDampingPerSecond:7});
   syncSceneAcousticBoundaries(field,scene.entities.values());
-  return traceAcousticTransfer(field,source,listener,{durationS:.22,sourceRadiusM:.65,acousticEnergyJ:1,maxReflections:6});
+  return traceAcousticTransfer(field,source,listener,{durationS:.65,sourceRadiusM:.65,acousticEnergyJ:1,maxReflections:6});
 }
 const closed=transfer(false),open=transfer(true);
 const dry=synthesizeEvent({type:'impact',id:9001,time:0,point:source,normal:[1,0,0],a:'demo-source',b:'ground',materialA:'steel',materialB:'default',energy:480,impulse:38,speed:14,size:.9},48_000);
