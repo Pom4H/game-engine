@@ -98,7 +98,7 @@ function buildDefinition():{definition:StructuralDefinition;meta:readonly CageMe
     const v0=id(s,0),v1=id(s,1),v2=id(s,2),v3=id(s,3);
     const w0=id(n,0),w1=id(n,1),w2=id(n,2),w3=id(n,3);
     const volume=(a:number,b:number,c:number,d:number)=>constraints.push({
-      kind:'volume',a,b,c,d,compliance:2.5e-8,yieldRatio:.65,breakRatio:2.8,plasticity:.015,
+      kind:'volume',a,b,c,d,compliance:2.5e-8,yieldRatio:10,breakRatio:100,plasticity:0,
     });
     volume(v0,v1,v3,w0);
     volume(v1,v2,v3,w2);
