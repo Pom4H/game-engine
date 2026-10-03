@@ -162,7 +162,7 @@ function findPeak(values:Float64Array,start:number,end:number,threshold:number,m
 }
 
 function cutoffFor(gain:number,extraDelay:number):number{
-  if(gain<=1e-6)return250;
+  if(gain<=1e-6)return 250;
   return Math.max(250,Math.min(18_000,250+17_750*Math.pow(clamp(gain),.32)*Math.exp(-extraDelay*10)));
 }
 
@@ -239,7 +239,7 @@ function mixLate(left:Float32Array,right:Float32Array,mono:Float32Array,sampleRa
   // Preserve a weak directional bias of the room's first arrival without turning
   // the diffuse tail back into a point source.
   const pan=clamp(V3.dot(transfer.direct.direction,rightAxis),-1,1)*.18,lg=Math.sqrt((1-pan)*.5),rg=Math.sqrt((1+pan)*.5);
-  for(let i=0;i<left.length;i++){left[i]*=lg*Math.SQRT2;right[i]*=rg*Math.SQRT2;}
+  for(let i=0;i<left.length;i++){left[i]=left[i]!*lg*Math.SQRT2;right[i]=right[i]!*rg*Math.SQRT2;}
 }
 
 export interface AcousticWebAudioGraph {
