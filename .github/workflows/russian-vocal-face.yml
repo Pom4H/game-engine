@@ -6,6 +6,7 @@ on:
       - 'src/audio/vocal-tract.ts'
       - 'src/audio/vocal-source.ts'
       - 'src/audio/russian-vocal.ts'
+      - 'src/animation/vocal-face.ts'
       - 'tools/vocal-face-demo/capture-russian-cpu.mjs'
       - 'test/russian-vocal.test.mjs'
       - '.github/workflows/russian-vocal-face.yml'
