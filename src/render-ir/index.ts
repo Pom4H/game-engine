@@ -122,7 +122,11 @@ export function defineCausalRenderObservation(value:CausalRenderObservation):Cau
     if(!identity.entityId||!identity.surfaceId||ids.has(key))throw new TypeError('Causal surfaces require stable unique identities');
     ids.add(key);finiteMat4(surface.transform,'surface.transform');finite3(surface.linearVelocityMps,'surface.linearVelocityMps');finite3(surface.angularVelocityRadps,'surface.angularVelocityRadps');
     if(surface.visualGeometry.kind!=='mesh'||surface.physicalGeometry&&surface.physicalGeometry.kind!=='mesh'||surface.material.kind!=='material'||surface.field&&surface.field.kind!=='surface-field')throw new TypeError('Causal surface resource kinds do not match their semantics');
-    for(const state of [surface.surface,surface.bodySurface])if(state&&Object.values(state).some(component=>typeof component!=='number'||!Number.isFinite(component)))throw new TypeError('Causal surface state must be finite');
+    if(surface.surface){
+      if(!['generic','road','sidewalk','curb'].includes(surface.surface.use))throw new TypeError('Unknown causal surface use');
+      const {use:_use,...numeric}=surface.surface;if(Object.values(numeric).some(component=>!Number.isFinite(component)))throw new TypeError('Causal surface state must be finite');
+    }
+    if(surface.bodySurface&&Object.values(surface.bodySurface).some(component=>!Number.isFinite(component)))throw new TypeError('Causal body surface state must be finite');
   }
   if(value.environment&&value.environment.kind!=='environment')throw new TypeError('Causal environment must reference an environment resource');
   return deepFreeze(structuredClone(value));
