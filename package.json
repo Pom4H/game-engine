@@ -10,7 +10,9 @@
     "./network": "./dist/network/index.js",
     "./render-ir": "./dist/render-ir/index.js",
     "./execution": "./dist/execution/index.js",
-    "./meshwork": "./dist/meshwork/index.js"
+    "./meshwork": "./dist/meshwork/index.js",
+    "./content": "./dist/content/index.js",
+    "./storage": "./dist/storage/index.js"
   },
   "files": [
     "dist",

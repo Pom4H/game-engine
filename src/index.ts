@@ -98,3 +98,6 @@ export {PlaybackClock,Replica,type Sample,type SampleRow} from './network/playba
 export {AuthoritySession,type AuthorityAdapter,type DebugAction,type DebugRequest} from './network/authority.js';
 
 export {CausalAuthority,type AuthorityClock,type AuthorityScope,type AuthorityGrant,type AuthorityProposal,type AuthorityCommitContext,type AuthorityCommitAdapter,type AuthorityCommitDecision,type AuthorityRecord,type AuthorityCommitResult,type CausalAuthorityStats} from './network/causal-authority.js';
+
+export {canonicalContent,contentHash,MemoryContentStore as SharedContentStore,type ContentHash as SharedContentHash,type ContentRef as SharedContentRef,type ResourceManifest as SharedResourceManifest,type ContentAddressedRepository as SharedContentAddressedRepository} from './content/index.js';
+export {CausalStorage,MemoryScopeHeadStore,type CausalStorageKind,type CausalRef,type CausalMutation,type CausalCheckpoint,type CausalScopeHead,type ScopeHeadStore,type CausalAppendInput,type CausalAppendResult,type CausalCheckpointResult,type RestoredMutation,type CausalRestore,type CausalHydrationProof} from './storage/index.js';
