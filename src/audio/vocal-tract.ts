@@ -348,7 +348,20 @@ export function renderArticulatedVocalTract(
   }
   const normalize=peak>1e-9?.88/peak:1;for(let i=0;i<count;i++){left[i]=Math.tanh(left[i]!*normalize*1.2);right[i]=left[i]!;}
   const sectionLengthM=tractLengthM/sections;
-  return{audio:{left,right,sampleRate},diagnostics:Object.freeze({phrase,durationS:duration,sampleRate,sections,tractLengthM,sectionLengthM,propagationDelayPerSectionS:sectionLengthM/SPEED_OF_SOUND_MPS,maxAbsReflection:Math.max(oral.maxAbsReflection,nasal.maxAbsReflection),minAreaCm2:minArea,maxAreaCm2:maxArea,gestures:Object.freeze(proxy.map(g=>Object.freeze(g))),articulatorGestures:Object.freeze(gestures.map(g=>Object.freeze({...g,from:Object.freeze({...g.from}),...(g.to?{to:Object.freeze({...g.to})}:{})}))})};
+  const articulated=Object.freeze(gestures.map(g=>Object.freeze({
+    ...g,
+    from:Object.freeze({...g.from}),
+    ...(g.to?{to:Object.freeze({...g.to})}:{}),
+  })));
+  const diagnostics:VocalTractDiagnostics=Object.freeze({
+    phrase,durationS:duration,sampleRate,sections,tractLengthM,sectionLengthM,
+    propagationDelayPerSectionS:sectionLengthM/SPEED_OF_SOUND_MPS,
+    maxAbsReflection:Math.max(oral.maxAbsReflection,nasal.maxAbsReflection),
+    minAreaCm2:minArea,maxAreaCm2:maxArea,
+    gestures:Object.freeze(proxy.map(g=>Object.freeze(g))),
+    articulatorGestures:articulated,
+  });
+  return{audio:{left,right,sampleRate},diagnostics};
 }
 
 export function synthesizeIAmAlive(options:VocalTractRenderOptions={}):VocalTractRender{
