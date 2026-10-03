@@ -9,16 +9,24 @@ export const VOCAL_FACE_IDS=Object.freeze({
   upperLip:'vocal-face-upper-lip',
   lowerLip:'vocal-face-lower-lip',
   tongue:'vocal-face-tongue',
+  upperTeeth:'vocal-face-upper-teeth',
   lowerTeeth:'vocal-face-lower-teeth',
 });
 
 export interface VocalFacePose {
   readonly jawDropM:number;
+  readonly jawAngleRad:number;
+  readonly toothClearanceM:number;
   readonly lipGapM:number;
   readonly lipWidthM:number;
   readonly lipProtrusionM:number;
   readonly tonguePosition:Vec3;
   readonly tongueScale:Vec3;
+}
+
+export interface VocalFaceCollisionDiagnostics {
+  readonly toothClearanceM:number;
+  readonly teethColliding:boolean;
 }
 
 const skin:[number,number,number,number]=[.62,.39,.30,1];
@@ -28,6 +36,8 @@ const tongueColor:[number,number,number,number]=[.62,.17,.20,1];
 const white:[number,number,number,number]=[.92,.94,.96,1];
 const iris:[number,number,number,number]=[.10,.24,.29,1];
 const black:[number,number,number,number]=[.008,.009,.012,1];
+
+const clamp01=(v:number)=>Math.max(0,Math.min(1,v));
 
 const kinematic=(size:Vec3)=>({mass:0,motion:'kinematic' as const,shape:'box' as const,collisionSize:size});
 
@@ -56,7 +66,7 @@ export function vocalFaceSceneSpec():SceneSpec{
     {id:'vocal-face-right-nostril',position:[.072,1.475,.700],mesh:{kind:'sphere',radius:.5},scale:[.060,.030,.018],material:{kind:'default',color:black,roughness:.92}},
     {id:VOCAL_FACE_IDS.mouth,position:[0,1.36,.525],mesh:{kind:'sphere',radius:.5},scale:[.46,.055,.055],material:{kind:'default',color:black,roughness:.86},body:kinematic([.46,.20,.08])},
     {id:'vocal-face-upper-teeth',position:[0,1.385,.566],mesh:{kind:'box',size:[.33,.055,.028]},material:{kind:'default',color:white,roughness:.20}},
-    {id:VOCAL_FACE_IDS.lowerTeeth,position:[0,1.335,.563],mesh:{kind:'box',size:[.32,.050,.026]},material:{kind:'default',color:white,roughness:.20},body:kinematic([.32,.05,.03])},
+    {id:VOCAL_FACE_IDS.lowerTeeth,position:[0,1.326,.563],mesh:{kind:'box',size:[.32,.050,.026]},material:{kind:'default',color:white,roughness:.20},body:kinematic([.32,.05,.03])},
     {id:VOCAL_FACE_IDS.tongue,position:[0,1.29,.548],mesh:{kind:'sphere',radius:.5},scale:[.31,.075,.22],material:{kind:'default',color:tongueColor,roughness:.72},body:kinematic([.31,.12,.22])},
     {id:VOCAL_FACE_IDS.upperLip,position:[0,1.405,.588],mesh:{kind:'sphere',radius:.5},scale:[.47,.078,.070],material:{kind:'default',color:lip,roughness:.48},body:kinematic([.47,.10,.08])},
     {id:VOCAL_FACE_IDS.lowerLip,position:[0,1.325,.590],mesh:{kind:'sphere',radius:.5},scale:[.47,.085,.075],material:{kind:'default',color:lip,roughness:.48},body:kinematic([.47,.11,.08])},
@@ -74,6 +84,36 @@ export function vocalFaceSceneSpec():SceneSpec{
   };
 }
 
+const TMJ_PIVOT:Vec3=[0,1.47,.24];
+const JAW_CENTER_REST:Vec3=[0,1.34,.035];
+const LOWER_TEETH_REST:Vec3=[0,1.326,.563];
+const UPPER_TEETH_BOTTOM_Y=1.385-.055/2;
+const LOWER_TOOTH_HALF_HEIGHT=.050/2;
+const MIN_TOOTH_CLEARANCE_M=.0035;
+
+const rotateAboutX=(point:Vec3,pivot:Vec3,angle:number,forward:number):Vec3=>{
+  const dy=point[1]-pivot[1],dz=point[2]-pivot[2],cs=Math.cos(angle),sn=Math.sin(angle);
+  return[
+    point[0],
+    pivot[1]+dy*cs-dz*sn,
+    pivot[2]+dy*sn+dz*cs+forward,
+  ];
+};
+
+function lowerIncisorTopY(angle:number,forward:number):number{
+  const center=rotateAboutX(LOWER_TEETH_REST,TMJ_PIVOT,angle,forward);
+  // Conservative vertical half extent of a box rotated about X.
+  const halfY=LOWER_TOOTH_HALF_HEIGHT*Math.abs(Math.cos(angle))+(.026/2)*Math.abs(Math.sin(angle));
+  return center[1]+halfY;
+}
+
+export function vocalFaceCollisionDiagnostics(scene:Scene):VocalFaceCollisionDiagnostics{
+  const lower=requireEntity(scene,VOCAL_FACE_IDS.lowerTeeth),angle=lower.rotation[0];
+  const halfY=LOWER_TOOTH_HALF_HEIGHT*Math.abs(Math.cos(angle))+(.026/2)*Math.abs(Math.sin(angle));
+  const clearance=UPPER_TEETH_BOTTOM_Y-(lower.position[1]+halfY);
+  return Object.freeze({toothClearanceM:clearance,teethColliding:clearance<0});
+}
+
 function requireEntity(scene:Scene,id:string):RuntimeEntity{
   const entity=scene.entities.get(id);if(!entity)throw new TypeError('Missing vocal face entity '+id);return entity;
 }
@@ -84,7 +124,11 @@ export class VocalFaceRig {
   private readonly upperLip:RuntimeEntity;
   private readonly lowerLip:RuntimeEntity;
   private readonly tongue:RuntimeEntity;
+  private readonly upperTeeth:RuntimeEntity;
   private readonly lowerTeeth:RuntimeEntity;
+  private jawAngle=0;
+  private jawAngularVelocity=0;
+  private jawInitialized=false;
 
   constructor(readonly scene:Scene){
     this.jaw=requireEntity(scene,VOCAL_FACE_IDS.jaw);
@@ -92,51 +136,96 @@ export class VocalFaceRig {
     this.upperLip=requireEntity(scene,VOCAL_FACE_IDS.upperLip);
     this.lowerLip=requireEntity(scene,VOCAL_FACE_IDS.lowerLip);
     this.tongue=requireEntity(scene,VOCAL_FACE_IDS.tongue);
+    this.upperTeeth=requireEntity(scene,VOCAL_FACE_IDS.upperTeeth);
     this.lowerTeeth=requireEntity(scene,VOCAL_FACE_IDS.lowerTeeth);
   }
 
-  apply(a:VocalArticulators):VocalFacePose{
-    const jawDrop=.015+.145*a.jawOpen;
+  private targetJawAngle(a:VocalArticulators):number{
+    // Speaking normally does not bring incisors into contact. Jaw control is an
+    // angle at the TMJ; translation emerges as a small anterior glide.
+    return .12*clamp01(a.jawOpen);
+  }
+
+  private applyPose(a:VocalArticulators,jawAngle:number):VocalFacePose{
+    const forward=.014*clamp01(a.jawOpen);
+    // Enforce a hard anatomical invariant at the incisors. If a future score
+    // asks for an impossible closure, increase opening rather than interpenetrate.
+    let angle=Math.max(0,jawAngle);
+    for(let i=0;i<8&&UPPER_TEETH_BOTTOM_Y-lowerIncisorTopY(angle,forward)<MIN_TOOTH_CLEARANCE_M;i++)angle+=.004;
+
+    const jawCenter=rotateAboutX(JAW_CENTER_REST,TMJ_PIVOT,angle,forward*.45);
+    const teethCenter=rotateAboutX(LOWER_TEETH_REST,TMJ_PIVOT,angle,forward);
+    const toothClearance=UPPER_TEETH_BOTTOM_Y-lowerIncisorTopY(angle,forward);
+    const jawDrop=JAW_CENTER_REST[1]-jawCenter[1];
+
     const closure=1-a.lipClosure;
     const lipGap=.006+.145*a.jawOpen*closure;
     const lipWidth=.47*(1-.31*a.lipRound-.08*a.labiodental);
     const protrusion=.588+.075*a.lipRound+.018*a.labiodental;
 
-    this.jaw.position[1]=1.34-jawDrop*.55;
-    this.jaw.position[2]=.035+jawDrop*.10;
-    this.jaw.rotation[0]=-.16*a.jawOpen;
-    this.mouth.position[1]=1.365-jawDrop*.18;
-    this.mouth.position[2]=.535+.018*a.lipRound;
+    this.jaw.position[0]=jawCenter[0];this.jaw.position[1]=jawCenter[1];this.jaw.position[2]=jawCenter[2];
+    this.jaw.rotation[0]=angle;
+
+    this.lowerTeeth.position[0]=teethCenter[0];this.lowerTeeth.position[1]=teethCenter[1];this.lowerTeeth.position[2]=teethCenter[2];
+    this.lowerTeeth.rotation[0]=angle;
+
+    this.mouth.position[1]=1.365-jawDrop*.32;
+    this.mouth.position[2]=.535+forward*.4+.018*a.lipRound;
     this.mouth.scale[0]=Math.max(.19,lipWidth*.95);
     this.mouth.scale[1]=Math.max(.018,.035+lipGap*1.25);
     this.mouth.scale[2]=.060+.018*a.lipRound;
 
-    const centerY=1.37-jawDrop*.16;
+    const centerY=1.37-jawDrop*.36;
     const upperY=centerY+lipGap*.50;
-    let lowerY=centerY-lipGap*.50-jawDrop*.08;
+    let lowerY=centerY-lipGap*.50-jawDrop*.18;
     if(a.labiodental>0)lowerY+=.055*a.labiodental;
     this.upperLip.position[0]=0;this.upperLip.position[1]=upperY;this.upperLip.position[2]=protrusion;
-    this.lowerLip.position[0]=0;this.lowerLip.position[1]=lowerY;this.lowerLip.position[2]=protrusion+.006*a.labiodental;
+    this.lowerLip.position[0]=0;this.lowerLip.position[1]=lowerY;this.lowerLip.position[2]=protrusion+forward*.35+.006*a.labiodental;
     for(const entity of [this.upperLip,this.lowerLip]){
       entity.scale[0]=lipWidth;
       entity.scale[1]=.070+.040*a.lipRound+.018*a.lipClosure;
       entity.scale[2]=.070+.042*a.lipRound;
     }
 
-    this.lowerTeeth.position[1]=1.335-jawDrop*.70;
-    this.lowerTeeth.position[2]=.563+.012*a.labiodental;
-    const tongueZ=.438+.145*a.tonguePosition+.035*a.tongueTip;
-    const tongueY=1.235-jawDrop*.30+.125*a.tongueHeight+.060*a.tongueTip;
+    const tongueZ=.438+.145*a.tonguePosition+.035*a.tongueTip+forward*.42;
+    const tongueY=1.235-jawDrop*.46+.125*a.tongueHeight+.060*a.tongueTip;
     this.tongue.position[0]=0;this.tongue.position[1]=tongueY;this.tongue.position[2]=tongueZ;
-    this.tongue.rotation[0]=-.18*a.tongueTip;
+    this.tongue.rotation[0]=angle*.45-.18*a.tongueTip;
     this.tongue.scale[0]=.31-.045*a.tongueHeight;
     this.tongue.scale[1]=.060+.055*a.tongueHeight;
     this.tongue.scale[2]=.22-.035*a.tonguePosition;
 
     return Object.freeze({
-      jawDropM:jawDrop,lipGapM:lipGap,lipWidthM:lipWidth,lipProtrusionM:protrusion-.588,
+      jawDropM:jawDrop,jawAngleRad:angle,toothClearanceM:toothClearance,
+      lipGapM:lipGap,lipWidthM:lipWidth,lipProtrusionM:protrusion-.588,
       tonguePosition:Object.freeze([0,tongueY,tongueZ]) as Vec3,
       tongueScale:Object.freeze([...this.tongue.scale]) as Vec3,
     });
   }
+
+  apply(a:VocalArticulators):VocalFacePose{
+    const target=this.targetJawAngle(a);
+    this.jawAngle=target;this.jawAngularVelocity=0;this.jawInitialized=true;
+    return this.applyPose(a,target);
+  }
+
+  /** Biomechanical jaw projection for animation. Motor commands may jump at
+   * phoneme boundaries; the mandible cannot. A critically damped TMJ hinge
+   * filters those commands and keeps the lower teeth rigidly on the mandible. */
+  step(a:VocalArticulators,dt:number):VocalFacePose{
+    if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Vocal face dt must be within (0, .25]');
+    const target=this.targetJawAngle(a);
+    if(!this.jawInitialized){this.jawAngle=target;this.jawAngularVelocity=0;this.jawInitialized=true;}
+    const omega=2*Math.PI*5.2,zeta=1;
+    let remaining=dt;
+    while(remaining>1e-9){
+      const h=Math.min(remaining,1/240);
+      const acceleration=omega*omega*(target-this.jawAngle)-2*zeta*omega*this.jawAngularVelocity;
+      this.jawAngularVelocity+=acceleration*h;
+      this.jawAngle+=this.jawAngularVelocity*h;
+      remaining-=h;
+    }
+    return this.applyPose(a,this.jawAngle);
+  }
+
 }
