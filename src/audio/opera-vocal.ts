@@ -67,7 +67,7 @@ export function originalOperaScore():readonly ArticulatorGesture[]{
     return Object.freeze({
       startS,endS,from:note.articulation,...(note.to?{to:note.to}:{}),
       voiced:note.adduction??.94,gain:1,pitchHz:note.pitchHz,lungPressurePa:note.pressurePa,
-      vibratoHz:note.vibrato?5.6:0,vibratoSemitones:note.vibrato?.42:0,
+      vibratoHz:note.vibrato?5.6:0,vibratoSemitones:note.vibrato ? .42 : 0,
     });
   }));
 }
