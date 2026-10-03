@@ -104,7 +104,7 @@ class TubeWaveguide {
   }
 }
 
-const GAUSS=(x:number,c:number,w:number)=>Math.exp(-((x-c)/w)**2);
+const GAUSS=(x:number,c:number,w:number)=>Math.exp(-(((x-c)/w)**2));
 
 export function vocalAreaFunction(kind:VocalArticulation,sections=24):Float64Array{
   if(!Number.isInteger(sections)||sections<12||sections>96)throw new RangeError('Vocal tract sections must be 12..96');
