@@ -1,0 +1,35 @@
+name: Russian Vocal Face
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/audio/vocal-tract.ts'
+      - 'src/audio/russian-vocal.ts'
+      - 'tools/vocal-face-demo/capture-russian-cpu.mjs'
+      - 'test/russian-vocal.test.mjs'
+      - '.github/workflows/russian-vocal-face.yml'
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/vocal-tract.test.mjs test/russian-vocal.test.mjs test/vocal-face.test.mjs
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: node tools/vocal-face-demo/capture-russian-cpu.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: russian-vocal-face-mp4
+          path: |
+            artifacts/russian-vocal-face/ya-izvlekayu-zvuk-iz-svoego-rta.mp4
+            artifacts/russian-vocal-face/poster.png
+            artifacts/russian-vocal-face/evidence.json
+          retention-days: 14
