@@ -42,6 +42,7 @@ export {material,materialKinds,thermalLinearScale,type MaterialKind,type Physica
 export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 export {synthesizeIAmAlive,renderVocalTract,renderArticulatedVocalTract,vocalAreaFunction,articulatorAreaFunction,interpolateArticulators,sampleArticulatorScore,scatterThreePort,VOCAL_ARTICULATOR_PRESETS,iAmAliveVocalScore,iAmAliveArticulatorScore,type VocalArticulation,type VocalArticulators,type VocalGesture,type ArticulatorGesture,type SampledArticulatorScore,type ThreePortScatterResult,type VocalTractRenderOptions,type VocalTractDiagnostics,type VocalTractRender} from './audio/vocal-tract.js';
+export {RUSSIAN_MOUTH_PHRASE,russianMouthArticulatorScore,synthesizeRussianMouthPhrase} from './audio/russian-vocal.js';
 export {traceAcousticTransfer,renderAcousticTransfer,renderAcousticTrajectory,connectAcousticWebAudio,type AcousticArrival,type AcousticLateField,type AcousticTransferObservation,type AcousticTransferTraceOptions,type AcousticRenderOptions,type AcousticTransferKeyframe,type AcousticTrajectoryRenderOptions,type AcousticWebAudioGraph} from './audio/acoustic-transfer.js';
 export {AudioSynthFamily,type EventSynthesizer,type AudioSynthPlugin} from './audio/depth.js';
 export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './audio/offline.js';
