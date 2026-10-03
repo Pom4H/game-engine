@@ -1,5 +1,5 @@
 import {mulberry32} from '../core/random.js';
-import {CompliantVelopharyngealValve,PressureDrivenVocalFolds} from './vocal-source.js';
+import {CompliantVelopharyngealValve,DiaphragmBreathSupport,PressureDrivenVocalFolds} from './vocal-source.js';
 import type {AudioChannels} from './synth.js';
 
 export type VocalArticulation='silence'|'a'|'i'|'ae'|'schwa'|'l'|'m'|'v';
@@ -28,10 +28,18 @@ export interface ArticulatorGesture {
   readonly endS:number;
   readonly from:VocalArticulators;
   readonly to?:VocalArticulators;
+  /** Fold adduction command. */
   readonly voiced?:number;
   readonly frication?:number;
+  /** Tissue tension target, not an authored oscillator phase. */
   readonly pitchHz?:number;
+  /** Legacy speech effort; used to derive pressure when lungPressurePa is absent. */
   readonly gain?:number;
+  /** Respiratory muscle target pressure. Typical speech ~700-1000 Pa, opera can exceed 1400 Pa. */
+  readonly lungPressurePa?:number;
+  /** Neuromuscular tension modulation for singing vibrato. */
+  readonly vibratoHz?:number;
+  readonly vibratoSemitones?:number;
 }
 
 export interface SampledArticulatorScore {
@@ -40,6 +48,9 @@ export interface SampledArticulatorScore {
   readonly frication:number;
   readonly pitchHz:number;
   readonly gain:number;
+  readonly lungPressurePa:number;
+  readonly vibratoHz:number;
+  readonly vibratoSemitones:number;
 }
 
 export interface VocalGesture {
@@ -500,10 +511,10 @@ export function renderArticulatedVocalTract(
   if(!Number.isInteger(sections)||sections<12||sections>96)throw new RangeError('Vocal tract sections must be 12..96');
   const duration=gestures.at(-1)?.endS??0;if(duration<=0)throw new RangeError('Articulator score must contain gestures');
   const count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
-  const network=new BranchedVocalNetwork(sections,sampleRate),folds=new PressureDrivenVocalFolds(sampleRate);
+  const network=new BranchedVocalNetwork(sections,sampleRate),folds=new PressureDrivenVocalFolds(sampleRate),breath=new DiaphragmBreathSupport(sampleRate);
   const current=new Float64Array(articulatorAreaFunction(gestures[0]!.from,sections)),target=new Float64Array(sections),rng=mulberry32(options.seed??0xA11CE),transition=options.transitionS??.014;
   const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAttack=1-Math.exp(-1/(sampleRate*.007)),scalarRelease=1-Math.exp(-1/(sampleRate*.003));
-  let gestureIndex=0,voicedState=0,gainState=0,pitchState=120,peak=0,minArea=Infinity,maxArea=0;
+  let gestureIndex=0,voicedState=0,gainState=0,pitchState=120,previousFoldFlow=0,peak=0,minArea=Infinity,maxArea=0;
   for(let sample=0;sample<count;sample++){
     const time=sample/sampleRate;while(gestureIndex<gestures.length-1&&time>=gestures[gestureIndex]!.endS)gestureIndex++;
     const gesture=gestures[gestureIndex]!,u=clamp((time-gesture.startS)/(gesture.endS-gesture.startS),0,1),state=interpolateArticulators(gesture.from,gesture.to??gesture.from,u);
@@ -515,12 +526,17 @@ export function renderArticulatedVocalTract(
     voicedState+=(voicedTarget<voicedState?scalarRelease:scalarAttack)*(voicedTarget-voicedState);
     gainState+=(gainTarget<gainState?scalarRelease:scalarAttack)*(gainTarget-gainState);
     pitchState+=scalarAttack*(pitchTarget-pitchState);
+    const vibratoHz=gesture.vibratoHz??0,vibratoSemitones=gesture.vibratoSemitones??0;
+    const vibratoRatio=vibratoHz>0&&vibratoSemitones!==0?2**((Math.sin(2*Math.PI*vibratoHz*time)*vibratoSemitones)/12):1;
+    const pressureTarget=gesture.lungPressurePa??gainState*900;
+    const support=breath.step({targetPressurePa:pressureTarget,glottalFlowM3S:previousFoldFlow});
     const fold=folds.step({
       adduction:voicedState,
-      tensionHz:pitchState,
-      lungPressurePa:gainState*900,
+      tensionHz:pitchState*vibratoRatio,
+      lungPressurePa:support.pressurePa,
       supraglottalPressurePa:network.supraglottalPressurePa,
     });
+    previousFoldFlow=fold.flowM3S;
     const flowNormalized=fold.flowM3S/.00020;
     const sampleOut=network.step(fold.source,flowNormalized,state,rng)*4.1;
     peak=Math.max(peak,Math.abs(sampleOut));left[sample]=sampleOut;right[sample]=sampleOut;
@@ -556,6 +572,9 @@ export function sampleArticulatorScore(gestures:readonly ArticulatorGesture[],ti
     frication:gesture.frication??articulators.labiodental*.72,
     pitchHz:gesture.pitchHz??120,
     gain:gesture.gain??1,
+    lungPressurePa:gesture.lungPressurePa??(gesture.gain??1)*900,
+    vibratoHz:gesture.vibratoHz??0,
+    vibratoSemitones:gesture.vibratoSemitones??0,
   });
 }
 
