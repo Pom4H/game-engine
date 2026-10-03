@@ -1,0 +1,38 @@
+name: Structural Soft Mouth
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/animation/soft-mouth.ts'
+      - 'src/animation/vocal-face.ts'
+      - 'src/physics/structure.ts'
+      - 'src/physics/structural-skin.ts'
+      - 'src/physics/structural-contact.ts'
+      - 'tools/vocal-face-demo/capture-soft-mouth-cpu.mjs'
+      - 'test/soft-mouth.test.mjs'
+      - '.github/workflows/structural-soft-mouth.yml'
+  workflow_dispatch:
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/soft-mouth.test.mjs test/vocal-face.test.mjs
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: node tools/vocal-face-demo/capture-soft-mouth-cpu.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: structural-soft-mouth-mp4
+          path: |
+            artifacts/soft-mouth/structural-soft-mouth.mp4
+            artifacts/soft-mouth/poster.png
+            artifacts/soft-mouth/evidence.json
+          retention-days: 14
