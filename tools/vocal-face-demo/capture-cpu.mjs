@@ -15,7 +15,7 @@ const silent=out+'/i-am-alive-face-silent.mp4';
 const encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','19','-pix_fmt','yuv420p','-movflags','+faststart',silent],{stdio:['pipe','inherit','inherit']});
 const completed=once(encoder,'exit'),telemetry=[];
 for(let frame=0;frame<frames;frame++){
-  const time=frame/fps,sample=sampleArticulatorScore(score,time),pose=rig.apply(sample.articulators);
+  const time=frame/fps,sample=sampleArticulatorScore(score,time),pose=rig.step(sample.articulators,1/fps);
   renderer.render(scene,scene.camera);
   const png=encodePng(renderer.framebuffer(),width,height);
   if(!encoder.stdin.write(png))await once(encoder.stdin,'drain');
