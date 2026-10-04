@@ -10,7 +10,7 @@ const P=VOCAL_ARTICULATOR_PRESETS;
 const freeze=(v:VocalArticulators)=>Object.freeze(v);
 const state=(base:VocalArticulators,patch:Partial<VocalArticulators>):VocalArticulators=>freeze({...base,...patch});
 
-export type EnglishNpcPhone='a'|'i'|'ae'|'schwa'|'l'|'m'|'v'|'silence';
+export type EnglishNpcPhone='a'|'o'|'i'|'ae'|'schwa'|'j'|'l'|'m'|'v'|'silence';
 export interface EnglishNpcPhoneToken{
   readonly phone:EnglishNpcPhone;
   readonly durationS:number;
@@ -31,8 +31,10 @@ export const DEFAULT_NPC_ENGLISH_VOICE:NpcEnglishVoice=Object.freeze({
 });
 
 const A=state(P.a,{jawOpen:.78,tonguePosition:.22,tongueHeight:.20,lipRound:.01});
+const O=state(P.a,{jawOpen:.50,tonguePosition:.28,tongueHeight:.40,lipRound:.52});
 const I=state(P.i,{jawOpen:.28,tonguePosition:.84,tongueHeight:.91,lipRound:0});
 const AE=state(P.ae,{jawOpen:.66,tonguePosition:.62,tongueHeight:.42,lipRound:0});
+const J=state(P.i,{jawOpen:.30,tonguePosition:.88,tongueHeight:.94,tongueTip:.12,lipRound:0});
 const SCHWA=state(P.schwa,{jawOpen:.39,tonguePosition:.50,tongueHeight:.40,lipRound:0});
 const L=state(P.l,{jawOpen:.36,tonguePosition:.75,tongueHeight:.58,tongueTip:.84,lipRound:0});
 const M=state(P.m,{jawOpen:.18,tonguePosition:.45,tongueHeight:.35,lipClosure:.995,velumOpen:1});
@@ -42,7 +44,7 @@ const token=(phone:EnglishNpcPhone,durationS:number,to?:EnglishNpcPhone):English
   Object.freeze({phone,durationS,...(to?{to}:{})});
 
 const PHONE:Readonly<Record<Exclude<EnglishNpcPhone,'silence'>,VocalArticulators>>=Object.freeze({
-  a:A,i:I,ae:AE,schwa:SCHWA,l:L,m:M,v:V,
+  a:A,o:O,i:I,ae:AE,schwa:SCHWA,j:J,l:L,m:M,v:V,
 });
 
 export const ENGLISH_NPC_LEXICON:Readonly<Record<string,readonly EnglishNpcPhoneToken[]>>=Object.freeze({
@@ -54,6 +56,25 @@ export const ENGLISH_NPC_LEXICON:Readonly<Record<string,readonly EnglishNpcPhone
     token('ae',.22),
     token('m',.16),
   ]),
+  'yeah':Object.freeze([
+    token('j',.10),
+    token('ae',.22),
+  ]),
+  'mama':Object.freeze([
+    token('m',.14),
+    token('a',.22),
+    token('m',.14),
+    token('a',.24),
+  ]),
+  'me':Object.freeze([
+    token('m',.15),
+    token('i',.24),
+  ]),
+  'mom':Object.freeze([
+    token('m',.15),
+    token('o',.23),
+    token('m',.16),
+  ]),
   'alive':Object.freeze([
     token('schwa',.13),
     token('l',.12),
@@ -63,7 +84,7 @@ export const ENGLISH_NPC_LEXICON:Readonly<Record<string,readonly EnglishNpcPhone
   ]),
 });
 
-const VOICED=new Set<EnglishNpcPhone>(['a','i','ae','schwa','l','m','v']);
+const VOICED=new Set<EnglishNpcPhone>(['a','o','i','ae','schwa','j','l','m','v']);
 
 function phoneState(phone:EnglishNpcPhone):VocalArticulators{
   return phone==='silence'?P.silence:PHONE[phone];
