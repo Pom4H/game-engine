@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'src/animation/soft-mouth.ts'
+      - 'src/animation/soft-tongue.ts'
       - 'src/animation/vocal-face.ts'
       - 'src/physics/structure.ts'
       - 'src/physics/structural-skin.ts'
