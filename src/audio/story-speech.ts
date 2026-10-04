@@ -1,3 +1,5 @@
+import {mulberry32} from '../core/random.js';
+import {DiaphragmBreathSupport,PressureDrivenVocalFolds} from './vocal-source.js';
 import {
   renderArticulatedVocalTract,
   VOCAL_ARTICULATOR_PRESETS,
@@ -5,11 +7,14 @@ import {
   type VocalAreaFrame,
   type VocalArticulators,
   type VocalTractRender,
+  scatterThreePort,
+  type VocalGesture,
   type VocalTractRenderOptions,
 } from './vocal-tract.js';
 import {
   STORY_NOMINAL_TRACT_LENGTH_CM,
   STORY_SECTIONS,
+  STORY_TUBELET_LENGTH_CM,
   resampleStoryArea,
   storyArea,
   storyControlForConsonant,
@@ -108,6 +113,192 @@ export function renderStorySpeech(
   );
 }
 
+
+class StoryTube{
+  readonly areas:Float64Array;
+  private readonly forward:Float64Array;
+  private readonly backward:Float64Array;
+  private readonly nextForward:Float64Array;
+  private readonly nextBackward:Float64Array;
+  maxAbsReflection=0;
+
+  constructor(readonly sections:number,readonly wallLoss:number){
+    this.areas=new Float64Array(sections);
+    this.forward=new Float64Array(sections);
+    this.backward=new Float64Array(sections);
+    this.nextForward=new Float64Array(sections);
+    this.nextBackward=new Float64Array(sections);
+  }
+
+  beginStep():void{
+    this.nextForward.fill(0);this.nextBackward.fill(0);
+    for(let i=0;i<this.sections-1;i++){
+      const left=Math.max(.0001,this.areas[i]!),right=Math.max(.0001,this.areas[i+1]!);
+      const r=(left-right)/(left+right);
+      this.maxAbsReflection=Math.max(this.maxAbsReflection,Math.abs(r));
+      const fromLeft=this.forward[i]!,fromRight=this.backward[i+1]!;
+      this.nextBackward[i]=(r*fromLeft+(1-r)*fromRight)*this.wallLoss;
+      this.nextForward[i+1]=((1+r)*fromLeft-r*fromRight)*this.wallLoss;
+    }
+  }
+  leftIncoming():{incoming:number;area:number}{return{incoming:this.backward[0]!,area:Math.max(.0001,this.areas[0]!)};}
+  rightIncoming():{incoming:number;area:number}{const i=this.sections-1;return{incoming:this.forward[i]!,area:Math.max(.0001,this.areas[i]!)};}
+  setLeftOutgoing(v:number):void{this.nextForward[0]=v*this.wallLoss;}
+  setRightOutgoing(v:number):void{this.nextBackward[this.sections-1]=v*this.wallLoss;}
+  inject(section:number,v:number):void{
+    const k=Math.max(1,Math.min(this.sections-2,section));
+    this.nextForward[k]=this.nextForward[k]!+v*.5;
+    this.nextBackward[k]=this.nextBackward[k]!+v*.5;
+  }
+  commit():void{this.forward.set(this.nextForward);this.backward.set(this.nextBackward);}
+}
+
+class StoryRadiator{
+  private previous=0;
+  radiate(incoming:number,areaCm2:number):{reflected:number;output:number}{
+    const radiusScale=Math.sqrt(Math.max(.0001,areaCm2));
+    const reflection=-clamp(.94-.11*radiusScale,.58,.93);
+    const pressure=(1+reflection)*incoming;
+    const output=(pressure-this.previous)*.78+pressure*.22;
+    this.previous=pressure;
+    return{reflected:reflection*incoming,output};
+  }
+}
+
+class StoryTransmissionNetwork{
+  readonly pharynx=new StoryTube(22,.9985);
+  readonly oral=new StoryTube(22,.9980);
+  readonly nasal=new StoryTube(30,.9970);
+  private readonly mouthRadiator=new StoryRadiator();
+  private readonly noseRadiator=new StoryRadiator();
+  private readonly nasalBase=new Float64Array(30);
+  private nasalPortAreaCm2=0;
+  maxBranchEnergyResidual=0;
+
+  constructor(){
+    for(let i=0;i<this.nasalBase.length;i++){
+      const x=(i+.5)/this.nasalBase.length;
+      this.nasalBase[i]=clamp(.55+2.4*x+1.0*Math.exp(-((x-.48)/.25)**2)-.65*Math.exp(-((x-.82)/.14)**2),.16,4.2);
+    }
+    this.nasal.areas.set(this.nasalBase);
+  }
+
+  setGeometry(area:Float64Array,nasalPortAreaCm2:number):void{
+    if(area.length!==STORY_SECTIONS)throw new RangeError('Story transmission network requires 44-section area');
+    for(let i=0;i<22;i++)this.pharynx.areas[i]=Math.max(.0001,area[i]!);
+    for(let i=0;i<22;i++)this.oral.areas[i]=Math.max(.0001,area[i+22]!);
+    this.nasalPortAreaCm2=Math.max(0,nasalPortAreaCm2);
+  }
+
+  get supraglottalPressurePa():number{return clamp(this.pharynx.leftIncoming().incoming*420,-600,600);}
+
+  private halfStep(source:number,flow:number,articulators:VocalArticulators,rng:()=>number):number{
+    const p=this.pharynx,o=this.oral,n=this.nasal;
+    const port=Math.max(.0001,this.nasalPortAreaCm2);
+    for(let i=0;i<n.sections;i++){
+      const q=clamp(i/4,0,1);
+      n.areas[i]=port+(this.nasalBase[i]!-port)*q;
+    }
+    p.beginStep();o.beginStep();n.beginStep();
+
+    const glottalIncoming=p.leftIncoming().incoming;
+    p.setLeftOutgoing(source+.70*glottalIncoming);
+
+    const pi=p.rightIncoming(),oi=o.leftIncoming(),ni=n.leftIncoming();
+    const branch=scatterThreePort([pi.incoming,oi.incoming,ni.incoming],[pi.area,oi.area,ni.area]);
+    this.maxBranchEnergyResidual=Math.max(this.maxBranchEnergyResidual,Math.abs(branch.energyResidual));
+    p.setRightOutgoing(branch.outgoing[0]);o.setLeftOutgoing(branch.outgoing[1]);n.setLeftOutgoing(branch.outgoing[2]);
+
+    let minArea=Infinity,minIndex=1;
+    for(let i=1;i<o.sections-1;i++)if(o.areas[i]!<minArea){minArea=o.areas[i]!;minIndex=i;}
+    const constrictionDrive=Math.max(articulators.labiodental,articulators.tongueTip);
+    const contraction=clamp((.55-minArea)/.53,0,1);
+    const jet=Math.abs(flow)/Math.max(.03,minArea)*constrictionDrive*contraction;
+    const noise=(rng()*2-1)*Math.max(0,jet-.05)*.035;
+    if(Math.abs(noise)>1e-12)o.inject(minIndex,noise);
+
+    const mouth=o.rightIncoming(),mr=this.mouthRadiator.radiate(mouth.incoming,mouth.area);
+    o.setRightOutgoing(mr.reflected);
+    const nose=n.rightIncoming(),nr=this.noseRadiator.radiate(nose.incoming,nose.area);
+    n.setRightOutgoing(nr.reflected);
+    p.commit();o.commit();n.commit();
+    return mr.output+nr.output*.86;
+  }
+
+  step(source:number,flow:number,articulators:VocalArticulators,rng:()=>number):number{
+    // Story's published D=c/(2Fs): two tubelet propagation updates per
+    // audio sample reproduce c when D=.396825 cm at Fs=44.1 kHz.
+    return .5*(
+      this.halfStep(source*.5,flow*.5,articulators,rng)+
+      this.halfStep(source*.5,flow*.5,articulators,rng)
+    );
+  }
+
+  get maxAbsReflection():number{return Math.max(this.pharynx.maxAbsReflection,this.oral.maxAbsReflection,this.nasal.maxAbsReflection);}
+}
+
+export function renderStoryTransmissionLineSpeech(
+  score:readonly StorySpeechGesture[],
+  options:StorySpeechOptions={},
+  phrase='Story transmission-line speech',
+):VocalTractRender{
+  validateScore(score);
+  const sampleRate=options.sampleRate??44_100;
+  if(sampleRate!==44_100)throw new RangeError('Story 44-section transmission-line proof currently requires 44.1 kHz');
+  const duration=score.at(-1)!.endS,count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
+  const network=new StoryTransmissionNetwork(),folds=new PressureDrivenVocalFolds(sampleRate),breath=new DiaphragmBreathSupport(sampleRate),rng=mulberry32(options.seed??0x5707);
+  const transition=options.transitionS??.035;
+  let gestureIndex=0,voicedState=0,gainState=0,pitchState=112,previousFlow=0,peak=0,minArea=Infinity,maxArea=0;
+  const attack=1-Math.exp(-1/(sampleRate*.008)),release=1-Math.exp(-1/(sampleRate*.004));
+
+  for(let sample=0;sample<count;sample++){
+    const time=sample/sampleRate;
+    while(gestureIndex<score.length-1&&time>=score[gestureIndex]!.endS)gestureIndex++;
+    const g=score[gestureIndex]!,state=areaAt(score,time,transition);
+    network.setGeometry(state.area,state.nasal);
+    for(const a of state.area){minArea=Math.min(minArea,a);maxArea=Math.max(maxArea,a);}
+    voicedState+=(g.voiced<voicedState?release:attack)*(g.voiced-voicedState);
+    gainState+=(g.gain<gainState?release:attack)*(g.gain-gainState);
+    pitchState+=attack*(g.pitchHz-pitchState);
+    const support=breath.step({targetPressurePa:g.lungPressurePa,glottalFlowM3S:previousFlow});
+    const fold=folds.step({
+      adduction:voicedState,
+      tensionHz:pitchState,
+      lungPressurePa:support.pressurePa*gainState,
+      supraglottalPressurePa:network.supraglottalPressurePa,
+    });
+    previousFlow=fold.flowM3S;
+    const out=network.step(fold.source,fold.flowM3S/.00020,g.articulators,rng)*4.0;
+    peak=Math.max(peak,Math.abs(out));left[sample]=out;right[sample]=out;
+  }
+
+  let energy=0;for(const v of left)energy+=v*v;
+  const rms=Math.sqrt(energy/Math.max(1,left.length)),normalize=rms>1e-9?.20/rms:1;
+  for(let i=0;i<left.length;i++){left[i]=Math.tanh(left[i]!*normalize*1.28);right[i]=left[i]!;}
+  const proxy:VocalGesture[]=score.map(g=>Object.freeze({
+    startS:g.startS,endS:g.endS,from:'schwa',
+    voiced:g.voiced,pitchHz:g.pitchHz,gain:g.gain,
+  }));
+  const articulatorGestures:ArticulatorGesture[]=score.map(g=>Object.freeze({
+    startS:g.startS,endS:g.endS,from:g.articulators,
+    voiced:g.voiced,pitchHz:g.pitchHz,lungPressurePa:g.lungPressurePa,gain:g.gain,
+  }));
+  return{
+    audio:{left,right,sampleRate},
+    diagnostics:Object.freeze({
+      phrase,durationS:duration,sampleRate,sections:STORY_SECTIONS,
+      tractLengthM:STORY_NOMINAL_TRACT_LENGTH_CM/100,
+      sectionLengthM:STORY_TUBELET_LENGTH_CM/100,
+      propagationDelayPerSectionS:(STORY_TUBELET_LENGTH_CM/100)/343,
+      maxAbsReflection:network.maxAbsReflection,
+      minAreaCm2:minArea,maxAreaCm2:maxArea,
+      gestures:Object.freeze(proxy),
+      articulatorGestures:Object.freeze(articulatorGestures),
+      geometryDriven:true,
+    }),
+  };
+}
+
 const P=VOCAL_ARTICULATOR_PRESETS;
 const silenceControl=storyControlForVowel('schwa');
 const aaControl=storyControlForVowel('aa');
@@ -125,5 +316,5 @@ export function storyMamaScore():readonly StorySpeechGesture[]{
 }
 
 export function synthesizeStoryMama(options:StorySpeechOptions={}):VocalTractRender{
-  return renderStorySpeech(storyMamaScore(),options,'mama');
+  return renderStoryTransmissionLineSpeech(storyMamaScore(),options,'mama');
 }
