@@ -1,5 +1,5 @@
 import {mulberry32} from '../core/random.js';
-import {DiaphragmBreathSupport,PressureDrivenVocalFolds} from './vocal-source.js';
+import {LfGlottalSource} from './lf-glottal.js';
 import {
   renderArticulatedVocalTract,
   VOCAL_ARTICULATOR_PRESETS,
@@ -246,9 +246,9 @@ export function renderStoryTransmissionLineSpeech(
   const sampleRate=options.sampleRate??44_100;
   if(sampleRate!==44_100)throw new RangeError('Story 44-section transmission-line proof currently requires 44.1 kHz');
   const duration=score.at(-1)!.endS,count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
-  const network=new StoryTransmissionNetwork(),folds=new PressureDrivenVocalFolds(sampleRate),breath=new DiaphragmBreathSupport(sampleRate),rng=mulberry32(options.seed??0x5707);
+  const network=new StoryTransmissionNetwork(),lf=new LfGlottalSource(sampleRate),rng=mulberry32(options.seed??0x5707);
   const transition=options.transitionS??.035;
-  let gestureIndex=0,voicedState=0,gainState=0,pitchState=112,previousFlow=0,peak=0,minArea=Infinity,maxArea=0;
+  let gestureIndex=0,voicedState=0,gainState=0,pitchState=112,peak=0,minArea=Infinity,maxArea=0;
   const attack=1-Math.exp(-1/(sampleRate*.008)),release=1-Math.exp(-1/(sampleRate*.004));
 
   for(let sample=0;sample<count;sample++){
@@ -260,15 +260,20 @@ export function renderStoryTransmissionLineSpeech(
     voicedState+=(g.voiced<voicedState?release:attack)*(g.voiced-voicedState);
     gainState+=(g.gain<gainState?release:attack)*(g.gain-gainState);
     pitchState+=attack*(g.pitchHz-pitchState);
-    const support=breath.step({targetPressurePa:g.lungPressurePa,glottalFlowM3S:previousFlow});
-    const fold=folds.step({
-      adduction:voicedState,
-      tensionHz:pitchState,
-      lungPressurePa:support.pressurePa*gainState,
-      supraglottalPressurePa:network.supraglottalPressurePa,
+    // VTL/Story-style parametric synthesis: the calibrated tract is excited by
+    // an LF glottal volume-flow pulse instead of the separate self-oscillating
+    // fold model used elsewhere in the engine.
+    const pressureScale=Math.sqrt(clamp(g.lungPressurePa/900,0,2));
+    const source=lf.step({
+      f0Hz:pitchState,
+      amplitudeCm3S:300*pressureScale*gainState,
+      openQuotient:.5,
+      speedQuotient:3,
+      returnPhase:.02,
+      voiced:voicedState,
     });
-    previousFlow=fold.flowM3S;
-    const out=network.step(fold.source,fold.flowM3S/.00020,g.articulators,rng)*4.0;
+    const normalizedFlow=source.flowCm3S/300;
+    const out=network.step(normalizedFlow,normalizedFlow,g.articulators,rng)*4.0;
     peak=Math.max(peak,Math.abs(out));left[sample]=out;right[sample]=out;
   }
 
