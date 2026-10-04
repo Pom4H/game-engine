@@ -1,0 +1,43 @@
+name: NPC Mama Motor Search
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/npc-speech-demo/search-mama.mjs'
+      - 'tools/npc-speech-demo/rank-motor-search.py'
+      - '.github/workflows/npc-mama-motor-search.yml'
+  workflow_dispatch:
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: sudo apt-get update && sudo apt-get install -y python3-venv
+      - run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --disable-pip-version-check vosk==0.3.45
+          mkdir -p .cache/vosk
+          curl -fL --retry 3 --retry-delay 2 https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip -o .cache/vosk/model.zip
+          unzip -q -o .cache/vosk/model.zip -d .cache/vosk
+      - run: node tools/npc-speech-demo/search-mama.mjs
+      - name: Rank candidates with ASR
+        run: |
+          .venv/bin/python tools/npc-speech-demo/rank-motor-search.py \
+            artifacts/npc-motor-search/mama \
+            .cache/vosk/vosk-model-small-en-us-0.15 \
+            mama \
+            artifacts/npc-motor-search/mama/search-results.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npc-mama-motor-search
+          path: artifacts/npc-motor-search/mama
+          retention-days: 14
