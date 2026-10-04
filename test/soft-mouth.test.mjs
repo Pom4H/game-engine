@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   Scene,SoftVocalFaceRig,softVocalFaceSceneSpec,
-  VOCAL_ARTICULATOR_PRESETS,physicalDialogueScoreA,sampleArticulatorScore,SOFT_MOUTH_MOTOR_LEAD_S,
+  VOCAL_ARTICULATOR_PRESETS,physicalDialogueScoreA,sampleArticulatorScore,sampleSoftMouthMotorPlan,SOFT_MOUTH_MOTOR_LEAD_S,
 } from '../dist/index.js';
 
 const LIP_CONTACT_TEST_MAX_GAP=.0062;
@@ -57,7 +57,7 @@ test('perioral volume stays finite, attached, unbroken and outside teeth through
   const scene=new Scene(softVocalFaceSceneSpec()),rig=new SoftVocalFaceRig(scene),score=physicalDialogueScoreA(),dt=1/240,duration=score.at(-1).endS;
   let maxPen=0,maxPenAt='',maxRemaining=0,maxKinetic=0,maxGap=0,minGap=Infinity,maxLipClosingSpeed=0,maxLipContactForce=0,maxLipContactPairs=0;
   for(let t=0;t<=duration+1e-9;t+=dt){
-    const sample=sampleArticulatorScore(score,Math.min(t,duration)),plan=sampleArticulatorScore(score,Math.min(t+SOFT_MOUTH_MOTOR_LEAD_S,duration)),state=rig.step(sample.articulators,dt,plan.articulators).mouth;
+    const sample=sampleArticulatorScore(score,Math.min(t,duration)),plan=sampleSoftMouthMotorPlan(score,Math.min(t,duration),SOFT_MOUTH_MOTOR_LEAD_S),state=rig.step(sample.articulators,dt,plan).mouth;
     if(state.maxContactPenetrationM>maxPen){maxPen=state.maxContactPenetrationM;maxPenAt='t='+t.toFixed(4)+' jaw='+sample.articulators.jawOpen.toFixed(3)+' closure='+sample.articulators.lipClosure.toFixed(3)+' labio='+sample.articulators.labiodental.toFixed(3)+' tip='+sample.articulators.tongueTip.toFixed(3)+' box='+(state.deepestContactBox??'?')+' point='+JSON.stringify(state.deepestContactPoint??null);}
     maxRemaining=Math.max(maxRemaining,state.remainingToothPenetrationM);
     maxKinetic=Math.max(maxKinetic,state.kineticEnergyJ);maxLipClosingSpeed=Math.max(maxLipClosingSpeed,state.maxLipClosingSpeedMps);maxLipContactForce=Math.max(maxLipContactForce,state.maxLipContactForceN);maxLipContactPairs=Math.max(maxLipContactPairs,state.lipContactPairs);
@@ -91,4 +91,16 @@ test('visible dental arch replaces slab teeth in the soft-face scene',()=>{
     assert.ok(tooth?.mesh?.kind==='sphere',arch+' tooth '+i);
     assert.ok(tooth.scale[0]>.02&&tooth.scale[0]<.04);
   }
+});
+
+
+test('anticipatory motor planner catches short bilabial events without point-sampling misses',()=>{
+  const score=physicalDialogueScoreA(),dt=.006;
+  let found=false;
+  for(let t=0;t<score.at(-1).endS-SOFT_MOUTH_MOTOR_LEAD_S;t+=dt){
+    const now=sampleArticulatorScore(score,t).articulators;
+    const plan=sampleSoftMouthMotorPlan(score,t,SOFT_MOUTH_MOTOR_LEAD_S);
+    if(now.lipClosure<.25&&plan.lipClosure>.9){found=true;break;}
+  }
+  assert.ok(found,'planner never anticipates a future bilabial closure');
 });
