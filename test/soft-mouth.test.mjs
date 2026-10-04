@@ -105,3 +105,23 @@ test('anticipatory motor planner catches short bilabial events without point-sam
   }
   assert.ok(found,'planner never anticipates a future bilabial closure');
 });
+
+
+test('soft tongue stays inside oral floor and never exits through the chin during dialogue',()=>{
+  const scene=new Scene(softVocalFaceSceneSpec()),rig=new SoftVocalFaceRig(scene),score=physicalDialogueScoreA(),dt=1/240,duration=score.at(-1).endS;
+  let minY=Infinity,maxZ=-Infinity,maxKinetic=0,maxPen=0;
+  for(let t=0;t<=duration+1e-9;t+=dt){
+    const sample=sampleArticulatorScore(score,Math.min(t,duration));
+    const plan=sampleSoftMouthMotorPlan(score,Math.min(t,duration),SOFT_MOUTH_MOTOR_LEAD_S);
+    const state=rig.step(sample.articulators,dt,plan).tongue;
+    minY=Math.min(minY,state.minNodeY);maxZ=Math.max(maxZ,state.maxNodeZ);maxKinetic=Math.max(maxKinetic,state.kineticEnergyJ);maxPen=Math.max(maxPen,state.maxTrialPenetrationM);
+    assert.equal(state.brokenConstraints,0,'tongue structural failure at t='+t.toFixed(4));
+    assert.ok(Number.isFinite(state.tipPosition[1])&&Number.isFinite(state.tipPosition[2]));
+  }
+  assert.ok(minY>=1.215,'tongue escaped below floor of mouth into chin: '+minY);
+  assert.ok(maxZ<.72,'tongue escaped through lips/front of face: '+maxZ);
+  assert.ok(maxKinetic<2,'tongue became numerically explosive: '+maxKinetic);
+  assert.ok(maxPen<.03,'tongue trial contact penetration too deep: '+maxPen);
+  const rigid=scene.entities.get('vocal-face-tongue');
+  assert.ok(rigid.scale[0]<.01,'legacy rigid tongue must stay hidden');
+});
