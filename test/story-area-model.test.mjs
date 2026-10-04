@@ -40,9 +40,11 @@ test('Story tier III nominal length is the published adult-male tract length',()
 });
 
 test('Story mama renders through MRI-calibrated area frames',()=>{
-  const result=synthesizeStoryMama({sampleRate:16000,controlRateHz:120});
+  const result=synthesizeStoryMama({controlRateHz:120});
   assert.equal(result.diagnostics.geometryDriven,true);
   assert.equal(result.diagnostics.phrase,'mama');
+  assert.equal(result.audio.sampleRate,44100);
+  assert.equal(result.diagnostics.sections,44);
   assert.ok(result.audio.left.some(v=>Math.abs(v)>.02));
   assert.ok(result.diagnostics.minAreaCm2>0);
 });
