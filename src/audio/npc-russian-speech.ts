@@ -12,7 +12,7 @@ const state=(base:VocalArticulators,patch:Partial<VocalArticulators>):VocalArtic
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
 
 export type RussianNpcPhone=
-  |'a'|'o'|'u'|'i'|'y'|'e'|'j'
+  |'a'|'o'|'u'|'i'|'y'|'e'|'schwa'|'j'
   |'m'|'n'|'p'|'b'|'f'|'v'
   |'t'|'d'|'k'|'g'|'s'|'z'
   |'sh'|'zh'|'ch'|'h'|'l'|'r'
@@ -33,10 +33,10 @@ export interface NpcRussianVoice{
 }
 
 export const DEFAULT_NPC_RUSSIAN_VOICE:NpcRussianVoice=Object.freeze({
-  basePitchHz:126,
-  pressurePa:900,
-  tractLengthM:.1715,
-  rate:.90,
+  basePitchHz:112,
+  pressurePa:950,
+  tractLengthM:.174,
+  rate:.82,
 });
 
 const A=state(P.a,{jawOpen:.76,tonguePosition:.25,tongueHeight:.22,lipRound:.01});
@@ -48,7 +48,7 @@ const E=state(P.i,{jawOpen:.45,tonguePosition:.68,tongueHeight:.64,tongueTip:.06
 const J=state(P.i,{jawOpen:.27,tonguePosition:.89,tongueHeight:.94,tongueTip:.12});
 
 const PHONE:Readonly<Record<Exclude<RussianNpcPhone,'silence'>,VocalArticulators>>=Object.freeze({
-  a:A,o:O,u:U,i:I,y:Y,e:E,j:J,
+  a:A,o:O,u:U,i:I,y:Y,e:E,schwa:P.schwa,j:J,
   m:P.m,
   n:state(I,{jawOpen:.22,tonguePosition:.82,tongueHeight:.70,tongueTip:1,velumOpen:.94,lipClosure:0}),
   p:state(P.m,{jawOpen:.16,velumOpen:0,lipClosure:.995}),
@@ -69,9 +69,33 @@ const PHONE:Readonly<Record<Exclude<RussianNpcPhone,'silence'>,VocalArticulators
   r:state(P.schwa,{jawOpen:.34,tonguePosition:.77,tongueHeight:.57,tongueTip:.96}),
 });
 
-const VOWELS=new Set<RussianNpcPhone>(['a','o','u','i','y','e']);
-const VOICED=new Set<RussianNpcPhone>(['a','o','u','i','y','e','j','m','n','b','v','d','g','z','zh','l','r']);
+const VOWELS=new Set<RussianNpcPhone>(['a','o','u','i','y','e','schwa']);
+const VOICED=new Set<RussianNpcPhone>(['a','o','u','i','y','e','schwa','j','m','n','b','v','d','g','z','zh','l','r']);
 const STOPS=new Set<RussianNpcPhone>(['p','b','t','d','k','g','ch']);
+
+const token=(phone:RussianNpcPhone,soft=false,stressed=false):RussianNpcPhoneToken=>
+  Object.freeze({phone,...(soft?{soft:true}:{}),...(stressed?{stressed:true}:{})});
+
+/**
+ * Linguistic planning is intentionally separate from the physical synthesizer.
+ * This seed lexicon supplies stress and ordinary Russian vowel reduction; NPCs
+ * may replace/extend it with a larger language model without changing acoustics.
+ */
+export const RUSSIAN_NPC_LEXICON:Readonly<Record<string,readonly RussianNpcPhoneToken[]>>=Object.freeze({
+  'привет':Object.freeze([
+    token('p'),token('r',true),token('i'),token('v',true),token('e',false,true),token('t'),
+  ]),
+  'я':Object.freeze([token('j'),token('a',false,true)]),
+  'говорю':Object.freeze([
+    token('g'),token('schwa'),token('v'),token('a'),token('r',true),token('u',false,true),
+  ]),
+  'своим':Object.freeze([
+    token('s'),token('v'),token('a'),token('i',false,true),token('m'),
+  ]),
+  'голосом':Object.freeze([
+    token('g'),token('o',false,true),token('l'),token('schwa'),token('s'),token('schwa'),token('m'),
+  ]),
+});
 
 function soften(a:VocalArticulators):VocalArticulators{
   return state(a,{
@@ -105,7 +129,7 @@ function nextLetter(text:string,index:number):string{
 const SOFT_VOWELS=new Set(['е','ё','и','ю','я']);
 
 export function russianTextToNpcPhones(input:string):readonly RussianNpcPhoneToken[]{
-  const text=input.toLowerCase().normalize('NFD');
+  const text=input.toLowerCase().normalize('NFC');
   const out:RussianNpcPhoneToken[]=[];
   let stressNextVowel=false;
 
@@ -122,6 +146,16 @@ export function russianTextToNpcPhones(input:string):readonly RussianNpcPhoneTok
 
   for(let i=0;i<text.length;i++){
     const ch=text[i]!;
+    if(/[а-яё]/u.test(ch)&&isBoundary(text,i)){
+      let end=i+1;
+      while(end<text.length&&/[а-яё]/u.test(text[end]!))end++;
+      const word=text.slice(i,end),lexical=RUSSIAN_NPC_LEXICON[word];
+      if(lexical){
+        out.push(...lexical);
+        i=end-1;
+        continue;
+      }
+    }
     if(ch==='\u0301'){
       for(let j=out.length-1;j>=0;j--)if(VOWELS.has(out[j]!.phone)){out[j]=Object.freeze({...out[j]!,stressed:true});break;}
       continue;
@@ -182,7 +216,7 @@ export function russianTextToNpcPhones(input:string):readonly RussianNpcPhoneTok
 
 function durationFor(token:RussianNpcPhoneToken,rate:number):number{
   if(token.phone==='silence')return token.pauseS??.04;
-  if(VOWELS.has(token.phone))return (token.stressed ? .165 : .125)/rate;
+  if(VOWELS.has(token.phone))return (token.stressed ? .185 : token.phone==='schwa' ? .085 : .115)/rate;
   if(token.phone==='r')return .095/rate;
   if(token.phone==='sh'||token.phone==='zh'||token.phone==='s'||token.phone==='z'||token.phone==='f'||token.phone==='v'||token.phone==='h')return .095/rate;
   if(STOPS.has(token.phone))return .075/rate;
