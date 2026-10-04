@@ -53,6 +53,8 @@ export interface SoftMouthDiagnostics{
   readonly outerAttachmentNodes:number;
   readonly cheekNodes:number;
   readonly chinNodes:number;
+  readonly orbicularisConstraints:number;
+  readonly orbicularisRestScale:number;
   readonly kineticEnergyJ:number;
   readonly mouthGapM:number;
   readonly maxContactPenetrationM:number;
@@ -329,6 +331,8 @@ export class SoftMouthRig{
   readonly surface:SurfaceTemplate;
   private readonly meta:readonly CageMeta[];
   private readonly entity:RuntimeEntity;
+  private readonly orbicularis:readonly number[];
+  private orbicularisScale=1;
   private readonly deformed:Float64Array;
   private readonly normals:Float64Array;
   private readonly lowerTeethRestFrame:Vec3;
@@ -340,6 +344,16 @@ export class SoftMouthRig{
     this.meta=built.meta;
     this.structure=new StructuralBody(built.definition);
     this.structure.activateFromRigid(this.structure.centerOfMass(),[0,0,0],[0,0,0]);
+    const orbicularis:number[]=[];
+    for(let i=0;i<built.definition.constraints.length;i++){
+      const constraint=built.definition.constraints[i]!;
+      if(constraint.kind!=='distance')continue;
+      const a=this.meta[constraint.a]!,b=this.meta[constraint.b]!;
+      const circumferential=a.ring===b.ring&&a.layer===b.layer;
+      const lipFiber=a.ring<=1&&(a.layer===0||a.ring===0);
+      if(circumferential&&lipFiber)orbicularis.push(i);
+    }
+    this.orbicularis=Object.freeze(orbicularis);
     this.surface=surfaceTemplate();
     this.skin=bindStructuralSkin(this.surface.positions,this.structure.originalPosition,6);
     this.deformed=new Float64Array(this.surface.positions.length);
@@ -413,6 +427,8 @@ export class SoftMouthRig{
 
   step(a:VocalArticulators,pose:VocalFacePose,dt:number):SoftMouthDiagnostics{
     if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('Soft mouth dt must be within (0,.1]');
+    this.orbicularisScale=clamp(1-.40*a.lipClosure-.10*a.lipRound,.48,1);
+    for(const index of this.orbicularis)this.structure.setDistanceRestScale(index,this.orbicularisScale);
     let remaining=dt,maxPen=0,contacts=0,deepestBox:string|undefined,deepestPoint:Vec3|undefined;
     while(remaining>1e-9){
       const h=Math.min(remaining,1/240);
@@ -480,6 +496,8 @@ export class SoftMouthRig{
       outerAttachmentNodes,
       cheekNodes,
       chinNodes,
+      orbicularisConstraints:this.orbicularis.length,
+      orbicularisRestScale:this.orbicularisScale,
       kineticEnergyJ:this.structure.kineticEnergy(),
       mouthGapM:mouthGap,
       maxContactPenetrationM:this.contacts.maxPenetration,
