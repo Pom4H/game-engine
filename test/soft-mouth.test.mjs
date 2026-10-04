@@ -49,7 +49,7 @@ test('perioral volume stays finite, attached, unbroken and outside teeth through
   let maxPen=0,maxPenAt='',maxRemaining=0,maxKinetic=0,maxGap=0,minGap=Infinity;
   for(let t=0;t<=duration+1e-9;t+=dt){
     const sample=sampleArticulatorScore(score,Math.min(t,duration)),state=rig.step(sample.articulators,dt).mouth;
-    if(state.maxContactPenetrationM>maxPen){maxPen=state.maxContactPenetrationM;maxPenAt='t='+t.toFixed(4)+' jaw='+sample.articulators.jawOpen.toFixed(3)+' closure='+sample.articulators.lipClosure.toFixed(3)+' labio='+sample.articulators.labiodental.toFixed(3)+' tip='+sample.articulators.tongueTip.toFixed(3);}
+    if(state.maxContactPenetrationM>maxPen){maxPen=state.maxContactPenetrationM;maxPenAt='t='+t.toFixed(4)+' jaw='+sample.articulators.jawOpen.toFixed(3)+' closure='+sample.articulators.lipClosure.toFixed(3)+' labio='+sample.articulators.labiodental.toFixed(3)+' tip='+sample.articulators.tongueTip.toFixed(3)+' box='+(state.deepestContactBox??'?')+' point='+JSON.stringify(state.deepestContactPoint??null);}
     maxRemaining=Math.max(maxRemaining,state.remainingToothPenetrationM);
     maxKinetic=Math.max(maxKinetic,state.kineticEnergyJ);
     maxGap=Math.max(maxGap,state.mouthGapM);minGap=Math.min(minGap,state.mouthGapM);
