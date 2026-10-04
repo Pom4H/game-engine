@@ -157,7 +157,7 @@ function oralBoundaryBoxes(scene:Scene):StructuralStaticBox[]{
   return[
     // Floor of mouth / mandibular soft-tissue foundation. Its top stays inside
     // the oral cavity, so a tongue node cannot emerge through the chin.
-    {id:'oral-floor',center:[0,lowerY-.135,lowerZ-.055],half:[.30,.095,.27]},
+    {id:'oral-floor',center:[0,lowerY-.186,lowerZ-.055],half:[.30,.075,.27]},
     // Upper dentition / anterior palate guards the tongue from leaving through
     // the upper face while still allowing ordinary palatal constrictions.
     {id:'upper-incisors',center:[0,upperY,upperZ+.002],half:[.18,.025,.022]},
