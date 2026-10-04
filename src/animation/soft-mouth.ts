@@ -1,110 +1,139 @@
-import {material,type MechanicalMaterial} from '../materials/catalog.js';
+import type {MechanicalMaterial} from '../materials/catalog.js';
 import type {Vec3} from '../math.js';
 import {applyStructuralSkin,bindStructuralSkin,type StructuralSkinBinding} from '../physics/structural-skin.js';
 import {StructuralStaticContactSolver,type StructuralContactStats,type StructuralStaticBox} from '../physics/structural-contact.js';
-import {StructuralBody,type StructuralDefinition,type StructuralConstraintSpec} from '../physics/structure.js';
-import type {Primitive,SceneSpec} from '../scene/types.js';
+import {StructuralBody,type StructuralConstraintSpec,type StructuralDefinition} from '../physics/structure.js';
+import type {Color,Primitive,SceneSpec} from '../scene/types.js';
 import {Scene,type RuntimeEntity} from '../scene/scene.js';
 import type {VocalArticulators} from '../audio/vocal-tract.js';
 import {VocalFaceRig,VOCAL_FACE_IDS,vocalFaceSceneSpec,type VocalFacePose} from './vocal-face.js';
 
-const CAGE_SLICES=24;
-const CAGE_CROSS=4;
-const RENDER_SLICES=48;
-const RENDER_CROSS=8;
-const SOFT_MOUTH_ID='vocal-face-soft-mouth';
+const CAGE_ANGLES=24;
+const CAGE_RINGS=5;
+const CAGE_LAYERS=2;
+const RENDER_ANGLES=48;
+const RENDER_RINGS=9;
+const SOFT_FACE_ID='vocal-face-soft-perioral';
+const MIN_LIP_CONTACT_GAP_M=.0015;
+
+const SKIN:Color=[.62,.39,.30,1];
+const VERMILION:Color=[.62,.13,.16,1];
+const MUCOSA:Color=[.39,.055,.075,1];
 
 const TISSUE:MechanicalMaterial=Object.freeze({
-  youngModulusPa:85_000,
-  yieldStressPa:62_000,
-  failureStressPa:520_000,
-  failureStrain:3.2,
-  plasticity:.025,
+  youngModulusPa:55_000,
+  yieldStressPa:220_000,
+  failureStressPa:480_000,
+  failureStrain:7.5,
+  plasticity:.02,
   brittle:false,
 });
 
 interface CageMeta{
-  readonly theta:number;
+  readonly angle:number;
+  readonly ring:number;
   readonly radial:number;
-  readonly depth:number;
+  readonly layer:0|1;
+  readonly lower:number;
+  readonly side:number;
 }
 
 interface SurfaceTemplate{
   readonly positions:Float64Array;
   readonly normals:Float64Array;
+  readonly colors:Float64Array;
   readonly indices:number[];
 }
 
 export interface SoftMouthDiagnostics{
   readonly nodes:number;
   readonly constraints:number;
+  readonly surfaceVertices:number;
+  readonly apertureBoundaryNodes:number;
+  readonly outerAttachmentNodes:number;
+  readonly cheekNodes:number;
+  readonly chinNodes:number;
   readonly kineticEnergyJ:number;
   readonly mouthGapM:number;
   readonly maxContactPenetrationM:number;
+  readonly remainingToothPenetrationM:number;
   readonly contacts:number;
   readonly brokenConstraints:number;
 }
 
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
+const smooth=(t:number)=>{const x=clamp(t,0,1);return x*x*(3-2*x);};
+const mix=(a:number,b:number,t:number)=>a+(b-a)*t;
 
-function ellipseNormal(theta:number,rx:number,ry:number):readonly[number,number]{
-  const nx=Math.cos(theta)/Math.max(1e-6,rx),ny=Math.sin(theta)/Math.max(1e-6,ry),l=Math.hypot(nx,ny)||1;
-  return[nx/l,ny/l];
+function outerRadiusY(angle:number):number{
+  const lower=Math.max(0,-Math.sin(angle)),upper=Math.max(0,Math.sin(angle));
+  return .165+.075*lower+.012*upper;
 }
 
-function restPoint(theta:number,radial:number,depth:number):Vec3{
-  const rx=.22,ry=.024,[nx,ny]=ellipseNormal(theta,rx,ry);
-  return[
-    rx*Math.cos(theta)+nx*radial,
-    1.365+ry*Math.sin(theta)+ny*radial,
-    .605+depth,
-  ];
+function restPoint(radial:number,angle:number,layer:0|1):Vec3{
+  const r=smooth(radial);
+  const innerRx=.172,innerRy=.021,outerRx=.405,outerRy=outerRadiusY(angle);
+  const rx=mix(innerRx,outerRx,r),ry=mix(innerRy,outerRy,r);
+  const lower=Math.max(0,-Math.sin(angle)),side=Math.abs(Math.cos(angle));
+  const y=1.365+ry*Math.sin(angle)-.012*r*lower;
+  const frontZ=.615-.078*r-.026*r*lower-.010*r*side;
+  const thickness=mix(.020,.030,r);
+  return[rx*Math.cos(angle),y,frontZ-(layer===1?thickness:0)];
+}
+
+function cageId(layer:number,ring:number,angle:number):number{
+  const a=(angle+CAGE_ANGLES)%CAGE_ANGLES;
+  return layer*CAGE_RINGS*CAGE_ANGLES+ring*CAGE_ANGLES+a;
 }
 
 function buildDefinition():{definition:StructuralDefinition;meta:readonly CageMeta[]}{
   const nodes:{position:Vec3;mass:number}[]=[],meta:CageMeta[]=[];
-  const cross:readonly (readonly[number,number])[]=[
-    [.014,.016],[-.014,.016],[-.014,-.016],[.014,-.016],
-  ];
-  for(let slice=0;slice<CAGE_SLICES;slice++){
-    const theta=slice/CAGE_SLICES*Math.PI*2;
-    for(const [radial,depth] of cross){
-      nodes.push({position:restPoint(theta,radial,depth),mass:.00038});
-      meta.push(Object.freeze({theta,radial,depth}));
-    }
+  for(let layer=0;layer<CAGE_LAYERS;layer++)for(let ring=0;ring<CAGE_RINGS;ring++)for(let angleIndex=0;angleIndex<CAGE_ANGLES;angleIndex++){
+    const angle=angleIndex/CAGE_ANGLES*Math.PI*2,radial=ring/(CAGE_RINGS-1);
+    const lower=Math.max(0,-Math.sin(angle)),side=Math.abs(Math.cos(angle));
+    nodes.push({position:restPoint(radial,angle,layer as 0|1),mass:mix(.00042,.00082,radial)});
+    meta.push(Object.freeze({angle,ring,radial,layer:layer as 0|1,lower,side}));
   }
 
   const constraints:StructuralConstraintSpec[]=[];
   const pairs=new Set<string>();
-  const addDistance=(a:number,b:number,areaM2=5e-6)=>{
+  const addDistance=(a:number,b:number,areaM2:number)=>{
     const lo=Math.min(a,b),hi=Math.max(a,b),key=lo+':'+hi;if(pairs.has(key))return;pairs.add(key);
     constraints.push({kind:'distance',a:lo,b:hi,areaM2,material:TISSUE});
   };
-  const id=(slice:number,crossIndex:number)=>((slice+CAGE_SLICES)%CAGE_SLICES)*CAGE_CROSS+(crossIndex%CAGE_CROSS);
+  const addVolume=(a:number,b:number,c:number,d:number)=>constraints.push({
+    kind:'volume',a,b,c,d,compliance:1.2e-8,yieldRatio:10,breakRatio:100,plasticity:0,
+  });
+
   const collisionTriangles:[number,number,number][]=[];
-
-  for(let s=0;s<CAGE_SLICES;s++){
-    const n=(s+1)%CAGE_SLICES;
-    for(let c=0;c<CAGE_CROSS;c++){
-      addDistance(id(s,c),id(s,(c+1)%CAGE_CROSS),7e-6);
-      addDistance(id(s,c),id(n,c),6e-6);
-      addDistance(id(s,c),id(n,(c+1)%CAGE_CROSS),3e-6);
-      const c1=(c+1)%CAGE_CROSS;
-      collisionTriangles.push([id(s,c),id(n,c),id(n,c1)],[id(s,c),id(n,c1),id(s,c1)]);
+  for(let layer=0;layer<CAGE_LAYERS;layer++)for(let ring=0;ring<CAGE_RINGS;ring++)for(let a=0;a<CAGE_ANGLES;a++){
+    const n=(a+1)%CAGE_ANGLES,current=cageId(layer,ring,a),around=cageId(layer,ring,n);
+    addDistance(current,around,ring<=1?8e-6:12e-6);
+    if(ring<CAGE_RINGS-1){
+      const out=cageId(layer,ring+1,a),outAround=cageId(layer,ring+1,n);
+      addDistance(current,out,ring<=1?10e-6:16e-6);
+      addDistance(current,outAround,6e-6);
+      addDistance(around,out,6e-6);
+      if(ring<=1)collisionTriangles.push([current,out,around],[around,out,outAround]);
     }
-    addDistance(id(s,0),id(s,2),3e-6);
-    addDistance(id(s,1),id(s,3),3e-6);
+    if(layer===0)addDistance(current,cageId(1,ring,a),9e-6);
+  }
 
-    const v0=id(s,0),v1=id(s,1),v2=id(s,2),v3=id(s,3);
-    const w0=id(n,0),w1=id(n,1),w2=id(n,2),w3=id(n,3);
-    const volume=(a:number,b:number,c:number,d:number)=>constraints.push({
-      kind:'volume',a,b,c,d,compliance:2.5e-8,yieldRatio:10,breakRatio:100,plasticity:0,
-    });
-    volume(v0,v1,v3,w0);
-    volume(v1,v2,v3,w2);
-    volume(v1,v3,w0,w2);
-    volume(v1,w0,w1,w2);
-    volume(v3,w0,w2,w3);
+  for(let ring=0;ring<CAGE_RINGS-1;ring++)for(let a=0;a<CAGE_ANGLES;a++){
+    const n=(a+1)%CAGE_ANGLES;
+    const f00=cageId(0,ring,a),f10=cageId(0,ring+1,a),f01=cageId(0,ring,n),f11=cageId(0,ring+1,n);
+    const b00=cageId(1,ring,a),b10=cageId(1,ring+1,a),b01=cageId(1,ring,n),b11=cageId(1,ring+1,n);
+    addVolume(f00,f10,f01,b00);
+    addVolume(f10,f11,f01,b11);
+    addVolume(f10,f01,b00,b11);
+    addVolume(f10,b00,b10,b11);
+    addVolume(f01,b00,b11,b01);
+  }
+
+  for(let a=0;a<CAGE_ANGLES;a++){
+    const n=(a+1)%CAGE_ANGLES;
+    const f0=cageId(0,0,a),f1=cageId(0,0,n),b0=cageId(1,0,a),b1=cageId(1,0,n);
+    collisionTriangles.push([f0,b0,f1],[f1,b0,b1]);
   }
 
   return{
@@ -112,8 +141,8 @@ function buildDefinition():{definition:StructuralDefinition;meta:readonly CageMe
       nodes:Object.freeze(nodes),
       constraints:Object.freeze(constraints),
       collisionTriangles:Object.freeze(collisionTriangles),
-      iterations:12,
-      internalDamping:28,
+      iterations:14,
+      internalDamping:34,
       sleepSpeed:.001,
       sleepDelay:1.5,
     }),
@@ -121,23 +150,54 @@ function buildDefinition():{definition:StructuralDefinition;meta:readonly CageMe
   };
 }
 
+function colorAt(radial:number,inner=false):Color{
+  if(inner)return MUCOSA;
+  if(radial<.10)return VERMILION;
+  if(radial<.26){
+    const t=(radial-.10)/.16;
+    return[
+      mix(VERMILION[0],SKIN[0],t),
+      mix(VERMILION[1],SKIN[1],t),
+      mix(VERMILION[2],SKIN[2],t),
+      1,
+    ];
+  }
+  return SKIN;
+}
+
 function surfaceTemplate():SurfaceTemplate{
-  const positions:number[]=[],normals:number[]=[],indices:number[]=[];
-  const rx=.22,ry=.024;
-  for(let s=0;s<RENDER_SLICES;s++){
-    const theta=s/RENDER_SLICES*Math.PI*2,[nx,ny]=ellipseNormal(theta,rx,ry);
-    for(let c=0;c<RENDER_CROSS;c++){
-      const phi=c/RENDER_CROSS*Math.PI*2,radial=.014*Math.cos(phi),depth=.016*Math.sin(phi);
-      positions.push(rx*Math.cos(theta)+nx*radial,1.365+ry*Math.sin(theta)+ny*radial,.605+depth);
-      normals.push(nx*Math.cos(phi),ny*Math.cos(phi),Math.sin(phi));
-    }
+  const positions:number[]=[],normals:number[]=[],colors:number[]=[],indices:number[]=[];
+  const frontId=(ring:number,a:number)=>ring*RENDER_ANGLES+(a+RENDER_ANGLES)%RENDER_ANGLES;
+  for(let ring=0;ring<RENDER_RINGS;ring++)for(let a=0;a<RENDER_ANGLES;a++){
+    const radial=ring/(RENDER_RINGS-1),angle=a/RENDER_ANGLES*Math.PI*2,p=restPoint(radial,angle,0),c=colorAt(radial);
+    positions.push(...p);normals.push(0,0,1);colors.push(...c);
   }
-  const id=(s:number,c:number)=>((s+RENDER_SLICES)%RENDER_SLICES)*RENDER_CROSS+(c%RENDER_CROSS);
-  for(let s=0;s<RENDER_SLICES;s++)for(let c=0;c<RENDER_CROSS;c++){
-    const n=(s+1)%RENDER_SLICES,c1=(c+1)%RENDER_CROSS;
-    indices.push(id(s,c),id(n,c),id(n,c1),id(s,c),id(n,c1),id(s,c1));
+  for(let ring=0;ring<RENDER_RINGS-1;ring++)for(let a=0;a<RENDER_ANGLES;a++){
+    const n=(a+1)%RENDER_ANGLES;
+    indices.push(frontId(ring,a),frontId(ring+1,a),frontId(ring,n));
+    indices.push(frontId(ring,n),frontId(ring+1,a),frontId(ring+1,n));
   }
-  return{positions:new Float64Array(positions),normals:new Float64Array(normals),indices};
+
+  const wallFrontBase=positions.length/3;
+  for(let a=0;a<RENDER_ANGLES;a++){
+    const angle=a/RENDER_ANGLES*Math.PI*2,p=restPoint(0,angle,0);
+    positions.push(...p);normals.push(0,0,1);colors.push(...VERMILION);
+  }
+  const wallBackBase=positions.length/3;
+  for(let a=0;a<RENDER_ANGLES;a++){
+    const angle=a/RENDER_ANGLES*Math.PI*2,p=restPoint(0,angle,1);
+    positions.push(...p);normals.push(0,0,-1);colors.push(...MUCOSA);
+  }
+  for(let a=0;a<RENDER_ANGLES;a++){
+    const n=(a+1)%RENDER_ANGLES,f0=wallFrontBase+a,f1=wallFrontBase+n,b0=wallBackBase+a,b1=wallBackBase+n;
+    indices.push(f0,b0,f1,f1,b0,b1);
+  }
+  return{
+    positions:new Float64Array(positions),
+    normals:new Float64Array(normals),
+    colors:new Float64Array(colors),
+    indices,
+  };
 }
 
 function computeNormals(positions:Float64Array,indices:readonly number[],out:Float64Array):void{
@@ -170,18 +230,50 @@ function contactBoxes(scene:Scene):StructuralStaticBox[]{
   return out;
 }
 
+function remainingBoxPenetration(body:StructuralBody,boxes:readonly StructuralStaticBox[]):number{
+  let max=0;
+  for(let node=0;node<body.nodeCount;node++){
+    const j=node*3,x=body.position[j]!,y=body.position[j+1]!,z=body.position[j+2]!;
+    for(const box of boxes){
+      const dx=box.half[0]-Math.abs(x-box.center[0]),dy=box.half[1]-Math.abs(y-box.center[1]),dz=box.half[2]-Math.abs(z-box.center[2]);
+      if(dx>=0&&dy>=0&&dz>=0)max=Math.max(max,Math.min(dx,dy,dz));
+    }
+  }
+  return max;
+}
+
+function projectLipContact(body:StructuralBody):void{
+  for(let a=1;a<CAGE_ANGLES/2;a++){
+    const mirror=(CAGE_ANGLES-a)%CAGE_ANGLES;
+    for(let layer=0;layer<CAGE_LAYERS;layer++){
+      const top=cageId(layer,0,a),bottom=cageId(layer,0,mirror),T=top*3,B=bottom*3;
+      const gap=body.position[T+1]!-body.position[B+1]!;
+      if(gap>=MIN_LIP_CONTACT_GAP_M)continue;
+      const wi=body.inverseMass[top]!,wj=body.inverseMass[bottom]!,denom=wi+wj;if(denom<=1e-12)continue;
+      const correction=(MIN_LIP_CONTACT_GAP_M-gap)/denom;
+      body.position[T+1]=body.position[T+1]!+wi*correction;
+      body.position[B+1]=body.position[B+1]!-wj*correction;
+    }
+  }
+}
+
 export function softVocalFaceSceneSpec():SceneSpec{
-  const base=vocalFaceSceneSpec();
-  const template=surfaceTemplate();
-  const soft:Primitive={kind:'triangle-mesh',positions:[...template.positions],normals:[...template.normals],indices:[...template.indices]};
+  const base=vocalFaceSceneSpec(),template=surfaceTemplate();
+  const soft:Primitive={
+    kind:'triangle-mesh',
+    positions:[...template.positions],
+    normals:[...template.normals],
+    colors:[...template.colors],
+    indices:[...template.indices],
+  };
   return{
     ...base,
     entities:[
       ...base.entities,
       {
-        id:SOFT_MOUTH_ID,
+        id:SOFT_FACE_ID,
         mesh:soft,
-        material:{kind:'default',color:[.48,.095,.12,1],roughness:.54,metalness:0},
+        material:{kind:'default',color:[1,1,1,1],roughness:.62,metalness:0},
       },
     ],
   };
@@ -196,6 +288,7 @@ export class SoftMouthRig{
   private readonly deformed:Float64Array;
   private readonly normals:Float64Array;
   private contacts:StructuralContactStats={contacts:0,maxPenetration:0,projectedSamples:0};
+  private remainingPenetration=0;
 
   constructor(readonly scene:Scene){
     const built=buildDefinition();
@@ -203,50 +296,79 @@ export class SoftMouthRig{
     this.structure=new StructuralBody(built.definition);
     this.structure.activateFromRigid(this.structure.centerOfMass(),[0,0,0],[0,0,0]);
     this.surface=surfaceTemplate();
-    this.skin=bindStructuralSkin(this.surface.positions,this.structure.originalPosition,4);
+    this.skin=bindStructuralSkin(this.surface.positions,this.structure.originalPosition,6);
     this.deformed=new Float64Array(this.surface.positions.length);
     this.normals=new Float64Array(this.surface.normals.length);
-    const entity=scene.entities.get(SOFT_MOUTH_ID);if(!entity)throw new TypeError('Soft mouth entity missing');
+    const entity=scene.entities.get(SOFT_FACE_ID);if(!entity)throw new TypeError('Soft perioral entity missing');
     this.entity=entity;
     this.projectSurface();
   }
 
   private target(meta:CageMeta,a:VocalArticulators,pose:VocalFacePose):Vec3{
-    const lower=Math.max(0,-Math.sin(meta.theta));
-    const rx=.22*(1-.24*a.lipRound-.065*a.labiodental);
-    const ry=.014+.071*a.jawOpen*(1-a.lipClosure);
-    const centerY=1.365-pose.jawDropM*.28-lower*pose.jawDropM*.30;
-    const centerZ=.605+.058*a.lipRound+.010*a.labiodental+lower*.008*a.jawOpen;
-    const [nx,ny]=ellipseNormal(meta.theta,Math.max(.12,rx),Math.max(.01,ry));
-    let y=centerY+ry*Math.sin(meta.theta)+ny*meta.radial;
-    let z=centerZ+meta.depth*(1+.18*a.lipRound);
-    if(lower&&a.labiodental>.01){y+=.032*a.labiodental;z+=.010*a.labiodental;}
-    return[
-      rx*Math.cos(meta.theta)+nx*meta.radial,
-      y,
-      z,
+    const rest=restPoint(meta.radial,meta.angle,meta.layer);
+    const lipWeight=(1-smooth(meta.radial))**2;
+    const outerWeight=smooth(meta.radial)**2;
+    const upper=Math.max(0,Math.sin(meta.angle)),lower=meta.lower;
+    const innerRx=.172*(1-.27*a.lipRound-.07*a.labiodental);
+    const innerRy=.003+.063*a.jawOpen*(1-a.lipClosure);
+    const centerY=1.365-pose.jawDropM*.08;
+    const inner:Vec3=[
+      innerRx*Math.cos(meta.angle),
+      centerY+innerRy*Math.sin(meta.angle),
+      .615+(meta.layer===1?-.020:0)+.050*a.lipRound,
     ];
+
+    if(lower&&a.labiodental>.001){
+      inner[1]+=lower*.032*a.labiodental;
+      inner[2]-=lower*.026*a.labiodental;
+    }
+
+    const jawFollow=lower*(.25+.75*outerWeight)*(1-lipWeight*a.lipClosure*.90);
+    const attached:Vec3=[
+      rest[0],
+      rest[1]-pose.jawDropM*.62*jawFollow,
+      rest[2]+.010*a.jawOpen*jawFollow,
+    ];
+
+    const target:Vec3=[
+      mix(attached[0],inner[0],lipWeight),
+      mix(attached[1],inner[1],lipWeight),
+      mix(attached[2],inner[2],lipWeight),
+    ];
+
+    if(meta.side>.70&&meta.radial>.55){
+      const buccinator=.006*a.lipRound*meta.side*outerWeight;
+      target[0]-=Math.sign(Math.cos(meta.angle))*buccinator;
+      target[2]-=.004*a.lipRound*outerWeight;
+    }
+    if(lower>.65&&meta.radial>.55){
+      target[1]-=.010*a.jawOpen*outerWeight;
+      target[2]+=.004*a.jawOpen*outerWeight;
+    }
+    if(upper>.7&&meta.radial>.70)target[1]+=pose.jawDropM*.04*outerWeight;
+    return target;
   }
 
   step(a:VocalArticulators,pose:VocalFacePose,dt:number):SoftMouthDiagnostics{
     if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('Soft mouth dt must be within (0,.1]');
-    let remaining=dt;
-    let maxPen=0,contacts=0;
+    let remaining=dt,maxPen=0,contacts=0;
     while(remaining>1e-9){
       const h=Math.min(remaining,1/240);
       for(let node=0;node<this.structure.nodeCount;node++){
-        const target=this.target(this.meta[node]!,a,pose),j=node*3;
+        const meta=this.meta[node]!,target=this.target(meta,a,pose),j=node*3;
         const dx=target[0]-this.structure.position[j]!,dy=target[1]-this.structure.position[j+1]!,dz=target[2]-this.structure.position[j+2]!;
         const vx=this.structure.velocity[j]!,vy=this.structure.velocity[j+1]!,vz=this.structure.velocity[j+2]!;
-        const corner=Math.abs(Math.cos(this.meta[node]!.theta)),stiffness=1.9+1.1*corner,damping=.052;
+        const lipWeight=(1-smooth(meta.radial))**2,outerWeight=smooth(meta.radial)**2;
+        const stiffness=1.8+3.8*outerWeight+1.9*lipWeight,damping=.060+.022*outerWeight;
         let fx=stiffness*dx-damping*vx,fy=stiffness*dy-damping*vy,fz=stiffness*dz-damping*vz;
-        const f=Math.hypot(fx,fy,fz),limit=.19;if(f>limit){const q=limit/f;fx*=q;fy*=q;fz*=q;}
+        const force=Math.hypot(fx,fy,fz),limit=.22;if(force>limit){const q=limit/force;fx*=q;fy*=q;fz*=q;}
         this.structure.addForce(node,[fx,fy,fz]);
       }
-      const contact=new StructuralStaticContactSolver(contactBoxes(this.scene),this.structure.definition.collisionTriangles??[]);
+      const boxes=contactBoxes(this.scene),contact=new StructuralStaticContactSolver(boxes,this.structure.definition.collisionTriangles??[]);
       contact.resetStats();
-      this.structure.step(h,[0,0,0],body=>contact.project(body));
+      this.structure.step(h,[0,0,0],body=>{contact.project(body);projectLipContact(body);});
       maxPen=Math.max(maxPen,contact.stats.maxPenetration);contacts+=contact.stats.contacts;
+      this.remainingPenetration=Math.max(this.remainingPenetration,remainingBoxPenetration(this.structure,boxes));
       remaining-=h;
     }
     this.contacts={contacts,maxPenetration:maxPen,projectedSamples:contacts};
@@ -261,23 +383,33 @@ export class SoftMouthRig{
       kind:'triangle-mesh',
       positions:[...this.deformed],
       normals:[...this.normals],
+      colors:[...this.surface.colors],
       indices:[...this.surface.indices],
     };
   }
 
   get diagnostics():SoftMouthDiagnostics{
     let broken=0;for(const value of this.structure.broken)broken+=value?1:0;
-    const upperSlice=Math.round(CAGE_SLICES*.25),lowerSlice=Math.round(CAGE_SLICES*.75);
-    const avgY=(slice:number)=>{
-      let y=0;for(let c=0;c<CAGE_CROSS;c++)y+=this.structure.position[(slice*CAGE_CROSS+c)*3+1]!;
-      return y/CAGE_CROSS;
-    };
+    const top=cageId(0,0,CAGE_ANGLES/4),bottom=cageId(0,0,CAGE_ANGLES*3/4);
+    const mouthGap=Math.max(0,this.structure.position[top*3+1]!-this.structure.position[bottom*3+1]!);
+    const apertureBoundaryNodes=CAGE_ANGLES*CAGE_LAYERS,outerAttachmentNodes=CAGE_ANGLES*CAGE_LAYERS;
+    let cheekNodes=0,chinNodes=0;
+    for(const meta of this.meta){
+      if(meta.radial>.55&&meta.side>.55)cheekNodes++;
+      if(meta.radial>.55&&meta.lower>.55)chinNodes++;
+    }
     return Object.freeze({
       nodes:this.structure.nodeCount,
       constraints:this.structure.constraintCount,
+      surfaceVertices:this.surface.positions.length/3,
+      apertureBoundaryNodes,
+      outerAttachmentNodes,
+      cheekNodes,
+      chinNodes,
       kineticEnergyJ:this.structure.kineticEnergy(),
-      mouthGapM:Math.max(0,avgY(upperSlice)-avgY(lowerSlice)),
+      mouthGapM:mouthGap,
       maxContactPenetrationM:this.contacts.maxPenetration,
+      remainingToothPenetrationM:this.remainingPenetration,
       contacts:this.contacts.contacts,
       brokenConstraints:broken,
     });
@@ -291,10 +423,10 @@ export class SoftVocalFaceRig{
   constructor(readonly scene:Scene){
     this.rigid=new VocalFaceRig(scene);
     this.mouth=new SoftMouthRig(scene);
-    this.hideLegacyLips();
+    this.hideLegacyMouthParts();
   }
 
-  private hideLegacyLips():void{
+  private hideLegacyMouthParts():void{
     for(const id of [VOCAL_FACE_IDS.upperLip,VOCAL_FACE_IDS.lowerLip]){
       const entity=this.scene.entities.get(id);if(entity)entity.scale.splice(0,3,.001,.001,.001);
     }
@@ -302,7 +434,7 @@ export class SoftVocalFaceRig{
 
   step(a:VocalArticulators,dt:number):{readonly pose:VocalFacePose;readonly mouth:SoftMouthDiagnostics}{
     const pose=this.rigid.step(a,dt);
-    this.hideLegacyLips();
+    this.hideLegacyMouthParts();
     const mouth=this.mouth.step(a,pose,dt);
     return Object.freeze({pose,mouth});
   }
