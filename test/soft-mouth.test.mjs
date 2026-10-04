@@ -66,3 +66,16 @@ test('perioral volume stays finite, attached, unbroken and outside teeth through
   assert.ok(minGap>=.0013,'lips crossed');
   assert.ok(maxGap>minGap*4,'mouth aperture did not articulate: min='+minGap+' max='+maxGap+' ratio='+(maxGap/minGap));
 });
+
+
+test('visible dental arch replaces slab teeth in the soft-face scene',()=>{
+  const scene=new Scene(softVocalFaceSceneSpec()),rig=new SoftVocalFaceRig(scene);
+  rig.step(VOCAL_ARTICULATOR_PRESETS.a,1/240);
+  assert.ok(scene.entities.get('vocal-face-upper-teeth').scale[0]<.01);
+  assert.ok(scene.entities.get('vocal-face-lower-teeth').scale[0]<.01);
+  for(const arch of ['upper','lower'])for(let i=0;i<8;i++){
+    const tooth=scene.entities.get('vocal-face-visible-'+arch+'-tooth-'+i);
+    assert.ok(tooth?.mesh?.kind==='sphere',arch+' tooth '+i);
+    assert.ok(tooth.scale[0]>.02&&tooth.scale[0]<.04);
+  }
+});
