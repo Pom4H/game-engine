@@ -34,6 +34,8 @@ jobs:
         run: node tools/npc-speech-demo/generate-audio.mjs
       - name: Dump vowel airway profiles
         run: node tools/npc-speech-demo/airway-dump.mjs
+      - name: Generate English ASR probe clips
+        run: node tools/npc-speech-demo/english-probe.mjs
       - name: Prepare offline English recognizer
         run: |
           python3 -m venv .venv
@@ -41,6 +43,17 @@ jobs:
           mkdir -p .cache/vosk
           curl -fL --retry 3 --retry-delay 2             https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip             -o .cache/vosk/model.zip
           unzip -q -o .cache/vosk/model.zip -d .cache/vosk
+      - name: Probe simple English words
+        run: |
+          mkdir -p artifacts/npc-speech/probe/asr
+          for word in yeah mama me mom yeah-mama; do
+            ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/probe/$word.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/probe/asr/$word.wav
+          done
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/probe/asr/yeah.wav .cache/vosk/vosk-model-small-en-us-0.15 "yeah" 2.0 artifacts/npc-speech/probe/yeah-asr.json
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/probe/asr/mama.wav .cache/vosk/vosk-model-small-en-us-0.15 "mama" 2.0 artifacts/npc-speech/probe/mama-asr.json
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/probe/asr/me.wav .cache/vosk/vosk-model-small-en-us-0.15 "me" 2.0 artifacts/npc-speech/probe/me-asr.json
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/probe/asr/mom.wav .cache/vosk/vosk-model-small-en-us-0.15 "mom" 2.0 artifacts/npc-speech/probe/mom-asr.json
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/probe/asr/yeah-mama.wav .cache/vosk/vosk-model-small-en-us-0.15 "yeah mama" 2.0 artifacts/npc-speech/probe/yeah-mama-asr.json
       - name: Convert both physical speech paths for ASR
         run: |
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-english-soft.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-soft.wav
@@ -62,6 +75,7 @@ jobs:
             "I am alive" \
             0.34 \
             artifacts/npc-speech/asr-waveguide.json
+            artifacts/npc-speech/probe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
