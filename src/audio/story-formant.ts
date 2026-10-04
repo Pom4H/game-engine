@@ -146,17 +146,34 @@ export function synthesizeStoryFormantLala(sampleRate=44_100):StoryFormantRender
 
   const vowelF=vowel.formants.map(x=>x.hz),lateralF=lateral.formants.map(x=>x.hz);
   const bwV=[70,90,120,180],bwL=[90,110,160,220];
-  const duration=1.72,count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
+  // Match the official VTL oracle timing exactly:
+  // silence .12 | l .18 | a .30 | l .18 | a .30 | silence .18.
+  // VTL keeps phonation continuous across the two syllables; only the
+  // tongue-tip lateral gesture switches with ~12 ms time constant.
+  const duration=1.26,count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
   const lf=new LfGlottalSource(sampleRate),filters=[new Resonator(),new Resonator(),new Resonator(),new Resonator()];
+  const TC=.012;
+  const lateralWindow=(t:number,start:number,end:number):number=>{
+    const on=smooth((t-(start-TC))/(2*TC));
+    const off=1-smooth((t-(end-TC))/(2*TC));
+    return clamp(Math.min(on,off),0,1);
+  };
+  const pressureEnvelope=(t:number):number=>{
+    const on=smooth((t-.10)/.012);
+    const off=1-smooth((t-1.08)/.05);
+    return clamp(Math.min(on,off),0,1);
+  };
 
   const stateAt=(t:number):{lateral:number;amp:number;f0:number}=>{
-    if(t<.24)return{lateral:1,amp:0,f0:116};
-    if(t<.42)return{lateral:1,amp:.78,f0:116};
-    if(t<.72){const q=smooth((t-.42)/.055);return{lateral:1-q,amp:.90+.10*q,f0:116};}
-    if(t<.90)return{lateral:0,amp:0,f0:114};
-    if(t<1.08)return{lateral:1,amp:.78,f0:114};
-    if(t<1.42){const q=smooth((t-1.08)/.055);return{lateral:1-q,amp:.90+.10*q,f0:112};}
-    return{lateral:0,amp:0,f0:112};
+    const lateral=Math.max(
+      lateralWindow(t,.12,.30),
+      lateralWindow(t,.60,.78),
+    );
+    const amp=pressureEnvelope(t);
+    // Approximate the VTL f0 gesture contour (80→83→78 st) as a gentle
+    // two-syllable fall around the same male modal register.
+    const f0=t<.60?116:112;
+    return{lateral,amp,f0};
   };
 
   for(let i=0;i<count;i++){
