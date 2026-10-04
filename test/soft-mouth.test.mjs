@@ -46,10 +46,10 @@ test('soft perioral tissue follows a sudden closure with inertia instead of tele
 
 test('perioral volume stays finite, attached, unbroken and outside teeth through dialogue articulation',()=>{
   const scene=new Scene(softVocalFaceSceneSpec()),rig=new SoftVocalFaceRig(scene),score=physicalDialogueScoreA(),dt=1/240,duration=score.at(-1).endS;
-  let maxPen=0,maxRemaining=0,maxKinetic=0,maxGap=0,minGap=Infinity;
+  let maxPen=0,maxPenAt='',maxRemaining=0,maxKinetic=0,maxGap=0,minGap=Infinity;
   for(let t=0;t<=duration+1e-9;t+=dt){
     const sample=sampleArticulatorScore(score,Math.min(t,duration)),state=rig.step(sample.articulators,dt).mouth;
-    maxPen=Math.max(maxPen,state.maxContactPenetrationM);
+    if(state.maxContactPenetrationM>maxPen){maxPen=state.maxContactPenetrationM;maxPenAt='t='+t.toFixed(4)+' jaw='+sample.articulators.jawOpen.toFixed(3)+' closure='+sample.articulators.lipClosure.toFixed(3)+' labio='+sample.articulators.labiodental.toFixed(3)+' tip='+sample.articulators.tongueTip.toFixed(3);}
     maxRemaining=Math.max(maxRemaining,state.remainingToothPenetrationM);
     maxKinetic=Math.max(maxKinetic,state.kineticEnergyJ);
     maxGap=Math.max(maxGap,state.mouthGapM);minGap=Math.min(minGap,state.mouthGapM);
@@ -60,7 +60,7 @@ test('perioral volume stays finite, attached, unbroken and outside teeth through
     }
     assert.ok(Number.isFinite(state.mouthGapM));
   }
-  assert.ok(maxPen<.010,'tooth contact projection allowed excessive trial penetration: '+maxPen);
+  assert.ok(maxPen<.010,'tooth contact projection allowed excessive trial penetration: '+maxPen+' at '+maxPenAt);
   assert.ok(maxRemaining<1e-8,'tooth penetration remained after projection: '+maxRemaining);
   assert.ok(maxKinetic<2,'soft face became numerically explosive: '+maxKinetic);
   assert.ok(minGap>=.0013,'lips crossed');
