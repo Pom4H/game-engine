@@ -18,6 +18,7 @@ const UPPER_GUM_ID='vocal-face-soft-upper-gum';
 const LOWER_GUM_ID='vocal-face-soft-lower-gum';
 const upperToothId=(i:number)=>'vocal-face-visible-upper-tooth-'+i;
 const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
+/** Anticipatory lip motor lead for natural coarticulation before bilabial closures. */
 export const SOFT_MOUTH_MOTOR_LEAD_S=.12;
 const MIN_LIP_CONTACT_GAP_M=.0015;
 const LIP_CONTACT_ZONE_M=.006;
