@@ -218,8 +218,8 @@ export class SoftTongueRig{
     // slider. Back vowels/stops lift the dorsum; front vowels lift the blade.
     const bodyCenter=.26+.52*a.tonguePosition;
     const bodyWidth=.17+.07*(1-a.tongueHeight);
-    const bodyWeight=Math.exp(-((meta.z01-bodyCenter)/bodyWidth)**2);
-    const tipWeight=Math.exp(-((meta.z01-.96)/.11)**2);
+    const bodyWeight=Math.exp(-(((meta.z01-bodyCenter)/bodyWidth)**2));
+    const tipWeight=Math.exp(-(((meta.z01-.96)/.11)**2));
 
     const longitudinalPull=(a.tonguePosition-.45)*.060*(.20+.80*meta.z01);
     const tipForward=.018*a.tongueTip*tipWeight;
