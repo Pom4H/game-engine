@@ -15,6 +15,8 @@ let target=0;
 for(let frame=0;frame<frames;frame++){
   target=frame/fps;
   while(scene.time+1e-9<target)scene.step(Math.min(simDt,target-scene.time));
+  const car=scene.entities.get('offroad');
+  if(car)scene.setCamera({position:[car.position[0]-6,car.position[1]+2.7,6.8],target:[car.position[0]+.8,car.position[1]+.15,0],fov:45});
   renderer.render(scene,scene.camera);
   const png=encodePng(renderer.framebuffer(),width,height);
   if(!encoder.stdin.write(png))await once(encoder.stdin,'drain');
