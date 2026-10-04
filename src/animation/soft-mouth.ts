@@ -19,6 +19,10 @@ const LOWER_GUM_ID='vocal-face-soft-lower-gum';
 const upperToothId=(i:number)=>'vocal-face-visible-upper-tooth-'+i;
 const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
 const MIN_LIP_CONTACT_GAP_M=.0015;
+const LIP_CONTACT_ZONE_M=.006;
+const LIP_CONTACT_STIFFNESS_N_M=7.5;
+const LIP_CONTACT_DAMPING_N_S_M=.045;
+const LIP_CONTACT_ADHESION_N=.0035;
 
 const SKIN:Color=[.62,.39,.30,1];
 const VERMILION:Color=[.62,.13,.16,1];
@@ -59,6 +63,10 @@ export interface SoftMouthDiagnostics{
   readonly chinNodes:number;
   readonly orbicularisConstraints:number;
   readonly orbicularisRestScale:number;
+  readonly lipClosureActivation:number;
+  readonly lipContactPairs:number;
+  readonly maxLipClosingSpeedMps:number;
+  readonly maxLipContactForceN:number;
   readonly kineticEnergyJ:number;
   readonly mouthGapM:number;
   readonly maxContactPenetrationM:number;
@@ -294,19 +302,41 @@ function remainingBoxPenetration(body:StructuralBody,boxes:readonly StructuralSt
   return max;
 }
 
-function projectLipContact(body:StructuralBody):void{
+interface LipContactSample{
+  readonly pairs:number;
+  readonly maxClosingSpeedMps:number;
+  readonly maxForceN:number;
+}
+
+function applyCompliantLipContact(body:StructuralBody):LipContactSample{
+  let pairs=0,maxClosingSpeedMps=0,maxForceN=0;
   for(let a=1;a<CAGE_ANGLES/2;a++){
     const mirror=(CAGE_ANGLES-a)%CAGE_ANGLES;
     for(let layer=0;layer<CAGE_LAYERS;layer++){
       const top=cageId(layer,0,a),bottom=cageId(layer,0,mirror),T=top*3,B=bottom*3;
       const gap=body.position[T+1]!-body.position[B+1]!;
-      if(gap>=MIN_LIP_CONTACT_GAP_M)continue;
-      const wi=body.inverseMass[top]!,wj=body.inverseMass[bottom]!,denom=wi+wj;if(denom<=1e-12)continue;
-      const correction=(MIN_LIP_CONTACT_GAP_M-gap)/denom;
-      body.position[T+1]=body.position[T+1]!+wi*correction;
-      body.position[B+1]=body.position[B+1]!-wj*correction;
+      if(gap>=LIP_CONTACT_ZONE_M)continue;
+
+      const gapSpeed=body.velocity[T+1]!-body.velocity[B+1]!;
+      const closingSpeed=Math.max(0,-gapSpeed);
+      const proximity=smooth((LIP_CONTACT_ZONE_M-gap)/(LIP_CONTACT_ZONE_M-MIN_LIP_CONTACT_GAP_M));
+      const compression=Math.max(0,MIN_LIP_CONTACT_GAP_M-gap);
+      const spring=LIP_CONTACT_STIFFNESS_N_M*compression;
+      const damping=LIP_CONTACT_DAMPING_N_S_M*proximity*closingSpeed;
+      const opening=Math.max(0,gapSpeed);
+      const adhesion=Math.min(LIP_CONTACT_ADHESION_N,LIP_CONTACT_DAMPING_N_S_M*.18*proximity*opening);
+      const force=clamp(spring+damping-adhesion,-LIP_CONTACT_ADHESION_N,.045);
+
+      if(Math.abs(force)>1e-9){
+        body.addForce(top,[0,force,0]);
+        body.addForce(bottom,[0,-force,0]);
+      }
+      pairs++;
+      maxClosingSpeedMps=Math.max(maxClosingSpeedMps,closingSpeed);
+      maxForceN=Math.max(maxForceN,Math.abs(force));
     }
   }
+  return Object.freeze({pairs,maxClosingSpeedMps,maxForceN});
 }
 
 function dentalVisualEntities(base:SceneSpec):SceneSpec['entities']{
@@ -378,6 +408,11 @@ export class SoftMouthRig{
   private readonly entity:RuntimeEntity;
   private readonly orbicularis:readonly number[];
   private orbicularisScale=1;
+  private lipClosureActivation=0;
+  private lipClosureVelocity=0;
+  private lipContactPairs=0;
+  private maxLipClosingSpeedMps=0;
+  private maxLipContactForceN=0;
   private readonly deformed:Float64Array;
   private readonly normals:Float64Array;
   private readonly lowerTeethRestFrame:Vec3;
@@ -410,13 +445,13 @@ export class SoftMouthRig{
     this.projectSurface();
   }
 
-  private target(meta:CageMeta,a:VocalArticulators,pose:VocalFacePose):Vec3{
+  private target(meta:CageMeta,a:VocalArticulators,pose:VocalFacePose,closure:number):Vec3{
     const rest=restPoint(meta.radial,meta.angle,meta.layer);
     const lipWeight=(1-smooth(meta.radial))**2;
     const outerWeight=smooth(meta.radial)**2;
     const upper=Math.max(0,Math.sin(meta.angle)),lower=meta.lower;
     const innerRx=.172*(1-.27*a.lipRound-.07*a.labiodental);
-    const innerRy=.003+.063*a.jawOpen*(1-a.lipClosure);
+    const innerRy=.003+.063*a.jawOpen*(1-closure);
     const centerY=1.365-pose.jawDropM*.08;
     const inner:MutableVec3=[
       innerRx*Math.cos(meta.angle),
@@ -431,7 +466,7 @@ export class SoftMouthRig{
       inner[2]=Math.max(pulledZ,incisorContactZ);
     }
 
-    const jawFollow=lower*(.25+.75*outerWeight)*(1-lipWeight*a.lipClosure*.90);
+    const jawFollow=lower*(.25+.75*outerWeight)*(1-lipWeight*closure*.90);
     const attached:MutableVec3=[
       rest[0],
       rest[1]-pose.jawDropM*.62*jawFollow,
@@ -472,15 +507,30 @@ export class SoftMouthRig{
 
   step(a:VocalArticulators,pose:VocalFacePose,dt:number):SoftMouthDiagnostics{
     if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('Soft mouth dt must be within (0,.1]');
-    this.orbicularisScale=clamp(1-.55*a.lipClosure-.11*a.lipRound,.40,1);
-    for(const index of this.orbicularis)this.structure.setDistanceRestScale(index,this.orbicularisScale);
     let remaining=dt,maxPen=0,contacts=0,deepestBox:string|undefined,deepestPoint:Vec3|undefined;
+    let lipPairs=0,maxClosingSpeed=0,maxContactForce=0;
     while(remaining>1e-9){
       const h=Math.min(remaining,1/240);
+
+      // Muscle activation is a biomechanical state, not a direct phoneme transform.
+      // Critical damping and a finite activation speed prevent one-frame rest-length jumps.
+      const targetClosure=clamp(a.lipClosure,0,1),omega=2*Math.PI*7.0;
+      const activationAcceleration=omega*omega*(targetClosure-this.lipClosureActivation)-2*omega*this.lipClosureVelocity;
+      this.lipClosureVelocity=clamp(this.lipClosureVelocity+activationAcceleration*h,-5.5,5.5);
+      this.lipClosureActivation=clamp(this.lipClosureActivation+this.lipClosureVelocity*h,0,1);
+
+      this.orbicularisScale=clamp(1-.47*this.lipClosureActivation-.08*a.lipRound,.45,1);
+      for(const index of this.orbicularis)this.structure.setDistanceRestScale(index,this.orbicularisScale);
+
+      const lipContact=applyCompliantLipContact(this.structure);
+      lipPairs=Math.max(lipPairs,lipContact.pairs);
+      maxClosingSpeed=Math.max(maxClosingSpeed,lipContact.maxClosingSpeedMps);
+      maxContactForce=Math.max(maxContactForce,lipContact.maxForceN);
+
       for(let node=0;node<this.structure.nodeCount;node++){
         const meta=this.meta[node]!;
         if(isBoneAttached(meta))continue;
-        const target=this.target(meta,a,pose),j=node*3;
+        const target=this.target(meta,a,pose,this.lipClosureActivation),j=node*3;
         const dx=target[0]-this.structure.position[j]!,dy=target[1]-this.structure.position[j+1]!,dz=target[2]-this.structure.position[j+2]!;
         const vx=this.structure.velocity[j]!,vy=this.structure.velocity[j+1]!,vz=this.structure.velocity[j+2]!;
         const lipWeight=(1-smooth(meta.radial))**2,outerWeight=smooth(meta.radial)**2;
@@ -493,17 +543,17 @@ export class SoftMouthRig{
         // Fast marginal orbicularis / incisivus bundle: speech closures last
         // only ~70-100 ms, so the free vermilion border needs a dedicated
         // contractile drive rather than waiting for cheek attachment forces.
-        if(a.lipClosure>.15&&meta.layer===0&&meta.ring<=1&&Math.abs(Math.sin(meta.angle))>.28){
+        if(this.lipClosureActivation>.15&&meta.layer===0&&meta.ring<=1&&Math.abs(Math.sin(meta.angle))>.28){
           const closureGain=meta.ring===0?1:.48;
           const desiredY=target[1],errorY=desiredY-this.structure.position[j+1]!;
-          const maxClosureForce=.110*a.lipClosure*closureGain;
+          const maxClosureForce=.072*this.lipClosureActivation*closureGain;
           const closeFy=clamp(errorY*4.6-this.structure.velocity[j+1]!*0.050,-maxClosureForce,maxClosureForce);
           this.structure.addForce(node,[0,closeFy,0]);
         }
       }
       const boxes=contactBoxes(this.scene),contact=new StructuralStaticContactSolver(boxes,this.structure.definition.collisionTriangles??[]);
       contact.resetStats();
-      this.structure.step(h,[0,0,0],body=>{this.projectBoneAttachments(body);contact.project(body);projectLipContact(body);});
+      this.structure.step(h,[0,0,0],body=>{this.projectBoneAttachments(body);contact.project(body);});
       if(contact.stats.maxPenetration>maxPen){
         maxPen=contact.stats.maxPenetration;
         deepestBox=contact.stats.deepestBoxId;
@@ -513,6 +563,9 @@ export class SoftMouthRig{
       this.remainingPenetration=Math.max(this.remainingPenetration,remainingBoxPenetration(this.structure,boxes));
       remaining-=h;
     }
+    this.lipContactPairs=lipPairs;
+    this.maxLipClosingSpeedMps=maxClosingSpeed;
+    this.maxLipContactForceN=maxContactForce;
     this.contacts={
       contacts,maxPenetration:maxPen,projectedSamples:contacts,
       ...(deepestBox?{deepestBoxId:deepestBox}:{}),
@@ -554,6 +607,10 @@ export class SoftMouthRig{
       chinNodes,
       orbicularisConstraints:this.orbicularis.length,
       orbicularisRestScale:this.orbicularisScale,
+      lipClosureActivation:this.lipClosureActivation,
+      lipContactPairs:this.lipContactPairs,
+      maxLipClosingSpeedMps:this.maxLipClosingSpeedMps,
+      maxLipContactForceN:this.maxLipContactForceN,
       kineticEnergyJ:this.structure.kineticEnergy(),
       mouthGapM:mouthGap,
       maxContactPenetrationM:this.contacts.maxPenetration,
