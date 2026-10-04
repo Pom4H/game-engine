@@ -427,7 +427,7 @@ export class SoftMouthRig{
 
   step(a:VocalArticulators,pose:VocalFacePose,dt:number):SoftMouthDiagnostics{
     if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('Soft mouth dt must be within (0,.1]');
-    this.orbicularisScale=clamp(1-.40*a.lipClosure-.10*a.lipRound,.48,1);
+    this.orbicularisScale=clamp(1-.55*a.lipClosure-.11*a.lipRound,.40,1);
     for(const index of this.orbicularis)this.structure.setDistanceRestScale(index,this.orbicularisScale);
     let remaining=dt,maxPen=0,contacts=0,deepestBox:string|undefined,deepestPoint:Vec3|undefined;
     while(remaining>1e-9){
@@ -451,8 +451,8 @@ export class SoftMouthRig{
         if(a.lipClosure>.15&&meta.layer===0&&meta.ring<=1&&Math.abs(Math.sin(meta.angle))>.28){
           const closureGain=meta.ring===0?1:.48;
           const desiredY=target[1],errorY=desiredY-this.structure.position[j+1]!;
-          const maxClosureForce=.060*a.lipClosure*closureGain;
-          const closeFy=clamp(errorY*3.2-this.structure.velocity[j+1]!*0.040,-maxClosureForce,maxClosureForce);
+          const maxClosureForce=.110*a.lipClosure*closureGain;
+          const closeFy=clamp(errorY*4.6-this.structure.velocity[j+1]!*0.050,-maxClosureForce,maxClosureForce);
           this.structure.addForce(node,[0,closeFy,0]);
         }
       }
