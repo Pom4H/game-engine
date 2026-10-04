@@ -136,3 +136,50 @@ export function synthesizeStoryFormantMama(sampleRate=44_100):StoryFormantRender
     phrase:'mama',
   });
 }
+
+
+export function synthesizeStoryFormantLala(sampleRate=44_100):StoryFormantRender{
+  if(sampleRate!==44_100&&sampleRate!==48_000&&sampleRate!==16_000)throw new RangeError('Unsupported Story formant sample rate');
+  const vowel=storyExtractFormants(storyControlForVowel('aa'),4);
+  const lateral=storyExtractFormants(storyControlForConsonant('l'),4);
+  if(vowel.formants.length<4||lateral.formants.length<4)throw new Error('Story /l a/ did not expose four resonances');
+
+  const vowelF=vowel.formants.map(x=>x.hz),lateralF=lateral.formants.map(x=>x.hz);
+  const bwV=[70,90,120,180],bwL=[90,110,160,220];
+  const duration=1.72,count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
+  const lf=new LfGlottalSource(sampleRate),filters=[new Resonator(),new Resonator(),new Resonator(),new Resonator()];
+
+  const stateAt=(t:number):{lateral:number;amp:number;f0:number}=>{
+    if(t<.24)return{lateral:1,amp:0,f0:116};
+    if(t<.42)return{lateral:1,amp:.78,f0:116};
+    if(t<.72){const q=smooth((t-.42)/.055);return{lateral:1-q,amp:.90+.10*q,f0:116};}
+    if(t<.90)return{lateral:0,amp:0,f0:114};
+    if(t<1.08)return{lateral:1,amp:.78,f0:114};
+    if(t<1.42){const q=smooth((t-1.08)/.055);return{lateral:1-q,amp:.90+.10*q,f0:112};}
+    return{lateral:0,amp:0,f0:112};
+  };
+
+  for(let i=0;i<count;i++){
+    const t=i/sampleRate,s=stateAt(t),src=lf.step({
+      f0Hz:s.f0,amplitudeCm3S:300*s.amp,openQuotient:.5,speedQuotient:3,returnPhase:.02,voiced:s.amp>0?1:0,
+    });
+    let x=src.derivativeCm3S2/(300*140);
+    const vowelMix=1-s.lateral;
+    for(let k=0;k<4;k++){
+      const f=interpolate(lateralF[k]!,vowelF[k]!,vowelMix);
+      const bw=interpolate(bwL[k]!,bwV[k]!,vowelMix);
+      x=filters[k]!.step(x,f,bw,sampleRate);
+    }
+    x*=interpolate(.72,1,vowelMix);
+    left[i]=x;right[i]=x;
+  }
+
+  let e=0;for(const v of left)e+=v*v;
+  const rms=Math.sqrt(e/Math.max(1,left.length)),scale=rms>1e-9?.19/rms:1;
+  for(let i=0;i<left.length;i++){left[i]=Math.tanh(left[i]!*scale*1.22);right[i]=left[i]!;}
+  return Object.freeze({
+    audio:Object.freeze({left,right,sampleRate}),
+    analysis:vowel,
+    phrase:'la la',
+  });
+}
