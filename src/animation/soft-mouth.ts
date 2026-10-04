@@ -19,12 +19,15 @@ const LOWER_GUM_ID='vocal-face-soft-lower-gum';
 const upperToothId=(i:number)=>'vocal-face-visible-upper-tooth-'+i;
 const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
 /** Anticipatory lip motor lead for natural coarticulation before bilabial closures. */
-export const SOFT_MOUTH_MOTOR_LEAD_S=.12;
+export const SOFT_MOUTH_MOTOR_LEAD_S=.18;
 const MIN_LIP_CONTACT_GAP_M=.0015;
-const LIP_CONTACT_ZONE_M=.006;
+const LIP_CONTACT_ZONE_M=.012;
 const LIP_CONTACT_STIFFNESS_N_M=7.5;
 const LIP_CONTACT_DAMPING_N_S_M=.090;
 const LIP_CONTACT_ADHESION_N=.0035;
+const LIP_VISCOSITY_ZONE_M=.030;
+const LIP_MAX_CLOSING_SPEED_MPS=.18;
+const LIP_MAX_OPENING_SPEED_MPS=.22;
 
 const SKIN:Color=[.62,.39,.30,1];
 const VERMILION:Color=[.62,.13,.16,1];
@@ -343,6 +346,25 @@ function applyCompliantLipContact(body:StructuralBody):LipContactSample{
   return Object.freeze({pairs,maxClosingSpeedMps,maxForceN});
 }
 
+function dampLipRelativeVelocity(body:StructuralBody):void{
+  for(let a=1;a<CAGE_ANGLES/2;a++){
+    const mirror=(CAGE_ANGLES-a)%CAGE_ANGLES;
+    for(let layer=0;layer<CAGE_LAYERS;layer++){
+      const top=cageId(layer,0,a),bottom=cageId(layer,0,mirror),T=top*3,B=bottom*3;
+      const gap=body.position[T+1]!-body.position[B+1]!;
+      if(gap>LIP_VISCOSITY_ZONE_M)continue;
+      const relative=body.velocity[T+1]!-body.velocity[B+1]!;
+      const target=clamp(relative,-LIP_MAX_CLOSING_SPEED_MPS,LIP_MAX_OPENING_SPEED_MPS);
+      const delta=target-relative;if(Math.abs(delta)<1e-9)continue;
+      const wi=body.inverseMass[top]!,wj=body.inverseMass[bottom]!,denom=wi+wj;
+      if(denom<=1e-12)continue;
+      const impulse=delta/denom;
+      body.velocity[T+1]=body.velocity[T+1]!+impulse*wi;
+      body.velocity[B+1]=body.velocity[B+1]!-impulse*wj;
+    }
+  }
+}
+
 function dentalVisualEntities(base:SceneSpec):SceneSpec['entities']{
   const upper=base.entities.find(entity=>entity.id===VOCAL_FACE_IDS.upperTeeth);
   const lower=base.entities.find(entity=>entity.id===VOCAL_FACE_IDS.lowerTeeth);
@@ -568,6 +590,7 @@ export class SoftMouthRig{
       const boxes=contactBoxes(this.scene),contact=new StructuralStaticContactSolver(boxes,this.structure.definition.collisionTriangles??[]);
       contact.resetStats();
       this.structure.step(h,[0,0,0],body=>{this.projectBoneAttachments(body);contact.project(body);});
+      dampLipRelativeVelocity(this.structure);
       if(contact.stats.maxPenetration>maxPen){
         maxPen=contact.stats.maxPenetration;
         deepestBox=contact.stats.deepestBoxId;
