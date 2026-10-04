@@ -179,9 +179,9 @@ export class SurfaceContactSystem {
    const wet=surface?clamp(surface.waterDepth/.004,0,1):0,mud=surface?clamp(surface.dirt*(.45+.55*wet),0,1):0;
    // A stationary or airborne tyre makes neither spray nor a rolling-water sound.
    if(speed<.15||wet<.04){this.wheelEmission.delete(wheel.id);continue;}this.wetnessValue=Math.max(this.wetnessValue,wet*clamp(speed/.6,0,1));
-   let amount=(this.wheelEmission.get(wheel.id)??0)+dt*(12+speed*6)*wet;
-   while(amount>=1){amount-=1;const index=this.sequence++%this.particleCapacity,a=this.sequence*2.3999632297,life=.20+((this.sequence*17)%19)/100,travel:Vec3=[wheel.velocity[0]/speed,0,wheel.velocity[2]/speed],lateral=wheel.lateral??[-travel[2],0,travel[0]],sideLength=Math.hypot(lateral[0],lateral[2])||1,fan=.35+wet*.72;
-    const velocity:Vec3=[travel[0]*speed*.16+lateral[0]/sideLength*fan+Math.sin(a)*.13,.28+wet*.66+speed*.055,travel[2]*speed*.16+lateral[2]/sideLength*fan+Math.cos(a)*.13];
+   let amount=(this.wheelEmission.get(wheel.id)??0)+dt*(18+speed*8)*wet*(.82+.58*mud);
+   while(amount>=1){amount-=1;const index=this.sequence++%this.particleCapacity,a=this.sequence*2.3999632297,life=.24+((this.sequence*17)%23)/100+mud*.16,travel:Vec3=[wheel.velocity[0]/speed,0,wheel.velocity[2]/speed],lateral=wheel.lateral??[-travel[2],0,travel[0]],sideLength=Math.hypot(lateral[0],lateral[2])||1,fan=.42+wet*.80;
+    const velocity:Vec3=[travel[0]*speed*.18+lateral[0]/sideLength*fan+Math.sin(a)*.18,(.34+wet*.82+speed*.07)*(1-.22*mud),travel[2]*speed*.18+lateral[2]/sideLength*fan+Math.cos(a)*.18];
     const p:SprayParticle={index,born:at,life,origin:[wheel.position[0],surface!.height+.02,wheel.position[2]],velocity,ground:surface!.height+.003,mud};this.particles.set(index,p);this.particle(index,mud);this.emitted++;
    }this.wheelEmission.set(wheel.id,amount);
   }
@@ -189,7 +189,7 @@ export class SurfaceContactSystem {
   for(const [index,p] of this.particles){const age=at-p.born,entity=this.particle(index,p.mud),height=p.origin[1]+p.velocity[1]*age-4.905*age*age;
    if(age>=p.life||height<p.ground){entity.position=[0,-1000,0];this.particles.delete(index);continue;}
    entity.position=[p.origin[0]+p.velocity[0]*age,height,p.origin[2]+p.velocity[2]*age];
-   const growth=.7+.3*clamp(age/.08,0,1);entity.scale=[.009*growth,.012+.016*(1-age/p.life),.009*growth] as MutableVec3;
+   const growth=.7+.3*clamp(age/.08,0,1),base=.009+p.mud*.014;entity.scale=[base*growth,.014+.022*(1-age/p.life)+p.mud*.009,base*growth] as MutableVec3;
   }
  }
  inspect(){return{surfaces:this.surfaces.size,wheelContacts:this.wheels.size,tiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.tileCount,0),detailedTiles:[...this.surfaces.values()].reduce((sum,s)=>sum+s.skin.detailedTiles,0),footprints:this.footprints.snapshot().length,particles:this.particles.size,particleEntities:this.particleIds.size,sprayEmitted:this.emitted,wetness:this.wetness};}

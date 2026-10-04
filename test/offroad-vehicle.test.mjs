@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Scene} from '../dist/index.js';
-import {hillyTerrainMesh} from '../dist/procedural/terrain.js';
+import {hillyTerrainMesh,hillyTerrainHeight,polygonSurfaceGrid} from '../dist/procedural/terrain.js';
 import {tyreRadialStiffness,tyreContactPatchLength,loadedTyreState} from '../dist/vehicles/tyre.js';
 import {detailedOffroadWheelMeshes} from '../dist/vehicles/offroad-wheel.js';
 import offroadSpec from '../tools/offroad/scene.mjs';
@@ -51,4 +51,31 @@ test('offroad demo runs the same cause chain from tyre load to muddy body state'
  assert.ok(scene.contacts.sprayEmitted>0,scene.contacts.inspect());
  assert.ok(state&&state.roadDirt>0,state);
  assert.ok(state&&state.wetness>0,state);
+});
+
+
+test('terrain corridor cuts and fills one continuous mesh to the authored offroad profile',()=>{
+ const options={size:[40,20],segments:[40,20],amplitudeM:2,seed:11,corridors:[{points:[[-15,.2,0],[0,1.1,0],[15,.4,0]],halfWidthM:3,shoulderM:4}]};
+ assert.ok(Math.abs(hillyTerrainHeight(options,-15,0)-.2)<1e-9);
+ assert.ok(Math.abs(hillyTerrainHeight(options,0,0)-1.1)<1e-9);
+ const edge=hillyTerrainHeight(options,0,8),natural=hillyTerrainHeight({...options,corridors:[]},0,8);
+ assert.ok(Math.abs(edge-natural)<1e-9,{edge,natural});
+});
+
+test('mud patch is dense clipped geometry rather than a rectangular slab',()=>{
+ const shape=[[-4,-2],[-1,-2.5],[4,-1.7],[3.4,2.2],[-2,2.5],[-4,1]];
+ const mesh=polygonSurfaceGrid(shape,.2);
+ assert.ok(mesh.indices.length/3>500,mesh.indices.length/3);
+ let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity;
+ for(let i=0;i<mesh.positions.length;i+=3){minX=Math.min(minX,mesh.positions[i]);maxX=Math.max(maxX,mesh.positions[i]);minZ=Math.min(minZ,mesh.positions[i+2]);maxZ=Math.max(maxZ,mesh.positions[i+2]);}
+ assert.ok(maxX-minX>7&&maxZ-minZ>3,{minX,maxX,minZ,maxZ});
+});
+
+test('offroad demo owns real water volume and a deformable non-rectangular mud projection',()=>{
+ const scene=new Scene(offroadSpec),mud=scene.entities.get('track-mud'),water=scene.entities.get('water-sheet');
+ assert.equal(scene.fluids.size,1);
+ assert.equal(mud.mesh.kind,'polygon-prism');
+ assert.equal(mud.renderMesh.kind,'triangle-mesh');
+ assert.ok(mud.renderMesh.indices.length/3>1000,mud.renderMesh.indices.length/3);
+ assert.equal(water.material.kind,'glass');
 });

@@ -123,6 +123,7 @@ struct VOut {
   @location(3) @interpolate(flat) reflected:u32,
   @location(4) velocity:vec2<f32>,
   @location(5) vertexColor:vec4<f32>,
+  @location(6) localPos:vec3<f32>,
 }
 
 fn hash3(p:vec3<f32>)->f32 {
@@ -146,7 +147,7 @@ fn tyreTracks(z:f32)->f32{
 }
 
 @vertex fn vs(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>, @location(6) vertexColor:vec4<f32>) -> VOut {
-  var out: VOut;out.reflected=0u;out.vertexColor=vertexColor;
+  var out: VOut;out.reflected=0u;out.vertexColor=vertexColor;out.localPos=position;
   let world=displaceWorld(u.model*vec4<f32>(position,1.0));
   out.position=f.viewVP*world;let previous=f.previousVP*displaceWorld(u.prevModel*vec4<f32>(position,1.0));
   let currentNdc=out.position.xy/max(abs(out.position.w),.00001);let previousNdc=previous.xy/max(abs(previous.w),.00001);
@@ -158,7 +159,7 @@ fn tyreTracks(z:f32)->f32{
 }
 
 @vertex fn reflectionVS(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>,@location(6) vertexColor:vec4<f32>)->VOut{
- var out:VOut;out.vertexColor=vertexColor;let world=displaceWorld(u.model*vec4<f32>(position,1));out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
+ var out:VOut;out.vertexColor=vertexColor;out.localPos=position;let world=displaceWorld(u.model*vec4<f32>(position,1));out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
 }
 
 fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,roughness:f32,base:vec3<f32>,f0:vec3<f32>,metal:f32,coat:f32,coatRoughness:f32)->vec3<f32>{
@@ -414,6 +415,21 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     albedo=mix(albedo,vec3<f32>(0.91,0.945,0.98),bodySnow*smoothstep(.18,.78,fbm(in.worldPos*4.4+seed)+.25));
   }
 
+  // Mud is a projection of real contact work accumulated on the body state.
+  // Lower panels, wheel-arch height and the rear wake receive most of the load.
+  var bodyMudMask=0.0;
+  if(u.motion.z>.001){
+    let motionDir=normalize(vec3<f32>(u.motion.x,0.0,u.motion.y)+vec3<f32>(0.0001,0.0,0.0));
+    let rearFacing=smoothstep(.02,.86,dot(n,-motionDir));
+    let lowBand=1.0-smoothstep(-.18,.72,in.localPos.y);
+    let sideBand=smoothstep(.12,.94,1.0-abs(n.y));
+    let splash=fbm(in.worldPos*vec3<f32>(5.8,8.6,5.8)+seed*9.0);
+    let flecks=noise3(in.worldPos*31.0+seed*17.0);
+    bodyMudMask=clamp(u.motion.z*(lowBand*.82+rearFacing*.46+sideBand*.18)*smoothstep(.30,.70,splash+flecks*.22),0.0,.92);
+    let mudColor=mix(vec3<f32>(.11,.055,.018),vec3<f32>(.27,.145,.052),noise3(in.worldPos*12.0+seed));
+    albedo=mix(albedo,mudColor,bodyMudMask*.88);
+  }
+
   var materialAO=1.0;var mappedRoughness=-1.0;var mappedMetalness=-1.0;
   if(u.texture.w>.5||u.detail.y>.5||u.detail.w>.5){
     let w=pow(abs(n),vec3<f32>(6));let weights=w/max(w.x+w.y+w.z,.001);
@@ -446,7 +462,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let wetness=clamp(u.surface.y+u.motion.w+waterDepth/0.006+puddleMask*.5,0.0,1.0);
   albedo*=1.0-u.surface.w-wetness*.24;
 
-  var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.006-deformation.y*.10+deformation.z*.07,.08,1.0);
+  var roughness=clamp(select(select(u.surface.z,u.pbr.x,u.pbr.x>=0.0),mappedRoughness,mappedRoughness>=0.0)-wetness*.28+paintMicro*.006-deformation.y*.10+deformation.z*.07+bodyMudMask*.38,.08,1.0);
   if(treatment>3.5&&treatment<4.5){
     // Sub-percent tonal variation keeps the flake visible only inside the
     // clearcoat highlight; it is intentionally below the level of a noisy paint texture.

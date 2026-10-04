@@ -35,6 +35,7 @@ export {defineScene} from './scene/define.js';
 export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from './scene/url.js';
 export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,SceneVehicleAssemblySpec,Primitive,MaterialSpec,CameraSpec,CameraRailSpec,LightSpec,LightEmissionSpec,RenderingSpec,ReflectionProbeSpec,Color} from './scene/types.js';
 export {primitiveMesh,primitiveKey,surfaceGridPrimitive,type MeshData} from './procedural/mesh.js';
+export {hillyTerrainHeight,hillyTerrainMesh,polygonSurfaceGrid,type HillyTerrainOptions,type TerrainCorridorSpec} from './procedural/terrain.js';
 export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/cloth.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
 
@@ -92,11 +93,13 @@ export {RenderProfiler,RENDER_CPU_QUANTA,RENDER_GPU_QUANTA,type RenderCpuQuantum
 export {analyzeWGSL,buildRenderAtomReport,type ShaderOperationAtoms,type ShaderEntryAtoms,type ShaderProgramAtoms,type RenderCommandAtoms,type RenderGeometryAtoms,type RenderMemoryAtoms,type RenderAtomReport} from './render/atoms.js';
 
 export {detailedRoadWheelMeshes,detailedPassengerWheelMeshes,type RoadWheelGeometrySpec} from './vehicles/passenger-wheel.js';
+export {detailedOffroadWheelMeshes,type OffroadWheelGeometrySpec} from './vehicles/offroad-wheel.js';
+export {tyreRadialStiffness,tyreContactPatchLength,loadedTyreState,type LoadedTyreState} from './vehicles/tyre.js';
 export {compileVehicle,type VehicleDefinition,type VehicleFamily,type VehicleReferenceProvenance,type ThreeBoxVehicleDefinition,type CompiledVehicleGeometry} from './vehicles/framework.js';
 export {PICKUP_CANOPY_VEHICLE_DEFINITION,compileDoubleCabPickupVehicle,type DoubleCabPickupVehicleDefinition} from './vehicles/pickup.js';
 
 export {Drivetrain,torqueAtRpm,validateDrivetrainSpec,type DrivetrainSpec,type DrivetrainInput,type DrivetrainState,type CombustionEngineSpec,type ClutchSpec,type GearboxSpec,type DifferentialSpec,type TorqueCurvePoint} from './vehicles/drivetrain.js';
-export {Vehicle,vehicle,wheel,wing,rotor,PartCondition,type VehicleControls,type VehicleAir,type VehiclePose,type PartSample,type VehicleBlueprint,type VehicleSpec,type WheelSpec,type WingSpec,type RotorSpec,type ConditionSpec} from './vehicles/vehicle.js';
+export {Vehicle,vehicle,wheel,wing,rotor,PartCondition,type VehicleControls,type VehicleAir,type VehiclePose,type PartSample,type VehicleBlueprint,type VehicleSpec,type WheelSpec,type WingSpec,type RotorSpec,type TyreComplianceSpec,type ConditionSpec} from './vehicles/vehicle.js';
 export {lightHelicopter,LIGHT_HELICOPTER_HOVER_COLLECTIVE,LIGHT_HELICOPTER_HOVER_ROLL,LIGHT_HELICOPTER_MAIN_RPM,LIGHT_HELICOPTER_TAIL_RPM} from './vehicles/helicopter.js';
 
 
