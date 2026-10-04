@@ -4,6 +4,7 @@ import {
   iAmAliveArticulatorScore,
   renderArticulatedVocalTract,
   synthesizeNpcEnglishSpeech,
+  synthesizeNpcEnglishAsrSkill,
   wavBytes,
 } from '../../dist/index.js';
 
@@ -12,6 +13,8 @@ const out='artifacts/npc-speech';await mkdir(out,{recursive:true});
 
 const soft=synthesizeNpcEnglishSpeech(NPC_DEMO_TEXT,{sampleRate:48_000,controlRateHz:240});
 await writeFile(out+'/npc-english-soft.wav',wavBytes(soft.audio));
+const calibratedYeah=synthesizeNpcEnglishAsrSkill('yeah',{sampleRate:48_000,controlRateHz:240});
+await writeFile(out+'/npc-asr-yeah.wav',wavBytes(calibratedYeah.audio));
 
 const base=[...iAmAliveArticulatorScore()];
 const fallback=renderArticulatedVocalTract(base,{sampleRate:48_000,seed:0xA11CE},NPC_DEMO_TEXT);
@@ -64,6 +67,7 @@ await writeFile(out+'/npc-word-alive.wav',wavBytes(clipAlive.audio));
 await writeFile(out+'/audio-evidence.json',JSON.stringify({
   text:NPC_DEMO_TEXT,
   softGeometry:soft.diagnostics,
+  calibratedYeah:calibratedYeah.diagnostics,
   waveguideFallback:fallback.diagnostics,
   asrCalibrated:{expected:'yeah yeah',diagnostics:yeahYeah.diagnostics},
   segmentedIAmAlive:segmented.diagnostics,
