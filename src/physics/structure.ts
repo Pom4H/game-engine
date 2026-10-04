@@ -244,6 +244,29 @@ export class StructuralBody {
     if(!wasDormant)this.wake();
   }
 
+  /**
+   * Actuate one distance element by changing its stress-free length relative
+   * to the original structural definition. This is the generic muscle /
+   * tendon / pneumatic-actuator primitive; the solver still owns motion,
+   * inertia, contacts and energy dissipation.
+   */
+  setDistanceRestScale(index:number,scale:number):void{
+    this.validateIndex(index,this.constraintCount);
+    if(this.kind[index]!==DISTANCE)throw new TypeError('Only distance constraints can be actively contracted');
+    if(!Number.isFinite(scale)||scale<.25||scale>4)throw new RangeError('Active distance rest scale must be within 0.25..4');
+    const next=this.originalRest[index]!*scale;
+    if(Math.abs(next-this.rest[index]!)<1e-12)return;
+    this.rest[index]=next;
+    this.lambda[index]=0;
+    this.wake();
+  }
+
+  distanceRestScale(index:number):number{
+    this.validateIndex(index,this.constraintCount);
+    if(this.kind[index]!==DISTANCE)throw new TypeError('Only distance constraints expose an active rest scale');
+    return this.rest[index]!/Math.max(1e-12,this.originalRest[index]!);
+  }
+
   /** Reposition a dormant structural shape without introducing velocity. */
   translate(offset:Vec3):void{
     if(this.mode!=='dormant')throw new Error('Only a dormant structural body can be translated');
