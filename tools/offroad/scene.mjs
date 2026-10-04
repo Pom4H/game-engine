@@ -18,18 +18,16 @@ const pickup=compileDoubleCabPickupVehicle(offroadDef);
 const wheelVisual={radius:.54,width:.42,rimRatio:.56,spokes:8,split:0,dish:.042,treadBlocks:48,treadDepthM:.038,deflectionM:.072,sidewallBulge:.14};
 const paint=[.12,.18,.085,1],glass=[.055,.09,.095,.72],rubber=[.018,.016,.013,1],rim=[.31,.33,.32,1];
 
-function mergedVehicle(){
- const positions=[],normals=[],indices=[],colors=[],add=(mesh,offset,color)=>{
-  if(mesh.kind!=='triangle-mesh')return;
-  const base=positions.length/3;
-  for(let i=0;i<mesh.positions.length;i+=3){positions.push(mesh.positions[i]+offset[0],mesh.positions[i+1]+offset[1],mesh.positions[i+2]+offset[2]);normals.push(mesh.normals[i],mesh.normals[i+1],mesh.normals[i+2]);colors.push(...color);}
-  for(const index of mesh.indices)indices.push(base+index);
- };
- const yShift=-1.04;
- for(const part of pickup.parts)if(part.id==='body'||part.id==='glass')add(part.mesh,[part.position[0],part.position[1]+yShift,part.position[2]],part.id==='glass'?glass:paint);
- const front=offroadDef.dimensions.wheelbase/2,rear=-front;
- for(const x of [front,rear])for(const [z,side] of [[-offroadDef.dimensions.track/2,-1],[offroadDef.dimensions.track/2,1]]){const w=detailedOffroadWheelMeshes(wheelVisual,side);add(w.tire,[x,.54+yShift,z],rubber);add(w.rim,[x,.54+yShift,z],rim);}
- return{kind:'triangle-mesh',positions,normals,indices,colors};
+function translated(mesh,offset){return{...mesh,positions:mesh.positions.map((v,i)=>v+offset[i%3])};}
+const bodyMesh=translated(pickup.parts.find(part=>part.id==='body').mesh,[0,-1.04,0]);
+const glassMesh=pickup.parts.find(part=>part.id==='glass').mesh;
+const visualBindings=[];
+function addWheelVisual(id,partId,x,z,side){
+ const wheel=detailedOffroadWheelMeshes(wheelVisual,side),y=.54-1.04;
+ entities.push({id:id+'-tyre',renderOnly:true,mesh:wheel.tire,material:{kind:'rubber',color:rubber,roughness:.96,pattern:'rubber'}});
+ entities.push({id:id+'-rim',renderOnly:true,mesh:wheel.rim,material:{kind:'aluminum',color:rim,roughness:.22,metalness:.96}});
+ visualBindings.push({entityId:id+'-tyre',assemblyId:'offroad',partId,wheelRole:'tyre',localPosition:[x,y,z]});
+ visualBindings.push({entityId:id+'-rim',assemblyId:'offroad',partId,wheelRole:'rim',localPosition:[x,y,z]});
 }
 
 const invisible={kind:'triangle-mesh',positions:[0,0,0,0,0,0,0,0,0],normals:[0,1,0,0,1,0,0,1,0],indices:[0,1,2]};
@@ -41,7 +39,8 @@ entities.push({id:'track-mud',position:[-16,.135,0],mesh:{kind:'polygon-prism',p
 
 const waterShape=[[-6,-3.45],[-3,-3.75],[0,-3.58],[3.2,-3.8],[6,-3.38],[6,3.38],[2.7,3.72],[-.4,3.55],[-3.4,3.82],[-6,3.42]];
 entities.push({id:'track-water-contact',position:[14,.235,0],mesh:{kind:'polygon-prism',points:waterShape,thickness:.03,axis:1},renderMesh:invisible,material:{kind:'default',color:[.14,.09,.045,1],roughness:.78,finish:'rough',ageYears:65},body:{},environmental:{surfaceUse:'road',waterDepthM:.05}});
-entities.push({id:'water-sheet',position:[14,.282,0],mesh:{kind:'box',size:[11.7,.045,7.15]},material:{kind:'glass',color:[.18,.31,.34,.42],roughness:.035,clearcoat:1,clearcoatRoughness:.025}});
+const waterGrid=polygonSurfaceGrid(waterShape,.18),waterSurface={...waterGrid,positions:waterGrid.positions.map((v,i)=>i%3===1?v+.012:v)};
+entities.push({id:'water-sheet',position:[14,.282,0],renderOnly:true,mesh:waterSurface,material:{kind:'glass',color:[.16,.28,.31,.38],roughness:.028,clearcoat:1,clearcoatRoughness:.025}});
 
 const addSlope=(id,x0,y0,x1,y1)=>{
  const dx=x1-x0,dy=y1-y0,length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),normal=[-Math.sin(angle),Math.cos(angle)],thickness=.20;
@@ -60,7 +59,14 @@ const vehicle={chassis:{massKg:chassisMass,sizeM:[5.25,1.24,2.02],dragAreaM2:1.1
  wheel('wheel.front.left',[1.61,-.20,-.91],.54),wheel('wheel.front.right',[1.61,-.20,.91],.54),
  wheel('wheel.rear.left',[-1.61,-.20,-.91]),wheel('wheel.rear.right',[-1.61,-.20,.91]),
 ]};
-entities.push({id:'offroad',position:[-19,1.28,0],mesh:{kind:'box',size:[5.25,1.24,2.02]},renderMesh:mergedVehicle(),material:{kind:'steel',color:[1,1,1,1],roughness:.38,metalness:.08,treatment:'painted',clearcoat:.72,clearcoatRoughness:.12},body:{mass:totalMass,shape:'box',collisionSize:[5.25,1.24,2.02],velocity:[5.0,0,0],friction:.74,restitution:.02}});
+entities.push({id:'offroad',position:[-19,1.28,0],mesh:{kind:'box',size:[5.25,1.24,2.02]},renderMesh:bodyMesh,material:{kind:'steel',color:paint,roughness:.34,metalness:.12,treatment:'painted',clearcoat:.78,clearcoatRoughness:.10},body:{mass:totalMass,shape:'box',collisionSize:[5.25,1.24,2.02],velocity:[5.0,0,0],friction:.74,restitution:.02}});
+entities.push({id:'offroad-glass',renderOnly:true,mesh:glassMesh,material:{kind:'glass',color:[.045,.075,.082,.36],roughness:.045,pattern:'window'}});
+visualBindings.push({entityId:'offroad-glass',assemblyId:'offroad',localPosition:[0,-1.04,0]});
+const front=offroadDef.dimensions.wheelbase/2,rear=-front,halfTrack=offroadDef.dimensions.track/2;
+addWheelVisual('offroad-front-left','wheel.front.left',front,-halfTrack,-1);
+addWheelVisual('offroad-front-right','wheel.front.right',front,halfTrack,1);
+addWheelVisual('offroad-rear-left','wheel.rear.left',rear,-halfTrack,-1);
+addWheelVisual('offroad-rear-right','wheel.rear.right',rear,halfTrack,1);
 
 export default{
  version:1,seed:90421,ground:-4,gravity:[0,-9.81,0],clearColor:[.36,.47,.52,1],
@@ -71,9 +77,10 @@ export default{
   {position:[13.5,1.82,5.7],target:[10.8,.58,0]},
   {position:[27,2.55,7.0],target:[24.5,.92,0]},
  ]},
- rendering:{sunDirection:[-.48,.70,-.31],sunColor:[1,.91,.78],skyColor:[.40,.53,.60],sunIntensity:1.35,exposure:1.02,shadowExtent:115,fogDensity:.0023,fogColor:[.45,.54,.56],reflectionProbe:{entity:'offroad',offset:[0,.45,0],radius:38,exclude:['offroad','water-sheet'],facesPerFrame:6,boxHalfExtents:[34,13,24]}},
+ rendering:{sunDirection:[-.48,.70,-.31],sunColor:[1,.91,.78],skyColor:[.40,.53,.60],sunIntensity:1.35,exposure:1.02,shadowExtent:115,fogDensity:.0023,fogColor:[.45,.54,.56],reflectionProbe:{entity:'offroad',offset:[0,.45,0],radius:38,exclude:['offroad','offroad-glass','offroad-front-left-tyre','offroad-front-left-rim','offroad-front-right-tyre','offroad-front-right-rim','offroad-rear-left-tyre','offroad-rear-left-rim','offroad-rear-right-tyre','offroad-rear-right-rim','water-sheet'],facesPerFrame:6,boxHalfExtents:[34,13,24]}},
  fluids:[{id:'water-crossing',shape:'box',center:[14,.275,0],sizeM:[11.7,.05,7.1],densityKgM3:998.2,velocity:[0,0,0],dragCoefficient:1.05}],
  soilVolumes:[{id:'mud-soil',center:[-16,.15,0],sizeM:[16,8],cells:[32,18],pressureScalePa:56000,sinkageExponent:.86,maxSinkageM:.29,cohesionPa:3600,frictionAngleDeg:21,compactionRatePerSecond:.82,rollingResistance:.095}],
  vehicleAssemblies:[{entityId:'offroad',vehicle,controls:{throttle:.55}}],
+ vehicleVisuals:visualBindings,
  entities,
 };

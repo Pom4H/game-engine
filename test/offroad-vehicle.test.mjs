@@ -79,3 +79,14 @@ test('offroad demo owns real water volume and a deformable non-rectangular mud p
  assert.ok(mud.renderMesh.indices.length/3>1000,mud.renderMesh.indices.length/3);
  assert.equal(water.material.kind,'glass');
 });
+
+
+test('vehicle visual children are render-only projections of the authoritative assembly',()=>{
+ const scene=new Scene(offroadSpec),car=scene.entities.get('offroad'),glass=scene.entities.get('offroad-glass'),tyre=scene.entities.get('offroad-front-left-tyre'),rim=scene.entities.get('offroad-front-left-rim');
+ assert.ok(car?.body&&glass&&tyre&&rim);
+ assert.equal(glass.body,undefined);assert.equal(tyre.body,undefined);assert.equal(rim.body,undefined);
+ assert.equal(glass.material.kind,'glass');assert.equal(tyre.material.kind,'rubber');assert.equal(rim.material.kind,'aluminum');
+ const before=[...rim.rotation];for(let i=0;i<60;i++)scene.step(1/60);
+ assert.notDeepEqual(rim.rotation,before,'rim spin must project from the physical wheel');
+ assert.ok(Math.hypot(tyre.position[0]-car.position[0],tyre.position[2]-car.position[2])>.5);
+});

@@ -13,6 +13,7 @@ import {fracturePlate} from '../materials/glass-fracture.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
+import {quaternionFromEuler,eulerFromQuaternion} from '../physics/rotation.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
 import {FluidField} from '../physics/fluid.js';
 import {WindField} from '../physics/wind.js';
@@ -21,7 +22,7 @@ import {bodyWheelSupport} from '../physics/wheel-support.js';
 import {Vehicle,vehicle as compileVehicle} from '../vehicles/vehicle.js';
 import type {EngineEvent} from './events.js';
 import {simulationProfile,type KernelProgram,type SimulationProfile,type SimulationProfileInput} from '../core/kernel.js';
-import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec} from './types.js';
+import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec,SceneVehicleVisualSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext,type ScenePlugin} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
 import {cameraOnRail} from './camera-rail.js';
@@ -139,6 +140,7 @@ export class Scene {
     for(const {entityId,...options} of this.spec.surfaceContacts?.wheels??[])this.contacts.addWheelContact(entityId,options);
     for(const walker of this.spec.animation?.walkers??[])this.animation.addWalker(walker);
     for(const vehicle of this.spec.animation?.vehicles??[])this.animation.addVehicle(vehicle);
+    this.syncVehicleVisuals();
     this.installSystemRuntime();
   }
 
@@ -155,7 +157,7 @@ export class Scene {
     const surface=deriveSurfaceState(profile,spec.material??{},this.environment);
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
-    const shouldCollide=spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle;
+    const shouldCollide=!spec.renderOnly&&(spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle);
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
     const body=shouldCollide?this.physics.add(new RigidBody({
       id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),kinematic:spec.body?.motion==='kinematic',
@@ -200,6 +202,7 @@ export class Scene {
     for(const entity of this.entities.values())if(entity.body&&(entity.body.invMass>0||entity.body.kinematic))ids.add(entity.id);
     for(const id of this.animation.controlledEntityIds())ids.add(id);
     for(const id of this.deformation.visualEntityIds())ids.add(id);
+    for(const visual of this.spec.vehicleVisuals??[])ids.add(visual.entityId);
     for(const id of this.contacts?.controlledEntityIds()??[])ids.add(id);
     this.renderMoverRevision=this.renderStructureRevision;this.renderMovers=ids;return ids;
   }
@@ -226,6 +229,33 @@ export class Scene {
       result.push({id:bodyId+':'+part.source.id,bodyId,position:sample.point,velocity:assembly.body.velocity,grounded:sample.contact,radius:sample.loadedRadiusM,angularSpeed:Math.abs(sample.angularSpeed),normalLoadN:sample.loadN});
     }
     return result;
+  }
+  private syncVehicleVisuals():void{
+    const qp=new Float64Array(4),ql=new Float64Array(4),q=new Float64Array(4);
+    for(const binding of this.spec.vehicleVisuals??[]){
+      const entity=this.entities.get(binding.entityId),parent=this.entities.get(binding.assemblyId),assembly=this.assemblies.get(binding.assemblyId);if(!entity||!parent||!assembly)continue;
+      const local:MutableVec3=[...binding.localPosition],rotation:MutableVec3=[...(binding.localRotation??[0,0,0])],scale:MutableVec3=[...(binding.localScale??[1,1,1])];
+      if(binding.partId){
+        const sample=assembly.part(binding.partId),part=assembly.blueprint.parts.find(candidate=>candidate.source.id===binding.partId)?.source;
+        if(part?.kind==='wheel'){
+          local[1]+=sample.compressionM;
+          rotation[1]+=Math.atan2(sample.localChord[2],sample.localChord[0]);
+          if(binding.wheelRole==='rim')rotation[2]-=sample.spinRad;
+          if(binding.wheelRole==='tyre'&&part.tyre){
+            const authored=Math.max(.01,part.radiusM-(part.tyre.maxDeflectionM??0)*.68),current=Math.max(.01,sample.loadedRadiusM);
+            scale[1]*=Math.max(.78,Math.min(1.08,current/authored));scale[2]*=Math.max(.98,Math.min(1.10,authored/current));
+          }
+        }
+      }
+      const [rx,ry,rz]=parent.rotation,sx=Math.sin(rx),cx=Math.cos(rx),sy=Math.sin(ry),cy=Math.cos(ry),sz=Math.sin(rz),cz=Math.cos(rz),x=local[0],y=local[1],z=local[2];
+      entity.position[0]=parent.position[0]+(cy*cz*x-cy*sz*y+sy*z);
+      entity.position[1]=parent.position[1]+((sx*sy*cz+cx*sz)*x+(-sx*sy*sz+cx*cz)*y-sx*cy*z);
+      entity.position[2]=parent.position[2]+((-cx*sy*cz+sx*sz)*x+(cx*sy*sz+sx*cz)*y+cx*cy*z);
+      quaternionFromEuler(parent.rotation,qp);quaternionFromEuler(rotation,ql);
+      const ax=qp[0]!,ay=qp[1]!,az=qp[2]!,aw=qp[3]!,bx=ql[0]!,by=ql[1]!,bz=ql[2]!,bw=ql[3]!;
+      q[0]=aw*bx+ax*bw+ay*bz-az*by;q[1]=aw*by-ax*bz+ay*bw+az*bx;q[2]=aw*bz+ax*by-ay*bx+az*bw;q[3]=aw*bw-ax*bx-ay*by-az*bz;
+      eulerFromQuaternion(q,entity.rotation);entity.scale.splice(0,3,...scale);
+    }
   }
   /** Physical state projected onto an authored surface or one of its generated visuals. */
   surfaceStateForRender(entityId:string){
@@ -273,6 +303,7 @@ export class Scene {
           return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
         });
       })
+      .use('vehicle-visuals',()=>{this.syncVehicleVisuals();})
       .use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
       .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet,this.assemblyWheelContacts());})
       .use('events',({at})=>{this.emitContactEvents(at);})

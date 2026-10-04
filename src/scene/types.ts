@@ -67,6 +67,8 @@ export interface EntitySpec {
   mesh?:Primitive;
   /** Optional high-detail visual geometry. Never changes mass, contacts or environmental queries. */
   renderMesh?:Primitive;
+  /** Pure projection entity. It never creates a collider, even for brittle visual materials such as glass. */
+  renderOnly?:boolean;
   material?:MaterialSpec;
   environmental?:EnvironmentalSpec;
   light?:LightSpec;
@@ -160,6 +162,18 @@ export interface SceneSurfaceContactsSpec {
   readonly snow?:readonly (SnowContactSurfaceOptions & {readonly surfaceId:string})[];
   readonly wheels?:readonly {readonly entityId:string;readonly radius?:number;readonly lateral?:Vec3}[];
 }
+export interface SceneVehicleVisualSpec {
+  /** Render-only entity whose transform is projected from one authoritative vehicle assembly. */
+  readonly entityId:string;
+  readonly assemblyId:string;
+  /** Local pose in the assembly body's frame. */
+  readonly localPosition:Vec3;
+  readonly localRotation?:Vec3;
+  readonly localScale?:Vec3;
+  /** Optional physical part supplying suspension/steer/spin state. */
+  readonly partId?:string;
+  readonly wheelRole?:'tyre'|'rim';
+}
 export interface SceneVehicleAssemblySpec {
   /** Existing authored Scene entity/body that owns the pose and collision shape. */
   readonly entityId:string;
@@ -177,6 +191,8 @@ export interface SceneSpec {
   deformation?:SceneDeformationSpec;
   /** Declarative physics assemblies adopt existing Scene bodies; no second pose/integrator. */
   vehicleAssemblies?:readonly SceneVehicleAssemblySpec[];
+  /** Visual children are projections of assembly state, never another vehicle simulation. */
+  vehicleVisuals?:readonly SceneVehicleVisualSpec[];
   /** Finite physical fluid volumes; rendering remains an ordinary entity/material concern. */
   fluids?:readonly FluidVolumeSpec[];
   /** Spatial air-flow volumes for wind tunnels, gust corridors and wake experiments. */

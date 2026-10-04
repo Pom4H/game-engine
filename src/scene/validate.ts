@@ -19,6 +19,8 @@ export function validateScene(value:unknown):SceneSpec{
     if(typeof entity.id!=='string'||!entity.id||entity.id.length>180||ids.has(entity.id))throw new TypeError(`Entity ${index} requires a unique stable id`);ids.add(entity.id);
     for(const key of ['position','rotation','scale'] as const)if(entity[key]!==undefined){if(!Array.isArray(entity[key]))throw new TypeError(`${entity.id}.${key} must be a vec3`);finiteVec3(entity[key] as number[],`${entity.id}.${key}`);}
     validateEntity(entity);
+    if(entity.renderOnly!==undefined&&typeof entity.renderOnly!=='boolean')throw new TypeError(`${entity.id}.renderOnly must be boolean`);
+    if(entity.renderOnly&&(entity.body!==undefined||entity.environmental!==undefined))throw new TypeError(`${entity.id}.renderOnly cannot own physics or environmental state`);
     if(entity.body!==undefined&&(!entity.body||typeof entity.body!=='object'))throw new TypeError(`${entity.id}.body must be an object`);
     if(entity.environmental!==undefined){if(!entity.environmental||typeof entity.environmental!=='object')throw new TypeError(`${entity.id}.environmental must be an object`);const use=(entity.environmental as Record<string,unknown>).surfaceUse;if(use!==undefined&&!['generic','road','sidewalk','curb'].includes(String(use)))throw new TypeError(`${entity.id}.environmental.surfaceUse is unknown`);}
     if(entity.material!==undefined){
@@ -51,13 +53,14 @@ export function validateScene(value:unknown):SceneSpec{
       validateSoilVolume(raw as SoilVolumeSpec);const id=(raw as SoilVolumeSpec).id;if(ids.has(id))throw new TypeError(`Duplicate soil ${id}`);ids.add(id);
     }
   }
+  const vehicleBlueprints=new Map<string,ReturnType<typeof compileVehicle>>();
   if(scene.vehicleAssemblies!==undefined){
     const assemblies=boundedArray(scene.vehicleAssemblies,'vehicleAssemblies',128),used=new Set<string>(),entities=scene.entities as EntitySpec[];
     for(const [index,raw] of assemblies.entries()){
       const path=`vehicleAssemblies[${index}]`,assembly=object(raw,path),entityId=stableId(assembly.entityId,`${path}.entityId`);
       if(used.has(entityId))throw new TypeError(`${path} duplicates assembly ${entityId}`);used.add(entityId);
       const entity=entities.find(candidate=>candidate.id===entityId);if(!entity?.body)throw new TypeError(`${path} requires entity ${entityId} with body`);
-      const authored=object(assembly.vehicle,`${path}.vehicle`),blueprint=compileVehicle(entityId,authored as unknown as Omit<VehicleSpec,'id'>);
+      const authored=object(assembly.vehicle,`${path}.vehicle`),blueprint=compileVehicle(entityId,authored as unknown as Omit<VehicleSpec,'id'>);vehicleBlueprints.set(entityId,blueprint);
       if(entity.body.mass!==blueprint.massKg)throw new TypeError(`${path} body.mass must equal compiled assembly mass ${blueprint.massKg}`);
       if(JSON.stringify(entity.body.collisionSize)!==JSON.stringify(blueprint.source.chassis.sizeM))throw new TypeError(`${path} body.collisionSize must equal chassis.sizeM`);
       if(assembly.air!==undefined){
@@ -71,6 +74,19 @@ export function validateScene(value:unknown):SceneSpec{
           number(value,`${path}.controls.${key}`,unipolar.has(key)?0:-1,1);
         }
       }
+    }
+  }
+  if(scene.vehicleVisuals!==undefined){
+    const visuals=boundedArray(scene.vehicleVisuals,'vehicleVisuals',1024),used=new Set<string>(),entities=scene.entities as EntitySpec[];
+    for(const [index,raw] of visuals.entries()){
+      const path=`vehicleVisuals[${index}]`,visual=object(raw,path),entityId=stableId(visual.entityId,`${path}.entityId`),assemblyId=stableId(visual.assemblyId,`${path}.assemblyId`);
+      if(used.has(entityId))throw new TypeError(`${path} duplicates visual entity ${entityId}`);used.add(entityId);
+      const entity=entities.find(candidate=>candidate.id===entityId);if(!entity?.renderOnly)throw new TypeError(`${path}.entityId requires renderOnly entity ${entityId}`);
+      const blueprint=vehicleBlueprints.get(assemblyId);if(!blueprint)throw new TypeError(`${path}.assemblyId references missing vehicle assembly ${assemblyId}`);
+      vector(visual.localPosition,3,`${path}.localPosition`);if(visual.localRotation!==undefined)vector(visual.localRotation,3,`${path}.localRotation`);if(visual.localScale!==undefined)vector(visual.localScale,3,`${path}.localScale`,Number.MIN_VALUE);
+      choice(visual.wheelRole,['tyre','rim'],`${path}.wheelRole`);
+      if(visual.partId!==undefined){const partId=stableId(visual.partId,`${path}.partId`),part=blueprint.parts.find(candidate=>candidate.source.id===partId);if(!part)throw new TypeError(`${path}.partId references missing part ${partId}`);if(visual.wheelRole!==undefined&&part.source.kind!=='wheel')throw new TypeError(`${path}.wheelRole requires wheel part`);}
+      else if(visual.wheelRole!==undefined)throw new TypeError(`${path}.wheelRole requires partId`);
     }
   }
     validateBindings(scene,scene.entities as EntitySpec[]);
@@ -311,6 +327,7 @@ export function validateEntity(value:unknown):EntitySpec{
   for(const key of ['position','rotation','scale'])if(e[key]!==undefined)vector(e[key],3,`${id}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
   if(e.mesh!==undefined)primitiveSpec(e.mesh,`${id}.mesh`);
   if(e.renderMesh!==undefined)primitiveSpec(e.renderMesh,`${id}.renderMesh`);
+  if(e.renderOnly!==undefined&&typeof e.renderOnly!=='boolean')throw new TypeError(`${id}.renderOnly must be boolean`);
   if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);if(b.fluid!==undefined){const p=object(b.fluid,`${id}.body.fluid`);number(p.enclosedVolumeM3,`${id}.body.fluid.enclosedVolumeM3`,0,1e6);optionalNumber(p,'leakAreaM2',`${id}.body.fluid`,0,100);}}
   if(e.material!==undefined)materialSpec(e.material,`${id}.material`);
   if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);if(env.snowMaterial!==undefined)materialSpec(env.snowMaterial,`${id}.environmental.snowMaterial`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
