@@ -5,7 +5,8 @@ on:
     paths:
       - 'src/animation/expressive-face.ts'
       - 'src/audio/native-*.ts'
-      - 'tools/tea-performance/**'
+      - 'tools/tea-performance/*.mjs'
+      - 'tools/tea-performance/*.html'
       - 'tools/tea-scene/server.mjs'
       - 'tools/tea-scene/webgpu-capture.mjs'
       - 'test/tea-performance.test.mjs'
@@ -36,7 +37,8 @@ jobs:
       - run: node --test test/native-speech.test.mjs test/native-tract-energy.test.mjs test/tea-performance.test.mjs test/conversation-face.test.mjs test/tea-scene.test.mjs
   hardware-views:
     needs: contracts
-    runs-on: [self-hosted, Windows]
+    # Same established selector as render.yml; do not assume custom OS labels.
+    runs-on: self-hosted
     timeout-minutes: 30
     defaults:
       run:
@@ -60,7 +62,7 @@ jobs:
           TEA_CAPTURE_MODE: ${{ inputs.mode || 'storyboard' }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
           $env:CHROME_PATH = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
           if (-not $env:CHROME_PATH) { throw 'Chrome is required' }
           $env:TEA_OUTPUT = Join-Path $env:USERPROFILE "game-engine-renders\tea-performance\$env:GITHUB_SHA"
