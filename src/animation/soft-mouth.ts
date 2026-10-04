@@ -322,7 +322,7 @@ function dentalVisualEntities(base:SceneSpec):SceneSpec['entities']{
         id:idFor(i),
         position:[frame[0]+x,frame[1]+y,frame[2]+z],
         mesh:{kind:'sphere',radius:.5,segments:14},
-        scale:[i===3||i===4?.034:.030,.044-.005*side,.023],
+        scale:[(i===3||i===4)?.034:.030,.044-.005*side,.023],
         material:{kind:'default',color:[.91,.90,.84,1],roughness:.26,metalness:0},
       });
     }
@@ -350,7 +350,7 @@ export function softVocalFaceSceneSpec():SceneSpec{
     indices:[...template.indices],
   };
   const hiddenLegacy=base.entities.map(entity=>
-    [VOCAL_FACE_IDS.upperLip,VOCAL_FACE_IDS.lowerLip,VOCAL_FACE_IDS.upperTeeth,VOCAL_FACE_IDS.lowerTeeth].includes(entity.id as never)
+    entity.id===VOCAL_FACE_IDS.upperLip||entity.id===VOCAL_FACE_IDS.lowerLip||entity.id===VOCAL_FACE_IDS.upperTeeth||entity.id===VOCAL_FACE_IDS.lowerTeeth
       ?{...entity,scale:[.001,.001,.001] as Vec3}
       :entity
   );
