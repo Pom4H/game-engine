@@ -11,7 +11,7 @@ output_json = sys.argv[5] if len(sys.argv) > 5 else None
 
 def normalize(text: str) -> str:
     text = text.lower().replace("ё", "е")
-    text = re.sub(r"[^а-я0-9\s]+", " ", text)
+    text = re.sub(r"[^a-zа-я0-9\s]+", " ", text)
     return " ".join(text.split())
 
 def edit_distance(a, b):
