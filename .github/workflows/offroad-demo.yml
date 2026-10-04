@@ -57,12 +57,17 @@ jobs:
           RENDER_REQUIRE_HARDWARE: '1'
           RENDER_PROFILING: '1'
           RENDER_WARMUP_FRAMES: '10'
+          RENDER_VIDEO_OUTPUT: 'artifacts/offroad.mp4'
+          RENDER_VIDEO_FPS: '30'
+          RENDER_VIDEO_START: '0'
+          RENDER_VIDEO_DURATION: '7.5'
         run: node tools/render-harness.mjs tools/offroad/scene.mjs tools/offroad/views.mjs 1600 900
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: offroad-render
           path: |
+            artifacts/offroad.mp4
             artifacts/offroad-*.png
             artifacts/render-hud.json
           retention-days: 14
