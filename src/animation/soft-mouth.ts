@@ -5,7 +5,7 @@ import {StructuralStaticContactSolver,type StructuralContactStats,type Structura
 import {StructuralBody,type StructuralConstraintSpec,type StructuralDefinition} from '../physics/structure.js';
 import type {Color,Primitive,SceneSpec} from '../scene/types.js';
 import {Scene,type RuntimeEntity} from '../scene/scene.js';
-import type {VocalArticulators} from '../audio/vocal-tract.js';
+import {sampleArticulatorScore,type ArticulatorGesture,type VocalArticulators} from '../audio/vocal-tract.js';
 import {VocalFaceRig,VOCAL_FACE_IDS,vocalFaceSceneSpec,type VocalFacePose} from './vocal-face.js';
 
 const CAGE_ANGLES=24;
@@ -20,6 +20,29 @@ const upperToothId=(i:number)=>'vocal-face-visible-upper-tooth-'+i;
 const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
 /** Anticipatory lip motor lead for natural coarticulation before bilabial closures. */
 export const SOFT_MOUTH_MOTOR_LEAD_S=.18;
+
+/**
+ * Anticipatory coarticulation planner for the perioral motor system.
+ * It scans the whole lookahead window so short bilabial events cannot be
+ * skipped by point sampling. Only closure is anticipated; other articulators
+ * stay on the acoustic-time state until their own motor models are added.
+ */
+export function sampleSoftMouthMotorPlan(
+  gestures:readonly ArticulatorGesture[],
+  timeS:number,
+  leadS=SOFT_MOUTH_MOTOR_LEAD_S,
+):VocalArticulators{
+  const current=sampleArticulatorScore(gestures,timeS).articulators;
+  if(leadS<=0)return current;
+  let closure=current.lipClosure;
+  const steps=Math.max(4,Math.ceil(leadS/.012));
+  for(let i=1;i<=steps;i++){
+    const at=timeS+leadS*i/steps;
+    const future=sampleArticulatorScore(gestures,at).articulators;
+    closure=Math.max(closure,future.lipClosure);
+  }
+  return Object.freeze({...current,lipClosure:closure});
+}
 const MIN_LIP_CONTACT_GAP_M=.0015;
 const LIP_CONTACT_ZONE_M=.012;
 const LIP_CONTACT_STIFFNESS_N_M=7.5;
