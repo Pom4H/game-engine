@@ -19,7 +19,7 @@ const LOWER_GUM_ID='vocal-face-soft-lower-gum';
 const upperToothId=(i:number)=>'vocal-face-visible-upper-tooth-'+i;
 const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
 /** Anticipatory lip motor lead for natural coarticulation before bilabial closures. */
-export const SOFT_MOUTH_MOTOR_LEAD_S=.18;
+export const SOFT_MOUTH_MOTOR_LEAD_S=.22;
 
 /**
  * Anticipatory coarticulation planner for the perioral motor system.
