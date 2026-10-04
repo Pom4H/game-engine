@@ -59,3 +59,18 @@ test('ASR-calibrated English motor skill stays on the physical soft-airway path'
   assert.equal(result.diagnostics.phrase,'yeah');
   assert.ok(result.audio.left.some(v=>Math.abs(v)>.02));
 });
+
+
+test('external VTL backend keeps GPL synthesis behind a process boundary',async()=>{
+  const {VTL_EXTERNAL_BACKEND,planVtlNpcSpeech,serializeVtlSegmentSequence}=await import('../dist/index.js');
+  assert.equal(VTL_EXTERNAL_BACKEND.kind,'external-process');
+  assert.equal(VTL_EXTERNAL_BACKEND.license,'GPL-3.0');
+  const plan=planVtlNpcSpeech('la la');
+  assert.equal(plan.backend,'vocaltractlab-external');
+  assert.equal(plan.sampleRate,44100);
+  assert.deepEqual(plan.segments.map(s=>s.phone),['','l','a','l','a','']);
+  assert.deepEqual(plan.segments.map(s=>s.durationS),[.12,.18,.30,.18,.30,.18]);
+  const seg=serializeVtlSegmentSequence(plan);
+  assert.match(seg,/name = l; duration_s = 0\.180000;/);
+  assert.match(seg,/name = a; duration_s = 0\.300000;/);
+});
