@@ -4,6 +4,7 @@ import {Scene} from '../dist/index.js';
 import {hillyTerrainMesh} from '../dist/procedural/terrain.js';
 import {tyreRadialStiffness,tyreContactPatchLength,loadedTyreState} from '../dist/vehicles/tyre.js';
 import {detailedOffroadWheelMeshes} from '../dist/vehicles/offroad-wheel.js';
+import offroadSpec from '../tools/offroad/scene.mjs';
 
 test('lower tyre pressure softens carcass and grows the physical contact patch',()=>{
  const high={pressurePa:240000,referencePressurePa:240000,radialStiffnessNPerM:180000,maxDeflectionM:.09},low={...high,pressurePa:120000};
@@ -38,4 +39,16 @@ test('logical assembly wheel can transfer muddy water to its owning body',()=>{
  assert.ok(state&&state.roadDirt>.01,state);
  assert.ok(state&&state.wetness>0,state);
  assert.ok(scene.contacts.sprayEmitted>0,scene.contacts.inspect());
+});
+
+
+test('offroad demo runs the same cause chain from tyre load to muddy body state',()=>{
+ const scene=new Scene(offroadSpec);
+ const startX=scene.entities.get('offroad').position[0];
+ for(let i=0;i<120;i++)scene.step(1/60);
+ const car=scene.entities.get('offroad'),state=scene.surfaces.body('offroad');
+ assert.ok(car.position[0]>startX+.5,{startX,x:car.position[0]});
+ assert.ok(scene.contacts.sprayEmitted>0,scene.contacts.inspect());
+ assert.ok(state&&state.roadDirt>0,state);
+ assert.ok(state&&state.wetness>0,state);
 });
