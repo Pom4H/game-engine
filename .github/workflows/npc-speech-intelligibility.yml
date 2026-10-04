@@ -28,10 +28,12 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/airway-geometry.test.mjs test/npc-speech.test.mjs
+      - run: node --test test/story-area-model.test.mjs test/airway-geometry.test.mjs test/npc-speech.test.mjs
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg unzip python3-venv
       - name: Generate physical NPC audio
         run: node tools/npc-speech-demo/generate-audio.mjs
+      - name: Generate Story MRI mama
+        run: node tools/npc-speech-demo/story-mama.mjs
       - name: Dump vowel airway profiles
         run: node tools/npc-speech-demo/airway-dump.mjs
       - name: Generate English ASR probe clips
@@ -64,6 +66,7 @@ jobs:
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-word-i.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-word-i.wav
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-word-am.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-word-am.wav
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-word-alive.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-word-alive.wav
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/story-mama.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-story-mama.wav
       - name: Probe legacy words separately
         run: |
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/asr-word-i.wav .cache/vosk/vosk-model-small-en-us-0.15 "I" 2.0 artifacts/npc-speech/asr-word-i.json
@@ -105,6 +108,14 @@ jobs:
             "I am alive" \
             0.34 \
             artifacts/npc-speech/asr-segmented.json
+      - name: Gate Story MRI mama
+        run: |
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
+            artifacts/npc-speech/asr-story-mama.wav \
+            .cache/vosk/vosk-model-small-en-us-0.15 \
+            "mama" \
+            0.01 \
+            artifacts/npc-speech/asr-story-mama.json
       - name: Gate ASR-calibrated physical NPC word
         run: |
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
@@ -127,6 +138,9 @@ jobs:
             artifacts/npc-speech/npc-word-i.wav
             artifacts/npc-speech/npc-word-am.wav
             artifacts/npc-speech/npc-word-alive.wav
+            artifacts/npc-speech/story-mama.wav
+            artifacts/npc-speech/story-mama.json
+            artifacts/npc-speech/asr-story-mama.json
             artifacts/npc-speech/poster.png
             artifacts/npc-speech/evidence.json
             artifacts/npc-speech/audio-evidence.json
