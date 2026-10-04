@@ -56,6 +56,13 @@ entities.push({id:'offroad',position:[-19,1.25,0],mesh:{kind:'box',size:[5.25,1.
 
 export default{
  version:1,seed:90421,ground:-4,gravity:[0,-9.81,0],clearColor:[.46,.57,.62,1],
+ camera:{position:[-15,3.3,8.5],target:[-17,.75,0],fov:44},
+ cameraRail:{durationSeconds:7.5,keyframes:[
+  {position:[-15,3.3,8.5],target:[-17,.75,0]},
+  {position:[-2,4.2,10.5],target:[-4,.9,0]},
+  {position:[14,3.1,8.4],target:[11,.65,0]},
+  {position:[30,4.1,10.5],target:[27,1.05,0]},
+ ]},
  rendering:{sunDirection:[-.42,.74,-.36],sunColor:[1,.94,.84],skyColor:[.47,.60,.68],sunIntensity:1.15,exposure:1.05,shadowExtent:110,fogDensity:.0035,fogColor:[.53,.62,.65]},
  soilVolumes:[{id:'mud-soil',center:[-16,.15,0],sizeM:[16,8],cells:[24,14],pressureScalePa:62000,sinkageExponent:.88,maxSinkageM:.24,cohesionPa:4200,frictionAngleDeg:23,compactionRatePerSecond:.75,rollingResistance:.085}],
  vehicleAssemblies:[{entityId:'offroad',vehicle,controls:{throttle:.48}}],
