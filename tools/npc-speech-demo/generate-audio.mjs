@@ -30,15 +30,33 @@ const repeated=Object.freeze([...first,gapGesture,...second]);
 const yeahYeah=renderArticulatedVocalTract(repeated,{sampleRate:48_000,seed:0xA11CE},'yeah yeah');
 await writeFile(out+'/npc-calibrated-yeah-yeah.wav',wavBytes(yeahYeah.audio));
 
+const compact=(items,startAt)=>{
+  const firstStart=items[0].startS;
+  return items.map(g=>Object.freeze({...g,startS:startAt+(g.startS-firstStart),endS:startAt+(g.endS-firstStart)}));
+};
+const wordI=compact(base.slice(1,3),.10);
+let cursor=wordI.at(-1).endS;
+const pause=(from,to)=>Object.freeze({startS:from,endS:to,from:base.at(-1).from,voiced:0,lungPressurePa:0,gain:0,pitchHz:118});
+const gap1=pause(cursor,cursor+.30);cursor=gap1.endS;
+const wordAm=compact(base.slice(3,5),cursor);cursor=wordAm.at(-1).endS;
+const gap2=pause(cursor,cursor+.30);cursor=gap2.endS;
+const wordAlive=compact(base.slice(5,10),cursor);cursor=wordAlive.at(-1).endS;
+const tail=pause(cursor,cursor+.24);
+const segmentedScore=Object.freeze([...wordI,gap1,...wordAm,gap2,...wordAlive,tail]);
+const segmented=renderArticulatedVocalTract(segmentedScore,{sampleRate:48_000,seed:0xA11CE},'I am alive');
+await writeFile(out+'/npc-segmented-i-am-alive.wav',wavBytes(segmented.audio));
+
 await writeFile(out+'/audio-evidence.json',JSON.stringify({
   text:NPC_DEMO_TEXT,
   softGeometry:soft.diagnostics,
   waveguideFallback:fallback.diagnostics,
   asrCalibrated:{expected:'yeah yeah',diagnostics:yeahYeah.diagnostics},
+  segmentedIAmAlive:segmented.diagnostics,
 },null,2));
 console.log(JSON.stringify({
   text:NPC_DEMO_TEXT,
   calibrated:'yeah yeah',
   calibratedWav:out+'/npc-calibrated-yeah-yeah.wav',
-  duration:yeahYeah.diagnostics.durationS,
+  segmented:out+'/npc-segmented-i-am-alive.wav',
+  duration:segmented.diagnostics.durationS,
 },null,2));
