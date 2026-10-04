@@ -182,7 +182,7 @@ export function russianTextToNpcPhones(input:string):readonly RussianNpcPhoneTok
 
 function durationFor(token:RussianNpcPhoneToken,rate:number):number{
   if(token.phone==='silence')return token.pauseS??.04;
-  if(VOWELS.has(token.phone))return (token.stressed?.165:.125)/rate;
+  if(VOWELS.has(token.phone))return (token.stressed ? .165 : .125)/rate;
   if(token.phone==='r')return .095/rate;
   if(token.phone==='sh'||token.phone==='zh'||token.phone==='s'||token.phone==='z'||token.phone==='f'||token.phone==='v'||token.phone==='h')return .095/rate;
   if(STOPS.has(token.phone))return .075/rate;
