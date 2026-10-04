@@ -212,16 +212,26 @@ export class SoftTongueRig{
 
   private target(meta:TongueMeta,a:VocalArticulators,pose:VocalFacePose):Vec3{
     const root=rootTarget(meta,pose);
-    const front=meta.z01**1.35,tip=meta.z01**3;
     const centerWeight=Math.sin(Math.PI*meta.x01);
-    const forward=(a.tonguePosition-.45)*.145*front+.030*a.tongueTip*tip;
-    const lift=(a.tongueHeight-.35)*.115*front+.052*a.tongueTip*tip;
-    const narrow=.020*a.tongueHeight*(1-centerWeight);
+
+    // Tongue body is a moving muscular hump, not a "front rises with height"
+    // slider. Back vowels/stops lift the dorsum; front vowels lift the blade.
+    const bodyCenter=.26+.52*a.tonguePosition;
+    const bodyWidth=.17+.07*(1-a.tongueHeight);
+    const bodyWeight=Math.exp(-((meta.z01-bodyCenter)/bodyWidth)**2);
+    const tipWeight=Math.exp(-((meta.z01-.96)/.11)**2);
+
+    const longitudinalPull=(a.tonguePosition-.45)*.060*(.20+.80*meta.z01);
+    const tipForward=.018*a.tongueTip*tipWeight;
+    const bodyLift=(a.tongueHeight-.35)*.145*bodyWeight;
+    const tipLift=.070*a.tongueTip*tipWeight;
+
+    const narrow=.030*a.tongueHeight*bodyWeight*(1-centerWeight);
     const x=root[0]*(1-narrow);
     return[
       x,
-      root[1]+lift,
-      root[2]+forward,
+      root[1]+bodyLift+tipLift,
+      root[2]+longitudinalPull+tipForward,
     ];
   }
 
