@@ -1,0 +1,54 @@
+name: VTL NPC Oracle
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/npc-speech-demo/vtl-oracle.py'
+      - 'tools/npc-speech-demo/mama.seg'
+      - '.github/workflows/vtl-npc-oracle.yml'
+  workflow_dispatch:
+
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build official VocalTractLab backend
+        run: |
+          git clone --depth 1 https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/vtl
+          cmake -S /tmp/vtl -B /tmp/vtl/out -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/vtl/out --config Release --target VocalTractLabApi -j2
+      - name: Synthesize mama with official VTL
+        run: |
+          mkdir -p artifacts/vtl-oracle
+          LIB=$(find /tmp/vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          test -n "$LIB"
+          python3 tools/npc-speech-demo/vtl-oracle.py \
+            "$LIB" \
+            /tmp/vtl/resources/JD3.speaker \
+            tools/npc-speech-demo/mama.seg \
+            artifacts/vtl-oracle/mama.wav
+      - name: Prepare offline ASR
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg python3-venv unzip
+          python3 -m venv .venv
+          .venv/bin/pip install --disable-pip-version-check vosk==0.3.45
+          mkdir -p .cache/vosk
+          curl -fL --retry 3 --retry-delay 2 https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip -o .cache/vosk/model.zip
+          unzip -q -o .cache/vosk/model.zip -d .cache/vosk
+      - name: Gate official VTL with Vosk
+        run: |
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/vtl-oracle/mama.wav -af "adelay=300,apad=pad_dur=0.3" -ac 1 -ar 16000 -sample_fmt s16 artifacts/vtl-oracle/asr.wav
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
+            artifacts/vtl-oracle/asr.wav \
+            .cache/vosk/vosk-model-small-en-us-0.15 \
+            "mama" \
+            0.01 \
+            artifacts/vtl-oracle/asr.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vtl-npc-oracle
+          path: artifacts/vtl-oracle
+          retention-days: 14
