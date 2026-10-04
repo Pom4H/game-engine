@@ -444,6 +444,17 @@ export class SoftMouthRig{
         const force=Math.hypot(fx,fy,fz),limit=.035+.045*outerWeight;
         if(force>limit){const q=limit/force;fx*=q;fy*=q;fz*=q;}
         this.structure.addForce(node,[fx,fy,fz]);
+
+        // Fast marginal orbicularis / incisivus bundle: speech closures last
+        // only ~70-100 ms, so the free vermilion border needs a dedicated
+        // contractile drive rather than waiting for cheek attachment forces.
+        if(a.lipClosure>.15&&meta.layer===0&&meta.ring<=1&&Math.abs(Math.sin(meta.angle))>.28){
+          const closureGain=meta.ring===0?1:.48;
+          const desiredY=target[1],errorY=desiredY-this.structure.position[j+1]!;
+          const maxClosureForce=.060*a.lipClosure*closureGain;
+          const closeFy=clamp(errorY*3.2-this.structure.velocity[j+1]!*0.040,-maxClosureForce,maxClosureForce);
+          this.structure.addForce(node,[0,closeFy,0]);
+        }
       }
       const boxes=contactBoxes(this.scene),contact=new StructuralStaticContactSolver(boxes,this.structure.definition.collisionTriangles??[]);
       contact.resetStats();
