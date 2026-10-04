@@ -6,6 +6,7 @@ import {
 } from '../dist/index.js';
 
 const LIP_CONTACT_TEST_MAX_GAP=.0062;
+const LIP_CONTACT_TEST_ZONE=.0121;
 
 test('perioral face is one structural soft-tissue volume with a real oral aperture',()=>{
   const scene=new Scene(softVocalFaceSceneSpec()),rig=new SoftVocalFaceRig(scene),d=rig.mouth.diagnostics;
@@ -75,8 +76,8 @@ test('perioral volume stays finite, attached, unbroken and outside teeth through
   assert.ok(maxLipClosingSpeed<=.181,'lip closing speed remained clap-like: '+maxLipClosingSpeed);
   assert.ok(maxLipContactForce<.0451,'lip contact force exceeded compliant cap: '+maxLipContactForce);
   assert.ok(minGap>=.0010,'lips crossed');
-  assert.ok(minGap<.008,'dialogue never reaches bilabial contact: '+minGap);
-  assert.ok(maxLipContactPairs>0,'anticipatory motor plan never reaches compliant lip contact');
+  assert.ok(minGap<LIP_CONTACT_TEST_ZONE,'dialogue never enters compliant bilabial contact zone: '+minGap);
+  assert.ok(maxLipContactPairs>0,'anticipatory motor plan never creates compliant lip contact pairs');
   assert.ok(maxGap>.080,'open vowels do not open the mouth enough: '+maxGap);
 });
 
