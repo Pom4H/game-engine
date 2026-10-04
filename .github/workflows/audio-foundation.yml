@@ -15,6 +15,7 @@ on:
       - 'test/vocal-face.test.mjs'
       - 'test/vocal-source.test.mjs'
       - 'test/airway-geometry.test.mjs'
+      - 'test/npc-speech.test.mjs'
       - 'test/acoustic-transfer.test.mjs'
       - 'src/scene/acoustic-boundary.ts'
       - 'src/physics/wave-field.ts'
@@ -52,7 +53,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/audio-foundation.test.mjs test/acoustic-transfer.test.mjs test/browser-audio.test.mjs test/vocal-source.test.mjs test/airway-geometry.test.mjs test/vocal-tract.test.mjs test/vocal-face.test.mjs test/kernel-depth.test.mjs
+      - run: node --test test/audio-foundation.test.mjs test/acoustic-transfer.test.mjs test/browser-audio.test.mjs test/vocal-source.test.mjs test/airway-geometry.test.mjs test/npc-speech.test.mjs test/vocal-tract.test.mjs test/vocal-face.test.mjs test/kernel-depth.test.mjs
       - run: node tools/acoustic-demo.mjs
       - run: node tools/car-garage-audio-demo.mjs
       - run: node tools/vocal-tract-demo.mjs
