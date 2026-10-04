@@ -7,6 +7,7 @@ if len(sys.argv) < 4:
 
 wav_path, model_dir, expected = sys.argv[1:4]
 max_wer = float(sys.argv[4]) if len(sys.argv) > 4 else 0.40
+output_json = sys.argv[5] if len(sys.argv) > 5 else None
 
 def normalize(text: str) -> str:
     text = text.lower().replace("ё", "е")
@@ -58,6 +59,10 @@ result = {
     "cer": cer,
     "max_wer": max_wer,
 }
-print(json.dumps(result, ensure_ascii=False, indent=2))
+payload = json.dumps(result, ensure_ascii=False, indent=2)
+print(payload)
+if output_json:
+    with open(output_json, "w", encoding="utf-8") as fh:
+        fh.write(payload + "\n")
 if wer > max_wer:
     raise SystemExit(f"speech intelligibility gate failed: WER={wer:.3f} > {max_wer:.3f}")
