@@ -178,7 +178,7 @@ class StoryTransmissionNetwork{
   constructor(){
     for(let i=0;i<this.nasalBase.length;i++){
       const x=(i+.5)/this.nasalBase.length;
-      this.nasalBase[i]=clamp(.55+2.4*x+1.0*Math.exp(-((x-.48)/.25)**2)-.65*Math.exp(-((x-.82)/.14)**2),.16,4.2);
+      this.nasalBase[i]=clamp(.55+2.4*x+1.0*Math.exp(-(((x-.48)/.25)**2))-.65*Math.exp(-(((x-.82)/.14)**2)),.16,4.2);
     }
     this.nasal.areas.set(this.nasalBase);
   }
