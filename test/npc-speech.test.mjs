@@ -47,3 +47,15 @@ test('English NPC seed planner preserves I am alive motor structure',async()=>{
   assert.equal(result.diagnostics.geometryDriven,true);
   assert.ok(result.audio.left.some(v=>Math.abs(v)>.02));
 });
+
+
+test('ASR-calibrated English motor skill stays on the physical soft-airway path',async()=>{
+  const {npcEnglishAsrMotorSkill,synthesizeNpcEnglishAsrSkill}=await import('../dist/index.js');
+  const skill=npcEnglishAsrMotorSkill('yeah');
+  assert.equal(skill.text,'yeah');
+  assert.ok(skill.score.length>=10);
+  const result=synthesizeNpcEnglishAsrSkill('yeah',{sampleRate:16000,controlRateHz:120});
+  assert.equal(result.diagnostics.geometryDriven,true);
+  assert.equal(result.diagnostics.phrase,'yeah');
+  assert.ok(result.audio.left.some(v=>Math.abs(v)>.02));
+});
