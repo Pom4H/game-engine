@@ -58,6 +58,7 @@ jobs:
         run: |
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-english-soft.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-soft.wav
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-english-waveguide.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-waveguide.wav
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-calibrated-yeah-yeah.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-calibrated.wav
       - name: Recognize soft-geometry path
         continue-on-error: true
         run: |
@@ -67,7 +68,8 @@ jobs:
             "I am alive" \
             0.34 \
             artifacts/npc-speech/asr-soft.json
-      - name: Gate intelligible physical NPC path
+      - name: Recognize legacy waveguide phrase
+        continue-on-error: true
         run: |
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
             artifacts/npc-speech/asr-waveguide.wav \
@@ -75,6 +77,15 @@ jobs:
             "I am alive" \
             0.34 \
             artifacts/npc-speech/asr-waveguide.json
+            artifacts/npc-speech/asr-calibrated.json
+      - name: Gate ASR-calibrated physical NPC utterance
+        run: |
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
+            artifacts/npc-speech/asr-calibrated.wav \
+            .cache/vosk/vosk-model-small-en-us-0.15 \
+            "yeah yeah" \
+            0.01 \
+            artifacts/npc-speech/asr-calibrated.json
             artifacts/npc-speech/probe
       - uses: actions/upload-artifact@v4
         if: always()
@@ -84,6 +95,7 @@ jobs:
             artifacts/npc-speech/npc-russian-geometry-speech.mp4
             artifacts/npc-speech/npc-english-soft.wav
             artifacts/npc-speech/npc-english-waveguide.wav
+            artifacts/npc-speech/npc-calibrated-yeah-yeah.wav
             artifacts/npc-speech/poster.png
             artifacts/npc-speech/evidence.json
             artifacts/npc-speech/audio-evidence.json
