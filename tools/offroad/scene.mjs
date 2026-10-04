@@ -1,4 +1,4 @@
-import {compileDoubleCabPickupVehicle,PICKUP_CANOPY_VEHICLE_DEFINITION} from '../../dist/vehicles/pickup.js';
+import {generateDetailedThreeBoxBody,generateDetailedThreeBoxGlass,M3_DETAILED_BODY_PARAMETERS} from '../../dist/vehicles/m3-detailed-procedural.js';
 import {hillyTerrainMesh,polygonSurfaceGrid} from '../../dist/procedural/terrain.js';
 import {detailedOffroadWheelMeshes} from '../../dist/vehicles/offroad-wheel.js';
 
@@ -13,14 +13,23 @@ for(let i=0;i<terrainBase.positions.length;i+=3){
 }
 const terrain={...terrainBase,colors};
 
-const offroadDef={...PICKUP_CANOPY_VEHICLE_DEFINITION,id:'offroad-double-cab',dimensions:{...PICKUP_CANOPY_VEHICLE_DEFINITION.dimensions,track:1.86,wheelRadius:.54,clearance:.34},wheel:{...PICKUP_CANOPY_VEHICLE_DEFINITION.wheel,width:.42,rimRatio:.56,spokes:8,dish:.042}};
-const pickup=compileDoubleCabPickupVehicle(offroadDef);
+const offroadBodyParams={
+ ...M3_DETAILED_BODY_PARAMETERS,
+ dimensions:{width:2.02,length:5.02,height:1.78,wheelbase:2.95,track:1.80,wheelRadius:.54,axleOffset:0,clearance:.34,rideHeight:.61},
+ side:[
+  [-.5,.90,.55,.98],[-.42,.97,.59,.91],[-.30,1.00,.62,.88],[-.10,.995,.62,.87],
+  [.08,.995,.61,.88],[.23,1.00,.61,.89],[.37,.995,.59,.94],[.47,.955,.53,.98],[.5,.89,.50,1],
+ ],
+ roof:[[-.30,.72,.94],[-.22,.74,.98],[-.05,.75,.995],[.08,.74,.985],[.12,.70,.94]],
+ cowl:.22,rearGlassBase:-.42,quarterWindowEnd:-.30,quarterKick:.055,frontDoorRear:-.06,rearDoorRear:-.27,
+ endRound:.46,archClearance:.055,archFlare:.055,shoulder:.22,roofCrown:.055,hoodCrown:.032,hoodRidge:.03,panelGap:.006,
+ sculpt:{...M3_DETAILED_BODY_PARAMETERS.sculpt,rockerHeight:.13,lowerWidth:.975,sideTaper:1.12,rearEndRound:.28,rearFloorRise:.16,rearWaist:.055,rearGlassInset:.09,roofRailDrop:.032,roofRailOutset:.025,faceting:.18,bumperDepth:.075,fenderCrown:.038},
+};
 const wheelVisual={radius:.54,width:.42,rimRatio:.56,spokes:8,split:0,dish:.042,treadBlocks:48,treadDepthM:.038,deflectionM:.072,sidewallBulge:.14};
-const paint=[.12,.18,.085,1],glass=[.055,.09,.095,.72],rubber=[.018,.016,.013,1],rim=[.31,.33,.32,1];
-
+const paint=[.105,.155,.072,1],rubber=[.018,.016,.013,1],rim=[.31,.33,.32,1];
 function translated(mesh,offset){return{...mesh,positions:mesh.positions.map((v,i)=>v+offset[i%3])};}
-const bodyMesh=translated(pickup.parts.find(part=>part.id==='body').mesh,[0,-1.04,0]);
-const glassMesh=pickup.parts.find(part=>part.id==='glass').mesh;
+const bodyMesh=translated(generateDetailedThreeBoxBody(offroadBodyParams),[0,-.99,0]);
+const glassMesh=generateDetailedThreeBoxGlass(offroadBodyParams);
 const visualBindings=[];
 function addWheelVisual(id,partId,x,z,side){
  const wheel=detailedOffroadWheelMeshes(wheelVisual,side),y=.54-1.04;
@@ -53,16 +62,16 @@ entities.push({id:'track-dry-exit',position:[38,1.08,0],mesh:{kind:'box',size:[1
 
 for(const [x,z,r] of [[-33,-9,.85],[-27,11,.58],[3,-12,.72],[27,12,.92],[36,-10,.64],[23,-8,.45]])entities.push({id:'rock-'+x+'-'+z,position:[x,r*.42,z],scale:[1.15,.78,.95],mesh:{kind:'sphere',radius:r,segments:14},material:{kind:'concrete',color:[.26,.245,.205,1],roughness:.95},body:{}});
 
-const chassisMass=2140,wheelMass=49,totalMass=chassisMass+wheelMass*4;
-const wheel=(id,at,steer=0)=>({id,kind:'wheel',at,massKg:wheelMass,radiusM:.54,widthM:.42,suspension:{restM:.41,travelM:.29,springNPerM:43000,damperNsPerM:5600},tyre:{pressurePa:118000,referencePressurePa:240000,radialStiffnessNPerM:175000,radialDampingNsPerM:3000,maxDeflectionM:.105},driveTorqueNm:860,brakeTorqueNm:1350,steerRad:steer,grip:1.34,treadDepthM:.022});
-const vehicle={chassis:{massKg:chassisMass,sizeM:[5.25,1.24,2.02],dragAreaM2:1.18},parts:[
- wheel('wheel.front.left',[1.61,-.20,-.91],.54),wheel('wheel.front.right',[1.61,-.20,.91],.54),
- wheel('wheel.rear.left',[-1.61,-.20,-.91]),wheel('wheel.rear.right',[-1.61,-.20,.91]),
+const chassisMass=2180,wheelMass=49,totalMass=chassisMass+wheelMass*4;
+const wheel=(id,at,steer=0)=>({id,kind:'wheel',at,massKg:wheelMass,radiusM:.54,widthM:.42,suspension:{restM:.41,travelM:.29,springNPerM:43500,damperNsPerM:5700},tyre:{pressurePa:118000,referencePressurePa:240000,radialStiffnessNPerM:175000,radialDampingNsPerM:3000,maxDeflectionM:.105},driveTorqueNm:900,brakeTorqueNm:1380,steerRad:steer,grip:1.34,treadDepthM:.022});
+const vehicle={chassis:{massKg:chassisMass,sizeM:[5.02,1.42,2.02],dragAreaM2:1.22},parts:[
+ wheel('wheel.front.left',[1.475,-.20,-.92],.54),wheel('wheel.front.right',[1.475,-.20,.92],.54),
+ wheel('wheel.rear.left',[-1.475,-.20,-.92]),wheel('wheel.rear.right',[-1.475,-.20,.92]),
 ]};
-entities.push({id:'offroad',position:[-19,1.28,0],mesh:{kind:'box',size:[5.25,1.24,2.02]},renderMesh:bodyMesh,material:{kind:'steel',color:paint,roughness:.34,metalness:.12,treatment:'painted',clearcoat:.78,clearcoatRoughness:.10},body:{mass:totalMass,shape:'box',collisionSize:[5.25,1.24,2.02],velocity:[5.0,0,0],friction:.74,restitution:.02}});
-entities.push({id:'offroad-glass',renderOnly:true,mesh:glassMesh,material:{kind:'glass',color:[.045,.075,.082,.36],roughness:.045,pattern:'window'}});
-visualBindings.push({entityId:'offroad-glass',assemblyId:'offroad',localPosition:[0,-1.04,0]});
-const front=offroadDef.dimensions.wheelbase/2,rear=-front,halfTrack=offroadDef.dimensions.track/2;
+entities.push({id:'offroad',position:[-19,1.30,0],mesh:{kind:'box',size:[5.02,1.42,2.02]},renderMesh:bodyMesh,material:{kind:'steel',color:paint,roughness:.28,metalness:.10,treatment:'painted',clearcoat:.82,clearcoatRoughness:.085},body:{mass:totalMass,shape:'box',collisionSize:[5.02,1.42,2.02],velocity:[5.0,0,0],friction:.74,restitution:.02}});
+entities.push({id:'offroad-glass',renderOnly:true,mesh:glassMesh,material:{kind:'glass',color:[.055,.105,.12,.30],roughness:.035,pattern:'window'}});
+visualBindings.push({entityId:'offroad-glass',assemblyId:'offroad',localPosition:[0,-.99,0]});
+const front=offroadBodyParams.dimensions.wheelbase/2,rear=-front,halfTrack=offroadBodyParams.dimensions.track/2;
 addWheelVisual('offroad-front-left','wheel.front.left',front,-halfTrack,-1);
 addWheelVisual('offroad-front-right','wheel.front.right',front,halfTrack,1);
 addWheelVisual('offroad-rear-left','wheel.rear.left',rear,-halfTrack,-1);
