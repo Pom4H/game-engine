@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import json,re,sys
+import json,re,sys,wave
+import numpy as np
 from faster_whisper import WhisperModel
 
 if len(sys.argv)<4:
@@ -20,8 +21,12 @@ def edit(a,b):
         prev=cur
     return prev[-1]
 
+with wave.open(wav,"rb") as wf:
+    if wf.getnchannels()!=1 or wf.getsampwidth()!=2 or wf.getframerate()!=16000:
+        raise SystemExit(f"Whisper WAV must be mono 16-bit 16kHz, got {wf.getnchannels()}ch/{wf.getsampwidth()*8}bit/{wf.getframerate()}Hz")
+    pcm=np.frombuffer(wf.readframes(wf.getnframes()),dtype=np.int16).astype(np.float32)/32768.0
 model=WhisperModel("tiny.en",device="cpu",compute_type="int8")
-segments,info=model.transcribe(wav,language="en",beam_size=5,vad_filter=False,temperature=0.0)
+segments,info=model.transcribe(pcm,language="en",beam_size=5,vad_filter=False,temperature=0.0)
 hyp=norm(" ".join(seg.text for seg in segments))
 ref=norm(expected)
 rw,hw=ref.split(),hyp.split()
