@@ -42,7 +42,8 @@ export {material,materialKinds,thermalLinearScale,type MaterialKind,type Physica
 export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 export {DiaphragmBreathSupport,PressureDrivenVocalFolds,CompliantVelopharyngealValve,type BreathSupportControl,type BreathSupportSample,type VocalFoldControl,type VocalFoldSample,type VelopharyngealControl} from './audio/vocal-source.js';
-export {synthesizeIAmAlive,renderVocalTract,renderArticulatedVocalTract,vocalAreaFunction,articulatorAreaFunction,interpolateArticulators,sampleArticulatorScore,scatterThreePort,VOCAL_ARTICULATOR_PRESETS,iAmAliveVocalScore,iAmAliveArticulatorScore,type VocalArticulation,type VocalArticulators,type VocalGesture,type ArticulatorGesture,type SampledArticulatorScore,type ThreePortScatterResult,type VocalTractRenderOptions,type VocalTractDiagnostics,type VocalTractRender} from './audio/vocal-tract.js';
+export {synthesizeIAmAlive,renderVocalTract,renderArticulatedVocalTract,vocalAreaFunction,articulatorAreaFunction,interpolateArticulators,sampleArticulatorScore,scatterThreePort,VOCAL_ARTICULATOR_PRESETS,iAmAliveVocalScore,iAmAliveArticulatorScore,type VocalArticulation,type VocalArticulators,type VocalGesture,type ArticulatorGesture,type SampledArticulatorScore,type ThreePortScatterResult,type VocalAreaFrame,type VocalTractRenderOptions,type VocalTractDiagnostics,type VocalTractRender} from './audio/vocal-tract.js';
+export {buildSoftAirwayTimeline,renderSoftGeometrySpeech,type SoftAirwayTimelineOptions,type SoftAirwayTimeline} from './audio/airway-geometry.js';
 export {PHYSICAL_DIALOGUE_SCRIPT,DIALOGUE_VOICE_A,DIALOGUE_VOICE_B,physicalDialogueScoreA,physicalDialogueScoreB,synthesizePhysicalDialogue,type PhysicalDialogueRender} from './audio/dialogue-vocal.js';
 export {ORIGINAL_OPERA_LYRICS,originalOperaScore,synthesizeOriginalOpera} from './audio/opera-vocal.js';
 export {RUSSIAN_MOUTH_PHRASE,russianMouthArticulatorScore,synthesizeRussianMouthPhrase} from './audio/russian-vocal.js';
@@ -65,8 +66,8 @@ export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/
 
 export {renderFootsteps,type FootstepSound} from './audio/footsteps.js';
 
-export {SoftTongueRig,softTonguePrimitive,addSoftTongueToScene,hideLegacyTongue,type SoftTongueDiagnostics} from './animation/soft-tongue.js';
-export {SOFT_MOUTH_MOTOR_LEAD_S,sampleSoftMouthMotorPlan,SoftMouthRig,SoftVocalFaceRig,softVocalFaceSceneSpec,type SoftMouthDiagnostics} from './animation/soft-mouth.js';
+export {SoftTongueRig,softTonguePrimitive,addSoftTongueToScene,hideLegacyTongue,type TongueAirwaySample,type SoftTongueDiagnostics} from './animation/soft-tongue.js';
+export {SOFT_MOUTH_MOTOR_LEAD_S,sampleSoftMouthMotorPlan,SoftMouthRig,SoftVocalFaceRig,softVocalFaceSceneSpec,type SoftMouthAperture,type SoftMouthDiagnostics} from './animation/soft-mouth.js';
 export {VocalFaceRig,vocalFaceSceneSpec,vocalFaceCollisionDiagnostics,VOCAL_FACE_IDS,type VocalFacePose,type VocalFaceCollisionDiagnostics} from './animation/vocal-face.js';
 export {AnimationSystem,sampleWalker,bindHumanoid,solveTwoBone} from './animation/locomotion.js';
 export type {WalkerSpec,HumanoidJoint,HumanoidBinding,HumanoidPose,RigTransform,VehiclePart,VehicleMotionSpec,GroundSampler} from './animation/locomotion.js';
