@@ -78,7 +78,6 @@ jobs:
             "I am alive" \
             0.34 \
             artifacts/npc-speech/asr-soft.json
-            artifacts/npc-speech/asr-green-yeah.json
       - name: Recognize legacy waveguide phrase
         continue-on-error: true
         run: |
@@ -88,11 +87,6 @@ jobs:
             "I am alive" \
             0.34 \
             artifacts/npc-speech/asr-waveguide.json
-            artifacts/npc-speech/asr-calibrated.json
-            artifacts/npc-speech/asr-segmented.json
-            artifacts/npc-speech/asr-word-i.json
-            artifacts/npc-speech/asr-word-am.json
-            artifacts/npc-speech/asr-word-alive.json
       - name: Recognize ASR-calibrated repeated motor skill
         continue-on-error: true
         run: |
@@ -119,7 +113,6 @@ jobs:
             "yeah" \
             0.01 \
             artifacts/npc-speech/asr-green-yeah.json
-            artifacts/npc-speech/probe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -140,4 +133,11 @@ jobs:
             artifacts/npc-speech/airway-vowels.json
             artifacts/npc-speech/asr-soft.json
             artifacts/npc-speech/asr-waveguide.json
+            artifacts/npc-speech/asr-green-yeah.json
+            artifacts/npc-speech/asr-calibrated.json
+            artifacts/npc-speech/asr-segmented.json
+            artifacts/npc-speech/asr-word-i.json
+            artifacts/npc-speech/asr-word-am.json
+            artifacts/npc-speech/asr-word-alive.json
+            artifacts/npc-speech/probe
           retention-days: 14
