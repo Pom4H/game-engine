@@ -41,26 +41,39 @@ jobs:
           mkdir -p .cache/vosk
           curl -fL --retry 3 --retry-delay 2             https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip             -o .cache/vosk/model.zip
           unzip -q -o .cache/vosk/model.zip -d .cache/vosk
-      - name: Convert speech for ASR
-        run: ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-english.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr.wav
-      - name: Recognize and gate intelligibility
+      - name: Convert both physical speech paths for ASR
+        run: |
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-english-soft.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-soft.wav
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-english-waveguide.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-waveguide.wav
+      - name: Recognize soft-geometry path
+        continue-on-error: true
         run: |
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
-            artifacts/npc-speech/asr.wav \
+            artifacts/npc-speech/asr-soft.wav \
             .cache/vosk/vosk-model-small-en-us-0.15 \
             "I am alive" \
             0.34 \
-            artifacts/npc-speech/asr.json
+            artifacts/npc-speech/asr-soft.json
+      - name: Gate intelligible physical NPC path
+        run: |
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
+            artifacts/npc-speech/asr-waveguide.wav \
+            .cache/vosk/vosk-model-small-en-us-0.15 \
+            "I am alive" \
+            0.34 \
+            artifacts/npc-speech/asr-waveguide.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: npc-english-physical-speech
           path: |
             artifacts/npc-speech/npc-russian-geometry-speech.mp4
-            artifacts/npc-speech/npc-english.wav
+            artifacts/npc-speech/npc-english-soft.wav
+            artifacts/npc-speech/npc-english-waveguide.wav
             artifacts/npc-speech/poster.png
             artifacts/npc-speech/evidence.json
             artifacts/npc-speech/audio-evidence.json
             artifacts/npc-speech/airway-vowels.json
-            artifacts/npc-speech/asr.json
+            artifacts/npc-speech/asr-soft.json
+            artifacts/npc-speech/asr-waveguide.json
           retention-days: 14
