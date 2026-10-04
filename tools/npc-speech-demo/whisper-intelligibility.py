@@ -27,7 +27,7 @@ with wave.open(wav,"rb") as wf:
     pcm=np.frombuffer(wf.readframes(wf.getnframes()),dtype=np.int16).astype(np.float32)/32768.0
 model_name=os.environ.get("WHISPER_MODEL","tiny.en")
 model=WhisperModel(model_name,device="cpu",compute_type="int8")
-segments,info=model.transcribe(pcm,language="en",beam_size=5,vad_filter=False,temperature=0.0,initial_prompt=None,condition_on_previous_text=False)
+segments,info=model.transcribe(pcm,language="en",beam_size=5,vad_filter=False,temperature=0.0,initial_prompt=None)
 hyp=norm(" ".join(seg.text for seg in segments))
 ref=norm(expected)
 rw,hw=ref.split(),hyp.split()
