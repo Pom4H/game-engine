@@ -490,7 +490,7 @@ class BranchedVocalNetwork {
     for(let i=1;i<o.sections;i++)if(oralAreas[i]!<minArea){minArea=oralAreas[i]!;minIndex=i;}
     const aperture=Math.max(.02,minArea);
     const alveolarDrive=state.tongueTip*(.35+.65*state.tonguePosition);
-    const dorsalDrive=state.tongueHeight*clamp((.58-state.tonguePosition)/.40,0,1);
+    const dorsalDrive=clamp((state.tongueHeight-.58)/.42,0,1)*clamp((.58-state.tonguePosition)/.40,0,1);
     const constrictionDrive=Math.max(state.labiodental,alveolarDrive,dorsalDrive*.72);
     const contraction=clamp((1.55-aperture)/1.50,0,1);
     const jetVelocity=Math.abs(glottalFlow)/Math.max(.035,aperture);
