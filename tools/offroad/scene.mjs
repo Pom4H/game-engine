@@ -1,4 +1,4 @@
-import {compileDoubleCabPickupVehicle,PICKUP_CANOPY_VEHICLE_DEFINITION} from '../../dist/index.js';
+import {compileDoubleCabPickupVehicle,PICKUP_CANOPY_VEHICLE_DEFINITION} from '../../dist/vehicles/pickup.js';
 import {hillyTerrainMesh,polygonSurfaceGrid} from '../../dist/procedural/terrain.js';
 import {detailedOffroadWheelMeshes} from '../../dist/vehicles/offroad-wheel.js';
 
