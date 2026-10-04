@@ -236,9 +236,9 @@ export class SoftTongueRig{
         const target=this.target(meta,a,pose),j=node*3;
         const dx=target[0]-this.structure.position[j]!,dy=target[1]-this.structure.position[j+1]!,dz=target[2]-this.structure.position[j+2]!;
         const vx=this.structure.velocity[j]!,vy=this.structure.velocity[j+1]!,vz=this.structure.velocity[j+2]!;
-        const drive=.55+1.75*meta.z01;
-        let fx=drive*dx-.060*vx,fy=drive*dy-.075*vy,fz=drive*dz-.060*vz;
-        const f=Math.hypot(fx,fy,fz),limit=.045;if(f>limit){const q=limit/f;fx*=q;fy*=q;fz*=q;}
+        const drive=.48+1.35*meta.z01;
+        let fx=drive*dx-.085*vx,fy=drive*dy-.105*vy,fz=drive*dz-.085*vz;
+        const f=Math.hypot(fx,fy,fz),limit=.034;if(f>limit){const q=limit/f;fx*=q;fy*=q;fz*=q;}
         this.structure.addForce(node,[fx,fy,fz]);
       }
       const contact=new StructuralStaticContactSolver(oralBoundaryBoxes(this.scene),this.structure.definition.collisionTriangles??[]);
