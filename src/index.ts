@@ -43,6 +43,7 @@ export {material,materialKinds,thermalLinearScale,type MaterialKind,type Physica
 export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 export {DiaphragmBreathSupport,PressureDrivenVocalFolds,CompliantVelopharyngealValve,type BreathSupportControl,type BreathSupportSample,type VocalFoldControl,type VocalFoldSample,type VelopharyngealControl} from './audio/vocal-source.js';
+export {VTL_EXTERNAL_BACKEND,planVtlNpcSpeech,serializeVtlSegmentSequence,type VtlSeedSyllable,type VtlExternalSegment,type VtlExternalPlan} from './audio/vtl-external.js';
 export {LfGlottalSource,lfPulseCycle,type LfGlottalControl,type LfGlottalSample} from './audio/lf-glottal.js';
 export {synthesizeIAmAlive,renderVocalTract,renderArticulatedVocalTract,vocalAreaFunction,articulatorAreaFunction,interpolateArticulators,sampleArticulatorScore,scatterThreePort,VOCAL_ARTICULATOR_PRESETS,iAmAliveVocalScore,iAmAliveArticulatorScore,type VocalArticulation,type VocalArticulators,type VocalGesture,type ArticulatorGesture,type SampledArticulatorScore,type ThreePortScatterResult,type VocalAreaFrame,type VocalTractRenderOptions,type VocalTractDiagnostics,type VocalTractRender} from './audio/vocal-tract.js';
 export {storyExtractFormants,synthesizeStoryFormantMama,synthesizeStoryFormantLala,type StoryFormant,type StoryFormantAnalysis,type StoryFormantRender} from './audio/story-formant.js';
