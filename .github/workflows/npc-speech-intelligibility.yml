@@ -30,8 +30,8 @@ jobs:
       - run: bun run build
       - run: node --test test/airway-geometry.test.mjs test/npc-speech.test.mjs
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg unzip python3-venv
-      - name: Render physical NPC utterance
-        run: node tools/npc-speech-demo/capture-cpu.mjs
+      - name: Generate physical NPC audio
+        run: node tools/npc-speech-demo/generate-audio.mjs
       - name: Prepare offline Russian recognizer
         run: |
           python3 -m venv .venv
@@ -53,5 +53,6 @@ jobs:
             artifacts/npc-speech/npc-russian.wav
             artifacts/npc-speech/poster.png
             artifacts/npc-speech/evidence.json
+            artifacts/npc-speech/audio-evidence.json
             artifacts/npc-speech/asr.json
           retention-days: 14
