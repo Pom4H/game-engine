@@ -14,6 +14,10 @@ const CAGE_LAYERS=2;
 const RENDER_ANGLES=48;
 const RENDER_RINGS=9;
 const SOFT_FACE_ID='vocal-face-soft-perioral';
+const UPPER_GUM_ID='vocal-face-soft-upper-gum';
+const LOWER_GUM_ID='vocal-face-soft-lower-gum';
+const upperToothId=(i:number)=>'vocal-face-visible-upper-tooth-'+i;
+const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
 const MIN_LIP_CONTACT_GAP_M=.0015;
 
 const SKIN:Color=[.62,.39,.30,1];
@@ -303,6 +307,39 @@ function projectLipContact(body:StructuralBody):void{
   }
 }
 
+function dentalVisualEntities(base:SceneSpec):SceneSpec['entities']{
+  const upper=base.entities.find(entity=>entity.id===VOCAL_FACE_IDS.upperTeeth);
+  const lower=base.entities.find(entity=>entity.id===VOCAL_FACE_IDS.lowerTeeth);
+  if(!upper?.position||!lower?.position)throw new TypeError('Dental frame positions missing');
+  const teeth:SceneSpec['entities'][number][]=[];
+  for(const [arch,frame,idFor] of [
+    ['upper',upper.position,upperToothId],
+    ['lower',lower.position,lowerToothId],
+  ] as const){
+    for(let i=0;i<DENTAL_X.length;i++){
+      const x=DENTAL_X[i]!,side=Math.abs(x)/.132,z=.008-.012*side**1.65,y=(arch==='upper'?-.001:.001)+.002*side;
+      teeth.push({
+        id:idFor(i),
+        position:[frame[0]+x,frame[1]+y,frame[2]+z],
+        mesh:{kind:'sphere',radius:.5,segments:14},
+        scale:[i===3||i===4?.034:.030,.044-.005*side,.023],
+        material:{kind:'default',color:[.91,.90,.84,1],roughness:.26,metalness:0},
+      });
+    }
+  }
+  teeth.push({
+    id:UPPER_GUM_ID,position:[upper.position[0],upper.position[1]+.020,upper.position[2]-.006],
+    mesh:{kind:'sphere',radius:.5,segments:18},scale:[.34,.052,.040],
+    material:{kind:'default',color:[.43,.15,.17,1],roughness:.62},
+  });
+  teeth.push({
+    id:LOWER_GUM_ID,position:[lower.position[0],lower.position[1]-.020,lower.position[2]-.006],
+    mesh:{kind:'sphere',radius:.5,segments:18},scale:[.33,.050,.038],
+    material:{kind:'default',color:[.43,.15,.17,1],roughness:.62},
+  });
+  return teeth;
+}
+
 export function softVocalFaceSceneSpec():SceneSpec{
   const base=vocalFaceSceneSpec(),template=surfaceTemplate();
   const soft:Primitive={
@@ -312,10 +349,16 @@ export function softVocalFaceSceneSpec():SceneSpec{
     colors:[...template.colors],
     indices:[...template.indices],
   };
+  const hiddenLegacy=base.entities.map(entity=>
+    [VOCAL_FACE_IDS.upperLip,VOCAL_FACE_IDS.lowerLip,VOCAL_FACE_IDS.upperTeeth,VOCAL_FACE_IDS.lowerTeeth].includes(entity.id as never)
+      ?{...entity,scale:[.001,.001,.001] as Vec3}
+      :entity
+  );
   return{
     ...base,
     entities:[
-      ...base.entities,
+      ...hiddenLegacy,
+      ...dentalVisualEntities(base),
       {
         id:SOFT_FACE_ID,
         mesh:soft,
@@ -531,8 +574,34 @@ export class SoftVocalFaceRig{
     this.hideLegacyMouthParts();
   }
 
+  private syncVisibleDentition():void{
+    const upper=this.scene.entities.get(VOCAL_FACE_IDS.upperTeeth),lower=this.scene.entities.get(VOCAL_FACE_IDS.lowerTeeth);
+    if(!upper||!lower)return;
+    for(const [arch,frame,idFor] of [
+      ['upper',upper,upperToothId],
+      ['lower',lower,lowerToothId],
+    ] as const){
+      const boxes=dentalArchBoxes(frame,arch);
+      for(let i=0;i<boxes.length;i++){
+        const tooth=this.scene.entities.get(idFor(i));if(!tooth)continue;
+        tooth.position.splice(0,3,...boxes[i]!.center);
+        tooth.rotation.splice(0,3,...frame.rotation);
+      }
+    }
+    const upperGum=this.scene.entities.get(UPPER_GUM_ID);
+    if(upperGum){
+      const p=transformDentalOffset(upper,[0,.020,-.006]);
+      upperGum.position.splice(0,3,...p);upperGum.rotation.splice(0,3,...upper.rotation);
+    }
+    const lowerGum=this.scene.entities.get(LOWER_GUM_ID);
+    if(lowerGum){
+      const p=transformDentalOffset(lower,[0,-.020,-.006]);
+      lowerGum.position.splice(0,3,...p);lowerGum.rotation.splice(0,3,...lower.rotation);
+    }
+  }
+
   private hideLegacyMouthParts():void{
-    for(const id of [VOCAL_FACE_IDS.upperLip,VOCAL_FACE_IDS.lowerLip]){
+    for(const id of [VOCAL_FACE_IDS.upperLip,VOCAL_FACE_IDS.lowerLip,VOCAL_FACE_IDS.upperTeeth,VOCAL_FACE_IDS.lowerTeeth]){
       const entity=this.scene.entities.get(id);if(entity)entity.scale.splice(0,3,.001,.001,.001);
     }
   }
@@ -540,6 +609,7 @@ export class SoftVocalFaceRig{
   step(a:VocalArticulators,dt:number):{readonly pose:VocalFacePose;readonly mouth:SoftMouthDiagnostics}{
     const pose=this.rigid.step(a,dt);
     this.hideLegacyMouthParts();
+    this.syncVisibleDentition();
     const mouth=this.mouth.step(a,pose,dt);
     return Object.freeze({pose,mouth});
   }
