@@ -36,7 +36,8 @@ const invisible={kind:'triangle-mesh',positions:[0,0,0,0,0,0,0,0,0],normals:[0,1
 const entities=[{id:'terrain',position:[0,0,0],mesh:terrain,material:{kind:'default',color:[1,1,1,1],roughness:.96,finish:'rough',ageYears:18}}];
 
 const mudShape=[[-8,-3.45],[-6.2,-3.95],[-3,-3.62],[.5,-4.08],[3.7,-3.68],[7.9,-3.38],[8,3.28],[5.8,3.84],[2.2,3.52],[-1.7,4.02],[-5.1,3.66],[-8,3.38]];
-entities.push({id:'track-mud',position:[-16,.135,0],mesh:{kind:'polygon-prism',points:mudShape,thickness:.03,axis:1},renderMesh:polygonSurfaceGrid(mudShape,.22),material:{kind:'default',color:[.18,.095,.038,1],roughness:.88,finish:'rough',ageYears:75},body:{},environmental:{surfaceUse:'road',waterDepthM:.016}});
+const mudGrid=polygonSurfaceGrid(mudShape,.22),mudRender={...mudGrid,positions:mudGrid.positions.map((v,i)=>i%3===1?v+.015:v)};
+entities.push({id:'track-mud',position:[-16,.135,0],mesh:{kind:'polygon-prism',points:mudShape,thickness:.03,axis:1},renderMesh:mudRender,material:{kind:'default',color:[.18,.095,.038,1],roughness:.88,finish:'rough',ageYears:75},body:{},environmental:{surfaceUse:'road',waterDepthM:.016}});
 
 const waterShape=[[-6,-3.45],[-3,-3.75],[0,-3.58],[3.2,-3.8],[6,-3.38],[6,3.38],[2.7,3.72],[-.4,3.55],[-3.4,3.82],[-6,3.42]];
 entities.push({id:'track-water-contact',position:[14,.235,0],mesh:{kind:'polygon-prism',points:waterShape,thickness:.03,axis:1},renderMesh:invisible,material:{kind:'default',color:[.14,.09,.045,1],roughness:.78,finish:'rough',ageYears:65},body:{},environmental:{surfaceUse:'road',waterDepthM:.05}});
