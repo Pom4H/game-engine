@@ -1,5 +1,5 @@
 import {AnimationSystem} from '../animation/locomotion.js';
-import {SurfaceContactSystem} from '../environment/surface-contacts.js';
+import {SurfaceContactSystem,type WheelSurfaceContact} from '../environment/surface-contacts.js';
 import {freezePrimitive,surfaceGridPrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
 import {environmentHistorySteps,environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
@@ -16,7 +16,8 @@ import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physic
 import {PlasticDeformationSystem} from '../physics/deformation.js';
 import {FluidField} from '../physics/fluid.js';
 import {WindField} from '../physics/wind.js';
-import {SoilField} from '../physics/soil.js';
+import {SoilField,soilWheelSupport} from '../physics/soil.js';
+import {bodyWheelSupport} from '../physics/wheel-support.js';
 import {Vehicle,vehicle as compileVehicle} from '../vehicles/vehicle.js';
 import type {EngineEvent} from './events.js';
 import {simulationProfile,type KernelProgram,type SimulationProfile,type SimulationProfileInput} from '../core/kernel.js';
@@ -94,6 +95,7 @@ export class Scene {
   private readonly surfaceVisuals=new Map<string,{source:string;entity:RuntimeEntity}>();
   /** Render projections keep a stable link to the authoritative physical surface. */
   private readonly surfaceVisualSources=new Map<string,string>();
+  private supportReady=false;
   private renderMoverRevision=-1;
   private renderMovers:ReadonlySet<string>=new Set<string>();
 
@@ -123,6 +125,7 @@ export class Scene {
         this.assemblies.set(assembly.entityId,runtime);
       }catch(error){runtime.dispose();throw error;}
     }
+    this.supportReady=true;this.refreshWheelSupport();
     for(const spec of this.spec.deformation?.bodies??[])this.deformation.attach(spec,this.entities);
     // Initial environmental facts exist before the first scheduled surface tick.
     // Cadence controls evolution, not whether authored physical state exists.
@@ -171,6 +174,7 @@ export class Scene {
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
     };
     this.entities.set(spec.id,runtime);this.renderStructureRevision++;
+    if(this.supportReady&&body)this.refreshWheelSupport();
     return runtime;
   }
 
@@ -209,6 +213,19 @@ export class Scene {
     this.animation.detachEntity(id);this.contacts?.onEntityRemoved(id);this.deformation.remove(id);
     const assembly=this.assemblies.get(id);if(assembly){assembly.dispose();this.assemblies.delete(id);}
     this.physics.remove(id);const removed=this.entities.delete(id);this.surfaces.remove(id);if(removed)this.renderStructureRevision++;
+    if(this.supportReady&&removed)this.refreshWheelSupport();
+  }
+  private refreshWheelSupport():void{
+    this.physics.wheelSupport=soilWheelSupport(bodyWheelSupport(this.physics.bodies.values(),this.physics.ground),this.soil);
+  }
+  private assemblyWheelContacts():WheelSurfaceContact[]{
+    const result:WheelSurfaceContact[]=[];
+    for(const [bodyId,assembly] of this.assemblies)for(const part of assembly.blueprint.parts){
+      if(part.source.kind!=='wheel')continue;
+      const sample=assembly.part(part.source.id);
+      result.push({id:bodyId+':'+part.source.id,bodyId,position:sample.point,velocity:assembly.body.velocity,grounded:sample.contact,radius:sample.loadedRadiusM,angularSpeed:Math.abs(sample.angularSpeed),normalLoadN:sample.loadN});
+    }
+    return result;
   }
   /** Physical state projected onto an authored surface or one of its generated visuals. */
   surfaceStateForRender(entityId:string){
@@ -257,7 +274,7 @@ export class Scene {
         });
       })
       .use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
-      .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet);})
+      .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet,this.assemblyWheelContacts());})
       .use('events',({at})=>{this.emitContactEvents(at);})
       .use('fracture-aggregate',({at})=>{for(const fracture of this.pendingFractures.values())this.fractureAggregate(fracture,at);})
       .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})

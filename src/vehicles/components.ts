@@ -6,9 +6,15 @@ import {validateThermalSpec,type ThermalSpec} from '../physics/thermal.js';
 
 interface PartSpec {readonly id:string;readonly at:Vec3;readonly massKg:number;readonly condition?:ConditionSpec;/** Optional chassis-local structural mount; defaults to at. */readonly mountAt?:Vec3;}
 export interface ShaftSpec {readonly id:string;readonly maxPowerW:number;readonly efficiency?:number;}
+/** Reduced-order pneumatic carcass. Pressure changes radial compliance instead of being a visual preset. */
+export interface TyreComplianceSpec {
+  readonly pressurePa:number;readonly referencePressurePa?:number;readonly radialStiffnessNPerM:number;
+  readonly radialDampingNsPerM?:number;readonly maxDeflectionM?:number;
+}
 export interface WheelSpec extends PartSpec {
   readonly kind:'wheel';readonly radiusM:number;readonly widthM:number;
   readonly suspension:{readonly restM:number;readonly travelM:number;readonly springNPerM:number;readonly damperNsPerM:number;readonly yieldForceN?:number};
+  readonly tyre?:TyreComplianceSpec;
   readonly driveTorqueNm?:number;readonly drivePowerW?:number;readonly brakeTorqueNm?:number;readonly brakeThermal?:ThermalSpec;readonly steerRad?:number;
   readonly grip?:number;readonly wornGripFraction?:number;readonly treadDepthM?:number;
 }
@@ -73,6 +79,11 @@ export function vehicle(id:string,spec:Omit<VehicleSpec,'id'>):VehicleBlueprint 
     let center=p.at,inertia=0,area=0,slope=0,induced=0,chord:Vec3=[1,0,0],normal:Vec3=[0,1,0],diag:Vec3;
     if(p.kind==='wheel'){
       check(p.radiusM,'Wheel radius',.0001,100);check(p.widthM,'Wheel width',.0001,100);
+      if(p.tyre){
+        check(p.tyre.pressurePa,'Tyre pressure',20_000,1_000_000);check(p.tyre.referencePressurePa??p.tyre.pressurePa,'Tyre reference pressure',20_000,1_000_000);
+        check(p.tyre.radialStiffnessNPerM,'Tyre radial stiffness',1_000,1e8);check(p.tyre.radialDampingNsPerM??0,'Tyre radial damping',0,1e7);
+        check(p.tyre.maxDeflectionM??Math.min(p.radiusM*.18,.10),'Tyre max deflection',.001,p.radiusM*.45);
+      }
       const s=p.suspension;check(s.restM,'Suspension rest',.0001,100);check(s.travelM,'Suspension travel',.0001,s.restM);
       check(s.springNPerM,'Spring stiffness',1e-6,1e9);check(s.damperNsPerM,'Damper',0,1e8);
       if(s.yieldForceN!==undefined)check(s.yieldForceN,'Yield force',1e-6);

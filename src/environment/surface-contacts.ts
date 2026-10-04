@@ -12,10 +12,12 @@ export interface SurfaceContactHost {
  add(entity:EntitySpec):RuntimeEntity;
  remove(id:string):void;
 }
-export interface SurfaceSample {readonly surfaceId:string;readonly height:number;readonly snowDepth:number;readonly waterDepth:number}
+export interface SurfaceSample {readonly surfaceId:string;readonly height:number;readonly snowDepth:number;readonly waterDepth:number;readonly dirt:number}
 export interface SurfaceFootprint extends SnowFootprint {readonly surfaceId:string}
 export interface WheelSurfaceContact {
  readonly id:string;
+ /** Owning dynamic body when id names a logical wheel rather than a Scene entity. */
+ readonly bodyId?:string;
  /** Position of the bottom of the tyre, in world metres. */
  readonly position:Vec3;
  readonly velocity:Vec3;
@@ -24,6 +26,8 @@ export interface WheelSurfaceContact {
  readonly radius?:number;
  /** Wheel angular speed magnitude in rad/s when known. */
  readonly angularSpeed?:number;
+ /** Authoritative normal load from the wheel force solve. */
+ readonly normalLoadN?:number;
  /** Unit direction away from the vehicle at this wheel. */
  readonly lateral?:Vec3;
 }
@@ -33,7 +37,7 @@ export interface SnowContactSurfaceOptions {
 }
 export interface SurfaceContactsOptions {readonly capacity?:number;readonly particleCapacity?:number;readonly id?:string}
 interface WheelBinding {readonly id:string;readonly radius?:number;readonly lateral?:Vec3}
-interface SprayParticle {readonly index:number;readonly born:number;readonly life:number;readonly origin:Vec3;readonly velocity:Vec3;readonly ground:number}
+interface SprayParticle {readonly index:number;readonly born:number;readonly life:number;readonly origin:Vec3;readonly velocity:Vec3;readonly ground:number;readonly mud:number}
 interface SnowBinding {readonly source:string;readonly skin:SnowSurface;visible:boolean}
 const contactNamespaces=new WeakMap<SurfaceContactHost,{sequence:number;reserved:Set<string>}>();
 function allocateNamespace(host:SurfaceContactHost,base:string):string{
@@ -100,7 +104,7 @@ export class SurfaceContactSystem {
   * bindings, so recursive cleanup does not unregister the original surface. */
  onEntityRemoved(id:string):void{
   this.removeWheelContact(id);this.removeSnowSurface(id);this.snowEntities.delete(id);
-  if(this.particleIds.delete(id))for(const [index] of this.particles)if(id===`${this.id}:spray:${index}`)this.particles.delete(index);
+  if(this.particleIds.delete(id))for(const [index,p] of this.particles)if(id===this.id+':spray:'+(p.mud>.22?'mud':'water')+':'+index)this.particles.delete(index);
  }
  addWheelContact(entityId:string,options:{readonly radius?:number;readonly lateral?:Vec3}={}):void{
   if(!this.host.entities.get(entityId)?.body||this.wheels.has(entityId)||options.radius!==undefined&&(!Number.isFinite(options.radius)||options.radius<=0)||options.lateral&&!finiteVec(options.lateral))throw new TypeError('Invalid wheel contact binding');
@@ -108,8 +112,8 @@ export class SurfaceContactSystem {
   this.host.surfaces.claimContactBody(entityId);
  }
  removeWheelContact(entityId:string):void{this.wheels.delete(entityId);this.wheelEmission.delete(entityId);this.host.surfaces.releaseContactBody(entityId);}
- private state(entity:RuntimeEntity,x:number,z:number):Pick<SurfaceEnvironmentState,'snowDepthM'|'waterDepthM'>{
-  return this.host.surfaces.sample(entity.id,x,z)??this.host.surfaces.surface(entity.id)??{snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0};
+ private state(entity:RuntimeEntity,x:number,z:number):Pick<SurfaceEnvironmentState,'snowDepthM'|'waterDepthM'|'dirt'>{
+  return this.host.surfaces.sample(entity.id,x,z)??this.host.surfaces.surface(entity.id)??{snowDepthM:entity.environmental?.snowDepthM??0,waterDepthM:entity.environmental?.waterDepthM??0,dirt:entity.material.surface.dirt};
  }
  /** Highest accessible surface. This is also the engine's foot-placement query. */
  sample(position:Vec3):SurfaceSample|undefined{
@@ -118,7 +122,7 @@ export class SurfaceContactSystem {
    if(!entity.environmental?.surfaceUse||!surfaceContains(entity,position[0],position[2]))continue;
    const state=this.state(entity,position[0],position[2]),skin=this.surfaces.get(entity.id)?.skin,height=skin?.sample(position[0],position[2])??surfaceElevation(entity)+state.snowDepthM;
    if(height>position[1]+.35||height<position[1]-1.0)continue;
-   if(!best||height>best.height)best={surfaceId:entity.id,height,snowDepth:state.snowDepthM,waterDepth:state.waterDepthM};
+   if(!best||height>best.height)best={surfaceId:entity.id,height,snowDepth:state.snowDepthM,waterDepth:state.waterDepthM,dirt:state.dirt};
   }return best;
  }
  private boundWheels():WheelSurfaceContact[]{const result:WheelSurfaceContact[]=[];for(const binding of this.wheels.values()){
@@ -129,7 +133,7 @@ export class SurfaceContactSystem {
  step(dt:number,at:number,feet:readonly FootContact[]=[],wheelContacts:readonly WheelSurfaceContact[]=[]):void{
   if(!Number.isFinite(dt)||dt<=0||dt>.25||!Number.isFinite(at)||at<this.time)throw new RangeError('Invalid surface contact time');
   const contacts=[...this.boundWheels(),...wheelContacts],ids=new Set<string>();
-  for(const wheel of contacts){if(!wheel.id||ids.has(wheel.id)||!finiteVec(wheel.position)||!finiteVec(wheel.velocity)||typeof wheel.grounded!=='boolean'||wheel.radius!==undefined&&(!Number.isFinite(wheel.radius)||wheel.radius<=0)||wheel.angularSpeed!==undefined&&(!Number.isFinite(wheel.angularSpeed)||wheel.angularSpeed<0)||wheel.lateral&&!finiteVec(wheel.lateral))throw new TypeError('Invalid wheel surface contact');ids.add(wheel.id);}
+  for(const wheel of contacts){if(!wheel.id||wheel.bodyId!==undefined&&!wheel.bodyId||ids.has(wheel.id)||!finiteVec(wheel.position)||!finiteVec(wheel.velocity)||typeof wheel.grounded!=='boolean'||wheel.radius!==undefined&&(!Number.isFinite(wheel.radius)||wheel.radius<=0)||wheel.angularSpeed!==undefined&&(!Number.isFinite(wheel.angularSpeed)||wheel.angularSpeed<0)||wheel.normalLoadN!==undefined&&(!Number.isFinite(wheel.normalLoadN)||wheel.normalLoadN<0)||wheel.lateral&&!finiteVec(wheel.lateral))throw new TypeError('Invalid wheel surface contact');ids.add(wheel.id);}
   // SnowFootprints validates the entire foot batch before touching persistent state.
   const created=this.footprints.update(at,feet,p=>{const s=this.sample(p);return s?{height:s.height,snowDepth:s.snowDepth}:undefined;});
   this.time=at;
@@ -152,9 +156,12 @@ export class SurfaceContactSystem {
   for(const spec of specs){const existing=this.host.entities.get(spec.id);if(existing&&this.snowEntities.get(spec.id)!==existing)throw new TypeError('Generated snow identity is occupied by an unowned entity');}
   for(const spec of specs){if(this.host.entities.has(spec.id))this.host.remove(spec.id);const entity=this.host.add(spec);this.snowEntities.set(spec.id,entity);}
  }
- private particle(index:number):RuntimeEntity{
-  const id=`${this.id}:spray:${index}`,found=this.host.entities.get(id);if(found){if(this.particleIds.get(id)!==found)throw new TypeError('Generated particle identity collides with an authored entity');return found;}
-  const entity=this.host.add({id,position:[0,-1000,0],mesh:{kind:'sphere',radius:.5,segments:6},scale:[.008,.018,.008],material:{kind:'default',color:[.52,.59,.63,.48],roughness:.14}});this.particleIds.set(id,entity);return entity;
+ private particle(index:number,mud:number):RuntimeEntity{
+  const kind=mud>.22?'mud':'water',id=this.id+':spray:'+kind+':'+index,otherId=this.id+':spray:'+(kind==='mud'?'water':'mud')+':'+index;
+  const other=this.particleIds.get(otherId);if(other)other.position=[0,-1000,0];
+  const found=this.host.entities.get(id);if(found){if(this.particleIds.get(id)!==found)throw new TypeError('Generated particle identity collides with an authored entity');return found;}
+  const color=kind==='mud'?[.27,.16,.075,.72] as const:[.52,.59,.63,.48] as const;
+  const entity=this.host.add({id,position:[0,-1000,0],mesh:{kind:'sphere',radius:.5,segments:6},scale:[.008,.018,.008],material:{kind:'default',color,roughness:kind==='mud'?.82:.14}});this.particleIds.set(id,entity);return entity;
  }
  private stepSpray(dt:number,at:number,contacts:readonly WheelSurfaceContact[]):void{
   this.wetnessValue=0;const live=new Set<string>();
@@ -162,24 +169,24 @@ export class SurfaceContactSystem {
    live.add(wheel.id);
    const speed=Math.hypot(wheel.velocity[0],wheel.velocity[2]),surface=wheel.grounded&&Math.abs(wheel.velocity[1])<.25?this.sample(wheel.position):undefined;
    if(surface){
-    const source=this.host.entities.get(wheel.id),body=source?.body,surfaceEntity=this.host.entities.get(surface.surfaceId),radius=wheel.radius??(source?.mesh?.kind==='sphere'?(source.mesh.radius??1)*source.scale[1]:.3);
+    const sourceId=wheel.bodyId??wheel.id,source=this.host.entities.get(sourceId),body=source?.body,surfaceEntity=this.host.entities.get(surface.surfaceId),radius=wheel.radius??(source?.mesh?.kind==='sphere'?(source.mesh.radius??1)*source.scale[1]:.3);
     if(body&&surfaceEntity?.body){
      const rollingSpeed=(wheel.angularSpeed??Math.hypot(...body.angularVelocity))*radius,lateral=wheel.lateral,lateralSpeed=lateral?Math.abs(wheel.velocity[0]*lateral[0]+wheel.velocity[2]*lateral[2]):0;
      const slipSpeed=Math.hypot(Math.abs(speed-rollingSpeed),lateralSpeed),friction=Math.sqrt(Math.max(0,body.friction*surfaceEntity.body.friction));
-     this.host.surfaces.applyContactWork({sourceId:wheel.id,surfaceId:surface.surfaceId,x:wheel.position[0],z:wheel.position[2],radiusM:Math.max(.06,radius*.55),durationSeconds:dt,speedMps:speed,slipSpeedMps:slipSpeed,normalLoadN:Math.max(1,body.mass)*9.81,frictionCoefficient:friction});
+     this.host.surfaces.applyContactWork({sourceId,surfaceId:surface.surfaceId,x:wheel.position[0],z:wheel.position[2],radiusM:Math.max(.06,radius*.55),durationSeconds:dt,speedMps:speed,slipSpeedMps:slipSpeed,normalLoadN:wheel.normalLoadN??Math.max(1,body.mass)*9.81,frictionCoefficient:friction});
     }
    }
-   const wet=surface?clamp(surface.waterDepth/.004,0,1):0;
+   const wet=surface?clamp(surface.waterDepth/.004,0,1):0,mud=surface?clamp(surface.dirt*(.45+.55*wet),0,1):0;
    // A stationary or airborne tyre makes neither spray nor a rolling-water sound.
    if(speed<.15||wet<.04){this.wheelEmission.delete(wheel.id);continue;}this.wetnessValue=Math.max(this.wetnessValue,wet*clamp(speed/.6,0,1));
    let amount=(this.wheelEmission.get(wheel.id)??0)+dt*(12+speed*6)*wet;
    while(amount>=1){amount-=1;const index=this.sequence++%this.particleCapacity,a=this.sequence*2.3999632297,life=.20+((this.sequence*17)%19)/100,travel:Vec3=[wheel.velocity[0]/speed,0,wheel.velocity[2]/speed],lateral=wheel.lateral??[-travel[2],0,travel[0]],sideLength=Math.hypot(lateral[0],lateral[2])||1,fan=.35+wet*.72;
     const velocity:Vec3=[travel[0]*speed*.16+lateral[0]/sideLength*fan+Math.sin(a)*.13,.28+wet*.66+speed*.055,travel[2]*speed*.16+lateral[2]/sideLength*fan+Math.cos(a)*.13];
-    const p:SprayParticle={index,born:at,life,origin:[wheel.position[0],surface!.height+.02,wheel.position[2]],velocity,ground:surface!.height+.003};this.particles.set(index,p);this.particle(index);this.emitted++;
+    const p:SprayParticle={index,born:at,life,origin:[wheel.position[0],surface!.height+.02,wheel.position[2]],velocity,ground:surface!.height+.003,mud};this.particles.set(index,p);this.particle(index,mud);this.emitted++;
    }this.wheelEmission.set(wheel.id,amount);
   }
   for(const id of this.wheelEmission.keys())if(!live.has(id))this.wheelEmission.delete(id);
-  for(const [index,p] of this.particles){const age=at-p.born,entity=this.particle(index),height=p.origin[1]+p.velocity[1]*age-4.905*age*age;
+  for(const [index,p] of this.particles){const age=at-p.born,entity=this.particle(index,p.mud),height=p.origin[1]+p.velocity[1]*age-4.905*age*age;
    if(age>=p.life||height<p.ground){entity.position=[0,-1000,0];this.particles.delete(index);continue;}
    entity.position=[p.origin[0]+p.velocity[0]*age,height,p.origin[2]+p.velocity[2]*age];
    const growth=.7+.3*clamp(age/.08,0,1);entity.scale=[.009*growth,.012+.016*(1-age/p.life),.009*growth] as MutableVec3;

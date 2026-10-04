@@ -171,9 +171,9 @@ export class SurfaceEnvironmentSystem {
       if(depth>.00015)field.deformation.stamp({x:work.x,z:work.z,radiusM:Math.max(.06,work.radiusM),depthM:depth,compaction:Math.min(1,.25+loadScale*.55),shear:Math.min(1,(work.slipSpeedMps+work.speedMps*.035)/5),displacementRatio:.78});
     }
     if(bodyState&&sample){
-      const spray=Math.min(1,(sample.slush+sample.puddle)*work.speedMps/8);
+      const spray=Math.min(1,(sample.slush+sample.puddle)*work.speedMps/8),mud=Math.min(1,sample.dirt*(.35+.65*sample.wetness)+sample.slush*.25);
       bodyState.rearSnow=Math.min(1,bodyState.rearSnow+spray*work.durationSeconds*.13);
-      bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*work.durationSeconds*.09);
+      bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*work.durationSeconds*(.09+.42*mud));
       bodyState.wetness=Math.min(1,bodyState.wetness+spray*work.durationSeconds*.15);
     }
     return true;
@@ -237,9 +237,9 @@ export class SurfaceEnvironmentSystem {
         const looseDepth=surface.snowDepthM+surface.waterDepthM*.35+surface.slush*.012;
         const depth=Math.min(Math.max(half[0],half[1])*.12,looseDepth*.8);
         if(depth>.00015)field.deformation.stamp({x:bodyEntity.position[0],z:bodyEntity.position[2],radiusM:Math.max(.12,Math.min(half[0],half[1])*.7),depthM:depth,compaction:.55,shear:Math.min(1,speed/10),displacementRatio:.74});
-        const spray=Math.min(1,(surface.slush+surface.puddle)*speed/8);
+        const spray=Math.min(1,(surface.slush+surface.puddle)*speed/8),mud=Math.min(1,surface.dirt*(.35+.65*surface.wetness)+surface.slush*.25);
         bodyState.rearSnow=Math.min(1,bodyState.rearSnow+spray*dt*.13);
-        bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*dt*.09);
+        bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*dt*(.09+.42*mud));
         bodyState.wetness=Math.min(1,bodyState.wetness+spray*dt*.15);
       }
     }
