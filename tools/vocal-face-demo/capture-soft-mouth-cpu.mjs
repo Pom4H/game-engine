@@ -31,7 +31,7 @@ for(let frame=0;frame<frames;frame++){
   const png=encodePng(renderer.framebuffer(),width,height);
   if(!encoder.stdin.write(png))await once(encoder.stdin,'drain');
   if(frame===Math.floor(frames*.55))await writeFile(out+'/poster.png',png);
-  if(frame%6===0)telemetry.push({time,pose:state.pose,mouth:d,articulators:sample.articulators});
+  if(frame%6===0)telemetry.push({time,pose:state.pose,mouth:d,tongue:state.tongue,articulators:sample.articulators});
 }
 encoder.stdin.end();const [videoCode]=await completed;if(videoCode!==0)throw new Error('video encoder failed '+videoCode);
 
@@ -45,6 +45,7 @@ await Promise.all([unlink(silent),unlink(wav)]);
 const stats=renderer.inspect(),d=rig.mouth.diagnostics;
 await writeFile(out+'/evidence.json',JSON.stringify({
   duration,frames,fps,renderer:stats,voice:voice.diagnostics,
+  tongue:rig.tongue.diagnostics,
   perioral:{
     nodes:d.nodes,constraints:d.constraints,surfaceVertices:d.surfaceVertices,
     apertureBoundaryNodes:d.apertureBoundaryNodes,outerAttachmentNodes:d.outerAttachmentNodes,
