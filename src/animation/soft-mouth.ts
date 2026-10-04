@@ -250,6 +250,22 @@ function dentalArchBoxes(entity:RuntimeEntity,arch:'upper'|'lower'):StructuralSt
   return out;
 }
 
+function framePoint(rest:Vec3,restFrame:Vec3,current:RuntimeEntity):Vec3{
+  const dx=rest[0]-restFrame[0],dy=rest[1]-restFrame[1],dz=rest[2]-restFrame[2];
+  const a=current.rotation[0],cs=Math.cos(a),sn=Math.sin(a);
+  return[
+    current.position[0]+dx,
+    current.position[1]+dy*cs-dz*sn,
+    current.position[2]+dy*sn+dz*cs,
+  ];
+}
+
+function isBoneAttached(meta:CageMeta):boolean{
+  if(meta.layer!==1)return false;
+  if(meta.radial>=.98)return true;
+  return meta.radial>=.25&&(meta.lower>.28||Math.sin(meta.angle)>.28);
+}
+
 function contactBoxes(scene:Scene):StructuralStaticBox[]{
   const upper=scene.entities.get(VOCAL_FACE_IDS.upperTeeth),lower=scene.entities.get(VOCAL_FACE_IDS.lowerTeeth);
   return[
@@ -315,6 +331,7 @@ export class SoftMouthRig{
   private readonly entity:RuntimeEntity;
   private readonly deformed:Float64Array;
   private readonly normals:Float64Array;
+  private readonly lowerTeethRestFrame:Vec3;
   private contacts:StructuralContactStats={contacts:0,maxPenetration:0,projectedSamples:0};
   private remainingPenetration=0;
 
@@ -329,6 +346,8 @@ export class SoftMouthRig{
     this.normals=new Float64Array(this.surface.normals.length);
     const entity=scene.entities.get(SOFT_FACE_ID);if(!entity)throw new TypeError('Soft perioral entity missing');
     this.entity=entity;
+    const lowerTeeth=scene.entities.get(VOCAL_FACE_IDS.lowerTeeth);if(!lowerTeeth)throw new TypeError('Lower teeth frame missing');
+    this.lowerTeethRestFrame=Object.freeze([...lowerTeeth.position]) as Vec3;
     this.projectSurface();
   }
 
@@ -379,13 +398,28 @@ export class SoftMouthRig{
     return target;
   }
 
+  private projectBoneAttachments(body:StructuralBody):void{
+    const lowerFrame=this.scene.entities.get(VOCAL_FACE_IDS.lowerTeeth);
+    if(!lowerFrame)throw new TypeError('Lower teeth frame missing');
+    for(let node=0;node<body.nodeCount;node++){
+      const meta=this.meta[node]!;if(!isBoneAttached(meta))continue;
+      const j=node*3,rest:Vec3=[body.originalPosition[j]!,body.originalPosition[j+1]!,body.originalPosition[j+2]!];
+      let target:Vec3;
+      if(meta.lower>.28)target=framePoint(rest,this.lowerTeethRestFrame,lowerFrame);
+      else target=rest;
+      body.position[j]=target[0];body.position[j+1]=target[1];body.position[j+2]=target[2];
+    }
+  }
+
   step(a:VocalArticulators,pose:VocalFacePose,dt:number):SoftMouthDiagnostics{
     if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('Soft mouth dt must be within (0,.1]');
     let remaining=dt,maxPen=0,contacts=0,deepestBox:string|undefined,deepestPoint:Vec3|undefined;
     while(remaining>1e-9){
       const h=Math.min(remaining,1/240);
       for(let node=0;node<this.structure.nodeCount;node++){
-        const meta=this.meta[node]!,target=this.target(meta,a,pose),j=node*3;
+        const meta=this.meta[node]!;
+        if(isBoneAttached(meta))continue;
+        const target=this.target(meta,a,pose),j=node*3;
         const dx=target[0]-this.structure.position[j]!,dy=target[1]-this.structure.position[j+1]!,dz=target[2]-this.structure.position[j+2]!;
         const vx=this.structure.velocity[j]!,vy=this.structure.velocity[j+1]!,vz=this.structure.velocity[j+2]!;
         const lipWeight=(1-smooth(meta.radial))**2,outerWeight=smooth(meta.radial)**2;
@@ -397,7 +431,7 @@ export class SoftMouthRig{
       }
       const boxes=contactBoxes(this.scene),contact=new StructuralStaticContactSolver(boxes,this.structure.definition.collisionTriangles??[]);
       contact.resetStats();
-      this.structure.step(h,[0,0,0],body=>{contact.project(body);projectLipContact(body);});
+      this.structure.step(h,[0,0,0],body=>{this.projectBoneAttachments(body);contact.project(body);projectLipContact(body);});
       if(contact.stats.maxPenetration>maxPen){
         maxPen=contact.stats.maxPenetration;
         deepestBox=contact.stats.deepestBoxId;
