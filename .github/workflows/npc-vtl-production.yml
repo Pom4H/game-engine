@@ -1,0 +1,72 @@
+name: NPC VTL Production Speech
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/audio/vtl-external.ts'
+      - 'src/index.ts'
+      - 'test/npc-speech.test.mjs'
+      - 'tools/npc-speech-demo/vtl-production-plan.mjs'
+      - 'tools/npc-speech-demo/vtl-oracle.py'
+      - 'tools/npc-speech-demo/whisper-intelligibility.py'
+      - '.github/workflows/npc-vtl-production.yml'
+  workflow_dispatch:
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/npc-speech.test.mjs
+      - name: Generate engine-owned VTL plan
+        run: node tools/npc-speech-demo/vtl-production-plan.mjs
+      - name: Build pinned official VocalTractLab backend
+        run: |
+          git clone https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/vtl
+          git -C /tmp/vtl checkout df30392f18dc5e175b577c3ba734caaa65a3927f
+          cmake -S /tmp/vtl -B /tmp/vtl/out -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/vtl/out --config Release --target VocalTractLabApi -j2
+      - name: Render with official VTL C API
+        run: |
+          LIB=$(find /tmp/vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          test -n "$LIB"
+          python3 tools/npc-speech-demo/vtl-oracle.py \
+            "$LIB" \
+            /tmp/vtl/resources/JD3.speaker \
+            artifacts/npc-vtl-production/la-la.seg \
+            artifacts/npc-vtl-production/la-la.wav
+      - name: Prepare Whisper oracle
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg python3-venv
+          python3 -m venv .venv
+          .venv/bin/pip install --disable-pip-version-check faster-whisper==1.2.0 requests numpy
+          ffmpeg -y -hide_banner -loglevel error \
+            -i artifacts/npc-vtl-production/la-la.wav \
+            -af "adelay=300,apad=pad_dur=0.3" \
+            -ac 1 -ar 16000 -sample_fmt s16 \
+            artifacts/npc-vtl-production/la-la-asr.wav
+      - name: Gate intelligibility
+        run: |
+          .venv/bin/python tools/npc-speech-demo/whisper-intelligibility.py \
+            artifacts/npc-vtl-production/la-la-asr.wav \
+            "la la" \
+            0.01 \
+            artifacts/npc-vtl-production/asr.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npc-vtl-production-speech
+          path: |
+            artifacts/npc-vtl-production/la-la.wav
+            artifacts/npc-vtl-production/la-la.seg
+            artifacts/npc-vtl-production/la-la.ges
+            artifacts/npc-vtl-production/backend.json
+            artifacts/npc-vtl-production/asr.json
+          retention-days: 14
