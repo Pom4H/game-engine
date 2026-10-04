@@ -52,7 +52,7 @@ const vehicle={chassis:{massKg:chassisMass,sizeM:[5.25,1.18,1.95],dragAreaM2:1.1
  wheel('wheel.front.left',[1.61,-.18,-.86],.52),wheel('wheel.front.right',[1.61,-.18,.86],.52),
  wheel('wheel.rear.left',[-1.61,-.18,-.86]),wheel('wheel.rear.right',[-1.61,-.18,.86]),
 ]};
-entities.push({id:'offroad',position:[-19,1.25,0],mesh:{kind:'box',size:[5.25,1.18,1.95]},renderMesh:mergedVehicle(),material:{kind:'steel',color:[1,1,1,1],roughness:.48,metalness:.08},body:{mass:totalMass,velocity:[5.2,0,0],friction:.72,restitution:.02}});
+entities.push({id:'offroad',position:[-19,1.25,0],mesh:{kind:'box',size:[5.25,1.18,1.95]},renderMesh:mergedVehicle(),material:{kind:'steel',color:[1,1,1,1],roughness:.48,metalness:.08},body:{mass:totalMass,shape:'box',collisionSize:[5.25,1.18,1.95],velocity:[5.2,0,0],friction:.72,restitution:.02}});
 
 export default{
  version:1,seed:90421,ground:-4,gravity:[0,-9.81,0],clearColor:[.46,.57,.62,1],
