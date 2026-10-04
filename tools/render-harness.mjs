@@ -75,7 +75,16 @@ const server=createServer(async(req,res)=>{
 });
 await new Promise((resolvePromise,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolvePromise)});
 const port=server.address().port;
-const chrome=process.env.CHROME_PATH??(['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'].find(existsSync));
+const chromeCandidates=process.platform==='win32'
+  ?[
+    join(process.env.ProgramFiles??process.env.PROGRAMFILES??'C:\\Program Files','Google','Chrome','Application','chrome.exe'),
+    join(process.env['ProgramFiles(x86)']??process.env['PROGRAMFILES(X86)']??'C:\\Program Files (x86)','Google','Chrome','Application','chrome.exe'),
+    join(process.env.LOCALAPPDATA??'', 'Google','Chrome','Application','chrome.exe'),
+  ]
+  :process.platform==='darwin'
+    ?['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','/Applications/Chromium.app/Contents/MacOS/Chromium']
+    :['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'];
+const chrome=process.env.CHROME_PATH??chromeCandidates.find(existsSync);
 if(!chrome)throw new Error('Chrome/Chromium not found');
 
 const profile=await mkdtemp(join(tmpdir(),'game-engine-chrome-'));
