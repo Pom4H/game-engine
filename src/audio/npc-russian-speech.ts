@@ -241,7 +241,7 @@ export function planNpcRussianSpeech(
     const holdEnd=end-transitionS;
     if(transitionS>1e-5){
       gestures.push(Object.freeze({startS:time,endS:holdEnd,from,...common}));
-      gestures.push(Object.freeze({startS:holdEnd,endS:end,from,to,...common}));
+      gestures.push(Object.freeze({startS:holdEnd,endS:end,from,to:to!,...common}));
     }else gestures.push(Object.freeze({startS:time,endS:end,from,...common}));
     time=end;
   }
