@@ -163,6 +163,10 @@ function oralBoundaryBoxes(scene:Scene):StructuralStaticBox[]{
     {id:'upper-incisors',center:[0,upperY,upperZ+.002],half:[.18,.025,.022]},
     {id:'lower-incisors',center:[0,lowerY,lowerZ+.002],half:[.18,.023,.022]},
     {id:'hard-palate',center:[0,1.515,.465],half:[.29,.032,.22]},
+    // Inner lip / anterior vestibule boundary. Russian speech never requires
+    // the tongue tip to leave the oral cavity; it may press here and deform,
+    // but cannot emerge through the lips or chin.
+    {id:'anterior-oral-wall',center:[0,1.335,.742],half:[.30,.145,.027]},
     // Posterior wall keeps the root in the pharyngeal/oral volume.
     {id:'posterior-oral-wall',center:[0,1.31,.315],half:[.30,.16,.025]},
   ];
