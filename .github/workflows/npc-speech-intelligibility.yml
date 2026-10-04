@@ -36,6 +36,8 @@ jobs:
         run: node tools/npc-speech-demo/story-mama.mjs
       - name: Generate Story formant mama
         run: node tools/npc-speech-demo/story-formant-mama.mjs
+      - name: Generate Story formant la la
+        run: node tools/npc-speech-demo/story-formant-lala.mjs
       - name: Dump vowel airway profiles
         run: node tools/npc-speech-demo/airway-dump.mjs
       - name: Generate English ASR probe clips
@@ -70,6 +72,7 @@ jobs:
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-word-alive.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-word-alive.wav
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/story-mama.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-story-mama.wav
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/story-formant-mama.wav -af "adelay=300,apad=pad_dur=0.3" -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-story-formant-mama.wav
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/story-formant-lala.wav -af "adelay=300,apad=pad_dur=0.3" -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-story-formant-lala.wav
       - name: Probe legacy words separately
         run: |
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/asr-word-i.wav .cache/vosk/vosk-model-small-en-us-0.15 "I" 2.0 artifacts/npc-speech/asr-word-i.json
@@ -111,6 +114,14 @@ jobs:
             "I am alive" \
             0.34 \
             artifacts/npc-speech/asr-segmented.json
+      - name: Gate Story formant la la with Whisper
+        run: |
+          .venv/bin/pip install --disable-pip-version-check faster-whisper==1.2.0 requests numpy
+          .venv/bin/python tools/npc-speech-demo/whisper-intelligibility.py \
+            artifacts/npc-speech/asr-story-formant-lala.wav \
+            "la la" \
+            0.01 \
+            artifacts/npc-speech/asr-story-formant-lala.json
       - name: Gate Story formant mama
         run: |
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
@@ -153,6 +164,9 @@ jobs:
             artifacts/npc-speech/story-mama.json
             artifacts/npc-speech/story-formant-mama.wav
             artifacts/npc-speech/story-formant-mama.json
+            artifacts/npc-speech/story-formant-lala.wav
+            artifacts/npc-speech/story-formant-lala.json
+            artifacts/npc-speech/asr-story-formant-lala.json
             artifacts/npc-speech/asr-story-formant-mama.json
             artifacts/npc-speech/asr-story-mama.json
             artifacts/npc-speech/poster.png
