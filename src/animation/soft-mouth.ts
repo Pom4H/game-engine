@@ -320,7 +320,9 @@ export class SoftMouthRig{
 
     if(lower&&a.labiodental>.001){
       inner[1]+=lower*.032*a.labiodental;
-      inner[2]-=lower*.026*a.labiodental;
+      const pulledZ=inner[2]-lower*.022*a.labiodental;
+      const incisorContactZ=meta.layer===1?.584:.598;
+      inner[2]=Math.max(pulledZ,incisorContactZ);
     }
 
     const jawFollow=lower*(.25+.75*outerWeight)*(1-lipWeight*a.lipClosure*.90);
