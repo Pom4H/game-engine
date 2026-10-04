@@ -49,7 +49,7 @@ test('soft perioral tissue follows a sudden closure with inertia instead of tele
   }
   assert.ok(after<LIP_CONTACT_TEST_MAX_GAP,'sustained /m/ must reach soft contact zone, gap='+after);
   assert.ok(after>=.0010,'lip surfaces must contact rather than cross');
-  assert.ok(maxClosingSpeed<.22,'soft lips still approach with a clap-like speed: '+maxClosingSpeed);
+  assert.ok(maxClosingSpeed<=.181,'soft lips still approach with a clap-like speed: '+maxClosingSpeed);
   assert.ok(maxContactForce<.0451,'lip contact force exceeded compliant contact cap: '+maxContactForce);
 });
 
@@ -72,7 +72,7 @@ test('perioral volume stays finite, attached, unbroken and outside teeth through
   assert.ok(maxPen<.010,'tooth contact projection allowed excessive trial penetration: '+maxPen+' at '+maxPenAt);
   assert.ok(maxRemaining<1e-8,'tooth penetration remained after projection: '+maxRemaining);
   assert.ok(maxKinetic<2,'soft face became numerically explosive: '+maxKinetic);
-  assert.ok(maxLipClosingSpeed<.22,'lip closing speed remained clap-like: '+maxLipClosingSpeed);
+  assert.ok(maxLipClosingSpeed<=.181,'lip closing speed remained clap-like: '+maxLipClosingSpeed);
   assert.ok(maxLipContactForce<.0451,'lip contact force exceeded compliant cap: '+maxLipContactForce);
   assert.ok(minGap>=.0010,'lips crossed');
   assert.ok(minGap<.008,'dialogue never reaches bilabial contact: '+minGap);
