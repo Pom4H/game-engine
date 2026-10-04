@@ -9,8 +9,8 @@ import {
 
 const out='artifacts/npc-speech';await mkdir(out,{recursive:true});
 const score=storyMamaScore();
-const render=synthesizeStoryMama({sampleRate:48_000,controlRateHz:240,seed:20261004});
-const frames=buildStoryAreaFrames(score,{sampleRate:48_000,controlRateHz:240});
+const render=synthesizeStoryMama({controlRateHz:240,seed:20261004});
+const frames=buildStoryAreaFrames(score,{sampleRate:44_100,controlRateHz:240,sections:44});
 await writeFile(out+'/story-mama.wav',wavBytes(render.audio));
 await writeFile(out+'/story-mama.json',JSON.stringify({
   text:'mama',
