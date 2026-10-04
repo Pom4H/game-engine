@@ -64,5 +64,5 @@ test('perioral volume stays finite, attached, unbroken and outside teeth through
   assert.ok(maxRemaining<1e-8,'tooth penetration remained after projection: '+maxRemaining);
   assert.ok(maxKinetic<2,'soft face became numerically explosive: '+maxKinetic);
   assert.ok(minGap>=.0013,'lips crossed');
-  assert.ok(maxGap>minGap*4,'mouth aperture did not articulate');
+  assert.ok(maxGap>minGap*4,'mouth aperture did not articulate: min='+minGap+' max='+maxGap+' ratio='+(maxGap/minGap));
 });
