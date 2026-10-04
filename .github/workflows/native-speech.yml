@@ -3,9 +3,9 @@ on:
   push:
     branches: [main, codex/native-speech-tea-performance]
     paths:
-      - 'src/audio/native-speech.ts'
+      - 'src/audio/native-*.ts'
       - 'tools/tea-performance/**'
-      - 'test/native-speech.test.mjs'
+      - 'test/native-*.test.mjs'
       - '.github/workflows/native-speech.yml'
   workflow_dispatch:
 permissions:
@@ -25,14 +25,14 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck && bun run build
       - name: Physical, deterministic and ownership invariants
-        run: node --test test/native-speech.test.mjs test/story-area-model.test.mjs
+        run: node --test test/native-speech.test.mjs test/native-tract-energy.test.mjs test/story-area-model.test.mjs
       - name: Synthesize all thirteen turns in TypeScript
         run: node tools/tea-performance/audio.mjs
       - name: Install independent ASR
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
-          python3 -m pip install faster-whisper
+          python3 -m pip install faster-whisper==1.2.1
       - name: Measure unprompted speech intelligibility
         env:
           WHISPER_MODEL: base.en
