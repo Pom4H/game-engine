@@ -171,7 +171,7 @@ export function storyControlForConsonant(name:StoryConsonant,activation=1):Story
 }
 
 /** Linear spatial resampling for the engine's current waveguide section count. */
-export function resampleStoryArea(area:readonly number[],sections:number):Float64Array{
+export function resampleStoryArea(area:ArrayLike<number>,sections:number):Float64Array{
   if(area.length<2||!Number.isInteger(sections)||sections<2)throw new RangeError('Invalid Story area resample dimensions');
   if(sections===area.length)return new Float64Array(area);
   const out=new Float64Array(sections);
