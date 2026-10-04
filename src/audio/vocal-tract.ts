@@ -431,6 +431,7 @@ class BranchedVocalNetwork {
   private velumControl=0;
   private oralClosurePressure=0;
   private previousOralAperture=.8;
+  private previousStopDrive=0;
   maxBranchEnergyResidual=0;
 
   constructor(readonly sections:number,readonly sampleRate:number){
@@ -503,17 +504,26 @@ class BranchedVocalNetwork {
     // is released through the same constriction when that closure opens.
     const dt=1/this.sampleRate;
     const closure=clamp((.22-aperture)/.20,0,1);
-    const leak=1-closure;
-    this.oralClosurePressure+=dt*(22*Math.abs(glottalFlow)*closure-34*leak*this.oralClosurePressure);
+    // A fricative slit (/v f s z/) is narrow but not sealed. Stop pressure is
+    // stored only when lips or tongue are actually commanded toward closure.
+    const stopDrive=Math.max(
+      state.lipClosure,
+      state.tongueTip*(1-state.labiodental),
+      dorsalDrive*.92,
+    );
+    const sealed=closure*clamp((stopDrive-.58)/.42,0,1);
+    const leak=1-sealed;
+    this.oralClosurePressure+=dt*(22*Math.abs(glottalFlow)*sealed-38*leak*this.oralClosurePressure);
     this.oralClosurePressure=clamp(this.oralClosurePressure,0,2.4);
     const opening=Math.max(0,aperture-this.previousOralAperture);
     const releaseFraction=clamp(opening/.035,0,1);
-    if(releaseFraction>0&&this.oralClosurePressure>.015){
+    if(releaseFraction>0&&this.oralClosurePressure>.015&&this.previousStopDrive>.58){
       const burst=this.oralClosurePressure*releaseFraction;
       o.inject(minIndex,(rng()*2-1)*burst*.11+burst*.035);
       this.oralClosurePressure*=1-.82*releaseFraction;
     }
     this.previousOralAperture=aperture;
+    this.previousStopDrive=stopDrive;
 
     const mouth=o.rightIncoming(),mouthRad=this.mouthRadiator.radiate(mouth.incoming,mouth.area);
     o.setRightOutgoing(mouthRad.reflected);
