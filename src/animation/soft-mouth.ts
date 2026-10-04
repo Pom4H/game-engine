@@ -58,6 +58,8 @@ export interface SoftMouthDiagnostics{
   readonly maxContactPenetrationM:number;
   readonly remainingToothPenetrationM:number;
   readonly contacts:number;
+  readonly deepestContactBox?:string;
+  readonly deepestContactPoint?:Vec3;
   readonly brokenConstraints:number;
 }
 
@@ -353,7 +355,7 @@ export class SoftMouthRig{
 
   step(a:VocalArticulators,pose:VocalFacePose,dt:number):SoftMouthDiagnostics{
     if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('Soft mouth dt must be within (0,.1]');
-    let remaining=dt,maxPen=0,contacts=0;
+    let remaining=dt,maxPen=0,contacts=0,deepestBox:string|undefined,deepestPoint:Vec3|undefined;
     while(remaining>1e-9){
       const h=Math.min(remaining,1/240);
       for(let node=0;node<this.structure.nodeCount;node++){
@@ -370,11 +372,20 @@ export class SoftMouthRig{
       const boxes=contactBoxes(this.scene),contact=new StructuralStaticContactSolver(boxes,this.structure.definition.collisionTriangles??[]);
       contact.resetStats();
       this.structure.step(h,[0,0,0],body=>{contact.project(body);projectLipContact(body);});
-      maxPen=Math.max(maxPen,contact.stats.maxPenetration);contacts+=contact.stats.contacts;
+      if(contact.stats.maxPenetration>maxPen){
+        maxPen=contact.stats.maxPenetration;
+        deepestBox=contact.stats.deepestBoxId;
+        deepestPoint=contact.stats.deepestPoint;
+      }
+      contacts+=contact.stats.contacts;
       this.remainingPenetration=Math.max(this.remainingPenetration,remainingBoxPenetration(this.structure,boxes));
       remaining-=h;
     }
-    this.contacts={contacts,maxPenetration:maxPen,projectedSamples:contacts};
+    this.contacts={
+      contacts,maxPenetration:maxPen,projectedSamples:contacts,
+      ...(deepestBox?{deepestBoxId:deepestBox}:{}),
+      ...(deepestPoint?{deepestPoint}:{}),
+    };
     this.projectSurface();
     return this.diagnostics;
   }
@@ -414,6 +425,8 @@ export class SoftMouthRig{
       maxContactPenetrationM:this.contacts.maxPenetration,
       remainingToothPenetrationM:this.remainingPenetration,
       contacts:this.contacts.contacts,
+      ...(this.contacts.deepestBoxId?{deepestContactBox:this.contacts.deepestBoxId}:{}),
+      ...(this.contacts.deepestPoint?{deepestContactPoint:this.contacts.deepestPoint}:{}),
       brokenConstraints:broken,
     });
   }
