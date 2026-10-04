@@ -21,7 +21,7 @@ const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
 const MIN_LIP_CONTACT_GAP_M=.0015;
 const LIP_CONTACT_ZONE_M=.006;
 const LIP_CONTACT_STIFFNESS_N_M=7.5;
-const LIP_CONTACT_DAMPING_N_S_M=.045;
+const LIP_CONTACT_DAMPING_N_S_M=.072;
 const LIP_CONTACT_ADHESION_N=.0035;
 
 const SKIN:Color=[.62,.39,.30,1];
@@ -514,12 +514,12 @@ export class SoftMouthRig{
 
       // Muscle activation is a biomechanical state, not a direct phoneme transform.
       // Critical damping and a finite activation speed prevent one-frame rest-length jumps.
-      const targetClosure=clamp(a.lipClosure,0,1),omega=2*Math.PI*7.0;
+      const targetClosure=clamp(a.lipClosure,0,1),omega=2*Math.PI*5.2;
       const activationAcceleration=omega*omega*(targetClosure-this.lipClosureActivation)-2*omega*this.lipClosureVelocity;
-      this.lipClosureVelocity=clamp(this.lipClosureVelocity+activationAcceleration*h,-5.5,5.5);
+      this.lipClosureVelocity=clamp(this.lipClosureVelocity+activationAcceleration*h,-4.0,4.0);
       this.lipClosureActivation=clamp(this.lipClosureActivation+this.lipClosureVelocity*h,0,1);
 
-      this.orbicularisScale=clamp(1-.47*this.lipClosureActivation-.08*a.lipRound,.45,1);
+      this.orbicularisScale=clamp(1-.51*this.lipClosureActivation-.08*a.lipRound,.41,1);
       for(const index of this.orbicularis)this.structure.setDistanceRestScale(index,this.orbicularisScale);
 
       const lipContact=applyCompliantLipContact(this.structure);
@@ -546,7 +546,7 @@ export class SoftMouthRig{
         if(this.lipClosureActivation>.15&&meta.layer===0&&meta.ring<=1&&Math.abs(Math.sin(meta.angle))>.28){
           const closureGain=meta.ring===0?1:.48;
           const desiredY=target[1],errorY=desiredY-this.structure.position[j+1]!;
-          const maxClosureForce=.072*this.lipClosureActivation*closureGain;
+          const maxClosureForce=.052*this.lipClosureActivation*closureGain;
           const closeFy=clamp(errorY*4.6-this.structure.velocity[j+1]!*0.050,-maxClosureForce,maxClosureForce);
           this.structure.addForce(node,[0,closeFy,0]);
         }
