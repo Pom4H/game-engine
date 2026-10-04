@@ -18,26 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cpu-video:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - run: bun install --frozen-lockfile
-      - run: bun run build
-      - name: Install ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
-      - name: Capture immediate CPU preview video
-        run: node tools/offroad/capture-cpu.mjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: offroad-cpu-video
-          path: artifacts/offroad-cpu.mp4
-          retention-days: 14
-
   physics:
     runs-on: ubuntu-latest
     timeout-minutes: 15
