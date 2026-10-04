@@ -243,7 +243,8 @@ function dentalArchBoxes(entity:RuntimeEntity,arch:'upper'|'lower'):StructuralSt
     const z=.008-.012*side**1.65;
     const y=(arch==='upper'?-.001:.001)+.002*side;
     const center=transformDentalOffset(entity,[x,y,z]);
-    const half=rotatedHalf(entity,[i===0||i===7?.0155:.0175,.0215,.0105]);
+    const toothHalfX=(i===0||i===7)?.0155:.0175;
+    const half=rotatedHalf(entity,[toothHalfX,.0215,.0105]);
     out.push({id:arch+'-tooth-'+i,center,half});
   }
   return out;
