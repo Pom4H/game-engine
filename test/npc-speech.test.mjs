@@ -33,3 +33,17 @@ test('generic NPC text renders through soft geometry rather than legacy area loo
   assert.ok(Math.sqrt(energy/result.audio.left.length)>.035);
   assert.ok(peak>.15);
 });
+
+
+test('English NPC seed planner preserves I am alive motor structure',async()=>{
+  const {englishTextToNpcPhones,planNpcEnglishSpeech,synthesizeNpcEnglishSpeech}=await import('../dist/index.js');
+  const phones=englishTextToNpcPhones('I am alive').map(p=>p.phone);
+  for(const expected of ['a','i','ae','m','schwa','l','v'])assert.ok(phones.includes(expected),expected);
+  const score=planNpcEnglishSpeech('I am alive');
+  assert.ok(score.length>=9);
+  assert.ok(score.some(g=>g.from.lipClosure>.95),'English /m/ bilabial closure missing');
+  assert.ok(score.some(g=>g.from.labiodental>.8),'English /v/ labiodental constriction missing');
+  const result=synthesizeNpcEnglishSpeech('I am alive',{sampleRate:16000,controlRateHz:120});
+  assert.equal(result.diagnostics.geometryDriven,true);
+  assert.ok(result.audio.left.some(v=>Math.abs(v)>.02));
+});
