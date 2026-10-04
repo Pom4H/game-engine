@@ -16,6 +16,8 @@ import {
 } from './vocal-tract.js';
 
 const SPEED_OF_SOUND_MPS=343;
+const AIRWAY_Z_BACK=.34;
+const AIRWAY_Z_FRONT=.70;
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
 const smooth=(t:number)=>{const x=clamp(t,0,1);return x*x*(3-2*x);};
 const mix=(a:number,b:number,t:number)=>a+(b-a)*t;
@@ -87,7 +89,6 @@ function areaFrame(
   velumOpen:number,
 ):VocalAreaFrame{
   const sorted=[...profile].sort((a,b)=>a.zM-b.zM);
-  const zBack=sorted[0]!.zM,zFront=sorted.at(-1)!.zM;
   const areas=new Array<number>(sections);
 
   for(let i=0;i<sections;i++){
@@ -95,7 +96,10 @@ function areaFrame(
     // The first ~24% of the acoustic tube is pharyngeal. Use the posterior
     // physical tongue geometry to control it rather than a phoneme/formant table.
     const oralT=clamp((x-.18)/.74,0,1);
-    const z=mix(zBack,zFront,oralT);
+    // Fixed head-relative acoustic axis. Tongue translation must move the
+    // constriction along this axis; normalizing to current tongue bounds would
+    // erase the front/back distinction between /i u/ and /t k/.
+    const z=mix(AIRWAY_Z_BACK,AIRWAY_Z_FRONT,oralT);
     const tongue=interpolateTongue(sorted,z);
     let area=geometryAreaCm2(tongue,oralT);
 
