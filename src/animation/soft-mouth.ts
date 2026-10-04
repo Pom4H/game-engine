@@ -666,7 +666,8 @@ export class SoftMouthRig{
     const widthRatio=clamp(width/.34,.10,1.25);
     const effectiveHeight=Math.max(0,height-.009);
     const heightRatio=clamp(effectiveHeight/.075,0,1.25);
-    const area=clamp(6.2*widthRatio*heightRatio,.02,7.5);
+    const roundingScale=clamp(1-.72*this.lipRoundActivation,.24,1);
+    const area=clamp(6.2*widthRatio*heightRatio*roundingScale,.02,7.5);
     return Object.freeze({widthM:width,heightM:height,centerZM:centerZ,effectiveAreaCm2:area});
   }
 
