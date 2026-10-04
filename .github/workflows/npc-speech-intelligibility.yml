@@ -1,0 +1,57 @@
+name: NPC Speech Intelligibility
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/audio/**'
+      - 'src/animation/soft-mouth.ts'
+      - 'src/animation/soft-tongue.ts'
+      - 'tools/npc-speech-demo/**'
+      - 'test/npc-speech.test.mjs'
+      - 'test/airway-geometry.test.mjs'
+      - '.github/workflows/npc-speech-intelligibility.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: npc-speech-intelligibility-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  intelligibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: node --test test/airway-geometry.test.mjs test/npc-speech.test.mjs
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg unzip python3-venv
+      - name: Render physical NPC utterance
+        run: node tools/npc-speech-demo/capture-cpu.mjs
+      - name: Prepare offline Russian recognizer
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --disable-pip-version-check vosk==0.3.45
+          mkdir -p .cache/vosk
+          curl -fL --retry 3 --retry-delay 2             https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip             -o .cache/vosk/model.zip
+          unzip -q -o .cache/vosk/model.zip -d .cache/vosk
+      - name: Convert speech for ASR
+        run: ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-russian.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr.wav
+      - name: Recognize and gate intelligibility
+        run: |
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py             artifacts/npc-speech/asr.wav             .cache/vosk/vosk-model-small-ru-0.22             "Привет. Я говорю своим голосом."             0.40 | tee artifacts/npc-speech/asr.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npc-russian-physical-speech
+          path: |
+            artifacts/npc-speech/npc-russian-geometry-speech.mp4
+            artifacts/npc-speech/npc-russian.wav
+            artifacts/npc-speech/poster.png
+            artifacts/npc-speech/evidence.json
+            artifacts/npc-speech/asr.json
+          retention-days: 14
