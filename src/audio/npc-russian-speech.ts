@@ -227,13 +227,22 @@ export function planNpcRussianSpeech(
 
     const end=time+duration;
     const pressure=token.phone==='silence'?0:voice.pressurePa*(VOWELS.has(token.phone)?1:.94);
-    gestures.push(Object.freeze({
-      startS:time,endS:end,from,...(to?{to}:{}),
+    const common={
       voiced:voicing(token.phone),
       pitchHz:voice.basePitchHz*(token.stressed?1.035:1),
       lungPressurePa:pressure,
       gain:token.phone==='silence'?0:1,
-    }));
+    };
+
+    // A phone needs a stable acoustic nucleus. Coarticulation belongs only to
+    // the final tens of milliseconds; interpolating over the entire phone
+    // destroys vowel/formant identity and makes connected speech unintelligible.
+    const transitionS=to?Math.min(.035,duration*.28):0;
+    const holdEnd=end-transitionS;
+    if(transitionS>1e-5){
+      gestures.push(Object.freeze({startS:time,endS:holdEnd,from,...common}));
+      gestures.push(Object.freeze({startS:holdEnd,endS:end,from,to,...common}));
+    }else gestures.push(Object.freeze({startS:time,endS:end,from,...common}));
     time=end;
   }
   const releaseEnd=time+.12;
