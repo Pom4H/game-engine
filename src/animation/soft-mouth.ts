@@ -82,6 +82,13 @@ interface SurfaceTemplate{
   readonly indices:number[];
 }
 
+export interface SoftMouthAperture{
+  readonly widthM:number;
+  readonly heightM:number;
+  readonly centerZM:number;
+  readonly effectiveAreaCm2:number;
+}
+
 export interface SoftMouthDiagnostics{
   readonly nodes:number;
   readonly constraints:number;
@@ -646,6 +653,21 @@ export class SoftMouthRig{
       colors:[...this.surface.colors],
       indices:[...this.surface.indices],
     };
+  }
+
+  apertureGeometry():SoftMouthAperture{
+    const right=cageId(0,0,0),top=cageId(0,0,CAGE_ANGLES/4),left=cageId(0,0,CAGE_ANGLES/2),bottom=cageId(0,0,CAGE_ANGLES*3/4);
+    const px=(id:number,axis:number)=>this.structure.position[id*3+axis]!;
+    const width=Math.abs(px(right,0)-px(left,0));
+    const height=Math.max(0,px(top,1)-px(bottom,1));
+    const centerZ=(px(right,2)+px(top,2)+px(left,2)+px(bottom,2))/4;
+    // World-space face geometry is deliberately stylized. Convert shape ratios
+    // into a physiological aperture range instead of treating cartoon metres as anatomy.
+    const widthRatio=clamp(width/.34,.10,1.25);
+    const effectiveHeight=Math.max(0,height-.009);
+    const heightRatio=clamp(effectiveHeight/.075,0,1.25);
+    const area=clamp(6.2*widthRatio*heightRatio,.02,7.5);
+    return Object.freeze({widthM:width,heightM:height,centerZM:centerZ,effectiveAreaCm2:area});
   }
 
   get diagnostics():SoftMouthDiagnostics{
