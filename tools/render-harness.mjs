@@ -7,6 +7,7 @@ import {join,resolve,extname} from 'node:path';
 import {tmpdir} from 'node:os';
 import {pathToFileURL} from 'node:url';
 import {spawn} from 'node:child_process';
+import {once} from 'node:events';
 
 const [sceneFile,viewsFile,widthArg='1280',heightArg='720']=process.argv.slice(2);
 if(!sceneFile||!viewsFile)throw new Error('usage: node tools/render-harness.mjs <scene.mjs> <views.mjs> [width] [height]');
@@ -15,6 +16,8 @@ if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1)throw 
 const warmupFrames=Number(process.env.RENDER_WARMUP_FRAMES??0);
 if(!Number.isSafeInteger(warmupFrames)||warmupFrames<0||warmupFrames>512)throw new RangeError('RENDER_WARMUP_FRAMES must be in [0, 512]');
 const profiling=process.env.RENDER_PROFILING==='1',requireHardware=process.env.RENDER_REQUIRE_HARDWARE==='1';
+const videoOutput=process.env.RENDER_VIDEO_OUTPUT??null,videoFps=Number(process.env.RENDER_VIDEO_FPS??30),videoStart=Number(process.env.RENDER_VIDEO_START??0),videoDuration=Number(process.env.RENDER_VIDEO_DURATION??0);
+if(videoOutput&&(!Number.isSafeInteger(videoFps)||videoFps<1||videoFps>60||!Number.isFinite(videoStart)||videoStart<0||!Number.isFinite(videoDuration)||videoDuration<=0||videoDuration>30))throw new RangeError('Invalid render video options');
 const scenePath=resolve(sceneFile);
 const viewsPath=resolve(viewsFile);
 const sceneUrl='/tools/'+scenePath.slice(resolve('tools').length+1).replaceAll('\\','/');
@@ -176,6 +179,23 @@ try{
   const adapterResult=await send('Runtime.evaluate',{expression:'window.__RENDER_HARNESS__.adapterInfo',returnByValue:true});
 
   await mkdir(resolve('artifacts'),{recursive:true});
+  let video=null;
+  if(videoOutput){
+    const output=resolve(videoOutput);await mkdir(join(output,'..'),{recursive:true});
+    const frames=Math.max(1,Math.round(videoDuration*videoFps));
+    const encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(videoFps),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart',output],{stdio:['pipe','inherit','inherit']});
+    const completed=once(encoder,'exit');
+    for(let frame=0;frame<frames;frame++){
+      const time=videoStart+frame/videoFps;
+      const result=await send('Runtime.evaluate',{expression:`(async()=>{const bridge=window.__GAME_ENGINE__;bridge.seek(${time});await bridge.flush();return{inspection:bridge.inspect(),camera:window.__RENDER_HARNESS__.runtime.scene.camera}})()`,awaitPromise:true,returnByValue:true});
+      if(result.exceptionDetails)throw new Error('Video render failed: '+JSON.stringify(result.exceptionDetails));
+      const shot=await send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
+      const png=Buffer.from(shot.data,'base64');if(!encoder.stdin.write(png))await once(encoder.stdin,'drain');
+      if(frame%30===0)console.log('video',frame+'/'+frames);
+    }
+    encoder.stdin.end();const [code]=await completed;if(code!==0)throw new Error('ffmpeg exit '+code);
+    video={output,frames,fps:videoFps,start:videoStart,duration:videoDuration};
+  }
   const results=[];
   for(const view of views){
     if(!view?.name||!view?.output||!view?.camera)throw new Error('Invalid view entry: '+JSON.stringify(view));
@@ -205,7 +225,7 @@ try{
     console.log(JSON.stringify(results.at(-1),null,2));
   }
 
-  const hud={resolution:[width,height],warmupFrames,adapter:adapterResult.result?.value,views:results};
+  const hud={resolution:[width,height],warmupFrames,adapter:adapterResult.result?.value,video,views:results};
   await writeFile(resolve('artifacts/render-hud.json'),JSON.stringify(hud,null,2));
   console.log(JSON.stringify({views:results.length,outputs:results.map(result=>result.output),hud:'artifacts/render-hud.json'},null,2));
 }finally{
