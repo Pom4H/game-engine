@@ -1,6 +1,6 @@
+import {renderSoftGeometrySpeech} from './airway-geometry.js';
 import {
   VOCAL_ARTICULATOR_PRESETS,
-  renderArticulatedVocalTract,
   type ArticulatorGesture,
   type VocalArticulators,
   type VocalTractRender,
@@ -106,5 +106,5 @@ export function russianMouthArticulatorScore():readonly ArticulatorGesture[]{
 }
 
 export function synthesizeRussianMouthPhrase(options:VocalTractRenderOptions={}):VocalTractRender{
-  return renderArticulatedVocalTract(russianMouthArticulatorScore(),options,RUSSIAN_MOUTH_PHRASE);
+  return renderSoftGeometrySpeech(russianMouthArticulatorScore(),options,RUSSIAN_MOUTH_PHRASE);
 }
