@@ -1,0 +1,35 @@
+diff --git a/src/VocalTractLabApi/VocalTractLabApi.cpp b/src/VocalTractLabApi/VocalTractLabApi.cpp
+index 426b92a..cf34e41 100644
+--- a/src/VocalTractLabApi/VocalTractLabApi.cpp
++++ b/src/VocalTractLabApi/VocalTractLabApi.cpp
+@@ -152,6 +152,13 @@ int vtlInitialize(const char *speakerFileName)
+ 
+   bool ok = vtlLoadSpeaker(speakerFileName, vocalTract, glottis, selectedGlottis);
+ 
++  // Anatomy transformations must retain this speaker's calibrated shapes.
++  if (ok)
++  {
++    AnatomyParams anatomyReference;
++    ok = anatomyReference.loadReferenceVocalTract(speakerFileName);
++  }
++
+   if (ok == false)
+   {
+     int i;
+diff --git a/src/VocalTractLabBackend/AnatomyParams.cpp b/src/VocalTractLabBackend/AnatomyParams.cpp
+index 7ee8460..48dde55 100644
+--- a/src/VocalTractLabBackend/AnatomyParams.cpp
++++ b/src/VocalTractLabBackend/AnatomyParams.cpp
+@@ -919,10 +919,10 @@ void AnatomyParams::setFor(VocalTract *tract)
+   newParam[VocalTract::TRY].min = transformY(&origAnatomyParams, origParam[VocalTract::TRY].min);
+   newParam[VocalTract::TRY].max = transformY(&origAnatomyParams, origParam[VocalTract::TRY].max);
+ 
+-  // TS1, TS2, TS3, TS4. Scale the tongue side height linearly with the VT depth.
++  // Scale the existing tongue side parameters linearly with the VT depth.
+ 
+   double depthScale = param[PALATE_DEPTH].x / origAnatomyParams.param[PALATE_DEPTH].x;
+-  for (i=0; i < 4; i++)
++  for (i=0; i < VocalTract::NUM_PARAMS - VocalTract::TS1; i++)
+   {
+     newParam[VocalTract::TS1+i].min = origParam[VocalTract::TS1+i].min*depthScale;
+     newParam[VocalTract::TS1+i].max = origParam[VocalTract::TS1+i].max*depthScale;

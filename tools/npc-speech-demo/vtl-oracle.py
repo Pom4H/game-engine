@@ -8,7 +8,7 @@ lib=ctypes.cdll.LoadLibrary(lib_path)
 
 lib.vtlInitialize.argtypes=[ctypes.c_char_p]
 lib.vtlInitialize.restype=ctypes.c_int
-lib.vtlSegmentSequenceToGesturalScore.argtypes=[ctypes.c_char_p,ctypes.c_char_p]
+lib.vtlSegmentSequenceToGesturalScore.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.c_bool]
 lib.vtlSegmentSequenceToGesturalScore.restype=ctypes.c_int
 lib.vtlGesturalScoreToAudio.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.c_void_p,ctypes.c_void_p,ctypes.c_int]
 lib.vtlGesturalScoreToAudio.restype=ctypes.c_int
@@ -21,7 +21,7 @@ for path in [speaker_path,segment_path]:
 rc=lib.vtlInitialize(speaker_path.encode())
 if rc: raise SystemExit(f"vtlInitialize failed: {rc}")
 try:
-    rc=lib.vtlSegmentSequenceToGesturalScore(segment_path.encode(),gesture.encode())
+    rc=lib.vtlSegmentSequenceToGesturalScore(segment_path.encode(),gesture.encode(),False)
     if rc: raise SystemExit(f"vtlSegmentSequenceToGesturalScore failed: {rc}")
     rc=lib.vtlGesturalScoreToAudio(gesture.encode(),out_wav.encode(),None,None,1)
     if rc: raise SystemExit(f"vtlGesturalScoreToAudio failed: {rc}")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json,re,sys,wave
+import json,os,re,sys,wave
 import numpy as np
 from faster_whisper import WhisperModel
 
@@ -25,17 +25,19 @@ with wave.open(wav,"rb") as wf:
     if wf.getnchannels()!=1 or wf.getsampwidth()!=2 or wf.getframerate()!=16000:
         raise SystemExit(f"Whisper WAV must be mono 16-bit 16kHz, got {wf.getnchannels()}ch/{wf.getsampwidth()*8}bit/{wf.getframerate()}Hz")
     pcm=np.frombuffer(wf.readframes(wf.getnframes()),dtype=np.int16).astype(np.float32)/32768.0
-model=WhisperModel("tiny.en",device="cpu",compute_type="int8")
-segments,info=model.transcribe(pcm,language="en",beam_size=5,vad_filter=False,temperature=0.0)
+model_name=os.environ.get("WHISPER_MODEL","tiny.en")
+model=WhisperModel(model_name,device="cpu",compute_type="int8")
+segments,info=model.transcribe(pcm,language="en",beam_size=5,vad_filter=False,temperature=0.0,initial_prompt=None,condition_on_previous_text=False)
 hyp=norm(" ".join(seg.text for seg in segments))
 ref=norm(expected)
 rw,hw=ref.split(),hyp.split()
 wer=edit(rw,hw)/max(1,len(rw))
 cer=edit(list(ref.replace(" ","")),list(hyp.replace(" ","")))/max(1,len(ref.replace(" ","")))
-result={"expected":ref,"recognized":hyp,"wer":wer,"cer":cer,"max_wer":max_wer,"language":info.language}
+result={"expected":ref,"recognized":hyp,"wer":wer,"cer":cer,"max_wer":max_wer,"language":info.language,"model":model_name,"initial_prompt":None}
 payload=json.dumps(result,ensure_ascii=False,indent=2)
 print(payload)
 if out:
     open(out,"w",encoding="utf-8").write(payload+"\n")
 if wer>max_wer:
     raise SystemExit(f"Whisper intelligibility gate failed: WER={wer:.3f} > {max_wer:.3f}")
+

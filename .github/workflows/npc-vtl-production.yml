@@ -8,6 +8,10 @@ on:
       - 'test/npc-speech.test.mjs'
       - 'tools/npc-speech-demo/vtl-production-plan.mjs'
       - 'tools/npc-speech-demo/vtl-oracle.py'
+      - 'tools/npc-speech-demo/vtl-dialogue-plan.mjs'
+      - 'tools/npc-speech-demo/vtl-dialogue.py'
+      - 'tools/npc-speech-demo/vtl-anatomy-reference.patch'
+      - 'test/vtl-dialogue.test.mjs'
       - 'tools/npc-speech-demo/whisper-intelligibility.py'
       - '.github/workflows/npc-vtl-production.yml'
   workflow_dispatch:
@@ -24,13 +28,14 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build
-      - run: node --test test/npc-speech.test.mjs
+      - run: node --test test/npc-speech.test.mjs test/vtl-dialogue.test.mjs
       - name: Generate engine-owned VTL plan
         run: node tools/npc-speech-demo/vtl-production-plan.mjs
       - name: Build pinned official VocalTractLab backend
         run: |
           git clone https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/vtl
           git -C /tmp/vtl checkout df30392f18dc5e175b577c3ba734caaa65a3927f
+          git -C /tmp/vtl apply "$GITHUB_WORKSPACE/tools/npc-speech-demo/vtl-anatomy-reference.patch"
           cmake -S /tmp/vtl -B /tmp/vtl/out -DCMAKE_BUILD_TYPE=Release
           cmake --build /tmp/vtl/out --config Release --target VocalTractLabApi -j2
       - name: Render with official VTL C API
@@ -42,6 +47,14 @@ jobs:
             /tmp/vtl/resources/JD3.speaker \
             artifacts/npc-vtl-production/la-la.seg \
             artifacts/npc-vtl-production/la-la.wav
+      - name: Render two-speaker dialogue from engine motor and prosody plan
+        run: |
+          node tools/npc-speech-demo/vtl-dialogue-plan.mjs
+          LIB=$(find /tmp/vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          test -n "$LIB"
+          python3 tools/npc-speech-demo/vtl-dialogue.py \
+            "$LIB" /tmp/vtl/resources/JD3.speaker \
+            artifacts/vtl-dialogue/plan.json artifacts/vtl-dialogue
       - name: Prepare Whisper oracle
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg python3-venv
@@ -52,6 +65,10 @@ jobs:
             -af "adelay=300,apad=pad_dur=0.3" \
             -ac 1 -ar 16000 -sample_fmt s16 \
             artifacts/npc-vtl-production/la-la-asr.wav
+          ffmpeg -y -hide_banner -loglevel error \
+            -i artifacts/vtl-dialogue/dialogue.wav \
+            -ac 1 -ar 16000 -sample_fmt s16 \
+            artifacts/vtl-dialogue/dialogue-asr.wav
       - name: Gate intelligibility
         run: |
           .venv/bin/python tools/npc-speech-demo/whisper-intelligibility.py \
@@ -59,6 +76,14 @@ jobs:
             "la la" \
             0.01 \
             artifacts/npc-vtl-production/asr.json
+      - name: Check the complete conversation with an unprompted recognizer
+        env:
+          WHISPER_MODEL: small.en
+        run: |
+          dialogue_expected=$(node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(fs.readFileSync("artifacts/vtl-dialogue/plan.json","utf8")); console.log(p.turns.map(t=>t.text).join(" "));')
+          .venv/bin/python tools/npc-speech-demo/whisper-intelligibility.py \
+            artifacts/vtl-dialogue/dialogue-asr.wav \
+            "$dialogue_expected" 0.15 artifacts/vtl-dialogue/asr.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -69,4 +94,5 @@ jobs:
             artifacts/npc-vtl-production/la-la.ges
             artifacts/npc-vtl-production/backend.json
             artifacts/npc-vtl-production/asr.json
+            artifacts/vtl-dialogue/
           retention-days: 14
