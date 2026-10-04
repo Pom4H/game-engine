@@ -276,8 +276,10 @@ function framePoint(rest:Vec3,restFrame:Vec3,current:RuntimeEntity):Vec3{
 
 function isBoneAttached(meta:CageMeta):boolean{
   if(meta.layer!==1)return false;
+  // The oral vestibule and inner lip must remain free. Bone attachment starts
+  // only in the outer posterior tissue near the alveolar/cheek foundation.
   if(meta.radial>=.98)return true;
-  return meta.radial>=.25&&(meta.lower>.28||Math.sin(meta.angle)>.28);
+  return meta.radial>=.72&&(meta.lower>.28||Math.sin(meta.angle)>.28);
 }
 
 /** Trial contact penetration is allowed only inside the XPBD predictor;
@@ -601,7 +603,7 @@ export class SoftMouthRig{
     let broken=0;for(const value of this.structure.broken)broken+=value?1:0;
     const top=cageId(0,0,CAGE_ANGLES/4),bottom=cageId(0,0,CAGE_ANGLES*3/4);
     const mouthGap=Math.max(0,this.structure.position[top*3+1]!-this.structure.position[bottom*3+1]!);
-    const apertureBoundaryNodes=CAGE_ANGLES*CAGE_LAYERS,outerAttachmentNodes=CAGE_ANGLES*CAGE_LAYERS;
+    const apertureBoundaryNodes=CAGE_ANGLES*CAGE_LAYERS,outerAttachmentNodes=this.meta.reduce((sum,meta)=>sum+(isBoneAttached(meta)?1:0),0);
     let cheekNodes=0,chinNodes=0;
     for(const meta of this.meta){
       if(meta.radial>.55&&meta.side>.55)cheekNodes++;
