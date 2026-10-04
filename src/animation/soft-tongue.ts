@@ -33,6 +33,13 @@ interface TongueMeta{
   readonly z01:number;
 }
 
+export interface TongueAirwaySample{
+  readonly zM:number;
+  readonly topYM:number;
+  readonly bottomYM:number;
+  readonly widthM:number;
+}
+
 export interface SoftTongueDiagnostics{
   readonly nodes:number;
   readonly constraints:number;
@@ -255,6 +262,20 @@ export class SoftTongueRig{
     applyStructuralSkin(this.skin,this.structure.originalPosition,this.structure.position,this.deformed);
     computeNormals(this.deformed,this.surface.indices,this.normals);
     this.entity.mesh={kind:'triangle-mesh',positions:[...this.deformed],normals:[...this.normals],indices:[...this.surface.indices]};
+  }
+
+  airwayProfile():readonly TongueAirwaySample[]{
+    const out:TongueAirwaySample[]=[];
+    for(let iz=0;iz<NZ;iz++){
+      let z=0,top=-Infinity,bottom=Infinity,minX=Infinity,maxX=-Infinity,count=0;
+      for(let node=0;node<this.meta.length;node++){
+        const meta=this.meta[node]!;if(meta.iz!==iz)continue;
+        const j=node*3,x=this.structure.position[j]!,y=this.structure.position[j+1]!,zz=this.structure.position[j+2]!;
+        z+=zz;top=Math.max(top,y);bottom=Math.min(bottom,y);minX=Math.min(minX,x);maxX=Math.max(maxX,x);count++;
+      }
+      out.push(Object.freeze({zM:z/Math.max(1,count),topYM:top,bottomYM:bottom,widthM:maxX-minX}));
+    }
+    return Object.freeze(out);
   }
 
   get diagnostics():SoftTongueDiagnostics{
