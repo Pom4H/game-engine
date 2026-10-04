@@ -272,7 +272,7 @@ function isBoneAttached(meta:CageMeta):boolean{
   return meta.radial>=.25&&(meta.lower>.28||Math.sin(meta.angle)>.28);
 }
 
-function contactBoxes(scene:Scene):StructuralStaticBox[]{
+/** Trial contact penetration is allowed only inside the XPBD predictor;\n * projection must leave no residual tooth overlap in committed soft-tissue state. */\nfunction contactBoxes(scene:Scene):StructuralStaticBox[]{
   const upper=scene.entities.get(VOCAL_FACE_IDS.upperTeeth),lower=scene.entities.get(VOCAL_FACE_IDS.lowerTeeth);
   return[
     ...(upper?dentalArchBoxes(upper,'upper'):[]),
