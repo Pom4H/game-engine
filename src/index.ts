@@ -65,6 +65,7 @@ export {SnowFootprints,type FootContact,type SnowFootprint} from './environment/
 
 export {renderFootsteps,type FootstepSound} from './audio/footsteps.js';
 
+export {SoftTongueRig,softTonguePrimitive,addSoftTongueToScene,hideLegacyTongue,type SoftTongueDiagnostics} from './animation/soft-tongue.js';
 export {SOFT_MOUTH_MOTOR_LEAD_S,sampleSoftMouthMotorPlan,SoftMouthRig,SoftVocalFaceRig,softVocalFaceSceneSpec,type SoftMouthDiagnostics} from './animation/soft-mouth.js';
 export {VocalFaceRig,vocalFaceSceneSpec,vocalFaceCollisionDiagnostics,VOCAL_FACE_IDS,type VocalFacePose,type VocalFaceCollisionDiagnostics} from './animation/vocal-face.js';
 export {AnimationSystem,sampleWalker,bindHumanoid,solveTwoBone} from './animation/locomotion.js';
