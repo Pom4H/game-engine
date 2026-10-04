@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'tools/npc-speech-demo/vtl-oracle.py'
+      - 'tools/npc-speech-demo/whisper-intelligibility.py'
       - 'tools/npc-speech-demo/mama.seg'
       - '.github/workflows/vtl-npc-oracle.yml'
   workflow_dispatch:
