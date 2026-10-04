@@ -361,9 +361,10 @@ export class SoftMouthRig{
         const dx=target[0]-this.structure.position[j]!,dy=target[1]-this.structure.position[j+1]!,dz=target[2]-this.structure.position[j+2]!;
         const vx=this.structure.velocity[j]!,vy=this.structure.velocity[j+1]!,vz=this.structure.velocity[j+2]!;
         const lipWeight=(1-smooth(meta.radial))**2,outerWeight=smooth(meta.radial)**2;
-        const stiffness=1.8+3.8*outerWeight+1.9*lipWeight,damping=.060+.022*outerWeight;
+        const stiffness=1.25+2.6*outerWeight+1.45*lipWeight,damping=.055+.025*outerWeight;
         let fx=stiffness*dx-damping*vx,fy=stiffness*dy-damping*vy,fz=stiffness*dz-damping*vz;
-        const force=Math.hypot(fx,fy,fz),limit=.22;if(force>limit){const q=limit/force;fx*=q;fy*=q;fz*=q;}
+        const force=Math.hypot(fx,fy,fz),limit=.035+.045*outerWeight;
+        if(force>limit){const q=limit/force;fx*=q;fy*=q;fz*=q;}
         this.structure.addForce(node,[fx,fy,fz]);
       }
       const boxes=contactBoxes(this.scene),contact=new StructuralStaticContactSolver(boxes,this.structure.definition.collisionTriangles??[]);
