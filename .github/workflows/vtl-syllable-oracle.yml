@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg python3-venv
           python3 -m venv .venv
-          .venv/bin/pip install --disable-pip-version-check faster-whisper==1.2.0
+          .venv/bin/pip install --disable-pip-version-check faster-whisper==1.2.0 requests
           for f in artifacts/vtl-syllables/*.wav; do
             base="${f%.wav}"
             ffmpeg -y -hide_banner -loglevel error -i "$f" -af "adelay=300,apad=pad_dur=0.3" -ac 1 -ar 16000 -sample_fmt s16 "${base}-16k.wav"
