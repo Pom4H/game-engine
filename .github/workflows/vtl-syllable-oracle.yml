@@ -1,0 +1,41 @@
+name: VTL Syllable Oracle
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/npc-speech-demo/vtl-oracle-batch.py'
+      - 'tools/npc-speech-demo/whisper-batch.py'
+      - '.github/workflows/vtl-syllable-oracle.yml'
+  workflow_dispatch:
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build official VTL
+        run: |
+          git clone --depth 1 https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/vtl
+          cmake -S /tmp/vtl -B /tmp/vtl/out -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/vtl/out --config Release --target VocalTractLabApi -j2
+      - name: Synthesize candidate syllables
+        run: |
+          mkdir -p artifacts/vtl-syllables
+          LIB=$(find /tmp/vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          python3 tools/npc-speech-demo/vtl-oracle-batch.py "$LIB" /tmp/vtl/resources/JD3.speaker artifacts/vtl-syllables
+      - name: Prepare Whisper
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg python3-venv
+          python3 -m venv .venv
+          .venv/bin/pip install --disable-pip-version-check faster-whisper==1.2.0
+          for f in artifacts/vtl-syllables/*.wav; do
+            base="${f%.wav}"
+            ffmpeg -y -hide_banner -loglevel error -i "$f" -af "adelay=300,apad=pad_dur=0.3" -ac 1 -ar 16000 -sample_fmt s16 "${base}-16k.wav"
+          done
+      - name: Transcribe all candidates once
+        run: .venv/bin/python tools/npc-speech-demo/whisper-batch.py artifacts/vtl-syllables artifacts/vtl-syllables/whisper.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vtl-syllable-oracle
+          path: artifacts/vtl-syllables
+          retention-days: 14
