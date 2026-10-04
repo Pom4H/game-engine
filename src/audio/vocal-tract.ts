@@ -65,12 +65,21 @@ export interface VocalGesture {
   readonly gain?:number;
 }
 
+export interface VocalAreaFrame {
+  readonly timeS:number;
+  readonly oralAreaCm2:readonly number[];
+  readonly velumOpen:number;
+  readonly lipAreaCm2?:number;
+}
+
 export interface VocalTractRenderOptions {
   readonly sampleRate?:number;
   readonly sections?:number;
   readonly tractLengthM?:number;
   readonly seed?:number;
   readonly transitionS?:number;
+  /** Optional control-rate geometry sampled from the actual soft-tissue model. */
+  readonly areaFrames?:readonly VocalAreaFrame[];
 }
 
 export interface VocalTractDiagnostics {
@@ -86,6 +95,7 @@ export interface VocalTractDiagnostics {
   readonly maxAreaCm2:number;
   readonly gestures:readonly VocalGesture[];
   readonly articulatorGestures?:readonly ArticulatorGesture[];
+  readonly geometryDriven?:boolean;
 }
 
 export interface VocalTractRender {
@@ -512,15 +522,30 @@ export function renderArticulatedVocalTract(
   const duration=gestures.at(-1)?.endS??0;if(duration<=0)throw new RangeError('Articulator score must contain gestures');
   const count=Math.ceil(duration*sampleRate),left=new Float32Array(count),right=new Float32Array(count);
   const network=new BranchedVocalNetwork(sections,sampleRate),folds=new PressureDrivenVocalFolds(sampleRate),breath=new DiaphragmBreathSupport(sampleRate);
-  const current=new Float64Array(articulatorAreaFunction(gestures[0]!.from,sections)),target=new Float64Array(sections),rng=mulberry32(options.seed??0xA11CE),transition=options.transitionS??.014;
-  const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.002,transition))),scalarAttack=1-Math.exp(-1/(sampleRate*.007)),scalarRelease=1-Math.exp(-1/(sampleRate*.003));
-  let gestureIndex=0,voicedState=0,gainState=0,pitchState=120,previousFoldFlow=0,peak=0,minArea=Infinity,maxArea=0;
+  const areaFrames=options.areaFrames??[];
+  for(let i=0;i<areaFrames.length;i++){
+    const frame=areaFrames[i]!;
+    if(!Number.isFinite(frame.timeS)||frame.timeS<0||(i>0&&frame.timeS<=areaFrames[i-1]!.timeS))throw new RangeError('Vocal area frames must have strictly increasing non-negative time');
+    if(frame.oralAreaCm2.length!==sections)throw new RangeError('Vocal area frame section count must match renderer sections');
+    for(const area of frame.oralAreaCm2)if(!Number.isFinite(area)||area<=0)throw new RangeError('Vocal area frame values must be positive finite areas');
+  }
+  const initialArea=areaFrames.length?areaFrames[0]!.oralAreaCm2:articulatorAreaFunction(gestures[0]!.from,sections);
+  const current=new Float64Array(initialArea),target=new Float64Array(sections),rng=mulberry32(options.seed??0xA11CE),transition=options.transitionS??.010;
+  const areaAlpha=1-Math.exp(-1/(sampleRate*Math.max(.0015,transition))),scalarAttack=1-Math.exp(-1/(sampleRate*.007)),scalarRelease=1-Math.exp(-1/(sampleRate*.003));
+  let gestureIndex=0,areaFrameIndex=0,voicedState=0,gainState=0,pitchState=120,previousFoldFlow=0,peak=0,minArea=Infinity,maxArea=0;
   for(let sample=0;sample<count;sample++){
     const time=sample/sampleRate;while(gestureIndex<gestures.length-1&&time>=gestures[gestureIndex]!.endS)gestureIndex++;
     const gesture=gestures[gestureIndex]!,u=clamp((time-gesture.startS)/(gesture.endS-gesture.startS),0,1),state=interpolateArticulators(gesture.from,gesture.to??gesture.from,u);
-    target.set(articulatorAreaFunction(state,sections));
+    let velumOpen=state.velumOpen;
+    if(areaFrames.length){
+      while(areaFrameIndex<areaFrames.length-2&&time>=areaFrames[areaFrameIndex+1]!.timeS)areaFrameIndex++;
+      const a=areaFrames[areaFrameIndex]!,b=areaFrames[Math.min(areaFrames.length-1,areaFrameIndex+1)]!;
+      const q=b.timeS>a.timeS?clamp((time-a.timeS)/(b.timeS-a.timeS),0,1):0;
+      for(let i=0;i<sections;i++)target[i]=a.oralAreaCm2[i]!+(b.oralAreaCm2[i]!-a.oralAreaCm2[i]!)*q;
+      velumOpen=a.velumOpen+(b.velumOpen-a.velumOpen)*q;
+    }else target.set(articulatorAreaFunction(state,sections));
     for(let i=0;i<sections;i++){current[i]=current[i]!+(target[i]!-current[i]!)*areaAlpha;minArea=Math.min(minArea,current[i]!);maxArea=Math.max(maxArea,current[i]!);}
-    network.setGeometry(current,state.velumOpen);
+    network.setGeometry(current,velumOpen);
 
     const voicedTarget=gesture.voiced??1,gainTarget=gesture.gain??1,pitchTarget=gesture.pitchHz??120;
     voicedState+=(voicedTarget<voicedState?scalarRelease:scalarAttack)*(voicedTarget-voicedState);
@@ -554,6 +579,7 @@ export function renderArticulatedVocalTract(
     minAreaCm2:minArea,maxAreaCm2:maxArea,
     gestures:Object.freeze(proxy.map(g=>Object.freeze(g))),
     articulatorGestures:articulated,
+    geometryDriven:areaFrames.length>0,
   });
   return{audio:{left,right,sampleRate},diagnostics};
 }
