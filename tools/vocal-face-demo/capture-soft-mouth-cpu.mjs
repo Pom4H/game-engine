@@ -5,7 +5,7 @@ import {once} from 'node:events';
 import {
   Scene,CpuRenderer,encodePng,SoftVocalFaceRig,softVocalFaceSceneSpec,
   physicalDialogueScoreA,sampleArticulatorScore,renderArticulatedVocalTract,
-  DIALOGUE_VOICE_A,wavBytes,SOFT_MOUTH_MOTOR_LEAD_S,
+  DIALOGUE_VOICE_A,wavBytes,sampleSoftMouthMotorPlan,SOFT_MOUTH_MOTOR_LEAD_S,
 } from '../../dist/index.js';
 
 const out='artifacts/soft-mouth';await mkdir(out,{recursive:true});
@@ -23,8 +23,8 @@ let maxPen=0,maxRemaining=0,maxKinetic=0,maxGap=0,minGap=Infinity;
 
 for(let frame=0;frame<frames;frame++){
   const time=frame/fps,sample=sampleArticulatorScore(score,Math.min(time,duration-1e-6));
-  const plan=sampleArticulatorScore(score,Math.min(time+SOFT_MOUTH_MOTOR_LEAD_S,duration-1e-6));
-  const state=rig.step(sample.articulators,1/fps,plan.articulators),d=state.mouth;
+  const plan=sampleSoftMouthMotorPlan(score,Math.min(time,duration-1e-6),SOFT_MOUTH_MOTOR_LEAD_S);
+  const state=rig.step(sample.articulators,1/fps,plan),d=state.mouth;
   maxPen=Math.max(maxPen,d.maxContactPenetrationM);maxRemaining=Math.max(maxRemaining,d.remainingToothPenetrationM);
   maxKinetic=Math.max(maxKinetic,d.kineticEnergyJ);maxGap=Math.max(maxGap,d.mouthGapM);minGap=Math.min(minGap,d.mouthGapM);
   renderer.render(scene,scene.camera);
