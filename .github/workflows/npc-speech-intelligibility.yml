@@ -60,6 +60,14 @@ jobs:
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-english-waveguide.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-waveguide.wav
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-calibrated-yeah-yeah.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-calibrated.wav
           ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-segmented-i-am-alive.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-segmented.wav
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-word-i.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-word-i.wav
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-word-am.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-word-am.wav
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/npc-word-alive.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/asr-word-alive.wav
+      - name: Probe legacy words separately
+        run: |
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/asr-word-i.wav .cache/vosk/vosk-model-small-en-us-0.15 "I" 2.0 artifacts/npc-speech/asr-word-i.json
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/asr-word-am.wav .cache/vosk/vosk-model-small-en-us-0.15 "am" 2.0 artifacts/npc-speech/asr-word-am.json
+          .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/asr-word-alive.wav .cache/vosk/vosk-model-small-en-us-0.15 "alive" 2.0 artifacts/npc-speech/asr-word-alive.json
       - name: Recognize soft-geometry path
         continue-on-error: true
         run: |
@@ -80,6 +88,9 @@ jobs:
             artifacts/npc-speech/asr-waveguide.json
             artifacts/npc-speech/asr-calibrated.json
             artifacts/npc-speech/asr-segmented.json
+            artifacts/npc-speech/asr-word-i.json
+            artifacts/npc-speech/asr-word-am.json
+            artifacts/npc-speech/asr-word-alive.json
       - name: Recognize ASR-calibrated repeated motor skill
         continue-on-error: true
         run: |
@@ -108,6 +119,9 @@ jobs:
             artifacts/npc-speech/npc-english-waveguide.wav
             artifacts/npc-speech/npc-calibrated-yeah-yeah.wav
             artifacts/npc-speech/npc-segmented-i-am-alive.wav
+            artifacts/npc-speech/npc-word-i.wav
+            artifacts/npc-speech/npc-word-am.wav
+            artifacts/npc-speech/npc-word-alive.wav
             artifacts/npc-speech/poster.png
             artifacts/npc-speech/evidence.json
             artifacts/npc-speech/audio-evidence.json
