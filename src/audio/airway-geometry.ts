@@ -39,7 +39,16 @@ function interpolateTongue(profile:readonly TongueAirwaySample[],z:number):Tongu
   if(!profile.length)throw new RangeError('Tongue airway profile is empty');
   const sorted=[...profile].sort((a,b)=>a.zM-b.zM);
   if(z<=sorted[0]!.zM)return sorted[0]!;
-  if(z>=sorted.at(-1)!.zM)return sorted.at(-1)!;
+  if(z>=sorted.at(-1)!.zM){
+    const last=sorted.at(-1)!,fade=smooth((z-last.zM)/.055);
+    const floor=oralFloorY(1);
+    return Object.freeze({
+      zM:z,
+      topYM:mix(last.topYM,floor,fade),
+      bottomYM:mix(last.bottomYM,floor,fade),
+      widthM:mix(last.widthM,0,fade),
+    });
+  }
   let i=0;while(i<sorted.length-2&&z>sorted[i+1]!.zM)i++;
   const a=sorted[i]!,b=sorted[i+1]!,q=clamp((z-a.zM)/Math.max(1e-9,b.zM-a.zM),0,1);
   return Object.freeze({
@@ -112,8 +121,8 @@ function areaFrame(
 
     // The last tube sections are literally governed by the measured physical
     // lip aperture, so /m p b u v/ affect acoustics through the face geometry.
-    if(x>.80){
-      const q=smooth((x-.80)/.20);
+    if(x>.88){
+      const q=smooth((x-.88)/.12);
       area=mix(area,lipAreaCm2,q);
     }
     areas[i]=clamp(area,.02,7.5);
