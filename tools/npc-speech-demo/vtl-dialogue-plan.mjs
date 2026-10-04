@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {mkdir,writeFile} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
 import {planVtlDialogue,VTL_EXTERNAL_BACKEND} from '../../dist/audio/vtl-external.js';
 
 // Hand-authored pronunciation and speech intent. All audio is produced later
@@ -31,6 +32,7 @@ const lines=[
     hz:[[0,186],[0.27,219],[0.57,191],[1,171]],pa:[[0,800],[0.3,840],[0.65,780],[1,700]]}
 ];
 
+export function createVtlDialoguePlan(){
 let startS=.20;
 const turns=lines.map((line,index)=>{
   const lead=.12,tail=.20,duration=line.score.reduce((sum,p)=>sum+p[1],0);
@@ -41,9 +43,15 @@ const turns=lines.map((line,index)=>{
   startS+=lead+duration+tail+line.gap;
   return turn;
 });
-const plan=planVtlDialogue(speakers,turns);
+return planVtlDialogue(speakers,turns);
+}
+
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
+const plan=createVtlDialoguePlan();
 const out=process.argv[2]??'artifacts/vtl-dialogue';
 await mkdir(out,{recursive:true});
 await writeFile(out+'/plan.json',JSON.stringify(plan,null,2)+'\n');
 await writeFile(out+'/backend.json',JSON.stringify(VTL_EXTERNAL_BACKEND,null,2)+'\n');
-console.log(JSON.stringify({plan:out+'/plan.json',durationS:startS,turns:turns.map(t=>({speaker:t.speakerId,text:t.text,startS:t.startS}))},null,2));
+const durationS=Math.max(...plan.turns.map(t=>t.startS+t.segments.reduce((sum,s)=>sum+s.durationS,0)));
+console.log(JSON.stringify({plan:out+'/plan.json',durationS,turns:plan.turns.map(t=>({speaker:t.speakerId,text:t.text,startS:t.startS}))},null,2));
+}

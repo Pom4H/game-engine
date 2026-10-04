@@ -4,7 +4,7 @@ import {batchStaticScenery} from '../../dist/procedural/static-batch.js';
 // Original street geometry in metres; M3 is reconstructed from a compact parametric profile.
 const C={snow:[.93,.955,.975,1],stone:[.59,.57,.52,1],dark:[.07,.075,.078,1],metal:[.16,.18,.19,1],glass:[.16,.23,.28,1]};
 const rng=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
-export function makeCity(kind='street'){if(kind==='laboratory')return makeLaboratory();
+export function makeCity(kind='street',options={}){if(kind==='laboratory')return makeLaboratory();
 
  const entities=[],random=rng(20260920),motions=[];let sequence=0;
  const add=(id,p,mesh,color=C.stone,extra={})=>{const e={id,position:p,mesh,material:{kind:'default',color,roughness:.8,...extra.material},...extra};if(extra.material)e.material={kind:'default',color,roughness:.8,...extra.material};entities.push(e);return e;};
@@ -257,6 +257,9 @@ export function makeCity(kind='street'){if(kind==='laboratory')return makeLabora
  if(kind==='courtyard'){spec.environment.sunlight=.12;spec.environment.snowfall='moderate';spec.rendering={sunDirection:[-.4,.5,-.3],sunColor:[.48,.63,1],sunIntensity:.70,skyColor:[.14,.20,.29],fogDensity:.006,exposure:1.10,shadowExtent:35};}
  spec.animation={walkers:[pedestrianAnimation()],vehicles:[{id:'passing',velocity:[CAR.speed,0,0],parts:motions.map(({id,origin,wheel,radius})=>({id,origin,wheel,radius}))}]};
  spec.surfaceContacts={snow:[{surfaceId:'walk-1',seed:701}],wheels:entities.filter(e=>e.id.startsWith('passing-contact')).map(e=>({entityId:e.id,radius:CAR.radius,lateral:[0,0,e.position[2]>CAR.z?1:-1]}))};
- const sourceCount=entities.length;spec.entities=batchStaticScenery(entities,e=>!e.id.startsWith('passing')&&!e.id.startsWith('walker-')&&e.material?.pattern!=='window');
+ // A camera-specific stage may select a city block before batching. Geometry,
+ // dimensions and dressing still come from the same winter-city authoring.
+ const sourceCount=entities.length,selected=options.select?entities.filter(options.select):entities;
+ spec.entities=batchStaticScenery(selected,e=>!e.id.startsWith('passing')&&!e.id.startsWith('walker-')&&e.material?.pattern!=='window');
  return{spec,motions,sourceCount};
 }

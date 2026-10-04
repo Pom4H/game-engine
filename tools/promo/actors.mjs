@@ -56,15 +56,18 @@ for(const side of [-1,1]){
  part('shoulderSeam'+q,joint('Shoulder'),[-.035,.038,0],[.172,.009,.105]);
  part('snowSleeve'+q,joint('Shoulder'),[-.067,-.022,0],[.009,.10,.116]);
 }
-export function pedestrianAnimation(){return{id:'walker',root:[WALK.startX,WALK.ground,WALK.z],speed:WALK.speed,period:WALK.period,bindings:garments.map(g=>g.binding)};}
-export function pedestrianPose(time){const pose=sampleWalker(pedestrianAnimation(),time),transforms=bindHumanoid(pose,garments.map(g=>g.binding));return{...pose,parts:Object.fromEntries(transforms.map(p=>[p.entity.slice(7),{position:p.position,rotation:p.rotation,scale:p.scale}]))};}
-export function makePedestrian(){
- const pose=pedestrianPose(0);
+export function pedestrianAnimation(options={}){
+ const {id='walker',root=[WALK.startX,WALK.ground,WALK.z],speed=WALK.speed,heading=0,heightScale=1}=options;
+ return{id,root,speed,heading,heightScale,period:WALK.period,bindings:garments.map(g=>({...g.binding,entity:id+'-'+g.key}))};
+}
+export function pedestrianPose(time,options={}){const rig=pedestrianAnimation(options),pose=sampleWalker(rig,time),transforms=bindHumanoid(pose,rig.bindings);return{...pose,parts:Object.fromEntries(transforms.map(p=>[p.entity.slice(rig.id.length+1),{position:p.position,rotation:p.rotation,scale:p.scale}]))};}
+export function makePedestrian(options={}){
+ const pose=pedestrianPose(0,options),id=options.id??'walker',palette=options.palette??{};
  return garments.map(({key})=>{
   const segment=/thigh|shin|Arm|forearm/.test(key),coat=/coat|hem|hood|collar|Arm|forearm|elbow|shoulder/.test(key),pants=/thigh|shin|knee/.test(key),skin=/head|nose/.test(key),scarf=key.startsWith('scarf'),hat=key.startsWith('hat'),snow=key.startsWith('snow');
   const trim=/Zip|Badge|Clip|lace|welt/.test(key),boot=/boot|cuff/.test(key),pack=key.startsWith('pack');
-  const color=snow?[.91,.94,.96,1]:coat?[.32,.37,.24,1]:pants?[.16,.18,.20,1]:skin?[.51,.34,.25,1]:scarf?[.24,.20,.16,1]:hat?[.12,.135,.125,1]:pack?[.29,.18,.105,1]:boot?[.235,.172,.119,1]:trim?[.21,.21,.19,1]:[.075,.08,.075,1];
-  return{id:'walker-'+key,...pose.parts[key],mesh:clothingMesh(key,segment),material:{kind:snow?'snow':'default',color,roughness:skin?.67:trim?.69:.93,...(!skin&&!snow?{pattern:'fabric'}:{})}};
+  const color=snow?[.91,.94,.96,1]:coat?(palette.coat??[.32,.37,.24,1]):pants?(palette.pants??[.16,.18,.20,1]):skin?(palette.skin??[.51,.34,.25,1]):scarf?(palette.scarf??[.24,.20,.16,1]):hat?(palette.hat??[.12,.135,.125,1]):pack?[.29,.18,.105,1]:boot?[.235,.172,.119,1]:trim?[.21,.21,.19,1]:[.075,.08,.075,1];
+  return{id:id+'-'+key,...pose.parts[key],mesh:clothingMesh(key,segment),material:{kind:snow?'snow':'default',color,roughness:skin?.67:trim?.69:.93,...(!skin&&!snow?{pattern:'fabric'}:{})}};
  });
 }
 function loft(rings,roundness=.8,folds=0,seed=1){return clothLoftMesh({rings,roundness,folds,seed,radialSegments:48,subdivisions:4});}

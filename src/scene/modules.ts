@@ -12,7 +12,13 @@ export type SystemAction=string;
 export type InternalCommand=SceneCommand|{type:'system';action:SystemAction;deltaSeconds:number};
 export type SceneModule=EngineModule<SceneModuleContext,SceneCommand>;
 export interface ScenePluginSystem{readonly id:string;readonly run:(scene:Scene,frame:SystemFrame)=>void}
-export interface ScenePlugin extends EnginePlugin<SceneModuleContext,InternalCommand>{readonly systems?:readonly ScenePluginSystem[]}
+export interface ScenePlugin extends EnginePlugin<SceneModuleContext,InternalCommand>{
+ readonly systems?:readonly ScenePluginSystem[];
+ /** Existing entities whose visual transforms or geometry this plugin updates.
+  * Keeps procedural performers in the moving render partition without inventing
+  * colliders or binding a shared prop to an unrelated skeleton. */
+ readonly renderMovers?:readonly string[];
+}
 
 export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
  const kernel=new EngineKernel<SceneModuleContext,InternalCommand>();

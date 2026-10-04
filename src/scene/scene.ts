@@ -99,6 +99,7 @@ export class Scene {
   private supportReady=false;
   private renderMoverRevision=-1;
   private renderMovers:ReadonlySet<string>=new Set<string>();
+  private readonly pluginRenderMovers=new Set<string>();
 
   constructor(input:SceneSpec){
     this.spec=validateScene(input);
@@ -182,10 +183,14 @@ export class Scene {
 
   use(module:SceneModule):this{this.kernel.use(module);this.simulationProgram=this.kernel.compile(this.simulationProfile);return this;}
   usePlugin(plugin:ScenePlugin):this{
+    const movers=plugin.renderMovers??[];
+    if(new Set(movers).size!==movers.length||movers.some(id=>!id||!this.entities.has(id)))throw new TypeError('Plugin render movers must name distinct existing entities');
     const systems=plugin.systems??[];
     this.systemRuntime.assertAvailable(systems.map(system=>system.id));
     this.kernel.usePlugin(plugin);
     this.systemRuntime.useMany(systems.map(system=>({id:system.id,handler:frame=>system.run(this,frame)})));
+    for(const id of movers)this.pluginRenderMovers.add(id);
+    if(movers.length)this.renderStructureRevision++;
     this.simulationProgram=this.kernel.compile(this.simulationProfile);
     return this;
   }
@@ -199,6 +204,7 @@ export class Scene {
   renderMoverIds():ReadonlySet<string>{
     if(this.renderMoverRevision===this.renderStructureRevision)return this.renderMovers;
     const ids=new Set<string>();
+    for(const id of this.pluginRenderMovers)ids.add(id);
     for(const entity of this.entities.values())if(entity.body&&(entity.body.invMass>0||entity.body.kinematic))ids.add(entity.id);
     for(const id of this.animation.controlledEntityIds())ids.add(id);
     for(const id of this.deformation.visualEntityIds())ids.add(id);
@@ -207,6 +213,7 @@ export class Scene {
     this.renderMoverRevision=this.renderStructureRevision;this.renderMovers=ids;return ids;
   }
   remove(id:string):void{
+    this.pluginRenderMovers.delete(id);
     // Only exact owned objects are removed; an authored replacement under a
     // formerly generated ID must survive source deletion and weather cleanup.
     for(const [key,visual] of this.surfaceVisuals){

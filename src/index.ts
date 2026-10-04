@@ -79,6 +79,7 @@ export {SoftTongueRig,softTonguePrimitive,addSoftTongueToScene,hideLegacyTongue,
 export {SOFT_MOUTH_MOTOR_LEAD_S,sampleSoftMouthMotorPlan,SoftMouthRig,SoftVocalFaceRig,softVocalFaceSceneSpec,type SoftMouthAperture,type SoftMouthDiagnostics} from './animation/soft-mouth.js';
 export {VocalFaceRig,vocalFaceSceneSpec,vocalFaceCollisionDiagnostics,VOCAL_FACE_IDS,type VocalFacePose,type VocalFaceCollisionDiagnostics} from './animation/vocal-face.js';
 export {AnimationSystem,sampleWalker,bindHumanoid,solveTwoBone} from './animation/locomotion.js';
+export {ConversationFaceRig,conversationFaceEntities,conversationHeadMesh,sampleConversationArticulation,type ConversationFaceOptions,type ConversationFaceFrame,type ConversationArticulation,type ConversationFacePose} from './animation/conversation-face.js';
 export type {WalkerSpec,HumanoidJoint,HumanoidBinding,HumanoidPose,RigTransform,VehiclePart,VehicleMotionSpec,GroundSampler} from './animation/locomotion.js';
 export {SurfaceContactSystem,surfaceContains,surfaceElevation} from './environment/surface-contacts.js';
 export type {SurfaceSample,SurfaceFootprint,WheelSurfaceContact,SnowContactSurfaceOptions} from './environment/surface-contacts.js';

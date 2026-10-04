@@ -1,0 +1,90 @@
+name: Winter Tea Scene
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/animation/conversation-face.ts'
+      - 'src/animation/locomotion.ts'
+      - 'src/audio/vtl-external.ts'
+      - 'src/render/cpu.ts'
+      - 'src/scene/scene.ts'
+      - 'src/scene/modules.ts'
+      - 'src/index.ts'
+      - 'tools/tea-scene/**'
+      - 'tools/promo/actors.mjs'
+      - 'tools/promo/city.mjs'
+      - 'tools/npc-speech-demo/vtl-dialogue.py'
+      - 'tools/npc-speech-demo/vtl-dialogue-plan.mjs'
+      - 'tools/npc-speech-demo/vtl-anatomy-reference.patch'
+      - 'test/conversation-face.test.mjs'
+      - 'test/tea-scene.test.mjs'
+      - '.github/workflows/winter-tea-scene.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: winter-tea-scene-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Check shared facial timing and conversation contracts
+        run: node --test test/vtl-dialogue.test.mjs test/conversation-face.test.mjs test/tea-scene.test.mjs test/animation.test.mjs test/kernel-depth.test.mjs
+      - name: Build the established physical speech backend
+        run: |
+          git clone https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/tea-vtl
+          git -C /tmp/tea-vtl checkout df30392f18dc5e175b577c3ba734caaa65a3927f
+          git -C /tmp/tea-vtl apply "$GITHUB_WORKSPACE/tools/npc-speech-demo/vtl-anatomy-reference.patch"
+          cmake -S /tmp/tea-vtl -B /tmp/tea-vtl/out -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/tea-vtl/out --config Release --target VocalTractLabApi -j2
+      - name: Generate the shared speech and action timeline
+        run: node tools/tea-scene/plan.mjs
+      - name: Synthesize the two VTL voices
+        run: |
+          tea_vtl_library=$(find /tmp/tea-vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          test -n "$tea_vtl_library"
+          python3 tools/npc-speech-demo/vtl-dialogue.py \
+            "$tea_vtl_library" /tmp/tea-vtl/resources/JD3.speaker \
+            artifacts/tea-scene/plan.json artifacts/tea-scene
+      - name: Install video encoder
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Render the complete shared scene with the engine CPU backend
+        env:
+          TEA_BACKEND: cpu
+          TEA_WIDTH: '640'
+          TEA_HEIGHT: '360'
+          TEA_FPS: '20'
+        run: node tools/tea-scene/capture.mjs video
+      - name: Verify video, speech provenance and renderer output
+        run: |
+          ffprobe -v error -count_frames -show_entries stream=codec_type,codec_name,width,height,nb_read_frames,duration -of json artifacts/tea-scene/winter-tea-scene.mp4 > artifacts/tea-scene/media-probe.json
+          python3 - <<'PYCODE'
+          import hashlib, json, pathlib
+          directory=pathlib.Path('artifacts/tea-scene')
+          evidence=json.loads((directory/'video-evidence.json').read_text())
+          probe=json.loads((directory/'media-probe.json').read_text())
+          video=next(s for s in probe['streams'] if s['codec_type']=='video')
+          audio=next(s for s in probe['streams'] if s['codec_type']=='audio')
+          assert evidence['backend']=='cpu'
+          assert video['width']==640 and video['height']==360
+          assert int(video['nb_read_frames'])==evidence['frames']
+          assert abs(float(video['duration'])-evidence['durationS'])<.06
+          assert abs(float(audio['duration'])-evidence['durationS'])<.08
+          assert evidence['sourceAudioSha256']==hashlib.sha256((directory/'dialogue.wav').read_bytes()).hexdigest()
+          assert evidence['sourcePlanSha256']==hashlib.sha256((directory/'plan.json').read_bytes()).hexdigest()
+          assert all(t['renderer']['drawCalls']>0 and not t['renderer']['errors'] for t in evidence['telemetry'])
+          assert (directory/'winter-tea-scene.mp4').stat().st_size>25000
+          print(json.dumps({'durationS':evidence['durationS'],'frames':evidence['frames'],'backend':evidence['backend'],'audioSha256':evidence['sourceAudioSha256'],'videoSha256':evidence['outputSha256']}))
+          PYCODE
+      # The capture writes ordinary local files. No release or artifact service is
+      # needed to render or play them; the Windows winter-render destination stays local.

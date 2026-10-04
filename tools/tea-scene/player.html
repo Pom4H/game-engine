@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Чай в зимнем городе</title>
+<style>
+html,body{margin:0;background:#182331;overflow:hidden;font-family:system-ui,sans-serif}canvas{display:block;width:100vw;height:100vh;object-fit:contain}
+#controls{position:fixed;left:24px;bottom:24px;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid #ffffff24;border-radius:14px;background:#152029e8;color:#f4f1e9;box-shadow:0 8px 24px #0004}
+#controls[hidden]{display:none}button{border:0;border-radius:8px;padding:10px 16px;font:600 14px system-ui;cursor:pointer;color:#243038;background:#e7d5ac}button.secondary{background:#ffffff16;color:#f4f1e9}button:disabled{opacity:.55;cursor:wait}#status{font-size:13px;color:#d8dde0;min-width:90px}
+</style>
+<canvas id="scene" aria-label="Двое жителей зимнего города разговаривают за чаем"></canvas>
+<div id="controls" hidden><button id="play" type="button" disabled>Смотреть сцену</button><button id="replay" class="secondary" type="button" disabled>Сначала</button><span id="status">Загружаю сцену…</span></div>
+<script type="module">
+import {WebGPURenderer} from '/dist/browser.js';
+import {createTeaScene} from './scene.mjs';
+const params=new URLSearchParams(location.search),captureMode=params.get('capture')==='1',controls=document.getElementById('controls'),status=document.getElementById('status');
+if(!captureMode)controls.hidden=false;
+try{
+  const width=Number(params.get('width')??960),height=Number(params.get('height')??540),canvas=document.getElementById('scene');
+  canvas.width=width;canvas.height=height;
+  const plan=await(await fetch('/plan.json')).json();let play=createTeaScene({plan});
+  const renderer=await WebGPURenderer.create(canvas);renderer.setResolution(width,height);
+  let tick=0,frameIndex=0,lastShot=null;play.step(0,0);
+  window.teaScene={duration:play.duration,
+    async frame(timeS){
+      const target=Math.round(timeS*60);if(target<tick)throw new RangeError('Capture must advance monotonically');
+      while(tick<target){tick++;play.step(tick/60,1/60);}
+      const sceneState=play.inspect();
+      if(lastShot!==null&&lastShot!==sceneState.shot)renderer.resetTemporalHistory();lastShot=sceneState.shot;
+      await renderer.prepareMaterials(play.scene);
+      renderer.setTimelineFrame?.(frameIndex++);renderer.render(play.scene,play.scene.camera);await renderer.flush();
+      const stats=renderer.inspect();if(stats.errors.length||!stats.drawCalls)throw new Error('Tea scene render failed: '+JSON.stringify(stats));
+      if(stats.profile?.enabled===false)delete stats.profile;
+      await new Promise(requestAnimationFrame);
+      return{timeS:tick/60,renderer:stats,scene:sceneState};
+    },inspect(){return{renderer:renderer.inspect(),scene:play.inspect()};},
+  };
+  window.teaReady=true;
+  if(!captureMode){
+    const playButton=document.getElementById('play'),replayButton=document.getElementById('replay');
+    let audioContext,audioBuffer,source,playing=false,playhead=0,origin=0,generation=0,paintTask=Promise.resolve(),busy=false;
+    const format=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
+    const clock=()=>Math.min(play.duration,Math.max(0,audioContext.currentTime-origin));
+    const label=()=>{playButton.textContent=playing?'Пауза':playhead>=play.duration?'Ещё раз':'Смотреть сцену';status.textContent=format(playhead>=play.duration?Math.ceil(play.duration):playhead)+' / '+format(Math.ceil(play.duration));};
+    const paint=timeS=>{paintTask=paintTask.then(()=>window.teaScene.frame(timeS));return paintTask;};
+    const pause=()=>{
+      if(playing)playhead=clock();playing=false;generation++;
+      if(source){try{source.stop();}catch{}source.disconnect();source=undefined;}label();
+    };
+    const rewind=async()=>{pause();await paintTask;play=createTeaScene({plan});tick=0;frameIndex=0;lastShot=null;renderer.resetTemporalHistory();play.step(0,0);playhead=0;await paint(0);label();};
+    const loop=async token=>{
+      if(!playing||token!==generation)return;
+      playhead=clock();await paint(playhead);
+      if(!playing||token!==generation)return;label();
+      if(playhead>=play.duration){pause();return;}
+      requestAnimationFrame(()=>loop(token).catch(failed));
+    };
+    const start=async()=>{
+      audioContext??=new AudioContext();await audioContext.resume();
+      if(!audioBuffer){status.textContent='Загружаю звук…';audioBuffer=await audioContext.decodeAudioData(await(await fetch('/dialogue.wav')).arrayBuffer());}
+      if(playhead>=play.duration)await rewind();
+      origin=audioContext.currentTime+.025-playhead;
+      if(playhead<audioBuffer.duration){source=audioContext.createBufferSource();source.buffer=audioBuffer;source.connect(audioContext.destination);source.start(audioContext.currentTime+.025,playhead);}
+      playing=true;const token=++generation;label();void loop(token).catch(failed);
+    };
+    const failed=error=>{pause();status.textContent='Не удалось воспроизвести сцену.';console.error(error);};
+    const action=async fn=>{if(busy)return;busy=true;playButton.disabled=true;replayButton.disabled=true;try{await fn();}catch(error){failed(error);}finally{busy=false;playButton.disabled=false;replayButton.disabled=false;}};
+    playButton.addEventListener('click',()=>action(async()=>{if(playing)pause();else await start();}));
+    replayButton.addEventListener('click',()=>action(async()=>{await rewind();await start();}));
+    await paint(0);label();playButton.disabled=false;replayButton.disabled=false;
+    addEventListener('pagehide',()=>{pause();void audioContext?.close();renderer.dispose();},{once:true});
+  }
+}catch(error){window.teaError=error?.stack??String(error);status.textContent='Не удалось открыть сцену.';console.error(error);}
+</script></html>
