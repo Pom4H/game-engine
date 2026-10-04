@@ -32,7 +32,7 @@ jobs:
         with:
           name: structural-soft-mouth-mp4
           path: |
-            artifacts/soft-mouth/structural-soft-mouth.mp4
+            artifacts/soft-mouth/continuous-perioral-soft-face.mp4
             artifacts/soft-mouth/poster.png
             artifacts/soft-mouth/evidence.json
           retention-days: 14
