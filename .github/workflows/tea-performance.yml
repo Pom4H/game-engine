@@ -1,0 +1,73 @@
+name: Tea Performance
+on:
+  push:
+    branches: [main, codex/native-speech-tea-performance]
+    paths:
+      - 'src/animation/expressive-face.ts'
+      - 'src/audio/native-*.ts'
+      - 'tools/tea-performance/**'
+      - 'tools/tea-scene/server.mjs'
+      - 'tools/tea-scene/webgpu-capture.mjs'
+      - 'test/tea-performance.test.mjs'
+      - '.github/workflows/tea-performance.yml'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Capture mode
+        type: choice
+        options: [storyboard, video]
+        default: storyboard
+permissions:
+  contents: read
+concurrency:
+  group: tea-performance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck && bun run build
+      - run: node --test test/native-speech.test.mjs test/native-tract-energy.test.mjs test/tea-performance.test.mjs test/conversation-face.test.mjs test/tea-scene.test.mjs
+  hardware-views:
+    needs: contracts
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Hardware WebGPU capture
+        env:
+          TEA_REQUIRE_HARDWARE: '1'
+          TEA_WIDTH: '960'
+          TEA_HEIGHT: '540'
+          TEA_FPS: '20'
+          TEA_CAPTURE_MODE: ${{ inputs.mode || 'storyboard' }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $env:CHROME_PATH = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $env:CHROME_PATH) { throw 'Chrome is required' }
+          $env:TEA_OUTPUT = Join-Path $env:USERPROFILE "game-engine-renders\tea-performance\$env:GITHUB_SHA"
+          node tools/tea-performance/audio.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/tea-performance/capture.mjs $env:TEA_CAPTURE_MODE
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host "TEA_LOCAL_OUTPUT=$env:TEA_OUTPUT"
+          if ($env:TEA_CAPTURE_MODE -eq 'storyboard') { node tools/tea-performance/review.mjs }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

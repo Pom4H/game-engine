@@ -11,7 +11,7 @@ export async function startTeaServer({root,planPath,audioPath,port=0}){
     if(url.pathname==='/plan.json')path=planPath;
     else if(url.pathname==='/dialogue.wav')path=audioPath;
     else if(url.pathname.startsWith('/assets/'))path=resolve(root,'tools/promo',url.pathname.slice(1));
-    else if(/^\/(dist|tools\/tea-scene|tools\/promo)\//.test(url.pathname))path=resolve(root,'.'+url.pathname);
+    else if(/^\/(dist|tools\/tea-scene|tools\/tea-performance|tools\/promo)\//.test(url.pathname))path=resolve(root,'.'+url.pathname);
     else{res.writeHead(404);res.end();return;}
     if(path!==planPath&&path!==audioPath&&!path.startsWith(root+sep)){res.writeHead(404);res.end();return;}
     res.setHeader('content-type',mime[extname(path)]??'application/octet-stream');res.end(await readFile(path));

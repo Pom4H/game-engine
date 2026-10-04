@@ -1,0 +1,38 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Чай, осторожно!</title>
+<style>html,body{margin:0;background:#17212b;overflow:hidden;font-family:system-ui}canvas{display:block;width:100vw;height:100vh;object-fit:contain}#controls{position:fixed;left:18px;bottom:18px;background:#13202de8;border:1px solid #ffffff30;color:white;padding:12px;max-width:340px}button{font:inherit;padding:9px 14px;cursor:pointer}p{margin:8px 0 0;font-size:12px;line-height:1.4;color:#d5dde4}</style>
+<canvas id="scene"></canvas><div id="controls" hidden><button id="play" disabled>Смотреть</button> <button id="replay" disabled>Сначала</button><p id="status">Загрузка…</p><p>Экспериментальный TS-синтез. Разборчивость проверяется отдельно от мимики и постановки.</p></div>
+<script type="module">
+import {WebGPURenderer} from '/dist/browser.js';
+import {createTeaPerformance} from './scene.mjs';
+const params=new URLSearchParams(location.search),capture=params.get('capture')==='1',controls=document.getElementById('controls'),status=document.getElementById('status');
+if(!capture)controls.hidden=false;
+try{
+ const width=Number(params.get('width')??960),height=Number(params.get('height')??540),canvas=document.getElementById('scene');canvas.width=width;canvas.height=height;
+ const plan=await(await fetch('/plan.json')).json();let play=createTeaPerformance({plan}),tick=0,frameIndex=0,lastShot=null;play.step(0,0);
+ const renderer=await WebGPURenderer.create(canvas);renderer.setResolution(width,height);await renderer.prepareMaterials(play.scene);
+ window.teaScene={duration:play.duration,async frame(time){
+  const target=Math.round(time*60);if(target<tick)throw new RangeError('Recreate scene for replay');
+  while(tick<target){tick++;play.step(tick/60,1/60);}
+  const scene=play.inspect(),cut=lastShot!==scene.shot;lastShot=scene.shot;if(cut)renderer.resetTemporalHistory();
+  if(cut)for(let i=0;i<8;i++){renderer.setTimelineFrame(frameIndex);renderer.render(play.scene,play.scene.camera);await renderer.flush();}
+  renderer.setTimelineFrame(frameIndex++);renderer.render(play.scene,play.scene.camera);await renderer.flush();
+  const stats=renderer.inspect();if(stats.errors.length||stats.drawCalls<1)throw new Error(JSON.stringify(stats.errors));
+  await new Promise(requestAnimationFrame);return{timeS:tick/60,scene,renderer:stats};
+ }};
+ window.teaReady=true;
+ if(!capture){
+  const button=document.getElementById('play'),replay=document.getElementById('replay');let context,buffer,source,playing=false,origin=0,time=0,generation=0,busy=false,paint=Promise.resolve();
+  const label=()=>{button.textContent=playing?'Пауза':'Смотреть';status.textContent=`${time.toFixed(1)} / ${play.duration} с · 13 реплик`;};
+  const pause=()=>{if(playing)time=Math.min(play.duration,Math.max(0,context.currentTime-origin));playing=false;generation++;if(source){try{source.stop();}catch{}source.disconnect();source=null;}label();};
+  const draw=t=>paint=paint.then(()=>window.teaScene.frame(t));
+  const reset=async()=>{pause();await paint;play=createTeaPerformance({plan});play.step(0,0);tick=0;frameIndex=0;lastShot=null;time=0;renderer.resetTemporalHistory();await draw(0);label();};
+  const fail=error=>{pause();status.textContent=String(error);console.error(error);};
+  const loop=async token=>{if(!playing||token!==generation)return;time=Math.min(play.duration,Math.max(0,context.currentTime-origin));await draw(time);if(!playing||token!==generation)return;label();if(time>=play.duration){pause();return;}requestAnimationFrame(()=>loop(token).catch(fail));};
+  const start=async()=>{context??=new AudioContext();await context.resume();if(!buffer){const response=await fetch('/dialogue.wav');if(!response.ok)throw new Error('Сначала выполните audio.mjs');buffer=await context.decodeAudioData(await response.arrayBuffer());}if(time>=play.duration)await reset();origin=context.currentTime+.03-time;if(time<buffer.duration){source=context.createBufferSource();source.buffer=buffer;source.connect(context.destination);source.start(context.currentTime+.03,time);}playing=true;void loop(++generation).catch(fail);};
+  const action=async fn=>{if(busy)return;busy=true;button.disabled=true;replay.disabled=true;try{await fn();}catch(e){fail(e);}finally{busy=false;button.disabled=false;replay.disabled=false;}};
+  button.onclick=()=>action(async()=>playing?pause():start());replay.onclick=()=>action(async()=>{await reset();await start();});
+  await draw(0);label();button.disabled=false;replay.disabled=false;
+  addEventListener('pagehide',()=>{pause();renderer.dispose();void context?.close();},{once:true});
+ }
+}catch(error){window.teaError=error.stack??String(error);status.textContent=window.teaError;console.error(error);}
+</script></html>
