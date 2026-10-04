@@ -59,3 +59,14 @@ test('Russian physical phrase now renders through geometry-driven acoustics',()=
   assert.equal(result.diagnostics.geometryDriven,true);
   assert.ok(result.audio.left.some(v=>Math.abs(v)>.02));
 });
+
+
+test('open a has a substantially larger oral cavity than high vowels',()=>{
+  const timeline=buildSoftAirwayTimeline(score,{sampleRate:24000,sections:18,controlRateHz:120,warmupS:.04});
+  const a=frameAt(timeline,.16),i=frameAt(timeline,.44),u=frameAt(timeline,.72);
+  const mean=x=>x.reduce((s,v)=>s+v,0)/x.length;
+  const aMid=mean(a.oralAreaCm2.slice(5,15)),iMid=mean(i.oralAreaCm2.slice(5,15)),uMid=mean(u.oralAreaCm2.slice(5,15));
+  assert.ok(aMid>iMid*1.35,'/a/ cavity not sufficiently more open than /i/: '+JSON.stringify({aMid,iMid}));
+  assert.ok(aMid>uMid*1.25,'/a/ cavity not sufficiently more open than /u/: '+JSON.stringify({aMid,uMid}));
+  assert.ok((u.lipAreaCm2??99)<1.8,'/u/ lip aperture remains too open: '+u.lipAreaCm2);
+});
