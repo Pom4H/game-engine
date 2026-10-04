@@ -18,6 +18,7 @@ const UPPER_GUM_ID='vocal-face-soft-upper-gum';
 const LOWER_GUM_ID='vocal-face-soft-lower-gum';
 const upperToothId=(i:number)=>'vocal-face-visible-upper-tooth-'+i;
 const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
+export const SOFT_MOUTH_MOTOR_LEAD_S=.12;
 const MIN_LIP_CONTACT_GAP_M=.0015;
 const LIP_CONTACT_ZONE_M=.006;
 const LIP_CONTACT_STIFFNESS_N_M=7.5;
@@ -511,7 +512,7 @@ export class SoftMouthRig{
     }
   }
 
-  step(a:VocalArticulators,pose:VocalFacePose,dt:number):SoftMouthDiagnostics{
+  step(a:VocalArticulators,pose:VocalFacePose,dt:number,motorPlan:VocalArticulators=a):SoftMouthDiagnostics{
     if(!Number.isFinite(dt)||dt<=0||dt>.1)throw new RangeError('Soft mouth dt must be within (0,.1]');
     let remaining=dt,maxPen=0,contacts=0,deepestBox:string|undefined,deepestPoint:Vec3|undefined;
     let lipPairs=0,maxClosingSpeed=0,maxContactForce=0;
@@ -526,9 +527,9 @@ export class SoftMouthRig{
         const nextVelocity=clamp(velocity+acceleration*h,-maxRate,maxRate);
         return[clamp(value+nextVelocity*h,0,1),nextVelocity] as const;
       };
-      [this.lipClosureActivation,this.lipClosureVelocity]=advanceMotor(this.lipClosureActivation,this.lipClosureVelocity,clamp(a.lipClosure,0,1),5.2,4.0);
-      [this.lipRoundActivation,this.lipRoundVelocity]=advanceMotor(this.lipRoundActivation,this.lipRoundVelocity,clamp(a.lipRound,0,1),5.6,4.2);
-      [this.labiodentalActivation,this.labiodentalVelocity]=advanceMotor(this.labiodentalActivation,this.labiodentalVelocity,clamp(a.labiodental,0,1),6.0,4.5);
+      [this.lipClosureActivation,this.lipClosureVelocity]=advanceMotor(this.lipClosureActivation,this.lipClosureVelocity,clamp(motorPlan.lipClosure,0,1),5.2,4.0);
+      [this.lipRoundActivation,this.lipRoundVelocity]=advanceMotor(this.lipRoundActivation,this.lipRoundVelocity,clamp(motorPlan.lipRound,0,1),5.6,4.2);
+      [this.labiodentalActivation,this.labiodentalVelocity]=advanceMotor(this.labiodentalActivation,this.labiodentalVelocity,clamp(motorPlan.labiodental,0,1),6.0,4.5);
       const jawOpen=clamp(pose.jawAngleRad/.12,0,1);
 
       this.orbicularisScale=clamp(1-.68*this.lipClosureActivation-.07*this.lipRoundActivation,.25,1);
@@ -677,11 +678,11 @@ export class SoftVocalFaceRig{
     }
   }
 
-  step(a:VocalArticulators,dt:number):{readonly pose:VocalFacePose;readonly mouth:SoftMouthDiagnostics}{
+  step(a:VocalArticulators,dt:number,motorPlan:VocalArticulators=a):{readonly pose:VocalFacePose;readonly mouth:SoftMouthDiagnostics}{
     const pose=this.rigid.step(a,dt);
     this.hideLegacyMouthParts();
     this.syncVisibleDentition();
-    const mouth=this.mouth.step(a,pose,dt);
+    const mouth=this.mouth.step(a,pose,dt,motorPlan);
     return Object.freeze({pose,mouth});
   }
 }
