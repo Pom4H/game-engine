@@ -37,7 +37,8 @@ jobs:
           mkdir -p .cache/vosk
           curl -fL --retry 3 --retry-delay 2 https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip -o .cache/vosk/model.zip
           unzip -q -o .cache/vosk/model.zip -d .cache/vosk
-      - name: Gate official VTL with Vosk
+      - name: Probe official VTL with Vosk
+        continue-on-error: true
         run: |
           ffmpeg -y -hide_banner -loglevel error -i artifacts/vtl-oracle/mama.wav -af "adelay=300,apad=pad_dur=0.3" -ac 1 -ar 16000 -sample_fmt s16 artifacts/vtl-oracle/asr.wav
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py \
@@ -45,7 +46,16 @@ jobs:
             .cache/vosk/vosk-model-small-en-us-0.15 \
             "mama" \
             0.01 \
-            artifacts/vtl-oracle/asr.json
+            artifacts/vtl-oracle/vosk.json
+      - name: Prepare Whisper oracle
+        run: .venv/bin/pip install --disable-pip-version-check faster-whisper==1.2.0
+      - name: Gate official VTL with Whisper
+        run: |
+          .venv/bin/python tools/npc-speech-demo/whisper-intelligibility.py \
+            artifacts/vtl-oracle/asr.wav \
+            "mama" \
+            0.34 \
+            artifacts/vtl-oracle/whisper.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
