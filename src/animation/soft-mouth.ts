@@ -7,6 +7,7 @@ import type {Color,Primitive,SceneSpec} from '../scene/types.js';
 import {Scene,type RuntimeEntity} from '../scene/scene.js';
 import {sampleArticulatorScore,type ArticulatorGesture,type VocalArticulators} from '../audio/vocal-tract.js';
 import {VocalFaceRig,VOCAL_FACE_IDS,vocalFaceSceneSpec,type VocalFacePose} from './vocal-face.js';
+import {SoftTongueRig,addSoftTongueToScene,hideLegacyTongue,type SoftTongueDiagnostics} from './soft-tongue.js';
 
 const CAGE_ANGLES=24;
 const CAGE_RINGS=5;
@@ -435,7 +436,7 @@ export function softVocalFaceSceneSpec():SceneSpec{
       ?{...entity,scale:[.001,.001,.001] as Vec3}
       :entity
   );
-  return{
+  return addSoftTongueToScene({
     ...base,
     entities:[
       ...hiddenLegacy,
@@ -446,7 +447,7 @@ export function softVocalFaceSceneSpec():SceneSpec{
         material:{kind:'default',color:[1,1,1,1],roughness:.62,metalness:0},
       },
     ],
-  };
+  });
 }
 
 export class SoftMouthRig{
@@ -686,11 +687,14 @@ export class SoftMouthRig{
 export class SoftVocalFaceRig{
   readonly rigid:VocalFaceRig;
   readonly mouth:SoftMouthRig;
+  readonly tongue:SoftTongueRig;
 
   constructor(readonly scene:Scene){
     this.rigid=new VocalFaceRig(scene);
     this.mouth=new SoftMouthRig(scene);
+    this.tongue=new SoftTongueRig(scene);
     this.hideLegacyMouthParts();
+    hideLegacyTongue(scene);
   }
 
   private syncVisibleDentition():void{
@@ -725,11 +729,13 @@ export class SoftVocalFaceRig{
     }
   }
 
-  step(a:VocalArticulators,dt:number,motorPlan:VocalArticulators=a):{readonly pose:VocalFacePose;readonly mouth:SoftMouthDiagnostics}{
+  step(a:VocalArticulators,dt:number,motorPlan:VocalArticulators=a):{readonly pose:VocalFacePose;readonly mouth:SoftMouthDiagnostics;readonly tongue:SoftTongueDiagnostics}{
     const pose=this.rigid.step(a,dt);
     this.hideLegacyMouthParts();
+    hideLegacyTongue(this.scene);
     this.syncVisibleDentition();
     const mouth=this.mouth.step(a,pose,dt,motorPlan);
-    return Object.freeze({pose,mouth});
+    const tongue=this.tongue.step(a,pose,dt);
+    return Object.freeze({pose,mouth,tongue});
   }
 }
