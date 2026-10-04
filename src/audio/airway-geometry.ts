@@ -83,11 +83,13 @@ function geometryAreaCm2(sample:TongueAirwaySample,t:number):number{
   const tongueWidth=clamp(sample.widthM/cavityWidth,0,1.2);
   const sideFraction=clamp(1-tongueWidth,0,.55);
 
-  // Central gap dominates ordinary vowels. When the dorsum/tip reaches the
-  // roof, only physically available lateral channels remain.
-  const central=6.8*gap**1.55;
-  const lateral=1.15*sideFraction*(1-gap)**1.2;
-  return clamp(.025+central+lateral,.025,7.2);
+  // The stylized face uses exaggerated world-space dimensions, so map the
+  // measured tongue-to-palate clearance into a physiological area nonlinearly.
+  // Narrow clearances collapse area rapidly; open vowels expand to several cm².
+  const normalizedGap=clamp((gap-.28)/.42,0,1);
+  const central=7.4*smooth(normalizedGap)**1.15;
+  const lateral=.72*sideFraction*(1-gap)**1.45;
+  return clamp(.025+central+lateral,.025,7.4);
 }
 
 function areaFrame(
@@ -115,7 +117,7 @@ function areaFrame(
     if(x<.24){
       const root=sorted[Math.min(sorted.length-1,1)]!;
       const rootGap=clamp((oralRoofY(.05)-root.topYM)/(oralRoofY(.05)-oralFloorY(.05)),0,1);
-      const pharyngeal=clamp(.35+5.0*rootGap**1.3,.12,5.8);
+      const pharyngeal=clamp(1.35+5.6*rootGap**1.18,.55,6.6);
       area=mix(pharyngeal,area,smooth(x/.24));
     }
 
