@@ -12,6 +12,8 @@ export interface StructuralContactStats {
   readonly contacts:number;
   readonly maxPenetration:number;
   readonly projectedSamples:number;
+  readonly deepestBoxId?:string;
+  readonly deepestPoint?:Vec3;
 }
 
 type Binding={nodes:readonly number[];weights:readonly number[]};
@@ -29,6 +31,8 @@ export class StructuralStaticContactSolver {
   private contactsValue=0;
   private maxPenetrationValue=0;
   private projectedValue=0;
+  private deepestBoxIdValue:string|undefined;
+  private deepestPointValue:Vec3|undefined;
 
   constructor(readonly boxes:readonly StructuralStaticBox[],collisionTriangles:readonly (readonly [number,number,number])[]=[]){
     for(const box of boxes){
@@ -45,7 +49,7 @@ export class StructuralStaticContactSolver {
     this.samples=Object.freeze(samples);
   }
 
-  resetStats():void{this.contactsValue=0;this.maxPenetrationValue=0;this.projectedValue=0;}
+  resetStats():void{this.contactsValue=0;this.maxPenetrationValue=0;this.projectedValue=0;this.deepestBoxIdValue=undefined;this.deepestPointValue=undefined;}
 
   project(body:StructuralBody):void{
     if(!this.samples.length)return;
@@ -62,12 +66,23 @@ export class StructuralStaticContactSolver {
           body.position[j+1]=body.position[j+1]!+hit.normal[1]*scale;
           body.position[j+2]=body.position[j+2]!+hit.normal[2]*scale;
         }
-        this.contactsValue++;this.projectedValue++;this.maxPenetrationValue=Math.max(this.maxPenetrationValue,hit.penetration);
+        this.contactsValue++;this.projectedValue++;
+        if(hit.penetration>this.maxPenetrationValue){
+          this.maxPenetrationValue=hit.penetration;
+          this.deepestBoxIdValue=box.id;
+          this.deepestPointValue=[...point];
+        }
       }
     }
   }
 
-  get stats():StructuralContactStats{return{contacts:this.contactsValue,maxPenetration:this.maxPenetrationValue,projectedSamples:this.projectedValue};}
+  get stats():StructuralContactStats{return{
+    contacts:this.contactsValue,
+    maxPenetration:this.maxPenetrationValue,
+    projectedSamples:this.projectedValue,
+    ...(this.deepestBoxIdValue?{deepestBoxId:this.deepestBoxIdValue}:{}),
+    ...(this.deepestPointValue?{deepestPoint:this.deepestPointValue}:{}),
+  };}
 
   private point(buffer:Float64Array,binding:Binding):Vec3{
     let x=0,y=0,z=0;
