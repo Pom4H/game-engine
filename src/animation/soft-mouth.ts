@@ -410,6 +410,10 @@ export class SoftMouthRig{
   private orbicularisScale=1;
   private lipClosureActivation=0;
   private lipClosureVelocity=0;
+  private lipRoundActivation=0;
+  private lipRoundVelocity=0;
+  private labiodentalActivation=0;
+  private labiodentalVelocity=0;
   private lipContactPairs=0;
   private maxLipClosingSpeedMps=0;
   private maxLipContactForceN=0;
@@ -445,23 +449,23 @@ export class SoftMouthRig{
     this.projectSurface();
   }
 
-  private target(meta:CageMeta,a:VocalArticulators,pose:VocalFacePose,closure:number):Vec3{
+  private target(meta:CageMeta,pose:VocalFacePose,jawOpen:number,closure:number,round:number,labiodental:number):Vec3{
     const rest=restPoint(meta.radial,meta.angle,meta.layer);
     const lipWeight=(1-smooth(meta.radial))**2;
     const outerWeight=smooth(meta.radial)**2;
     const upper=Math.max(0,Math.sin(meta.angle)),lower=meta.lower;
-    const innerRx=.172*(1-.27*a.lipRound-.07*a.labiodental);
-    const innerRy=.003+.063*a.jawOpen*(1-closure);
+    const innerRx=.172*(1-.27*round-.07*labiodental);
+    const innerRy=.002+.063*jawOpen*(1-closure);
     const centerY=1.365-pose.jawDropM*.08;
     const inner:MutableVec3=[
       innerRx*Math.cos(meta.angle),
       centerY+innerRy*Math.sin(meta.angle),
-      .615+(meta.layer===1?-.020:0)+.050*a.lipRound,
+      .615+(meta.layer===1?-.020:0)+.050*round,
     ];
 
-    if(lower&&a.labiodental>.001){
-      inner[1]+=lower*.032*a.labiodental;
-      const pulledZ=inner[2]-lower*.022*a.labiodental;
+    if(lower&&labiodental>.001){
+      inner[1]+=lower*.032*labiodental;
+      const pulledZ=inner[2]-lower*.022*labiodental;
       const incisorContactZ=meta.layer===1?.584:.598;
       inner[2]=Math.max(pulledZ,incisorContactZ);
     }
@@ -470,7 +474,7 @@ export class SoftMouthRig{
     const attached:MutableVec3=[
       rest[0],
       rest[1]-pose.jawDropM*.62*jawFollow,
-      rest[2]+.010*a.jawOpen*jawFollow,
+      rest[2]+.010*jawOpen*jawFollow,
     ];
 
     const target:MutableVec3=[
@@ -480,13 +484,13 @@ export class SoftMouthRig{
     ];
 
     if(meta.side>.70&&meta.radial>.55){
-      const buccinator=.006*a.lipRound*meta.side*outerWeight;
+      const buccinator=.006*round*meta.side*outerWeight;
       target[0]-=Math.sign(Math.cos(meta.angle))*buccinator;
-      target[2]-=.004*a.lipRound*outerWeight;
+      target[2]-=.004*round*outerWeight;
     }
     if(lower>.65&&meta.radial>.55){
-      target[1]-=.010*a.jawOpen*outerWeight;
-      target[2]+=.004*a.jawOpen*outerWeight;
+      target[1]-=.010*jawOpen*outerWeight;
+      target[2]+=.004*jawOpen*outerWeight;
     }
     if(upper>.7&&meta.radial>.70)target[1]+=pose.jawDropM*.04*outerWeight;
     return target;
@@ -514,12 +518,18 @@ export class SoftMouthRig{
 
       // Muscle activation is a biomechanical state, not a direct phoneme transform.
       // Critical damping and a finite activation speed prevent one-frame rest-length jumps.
-      const targetClosure=clamp(a.lipClosure,0,1),omega=2*Math.PI*5.2;
-      const activationAcceleration=omega*omega*(targetClosure-this.lipClosureActivation)-2*omega*this.lipClosureVelocity;
-      this.lipClosureVelocity=clamp(this.lipClosureVelocity+activationAcceleration*h,-4.0,4.0);
-      this.lipClosureActivation=clamp(this.lipClosureActivation+this.lipClosureVelocity*h,0,1);
+      const advanceMotor=(value:number,velocity:number,target:number,frequencyHz:number,maxRate:number):readonly[number,number]=>{
+        const omega=2*Math.PI*frequencyHz;
+        const acceleration=omega*omega*(target-value)-2*omega*velocity;
+        const nextVelocity=clamp(velocity+acceleration*h,-maxRate,maxRate);
+        return[clamp(value+nextVelocity*h,0,1),nextVelocity] as const;
+      };
+      [this.lipClosureActivation,this.lipClosureVelocity]=advanceMotor(this.lipClosureActivation,this.lipClosureVelocity,clamp(a.lipClosure,0,1),5.2,4.0);
+      [this.lipRoundActivation,this.lipRoundVelocity]=advanceMotor(this.lipRoundActivation,this.lipRoundVelocity,clamp(a.lipRound,0,1),5.6,4.2);
+      [this.labiodentalActivation,this.labiodentalVelocity]=advanceMotor(this.labiodentalActivation,this.labiodentalVelocity,clamp(a.labiodental,0,1),6.0,4.5);
+      const jawOpen=clamp(pose.jawAngleRad/.12,0,1);
 
-      this.orbicularisScale=clamp(1-.51*this.lipClosureActivation-.08*a.lipRound,.41,1);
+      this.orbicularisScale=clamp(1-.68*this.lipClosureActivation-.07*this.lipRoundActivation,.25,1);
       for(const index of this.orbicularis)this.structure.setDistanceRestScale(index,this.orbicularisScale);
 
       const lipContact=applyCompliantLipContact(this.structure);
@@ -530,7 +540,7 @@ export class SoftMouthRig{
       for(let node=0;node<this.structure.nodeCount;node++){
         const meta=this.meta[node]!;
         if(isBoneAttached(meta))continue;
-        const target=this.target(meta,a,pose,this.lipClosureActivation),j=node*3;
+        const target=this.target(meta,pose,jawOpen,this.lipClosureActivation,this.lipRoundActivation,this.labiodentalActivation),j=node*3;
         const dx=target[0]-this.structure.position[j]!,dy=target[1]-this.structure.position[j+1]!,dz=target[2]-this.structure.position[j+2]!;
         const vx=this.structure.velocity[j]!,vy=this.structure.velocity[j+1]!,vz=this.structure.velocity[j+2]!;
         const lipWeight=(1-smooth(meta.radial))**2,outerWeight=smooth(meta.radial)**2;
@@ -546,8 +556,8 @@ export class SoftMouthRig{
         if(this.lipClosureActivation>.15&&meta.layer===0&&meta.ring<=1&&Math.abs(Math.sin(meta.angle))>.28){
           const closureGain=meta.ring===0?1:.48;
           const desiredY=target[1],errorY=desiredY-this.structure.position[j+1]!;
-          const maxClosureForce=.120*this.lipClosureActivation*closureGain;
-          const closeFy=clamp(errorY*7.5-this.structure.velocity[j+1]!*0.110,-maxClosureForce,maxClosureForce);
+          const maxClosureForce=.135*this.lipClosureActivation*closureGain;
+          const closeFy=clamp(errorY*8.4-this.structure.velocity[j+1]!*0.145,-maxClosureForce,maxClosureForce);
           this.structure.addForce(node,[0,closeFy,0]);
         }
       }
