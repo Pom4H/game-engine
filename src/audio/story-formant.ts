@@ -24,7 +24,7 @@ export interface StoryFormantRender{
  * volume-velocity transmission is proportional to 1/D of the cascaded matrix.
  * This is a cheap projection of the same MRI area function used by Story/VTL.
  */
-function tubeResponse(area:readonly number[],frequencyHz:number,lengthCm:number):number{
+function tubeResponse(area:ArrayLike<number>,frequencyHz:number,lengthCm:number):number{
   const n=area.length,dx=lengthCm/n,k=2*Math.PI*frequencyHz/C_CM_S;
   let A=1,Bi=0,Ci=0,D=1;
   for(let i=0;i<n;i++){
