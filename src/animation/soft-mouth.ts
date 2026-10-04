@@ -21,7 +21,7 @@ const lowerToothId=(i:number)=>'vocal-face-visible-lower-tooth-'+i;
 const MIN_LIP_CONTACT_GAP_M=.0015;
 const LIP_CONTACT_ZONE_M=.006;
 const LIP_CONTACT_STIFFNESS_N_M=7.5;
-const LIP_CONTACT_DAMPING_N_S_M=.072;
+const LIP_CONTACT_DAMPING_N_S_M=.090;
 const LIP_CONTACT_ADHESION_N=.0035;
 
 const SKIN:Color=[.62,.39,.30,1];
@@ -546,8 +546,8 @@ export class SoftMouthRig{
         if(this.lipClosureActivation>.15&&meta.layer===0&&meta.ring<=1&&Math.abs(Math.sin(meta.angle))>.28){
           const closureGain=meta.ring===0?1:.48;
           const desiredY=target[1],errorY=desiredY-this.structure.position[j+1]!;
-          const maxClosureForce=.052*this.lipClosureActivation*closureGain;
-          const closeFy=clamp(errorY*4.6-this.structure.velocity[j+1]!*0.050,-maxClosureForce,maxClosureForce);
+          const maxClosureForce=.120*this.lipClosureActivation*closureGain;
+          const closeFy=clamp(errorY*7.5-this.structure.velocity[j+1]!*0.110,-maxClosureForce,maxClosureForce);
           this.structure.addForce(node,[0,closeFy,0]);
         }
       }
