@@ -48,3 +48,21 @@ test('Story mama renders through MRI-calibrated area frames',()=>{
   assert.ok(result.audio.left.some(v=>Math.abs(v)>.02));
   assert.ok(result.diagnostics.minAreaCm2>0);
 });
+
+
+test('LF source follows VTL-style pulse controls and closes each cycle',async()=>{
+  const {lfPulseCycle,LfGlottalSource}=await import('../dist/index.js');
+  const pulse=lfPulseCycle(2048,{amplitudeCm3S:300,openQuotient:.5,speedQuotient:3,returnPhase:.02,voiced:1});
+  assert.ok(Math.max(...pulse)>250,'LF flow peak is too small');
+  assert.ok(pulse[0]<1e-6,'LF cycle must begin closed');
+  assert.ok(pulse.at(-1)<5,'LF return phase must approach closure by cycle end');
+  assert.ok(pulse.every(v=>Number.isFinite(v)&&v>=0));
+  const source=new LfGlottalSource(44100);
+  let peak=0;
+  for(let i=0;i<44100/110;i++){
+    const s=source.step({f0Hz:110,amplitudeCm3S:300,voiced:1});
+    peak=Math.max(peak,s.flowCm3S);
+    assert.ok(Number.isFinite(s.derivativeCm3S2));
+  }
+  assert.ok(peak>200);
+});
