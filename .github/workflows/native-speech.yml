@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
@@ -33,9 +33,13 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
           python3 -m pip install faster-whisper==1.2.1
-      - name: Measure unprompted speech intelligibility
+      - name: Diagnose all utterances without decoder context or transcript prompts
         env:
           WHISPER_MODEL: base.en
         run: |
           ffmpeg -y -v error -i artifacts/tea-performance/dialogue.wav -ac 1 -ar 16000 artifacts/tea-performance/dialogue-16k.wav
-          python3 tools/npc-speech-demo/whisper-intelligibility.py artifacts/tea-performance/dialogue-16k.wav "$(cat artifacts/tea-performance/expected.txt)" 0.25 artifacts/tea-performance/asr.json
+          python3 tools/tea-performance/diagnose-asr.py artifacts/tea-performance/dialogue-16k.wav artifacts/tea-performance/plan.json artifacts/tea-performance/asr-turns.json
+      - name: Measure unprompted full-recording speech intelligibility
+        env:
+          WHISPER_MODEL: base.en
+        run: python3 tools/npc-speech-demo/whisper-intelligibility.py artifacts/tea-performance/dialogue-16k.wav "$(cat artifacts/tea-performance/expected.txt)" 0.25 artifacts/tea-performance/asr.json
