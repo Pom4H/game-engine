@@ -28,6 +28,8 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run build
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
       - name: Capture immediate CPU preview video
         run: node tools/offroad/capture-cpu.mjs
       - uses: actions/upload-artifact@v4
