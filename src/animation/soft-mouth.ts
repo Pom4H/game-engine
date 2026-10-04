@@ -224,12 +224,37 @@ function rotatedHalf(entity:RuntimeEntity,base:Vec3):Vec3{
   return[base[0],base[1]*c+base[2]*s,base[1]*s+base[2]*c];
 }
 
+const DENTAL_X=Object.freeze([-.132,-.096,-.061,-.021,.021,.061,.096,.132] as const);
+
+function transformDentalOffset(entity:RuntimeEntity,offset:Vec3):Vec3{
+  const a=entity.rotation[0],cs=Math.cos(a),sn=Math.sin(a);
+  return[
+    entity.position[0]+offset[0],
+    entity.position[1]+offset[1]*cs-offset[2]*sn,
+    entity.position[2]+offset[1]*sn+offset[2]*cs,
+  ];
+}
+
+function dentalArchBoxes(entity:RuntimeEntity,arch:'upper'|'lower'):StructuralStaticBox[]{
+  const out:StructuralStaticBox[]=[];
+  for(let i=0;i<DENTAL_X.length;i++){
+    const x=DENTAL_X[i]!,side=Math.abs(x)/.132;
+    // Real incisors lead the arch; canine/lateral teeth recede posteriorly.
+    const z=.008-.012*side**1.65;
+    const y=(arch==='upper'?-.001:.001)+.002*side;
+    const center=transformDentalOffset(entity,[x,y,z]);
+    const half=rotatedHalf(entity,[i===0||i===7?.0155:.0175,.0215,.0105]);
+    out.push({id:arch+'-tooth-'+i,center,half});
+  }
+  return out;
+}
+
 function contactBoxes(scene:Scene):StructuralStaticBox[]{
   const upper=scene.entities.get(VOCAL_FACE_IDS.upperTeeth),lower=scene.entities.get(VOCAL_FACE_IDS.lowerTeeth);
-  const out:StructuralStaticBox[]=[];
-  if(upper)out.push({id:'upper-teeth',center:[...upper.position],half:rotatedHalf(upper,[.165,.0275,.014])});
-  if(lower)out.push({id:'lower-teeth',center:[...lower.position],half:rotatedHalf(lower,[.16,.025,.013])});
-  return out;
+  return[
+    ...(upper?dentalArchBoxes(upper,'upper'):[]),
+    ...(lower?dentalArchBoxes(lower,'lower'):[]),
+  ];
 }
 
 function remainingBoxPenetration(body:StructuralBody,boxes:readonly StructuralStaticBox[]):number{
