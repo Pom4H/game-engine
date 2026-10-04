@@ -47,7 +47,7 @@ jobs:
         run: |
           mkdir -p artifacts/npc-speech/probe/asr
           for word in yeah mama me mom yeah-mama; do
-            ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/probe/$word.wav -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/probe/asr/$word.wav
+            ffmpeg -y -hide_banner -loglevel error -i artifacts/npc-speech/probe/$word.wav -af "adelay=350,apad=pad_dur=0.35" -ac 1 -ar 16000 -sample_fmt s16 artifacts/npc-speech/probe/asr/$word.wav
           done
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/probe/asr/yeah.wav .cache/vosk/vosk-model-small-en-us-0.15 "yeah" 2.0 artifacts/npc-speech/probe/yeah-asr.json
           .venv/bin/python tools/npc-speech-demo/vosk-intelligibility.py artifacts/npc-speech/probe/asr/mama.wav .cache/vosk/vosk-model-small-en-us-0.15 "mama" 2.0 artifacts/npc-speech/probe/mama-asr.json
