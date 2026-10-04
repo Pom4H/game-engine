@@ -1,5 +1,5 @@
 import type {MechanicalMaterial} from '../materials/catalog.js';
-import type {Vec3} from '../math.js';
+import type {MutableVec3,Vec3} from '../math.js';
 import {applyStructuralSkin,bindStructuralSkin,type StructuralSkinBinding} from '../physics/structural-skin.js';
 import {StructuralStaticContactSolver,type StructuralContactStats,type StructuralStaticBox} from '../physics/structural-contact.js';
 import {StructuralBody,type StructuralConstraintSpec,type StructuralDefinition} from '../physics/structure.js';
@@ -312,7 +312,7 @@ export class SoftMouthRig{
     const innerRx=.172*(1-.27*a.lipRound-.07*a.labiodental);
     const innerRy=.003+.063*a.jawOpen*(1-a.lipClosure);
     const centerY=1.365-pose.jawDropM*.08;
-    const inner:Vec3=[
+    const inner:MutableVec3=[
       innerRx*Math.cos(meta.angle),
       centerY+innerRy*Math.sin(meta.angle),
       .615+(meta.layer===1?-.020:0)+.050*a.lipRound,
@@ -324,13 +324,13 @@ export class SoftMouthRig{
     }
 
     const jawFollow=lower*(.25+.75*outerWeight)*(1-lipWeight*a.lipClosure*.90);
-    const attached:Vec3=[
+    const attached:MutableVec3=[
       rest[0],
       rest[1]-pose.jawDropM*.62*jawFollow,
       rest[2]+.010*a.jawOpen*jawFollow,
     ];
 
-    const target:Vec3=[
+    const target:MutableVec3=[
       mix(attached[0],inner[0],lipWeight),
       mix(attached[1],inner[1],lipWeight),
       mix(attached[2],inner[2],lipWeight),
