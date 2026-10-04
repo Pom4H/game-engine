@@ -589,10 +589,11 @@ export function renderArticulatedVocalTract(
     const vibratoRatio=vibratoHz>0&&vibratoSemitones!==0?2**((Math.sin(2*Math.PI*vibratoHz*time)*vibratoSemitones)/12):1;
     const pressureTarget=gesture.lungPressurePa??gainState*900;
     const support=breath.step({targetPressurePa:pressureTarget,glottalFlowM3S:previousFoldFlow});
+    const respiratoryGate=gainTarget<=0?clamp(gainState,0,1):1;
     const fold=folds.step({
       adduction:voicedState,
       tensionHz:pitchState*vibratoRatio,
-      lungPressurePa:support.pressurePa,
+      lungPressurePa:support.pressurePa*respiratoryGate,
       supraglottalPressurePa:network.supraglottalPressurePa,
     });
     previousFoldFlow=fold.flowM3S;
