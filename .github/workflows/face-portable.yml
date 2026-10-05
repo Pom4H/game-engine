@@ -47,6 +47,7 @@ jobs:
           path: artifacts/face-portable
           retention-days: 3
   hardware-capture:
+    if: github.event_name == 'workflow_dispatch'
     needs: bundle
     runs-on: self-hosted
     timeout-minutes: 20
