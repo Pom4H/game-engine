@@ -15,19 +15,19 @@ const dictionary={
 const vowel=phone=>/^(a|a:|A|ae|E|e|e:|i|i:|I|o|o:|O|u|u:|U|@|V|aI|aU|eI|oU)$/.test(phone);
 const baseDuration=phone=>vowel(phone)?(phone==='@'?.062:phone.length>1?.14:.105):['s','S','f','T'].includes(phone)?.09:['p','t','k'].includes(phone)?.072:.065;
 export const teaPerformanceLines=Object.freeze([
- {id:'offer',speakerId:'mike',text:'You look frozen. Want some tea?',startS:1.20,intent:'question'},
- {id:'cold',speakerId:'anna',text:'Please. My hands are ice.',startS:4.90,intent:'warm'},
+ {id:'offer',speakerId:'mike',text:'Do you want some tea?',startS:1.20,intent:'question'},
+ {id:'cold',speakerId:'anna',text:'Yes, please.',startS:4.90,intent:'warm'},
  {id:'warning',speakerId:'mike',text:'Careful. It is very hot.',startS:8.00,intent:'warning'},
- {id:'confident',speakerId:'anna',text:'I can handle hot tea.',startS:11.00,intent:'confident'},
+ {id:'confident',speakerId:'anna',text:'Okay. I can handle hot tea.',startS:11.00,intent:'confident'},
  {id:'handoff',speakerId:'mike',text:'Here you go.',startS:14.10,intent:'warm'},
  {id:'thanks',speakerId:'anna',text:'Thank you.',startS:15.90,intent:'warm'},
- {id:'hot',speakerId:'anna',text:'Oh! That is hot.',startS:19.00,intent:'surprise'},
+ {id:'hot',speakerId:'anna',text:'It is very hot.',startS:19.00,intent:'surprise'},
  {id:'told-you',speakerId:'mike',text:'I did say careful.',startS:21.80,intent:'amused'},
  {id:'teasing',speakerId:'anna',text:'You sound very pleased.',startS:24.50,intent:'teasing'},
- {id:'admit',speakerId:'mike',text:'Only a little.',startS:27.30,intent:'amused'},
+ {id:'admit',speakerId:'mike',text:'Just a little.',startS:27.30,intent:'amused'},
  {id:'inside',speakerId:'anna',text:'Let us go inside.',startS:29.80,intent:'suggest'},
  {id:'agree',speakerId:'mike',text:'Good idea. Bring the tea.',startS:32.30,intent:'warm'},
- {id:'last-word',speakerId:'anna',text:'I am not leaving it.',startS:35.30,intent:'amused'},
+ {id:'last-word',speakerId:'anna',text:'Okay. Let us go.',startS:35.30,intent:'amused'},
 ]);
 export const TEA_PERFORMANCE_DURATION=42;
 export function pronounce(text){
