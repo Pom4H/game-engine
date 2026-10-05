@@ -104,7 +104,7 @@ node tools/character-creator/capture.mjs
 
 Capture использует установленный Chrome, при необходимости CHROME_PATH.
 Workflow **Character Creator** сначала выполняет контракты и проверку типов,
-затем снимает редактор на Windows self-hosted GPU. Он проверяет настоящий
+затем снимает редактор на аппаратном GPU macOS runner. Он проверяет настоящий
 WebGPU adapter, свежий исходный SHA, смену роста и одежды через элементы
 управления, JSON roundtrip, разные виды и мобильную компоновку.
 
