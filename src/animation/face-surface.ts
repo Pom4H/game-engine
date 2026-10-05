@@ -28,7 +28,7 @@ function normalsFor(p:Float64Array,indices:readonly number[],out:Float64Array):v
 }
 export function validateFaceIdentity(identity:FaceIdentity):void{
   for(const key of ['skin','iris'] as const)if(identity[key].length!==4||identity[key].some(v=>!Number.isFinite(v)||v<0||v>1))throw new RangeError('Invalid face '+key);
-  for(const [key,lo,hi] of [['jawWidth',.8,1.2],['cheekbone',0,.02],['noseLength',.015,.055]] as const)if(!Number.isFinite(identity[key])||identity[key]<lo||identity[key]>hi)throw new RangeError('Invalid face '+key);
+  for(const [key,lo,hi] of [['jawWidth',.62,1.2],['cheekbone',0,.02],['cheekHollow',0,.03],['noseLength',.015,.08],['noseHook',0,.03],['foreheadHeight',.9,1.5],['templeWidth',.7,1.2],['chinLength',0,.05],['chinForward',-.005,.03],['mouthForward',0,.02]] as const)if(!Number.isFinite(identity[key])||identity[key]<lo||identity[key]>hi)throw new RangeError('Invalid face '+key);
 }
 
 /** One anatomically authored CC0 skin surface, procedurally varied and flexed.
@@ -60,9 +60,14 @@ export class FaceSurface {
     const colors:number[]=[];
     for(let v=0;v<n;v++){
       const k=v*3,x=p[k]!,y=p[k+1]!,z=p[k+2]!,front=smooth((x+.02)/.08);
-      const cheek=gauss(y,-.012,.026)*gauss(Math.abs(z),.050,.025)*front,jaw=smooth((-.035-y)/.06)*front,brow=gauss(y,.056,.015)*gauss(Math.abs(z),.035,.020)*front;
-      p[k]=x+(identity.cheekbone-.007)*cheek+(identity.noseLength-.031)*gauss(y,-.004,.016)*gauss(z,0,.016)*front;
-      p[k+2]=z*(1+(identity.jawWidth-1)*jaw*.55);
+      const cheek=gauss(y,-.012,.026)*gauss(Math.abs(z),.050,.025)*front,jaw=smooth((-.028-y)/.075)*front,brow=gauss(y,.056,.015)*gauss(Math.abs(z),.035,.020)*front;
+      const forehead=smooth((y-.018)/.080)*front,temple=gauss(y,.055,.052)*front;
+      const nose=gauss(y,-.004,.023)*gauss(z,0,.021)*front,noseTip=gauss(y,-.020,.016)*gauss(z,0,.017)*front;
+      const chin=gauss(y,-.078,.024)*gauss(z,0,.040)*front,mouth=gauss(y,-.046,.015)*gauss(z,0,.043)*front;
+      const hollow=gauss(y,-.020,.030)*gauss(Math.abs(z),.047,.022)*front;
+      p[k]=x+(identity.cheekbone-.007)*cheek+(identity.noseLength-.031)*1.75*nose+identity.chinForward*chin+identity.mouthForward*mouth-identity.cheekHollow*hollow;
+      p[k+1]=y+(identity.foreheadHeight-1)*Math.max(0,y-.018)*forehead-identity.noseHook*noseTip-identity.chinLength*chin;
+      p[k+2]=z*(1+(identity.templeWidth-1)*temple)*(1+(identity.jawWidth-1)*jaw*.96);
       this.mask.set([cheek,jaw,brow,z<0?-1:1,front],v*5);
       const arch=.052+.008*gauss(Math.abs(z),.033,.016),hair=front*gauss(y,arch,.0022)*smooth((Math.abs(z)-.013)/.007)*smooth((.060-Math.abs(z))/.010);
       const beard=identity.stubble?.18*front*smooth((-.025-y)/.022):0;
