@@ -1,0 +1,181 @@
+name: Tea Performance VTL Hardware
+on:
+  pull_request:
+    paths:
+      - 'src/animation/face-surface.ts'
+      - 'src/animation/expressive-face.ts'
+      - 'src/assets/face-reference.ts'
+      - 'src/procedural/mesh-stream.ts'
+      - 'src/render/webgpu.ts'
+      - 'tools/tea-performance/**'
+      - 'tools/tea-scene/**'
+      - 'tools/npc-speech-demo/vtl-dialogue.py'
+      - 'tools/npc-speech-demo/vtl-anatomy-reference.patch'
+      - '.github/workflows/tea-performance-vtl-hardware.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tea-performance-vtl-hardware-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audio:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      source: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run typecheck && bun run build
+      - name: Build pinned VocalTractLab
+        run: |
+          git clone --quiet https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/vtl
+          git -C /tmp/vtl checkout --quiet df30392f18dc5e175b577c3ba734caaa65a3927f
+          git -C /tmp/vtl apply "$GITHUB_WORKSPACE/tools/npc-speech-demo/vtl-anatomy-reference.patch"
+          cmake -S /tmp/vtl -B /tmp/vtl/out -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/vtl/out --config Release --target VocalTractLabApi -j2
+      - name: Generate shared motor/VTL plans and synthesize both speakers
+        env:
+          TEA_OUTPUT: artifacts/tea-performance-vtl
+        run: |
+          node tools/tea-performance/plan-vtl.mjs
+          lib=$(find /tmp/vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          test -n "$lib"
+          python3 tools/npc-speech-demo/vtl-dialogue.py "$lib" /tmp/vtl/resources/JD3.speaker artifacts/tea-performance-vtl/plan.json artifacts/tea-performance-vtl
+      - name: Normalize dialogue for actual playback
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          ffmpeg -y -v error -i artifacts/tea-performance-vtl/dialogue.wav             -af "loudnorm=I=-16:TP=-1.5:LRA=9"             -ar 44100 -ac 2 -c:a pcm_s16le artifacts/tea-performance-vtl/dialogue-release.wav
+          ffmpeg -hide_banner -i artifacts/tea-performance-vtl/dialogue-release.wav             -af volumedetect -f null - 2> artifacts/tea-performance-vtl/volume.txt
+          cat artifacts/tea-performance-vtl/volume.txt
+          grep -q 'max_volume:' artifacts/tea-performance-vtl/volume.txt
+      - name: Independent no-prompt speech gate
+        run: |
+          python3 -m pip install faster-whisper==1.2.1
+          ffmpeg -y -v error -i artifacts/tea-performance-vtl/dialogue-release.wav -ac 1 -ar 16000 artifacts/tea-performance-vtl/dialogue-release-16k.wav
+          WHISPER_MODEL=base.en python3 tools/npc-speech-demo/whisper-intelligibility.py             artifacts/tea-performance-vtl/dialogue-release-16k.wav             "$(cat artifacts/tea-performance-vtl/expected.txt)"             0.25 artifacts/tea-performance-vtl/asr-release.json
+      - name: Audio contract
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, re, subprocess
+          p=pathlib.Path('artifacts/tea-performance-vtl')
+          probe=json.loads(subprocess.check_output([
+            'ffprobe','-v','error','-show_streams','-show_format','-of','json',str(p/'dialogue-release.wav')
+          ]))
+          a=probe['streams'][0]
+          assert a['codec_name']=='pcm_s16le' and int(a['sample_rate'])==44100 and int(a['channels'])==2
+          assert 36 < float(probe['format']['duration']) < 43
+          text=(p/'volume.txt').read_text(errors='replace')
+          maxv=float(re.findall(r'max_volume:\s*(-?[0-9.]+) dB',text)[-1])
+          mean=float(re.findall(r'mean_volume:\s*(-?[0-9.]+) dB',text)[-1])
+          assert -3.0 <= maxv <= -0.1, (maxv,mean)
+          assert mean > -25, (maxv,mean)
+          print({'duration':probe['format']['duration'],'maxDb':maxv,'meanDb':mean})
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tea-vtl-release-input
+          path: |
+            artifacts/tea-performance-vtl/motor-plan.json
+            artifacts/tea-performance-vtl/dialogue-release.wav
+            artifacts/tea-performance-vtl/asr-release.json
+            artifacts/tea-performance-vtl/expected.txt
+          retention-days: 3
+
+  hardware:
+    needs: audio
+    runs-on: self-hosted
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.audio.outputs.source }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: tea-vtl-release-input
+          path: artifacts/tea-performance-vtl
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Build exact source
+        run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Locate Chrome and ffmpeg
+        run: |
+          $ErrorActionPreference='Stop'
+          $candidates=@(
+            "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+            "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+            "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
+          )
+          $chrome=$candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if(-not $chrome){throw 'Chrome is required'}
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Append
+          if(-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)){throw 'ffmpeg is required on hardware runner'}
+          if(-not (Get-Command ffprobe -ErrorAction SilentlyContinue)){throw 'ffprobe is required on hardware runner'}
+      - name: Hardware WebGPU 720p30 capture with audible VTL dialogue
+        env:
+          TEA_REQUIRE_HARDWARE: '1'
+          TEA_WIDTH: '1280'
+          TEA_HEIGHT: '720'
+          TEA_FPS: '30'
+          TEA_OUTPUT: artifacts/tea-performance-vtl
+          TEA_PLAN: artifacts/tea-performance-vtl/motor-plan.json
+          TEA_AUDIO: artifacts/tea-performance-vtl/dialogue-release.wav
+          GITHUB_SHA: ${{ needs.audio.outputs.source }}
+        run: |
+          Remove-Item Env:TEA_SOFTWARE_GPU -ErrorAction SilentlyContinue
+          node tools/tea-performance/capture.mjs video
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify release media has hardware frames and audible stereo AAC
+        env:
+          SOURCE_SHA: ${{ needs.audio.outputs.source }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $video='artifacts/tea-performance-vtl/tea-performance.mp4'
+          if(-not (Test-Path $video)){throw 'Missing release MP4'}
+          $probe=(ffprobe -v error -count_frames -show_streams -show_format -of json $video | ConvertFrom-Json)
+          $v=$probe.streams | Where-Object codec_type -eq 'video'
+          $a=$probe.streams | Where-Object codec_type -eq 'audio'
+          if($v.width -ne 1280 -or $v.height -ne 720){throw "Wrong resolution $($v.width)x$($v.height)"}
+          if([int]$v.nb_read_frames -lt 1250){throw "Too few frames $($v.nb_read_frames)"}
+          if($a.codec_name -ne 'aac' -or [int]$a.channels -ne 2 -or [int]$a.sample_rate -ne 44100){throw 'Missing expected AAC stereo track'}
+          if([math]::Abs([double]$probe.format.duration-42) -gt .1){throw "Wrong duration $($probe.format.duration)"}
+          $e=Get-Content artifacts/tea-performance-vtl/video-evidence.json | ConvertFrom-Json
+          if($e.backend -ne 'webgpu-hardware'){throw "Not hardware WebGPU: $($e.backend)"}
+          if($e.sourceCommit -ne $env:SOURCE_SHA){throw 'Stale source commit'}
+          ffmpeg -y -v error -i $video -vn -c:a pcm_s16le artifacts/tea-performance-vtl/muxed-audio.wav
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          ffmpeg -hide_banner -i artifacts/tea-performance-vtl/muxed-audio.wav -af volumedetect -f null - 2> artifacts/tea-performance-vtl/muxed-volume.txt
+          $txt=Get-Content artifacts/tea-performance-vtl/muxed-volume.txt -Raw
+          if($txt -notmatch 'max_volume:\s*(-?[0-9.]+) dB'){throw 'No audio peak measurement'}
+          $peak=[double]$Matches[1]
+          if($peak -lt -4){throw "Muxed audio too quiet: $peak dB"}
+          Write-Host "TEA_RELEASE_VIDEO=$video"
+          Write-Host "TEA_RELEASE_PEAK_DB=$peak"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tea-performance-vtl-hardware-720p30
+          path: |
+            artifacts/tea-performance-vtl/tea-performance.mp4
+            artifacts/tea-performance-vtl/video-evidence.json
+            artifacts/tea-performance-vtl/asr-release.json
+            artifacts/tea-performance-vtl/muxed-volume.txt
+          retention-days: 3
