@@ -66,9 +66,9 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           TEA_OUTPUT: artifacts/tea-performance-vtl
-          TEA_WIDTH: '640'
-          TEA_HEIGHT: '360'
-          TEA_FPS: '15'
+          TEA_WIDTH: '480'
+          TEA_HEIGHT: '270'
+          TEA_FPS: '8'
         run: node tools/tea-performance/capture-cpu.mjs
       - name: Verify media and provenance
         run: |
@@ -81,7 +81,7 @@ jobs:
           video=next(s for s in probe['streams'] if s['codec_type']=='video')
           audio=next(s for s in probe['streams'] if s['codec_type']=='audio')
           assert e['audioBackend']=='VocalTractLab' and e['videoBackend']=='cpu'
-          assert video['width']==640 and video['height']==360
+          assert video['width']==480 and video['height']==270
           assert int(video['nb_read_frames'])==e['frames']
           assert abs(float(video['duration'])-42)<.08 and abs(float(audio['duration'])-42)<.1
           assert e['audioSha256']==hashlib.sha256((p/'dialogue.wav').read_bytes()).hexdigest()
