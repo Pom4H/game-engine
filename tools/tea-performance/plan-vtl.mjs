@@ -40,5 +40,6 @@ const vtlEnd=Math.max(...plan.turns.map(turn=>turn.startS+turn.segments.reduce((
 if(Math.abs(nativeEnd-vtlEnd)>1e-9)throw new Error('VTL phoneme expansion changed performance timing');
 if(vtlEnd>TEA_PERFORMANCE_DURATION)throw new Error('Speech plan exceeds performance duration');
 await writeFile(out+'/plan.json',JSON.stringify(plan,null,2)+'\n');
+await writeFile(out+'/motor-plan.json',JSON.stringify(native,null,2)+'\n');
 await writeFile(out+'/expected.txt',plan.turns.map(t=>t.text).join(' ')+'\n');
 console.log(JSON.stringify({backend:'vocaltractlab-external',sampleRate:plan.sampleRate,turns:plan.turns.length,durationS:TEA_PERFORMANCE_DURATION,lastSpeechEndS:vtlEnd,output:out}));
