@@ -1,6 +1,14 @@
 name: Tea Chaos Fast
 on:
-  workflow_dispatch:
+  push:
+    branches: [codex/tea-chaos-fast]
+    paths:
+      - 'src/animation/expressive-face.ts'
+      - 'src/animation/face-surface.ts'
+      - 'tools/tea-performance/stage.mjs'
+      - 'tools/tea-performance/scene.mjs'
+      - 'tools/tea-performance/spit-sfx.mjs'
+      - '.github/workflows/tea-chaos-fast.yml'
 permissions:
   contents: read
   actions: read
