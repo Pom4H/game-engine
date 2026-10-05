@@ -59,9 +59,10 @@ function faceLayers(actor,t){
   // Awkward, ugly suppressed laugh: one eye nearly shuts, one side of the lip
   // lifts harder, nose wrinkles and cheeks bunch asymmetrically.
   cue(window(t,19.95,20.25,24.25,24.8),{
-   smileLeft:.96,smileRight:.61,cheekLeft:.80,cheekRight:.49,
-   squintLeft:.72,squintRight:.31,sneerLeft:.24,sneerRight:.67,
-   browLeft:.13,browRight:.34,browTiltLeft:.27,browTiltRight:.73,
+   smileLeft:.56,smileRight:.18,cheekLeft:.80,cheekRight:.43,
+   squintLeft:.76,squintRight:.28,sneerLeft:.18,sneerRight:.82,
+   frownLeft:.05,frownRight:.72,chinBunch:.64,
+   browLeft:.10,browRight:.37,browTiltLeft:.22,browTiltRight:.79,
   });
   cue(window(t,26.8,27.6,28.8,29.6),{smileLeft:.72,smileRight:.31,browLeft:.29,cheekLeft:.35,squintLeft:.24,sneerRight:.26});
   cue(window(t,31.8,32.6,34.4,35.1),{smileLeft:.25,smileRight:.42,cheekRight:.28,squintRight:.11});
@@ -71,11 +72,12 @@ function faceLayers(actor,t){
   cue(window(t,15.4,16.1,16.9,17.4),{smileLeft:.24,smileRight:.34,cheekLeft:.18,cheekRight:.31});
   // Burn/cringe: asymmetric pain-disgust instead of symmetric surprise.
   cue(window(t,18.60,18.84,20.28,21.05),{
-   browLeft:.98,browRight:.46,browTiltLeft:.86,browTiltRight:.19,
-   cheekLeft:.57,cheekRight:.18,squintLeft:.88,squintRight:.24,
-   sneerLeft:.81,sneerRight:.19,smileLeft:.03,smileRight:.12,
+   browLeft:.94,browRight:.38,browTiltLeft:.90,browTiltRight:.15,
+   cheekLeft:.58,cheekRight:.16,squintLeft:.92,squintRight:.20,
+   sneerLeft:.78,sneerRight:.12,frownLeft:.71,frownRight:.18,chinBunch:.86,
+   smileLeft:.02,smileRight:.08,
   });
-  cue(window(t,20.15,20.42,21.20,21.75),{squintLeft:.62,squintRight:.36,sneerLeft:.53,sneerRight:.11,browLeft:.72,browRight:.31});
+  cue(window(t,20.15,20.42,21.20,21.75),{squintLeft:.68,squintRight:.31,sneerLeft:.58,sneerRight:.09,frownLeft:.59,frownRight:.14,chinBunch:.73,browLeft:.72,browRight:.27});
   cue(window(t,24.1,24.8,26.5,27.2),{browRight:.49,smileRight:.61,cheekRight:.31,squintLeft:.08,squintRight:.20,sneerRight:.30});
   cue(window(t,29.3,30.1,31.4,32),{browLeft:.28,browRight:.17,sneerLeft:.08});
   cue(window(t,35.0,35.8,37.1,38.0),{smileLeft:.27,smileRight:.55,cheekLeft:.20,cheekRight:.40,squintRight:.12});
