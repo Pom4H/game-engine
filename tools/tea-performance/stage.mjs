@@ -105,7 +105,8 @@ export function createPerformanceStage(){
  add('tea-pot-spout',{kind:'cylinder',radius:.018,topRadius:.010,height:.135,segments:20},pot);
  add('tea-stream',{kind:'cylinder',radius:.0026,height:1,segments:10},{kind:'default',color:[.36,.17,.050,1],roughness:.1,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
  for(let i=0;i<12;i++)add('tea-steam-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.66,.70,.72,.07],roughness:1},[0,0,0],{scale:[.0001,.0001,.0001]});
- for(let i=0;i<128;i++)add('tea-spray-'+i,{kind:'sphere',radius:.5,segments:6},{kind:'default',color:[.34,.095,.014,.82],roughness:.06,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
+ for(let i=0;i<72;i++)add('tea-mist-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.70,.78,.80,.085],roughness:.22},[0,0,0],{scale:[.0001,.0001,.0001]});
+ for(let i=0;i<36;i++)add('tea-droplet-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.31,.075,.012,.68],roughness:.08,clearcoat:.95},[0,0,0],{scale:[.0001,.0001,.0001]});
  const actors=cast.flatMap(actor=>{
   const base=makePedestrian({...actor,speed:0}).filter(e=>!e.id.endsWith('-nose')&&!e.id.endsWith('-head')&&!e.id.includes('-snow'));
   return [...base,...snowShells(actor,base)];
