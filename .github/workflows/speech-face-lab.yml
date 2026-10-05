@@ -1,27 +1,37 @@
 name: Speech Face Lab
 on:
-  push:
-    branches: [codex/native-speech-tea-performance]
+  pull_request:
     paths: ['.github/workflows/speech-face-lab.yml']
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   reproduce:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v7
-      - name: Fetch verified CC0 anatomical reference, not application code
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run typecheck && bun run build
+      - name: Exact source, build and CC0 mesh reference
         run: |
-          mkdir -p artifacts/reference
-          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/base.obj -o artifacts/reference/base.obj
-          test "$(git hash-object artifacts/reference/base.obj)" = d26635e9326e3cca30778fd7b9c00062b03cce09
-          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.ASSETS.md -o artifacts/reference/LICENSE.ASSETS.md
-          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.md -o artifacts/reference/LICENSE.md
-          sha256sum artifacts/reference/*
+          mkdir -p artifacts/reproduction/reference
+          git archive --format=tar HEAD | gzip > artifacts/reproduction/source.tar.gz
+          tar -czf artifacts/reproduction/build.tar.gz dist node_modules
+          git rev-parse HEAD > artifacts/reproduction/commit.txt
+          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/base.obj -o artifacts/reproduction/reference/base.obj
+          test "$(git hash-object artifacts/reproduction/reference/base.obj)" = d26635e9326e3cca30778fd7b9c00062b03cce09
+          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.ASSETS.md -o artifacts/reproduction/reference/LICENSE.ASSETS.md
+          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.md -o artifacts/reproduction/reference/LICENSE.md
+          sha256sum artifacts/reproduction/reference/* > artifacts/reproduction/reference/SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: face-topology-reference
-          path: artifacts/reference
+          name: speech-face-lab-inputs
+          path: artifacts/reproduction
           retention-days: 1
