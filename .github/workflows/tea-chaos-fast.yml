@@ -30,6 +30,12 @@ jobs:
           if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
           bun run build
           if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      - name: Add procedural spit SFX to the existing VTL dialogue
+        run: |
+          node tools/tea-performance/spit-sfx.mjs
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          ffmpeg -y -v error -i artifacts/tea-chaos/dialogue-release.wav -i artifacts/tea-chaos/spit-sfx.wav -filter_complex "[0:a]volume=1.0[a0];[1:a]volume=0.72[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.94[a]" -map "[a]" -ar 44100 -ac 2 -c:a pcm_s16le artifacts/tea-chaos/dialogue-with-spit.wav
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
       - name: Hardware WebGPU visual-only rerender
         env:
           TEA_REQUIRE_HARDWARE: '1'
@@ -38,7 +44,7 @@ jobs:
           TEA_FPS: '20'
           TEA_OUTPUT: artifacts/tea-chaos
           TEA_PLAN: artifacts/tea-chaos/motor-plan.json
-          TEA_AUDIO: artifacts/tea-chaos/dialogue-release.wav
+          TEA_AUDIO: artifacts/tea-chaos/dialogue-with-spit.wav
           TEA_SOURCE_COMMIT: ${{ github.sha }}
         run: |
           $ErrorActionPreference='Stop'
