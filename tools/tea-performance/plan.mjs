@@ -10,7 +10,7 @@ const dictionary={
  sound:'s aU n d',pleased:'p l i: z d',only:'oU n l i',a:'@',little:'l I t @ l',
  let:'l E t',us:'V s',inside:'I n s aI d',good:'g U d',idea:'aI d i: @',
  bring:'b r I N',the:'D @',am:'ae m',not:'n A t',leaving:'l i: v I N',
- do:'d u:',yes:'j E s',okay:'oU k eI',just:'dZ V s t',minute:'m I n I t',
+ do:'d u:',yes:'j E s',okay:'oU k eI',just:'dZ V s t',minute:'m I n I t',ah:'a:',ha:'h a:',
 };
 const vowel=phone=>/^(a|a:|A|ae|E|e|e:|i|i:|I|o|o:|O|u|u:|U|@|V|aI|aU|eI|oU)$/.test(phone);
 const baseDuration=phone=>vowel(phone)?(phone==='@'?.062:phone.length>1?.14:.105):['s','S','f','T'].includes(phone)?.09:['p','t','k'].includes(phone)?.072:.065;
@@ -21,8 +21,8 @@ export const teaPerformanceLines=Object.freeze([
  {id:'confident',speakerId:'anna',text:'Okay. I can handle hot tea.',startS:11.00,intent:'confident'},
  {id:'handoff',speakerId:'mike',text:'Here you go.',startS:14.10,intent:'warm'},
  {id:'thanks',speakerId:'anna',text:'Thank you.',startS:15.90,intent:'warm'},
- {id:'hot',speakerId:'anna',text:'It is very hot.',startS:19.00,intent:'surprise'},
- {id:'told-you',speakerId:'mike',text:'I did say careful.',startS:21.80,intent:'amused'},
+ {id:'hot',speakerId:'anna',text:'Ah! Hot! Hot!',startS:19.00,intent:'surprise'},
+ {id:'told-you',speakerId:'mike',text:'Ha ha ha! I did say careful.',startS:21.15,intent:'amused'},
  {id:'teasing',speakerId:'anna',text:'You sound very pleased.',startS:24.50,intent:'teasing'},
  {id:'admit',speakerId:'mike',text:'Just a little.',startS:27.30,intent:'amused'},
  {id:'inside',speakerId:'anna',text:'Let us go inside.',startS:29.80,intent:'suggest'},
