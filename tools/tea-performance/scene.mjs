@@ -41,27 +41,48 @@ export function performanceCamera(t){
  p[0]+=.013*Math.sin(t*.36);return{shot,camera:{position:p,target:q,fov,focusDistance:Math.hypot(...sub(p,q)),aperture:.018}};
 }
 function faceLayers(actor,t){
- const mike=actor.id==='mike',layers=[{weight:1,actions:{smileLeft:.12,smileRight:.16,browTiltLeft:.47,browTiltRight:.50}}];
+ const mike=actor.id==='mike',phase=mike?.7:2.1;
+ const idleA=.5+.5*Math.sin(t*.83+phase),idleB=.5+.5*Math.sin(t*1.17+phase*1.7);
+ // Deliberately imperfect rest pose: no two sides settle on the same value.
+ const layers=[{weight:1,actions:{
+  smileLeft:.08+.035*idleA,smileRight:.13+.028*idleB,
+  browTiltLeft:.44+.05*idleB,browTiltRight:.53-.04*idleA,
+  cheekLeft:.025*idleB,cheekRight:.018*idleA,
+  squintLeft:.025+.025*idleA,squintRight:.018+.020*idleB,
+  sneerLeft:.012*idleB,sneerRight:.009*idleA,
+ }}];
  const cue=(amount,actions)=>layers.push({weight:clamp(amount),actions});
  if(mike){
-  cue(window(t,.8,1.5,3.7,4.5),{browLeft:.34,browRight:.29,smileLeft:.27,smileRight:.20});
-  cue(window(t,7.4,8.2,10.2,11),{browLeft:.25,browRight:.12});
-  cue(window(t,18.6,19.2,20.4,21.2),{browLeft:.48,browRight:.37});
-  cue(window(t,20.0,20.35,24.25,24.8),{smileLeft:.95,smileRight:.92,cheekLeft:.72,cheekRight:.66,squint:.42,browLeft:.18,browRight:.12});
-  cue(window(t,26.8,27.6,28.8,29.6),{smileLeft:.65,smileRight:.36,browLeft:.24,cheekLeft:.32});
-  cue(window(t,31.8,32.6,34.4,35.1),{smileLeft:.30,smileRight:.40,cheekRight:.25});
+  cue(window(t,.8,1.5,3.7,4.5),{browLeft:.34,browRight:.18,smileLeft:.29,smileRight:.17,squintLeft:.06,squintRight:.02});
+  cue(window(t,7.4,8.2,10.2,11),{browLeft:.25,browRight:.10,sneerLeft:.08});
+  cue(window(t,18.6,19.2,20.1,20.5),{browLeft:.55,browRight:.28,squintLeft:.18,squintRight:.04});
+  // Awkward, ugly suppressed laugh: one eye nearly shuts, one side of the lip
+  // lifts harder, nose wrinkles and cheeks bunch asymmetrically.
+  cue(window(t,19.95,20.25,24.25,24.8),{
+   smileLeft:.96,smileRight:.61,cheekLeft:.80,cheekRight:.49,
+   squintLeft:.72,squintRight:.31,sneerLeft:.24,sneerRight:.67,
+   browLeft:.13,browRight:.34,browTiltLeft:.27,browTiltRight:.73,
+  });
+  cue(window(t,26.8,27.6,28.8,29.6),{smileLeft:.72,smileRight:.31,browLeft:.29,cheekLeft:.35,squintLeft:.24,sneerRight:.26});
+  cue(window(t,31.8,32.6,34.4,35.1),{smileLeft:.25,smileRight:.42,cheekRight:.28,squintRight:.11});
  }else{
-  cue(window(t,0,1.1,6.9,7.7),{squint:.19,browLeft:.09,browRight:.09});
-  cue(window(t,10.7,11.4,12.8,13.5),{browLeft:.55,smileLeft:.15,smileRight:.42});
-  cue(window(t,15.4,16.1,16.9,17.4),{smileLeft:.29,smileRight:.32,cheekLeft:.22,cheekRight:.28});
-  cue(window(t,18.62,18.86,20.15,20.9),{browLeft:1,browRight:1,cheekLeft:.08,cheekRight:.08});
-  cue(window(t,20.0,20.25,21.0,21.6),{squint:.46,browLeft:.72,browRight:.77});
-  cue(window(t,24.1,24.8,26.5,27.2),{browRight:.47,smileRight:.58,cheekRight:.26});
-  cue(window(t,29.3,30.1,31.4,32),{browLeft:.26,browRight:.19});
-  cue(window(t,35.0,35.8,37.1,38.0),{smileLeft:.30,smileRight:.57,cheekLeft:.23,cheekRight:.37});
+  cue(window(t,0,1.1,6.9,7.7),{squintLeft:.16,squintRight:.22,browLeft:.08,browRight:.11});
+  cue(window(t,10.7,11.4,12.8,13.5),{browLeft:.57,browRight:.22,smileLeft:.11,smileRight:.44,sneerRight:.15});
+  cue(window(t,15.4,16.1,16.9,17.4),{smileLeft:.24,smileRight:.34,cheekLeft:.18,cheekRight:.31});
+  // Burn/cringe: asymmetric pain-disgust instead of symmetric surprise.
+  cue(window(t,18.60,18.84,20.28,21.05),{
+   browLeft:.98,browRight:.46,browTiltLeft:.86,browTiltRight:.19,
+   cheekLeft:.57,cheekRight:.18,squintLeft:.88,squintRight:.24,
+   sneerLeft:.81,sneerRight:.19,smileLeft:.03,smileRight:.12,
+  });
+  cue(window(t,20.15,20.42,21.20,21.75),{squintLeft:.62,squintRight:.36,sneerLeft:.53,sneerRight:.11,browLeft:.72,browRight:.31});
+  cue(window(t,24.1,24.8,26.5,27.2),{browRight:.49,smileRight:.61,cheekRight:.31,squintLeft:.08,squintRight:.20,sneerRight:.30});
+  cue(window(t,29.3,30.1,31.4,32),{browLeft:.28,browRight:.17,sneerLeft:.08});
+  cue(window(t,35.0,35.8,37.1,38.0),{smileLeft:.27,smileRight:.55,cheekLeft:.20,cheekRight:.40,squintRight:.12});
  }
  const listening=mike?pulse(t,5.7,.70,.12)+pulse(t,30.7,.80,.17):pulse(t,2.4,.70,.14)+pulse(t,28.0,.8,.20);
- cue(listening,{browLeft:.40,browRight:.35});return layers;
+ cue(listening,{browLeft:.40,browRight:.31,squintLeft:.07,squintRight:.03});
+ return layers;
 }
 function bodyPose(actor,t){
  const base=sampleWalker({...actor,speed:0},0),h=actor.heightScale;
@@ -109,9 +130,13 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
    const recoil=mike?0:window(t,18.68,18.92,20.05,20.70),laugh=mike?window(t,19.95,20.25,24.25,24.8):0,shopLook=window(t,29.75,30.6,31.4,32.1);
    const routeHeading=t>=DEPART_START?pose.heading:-Math.PI/2,turnToShop=deltaAngle(pose.heading,routeHeading)*shopLook*.56;
    const laughShake=laugh*Math.sin(t*18);
-   const rotation=[mike?.055*laughShake:.12*recoil,pose.heading+turnToShop+(mike?.04:-.04)*(1-lookDown),-.24*lookDown+nod+.18*recoil+.055*laughShake];
+   const microPitch=.006*Math.sin(t*1.31+(mike?.2:1.7))+.003*Math.sin(t*3.9+(mike?1.1:.4));
+   const microYaw=.008*Math.sin(t*.91+(mike?.4:2.2))+.004*Math.sin(t*2.7+(mike?2.0:.6));
+   const rotation=[(mike?.055*laughShake:.12*recoil)+microPitch,pose.heading+turnToShop+(mike?.04:-.04)*(1-lookDown)+microYaw,-.24*lookDown+nod+.18*recoil+.055*laughShake];
    const other=actors.find(a=>a.id!==actor.id),otherHead=add(other.root,[0,1.57*other.heightScale,0]);
-   let gaze=mix(otherHead,cupRest,lookDown);if(t>=DEPART_START)gaze=[SHOP_DOOR[0],1.35,SHOP_DOOR[2]];
+   let gaze=mix(otherHead,cupRest,lookDown);
+   gaze=add(gaze,[0,.006*Math.sin(t*2.31+(mike?.3:1.4)),.008*Math.sin(t*1.73+(mike?1.8:.2))]);
+   if(t>=DEPART_START)gaze=[SHOP_DOOR[0],1.35,SHOP_DOOR[2]];
    const layers=faceLayers(actor,t);
    const face=actor.face.step(t,dt,{position:pose.joints.head,rotation,scale:actor.heightScale,gazeTarget:gaze},motor,layers);
    return{actor,pose,motor,rotation,gaze,layers,face};
