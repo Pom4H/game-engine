@@ -136,14 +136,26 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
   put(scene,'tea-stream',stream.position,stream.rotation,[Math.max(.0001,flow),Math.max(.0001,stream.length*flow),Math.max(.0001,flow)]);
   for(let i=0;i<12;i++){const age=(t*.62+i/12)%1,visible=fill*(1-age)**2,size=(.008+.016*age)*visible;put(scene,'tea-steam-'+i,add(cupPosition,[Math.sin(i*2.399+t*.9)*.015+age*.018,.057+age*.16,Math.cos(i*2.399+t*.63)*.012]),[0,0,0],[Math.max(.0001,size),Math.max(.0001,size*1.45),Math.max(.0001,size)]);}
   const sprayAge=t-TEA_SPIT_EVENT.startS,sprayAlive=sprayAge>=0&&sprayAge<TEA_SPIT_EVENT.durationS,spitOrigin=anna.face.lowerLipWorld;
-  for(let i=0;i<128;i++){
-   if(!sprayAlive){put(scene,'tea-spray-'+i,[0,-50,0],[0,0,0],[.0001,.0001,.0001]);continue;}
+  // Near field is a dense water/mist plume, not discrete beads. Each soft puff
+  // appears with a short phase delay, expands while advecting, and loses vertical
+  // speed slowly; only the sparse far field becomes ballistic droplets.
+  for(let i=0;i<72;i++){
+   const delay=(i/72)*.18+hash01(i+701)*.035,age=sprayAge-delay;
+   if(!sprayAlive||age<0||age>.92){put(scene,'tea-mist-'+i,[0,-50,0],[0,0,0],[.0001,.0001,.0001]);continue;}
    const r0=hash01(i+1),r1=hash01(i+101),r2=hash01(i+211),r3=hash01(i+307);
-   const localVelocity=[.62+r0*2.70,(r1-.34)*1.95,(r2-.5)*3.10],velocity=rotate(anna.rotation,localVelocity);
-   const drag=(1-Math.exp(-2.1*sprayAge))/2.1,origin=i%5===0?point(cupMatrix,[.01,.045,(r2-.5)*.035]):spitOrigin;
-   const p=[origin[0]+velocity[0]*drag,origin[1]+velocity[1]*drag-3.4*sprayAge*sprayAge,origin[2]+velocity[2]*drag];
-   const size=(.004+r3*.009)*(1-clamp((sprayAge-.90)/.36)),stretch=1+r0*.45;
-   put(scene,'tea-spray-'+i,p,[0,0,0],[Math.max(.0001,size*stretch),Math.max(.0001,size),Math.max(.0001,size)]);
+   const localVelocity=[.48+r0*1.28,(r1-.50)*.58,(r2-.5)*1.06],velocity=rotate(anna.rotation,localVelocity);
+   const drag=(1-Math.exp(-2.7*age))/2.7,p=[spitOrigin[0]+velocity[0]*drag,spitOrigin[1]+velocity[1]*drag-.22*age*age,spitOrigin[2]+velocity[2]*drag];
+   const grow=.040+r3*.040+age*(.055+r0*.035),fade=1-clamp((age-.64)/.28);
+   put(scene,'tea-mist-'+i,p,[0,0,0],[Math.max(.0001,grow*1.85*fade),Math.max(.0001,grow*.82*fade),Math.max(.0001,grow*1.18*fade)]);
+  }
+  for(let i=0;i<36;i++){
+   const delay=.055+hash01(i+901)*.22,age=sprayAge-delay;
+   if(!sprayAlive||age<0||age>1.08){put(scene,'tea-droplet-'+i,[0,-50,0],[0,0,0],[.0001,.0001,.0001]);continue;}
+   const r0=hash01(i+31),r1=hash01(i+131),r2=hash01(i+231),r3=hash01(i+331);
+   const velocity=rotate(anna.rotation,[.85+r0*1.85,(r1-.30)*1.15,(r2-.5)*2.05]);
+   const drag=(1-Math.exp(-1.8*age))/1.8,p=[spitOrigin[0]+velocity[0]*drag,spitOrigin[1]+velocity[1]*drag-2.75*age*age,spitOrigin[2]+velocity[2]*drag];
+   const size=(.0028+r3*.0055)*(1-clamp((age-.82)/.26));
+   put(scene,'tea-droplet-'+i,p,[0,0,0],[Math.max(.0001,size*1.55),Math.max(.0001,size),Math.max(.0001,size)]);
   }
   const results=[];
   for(const item of prepared){
