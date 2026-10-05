@@ -12,18 +12,16 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - run: bun install --frozen-lockfile && bun run typecheck && bun run build
-      - name: Reproducible lab inputs
+      - name: Fetch verified CC0 anatomical reference, not application code
         run: |
-          mkdir -p artifacts/reproduction
-          git archive --format=tar HEAD | gzip > artifacts/reproduction/source.tar.gz
-          tar -czf artifacts/reproduction/build.tar.gz dist node_modules
-          git rev-parse HEAD > artifacts/reproduction/commit.txt
+          mkdir -p artifacts/reference
+          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/base.obj -o artifacts/reference/base.obj
+          test "$(git hash-object artifacts/reference/base.obj)" = d26635e9326e3cca30778fd7b9c00062b03cce09
+          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.ASSETS.md -o artifacts/reference/LICENSE.ASSETS.md
+          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.md -o artifacts/reference/LICENSE.md
+          sha256sum artifacts/reference/*
       - uses: actions/upload-artifact@v4
         with:
-          name: speech-face-reproduction
-          path: artifacts/reproduction
+          name: face-topology-reference
+          path: artifacts/reference
           retention-days: 1
