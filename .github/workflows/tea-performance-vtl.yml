@@ -57,6 +57,8 @@ jobs:
       - name: Measure the actual VTL dialogue without transcript prompting
         id: asr
         continue-on-error: true
+        env:
+          WHISPER_MODEL: base.en
         run: |
           ffmpeg -y -v error -i artifacts/tea-performance-vtl/dialogue.wav -ac 1 -ar 16000 artifacts/tea-performance-vtl/dialogue-16k.wav
           python3 tools/npc-speech-demo/whisper-intelligibility.py artifacts/tea-performance-vtl/dialogue-16k.wav "$(cat artifacts/tea-performance-vtl/expected.txt)" 0.25 artifacts/tea-performance-vtl/asr.json
