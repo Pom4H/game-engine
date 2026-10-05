@@ -139,7 +139,7 @@ jobs:
           TEA_OUTPUT: artifacts/tea-performance-vtl
           TEA_PLAN: artifacts/tea-performance-vtl/motor-plan.json
           TEA_AUDIO: artifacts/tea-performance-vtl/dialogue-release.wav
-          GITHUB_SHA: ${{ needs.audio.outputs.source }}
+          TEA_SOURCE_COMMIT: ${{ needs.audio.outputs.source }}
         run: |
           Remove-Item Env:TEA_SOFTWARE_GPU -ErrorAction SilentlyContinue
           node tools/tea-performance/capture.mjs video
