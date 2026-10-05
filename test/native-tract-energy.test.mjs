@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {NativeVocalTract,NativeSpeechMotor,NativeSpeechStream,createVocalMotorFrame,nativeSpeechPlan} from '../dist/audio/native-speech.js';
 import {NATIVE_VOWEL_REFERENCE,nativeVowelArea} from '../dist/audio/native-vowels.js';
+import {nativeGlottalOpening} from '../dist/audio/native-tract.js';
 test('geometry updates preserve power-normalised acoustic coordinates and a closed nose stays closed',()=>{
  const voice={id:'a',name:'A',tractLengthM:.175,pan:0};
  const tube=new NativeVocalTract(.175),frame=createVocalMotorFrame(.175);frame.voicing=1;
@@ -36,4 +37,16 @@ test('high front vowel no longer becomes an almost silent occlusion at unchanged
   const window=pcm.subarray(11025,24255);return Math.sqrt(window.reduce((s,x)=>s+x*x,0)/window.length);
  };
  const a=render('a'),i=render('i:');assert.ok(i>a*.1,{a,i});
+});
+test('prescribed glottal cycle retains closure contact without a spurious zero left-hand slope',()=>{
+ const close=.65,peak=close*.65,epsilon=1e-7;
+ assert.equal(nativeGlottalOpening(0),0);assert.equal(nativeGlottalOpening(peak),1);
+ assert.equal(nativeGlottalOpening(close),0);assert.equal(nativeGlottalOpening(1),0);
+ for(let i=0;i<=4096;i++){const p=i/4096,a=nativeGlottalOpening(p);assert.ok(Number.isFinite(a)&&a>=0&&a<=1);if(p>=close)assert.equal(a,0);}
+ const left=(nativeGlottalOpening(close)-nativeGlottalOpening(close-epsilon))/epsilon;
+ assert.ok(Math.abs(left+Math.PI/(2*(close-peak)))<1e-5,'closing velocity reaches contact, rather than fading to zero');
+ // Integral follows analytically from the half-cosine opening and cosine closing.
+ const n=32768;let integral=0;for(let i=0;i<n;i++)integral+=nativeGlottalOpening((i+.5)/n)/n;
+ assert.ok(Math.abs(integral-(peak/2+2*(close-peak)/Math.PI))<1e-8);
+ for(const p of [NaN,Infinity,-.001,1.001])assert.throws(()=>nativeGlottalOpening(p));
 });

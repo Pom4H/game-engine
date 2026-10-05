@@ -3,6 +3,23 @@ import {storyArea,storyControlForVowel,STORY_SECTIONS} from './story-area-model.
 const TAU=2*Math.PI,C=343,RHO=1.225,CM2=1e-4;
 const finite=(v:number,lo:number,hi:number,label:string)=>{if(!Number.isFinite(v)||v<lo||v>hi)throw new RangeError(label+' outside '+lo+'..'+hi);};
 
+/** Prescribed Rosenberg-style opening, NOT a self-oscillating tissue model.
+ * Keep the existing open fraction (.65) and opening/closing times unchanged.
+ * A cosine closing branch reaches contact with nonzero left-hand slope. The
+ * previous squared cosine incorrectly forced that slope to zero and removed
+ * most upper source harmonics before the vocal tract could filter them.
+ * Here this is a geometric area envelope; pressure and impedance still own
+ * volume flow. It is not an imposed flow recording or a naturalness claim.
+ * Background: Rosenberg (1971), DOI 10.1121/1.1912389.
+ */
+export function nativeGlottalOpening(phase:number):number {
+  finite(phase,0,1,'glottal phase');
+  const open=.65,peak=open*.65;
+  if(phase<peak)return .5-.5*Math.cos(Math.PI*phase/peak);
+  if(phase<open)return Math.cos(Math.PI/2*(phase-peak)/(open*.35));
+  return 0;
+}
+
 /** Kelly-Lochbaum pressure-wave network. One step moves a wave one tubelet.
  * The clock is c*N/L, not the PCM rate: changing anatomy cannot silently change
  * the speed of sound. Fractional resampling happens ONLY at the output. */
@@ -71,10 +88,7 @@ export class NativeVocalTract {
       nb[branch]=(p-f[branch]!)*loss;nf[branch+1]=(p-b[branch+1]!)*loss;nnr[0]=(p-nl[0]!)*loss;
     }else nnr[0]=nl[0]!*loss;
     this.phase+=frame.pitchHz/this.internalRate;this.phase-=Math.floor(this.phase);
-    // Geometric, prescribed glottal cycle. Smooth open / faster closure.
-    const open=.65,t=this.phase;let shape=0;
-    if(t<open*.65)shape=.5-.5*Math.cos(Math.PI*t/(open*.65));
-    else if(t<open)shape=Math.cos(Math.PI/2*(t-open*.65)/(open*.35))**2;
+    const shape=nativeGlottalOpening(this.phase);
     const gate=frame.voicing,Ag=(voice.glottalAreaM2??.000018)*(gate*shape+(1-gate)*.55);
     const Z=RHO*C/(A[0]!*CM2),dp=frame.lungPressurePa-2*b[0]!;
     const resistance=RHO/(2*Math.max(1e-20,Ag*Ag));
