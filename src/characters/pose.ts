@@ -11,7 +11,7 @@ export function sampleCharacterPose(walker:WalkerSpec,mode:CharacterPoseName='id
   if(!Number.isFinite(time)||time<0)throw new RangeError('Pose time must be finite and non-negative');
   const h=walker.heightScale??1,heading=walker.heading??0,speed=mode==='walk'?.62*h:0;
   const root:Vec3=[walker.root[0]-Math.cos(heading)*speed*time,walker.root[1],walker.root[2]+Math.sin(heading)*speed*time];
-  const pose=sampleWalker({...walker,root,speed},time);
+  const pose=sampleWalker({...walker,root,speed,stance:'neutral'},time);
   if(mode==='idle'||mode==='walk')return pose;
   const m=humanoidMeasurements(walker.proportions,h),joints={...pose.joints};
   const rotate=(v:Vec3):Vec3=>[Math.cos(heading)*v[0]+Math.sin(heading)*v[2],v[1],-Math.sin(heading)*v[0]+Math.cos(heading)*v[2]];

@@ -1,5 +1,5 @@
 import {bindHumanoid,humanoidMeasurements,sampleWalker,type HumanoidBinding,type HumanoidJoint,type WalkerSpec} from '../animation/locomotion.js';
-import {V3,type Vec3} from '../math.js';
+import {V3,compose,type Vec3} from '../math.js';
 import {clothLoftMesh,type ClothRing} from '../procedural/cloth.js';
 import {primitiveMesh} from '../procedural/mesh.js';
 import type {Color,EntitySpec,MaterialSpec,Primitive} from '../scene/types.js';
@@ -23,7 +23,7 @@ export const DEFAULT_CHARACTER_SPEC:CharacterSpec=Object.freeze({
  version:1,id:'skeptic',seed:4217,
  body:Object.freeze({height:1.88,shoulders:.91,hips:.96,torso:1.04,arms:1.04,legs:1.10,build:.28}),
  outfit:Object.freeze({top:'parka',bottom:'jeans',shoes:'boots',scarf:true}),
- colors:Object.freeze({skin:'#c9ac96',hair:'#493126',top:'#856044',bottom:'#303640',shoes:'#513d30',scarf:'#77736a'}),
+ colors:Object.freeze({skin:'#bc896b',hair:'#493126',top:'#856044',bottom:'#303640',shoes:'#513d30',scarf:'#77736a'}),
  hairStyle:'swept',expression:'skeptical',
 });
 
@@ -125,14 +125,22 @@ function frontSurface(mesh:Mesh,y:number,z:number):number{
  if(!Number.isFinite(front))throw new Error('Character detail lies outside its garment surface');
  return front;
 }
+function surfaced(mesh:Mesh,garment:Mesh,offset:Vec3):Mesh{
+ const positions:number[]=[],normals:number[]=Array(mesh.positions.length).fill(0);
+ for(let i=0;i<mesh.positions.length;i+=3){const y=mesh.positions[i+1]!+offset[1],z=mesh.positions[i+2]!+offset[2];positions.push(frontSurface(garment,y,z)+mesh.positions[i]!+offset[0],y,z);}
+ for(let i=0;i<mesh.indices.length;i+=3){const a=mesh.indices[i]!,b=mesh.indices[i+1]!,c=mesh.indices[i+2]!,p=(k:number)=>positions.slice(k*3,k*3+3) as unknown as Vec3,n=V3.cross(V3.sub(p(b),p(a)),V3.sub(p(c),p(a)));for(const k of [a,b,c])for(let axis=0;axis<3;axis++)normals[k*3+axis]=normals[k*3+axis]!+n[axis]!;}
+ for(let i=0;i<normals.length;i+=3){const n=V3.normalize(normals.slice(i,i+3) as unknown as Vec3);normals[i]=n[0];normals[i+1]=n[1];normals[i+2]=n[2];}
+ return{kind:'triangle-mesh',positions,normals,indices:[...mesh.indices]};
+}
 
 /** Compile once from a recipe; the Scene AnimationSystem subsequently owns
  * every transform. Garment dimensions and bone lengths share measurements,
  * so changing proportions also changes the contact-preserving skeleton. */
 export function compileCharacter(input:CharacterSpec|unknown=DEFAULT_CHARACTER_SPEC):CompiledCharacter{
- const spec=characterSpec(input),b=spec.body,proportions={shoulders:b.shoulders,hips:b.hips,torso:b.torso,arms:b.arms,legs:b.legs},m=humanoidMeasurements(proportions),heightScale=b.height/(m.headHeight+characterHeadTopOffset(spec.hairStyle));
+ const spec=characterSpec(input),b=spec.body,proportions={shoulders:b.shoulders,hips:b.hips,torso:b.torso,arms:b.arms,legs:b.legs},m=humanoidMeasurements(proportions);
+ const unitWalker:WalkerSpec={id:spec.id,root:[0,0,0],speed:0,proportions,stance:'neutral'},heightScale=b.height/(sampleWalker(unitWalker,0).joints.head[1]+characterHeadTopOffset(spec.hairStyle));
  const entities:EntitySpec[]=[],bindings:HumanoidBinding[]=[],skin=color(spec.colors.skin),top=color(spec.colors.top),bottom=color(spec.colors.bottom),shoes=color(spec.colors.shoes),scarf=color(spec.colors.scarf),stitch=shade(top,.73),hardware:MaterialSpec={color:[.32,.30,.25,1],roughness:.52,metalness:.45};
- const width=.85+b.build*.30,depth=.82+b.build*.47,coat=spec.outfit.top,torso=m.shoulderOffset,hem=coat==='parka'?-.19:coat==='jacket'?-.062:-.028,extra=coat==='parka'?1.09:coat==='jacket'?1.03:1;
+ const width=.85+b.build*.30,depth=.82+b.build*.47,coat=spec.outfit.top,torso=m.shoulderOffset,hem=coat==='parka'?-.17:coat==='jacket'?-.062:-.028,extra=coat==='parka'?1.09:coat==='jacket'?1.03:1;
  // Shoulder span is skeletal: changing soft-tissue build must not pull the
  // torso away from its sleeve sockets at the widest shoulder setting.
  const chestWidth=(Math.max(.16,m.shoulderHalfWidth)+.012+(b.build-.5)*.028)*extra,hipWidth=m.hipHalfWidth+.077*width,bodyDepth=.128*depth*extra,front=.012;
@@ -140,24 +148,48 @@ export function compileCharacter(input:CharacterSpec|unknown=DEFAULT_CHARACTER_S
  const add=(key:string,joint:HumanoidJoint,mesh:Mesh,material:MaterialSpec,options:Omit<HumanoidBinding,'entity'|'joint'>={})=>{
   const id=`${spec.id}:${key}`;entities.push({id,mesh,material,renderOnly:true});bindings.push({entity:id,joint,...options});
  };
- const bodyRings:ClothRing[]=[
-  [hem,.93*bodyDepth,hipWidth*extra,front],
-  [hem+.025,bodyDepth,hipWidth*extra*1.015,front],
-  [Math.max(.045,hem+.085),bodyDepth*.96,hipWidth*extra*.97,front],
+ const legWidth=.87+b.build*.23;
+ const thigh=(name:string)=>loft([[-.57,.084*depth,.082*legWidth],[-.43,.097*depth,.095*legWidth],[-.15,.092*depth,.094*legWidth],[.24,.080*depth,.081*legWidth],[.48,.073*depth,.074*legWidth],[.56,.069*depth,.071*legWidth]],seed(name+'-thigh'),.0024,.88,36,3);
+ const thighMeshes={left:thigh('left'),right:thigh('right')};
+ // Long outerwear needs room for two thighs and their forward swing. A flared,
+ // flatter lower cut keeps the full hem outside the trousers in motion.
+ const topRoundness=coat==='parka'?.70:.85;
+ let lowerRings:ClothRing[]=[[hem,.98*bodyDepth,hipWidth*extra,front],[hem+.025,bodyDepth,hipWidth*extra*1.005,front],[Math.max(.045,hem+.085),bodyDepth*.96,hipWidth*extra*.97,front]];
+ if(coat==='parka'){
+  const heights=[hem,hem+.035,-.070,.015,.060],points:Vec3[]=[],rig:HumanoidBinding[]=[{entity:'left',joint:'leftHip',boneTo:'leftKnee'},{entity:'right',joint:'rightHip',boneTo:'rightKnee'}];
+  // Fit only the lower cut to the exact generated trouser surface, across the
+  // editor's complete gait. Upper torso/shoulders keep their authored shape.
+  for(let frame=-1;frame<=64;frame++){
+   const pose=sampleWalker({...unitWalker,speed:frame<0?0:.62,period:1.3},frame<0?0:frame*1.3/64);
+   for(const transform of bindHumanoid(pose,rig)){
+    const mesh=thighMeshes[transform.entity as 'left'|'right'],matrix=compose(transform.position,transform.rotation,transform.scale),p=mesh.positions;
+    for(let i=0;i<p.length;i+=3){const y=matrix[1]!*p[i]!+matrix[5]!*p[i+1]!+matrix[9]!*p[i+2]!+matrix[13]!-pose.joints.pelvis[1];if(y<hem-.035||y>.12)continue;points.push([matrix[0]!*p[i]!+matrix[4]!*p[i+1]!+matrix[8]!*p[i+2]!+matrix[12]!-pose.joints.pelvis[0],y,matrix[2]!*p[i]!+matrix[6]!*p[i+1]!+matrix[10]!*p[i+2]!+matrix[14]!-pose.joints.pelvis[2]]);}
+   }
+  }
+  lowerRings=heights.map((y,index)=>{
+   const low=heights[Math.max(0,index-1)]!-.010,high=heights[Math.min(heights.length-1,index+1)]!+.012,section=points.filter(p=>p[1]>=low&&p[1]<=high);
+   let radiusZ=Math.max(hipWidth*extra,m.hipHalfWidth+.105*legWidth+.025);for(const p of section)radiusZ=Math.max(radiusZ,Math.abs(p[2])+.022);
+   let back=bodyDepth-front+.012,ahead=bodyDepth+front+.010;
+   // Solve both sides of the rounded cross-section, including sewing ease.
+   // The measured point's lateral coordinate limits how much depth remains.
+   for(let pass=0;pass<3;pass++)for(const p of section){const f=(1-(Math.abs(p[2])/radiusZ)**(2/topRoundness))**(topRoundness/2);ahead=Math.max(ahead,(2*(p[0]+.009)+back*(1-f))/(1+f));back=Math.max(back,(-2*(p[0]-.009)+ahead*(1-f))/(1+f));}
+   return[y,(ahead+back)/2,radiusZ,(ahead-back)/2] as ClothRing;
+  });
+ }
+ const bodyRings:ClothRing[]=[...lowerRings,
   [torso*.47,bodyDepth*.94,chestWidth*.93,front],
   [torso*.77,bodyDepth*1.02,chestWidth,front],
   [torso*.94,bodyDepth*.95,chestWidth*.98,front],
   [torso+.022,bodyDepth*.72,chestWidth*.80,front],
   [m.neckOffset-.022,.061*depth,.078,front],
  ];
- add('top','pelvis',loft(bodyRings,seed('top'),coat==='sweater'?.0030:.0038,.85,48,4),fabric(top));
+ const topMesh=loft(bodyRings,seed('top'),coat==='sweater'?.0030:.0038,topRoundness,48,4);
+ add('top','pelvis',topMesh,fabric(top));
  add('waist','pelvis',loft([[-.13,.085*depth,hipWidth*.88],[-.05,.119*depth,hipWidth],[.074,.109*depth,hipWidth*.95],[.108,.103*depth,hipWidth*.93]],seed('waist'),.002),fabric(bottom));
  add('neck','neck',loft([[-.060,.043,.049],[-.035,.052,.052],[.070,.048,.050],[.10,.044,.048]],seed('neck'),0,1,40,3),{color:skin,roughness:.79});
- const torsoFront=(y:number)=>{
-  let i=0;while(i<bodyRings.length-2&&y>bodyRings[i+1]![0])i++;
-  const a=bodyRings[i]!,c=bodyRings[i+1]!,t=Math.max(0,Math.min(1,(y-a[0])/(c[0]-a[0])));return front+a[1]+(c[1]-a[1])*t+.005;
- };
- const hemMesh=loft([[hem-.002,bodyDepth*.935,hipWidth*extra*1.005,front],[hem+.010,bodyDepth*1.003,hipWidth*extra*1.016,front],[hem+.026,bodyDepth*1.009,hipWidth*extra*1.017,front]],seed('hem'),.0015,.85,40,2);
+ const torsoFront=(y:number)=>frontSurface(topMesh,y,0)+.0025;
+ const lower=bodyRings[0]!,nextLower=bodyRings[1]!,lowerCentre=lower[3]??0;
+ const hemMesh=loft([[hem-.002,lower[1]+.001,lower[2]+.001,lowerCentre],[hem+.008,lower[1]+.002,lower[2]+.002,lowerCentre],[hem+.016,lower[1]+(nextLower[1]-lower[1])*.45+.002,lower[2]+.002,lowerCentre+((nextLower[3]??0)-lowerCentre)*.45]],seed('hem'),.0012,topRoundness,48,2);
  add('top-hem','pelvis',hemMesh,fabric(shade(top,.82)));
  if(coat!=='sweater'){
   const zipBottom=hem+.043,zipTop=m.neckOffset-.025,steps=18,zip:Vec3[]=[],zipEdges:Mesh[]=[],teeth:Mesh[]=[];
@@ -188,15 +220,15 @@ export function compileCharacter(input:CharacterSpec|unknown=DEFAULT_CHARACTER_S
  }
  for(const side of [-1,1] as const){
   const name=side<0?'left':'right',joint=(suffix:'Hip'|'Knee'|'Ankle'|'Foot'|'Shoulder'|'Elbow'|'Hand')=>`${name}${suffix}` as HumanoidJoint;
-  const armWidth=(.88+b.build*.24)*extra,legWidth=.87+b.build*.23;
+  const armWidth=(.88+b.build*.24)*extra;
   // A segment is authored along unit +Y, proximal at -.5, distal at +.5.
   // The binding stretches only its length to the actual IK bone.
   const upperBinding={boneTo:joint('Elbow')},lowerBinding={boneTo:joint('Hand')},thighBinding={boneTo:joint('Knee')},shinBinding={boneTo:joint('Ankle')};
-  add(`${name}-upper-sleeve`,joint('Shoulder'),loft([[-.60,.048*armWidth,.052*armWidth],[-.51,.075*armWidth,.082*armWidth],[-.38,.078*armWidth,.081*armWidth],[.08,.073*armWidth,.076*armWidth],[.42,.064*armWidth,.067*armWidth],[.56,.060*armWidth,.064*armWidth]],seed(name+'-upper-sleeve'),.0028,.9,36,3),fabric(top),upperBinding);
+  add(`${name}-upper-sleeve`,joint('Shoulder'),loft([[-.60,.034*armWidth,.038*armWidth],[-.53,.055*armWidth,.060*armWidth],[-.38,.070*armWidth,.073*armWidth],[.08,.070*armWidth,.073*armWidth],[.42,.063*armWidth,.065*armWidth],[.56,.060*armWidth,.063*armWidth]],seed(name+'-upper-sleeve'),.0024,.9,36,3),fabric(top),upperBinding);
   add(`${name}-lower-sleeve`,joint('Elbow'),loft([[-.56,.060*armWidth,.064*armWidth],[-.34,.064*armWidth,.067*armWidth],[.02,.058*armWidth,.061*armWidth],[.34,.048*armWidth,.051*armWidth],[.49,.044*armWidth,.046*armWidth],[.52,.042*armWidth,.044*armWidth]],seed(name+'-lower-sleeve'),.0028,.9,36,3),fabric(top),lowerBinding);
   add(`${name}-sleeve-cuff`,joint('Elbow'),loft([[.39,.0485*armWidth,.0515*armWidth],[.45,.047*armWidth,.049*armWidth],[.54,.0425*armWidth,.0445*armWidth]],seed(name+'-cuff'),.0012,.89,28,2),fabric(shade(top,.80)),lowerBinding);
-  add(`${name}-sleeve-stitch`,joint('Shoulder'),cord([[0,-.49,side*.083*armWidth],[.006,-.33,side*.083*armWidth],[.004,.10,side*.078*armWidth],[0,.42,side*.069*armWidth]],.0012),fabric(stitch),upperBinding);
-  add(`${name}-thigh`,joint('Hip'),loft([[-.57,.084*depth,.082*legWidth],[-.43,.097*depth,.095*legWidth],[-.15,.092*depth,.094*legWidth],[.24,.080*depth,.081*legWidth],[.48,.073*depth,.074*legWidth],[.56,.069*depth,.071*legWidth]],seed(name+'-thigh'),.0024,.88,36,3),fabric(bottom),thighBinding);
+  add(`${name}-sleeve-stitch`,joint('Shoulder'),cord([[0,-.49,side*.065*armWidth],[.006,-.33,side*.075*armWidth],[.004,.10,side*.075*armWidth],[0,.42,side*.067*armWidth]],.0012),fabric(stitch),upperBinding);
+  add(`${name}-thigh`,joint('Hip'),thighMeshes[name],fabric(bottom),thighBinding);
   add(`${name}-shin`,joint('Knee'),loft([[-.57,.072*depth,.073*legWidth],[-.43,.076*depth,.074*legWidth],[-.10,.069*depth,.068*legWidth],[.16,.062*depth,.061*legWidth],[.43,.058*depth,.058*legWidth],[.56,.059*depth,.059*legWidth]],seed(name+'-shin'),.0028,.86,36,3),fabric(bottom),shinBinding);
   add(`${name}-denim-seam`,joint('Hip'),cord([[0,-.43,side*.096*legWidth],[.002,-.1,side*.094*legWidth],[0,.24,side*.083*legWidth],[.002,.49,side*.075*legWidth]],.0011),fabric(shade(bottom,1.28)),thighBinding);
   add(`${name}-lower-seam`,joint('Knee'),cord([[0,-.49,side*.075*legWidth],[.002,-.1,side*.070*legWidth],[0,.21,side*.063*legWidth],[.002,.49,side*.061*legWidth]],.0011),fabric(shade(bottom,1.23)),shinBinding);
@@ -206,11 +238,12 @@ export function compileCharacter(input:CharacterSpec|unknown=DEFAULT_CHARACTER_S
    add(`${name}-cargo-flap`,joint('Hip'),moved(loft([[-.015,.043,.012],[.085,.042,.013]],seed(name+'-flap'),.0003,.50,24,2),[.004,-.18,side*.098*legWidth]),fabric(shade(bottom,.84)),thighBinding);
   }
   if(coat!=='sweater'){
-   const y=coat==='parka'?.035:.14,z=side*hipWidth*.60,x=torsoFront(y)-.010;
-   add(`${name}-top-pocket`,'pelvis',moved(panel(.136,.006,.103,seed(name+'-pocket')),[x,y,z]),fabric(shade(top,.94)));
-   add(`${name}-top-pocket-flap`,'pelvis',moved(panel(.034,.008,.11,seed(name+'-flap')),[x+.003,y+.061,z]),fabric(shade(top,.87)));
-   add(`${name}-pocket-stitch`,'pelvis',cord([[x+.008,y+.063,z-side*.051],[x+.008,y-.057,z-side*.049],[x+.008,y-.065,z],[x+.008,y-.057,z+side*.049],[x+.008,y+.063,z+side*.051]],.001),fabric(stitch));
-   if(coat==='jacket')add(`${name}-chest-pocket`,'chest',moved(panel(.094,.004,.080,seed(name+'-chest-pocket')),[bodyDepth+.016,-.035,side*chestWidth*.52]),fabric(shade(top,.90)));
+   const y=coat==='parka'?.035:.14,z=side*hipWidth*.60;
+   add(`${name}-top-pocket`,'pelvis',surfaced(panel(.136,.0030,.103,seed(name+'-pocket')),topMesh,[.0010,y,z]),fabric(shade(top,.98)));
+   add(`${name}-top-pocket-flap`,'pelvis',surfaced(panel(.028,.0040,.11,seed(name+'-flap')),topMesh,[.0015,y+.061,z]),fabric(shade(top,.94)));
+   const stitched=(y:number,z:number):Vec3=>[frontSurface(topMesh,y,z)+.0045,y,z];
+   add(`${name}-pocket-stitch`,'pelvis',cord([stitched(y+.059,z-side*.050),stitched(y-.057,z-side*.048),stitched(y-.065,z),stitched(y-.057,z+side*.048),stitched(y+.059,z+side*.050)],.0008),fabric(stitch));
+   if(coat==='jacket')add(`${name}-chest-pocket`,'pelvis',surfaced(panel(.094,.003,.080,seed(name+'-chest-pocket')),topMesh,[.001,m.chestOffset-.035,side*chestWidth*.52]),fabric(shade(top,.95)));
   }
   // The palm and four curved digits are one smooth surfaced mesh. Their local
   // wrist overlaps the cuff; no ball joint or mitten proxy is exposed.
@@ -240,7 +273,7 @@ export function compileCharacter(input:CharacterSpec|unknown=DEFAULT_CHARACTER_S
  }
  const head=createCharacterHead({id:spec.id,seed:spec.seed,skin,hair:color(spec.colors.hair),expression:spec.expression,hairStyle:spec.hairStyle});
  entities.push(...head.entities);bindings.push(...head.bindings);
- const walker:WalkerSpec={id:spec.id,root:[0,0,0],heading:0,speed:0,period:1.3,heightScale,proportions,bindings};
+ const walker:WalkerSpec={id:spec.id,root:[0,0,0],heading:0,speed:0,period:1.3,heightScale,proportions,bindings,stance:'neutral'};
  const transforms=new Map(bindHumanoid(sampleWalker(walker,0),bindings).map(transform=>[transform.entity,transform]));
  const initialized=entities.map(entity=>{const transform=transforms.get(entity.id);if(!transform)throw new Error(`Unbound character part ${entity.id}`);return{...entity,position:transform.position,rotation:transform.rotation,scale:transform.scale,renderOnly:true};});
  const triangles=initialized.reduce((total,entity)=>{const mesh=entity.renderMesh??entity.mesh;return total+(mesh?mesh.kind==='triangle-mesh'?mesh.indices.length/3:primitiveMesh(mesh).indices.length/3:0);},0);

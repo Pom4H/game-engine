@@ -119,6 +119,41 @@ test('hands follow forearm orientation at the wrist and stay inside their cuffs 
  }
 });
 
+test('parka encloses upper trousers through the complete walk cycle and keeps a finished hem',()=>{
+ const slices=mesh=>{
+  const p=mesh.positions,triangles=[];
+  for(let i=0;i<mesh.indices.length;i+=3){
+   const a=mesh.indices[i]*3,b=mesh.indices[i+1]*3,c=mesh.indices[i+2]*3,by=p[b+1]-p[a+1],bz=p[b+2]-p[a+2],cy=p[c+1]-p[a+1],cz=p[c+2]-p[a+2],det=by*cz-bz*cy;
+   if(Math.abs(det)<1e-12)continue;
+   triangles.push({x:p[a],y:p[a+1],z:p[a+2],bx:p[b]-p[a],cx:p[c]-p[a],by,bz,cy,cz,det,ymin:Math.min(p[a+1],p[b+1],p[c+1]),ymax:Math.max(p[a+1],p[b+1],p[c+1]),zmin:Math.min(p[a+2],p[b+2],p[c+2]),zmax:Math.max(p[a+2],p[b+2],p[c+2])});
+  }
+  return(y,z)=>{let lo=Infinity,hi=-Infinity;
+   for(const t of triangles){
+    if(y<t.ymin-1e-7||y>t.ymax+1e-7||z<t.zmin-1e-7||z>t.zmax+1e-7)continue;
+    const dy=y-t.y,dz=z-t.z,u=(dy*t.cz-dz*t.cy)/t.det,v=(t.by*dz-t.bz*dy)/t.det;
+    if(u< -1e-7||v< -1e-7||u+v>1+1e-7)continue;
+    const x=t.x+u*t.bx+v*t.cx;lo=Math.min(lo,x);hi=Math.max(hi,x);
+   }return[lo,hi];
+  };
+ };
+ for(const recipe of [{},{seed:931,body:{hips:1.3,legs:.7,build:1},outfit:{bottom:'cargo'}},{seed:91,body:{hips:.7,legs:1.3,build:0}}]){
+  const compiled=compileCharacter(recipe),top=compiled.entities.find(e=>e.id.endsWith(':top')).mesh,bounds=slices(top),hem=Math.min(...top.positions.filter((_,i)=>i%3===1)),trousers=compiled.entities.filter(e=>/:(waist|(?:left|right)-(thigh|denim-seam|cargo-pocket|cargo-flap))$/.test(e.id));
+  const moments=[['idle',0],['reach',0],['t-pose',0],['walk',.34],['walk',.65],['walk',1],...Array.from({length:25},(_,i)=>['walk',i*1.3/24])];
+  for(const [mode,time] of moments){
+   const pose=sampleCharacterPose(compiled.walker,mode,time),transforms=new Map(bindHumanoid(pose,compiled.walker.bindings).map(t=>[t.entity,t]));let covered=0;
+   for(const entity of trousers){const tr=transforms.get(entity.id),m=compose(tr.position,tr.rotation,tr.scale),p=entity.mesh.positions;
+    for(let i=0;i<p.length;i+=3){
+     const point=[0,1,2].map(k=>(m[k]*p[i]+m[k+4]*p[i+1]+m[k+8]*p[i+2]+m[k+12]-pose.joints.pelvis[k])/compiled.walker.heightScale);
+     if(point[1]<hem+.004||point[1]>.13)continue;
+     const [lo,hi]=bounds(point[1],point[2]);covered++;
+     assert.ok(point[0]>=lo+.0005&&point[0]<=hi-.0005,`${entity.id} ${mode} at ${time.toFixed(3)}: trousers ${point} must be inside coat [${lo},${hi}]`);
+    }
+   }
+   assert.ok(covered>300,'the check must include real upper trouser surfaces');
+  }
+ }
+});
+
 test('exported scene recipe rehydrates into the existing animation system without a second update loop',()=>{
  const compiled=compileCharacter(CHARACTER_PRESETS[1].spec),walker={...compiled.walker,root:[3,.25,-2],speed:.75,heading:.55};
  const exported=JSON.parse(JSON.stringify({version:1,seed:compiled.spec.seed,ground:.25,gravity:[0,-9.81,0],entities:compiled.entities,animation:{walkers:[walker]}}));

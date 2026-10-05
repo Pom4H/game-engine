@@ -23,9 +23,10 @@ export interface HumanoidBinding {
 export interface HumanoidProportions {
  readonly shoulders?:number;readonly hips?:number;readonly torso?:number;readonly arms?:number;readonly legs?:number;
 }
-/** Shared rest-rig dimensions in metres. Heights are measured from the sole's
- * ground plane; offsets are measured from the pelvis. Head size is independent
- * of torso/leg proportions, so changing the body only relocates the face. */
+/** Shared rest-rig dimensions in metres. Absolute heights describe the original
+ * rest pose above the sole's ground plane; offsets are measured from the pelvis.
+ * Authored stances derive pelvis height from limb lengths and ground contacts.
+ * Head size is independent of torso/leg proportions. */
 export interface HumanoidMeasurements {
  readonly upperArm:number;readonly forearm:number;readonly thigh:number;readonly shin:number;
  readonly hipHalfWidth:number;readonly shoulderHalfWidth:number;
@@ -54,6 +55,9 @@ export function humanoidMeasurements(proportions?:HumanoidProportions,heightScal
 export interface WalkerSpec {
  readonly id:string;readonly root:Vec3;readonly heading?:number;readonly speed:number;
  readonly period?:number;readonly heightScale?:number;readonly proportions?:HumanoidProportions;readonly bindings?:readonly HumanoidBinding[];
+ /** Opt-in relaxed standing pose at zero speed. The existing gait and callers
+  * without a stance retain their original poses. */
+ readonly stance?:'neutral';
 }
 export interface HumanoidPose {
  readonly position:Vec3;readonly heading:number;readonly heightScale:number;
@@ -84,6 +88,7 @@ export function solveTwoBone(root:Vec3,target:Vec3,upper:number,lower:number,pol
 function checkedWalker(spec:WalkerSpec):HumanoidMeasurements {
  if(!spec.id||spec.id.length>160)throw new TypeError('Walker requires a stable id');finiteVec3(spec.root,'Walker root');
  if(!Number.isFinite(spec.speed)||spec.speed<0||spec.speed>12||!Number.isFinite(spec.heading??0)||!Number.isFinite(spec.period??1.3)||(spec.period??1.3)<.25||(spec.period??1.3)>4||!Number.isFinite(spec.heightScale??1)||(spec.heightScale??1)<.25||(spec.heightScale??1)>3)throw new RangeError('Invalid locomotion dimensions or timing');
+ if(spec.stance!==undefined&&spec.stance!=='neutral')throw new TypeError('Unknown walker stance');
  for(const binding of spec.bindings??[]){if(!binding.entity)throw new TypeError('Rig binding requires an entity');if(binding.boneTo!==undefined&&binding.orientFrom!==undefined)throw new TypeError('Rig binding cannot combine boneTo and orientFrom');for(const v of [binding.offset,binding.scale,binding.rotation])if(v)finiteVec3(v,'Rig transform');if(binding.scale?.some(v=>v<=0))throw new RangeError('Rig scale must be positive');}
  return humanoidMeasurements(spec.proportions,spec.heightScale??1);
 }
@@ -114,13 +119,21 @@ export function sampleWalker(spec:WalkerSpec,time:number,terrain?:GroundSampler,
   feet.push({id:spec.id+':'+name,position:foot,grounded,yaw:heading+side*.035});
   footLocal.push([x-travel,y,side*dimensions.footHalfSpacing]);pitch[name]=-.14*Math.sin(swing*Math.PI);
  }
- const terrainRoot=groundAt(travel,0);let hipY=terrainRoot+dimensions.pelvisGaitBaseHeight+.008*h*Math.cos(phase*4*Math.PI);
- const upper=dimensions.thigh,lower=dimensions.shin,reach=upper+lower-.005*h;
+ const terrainRoot=groundAt(travel,0),neutral=spec.stance==='neutral'&&spec.speed===0;
+ // Authored relaxed standing uses an 8-degree knee bend. The law of cosines
+ // gives the reachable hip-to-ankle distance from the actual segment lengths;
+ // ground contacts then determine pelvis height, including lateral stance.
+ const upper=dimensions.thigh,lower=dimensions.shin,reach=neutral?Math.sqrt(upper*upper+lower*lower+2*upper*lower*Math.cos(8*Math.PI/180)):upper+lower-.005*h;
+ let hipY=neutral?footLocal[0]![1]+dimensions.ankleHeight+reach:terrainRoot+dimensions.pelvisGaitBaseHeight+.008*h*Math.cos(phase*4*Math.PI);
  for(const foot of footLocal){const horizontal=Math.hypot(foot[0],Math.abs(foot[2])-dimensions.hipHalfWidth);hipY=Math.min(hipY,foot[1]+dimensions.ankleHeight+Math.sqrt(Math.max(.01*h*h,reach*reach-horizontal*horizontal)));}
  const local:Record<HumanoidJoint,Vec3>={root:[0,terrainRoot,0],pelvis:[0,hipY,0],chest:[.009*h,hipY+dimensions.chestOffset,0],neck:[.022*h,hipY+dimensions.neckOffset,0],head:[.026*h,hipY+dimensions.headOffset,0],leftHip:[0,0,0],rightHip:[0,0,0],leftKnee:[0,0,0],rightKnee:[0,0,0],leftAnkle:[0,0,0],rightAnkle:[0,0,0],leftFoot:[0,0,0],rightFoot:[0,0,0],leftShoulder:[0,0,0],rightShoulder:[0,0,0],leftElbow:[0,0,0],rightElbow:[0,0,0],leftHand:[0,0,0],rightHand:[0,0,0]};
+ // Hands hang slightly forward and outside the shoulders. Their vertical
+ // position follows a 12-degree elbow bend rather than shortening the arm.
+ const handForward=.018*h,handLateral=.05*h,handDrop=neutral?Math.sqrt(dimensions.upperArm**2+dimensions.forearm**2+2*dimensions.upperArm*dimensions.forearm*Math.cos(12*Math.PI/180)-handForward**2-handLateral**2):0;
  for(let i=0;i<2;i++){
   const side=i===0?-1:1,name=i===0?'left':'right',f=footLocal[i]!,hip:Vec3=[0,hipY,side*dimensions.hipHalfWidth],ankle:Vec3=[f[0],f[1]+dimensions.ankleHeight,f[2]],leg=solveTwoBone(hip,ankle,upper,lower,[1,0,0]);
-  const shoulder:Vec3=[.01*h,hipY+dimensions.shoulderOffset,side*dimensions.shoulderHalfWidth],hand:Vec3=[-.028*h-side*Math.sin(phase*2*Math.PI)*.125*h*(spec.proportions?.arms??1),hipY+dimensions.handRestOffset,side*dimensions.handHalfSpacing],arm=solveTwoBone(shoulder,hand,dimensions.upperArm,dimensions.forearm,[-1,0,0]);
+  const shoulder:Vec3=[.01*h,hipY+dimensions.shoulderOffset,side*dimensions.shoulderHalfWidth];
+  const hand:Vec3=neutral?[shoulder[0]+handForward,shoulder[1]-handDrop,shoulder[2]+side*handLateral]:[-.028*h-side*Math.sin(phase*2*Math.PI)*.125*h*(spec.proportions?.arms??1),hipY+dimensions.handRestOffset,side*dimensions.handHalfSpacing],arm=solveTwoBone(shoulder,hand,dimensions.upperArm,dimensions.forearm,[-1,0,0]);
   local[`${name}Hip`]=hip;local[`${name}Knee`]=leg.joint;local[`${name}Ankle`]=leg.end;local[`${name}Foot`]=f;local[`${name}Shoulder`]=shoulder;local[`${name}Elbow`]=arm.joint;local[`${name}Hand`]=arm.end;
  }
  const joints={} as Record<HumanoidJoint,Vec3>;for(const key of Object.keys(local) as HumanoidJoint[]){const point=local[key];joints[key]=world([point[0],point[1]-base[1],point[2]],base,heading);}

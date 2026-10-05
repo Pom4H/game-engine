@@ -81,7 +81,11 @@ export class CharacterStudio {
     const target=face?[this.pose.joints.head[0]+.016,this.pose.joints.head[1]+.04*(this.actor.walker.heightScale??1),this.pose.joints.head[2]]:[0,h*.51,0];
     const bodyWidth=this.poseMode==='t-pose'?2*(m.shoulderHalfWidth+m.upperArm+m.forearm)+.18:Math.max(.80,2*m.shoulderHalfWidth+.25);
     const aspect=this.canvas.width/this.canvas.height,fov=face?30:32,visibleHeight=face?.50*(this.actor.walker.heightScale??1):h;
-    const distance=clamp(Math.max(visibleHeight*.65,face?.28:bodyWidth*.65/aspect)/Math.tan(fov*Math.PI/360)*this.zoom,.65,14.5);
+    // Narrow stages reserve vertical room for the title and camera controls.
+    // Fit the complete body inside that space, including the boots and hair.
+    const viewportWidth=this.canvas.getBoundingClientRect?.().width??this.canvas.width;
+    const verticalFit=!face&&viewportWidth<=600?.79:.65;
+    const distance=clamp(Math.max(visibleHeight*verticalFit,face?.28:bodyWidth*.65/aspect)/Math.tan(fov*Math.PI/360)*this.zoom,.65,14.5);
     this.scene.setCamera({position:[target[0]+Math.cos(this.yaw)*Math.cos(this.pitch)*distance,target[1]+Math.sin(this.pitch)*distance,target[2]+Math.sin(this.yaw)*Math.cos(this.pitch)*distance],target,fov,aperture:0});
   }
   resize(){

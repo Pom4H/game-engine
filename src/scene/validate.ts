@@ -200,7 +200,7 @@ function validateBindings(scene:Record<string,unknown>,entities:readonly EntityS
     const validator=new AnimationSystem();
     const claim=(id:string,path:string)=>{const entity=reference(id,path),body=entity.body;if(body&&body.motion!=='kinematic'&&(body.mass??(body.velocity||body.angularVelocity?1:0))>0)throw new TypeError(`${path} cannot bind a dynamic physics body`);if(claimed.has(id))throw new TypeError(`${path} binds entity ${id} more than once`);claimed.add(id);};
     for(const [i,raw] of walkers.entries()){
-      const path=`animation.walkers[${i}]`,w=object(raw,path);stableId(w.id,`${path}.id`,160);vector(w.root,3,`${path}.root`);number(w.speed,`${path}.speed`,0,12);optionalNumber(w,'heading',path);optionalNumber(w,'period',path,.25,4);optionalNumber(w,'heightScale',path,.25,3);
+      const path=`animation.walkers[${i}]`,w=object(raw,path);stableId(w.id,`${path}.id`,160);vector(w.root,3,`${path}.root`);number(w.speed,`${path}.speed`,0,12);optionalNumber(w,'heading',path);optionalNumber(w,'period',path,.25,4);optionalNumber(w,'heightScale',path,.25,3);choice(w.stance,['neutral'],`${path}.stance`);
       for(const [j,value] of (w.bindings===undefined?[]:boundedArray(w.bindings,`${path}.bindings`,4096)).entries()){
         const p=`${path}.bindings[${j}]`,b=object(value,p);claim(stableId(b.entity,`${p}.entity`),`${p}.entity`);
         if(!HUMANOID_JOINTS.includes(String(b.joint)))throw new TypeError(`${p}.joint is unknown`);

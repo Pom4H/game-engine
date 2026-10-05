@@ -147,7 +147,7 @@ export async function captureCharacterCreator(){
   await mkdir(output,{recursive:true});
   for(const name of await readdir(output))if(/^character-creator-.*\.(png|json)$/.test(name))await rm(join(output,name));
   const evidencePath=join(output,'character-creator-evidence.json');
-  let profile,downloads,server,child,stderr='',socket,sequence=0,closed=false,lastFrame=0;
+  let profile,downloads,server,child,stderr='',socket,sequence=0,closed=false,lastFrame=0,documentId='served-editor';
   const pending=new Map();
   const cleanup=async()=>{
     if(closed)return;closed=true;
@@ -185,6 +185,11 @@ export async function captureCharacterCreator(){
       if(message.method==='Runtime.exceptionThrown')evidence.browserErrors.push({type:'exception',details:message.params.exceptionDetails});
       if(message.method==='Runtime.consoleAPICalled'&&message.params.type==='error')evidence.browserErrors.push({type:'console',args:message.params.args.map(arg=>arg.value??arg.description??arg.type)});
       if(message.method==='Log.entryAdded'&&message.params.entry.level==='error')evidence.browserErrors.push({type:'log',entry:message.params.entry});
+      if(message.method==='Network.requestWillBeSent'&&documentId==='standalone-file'){
+        const {request,type}=message.params;
+        if(/^https?:/i.test(request.url))evidence.standalone.httpRequests.push({url:request.url,method:request.method,type});
+        if(type==='Document'&&request.url===evidence.standalone.href)evidence.standalone.documentRequestObserved=true;
+      }
       const request=pending.get(message.id);if(!request)return;pending.delete(message.id);clearTimeout(request.timer);
       message.error?request.reject(new Error(message.error.message)):request.resolve(message.result);
     });
@@ -201,20 +206,26 @@ export async function captureCharacterCreator(){
       const fatal=await evaluate('window.__CHARACTER_ERROR__??null');check(!fatal,'Character editor failed: '+fatal);
       check(evidence.browserErrors.length===0,'Browser errors: '+JSON.stringify(evidence.browserErrors));
     };
-    for(const method of ['Runtime.enable','Page.enable','Log.enable'])await send(method);
+    const navigateReady=async(url,label)=>{
+      const navigation=await send('Page.navigate',{url});check(!navigation.errorText,label+' navigation failed: '+navigation.errorText);
+      for(let i=0;i<600;i++){
+        let state;
+        try{state=await evaluate('({href:location.href,ready:window.__CHARACTER_READY__===true,error:window.__CHARACTER_ERROR__??null})');}
+        catch(error){if(!/Execution context was destroyed|Cannot find context with specified id|Cannot find default execution context/.test(error.message))throw error;await delay(100);continue;}
+        // A previous document can remain observable briefly during navigation.
+        // Its READY flag must never satisfy the new document's initialization.
+        if(state.href===url){check(!state.error,label+' initialization failed: '+state.error);if(state.ready)return;}
+        await delay(100);
+      }
+      throw new Error(label+' initialization timed out: '+stderr);
+    };
+    for(const method of ['Runtime.enable','Page.enable','Log.enable','Network.enable'])await send(method);
     await send('Page.addScriptToEvaluateOnNewDocument',{source:gpuInstrumentation});
     await send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloads});
     await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
     const address=server.address();check(address&&typeof address==='object','Character server did not bind a TCP port');
     const pageURL=`http://127.0.0.1:${address.port}/?capture=1&captureToken=${encodeURIComponent(token)}`;
-    await send('Page.navigate',{url:pageURL});
-    let ready=false;
-    for(let i=0;i<600;i++){
-      const state=await evaluate('({ready:window.__CHARACTER_READY__===true,error:window.__CHARACTER_ERROR__??null})');
-      check(!state.error,'Character editor initialization failed: '+state.error);
-      if(state.ready){ready=true;break;}await delay(100);
-    }
-    check(ready,'Character editor initialization timed out: '+stderr);
+    await navigateReady(pageURL,'Served character editor');
     await evaluate('window.characterCreator.settle()');
     const initial=await evaluate('window.characterCreator.inspect()');
     check(await evaluate('new URL(location.href).searchParams.get("captureToken")')===token,'Capture run token was lost during navigation');
@@ -231,8 +242,10 @@ export async function captureCharacterCreator(){
     const capture=async(name,{canvas=false}={})=>{
       await evaluate('window.characterCreator.settle()');await assertBrowser();
       const inspection=await evaluate('window.characterCreator.inspect()');lastFrame=validateInspection(inspection,lastFrame);
-      evidence.adapters=await evaluate('window.__CHARACTER_CAPTURE_GPU__');
-      for(const adapter of evidence.adapters.filter(item=>item.requestedDevices>0))validateAdapter(adapter,{allowSoftware});
+      const adapters=await evaluate('window.__CHARACTER_CAPTURE_GPU__');
+      check(Array.isArray(adapters)&&adapters.some(adapter=>adapter.requestedDevices>0),'Current document created no observable WebGPU device');
+      if(documentId==='standalone-file')evidence.standalone.adapters=adapters;else evidence.adapters=adapters;
+      for(const adapter of adapters.filter(item=>item.requestedDevices>0))validateAdapter(adapter,{allowSoftware});
       const dimensions=await evaluate('({width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth})');
       check(dimensions.scrollWidth<=dimensions.width+1,`Horizontal page overflow in ${name}: ${JSON.stringify(dimensions)}`);
       let clip;
@@ -246,7 +259,7 @@ export async function captureCharacterCreator(){
       check(png.sampledColours>=24&&png.luminanceDeviation>=4,`Suspiciously empty screenshot ${name}: ${JSON.stringify(png)}`);
       const filename=`character-creator-${name}.png`;await writeFile(join(output,filename),bytes);
       const spec=await evaluate('window.characterCreator.getSpec()');
-      const record={name,file:filename,capturedAt:new Date().toISOString(),...png,viewport:dimensions,clip:clip??null,renderedFrames:lastFrame,revision:inspection.revision,pose:inspection.pose,camera:inspection.camera,metrics:inspection.metrics,renderer:inspection.renderer,spec,specSha256:sha256(JSON.stringify(ordered(spec)))};
+      const record={name,documentId,file:filename,capturedAt:new Date().toISOString(),...png,viewport:dimensions,clip:clip??null,renderedFrames:lastFrame,revision:inspection.revision,pose:inspection.pose,camera:inspection.camera,metrics:inspection.metrics,renderer:inspection.renderer,spec,specSha256:sha256(JSON.stringify(ordered(spec)))};
       evidence.screenshots.push(record);console.log(JSON.stringify({capture:name,file:filename,backend:evidence.backend,width:png.width,height:png.height,frame:lastFrame,sha256:png.sha256}));
       return record;
     };
@@ -257,6 +270,9 @@ export async function captureCharacterCreator(){
     for(const view of ['front','side','back','face']){await evaluate(`window.characterCreator.setView(${JSON.stringify(view)})`);await capture(view,{canvas:true});}
     await evaluate('window.characterCreator.setView("three-quarter")');
     for(const pose of ['reach','t-pose']){await evaluate(`window.characterCreator.setPose(${JSON.stringify(pose)},0)`);await capture(pose,{canvas:true});}
+    check(initialSpec.outfit.top==='parka','The default gait proof must render the parka recipe');
+    await evaluate('window.characterCreator.setPose("walk",0.50)');
+    await capture('parka-walk',{canvas:true});
     await evaluate('window.characterCreator.setPose("idle",0)');
 
     // Export must produce a real downloaded file, not only text on the page.
@@ -317,13 +333,69 @@ export async function captureCharacterCreator(){
     await capture('mobile');await capture('mobile-body',{canvas:true});
     const finalInspection=await evaluate('window.characterCreator.inspect()');
     evidence.renderedFrames=finalInspection.renderedFrames;
+
+    // Prove the delivered single file independently of the development server.
+    // The same Chrome tab loads a new document and receives fresh GPU hooks.
+    const standalonePath=join(root,'artifacts/character-creator.html');
+    check(existsSync(standalonePath),'Build artifacts/character-creator.html before capture: node tools/character-creator/bundle.mjs');
+    const standaloneBytes=await readFile(standalonePath),standaloneURL=pathToFileURL(standalonePath);
+    standaloneURL.searchParams.set('capture','1');standaloneURL.searchParams.set('captureToken',token);
+    evidence.standalone={status:'running',file:relative(root,standalonePath).replaceAll('\\','/'),bytes:standaloneBytes.length,sha256:sha256(standaloneBytes),href:standaloneURL.href,documentRequestObserved:false,httpRequests:[],adapters:[],previousDocumentLastFrame:lastFrame};
+    await assertBrowser();
+    server.closeAllConnections();await new Promise((yes,no)=>server.close(error=>error?no(error):yes()));server=null;
+    evidence.standalone.serverStopped=true;
+    await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+    documentId='standalone-file';
+    await navigateReady(standaloneURL.href,'Standalone character editor');
+    lastFrame=0; // Renderer counters belong to one document, never across reloads.
+    const fileState=await evaluate('({href:location.href,protocol:location.protocol,origin:location.origin,metadata:globalThis.__CHARACTER_BUILD_META__,captureToken:new URLSearchParams(location.search).get("captureToken")})');
+    check(fileState.protocol==='file:'&&fileState.href===standaloneURL.href,'Standalone capture must come from the exact delivered file:// document');
+    check(fileState.captureToken===token,'Standalone capture lost the current run token');
+    check(fileState.metadata?.standalone===true,'Standalone document has no embedded standalone build metadata');
+    check(fileState.metadata.sourceRevision===initial.sourceRevision,'Standalone HTML was built from another source revision');
+    Object.assign(evidence.standalone,{origin:fileState.origin,protocol:fileState.protocol,metadata:fileState.metadata});
+    await evaluate('window.characterCreator.settle()');
+    const fileInitial=await evaluate('window.characterCreator.inspect()');
+    check(fileInitial.sourceRevision===initial.sourceRevision,'Standalone renderer source revision differs from the served engine');
+    lastFrame=validateInspection(fileInitial,0);evidence.standalone.initialRenderedFrames=lastFrame;evidence.standalone.initialRevision=fileInitial.revision;
+    evidence.standalone.adapters=await evaluate('window.__CHARACTER_CAPTURE_GPU__');
+    const fileAdapters=evidence.standalone.adapters.filter(adapter=>adapter.requestedDevices>0);
+    check(fileAdapters.length>0,'Standalone file created no new WebGPU device');
+    const fileBackends=fileAdapters.map(adapter=>validateAdapter(adapter,{allowSoftware}));
+    evidence.standalone.backend=fileBackends.includes('webgpu-software')?'webgpu-software':'webgpu-hardware';
+    evidence.standalone.hardwareProof=!allowSoftware&&evidence.standalone.backend==='webgpu-hardware';
+
+    const presetPoint=await evaluate(`(()=>{const button=document.querySelector('button[data-preset="mechanic"]');if(!button||button.disabled)throw new Error('Missing active mechanic preset');button.scrollIntoView({block:'center'});const r=button.getBoundingClientRect();if(r.width<20||r.height<20||r.bottom>innerHeight||r.top<0)throw new Error('Mechanic preset is not visible');return{x:r.x+r.width/2,y:r.y+r.height/2};})()`);
+    for(const type of ['mousePressed','mouseReleased'])await send('Input.dispatchMouseEvent',{type,...presetPoint,button:'left',clickCount:1});
+    await evaluate('window.characterCreator.settle()');
+    const {CHARACTER_PRESETS}=await import('../../dist/characters/character.js');
+    const mechanic=CHARACTER_PRESETS.find(preset=>preset.id==='mechanic');check(mechanic,'Engine has no mechanic preset');
+    const fileSpec=await evaluate('window.characterCreator.getSpec()');
+    check(equal(fileSpec,mechanic.spec),'Standalone preset click did not apply the complete mechanic recipe');
+    const selectedInspection=await evaluate('window.characterCreator.inspect()');
+    check(selectedInspection.revision>fileInitial.revision,'Standalone preset click did not commit a new character scene');
+    check(await evaluate(`document.querySelector('button[data-preset="mechanic"]').getAttribute('aria-pressed')`)==='true','Standalone preset selection was not reflected in the editor');
+    await evaluate('window.characterCreator.setPose("idle",0)');
+    await evaluate('window.characterCreator.setView("three-quarter")');
+    await evaluate('window.scrollTo(0,0)');
+    const standaloneShot=await capture('standalone-mechanic');
+    evidence.standalone.screenshot=standaloneShot.file;evidence.standalone.renderedFrames=standaloneShot.renderedFrames;
+    evidence.standalone.resourceTiming=await evaluate(`(()=>{const resources=performance.getEntriesByType('resource');return{count:resources.length,protocols:[...new Set(resources.map(resource=>new URL(resource.name).protocol))],httpResources:resources.filter(resource=>/^https?:/i.test(resource.name)).map(resource=>({url:resource.name,type:resource.initiatorType}))};})()`);
+    check(evidence.standalone.documentRequestObserved,'CDP did not observe loading the delivered file:// HTML');
+    check(evidence.standalone.httpRequests.length===0&&evidence.standalone.resourceTiming.httpResources.length===0,'Standalone editor attempted HTTP asset or metadata requests: '+JSON.stringify(evidence.standalone.httpRequests));
+    check(sha256(await readFile(standalonePath))===evidence.standalone.sha256,'Standalone HTML changed after being loaded for capture');
+    evidence.standalone.status='passed';
+    evidence.renderedFrames+=standaloneShot.renderedFrames;
+    evidence.checks.push({name:'standalone-file-preset-and-no-http',passed:true,file:evidence.standalone.file,sha256:evidence.standalone.sha256,sourceRevision:fileState.metadata.sourceRevision,backend:evidence.standalone.backend,hardwareProof:evidence.standalone.hardwareProof,initialFrames:evidence.standalone.initialRenderedFrames,finalFrames:standaloneShot.renderedFrames,screenshot:standaloneShot.file});
+
     check(new Set(evidence.screenshots.map(shot=>shot.sha256)).size===evidence.screenshots.length,'Two requested captures are identical; a view or state update may have been lost');
     const finalSources=await manifest();check(finalSources.sha256===sources.sha256,'Source or compiled engine changed during capture');
     await assertBrowser();
     evidence.checks.push({name:'fresh-distinct-frames-and-stable-source',passed:true,screenshots:evidence.screenshots.length});
     evidence.status='passed';
   }catch(error){
-    evidence.status='failed';evidence.error=error?.stack??String(error);evidence.chromeStderr=stderr;
+    evidence.status='failed';evidence.hardwareProof=false;evidence.error=error?.stack??String(error);evidence.chromeStderr=stderr;
+    if(evidence.standalone&&evidence.standalone.status!=='passed'){evidence.standalone.status='failed';evidence.standalone.hardwareProof=false;}
     throw error;
   }finally{
     evidence.completedAt=new Date().toISOString();

@@ -68,13 +68,13 @@ jobs:
             echo "Chrome/Chromium not found on GPU worker" >&2
             exit 1
           fi
-      - name: Render editor views and verify actual controls
+      - name: Bundle the standalone character editor
+        run: node tools/character-creator/bundle.mjs
+      - name: Render editor and standalone file and verify actual controls
         env:
           CHARACTER_REQUIRE_HARDWARE: '1'
           CHARACTER_ALLOW_SOFTWARE: '0'
         run: node tools/character-creator/capture.mjs
-      - name: Bundle the standalone character editor
-        run: node tools/character-creator/bundle.mjs
       - name: Upload character editor and render evidence
         if: always()
         uses: actions/upload-artifact@v4

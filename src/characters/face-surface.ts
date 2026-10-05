@@ -74,11 +74,12 @@ class FaceSurface {
       // The reference has a pointed projecting nose, with a narrow descending
       // tip. Shape the same continuous surface instead of adding a bulb mesh.
       const tip=smooth((p[k]!-.118)/.046);
-      p[k]=p[k]!-.020*tip;p[k+1]=-.015+(p[k+1]!+.015)*(1-.25*tip)-.006*tip;p[k+2]=p[k+2]!*(1-.52*tip);
+      p[k]=p[k]!-.014*tip;p[k+1]=-.030+(p[k+1]!+.030)*(1-.48*tip)-.006*tip;p[k+2]=p[k+2]!*(1-.70*tip);
       this.mask.set([cheek,jaw,brow,z<0?-1:1,front],v*5);
       const beard=identity.stubble?.11*front*smooth((-.025-y)/.022):0;
       const lip=front*gauss(y,-.045,.006)*smooth((.030-Math.abs(z))/.009),freckle=identity.freckles&&Math.sin(v*12.9898)*43758.5453%1>.92&&Math.abs(z)>.028&&y<.02&&y>-.025?.07:0;
-      colors.push(clamp(1-beard-freckle),clamp(1-beard-.10*cheek-.30*lip-freckle),clamp(1-beard-.07*cheek-.22*lip-freckle),1);
+      const blush=.065*nose+.07*front*gauss(y,.012,.017)*gauss(Math.abs(z),.038,.022);
+      colors.push(clamp(1-beard-freckle),clamp(1-beard-.10*cheek-.30*lip-blush-freckle),clamp(1-beard-.07*cheek-.22*lip-blush*.8-freckle),1);
     }
     // Upper/lower edge share U samples. Any common smile curve is an
     // area-preserving shear; the polygon integral sets the gap scale exactly.
@@ -107,10 +108,10 @@ class FaceSurface {
         z=c.width*.5*u;
         y=cy+c.gap*.5*v+(.0045*smile+.0058*sneer-.0068*frown)*corner*corner+.0028*c.chinBunch*(1-corner);
       }else{
-        z=b[k+2]!;const center=z<0?-.03385:.03385,left=z<0,blink=clamp(c.blink+c.squint*.32+(left?c.squintLeft:c.squintRight)*.62);
+        const center=b[k+2]!<0?-.03385:.03385;z=center+(b[k+2]!-center)*1.22;const left=z<0,blink=clamp(c.blink+c.squint*.32+(left?c.squintLeft:c.squintRight)*.62);
         const line=.0282+.035*(Math.abs(z)-.03385);
         y=b[k+1]!+(line-b[k+1]!)*blink+c.gazeY*.25;
-        x=.07456+Math.sqrt(Math.max(0,.0140**2-(z-center)**2-(y-.029)**2))+.00055;
+        x=.07456+.014*Math.sqrt(Math.max(0,1-((z-center)/.0175)**2-((y-.029)/.014)**2))+.00055;
       }
       d[i*3]=x-p[k]!;d[i*3+1]=y-p[k+1]!;d[i*3+2]=z-p[k+2]!;
     }

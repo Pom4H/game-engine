@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {AnimationSystem,bindHumanoid,humanoidMeasurements,sampleWalker} from '../dist/animation/locomotion.js';
+import {Scene} from '../dist/scene/scene.js';
 
 const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 const near=(actual,expected,tolerance=1e-9)=>assert.ok(Math.abs(actual-expected)<tolerance,`${actual} != ${expected}`);
@@ -119,4 +120,54 @@ test('invalid body factors are rejected before a rig is registered or sampled',(
  }
  for(const proportions of [null,[],1,'body'])assert.throws(()=>humanoidMeasurements(proportions),/object/);
  for(const scale of [NaN,Infinity,0,.24999,3.00001])assert.throws(()=>humanoidMeasurements({},scale),/height scale/);
+});
+
+test('neutral stance uses nearly extended measured legs and relaxed elbows without moving grounded soles',()=>{
+ const flexion=(a,joint,b)=>{
+  const u=a.map((value,i)=>value-joint[i]),v=b.map((value,i)=>value-joint[i]);
+  const cosine=u.reduce((sum,value,i)=>sum+value*v[i],0)/(Math.hypot(...u)*Math.hypot(...v));
+  return Math.PI-Math.acos(Math.max(-1,Math.min(1,cosine)));
+ };
+ for(const proportions of extremes)for(const heading of [0,.73,-Math.PI/2]){
+  const walker={id:'neutral',root:[3,.4,-2],speed:0,heightScale:.9,heading,proportions,stance:'neutral'};
+  const pose=sampleWalker(walker,0),m=humanoidMeasurements(proportions,.9),j=pose.joints;
+  for(const side of ['left','right']){
+   near(flexion(j[side+'Hip'],j[side+'Knee'],j[side+'Ankle']),8*Math.PI/180);
+   near(flexion(j[side+'Shoulder'],j[side+'Elbow'],j[side+'Hand']),12*Math.PI/180);
+   near(distance(j[side+'Hip'],j[side+'Knee']),m.thigh);near(distance(j[side+'Knee'],j[side+'Ankle']),m.shin);
+   near(distance(j[side+'Shoulder'],j[side+'Elbow']),m.upperArm);near(distance(j[side+'Elbow'],j[side+'Hand']),m.forearm);
+   const foot=pose.feet.find(value=>value.id===walker.id+':'+side);
+   assert.ok(foot.grounded);near(foot.position[1],walker.root[1]);
+   pointNear(j[side+'Ankle'],[foot.position[0],foot.position[1]+m.ankleHeight,foot.position[2]]);
+  }
+  near(j.neck[1]-j.pelvis[1],m.neckOffset);near(j.head[1]-j.pelvis[1],m.headOffset);
+  for(const time of [.2,1.7,60])assert.deepEqual(sampleWalker(walker,time),pose,'a standing pose has no gait bob or route drift');
+ }
+});
+
+test('neutral stance is explicitly validated and leaves every moving gait bit-identical',()=>{
+ for(const stance of [null,'legacy','crouch',false,1]){
+  const walker={id:'stance',root:[0,0,0],speed:0,stance};
+  assert.throws(()=>sampleWalker(walker,0),/stance/);
+  assert.throws(()=>new AnimationSystem().addWalker(walker),/stance/);
+  assert.throws(()=>new Scene({version:1,entities:[],animation:{walkers:[walker]}}),/stance/);
+ }
+ for(const proportions of [undefined,...extremes])for(const heading of [0,.73,-Math.PI/2])for(const speed of [.01,.86,12])for(const time of [0,.17,.51,1.29,4.2]){
+  const walker={id:'legacy-moving',root:[3,.2,-2],heightScale:.82,heading,speed,proportions};
+  assert.deepEqual(sampleWalker({...walker,stance:'neutral'},time),sampleWalker(walker,time));
+ }
+});
+
+test('neutral stance survives scene JSON export and remains the sole static animation pose',()=>{
+ const walker={id:'exported',root:[3,.25,-2],heading:.73,speed:0,heightScale:1.1,proportions:{shoulders:.7,hips:1.3,arms:1.3,legs:.7,torso:1.3},stance:'neutral',bindings:[
+  {entity:'head',joint:'head'},
+  {entity:'thigh',joint:'leftHip',boneTo:'leftKnee'},
+  {entity:'hand',joint:'rightHand',orientFrom:'rightElbow'},
+ ]};
+ const scene=new Scene(JSON.parse(JSON.stringify({version:1,ground:.25,entities:walker.bindings.map(binding=>({id:binding.entity,renderOnly:true})),animation:{walkers:[walker]}})));
+ const expected=sampleWalker(walker,0),transforms=bindHumanoid(expected,walker.bindings);
+ for(let tick=0;tick<12;tick++){
+  scene.step(1/60);assert.deepEqual(scene.animation.pose(walker.id),expected);
+  for(const transform of transforms){const entity=scene.entities.get(transform.entity);assert.deepEqual(entity.position,transform.position);assert.deepEqual(entity.rotation,transform.rotation);assert.deepEqual(entity.scale,transform.scale);}
+ }
 });
