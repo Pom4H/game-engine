@@ -20,7 +20,7 @@ export const WINTER_FACE_IDENTITIES:Readonly<Record<'mike'|'anna',FaceIdentity>>
   mike:Object.freeze({skin:[.51,.34,.25,1] as Color,iris:[.11,.16,.12,1] as Color,jawWidth:1.09,cheekbone:.006,noseLength:.035,stubble:true}),
   anna:Object.freeze({skin:[.62,.43,.33,1] as Color,iris:[.12,.24,.28,1] as Color,jawWidth:.94,cheekbone:.009,noseLength:.027,freckles:true}),
 });
-const KEYS=['smileLeft','smileRight','browLeft','browRight','browTiltLeft','browTiltRight','cheekLeft','cheekRight','squint','blink'] as const;
+const KEYS=['smileLeft','smileRight','browLeft','browRight','browTiltLeft','browTiltRight','cheekLeft','cheekRight','squint','squintLeft','squintRight','sneerLeft','sneerRight','blink'] as const;
 const clamp=(x:number,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const valid=(x:number,label:string)=>{if(!Number.isFinite(x)||x<0||x>1)throw new RangeError(label+' must be within 0..1');};
 type FaceActionValues={-readonly [K in keyof Required<FaceActions>]:number};
@@ -93,7 +93,8 @@ export class ExpressiveFaceRig {
     const blink=Math.max(actions.blink,spontaneous),width=motor.lipWidthM/scale,gap=motor.lipGapM/scale,cy=-.043-gap*.30-.011*Math.sin(motor.jawAngleRad);
     this.surface.update({...neutralFaceSurface(),width,gap,protrusion:motor.lipProtrusionM/scale,jaw:motor.jawAngleRad,
       smileLeft:actions.smileLeft,smileRight:actions.smileRight,browLeft:actions.browLeft,browRight:actions.browRight,browTiltLeft:actions.browTiltLeft,browTiltRight:actions.browTiltRight,
-      cheekLeft:actions.cheekLeft,cheekRight:actions.cheekRight,squint:actions.squint,blink,gazeY:this.gazeY});
+      cheekLeft:actions.cheekLeft,cheekRight:actions.cheekRight,squint:actions.squint,squintLeft:actions.squintLeft,squintRight:actions.squintRight,
+      sneerLeft:actions.sneerLeft,sneerRight:actions.sneerRight,blink,gazeY:this.gazeY});
     place('skin',[0,0,0],[1,1,1]);
     place('mouth',[.081,cy,0],[.035,Math.max(1e-7,gap),width]);
     // Teeth stay inside the oral cavity. Visibility is determined by actual
