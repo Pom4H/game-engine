@@ -31,12 +31,16 @@ for(let n=0;n<Math.ceil(TEA_SPIT_EVENT.durationS*rate);n++){
 // Individual droplets hit nearby coat/table/ground after the spray front.
 // Fixed seeds keep replay/render bit-stable.
 for(let k=0;k<34;k++){
-  const delay=.07+((k*73)%101)/101*.72,amp=.018+((k*37)%31)/31*.05;
-  const freq=1500+((k*53)%97)/97*5200,decay=38+((k*29)%23);
-  for(let n=0;n<Math.round(.045*rate);n++){
-    const t=n/rate,env=Math.exp(-t*decay);
-    const click=(Math.sin(2*Math.PI*freq*t)+.42*random())*env*amp;
-    add(TEA_SPIT_EVENT.startS+delay+t,click,-.24+(((k*17)%11)-5)*.035);
+  const delay=.07+((k*73)%101)/101*.72,amp=.012+((k*37)%31)/31*.035;
+  // Wet splat only: short low-passed noise pressure impulse. Deliberately no
+  // sinusoidal/ringing component — tonal 1.5–7 kHz impacts read as breaking glass.
+  let wetLp=0;
+  const decay=52+((k*29)%23);
+  for(let n=0;n<Math.round(.035*rate);n++){
+    const t=n/rate,env=Math.exp(-t*decay),white=random();
+    wetLp+=.18*(white-wetLp);
+    const splat=(wetLp*.86+white*.14)*env*amp;
+    add(TEA_SPIT_EVENT.startS+delay+t,splat,-.24+(((k*17)%11)-5)*.035);
   }
 }
 let peak=0;for(let i=0;i<frames;i++)peak=Math.max(peak,Math.abs(left[i]),Math.abs(right[i]));
