@@ -4,22 +4,60 @@ import {expressiveFaceEntities,WINTER_FACE_IDENTITIES} from '../../dist/animatio
 
 export const CENTER=[-19.95,0,5.25],GROUND=.166,TABLE=1.06;
 export const at=(x,y,z)=>[CENTER[0]+x,y,CENTER[2]+z];
+// Door of b1-2: building centre -20, width 14, doorx=x+width*.345,
+// facade z=8.30. Stop just outside the threshold instead of walking into glazing.
+export const SHOP_DOOR=[-15.17,GROUND,7.82];
+
+const SNOW_SHELL_TARGETS=['coat','hood','hat','pack','upperArm-1','upperArm1'];
+const fract=x=>x-Math.floor(x);
+function snowShellMesh(mesh,seed){
+ if(mesh?.kind!=='triangle-mesh'||!mesh.positions?.length||!mesh.normals?.length)return null;
+ const positions=[],normals=[],indices=[],triangles=mesh.indices??Array.from({length:mesh.positions.length/3},(_,i)=>i);
+ for(let i=0;i<triangles.length;i+=3){
+  const ia=triangles[i],ib=triangles[i+1],ic=triangles[i+2],ids=[ia,ib,ic];
+  const ny=(mesh.normals[ia*3+1]+mesh.normals[ib*3+1]+mesh.normals[ic*3+1])/3;
+  const exposure=Math.max(0,Math.min(1,(ny-.08)/.92));
+  const noise=fract(Math.sin((i+1)*(12.9898+seed*.071))*43758.5453);
+  // Snow is a conformal shell of the garment itself: no independent cloud of
+  // flakes can drift away from elbows, shoulders or the hat when the rig moves.
+  if(exposure<.12||noise>exposure*.88)continue;
+  const start=positions.length/3,thickness=.0025+.0035*exposure;
+  for(const id of ids){
+   const k=id*3,n=[mesh.normals[k],mesh.normals[k+1],mesh.normals[k+2]];
+   positions.push(mesh.positions[k]+n[0]*thickness,mesh.positions[k+1]+n[1]*thickness,mesh.positions[k+2]+n[2]*thickness);
+   normals.push(...n);
+  }
+  indices.push(start,start+1,start+2);
+ }
+ return positions.length?{kind:'triangle-mesh',positions,normals,indices}:null;
+}
+function snowShells(actor,entities){
+ const byId=new Map(entities.map(e=>[e.id,e])),material={kind:'snow',color:[.91,.94,.96,1],roughness:.96,texture:{url:'/assets/snow-granular.png',sizeM:.22,bumpStrength:.55,albedoStrength:.5}};
+ return SNOW_SHELL_TARGETS.flatMap((key,index)=>{
+  const source=byId.get(actor.id+'-'+key),mesh=snowShellMesh(source?.mesh,actor.id.length*97+index*31);
+  return source&&mesh?[{...source,id:actor.id+'-snow-shell-'+key,mesh,material,renderOnly:true}]:[];
+ });
+}
 export const cast=[
  {id:'mike',root:at(-.59,GROUND,0),heading:.27,heightScale:1,palette:{skin:WINTER_FACE_IDENTITIES.mike.skin}},
  {id:'anna',root:at(.59,GROUND,.015),heading:Math.PI-.27,heightScale:.97,palette:{skin:WINTER_FACE_IDENTITIES.anna.skin,coat:[.37,.18,.14,1],scarf:[.49,.37,.22,1],hat:[.21,.17,.14,1],pants:[.15,.18,.205,1]}},
 ];
 export function performanceBindings(actor){
- return pedestrianAnimation({...actor,speed:0}).bindings.map(binding=>{
+ const adjusted=pedestrianAnimation({...actor,speed:0}).bindings.map(binding=>{
   const key=binding.entity.slice(actor.id.length+1),b={...binding,offset:[...(binding.offset??[0,0,0])],scale:[...(binding.scale??[1,1,1])]};
   if(key==='hat'){b.offset[1]=.145;b.scale[1]=.15;}
   if(key==='hatBand'){b.offset[1]=.086;b.scale[1]=.037;}
   if(key==='hatPom')b.offset[1]=.230;
-  if(key==='snowHat')b.offset[1]=.215;
   if(key==='collar'){b.offset[1]=-.019;b.scale[1]=.086;}
   if(key==='scarf'){b.offset[1]=-.018;b.scale[1]=.087;}
   if(key==='hood'){b.offset[0]-=.025;b.offset[1]-=.030;}
   return b;
- }).filter(b=>!b.entity.endsWith('-nose')&&!b.entity.endsWith('-head'));
+ }).filter(b=>!b.entity.endsWith('-nose')&&!b.entity.endsWith('-head')&&!b.entity.includes('-snow'));
+ const byKey=new Map(adjusted.map(binding=>[binding.entity.slice(actor.id.length+1),binding]));
+ const shells=SNOW_SHELL_TARGETS.flatMap(key=>{
+  const source=byKey.get(key);return source?[{...source,entity:actor.id+'-snow-shell-'+key}]:[];
+ });
+ return [...adjusted,...shells];
 }
 function lathe(profile,segments=48){
  const positions=[],normals=[],indices=[];
@@ -63,7 +101,11 @@ export function createPerformanceStage(){
  add('tea-pot-spout',{kind:'cylinder',radius:.018,topRadius:.010,height:.135,segments:20},pot);
  add('tea-stream',{kind:'cylinder',radius:.0026,height:1,segments:10},{kind:'default',color:[.36,.17,.050,1],roughness:.1,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
  for(let i=0;i<12;i++)add('tea-steam-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.66,.70,.72,.07],roughness:1},[0,0,0],{scale:[.0001,.0001,.0001]});
- const actors=cast.flatMap(actor=>makePedestrian({...actor,speed:0}).filter(e=>!e.id.endsWith('-nose')&&!e.id.endsWith('-head')));
+ for(let i=0;i<96;i++)add('tea-spray-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.28,.075,.012,.92],roughness:.08,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
+ const actors=cast.flatMap(actor=>{
+  const base=makePedestrian({...actor,speed:0}).filter(e=>!e.id.endsWith('-nose')&&!e.id.endsWith('-head')&&!e.id.includes('-snow'));
+  return [...base,...snowShells(actor,base)];
+ });
  const faces=cast.flatMap(actor=>expressiveFaceEntities(actor.id,WINTER_FACE_IDENTITIES[actor.id]));
  spec.entities.push(...actors,...faces,...added,
   {id:'tea-sky-fill',position:at(-1.2,3.1,-1.7),light:{kind:'point',color:[.80,.87,1],intensity:2.2,range:7}},
