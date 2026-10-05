@@ -19,6 +19,8 @@
     "README.md"
   ],
   "scripts": {
+    "characters": "bun run build && node tools/character-creator/server.mjs",
+    "characters:bundle": "bun run build && node tools/character-creator/bundle.mjs",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",

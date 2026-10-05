@@ -1,0 +1,101 @@
+name: Character Creator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/characters/**'
+      - 'src/animation/locomotion.ts'
+      - 'src/render/**'
+      - 'src/scene/**'
+      - 'src/index.ts'
+      - 'tools/character-creator/**'
+      - 'test/character*.test.mjs'
+      - 'test/humanoid-proportions.test.mjs'
+      - '.github/workflows/character-creator.yml'
+      - 'package.json'
+      - 'bun.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: character-creator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Character geometry, articulated proportions and face contracts
+        run: node --test test/character.test.mjs test/character-face.test.mjs test/character-pose.test.mjs test/character-creator.test.mjs test/humanoid-proportions.test.mjs test/animation.test.mjs test/conversation-face.test.mjs
+      - name: Check capture script syntax
+        run: node --check tools/character-creator/capture.mjs
+
+  hardware-editor:
+    needs: validate
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Locate hardware Chrome
+        run: |
+          $candidates = @(
+            "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+            "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+            "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe",
+            "$env:ProgramFiles\Chromium\Application\chrome.exe",
+            "$env:ProgramFiles\Chromium\chromium.exe"
+          )
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { $chrome = (Get-Command chromium.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw 'Chrome/Chromium not found on GPU worker' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Render editor views and verify actual controls
+        env:
+          CHARACTER_REQUIRE_HARDWARE: '1'
+          CHARACTER_ALLOW_SOFTWARE: '0'
+        run: node tools/character-creator/capture.mjs
+      - name: Bundle the standalone character editor
+        run: node tools/character-creator/bundle.mjs
+      - name: Preserve this run on the GPU worker
+        if: always()
+        run: |
+          $target = Join-Path $env:USERPROFILE "game-engine-renders\character-creator\$env:GITHUB_SHA-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          New-Item -ItemType Directory -Force $target | Out-Null
+          Get-ChildItem artifacts/character-creator-* -ErrorAction SilentlyContinue | Copy-Item -Destination $target -Force
+      - name: Upload character editor and render evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: character-creator-${{ github.sha }}
+          path: |
+            artifacts/character-creator.html
+            artifacts/character-creator-*.png
+            artifacts/character-creator-*.json
+          if-no-files-found: error
+          retention-days: 14

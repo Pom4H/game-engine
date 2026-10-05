@@ -204,7 +204,7 @@ function validateBindings(scene:Record<string,unknown>,entities:readonly EntityS
       for(const [j,value] of (w.bindings===undefined?[]:boundedArray(w.bindings,`${path}.bindings`,4096)).entries()){
         const p=`${path}.bindings[${j}]`,b=object(value,p);claim(stableId(b.entity,`${p}.entity`),`${p}.entity`);
         if(!HUMANOID_JOINTS.includes(String(b.joint)))throw new TypeError(`${p}.joint is unknown`);
-        choice(b.boneTo,HUMANOID_JOINTS,`${p}.boneTo`);choice(b.foot,['left','right'],`${p}.foot`);
+        choice(b.boneTo,HUMANOID_JOINTS,`${p}.boneTo`);choice(b.orientFrom,HUMANOID_JOINTS,`${p}.orientFrom`);choice(b.foot,['left','right'],`${p}.foot`);
         for(const key of ['offset','rotation','scale'])if(b[key]!==undefined)vector(b[key],3,`${p}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
       }
       validator.addWalker(w as unknown as WalkerSpec);

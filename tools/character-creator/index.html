@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#191a18">
+  <title>Конструктор персонажа — ROM4 Game Engine</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/tools/character-creator/style.css">
+</head>
+<body>
+<header class="appbar">
+  <a class="brand" href="/" aria-label="ROM4 Game Engine"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>ROM4</strong><span class="brand-product">GAME ENGINE</span></a>
+  <span class="app-title">Конструктор персонажа</span>
+  <div class="header-actions"><button id="undo" class="icon-button" title="Отменить (Ctrl+Z)" aria-label="Отменить изменение" disabled>↶</button><button id="redo" class="icon-button" title="Повторить (Ctrl+Shift+Z)" aria-label="Повторить изменение" disabled>↷</button><button id="open-code" class="primary" type="button">Сохранить <span aria-hidden="true">↗</span></button></div>
+</header>
+<main class="workspace">
+  <aside class="library" aria-label="Референс и готовые образы">
+    <div class="section-heading"><span>ОТПРАВНАЯ ТОЧКА</span><span>01</span></div>
+    <figure class="reference"><img src="/tools/character-creator/reference.jpeg" alt="Референс: вытянутое лицо, приподнятая бровь и растрёпанные каштановые волосы"><figcaption><span>Референс лица</span><span>↗</span></figcaption></figure>
+    <div class="section-heading presets-heading"><span>ГОТОВЫЕ ОБРАЗЫ</span><span>03</span></div>
+    <div id="presets" class="presets"></div>
+    <button id="reset" class="text-button" type="button">Восстановить исходный образ</button>
+    <div class="library-note"><span class="tiny-cross" aria-hidden="true">+</span><p>Пропорции, одежда и поза<br>собираются в одну 3D-модель.</p></div>
+  </aside>
+  <section class="stage" aria-label="Предпросмотр персонажа">
+    <div id="viewport" class="viewport"><canvas id="character-canvas" aria-label="Трёхмерный персонаж. Используйте кнопки вида или перетаскивание для поворота." tabindex="0"></canvas></div>
+    <div class="stage-heading"><div class="eyebrow">CHARACTER <span id="character-number">001</span></div><h1 id="character-name">Скептик</h1><p id="character-description">Длинный силуэт · зимняя парка</p></div>
+    <div class="stage-tools"><label class="pose-label" for="pose-mode">ПОЗА</label><select id="pose-mode"><option value="idle">Спокойно стоит</option><option value="walk">Идёт</option><option value="reach">Тянется рукой</option><option value="t-pose">Руки в стороны</option></select><button id="play-motion" class="icon-button" type="button" aria-label="Запустить движение" title="Запустить движение">▷</button></div>
+    <div class="height-ruler" aria-hidden="true"><span id="height-label">1,88 м</span><i></i></div>
+    <div id="loading" class="loading" role="status"><span class="loader"></span><strong>Собираю персонажа</strong><span id="loading-detail">Геометрия, одежда и свет</span></div>
+    <div id="engine-error" class="engine-error" hidden><strong>Не удалось запустить 3D</strong><p id="engine-error-text"></p><button id="retry-engine" type="button">Попробовать ещё раз</button></div>
+    <div class="stage-bottom">
+      <div class="view-controls" role="group" aria-label="Вид камеры"><button data-view="three-quarter" aria-pressed="true" title="Три четверти">¾</button><button data-view="front" aria-pressed="false">Спереди</button><button data-view="side" aria-pressed="false">Сбоку</button><button data-view="back" aria-pressed="false">Сзади</button><button data-view="face" aria-pressed="false">Лицо</button></div>
+      <div class="stage-bottom-line"><span class="orbit-hint">Потяни, чтобы повернуть · Прокрути, чтобы приблизить</span><button id="screenshot" class="text-button" type="button">Снимок <span aria-hidden="true">↓</span></button></div>
+    </div>
+  </section>
+  <aside class="inspector" aria-label="Параметры персонажа">
+    <div class="inspector-top"><span class="section-heading">ПАРАМЕТРЫ</span><span id="edit-marker">LIVE</span></div>
+    <div class="tabs" role="tablist" aria-label="Раздел параметров"><button id="tab-body" role="tab" aria-selected="true" aria-controls="panel-body" data-tab="body">Тело</button><button id="tab-outfit" role="tab" aria-selected="false" aria-controls="panel-outfit" data-tab="outfit" tabindex="-1">Одежда</button><button id="tab-face" role="tab" aria-selected="false" aria-controls="panel-face" data-tab="face" tabindex="-1">Лицо</button><button id="tab-code" role="tab" aria-selected="false" aria-controls="panel-code" data-tab="code" tabindex="-1">Код</button></div>
+    <div class="panel-scroll">
+      <section id="panel-body" role="tabpanel" aria-labelledby="tab-body"><div class="panel-intro"><h2>Силуэт и пропорции</h2><p>Одежда подстраивается под тело.</p></div><div id="body-controls"></div><div class="detail-note"><span>01 / 07</span><p>Длины конечностей общие для геометрии и движения.</p></div></section>
+      <section id="panel-outfit" role="tabpanel" aria-labelledby="tab-outfit" hidden><div class="panel-intro"><h2>Собери образ</h2><p>Крой, материалы и цвет.</p></div>
+        <label class="select-field">Верх<select data-path="outfit.top"><option value="parka">Зимняя парка</option><option value="jacket">Рабочая куртка</option><option value="sweater">Свитер</option></select></label>
+        <label class="select-field">Брюки<select data-path="outfit.bottom"><option value="jeans">Прямые джинсы</option><option value="cargo">Карго с карманами</option></select></label>
+        <label class="select-field">Обувь<select data-path="outfit.shoes"><option value="boots">Ботинки на шнуровке</option><option value="sneakers">Кеды</option></select></label>
+        <label class="check-field"><span>Шарф</span><input type="checkbox" data-path="outfit.scarf"><span class="check-track" aria-hidden="true"></span></label>
+        <h3 class="subheading">ПАЛИТРА ОДЕЖДЫ</h3><div id="outfit-colors" class="color-fields"></div>
+      </section>
+      <section id="panel-face" role="tabpanel" aria-labelledby="tab-face" hidden><div class="panel-intro"><h2>Выражение и волосы</h2><p>Вытянутое лицо из референса.</p></div>
+        <label class="select-field">Выражение<select data-path="expression"><option value="skeptical">Скептический взгляд</option><option value="neutral">Спокойное лицо</option><option value="smirk">Кривая усмешка</option></select></label>
+        <label class="select-field">Причёска<select data-path="hairStyle"><option value="swept">Растрёпанные волосы</option><option value="short">Короткая стрижка</option><option value="none">Без волос</option></select></label>
+        <div id="face-colors" class="color-fields"></div>
+        <h3 class="subheading">ВАРИАЦИЯ ДЕТАЛЕЙ</h3><div class="seed-field"><input id="seed" data-path="seed" type="number" min="0" max="4294967295" step="1" aria-label="Номер вариации"><button id="new-seed" type="button" title="Другая вариация">Сменить ↻</button></div><p class="field-hint">Меняет пряди и складки. Один номер воспроизводит один результат.</p>
+      </section>
+      <section id="panel-code" role="tabpanel" aria-labelledby="tab-code" hidden><div class="panel-intro"><h2>Твой персонаж</h2><p>Сохрани настройки или добавь модель в сцену.</p></div><div class="export-buttons"><button id="export-json" class="primary" type="button">Скачать JSON <span>↓</span></button><button id="download-ts" type="button">Скачать TypeScript <span>↓</span></button></div><label class="code-label" for="spec-json">CHARACTER SPEC · JSON</label><textarea id="spec-json" spellcheck="false" aria-describedby="json-status"></textarea><div class="json-actions"><button id="import-json" type="button">Применить JSON</button><button id="upload-json" class="text-button" type="button">Открыть файл</button><input id="json-file" type="file" accept=".json,application/json" hidden></div><p id="json-status" class="field-hint" role="status">Параметры сохраняются в этом браузере.</p><details class="integration-example"><summary>Как добавить в scene.ts</summary><pre><code>import {compileCharacter} from
+  '@rom4/game-engine';
+
+const actor = compileCharacter(spec);
+
+export default {
+  version: 1,
+  entities: actor.entities,
+  animation: {
+    walkers: [actor.walker]
+  }
+};</code></pre></details></section>
+    </div>
+    <div class="inspector-footer"><span class="status-dot" aria-hidden="true"></span><span id="save-status" role="status">Подготавливаю модель…</span></div>
+  </aside>
+</main>
+<footer class="statusbar"><span><span class="status-square" aria-hidden="true"></span><span id="backend-status">WEBGPU</span></span><span id="geometry-status">—</span><span class="footer-shortcut">Ctrl + Z · Отменить</span></footer>
+<div id="toast" class="toast" role="status" hidden></div>
+<script type="module" src="/tools/character-creator/app.mjs"></script>
+</body>
+</html>
