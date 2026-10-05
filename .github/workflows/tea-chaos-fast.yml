@@ -1,0 +1,130 @@
+name: Tea Chaos Fast
+on:
+  push:
+    branches: [codex/tea-chaos-fast]
+    paths:
+      - 'tools/tea-performance/**'
+      - '.github/workflows/tea-chaos-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: tea-chaos-fast
+  cancel-in-progress: true
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      source: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run build
+      - name: Parse and simulate only the changed scene
+        run: |
+          node --check tools/tea-performance/stage.mjs
+          node --check tools/tea-performance/scene.mjs
+          node --check tools/tea-performance/plan.mjs
+          node - <<'JS'
+          const {createTeaPerformance}=await import('./tools/tea-performance/scene.mjs');
+          const play=createTeaPerformance();play.step(0,0);
+          let spray=false;
+          for(let tick=1;tick<=2520;tick++){
+            play.step(tick/60,1/60);
+            const s=play.inspect();if(s.sprayActive)spray=true;
+          }
+          const end=play.inspect(),door=end.shopDoor;
+          for(const actor of end.actors){
+            const d=Math.hypot(actor.position[0]-door[0],actor.position[2]-door[2]);
+            if(d>.55)throw new Error(actor.id+' missed shop door by '+d);
+          }
+          if(!spray)throw new Error('tea spray never became active');
+          const ids=[...play.scene.entities.keys()];
+          if(ids.some(id=>/-(snowPack|snowHood|snowHat|snowBackpack|snowCoat|snowSleeve)/.test(id)))throw new Error('legacy floating snow survived');
+          if(ids.filter(id=>id.includes('-snow-shell-')).length<8)throw new Error('garment snow shells missing');
+          console.log(JSON.stringify({door,actors:end.actors.map(a=>({id:a.id,position:a.position})),snowShells:ids.filter(id=>id.includes('-snow-shell-')).length,spray}));
+          JS
+      - name: Build pinned VTL and synthesize changed dialogue
+        run: |
+          git clone --quiet https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/vtl
+          git -C /tmp/vtl checkout --quiet df30392f18dc5e175b577c3ba734caaa65a3927f
+          git -C /tmp/vtl apply "$GITHUB_WORKSPACE/tools/npc-speech-demo/vtl-anatomy-reference.patch"
+          cmake -S /tmp/vtl -B /tmp/vtl/out -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/vtl/out --config Release --target VocalTractLabApi -j2
+          mkdir -p artifacts/tea-chaos
+          TEA_OUTPUT=artifacts/tea-chaos node tools/tea-performance/plan-vtl.mjs
+          lib=$(find /tmp/vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          python3 tools/npc-speech-demo/vtl-dialogue.py "$lib" /tmp/vtl/resources/JD3.speaker artifacts/tea-chaos/plan.json artifacts/tea-chaos
+      - name: Normalize only for playback
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          ffmpeg -y -v error -i artifacts/tea-chaos/dialogue.wav -af "loudnorm=I=-16:TP=-1.5:LRA=9" -ar 44100 -ac 2 -c:a pcm_s16le artifacts/tea-chaos/dialogue-release.wav
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tea-chaos-input
+          path: |
+            artifacts/tea-chaos/motor-plan.json
+            artifacts/tea-chaos/dialogue-release.wav
+          retention-days: 1
+
+  render:
+    needs: prepare
+    runs-on: self-hosted
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.source }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: tea-chaos-input
+          path: artifacts/tea-chaos
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: |
+          bun install --frozen-lockfile
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          bun run build
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      - name: One hardware WebGPU preview render
+        env:
+          TEA_REQUIRE_HARDWARE: '1'
+          TEA_WIDTH: '960'
+          TEA_HEIGHT: '540'
+          TEA_FPS: '20'
+          TEA_OUTPUT: artifacts/tea-chaos
+          TEA_PLAN: artifacts/tea-chaos/motor-plan.json
+          TEA_AUDIO: artifacts/tea-chaos/dialogue-release.wav
+          TEA_SOURCE_COMMIT: ${{ needs.prepare.outputs.source }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $candidates=@("$env:ProgramFiles\Google\Chrome\Application\chrome.exe","${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe","$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $env:CHROME_PATH=$candidates|Where-Object{Test-Path $_}|Select-Object -First 1
+          if(-not $env:CHROME_PATH){throw 'Chrome is required'}
+          Remove-Item Env:TEA_SOFTWARE_GPU -ErrorAction SilentlyContinue
+          node tools/tea-performance/capture.mjs video
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          $e=Get-Content artifacts/tea-chaos/video-evidence.json -Raw|ConvertFrom-Json
+          if($e.backend -ne 'webgpu-hardware'){throw "Not hardware WebGPU: $($e.backend)"}
+          if($e.width -ne 960 -or $e.height -ne 540 -or $e.fps -ne 20){throw 'Preview geometry mismatch'}
+          $probe=ffprobe -v error -show_streams -show_format -of json artifacts/tea-chaos/tea-performance.mp4|ConvertFrom-Json
+          $v=$probe.streams|Where-Object codec_type -eq 'video';$a=$probe.streams|Where-Object codec_type -eq 'audio'
+          if($v.width -ne 960 -or $v.height -ne 540){throw 'MP4 resolution mismatch'}
+          if($a.codec_name -ne 'aac' -or [int]$a.channels -ne 2){throw 'Missing stereo AAC'}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tea-chaos-fast-video
+          path: |
+            artifacts/tea-chaos/tea-performance.mp4
+            artifacts/tea-chaos/video-evidence.json
+          retention-days: 2
