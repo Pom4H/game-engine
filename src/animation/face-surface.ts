@@ -7,9 +7,9 @@ import type {FaceIdentity} from './expressive-face.js';
 export interface FaceSurfaceControls {
   width:number;gap:number;protrusion:number;jaw:number;
   smileLeft:number;smileRight:number;browLeft:number;browRight:number;browTiltLeft:number;browTiltRight:number;
-  cheekLeft:number;cheekRight:number;squint:number;blink:number;gazeY:number;
+  cheekLeft:number;cheekRight:number;squint:number;squintLeft:number;squintRight:number;sneerLeft:number;sneerRight:number;blink:number;gazeY:number;
 }
-export const neutralFaceSurface=():FaceSurfaceControls=>({width:.047,gap:.003,protrusion:0,jaw:0,smileLeft:0,smileRight:0,browLeft:0,browRight:0,browTiltLeft:.5,browTiltRight:.5,cheekLeft:0,cheekRight:0,squint:0,blink:0,gazeY:0});
+export const neutralFaceSurface=():FaceSurfaceControls=>({width:.047,gap:.003,protrusion:0,jaw:0,smileLeft:0,smileRight:0,browLeft:0,browRight:0,browTiltLeft:.5,browTiltRight:.5,cheekLeft:0,cheekRight:0,squint:0,squintLeft:0,squintRight:0,sneerLeft:0,sneerRight:0,blink:0,gazeY:0});
 const clamp=(x:number,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const smooth=(x:number)=>{x=clamp(x);return x*x*(3-2*x);};
 const gauss=(x:number,m:number,s:number)=>Math.exp(-(((x-m)/s)**2));
@@ -81,19 +81,20 @@ export class FaceSurface {
   private evaluate(c:FaceSurfaceControls):void{
     const p=this.positions,b=this.base,m=this.mask,d=this.deltas;
     for(let v=0;v<p.length/3;v++){
-      const k=v*3,o=v*5,left=m[o+3]!<0,smile=left?c.smileLeft:c.smileRight,cheek=left?c.cheekLeft:c.cheekRight,brow=left?c.browLeft:c.browRight,tilt=(left?c.browTiltLeft:c.browTiltRight)-.5;
-      p[k]=b[k]!+.003*(smile+cheek)*m[o]!-.002*Math.sin(c.jaw)*m[o+1]!;
-      p[k+1]=b[k+1]!+.005*(smile+cheek)*m[o]!+(.007*brow+.12*tilt*(Math.abs(b[k+2]!)-.035))*m[o+2]!-.060*Math.sin(c.jaw)*m[o+1]!;
-      p[k+2]=b[k+2]!+m[o+3]!*.002*smile*m[o]!;
+      const k=v*3,o=v*5,left=m[o+3]!<0,smile=left?c.smileLeft:c.smileRight,cheek=left?c.cheekLeft:c.cheekRight,brow=left?c.browLeft:c.browRight,tilt=(left?c.browTiltLeft:c.browTiltRight)-.5,sneer=left?c.sneerLeft:c.sneerRight;
+      const upperLip=gauss(b[k+1]!,-.036,.011)*gauss(Math.abs(b[k+2]!),.024,.027)*m[o+4]!,noseWrinkle=gauss(b[k+1]!,-.010,.015)*gauss(Math.abs(b[k+2]!),.022,.020)*m[o+4]!;
+      p[k]=b[k]!+.003*(smile+cheek)*m[o]!-.002*Math.sin(c.jaw)*m[o+1]!+.0028*sneer*(upperLip+noseWrinkle*.45);
+      p[k+1]=b[k+1]!+.005*(smile+cheek)*m[o]!+(.007*brow+.12*tilt*(Math.abs(b[k+2]!)-.035))*m[o+2]!-.060*Math.sin(c.jaw)*m[o+1]!+.0048*sneer*upperLip+.0024*sneer*noseWrinkle;
+      p[k+2]=b[k+2]!+m[o+3]!*(.002*smile+.0014*sneer)*(m[o]!+upperLip*.8);
     }
     const mouthCount=this.mouthBoundary.length,cy=-.043-c.gap*.30-.011*Math.sin(c.jaw);
     for(let i=0;i<this.anchors.length;i++){
       const k=this.anchors[i]!*3;let x:number,y:number,z:number;
       if(i<mouthCount){
-        const u=this.mouthU[i]!,v=this.mouthV[i]!,smile=u<0?c.smileLeft:c.smileRight;
-        x=b[k]!-.002+c.protrusion;z=c.width*.5*u;y=cy+c.gap*.5*v+.0045*smile*u*u;
+        const u=this.mouthU[i]!,v=this.mouthV[i]!,smile=u<0?c.smileLeft:c.smileRight,sneer=u<0?c.sneerLeft:c.sneerRight;
+        x=b[k]!-.002+c.protrusion+.0012*sneer*(1-Math.abs(u));z=c.width*.5*u;y=cy+c.gap*.5*v+(.0045*smile+.0058*sneer)*u*u;
       }else{
-        z=b[k+2]!;const center=z<0?-.03385:.03385,blink=clamp(c.blink+c.squint*.48);
+        z=b[k+2]!;const center=z<0?-.03385:.03385,left=z<0,blink=clamp(c.blink+c.squint*.32+(left?c.squintLeft:c.squintRight)*.62);
         const line=.0282+.035*(Math.abs(z)-.03385);
         y=b[k+1]!+(line-b[k+1]!)*blink+c.gazeY*.25;
         x=.07456+Math.sqrt(Math.max(0,.0140**2-(z-center)**2-(y-.029)**2))+.00055;
@@ -109,7 +110,7 @@ export class FaceSurface {
   update(c:FaceSurfaceControls):void{
     const values=fields.map(k=>c[k]);
     if(values.some(v=>!Number.isFinite(v))||c.width<=0||c.width>.12||c.gap<0||c.gap>.08||c.protrusion<0||c.protrusion>.03||c.jaw<0||c.jaw>1||Math.abs(c.gazeY)>.03)throw new RangeError('Invalid facial surface controls');
-    for(const key of ['smileLeft','smileRight','browLeft','browRight','browTiltLeft','browTiltRight','cheekLeft','cheekRight','squint','blink'] as const)if(c[key]<0||c[key]>1)throw new RangeError('Invalid facial action '+key);
+    for(const key of ['smileLeft','smileRight','browLeft','browRight','browTiltLeft','browTiltRight','cheekLeft','cheekRight','squint','squintLeft','squintRight','sneerLeft','sneerRight','blink'] as const)if(c[key]<0||c[key]>1)throw new RangeError('Invalid facial action '+key);
     if(values.length===this.last.length&&values.every((v,i)=>v===this.last[i]))return;
     this.evaluate(c);normalsFor(this.positions,this.indices,this.normals);this.stream.publish(this.positions,this.normals);this.last=values;
   }
