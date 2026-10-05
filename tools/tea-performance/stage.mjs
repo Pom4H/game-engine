@@ -12,22 +12,28 @@ const SNOW_SHELL_TARGETS=['coat','hood','hat','pack','upperArm-1','upperArm1'];
 const fract=x=>x-Math.floor(x);
 function snowShellMesh(mesh,seed){
  if(mesh?.kind!=='triangle-mesh'||!mesh.positions?.length||!mesh.normals?.length)return null;
- const positions=[],normals=[],indices=[],triangles=mesh.indices??Array.from({length:mesh.positions.length/3},(_,i)=>i);
+ const triangles=mesh.indices??Array.from({length:mesh.positions.length/3},(_,i)=>i),candidates=[];let total=0,state=seed>>>0||1;
+ const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
+ const norm=v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);},cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
  for(let i=0;i<triangles.length;i+=3){
-  const ia=triangles[i],ib=triangles[i+1],ic=triangles[i+2],ids=[ia,ib,ic];
-  const ny=(mesh.normals[ia*3+1]+mesh.normals[ib*3+1]+mesh.normals[ic*3+1])/3;
-  // Keep one continuous conformal cap on genuinely upward-facing cloth.
-  // The previous stochastic triangle mask exposed the coarse garment topology.
-  if(ny<.46)continue;
-  const start=positions.length/3,thickness=.0018+.0014*Math.min(1,ny);
-  for(const id of ids){
-   const k=id*3,n=[mesh.normals[k],mesh.normals[k+1],mesh.normals[k+2]];
-   positions.push(mesh.positions[k]+n[0]*thickness,mesh.positions[k+1]+n[1]*thickness,mesh.positions[k+2]+n[2]*thickness);
-   normals.push(...n);
-  }
-  indices.push(start,start+1,start+2);
+  const ids=[triangles[i],triangles[i+1],triangles[i+2]],p=ids.map(id=>mesh.positions.slice(id*3,id*3+3)),e1=p[1].map((x,k)=>x-p[0][k]),e2=p[2].map((x,k)=>x-p[0][k]),cr=cross(e1,e2),twiceArea=Math.hypot(...cr),n=norm(cr);
+  const exposure=Math.max(0,Math.min(1,(n[1]-.14)/.86)),weight=twiceArea*.5*exposure*exposure;
+  if(weight<1e-7)continue;total+=weight;candidates.push({ids,p,n,e1,cumulative:total});
  }
- return positions.length?{kind:'triangle-mesh',positions,normals,indices}:null;
+ if(!candidates.length)return null;
+ const positions=[],normals=[],indices=[],count=Math.min(180,Math.max(48,Math.round(candidates.length*.62)));
+ for(let grain=0;grain<count;grain++){
+  const needle=random()*total;let tri=candidates[candidates.length-1];for(const q of candidates)if(q.cumulative>=needle){tri=q;break;}
+  const su=Math.sqrt(random()),v=random(),weights=[1-su,su*(1-v),su*v],center=[0,1,2].map(k=>tri.p.reduce((sum,p,j)=>sum+p[k]*weights[j],0));
+  const n=tri.n,tangent=norm(tri.e1),bitangent=norm(cross(n,tangent)),radius=.007+random()*.013,height=.0018+random()*.0035,offset=.0012+random()*.0014,rays=6,start=positions.length/3;
+  positions.push(center[0]+n[0]*(offset+height),center[1]+n[1]*(offset+height),center[2]+n[2]*(offset+height));normals.push(...n);
+  for(let k=0;k<rays;k++){
+   const a=k/rays*Math.PI*2,rr=radius*(.72+random()*.34),edge=center.map((x,j)=>x+(tangent[j]*Math.cos(a)+bitangent[j]*Math.sin(a))*rr+n[j]*offset);
+   positions.push(...edge);const side=norm([n[0]*.85+tangent[0]*Math.cos(a)*.22+bitangent[0]*Math.sin(a)*.22,n[1]*.85+tangent[1]*Math.cos(a)*.22+bitangent[1]*Math.sin(a)*.22,n[2]*.85+tangent[2]*Math.cos(a)*.22+bitangent[2]*Math.sin(a)*.22]);normals.push(...side);
+  }
+  for(let k=0;k<rays;k++)indices.push(start,start+1+k,start+1+(k+1)%rays);
+ }
+ return{kind:'triangle-mesh',positions,normals,indices};
 }
 function snowShells(actor,entities){
  const byId=new Map(entities.map(e=>[e.id,e])),material={kind:'snow',color:[.91,.94,.96,1],roughness:.96,texture:{url:'/assets/snow-granular.png',sizeM:.22,bumpStrength:.55,albedoStrength:.5}};
@@ -99,7 +105,7 @@ export function createPerformanceStage(){
  add('tea-pot-spout',{kind:'cylinder',radius:.018,topRadius:.010,height:.135,segments:20},pot);
  add('tea-stream',{kind:'cylinder',radius:.0026,height:1,segments:10},{kind:'default',color:[.36,.17,.050,1],roughness:.1,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
  for(let i=0;i<12;i++)add('tea-steam-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.66,.70,.72,.07],roughness:1},[0,0,0],{scale:[.0001,.0001,.0001]});
- for(let i=0;i<96;i++)add('tea-spray-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.42,.115,.018,.95],roughness:.06,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
+ for(let i=0;i<128;i++)add('tea-spray-'+i,{kind:'sphere',radius:.5,segments:6},{kind:'default',color:[.34,.095,.014,.82],roughness:.06,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
  const actors=cast.flatMap(actor=>{
   const base=makePedestrian({...actor,speed:0}).filter(e=>!e.id.endsWith('-nose')&&!e.id.endsWith('-head')&&!e.id.includes('-snow'));
   return [...base,...snowShells(actor,base)];
