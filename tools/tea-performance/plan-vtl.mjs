@@ -11,11 +11,20 @@ const native=createTeaPerformancePlan();
 // represents these two English diphthongs as consecutive phone gestures rather
 // than single symbols; split their authored duration evenly, preserving the
 // utterance duration and all prosody control times.
+const VTL_EQUIVALENT=Object.freeze({
+  A:'a',      // open back vowel: VTL inventory uses /a/
+  ae:'E',     // front-open English target approximated by VTL /E/
+  V:'a',      // STRUT-like target: same choice used by the accepted VTL tea plan
+  w:'u',      // labial-velar glide represented as a short /u/ gesture
+});
 const splitForVtl=segment=>{
   const pair=segment.phone==='oU'?['o','U']:segment.phone==='eI'?['e','I']:null;
-  if(!pair)return [segment];
-  const a=segment.durationS/2,b=segment.durationS-a;
-  return [{phone:pair[0],durationS:a},{phone:pair[1],durationS:b}];
+  if(pair){
+    const a=segment.durationS/2,b=segment.durationS-a;
+    return [{phone:pair[0],durationS:a},{phone:pair[1],durationS:b}];
+  }
+  const equivalent=VTL_EQUIVALENT[segment.phone];
+  return equivalent?[{...segment,phone:equivalent}]:[segment];
 };
 const speakers=native.speakers.map(speaker=>({
   id:speaker.id,
