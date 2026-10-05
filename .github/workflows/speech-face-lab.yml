@@ -99,6 +99,8 @@ jobs:
         run: |
           if ! command -v ffmpeg; then sudo apt-get update -qq && sudo apt-get install -y ffmpeg; fi
           python3 -m pip install faster-whisper==1.2.1
+      - name: Independent PCM decoder and error-counting regressions
+        run: python3 tools/speech-lab/test_recognize.py
       - name: Both unprompted acceptance gates, no cherry-picked cases
         env:
           WHISPER_MODEL: base.en
