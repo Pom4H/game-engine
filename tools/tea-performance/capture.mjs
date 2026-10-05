@@ -9,8 +9,8 @@ const mode=process.argv[2]??'storyboard';if(!['storyboard','video'].includes(mod
 const root=resolve('.'),out=resolve(process.env.TEA_OUTPUT??'artifacts/tea-performance');await mkdir(out,{recursive:true});
 const width=Number(process.env.TEA_WIDTH??960),height=Number(process.env.TEA_HEIGHT??540),fps=Number(process.env.TEA_FPS??20);
 if(![width,height].every(x=>Number.isInteger(x)&&x>=160&&x<=3840&&x%2===0)||![15,20,30,60].includes(fps))throw new RangeError('Invalid capture dimensions/cadence');
-const plan=createTeaPerformancePlan(),planPath=out+'/plan.json',audioPath=resolve(process.env.TEA_AUDIO??out+'/dialogue.wav');
-await writeFile(planPath,JSON.stringify(plan,null,2));
+const plan=createTeaPerformancePlan(),requestedPlan=process.env.TEA_PLAN?resolve(process.env.TEA_PLAN):null,planPath=requestedPlan??out+'/plan.json',audioPath=resolve(process.env.TEA_AUDIO??out+'/dialogue.wav');
+if(requestedPlan){JSON.parse(await readFile(planPath,'utf8'));}else await writeFile(planPath,JSON.stringify(plan,null,2));
 const started=Date.now(),sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const capture=await createWebGpuCapture({root,width,height,planPath,audioPath,pagePath:'/tools/tea-performance/player.html'});
 let encoder;
@@ -32,7 +32,7 @@ try{
    if(i%fps===0)evidence.views.push({frame:i,time:frame.timeS,scene:frame.scene,renderer:frame.renderer});if(i%60===0)console.log(JSON.stringify({frame:i,frames,time:i/fps}));
   }
   encoder.stdin.end();const [code]=await done;if(code!==0)throw new Error('Encoder failed '+code);encoder=null;
-  const mux=spawnSync('ffmpeg',['-y','-v','error','-i',silent,'-i',audioPath,'-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','192k','-af','apad','-t',String(capture.duration),'-movflags','+faststart',output],{encoding:'utf8'});if(mux.status!==0)throw new Error(mux.stderr);await unlink(silent);evidence.frames=frames;evidence.videoSha256=sha(await readFile(output));
+  const mux=spawnSync('ffmpeg',['-y','-v','error','-i',silent,'-i',audioPath,'-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','256k','-af','apad','-t',String(capture.duration),'-movflags','+faststart',output],{encoding:'utf8'});if(mux.status!==0)throw new Error(mux.stderr);await unlink(silent);evidence.frames=frames;evidence.videoSha256=sha(await readFile(output));
  }
  evidence.elapsedSeconds=(Date.now()-started)/1000;await writeFile(out+'/'+mode+'-evidence.json',JSON.stringify(evidence,null,2));
  console.log(JSON.stringify({...evidence,views:undefined}));
