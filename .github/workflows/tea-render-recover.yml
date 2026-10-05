@@ -51,8 +51,9 @@ jobs:
           ffmpeg -y -v error -i $video -vn -c:a pcm_s16le $muxed
           if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }
           $volume = Join-Path $root 'recovered-volume.txt'
-          cmd.exe /d /s /c "ffmpeg -hide_banner -i \"$muxed\" -af volumedetect -f null - 2> \"$volume\""
-          if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }
+          $stdout=Join-Path $root 'recovered-volume-stdout.txt'
+          $proc=Start-Process -FilePath 'ffmpeg' -ArgumentList @('-hide_banner','-i',$muxed,'-af','volumedetect','-f','null','-') -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $volume
+          if($proc.ExitCode -ne 0){ exit $proc.ExitCode }
           $txt=Get-Content $volume -Raw
           if($txt -notmatch 'max_volume:\s*(-?[0-9.]+) dB'){ throw 'No audio peak measurement' }
           $peak=[double]$Matches[1]
