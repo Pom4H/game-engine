@@ -8,7 +8,7 @@ import {createTeaPerformance} from './scene.mjs';
 import {createTeaPerformancePlan} from './plan.mjs';
 
 const width=Number(process.env.TEA_WIDTH??640),height=Number(process.env.TEA_HEIGHT??360),fps=Number(process.env.TEA_FPS??15);
-if(![10,12,15,20,30].includes(fps)||!Number.isInteger(width)||!Number.isInteger(height)||width%2||height%2)throw new RangeError('Invalid capture geometry/cadence');
+if(![6,8,10,12,15,20,30].includes(fps)||!Number.isInteger(width)||!Number.isInteger(height)||width%2||height%2)throw new RangeError('Invalid capture geometry/cadence');
 const out=resolve(process.env.TEA_OUTPUT??'artifacts/tea-performance-vtl');
 const planPath=resolve(process.env.TEA_PLAN??out+'/plan.json'),audioPath=resolve(process.env.TEA_AUDIO??out+'/dialogue.wav');
 await mkdir(out,{recursive:true});
