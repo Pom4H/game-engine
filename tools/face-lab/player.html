@@ -1,0 +1,21 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Лаборатория мимики</title>
+<style>html,body{margin:0;background:#14202b;color:#f1f2f3;font:14px system-ui;overflow:hidden}canvas{display:block;width:100vw;height:100vh;object-fit:contain}#info{position:fixed;top:18px;left:24px;right:24px;pointer-events:none;line-height:1.5;text-shadow:0 1px 4px #000}h1{font-size:16px;margin:0 0 5px;font-weight:600}p{margin:0;font-size:12px;opacity:.78}#controls{position:fixed;bottom:18px;left:24px;display:flex;gap:8px}#controls[hidden]{display:none}button{font:inherit;color:inherit;background:#263747;border:1px solid #ffffff40;padding:9px 15px;cursor:pointer}</style>
+<canvas></canvas><div id="info"><h1>Речь · выражение · взгляд · моргание</h1><p id="status">WebGPU · процедурная деформация анатомической сетки</p><p>Проверка мимики без звука. TS-речь ещё не прошла проверку разборчивости.</p></div><div id="controls"><button id="toggle">Пауза</button><button id="reset">Сначала</button></div>
+<script type="module">
+import {WebGPURenderer} from '/dist/browser.js';
+import {createFaceLab} from './scene.mjs';
+const params=new URLSearchParams(location.search),capture=params.has('capture'),canvas=document.querySelector('canvas'),status=document.querySelector('#status');canvas.width=+(params.get('width')??960);canvas.height=+(params.get('height')??540);
+if(capture)document.querySelector('#controls').hidden=true;
+try{
+ let lab=createFaceLab(),frameIndex=0;lab.frame(0);
+ const renderer=await WebGPURenderer.create(canvas,{profiling:true});renderer.setResolution(canvas.width,canvas.height);await renderer.prepareMaterials(lab.scene);
+ window.teaScene={duration:lab.duration,async frame(t){const state=lab.frame(t);renderer.setTimelineFrame(frameIndex++);renderer.render(lab.scene,lab.scene.camera);await renderer.flush();const stats=renderer.inspect();if(stats.errors.length)throw new Error(JSON.stringify(stats.errors));status.textContent=state.actors.map(a=>`${a.id}: ${a.phone||'пауза'}`).join('   ·   ')+`   |   ${t.toFixed(1)} с`;await new Promise(requestAnimationFrame);return{timeS:state.timeS,scene:state,renderer:stats};}};window.teaReady=true;
+ if(!capture){
+  let running=true,time=0,last=performance.now(),busy=false,reset=false;
+  document.querySelector('#toggle').onclick=()=>{running=!running;document.querySelector('#toggle').textContent=running?'Пауза':'Смотреть';last=performance.now();};
+  document.querySelector('#reset').onclick=()=>{reset=true;};
+  const loop=async now=>{if(busy)return;busy=true;try{if(reset||time>=lab.duration){lab.dispose();lab=createFaceLab();lab.frame(0);renderer.resetTemporalHistory();time=0;frameIndex=0;last=now;reset=false;}if(running)time=Math.min(lab.duration,time+(now-last)/1000);last=now;await window.teaScene.frame(time);}catch(e){running=false;status.textContent=String(e);console.error(e);}finally{busy=false;requestAnimationFrame(loop);}};
+  requestAnimationFrame(loop);addEventListener('pagehide',()=>{running=false;lab.dispose();renderer.dispose();},{once:true});
+ }
+}catch(e){window.teaError=e.stack??String(e);status.textContent=window.teaError;console.error(e);}
+</script></html>

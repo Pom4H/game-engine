@@ -1,37 +1,123 @@
 name: Speech Face Lab
 on:
-  pull_request:
-    paths: ['.github/workflows/speech-face-lab.yml']
+  workflow_call:
+    inputs:
+      source_ref:
+        type: string
+        required: true
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/animation/face-surface.ts'
+      - 'src/animation/expressive-face.ts'
+      - 'src/assets/face-reference.ts'
+      - 'src/procedural/mesh-stream.ts'
+      - 'src/procedural/mesh.ts'
+      - 'src/render/webgpu.ts'
+      - 'src/audio/native-*.ts'
+      - 'tools/face-lab/**'
+      - 'tools/speech-lab/**'
+      - 'test/face-surface.test.mjs'
+      - 'test/mesh-stream-render.test.mjs'
+      - 'test/speech-lab.test.mjs'
+      - '.github/workflows/speech-face-lab.yml'
 permissions:
   contents: read
 jobs:
-  reproduce:
+  contracts:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 8
+    outputs:
+      commit: ${{ steps.source.outputs.sha }}
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ inputs.source_ref || github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile && bun run typecheck && bun run build
-      - name: Exact source, build and CC0 mesh reference
-        run: |
-          mkdir -p artifacts/reproduction/reference
-          git archive --format=tar HEAD | gzip > artifacts/reproduction/source.tar.gz
-          tar -czf artifacts/reproduction/build.tar.gz dist node_modules
-          git rev-parse HEAD > artifacts/reproduction/commit.txt
-          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/base.obj -o artifacts/reproduction/reference/base.obj
-          test "$(git hash-object artifacts/reproduction/reference/base.obj)" = d26635e9326e3cca30778fd7b9c00062b03cce09
-          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.ASSETS.md -o artifacts/reproduction/reference/LICENSE.ASSETS.md
-          curl --fail --location --max-time 60 https://raw.githubusercontent.com/makehumancommunity/makehuman/master/LICENSE.md -o artifacts/reproduction/reference/LICENSE.md
-          sha256sum artifacts/reproduction/reference/* > artifacts/reproduction/reference/SHA256SUMS
-      - uses: actions/upload-artifact@v4
+      - name: Geometry, aperture, stream lifetime, speech controls and the complete tea performance
+        run: node --test test/face-surface.test.mjs test/mesh-stream-render.test.mjs test/speech-lab.test.mjs test/tea-performance.test.mjs test/conversation-face.test.mjs test/tea-scene.test.mjs test/native-speech.test.mjs test/native-tract-energy.test.mjs
+  browser-validation:
+    needs: contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
         with:
-          name: speech-face-lab-inputs
-          path: artifacts/reproduction
+          ref: ${{ needs.contracts.outputs.commit }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run build
+      - name: Explicit software WebGPU validation, not the hardware render gate
+        env:
+          TEA_SOFTWARE_GPU: '1'
+          GITHUB_SHA: ${{ needs.contracts.outputs.commit }}
+        run: |
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          test -n "$CHROME_PATH"
+          if ! command -v ffmpeg; then sudo apt-get update -qq && sudo apt-get install -y ffmpeg; fi
+          node tools/face-lab/capture.mjs
+      - name: Collect inspectable evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/face-lab
+          git rev-parse HEAD > artifacts/face-lab/source-commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: face-flex-software-validation
+          path: artifacts/face-lab
+          retention-days: 1
+  intelligibility:
+    needs: contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.contracts.outputs.commit }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run build
+      - name: Render the complete fixed corpus and independent long dialogue
+        env:
+          GITHUB_SHA: ${{ needs.contracts.outputs.commit }}
+        run: |
+          node tools/speech-lab/render.mjs
+          node tools/tea-performance/audio.mjs
+      - name: Install independent recognizer
+        run: |
+          if ! command -v ffmpeg; then sudo apt-get update -qq && sudo apt-get install -y ffmpeg; fi
+          python3 -m pip install faster-whisper==1.2.1
+      - name: Both unprompted acceptance gates, no cherry-picked cases
+        env:
+          WHISPER_MODEL: base.en
+        run: |
+          ffmpeg -y -v error -i artifacts/tea-performance/dialogue.wav -ac 1 -ar 16000 artifacts/tea-performance/dialogue-16k.wav
+          set +e
+          python3 tools/speech-lab/recognize.py artifacts/speech-lab
+          short_status=$?
+          python3 tools/tea-performance/diagnose-asr.py artifacts/tea-performance/dialogue-16k.wav artifacts/tea-performance/plan.json artifacts/tea-performance/asr-turns.json
+          turn_status=$?
+          python3 tools/npc-speech-demo/whisper-intelligibility.py artifacts/tea-performance/dialogue-16k.wav "$(cat artifacts/tea-performance/expected.txt)" 0.25 artifacts/tea-performance/asr.json
+          long_status=$?
+          test "$short_status" -eq 0 && test "$turn_status" -eq 0 && test "$long_status" -eq 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-speech-fixed-corpus-evidence
+          path: |
+            artifacts/speech-lab
+            artifacts/tea-performance/*.json
+            artifacts/tea-performance/expected.txt
           retention-days: 1
