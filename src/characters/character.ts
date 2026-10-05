@@ -77,7 +77,7 @@ export function characterSpec(input:unknown=DEFAULT_CHARACTER_SPEC):CharacterSpe
 
 function frozen(spec:CharacterSpec):CharacterSpec{return Object.freeze({...spec,body:Object.freeze(spec.body),outfit:Object.freeze(spec.outfit),colors:Object.freeze(spec.colors)});}
 export const CHARACTER_PRESETS:readonly {readonly id:string;readonly name:string;readonly description:string;readonly spec:CharacterSpec}[]=Object.freeze([
- Object.freeze({id:'skeptic',name:'Скептик',description:'Длинная парка, узкие джинсы и тяжёлые ботинки.',spec:DEFAULT_CHARACTER_SPEC}),
+ Object.freeze({id:'skeptic',name:'Скептик',description:'Укороченная парка, узкие джинсы и тяжёлые ботинки.',spec:DEFAULT_CHARACTER_SPEC}),
  Object.freeze({id:'mechanic',name:'Механик',description:'Широкие плечи, рабочая куртка и карго.',spec:frozen(characterSpec({id:'mechanic',seed:832,body:{height:1.79,shoulders:1.14,hips:1.04,torso:1.01,arms:1,legs:.96,build:.77},outfit:{top:'jacket',bottom:'cargo',shoes:'boots',scarf:false},colors:{skin:'#b59178',hair:'#332821',top:'#58645a',bottom:'#54564c',shoes:'#302c29',scarf:'#7a8174'},hairStyle:'short',expression:'neutral'}))}),
  Object.freeze({id:'wanderer',name:'Наблюдатель',description:'Тёплый свитер, прямые джинсы и кеды.',spec:frozen(characterSpec({id:'wanderer',seed:6029,body:{height:1.83,shoulders:1.02,hips:.99,torso:.98,arms:1.01,legs:1.03,build:.43},outfit:{top:'sweater',bottom:'jeans',shoes:'sneakers',scarf:false},colors:{skin:'#d1af95',hair:'#675044',top:'#47687a',bottom:'#414e5c',shoes:'#afaa9d',scarf:'#777c89'},hairStyle:'swept',expression:'smirk'}))}),
 ]);
@@ -140,7 +140,7 @@ export function compileCharacter(input:CharacterSpec|unknown=DEFAULT_CHARACTER_S
  const spec=characterSpec(input),b=spec.body,proportions={shoulders:b.shoulders,hips:b.hips,torso:b.torso,arms:b.arms,legs:b.legs},m=humanoidMeasurements(proportions);
  const unitWalker:WalkerSpec={id:spec.id,root:[0,0,0],speed:0,proportions,stance:'neutral'},heightScale=b.height/(sampleWalker(unitWalker,0).joints.head[1]+characterHeadTopOffset(spec.hairStyle));
  const entities:EntitySpec[]=[],bindings:HumanoidBinding[]=[],skin=color(spec.colors.skin),top=color(spec.colors.top),bottom=color(spec.colors.bottom),shoes=color(spec.colors.shoes),scarf=color(spec.colors.scarf),stitch=shade(top,.73),hardware:MaterialSpec={color:[.32,.30,.25,1],roughness:.52,metalness:.45};
- const width=.85+b.build*.30,depth=.82+b.build*.47,coat=spec.outfit.top,torso=m.shoulderOffset,hem=coat==='parka'?-.17:coat==='jacket'?-.062:-.028,extra=coat==='parka'?1.09:coat==='jacket'?1.03:1;
+ const width=.85+b.build*.30,depth=.82+b.build*.47,coat=spec.outfit.top,torso=m.shoulderOffset,hem=coat==='parka'?-.085:coat==='jacket'?-.062:-.028,extra=coat==='parka'?1.09:coat==='jacket'?1.03:1;
  // Shoulder span is skeletal: changing soft-tissue build must not pull the
  // torso away from its sleeve sockets at the widest shoulder setting.
  const chestWidth=(Math.max(.16,m.shoulderHalfWidth)+.012+(b.build-.5)*.028)*extra,hipWidth=m.hipHalfWidth+.077*width,bodyDepth=.128*depth*extra,front=.012;
@@ -151,19 +151,19 @@ export function compileCharacter(input:CharacterSpec|unknown=DEFAULT_CHARACTER_S
  const legWidth=.87+b.build*.23;
  const thigh=(name:string)=>loft([[-.57,.084*depth,.082*legWidth],[-.43,.097*depth,.095*legWidth],[-.15,.092*depth,.094*legWidth],[.24,.080*depth,.081*legWidth],[.48,.073*depth,.074*legWidth],[.56,.069*depth,.071*legWidth]],seed(name+'-thigh'),.0024,.88,36,3);
  const thighMeshes={left:thigh('left'),right:thigh('right')};
- // Long outerwear needs room for two thighs and their forward swing. A flared,
- // flatter lower cut keeps the full hem outside the trousers in motion.
+ // A cropped parka clears the moving upper thighs without a long, rigid flap
+ // projecting forward. Sewing ease follows only the trousers above its hem.
  const topRoundness=coat==='parka'?.70:.85;
  let lowerRings:ClothRing[]=[[hem,.98*bodyDepth,hipWidth*extra,front],[hem+.025,bodyDepth,hipWidth*extra*1.005,front],[Math.max(.045,hem+.085),bodyDepth*.96,hipWidth*extra*.97,front]];
  if(coat==='parka'){
-  const heights=[hem,hem+.035,-.070,.015,.060],points:Vec3[]=[],rig:HumanoidBinding[]=[{entity:'left',joint:'leftHip',boneTo:'leftKnee'},{entity:'right',joint:'rightHip',boneTo:'rightKnee'}];
+  const heights=[hem,hem+.025,-.015,.030,.075],points:Vec3[]=[],rig:HumanoidBinding[]=[{entity:'left',joint:'leftHip',boneTo:'leftKnee'},{entity:'right',joint:'rightHip',boneTo:'rightKnee'}];
   // Fit only the lower cut to the exact generated trouser surface, across the
   // editor's complete gait. Upper torso/shoulders keep their authored shape.
   for(let frame=-1;frame<=64;frame++){
    const pose=sampleWalker({...unitWalker,speed:frame<0?0:.62,period:1.3},frame<0?0:frame*1.3/64);
    for(const transform of bindHumanoid(pose,rig)){
     const mesh=thighMeshes[transform.entity as 'left'|'right'],matrix=compose(transform.position,transform.rotation,transform.scale),p=mesh.positions;
-    for(let i=0;i<p.length;i+=3){const y=matrix[1]!*p[i]!+matrix[5]!*p[i+1]!+matrix[9]!*p[i+2]!+matrix[13]!-pose.joints.pelvis[1];if(y<hem-.035||y>.12)continue;points.push([matrix[0]!*p[i]!+matrix[4]!*p[i+1]!+matrix[8]!*p[i+2]!+matrix[12]!-pose.joints.pelvis[0],y,matrix[2]!*p[i]!+matrix[6]!*p[i+1]!+matrix[10]!*p[i+2]!+matrix[14]!-pose.joints.pelvis[2]]);}
+    for(let i=0;i<p.length;i+=3){const y=matrix[1]!*p[i]!+matrix[5]!*p[i+1]!+matrix[9]!*p[i+2]!+matrix[13]!-pose.joints.pelvis[1];if(y<hem-.002||y>.12)continue;points.push([matrix[0]!*p[i]!+matrix[4]!*p[i+1]!+matrix[8]!*p[i+2]!+matrix[12]!-pose.joints.pelvis[0],y,matrix[2]!*p[i]!+matrix[6]!*p[i+1]!+matrix[10]!*p[i+2]!+matrix[14]!-pose.joints.pelvis[2]]);}
    }
   }
   lowerRings=heights.map((y,index)=>{
