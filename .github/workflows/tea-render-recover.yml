@@ -26,7 +26,10 @@ jobs:
 
           $expectedVideoSha='87b60a32fd8243ce750a2c18982bc18b219ed8310d715cf70f2ec64c723109b6'
           $expectedSource='7e88ab9c112a5d263fea71d134f11836c31ec953'
-          $actualVideoSha=(Get-FileHash -Algorithm SHA256 $video).Hash.ToLowerInvariant()
+          $sha256=[System.Security.Cryptography.SHA256]::Create()
+          $stream=[System.IO.File]::OpenRead($video)
+          try { $actualVideoSha=[System.BitConverter]::ToString($sha256.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+          finally { $stream.Dispose(); $sha256.Dispose() }
           if($actualVideoSha -ne $expectedVideoSha){ throw "Unexpected MP4 SHA $actualVideoSha" }
 
           $e=Get-Content $evidencePath -Raw | ConvertFrom-Json
