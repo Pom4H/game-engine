@@ -25,7 +25,14 @@ try{
  }else{
   const audio=await readFile(audioPath);if(audio.toString('ascii',0,4)!=='RIFF')throw new TypeError('WAV required');evidence.audioSha256=sha(audio);
   const silent=out+'/tea-performance-silent.mp4',output=out+'/tea-performance.mp4',frames=Math.round(capture.duration*fps);
-  encoder=spawn('ffmpeg',['-y','-v','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-movflags','+faststart',silent],{stdio:['pipe','inherit','inherit']});
+  const encoders=spawnSync('ffmpeg',['-hide_banner','-encoders'],{encoding:'utf8'});if(encoders.status!==0)throw new Error(encoders.stderr||'ffmpeg -encoders failed');
+  const available=new Set((encoders.stdout+'\n'+encoders.stderr).split(/\r?\n/).map(line=>line.trim().split(/\s+/)[1]).filter(Boolean));
+  const videoEncoder=['libx264','h264_amf','h264_nvenc','h264_qsv','h264_mf'].find(name=>available.has(name));
+  if(!videoEncoder)throw new Error('No H.264 encoder available; expected one of libx264/h264_amf/h264_nvenc/h264_qsv/h264_mf');
+  const codecArgs=videoEncoder==='libx264'?['-c:v',videoEncoder,'-preset','fast','-crf','20']:['-c:v',videoEncoder,'-b:v','12M','-maxrate','18M','-bufsize','24M'];
+  evidence.videoEncoder=videoEncoder;
+  console.log(JSON.stringify({videoEncoder}));
+  encoder=spawn('ffmpeg',['-y','-v','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an',...codecArgs,'-pix_fmt','yuv420p','-movflags','+faststart',silent],{stdio:['pipe','inherit','inherit']});
   const done=once(encoder,'exit');done.catch(()=>{});let error;encoder.on('error',e=>error=e);encoder.stdin.on('error',e=>error=e);
   for(let i=0;i<frames;i++){
    const frame=await capture.frame(i/fps);if(error)throw error;if(!encoder.stdin.write(frame.bytes))await once(encoder.stdin,'drain');
