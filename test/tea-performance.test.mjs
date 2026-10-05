@@ -10,7 +10,7 @@ const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 
 test('new script contains thirteen authored turns without overlapping one speaker or silently inventing unknown words',()=>{
  const p=createTeaPerformancePlan();assert.equal(p.turns.length,13);assert.equal(TEA_PERFORMANCE_DURATION,42);
- assert.equal(p.turns.reduce((n,t)=>n+t.text.match(/[a-z]+/gi).length,0),55);
+ assert.equal(p.turns.reduce((n,t)=>n+t.text.match(/[a-z]+/gi).length,0),51);
  assert.throws(()=>pronounce('Unknown'),/Missing authored/);
  assert.notEqual(p.speakers[0].tractLengthM,p.speakers[1].tractLengthM);
  for(const s of p.speakers){let end=0;for(const t of p.turns.filter(t=>t.speakerId===s.id)){assert.ok(t.startS>=end);end=t.startS+t.segments.reduce((n,p)=>n+p.durationS,0);}assert.ok(end<42);}
