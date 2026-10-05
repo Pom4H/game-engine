@@ -134,14 +134,14 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
   const potGrip=point(potMatrix,[-.126,.016,0]),flow=window(t,7.91,8.12,9.95,10.14),stream=segmentPose(spout,liquid);
   put(scene,'tea-stream',stream.position,stream.rotation,[Math.max(.0001,flow),Math.max(.0001,stream.length*flow),Math.max(.0001,flow)]);
   for(let i=0;i<12;i++){const age=(t*.62+i/12)%1,visible=fill*(1-age)**2,size=(.008+.016*age)*visible;put(scene,'tea-steam-'+i,add(cupPosition,[Math.sin(i*2.399+t*.9)*.015+age*.018,.057+age*.16,Math.cos(i*2.399+t*.63)*.012]),[0,0,0],[Math.max(.0001,size),Math.max(.0001,size*1.45),Math.max(.0001,size)]);}
-  const sprayAge=t-18.92,sprayAlive=sprayAge>=0&&sprayAge<1.05,spitOrigin=anna.face.lowerLipWorld;
+  const sprayAge=t-18.92,sprayAlive=sprayAge>=0&&sprayAge<1.28,spitOrigin=anna.face.lowerLipWorld;
   for(let i=0;i<96;i++){
    if(!sprayAlive){put(scene,'tea-spray-'+i,[0,-50,0],[0,0,0],[.0001,.0001,.0001]);continue;}
    const r0=hash01(i+1),r1=hash01(i+101),r2=hash01(i+211),r3=hash01(i+307);
-   const localVelocity=[.75+r0*2.25,(r1-.28)*1.45,(r2-.5)*2.35],velocity=rotate(anna.rotation,localVelocity);
+   const localVelocity=[.62+r0*2.70,(r1-.34)*1.95,(r2-.5)*3.10],velocity=rotate(anna.rotation,localVelocity);
    const drag=(1-Math.exp(-2.1*sprayAge))/2.1,origin=i%5===0?point(cupMatrix,[.01,.045,(r2-.5)*.035]):spitOrigin;
-   const p=[origin[0]+velocity[0]*drag,origin[1]+velocity[1]*drag-4.2*sprayAge*sprayAge,origin[2]+velocity[2]*drag];
-   const size=(.003+r3*.008)*(1-clamp((sprayAge-.72)/.33));
+   const p=[origin[0]+velocity[0]*drag,origin[1]+velocity[1]*drag-3.4*sprayAge*sprayAge,origin[2]+velocity[2]*drag];
+   const size=(.006+r3*.014)*(1-clamp((sprayAge-.90)/.36));
    put(scene,'tea-spray-'+i,p,[0,0,0],[Math.max(.0001,size),Math.max(.0001,size*(1.1+r0*1.7)),Math.max(.0001,size)]);
   }
   const results=[];
@@ -162,7 +162,7 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
     left=mix(left,at(.25,1.43,.02),window(t,10.75,11.3,12.4,13));
     const receive=ramp(t,13.9,14.85);right=mix(right,gripAnna,receive);if(receive>.999)rightGrip='cup';
     const support=window(t,15.65,16.6,18.65,19.05);left=mix(left,point(cupMatrix,[.016,-.012,.048]),support);
-    left=mix(left,add(item.face.lowerLipWorld,[-.035,.025,.055]),window(t,18.78,19.03,20.18,20.72));
+    left=mix(left,local(joints.chest,[0,pose.heading,0],[.34,.12,-.34]),window(t,18.78,19.03,20.18,20.72));
     left=mix(left,local(joints.chest,[0,pose.heading,0],[.28,.07,-.12]),window(t,24.2,24.9,26.0,26.8));
     left=mix(left,add(joints.leftShoulder,[.025,.06,.45]),window(t,29.6,30.2,31.2,31.9));
    }

@@ -16,12 +16,10 @@ function snowShellMesh(mesh,seed){
  for(let i=0;i<triangles.length;i+=3){
   const ia=triangles[i],ib=triangles[i+1],ic=triangles[i+2],ids=[ia,ib,ic];
   const ny=(mesh.normals[ia*3+1]+mesh.normals[ib*3+1]+mesh.normals[ic*3+1])/3;
-  const exposure=Math.max(0,Math.min(1,(ny-.08)/.92));
-  const noise=fract(Math.sin((i+1)*(12.9898+seed*.071))*43758.5453);
-  // Snow is a conformal shell of the garment itself: no independent cloud of
-  // flakes can drift away from elbows, shoulders or the hat when the rig moves.
-  if(exposure<.12||noise>exposure*.88)continue;
-  const start=positions.length/3,thickness=.0025+.0035*exposure;
+  // Keep one continuous conformal cap on genuinely upward-facing cloth.
+  // The previous stochastic triangle mask exposed the coarse garment topology.
+  if(ny<.46)continue;
+  const start=positions.length/3,thickness=.0018+.0014*Math.min(1,ny);
   for(const id of ids){
    const k=id*3,n=[mesh.normals[k],mesh.normals[k+1],mesh.normals[k+2]];
    positions.push(mesh.positions[k]+n[0]*thickness,mesh.positions[k+1]+n[1]*thickness,mesh.positions[k+2]+n[2]*thickness);
@@ -101,7 +99,7 @@ export function createPerformanceStage(){
  add('tea-pot-spout',{kind:'cylinder',radius:.018,topRadius:.010,height:.135,segments:20},pot);
  add('tea-stream',{kind:'cylinder',radius:.0026,height:1,segments:10},{kind:'default',color:[.36,.17,.050,1],roughness:.1,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
  for(let i=0;i<12;i++)add('tea-steam-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.66,.70,.72,.07],roughness:1},[0,0,0],{scale:[.0001,.0001,.0001]});
- for(let i=0;i<96;i++)add('tea-spray-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.28,.075,.012,.92],roughness:.08,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
+ for(let i=0;i<96;i++)add('tea-spray-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.42,.115,.018,.95],roughness:.06,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
  const actors=cast.flatMap(actor=>{
   const base=makePedestrian({...actor,speed:0}).filter(e=>!e.id.endsWith('-nose')&&!e.id.endsWith('-head')&&!e.id.includes('-snow'));
   return [...base,...snowShells(actor,base)];
