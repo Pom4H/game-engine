@@ -23,13 +23,13 @@ function segmentPose(a,b){const d=sub(b,a),length=Math.hypot(...d);return{positi
 export function performanceCamera(t){
  let shot='arrival',p=at(-.05,1.83,-2.55),q=at(0,1.28,0),fov=36;
  if(t>=1.15&&t<4.25){shot='offer';p=at(.54,1.79,-1.10);q=at(-.54,1.59,0);fov=27;}
- else if(t>=4.25&&t<7.40){shot='cold-hands';p=at(-.60,1.77,-1.20);q=at(.52,1.47,0);fov=30;}
+ else if(t>=4.25&&t<7.40){shot='cold-hands';p=at(.12,1.79,-1.58);q=at(.52,1.47,0);fov=30;}
  else if(t>=7.40&&t<11){shot='warning-and-pour';p=at(-.08,1.78,-2.15);q=at(-.04,1.31,-.015);fov=34;}
- else if(t>=11&&t<13.6){shot='confident';p=at(-.55,1.80,-1.16);q=at(.51,1.53,0);fov=28;}
+ else if(t>=11&&t<13.6){shot='confident';p=at(.16,1.80,-1.42);q=at(.51,1.53,0);fov=28;}
  else if(t>=13.6&&t<17.4){shot='handoff';p=at(-.07,1.79,-2.06);q=at(0,1.38,-.025);fov=33;}
- else if(t>=17.4&&t<21.65){shot='too-hot';p=at(-.62,1.79,-1.13);q=at(.47,1.49,0);fov=31;}
+ else if(t>=17.4&&t<21.65){shot='too-hot';p=at(.14,1.80,-1.42);q=at(.47,1.49,0);fov=31;}
  else if(t>=21.65&&t<24.35){shot='told-you';p=at(.50,1.80,-1.08);q=at(-.55,1.58,0);fov=26;}
- else if(t>=24.35&&t<27.2){shot='teasing';p=at(-.62,1.78,-1.17);q=at(.50,1.53,0);fov=28;}
+ else if(t>=24.35&&t<27.2){shot='teasing';p=at(.12,1.79,-1.44);q=at(.50,1.53,0);fov=28;}
  else if(t>=27.2&&t<29.55){shot='smirk';p=at(.52,1.78,-1.10);q=at(-.55,1.58,0);fov=27;}
  else if(t>=29.55&&t<37.6){shot='lets-go';p=at(-.11,1.84,-2.40);q=at(0,1.38,.05);fov=35;}
  else if(t>=37.6){shot='departure';const d=.46*(t-37.6);p=at(-1.50,1.88,-1.55+d*.30);q=at(.0,1.22,.30+d);fov=39;}
