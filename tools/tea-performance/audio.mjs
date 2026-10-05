@@ -1,0 +1,11 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {resolve} from 'node:path';
+import {renderNativeSpeech} from '../../dist/audio/native-speech.js';
+import {wavBytes} from '../../dist/audio/synth.js';
+import {createTeaPerformancePlan,TEA_PERFORMANCE_DURATION} from './plan.mjs';
+const out=resolve(process.env.TEA_OUTPUT??'artifacts/tea-performance');await mkdir(out,{recursive:true});
+const plan=createTeaPerformancePlan(),start=performance.now(),result=renderNativeSpeech(plan,{durationS:TEA_PERFORMANCE_DURATION}),wav=wavBytes(result.audio);
+const evidence={...result.diagnostics,renderMs:performance.now()-start,sourceCommit:process.env.GITHUB_SHA??null,sha256:createHash('sha256').update(wav).digest('hex')};
+await writeFile(out+'/dialogue.wav',wav);await writeFile(out+'/plan.json',JSON.stringify(plan,null,2));await writeFile(out+'/speech-evidence.json',JSON.stringify(evidence,null,2));await writeFile(out+'/expected.txt',plan.turns.map(t=>t.text).join(' '));
+console.log(JSON.stringify(evidence,null,2));

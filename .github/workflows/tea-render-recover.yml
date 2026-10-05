@@ -1,0 +1,75 @@
+name: Recover Tea Hardware Render
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/tea-render-recover.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recover:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: self-hosted
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Recover the already completed hardware render without checkout
+        run: |
+          $ErrorActionPreference='Stop'
+          $root = Join-Path $env:GITHUB_WORKSPACE 'artifacts\tea-performance-vtl'
+          $video = Join-Path $root 'tea-performance.mp4'
+          $evidencePath = Join-Path $root 'video-evidence.json'
+          if(-not (Test-Path $video)){ throw "Missing completed hardware MP4 at $video" }
+          if(-not (Test-Path $evidencePath)){ throw "Missing hardware evidence at $evidencePath" }
+
+          $expectedVideoSha='87b60a32fd8243ce750a2c18982bc18b219ed8310d715cf70f2ec64c723109b6'
+          $expectedSource='7e88ab9c112a5d263fea71d134f11836c31ec953'
+          $sha256=[System.Security.Cryptography.SHA256]::Create()
+          $stream=[System.IO.File]::OpenRead($video)
+          try { $actualVideoSha=[System.BitConverter]::ToString($sha256.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+          finally { $stream.Dispose(); $sha256.Dispose() }
+          if($actualVideoSha -ne $expectedVideoSha){ throw "Unexpected MP4 SHA $actualVideoSha" }
+
+          $e=Get-Content $evidencePath -Raw | ConvertFrom-Json
+          if($e.backend -ne 'webgpu-hardware'){ throw "Not hardware WebGPU: $($e.backend)" }
+          if($e.adapter.vendor -ne 'amd' -or $e.adapter.architecture -ne 'rdna-3'){ throw "Unexpected adapter: $($e.adapter | ConvertTo-Json -Compress)" }
+          if($e.sourceCommit -ne $expectedSource){ throw "Unexpected rendered source $($e.sourceCommit)" }
+          if($e.width -ne 1280 -or $e.height -ne 720 -or $e.fps -ne 30 -or $e.frames -ne 1260){ throw 'Hardware render dimensions/cadence mismatch' }
+          if($e.videoSha256 -ne $actualVideoSha){ throw 'Evidence/video SHA mismatch' }
+
+          $probe = ffprobe -v error -count_frames -show_streams -show_format -of json $video | ConvertFrom-Json
+          if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }
+          $v=$probe.streams | Where-Object codec_type -eq 'video'
+          $a=$probe.streams | Where-Object codec_type -eq 'audio'
+          if($v.width -ne 1280 -or $v.height -ne 720 -or [int]$v.nb_read_frames -ne 1260){ throw 'ffprobe video contract failed' }
+          if($a.codec_name -ne 'aac' -or [int]$a.channels -ne 2 -or [int]$a.sample_rate -ne 44100){ throw 'ffprobe AAC stereo contract failed' }
+          if([math]::Abs([double]$probe.format.duration-42) -gt .1){ throw "Wrong duration $($probe.format.duration)" }
+
+          $muxed = Join-Path $root 'recovered-audio.wav'
+          ffmpeg -y -v error -i $video -vn -c:a pcm_s16le $muxed
+          if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }
+          $volume = Join-Path $root 'recovered-volume.txt'
+          $stdout=Join-Path $root 'recovered-volume-stdout.txt'
+          $proc=Start-Process -FilePath 'ffmpeg' -ArgumentList @('-hide_banner','-i',$muxed,'-af','volumedetect','-f','null','-') -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $volume
+          if($proc.ExitCode -ne 0){ exit $proc.ExitCode }
+          $txt=Get-Content $volume -Raw
+          if($txt -notmatch 'max_volume:\s*(-?[0-9.]+) dB'){ throw 'No audio peak measurement' }
+          $peak=[double]$Matches[1]
+          if($peak -lt -4){ throw "Muxed audio too quiet: $peak dB" }
+
+          $out=Join-Path $env:GITHUB_WORKSPACE 'artifacts\tea-hardware-recovery'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item $video (Join-Path $out 'winter-tea-hardware-720p30.mp4')
+          Copy-Item $evidencePath (Join-Path $out 'video-evidence.json')
+          Copy-Item $volume (Join-Path $out 'volume.txt')
+          @{videoSha256=$actualVideoSha;sourceCommit=$e.sourceCommit;backend=$e.backend;adapter=$e.adapter;width=$e.width;height=$e.height;fps=$e.fps;frames=$e.frames;durationS=$e.durationS;peakDb=$peak} |
+            ConvertTo-Json -Depth 4 | Set-Content (Join-Path $out 'recovery-evidence.json')
+          Write-Host "RECOVERED_VIDEO_SHA=$actualVideoSha"
+          Write-Host "RECOVERED_AUDIO_PEAK_DB=$peak"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: winter-tea-hardware-720p30
+          path: artifacts/tea-hardware-recovery
+          retention-days: 3

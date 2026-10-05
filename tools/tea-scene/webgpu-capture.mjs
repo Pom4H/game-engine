@@ -5,8 +5,9 @@ import {tmpdir} from 'node:os';
 import {once} from 'node:events';
 import {startTeaServer} from './server.mjs';
 
-export async function createWebGpuCapture({root,width,height,planPath,audioPath}){
-  const chrome=process.env.CHROME_PATH;if(!chrome)throw new Error('CHROME_PATH is required for WebGPU capture; TEA_BACKEND=cpu uses the engine CPU renderer');
+export async function createWebGpuCapture({root,width,height,planPath,audioPath,pagePath='/tools/tea-scene/player.html'}){
+  if(!['/tools/tea-scene/player.html','/tools/tea-performance/player.html','/tools/face-lab/player.html'].includes(pagePath))throw new RangeError('Unknown tea capture page');
+  const chrome=process.env.CHROME_PATH;if(!chrome)throw new Error('CHROME_PATH is required for WebGPU capture');
   const server=await startTeaServer({root,planPath,audioPath});
   const profile=await mkdtemp(join(tmpdir(),'winter-tea-'));
   const software=process.env.TEA_SOFTWARE_GPU==='1';
@@ -33,15 +34,15 @@ export async function createWebGpuCapture({root,width,height,planPath,audioPath}
     if(!page)throw new Error('Chrome page target unavailable');
     socket=new WebSocket(page.webSocketDebuggerUrl);
     await new Promise((yes,no)=>{socket.addEventListener('open',yes,{once:true});socket.addEventListener('error',no,{once:true});});
-    socket.addEventListener('message',event=>{const message=JSON.parse(String(event.data));if(!message.id)return;const request=pending.get(message.id);if(!request)return;pending.delete(message.id);clearTimeout(request.timer);message.error?request.reject(new Error(message.error.message)):request.resolve(message.result);});
+    socket.addEventListener('message',event=>{const message=JSON.parse(String(event.data));if(!message.id){if(message.method==='Runtime.exceptionThrown')stderr=(stderr+'\nPAGE_EXCEPTION '+JSON.stringify(message.params.exceptionDetails)).slice(-20000);if(message.method==='Runtime.consoleAPICalled'&&message.params.type==='error')stderr=(stderr+'\nPAGE_ERROR '+JSON.stringify(message.params.args)).slice(-20000);return;}const request=pending.get(message.id);if(!request)return;pending.delete(message.id);clearTimeout(request.timer);message.error?request.reject(new Error(message.error.message)):request.resolve(message.result);});
     const send=(method,params={})=>new Promise((yes,no)=>{const id=++sequence,timer=setTimeout(()=>{pending.delete(id);no(new Error('DevTools timeout: '+method));},60000);pending.set(id,{resolve:yes,reject:no,timer});socket.send(JSON.stringify({id,method,params}));});
     const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description??r.exceptionDetails.text);return r.result?.value;};
     await send('Page.enable');await send('Runtime.enable');await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
-    await send('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/tools/tea-scene/player.html?capture=1&width=${width}&height=${height}`});
+    await send('Page.navigate',{url:`http://127.0.0.1:${server.address().port}${pagePath}?capture=1&width=${width}&height=${height}`});
     let state;
     for(let i=0;i<600;i++){state=await evaluate('({ready:window.teaReady===true,error:window.teaError??null})');if(state.error)throw new Error(state.error);if(state.ready)break;await new Promise(yes=>setTimeout(yes,100));}
-    if(!state?.ready)throw new Error('Tea player did not initialize: '+stderr);
-    const adapter=await evaluate("(async()=>{const a=await navigator.gpu.requestAdapter();if(!a)return null;const i=a.info??{};return {vendor:i.vendor,architecture:i.architecture,device:i.device,description:i.description,isFallbackAdapter:a.isFallbackAdapter??i.isFallbackAdapter??false};})()");
+    if(!state?.ready)throw new Error('Tea player did not initialize: '+JSON.stringify(await evaluate('({url:location.href,stage:window.labStage,state:document.readyState,html:document.body.innerHTML.slice(0,300)})'))+'\n'+stderr);
+    const adapter=await evaluate("(async()=>{const a=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});if(!a)return null;const i=a.info??{};return {vendor:i.vendor,architecture:i.architecture,device:i.device,description:i.description,isFallbackAdapter:a.isFallbackAdapter??i.isFallbackAdapter??false};})()");
     if(!adapter)throw new Error('No WebGPU adapter');
     const isSoftware=software||adapter.isFallbackAdapter||/swiftshader|lavapipe|llvmpipe|software|microsoft basic render/i.test(JSON.stringify(adapter));
     if(process.env.TEA_REQUIRE_HARDWARE==='1'&&isSoftware)throw new Error('Hardware WebGPU requested, software adapter reported: '+JSON.stringify(adapter));

@@ -1,0 +1,15 @@
+name: Native Speech Reference
+on:
+  push:
+    branches: [codex/native-speech-tea-performance]
+    paths: ['tools/tea-performance/fetch-reference.py', '.github/workflows/native-reference.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  published-measurement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 tools/tea-performance/fetch-reference.py

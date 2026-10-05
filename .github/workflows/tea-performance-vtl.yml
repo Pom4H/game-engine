@@ -1,0 +1,100 @@
+name: Tea Performance VTL
+on:
+  pull_request:
+    paths:
+      - 'src/animation/face-surface.ts'
+      - 'src/animation/expressive-face.ts'
+      - 'src/assets/face-reference.ts'
+      - 'tools/tea-performance/**'
+      - 'tools/npc-speech-demo/vtl-dialogue.py'
+      - 'tools/npc-speech-demo/vtl-anatomy-reference.patch'
+      - '.github/workflows/tea-performance-vtl.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tea-performance-vtl-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run typecheck && bun run build
+      - name: Full face/body/prop contracts
+        run: node --test test/face-surface.test.mjs test/mesh-stream-render.test.mjs test/tea-performance.test.mjs test/conversation-face.test.mjs
+      - name: Build pinned VocalTractLab backend
+        run: |
+          git clone --quiet https://github.com/TUD-STKS/VocalTractLabBackend-dev.git /tmp/vtl
+          git -C /tmp/vtl checkout --quiet df30392f18dc5e175b577c3ba734caaa65a3927f
+          git -C /tmp/vtl apply "$GITHUB_WORKSPACE/tools/npc-speech-demo/vtl-anatomy-reference.patch"
+          cmake -S /tmp/vtl -B /tmp/vtl/out -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/vtl/out --config Release --target VocalTractLabApi -j2
+      - name: Generate the 13-turn shared performance plan
+        env:
+          TEA_OUTPUT: artifacts/tea-performance-vtl
+        run: node tools/tea-performance/plan-vtl.mjs
+      - name: Synthesize both characters with VTL
+        env:
+          TEA_OUTPUT: artifacts/tea-performance-vtl
+        run: |
+          lib=$(find /tmp/vtl/lib -type f \( -name 'libVocalTractLabApi.so' -o -name 'VocalTractLabApi.so' \) | head -1)
+          test -n "$lib"
+          python3 tools/npc-speech-demo/vtl-dialogue.py "$lib" /tmp/vtl/resources/JD3.speaker artifacts/tea-performance-vtl/plan.json artifacts/tea-performance-vtl
+      - name: Install media tools and independent ASR
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python3 -m pip install faster-whisper==1.2.1
+      - name: Measure the actual VTL dialogue without transcript prompting
+        id: asr
+        continue-on-error: true
+        env:
+          WHISPER_MODEL: base.en
+        run: |
+          ffmpeg -y -v error -i artifacts/tea-performance-vtl/dialogue.wav -ac 1 -ar 16000 artifacts/tea-performance-vtl/dialogue-16k.wav
+          python3 tools/npc-speech-demo/whisper-intelligibility.py artifacts/tea-performance-vtl/dialogue-16k.wav "$(cat artifacts/tea-performance-vtl/expected.txt)" 0.25 artifacts/tea-performance-vtl/asr.json
+      - name: Render the new continuous faces in the full tea scene
+        env:
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          TEA_OUTPUT: artifacts/tea-performance-vtl
+          TEA_WIDTH: '320'
+          TEA_HEIGHT: '180'
+          TEA_FPS: '8'
+        run: node tools/tea-performance/capture-cpu.mjs
+      - name: Verify media and provenance
+        run: |
+          ffprobe -v error -count_frames -show_entries stream=codec_type,width,height,nb_read_frames,duration -of json artifacts/tea-performance-vtl/tea-vtl-scene.mp4 > artifacts/tea-performance-vtl/media-probe.json
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('artifacts/tea-performance-vtl')
+          e=json.loads((p/'video-evidence.json').read_text())
+          probe=json.loads((p/'media-probe.json').read_text())
+          video=next(s for s in probe['streams'] if s['codec_type']=='video')
+          audio=next(s for s in probe['streams'] if s['codec_type']=='audio')
+          assert e['audioBackend']=='VocalTractLab' and e['videoBackend']=='cpu'
+          assert video['width']==320 and video['height']==180
+          assert int(video['nb_read_frames'])==e['frames']
+          assert abs(float(video['duration'])-42)<.08 and abs(float(audio['duration'])-42)<.1
+          assert e['audioSha256']==hashlib.sha256((p/'dialogue.wav').read_bytes()).hexdigest()
+          assert e['videoSha256']==hashlib.sha256((p/'tea-vtl-scene.mp4').read_bytes()).hexdigest()
+          assert all(x['renderer']['drawCalls']>0 and not x['renderer']['errors'] for x in e['telemetry'])
+          print(json.dumps({'frames':e['frames'],'videoSha256':e['videoSha256'],'audioSha256':e['audioSha256']}))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tea-performance-vtl-video
+          path: artifacts/tea-performance-vtl
+          retention-days: 3
+      - name: Enforce speech gate after preserving the rendered evidence
+        if: steps.asr.outcome != 'success'
+        run: exit 1

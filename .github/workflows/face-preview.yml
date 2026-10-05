@@ -1,0 +1,44 @@
+name: Face Preview
+on:
+  pull_request:
+    paths:
+      - 'tools/face-lab/preview.mjs'
+      - 'tools/face-lab/player.html'
+      - 'tools/face-lab/scene.mjs'
+      - 'src/animation/face-surface.ts'
+      - 'src/animation/expressive-face.ts'
+      - 'src/assets/face-reference.ts'
+      - 'src/procedural/mesh-stream.ts'
+      - 'src/render/webgpu.ts'
+      - '.github/workflows/face-preview.yml'
+permissions:
+  contents: read
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run build
+      - name: Render genuine engine preview through software WebGPU
+        env:
+          TEA_SOFTWARE_GPU: '1'
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          test -n "$CHROME_PATH"
+          if ! command -v ffmpeg; then sudo apt-get update -qq && sudo apt-get install -y ffmpeg; fi
+          node tools/face-lab/preview.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: face-preview-mp4
+          path: artifacts/face-preview
+          retention-days: 3
