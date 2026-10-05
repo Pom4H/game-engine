@@ -1,0 +1,86 @@
+name: Portable Face Lab
+on:
+  pull_request:
+    paths:
+      - 'tools/face-lab/**'
+      - 'src/animation/face-surface.ts'
+      - 'src/animation/expressive-face.ts'
+      - 'src/assets/face-reference.ts'
+      - 'src/procedural/mesh-stream.ts'
+      - 'src/render/webgpu.ts'
+      - '.github/workflows/face-portable.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: portable-face-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  bundle:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      source: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile && bun run typecheck && bun run build
+      - name: Fixed topology, aperture, previous-frame geometry and full scene contracts
+        run: |
+          mkdir -p artifacts/face-portable
+          set -o pipefail
+          node --test test/face-surface.test.mjs test/mesh-stream-render.test.mjs test/speech-lab.test.mjs test/tea-performance.test.mjs test/conversation-face.test.mjs test/tea-scene.test.mjs test/native-speech.test.mjs test/native-tract-energy.test.mjs | tee artifacts/face-portable/tests.txt
+      - name: Build one HTML with the actual engine, scene and CC0 anatomical data
+        run: bun tools/face-lab/portable.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: portable-face-lab
+          path: artifacts/face-portable
+          retention-days: 3
+  hardware-capture:
+    needs: bundle
+    runs-on: self-hosted
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.bundle.outputs.source }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Actual GPU only, no software fallback
+        env:
+          TEA_REQUIRE_HARDWARE: '1'
+          GITHUB_SHA: ${{ needs.bundle.outputs.source }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $env:CHROME_PATH = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $env:CHROME_PATH) { throw 'Chrome is required' }
+          Remove-Item Env:TEA_SOFTWARE_GPU -ErrorAction SilentlyContinue
+          node tools/face-lab/capture.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: face-lab-hardware
+          path: artifacts/face-lab
+          retention-days: 3
