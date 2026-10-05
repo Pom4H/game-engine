@@ -15,7 +15,7 @@ const started=Date.now(),sha=bytes=>createHash('sha256').update(bytes).digest('h
 const capture=await createWebGpuCapture({root,width,height,planPath,audioPath,pagePath:'/tools/tea-performance/player.html'});
 let encoder;
 try{
- const evidence={schema:1,sourceCommit:process.env.GITHUB_SHA??null,backend:capture.kind,adapter:capture.adapter,width,height,fps,durationS:capture.duration,planSha256:sha(await readFile(planPath)),frames:0,views:[]};
+ const evidence={schema:1,sourceCommit:process.env.TEA_SOURCE_COMMIT??process.env.GITHUB_SHA??null,backend:capture.kind,adapter:capture.adapter,width,height,fps,durationS:capture.duration,planSha256:sha(await readFile(planPath)),frames:0,views:[]};
  if(mode==='storyboard'){
   for(const [name,time] of [['offer',2.2],['cold-hands',5.65],['pour',8.75],['confident',11.7],['handoff',15.1],['too-hot',19.3],['smirk',27.9],['departure',40.5]]){
    const frame=await capture.frame(time),file=out+'/'+name+'.png';await writeFile(file,frame.bytes);
