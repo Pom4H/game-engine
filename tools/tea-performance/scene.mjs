@@ -5,6 +5,7 @@ import {NativeSpeechMotor,nativeSpeechPlan,createVocalMotorFrame} from '../../di
 import {compose} from '../../dist/math.js';
 import {createPerformanceStage,performanceBindings,cast,at,GROUND,TABLE,SHOP_DOOR} from './stage.mjs';
 import {createTeaPerformancePlan,TEA_PERFORMANCE_DURATION} from './plan.mjs';
+import {TEA_SPIT_EVENT} from './chaos-events.mjs';
 
 // Authored acting intent, not a fluid/biomechanical simulation. The same scene
 // tick owns voice motors, facial projection, hands, held props and camera.
@@ -134,7 +135,7 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
   const potGrip=point(potMatrix,[-.126,.016,0]),flow=window(t,7.91,8.12,9.95,10.14),stream=segmentPose(spout,liquid);
   put(scene,'tea-stream',stream.position,stream.rotation,[Math.max(.0001,flow),Math.max(.0001,stream.length*flow),Math.max(.0001,flow)]);
   for(let i=0;i<12;i++){const age=(t*.62+i/12)%1,visible=fill*(1-age)**2,size=(.008+.016*age)*visible;put(scene,'tea-steam-'+i,add(cupPosition,[Math.sin(i*2.399+t*.9)*.015+age*.018,.057+age*.16,Math.cos(i*2.399+t*.63)*.012]),[0,0,0],[Math.max(.0001,size),Math.max(.0001,size*1.45),Math.max(.0001,size)]);}
-  const sprayAge=t-18.92,sprayAlive=sprayAge>=0&&sprayAge<1.28,spitOrigin=anna.face.lowerLipWorld;
+  const sprayAge=t-TEA_SPIT_EVENT.startS,sprayAlive=sprayAge>=0&&sprayAge<TEA_SPIT_EVENT.durationS,spitOrigin=anna.face.lowerLipWorld;
   for(let i=0;i<128;i++){
    if(!sprayAlive){put(scene,'tea-spray-'+i,[0,-50,0],[0,0,0],[.0001,.0001,.0001]);continue;}
    const r0=hash01(i+1),r1=hash01(i+101),r2=hash01(i+211),r3=hash01(i+307);
