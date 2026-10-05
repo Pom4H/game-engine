@@ -8,6 +8,7 @@ on:
       - '.github/workflows/tea-chaos-fast.yml'
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: tea-chaos-fast
   cancel-in-progress: true
