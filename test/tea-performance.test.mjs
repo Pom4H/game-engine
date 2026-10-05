@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Scene} from '../dist/scene/scene.js';
+import {compose} from '../dist/math.js';
 import {NativeSpeechMotor,createVocalMotorFrame} from '../dist/audio/native-speech.js';
 import {ExpressiveFaceRig,expressiveHeadMesh,expressiveFaceEntities,WINTER_FACE_IDENTITIES,blendFaceActions} from '../dist/animation/expressive-face.js';
 import {createTeaPerformancePlan,TEA_PERFORMANCE_DURATION,pronounce} from '../tools/tea-performance/plan.mjs';
@@ -63,7 +64,7 @@ test('42-second performance stays finite, shares one clock and transfers the cup
   }
   if(cup.owner==='both')shared++;
   if(teapot.flow>.95){pours++;assert.ok(Math.hypot(teapot.spout[0]-cup.position[0],teapot.spout[2]-cup.position[2])<.035);}
-  if(cup.sip>.999)sips++;
+  if(cup.sip>.999){sips++;const m=compose(cup.position,cup.rotation,[1,1,1]),rim=[0,1,2].map(i=>m[i]*.035+m[i+4]*.044+m[i+12]);const lip=state.actors.find(a=>a.id==='anna').face.lowerLipWorld;assert.ok(distance(rim,lip)<.002,'sip must touch the actual lower lip, not an estimated head anchor');}
  }
  assert.deepEqual(owners,['table','mike','both','anna']);assert.ok(shared>20&&pours>60&&sips>15);assert.ok(departed);
  assert.ok(shots.size>=10);for(const prefix of ['mike-face-','anna-face-','tea-cup-','tea-pot-'])assert.ok([...moved].some(id=>id.startsWith(prefix)));

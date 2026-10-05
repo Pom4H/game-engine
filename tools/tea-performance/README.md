@@ -5,6 +5,15 @@ synthesizer generates deterministic audio, but the complete dialogue currently
 fails independent speech recognition. The scene contracts pass; its new faces
 and cinematography still require a completed hardware render and visual review.
 
+## Continuous skin and fixed speech lab
+
+The experimental branch now uses a single CC0 anatomical skin mesh with our
+own procedural flexes, shared acoustic lip area, and a real lower-lip contact
+attachment. It replaces the earlier independent lip/brow pieces in this
+experimental scene only. See `../face-lab/README.md` and the fixed 48-clip speech
+laboratory. Historical ASR/render statuses below describe their pinned commits,
+not validation of the new skin. Native intelligibility is not yet accepted.
+
 ## What is implemented
 
 `src/audio/native-speech.ts` compiles pronunciation, coarticulation, pressure and

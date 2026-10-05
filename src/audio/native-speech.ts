@@ -38,9 +38,11 @@ function target(phone:string,context?:Float64Array):Target {
   const round=['u','u:','U','o','o:','O','w','y','Y','2','9'].includes(phone)?(['U','O'].includes(phone)?.65:.9):0;
   const spread=['i','i:','I','j','e','e:','E','ae'].includes(phone)?.65:0;
   const tip=['t','d','n','l','T','D'].includes(phone)?1:0;
-  const closure=['p','b','m'].includes(phone)?1:0,labiodental=['f','v'].includes(phone)?1:0;
+  const closure=['','p','b','m'].includes(phone)?1:0,labiodental=['f','v'].includes(phone)?1:0;
   const jaw=['a','a:','A','ae'].includes(phone)?.1:['E','O'].includes(phone)?.07:.03;
-  const control=consonant?storyControlForConsonant(consonant):undefined;
+  // Silence is a relaxed, closed-lip articulation, not an open schwa.
+  // The same terminal section closes in acoustics and on the visible face.
+  const control=consonant?storyControlForConsonant(consonant):!phone?storyControlForConsonant('p'):undefined;
   if(!vowel&&!consonant&&!['w','j','h','r','R','?',''].includes(phone))throw new RangeError('No native articulatory target for phone '+JSON.stringify(phone));
   const area=vowel?nativeVowelArea(vowel):phone==='w'?nativeVowelArea('u'):phone==='j'?nativeVowelArea('i'):Float64Array.from(context??nativeVowelArea('schwa'));
   // A consonant changes local passage over its surrounding vowel substrate.

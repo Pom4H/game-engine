@@ -100,12 +100,13 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
    const turnToShop=deltaAngle(pose.heading,-Math.PI/2)*shopLook*.56;
    const rotation=[mike?0:.035*recoil,pose.heading+turnToShop+(mike?.04:-.04)*(1-lookDown),-.24*lookDown+nod+.085*recoil];
    const other=actors.find(a=>a.id!==actor.id),otherHead=add(other.root,[0,1.57*other.heightScale,Math.max(0,t-38)*.46]);
-   return{actor,pose,motor,rotation,gaze:mix(otherHead,cupRest,lookDown),layers:faceLayers(actor,t)};
+   const gaze=mix(otherHead,cupRest,lookDown),layers=faceLayers(actor,t);
+   const face=actor.face.step(t,dt,{position:pose.joints.head,rotation,scale:actor.heightScale,gazeTarget:gaze},motor,layers);
+   return{actor,pose,motor,rotation,gaze,layers,face};
   });
   const anna=prepared.find(p=>p.actor.id==='anna');
   const sip=window(t,17.3,18.05,18.52,18.98),cupRotation=[0,0,-.32*sip];
-  const mouthMatrix=compose(anna.pose.joints.head,anna.rotation,[anna.actor.heightScale,anna.actor.heightScale,anna.actor.heightScale]);
-  const mouth=point(mouthMatrix,[.093+anna.motor.lipProtrusionM/anna.actor.heightScale,-.043-.011*Math.sin(anna.motor.jawAngleRad),0]);
+  const mouth=anna.face.lowerLipWorld;
   const sipCenter=sub(mouth,rotate(cupRotation,[.035,.044,0]));
   let cupPosition=track(t,[[0,cupRest],[13.65,cupRest],[14.75,at(0,1.44,-.12)],[15.6,at(0,1.44,-.12)],[16.6,at(.34,1.30,-.095)]]);
   cupPosition=mix(cupPosition,sipCenter,sip);
@@ -149,7 +150,7 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
    for(const p of bindHumanoid(pose,actor.bindings))put(scene,p.entity,p.position,p.rotation,p.scale);
    const matrix=compose(joints.head,rotation,[h,h,h]);
    for(const binding of actor.bindings.filter(b=>b.joint==='head'))put(scene,binding.entity,point(matrix,binding.offset??[0,0,0]),rotation,(binding.scale??[1,1,1]).map(v=>v*h));
-   const face=actor.face.step(t,dt,{position:joints.head,rotation,scale:h,gazeTarget:gaze},motor,layers);
+   const face=item.face;
    results.push({id:actor.id,position:pose.position,heading:pose.heading,heightScale:h,feet:pose.feet,joints,face,motor:{timeS:motor.timeS,phone:motor.phone,active:motor.active,pitchHz:motor.pitchHz,lungPressurePa:motor.lungPressurePa,lipWidthM:motor.lipWidthM,lipGapM:motor.lipGapM,terminalAreaCm2:motor.oralAreaCm2[43]},grips:{left:leftGrip,right:rightGrip}});
   }
   const camera=performanceCamera(t);scene.setCamera(camera.camera);

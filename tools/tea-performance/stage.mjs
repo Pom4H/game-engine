@@ -1,6 +1,6 @@
 import {makeCity} from '../promo/city.mjs';
 import {makePedestrian,pedestrianAnimation} from '../promo/actors.mjs';
-import {expressiveHeadMesh,expressiveFaceEntities,WINTER_FACE_IDENTITIES} from '../../dist/animation/expressive-face.js';
+import {expressiveFaceEntities,WINTER_FACE_IDENTITIES} from '../../dist/animation/expressive-face.js';
 
 export const CENTER=[-19.95,0,5.25],GROUND=.166,TABLE=1.06;
 export const at=(x,y,z)=>[CENTER[0]+x,y,CENTER[2]+z];
@@ -19,7 +19,7 @@ export function performanceBindings(actor){
   if(key==='scarf'){b.offset[1]=-.018;b.scale[1]=.087;}
   if(key==='hood'){b.offset[0]-=.025;b.offset[1]-=.030;}
   return b;
- }).filter(b=>!b.entity.endsWith('-nose'));
+ }).filter(b=>!b.entity.endsWith('-nose')&&!b.entity.endsWith('-head'));
 }
 function lathe(profile,segments=48){
  const positions=[],normals=[],indices=[];
@@ -63,7 +63,7 @@ export function createPerformanceStage(){
  add('tea-pot-spout',{kind:'cylinder',radius:.018,topRadius:.010,height:.135,segments:20},pot);
  add('tea-stream',{kind:'cylinder',radius:.0026,height:1,segments:10},{kind:'default',color:[.36,.17,.050,1],roughness:.1,clearcoat:1},[0,0,0],{scale:[.0001,.0001,.0001]});
  for(let i=0;i<12;i++)add('tea-steam-'+i,{kind:'sphere',radius:.5,segments:8},{kind:'default',color:[.66,.70,.72,.07],roughness:1},[0,0,0],{scale:[.0001,.0001,.0001]});
- const actors=cast.flatMap(actor=>makePedestrian({...actor,speed:0}).filter(e=>!e.id.endsWith('-nose')).map(e=>e.id===actor.id+'-head'?{...e,mesh:expressiveHeadMesh(WINTER_FACE_IDENTITIES[actor.id])}:e));
+ const actors=cast.flatMap(actor=>makePedestrian({...actor,speed:0}).filter(e=>!e.id.endsWith('-nose')&&!e.id.endsWith('-head')));
  const faces=cast.flatMap(actor=>expressiveFaceEntities(actor.id,WINTER_FACE_IDENTITIES[actor.id]));
  spec.entities.push(...actors,...faces,...added,
   {id:'tea-sky-fill',position:at(-1.2,3.1,-1.7),light:{kind:'point',color:[.80,.87,1],intensity:2.2,range:7}},
