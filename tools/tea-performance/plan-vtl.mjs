@@ -12,17 +12,15 @@ const native=createTeaPerformancePlan();
 // than single symbols; split their authored duration evenly, preserving the
 // utterance duration and all prosody control times.
 const VTL_EQUIVALENT=Object.freeze({
-  A:'a',      // open back vowel: VTL inventory uses /a/
+  A:'O',      // HOT-like target: VTL /O/ avoids the hard/heart-like /a/ quality
   ae:'E',     // front-open English target approximated by VTL /E/
-  V:'a',      // STRUT-like target: same choice used by the accepted VTL tea plan
-  w:'u',      // labial-velar glide represented as a short /u/ gesture
+  V:'@',      // STRUT-like target: central vowel is closer than open /a/
+  w:'u:',     // labial-velar glide represented as a short rounded /u:/ gesture
 });
 const splitForVtl=segment=>{
-  const pair=segment.phone==='oU'?['o','U']:segment.phone==='eI'?['e','I']:null;
-  if(pair){
-    const a=segment.durationS/2,b=segment.durationS-a;
-    return [{phone:pair[0],durationS:a},{phone:pair[1],durationS:b}];
-  }
+  const pair=null;
+  const diphthong=segment.phone==='oU'?'o:':segment.phone==='eI'?'e:':null;
+  if(diphthong)return [{...segment,phone:diphthong}];
   const equivalent=VTL_EQUIVALENT[segment.phone];
   return equivalent?[{...segment,phone:equivalent}]:[segment];
 };
