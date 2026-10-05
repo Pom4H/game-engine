@@ -3,7 +3,7 @@ import {sampleWalker,bindHumanoid,solveTwoBone} from '../../dist/animation/locom
 import {ExpressiveFaceRig,WINTER_FACE_IDENTITIES} from '../../dist/animation/expressive-face.js';
 import {NativeSpeechMotor,nativeSpeechPlan,createVocalMotorFrame} from '../../dist/audio/native-speech.js';
 import {compose} from '../../dist/math.js';
-import {createPerformanceStage,performanceBindings,cast,at,GROUND,TABLE} from './stage.mjs';
+import {createPerformanceStage,performanceBindings,cast,at,GROUND,TABLE,SHOP_DOOR} from './stage.mjs';
 import {createTeaPerformancePlan,TEA_PERFORMANCE_DURATION} from './plan.mjs';
 
 // Authored acting intent, not a fluid/biomechanical simulation. The same scene
@@ -17,6 +17,9 @@ const rotate=(r,p)=>point(compose([0,0,0],r,[1,1,1]),p);
 const local=(p,r,v)=>point(compose(p,r,[1,1,1]),v);
 const deltaAngle=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 const pulse=(t,start,length,amplitude=1)=>{const u=(t-start)/length;return u>0&&u<1?Math.sin(Math.PI*u)**2*amplitude:0;};
+const DEPART_START=35.55,DEPART_END=42;
+const doorTarget=actor=>[SHOP_DOOR[0]+(actor.id==='mike'?-.18:.18),GROUND,SHOP_DOOR[2]-(actor.id==='mike'?.12:.28)];
+const hash01=n=>{const x=Math.sin(n*12.9898+78.233)*43758.5453;return x-Math.floor(x);};
 function track(t,keys){if(t<=keys[0][0])return [...keys[0][1]];for(let i=1;i<keys.length;i++)if(t<keys[i][0])return mix(keys[i-1][1],keys[i][1],ramp(t,keys[i-1][0],keys[i][0]));return [...keys.at(-1)[1]];}
 const put=(scene,id,p,r=[0,0,0],s)=>{const e=scene.entities.get(id);if(!e)throw new Error('Missing stage output '+id);e.position.splice(0,3,...p);e.rotation.splice(0,3,...r);if(s)e.scale.splice(0,3,...s);};
 function segmentPose(a,b){const d=sub(b,a),length=Math.hypot(...d);return{position:mix(a,b,.5),rotation:[Math.atan2(d[2],d[1]),0,Math.asin(-d[0]/Math.max(1e-9,length))],length};}
@@ -31,8 +34,9 @@ export function performanceCamera(t){
  else if(t>=21.65&&t<24.35){shot='told-you';p=at(.50,1.80,-1.08);q=at(-.55,1.58,0);fov=26;}
  else if(t>=24.35&&t<27.2){shot='teasing';p=at(.12,1.79,-1.44);q=at(.50,1.53,0);fov=28;}
  else if(t>=27.2&&t<29.55){shot='smirk';p=at(.52,1.78,-1.10);q=at(-.55,1.58,0);fov=27;}
- else if(t>=29.55&&t<37.6){shot='lets-go';p=at(-.11,1.84,-2.40);q=at(0,1.38,.05);fov=35;}
- else if(t>=37.6){shot='departure';const d=.46*(t-37.6);p=at(-1.50,1.88,-1.55+d*.30);q=at(.0,1.22,.30+d);fov=39;}
+ else if(t>=29.55&&t<35.55){shot='lets-go';p=at(-.11,1.84,-2.40);q=at(0,1.38,.05);fov=35;}
+ else if(t>=35.55){shot='departure';const u=ramp(t,35.55,42),startP=at(-1.50,1.88,-1.55),startQ=at(.0,1.22,.30);
+  p=mix(startP,[SHOP_DOOR[0]-2.7,1.90,SHOP_DOOR[2]-2.8],u);q=mix(startQ,[SHOP_DOOR[0],1.28,SHOP_DOOR[2]],u);fov=39;}
  p[0]+=.013*Math.sin(t*.36);return{shot,camera:{position:p,target:q,fov,focusDistance:Math.hypot(...sub(p,q)),aperture:.018}};
 }
 function faceLayers(actor,t){
@@ -42,15 +46,15 @@ function faceLayers(actor,t){
   cue(window(t,.8,1.5,3.7,4.5),{browLeft:.34,browRight:.29,smileLeft:.27,smileRight:.20});
   cue(window(t,7.4,8.2,10.2,11),{browLeft:.25,browRight:.12});
   cue(window(t,18.6,19.2,20.4,21.2),{browLeft:.48,browRight:.37});
-  cue(window(t,21.5,22.3,23.6,24.4),{smileLeft:.66,smileRight:.28,cheekLeft:.40,squint:.08});
+  cue(window(t,20.0,20.35,24.25,24.8),{smileLeft:.95,smileRight:.92,cheekLeft:.72,cheekRight:.66,squint:.42,browLeft:.18,browRight:.12});
   cue(window(t,26.8,27.6,28.8,29.6),{smileLeft:.65,smileRight:.36,browLeft:.24,cheekLeft:.32});
   cue(window(t,31.8,32.6,34.4,35.1),{smileLeft:.30,smileRight:.40,cheekRight:.25});
  }else{
   cue(window(t,0,1.1,6.9,7.7),{squint:.19,browLeft:.09,browRight:.09});
   cue(window(t,10.7,11.4,12.8,13.5),{browLeft:.55,smileLeft:.15,smileRight:.42});
   cue(window(t,15.4,16.1,16.9,17.4),{smileLeft:.29,smileRight:.32,cheekLeft:.22,cheekRight:.28});
-  cue(window(t,18.7,19.10,19.8,20.8),{browLeft:.80,browRight:.87});
-  cue(window(t,20.1,20.5,21.0,21.5),{squint:.36});
+  cue(window(t,18.62,18.86,20.15,20.9),{browLeft:1,browRight:1,cheekLeft:.08,cheekRight:.08});
+  cue(window(t,20.0,20.25,21.0,21.6),{squint:.46,browLeft:.72,browRight:.77});
   cue(window(t,24.1,24.8,26.5,27.2),{browRight:.47,smileRight:.58,cheekRight:.26});
   cue(window(t,29.3,30.1,31.4,32),{browLeft:.26,browRight:.19});
   cue(window(t,35.0,35.8,37.1,38.0),{smileLeft:.30,smileRight:.57,cheekLeft:.23,cheekRight:.37});
@@ -60,6 +64,11 @@ function faceLayers(actor,t){
 }
 function bodyPose(actor,t){
  const base=sampleWalker({...actor,speed:0},0),h=actor.heightScale;
+ if(t>=DEPART_START){
+  const target=doorTarget(actor),dx=target[0]-actor.root[0],dz=target[2]-actor.root[2],distance=Math.hypot(dx,dz),duration=DEPART_END-DEPART_START;
+  const heading=-Math.atan2(dz,dx),elapsed=Math.min(duration,t-DEPART_START),speed=distance/duration;
+  return sampleWalker({...actor,root:actor.root,heading,speed},elapsed);
+ }
  const heading=actor.heading+deltaAngle(actor.heading,-Math.PI/2)*ramp(t,37,37.65);
  const travel=Math.max(0,t-38)*.46,root=add(actor.root,[0,0,travel]);
  const now=sampleWalker({...actor,root,heading,speed:0},0),joints=Object.fromEntries(Object.entries(now.joints).map(([key,p])=>[key,[...p]]));
@@ -96,11 +105,13 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
    const pose=bodyPose(actor,t),mike=actor.id==='mike',motor=actor.motor.sample(t,actor.state);
    const lookDown=mike?window(t,6.6,7.4,10.9,11.7):window(t,13.1,14.0,20.8,21.5);
    const nod=mike?pulse(t,5.65,.68,-.06)+pulse(t,30.6,.75,-.08):pulse(t,4.9,.65,-.07)+pulse(t,16.1,.55,-.055);
-   const recoil=mike?0:window(t,18.70,19.02,19.65,20.20),shopLook=window(t,29.75,30.6,31.4,32.1);
-   const turnToShop=deltaAngle(pose.heading,-Math.PI/2)*shopLook*.56;
-   const rotation=[mike?0:.035*recoil,pose.heading+turnToShop+(mike?.04:-.04)*(1-lookDown),-.24*lookDown+nod+.085*recoil];
-   const other=actors.find(a=>a.id!==actor.id),otherHead=add(other.root,[0,1.57*other.heightScale,Math.max(0,t-38)*.46]);
-   const gaze=mix(otherHead,cupRest,lookDown),layers=faceLayers(actor,t);
+   const recoil=mike?0:window(t,18.68,18.92,20.05,20.70),laugh=mike?window(t,19.95,20.25,24.25,24.8):0,shopLook=window(t,29.75,30.6,31.4,32.1);
+   const routeHeading=t>=DEPART_START?pose.heading:-Math.PI/2,turnToShop=deltaAngle(pose.heading,routeHeading)*shopLook*.56;
+   const laughShake=laugh*Math.sin(t*18);
+   const rotation=[mike?.055*laughShake:.12*recoil,pose.heading+turnToShop+(mike?.04:-.04)*(1-lookDown),-.24*lookDown+nod+.18*recoil+.055*laughShake];
+   const other=actors.find(a=>a.id!==actor.id),otherHead=add(other.root,[0,1.57*other.heightScale,0]);
+   let gaze=mix(otherHead,cupRest,lookDown);if(t>=DEPART_START)gaze=[SHOP_DOOR[0],1.35,SHOP_DOOR[2]];
+   const layers=faceLayers(actor,t);
    const face=actor.face.step(t,dt,{position:pose.joints.head,rotation,scale:actor.heightScale,gazeTarget:gaze},motor,layers);
    return{actor,pose,motor,rotation,gaze,layers,face};
   });
@@ -123,6 +134,16 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
   const potGrip=point(potMatrix,[-.126,.016,0]),flow=window(t,7.91,8.12,9.95,10.14),stream=segmentPose(spout,liquid);
   put(scene,'tea-stream',stream.position,stream.rotation,[Math.max(.0001,flow),Math.max(.0001,stream.length*flow),Math.max(.0001,flow)]);
   for(let i=0;i<12;i++){const age=(t*.62+i/12)%1,visible=fill*(1-age)**2,size=(.008+.016*age)*visible;put(scene,'tea-steam-'+i,add(cupPosition,[Math.sin(i*2.399+t*.9)*.015+age*.018,.057+age*.16,Math.cos(i*2.399+t*.63)*.012]),[0,0,0],[Math.max(.0001,size),Math.max(.0001,size*1.45),Math.max(.0001,size)]);}
+  const sprayAge=t-18.92,sprayAlive=sprayAge>=0&&sprayAge<1.05,spitOrigin=anna.face.lowerLipWorld;
+  for(let i=0;i<96;i++){
+   if(!sprayAlive){put(scene,'tea-spray-'+i,[0,-50,0],[0,0,0],[.0001,.0001,.0001]);continue;}
+   const r0=hash01(i+1),r1=hash01(i+101),r2=hash01(i+211),r3=hash01(i+307);
+   const localVelocity=[.75+r0*2.25,(r1-.28)*1.45,(r2-.5)*2.35],velocity=rotate(anna.rotation,localVelocity);
+   const drag=(1-Math.exp(-2.1*sprayAge))/2.1,origin=i%5===0?point(cupMatrix,[.01,.045,(r2-.5)*.035]):spitOrigin;
+   const p=[origin[0]+velocity[0]*drag,origin[1]+velocity[1]*drag-4.2*sprayAge*sprayAge,origin[2]+velocity[2]*drag];
+   const size=(.003+r3*.008)*(1-clamp((sprayAge-.72)/.33));
+   put(scene,'tea-spray-'+i,p,[0,0,0],[Math.max(.0001,size),Math.max(.0001,size*(1.1+r0*1.7)),Math.max(.0001,size)]);
+  }
   const results=[];
   for(const item of prepared){
    const {actor,pose,motor,rotation,gaze,layers}=item,mike=actor.id==='mike',h=actor.heightScale,joints=pose.joints;
@@ -131,7 +152,9 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
     left=mix(left,at(-.36,1.25,-.26),window(t,.55,1.43,3.3,4.2));
     const holding=window(t,6.20,6.98,11.10,11.80);right=mix(right,potGrip,holding);if(holding>.999)rightGrip='teapot';
     const cupHold=window(t,12.9,13.65,15.6,16.25);left=mix(left,gripMike,cupHold);if(cupHold>.999)leftGrip='cup';
-    left=mix(left,local(joints.chest,[0,pose.heading,0],[.30,-.015,-.18]),window(t,21.5,22.1,23.0,23.7));
+    const laugh=window(t,20.0,20.3,24.1,24.7);
+    left=mix(left,local(joints.chest,[0,pose.heading,0],[.19,-.16,-.12]),laugh);
+    right=mix(right,local(joints.chest,[0,pose.heading,0],[.18,-.17,.13]),laugh);
     right=mix(right,local(joints.chest,[0,pose.heading,0],[.22,-.09,.24]),window(t,27.0,27.6,28.3,29.1));
    }else{
     const rub=window(t,.0,1.1,6.2,7.1),beat=Math.sin(t*14)*.012*rub;
@@ -139,7 +162,7 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
     left=mix(left,at(.25,1.43,.02),window(t,10.75,11.3,12.4,13));
     const receive=ramp(t,13.9,14.85);right=mix(right,gripAnna,receive);if(receive>.999)rightGrip='cup';
     const support=window(t,15.65,16.6,18.65,19.05);left=mix(left,point(cupMatrix,[.016,-.012,.048]),support);
-    left=mix(left,at(.30,1.37,.13),window(t,18.80,19.15,20.0,20.65));
+    left=mix(left,add(item.face.lowerLipWorld,[-.035,.025,.055]),window(t,18.78,19.03,20.18,20.72));
     left=mix(left,local(joints.chest,[0,pose.heading,0],[.28,.07,-.12]),window(t,24.2,24.9,26.0,26.8));
     left=mix(left,add(joints.leftShoulder,[.025,.06,.45]),window(t,29.6,30.2,31.2,31.9));
    }
@@ -154,7 +177,7 @@ export function createTeaPerformance({plan=createTeaPerformancePlan()}={}){
    results.push({id:actor.id,position:pose.position,heading:pose.heading,heightScale:h,feet:pose.feet,joints,face,motor:{timeS:motor.timeS,phone:motor.phone,active:motor.active,pitchHz:motor.pitchHz,lungPressurePa:motor.lungPressurePa,lipWidthM:motor.lipWidthM,lipGapM:motor.lipGapM,terminalAreaCm2:motor.oralAreaCm2[43]},grips:{left:leftGrip,right:rightGrip}});
   }
   const camera=performanceCamera(t);scene.setCamera(camera.camera);
-  observation={timeS:t,shot:camera.shot,actors:results,cup:{position:cupPosition,rotation:cupRotation,owner,fill,sip,gripPoints:{mike:gripMike,anna:gripAnna}},teapot:{position:potPosition,gripPoint:potGrip,spout,flow},sourceCityEntities:sourceCount,activeTurns:plan.turns.filter(turn=>t>=turn.startS&&t<turn.startS+turn.segments.reduce((sum,s)=>sum+s.durationS,0)).map(({id,speakerId,text})=>({id,speakerId,text})),speechBackend:'native-typescript',acting:'authored-IK',renderMovers:movers.length};
+  observation={timeS:t,shot:camera.shot,actors:results,cup:{position:cupPosition,rotation:cupRotation,owner,fill,sip,gripPoints:{mike:gripMike,anna:gripAnna}},teapot:{position:potPosition,gripPoint:potGrip,spout,flow},sourceCityEntities:sourceCount,activeTurns:plan.turns.filter(turn=>t>=turn.startS&&t<turn.startS+turn.segments.reduce((sum,s)=>sum+s.durationS,0)).map(({id,speakerId,text})=>({id,speakerId,text})),speechBackend:'native-typescript',acting:'authored-IK',sprayActive:sprayAlive,shopDoor:SHOP_DOOR,renderMovers:movers.length};
  };
  scene.usePlugin({id:'tea.performance.native',renderMovers:movers,systems:[{id:'tea.performance.native.step',run:(_host,frame)=>perform(frame.at,frame.dt)}],modules:[{id:'tea:performance:native',phase:'simulate',rateHz:60,reads:[],writes:['entities'],after:['engine:vehicle-visuals'],context:'none',run:(_context,frame)=>[{type:'system',action:'tea.performance.native.step',deltaSeconds:frame.deltaSeconds}]}]});
  return{scene,duration:TEA_PERFORMANCE_DURATION,
