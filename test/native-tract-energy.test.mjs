@@ -45,8 +45,44 @@ test('prescribed glottal cycle retains closure contact without a spurious zero l
  for(let i=0;i<=4096;i++){const p=i/4096,a=nativeGlottalOpening(p);assert.ok(Number.isFinite(a)&&a>=0&&a<=1);if(p>=close)assert.equal(a,0);}
  const left=(nativeGlottalOpening(close)-nativeGlottalOpening(close-epsilon))/epsilon;
  assert.ok(Math.abs(left+Math.PI/(2*(close-peak)))<1e-5,'closing velocity reaches contact, rather than fading to zero');
- // Integral follows analytically from the half-cosine opening and cosine closing.
  const n=32768;let integral=0;for(let i=0;i<n;i++)integral+=nativeGlottalOpening((i+.5)/n)/n;
  assert.ok(Math.abs(integral-(peak/2+2*(close-peak)/Math.PI))<1e-8);
  for(const p of [NaN,Infinity,-.001,1.001])assert.throws(()=>nativeGlottalOpening(p));
+});
+const jetVoice={id:'a',name:'A',tractLengthM:.175,pan:0,breathiness:0};
+const rhoC=1.225*343;
+function jetPair(section=36){
+ const frame=createVocalMotorFrame(.175);frame.oralAreaCm2.fill(1);frame.oralAreaCm2[section]=.05;frame.oralAreaCm2[section+1]=.4;
+ frame.lungPressurePa=800;frame.voicing=0;frame.aspiration=0;frame.constrictionSection=section;
+ const quiet=new NativeVocalTract(.175,123),jet=new NativeVocalTract(.175,123);quiet.setGeometry(frame);jet.setGeometry(frame);
+ return{frame,quiet,jet,section};
+}
+test('frication cannot precede pressure propagation from the glottis to a remote constriction',()=>{
+ const {frame,quiet,jet,section}=jetPair();
+ for(let step=0;step<=section;step++){
+  quiet.step({...frame,frication:0},jetVoice);jet.step({...frame,frication:1},jetVoice);
+  for(let i=0;i<44;i++){
+   assert.ok(Math.abs(quiet.forward[i]-jet.forward[i])===0,'a noise source teleported to section '+i+' at step '+step);
+   assert.ok(Math.abs(quiet.backward[i]-jet.backward[i])===0);
+  }
+ }
+ quiet.step({...frame,frication:0},jetVoice);jet.step({...frame,frication:1},jetVoice);
+ assert.ok(Math.abs(quiet.forward[section+1]-jet.forward[section+1])>1e-8,'the arriving jet must excite a source');
+});
+test('a frication pressure dipole preserves incremental volume flux across unequal sections',()=>{
+ for(const areas of [[.05,.4],[.4,.05],[.2,.2]]){
+  const {frame,quiet,jet,section}=jetPair();frame.oralAreaCm2[section]=areas[0];frame.oralAreaCm2[section+1]=areas[1];quiet.setGeometry(frame);jet.setGeometry(frame);
+  quiet.injectPressure(section,1000);jet.injectPressure(section,1000);
+  quiet.step({...frame,frication:0},jetVoice);jet.step({...frame,frication:1},jetVoice);
+  const leftP=jet.backward[section]-quiet.backward[section],rightP=jet.forward[section+1]-quiet.forward[section+1];
+  const leftQ=-leftP/(rhoC/(areas[0]*1e-4)),rightQ=rightP/(rhoC/(areas[1]*1e-4));
+  assert.ok(Math.abs(leftQ)>1e-12);
+  assert.ok(Math.abs(leftQ-rightQ)<Math.abs(leftQ)*1e-8,JSON.stringify({areas,leftQ,rightQ}));
+ }
+});
+test('equal local incoming pressures produce no jet noise despite nonzero lung pressure',()=>{
+ const {frame,quiet,jet,section}=jetPair();
+ for(const tube of [quiet,jet]){tube.forward[section]=100;tube.backward[section+1]=100;}
+ quiet.step({...frame,frication:0},jetVoice);jet.step({...frame,frication:1},jetVoice);
+ assert.equal(jet.forward[section+1],quiet.forward[section+1]);assert.equal(jet.backward[section],quiet.backward[section]);
 });

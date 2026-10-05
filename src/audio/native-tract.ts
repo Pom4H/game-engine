@@ -6,8 +6,8 @@ const finite=(v:number,lo:number,hi:number,label:string)=>{if(!Number.isFinite(v
 /** Prescribed Rosenberg-style opening, NOT a self-oscillating tissue model.
  * Keep the existing open fraction (.65) and opening/closing times unchanged.
  * A cosine closing branch reaches contact with nonzero left-hand slope. The
- * previous squared cosine incorrectly forced that slope to zero and removed
- * most upper source harmonics before the vocal tract could filter them.
+ * previous squared cosine forced that slope to zero and strongly suppressed
+ * upper source harmonics before the vocal tract could filter them.
  * Here this is a geometric area envelope; pressure and impedance still own
  * volume flow. It is not an imposed flow recording or a naturalness claim.
  * Background: Rosenberg (1971), DOI 10.1121/1.1912389.
@@ -97,9 +97,19 @@ export class NativeVocalTract {
     const random=this.noise();this.lowNoise+=.18*(random-this.lowNoise);const noise=random-this.lowNoise;
     if(frame.lungPressurePa>0){
       const idx=Math.min(42,Math.max(1,frame.constrictionSection)),jetArea=A[idx]!*CM2;
-      const q=.5*RHO*(flow/Math.max(1e-8,jetArea))**2;
-      const turbulence=frame.frication*.030*Math.min(frame.lungPressurePa,q)*noise;
-      nf[idx+1]=nf[idx+1]!+turbulence;nb[idx]=nb[idx]!-turbulence;
+      const leftZ=RHO*C/jetArea,rightZ=RHO*C/(A[idx+1]!*CM2);
+      // At a pressure-continuous junction U=2*(pL_in-pR_in)/(ZL+ZR).
+      // Glottal flow is not local jet flow: before propagation arrives here,
+      // or under equal opposing incident waves, the local source must be zero.
+      const localFlow=2*(f[idx]!-b[idx+1]!)/(leftZ+rightZ);
+      const q=.5*RHO*(localFlow/jetArea)**2;
+      // Preserve the existing empirical full pressure-jump scale (2*.030),
+      // not the incorrect equal-amplitude outgoing waves at unequal areas.
+      // For S=pR-pL, dU=S/(ZL+ZR), dpL_out=-ZL*dU, dpR_out=ZR*dU.
+      // Both ports therefore carry the SAME incremental volume flux.
+      const jump=2*frame.frication*.030*Math.min(frame.lungPressurePa,q)*noise;
+      const sourceFlow=jump/(leftZ+rightZ);
+      nf[idx+1]=nf[idx+1]!+rightZ*sourceFlow;nb[idx]=nb[idx]!-leftZ*sourceFlow;
       nf[0]+=(frame.aspiration*.010+(voice.breathiness??.025)*gate*.002)*frame.lungPressurePa*noise;
     }
     const mouthAlpha=Math.exp(-TAU*4000/this.internalRate),noseAlpha=Math.exp(-TAU*3000/this.internalRate);
