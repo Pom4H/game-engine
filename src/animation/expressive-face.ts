@@ -17,10 +17,10 @@ export interface FaceActions {
   readonly frownLeft?:number;readonly frownRight?:number;readonly chinBunch?:number;readonly blink?:number;
 }
 export interface FaceActionLayer {readonly weight:number;readonly actions:FaceActions;}
-export interface FaceIdentity {readonly skin:Color;readonly iris:Color;readonly jawWidth:number;readonly cheekbone:number;readonly noseLength:number;readonly stubble?:boolean;readonly freckles?:boolean;}
+export interface FaceIdentity {readonly skin:Color;readonly iris:Color;readonly jawWidth:number;readonly cheekbone:number;readonly cheekHollow:number;readonly noseLength:number;readonly noseHook:number;readonly foreheadHeight:number;readonly templeWidth:number;readonly chinLength:number;readonly chinForward:number;readonly mouthForward:number;readonly stubble?:boolean;readonly freckles?:boolean;}
 export const WINTER_FACE_IDENTITIES:Readonly<Record<'mike'|'anna',FaceIdentity>>=Object.freeze({
-  mike:Object.freeze({skin:[.51,.34,.25,1] as Color,iris:[.11,.16,.12,1] as Color,jawWidth:1.09,cheekbone:.006,noseLength:.035,stubble:true}),
-  anna:Object.freeze({skin:[.62,.43,.33,1] as Color,iris:[.12,.24,.28,1] as Color,jawWidth:.94,cheekbone:.009,noseLength:.027,freckles:true}),
+  mike:Object.freeze({skin:[.51,.34,.25,1] as Color,iris:[.11,.16,.12,1] as Color,jawWidth:.70,cheekbone:.003,cheekHollow:.012,noseLength:.071,noseHook:.018,foreheadHeight:1.42,templeWidth:.88,chinLength:.018,chinForward:.013,mouthForward:.011,stubble:true}),
+  anna:Object.freeze({skin:[.62,.43,.33,1] as Color,iris:[.12,.24,.28,1] as Color,jawWidth:.74,cheekbone:.002,cheekHollow:.015,noseLength:.058,noseHook:.011,foreheadHeight:1.31,templeWidth:.84,chinLength:.034,chinForward:.010,mouthForward:.009,freckles:true}),
 });
 const KEYS=['smileLeft','smileRight','browLeft','browRight','browTiltLeft','browTiltRight','cheekLeft','cheekRight','squint','squintLeft','squintRight','sneerLeft','sneerRight','frownLeft','frownRight','chinBunch','blink'] as const;
 const clamp=(x:number,a=0,b=1)=>Math.max(a,Math.min(b,x));
@@ -61,10 +61,10 @@ export interface ExpressiveFaceObservation {
 export class ExpressiveFaceRig {
   readonly surface:FaceSurface;
   private readonly parts=new Map<string,RuntimeEntity>();
-  private readonly phase:number;
+  private readonly phase:number;private readonly identity:FaceIdentity;
   private gazeY=0;private gazeZ=0;private previousTime:number|undefined;
   constructor(readonly scene:Scene,readonly id:string,identity:FaceIdentity){
-    validateFaceIdentity(identity);this.surface=new FaceSurface(identity);
+    validateFaceIdentity(identity);this.identity=identity;this.surface=new FaceSurface(identity);
     for(const key of keys){const entity=scene.entities.get(id+'-face-'+key);if(!entity)throw new Error('Missing face part '+key);this.parts.set(key,entity);}
     this.parts.get('skin')!.renderMesh=this.surface.stream.primitive;
     let hash=2166136261;for(const char of id)hash=Math.imul(hash^char.charCodeAt(0),16777619);this.phase=(hash>>>0)/4294967296*3.6;
@@ -98,12 +98,13 @@ export class ExpressiveFaceRig {
       cheekLeft:actions.cheekLeft,cheekRight:actions.cheekRight,squint:actions.squint,squintLeft:actions.squintLeft,squintRight:actions.squintRight,
       sneerLeft:actions.sneerLeft,sneerRight:actions.sneerRight,frownLeft:actions.frownLeft,frownRight:actions.frownRight,chinBunch:actions.chinBunch,blink,gazeY:this.gazeY});
     place('skin',[0,0,0],[1,1,1]);
-    place('mouth',[.081,cy,0],[.035,Math.max(1e-7,gap),width]);
+    const mouthX=.081+this.identity.mouthForward;
+    place('mouth',[mouthX,cy,0],[.035,Math.max(1e-7,gap),width]);
     // Teeth stay inside the oral cavity. Visibility is determined by actual
     // lip occlusion rather than teleporting teeth at a loudness threshold.
-    place('upper-teeth',[.094,-.041,0],[.007,.004,.031]);
-    place('lower-teeth',[.092,cy-gap*.32-.004,0],[.006,.0034,.029]);
-    place('tongue',[.086,cy-gap*.35-.003,0],[.016,.004,.024]);
+    place('upper-teeth',[.094+this.identity.mouthForward,-.041,0],[.007,.004,.031]);
+    place('lower-teeth',[.092+this.identity.mouthForward,cy-gap*.32-.004,0],[.006,.0034,.029]);
+    place('tongue',[.086+this.identity.mouthForward,cy-gap*.35-.003,0],[.016,.004,.024]);
     for(const side of [-1,1]){
       const name=side<0?'left':'right',z=side*.03385,ey=this.gazeY,ez=this.gazeZ,ex=.07456+Math.sqrt(.014**2-ey*ey-ez*ez);
       place(name+'-eye',[.07456,.029,z],[.027,.028,.028]);
