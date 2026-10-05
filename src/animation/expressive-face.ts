@@ -12,7 +12,8 @@ export interface FaceActions {
   readonly browLeft?:number;readonly browRight?:number;
   readonly browTiltLeft?:number;readonly browTiltRight?:number;
   readonly cheekLeft?:number;readonly cheekRight?:number;
-  readonly squint?:number;readonly blink?:number;
+  readonly squint?:number;readonly squintLeft?:number;readonly squintRight?:number;
+  readonly sneerLeft?:number;readonly sneerRight?:number;readonly blink?:number;
 }
 export interface FaceActionLayer {readonly weight:number;readonly actions:FaceActions;}
 export interface FaceIdentity {readonly skin:Color;readonly iris:Color;readonly jawWidth:number;readonly cheekbone:number;readonly noseLength:number;readonly stubble?:boolean;readonly freckles?:boolean;}
