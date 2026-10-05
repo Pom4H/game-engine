@@ -13,7 +13,8 @@ export interface FaceActions {
   readonly browTiltLeft?:number;readonly browTiltRight?:number;
   readonly cheekLeft?:number;readonly cheekRight?:number;
   readonly squint?:number;readonly squintLeft?:number;readonly squintRight?:number;
-  readonly sneerLeft?:number;readonly sneerRight?:number;readonly blink?:number;
+  readonly sneerLeft?:number;readonly sneerRight?:number;
+  readonly frownLeft?:number;readonly frownRight?:number;readonly chinBunch?:number;readonly blink?:number;
 }
 export interface FaceActionLayer {readonly weight:number;readonly actions:FaceActions;}
 export interface FaceIdentity {readonly skin:Color;readonly iris:Color;readonly jawWidth:number;readonly cheekbone:number;readonly noseLength:number;readonly stubble?:boolean;readonly freckles?:boolean;}
@@ -21,7 +22,7 @@ export const WINTER_FACE_IDENTITIES:Readonly<Record<'mike'|'anna',FaceIdentity>>
   mike:Object.freeze({skin:[.51,.34,.25,1] as Color,iris:[.11,.16,.12,1] as Color,jawWidth:1.09,cheekbone:.006,noseLength:.035,stubble:true}),
   anna:Object.freeze({skin:[.62,.43,.33,1] as Color,iris:[.12,.24,.28,1] as Color,jawWidth:.94,cheekbone:.009,noseLength:.027,freckles:true}),
 });
-const KEYS=['smileLeft','smileRight','browLeft','browRight','browTiltLeft','browTiltRight','cheekLeft','cheekRight','squint','squintLeft','squintRight','sneerLeft','sneerRight','blink'] as const;
+const KEYS=['smileLeft','smileRight','browLeft','browRight','browTiltLeft','browTiltRight','cheekLeft','cheekRight','squint','squintLeft','squintRight','sneerLeft','sneerRight','frownLeft','frownRight','chinBunch','blink'] as const;
 const clamp=(x:number,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const valid=(x:number,label:string)=>{if(!Number.isFinite(x)||x<0||x>1)throw new RangeError(label+' must be within 0..1');};
 type FaceActionValues={-readonly [K in keyof Required<FaceActions>]:number};
@@ -95,7 +96,7 @@ export class ExpressiveFaceRig {
     this.surface.update({...neutralFaceSurface(),width,gap,protrusion:motor.lipProtrusionM/scale,jaw:motor.jawAngleRad,
       smileLeft:actions.smileLeft,smileRight:actions.smileRight,browLeft:actions.browLeft,browRight:actions.browRight,browTiltLeft:actions.browTiltLeft,browTiltRight:actions.browTiltRight,
       cheekLeft:actions.cheekLeft,cheekRight:actions.cheekRight,squint:actions.squint,squintLeft:actions.squintLeft,squintRight:actions.squintRight,
-      sneerLeft:actions.sneerLeft,sneerRight:actions.sneerRight,blink,gazeY:this.gazeY});
+      sneerLeft:actions.sneerLeft,sneerRight:actions.sneerRight,frownLeft:actions.frownLeft,frownRight:actions.frownRight,chinBunch:actions.chinBunch,blink,gazeY:this.gazeY});
     place('skin',[0,0,0],[1,1,1]);
     place('mouth',[.081,cy,0],[.035,Math.max(1e-7,gap),width]);
     // Teeth stay inside the oral cavity. Visibility is determined by actual
