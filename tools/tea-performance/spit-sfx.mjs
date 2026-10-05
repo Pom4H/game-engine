@@ -11,22 +11,24 @@ const add=(time,value,pan=-.24)=>{
   const i=Math.round(time*rate);if(i<0||i>=frames)return;
   const theta=(pan+1)*Math.PI/4;left[i]+=value*Math.cos(theta);right[i]+=value*Math.sin(theta);
 };
-let lp=0,prev=0;
+let slow=0,mid=0,wet=0;
 for(let n=0;n<Math.ceil(TEA_SPIT_EVENT.durationS*rate);n++){
-  const t=n/rate,global=TEA_SPIT_EVENT.startS+t;
-  const white=random();
-  lp+=.055*(white-lp);
-  const high=white-lp;
-  // First ~80 ms: compressed lips open abruptly, followed by sustained wet
-  // turbulent airflow. This is not a recorded sample.
-  const burst=Math.exp(-t*34)*high*.72;
-  const sustain=t<.58?Math.sin(Math.PI*Math.min(1,t/.035))*Math.exp(-t*2.6):0;
-  const flutter=.72+.28*Math.sin(2*Math.PI*(23+4*Math.sin(t*9))*t);
-  const pffff=high*sustain*flutter*.28;
-  // A low wet component follows pressure release without becoming a voiced tone.
-  prev+=.11*(white-prev);
-  const wet=(prev-lp)*Math.exp(-Math.max(0,t-.06)*5.8)*(t<.42?1:0)*.13;
-  add(global,burst+pffff+wet);
+  const t=n/rate,global=TEA_SPIT_EVENT.startS+t,white=random();
+  // Water being blown from the mouth: pressure ramps up instead of a hard /p/
+  // transient. Two one-pole filters keep the energy in a wet mid-band and
+  // deliberately remove the foil-like high-frequency edge.
+  slow+=.018*(white-slow);
+  mid+=.095*(white-mid);
+  wet+=.035*(white-wet);
+  const band=(mid-slow)*.78+wet*.22;
+  const attack=Math.min(1,t/.045),release=Math.exp(-Math.max(0,t-.34)*4.4);
+  const envelope=attack*release*(t<.78?1:Math.max(0,1-(t-.78)/.22));
+  const liquidPulse=.74+.20*Math.sin(2*Math.PI*11.5*t+.35*Math.sin(t*31))+.06*Math.sin(2*Math.PI*23*t);
+  const mouthNoise=band*envelope*liquidPulse*.56;
+  // Low wet turbulence represents liquid shearing across lips/teeth; no
+  // instantaneous plosive burst and no narrow-band ringing.
+  const turbulence=(wet-slow)*envelope*.24;
+  add(global,mouthNoise+turbulence);
 }
 // Individual droplets hit nearby coat/table/ground after the spray front.
 // Fixed seeds keep replay/render bit-stable.
