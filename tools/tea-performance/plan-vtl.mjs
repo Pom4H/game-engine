@@ -14,7 +14,7 @@ const vtlSegments=segments=>segments.flatMap(segment=>{
   const {phone,durationS}=segment;
   if(phone==='oU')return [{phone:'o',durationS:durationS*.58},{phone:'U',durationS:durationS*.42}];
   if(phone==='eI')return [{phone:'e',durationS:durationS*.58},{phone:'I',durationS:durationS*.42}];
-  const mapped=phone==='V'||phone==='A'?'a':phone==='ae'?'E':phone;
+  const mapped=phone==='V'||phone==='A'?'a':phone==='ae'?'E':phone==='w'?'u':phone;
   return [{phone:mapped,durationS}];
 });
 const speakers=native.speakers.map(speaker=>({
