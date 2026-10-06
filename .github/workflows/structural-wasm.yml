@@ -1,0 +1,43 @@
+name: Structural JS-Wasm comparison
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/structural-wasm/**'
+      - 'src/physics/structure.ts'
+      - 'src/math.ts'
+      - 'src/materials/catalog.ts'
+      - 'src/vehicles/passenger.ts'
+      - 'src/vehicles/m3.ts'
+      - '.github/workflows/structural-wasm.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: structural-wasm-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Wasm compiler
+        run: sudo apt-get update && sudo apt-get install -y clang lld
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck && bun run build
+      - name: Physics regression checks
+        run: node --test test/contact-laws.test.mjs test/wave-field.test.mjs test/vehicle-interaction.test.mjs
+      - name: Verify and measure actual compiled Wasm
+        run: node --expose-gc tools/structural-wasm/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: structural-js-wasm-${{ github.sha }}
+          path: artifacts/structural-wasm/
+          if-no-files-found: error
