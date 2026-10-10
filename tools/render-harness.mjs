@@ -18,7 +18,9 @@ if(!Number.isSafeInteger(warmupFrames)||warmupFrames<0||warmupFrames>512)throw n
 const profiling=process.env.RENDER_PROFILING==='1',requireHardware=process.env.RENDER_REQUIRE_HARDWARE==='1';
 const fpsBenchFrames=Number(process.env.RENDER_FPS_BENCH_FRAMES??0);
 if(!Number.isSafeInteger(fpsBenchFrames)||fpsBenchFrames<0||fpsBenchFrames>240)throw new RangeError('RENDER_FPS_BENCH_FRAMES must be within 0..240');
-if(fpsBenchFrames&&(!profiling||!requireHardware))throw new Error('GPU FPS benchmark requires hardware and profiling enabled');
+if(fpsBenchFrames&&!requireHardware)throw new Error('GPU FPS benchmark requires a hardware WebGPU adapter');
+const fpsBenchLabel=process.env.RENDER_FPS_BENCH_LABEL??'';
+if(fpsBenchLabel&&!/^[a-z][a-z0-9-]{0,24}$/.test(fpsBenchLabel))throw new RangeError('Invalid FPS benchmark artifact label');
 const videoOutput=process.env.RENDER_VIDEO_OUTPUT??null,videoFps=Number(process.env.RENDER_VIDEO_FPS??30),videoStart=Number(process.env.RENDER_VIDEO_START??0),videoDuration=Number(process.env.RENDER_VIDEO_DURATION??0);
 if(videoOutput&&(!Number.isSafeInteger(videoFps)||videoFps<1||videoFps>60||!Number.isFinite(videoStart)||videoStart<0||!Number.isFinite(videoDuration)||videoDuration<=0||videoDuration>30))throw new RangeError('Invalid render video options');
 const scenePath=resolve(sceneFile);
@@ -268,7 +270,8 @@ try{
     if(sampled.exceptionDetails||!sampled.result?.value)throw new Error('GPU benchmark failed: '+JSON.stringify(sampled.exceptionDetails??sampled));
     fpsBenchmark={...sampled.result.value,adapter:adapterResult.result?.value};
     await mkdir(resolve('artifacts/fps'),{recursive:true});
-    await writeFile(resolve('artifacts/fps/gpu-budget.json'),JSON.stringify(fpsBenchmark,null,2)+'\n');
+    const artifactName=fpsBenchLabel?'gpu-budget-'+fpsBenchLabel+'.json':'gpu-budget.json';
+    await writeFile(resolve('artifacts/fps',artifactName),JSON.stringify(fpsBenchmark,null,2)+'\n');
     console.log('GPU_FPS_BENCHMARK='+JSON.stringify(fpsBenchmark));
   }
   let video=null;

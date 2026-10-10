@@ -35,12 +35,22 @@ jobs:
           RENDER_FPS_BENCH_FRAMES: '90'
           RENDER_WARMUP_FRAMES: '12'
         run: node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+      - name: Measure full-resolution pacing without profiling overhead
+        shell: powershell
+        env:
+          RENDER_PROFILING: '0'
+          RENDER_REQUIRE_HARDWARE: '1'
+          RENDER_FPS_BENCH_FRAMES: '90'
+          RENDER_FPS_BENCH_LABEL: 'unprofiled'
+          RENDER_WARMUP_FRAMES: '12'
+        run: node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: fps-webgpu-1080p
           path: |
             artifacts/fps/gpu-budget.json
+            artifacts/fps/gpu-budget-unprofiled.json
             artifacts/render-hud.json
   gpu-budget-apple-silicon:
     runs-on: macos-latest
@@ -59,10 +69,19 @@ jobs:
           RENDER_FPS_BENCH_FRAMES: '90'
           RENDER_WARMUP_FRAMES: '12'
         run: node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+      - name: Measure full-resolution pacing without profiling overhead
+        env:
+          RENDER_PROFILING: '0'
+          RENDER_REQUIRE_HARDWARE: '1'
+          RENDER_FPS_BENCH_FRAMES: '90'
+          RENDER_FPS_BENCH_LABEL: 'unprofiled'
+          RENDER_WARMUP_FRAMES: '12'
+        run: node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: fps-webgpu-apple-silicon
           path: |
             artifacts/fps/gpu-budget.json
+            artifacts/fps/gpu-budget-unprofiled.json
             artifacts/render-hud.json
