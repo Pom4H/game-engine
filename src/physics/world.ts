@@ -432,12 +432,9 @@ export class PhysicsWorld {
   }
 
   private rebuildIndex():void{
-    // Refill the broadphase once per substep instead of remove()+invalidate
-    // for every body. Input order and oversized-membership handling are retained.
-    this.index.rebuild(this.bodies.values(),body=>{
-      body.syncSpatial();
-      return shapeRadius(body.shape);
-    });
+    this.index.clear();this.index.beginBatch();
+    for(const body of this.bodies.values()){body.syncSpatial();this.index.add(body,shapeRadius(body.shape));}
+    this.index.endBatch();
   }
 
   private resolveGround(body:RigidBody,dt:number):void{

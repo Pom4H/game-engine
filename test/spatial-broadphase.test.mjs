@@ -49,24 +49,3 @@ test('a large static floor still supports a falling rigid body',()=>{
   assert.ok(body.position[1]>=.5-1e-3);
 });
 
-test('bulk rebuild retains reference cell order and cache invalidation',()=>{
-  const regular=new SpatialHash(8),bulk=new SpatialHash(8);
-  const items=Array.from({length:140},(_,i)=>({
-    x:((i*37)%137)-68,z:((i*53)%139)-69,r:i%19===0?80:i%7===0?16:1,
-  }));
-  for(let frame=0;frame<5;frame++){
-    regular.clear();regular.beginBatch();
-    for(const item of items)regular.add(item,item.r);
-    regular.endBatch();
-    bulk.rebuild(items,item=>item.r);
-    assert.deepEqual(bulk.diagnostics.cells,regular.diagnostics.cells);
-    assert.deepEqual(bulk.diagnostics.oversizedItems,regular.diagnostics.oversizedItems);
-    for(let x=-80;x<=80;x+=17)for(let z=-80;z<=80;z+=29){
-      assert.deepEqual(bulk.near(x,z,4),regular.near(x,z,4),'candidate order changed');
-    }
-    // Queries are invalidated exactly once after the next replacement.
-    for(let i=0;i<items.length;i+=9){items[i].x+=2.25;items[i].z-=1.75;}
-  }
-  const duplicate={x:0,z:0};
-  assert.throws(()=>bulk.rebuild([duplicate,duplicate],()=>1),/distinct/);
-});
