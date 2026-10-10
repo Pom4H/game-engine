@@ -30,6 +30,7 @@ function physics(){
   check('physics','independent experiment suite',proof.experiments.length>=config.physics.minimumExperiments);
   check('physics','causal energy proof',proof.requirements.some(x=>x.id==='energy-accounting'&&x.status==='available')&&proof.requirements.some(x=>x.id==='cause-provenance'&&x.status==='available'));
   if(!proof.releaseReady)missing('physics','proving-ground release coverage','Still missing: '+proof.missing.join(', '));
+  missing('physics','experimental reality gap','Analytic invariants pass but real measured lift/drag, tyres, deformation and water experiments are not yet paired to the solver.');
   results.physics={fixtures:bench.samples.map(x=>({id:x.id,hash:x.fingerprint,cpuMedianMs:x.performance.medianMsPerTick})),
     experimentCount:proof.experiments.length,releaseReady:proof.releaseReady,missingDomains:proof.missing};
 }
