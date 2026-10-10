@@ -45,10 +45,10 @@ export function projectOfficeAgents(
  * engine meshes, not a parallel renderer or another source of truth. */
 const PAL={
  white:[.94,.955,.96,1],paper:[.99,.985,.95,1],cream:[.94,.855,.72,1],
- sky:[.69,.83,.93,1],blue:[.18,.43,.78,1],navy:[.14,.25,.43,1],
+ sky:[.54,.74,.92,1],blue:[.18,.43,.78,1],navy:[.14,.25,.43,1],
  yellow:[1,.77,.13,1],orange:[.99,.52,.16,1],green:[.25,.69,.40,1],
  lime:[.59,.81,.32,1],red:[.89,.30,.27,1],tan:[.86,.74,.57,1],
- floor:[.89,.83,.71,1],edge:[.69,.74,.79,1],dark:[.20,.26,.31,1],
+ floor:[.84,.76,.62,1],edge:[.55,.63,.72,1],dark:[.20,.26,.31,1],
  skin:[1,.78,.23,1],brown:[.37,.23,.15,1],
 } satisfies Record<string,Color>;
 const PHASE_COLOR:Record<OfficePhase,Color>={
@@ -225,11 +225,11 @@ export class AgentOffice {
   const entities=batchStaticScenery(k.entities,e=>!!e.renderOnly&&!!e.mesh&&!movable.has(e.id),18);
   const spec:SceneSpec={
    version:1,seed:4327,ground:-.4,gravity:[0,-9.81,0],entities,
-   clearColor:[.78,.86,.91,1],
+   clearColor:[.75,.85,.93,1],
    environment:{temperatureC:22,humidity:.36,wind:[0,0,0],sunlight:.82,groundMoisture:0,precipitation:'arid',snowfall:'none'},
-   rendering:{sunDirection:[-.48,.77,.43],sunColor:[1,.95,.86],sunIntensity:2.0,
-    skyColor:[.70,.80,.88],fogDensity:0,exposure:1.06,shadowExtent:22},
-   camera:{position:[13,11.7,14],target:[0,1.25,0],fov:47},
+   rendering:{sunDirection:[-.48,.77,.43],sunColor:[1,.95,.86],sunIntensity:1.45,
+    skyColor:[.57,.73,.88],fogDensity:0,exposure:.92,shadowExtent:22},
+   camera:{position:[12.6,10.3,13.7],target:[0,.70,0],fov:45},
   };
   this.scene=new Scene(spec);this.actors=actors;
   if(movable.size)this.scene.usePlugin({id:'office:toy-brick-projection',

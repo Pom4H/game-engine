@@ -7,7 +7,7 @@ const canvas=$('#scene'),slider=$('#seek'),journal=new ActivityJournal();
 const PHASE={offline:'OFFLINE',idle:'IDLE',working:'WORKING',tool:'TOOL',blocked:'BLOCKED',done:'DONE'};
 let renderer,office,selectedAgent=null,selectedFact=null,playing=false,lastFrame=0;
 let mode='demo',cursorMs=0,firstMs=0,lastMs=0,dirty=true,frameCount=0,lastUiAt=0,building=Promise.resolve();
-let yaw=.86,pitch=.46,distance=21.5;
+let yaw=.83,pitch=.49,distance=20.5;
 const time=ms=>{const n=Math.floor(ms/1000);return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');};
 const error=e=>{const panel=$('#error');panel.hidden=false;panel.textContent='3D: '+(e?.message??String(e));playing=false;};
 const eventTitle=f=>f.kind.replaceAll('agent.','').replaceAll('.',' / ').toUpperCase();
@@ -43,8 +43,8 @@ function refreshBounds(){
 }
 function viewCamera(){
   if(!office)return;
-  const target=[0,1.30,0];
-  office.scene.setCamera({position:[Math.cos(yaw)*Math.cos(pitch)*distance,target[1]+Math.sin(pitch)*distance,Math.sin(yaw)*Math.cos(pitch)*distance],target,fov:45});
+  const target=[0,.70,0];
+  office.scene.setCamera({position:[Math.cos(yaw)*Math.cos(pitch)*distance,target[1]+Math.sin(pitch)*distance,Math.sin(yaw)*Math.cos(pitch)*distance],target,fov:44});
   renderer?.resetTemporalHistory?.();dirty=true;
 }
 function resize(){
