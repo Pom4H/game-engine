@@ -276,22 +276,26 @@ export class AgentCampus{
   if(!Number.isFinite(cursorMs)||cursorMs<0)throw new RangeError('Invalid campus replay time');
   const journeys=campusJourneys(facts),result:CampusAgentPose[]=[];
   for(const actor of this.actors){
-   let room=actor.agent.home,position=actor.home,heading=0,walked=0,traveling=false;
+   let room=actor.agent.home,position=actor.home,heading=0,walked=0,traveling=false,strideWeight=0;
    let causeId:string|undefined,destination:CampusRoom|undefined;
    for(const journey of journeys){
     if(journey.agentId!==actor.agent.id)continue;
     if(journey.endMs<=cursorMs){
-     room=journey.to;position=at(room,this.actors.indexOf(actor));continue;
+     const arrived=at(journey.to,this.actors.indexOf(actor));
+     heading=samplePath(path(position,arrived,room,actor.lane),1).heading;
+     room=journey.to;position=arrived;continue;
     }
     if(journey.startMs<=cursorMs){
      destination=journey.to;causeId=journey.causeId;
      const nodes=path(position,at(destination,this.actors.indexOf(actor)),room,actor.lane);
-     const sample=samplePath(nodes,(cursorMs-journey.startMs)/(journey.endMs-journey.startMs));
+     const progress=(cursorMs-journey.startMs)/(journey.endMs-journey.startMs);
+     strideWeight=Math.max(0,Math.min(1,Math.min(progress,1-progress)*9));
+     const sample=samplePath(nodes,progress);
      position=sample.position;heading=sample.heading;walked=sample.walked;traveling=true;
      break;
     }
    }
-   const phase=walkingPhase(walked,traveling),bob=traveling?Math.abs(Math.sin(phase))*.045:0;
+   const phase=walkingPhase(walked,traveling),bob=traveling?Math.abs(Math.sin(phase))*.045*strideWeight:0;
    for(const part of actor.parts){
     const entity=this.scene.entities.get(part.id);
     if(!entity)throw new Error('Campus projector lost drawable '+part.id);
@@ -300,10 +304,10 @@ export class AgentCampus{
       rz=-Math.sin(heading)*lx+Math.cos(heading)*lz;
     let swing=0;
     if(traveling){
-     if(part.part==='leg:left'||part.part==='shoe:left')swing=.46*Math.sin(phase);
-     if(part.part==='leg:right'||part.part==='shoe:right')swing=-.46*Math.sin(phase);
-     if(part.part==='arm:left'||part.part==='hand:left')swing=-.30*Math.sin(phase);
-     if(part.part==='arm:right'||part.part==='hand:right')swing=.30*Math.sin(phase);
+     if(part.part==='leg:left'||part.part==='shoe:left')swing=.46*Math.sin(phase)*strideWeight;
+     if(part.part==='leg:right'||part.part==='shoe:right')swing=-.46*Math.sin(phase)*strideWeight;
+     if(part.part==='arm:left'||part.part==='hand:left')swing=-.30*Math.sin(phase)*strideWeight;
+     if(part.part==='arm:right'||part.part==='hand:right')swing=.30*Math.sin(phase)*strideWeight;
     }
     entity.position.splice(0,3,position[0]+rx,position[1]+ly+bob,position[2]+rz);
     entity.rotation.splice(0,3,swing,heading,0);
