@@ -84,6 +84,9 @@ try{
   const adapter=await evaluate('(async()=>{const a=await navigator.gpu?.requestAdapter({powerPreference:"high-performance"});const i=a?.info??{};return {vendor:i.vendor??"",device:i.device??"",architecture:i.architecture??"",description:i.description??"",isFallbackAdapter:a?.isFallbackAdapter??i.isFallbackAdapter??false}})()');
   check(initial.webgpu&&initial.renderer?.backend==='webgpu','Browser did not use the engine WebGPU renderer');
   check(initial.renderer.drawCalls>0&&initial.renderer.triangles>0,'GPU submitted no office geometry');
+  check(initial.style==='toy-brick-v1','CI must render the toy-brick scene, not the former dark office');
+  check(initial.sceneEntities<250,'Toy-brick static batching regressed; too many drawables: '+initial.sceneEntities);
+  check(initial.renderer.drawCalls<250,'The toy scene must submit fewer draws than the old 319-draw office: '+initial.renderer.drawCalls);
   check(initial.agents.length===4,'Expected four real projected actors in the demo');
   const adapterText=Object.values(adapter).join(' ');
   const software=adapter.isFallbackAdapter||/swiftshader|lavapipe|llvmpipe|software|warp\b|microsoft basic render/i.test(adapterText);

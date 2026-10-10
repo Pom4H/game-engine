@@ -11,6 +11,7 @@ on:
       - 'tools/agent-office/**'
       - 'examples/agent-office/**'
       - 'test/agent-office.test.mjs'
+      - 'test/codex-office.test.mjs'
       - '.github/workflows/agent-office.yml'
       - 'package.json'
   workflow_dispatch:
@@ -35,12 +36,13 @@ jobs:
       - run: bun run typecheck
       - run: bun run build
       - name: Causal journal / office projection / live event ingest
-        run: node --test test/agent-office.test.mjs
+        run: node --test test/agent-office.test.mjs test/codex-office.test.mjs
       - name: Syntax check browser and capture entrypoints
         run: |
           node --check tools/agent-office/app.mjs
           node --check tools/agent-office/server.mjs
           node --check tools/agent-office/capture.mjs
+          node --check tools/agent-office/codex-bridge.mjs
       - name: Capture actual 3D office on GPU
         env:
           OFFICE_REQUIRE_HARDWARE: '1'

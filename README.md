@@ -127,3 +127,7 @@ ports. The WSCN v3 extension is pure static metadata with no per-tick DSL
 interpreter. Only actual committed impact/fracture effects are linked at
 runtime; unimplemented links stay declarative. See
 [docs/WORLD_COUPLINGS.md](docs/WORLD_COUPLINGS.md).
+
+## Agent Office: toy-brick observability
+
+`bun run office:demo` opens a WebGPU toy-brick office with deterministic causal replay; `bun run office:live` accepts real observed facts through the loopback API. Codex app-server notifications can be normalized with `CodexActivityAdapter` without exposing prompts or reasoning. See [docs/AGENT_OFFICE.md](docs/AGENT_OFFICE.md).

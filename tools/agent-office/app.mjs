@@ -7,7 +7,7 @@ const canvas=$('#scene'),slider=$('#seek'),journal=new ActivityJournal();
 const PHASE={offline:'OFFLINE',idle:'IDLE',working:'WORKING',tool:'TOOL',blocked:'BLOCKED',done:'DONE'};
 let renderer,office,selectedAgent=null,selectedFact=null,playing=false,lastFrame=0;
 let mode='demo',cursorMs=0,firstMs=0,lastMs=0,dirty=true,frameCount=0,lastUiAt=0,building=Promise.resolve();
-let yaw=.92,pitch=.42,distance=24;
+let yaw=.86,pitch=.46,distance=21.5;
 const time=ms=>{const n=Math.floor(ms/1000);return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');};
 const error=e=>{const panel=$('#error');panel.hidden=false;panel.textContent='3D: '+(e?.message??String(e));playing=false;};
 const eventTitle=f=>f.kind.replaceAll('agent.','').replaceAll('.',' / ').toUpperCase();
@@ -43,8 +43,8 @@ function refreshBounds(){
 }
 function viewCamera(){
   if(!office)return;
-  const target=[0,1.15,-.2];
-  office.scene.setCamera({position:[Math.cos(yaw)*Math.cos(pitch)*distance,target[1]+Math.sin(pitch)*distance,Math.sin(yaw)*Math.cos(pitch)*distance],target,fov:49});
+  const target=[0,1.30,0];
+  office.scene.setCamera({position:[Math.cos(yaw)*Math.cos(pitch)*distance,target[1]+Math.sin(pitch)*distance,Math.sin(yaw)*Math.cos(pitch)*distance],target,fov:45});
   renderer?.resetTemporalHistory?.();dirty=true;
 }
 function resize(){
@@ -116,6 +116,7 @@ function inspect(){
   const facts=journal.snapshot();
   return{mode,events:facts.length,atMs:cursorMs,agents:office?.project(facts,cursorMs)??[],
     cause:selectedFact?journal.lineage(selectedFact):undefined,renderer:renderer?.inspect(),webgpu:!!renderer,
+    style:office?.style??null,sceneEntities:office?.scene.entities.size??0,
     projectionOwner:'AgentOffice / activity journal',authority:'external events',demo:mode==='demo'};
 }
 async function ingest(facts){
@@ -177,7 +178,7 @@ canvas.addEventListener('pointermove',event=>{
 });
 canvas.addEventListener('pointerup',()=>dragging.active=false);
 canvas.addEventListener('pointercancel',()=>dragging.active=false);
-canvas.addEventListener('wheel',event=>{event.preventDefault();distance=Math.max(12,Math.min(40,distance*Math.exp(event.deltaY*.001)));viewCamera();},{passive:false});
+canvas.addEventListener('wheel',event=>{event.preventDefault();distance=Math.max(13,Math.min(40,distance*Math.exp(event.deltaY*.001)));viewCamera();},{passive:false});
 new ResizeObserver(resize).observe(canvas);
 globalThis.__AGENT_OFFICE__={inspect,seek,select:(id)=>{selectedFact=id;renderUi();},capture:async()=>{await renderer?.flush();return canvas.toDataURL('image/png');}};
 init().catch(error);
