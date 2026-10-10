@@ -365,7 +365,7 @@ export class SurfaceEnvironmentSystem {
   }
 
   private stepSurface(state:SurfaceEnvironmentState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState,exposure:SurfaceState,factors:SurfaceStepFactors):void{
-    const use=state.use;
+    const use=state.use,profile=entity.material.profile;
     state.snowDepthM+=factors.snowfallDelta;
     // Authoritative material thermal/solar laws were evaluated once for this
     // surface. Applying the same coefficients to every cell preserves the
