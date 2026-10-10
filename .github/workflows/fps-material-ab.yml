@@ -1,0 +1,71 @@
+name: Material shader A/B - native GPU and image parity
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/fps/compare-gpu-images.mjs'
+      - '.github/workflows/fps-material-ab.yml'
+  workflow_dispatch:
+concurrency:
+  group: material-shader-ab-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: windows-rdna3
+            runner: '["self-hosted", "Windows", "X64"]'
+          - label: apple-silicon
+            runner: '"macos-latest"'
+    runs-on: ${{ fromJSON(matrix.runner) }}
+    timeout-minutes: 28
+    defaults:
+      run:
+        shell: bash
+    env:
+      BASELINE_SHA: e08c30e3b879c207e1d8e5fc171ef663b718169d
+      RENDER_PROFILING: '1'
+      RENDER_REQUIRE_HARDWARE: '1'
+      RENDER_FPS_BENCH_FRAMES: '90'
+      RENDER_WARMUP_FRAMES: '12'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Ensure ffmpeg for image comparison
+        if: runner.os == 'macOS'
+        run: brew list ffmpeg >/dev/null 2>&1 || brew install ffmpeg
+      - name: Render and profile original material shader
+        run: |
+          git -c advice.detachedHead=false checkout -f "$BASELINE_SHA"
+          bun install --frozen-lockfile
+          bun run build
+          RENDER_FPS_BENCH_LABEL=baseline node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          mkdir -p artifacts/fps/label-ab-baseline
+          cp artifacts/render34.png artifacts/render35.png artifacts/render36.png artifacts/render37.png artifacts/fps/label-ab-baseline/
+      - name: Render and profile optimized material shader
+        run: |
+          git -c advice.detachedHead=false checkout -f "$GITHUB_SHA"
+          bun install --frozen-lockfile
+          bun run build
+          RENDER_FPS_BENCH_LABEL=optimized node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          node tools/fps/compare-gpu-images.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: material-shader-ab-${{ matrix.label }}
+          path: |
+            artifacts/fps/gpu-budget-baseline.json
+            artifacts/fps/gpu-budget-optimized.json
+            artifacts/fps/material-shader-ab.json
+            artifacts/fps/label-ab-baseline/*.png
+            artifacts/render34.png
+            artifacts/render35.png
+            artifacts/render36.png
+            artifacts/render37.png
