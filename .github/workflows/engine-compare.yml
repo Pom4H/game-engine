@@ -1,0 +1,86 @@
+name: Engine compare - Three Babylon JS Rust WebGPU
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/engine-compare.yml'
+      - 'tools/engine-compare/**'
+      - 'kernels/bench-motion/**'
+  workflow_dispatch:
+concurrency:
+  group: engine-compare-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cubes:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 80
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Rust WASM target on self-hosted Windows
+        run: |
+          $ErrorActionPreference='Stop'
+          $cargoDir=Join-Path $env:USERPROFILE '.cargo\bin'
+          if (Test-Path $cargoDir) {
+            $env:PATH="$cargoDir;$env:PATH"
+            $cargoDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+          if (-not (Get-Command rustup -ErrorAction SilentlyContinue)) {
+            $installer=Join-Path $env:RUNNER_TEMP 'rustup-init.exe'
+            Invoke-WebRequest -Uri 'https://win.rustup.rs/x86_64' -OutFile $installer
+            & $installer -y --profile minimal --default-toolchain stable --no-modify-path
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $env:PATH="$cargoDir;$env:PATH"
+            $cargoDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+          rustup target add wasm32-unknown-unknown
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Install, build and compile motion kernel
+        run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --manifest-path kernels/bench-motion/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/bench-motion/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Pin external benchmark and install exact dependencies
+        run: |
+          $ErrorActionPreference='Stop'
+          $upstream='artifacts/engine-compare/upstream'
+          git clone --filter=blob:none https://github.com/KilledByAPixel/webgl-engine-bench.git $upstream
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git -C $upstream checkout --detach 2785ce1d4a0afdfff88d4d1f6863de9427f831f5
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm ci --prefix $upstream
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Prepare identical seeded cube workload
+        run: |
+          node tools/engine-compare/prepare.mjs artifacts/engine-compare/upstream
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Require numerical parity for 120 fixed ticks
+        run: |
+          node tools/engine-compare/parity.mjs artifacts/engine-compare/upstream
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Compare all 6 GPU variants on installed Chrome
+        run: |
+          Push-Location artifacts/engine-compare/upstream
+          try {
+            node tools/rom4-run.mjs --full
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: engine-compare-six-way
+          path: |
+            artifacts/engine-compare/results.json
+            artifacts/engine-compare/parity.json
+            artifacts/engine-compare/*.png
+          if-no-files-found: warn
