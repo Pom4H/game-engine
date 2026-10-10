@@ -106,6 +106,51 @@ jobs:
           if ($env:QUALITY_STRICT -eq 'true') { $args += '--strict-references' }
           node @args
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  render-performance-apple-silicon:
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Metrics regression
+        run: node --test test/quality-gates.test.mjs
+      - name: Verify hardware capture tools
+        run: |
+          command -v ffmpeg
+          test -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      - name: Profile 1080p Chrome WebGPU and render reference views
+        env:
+          RENDER_PROFILING: '1'
+          RENDER_REQUIRE_HARDWARE: '1'
+          RENDER_FPS_BENCH_FRAMES: '90'
+          RENDER_WARMUP_FRAMES: '12'
+        run: node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+      - name: Compare against Apple Silicon performance profile
+        env:
+          QUALITY_STRICT: ${{ inputs.strict_references }}
+        run: |
+          if [ "$QUALITY_STRICT" = "true" ]; then
+            node tools/quality/gate.mjs gpu --profile=apple-silicon-1080p --strict-references
+          else
+            node tools/quality/gate.mjs gpu --profile=apple-silicon-1080p
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reality-gpu-apple-silicon
+          retention-days: 21
+          path: |
+            artifacts/quality/
+            artifacts/fps/gpu-budget.json
+            artifacts/render-hud.json
+            artifacts/render34.png
+            artifacts/render35.png
+            artifacts/render36.png
+            artifacts/render37.png
       - uses: actions/upload-artifact@v4
         if: always()
         with:
