@@ -66,7 +66,7 @@ try {
   const empty=runTicks(()=>new Scene({version:1,entities:[]}));
   const report={
     comparableEntities:65, parityTicks:120,
-    runtime:{bodies65:bodies,emptyScene:empty,defaultMode:'kernel'},
+    runtime:{bodies65:bodies,emptyScene:empty,defaultMode:'direct'},
     authoring:{worldBytes:source.length,typescriptBytes:tsSource.length,
       worldNonblankLines:source.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length,
       typescriptNonblankLines:tsSource.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length},

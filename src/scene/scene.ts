@@ -76,8 +76,9 @@ export class Scene {
   private simulationProfile:SimulationProfile=simulationProfile('detailed');
   private simulationProgram:KernelProgram<SceneModuleContext,InternalCommand>=this.kernel.compile(this.simulationProfile);
   private directSystemPlan:DirectScenePlan|undefined=compileDirectScenePlan(this.kernel,this.simulationProfile);
-  // Direct dispatch stays experimental until repeatable benches prove an improvement.
-  private dispatchMode:'kernel'|'direct'='kernel';
+  // Direct execution is equivalent to KernelProgram for built-in systems; selected
+  // profiles/plugins with custom modules still use the authoritative KernelProgram.
+  private dispatchMode:'kernel'|'direct'='direct';
   setSystemDispatch(mode:'kernel'|'direct'):void{
     if(mode!=='kernel'&&mode!=='direct')throw new TypeError('Unknown system dispatch mode');
     this.dispatchMode=mode;

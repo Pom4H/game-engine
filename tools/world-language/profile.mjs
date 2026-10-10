@@ -7,7 +7,7 @@ import {Scene} from '../../dist/scene/scene.js';
 
 const root=resolve(fileURLToPath(new URL('../..',import.meta.url)));
 const source=resolve(process.argv[2]??join(root,'examples/worlds/array.world'));
-const ticks=Number(process.argv[3]??240),mode=process.argv[4]??'kernel';
+const ticks=Number(process.argv[3]??240),mode=process.argv[4]??'direct';
 if(!Number.isSafeInteger(ticks)||ticks<1||ticks>100000)throw new RangeError('Ticks must be within 1..100000');
 if(mode!=='kernel'&&mode!=='direct')throw new TypeError('Dispatch must be kernel or direct');
 const dir=mkdtempSync(join(tmpdir(),'world-profiler-'));

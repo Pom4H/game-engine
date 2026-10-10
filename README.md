@@ -58,7 +58,10 @@ cargo run --manifest-path compiler/Cargo.toml -- compile examples/worlds/collisi
 Read [compiler/README.md](compiler/README.md) for the language, binary ABI,
 and `sceneFromURL` integration. Opt-in `performance {tick_budget:5ms;
 sample_every:5; history:120}` profiles CPU system costs and budget exceedances.
-Run `bun run world:profile` to produce a causal CPU performance JSON report. `decodeWorldBinary()` is exported by both the
+Run `bun run world:profile` to produce a causal CPU performance JSON report.
+The precompiled direct scheduler is the built-in fast path. Custom modules use
+the original KernelProgram, and `scene.setSystemDispatch('kernel')` can force it
+for parity and runtime comparisons. `decodeWorldBinary()` is exported by both the
 core and browser packages.
 
 ## Rust/WASM real-time acoustic kernel

@@ -120,10 +120,12 @@ CPU budget exceedances and workload counts. For a reproducible headless trace,
 run `bun run world:profile` (or `node tools/world-language/profile.mjs
 examples/worlds/array.world 240 direct`). CI attaches JSON containing
 the slowest systems, exact sampled CPU costs and simulation workload. GPU measurements belong to the
-separate render profiler, not this diagnostic. The ordinary Kernel executor
-stays the default; `scene.setSystemDispatch('direct')` opts into the
-experimental compiled system schedule for A/B testing and is never silently
-enabled by a performance directive.
+separate render profiler, not this diagnostic. The compiled built-in system schedule is the default when all selected modules
+are engine-owned: it avoids temporary per-module command arrays without
+reimplementing physical laws. Custom plugin modules automatically fall back to
+the existing KernelProgram. Use `scene.setSystemDispatch('kernel')` for an
+equivalent legacy execution path and A/B comparisons. Performance directives
+only enable sampling; they do not modify the execution mode.
 
 ## WSCN ABI v1 / v2 (little endian)
 

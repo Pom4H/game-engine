@@ -26,6 +26,16 @@ test('direct program uses the exact selected kernel schedules and keeps state/ev
   }
 });
 
+test('direct execution is default for built-ins',()=>{
+  const direct=new Scene(spec()),kernel=new Scene(spec());
+  for(let i=0;i<30;i++){
+    direct.step(1/60);
+    kernel.setSystemDispatch('kernel');
+    kernel.step(1/60);
+  }
+  assert.deepEqual(direct.snapshot(),kernel.snapshot());
+});
+
 test('third party modules force fallback without changing command semantics',()=>{
   const scene=new Scene(spec());
   scene.use({id:'extra',phase:'publish',rateHz:60,reads:[],writes:[],run:()=>[{type:'resource',key:'probe',value:42}]});
