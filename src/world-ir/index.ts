@@ -122,6 +122,34 @@ function deepFreeze<T>(value:T):T{
 const convention=Object.freeze({handedness:'right' as const,up:'+Y' as const,position:'m' as const,time:'s' as const,angle:'rad' as const});
 const pairKey=(a:string,b:string)=>a<b?a+'\u0000'+b:b+'\u0000'+a;
 
+/** One validation contract for authored observations AND untrusted projections. */
+function validateEffect(effect:WorldInteractionEffect):void{
+    if(effect.kind==='contact'){
+      vec3(effect.pointM,'contact point');
+      vec3(effect.normal,'contact normal');
+      for(const [name,n] of Object.entries({
+        penetrationM:effect.penetrationM,normalImpulseNs:effect.normalImpulseNs,
+        normalSpeedMps:effect.normalSpeedMps,normalEnergyJ:effect.normalEnergyJ,
+      }))finite(n,name);
+      if(effect.penetrationM<0||effect.normalEnergyJ<0)fail('invalid contact energy/depth');
+    }else if(effect.kind==='weather'){
+      vec3(effect.windMps,'weather wind');
+      for(const n of [effect.temperatureC,effect.snowfallRateMps,effect.humidity,effect.sunlight,effect.groundMoisture])finite(n,'weather');
+    }else if(effect.kind==='surface-work'){
+      for(const n of Object.values(effect.resulting))finite(n,'surface state');
+      for(const n of Object.values(effect.contact))if(typeof n==='number')finite(n,'surface contact');
+      finite(effect.workJ,'surface mechanical work');
+      if(effect.workJ<0||!Number.isSafeInteger(effect.affectedCells)||effect.affectedCells<1)
+        fail('invalid surface work');
+    }else if(effect.kind==='event'){
+      finite(effect.event.time,'event time');
+      vec3(effect.event.point,'event point');
+      if(effect.event.type!=='mechanism')vec3(effect.event.normal,'event normal');
+      finite(effect.event.energy,'event energy');
+    }
+  else fail('unknown interaction effect');
+}
+
 /**
  * A fixed-capacity observational ring. Inserting never grows its storage.
  * Parent identifiers are meaningful even after the older parent is evicted:
@@ -151,34 +179,17 @@ export class WorldInteractionJournal {
     if(!Number.isSafeInteger(input.tick)||input.tick<0)fail('tick');
     finite(input.timeSeconds,'timeSeconds');
     id(input.source.id,'source');
-    if(input.target)id(input.target.id,'target');
-    if(input.causeId&&!/^wi:1:[1-9][0-9]*$/.test(input.causeId))fail('invalid causal reference');
-    // Validate the numeric payload at the boundary. Source/target and physical
-    // units are defined once, not guessed by downstream render/audio code.
-    const effect=input.effect;
-    if(effect.kind==='contact'){
-      vec3(effect.pointM,'contact point');
-      vec3(effect.normal,'contact normal');
-      for(const [name,n] of Object.entries({
-        penetrationM:effect.penetrationM,normalImpulseNs:effect.normalImpulseNs,
-        normalSpeedMps:effect.normalSpeedMps,normalEnergyJ:effect.normalEnergyJ,
-      }))finite(n,name);
-      if(effect.penetrationM<0||effect.normalEnergyJ<0)fail('invalid contact energy/depth');
-    }else if(effect.kind==='weather'){
-      vec3(effect.windMps,'weather wind');
-      for(const n of [effect.temperatureC,effect.snowfallRateMps,effect.humidity,effect.sunlight,effect.groundMoisture])finite(n,'weather');
-    }else if(effect.kind==='surface-work'){
-      for(const n of Object.values(effect.resulting))finite(n,'surface state');
-      for(const n of Object.values(effect.contact))if(typeof n==='number')finite(n,'surface contact');
-      finite(effect.workJ,'surface mechanical work');
-      if(effect.workJ<0||!Number.isSafeInteger(effect.affectedCells)||effect.affectedCells<1)
-        fail('invalid surface work');
-    }else if(effect.kind==='event'){
-      finite(effect.event.time,'event time');
-      vec3(effect.event.point,'event point');
-      if(effect.event.type!=='mechanism')vec3(effect.event.normal,'event normal');
-      finite(effect.event.energy,'event energy');
+    if(!['body','ground','surface','environment','entity'].includes(input.source.domain))
+      fail('unknown source domain');
+    if(input.target){
+      id(input.target.id,'target');
+      if(!['body','ground','surface','environment','entity'].includes(input.target.domain))
+        fail('unknown target domain');
     }
+    if(input.causeId&&!/^wi:1:[1-9][0-9]*$/.test(input.causeId))fail('invalid causal reference');
+    // All effects share the same validation as external render/network readers.
+    const effect=input.effect;
+    validateEffect(effect);
     const sequence=this.next++;
     const law:WorldInteractionLaw=effect.kind==='event'
       ?WORLD_INTERACTION_LAWS[effect.event.type]:WORLD_INTERACTION_LAWS[effect.kind];
@@ -215,7 +226,13 @@ export class WorldInteractionJournal {
         penetrationM:contact.penetration,normalImpulseNs:contact.impulse,
         normalSpeedMps:contact.normalSpeed,normalEnergyJ:contact.normalEnergy},
     });
-    this.recentContacts.set(pairKey(contact.a,contact.b),record.id);
+    const key=pairKey(contact.a,contact.b);
+    this.recentContacts.delete(key);
+    if(this.recentContacts.size>=this.capacity){
+      const oldest=this.recentContacts.keys().next().value;
+      if(oldest!==undefined)this.recentContacts.delete(oldest);
+    }
+    this.recentContacts.set(key,record.id);
     return record;
   }
 
@@ -294,6 +311,16 @@ export function validateWorldInteractionGraph(graph:WorldInteractionGraph):World
     const expectedLaw=item.effect.kind==='event'
       ?WORLD_INTERACTION_LAWS[item.effect.event.type]:WORLD_INTERACTION_LAWS[item.effect.kind];
     if(item.law!==expectedLaw)fail('interaction law contradicts its committed effect');
+    id(item.source.id,'graph source');
+    if(!['body','ground','surface','environment','entity'].includes(item.source.domain))
+      fail('invalid graph source domain');
+    if(item.target){
+      id(item.target.id,'graph target');
+      if(!['body','ground','surface','environment','entity'].includes(item.target.domain))
+        fail('invalid graph target domain');
+    }
+    finite(item.timeSeconds,'interaction time');
+    validateEffect(item.effect);
     if(item.schema!==WORLD_INTERACTION_IR_VERSION||item.sequence<=previous||
        item.sequence<graph.firstSequence||item.sequence>=graph.nextSequence||
        item.id!=='wi:1:'+item.sequence)fail('unordered or invalid interaction identity');

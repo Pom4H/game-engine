@@ -186,7 +186,7 @@ export class SurfaceEnvironmentSystem {
       bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*work.durationSeconds*(.09+.42*mud));
       bodyState.wetness=Math.min(1,bodyState.wetness+spray*work.durationSeconds*.15);
     }
-    if(sample)for(const observer of this.workObservers)observer(work,energy,touched.length,sample);
+    for(const observer of this.workObservers)observer(work,energy,touched.length,sample??touched[0]!);
     return true;
   }
 

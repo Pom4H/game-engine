@@ -197,3 +197,35 @@ test('WASM rigid acceleration yields the same causal interaction IDs and cross-d
   }
  }finally{b.physics.setRigidContactKernel(null);kernel.dispose();}
 });
+
+
+test('untrusted causal graph rejects corrupted units, physical laws and missing parents',()=>{
+ const journal=new WorldInteractionJournal(16);
+ journal.recordWeather(fixture().environment,1,.1);
+ const original=journal.snapshot(1,.1);
+ const law=structuredClone(original);
+ law.interactions[0].law='physics.contact';
+ assert.throws(()=>validateWorldInteractionGraph(law),/law/);
+ const broken=structuredClone(original);
+ broken.interactions[0].effect.temperatureC=NaN;
+ assert.throws(()=>validateWorldInteractionGraph(broken),/finite/);
+ const invalidDomain=structuredClone(original);
+ invalidDomain.interactions[0].source.domain='invented-source';
+ assert.throws(()=>validateWorldInteractionGraph(invalidDomain),/domain/);
+ const nonexistentParent=structuredClone(original);
+ nonexistentParent.interactions[0].causeId='wi:1:1';
+ assert.throws(()=>validateWorldInteractionGraph(nonexistentParent),/parent/);
+});
+
+test('bounded parent index evicts older pairs without unbounded auxiliary memory',()=>{
+ const journal=new WorldInteractionJournal(16);
+ for(let i=0;i<40;i++)journal.recordContact({
+  a:'body'+i,b:'ground',normal:[0,1,0],point:[i,0,0],
+  penetration:0,impulse:1,normalSpeed:1,normalEnergy:1,mode:'resolve',
+ },1,.016);
+ assert.equal(journal.stats.retained,16);
+ assert.equal(journal.stats.dropped,24);
+ assert.equal(journal.contactForPair('body0','ground',1),undefined);
+ assert.ok(journal.contactForPair('body39','ground',1));
+ validateWorldInteractionGraph(journal.snapshot(1,.016));
+});
