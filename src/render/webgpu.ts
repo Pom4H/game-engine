@@ -27,7 +27,10 @@ const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean}
 interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
-interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4}
+interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4;
+  /** Bounded staging buffers owned by a GPUObject and reused across frames. */
+  uniformStaging?:Float32Array;surfaceStaging?:Float32Array;deformationStaging?:Float32Array;
+}
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
 const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`
@@ -1140,7 +1143,10 @@ export class WebGPURenderer implements Renderer{
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();}
   inspect():RenderStats{
     const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);
-    return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10+this.gpu.probeFilterPasses.length,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,errors:[...this.errors],
+    const gpuObjects=[...this.objects.values()];
+    const cpuStagingBytes=gpuObjects.reduce((sum,object)=>sum+
+      (object.uniformStaging?.byteLength??0)+(object.surfaceStaging?.byteLength??0)+(object.deformationStaging?.byteLength??0),0);
+    return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10+this.gpu.probeFilterPasses.length,textures:gpuObjects.filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,cpuStagingBytes,errors:[...this.errors],
       ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
       ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};
   }
@@ -1277,7 +1283,9 @@ export class WebGPURenderer implements Renderer{
     const surfaceState=this.lastScene?.surfaceStateForRender(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
     if(!dynamic&&object.uniformReady&&!modelChanged&&!previousChanged)return;
-    const uniform=new Float32Array(88);
+    // WebGPU.writeBuffer copies its input during the call. Keep one staging
+    // buffer per object instead of allocating a fresh array every frame.
+    const uniform=object.uniformStaging??(object.uniformStaging=new Float32Array(88));
     uniform.set(model,0);uniform.set(previousModel,16);uniform.set(entity.material.color,32);uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
     uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],52);uniform.set([surfaceUseCode(entity.environmental?.surfaceUse),treatmentCode(entity.material.treatment),entity.material.clearcoat??-1,entity.material.clearcoatRoughness??-1],56);
     uniform.set(field?[...field.center,...field.size]:[0,0,1,1],60);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],64);
@@ -1288,14 +1296,30 @@ export class WebGPURenderer implements Renderer{
     const snowpack=surfaceState?.snowpack;
     uniform.set([snowpack?.freshness??0,snowpack?.liquidFraction??0,snowpack?.crust??0,Math.min(1,(snowpack?.grainSizeMm??0)/4.5)],84);
     if(field){
-      const pixels=new Float32Array(object.width*object.height*4),deformationPixels=new Float32Array(object.width*object.height*4);
-      field.cells.forEach((cell,i)=>pixels.set([cell.trackMelt,cell.snowDepthM,cell.waterDepthM,cell.slush],i*4));
-      field.deformation.cells.forEach((cell,i)=>deformationPixels.set([cell.displacementM,cell.compaction,cell.shear,cell.history],i*4));
+      const size=object.width*object.height*4;
+      const pixels=object.surfaceStaging?.length===size?object.surfaceStaging:(object.surfaceStaging=new Float32Array(size));
+      const deformationPixels=object.deformationStaging?.length===size?object.deformationStaging:(object.deformationStaging=new Float32Array(size));
+      // Same exact scalar contents and texture uploads; no per-cell scratch arrays.
+      for(let i=0;i<field.cells.length;i++){
+        const cell=field.cells[i]!,at=i*4;
+        pixels[at]=cell.trackMelt;pixels[at+1]=cell.snowDepthM;
+        pixels[at+2]=cell.waterDepthM;pixels[at+3]=cell.slush;
+      }
+      for(let i=0;i<field.deformation.cells.length;i++){
+        const cell=field.deformation.cells[i]!,at=i*4;
+        deformationPixels[at]=cell.displacementM;deformationPixels[at+1]=cell.compaction;
+        deformationPixels[at+2]=cell.shear;deformationPixels[at+3]=cell.history;
+      }
       this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);
       this.device.queue.writeTexture({texture:object.deformationTexture},deformationPixels,{bytesPerRow:object.width*16},[object.width,object.height]);
       this.profiler.addUpload(pixels.byteLength+deformationPixels.byteLength,'surface');
     }
-    this.device.queue.writeBuffer(object.uniform,0,uniform);this.profiler.addUpload(uniform.byteLength,'uniform');object.uniformReady=true;object.lastModel=new Float32Array(model);object.lastPrevModel=new Float32Array(previousModel);
+    this.device.queue.writeBuffer(object.uniform,0,uniform);
+    this.profiler.addUpload(uniform.byteLength,'uniform');
+    object.uniformReady=true;
+    if(!object.lastModel)object.lastModel=new Float32Array(16);
+    if(!object.lastPrevModel)object.lastPrevModel=new Float32Array(16);
+    object.lastModel.set(model);object.lastPrevModel.set(previousModel);
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean,withColor=true):void{const mesh=this.mesh(renderPrimitive(entity)!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);if(withColor)pass.setVertexBuffer(1,mesh.color);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
   private drawShadowBatch(pass:GPUAny,batch:ShadowBatchPlan):void{const first=batch.items[0]!,mesh=this.mesh(renderPrimitive(first)!),object=this.objects.get(first.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setVertexBuffer(1,batch.buffer);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count,batch.items.length);}
