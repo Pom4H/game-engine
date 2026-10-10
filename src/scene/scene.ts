@@ -255,7 +255,7 @@ export class Scene {
     if(body){position=body.position;rotation=body.rotation;}
     const runtime:RuntimeEntity={
       id:spec.id,position,rotation,scale,
-      ...(spec.renderOnly?{renderOnly:true}:{})
+      ...(spec.renderOnly?{renderOnly:true}:{}),
       material:Object.freeze({...spec.material,...(spec.material?.texture?{texture:Object.freeze({...spec.material.texture})}:{}),kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
