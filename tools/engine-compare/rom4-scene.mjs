@@ -34,7 +34,7 @@ function baseScene() {
 }
 
 export function createRom4Scene(backend) {
-  if (backend !== 'js' && backend !== 'rust') throw new Error('Unknown backend ' + backend);
+  if (backend !== 'js' && backend !== 'rust' && backend !== 'js-baseline') throw new Error('Unknown backend ' + backend);
   let runtime, sim, requested = 0, count = 0, epoch = 0;
   const names = [], active = [];
 
@@ -87,6 +87,9 @@ export function createRom4Scene(backend) {
         autoplay: false, audio: false, exposeBridge: false,
         resolution: [WIDTH, HEIGHT], profiling: true
       });
+      // Identical production renderer can be run with instancing disabled for
+      // a strict visual and performance A/B against its unbatched GPU path.
+      if (backend === 'js-baseline') runtime.renderer.setInstancingEnabled(false);
       if (runtime.renderer.inspect().backend !== 'webgpu')
         throw new Error('ROM4 WebGPU hardware renderer required');
     },

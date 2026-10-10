@@ -16,7 +16,7 @@ await copyFile(resolve('kernels/bench-motion/target/wasm32-unknown-unknown/relea
   join(upstream, 'rom4/bench_motion.wasm'));
 await copyFile(join(here, 'rom4-scene.mjs'), join(upstream, 'scenes/cubes/rom4-scene.mjs'));
 await copyFile(join(here, 'rom4-motion.mjs'), join(upstream, 'scenes/cubes/rom4-motion.mjs'));
-for (const backend of ['js', 'rust'])
+for (const backend of ['js', 'rust', 'js-baseline'])
   await writeFile(join(upstream, 'scenes/cubes/rom4-' + backend + '.js'),
     "import {createRom4Scene} from './rom4-scene.mjs';\nexport default createRom4Scene('" + backend + "');\n");
 
@@ -63,4 +63,4 @@ for (const [source, dest, variantFrom, variantTo] of [
 const whitePng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg==';
 await writeFile(join(upstream, 'assets/atlas.png'), Buffer.from(whitePng, 'base64'));
 await copyFile(join(here, 'run.mjs'), join(upstream, 'tools/rom4-run.mjs'));
-console.log('Prepared six WebGPU adapters, upstream SHA=' + UPSTREAM);
+console.log('Prepared seven WebGPU adapters, upstream SHA=' + UPSTREAM);

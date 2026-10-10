@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {cpus, totalmem, platform, release} from 'node:os';
-import {mkdir, writeFile} from 'node:fs/promises';
+import {mkdir, writeFile, readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {startServer} from './serve.mjs';
 
@@ -14,7 +14,8 @@ const SCENES = [
   'babylon-instances-webgpu',
   'babylon-thin-webgpu',
   'rom4-js',
-  'rom4-rust'
+  'rom4-rust',
+  'rom4-js-baseline'
 ];
 const LEVELS = [1000, 2000, 5000];
 const REPEATS = process.argv.includes('--full') ? 3 : 1;
@@ -101,6 +102,48 @@ try {
       report.failures.push({scene, phase: 'screenshot', error: String(error)});
       console.error('SCREENSHOT_FAIL=' + scene, error);
     }
+    await save();
+  }
+  // Compare new instancing to the original per-object path at SAME tick,
+  // same PBR shading, same scene. A speedup with a missing/dark image fails.
+  if (screenshotValidated.has('rom4-js') && screenshotValidated.has('rom4-js-baseline')) {
+    const [after, before] = await Promise.all([
+      readFile(resolve(OUTPUT, 'rom4-js.png')),
+      readFile(resolve(OUTPUT, 'rom4-js-baseline.png'))
+    ]);
+    const visual = await page.evaluate(async ({after, before}) => {
+      const pixels = async str => {
+        const bytes = Uint8Array.from(atob(str), x => x.charCodeAt(0));
+        const bmp = await createImageBitmap(new Blob([bytes], {type:'image/png'}));
+        const canvas = document.createElement('canvas');
+        canvas.width = bmp.width; canvas.height = bmp.height;
+        const ctx = canvas.getContext('2d', {willReadFrequently:true});
+        ctx.drawImage(bmp,0,0);bmp.close();
+        return {width:canvas.width,height:canvas.height,data:ctx.getImageData(0,0,canvas.width,canvas.height).data};
+      };
+      const a=await pixels(after),b=await pixels(before);
+      if(a.width!==b.width||a.height!==b.height)throw new Error('Different screenshot dimensions');
+      let diff=0,changed=0,max=0;
+      for(let i=0;i<a.data.length;i+=4){
+        let delta=0;
+        for(let c=0;c<3;c++){
+          const d=Math.abs(a.data[i+c]-b.data[i+c]);
+          delta+=d;max=Math.max(max,d);
+        }
+        diff+=delta;
+        if(delta>60)changed++;
+      }
+      return {
+        size:[a.width,a.height],
+        meanAbsoluteRgb8:diff/(a.width*a.height*3),
+        pixelsWithRgbDeltaAbove60:changed,
+        fractionSignificant:changed/(a.width*a.height),maxChannelDelta:max
+      };
+    },{after:after.toString('base64'),before:before.toString('base64')});
+    report.visualParity=visual;
+    console.log('VISUAL_PARITY='+JSON.stringify(visual));
+    if(visual.meanAbsoluteRgb8>4 || visual.fractionSignificant>0.03)
+      report.failures.push({phase:'visual-parity',error:'Instancing changed the rendered picture',...visual});
     await save();
   }
   for (const scene of SCENES) {

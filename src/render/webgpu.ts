@@ -33,6 +33,8 @@ interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture
   lastSurfaceRevision?:number|undefined;
 }
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
+interface GPUInstanceBatch{buffer:GPUAny;capacity:number;data:Float32Array}
+interface InstancePlan{key:string;items:RuntimeEntity[];first:RuntimeEntity;culled:boolean;buffer:GPUAny}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
 const materialShader=(reflection=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`
 override MATERIAL_CLASS:i32=-1;
@@ -128,6 +130,8 @@ struct VOut {
   @location(4) velocity:vec2<f32>,
   @location(5) vertexColor:vec4<f32>,
   @location(6) localPos:vec3<f32>,
+  @location(7) @interpolate(flat) tint:vec4<f32>,
+  @location(8) @interpolate(flat) instanceSeed:f32,
 }
 
 fn hash3(p:vec3<f32>)->f32 {
@@ -151,7 +155,7 @@ fn tyreTracks(z:f32)->f32{
 }
 
 @vertex fn vs(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>, @location(6) vertexColor:vec4<f32>) -> VOut {
-  var out: VOut;out.reflected=0u;out.vertexColor=vertexColor;out.localPos=position;
+  var out: VOut;out.reflected=0u;out.vertexColor=vertexColor;out.localPos=position;out.tint=u.color;out.instanceSeed=u.weather.z;
   let world=displaceWorld(u.model*vec4<f32>(position,1.0));
   out.position=f.viewVP*world;let previous=f.previousVP*displaceWorld(u.prevModel*vec4<f32>(position,1.0));
   let currentNdc=out.position.xy/max(abs(out.position.w),.00001);let previousNdc=previous.xy/max(abs(previous.w),.00001);
@@ -162,8 +166,28 @@ fn tyreTracks(z:f32)->f32{
   return out;
 }
 
+// Instanced PBR: full per-instance current/previous model, tint and seed.
+@vertex fn vsInstanced(
+ @location(0) position:vec3<f32>,@location(1) normal:vec3<f32>,@location(6) vertexColor:vec4<f32>,
+ @location(2) m0:vec4<f32>,@location(3) m1:vec4<f32>,@location(4) m2:vec4<f32>,@location(5) m3:vec4<f32>,
+ @location(7) p0:vec4<f32>,@location(8) p1:vec4<f32>,@location(9) p2:vec4<f32>,@location(10) p3:vec4<f32>,
+ @location(11) tint:vec4<f32>,@location(12) seed:vec4<f32>
+)->VOut{
+ let m=mat4x4<f32>(m0,m1,m2,m3);let pm=mat4x4<f32>(p0,p1,p2,p3);
+ var out:VOut;out.reflected=0u;out.vertexColor=vertexColor;out.localPos=position;out.tint=tint;out.instanceSeed=seed.x;
+ let world=displaceWorld(m*vec4<f32>(position,1.0));
+ out.position=f.viewVP*world;
+ let previous=f.previousVP*displaceWorld(pm*vec4<f32>(position,1.0));
+ let currentNdc=out.position.xy/max(abs(out.position.w),.00001);
+ let previousNdc=previous.xy/max(abs(previous.w),.00001);
+ out.velocity=vec2<f32>((currentNdc.x-previousNdc.x)*.5,(previousNdc.y-currentNdc.y)*.5);
+ out.worldPos=world.xyz;out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);
+ let a=m[0].xyz;let b=m[1].xyz;let c=m[2].xyz;
+ out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);
+ return out;
+}
 @vertex fn reflectionVS(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>,@location(6) vertexColor:vec4<f32>)->VOut{
- var out:VOut;out.vertexColor=vertexColor;out.localPos=position;let world=displaceWorld(u.model*vec4<f32>(position,1));out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
+ var out:VOut;out.vertexColor=vertexColor;out.localPos=position;out.tint=u.color;out.instanceSeed=u.weather.z;let world=displaceWorld(u.model*vec4<f32>(position,1));out.position=f.reflectionVP*world;out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=vec2<f32>(select(position.x+.5,.5-position.x,normal.z<-.5),.5-position.y);out.reflected=1u;out.velocity=vec2<f32>(0);return out;
 }
 
 fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,viewDir:vec3<f32>,roughness:f32,base:vec3<f32>,f0:vec3<f32>,metal:f32,coat:f32,coatRoughness:f32)->vec3<f32>{
@@ -251,7 +275,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let halfDir=normalize(light+viewDir);
   let ndl=max(dot(n,light),0.0);
 
-  var albedo=u.color.rgb*in.vertexColor.rgb;
+  var albedo=in.tint.rgb*in.vertexColor.rgb;
   // No label is represented by an exactly transparent 1x1 texture.
   // Skip the redundant fetch on every pixel of an unlabelled object.
   // A real label (1024x128) keeps the original sampling/filtering equations.
@@ -268,7 +292,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   // Paint microflake stays procedural: no texture fetch, but it modulates both
   // the base coat and its roughness so the clearcoat catches fine metallic breakup.
   let paintMicro=select(0.0,hash3(floor(in.worldPos*420.0))-.5,treatment>3.5&&treatment<4.5&&materialKind>1.5&&materialKind<2.5);
-  let seed=vec3<f32>(u.weather.z*13.7,u.weather.z*7.1,u.weather.z*3.9);
+  let seed=vec3<f32>(in.instanceSeed*13.7,in.instanceSeed*7.1,in.instanceSeed*3.9);
   let upward=smoothstep(0.05,0.82,n.y);
   let snowHistory=max(max(u.snowpack.x,u.snowpack.y),max(u.snowpack.z,u.snowpack.w));
   let snowFresh=select(.45,u.snowpack.x,snowHistory>.0001);
@@ -287,7 +311,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let aa=max(fwidth(uv.x),fwidth(uv.y))*.7;
     let seam=1.0-smoothstep(.022-aa,.045+aa,min(edge.x,edge.y));
     let brickId=floor(uv);
-    let brickTone=hash3(vec3<f32>(brickId,u.weather.z*100.0))-.5;
+    let brickTone=hash3(vec3<f32>(brickId,in.instanceSeed*100.0))-.5;
     let weather=noise3(in.worldPos*vec3<f32>(.34,.055,.34)+seed*2.0)-.5;
     albedo*=1.0+brickTone*.10+weather*.07;
     albedo=mix(albedo,vec3<f32>(.34,.33,.31),seam*.32);
@@ -300,7 +324,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   }
   if(materialKind>5.5&&materialKind<6.5){
     let dirty=(1.0-smoothstep(.03,.42,in.worldPos.y))*(.55+.45*noise3(in.worldPos*vec3<f32>(2.7,3.0,5.0)));let crystals=noise3(in.worldPos*22.0);
-    albedo=mix(u.color.rgb,vec3<f32>(.37,.34,.30),dirty*.30);
+    albedo=mix(in.tint.rgb,vec3<f32>(.37,.34,.30),dirty*.30);
     albedo*=.94+noise3(in.worldPos*5.0)*.06;
     let grad=vec3<f32>(noise3(in.worldPos*22.0+vec3<f32>(.3,0,0))-crystals,noise3(in.worldPos*22.0+vec3<f32>(0,.3,0))-crystals,noise3(in.worldPos*22.0+vec3<f32>(0,0,.3))-crystals);
     n=normalize(n+(grad-n*dot(grad,n))*.48);
@@ -658,8 +682,8 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let glassReflection=mix(glassFallback,localProbe,f.params.y*(1.0-smoothstep(.08,.32,roughness))*.72);
     // Preserve the cool pane tint in transmission while allowing the grazing
     // Fresnel lobe to remain neutral and crisp against the city capture.
-    transmitted*=mix(vec3<f32>(1.0),u.color.rgb,clamp(1.0-transmission,.0,.35));
-    let reflectionTint=mix(vec3<f32>(1.0),u.color.rgb*.92+.08,clamp(glassF,.0,.72));
+    transmitted*=mix(vec3<f32>(1.0),in.tint.rgb,clamp(1.0-transmission,.0,.35));
+    let reflectionTint=mix(vec3<f32>(1.0),in.tint.rgb*.92+.08,clamp(glassF,.0,.72));
     color=mix(transmitted,glassReflection*reflectionTint,glassF);
   }
   if(materialKind>9.5){
@@ -690,7 +714,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   // Pack independent SSR roughness in reflectance.a; normal.a stays the base
   // roughness for diffuse/AO. Zero alpha still disables asphalt SSR.
   let screenRoughness=mix(roughness,min(roughness,coatRough),clearcoat);
-  let glassOpacity=mix(clamp(u.color.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(u.color.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(.5+.5*screenRoughness,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
+  let glassOpacity=mix(clamp(in.tint.a*.90,.22,.55),.82,grazing);var out:GOut;out.color=vec4<f32>(color,select(in.tint.a,glassOpacity,materialKind>.5&&materialKind<1.5));out.normal=vec4<f32>(n*.5+.5,roughness);out.specular=vec4<f32>(screenReflectance,select(.5+.5*screenRoughness,0.0,materialKind>4.5&&materialKind<5.5));out.velocity=in.velocity;return out;
 }`;
 
 const SNOW_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+FOG_MEDIUM_WGSL+SNOWFALL_WGSL;
@@ -748,7 +772,9 @@ export class WebGPURenderer implements Renderer{
   private depth:GPUAny=null;private hdr:GPUAny=null;private opaqueScene:GPUAny=null;private opaqueBind:GPUAny=null;private normal:GPUAny=null;private specular:GPUAny=null;private velocity:GPUAny=null;private effectsHdr:GPUAny=null;private effectsBind:GPUAny=null;private taaA:GPUAny=null;private taaB:GPUAny=null;private taaBindAB:GPUAny=null;private taaBindBA:GPUAny=null;private presentBindA:GPUAny=null;private presentBindB:GPUAny=null;private reflection:GPUAny=null;private reflectionDepth:GPUAny=null;private depthW=0;private depthH=0;
   private fixedResolution:readonly [number,number]|undefined;
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
-  private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
+  private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();
+  private readonly instanceBatches=new Map<string,GPUInstanceBatch>();
+  private instancingEnabled=true;private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;private renderFrame:RenderFrameIR|null=null;
   private readonly frameFamily=new RenderFrameFamily();private frameBuilder:RenderFrameBuilder=this.frameFamily.compile('detailed');
@@ -799,10 +825,19 @@ export class WebGPURenderer implements Renderer{
     const frameBind=device.createBindGroup({layout:frameLayout,entries:[{binding:0,resource:{buffer:frame}}]});
     const reflectionBind=device.createBindGroup({layout:lightLayout,entries:[{binding:0,resource:{buffer:frame}},{binding:1,resource:shadow.createView()},{binding:2,resource:comparison},{binding:3,resource:emptyLabel.createView()},{binding:4,resource:sampler},{binding:5,resource:{buffer:lightBuffer}},{binding:6,resource:{buffer:cellBuffer}},{binding:7,resource:noiseVolume.createView()},{binding:8,resource:noiseSampler},{binding:9,resource:environmentView},{binding:10,resource:localProbeView},{binding:11,resource:dynamicShadow.createView()},{binding:12,resource:emptyLabel.createView()}]});
     const layout=device.createPipelineLayout({bindGroupLayouts:[objectLayout,lightLayout]});
+    const instanceVertexBuffer={arrayStride:160,stepMode:'instance',attributes:[
+      {shaderLocation:2,offset:0,format:'float32x4'},{shaderLocation:3,offset:16,format:'float32x4'},
+      {shaderLocation:4,offset:32,format:'float32x4'},{shaderLocation:5,offset:48,format:'float32x4'},
+      {shaderLocation:7,offset:64,format:'float32x4'},{shaderLocation:8,offset:80,format:'float32x4'},
+      {shaderLocation:9,offset:96,format:'float32x4'},{shaderLocation:10,offset:112,format:'float32x4'},
+      {shaderLocation:11,offset:128,format:'float32x4'},{shaderLocation:12,offset:144,format:'float32x4'}
+    ]};
+    const instancedVertex={...vertex,entryPoint:'vsInstanced',buffers:[geometryVertexBuffer,colorVertexBuffer,instanceVertexBuffer]};
     const blend={color:{srcFactor:'src-alpha',dstFactor:'one-minus-src-alpha',operation:'add'},alpha:{srcFactor:'one',dstFactor:'one-minus-src-alpha',operation:'add'}};
     const materialClasses=[0,1,2,3,4,5,6,7,8,9,10] as const;
-    const make=(transparent:boolean,cullMode:'none'|'back',materialClass=-1)=>device.createRenderPipeline({layout,vertex,fragment:{module,entryPoint:'fs',constants:{MATERIAL_CLASS:materialClass},targets:[{format:'rgba16float',...(transparent?{blend}:{})},{format:'rgba16float',...(transparent?{writeMask:0}:{})},{format:'rgba8unorm',...(transparent?{writeMask:0}:{})},{format:'rg16float',...(transparent?{writeMask:0}:{})}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:!transparent,depthCompare:'less'}});
+    const make=(transparent:boolean,cullMode:'none'|'back',materialClass=-1,instanced=false)=>device.createRenderPipeline({layout,vertex:instanced?instancedVertex:vertex,fragment:{module,entryPoint:'fs',constants:{MATERIAL_CLASS:materialClass},targets:[{format:'rgba16float',...(transparent?{blend}:{})},{format:'rgba16float',...(transparent?{writeMask:0}:{})},{format:'rgba8unorm',...(transparent?{writeMask:0}:{})},{format:'rg16float',...(transparent?{writeMask:0}:{})}]},primitive:{topology:'triangle-list',cullMode},depthStencil:{format:'depth32float',depthWriteEnabled:!transparent,depthCompare:'less'}});
     const opaqueCulled=new Map(materialClasses.map(code=>[code,make(false,'back',code)])),opaqueDouble=new Map(materialClasses.map(code=>[code,make(false,'none',code)]));
+    const opaqueInstancedCulled=new Map(materialClasses.map(code=>[code,make(false,'back',code,true)])),opaqueInstancedDouble=new Map(materialClasses.map(code=>[code,make(false,'none',code,true)]));
     const transparent=make(true,'none',-1);
     const glass=device.createRenderPipeline({layout,vertex,fragment:{module,entryPoint:'fs',constants:{MATERIAL_CLASS:1},targets:[{format:'rgba16float'},{format:'rgba16float',writeMask:0},{format:'rgba8unorm',writeMask:0},{format:'rg16float',writeMask:0}]},primitive:{topology:'triangle-list',cullMode:'back'},depthStencil:{format:'depth32float',depthWriteEnabled:false,depthCompare:'less'}});
     const blitModule=device.createShaderModule({code:`
@@ -849,7 +884,7 @@ export class WebGPURenderer implements Renderer{
     const probeFrames=Array.from({length:6},(_,face)=>device.createBuffer({label:`reflection probe frame ${face}`,size:112,usage:0x40|0x08}));
     const probeFrameBinds=probeFrames.map(buffer=>device.createBindGroup({layout:probeFrameLayout,entries:[{binding:0,resource:{buffer}}]}));
     for(const shader of [module,reflectionModule,probeModule,probeFilterModule,skyModule,effectsModule,taaModule,presentModule,snowModule,bloomModule]){const info=await shader.getCompilationInfo();const errors=info.messages.filter((m:any)=>m.type==='error');if(errors.length)throw new Error(errors.map((m:any)=>m.message).join('\n'));}
-    return new WebGPURenderer(canvas,device,context,format,{probeFilter,probeFilterPasses,localProbeMap,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,sky,effects,taa,taaParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
+    return new WebGPURenderer(canvas,device,context,format,{probeFilter,probeFilterPasses,localProbeMap,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,opaqueInstancedCulled,opaqueInstancedDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,sky,effects,taa,taaParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind},profiling,timestampQueries);
   }
   private timelineFrame:number|null=null;
   /** Align temporal sampling when separate workers render ranges of one timeline. */
@@ -858,6 +893,11 @@ export class WebGPURenderer implements Renderer{
     this.timelineFrame=frame;
   }
   resetTemporalHistory():void{this.historyValid=false;this.previousVp=null;this.previousCamera=null;this.previousTarget=null;this.previousModels.clear();}
+  /** Debug/profiling A/B; authoritative Scene entities and simulation are unchanged. */
+  setInstancingEnabled(enabled:boolean):void{
+    this.instancingEnabled=enabled;
+    if(!enabled){for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();}
+  }
   setSimulationProfile(profile:SimulationProfileInput):void{
     this.frameBuilder=this.frameFamily.compile(profile);
     this.renderFrame=null;this.collectedScene=null;this.collectedRevision=-1;this.staticCullRevision=-1;this.shadowValid=false;
@@ -1022,14 +1062,16 @@ export class WebGPURenderer implements Renderer{
     const staticShadowPlan=shadowDirty?this.prepareShadowBatches(staticShadowDrawables,modelFor,'static'):
       {singles:staticShadowDrawables,batches:[] as ShadowBatchPlan[],instances:0};
     const dynamicShadowPlan=this.prepareShadowBatches(dynamicShadowDrawables,modelFor,'dynamic');
+    const opaquePlan=this.instancingEnabled?this.prepareInstanceBatches(culled.cameraOpaque,modelFor):
+      {singles:culled.cameraOpaque,batches:[] as InstancePlan[],instances:0};
     const prepared=new Map<string,RuntimeEntity>();
-    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,
+    for(const entity of [...opaquePlan.singles,...opaquePlan.batches.map(b=>b.first),...culled.cameraTransparent,
       ...(shadowDirty?staticShadowPlan.singles:[]),
       ...(shadowDirty?staticShadowPlan.batches.map(b=>b.items[0]!):[]),
       ...dynamicShadowPlan.singles,...dynamicShadowPlan.batches.map(b=>b.items[0]!),
       ...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
     this.profiler.measure('prepare',()=>{for(const entity of prepared.values()){const model=modelFor(entity);if(this.needsPrepare(entity,model))this.prepare(entity,model);}});
-    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:staticShadowPlan.instances+dynamicShadowPlan.instances});
+    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:staticShadowPlan.instances+dynamicShadowPlan.instances,instancedOpaque:opaquePlan.instances});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
     this.profiler.measure('encode.shadow',()=>{
       if(shadowDirty){
@@ -1092,7 +1134,16 @@ export class WebGPURenderer implements Renderer{
       const timing=this.profiler.timestampWrites('main'),occlusion=this.profiler.occlusionSet(),pass=encoder.beginRenderPass({label:'render.main.opaque',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.opaqueScene.createView(),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'store'},{view:this.normal.createView(),clearValue:{r:.5,g:.5,b:1,a:1},loadOp:'clear',storeOp:'store'},{view:this.specular.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'},{view:this.velocity.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       pass.setPipeline(this.gpu.sky);pass.setBindGroup(0,this.gpu.frameBind);pass.draw(3);
       this.drawCalls=0;this.triangles=0;pass.setBindGroup(1,this.gpu.lightBind);const query=this.profiler.beginOcclusion(pass,'mainOpaque');
-      for(const [key,group] of materialPipelineGroups(culled.cameraOpaque)){const [code,culled]=key;pass.setPipeline((culled?this.gpu.opaqueCulled:this.gpu.opaqueDouble).get(code)!);for(const e of group)this.draw(pass,e,true);}
+      for(const [key,group] of materialPipelineGroups(opaquePlan.singles)){
+        const [code,culled]=key;
+        pass.setPipeline((culled?this.gpu.opaqueCulled:this.gpu.opaqueDouble).get(code)!);
+        for(const e of group)this.draw(pass,e,true);
+      }
+      for(const batch of opaquePlan.batches){
+        const code=materialCode(batch.first.material.kind);
+        pass.setPipeline((batch.culled?this.gpu.opaqueInstancedCulled:this.gpu.opaqueInstancedDouble).get(code)!);
+        this.drawInstanceBatch(pass,batch);
+      }
       this.profiler.endOcclusion(pass,query);pass.end();
     });
     this.profiler.measure('encode.main',()=>{
@@ -1152,7 +1203,12 @@ export class WebGPURenderer implements Renderer{
       for(const entity of staticShadowDrawables)this.shadowState.set(entity.id,{primitive:renderPrimitive(entity)!,model:new Float32Array(modelFor(entity))});
     }
     this.taaHistoryIndex=taaOutputIndex;this.historyValid=true;this.previousVp=vp;this.previousCamera=[...camera.position];this.previousTarget=[...camera.target];this.lastRenderTime=scene.time;this.lastCamera=[...camera.position];
-    this.previousModels.clear();for(const entity of prepared.values())this.previousModels.set(entity.id,modelFor(entity));
+    this.previousModels.clear();
+    for(const entity of prepared.values())this.previousModels.set(entity.id,modelFor(entity));
+    // Render-only projections remain individually tracked for temporal
+    // reprojection and replay even when encoded as one GPU draw.
+    for(const batch of opaquePlan.batches)for(const e of batch.items)
+      this.previousModels.set(e.id,modelFor(e));
   }
   private queueMaterialLoads(scene:Scene):void{
     if(this.disposed)return;
@@ -1206,7 +1262,7 @@ export class WebGPURenderer implements Renderer{
   }
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
-  dispose():void{if(this.disposed)return;this.disposed=true;this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
+  dispose():void{if(this.disposed)return;this.disposed=true;for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
   private updateEnvironmentMap(scene:Scene,origin:Vec3,localProbeOwnsNearby=false):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
     if(this.environmentScene!==scene){this.environmentScene=scene;this.environmentKey='';}
@@ -1379,6 +1435,56 @@ export class WebGPURenderer implements Renderer{
     object.lastModel.set(model);object.lastPrevModel.set(previousModel);
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean,withColor=true):void{const mesh=this.mesh(renderPrimitive(entity)!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);if(withColor)pass.setVertexBuffer(1,mesh.color);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
+  private drawInstanceBatch(pass:GPUAny,batch:InstancePlan):void{
+    const mesh=this.mesh(renderPrimitive(batch.first)!),obj=this.objects.get(batch.first.id)!;
+    pass.setBindGroup(0,obj.bind);
+    pass.setVertexBuffer(0,mesh.vertex);
+    pass.setVertexBuffer(1,mesh.color);
+    pass.setVertexBuffer(2,batch.buffer);
+    pass.setIndexBuffer(mesh.index,mesh.format);
+    pass.drawIndexed(mesh.count,batch.items.length);
+    this.drawCalls++;this.triangles+=mesh.triangles*batch.items.length;
+  }
+  private prepareInstanceBatches(entities:readonly RuntimeEntity[],modelFor:(e:RuntimeEntity)=>Mat4):
+    {singles:RuntimeEntity[];batches:InstancePlan[];instances:number}{
+    const singles:RuntimeEntity[]=[],groups=new Map<string,RuntimeEntity[]>();
+    for(const entity of entities){
+      if(!canBatchOpaque(entity)){singles.push(entity);continue;}
+      const key=opaqueInstanceKey(entity);
+      const list=groups.get(key);
+      if(list)list.push(entity);else groups.set(key,[entity]);
+    }
+    const batches:InstancePlan[]=[];const used=new Set<string>();let instances=0;
+    for(const [key,items] of groups){
+      if(items.length<4){singles.push(...items);continue;}
+      used.add(key);
+      let batch=this.instanceBatches.get(key),capacity=1;
+      while(capacity<items.length)capacity*=2;
+      if(!batch||batch.capacity<items.length){
+        batch?.buffer.destroy();
+        batch={buffer:this.device.createBuffer({size:capacity*160,usage:0x20|0x08}),
+          capacity,data:new Float32Array(capacity*40)};
+        this.instanceBatches.set(key,batch);
+      }
+      const data=batch.data;
+      for(let i=0;i<items.length;i++){
+        const entity=items[i]!,current=modelFor(entity),previous=this.previousModels.get(entity.id)??current;
+        const offset=i*40;
+        data.set(current,offset);data.set(previous,offset+16);
+        data.set(entity.material.color,offset+32);
+        data[offset+36]=stableSeed(entity.id);
+        data[offset+37]=0;data[offset+38]=0;data[offset+39]=0;
+      }
+      const bytes=data.subarray(0,items.length*40);
+      this.device.queue.writeBuffer(batch.buffer,0,bytes);
+      this.profiler.addUpload(bytes.byteLength,'instance');
+      batches.push({key,items,first:items[0]!,culled:canCullBack(items[0]!),buffer:batch.buffer});
+      instances+=items.length;
+    }
+    for(const [key,batch] of this.instanceBatches)
+      if(!used.has(key)){batch.buffer.destroy();this.instanceBatches.delete(key);}
+    return{singles,batches,instances};
+  }
   private drawShadowBatch(pass:GPUAny,batch:ShadowBatchPlan):void{const first=batch.items[0]!,mesh=this.mesh(renderPrimitive(first)!),object=this.objects.get(first.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setVertexBuffer(1,batch.buffer);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count,batch.items.length);}
   private prepareShadowBatches(entities:readonly RuntimeEntity[],modelFor:(entity:RuntimeEntity)=>Mat4=(entity=>this.model(entity)),scope='shadow'):{singles:RuntimeEntity[];batches:ShadowBatchPlan[];instances:number}{
     const singles:RuntimeEntity[]=[],groups=new Map<string,{key:string;items:RuntimeEntity[];culled:boolean}>();
@@ -1581,6 +1687,20 @@ function isStaticShadowCaster(entity:RuntimeEntity,movers:ReadonlySet<string>):b
 function canCullBack(entity:RuntimeEntity):boolean{
   const kind=renderPrimitive(entity)?.kind;
   return kind==='box'||kind==='sphere'||kind==='cylinder'||kind==='torus'||kind==='polygon-prism';
+}
+function canBatchOpaque(e:RuntimeEntity):boolean{
+  return e.renderOnly===true&&!!renderPrimitive(e)&&e.material.color[3]>=.98&&
+    canCullBack(e)&&e.material.kind!=='glass'&&e.material.kind!=='snow'&&
+    e.material.kind!=='asphalt'&&!e.environmental&&!e.light&&
+    !e.material.texture&&!e.material.label&&!e.material.emissive;
+}
+function opaqueInstanceKey(e:RuntimeEntity):string{
+  const m=e.material;
+  // All u-uniforms remain shared EXCEPT model, previous model, color and
+  // material identity seed; those travel in the GPU instance stream.
+  return JSON.stringify([primitiveKey(renderPrimitive(e)!),canCullBack(e),
+    m.kind,m.roughness,m.metalness,m.clearcoat,m.clearcoatRoughness,
+    m.pattern,m.finish,m.ageYears,m.treatment,m.profile.optical,m.surface]);
 }
 function materialPipelineGroups(entities:readonly RuntimeEntity[]):Array<[[number,boolean],RuntimeEntity[]]>{
   const groups=new Map<string,{key:[number,boolean];items:RuntimeEntity[]}>();
