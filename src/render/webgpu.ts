@@ -950,6 +950,9 @@ export class WebGPURenderer implements Renderer{
     });
     const {vp,cullVP,reflectionVP,lightVP,right,up,frame}=frameState;
     const classified=this.profiler.measure('visibility',()=>({visible:this.collectedVisible,opaque:this.collectedOpaque,transparent:this.collectedTransparent}));
+    // reflectionMap is sampled by the wet asphalt material only. With no
+    // asphalt in the scene there is no receiver for this extra render pass.
+    const needsPlanarReflection=classified.opaque.some(e=>e.material.kind==='asphalt');
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     const frameModels=this.frameModels;frameModels.clear();
@@ -976,7 +979,7 @@ export class WebGPURenderer implements Renderer{
           const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
           if(visible.camera)(opaque?cameraOpaque:cameraTransparent).push(entity);
           if(opaque&&visible.shadow)shadowCasters.push(entity);
-          if(opaque&&visible.reflection)reflectedObjects.push(entity);
+          if(needsPlanarReflection&&opaque&&visible.reflection)reflectedObjects.push(entity);
         }
         this.staticCameraOpaque=cameraOpaque;this.staticCameraTransparent=cameraTransparent;this.staticShadowCasters=shadowCasters;this.staticReflectedObjects=reflectedObjects;
         this.staticCullRevision=scene.renderStructureRevision;
@@ -987,7 +990,7 @@ export class WebGPURenderer implements Renderer{
         const visible=visibilityFor(entity),opaque=entity.material.color[3]>=.98;
         if(visible.camera)(opaque?cameraOpaque:cameraTransparent).push(entity);
         if(opaque&&visible.shadow)shadowCasters.push(entity);
-        if(opaque&&visible.reflection)reflectedObjects.push(entity);
+        if(needsPlanarReflection&&opaque&&visible.reflection)reflectedObjects.push(entity);
       }
       cameraOpaque.sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
       cameraTransparent.sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
@@ -1016,28 +1019,43 @@ export class WebGPURenderer implements Renderer{
         const data=probeUniform(scene,reflectionProbe.position,faceVp);this.device.queue.writeBuffer(this.gpu.probeFrames[face],0,data);this.profiler.addUpload(data.byteLength,'frame');
       }
     }
+    const staticShadowPlan=shadowDirty?this.prepareShadowBatches(staticShadowDrawables,modelFor,'static'):
+      {singles:staticShadowDrawables,batches:[] as ShadowBatchPlan[],instances:0};
+    const dynamicShadowPlan=this.prepareShadowBatches(dynamicShadowDrawables,modelFor,'dynamic');
     const prepared=new Map<string,RuntimeEntity>();
-    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,...(shadowDirty?staticShadowDrawables:[]),...dynamicShadowDrawables,...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
+    for(const entity of [...culled.cameraOpaque,...culled.cameraTransparent,
+      ...(shadowDirty?staticShadowPlan.singles:[]),
+      ...(shadowDirty?staticShadowPlan.batches.map(b=>b.items[0]!):[]),
+      ...dynamicShadowPlan.singles,...dynamicShadowPlan.batches.map(b=>b.items[0]!),
+      ...culled.reflectedObjects,...probeFaces.flatMap(face=>face.entities)])prepared.set(entity.id,entity);
     this.profiler.measure('prepare',()=>{for(const entity of prepared.values()){const model=modelFor(entity);if(this.needsPrepare(entity,model))this.prepare(entity,model);}});
-    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:0});
+    this.profiler.setWork({cameraOpaque:culled.cameraOpaque.length,cameraTransparent:culled.cameraTransparent.length,shadowCasters:shadowDrawables.length,reflected:culled.reflectedObjects.length,shadowBatchedInstances:staticShadowPlan.instances+dynamicShadowPlan.instances});
     const encoder=this.device.createCommandEncoder({label:`render frame ${frameId}`});
     this.profiler.measure('encode.shadow',()=>{
       if(shadowDirty){
         const timing=this.profiler.timestampWrites('shadow');
         const staticPass=encoder.beginRenderPass({label:'render.shadow.static',...(timing?{timestampWrites:timing}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
         staticPass.setBindGroup(1,this.gpu.frameBind);
-        for(const [culled,group] of partitionByCull(staticShadowDrawables)){
+        for(const [culled,group] of partitionByCull(staticShadowPlan.singles)){
           staticPass.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);
           for(const entity of group)this.draw(staticPass,entity,false,false);
+        }
+        for(const batch of staticShadowPlan.batches){
+          staticPass.setPipeline(batch.culled?this.gpu.shadowCulledInstanced:this.gpu.shadowDoubleInstanced);
+          this.drawShadowBatch(staticPass,batch);
         }
         staticPass.end();
       }
       const timing=shadowDirty?undefined:this.profiler.timestampWrites('shadow'),occlusion=this.profiler.occlusionSet();
       const dynamicPass=encoder.beginRenderPass({label:'render.shadow.dynamic',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.dynamicShadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       dynamicPass.setBindGroup(1,this.gpu.frameBind);const query=this.profiler.beginOcclusion(dynamicPass,'shadow');
-      for(const [culled,group] of partitionByCull(dynamicShadowDrawables)){
+      for(const [culled,group] of partitionByCull(dynamicShadowPlan.singles)){
         dynamicPass.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);
         for(const entity of group)this.draw(dynamicPass,entity,false,false);
+      }
+      for(const batch of dynamicShadowPlan.batches){
+        dynamicPass.setPipeline(batch.culled?this.gpu.shadowCulledInstanced:this.gpu.shadowDoubleInstanced);
+        this.drawShadowBatch(dynamicPass,batch);
       }
       this.profiler.endOcclusion(dynamicPass,query);dynamicPass.end();
     });
@@ -1362,9 +1380,18 @@ export class WebGPURenderer implements Renderer{
   }
   private draw(pass:GPUAny,entity:RuntimeEntity,count:boolean,withColor=true):void{const mesh=this.mesh(renderPrimitive(entity)!),object=this.objects.get(entity.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);if(withColor)pass.setVertexBuffer(1,mesh.color);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count);if(count){this.drawCalls++;this.triangles+=mesh.triangles;}}
   private drawShadowBatch(pass:GPUAny,batch:ShadowBatchPlan):void{const first=batch.items[0]!,mesh=this.mesh(renderPrimitive(first)!),object=this.objects.get(first.id)!;pass.setBindGroup(0,object.bind);pass.setVertexBuffer(0,mesh.vertex);pass.setVertexBuffer(1,batch.buffer);pass.setIndexBuffer(mesh.index,mesh.format);pass.drawIndexed(mesh.count,batch.items.length);}
-  private prepareShadowBatches(entities:readonly RuntimeEntity[],modelFor:(entity:RuntimeEntity)=>Mat4=(entity=>this.model(entity))):{singles:RuntimeEntity[];batches:ShadowBatchPlan[];instances:number}{
+  private prepareShadowBatches(entities:readonly RuntimeEntity[],modelFor:(entity:RuntimeEntity)=>Mat4=(entity=>this.model(entity)),scope='shadow'):{singles:RuntimeEntity[];batches:ShadowBatchPlan[];instances:number}{
     const singles:RuntimeEntity[]=[],groups=new Map<string,{key:string;items:RuntimeEntity[];culled:boolean}>();
-    for(const entity of entities){const key=shadowBatchKey(entity),culled=canCullBack(entity);let group=groups.get(key);if(!group){group={key,items:[],culled};groups.set(key,group);}group.items.push(entity);}
+    for(const entity of entities){
+      // Uniform shadow batching is valid only without per-object deformation.
+      if(!entity.renderOnly||entity.environmental||!canCullBack(entity)){
+        singles.push(entity);continue;
+      }
+      const key=scope+'|'+shadowBatchKey(entity),culled=canCullBack(entity);
+      let group=groups.get(key);
+      if(!group){group={key,items:[],culled};groups.set(key,group);}
+      group.items.push(entity);
+    }
     const used=new Set<string>(),batches:ShadowBatchPlan[]=[];let instances=0;
     for(const group of groups.values()){
       if(group.items.length<4){singles.push(...group.items);continue;}
@@ -1374,7 +1401,7 @@ export class WebGPURenderer implements Renderer{
       if(!floatArrayEqual(batch.data,data)){this.device.queue.writeBuffer(batch.buffer,0,data);this.profiler.addUpload(data.byteLength,'instance');batch.data=data;}
       instances+=group.items.length;batches.push({key:group.key,items:group.items,culled:group.culled,buffer:batch.buffer});
     }
-    for(const [key,batch] of this.shadowBatches)if(!used.has(key)){batch.buffer.destroy();this.shadowBatches.delete(key);}
+    for(const [key,batch] of this.shadowBatches)if(key.startsWith(scope+'|')&&!used.has(key)){batch.buffer.destroy();this.shadowBatches.delete(key);}
     return{singles,batches,instances};
   }
   private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),color:this.buffer(data.colors,0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
