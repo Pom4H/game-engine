@@ -70,7 +70,7 @@ for(const workload of workloads){
  try{
   contexts.typescript=await setup(workload,'typescript');
   contexts.wasm=await setup(workload,'wasm');
-  contexts.serial=await setup(workload,'wasm-serial');
+  contexts['wasm-serial']=await setup(workload,'wasm-serial');
   for(let round=0;round<rounds;round++){
    // Interleave backends to reduce CPU frequency/load/JIT ordering bias.
    const order=round%2===0?['typescript','wasm-serial','wasm']:['wasm','wasm-serial','typescript'];
@@ -80,7 +80,7 @@ for(const workload of workloads){
     context.samples.push((performance.now()-start)/ticks);
    }
   }
-  const ts=contexts.typescript,wasm=contexts.wasm,serial=contexts.serial;
+  const ts=contexts.typescript,wasm=contexts.wasm,serial=contexts['wasm-serial'];
   if(ts.contacts!==wasm.contacts||ts.contacts!==serial.contacts)
    throw new Error('Contact replay count changed for '+workload.id);
   const jsMs=median(ts.samples),wasmMs=median(wasm.samples),serialMs=median(serial.samples);
