@@ -83,7 +83,7 @@ export class CodexActivityAdapter {
    const item=params.item as Record<string,unknown>|undefined;
    const itemId=compact(item?.id),type=item?.type;
    const kinds=['commandExecution','fileChange','mcpToolCall','dynamicToolCall','webSearch','collabAgentToolCall'];
-   if(!itemId||typeof type!=='string'||!kinds.includes(type))return emitted;
+   if(!item||!itemId||typeof type!=='string'||!kinds.includes(type))return emitted;
    const turnId=compact(params.turnId)??this.turnByThread.get(threadId)??'turn';
    const prefix='codex:'+short(threadId)+':'+short(turnId)+':'+short(itemId);
    const key=threadId+'\0'+turnId+'\0'+itemId;
