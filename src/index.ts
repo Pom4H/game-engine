@@ -128,3 +128,5 @@ export {CausalAuthority,type AuthorityClock,type AuthorityScope,type AuthorityGr
 
 export {canonicalContent,contentHash,MemoryContentStore as SharedContentStore,type ContentHash as SharedContentHash,type ContentRef as SharedContentRef,type ResourceManifest as SharedResourceManifest,type ContentAddressedRepository as SharedContentAddressedRepository} from './content/index.js';
 export {CausalStorage,MemoryScopeHeadStore,type CausalStorageKind,type CausalRef,type CausalMutation,type CausalCheckpoint,type CausalScopeHead,type ScopeHeadStore,type CausalAppendInput,type CausalAppendResult,type CausalCheckpointResult,type RestoredMutation,type CausalRestore,type CausalHydrationProof} from './storage/index.js';
+
+export {decodeWorldBinary,isWorldBinary,WORLD_BINARY_VERSION} from './scene/world-binary.js';

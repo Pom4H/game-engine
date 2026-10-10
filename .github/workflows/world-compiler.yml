@@ -1,0 +1,37 @@
+name: World compiler (Rust / engine ABI)
+on:
+  push:
+    paths:
+      - 'compiler/**'
+      - 'examples/worlds/**'
+      - 'src/scene/world-binary.ts'
+      - 'src/scene/url.ts'
+      - 'src/browser.ts'
+      - 'src/index.ts'
+      - 'test/world-compiler.test.mjs'
+      - 'package.json'
+      - '.github/workflows/world-compiler.yml'
+  pull_request:
+    paths:
+      - 'compiler/**'
+      - 'examples/worlds/**'
+      - 'src/scene/world-binary.ts'
+      - 'src/scene/url.ts'
+      - 'src/browser.ts'
+      - 'src/index.ts'
+      - 'test/world-compiler.test.mjs'
+      - 'package.json'
+      - '.github/workflows/world-compiler.yml'
+jobs:
+  compile-and-integrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: cargo --version && cargo test --manifest-path compiler/Cargo.toml
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: node --test test/world-compiler.test.mjs

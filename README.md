@@ -40,3 +40,21 @@ interest. Seeing a mountain 100 km away does not activate its collision bodies,
 NPCs, economy or other detailed simulation.
 
 See docs/INFINITE_WORLD.md.
+
+## Rust World compiler (ahead of time)
+
+The experimental `worldc` compiler converts `.world` declarative scenes into a
+fixed-layout `.wscn` binary with SI units and stable entity IDs. It compiles
+**before** execution; scene loading hydrates the existing `SceneSpec` and
+preserves the engine's physics/render hot path. The v0.1 language currently
+covers entities, primitive physical geometry, camera, material, initial motion,
+and basic environment. It does not replace the existing TypeScript DSL.
+
+```sh
+cargo test --manifest-path compiler/Cargo.toml
+cargo run --manifest-path compiler/Cargo.toml -- compile examples/worlds/collision.world
+```
+
+Read [compiler/README.md](compiler/README.md) for the language, binary ABI,
+and `sceneFromURL` integration. `decodeWorldBinary()` is exported by both the
+core and browser packages.

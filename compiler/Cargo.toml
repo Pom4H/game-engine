@@ -1,0 +1,13 @@
+[package]
+name = "worldc"
+version = "0.1.0"
+edition = "2021"
+description = "Ahead-of-time compiler for game-engine World scene language"
+license = "MIT"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "worldc"
+path = "src/main.rs"

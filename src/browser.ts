@@ -8,3 +8,4 @@ export {sampleCharacterPose,type CharacterPoseName} from './characters/pose.js';
 export {humanoidMeasurements,type HumanoidMeasurements,type HumanoidProportions} from './animation/locomotion.js';
 
 export {connectAcousticWebAudio,type AcousticTransferObservation,type AcousticWebAudioGraph} from './audio/acoustic-transfer.js';
+export {decodeWorldBinary,isWorldBinary,WORLD_BINARY_VERSION} from './scene/world-binary.js';

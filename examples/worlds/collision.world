@@ -1,0 +1,35 @@
+// Native World source, compiled before the engine starts.
+// cargo run --manifest-path compiler/Cargo.toml -- compile examples/worlds/collision.world
+world Collision {
+  seed: 42
+  gravity: (0m/s2, -9.81m/s2, 0m/s2)
+  ground: -100m
+
+  camera {
+    position: (8m, 4m, 10m)
+    target: (0m, 1m, 0m)
+    fov: 55deg
+  }
+
+  environment {
+    temperature: -5C
+    snowfall: light
+  }
+
+  entity floor {
+    position: (0m, -0.1m, 0m)
+    mesh: box(12m, 0.2m, 12m)
+    material: concrete
+    body: static
+  }
+
+  entity ball {
+    position: (0m, 3m, 0m)
+    mesh: sphere(50cm)
+    material: steel
+    roughness: 0.3
+    body: dynamic(3kg)
+    velocity: (1m/s, 0m/s, 0m/s)
+    restitution: 0.5
+  }
+}

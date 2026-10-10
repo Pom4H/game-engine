@@ -24,7 +24,9 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
-    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs"
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs",
+    "world:compile": "cargo run --manifest-path compiler/Cargo.toml -- compile",
+    "world:test": "cargo test --manifest-path compiler/Cargo.toml"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
