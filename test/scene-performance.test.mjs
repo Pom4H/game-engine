@@ -38,7 +38,7 @@ test('WSCN v2 profile roundtrip, bounded sampling and deterministic physics pari
     assert.equal(report.latest.tick,125);
     assert.equal(report.latest.work.bodies,65);
     assert.ok(report.latest.work.substeps>=1);
-    assert.equal(report.latest.work.dispatch,'kernel');
+    assert.equal(report.latest.work.dispatch,'direct');
     assert.ok(report.tick.meanMs>0);
     assert.ok(report.systems.physics.count>0);
     assert.ok(report.latest.overheadMs>=0);
