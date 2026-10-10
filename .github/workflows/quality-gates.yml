@@ -26,7 +26,7 @@ on:
         default: false
 concurrency:
   group: reality-quality-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   physics-audio:
     runs-on: ubuntu-latest
