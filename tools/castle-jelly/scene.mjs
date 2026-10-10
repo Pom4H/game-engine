@@ -4,8 +4,17 @@ import {Scene} from '../../dist/scene/scene.js';
 // Water elevations and normals are projections of a causal, obstacle-aware
 // finite-difference wave field (not animated circles painted in a shader).
 export const duration=7.2;
-export const waterLevel=.88;
-const W=94,H=82,D=.165,LEFT=-(W-1)*D/2,BACK=-(H-1)*D/2;
+export const waterLevel=.925;
+// Linear capillary-gravity wave model in a shallow miniature jelly basin.
+// omega(k)^2 = c_g^2*k^2 + b*k^4; surface elasticity is explicit,
+// not an arbitrary second sine wave in the presentation.
+export const dispersion={gravitySpeedMps:1.50,capillaryFlexM4S2:.018,dampingPerSecond:.25};
+export function phaseSpeedMps(wavelengthM){
+ if(!Number.isFinite(wavelengthM)||wavelengthM<=0)throw new RangeError('Positive wavelength required');
+ const k=2*Math.PI/wavelengthM;
+ return Math.sqrt(dispersion.gravitySpeedMps**2+dispersion.capillaryFlexM4S2*k*k);
+}
+const W=128,H=116,D=.12,LEFT=-(W-1)*D/2,BACK=-(H-1)*D/2;
 const id=(x,z)=>z*W+x;
 const inIsland=(x,z)=>Math.abs(x)<3.36&&Math.abs(z)<2.75;
 
@@ -14,6 +23,8 @@ export class JellyWaves {
     this.height=new Float64Array(W*H);
     this.velocity=new Float64Array(W*H);
     this.solid=new Uint8Array(W*H);
+    this.laplacian=new Float64Array(W*H);
+    this.nextVelocity=new Float64Array(W*H);
     for(let z=0;z<H;z++)for(let x=0;x<W;x++){
       const px=LEFT+x*D,pz=BACK+z*D;
       this.solid[id(x,z)]=inIsland(px,pz)?1:0;
@@ -30,19 +41,29 @@ export class JellyWaves {
     }
   }
   step(dt=1/60){
-    // CFL c*dt/dx <= 1/sqrt(2). Domain cell size is 0.165 m.
-    const c=2.1;if(c*dt/D>Math.SQRT1_2)throw new Error('Wave CFL violation');
-    const v=this.velocity,h=this.height,s=this.solid;
-    const next=new Float64Array(v.length);
+    // Dispersive capillary-gravity waves: eta_tt=c_g² Δeta - b Δ²eta.
+    // The biharmonic term makes high spatial frequencies propagate faster;
+    // solid island cells reflect all wavelengths through zero normal slope.
+    const {gravitySpeedMps:c,capillaryFlexM4S2:b,dampingPerSecond:d}=dispersion;
+    const maxK2=8/(D*D);
+    if(dt*Math.sqrt(c*c*maxK2+b*maxK2*maxK2)>=2)throw new Error('Dispersive CFL violation');
+    const h=this.height,v=this.velocity,s=this.solid,lap=this.laplacian,next=this.nextVelocity;
     const inv=1/(D*D);
+    // First Laplacian, incorporating Neumann rock walls.
+    for(let z=1;z<H-1;z++)for(let x=1;x<W-1;x++){
+      const i=id(x,z);if(s[i]){lap[i]=0;continue;}
+      const adjacent=(j)=>s[j]?h[i]:h[j];
+      lap[i]=(adjacent(i-1)+adjacent(i+1)+adjacent(i-W)+adjacent(i+W)-4*h[i])*inv;
+    }
+    // Second Laplacian is the energy-stable L² discretization of bending.
     for(let z=1;z<H-1;z++)for(let x=1;x<W-1;x++){
       const i=id(x,z);if(s[i])continue;
-      const adjacent=(j)=>s[j]?h[i]:h[j];
-      const lap=(adjacent(i-1)+adjacent(i+1)+adjacent(i-W)+adjacent(i+W)-4*h[i])*inv;
-      // Absorbing outer rim suppresses reflections from the demonstration tank.
+      const adjacent=(j)=>s[j]?lap[i]:lap[j];
+      const biharmonic=(adjacent(i-1)+adjacent(i+1)+adjacent(i-W)+adjacent(i+W)-4*lap[i])*inv;
       const rim=Math.min(x,W-1-x,z,H-1-z)*D;
-      const damping=1.0+Math.max(0,1.15-rim)*3.5;
-      next[i]=(v[i]+c*c*lap*dt)*Math.exp(-damping*dt);
+      const sponge=Math.max(0,1.0-rim)*3.0;
+      const acceleration=c*c*lap[i]-b*biharmonic;
+      next[i]=(v[i]+acceleration*dt)*Math.exp(-(d+sponge)*dt);
     }
     for(let z=1;z<H-1;z++)for(let x=1;x<W-1;x++){
       const i=id(x,z);if(!s[i]){v[i]=next[i];h[i]+=dt*v[i];}
@@ -53,12 +74,26 @@ export class JellyWaves {
     const steps=Math.round(dt*60);
     for(let j=0;j<steps;j++){
       const now=t-dt+(j+1)/60;
-      // Waterfall splash: repeatable continuous pressure-to-velocity coupling.
-      this.inject(-.12,3.17,1.8/60,.50);
-      // Boat displacement/wake moves around the base of the island.
-      this.inject(1.72,4.40,.46/60,.37);
+      // Two spectral components share ONE physical source; omega(k)
+      // controls how their wavelengths subsequently separate in space.
+      const drive=11*Math.sin(2*Math.PI*.76*now)+7.8*Math.sin(2*Math.PI*2.1*now);
+      this.inject(-.12,3.25,drive/60,.25);
+      // Broadband falling-water impulses produce expanding packets,
+      // visibly splitting their short and long wavelength components.
+      if(Math.floor((now-1/60)/1.15)!==Math.floor(now/1.15))
+        this.inject(-.12,3.25,2.2,.28);
+      this.inject(1.72,4.40,(1.6*Math.sin(2*Math.PI*1.27*now))/60,.36);
       this.step(1/60);
     }
+  }
+  waveStats(){
+    let sum=0,crest=0,min=Infinity,max=-Infinity,wet=0;
+    for(let i=0;i<this.height.length;i++)if(!this.solid[i]){
+      const h=this.height[i];sum+=h*h;wet++;min=Math.min(min,h);max=Math.max(max,h);
+      if(Math.abs(h)>.012)crest++;
+    }
+    return{rmsHeightM:Math.sqrt(sum/wet),visibleCrestCells:crest,minimumM:min,maximumM:max,
+      longPhaseSpeedMps:phaseSpeedMps(2.4),shortPhaseSpeedMps:phaseSpeedMps(.48)};
   }
   surface(){
     const positions=[],normals=[],colors=[],indices=[];
@@ -67,12 +102,12 @@ export class JellyWaves {
       const l=p(id(Math.max(0,x-1),z)),r=p(id(Math.min(W-1,x+1),z));
       const b=p(id(x,Math.max(0,z-1))),f=p(id(x,Math.min(H-1,z+1)));
       const dx=(r-l)/(2*D),dz=(f-b)/(2*D),mag=Math.hypot(dx,dz),curv=Math.abs(l+r+b+f-4*h)/(D*D);
-      const shore=Math.max(0,1-Math.max(Math.abs(LEFT+x*D)-3.36,Math.abs(BACK+z*D)-2.75)/.7);
-      const foam=Math.min(.83,Math.max(0,mag-.045)*2.4+Math.max(0,curv-.12)*.11+(BACK+z*D>2.65&&Math.abs(LEFT+x*D)<.7?.25:0));
-      const base=[.86,.28,.48],light=[1,.78,.82],k=Math.max(0,Math.min(.86,foam+Math.max(0,shore)*.06));
-      positions.push(LEFT+x*D,waterLevel+h*1.7,BACK+z*D);
-      const len=Math.hypot(dx*1.7,1,dz*1.7);
-      normals.push(-dx*1.7/len,1/len,-dz*1.7/len);
+      const shore=Math.max(0,1-Math.max(Math.abs(LEFT+x*D)-3.36,Math.abs(BACK+z*D)-2.75)/.45);
+      const foam=Math.min(.94,Math.max(0,mag-.045)*1.7+Math.max(0,curv-.18)*.065+(BACK+z*D>2.65&&Math.abs(LEFT+x*D)<.6?.09:0));
+      const base=[.91,.32,.55],light=[1,.89,.93],k=Math.max(0,Math.min(.94,foam+Math.max(0,shore)*.035));
+      positions.push(LEFT+x*D,waterLevel+h*2.6,BACK+z*D);
+      const len=Math.hypot(dx*2.6,1,dz*2.6);
+      normals.push(-dx*2.6/len,1/len,-dz*2.6/len);
       colors.push(base[0]*(1-k)+light[0]*k,base[1]*(1-k)+light[1]*k,base[2]*(1-k)+light[2]*k,1);
     }
     for(let z=0;z<H-1;z++)for(let x=0;x<W-1;x++){
@@ -189,9 +224,10 @@ export const baseSpec={
  entities,
 };
 export function createCastleJelly(){
- const waves=new JellyWaves(),scene=new Scene({...baseSpec,entities:[...entities,{
+ const waves=new JellyWaves();waves.advance(1.25,1.25);
+ const scene=new Scene({...baseSpec,entities:[...entities,{
   id:'water-wave-mesh',position:[0,0,0],renderOnly:true,mesh:waves.surface(),
-  material:{kind:'glass',color:[.94,.36,.57,.88],roughness:.12,clearcoat:.9,clearcoatRoughness:.06}
+  material:{kind:'default',color:[1,1,1,1],roughness:.17,clearcoat:1,clearcoatRoughness:.045}
  }]});
  let tick=0;
  return {scene,waves,duration,step(time){
@@ -199,16 +235,16 @@ export function createCastleJelly(){
   if(target<tick)throw new Error('Castle timeline must advance monotonically');
   const dt=(target-tick)/60;
   if(dt>0){
-   waves.advance(dt,target/60);
+   waves.advance(dt,target/60+1.25);
    tick=target;
    // Geometry identity is part of the renderer's content cache key.
    // Re-create only the liquid projection; all land/castle entities are stable.
    scene.remove('water-wave-mesh');
    scene.add({id:'water-wave-mesh',position:[0,0,0],renderOnly:true,mesh:waves.surface(),
-    material:{kind:'glass',color:[.94,.36,.57,.88],roughness:.12,clearcoat:.9,clearcoatRoughness:.06}});
+    material:{kind:'default',color:[1,1,1,1],roughness:.17,clearcoat:1,clearcoatRoughness:.045}});
    // The ship floats in place. The wake is coupled to its authored hull.
   }
-  return {tick,waterEnergy:waves.energy(),obstacleCells:waves.solid.reduce((n,v)=>n+v,0)};
+  return {tick,waterEnergy:waves.energy(),...waves.waveStats(),obstacleCells:waves.solid.reduce((n,v)=>n+v,0)};
  }};
 }
 export default baseSpec;
