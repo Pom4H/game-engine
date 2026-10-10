@@ -59,7 +59,7 @@ test('actual Scene geometry, visual-only actors, and backward seek parity',()=>{
   const office=new AgentOffice(agents);
   assert.ok(office.scene.entities.size>60);
   assert.equal(office.scene.physics.bodies.size,0,'telemetry never invents physical bodies');
-  assert.ok(office.scene.renderMoverIds().has('office-agent-0:pelvis'));
+  assert.ok(office.scene.renderMoverIds().has('office-agent-0:top'));
   const start=office.project(journal.snapshot(),1000);
   const marker=office.scene.entities.get('office:status:0');
   const first=[...marker.position];
