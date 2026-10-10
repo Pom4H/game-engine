@@ -2,24 +2,24 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#d7e7f2">
-<title>The Engine — Inter-office activity</title><link rel="icon" href="data:,">
+<title>The Engine — Toy-brick Campus Walkthrough</title><link rel="icon" href="data:,">
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:#c4dce9;color:#1e3945}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:#32495a;color:#eaf3ee}
 #world{display:block;width:100%;height:100%;touch-action:none}
 .overlay{position:absolute;pointer-events:none;user-select:none}
 .top{top:24px;left:31px;right:31px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-.logo{display:flex;gap:12px;align-items:center;font-size:12px;font-weight:800;letter-spacing:.15em;color:#1c3e4c}
+.logo{display:flex;gap:12px;align-items:center;font-size:12px;font-weight:800;letter-spacing:.15em;color:#f4f5e9}
 .logo i{display:block;width:25px;height:25px;background:#efbc60;transform:rotate(0deg);box-shadow:inset -8px -8px 0 #e4a844}
-.topline{margin:10px 0 0 36px;font-size:11px;color:#587886;letter-spacing:.07em}
-.chip{padding:11px 15px;background:#f6faf8d9;border:1px solid #a9c5d1;color:#315866;font-size:10px;font-weight:800;letter-spacing:.10em}
+.topline{margin:10px 0 0 36px;font-size:11px;color:#bdd1d7;letter-spacing:.07em}
+.chip{padding:11px 15px;background:#162b38e3;border:1px solid #65818a;color:#e9f1e7;font-size:10px;font-weight:800;letter-spacing:.10em}
 .footer{bottom:22px;left:30px;right:30px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px}
 .status{width:305px;max-width:45%;padding:13px 15px;background:#172c36e8;color:#e8f3ee;border-left:3px solid #eebe69}
 .status label{display:block;color:#9dbec5;font-size:9px;letter-spacing:.16em;font-weight:800}
 .status strong{font-size:15px;display:block;margin:7px 0 5px}
 .status span{display:block;color:#bdd0d1;font-size:11px}
-.timing{width:290px;max-width:45%;padding:12px 15px;background:#f5faf8e0;border:1px solid #afcad3}
-.clock{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#355868;font-weight:750}
-#progress{height:4px;background:#b4cbd4;margin-top:10px;position:relative;overflow:hidden}
+.timing{width:290px;max-width:45%;padding:12px 15px;background:#18313ee9;border:1px solid #7798a0}
+.clock{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#eff5ed;font-weight:750}
+#progress{height:4px;background:#829ba4;margin-top:10px;position:relative;overflow:hidden}
 #progress i{display:block;width:0;height:100%;background:#e2a74b}
 #play{position:absolute;bottom:110px;right:31px;background:#18333e;color:#f3f7f2;border:0;padding:10px 17px;font-weight:750;cursor:pointer;font-size:12px;letter-spacing:.05em}
 #play:focus-visible{outline:2px solid #e4ac57}
@@ -27,11 +27,11 @@
 </style></head><body>
 <canvas id="world" aria-label="Two connected LEGO-style offices with moving agents"></canvas>
 <header class="top overlay"><div><div class="logo"><i aria-hidden="true"></i>THE ENGINE / CAMPUS</div>
- <p class="topline">Two offices · one causal timeline</p></div>
- <div class="chip">RESEARCH&nbsp;&nbsp; → &nbsp;&nbsp;CORRIDOR&nbsp;&nbsp; → &nbsp;&nbsp;BUILD</div>
+ <p class="topline">A living miniature of one causal system</p></div>
+ <div class="chip">RESEARCH LAB&nbsp;&nbsp; → &nbsp;&nbsp;SHARED WALKWAY&nbsp;&nbsp; → &nbsp;&nbsp;BUILD STUDIO</div>
 </header>
-<div class="footer overlay"><div class="status"><label>OBSERVED EVENT PROJECTION · SYNTHETIC DEMO</label>
-<strong id="action">Office-to-office handoff</strong><span id="participants">Agents arrive in the connected workspace</span></div>
+<div class="footer overlay"><div class="status"><label>SYNTHETIC CAUSAL REPLAY · REAL WEBGPU</label>
+<strong id="action">Research → Build</strong><span id="participants">Three agents cross the studio walkway</span></div>
 <div class="timing"><div class="clock"><span>REPLAY · <span id="elapsed">00:00</span></span>
 <span id="count">4 AGENTS</span></div><div id="progress"><i id="progress-fill"></i></div></div></div>
 <button id="play" type="button">PAUSE</button><div id="warning" role="alert"></div>

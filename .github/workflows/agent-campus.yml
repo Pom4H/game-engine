@@ -1,4 +1,4 @@
-name: Agent Campus - real WebGPU MP4
+name: Agent Campus - cinematic supersampled WebGPU MP4
 on:
   push:
     branches: [main]
@@ -18,7 +18,7 @@ concurrency:
 jobs:
   campus-video:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

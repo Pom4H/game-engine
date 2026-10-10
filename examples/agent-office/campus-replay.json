@@ -279,8 +279,9 @@
   ],
   "capture": {
     "durationSeconds": 13,
-    "fps": 12,
-    "width": 1280,
-    "height": 720
+    "fps": 24,
+    "width": 1920,
+    "height": 1080,
+    "supersample": 1.3333333333333333
   }
 }

@@ -20,7 +20,7 @@ const candidates=process.platform==='win32'?[
 ]:['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'];
 const chrome=process.env.CHROME_PATH??candidates.find(existsSync);
 check(chrome&&existsSync(chrome),'Self-hosted GPU worker needs Chrome at CHROME_PATH');
-const width=1280,height=720,fps=12,durationSeconds=13,frames=fps*durationSeconds;
+const width=1920,height=1080,fps=24,durationSeconds=13,frames=fps*durationSeconds;
 const dir=resolve('artifacts/agent-campus');await mkdir(dir,{recursive:true});
 const video=join(dir,'campus-walkthrough.mp4');
 const profile=await mkdtemp(join(tmpdir(),'agent-campus-gpu-'));
@@ -84,6 +84,9 @@ try{
  const seek=sec=>evalOnPage('globalThis.__CAMPUS__.seek('+sec+')');
  const first=await seek(0),middle=await seek(5.25),last=await seek(12.9);
  check(first.renderer?.backend==='webgpu'&&first.renderer.drawCalls>0,'Real engine renderer did not submit campus geometry');
+ check(first.renderer.width>=width*1.3&&first.renderer.height>=height*1.3,
+   'WebGPU supersampling was disabled; staircase-edge regression: '+JSON.stringify(first.renderer));
+ check(first.renderer.drawCalls<170,'Art scene exceeded mobile-friendly draw budget');
  check(first.renderer.errors?.length===0,'Initial WebGPU errors: '+JSON.stringify(first.renderer.errors));
  const p=(set,id)=>set.agents.find(a=>a.id===id);
  check(p(first,'researcher').position[0]<-6&&p(last,'researcher').position[0]>6,'Researcher did not move between offices');
@@ -96,7 +99,7 @@ try{
   let output='',err='';process.stdout.on('data',v=>output+=String(v));process.stderr.on('data',v=>err+=String(v));
   process.once('error',no);process.once('close',code=>code===0?yes(output):no(new Error(err)));
  });
- const codec=encoders.includes('libx264')?['-c:v','libx264','-preset','medium','-crf','19']:
+ const codec=encoders.includes('libx264')?['-c:v','libx264','-preset','slow','-crf','17']:
   ['-c:v','mpeg4','-q:v','2'];
  encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe',
   '-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an',...codec,
@@ -134,7 +137,7 @@ try{
  const stream=probe.streams?.[0];
  check(stream?.width===width&&stream?.height===height,'MP4 dimensions wrong: '+JSON.stringify(stream));
  check(Number(stream.nb_read_frames)===frames,'MP4 was truncated: '+JSON.stringify(stream));
- const evidence={schema:1,source:'real WebGPU screenshot sequence',syntheticReplay:true,
+ const evidence={schema:2,source:'real WebGPU supersampled screenshot sequence',syntheticReplay:true,outputResolution:[width,height],supersampleFactor:4/3,
   gitRevision:process.env.GITHUB_SHA??null,adapter,software,fps,frames,durationSeconds,
   renderer:last.renderer,previews,mp4:video,ffprobe:probe,errors};
  await writeFile(join(dir,'campus-evidence.json'),JSON.stringify(evidence,null,2));

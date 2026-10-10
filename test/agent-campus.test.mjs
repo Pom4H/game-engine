@@ -71,3 +71,23 @@ test('walkthrough uses synthetic provenance, stable paths and no private interna
  assert.ok(raw.agents.length>=3);
  assert.equal(raw.capture.width,1280);
 });
+
+test('cinematic replay keeps 24fps positions continuous and turns smooth',()=>{
+ const campus=new AgentCampus(raw.agents),positions=[],angles=[];
+ const entity=campus.scene.entities.get('campus:agent:0:body');
+ assert.ok(entity);
+ for(let i=17;i<=209;i++){
+  const time=i/24;
+  const pose=campus.project(facts,seconds(time));
+  positions.push(find(pose,'researcher').position);
+  angles.push(entity.rotation[1]);
+ }
+ for(let i=1;i<positions.length;i++){
+  const a=positions[i-1],b=positions[i];
+  const movement=Math.hypot(a[0]-b[0],a[2]-b[2]);
+  assert.ok(movement<.28,'Visible position teleported at 24fps: '+i+' '+movement);
+  const delta=Math.atan2(Math.sin(angles[i]-angles[i-1]),Math.cos(angles[i]-angles[i-1]));
+  assert.ok(Math.abs(delta)<.60,'Waypoint created hard instantaneous heading step: '+i+' '+delta);
+ }
+ assert.ok(new Set(positions.map(p=>p[0].toFixed(3))).size>50,'Replay must produce smooth distinct locations');
+});
