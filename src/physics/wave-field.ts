@@ -86,7 +86,7 @@ export class AcousticWaveField {
   private readonly ny:number;
   private readonly nz:number;
   private solidCount=0;
-  private readonly numericalKernel?:AcousticWaveKernel;
+  private readonly numericalKernel:AcousticWaveKernel|undefined;
   private pressurePlaneScratch?:Float32Array;
   private disposed=false;
 

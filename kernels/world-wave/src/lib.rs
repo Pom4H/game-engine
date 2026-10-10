@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn finite_wave_propagation_and_hard_wall() {
         let mut wave = Wave::create(9, 3, 3).unwrap();
-        let at = |x, y, z| x + 9 * (y + 3 * z);
+        let at = |x: usize, y: usize, z: usize| x + 9 * (y + 3 * z);
         wave.pressure[at(2, 1, 1)] = 100.0;
         wave.step(1.0, 0.5, 0.5);
         assert!(wave.pressure[at(3, 1, 1)] > 0.0);
