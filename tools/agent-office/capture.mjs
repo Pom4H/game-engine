@@ -109,11 +109,23 @@ try{
   check(stageProof.sampledColours>25&&stageProof.luminanceDeviation>5,'Office GPU image lacks meaningful geometric variation');
   await writeFile(join(dir,'agent-office-demo.png'),screenshot);
   await writeFile(join(dir,'agent-office-canvas.png'),stage);
+  // Exercise the actual agent-selection drill-down. The viewport must move to
+  // a real observed performer rather than a hidden/generated actor.
+  await evaluate('document.querySelector("#agents .agent")?.click()');
+  await sleep(550);
+  const detail=await evaluate('globalThis.__AGENT_OFFICE__.inspect()');
+  check(detail.focusedAgent==='orchestrator','Selecting an agent must focus the 3D performer');
+  check(Math.abs(detail.camera.target[0])>0.1,'Drill-down camera did not move to the observed performer');
+  const detailPng=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+  const detailBytes=Buffer.from(detailPng.data,'base64');
+  const detailProof=inspectPng(detailBytes);
+  check(detailProof.sampledColours>35,'Agent close-up contains no meaningful geometry');
+  await writeFile(join(dir,'agent-office-detail.png'),detailBytes);
   const evidence={schema:1,revision:process.env.GITHUB_SHA??null,source:'real WebGPU browser capture',
     adapter,software,layout,initial:{events:initial.events,agents:initial.agents,renderer:initial.renderer},
     failed:{atMs:failed.atMs,agents:failed.agents},
     final:{atMs:final.atMs,agents:final.agents,renderer:final.renderer},
-    screenshot:screenshotProof,canvas:stageProof,issues};
+    screenshot:screenshotProof,canvas:stageProof,detail:detailProof,focusedAgent:detail.focusedAgent,issues};
   await writeFile(join(dir,'agent-office-evidence.json'),JSON.stringify(evidence,null,2));
   console.log(JSON.stringify({ok:true,image:'artifacts/agent-office-demo.png',canvas:'artifacts/agent-office-canvas.png',adapter,stageProof,agents:final.agents.length},null,2));
 }finally{

@@ -237,6 +237,8 @@ export class AgentOffice {
    modules:[{id:'office:projection-frame',phase:'simulate',rateHz:60,reads:[],writes:[],after:[],context:'none',run:()=>[]}],
   });
  }
+ /** Stable camera anchor for semantic drill-down; this does not change any agent state. */
+ agentPosition(id:string):Vec3|undefined{return this.actors.find(a=>a.id===id)?.position;}
  /** No physics tick or synthetic subagent activity is advanced by replay. */
  project(facts:readonly ActivityFact[],atMs:number):readonly OfficeAgentState[]{
   if(!Number.isFinite(atMs)||atMs<0)throw new RangeError('Office projection time must be nonnegative');

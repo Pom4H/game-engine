@@ -7,7 +7,7 @@ const canvas=$('#scene'),slider=$('#seek'),journal=new ActivityJournal();
 const PHASE={offline:'OFFLINE',idle:'IDLE',working:'WORKING',tool:'TOOL',blocked:'BLOCKED',done:'DONE'};
 let renderer,office,selectedAgent=null,selectedFact=null,playing=false,lastFrame=0;
 let mode='demo',cursorMs=0,firstMs=0,lastMs=0,dirty=true,frameCount=0,lastUiAt=0,building=Promise.resolve();
-let yaw=.83,pitch=.49,distance=20.5;
+let yaw=.83,pitch=.49,distance=20.5,knownAgents=0;
 const time=ms=>{const n=Math.floor(ms/1000);return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');};
 const error=e=>{const panel=$('#error');panel.hidden=false;panel.textContent='3D: '+(e?.message??String(e));playing=false;};
 const eventTitle=f=>f.kind.replaceAll('agent.','').replaceAll('.',' / ').toUpperCase();
@@ -18,12 +18,14 @@ const roster=facts=>{
     members.set(f.actor.id,{id:f.actor.id,name:f.kind==='agent.started'&&f.label?f.label:f.actor.id});
   for(const f of facts)if(f.actor.domain==='agent'&&f.kind==='agent.started'&&f.label)
     members.set(f.actor.id,{id:f.actor.id,name:f.label});
+  knownAgents=members.size;
   return [...members.values()].slice(0,8);
 };
 const rosterKey=agents=>agents.map(a=>a.id+'='+a.name).join('|');
 async function rebuildIfNeeded(){
   if(!renderer)return;
   const agents=roster(journal.snapshot());
+  $('#agent-count').textContent=String(agents.length).padStart(2,'0')+(knownAgents>agents.length?' / '+knownAgents:'');
   if(office&&rosterKey(office.agents)===rosterKey(agents))return;
   const next=new AgentOffice(agents);
   await renderer.prepareMaterials(next.scene);
@@ -43,8 +45,10 @@ function refreshBounds(){
 }
 function viewCamera(){
   if(!office)return;
-  const target=[0,.70,0];
-  office.scene.setCamera({position:[Math.cos(yaw)*Math.cos(pitch)*distance,target[1]+Math.sin(pitch)*distance,Math.sin(yaw)*Math.cos(pitch)*distance],target,fov:44});
+  const focus=selectedAgent?office.agentPosition(selectedAgent):undefined;
+  const target=focus?[focus[0],.94,focus[2]-.30]:[0,.70,0];
+  const viewDistance=focus?Math.min(9.5,distance):distance;
+  office.scene.setCamera({position:[target[0]+Math.cos(yaw)*Math.cos(pitch)*viewDistance,target[1]+Math.sin(pitch)*viewDistance,target[2]+Math.sin(yaw)*Math.cos(pitch)*viewDistance],target,fov:focus?43:44});
   renderer?.resetTemporalHistory?.();dirty=true;
 }
 function resize(){
@@ -59,7 +63,7 @@ function renderAgents(states){
   for(let i=0;i<states.length;i++){
     const state=states[i],button=document.createElement('button');button.type='button';
     button.className='agent'+(selectedAgent===state.id?' active':'');
-    button.addEventListener('click',()=>{selectedAgent=state.id;renderUi();});
+    button.addEventListener('click',()=>{selectedAgent=selectedAgent===state.id?null:state.id;viewCamera();renderUi();});
     const avatar=card('avatar');avatar.textContent=String(i+1).padStart(2,'0');
     const info=card('info'),name=card('name'),task=card('task');
     name.textContent=state.name;task.textContent=state.tool??state.task??'—';
@@ -76,7 +80,7 @@ function eventButton(f){
   const title=document.createElement('strong');title.textContent=eventTitle(f);
   const sub=document.createElement('p');sub.textContent=f.label??(f.target?f.target.domain+' / '+f.target.id:'event '+f.id);
   button.append(top,title,sub);
-  button.addEventListener('click',()=>{selectedFact=f.id;selectedAgent=f.actor.domain==='agent'?f.actor.id:selectedAgent;playing=false;cursorMs=f.atMs;renderUi();dirty=true;});
+  button.addEventListener('click',()=>{selectedFact=f.id;selectedAgent=f.actor.domain==='agent'?f.actor.id:selectedAgent;playing=false;cursorMs=f.atMs;viewCamera();renderUi();dirty=true;});
   return button;
 }
 function renderEvents(facts){
@@ -117,6 +121,7 @@ function inspect(){
   return{mode,events:facts.length,atMs:cursorMs,agents:office?.project(facts,cursorMs)??[],
     cause:selectedFact?journal.lineage(selectedFact):undefined,renderer:renderer?.inspect(),webgpu:!!renderer,
     style:office?.style??null,sceneEntities:office?.scene.entities.size??0,
+    focusedAgent:selectedAgent,knownAgents,camera:office?.scene.camera,
     projectionOwner:'AgentOffice / activity journal',authority:'external events',demo:mode==='demo'};
 }
 async function ingest(facts){

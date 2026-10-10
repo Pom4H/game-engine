@@ -61,6 +61,8 @@ test('actual Scene geometry, visual-only actors, and backward seek parity',()=>{
   assert.ok([...office.scene.entities.keys()].some(id=>id.startsWith('batch:')),'static scenery is batched');
   assert.ok(office.scene.entities.size<250,'toy LOD must avoid hundreds of physical character parts');
   assert.equal(office.style,'toy-brick-v1');
+  assert.deepEqual(office.agentPosition('research')?.length,3);
+  assert.equal(office.agentPosition('not-present'),undefined);
   assert.equal(office.scene.physics.bodies.size,0,'telemetry never invents physical bodies');
   assert.ok(office.scene.renderMoverIds().has('office:agent:0:arm:right'));
   const start=office.project(journal.snapshot(),1000);
