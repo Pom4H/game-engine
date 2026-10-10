@@ -8,7 +8,7 @@ on:
       - '.github/workflows/fps-material-ab.yml'
   workflow_dispatch:
 concurrency:
-  group: material-shader-ab-${{ github.ref }}
+  group: effects-gi-ab-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
