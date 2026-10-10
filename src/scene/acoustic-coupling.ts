@@ -128,7 +128,9 @@ export class SceneAcousticCoupling {
         id:'engine:acoustic:'+this.fieldId,
         phase:'commit',rateHz:60,reads:['contacts','entities','events','environment'],
         writes:['acoustic-field:'+this.fieldId,'npc-hearing'],
-        after:['destruction.resolve'],
+        // Cleanup mutates entity membership; the acoustic reader must run
+        // after that explicit commit, not as an ambiguous sibling.
+        after:['engine:cleanup'],
         depth:{axis:ENGINE_DOMAINS.audio,min:ENGINE_DEPTH.active},
         context:'none',
         run:(_context,frame)=>[{

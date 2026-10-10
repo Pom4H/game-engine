@@ -136,7 +136,7 @@ export class Scene {
       transmissionFraction:input.transmissionFraction,
       peakPressurePa:input.result.peakPressurePa,
       affectedCells:input.result.affectedCells,
-    },input.contact.a,this.tick+1,at,causeId);
+    },input.contact.a,this.captureStepTime!==undefined&&this.time<at?this.tick+1:this.tick,at,causeId);
   }
   /** @internal Sensor observes actual pressure, not an inferred NPC action. */
   observeAcousticHearing(input:{
@@ -147,7 +147,7 @@ export class Scene {
       fieldId:input.fieldId,positionM:input.positionM,
       rmsPressurePa:input.rmsPressurePa,peakAbsPressurePa:input.peakAbsPressurePa,
       samples:input.samples,
-    },input.listenerId,this.tick+1,at);
+    },input.listenerId,this.captureStepTime!==undefined&&this.time<at?this.tick+1:this.tick,at);
   }
   /** Scene-owned force-driver assemblies keyed by their authoritative entity/body id. */
   readonly assemblies=new Map<string,Vehicle>();
