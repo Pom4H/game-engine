@@ -238,6 +238,15 @@ try{
       const pace=stats(interval),whole=stats(frameCpu),simulation=stats(simulationCpu),render=stats(renderCpu);
       const gpuStats=gpuProfile.timestampQueries&&gpuProfile.gpuFrames>0?gpuProfile.gpuTotal??null:null;
       const gpu= gpuStats?{...gpuStats,samples:gpuProfile.gpuFrames}:null;
+      // Separate unrendered simulation pass for precise system-level costs.
+      // Kept out of the FPS loop so diagnostic clock reads do not perturb pacing.
+      runtime.scene.enablePerformanceProfiling({tickBudgetMs:5,sampleEvery:1,history:120});
+      for(let i=0;i<90;i++)runtime.scene.step(1/60);
+      const simulationProfile=runtime.scene.performanceReport();
+      runtime.scene.disablePerformanceProfiling();
+      const simulationHotspots=simulationProfile?
+        Object.entries(simulationProfile.systems).map(([name,value])=>({name,...value}))
+          .sort((a,b)=>b.p95Ms-a.p95Ms):[];
       const pass=(value)=>value!==null&&value<=budget;
       return{
         schema:1,requestedFrames:requested,resolution:[runtime.renderer.inspect().width,runtime.renderer.inspect().height],
@@ -248,6 +257,7 @@ try{
         gpuFrames:gpuProfile.gpuFrames,
         gpuPasses:gpuProfile.gpu,
         cpuStages:gpuProfile.cpu,
+        simulationProfile,simulationHotspots,
         renderWork:gpuProfile.latestCpu?.work??null,
         validation:{cpuP95WithinBudget:pass(whole.p95Ms),
           gpuP95WithinBudget:gpu?pass(gpu.p95Ms):null,
