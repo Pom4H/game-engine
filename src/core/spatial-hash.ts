@@ -11,18 +11,37 @@ export class SpatialHash<T extends object & SpatialItem = SpatialItem & object> 
   constructor(readonly size=32){if(!Number.isFinite(size)||size<=0)throw new RangeError('Spatial cell size must be positive and finite');}
   add(item:T,radius=Math.hypot(item.w??1,item.l??1)/2):void{
     this.validate(item.x,item.z,radius);this.remove(item);
+    this.insertKnown(item,radius);
+    this.invalidateQueries();
+  }
+  /** Replace every member in a single pass. Preserves input order, oversized
+   * handling, and cell/query semantics of clear()+add(); no per-item invalidation.
+   * The input must consist of distinct object identities (as in PhysicsWorld.bodies).
+   */
+  rebuild(items:Iterable<T>,radiusFor:(item:T)=>number):void{
+    this.clear();
+    const seen=new Set<T>();
+    for(const item of items){
+      if(seen.has(item))throw new TypeError('Spatial rebuild requires distinct objects');
+      seen.add(item);
+      const radius=radiusFor(item);
+      this.validate(item.x,item.z,radius);
+      this.insertKnown(item,radius);
+    }
+  }
+  private insertKnown(item:T,radius:number):void{
     const minX=Math.floor((item.x-radius)/this.size),maxX=Math.floor((item.x+radius)/this.size);
     const minZ=Math.floor((item.z-radius)/this.size),maxZ=Math.floor((item.z+radius)/this.size);
     const width=maxX-minX+1,height=maxZ-minZ+1;
     if(width>SPATIAL_MAX_ITEM_CELLS/height){
-      this.oversized.set(item,{minX,maxX,minZ,maxZ});this.invalidateQueries();return;
+      this.oversized.set(item,{minX,maxX,minZ,maxZ});return;
     }
     const keys:string[]=[];
     for(let x=minX;x<=maxX;x++)for(let z=minZ;z<=maxZ;z++){
       const key=`${x},${z}`;let bucket=this.buckets.get(key);
       if(!bucket)this.buckets.set(key,bucket=[]);bucket.push(item);keys.push(key);
     }
-    this.memberships.set(item,keys);this.invalidateQueries();
+    this.memberships.set(item,keys);
   }
   remove(item:T):boolean{
     if(this.oversized.delete(item)){this.invalidateQueries();return true;}

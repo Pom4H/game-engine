@@ -21,7 +21,7 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: node --test test/contact-laws.test.mjs test/world-direct-execution.test.mjs
+      - run: node --test test/contact-laws.test.mjs test/spatial-broadphase.test.mjs test/world-direct-execution.test.mjs
       - run: node tools/fps/physics-benchmark.mjs
       - uses: actions/upload-artifact@v4
         if: always()
