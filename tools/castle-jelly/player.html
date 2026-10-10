@@ -25,10 +25,17 @@ window.castleReady=false;window.castleError=null;
 try{
  const play=createCastleJelly(),renderer=await WebGPURenderer.create(canvas);
  renderer.setResolution(width,height);
- let tick=0,frame=0;
+ let tick=0,frame=0,lastShot=-1;
  window.castle={duration,async frame(t){
    if(!Number.isFinite(t)||t<0||t>=duration+1/30)throw new RangeError('Invalid time');
    const state=play.step(t);tick=state.tick;
+   // Wide shot -> close surface inspection -> wide shot. No postprocessed
+   // ripple cards: each shot sees the same simulated height field.
+   const shot=t<1.65?0:t<5.7?1:2;
+   if(shot!==lastShot){renderer.resetTemporalHistory();lastShot=shot;}
+   play.scene.camera=shot===1
+     ?{position:[4.5,2.60,8.5],target:[-.5,1.00,4.0],fov:39}
+     :{position:[11.8,11.0,15.1],target:[0,3.18,.05],fov:35};
    await renderer.prepareMaterials(play.scene);
    renderer.setTimelineFrame(frame++);
    renderer.render(play.scene,play.scene.camera);
