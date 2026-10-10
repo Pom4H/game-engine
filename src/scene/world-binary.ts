@@ -11,7 +11,7 @@ import {validateScene} from './validate.js';
  * This module executes only at scene load, never during simulation/render ticks.
  * Physics/renderer continue to consume the engine's native SceneSpec.
  */
-export const WORLD_BINARY_VERSION=1;
+export const WORLD_BINARY_VERSION=2; // ABI v1 supported; v2 adds performance metadata
 const HEADER_BYTES=160,RECORD_BYTES=160,MAX_BYTES=32*1024*1024,MAX_ENTITIES=20_000;
 const MATERIALS=['default','glass','steel','wood','concrete','asphalt','snow','rubber','plastic','aluminum','mirror'] as const satisfies readonly MaterialKind[];
 const SNOWFALL=['none','light','moderate','heavy'] as const;
@@ -35,7 +35,9 @@ export function decodeWorldBinary(input:ArrayBuffer|Uint8Array):SceneSpec{
   const vec3=(at:number):[number,number,number]=>[
     finite(f64(at),'vector'),finite(f64(at+8),'vector'),finite(f64(at+16),'vector'),
   ];
-  if(u16(4)!==WORLD_BINARY_VERSION)fail('unsupported ABI version');
+  const version=u16(4);
+  if(version!==1&&version!==WORLD_BINARY_VERSION)fail('unsupported ABI version');
+  if(version===1&&(u32(152)!==0||u32(156)!==0))fail('unexpected v1 extension');
   if(u16(6)!==HEADER_BYTES||u32(8)!==RECORD_BYTES)fail('unsupported record layout');
   const count=u32(12),recordsOffset=u32(16),stringsOffset=u32(20),total=u32(24),worldFlags=u32(28);
   if(count>MAX_ENTITIES)fail('too many entities');
@@ -50,6 +52,7 @@ export function decodeWorldBinary(input:ArrayBuffer|Uint8Array):SceneSpec{
   };
   // Metadata name is retained in the file for tools; it is not a runtime entity.
   readString(u32(144),u32(148));
+  let lastStringEnd=u32(144)+u32(148);
   const scene:SceneSpec={version:1,seed:u32(32),gravity:vec3(40),ground:finite(f64(64),'ground'),entities:[]};
   if(worldFlags&1)scene.camera={
     position:vec3(72),target:vec3(96),fov:finite(f64(120),'camera.fov'),
@@ -69,6 +72,7 @@ export function decodeWorldBinary(input:ArrayBuffer|Uint8Array):SceneSpec{
   for(let index=0;index<count;index++){
     const at=recordsOffset+index*RECORD_BYTES;
     const id=readString(u32(at),u16(at+4));
+    lastStringEnd=Math.max(lastStringEnd,u32(at)+u16(at+4));
     if(!id||ids.has(id))fail('empty or duplicate entity id');
     ids.add(id);
     const primitiveTag=u8(at+6),materialIndex=u8(at+7),flags=u32(at+8);
@@ -104,6 +108,15 @@ export function decodeWorldBinary(input:ArrayBuffer|Uint8Array):SceneSpec{
   }
   // Normal validator remains the single authority for physical/render invariants.
   scene.entities=entities;
+  if(version===2){
+    const offset=u32(152),length=u32(156);
+    if(length!==16||offset<lastStringEnd||offset+length!==stringLength)fail('invalid performance extension bounds');
+    const at=stringsOffset+offset;
+    const budgetMs=finite(f64(at),'performance.tickBudgetMs');
+    const sampleEvery=u32(at+8),history=u32(at+12);
+    if(budgetMs<.001||budgetMs>1000||sampleEvery<1||sampleEvery>1024||history<8||history>4096)fail('invalid performance settings');
+    scene.performance={tickBudgetMs:budgetMs,sampleEvery,history};
+  }
   return validateScene(scene);
 }
 

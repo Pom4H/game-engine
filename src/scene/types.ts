@@ -183,6 +183,8 @@ export interface SceneVehicleAssemblySpec {
   readonly air?:VehicleAir;
 }
 export interface SceneSpec {
+  /** Opt-in CPU profiler: diagnoses cost without changing physics or render quality. */
+  performance?:import('./performance.js').ScenePerformanceConfig;
   /** Declarative rig/routes restored by Scene construction, URL loading and reset. */
   animation?:SceneAnimationSpec;
   /** Author contact bindings once; native systems own every subsequent update. */

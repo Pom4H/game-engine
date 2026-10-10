@@ -144,7 +144,7 @@ fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f6
                 Dimension::Scalar => "unitless", Dimension::Length => "m/cm/mm",
                 Dimension::Speed => "m/s or km/h", Dimension::Acceleration => "m/s2",
                 Dimension::Mass => "kg/g", Dimension::Angle => "deg/rad",
-                Dimension::Temperature => "C", Dimension::Time => "s/ms/us", Dimension::Time => "s/ms/us",
+                Dimension::Temperature => "C", Dimension::Time => "s/ms/us",
             };
             return Err(CompileError::new(at, format!("unit {unit:?} is invalid; expected {expected}")));
         }
@@ -165,7 +165,7 @@ fn unit_name(dimension: Dimension) -> &'static str {
         Dimension::Acceleration => "m/s2",
         Dimension::Mass => "kg/g",
         Dimension::Angle => "deg/rad",
-        Dimension::Temperature => "C",
+        Dimension::Temperature => "C", Dimension::Time => "s/ms/us",
     }
 }
 fn literal(value: f64, unit: &str, at: usize) -> Result<Quantity> {

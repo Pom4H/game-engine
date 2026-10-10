@@ -137,6 +137,14 @@ export function validateScene(value:unknown):SceneSpec{
       }
     }
   }
+  if(scene.performance!==undefined){
+    const config=object(scene.performance,'performance');
+    number(config.tickBudgetMs,'performance.tickBudgetMs',.001,1000);
+    number(config.sampleEvery,'performance.sampleEvery',1,1024);
+    number(config.history,'performance.history',8,4096);
+    if(!Number.isInteger(config.sampleEvery)||!Number.isInteger(config.history))throw new TypeError('performance sampling and history must be integers');
+    if(Object.keys(config).some(key=>!['tickBudgetMs','sampleEvery','history'].includes(key)))throw new TypeError('Unknown performance option');
+  }
   if(scene.camera!==undefined){
     const camera=object(scene.camera,'camera');optionalNumber(camera,'fov','camera',1,179);optionalNumber(camera,'focusDistance','camera',.05);optionalNumber(camera,'aperture','camera',0,20);
     if(JSON.stringify(camera.position)===JSON.stringify(camera.target))throw new TypeError('camera position and target must differ');
