@@ -1,4 +1,4 @@
-name: GPU shader triple A/B - Windows RDNA3
+name: GPU shader crossover A-B-B-A - self-hosted RDNA3
 on:
   push:
     branches: [main]
@@ -6,8 +6,9 @@ on:
       - '.github/workflows/fps-windows-triple-ab.yml'
       - 'src/render/webgpu.ts'
       - 'src/render/lighting.ts'
-      - 'test/shader-zero-contribution.test.mjs'
+      - 'tools/fps/aggregate-gpu-crossover.mjs'
       - 'tools/fps/compare-gpu-images.mjs'
+      - 'test/shader-zero-contribution.test.mjs'
   workflow_dispatch:
 concurrency:
   group: gpu-shader-triple-${{ github.ref }}
@@ -15,10 +16,9 @@ concurrency:
 jobs:
   compare:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
-      ORIGINAL_SHA: e08c30e3b879c207e1d8e5fc171ef663b718169d
-      MATERIAL_SHA: c9c5ecbedd291df8ed1100e784c8038d4c9904ee
+      BASELINE_SHA: 31d83a331aeb4063d27b7741f5f3b838a9df588e
       RENDER_PROFILING: '1'
       RENDER_REQUIRE_HARDWARE: '1'
       RENDER_FPS_BENCH_FRAMES: '90'
@@ -31,68 +31,51 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - name: Original shader - baseline on the same GPU
+      - name: Real WebGPU A-B-B-A and pixel-equivalence test
         shell: powershell
         run: |
-          $ErrorActionPreference = 'Stop'
-          git -c advice.detachedHead=false checkout -f $env:ORIGINAL_SHA
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          bun install --frozen-lockfile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          bun run build
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $env:RENDER_FPS_BENCH_LABEL='baseline'
-          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $ErrorActionPreference='Stop'
+          function CheckNativeExit([string]$step) {
+            if ($LASTEXITCODE -ne 0) { throw "$step failed with exit code $LASTEXITCODE" }
+          }
+          function RunVariant([string]$commit,[string]$label) {
+            git -c advice.detachedHead=false checkout -f $commit
+            CheckNativeExit "checkout $commit"
+            bun install --frozen-lockfile
+            CheckNativeExit "install $label"
+            bun run build
+            CheckNativeExit "build $label"
+            $env:RENDER_FPS_BENCH_LABEL=$label
+            node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+            CheckNativeExit "hardware capture $label"
+          }
+          # A1: unchanged weather/material/GI with original asphalt noise.
+          RunVariant $env:BASELINE_SHA 'a1'
           New-Item -ItemType Directory -Force artifacts/fps/label-ab-baseline | Out-Null
           Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png artifacts/fps/label-ab-baseline/ -Force
-      - name: Optimized material main - label and grain AA
-        shell: powershell
-        run: |
-          $ErrorActionPreference = 'Stop'
-          git -c advice.detachedHead=false checkout -f $env:MATERIAL_SHA
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          bun install --frozen-lockfile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          bun run build
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $env:RENDER_FPS_BENCH_LABEL='optimized'
-          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/fps/compare-gpu-images.mjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          New-Item -ItemType Directory -Force artifacts/fps/material-views | Out-Null
-          Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png artifacts/fps/material-views/ -Force
-          Copy-Item artifacts/fps/gpu-budget-baseline.json artifacts/fps/gpu-budget-original.json -Force
-          Copy-Item artifacts/fps/gpu-budget-optimized.json artifacts/fps/gpu-budget-material.json -Force
-      - name: Optimized effects GI - same renderer and scene
-        shell: powershell
-        run: |
-          $ErrorActionPreference = 'Stop'
-          git -c advice.detachedHead=false checkout -f $env:GITHUB_SHA
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          bun install --frozen-lockfile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          bun run build
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item artifacts/fps/gpu-budget-a1.json artifacts/fps/gpu-budget-baseline.json -Force
+          # B1: candidate dry-road noise fast path.
+          RunVariant $env:GITHUB_SHA 'b1'
           node --test test/shader-zero-contribution.test.mjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Copy-Item artifacts/fps/gpu-budget-material.json artifacts/fps/gpu-budget-baseline.json -Force
-          Copy-Item artifacts/fps/material-views/render34.png,artifacts/fps/material-views/render35.png,artifacts/fps/material-views/render36.png,artifacts/fps/material-views/render37.png artifacts/fps/label-ab-baseline/ -Force
-          $env:RENDER_FPS_BENCH_LABEL='optimized'
-          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          CheckNativeExit 'zero-contribution algebra'
+          Copy-Item artifacts/fps/gpu-budget-b1.json artifacts/fps/gpu-budget-optimized.json -Force
           node tools/fps/compare-gpu-images.mjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Write-Host 'Original main/shader A/B => artifacts/fps/material-shader-ab.json'
-          Write-Host 'GI effects/shader A/B => artifacts/fps/shader-ab.json'
+          CheckNativeExit 'image equivalence'
+          # Reverse the order to control warming and scheduling drift.
+          RunVariant $env:GITHUB_SHA 'b2'
+          RunVariant $env:BASELINE_SHA 'a2'
+          git -c advice.detachedHead=false checkout -f $env:GITHUB_SHA
+          CheckNativeExit 'restore candidate'
+          node tools/fps/aggregate-gpu-crossover.mjs
+          CheckNativeExit 'GPU crossover'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: rdna3-material-effects-triple
+          name: gpu-shader-crossover-rdna3
           path: |
-            artifacts/fps/*.json
-            artifacts/fps/material-views/*.png
+            artifacts/fps/gpu-budget-*.json
+            artifacts/fps/shader-ab.json
+            artifacts/fps/gpu-crossover.json
             artifacts/fps/label-ab-baseline/*.png
             artifacts/render34.png
             artifacts/render35.png

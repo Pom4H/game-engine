@@ -85,3 +85,15 @@ The native Windows GPU A/B workflow compares full 1080p PNGs on four identical
 camera angles against archived source commits. GPU timing samples are required
 for a valid performance result; clean images alone cannot claim a speedup.
 Each commit updates only the implementation, not any scene LOD or weather.
+
+## Four-run A-B-B-A dry-road GPU crossover
+
+The native Windows self-hosted GPU job uses fixed 1920×1080 hardware
+Chrome, with 90 frames per run, in order: baseline, candidate, candidate,
+baseline. Baseline is a pinned shader commit with the same material/GI
+implementation before the dry-asphalt-noise shortcut. All four runs
+require actual WebGPU timestamp-query frames; four same-camera PNG images
+must pass SSIM and luma error checks. Paired A/B measurements avoid
+interpreting GPU heating/JIT/order drift as a performance improvement.
+Neither a passing A/B workflow nor a temporary >60 FPS median proves a
+stable p95 budget below 16.667 ms.
