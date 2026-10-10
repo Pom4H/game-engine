@@ -60,6 +60,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           ffprobe -v error -show_entries stream=codec_name,width,height -of json artifacts/castle-jelly/castle-jelly.mp4
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Emit visual proof thumbnail for review
+        if: steps.video.outcome == 'success'
+        run: |
+          ffmpeg -y -hide_banner -loglevel error -i artifacts/castle-jelly/poster.png -vf "scale=480:-2" -q:v 6 artifacts/castle-jelly/preview.jpg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $encoded = [Convert]::ToBase64String([IO.File]::ReadAllBytes("artifacts/castle-jelly/preview.jpg"))
+          Write-Host "CASTLE_POSTER_JPEG_BASE64=$encoded"
       - name: Keep video on GPU runner
         if: steps.video.outcome == 'success'
         run: |
