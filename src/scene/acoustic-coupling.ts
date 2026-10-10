@@ -169,7 +169,12 @@ export class SceneAcousticCoupling {
       const tA=impedanceFraction(a,mediumZ),tB=impedanceFraction(b,mediumZ);
       const radiated=energy*(1-(1-tA)*(1-tB));
       if(radiated<=eps)continue;
-      const sourceRadiusM=Math.max(this.field.cellSizeM*1.5,Math.min(radius(a),radius(b)));
+      // A rigid contact is generally *inside* the two touching solid
+      // occupancy masks. Radiate from the exposed air around the smaller
+      // body's outer surface, accounting for the 3D cell diagonal of the
+      // finite-volume raster. Never write pressure inside solid voxels.
+      const sourceRadiusM=Math.min(radius(a),radius(b))+
+        Math.sqrt(3)*this.field.cellSizeM;
       const result=this.field.injectEnergyPacket({
         position:contact.point,acousticEnergyJ:radiated,radiusM:sourceRadiusM,
       });
