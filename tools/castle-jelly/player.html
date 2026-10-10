@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Castle Jelly — Game Engine</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#e9e7e1;font-family:Georgia,serif}
+canvas{display:block;width:100vw;height:100vh;object-fit:contain}
+aside{position:fixed;left:35px;top:30px;color:#322a28;pointer-events:none}
+small{font:11px sans-serif;letter-spacing:2px;color:#77716a}
+h1{font-size:59px;line-height:.85;font-weight:400;font-style:italic;letter-spacing:-3px;margin:18px 0}
+p{font-size:13px;line-height:1.5;max-width:170px}
+footer{position:fixed;left:35px;bottom:26px;font:12px sans-serif;letter-spacing:.7px;color:#69605d}
+body.capture aside,body.capture footer{display:none}
+</style>
+<canvas id="world" aria-label="Procedural pastel castle above a moving pink wave basin"></canvas>
+<aside><small>MATERIAL STUDIES / GAME ENGINE</small><h1>Castle<br>Jelly.</h1><p>Light, water and stone, held together by physics.</p></aside>
+<footer>Waterfall + boat + obstacles → surface waves → geometry &amp; light</footer>
+<script type="module">
+import {WebGPURenderer} from '/dist/browser.js';
+import {createCastleJelly,duration} from './scene.mjs';
+const query=new URLSearchParams(location.search),capture=query.has('capture'),canvas=document.getElementById('world');
+if(capture)document.body.classList.add('capture');
+const width=Number(query.get('width')||960),height=Number(query.get('height')||540);
+canvas.width=width;canvas.height=height;
+window.castleReady=false;window.castleError=null;
+try{
+ const play=createCastleJelly(),renderer=await WebGPURenderer.create(canvas);
+ renderer.setResolution(width,height);
+ let tick=0,frame=0;
+ window.castle={duration,async frame(t){
+   if(!Number.isFinite(t)||t<0||t>=duration+1/30)throw new RangeError('Invalid time');
+   const state=play.step(t);tick=state.tick;
+   await renderer.prepareMaterials(play.scene);
+   renderer.setTimelineFrame(frame++);
+   renderer.render(play.scene,play.scene.camera);
+   await renderer.flush();
+   await new Promise(requestAnimationFrame);
+   const stats=renderer.inspect();
+   if(stats.errors.length||stats.drawCalls<1)throw new Error('WebGPU rendering failed: '+JSON.stringify(stats));
+   return{time:tick/60,renderer:{backend:stats.backend,triangles:stats.triangles,drawCalls:stats.drawCalls,errors:stats.errors},...state};
+ },close(){renderer.dispose();}};
+ await window.castle.frame(0);
+ window.castleReady=true;
+ if(!capture){
+   const start=performance.now();
+   async function loop(){
+     const t=Math.min(duration-.001,(performance.now()-start)/1000);
+     await window.castle.frame(t);
+     if(t<duration-.001)requestAnimationFrame(()=>{loop().catch(e=>{window.castleError=String(e);console.error(e);});});
+   }
+   requestAnimationFrame(()=>{loop().catch(e=>{window.castleError=String(e);console.error(e);});});
+ }
+}catch(error){window.castleError=error.stack||String(error);console.error(error);}
+</script></html>
