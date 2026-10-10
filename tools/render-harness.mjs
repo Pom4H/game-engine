@@ -20,6 +20,17 @@ const fpsBenchFrames=Number(process.env.RENDER_FPS_BENCH_FRAMES??0);
 if(!Number.isSafeInteger(fpsBenchFrames)||fpsBenchFrames<0||fpsBenchFrames>240)throw new RangeError('RENDER_FPS_BENCH_FRAMES must be within 0..240');
 if(fpsBenchFrames&&!requireHardware)throw new Error('GPU FPS benchmark requires a hardware WebGPU adapter');
 const fpsBenchLabel=process.env.RENDER_FPS_BENCH_LABEL??'';
+const fpsRigidBackend=process.env.RENDER_RIGID_BACKEND??'js';
+if(!['js','rust'].includes(fpsRigidBackend))throw new TypeError('Invalid RENDER_RIGID_BACKEND');
+const fpsRoutePath=(process.env.RENDER_FPS_ROUTE_MODULE??'').replaceAll('\\','/');
+if(fpsRoutePath&&!/^tools\/[a-z0-9\/-]+\.mjs$/.test(fpsRoutePath))
+  throw new TypeError('RENDER_FPS_ROUTE_MODULE must be a module beneath tools/');
+const fpsRouteUrl=fpsRoutePath?'/'+fpsRoutePath:'';
+const fpsLastFrame=process.env.RENDER_FPS_LAST_FRAME??'';
+if(fpsLastFrame&&!/^[a-z][a-z0-9-]{0,20}$/.test(fpsLastFrame))
+  throw new TypeError('Invalid RENDER_FPS_LAST_FRAME');
+if((fpsRigidBackend==='rust'||fpsRouteUrl||fpsLastFrame)&&!fpsBenchFrames)
+  throw new TypeError('City backend/route/capture requires RENDER_FPS_BENCH_FRAMES');
 if(fpsBenchLabel&&!/^[a-z][a-z0-9-]{0,24}$/.test(fpsBenchLabel))throw new RangeError('Invalid FPS benchmark artifact label');
 const videoOutput=process.env.RENDER_VIDEO_OUTPUT??null,videoFps=Number(process.env.RENDER_VIDEO_FPS??30),videoStart=Number(process.env.RENDER_VIDEO_START??0),videoDuration=Number(process.env.RENDER_VIDEO_DURATION??0);
 if(videoOutput&&(!Number.isSafeInteger(videoFps)||videoFps<1||videoFps>60||!Number.isFinite(videoStart)||videoStart<0||!Number.isFinite(videoDuration)||videoDuration<=0||videoDuration>30))throw new RangeError('Invalid render video options');
@@ -49,7 +60,21 @@ try{
     if(adapterInfo.isFallbackAdapter||/swiftshader|lavapipe|llvmpipe|software|microsoft basic render/i.test(JSON.stringify(adapterInfo)))throw new Error('Software adapter rejected: '+JSON.stringify(adapterInfo));
   }
   const runtime=await BrowserRuntime.create(canvas,scene,{autoplay:false,audio:false,exposeBridge:true,resolution:[${width},${height}],profiling:${profiling}});
-  globalThis.__RENDER_HARNESS__={runtime,adapterInfo};
+  const fpsRoute=${fpsRouteUrl?JSON.stringify(fpsRouteUrl):'null'};
+  const route=fpsRoute?await import(fpsRoute):null;
+  if(route&&typeof route.cityCameraAtTick!=='function')
+    throw new Error('FPS route must export cityCameraAtTick(tick)');
+  let rigidKernel=null;
+  if(${fpsRigidBackend==='rust'}){
+    const {createWasmRigidContactKernel}=await import('/dist/physics/rigid-wasm.js');
+    const source=await fetch('/kernels/world-rigid/target/wasm32-unknown-unknown/release/world_rigid_kernel.wasm');
+    if(!source.ok)throw new Error('Built Rust rigid kernel was not served');
+    rigidKernel=await createWasmRigidContactKernel(await source.arrayBuffer());
+    runtime.scene.physics.setRigidContactKernel(rigidKernel);
+  }
+  globalThis.__RENDER_HARNESS__={runtime,adapterInfo,
+    fpsRoute:route?.cityCameraAtTick??null,rigidKernel,
+    backend:rigidKernel?'rust':'js'};
   document.documentElement.dataset.engineReady='1';
 }catch(error){
   window.__ENGINE_ERROR__=error?.stack??String(error);
@@ -62,6 +87,11 @@ const server=createServer(async(req,res)=>{
     const url=new URL(req.url??'/', 'http://127.0.0.1');
     if(url.pathname==='/'){
       res.writeHead(200,{'content-type':mime['.html'],'cache-control':'no-store'});res.end(html);return;
+    }
+    if(url.pathname==='/kernels/world-rigid/target/wasm32-unknown-unknown/release/world_rigid_kernel.wasm'){
+      const data=await readFile(resolve('kernels/world-rigid/target/wasm32-unknown-unknown/release/world_rigid_kernel.wasm'));
+      res.writeHead(200,{'content-type':'application/wasm','cache-control':'no-store'});
+      res.end(data);return;
     }
     if(url.pathname.startsWith('/dist/')){
       const p=join(dist,url.pathname.slice(6));
@@ -219,6 +249,8 @@ try{
           if(previous>0)interval.push(timestamp-previous);
           previous=timestamp;
           const a=performance.now();
+          if(window.__RENDER_HARNESS__.fpsRoute)
+            runtime.scene.setCamera(window.__RENDER_HARNESS__.fpsRoute(done));
           runtime.scene.step(1/60);
           const b=performance.now();
           runtime.render();
@@ -236,6 +268,15 @@ try{
       // Let async GPU timestamp readbacks settle without adding simulated frames.
       await new Promise(resolve=>setTimeout(resolve,30));
       const gpuProfile=runtime.profile();
+      // Sample authoritative rigid state before the separate diagnostic
+      // simulation below; that phase is deliberately excluded from FPS.
+      const rigidDiagnostics=runtime.scene.physics.rigidContactDiagnostics;
+      const trafficBodies=[...runtime.scene.physics.bodies.values()]
+        .filter(body=>body.id.startsWith('bench-car-'))
+        .map(body=>({id:body.id,position:[...body.position],
+          velocity:[...body.velocity],rotation:[...body.rotation],
+          sleeping:body.sleeping}));
+      const finalCamera=runtime.scene.camera;
       const budget=1000/60;
       const pace=stats(interval),whole=stats(frameCpu),simulation=stats(simulationCpu),render=stats(renderCpu);
       const gpuStats=gpuProfile.timestampQueries&&gpuProfile.gpuFrames>0?gpuProfile.gpuTotal??null:null;
@@ -252,6 +293,8 @@ try{
       const pass=(value)=>value!==null&&value<=budget;
       return{
         schema:1,requestedFrames:requested,resolution:[runtime.renderer.inspect().width,runtime.renderer.inspect().height],
+        rigidBackend:window.__RENDER_HARNESS__.backend,rigidDiagnostics,
+        trafficBodies,finalCamera,cameraRouteEnabled:!!window.__RENDER_HARNESS__.fpsRoute,
         budgetMs:budget,frameInterval:pace,frameCpu:whole,simulationCpu:simulation,renderCpu:render,
         observedFps:pace.p50Ms?1000/pace.p50Ms:null,
         gpu,
@@ -273,6 +316,13 @@ try{
     const artifactName=fpsBenchLabel?'gpu-budget-'+fpsBenchLabel+'.json':'gpu-budget.json';
     await writeFile(resolve('artifacts/fps',artifactName),JSON.stringify(fpsBenchmark,null,2)+'\n');
     console.log('GPU_FPS_BENCHMARK='+JSON.stringify(fpsBenchmark));
+    if(fpsLastFrame){
+      const frame=await send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
+      const destination=resolve('artifacts/city-benchmark/last-'+fpsLastFrame+'.png');
+      await mkdir(resolve('artifacts/city-benchmark'),{recursive:true});
+      await writeFile(destination,Buffer.from(frame.data,'base64'));
+      console.log('FPS_FINAL_IMAGE='+destination);
+    }
   }
   let video=null;
   if(videoOutput){

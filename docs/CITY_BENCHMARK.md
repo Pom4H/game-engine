@@ -45,3 +45,21 @@ WASM calls. An FPS improvement is never inferred from CPU timings.
 The GitHub Actions workflow uses ONLY the project's Windows self-hosted GPU
 runner. GPU timestamps and frame pacing will be captured separately from
 real Chrome WebGPU render loops along the same camera route.
+
+## Hardware FPS comparison
+
+`tools/render-harness.mjs` provides an opt-in City harness that installs
+the actual existing Rust/WASM contact kernel into `BrowserRuntime.scene.physics`
+before sampling. The exact same 180 camera states are supplied by
+`cityCameraAtTick` for JS and Rust. WebGPU timestamp queries measure
+`main`, `effects` and total GPU cost. The final frame is captured **before**
+the usual still-image `seek()` resets any scene, ensuring its physical backend
+was in fact Rust for the Rust capture. The browser sampler includes the
+kernel's `rigidContactDiagnostics` and 48 body states in each report.
+
+`compare-render.mjs` hard-gates a nonzero Rust contact count, identical
+camera/hardware, matching body trajectories and SSIM/mean pixel difference
+of the two final 1920×1080 PNGs. JS/Rust rendering has no shader differences.
+Reported FPS is real `requestAnimationFrame` pacing, not an inferred fps
+from CPU-only timing. Both runners are on ONE self-hosted Windows GPU.
+Files are archived as `city-benchmark-js-rust` GitHub Actions artifact.

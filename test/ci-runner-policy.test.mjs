@@ -8,7 +8,7 @@ import {join} from 'node:path';
 // invalidates same-device performance comparisons.
 const dir='.github/workflows';
 const protectedWorkflows=[
-  'fps-gpu.yml','fps-physics.yml','fps-material-ab.yml',
+  'fps-gpu.yml','fps-physics.yml','fps-material-ab.yml','city-benchmark.yml',
   'fps-windows-triple-ab.yml','quality-gates.yml',
   'offroad-demo.yml','character-creator.yml','meshwork-gpu.yml',
 ];
