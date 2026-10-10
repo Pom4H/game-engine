@@ -19,6 +19,7 @@ const SCENES = [
 const LEVELS = [1000, 2000, 5000];
 const REPEATS = process.argv.includes('--full') ? 3 : 1;
 const OUTPUT = resolve('..');
+const screenshotValidated = new Set();
 const server = await startServer(8128);
 let browser;
 const report = {
@@ -88,7 +89,12 @@ try {
       const hasSize = await page.locator('#stage canvas').evaluateAll(
         canvases => canvases.some(canvas => canvas.width === 1280 && canvas.height === 720));
       assert.ok(hasSize, 'Not a 1280x720 backing canvas');
-      await page.locator('#stage').screenshot({path: resolve(OUTPUT, scene + '.png')});
+      const screenshot = await page.locator('#stage').screenshot({path: resolve(OUTPUT, scene + '.png')});
+      // This scene has 2000 multicoloured cubes; blank WebGPU canvases compress
+      // to ~4 KiB versus >150 KiB for a real image. Treat blanks as failures.
+      assert.ok(screenshot.byteLength > 30000,
+        'Blank/suspiciously empty 2000-cube frame: PNG bytes=' + screenshot.byteLength);
+      screenshotValidated.add(scene);
       report.screenshots.push(scene);
       console.log('SCREENSHOT=' + scene);
     } catch (error) {
@@ -98,6 +104,7 @@ try {
     await save();
   }
   for (const scene of SCENES) {
+    if (!screenshotValidated.has(scene)) continue;
     try {
       const result = await navigate(page, scene, {
         mode: 'count', n: '2000', n2: '1000'
@@ -123,6 +130,7 @@ try {
     for (const n of LEVELS) {
       const order = rep % 2 === 0 ? SCENES : [...SCENES].reverse();
       for (const scene of order) {
+        if (!screenshotValidated.has(scene)) continue;
         try {
           const result = await navigate(page, scene, {
             mode: 'fixed', n: String(n), quick: '1'

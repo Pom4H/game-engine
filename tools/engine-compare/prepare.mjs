@@ -48,6 +48,12 @@ for (const [source, dest, variantFrom, variantTo] of [
     "engine = new BABYLON.WebGPUEngine(canvas, { antialias: false, adaptToDeviceRatio: false });\n" +
     "  await engine.initAsync();");
   content = content.replace(variantFrom, variantTo);
+  // Babylon WebGPU requires frame boundaries for manual scene.render() calls.
+  // runRenderLoop normally inserts these; the upstream benchmark owns RAF.
+  const bareRenders = content.split('scene.render();').length - 1;
+  if (bareRenders < 2) throw new Error('Expected Babylon warm and frame render calls');
+  content = content.replaceAll('scene.render();',
+    'engine.beginFrame(); scene.render(); engine.endFrame();');
   await writeFile(join(upstream, 'scenes/cubes', dest), content);
 }
 
