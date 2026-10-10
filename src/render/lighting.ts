@@ -195,13 +195,18 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
    let qp=positionAt(q,size);let delta=qp-pos;let separation=length(delta);
    if(separation>.035&&separation<.82){
     let direction=delta/separation;
-    let qWorldNormal=textureLoad(normals,q,0).xyz*2.0-1.0;
-    let qn=viewNormal(qWorldNormal);
     let receive=max(dot(n,direction)-.04,0.0);
-    let emit=max(dot(qn,-direction),0.0);
-    let range=1.0-smoothstep(.08,.82,separation);
-    let weight=receive*(.35+.65*emit)*range;
-    indirect+=textureLoad(hdr,q,0).rgb*weight;indirectWeight+=weight;
+    // A ray in the receiver tangent plane contributes zero diffuse light.
+    // Don't read the neighbour normal or HDR texel until receiving geometry
+    // has proven a positive hemispherical transfer. Same radiance/weights.
+    if(receive>0.0){
+      let qWorldNormal=textureLoad(normals,q,0).xyz*2.0-1.0;
+      let qn=viewNormal(qWorldNormal);
+      let emit=max(dot(qn,-direction),0.0);
+      let range=1.0-smoothstep(.08,.82,separation);
+      let weight=receive*(.35+.65*emit)*range;
+      indirect+=textureLoad(hdr,q,0).rgb*weight;indirectWeight+=weight;
+    }
    }
   }
   if(indirectWeight>.001){color+=indirect/indirectWeight*.034*(.72+.28*normalSample.a);}

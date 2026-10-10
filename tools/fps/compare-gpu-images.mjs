@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /** Same-device, same-scene A/B: image fidelity is a hard gate; FPS claims are not.
- * The baseline shader lacks the exact empty-label and subpixel-grain fast paths.
+ * The baseline is the matched shader before the new geometric GI receiving-hemisphere skip.
  * Uses existing CPU SSIM metric; ffmpeg only decodes captured PNGs.
  */
 import assert from 'node:assert/strict';
@@ -58,6 +58,6 @@ const report={
  },warning:'GPU speedup is a paired sample, not a universal FPS claim; only image fidelity is a hard gate.',
 };
 mkdirSync(resolve(root,'artifacts/fps'),{recursive:true});
-writeFileSync(resolve(root,'artifacts/fps/material-shader-ab.json'),JSON.stringify(report,null,2)+'\n');
-console.log('MATERIAL_SHADER_AB='+JSON.stringify(report));
-assert.ok(report.image.allPassed,'Material shader A/B changed the scene image outside a tight pixel-error tolerance');
+writeFileSync(resolve(root,'artifacts/fps/shader-ab.json'),JSON.stringify(report,null,2)+'\n');
+console.log('SHADER_AB='+JSON.stringify(report));
+assert.ok(report.image.allPassed,'Shader A/B changed the scene image outside a tight pixel-error tolerance');

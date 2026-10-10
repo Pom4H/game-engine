@@ -1,9 +1,10 @@
-name: Material shader A/B - native GPU and image parity
+name: Effects GI A/B - native GPU and image parity
 on:
   push:
     branches: [main]
     paths:
       - 'tools/fps/compare-gpu-images.mjs'
+      - 'src/render/lighting.ts'
       - '.github/workflows/fps-material-ab.yml'
   workflow_dispatch:
 concurrency:
@@ -26,7 +27,7 @@ jobs:
       run:
         shell: bash
     env:
-      BASELINE_SHA: e08c30e3b879c207e1d8e5fc171ef663b718169d
+      BASELINE_SHA: c9c5ecbedd291df8ed1100e784c8038d4c9904ee
       RENDER_PROFILING: '1'
       RENDER_REQUIRE_HARDWARE: '1'
       RENDER_FPS_BENCH_FRAMES: '90'
@@ -59,11 +60,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: material-shader-ab-${{ matrix.label }}
+          name: effects-gi-ab-${{ matrix.label }}
           path: |
             artifacts/fps/gpu-budget-baseline.json
             artifacts/fps/gpu-budget-optimized.json
-            artifacts/fps/material-shader-ab.json
+            artifacts/fps/shader-ab.json
             artifacts/fps/label-ab-baseline/*.png
             artifacts/render34.png
             artifacts/render35.png
