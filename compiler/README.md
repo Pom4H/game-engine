@@ -19,11 +19,11 @@ The binary can be loaded directly:
 ```ts
 import {decodeWorldBinary, Scene} from '@rom4/game-engine';
 const compiled = await fetch('/scenes/collision.wscn').then(r => r.arrayBuffer());
-const scene = new Scene(decodeWorldBinary(compiled));
+const scene = new Scene(compiled); // WSCN accepted directly; equivalent to decodeWorldBinary(compiled)
 ```
 
 Or through `sceneFromURL('http://localhost:4173/?src=/scenes/collision.wscn')`.
-`BrowserRuntime.create(canvas, decodeWorldBinary(buffer))` also works.
+`BrowserRuntime.create(canvas, buffer)` and `runtime.replaceScene(buffer)` also work.
 
 Compilation is outside the simulation/render loop. The browser does not ship a
 Rust parser or evaluate a World program. The output is decoded/validated once,

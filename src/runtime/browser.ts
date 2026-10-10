@@ -5,6 +5,7 @@ import {ProceduralAudio,type AmbientAudioState} from '../audio/browser.js';
 import {FixedClock} from '../core/fixed-clock.js';
 import {simulationProfile,type SimulationProfile,type SimulationProfileInput} from '../core/kernel.js';
 import {Scene} from '../scene/scene.js';
+import {decodeWorldBinary} from '../scene/world-binary.js';
 import type {EngineEvent} from '../scene/events.js';
 import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
 import {WebGPURenderer} from '../render/webgpu.js';
@@ -31,10 +32,11 @@ export class BrowserRuntime {
     this.initial=structuredClone(scene);this.simulationProfile=simulationProfile(options.profile??'detailed');this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);this.renderer=renderer;this.renderer.setSimulationProfile?.(this.simulationProfile);this.tickRate=options.tickRate??60;this.stepSeconds=1/this.tickRate;this.clock=new FixedClock(1000/this.tickRate);this.audio=options.audio===false?null:new ProceduralAudio(this.simulationProfile);
   }
 
-  static async create(canvas:HTMLCanvasElement,scene:SceneSpec,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
+  static async create(canvas:HTMLCanvasElement,scene:SceneSpec|ArrayBuffer|Uint8Array,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
+    const authored=scene instanceof ArrayBuffer||scene instanceof Uint8Array?decodeWorldBinary(scene):scene;
     const renderer=await WebGPURenderer.create(canvas,{profiling:options.profiling??false});let runtime:BrowserRuntime|undefined;
     try{
-      runtime=new BrowserRuntime(canvas,scene,renderer,options);
+      runtime=new BrowserRuntime(canvas,authored,renderer,options);
       if(options.resolution)renderer.setResolution(...options.resolution);
       if(options.controlledWalker)runtime.controlWalker(options.controlledWalker);
       await renderer.prepareMaterials(runtime.scene);runtime.render();if(options.autoplay!==false)runtime.resume();
@@ -71,10 +73,11 @@ export class BrowserRuntime {
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   reset():void{this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);this.render();}
-  async replaceScene(scene:SceneSpec):Promise<void>{
+  async replaceScene(scene:SceneSpec|ArrayBuffer|Uint8Array):Promise<void>{
+    const authored=scene instanceof ArrayBuffer||scene instanceof Uint8Array?decodeWorldBinary(scene):scene;
     this.pause();
     this.controls?.dispose();this.controls=null;
-    this.initial=structuredClone(scene);
+    this.initial=structuredClone(authored);
     this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);
     await this.renderer.prepareMaterials?.(this.scene);
     this.render();await this.renderer.flush();

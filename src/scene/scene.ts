@@ -25,6 +25,7 @@ import {simulationProfile,type KernelProgram,type SimulationProfile,type Simulat
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec,SceneVehicleVisualSpec} from './types.js';
 import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext,type ScenePlugin} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
+import {decodeWorldBinary} from './world-binary.js';
 import {cameraOnRail} from './camera-rail.js';
 import {SceneSystemRuntime} from './system-runtime.js';
 
@@ -101,8 +102,9 @@ export class Scene {
   private renderMovers:ReadonlySet<string>=new Set<string>();
   private readonly pluginRenderMovers=new Set<string>();
 
-  constructor(input:SceneSpec){
-    this.spec=validateScene(input);
+  constructor(input:SceneSpec|ArrayBuffer|Uint8Array){
+    const authored=input instanceof ArrayBuffer||input instanceof Uint8Array?decodeWorldBinary(input):input;
+    this.spec=validateScene(authored);
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
     this.fluids=new FluidField(this.spec.fluids??[]);this.physics.fluidAt=body=>this.fluids.sampleXZ(body.position[0],body.position[2]);

@@ -64,7 +64,8 @@ test('Rust World compiler produces reproducible engine-ready physics scenes', {s
     assert.equal(spec.entities.length,2);
     assert.deepEqual(spec.entities[1].mesh,{kind:'sphere',radius:.5});
     assert.equal(spec.entities[1].body.mass,3);
-    const a=new Scene(spec),b=new Scene(spec);
+    const a=new Scene(bytes),b=new Scene(spec);
+    assert.deepEqual(a.spec,b.spec,'native Scene constructor must accept WSCN directly');
     for(let i=0;i<180;i++){a.step(1/60);b.step(1/60);}
     assert.deepEqual(a.snapshot(),b.snapshot());
     assert.ok(a.entities.get('ball').position[1]<3);
