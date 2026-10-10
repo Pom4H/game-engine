@@ -8,6 +8,19 @@ const WIDTH = 1280, HEIGHT = 720;
 const mesh = Object.freeze({kind: 'box', size: [1, 1, 1]});
 const camera = Object.freeze({position: [0, 0, 40], target: [0, 0, 0], fov: 60});
 
+// Upstream Three/Babylon cubes use Euler 'YXZ' (Ry * Rx * Rz), whereas
+// ROM4 compose() uses Rx * Ry * Rz. Convert without altering orientation.
+function referenceToEngineEuler(rx, ry, rz) {
+  const sx = Math.sin(rx), cx = Math.cos(rx);
+  const sy = Math.sin(ry), cy = Math.cos(ry);
+  const sz = Math.sin(rz), cz = Math.cos(rz);
+  return [
+    Math.atan2(sx, cy * cx),
+    Math.asin(Math.max(-1, Math.min(1, sy * cx))),
+    Math.atan2(cy * sz - sy * sx * cz, cy * cz + sy * sx * sz)
+  ];
+}
+
 function baseScene() {
   return {
     version: 1, seed: 1, clearColor: [0, 0, 0, 1],
@@ -38,7 +51,7 @@ export function createRom4Scene(backend) {
         active[i] = scene.add({
           id, renderOnly: true, mesh,
           position: [sim.x[i], sim.y[i], sim.z[i]],
-          rotation: [sim.rx[i], sim.ry[i], sim.rz[i]],
+          rotation: referenceToEngineEuler(sim.rx[i], sim.ry[i], sim.rz[i]),
           material: {
             kind: 'steel',
             color: [sim.r[i], sim.g[i], sim.b[i], 1],
@@ -89,7 +102,10 @@ export function createRom4Scene(backend) {
       for (let i = 0; i < count; i++) {
         const entity = active[i];
         entity.position[0] = sim.x[i]; entity.position[1] = sim.y[i]; entity.position[2] = sim.z[i];
-        entity.rotation[0] = sim.rx[i]; entity.rotation[1] = sim.ry[i]; entity.rotation[2] = sim.rz[i];
+        const euler = referenceToEngineEuler(sim.rx[i], sim.ry[i], sim.rz[i]);
+        entity.rotation[0] = euler[0];
+        entity.rotation[1] = euler[1];
+        entity.rotation[2] = euler[2];
       }
       const stats = runtime.render();
       if (stats.errors.length) throw new Error('ROM4 render errors: ' + stats.errors.join('; '));
