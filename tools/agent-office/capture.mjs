@@ -74,6 +74,11 @@ try{
     await sleep(120);
   }
   check(ready,'Office did not render: '+reason+' '+JSON.stringify(issues.slice(-2)));
+  const layout=await evaluate('(()=>{const rect=id=>{const r=document.querySelector(id).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height}};return {viewport:innerHeight,stage:rect(".stage"),canvas:rect("#scene"),timeline:rect(".timeline")}})()');
+  check(layout.stage.bottom<=layout.viewport+2&&layout.timeline.bottom<=layout.viewport+2,
+    'Office overflows the visible browser viewport: '+JSON.stringify(layout));
+  check(Math.abs(layout.canvas.top-layout.stage.top)<2&&Math.abs(layout.canvas.height-layout.stage.height)<2,
+    'WebGPU canvas does not fill the stage: '+JSON.stringify(layout));
   await sleep(550);
   const initial=await evaluate('globalThis.__AGENT_OFFICE__.inspect()');
   const adapter=await evaluate('(async()=>{const a=await navigator.gpu?.requestAdapter({powerPreference:"high-performance"});const i=a?.info??{};return {vendor:i.vendor??"",device:i.device??"",architecture:i.architecture??"",description:i.description??"",isFallbackAdapter:a?.isFallbackAdapter??i.isFallbackAdapter??false}})()');
@@ -102,7 +107,7 @@ try{
   await writeFile(join(dir,'agent-office-demo.png'),screenshot);
   await writeFile(join(dir,'agent-office-canvas.png'),stage);
   const evidence={schema:1,revision:process.env.GITHUB_SHA??null,source:'real WebGPU browser capture',
-    adapter,software,initial:{events:initial.events,agents:initial.agents,renderer:initial.renderer},
+    adapter,software,layout,initial:{events:initial.events,agents:initial.agents,renderer:initial.renderer},
     failed:{atMs:failed.atMs,agents:failed.agents},
     final:{atMs:final.atMs,agents:final.agents,renderer:final.renderer},
     screenshot:screenshotProof,canvas:stageProof,issues};
