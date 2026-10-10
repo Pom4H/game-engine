@@ -131,3 +131,7 @@ runtime; unimplemented links stay declarative. See
 ## Agent Office: toy-brick observability
 
 `bun run office:demo` opens a WebGPU toy-brick office with deterministic causal replay; `bun run office:live` accepts real observed facts through the loopback API. Codex app-server notifications can be normalized with `CodexActivityAdapter` without exposing prompts or reasoning. See [docs/AGENT_OFFICE.md](docs/AGENT_OFFICE.md).
+
+## Self-hosted GPU render without GitHub Actions
+
+On our Windows/Linux GPU worker, run `node tools/agent-office/render-on-worker.mjs` in an up-to-date checkout. The command renders and verifies the real Agent Campus 1080p/24fps H.264 file using hardware WebGPU; `--publish` optionally uploads it to a private prerelease. See [Agent Campus](docs/AGENT_CAMPUS.md).
