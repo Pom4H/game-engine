@@ -11,7 +11,15 @@ mod math {
         #[link_name="sin"] fn sin_import(x:f64)->f64;
         #[link_name="cos"] fn cos_import(x:f64)->f64;
     }
-    #[inline] pub fn hypot(x:f64,y:f64,z:f64)->f64{unsafe{hypot3(x,y,z)}}
+    // Fast finite-range Euclidean norm stays inside WebAssembly and avoids a
+    // host FFI call for every SAT axis, friction tangent and angular impulse.
+    // Preserve scaled Math.hypot for extreme magnitudes to avoid overflow.
+    #[inline] pub fn hypot(x:f64,y:f64,z:f64)->f64{
+        let largest=x.abs().max(y.abs()).max(z.abs());
+        if largest>1e100 || (largest<1e-100 && largest>0.0){
+            unsafe{hypot3(x,y,z)}
+        }else{(x*x+y*y+z*z).sqrt()}
+    }
     #[inline] pub fn sin(x:f64)->f64{unsafe{sin_import(x)}}
     #[inline] pub fn cos(x:f64)->f64{unsafe{cos_import(x)}}
 }
@@ -52,15 +60,27 @@ impl V {
     }
 }
 
+fn rotation_basis(rotation:V)->[V;3]{
+    let rx=rotation.x;let ry=rotation.y;let rz=rotation.z;
+    let sx=math::sin(rx);let cx=math::cos(rx);
+    let sy=math::sin(ry);let cy=math::cos(ry);
+    let sz=math::sin(rz);let cz=math::cos(rz);
+    [
+        V{x:cy*cz,y:sx*sy*cz+cx*sz,z:-cx*sy*cz+sx*sz},
+        V{x:-cy*sz,y:-sx*sy*sz+cx*cz,z:cx*sy*sz+sx*cz},
+        V{x:sy,y:-sx*cy,z:cx*cy},
+    ]
+}
 #[derive(Clone,Copy)]
 struct Body {
-    pos:V,rotation:V,velocity:V,omega:V,inv_mass:f64,inv_inertia:V,
+    pos:V,rotation:V,axes:[V;3],velocity:V,omega:V,inv_mass:f64,inv_inertia:V,
     shape:u32,half:V,offset:V,restitution:f64,friction:f64,
 }
 impl Body {
     fn read(s:&[f64])->Self{
+        let rotation=V::from(s,3);
         Self{
-            pos:V::from(s,0),rotation:V::from(s,3),velocity:V::from(s,6),
+            pos:V::from(s,0),rotation,axes:rotation_basis(rotation),velocity:V::from(s,6),
             omega:V::from(s,9),inv_mass:s[12],inv_inertia:V::from(s,13),
             shape:s[16] as u32,half:V::from(s,17),offset:V::from(s,20),
             restitution:s[23],friction:s[24],
@@ -69,17 +89,7 @@ impl Body {
     fn write(self,s:&mut [f64]){
         self.pos.write(s,0);self.velocity.write(s,6);self.omega.write(s,9);
     }
-    fn basis(self)->[V;3]{
-        let rx=self.rotation.x;let ry=self.rotation.y;let rz=self.rotation.z;
-        let sx=math::sin(rx);let cx=math::cos(rx);
-        let sy=math::sin(ry);let cy=math::cos(ry);
-        let sz=math::sin(rz);let cz=math::cos(rz);
-        [
-            V{x:cy*cz,y:sx*sy*cz+cx*sz,z:-cx*sy*cz+sx*sz},
-            V{x:-cy*sz,y:-sx*sy*sz+cx*cz,z:cx*sy*sz+sx*cz},
-            V{x:sy,y:-sx*cy,z:cx*cy},
-        ]
-    }
+    #[inline] fn basis(self)->[V;3]{self.axes}
     fn local_to_world(self,v:V)->V{
         let basis=self.basis();
         V{x:basis[0].x*v.x+basis[1].x*v.y+basis[2].x*v.z,
@@ -304,13 +314,13 @@ mod abi {
 mod tests {
     use super::*;
     fn ball(x:f64,velocity:f64)->Body{
-        Body{pos:V{x,y:0.,z:0.},rotation:V::ZERO,
+        Body{pos:V{x,y:0.,z:0.},rotation:V::ZERO,axes:rotation_basis(V::ZERO),
             velocity:V{x:velocity,y:0.,z:0.},omega:V::ZERO,
             inv_mass:1.,inv_inertia:V{x:2.5,y:2.5,z:2.5},shape:0,
             half:V{x:0.5,y:0.,z:0.},offset:V::ZERO,restitution:0.,friction:0.}
     }
     fn box_body(x:f64,y:f64)->Body{
-        Body{pos:V{x,y,z:0.},rotation:V::ZERO,velocity:V::ZERO,
+        Body{pos:V{x,y,z:0.},rotation:V::ZERO,axes:rotation_basis(V::ZERO),velocity:V::ZERO,
             omega:V::ZERO,inv_mass:1.,inv_inertia:V{x:1.,y:1.,z:1.},
             shape:1,half:V{x:0.5,y:0.5,z:0.5},offset:V::ZERO,restitution:0.,friction:0.}
     }
@@ -336,7 +346,7 @@ mod tests {
     }
     #[test]fn rotated_obb_sat(){
         let mut rail=box_body(0.,0.);
-        rail.half=V{x:2.,y:0.25,z:0.25};rail.rotation.y=std::f64::consts::FRAC_PI_2;
+        rail.half=V{x:2.,y:0.25,z:0.25};rail.rotation.y=std::f64::consts::FRAC_PI_2;rail.axes=rotation_basis(rail.rotation);
         let mut mover=box_body(0.15,0.);
         mover.pos.z=1.7;
         assert!(intersect(rail,mover).is_some());
