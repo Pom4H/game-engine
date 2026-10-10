@@ -1,0 +1,13 @@
+{
+  "scene": "./glass.scene.json",
+  "ticks": 30,
+  "dt": 0.016666666666666666,
+  "traceCapacity": 4096,
+  "tickBudgetMs": 5,
+  "sampleEvery": 5,
+  "assertions": [
+    {"type": "entity-absent", "id": "glass"},
+    {"type": "event-count", "event": "fracture", "min": 1},
+    {"type": "interaction-count", "effect": "contact", "min": 1}
+  ]
+}

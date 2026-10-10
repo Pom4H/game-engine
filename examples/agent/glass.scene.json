@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "seed": 46,
+  "gravity": [0, 0, 0],
+  "ground": -100,
+  "entities": [
+    {"id": "glass", "position": [0, 1, 0], "mesh": {"kind": "box", "size": [0.01, 1.4, 1.2]}, "material": {"kind": "glass"}},
+    {"id": "ball", "position": [-1, 1, 0], "mesh": {"kind": "sphere", "radius": 0.11}, "material": {"kind": "steel"}, "body": {"mass": 3.8, "velocity": [30, 0, 0]}}
+  ]
+}

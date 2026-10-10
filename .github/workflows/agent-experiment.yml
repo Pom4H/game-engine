@@ -1,0 +1,32 @@
+name: Agent experiment contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/agent/**'
+      - 'examples/agent/**'
+      - 'test/agent-experiment.test.mjs'
+      - '.github/workflows/agent-experiment.yml'
+  workflow_dispatch:
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: node --test test/agent-experiment.test.mjs
+      - name: Reproduce causal glass fracture and CPU observations
+        run: node tools/agent/experiment.mjs examples/agent/glass.experiment.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-experiment-evidence
+          retention-days: 21
+          path: artifacts/agent/**
