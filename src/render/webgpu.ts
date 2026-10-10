@@ -75,7 +75,7 @@ struct U {
 @group(1) @binding(11) var dynamicShadowMap:texture_depth_2d;
 @group(1) @binding(12) var opaqueScene:texture_2d<f32>;
 fn deformationAt(worldXZ:vec2<f32>)->vec4<f32>{
- if(u.fieldSize.z<.5){return vec4<f32>(0);}
+ if(u.fieldSize.w<.5){return vec4<f32>(0);}
  let dims=max(vec2<i32>(1),vec2<i32>(u.fieldSize.xy));
  let uv=clamp((worldXZ-u.fieldFrame.xy)/max(u.fieldFrame.zw,vec2<f32>(.0001))+.5,vec2<f32>(0),vec2<f32>(1));
  let p=clamp(uv*vec2<f32>(dims)-.5,vec2<f32>(0),vec2<f32>(dims-1));
@@ -86,7 +86,7 @@ fn deformationAt(worldXZ:vec2<f32>)->vec4<f32>{
  let d=textureLoad(deformationTexture,i1,0);
  return mix(mix(a,b,t.x),mix(c,d,t.x),t.y);
 }
-fn displaceWorld(world:vec4<f32>)->vec4<f32>{var w=world;if(u.fieldSize.z>.5){w.y+=deformationAt(w.xz).x;}return w;}
+fn displaceWorld(world:vec4<f32>)->vec4<f32>{var w=world;if(u.fieldSize.w>.5){w.y+=deformationAt(w.xz).x;}return w;}
 @vertex fn shadowVS(@location(0) position:vec3<f32>)->@builtin(position) vec4<f32>{return f.lightVP*displaceWorld(u.model*vec4<f32>(position,1));}
 @vertex fn shadowVSInstanced(
  @location(0) position:vec3<f32>,
@@ -228,7 +228,10 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let geometricNormal=normalize(in.normal);
   var n=geometricNormal;
   let deformation=deformationAt(in.worldPos.xz);
-  if(u.fieldSize.z>.5){
+  // Physical deformation texels are provably zero until the first stamp.
+  // Keep weather field sampling active (z), but elide five deformation
+  // texture fetches and normal reconstruction when the field is pristine.
+  if(u.fieldSize.w>.5){
     let sx=max(u.fieldFrame.z/max(u.fieldSize.x,1.0),.001);
     let sz=max(u.fieldFrame.w/max(u.fieldSize.y,1.0),.001);
     let hx0=deformationAt(in.worldPos.xz-vec2<f32>(sx,0)).x;
@@ -1292,7 +1295,7 @@ export class WebGPURenderer implements Renderer{
     const uniform=object.uniformStaging??(object.uniformStaging=new Float32Array(88));
     uniform.set(model,0);uniform.set(previousModel,16);uniform.set(entity.material.color,32);uniform.set([surface.moss,surface.wetness,surface.roughness,surface.darkening],36);uniform.set([surface.dirt,surface.wear,stableSeed(entity.id),materialCode(entity.material.kind)],40);
     uniform.set([surfaceState?.snowDepthM??0,surfaceState?.waterDepthM??0,surfaceState?.slush??0,surfaceState?.iceDepthM??0],44);uniform.set([surfaceState?.puddle??0,surfaceState?.trackMelt??0,body?.snowCoverage??0,body?.rearSnow??0],48);uniform.set([body?.directionX??1,body?.directionZ??0,body?.roadDirt??0,body?.wetness??0],52);uniform.set([surfaceUseCode(entity.environmental?.surfaceUse),treatmentCode(entity.material.treatment),entity.material.clearcoat??-1,entity.material.clearcoatRoughness??-1],56);
-    uniform.set(field?[...field.center,...field.size]:[0,0,1,1],60);uniform.set([field?.nx??1,field?.nz??1,field?1:0,0],64);
+    uniform.set(field?[...field.center,...field.size]:[0,0,1,1],60);uniform.set([field?.nx??1,field?.nz??1,field?1:0,field?.deformation.hasStampedDeformation?1:0],64);
     uniform.set([entity.material.roughness??-1,entity.material.metalness??entity.material.profile.optical.metalness,entity.material.pattern==='brick'?1:entity.material.pattern==='plaster'?2:entity.material.pattern==='rubber'?3:entity.material.pattern==='window'?4:entity.material.pattern==='fabric'?5:0,entity.material.profile.optical.ior],68);uniform.set([...(entity.material.emissive??[0,0,0]),entity.material.profile.optical.transmission],72);
     const texture=entity.material.texture,normalReady=!!(texture?.normalUrl&&this.surfaceTextures.get(texture.normalUrl)),ormReady=!!(texture?.ormUrl&&this.surfaceTextures.get(texture.ormUrl));
     uniform.set([texture?.sizeM??1,texture?.bumpStrength??.5,texture?.albedoStrength??1,texture?.url&&this.surfaceTextures.get(texture.url)?1:0],76);

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {Scene} from '../dist/scene/scene.js';
+import {DeformableSurfaceField} from '../dist/environment/deformable-surface.js';
 
 const sceneSpec=()=>({
   version:1,seed:7,gravity:[0,-9.81,0],ground:-100,
@@ -67,4 +68,17 @@ test('surface revisions mark authoritative weather and contact mutations for GPU
     durationSeconds:.03,speedMps:12,slipSpeedMps:2,normalLoadN:3600,frictionCoefficient:.7,
   }),true);
   assert.equal(field.revision,observed+1,'contact invalidates its field before rendering');
+});
+
+test('pristine deformation is an exact zero field until the first physical stamp',()=>{
+  const field=new DeformableSurfaceField([0,0],[4,4],16,16);
+  assert.equal(field.hasStampedDeformation,false);
+  field.relax(1/30,0.25);
+  assert.ok(field.cells.every(cell=>cell.displacementM===0&&cell.compaction===0&&cell.shear===0&&cell.history===0));
+  assert.equal(field.hasStampedDeformation,false);
+  assert.equal(field.stamp({x:0,z:0,radiusM:.6,depthM:.02,compaction:.5,shear:.2}),true);
+  assert.equal(field.hasStampedDeformation,true);
+  assert.ok(field.cells.some(cell=>cell.displacementM!==0));
+  field.relax(1/30,.2);
+  assert.equal(field.hasStampedDeformation,true);
 });

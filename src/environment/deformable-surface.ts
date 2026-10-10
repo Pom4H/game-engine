@@ -25,6 +25,11 @@ const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
  */
 export class DeformableSurfaceField {
   readonly cells:DeformableSurfaceCell[];
+  /** Monotonic proof that at least one physical stamp has ever modified cells.
+   * A never-stamped field remains exactly zero under relaxation: shaders can
+   * skip all deformation sampling, including in shadows and reflections.
+   */
+  hasStampedDeformation=false;
   constructor(
     readonly center:readonly[number,number],
     readonly size:readonly[number,number],
@@ -77,6 +82,7 @@ export class DeformableSurfaceField {
         cell.history=clamp(cell.history+item.weight*.035,0,1);
       }
     }
+    this.hasStampedDeformation=true;
     return true;
   }
 
