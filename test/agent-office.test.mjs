@@ -57,7 +57,8 @@ test('state and token attribution are deterministic at every cursor',()=>{
 test('actual Scene geometry, visual-only actors, and backward seek parity',()=>{
   const journal=new ActivityJournal();journal.ingestMany(data);
   const office=new AgentOffice(agents);
-  assert.ok(office.scene.entities.size>60);
+  assert.ok(office.scene.entities.size>20);
+  assert.ok([...office.scene.entities.keys()].some(id=>id.startsWith('batch:')),'static scenery is batched');
   assert.ok(office.scene.entities.size<250,'toy LOD must avoid hundreds of physical character parts');
   assert.equal(office.style,'toy-brick-v1');
   assert.equal(office.scene.physics.bodies.size,0,'telemetry never invents physical bodies');
