@@ -20,6 +20,9 @@ on:
   pull_request:
     paths:
       - 'src/world-ir/**'
+      - 'compiler/**'
+      - 'examples/worlds/coupled-glass.world'
+      - 'test/world-couplings.test.mjs'
       - 'src/scene/scene.ts'
       - 'src/environment/surface-state.ts'
       - 'src/execution/index.ts'
@@ -51,3 +54,5 @@ jobs:
         run: node --test test/world-interaction-ir.test.mjs test/world-couplings.test.mjs test/causal-render-contract.test.mjs test/contact-laws.test.mjs test/audio-foundation.test.mjs test/authority-ledger.test.mjs test/emergence-rigid-batch.test.mjs
       - name: Bounded physical system and world code parity
         run: node --test test/world-compiler.test.mjs test/scene-performance.test.mjs
+      - name: Emergent proving ground including fluids soil weather rotation and wave fields
+        run: node --test test/proving-ground.test.mjs test/shallow-water-basin.test.mjs test/kernel-depth.test.mjs test/wave-field.test.mjs
