@@ -1,0 +1,93 @@
+name: GPU shader triple A/B - Windows RDNA3
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fps-windows-triple-ab.yml'
+  workflow_dispatch:
+concurrency:
+  group: gpu-shader-triple-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    env:
+      ORIGINAL_SHA: e08c30e3b879c207e1d8e5fc171ef663b718169d
+      MATERIAL_SHA: c9c5ecbedd291df8ed1100e784c8038d4c9904ee
+      RENDER_PROFILING: '1'
+      RENDER_REQUIRE_HARDWARE: '1'
+      RENDER_FPS_BENCH_FRAMES: '90'
+      RENDER_WARMUP_FRAMES: '12'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Original shader - baseline on the same GPU
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git -c advice.detachedHead=false checkout -f $env:ORIGINAL_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:RENDER_FPS_BENCH_LABEL='baseline'
+          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force artifacts/fps/label-ab-baseline | Out-Null
+          Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png artifacts/fps/label-ab-baseline/ -Force
+      - name: Optimized material main - label and grain AA
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git -c advice.detachedHead=false checkout -f $env:MATERIAL_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:RENDER_FPS_BENCH_LABEL='optimized'
+          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/fps/compare-gpu-images.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force artifacts/fps/material-views | Out-Null
+          Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png artifacts/fps/material-views/ -Force
+          Copy-Item artifacts/fps/gpu-budget-baseline.json artifacts/fps/gpu-budget-original.json -Force
+          Copy-Item artifacts/fps/gpu-budget-optimized.json artifacts/fps/gpu-budget-material.json -Force
+      - name: Optimized effects GI - same renderer and scene
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git -c advice.detachedHead=false checkout -f $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item artifacts/fps/gpu-budget-material.json artifacts/fps/gpu-budget-baseline.json -Force
+          Copy-Item artifacts/fps/material-views/render34.png,artifacts/fps/material-views/render35.png,artifacts/fps/material-views/render36.png,artifacts/fps/material-views/render37.png artifacts/fps/label-ab-baseline/ -Force
+          $env:RENDER_FPS_BENCH_LABEL='optimized'
+          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/fps/compare-gpu-images.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host 'Original main/shader A/B => artifacts/fps/material-shader-ab.json'
+          Write-Host 'GI effects/shader A/B => artifacts/fps/shader-ab.json'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rdna3-material-effects-triple
+          path: |
+            artifacts/fps/*.json
+            artifacts/fps/material-views/*.png
+            artifacts/fps/label-ab-baseline/*.png
+            artifacts/render34.png
+            artifacts/render35.png
+            artifacts/render36.png
+            artifacts/render37.png
