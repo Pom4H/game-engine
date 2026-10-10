@@ -23,7 +23,7 @@ import {Vehicle,vehicle as compileVehicle} from '../vehicles/vehicle.js';
 import type {EngineEvent} from './events.js';
 import {simulationProfile,type KernelProgram,type SimulationProfile,type SimulationProfileInput} from '../core/kernel.js';
 import type {AppearancePatch,BodySpec,CameraSpec,Color,SurfaceTextureSpec,EnvironmentalSpec,EntitySpec,LightSpec,Primitive,SceneSnapshot,SceneSpec,SceneVehicleVisualSpec} from './types.js';
-import {sceneKernel,type InternalCommand,type SceneModule,type SceneModuleContext,type ScenePlugin} from './modules.js';
+import {sceneKernel,compileDirectScenePlan,type DirectScenePlan,type InternalCommand,type SceneModule,type SceneModuleContext,type ScenePlugin} from './modules.js';
 import {validateEntity,validateScene} from './validate.js';
 import {decodeWorldBinary} from './world-binary.js';
 import {cameraOnRail} from './camera-rail.js';
@@ -74,6 +74,7 @@ export class Scene {
   readonly kernel=sceneKernel();
   private simulationProfile:SimulationProfile=simulationProfile('detailed');
   private simulationProgram:KernelProgram<SceneModuleContext,InternalCommand>=this.kernel.compile(this.simulationProfile);
+  private directSystemPlan:DirectScenePlan|undefined=compileDirectScenePlan(this.kernel,this.simulationProfile);
   readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
   /** Scene-owned force-driver assemblies keyed by their authoritative entity/body id. */
@@ -186,7 +187,12 @@ export class Scene {
     return runtime;
   }
 
-  use(module:SceneModule):this{this.kernel.use(module);this.simulationProgram=this.kernel.compile(this.simulationProfile);return this;}
+  use(module:SceneModule):this{
+    this.kernel.use(module);
+    this.simulationProgram=this.kernel.compile(this.simulationProfile);
+    this.directSystemPlan=compileDirectScenePlan(this.kernel,this.simulationProfile);
+    return this;
+  }
   usePlugin(plugin:ScenePlugin):this{
     const movers=plugin.renderMovers??[];
     if(new Set(movers).size!==movers.length||movers.some(id=>!id||!this.entities.has(id)))throw new TypeError('Plugin render movers must name distinct existing entities');
@@ -197,12 +203,14 @@ export class Scene {
     for(const id of movers)this.pluginRenderMovers.add(id);
     if(movers.length)this.renderStructureRevision++;
     this.simulationProgram=this.kernel.compile(this.simulationProfile);
+    this.directSystemPlan=compileDirectScenePlan(this.kernel,this.simulationProfile);
     return this;
   }
   get profile():SimulationProfile{return this.simulationProfile;}
   setSimulationProfile(input:SimulationProfileInput):SimulationProfile{
     this.simulationProfile=simulationProfile(input);
     this.simulationProgram=this.kernel.compile(this.simulationProfile);
+    this.directSystemPlan=compileDirectScenePlan(this.kernel,this.simulationProfile);
     this.physics.setSimulationProfile(this.simulationProfile);
     return this.simulationProfile;
   }
@@ -277,7 +285,18 @@ export class Scene {
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,profile?:SimulationProfileInput):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
-    const at=this.time+dt,program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);this.lastExecution=[];
+    const at=this.time+dt;
+    this.lastExecution=[];
+    if(profile===undefined&&this.directSystemPlan){
+      // Compile out per-tick command allocations, frame freezing and scheduler
+      // dispatch. The ordered actions/rates come from the authoritative Kernel schedule.
+      for(const system of this.directSystemPlan[(this.tick+1)%this.directSystemPlan.length]!){
+        this.lastExecution.push(system.id);
+        this.systemRuntime.run(system.action,dt*60/system.rateHz,at);
+      }
+      return;
+    }
+    const program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);
     program.run(this.tick+1,{} as SceneModuleContext,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
       for(const command of commands)this.commit(command,at);
       return {} as SceneModuleContext;

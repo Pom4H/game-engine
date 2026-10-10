@@ -1,4 +1,4 @@
-import {ENGINE_DEPTH,EngineKernel,type EngineModule,type EnginePlugin} from '../core/kernel.js';
+import {ENGINE_DEPTH,EngineKernel,type EngineModule,type EnginePlugin,type SimulationProfileInput} from '../core/kernel.js';
 import {ENGINE_DOMAINS,ENGINE_SLOTS} from '../core/domains.js';
 import type {EnvironmentState} from '../environment/types.js';
 import type {Vec3} from '../math.js';
@@ -20,9 +20,7 @@ export interface ScenePlugin extends EnginePlugin<SceneModuleContext,InternalCom
  readonly renderMovers?:readonly string[];
 }
 
-export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
- const kernel=new EngineKernel<SceneModuleContext,InternalCommand>();
- const definitions=[
+const definitions=[
   {action:'weather',id:'engine:weather',phase:'input',rateHz:10,reads:[],writes:['environment'],after:[],depth:{axis:ENGINE_DOMAINS.world,min:ENGINE_DEPTH.dormant}},
   {action:'surfaces',id:'engine:surfaces',phase:'input',rateHz:30,reads:['environment','entities'],writes:['surface-state'],after:['engine:weather'],depth:{axis:ENGINE_DOMAINS.world,min:ENGINE_DEPTH.aggregate}},
   {action:'animation',id:'engine:animation.aggregate',slot:ENGINE_SLOTS.agentsSimulate,phase:'simulate',rateHz:10,reads:['surface-state'],writes:['entities','animation'],after:[],depth:{axis:ENGINE_DOMAINS.agents,min:ENGINE_DEPTH.aggregate,max:ENGINE_DEPTH.active-1}},
@@ -40,6 +38,24 @@ export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
   {action:'cleanup',id:'engine:cleanup',phase:'commit',rateHz:10,reads:[],writes:['entities'],after:[ENGINE_SLOTS.destructionResolve],depth:{axis:ENGINE_DOMAINS.world,min:ENGINE_DEPTH.dormant}},
   {action:'clock',id:'engine:clock',slot:ENGINE_SLOTS.clock,phase:'commit',rateHz:60,reads:[],writes:['time'],after:['engine:cleanup'],depth:{axis:ENGINE_DOMAINS.core,min:ENGINE_DEPTH.dormant}},
  ] as const;
+const builtinActions:ReadonlyMap<string,string>=new Map(definitions.map(definition=>[definition.id,definition.action]));
+export interface DirectSceneSystem{readonly id:string;readonly action:string;readonly rateHz:number}
+export type DirectScenePlan=readonly (readonly DirectSceneSystem[])[];
+/** Compile the SAME kernel schedule to direct built-in handler calls.
+ * Plugins and custom modules fall back to KernelProgram; physics is never duplicated.
+ */
+export function compileDirectScenePlan(kernel:EngineKernel<SceneModuleContext,InternalCommand>,profile:SimulationProfileInput):DirectScenePlan|undefined{
+ const schedule=kernel.scheduler.compile(profile);
+ if(schedule.selectedModules.some(module=>!builtinActions.has(module.id)))return undefined;
+ return Object.freeze(Array.from({length:schedule.cycleTicks},(_,tick)=>Object.freeze(
+  schedule.plan(tick).flatMap(batch=>batch.modules.map(module=>Object.freeze({
+   id:module.id,action:builtinActions.get(module.id)!,rateHz:module.rateHz,
+  })))
+ )));
+}
+
+export function sceneKernel():EngineKernel<SceneModuleContext,InternalCommand>{
+ const kernel=new EngineKernel<SceneModuleContext,InternalCommand>();
  const modules=definitions.map(definition=>({
   ...definition,
   context:'none' as const,
