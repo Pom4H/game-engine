@@ -80,8 +80,13 @@ try{
  const frames=Math.round(duration*fps);
  const mp4=join(output,'castle-jelly.mp4'),poster=join(output,'poster.png');
  const available=spawnSync('ffmpeg',['-hide_banner','-encoders'],{encoding:'utf8'}).stdout||'';
- const choices=['h264_nvenc','libx264','h264_mf','libopenh264','mpeg4'];
- const codec=choices.find(name=>new RegExp('\\b'+name+'\\b').test(available));
+ const choices=['libx264','libopenh264','h264_mf','h264_nvenc','mpeg4'];
+ const codec=choices.find(name=>{
+  if(!new RegExp('\\b'+name+'\\b').test(available))return false;
+  const probe=spawnSync('ffmpeg',['-hide_banner','-loglevel','error','-f','lavfi','-i','color=c=black:s=160x90:r=1','-frames:v','1','-c:v',name,'-f','null','-'],{encoding:'utf8',timeout:10000});
+  console.log('Encoder probe '+name+': '+(probe.status===0?'OK':(probe.stderr||probe.error||'unavailable').toString().slice(0,180)));
+  return probe.status===0;
+ });
  if(!codec)throw new Error('No available FFmpeg MP4 codec: '+available.slice(-3000));
  console.log('Castle video encoder: '+codec);
  encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an','-c:v',codec,'-pix_fmt','yuv420p','-movflags','+faststart',mp4],{stdio:['pipe','inherit','inherit']});
