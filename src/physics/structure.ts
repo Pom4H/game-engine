@@ -93,12 +93,20 @@ export const STRUCTURAL_KERNEL_FIELDS=[
 ] as const;
 export type StructuralKernelField=typeof STRUCTURAL_KERNEL_FIELDS[number];
 export type StructuralKernelBuffer=Float64Array|Uint16Array|Uint8Array;
+export interface StructuralKernelContactStats {
+  readonly contacts:number;
+  readonly projectedSamples:number;
+  readonly maxPenetration:number;
+  readonly deepestBoxId?:string;
+  readonly deepestPoint?:Vec3;
+}
 export interface StructuralNumericalKernel {
   readonly buffers:Readonly<Record<StructuralKernelField,StructuralKernelBuffer>>;
   solve(input:Readonly<{
     dt:number;gravity:Vec3;iterations:number;damping:number;thermalScale:number;
     sleepSpeed:number;sleepDelay:number;plasticWorkJ:number;quietTime:number;steps:number;
   }>):Readonly<{plasticWorkJ:number;quietTime:number;steps:number;shouldBake:boolean}>;
+  contactStats?():StructuralKernelContactStats;
   dispose():void;
 }
 export class StructuralBody {
@@ -236,6 +244,10 @@ export class StructuralBody {
 
   /** Backend selection is per structural body, never a global physics override. */
   get backend(): 'typescript'|'wasm' {return this.numericalKernel?'wasm':'typescript';}
+  /** Stats for optional Rust-owned static structural contacts. */
+  get nativeContactStats():StructuralKernelContactStats|undefined{
+    return this.numericalKernel?.contactStats?.();
+  }
 
   /** Attach exactly once while dormant and before other systems cache array views. */
   installKernel(kernel:StructuralNumericalKernel):void{

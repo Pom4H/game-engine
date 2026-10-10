@@ -31,9 +31,25 @@ separate control.
 
 There is one Wasm instance per active structural body, no per-tick buffer
 copy, and a single exported Rust solver call per no-projector physical tick.
-External contactProjector callbacks still work, but fall back to the original
-TypeScript projection/XPBD step running **on the same Rust buffers**. That path
-is intentionally not counted as Rust acceleration; see the separate benchmark.
+Static structural contacts can be compiled with the same Rust solver, avoiding
+per-iteration JavaScript callbacks and extra node copies:
+
+    const body=await createWasmStructuralBody(definition,program,{
+      staticContacts:{boxes:[{id:'wall',center:[1,0,0],half:[.5,1,2]}]}
+    });
+    body.step(1/120,[0,-9.81,0]);
+    console.log(body.nativeContactStats); // contact count, penetration, deepest box
+
+The compiled contact plan uses the existing definition.collisionTriangles:
+barycentric triangle samples followed by unique sorted vertex samples, with
+the same crossing-face preference and inverse-mass projection as
+StructuralStaticContactSolver. It is built before buffer views are attached,
+so no WebAssembly memory growth can detach active arrays during a tick.
+
+Arbitrary external contactProjector callbacks remain supported but fall
+back to the original TypeScript projection/XPBD step on the same Rust-owned
+buffers. The benchmark records this fallback separately; it is not a claim
+of contact acceleration.
 
 In particular, this does not change PhysicsWorld rigid collision solver.
 The combined PhysicsWorld + M3 test uses *independent* probe rigid bodies
@@ -57,7 +73,9 @@ must match exactly. Physical coefficients are never retuned for Rust.
 - Detach is an explicit one-time copy back to self-owned TypedArrays so the
   body remains usable after Wasm memory is freed.
 - No implicit fallbacks or hidden physical coefficient changes.
-- Projector callbacks stay correct and stable but are not yet native.
+- Compiled box/triangle structural contact projection runs in Rust between
+  the identical XPBD phases, before strain capture and after every sweep.
+- Arbitrary user-defined projector callbacks remain on the JS fallback path.
 
 The GitHub Actions artifact contains the compiled wasm and benchmark JSON.
 Treat benchmark ratios as workload-specific, not universal.

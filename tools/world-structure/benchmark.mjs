@@ -25,12 +25,15 @@ function worldFixture(){
  return world;
 }
 async function make(mode, count, withWorld, withContacts){
+ const boxes=[{id:'wall',center:[1.25,.4,0],half:[.4,1.2,1.8]}];
+ const native=mode==='rust'&&withContacts==='native';
  const bodies=await Promise.all(Array.from({length:count},()=>mode==='rust'?
-   createWasmStructuralBody(definition,compiled):Promise.resolve(new StructuralBody(definition))));
+   createWasmStructuralBody(definition,compiled,native?{staticContacts:{boxes}}:{}):
+   Promise.resolve(new StructuralBody(definition))));
  for(const body of bodies)body.activateFromRigid(body.centerOfMass(),[.3,-.1,.2],[0,0,0]);
  const world=withWorld?worldFixture():null;
- const contacts=withContacts?bodies.map(()=>new StructuralStaticContactSolver(
-   [{id:'wall',center:[1,0,0],half:[.5,.9,.5]}],definition.collisionTriangles??[],
+ const contacts=withContacts&&!native?bodies.map(()=>new StructuralStaticContactSolver(
+   boxes,definition.collisionTriangles??[],
  )):null;
  return{bodies,world,contacts,dispose(){for(const body of bodies)body.detachKernel();}};
 }
@@ -68,7 +71,8 @@ const workloads=[
  {id:'M3-active-1',bodies:1,rigid:false,contacts:false},
  {id:'M3-active-8',bodies:8,rigid:false,contacts:false},
  {id:'M3-plus-rigid-contact-world',bodies:1,rigid:true,contacts:false},
- {id:'M3-with-structural-wall-projector',bodies:1,rigid:false,contacts:true},
+ {id:'M3-static-contacts-native',bodies:1,rigid:false,contacts:'native'},
+ {id:'M3-external-contact-callback-control',bodies:1,rigid:false,contacts:'callback'},
 ];
 for(const workload of workloads){
  // Measure same complete workflow for each backend; order alternates by case.
@@ -80,7 +84,7 @@ for(const workload of workloads){
 }
 const output={
  schema:1,sha:process.env.GITHUB_SHA??null,node:process.version,platform:process.platform,arch:process.arch,
- method:'Rust/JS structural XPBD in the production StructuralBody API; 40 warmup ticks, 5 rounds, 110 world ticks each. PhysicsWorld workload has independent rigid probe contacts (no duplicate M3 mass). External structural contact callback uses TS fallback by design.',
+ method:'Rust/JS structural XPBD in the production StructuralBody API; 40 warmup ticks, 5 rounds, 110 world ticks each. PhysicsWorld workload has independent rigid probe contacts (no duplicate M3 mass). Precompiled static wall contacts execute inside Rust without JS projection calls; arbitrary external projector callbacks use TS fallback on the same Rust-owned memory.',
  notes:'These results are NOT whole-game FPS. Rust pays instance setup outside timed hot path; all bodies remain in owned persistent WASM memory.',
  workloads:metrics,
 };

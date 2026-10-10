@@ -3,6 +3,13 @@ import {
   type StructuralDefinition,type StructuralKernelField,
   type StructuralKernelBuffer,type StructuralNumericalKernel,
 } from './structure.js';
+import {StructuralStaticContactSolver,type StructuralStaticBox} from './structural-contact.js';
+
+export interface RustStructuralStaticContacts {
+  readonly boxes:readonly StructuralStaticBox[];
+  /** Defaults to definition.collisionTriangles, preserving their order. */
+  readonly collisionTriangles?:readonly (readonly [number,number,number])[];
+}
 
 interface StructureExports {
   readonly memory:WebAssembly.Memory;
@@ -10,6 +17,10 @@ interface StructureExports {
   world_structure_free(handle:number):void;
   world_structure_field(handle:number,field:number):number;
   world_structure_scalars(handle:number):number;
+  world_structure_add_box(handle:number,cx:number,cy:number,cz:number,hx:number,hy:number,hz:number):number;
+  world_structure_add_triangle(handle:number,a:number,b:number,c:number):number;
+  world_structure_finish_contacts(handle:number):number;
+  world_structure_contact_stats(handle:number):number;
   world_structure_step(
     handle:number,iterations:number,dt:number,gx:number,gy:number,gz:number,
     damping:number,thermal:number,sleepSpeed:number,sleepDelay:number,contacts:number,
@@ -19,7 +30,9 @@ function exportsOf(instance:WebAssembly.Instance):StructureExports{
   const source=instance.exports as Record<string,unknown>;
   if(!(source.memory instanceof WebAssembly.Memory))
     throw new TypeError('World structure WASM must export memory');
-  for(const name of ['world_structure_new','world_structure_free','world_structure_field','world_structure_scalars','world_structure_step']){
+  for(const name of ['world_structure_new','world_structure_free','world_structure_field','world_structure_scalars','world_structure_step',
+    'world_structure_add_box','world_structure_add_triangle',
+    'world_structure_finish_contacts','world_structure_contact_stats']){
     if(typeof source[name]!=='function')throw new TypeError('World structure WASM missing '+name);
   }
   return instance.exports as unknown as StructureExports;
@@ -31,6 +44,7 @@ function exportsOf(instance:WebAssembly.Instance):StructureExports{
  */
 export async function createWasmStructuralBody(
   definition:StructuralDefinition,source:WebAssembly.Module|ArrayBuffer|Uint8Array,
+  options:{readonly staticContacts?:RustStructuralStaticContacts}={},
 ):Promise<StructuralBody>{
   // Validates all constraints/material properties with existing engine rules.
   const body=new StructuralBody(definition);
@@ -39,13 +53,34 @@ export async function createWasmStructuralBody(
   // Supplied host Math.hypot/exp/pow match the production numerical contract.
   const instance=await WebAssembly.instantiate(module,{
     math:{hypot:Math.hypot,exp:Math.exp,pow:Math.pow},
-    world:{project:()=>{throw new Error('Unexpected structural callback from Rust');}},
   });
   const wasm=exportsOf(instance);
   const handle=wasm.world_structure_new(body.nodeCount,body.constraintCount)>>>0;
   if(handle===0)throw new RangeError('WASM refused structural node/constraint count');
   let released=false;
   try{
+    const staticContacts=options.staticContacts;
+    const contactBoxes=staticContacts?.boxes??[];
+    const triangles=staticContacts?.collisionTriangles??definition.collisionTriangles??[];
+    if(staticContacts){
+      // Reuse engine-owned validation of collision inputs; compile only once.
+      new StructuralStaticContactSolver(contactBoxes,triangles);
+      for(const triangle of triangles){
+        if(triangle.some(index=>index>=body.nodeCount))throw new RangeError('Structural triangle exceeds node count');
+      }
+      for(const box of contactBoxes){
+        if(wasm.world_structure_add_box(handle,...box.center,...box.half)!==1)
+          throw new RangeError('Rust static contact box rejected');
+      }
+      for(const triangle of triangles){
+        if(wasm.world_structure_add_triangle(handle,...triangle)!==1)
+          throw new RangeError('Rust structural contact triangle rejected');
+      }
+      if(wasm.world_structure_finish_contacts(handle)!==1)
+        throw new Error('Rust contact configuration failed');
+    }
+    // Rust may allocate while the contact plan is assembled. Bind all JS views
+    // afterwards and never resize Wasm memory during a physical step.
     const memory=wasm.memory,buffer=memory.buffer;
     const buffers={} as Record<StructuralKernelField,StructuralKernelBuffer>;
     for(const [index,key] of STRUCTURAL_KERNEL_FIELDS.entries()){
@@ -61,6 +96,13 @@ export async function createWasmStructuralBody(
     if(scalarPointer===0||scalarPointer%8!==0||scalarPointer+24>buffer.byteLength)
       throw new RangeError('WASM structural scalar buffer is invalid');
     const scalars=new Float64Array(buffer,scalarPointer,3);
+    let contactStats:Float64Array|undefined;
+    if(staticContacts){
+      const pointer=wasm.world_structure_contact_stats(handle)>>>0;
+      if(!pointer||pointer%8!==0||pointer+7*8>buffer.byteLength)
+        throw new RangeError('Rust structural contact stats are invalid');
+      contactStats=new Float64Array(buffer,pointer,7);
+    }
     const kernel:StructuralNumericalKernel={
       buffers,
       solve(input){
@@ -70,11 +112,23 @@ export async function createWasmStructuralBody(
         const [gx,gy,gz]=input.gravity;
         const status=wasm.world_structure_step(
           handle,input.iterations,input.dt,gx,gy,gz,input.damping,input.thermalScale,
-          input.sleepSpeed,input.sleepDelay,0,
+          input.sleepSpeed,input.sleepDelay,staticContacts?1:0,
         );
         if(status!==1&&status!==2)throw new Error('Rust structural solver rejected step');
         return{plasticWorkJ:scalars[0]!,quietTime:scalars[1]!,steps:scalars[2]!,shouldBake:status===2};
       },
+      ...(contactStats?{contactStats(){
+        const index=contactStats[3]!;
+        return{
+          contacts:contactStats[0]!,
+          maxPenetration:contactStats[1]!,
+          projectedSamples:contactStats[2]!,
+          ...(index>=0?{
+            deepestBoxId:contactBoxes[index]!.id,
+            deepestPoint:[contactStats[4]!,contactStats[5]!,contactStats[6]!] as const,
+          }:{}),
+        };
+      }}:{}),
       dispose(){
         if(released)return;
         released=true;

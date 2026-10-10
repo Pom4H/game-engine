@@ -10,19 +10,15 @@ mod host {
         #[link_name="exp"] fn exp(x:f64)->f64;
         #[link_name="pow"] fn pow(x:f64,y:f64)->f64;
     }
-    #[link(wasm_import_module="world")]
-    extern "C" { #[link_name="project"] fn project(iteration:i32); }
     #[inline] pub fn norm(x:f64,y:f64,z:f64)->f64{unsafe{hypot3(x,y,z)}}
     #[inline] pub fn exponential(x:f64)->f64{unsafe{exp(x)}}
     #[inline] pub fn power(x:f64,y:f64)->f64{unsafe{pow(x,y)}}
-    #[inline] pub fn contact(iteration:i32){unsafe{project(iteration)}}
 }
 #[cfg(not(target_arch="wasm32"))]
 mod host {
     pub fn norm(x:f64,y:f64,z:f64)->f64{(x*x+y*y+z*z).sqrt()}
     pub fn exponential(x:f64)->f64{x.exp()}
     pub fn power(x:f64,y:f64)->f64{x.powf(y)}
-    pub fn contact(_iteration:i32){}
 }
 
 const POSITION:usize=0;
@@ -73,12 +69,84 @@ fn volume(p:&[f64],a:usize,b:usize,c:usize,d:usize)->f64{
 }
 
 // Public ABI tags match src/physics/structure-wasm.ts.
+#[derive(Clone,Copy)]
+struct StaticBox{center:[f64;3],half:[f64;3]}
+#[derive(Clone,Copy)]
+struct Binding{nodes:[usize;3],weights:[f64;3],count:usize}
+/// The identical position projection used by StructuralStaticContactSolver.
+/// Both collision samples and static boxes are precompiled, outside the tick.
+fn project_static(
+    p:&mut [f64],previous:&[f64],inverse:&[f64],boxes:&[StaticBox],
+    bindings:&[Binding],stats:&mut [f64;7],
+){
+    for binding in bindings{
+        let mut point=[0.0;3];let mut prior=[0.0;3];
+        for i in 0..binding.count{
+            let j=binding.nodes[i]*3;let weight=binding.weights[i];
+            for axis in 0..3{
+                point[axis]+=p[j+axis]*weight;
+                prior[axis]+=previous[j+axis]*weight;
+            }
+        }
+        for (box_index,b) in boxes.iter().enumerate(){
+            let local=[
+                point[0]-b.center[0],point[1]-b.center[1],point[2]-b.center[2]
+            ];
+            if (0..3).any(|axis|local[axis].abs()>b.half[axis]){continue;}
+            let mut crossed=None;
+            for axis in 0..3{
+                let before=prior[axis]-b.center[axis];
+                if before>b.half[axis]&&local[axis]<=b.half[axis]{
+                    crossed=Some((axis,1.0));break;
+                }
+                if before< -b.half[axis]&&local[axis]>= -b.half[axis]{
+                    crossed=Some((axis,-1.0));break;
+                }
+            }
+            let (axis,sign)=if let Some(crossed)=crossed{crossed}else{
+                let gap=[
+                    b.half[0]-local[0].abs(),
+                    b.half[1]-local[1].abs(),
+                    b.half[2]-local[2].abs(),
+                ];
+                let axis=if gap[0]<=gap[1]&&gap[0]<=gap[2]{0}
+                    else if gap[1]<=gap[2]{1}else{2};
+                (axis,if local[axis]>=0.0{1.0}else{-1.0})
+            };
+            let face=b.center[axis]+sign*b.half[axis];
+            let penetration=(face-point[axis]).abs().max(0.0);
+            let mut effective=0.0;
+            for i in 0..binding.count{
+                let weight=binding.weights[i];
+                effective+=weight*weight*inverse[binding.nodes[i]];
+            }
+            if effective<=1e-14{continue;}
+            let lambda=penetration/effective;
+            for i in 0..binding.count{
+                let node=binding.nodes[i];let j=node*3;
+                let scale=inverse[node]*binding.weights[i]*lambda;
+                p[j+axis]+=sign*scale;
+            }
+            stats[0]+=1.0;stats[2]+=1.0;
+            if penetration>stats[1]{
+                stats[1]=penetration;
+                stats[3]=box_index as f64;
+                stats[4]=point[0];stats[5]=point[1];stats[6]=point[2];
+            }
+        }
+    }
+}
+
 const N_FIELDS:usize=23;
 pub struct Structure {
     n:usize,m:usize,
     floats:Vec<Vec<f64>>,kind:Vec<u8>,ia:Vec<u16>,ib:Vec<u16>,ic:Vec<u16>,id:Vec<u16>,broken:Vec<u8>,
     /// [plasticWorkJ, quietTimeSeconds, steps].
     scalars:[f64;3],
+    boxes:Vec<StaticBox>,bindings:Vec<Binding>,sampled_nodes:Vec<bool>,
+    /// [contact count, maximum penetration, projected samples, deepest box index,
+    ///  deepest point xyz]; index -1 means no deepest box.
+    contact_stats:[f64;7],
 }
 impl Structure {
     fn new(n:usize,m:usize)->Option<Self>{
@@ -88,8 +156,27 @@ impl Structure {
             n,m,
             floats:lengths.iter().map(|len|vec![0.0;*len]).collect(),
             kind:vec![0;m],ia:vec![0;m],ib:vec![0;m],ic:vec![0;m],id:vec![0;m],broken:vec![0;m],
-            scalars:[0.0;3],
+            scalars:[0.0;3],boxes:Vec::new(),bindings:Vec::new(),
+            sampled_nodes:vec![false;n],contact_stats:[0.,0.,0.,-1.,0.,0.,0.],
         })
+    }
+    fn add_box(&mut self,center:[f64;3],half:[f64;3])->bool{
+        if self.boxes.len()>=1024 ||!center.iter().chain(half.iter()).all(|x|x.is_finite())
+          ||half.iter().any(|x|*x<=0.0){return false;}
+        self.boxes.push(StaticBox{center,half});true
+    }
+    fn add_triangle(&mut self,a:usize,b:usize,c:usize)->bool{
+        if self.bindings.len()>=16384||a>=self.n||b>=self.n||c>=self.n||a==b||a==c||b==c{return false;}
+        self.bindings.push(Binding{nodes:[a,b,c],weights:[1.0/3.0;3],count:3});
+        self.sampled_nodes[a]=true;self.sampled_nodes[b]=true;self.sampled_nodes[c]=true;
+        true
+    }
+    fn finish_contacts(&mut self){
+        for node in 0..self.n{
+            if self.sampled_nodes[node]{
+                self.bindings.push(Binding{nodes:[node,0,0],weights:[1.0,0.0,0.0],count:1});
+            }
+        }
     }
     fn f64_field(&mut self,kind:usize)->*mut f64{self.floats[kind].as_mut_ptr()}
     fn ptr(&mut self,kind:usize)->u32{
@@ -121,7 +208,7 @@ impl Structure {
         }
         // Contact projector runs before strain capture and after each iteration,
         // in exactly the order of the TS implementation.
-        if contact{host::contact(-1);}
+        if contact{project_static(p,prev,inverse,&self.boxes,&self.bindings,&mut self.contact_stats);}
         for i in 0..m{
             lambda[i]=0.0;
             if broken[i]!=0{continue;}
@@ -162,7 +249,7 @@ impl Structure {
                     apply(p,inverse,c,g[2],dl);apply(p,inverse,d,g[3],dl);
                 }
             }
-            if contact{host::contact(iteration as i32);}
+            if contact{let _=iteration;project_static(p,prev,inverse,&self.boxes,&self.bindings,&mut self.contact_stats);}
         }
         let inv_dt=1.0/dt;
         for i in 0..n*3{v[i]=(p[i]-prev[i])*inv_dt;}
@@ -246,6 +333,31 @@ mod abi {
         if handle==0||kind as usize>=N_FIELDS{return 0;}
         (&mut *(handle as *mut Structure)).ptr(kind as usize)
     }
+    #[no_mangle]
+    pub unsafe extern "C" fn world_structure_add_box(
+        handle:u32,cx:f64,cy:f64,cz:f64,hx:f64,hy:f64,hz:f64
+    )->u32{
+        if handle==0{return 0;}
+        (&mut *(handle as *mut Structure))
+            .add_box([cx,cy,cz],[hx,hy,hz]) as u32
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn world_structure_add_triangle(handle:u32,a:u32,b:u32,c:u32)->u32{
+        if handle==0{return 0;}
+        (&mut *(handle as *mut Structure)).add_triangle(a as usize,b as usize,c as usize) as u32
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn world_structure_finish_contacts(handle:u32)->u32{
+        if handle==0{return 0;}
+        (&mut *(handle as *mut Structure)).finish_contacts();
+        1
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn world_structure_contact_stats(handle:u32)->u32{
+        if handle==0{return 0;}
+        (&mut *(handle as *mut Structure)).contact_stats.as_mut_ptr() as u32
+    }
+
     #[no_mangle]
     pub unsafe extern "C" fn world_structure_scalars(handle:u32)->u32{
         if handle==0{return 0;}

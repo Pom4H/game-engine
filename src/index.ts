@@ -133,5 +133,5 @@ export {CausalStorage,MemoryScopeHeadStore,type CausalStorageKind,type CausalRef
 
 export {decodeWorldBinary,isWorldBinary,WORLD_BINARY_VERSION} from './scene/world-binary.js';
 
-export {STRUCTURAL_KERNEL_FIELDS,type StructuralNumericalKernel,type StructuralKernelField,type StructuralKernelBuffer} from './physics/structure.js';
-export {createWasmStructuralBody} from './physics/structure-wasm.js';
+export {STRUCTURAL_KERNEL_FIELDS,type StructuralNumericalKernel,type StructuralKernelField,type StructuralKernelBuffer,type StructuralKernelContactStats} from './physics/structure.js';
+export {createWasmStructuralBody,type RustStructuralStaticContacts} from './physics/structure-wasm.js';

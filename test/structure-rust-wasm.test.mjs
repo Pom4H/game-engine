@@ -105,3 +105,51 @@ test('explicit detachment restores TS arrays and continuing physical dynamics',a
  for(let i=0;i<20;i++){reference.step(1/120,[0,-9.81,0]);body.step(1/120,[0,-9.81,0]);}
  parity(reference,body,40);
 });
+
+
+test('native Rust structural contacts match production JS box projection at every XPBD iteration',async()=>{
+ const boxes=[
+  {id:'wall',center:[.8,.1,.1],half:[.3,.6,.6]},
+  {id:'floor',center:[0,-.4,0],half:[3,.2,3]},
+ ];
+ const triangles=[[0,1,2],[0,2,3]];
+ const definition={...tetra,collisionTriangles:triangles,internalDamping:4,sleepDelay:10};
+ const reference=new StructuralBody(definition);
+ const accelerated=await createWasmStructuralBody(definition,module,{staticContacts:{boxes,collisionTriangles:triangles}});
+ const solver=new StructuralStaticContactSolver(boxes,triangles);
+ try{
+  for(const body of [reference,accelerated])body.activateFromRigid(body.centerOfMass(),[.08,-.1,.1],[0,0,0]);
+  assert.equal(accelerated.backend,'wasm');
+  for(let tick=0;tick<90;tick++){
+   input(reference,tick);input(accelerated,tick);
+   reference.step(1/120,[0,-9.81,0],body=>solver.project(body));
+   accelerated.step(1/120,[0,-9.81,0]);
+   parity(reference,accelerated,tick,1e-8,1e-9);
+   const native=accelerated.nativeContactStats;
+   const old=solver.stats;
+   assert.equal(native.contacts,old.contacts,'native collision count '+tick);
+   assert.equal(native.projectedSamples,old.projectedSamples);
+   assert.ok(Math.abs(native.maxPenetration-old.maxPenetration)<1e-9,'contact depth '+tick);
+   assert.equal(native.deepestBoxId,old.deepestBoxId,'deepest obstacle '+tick);
+  }
+  assert.ok(solver.stats.contacts>0,'fixture must exercise physical wall contact');
+ }finally{accelerated.detachKernel();}
+});
+
+test('M3 native static contacts preserve structural node ownership and impulse response',async()=>{
+ const boxes=[{id:'vehicle-wall',center:[1.25,.4,0],half:[.4,1.2,1.8]}];
+ const reference=new StructuralBody(car);
+ const accelerated=await createWasmStructuralBody(car,module,{staticContacts:{boxes}});
+ const contact=new StructuralStaticContactSolver(boxes,car.collisionTriangles);
+ try{
+  for(const body of [reference,accelerated])body.activateFromRigid(body.centerOfMass(),[.3,0,0],[0,0,0]);
+  for(let tick=0;tick<55;tick++){
+   reference.wake();accelerated.wake();
+   reference.step(1/120,[0,0,0],body=>contact.project(body));
+   accelerated.step(1/120,[0,0,0]);
+   parity(reference,accelerated,tick,1e-8,1e-9);
+  }
+  assert.equal(accelerated.nativeContactStats.contacts,contact.stats.contacts);
+  assert.ok(contact.stats.contacts>0);
+ }finally{accelerated.detachKernel();}
+});
