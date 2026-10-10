@@ -12,7 +12,7 @@ import {transferFragmentMotion} from '../materials/fragment-motion.js';
 import {fracturePlate} from '../materials/glass-fracture.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
-import {PhysicsWorld,RigidBody,type CollisionShape,type Contact} from '../physics/world.js';
+import {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type ContactModel} from '../physics/world.js';
 import {quaternionFromEuler,eulerFromQuaternion} from '../physics/rotation.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
 import {FluidField} from '../physics/fluid.js';
@@ -354,7 +354,7 @@ export class Scene {
       .use('animation',({at})=>{this.animation.step(at,this.entities,p=>this.contacts.sample(p));})
       .use('physics',({dt})=>{
         this.pendingFractures.clear();
-        this.physics.step(dt,contact=>{
+        const law:ContactModel=contact=>{
           const result=evaluateFracture(contact);
           if(result.fracture){
             if(this.pendingFractures.has(result.fracture.body.id))return{mode:'penetrate',energyLoss:0};
@@ -363,7 +363,17 @@ export class Scene {
           }
           const plasticWork=this.deformation.absorbContact(contact,this.entities);
           return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
-        });
+        };
+        // Exact engine-owned proof: neither body can fracture nor spend
+        // plastic energy. The callback would return {mode:'resolve'} without
+        // mutating any material/domain state. Contact events still derive from
+        // resulting PhysicsWorld contacts during the commit phase.
+        // If a new contact-dependent law is added here, update this predicate
+        // or remove it: default behavior is always synchronous.
+        law.canResolveWithoutCallback=(a,b)=>
+          !a.material.mechanical.brittle&&!b.material.mechanical.brittle&&
+          !this.deformation.hasContactBody(a.id)&&!this.deformation.hasContactBody(b.id);
+        this.physics.step(dt,law);
       })
       .use('vehicle-visuals',()=>{this.syncVehicleVisuals();})
       .use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})

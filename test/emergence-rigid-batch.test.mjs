@@ -203,7 +203,106 @@ test('emergent scene preserves weather, fluid, fracture, sound and causal render
   // The material-law callback is intentionally never speculated in a batch.
   const diagnostics=accelerated.physics.rigidContactDiagnostics;
   assert.ok(diagnostics.policyFallbacks>0,JSON.stringify(diagnostics));
-  assert.equal(diagnostics.calls,0,'Scene must retain per-contact material decisions');
+  // Batching is permitted elsewhere only for pairs with a domain-owned inert proof.
   assert.deepEqual(original.lastExecution,accelerated.lastExecution,'engine systems must not be bypassed');
  }finally{accelerated.physics.setRigidContactKernel(null);kernel.dispose();}
+});
+
+
+test('Scene certifies inert steel contacts for batching while preserving emergent events and observations',async()=>{
+ const spec={
+  version:1,seed:621,gravity:[0,0,0],ground:-100,
+  environment:{temperatureC:-8,snowfall:'light',wind:[3,0,1],humidity:.6},
+  fluids:[{id:'far-water',shape:'box',center:[100,0,0],sizeM:[8,2,8],densityKgM3:997}],
+  windVolumes:[{id:'gust',center:[0,3,0],sizeM:[30,7,30],wind:[8,0,3]}],
+  entities:[
+   {id:'steel-1',position:[-1.8,3,0],mesh:{kind:'box',size:[4,1.3,1.8]},material:{kind:'steel'},body:{mass:1200,velocity:[4,0,0]}},
+   {id:'steel-2',position:[1.8,3,0],mesh:{kind:'box',size:[4,1.3,1.8]},material:{kind:'steel'},body:{mass:1200,velocity:[-3,0,0]}},
+   {id:'steel-3',position:[-1.8,3,3],mesh:{kind:'box',size:[4,1.3,1.8]},material:{kind:'steel'},body:{mass:1200,velocity:[3,0,0]}},
+   {id:'steel-4',position:[1.8,3,3],mesh:{kind:'box',size:[4,1.3,1.8]},material:{kind:'steel'},body:{mass:1200,velocity:[-4,0,0]}},
+  ],
+ };
+ const reference=new Scene(spec),native=new Scene(spec);
+ const kernel=await createWasmRigidContactKernel(module);
+ native.physics.setRigidContactKernel(kernel);
+ const eventsA=[],eventsB=[];
+ try{
+  for(let tick=0;tick<65;tick++){
+   reference.step(1/60);native.step(1/60);
+   const a=reference.snapshot(),b=native.snapshot();
+   assert.deepEqual(a.entities.map(e=>e.id),b.entities.map(e=>e.id));
+   for(let i=0;i<a.entities.length;i++)for(const key of ['position','rotation','velocity'])
+    for(let axis=0;axis<3;axis++)epsilon(a.entities[i][key][axis],b.entities[i][key][axis],
+     'certified Scene tick '+tick+' '+key);
+   eventsA.push(...reference.drainEvents());eventsB.push(...native.drainEvents());
+  }
+  assert.ok(eventsA.some(e=>e.type==='impact'));
+  assert.deepEqual(eventsA.map(e=>[e.type,e.id,e.a,e.b]),
+                   eventsB.map(e=>[e.type,e.id,e.a,e.b]));
+  const stats=native.physics.rigidContactDiagnostics;
+  assert.ok(stats.calls>0,JSON.stringify(stats));
+  assert.ok(stats.contacts>0,JSON.stringify(stats));
+  assert.equal(stats.policyFallbacks,0,'inert steel collisions have a Scene-owned proof');
+  assert.deepEqual(reference.lastExecution,native.lastExecution);
+  const storeA=new MemoryContentStore(),storeB=new MemoryContentStore();
+  const left=projectSceneRenderFrame(reference,storeA,{epoch:1n,frame:2n});
+  const right=projectSceneRenderFrame(native,storeB,{epoch:1n,frame:2n});
+  const obsA=storeA.require(left.frame.observation.hash);
+  const obsB=storeB.require(right.frame.observation.hash);
+  assert.equal(obsA.surfaces.length,obsB.surfaces.length);
+  for(let i=0;i<obsA.surfaces.length;i++){
+   assert.deepEqual(obsA.surfaces[i].identity,obsB.surfaces[i].identity);
+   for(let j=0;j<16;j++)epsilon(obsA.surfaces[i].transform[j],obsB.surfaces[i].transform[j],'certified render');
+  }
+ }finally{native.physics.setRigidContactKernel(null);kernel.dispose();}
+});
+
+
+test('live plastic-deformation registration revokes inert batch proof without rebuilding the world',async()=>{
+ const skin={
+  kind:'triangle-mesh',
+  positions:[0,0,0,0,1,0,1,0,0],
+  normals:[0,0,1,0,0,1,0,0,1],
+  indices:[0,1,2],
+ };
+ const spec={
+  version:1,seed:71,gravity:[0,0,0],ground:-100,
+  entities:[
+   {id:'steel-a',position:[-1.8,2,0],mesh:{kind:'box',size:[4,1.2,1.8]},
+    material:{kind:'steel'},body:{mass:1200,velocity:[5,0,0]}},
+   {id:'steel-b',position:[1.8,2,0],mesh:{kind:'box',size:[4,1.2,1.8]},
+    material:{kind:'steel'},body:{mass:1200,velocity:[-5,0,0]}},
+   {id:'skin',renderOnly:true,mesh:skin,position:[-1.8,2,0],material:{kind:'steel'}},
+  ],
+ };
+ const a=new Scene(spec),b=new Scene(spec);
+ const kernel=await createWasmRigidContactKernel(module);
+ b.physics.setRigidContactKernel(kernel);
+ try{
+  for(let tick=0;tick<8;tick++){a.step(1/60);b.step(1/60);}
+  const certified=b.physics.rigidContactDiagnostics;
+  assert.ok(certified.calls>0,'ordinary steel contact must batch before deformation registration');
+  for(const scene of [a,b]){
+   scene.deformation.attach({bodyId:'steel-a',visualIds:['skin'],minEnergyJ:1},scene.entities);
+   const mover=scene.entities.get('steel-a').body;
+   const target=scene.entities.get('steel-b').body;
+   mover.position[0]=-1.8;target.position[0]=1.8;
+   mover.velocity[0]=10;target.velocity[0]=-10;
+   mover.wake();target.wake();
+  }
+  for(let tick=8;tick<25;tick++){
+   a.step(1/60);b.step(1/60);
+   const ref=a.snapshot(),state=b.snapshot();
+   assert.deepEqual(ref.entities.map(e=>e.id),state.entities.map(e=>e.id));
+   for(let i=0;i<ref.entities.length;i++){
+    for(let axis=0;axis<3;axis++)epsilon(ref.entities[i].position[axis],state.entities[i].position[axis],
+     'deform body location tick '+tick);
+   }
+  }
+  assert.equal(a.deformation.hasContactBody('steel-a'),true);
+  assert.equal(b.deformation.hasContactBody('steel-a'),true);
+  assert.ok(b.physics.rigidContactDiagnostics.policyFallbacks>0,
+   'deformable body must force synchronous material decision');
+  assert.deepEqual(a.deformation.dents('steel-a'),b.deformation.dents('steel-a'));
+ }finally{b.physics.setRigidContactKernel(null);kernel.dispose();}
 });

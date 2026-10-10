@@ -110,7 +110,13 @@ export interface ContactDecision {
   /** Energy consumed by fracture/plastic work while bodies continue through each other. */
   readonly energyLoss?:number;
 }
-export type ContactModel=(contact:ContactCandidate)=>ContactDecision;
+export type ContactModel=((contact:ContactCandidate)=>ContactDecision)&{
+  /** Explicit semantic proof supplied by the owning domain, not inferred by
+   * the accelerator. True means this exact pair MUST resolve normally with no
+   * material mutations or callback side effects. Default: no proof, so serial.
+   * Called at the batch boundary before broadphase candidate states mutate. */
+  canResolveWithoutCallback?:(a:RigidBody,b:RigidBody)=>boolean;
+};
 
 export interface Contact {
   readonly a:string;
@@ -315,10 +321,16 @@ export class PhysicsWorld {
       // Batch is confined to ONE current A body. Processing A in Rust before
       // asking SpatialHash for the next body preserves dynamic query positions,
       // wakeups, the Seen order and the exact sequential impulse dependency.
-      // Cross-domain material callbacks may mutate arbitrary physical state:
-      // never precompute/commit their contacts as a batch.
+      // The domain may explicitly prove particular pairs cannot cause material
+      // side effects. Without that proof cross-domain callbacks must remain
+      // synchronous and ordered before the next collision can be evaluated.
       if(native?.batch){
-        const policy=!!contactModel,traceEnabled=!!trace;
+        const policy=!!contactModel&&(
+          !contactModel.canResolveWithoutCallback ||
+          candidates.some(b=>
+            b!==a&&!(a.collisionClass==='debris'&&b.collisionClass==='debris')&&
+            !contactModel.canResolveWithoutCallback!(a,b))
+        ),traceEnabled=!!trace;
         const capacity=candidates.length>(native.maxBatchSize??0)+1;
         // Finite horizontal surfaces own their manifolds, friction and sleep
         // policy in JS; a single such candidate opts this A out of batching.

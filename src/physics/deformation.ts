@@ -108,6 +108,11 @@ export class PlasticDeformationSystem {
     this.syncState(this.states.get(input.bodyId)!,entities);
   }
 
+  /** Cheap conservative guard for domain-certified inert contact pairs.
+   * This must be consulted live: plugin/scene operations can attach/remove
+   * deformable bodies, changing which physical contacts have consequences. */
+  hasContactBody(bodyId:string):boolean{return this.states.has(bodyId);}
+
   /**
    * Consume ductile plastic work from a contact before the rigid response.
    * For two deformable bodies the shared normal-energy budget is split in

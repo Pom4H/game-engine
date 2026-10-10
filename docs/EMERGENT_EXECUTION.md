@@ -68,10 +68,16 @@ It does not batch the entire simulation tick.
 
 Batching is forbidden whenever one of these holds:
 
-1. **A contact callback is present.** Custom fracture/deformation/material
-   laws can affect other parts of the world or future contacts, so each contact
-   must be observed before the next one is calculated. The previous synchronous
-   Rust per-pair path is used instead.
+1. **No domain-owned proof that every candidate is inert.** Arbitrary
+   contact callbacks can mutate the world, so they always execute synchronously
+   and are never speculated. The built-in Scene material law is a narrow
+   exception: it explicitly certifies a pair with two non-brittle bodies
+   and no registered plastic-deformation bodies as an ordinary resolve with
+   no callback side effects. A body with brittle fracture potential or
+   persistent deformation *never* qualifies. The proof is re-evaluated using
+   live material and deformation state at every current-A candidate query.
+   Any candidate without proof makes the entire current-A batch fall back
+   to sequential callback execution.
 2. **Causal tracing is enabled.** The engine's complete TypeScript energy and
    attribution path is used, with no missing impulse provenance.
 3. **A finite horizontal static surface is a possible candidate.** The
@@ -80,11 +86,12 @@ Batching is forbidden whenever one of these holds:
 4. **The candidate set exceeds 256.** This A falls back to per-pair processing.
    The fixed Wasm buffer is bounded; no mid-tick growth/detachment is allowed.
 
-An entity with `renderOnly` geometry never creates a collider. A runtime
-`Scene` currently always supplies the material contact callback: its
-contacts **remain sequential**. Do not make scenes use the pure-rigid batch
-by deleting the callback or pre-applying material decisions. The batch is
-for callers who intentionally use `PhysicsWorld` without a material policy.
+An entity with `renderOnly` geometry never creates a collider. Runtime
+`Scene` keeps the material law and its full side effects. Pairs explicitly
+proven inert by the engine may run in the batch; glass, deformation and
+custom handlers remain sequential. Do **not** pre-apply or omit material
+decisions merely to enable an accelerator. A newly introduced contact law
+must update/revoke the proof, never silently inherit it.
 
 ## Inspection and validation
 
@@ -106,14 +113,16 @@ The CI gates must cover all layers:
 
 - Native Rust unit tests and JS/Rust replay with multiple moving boxes,
   spheres, angular impulses, sequential dependent pair contacts and sleepers.
-- A material/fragmentation scene with snow, rain/water, wind and fluid;
+- A material/fragmentation scene with snow, water, wind and fluid;
   compare physical state, event identity, surface temperature/wetness, sound,
   causal Render IR, acoustic boundaries and simulation-system execution.
 - The same trace and energy-closure oracle without using the native contact
   solver while tracing.
 - A full-physics-tick benchmark contrasting original TypeScript, serial Wasm
   and per-A batched Wasm. Include dense and sparse worlds and the material
-  callback fallback (the latter intentionally does not batch).
+  callback fallback (the latter intentionally does not batch). A separate
+  Scene-only inert-metal test must demonstrate that the built-in proof
+  can safely batch while preserving events and Render IR.
 
 **No cross-domain correctness claim can be inferred from faster microkernels.
 No entire-engine FPS claim is made without a complete render/physics run.**

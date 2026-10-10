@@ -103,3 +103,7 @@ static road manifolds and oversized candidate sets. See
 [docs/EMERGENT_EXECUTION.md](docs/EMERGENT_EXECUTION.md) for the complete
 weather → surface → forces/contacts → fracture/deformation →
 commit/events → audio/render/network contract and its CI parity gates.
+
+A certified inert-contact subset of the built-in Scene material law can also
+use the Rust batch without disabling material/fracture/audio systems; the
+contract must be updated whenever contact material logic changes.

@@ -63,3 +63,20 @@ No coefficient tuning is permitted to make the two paths agree.
 The optional Rust implementation is not a replacement for the broadphase,
 the ground manifold solver or user-supplied collision plugins. It is also
 not a native GPU compute solver: CPU→WASM scratch exchange still costs work.
+
+### Domain-certified material-free contacts inside Scene
+
+The default `Scene` physics step still calls the authoritative material
+decision callback. The Scene can explicitly prove one pair inert only when
+**both materials are non-brittle** and **neither body belongs to the persistent
+plastic-deformation system**. Such pairs have no contact-law side effects:
+they produce ordinary rigid impulses and the same later impact/audio events.
+If every candidate for an A body is proven inert, that A may enter the Rust
+batch. Glass, vehicle visual dent bindings, other material effects, arbitrary
+user callbacks and cause tracing remain synchronous per-contact. The proof
+is evaluated live, never cached across world changes.
+
+`test/emergence-rigid-batch.test.mjs` compares both paths across
+weather, snow/water phase state, fluids, wind, fracture, acoustic boundaries,
+audio synthesis and causal render observations. A separate metal-only scene
+proves batch entry with the native Scene contact policy retained.
