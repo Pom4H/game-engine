@@ -82,6 +82,8 @@ export function verifyGpuProfile(report,profile){
   checks.push({name:'hardware GPU timestamps',passed:report.timestampQueries===true,actual:report.timestampQueries,limit:true});
   const adapter=JSON.stringify(report.adapter??{}).toLowerCase();
   checks.push({name:'hardware adapter',passed:adapter.length>2&&!/swiftshader|lavapipe|llvmpipe|software adapter/.test(adapter),actual:report.adapter});
+  if(profile.adapterVendor)checks.push({name:'named GPU vendor',passed:report.adapter?.vendor?.toLowerCase()===profile.adapterVendor.toLowerCase(),actual:report.adapter?.vendor,limit:profile.adapterVendor});
+  if(profile.adapterArchitecture)checks.push({name:'named GPU architecture',passed:report.adapter?.architecture?.toLowerCase()===profile.adapterArchitecture.toLowerCase(),actual:report.adapter?.architecture,limit:profile.adapterArchitecture});
   return {passed:checks.every(x=>x.passed),checks,
     gpuHotspots:Object.entries(report.gpuPasses??{}).map(([name,value])=>({name,p95Ms:value?.p95Ms??null})).filter(x=>x.p95Ms!==null).sort((a,b)=>b.p95Ms-a.p95Ms).slice(0,12),
     simulationHotspots:(report.simulationHotspots??[]).slice(0,12)};
