@@ -6,11 +6,17 @@ on:
       - 'examples/worlds/**'
       - 'tools/world-language/**'
       - 'src/scene/scene.ts'
+      - 'src/scene/modules.ts'
+      - 'src/scene/system-runtime.ts'
+      - 'src/scene/performance.ts'
+      - 'src/scene/validate.ts'
       - 'src/scene/world-binary.ts'
       - 'src/scene/url.ts'
       - 'src/browser.ts'
       - 'src/index.ts'
       - 'test/world-compiler.test.mjs'
+      - 'test/world-direct-execution.test.mjs'
+      - 'test/scene-performance.test.mjs'
       - 'package.json'
       - '.github/workflows/world-compiler.yml'
   pull_request:
@@ -19,11 +25,17 @@ on:
       - 'examples/worlds/**'
       - 'tools/world-language/**'
       - 'src/scene/scene.ts'
+      - 'src/scene/modules.ts'
+      - 'src/scene/system-runtime.ts'
+      - 'src/scene/performance.ts'
+      - 'src/scene/validate.ts'
       - 'src/scene/world-binary.ts'
       - 'src/scene/url.ts'
       - 'src/browser.ts'
       - 'src/index.ts'
       - 'test/world-compiler.test.mjs'
+      - 'test/world-direct-execution.test.mjs'
+      - 'test/scene-performance.test.mjs'
       - 'package.json'
       - '.github/workflows/world-compiler.yml'
 jobs:
@@ -39,7 +51,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run build
       - run: bun run tsc -p tools/world-language/tsconfig.json
-      - run: node --test test/world-compiler.test.mjs
+      - run: node --test test/world-compiler.test.mjs test/world-direct-execution.test.mjs test/scene-performance.test.mjs
       - run: bun tools/world-language/benchmark.ts
       - uses: actions/upload-artifact@v4
         with:

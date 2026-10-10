@@ -1,5 +1,6 @@
 export {BrowserRuntime,type BrowserRuntimeOptions} from './runtime/browser.js';
 export {WebGPURenderer} from './render/webgpu.js';
+export {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport} from './scene/performance.js';
 export {sceneFromURL,sceneURL,encodeScene,decodeScene} from './scene/url.js';
 export {WalkWorld,walkerInput,type WalkBox} from './runtime/walker-motion.js';
 export {WalkerControls,type WalkerControlOptions} from './runtime/walker-controls.js';

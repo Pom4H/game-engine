@@ -28,6 +28,7 @@ import {validateEntity,validateScene} from './validate.js';
 import {decodeWorldBinary} from './world-binary.js';
 import {cameraOnRail} from './camera-rail.js';
 import {SceneSystemRuntime} from './system-runtime.js';
+import {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport} from './performance.js';
 
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
@@ -77,6 +78,11 @@ export class Scene {
   private directSystemPlan:DirectScenePlan|undefined=compileDirectScenePlan(this.kernel,this.simulationProfile);
   readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
+  private sceneProfiler:ScenePerformanceProfiler|undefined;
+  /** CPU tick p50/p95, per-system costs, budget exceedances, live workload. */
+  performanceReport():ScenePerformanceReport|undefined{return this.sceneProfiler?.report();}
+  enablePerformanceProfiling(config:ScenePerformanceConfig):void{this.sceneProfiler=new ScenePerformanceProfiler(config);}
+  disablePerformanceProfiling():void{this.sceneProfiler=undefined;}
   /** Scene-owned force-driver assemblies keyed by their authoritative entity/body id. */
   readonly assemblies=new Map<string,Vehicle>();
   lastExecution:string[]=[];
@@ -149,6 +155,7 @@ export class Scene {
     for(const vehicle of this.spec.animation?.vehicles??[])this.animation.addVehicle(vehicle);
     this.syncVehicleVisuals();
     this.installSystemRuntime();
+    if(this.spec.performance)this.enablePerformanceProfiling(this.spec.performance);
   }
 
   add(spec:EntitySpec):RuntimeEntity{
@@ -285,22 +292,36 @@ export class Scene {
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,profile?:SimulationProfileInput):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
-    const at=this.time+dt;
-    this.lastExecution=[];
-    if(profile===undefined&&this.directSystemPlan){
-      // Compile out per-tick command allocations, frame freezing and scheduler
-      // dispatch. The ordered actions/rates come from the authoritative Kernel schedule.
-      for(const system of this.directSystemPlan[(this.tick+1)%this.directSystemPlan.length]!){
-        this.lastExecution.push(system.id);
-        this.systemRuntime.run(system.action,dt*60/system.rateHz,at);
-      }
-      return;
+    const at=this.time+dt,profiler=this.sceneProfiler;
+    const sampled=profiler!==undefined&&profiler.shouldSample(this.tick+1);
+    if(sampled){
+      profiler.begin(this.tick+1);
+      this.systemRuntime.measureSystems((action,ms)=>profiler.system(action,ms));
     }
-    const program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);
-    program.run(this.tick+1,{} as SceneModuleContext,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
-      for(const command of commands)this.commit(command,at);
-      return {} as SceneModuleContext;
-    }});
+    this.lastExecution=[];
+    try {
+      if(profile===undefined&&this.directSystemPlan){
+        for(const system of this.directSystemPlan[(this.tick+1)%this.directSystemPlan.length]!){
+          this.lastExecution.push(system.id);
+          this.systemRuntime.run(system.action,dt*60/system.rateHz,at);
+        }
+        return;
+      }
+      const program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);
+      program.run(this.tick+1,{} as SceneModuleContext,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+        for(const command of commands)this.commit(command,at);
+        return {} as SceneModuleContext;
+      }});
+    } finally {
+      if(sampled){
+        this.systemRuntime.measureSystems(undefined);
+        const stats=this.physics.stats;
+        profiler.end({
+          entities:this.entities.size,bodies:stats.bodies,contacts:stats.contacts,
+          substeps:stats.substeps,collisionSurfaceIterations:stats.collisionSurfaceIterations,
+        });
+      }
+    }
   }
   private commit(command:InternalCommand,at:number):void{
     if(command.type==='spawn'){this.add(command.entity);return;}

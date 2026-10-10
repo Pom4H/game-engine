@@ -13,6 +13,9 @@ export interface SystemRegistration{readonly id:string;readonly handler:SystemHa
  */
 export class SceneSystemRuntime {
   private readonly handlers=new Map<SystemAction,SystemHandler>();
+  private measure:((action:SystemAction,ms:number)=>void)|undefined;
+  /** Only sampled ticks install a callback; the default path reads no clocks. */
+  measureSystems(callback:((action:SystemAction,ms:number)=>void)|undefined):void{this.measure=callback;}
 
   assertAvailable(actions:readonly SystemAction[]):void{
     const seen=new Set<string>();
@@ -33,7 +36,10 @@ export class SceneSystemRuntime {
   run(action:SystemAction,dt:number,at:number):void{
     const handler=this.handlers.get(action);
     if(!handler)throw new TypeError(`No system implementation: ${action}`);
-    handler(Object.freeze({dt,at}));
+    const frame=Object.freeze({dt,at}),probe=this.measure;
+    if(!probe){handler(frame);return;}
+    const start=performance.now();
+    try{handler(frame);}finally{probe(action,performance.now()-start);}
   }
 
   get actions():readonly SystemAction[]{return Object.freeze([...this.handlers.keys()]);}

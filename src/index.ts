@@ -1,4 +1,5 @@
 export {FixedClock} from './core/fixed-clock.js';
+export {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport,type ScenePerformanceSample} from './scene/performance.js';
 export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
 export {EngineKernel,KernelProgram,ModuleScheduler,ENGINE_PHASES,ENGINE_DEPTH,ENGINE_DEPTH_AXES,SIMULATION_TIERS,simulationDepth,simulationProfile,simulationProfileKey,simulationTierDepth,simulationTierForDepth,validateEngineDepth,type EngineModule,type EnginePlugin,type EnginePhase,type ModuleDescription,type ModuleDepthRequirement,type ModuleFrame,type EngineDepth,type SimulationProfile,type SimulationProfileInput,type SimulationProfileSpec,type SimulationTier} from './core/kernel.js';
 export {DepthVariantRegistry,compileDepthVariants,type DepthRange,type DepthVariant,type DepthVariantPlugin,type CompiledDepthVariant,type CompiledDepthVariants} from './core/variants.js';
