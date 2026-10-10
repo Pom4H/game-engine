@@ -1,0 +1,76 @@
+name: Castle Jelly WebGPU Video
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/castle-jelly/**'
+      - 'test/castle-jelly.test.mjs'
+      - '.github/workflows/castle-jelly.yml'
+      - 'src/render/**'
+      - 'src/scene/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: castle-jelly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Build game engine
+        run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify causal water solver and scene
+        run: |
+          node --test test/castle-jelly.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Locate GPU Chrome
+        run: |
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw 'Hardware Chrome not found' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          ffmpeg -version | Select-Object -First 1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Render actual Game Engine WebGPU frames into MP4
+        id: video
+        env:
+          CASTLE_WIDTH: '960'
+          CASTLE_HEIGHT: '540'
+          CASTLE_FPS: '15'
+        run: |
+          node tools/castle-jelly/capture.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ffprobe -v error -show_entries stream=codec_name,width,height -of json artifacts/castle-jelly/castle-jelly.mp4
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Keep video on GPU runner
+        if: steps.video.outcome == 'success'
+        run: |
+          $target = Join-Path $env:USERPROFILE 'game-engine-renders\castle-jelly'
+          New-Item -ItemType Directory -Force $target | Out-Null
+          Copy-Item artifacts/castle-jelly/* $target -Force
+      - name: Publish MP4 for download
+        if: steps.video.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = 'castle-jelly-' + $env:GITHUB_SHA.Substring(0,7)
+          node tools/publish-release.mjs $tag artifacts/castle-jelly/castle-jelly.mp4 artifacts/castle-jelly/poster.png artifacts/castle-jelly/evidence.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
