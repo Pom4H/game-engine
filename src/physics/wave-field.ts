@@ -222,6 +222,46 @@ export class AcousticWaveField {
   }
 
   /**
+   * Add exactly the requested INCREMENT in compressional wave energy.
+   *
+   * Unlike an explosion from an initially quiet field, contact-driven sources
+   * may overlap existing pressure. Solve the quadratic energy increment using
+   * the already stored pressure: E' - E = cellVolume/(2*rho*c^2) *
+   * (a^2 sum(w^2) + 2*a*abs(sum(p*w))). Select source polarity that adds
+   * energy; no wave or material coefficients are fitted to a visual fixture.
+   * Returned null means the contact is outside the air grid/inside solids:
+   * nothing is silently credited to the acoustic energy ledger.
+   */
+  injectEnergyPacket(input:{
+    readonly position:Vec3;readonly acousticEnergyJ:number;readonly radiusM:number;
+  }):BlastInjection|null{
+    const {position,acousticEnergyJ,radiusM}=input;
+    if(!position.every(Number.isFinite)||!Number.isFinite(acousticEnergyJ)||
+       !Number.isFinite(radiusM)||acousticEnergyJ<=0||radiusM<=0)
+      throw new RangeError('Acoustic energy packet requires finite position, positive energy and radius');
+    const bounds=this.sourceBounds(position,radiusM);
+    let sumW2=0,sumPW=0,affectedCells=0;
+    this.forSourceCells(bounds,position,radiusM,(index,weight)=>{
+      if(this.solid[index])return;
+      sumW2+=weight*weight;sumPW+=this.pressurePa[index]!*weight;affectedCells++;
+    });
+    if(!affectedCells||sumW2<=0)return null;
+    const bulk=this.densityKgM3*this.waveSpeedMps*this.waveSpeedMps;
+    const k=this.cellSizeM**3/(2*bulk),required=acousticEnergyJ/k;
+    const root=Math.sqrt(sumPW*sumPW+sumW2*required),denom=root+Math.abs(sumPW);
+    // Stable quadratic root avoids catastrophic cancellation when the old
+    // wave amplitude is already larger than the new source.
+    const amplitude=required/denom;
+    if(!Number.isFinite(amplitude)||amplitude<=0)
+      throw new RangeError('Acoustic energy packet exceeds representable pressure');
+    const polarity=sumPW<0?-1:1;
+    this.forSourceCells(bounds,position,radiusM,(index,weight)=>{
+      if(!this.solid[index])this.pressurePa[index]!+=polarity*amplitude*weight;
+    });
+    return Object.freeze({acousticEnergyJ,affectedCells,peakPressurePa:amplitude});
+  }
+
+  /**
    * First-order linear-acoustics FDTD on a staggered grid.
    * Pressure is cell-centred; medium velocity lives on faces. Hard cells impose
    * zero normal velocity, so walls reflect instead of transmitting the wave.

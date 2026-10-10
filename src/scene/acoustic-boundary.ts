@@ -34,6 +34,7 @@ export function syncSceneAcousticBoundaries(
   let entityCount=0,bodyObstacles=0,meshObstacles=0,triangles=0;
   for(const entity of entities){
     entityCount++;
+    if(entity.renderOnly)continue;
     if(entity.body){
       if(entity.body.collisionClass==='debris')continue;
       const body=entity.body;

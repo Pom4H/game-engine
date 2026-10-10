@@ -140,3 +140,5 @@ export {createWasmRigidContactKernel} from './physics/rigid-wasm.js';
 
 export {compileWorldCouplings,signalPortDimension,signalPortIndex,WORLD_SIGNAL_PORTS,WORLD_COUPLING_ABI_VERSION,WORLD_MAX_COUPLINGS,type WorldSignalPort,type WorldCoupling,type WorldCouplingDimension} from './world-ir/couplings.js';
 export {WorldInteractionJournal,eventsFromWorldInteractions,validateWorldInteractionGraph,WORLD_INTERACTION_IR_VERSION,WORLD_INTERACTION_LAWS,type WorldInteractionLaw,type WorldInteractionGraph,type WorldInteraction,type WorldInteractionEffect,type WorldInteractionDomain,type WorldInteractionRef,type WorldContactEffect,type WorldSurfaceEffect,type WorldWeatherEffect,type WorldEventEffect,type WorldInteractionStats} from './world-ir/index.js';
+
+export {SceneAcousticCoupling,attachSceneAcoustics,type SceneAcousticCouplingOptions,type AcousticListenerSpec,type AcousticSensorObservation,type AcousticCouplingStats} from './scene/acoustic-coupling.js';

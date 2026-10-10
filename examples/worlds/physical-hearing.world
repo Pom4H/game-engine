@@ -1,0 +1,43 @@
+# Physical acoustic source and real NPC pressure sensor
+#
+# Existing rigid-body laws decide contact impulse and dissipated energy.
+# The acoustic medium owns wave propagation. NPCs are sensor positions,
+# not scripted reactions; AI policy remains a separate owner.
+world PhysicalHearing {
+  ground: -100m
+  gravity: (0m/s2, 0m/s2, 0m/s2)
+  environment { temperature: 20C }
+
+  entity striker {
+    position: (-0.6m, 2m, 0m)
+    mesh: sphere(0.4m)
+    material: steel
+    body: dynamic(4kg)
+    velocity: (8m/s, 0m/s, 0m/s)
+  }
+  entity receiver {
+    position: (0.6m, 2m, 0m)
+    mesh: sphere(0.4m)
+    material: steel
+    body: dynamic(4kg)
+    velocity: (-8m/s, 0m/s, 0m/s)
+  }
+  # World-space ear marker. Only a renderer may draw it; it is not a
+  # physical wall, collider or acoustic obstacle.
+  entity listener {
+    position: (3m, 2m, 0m)
+    mesh: sphere(0.1m)
+    render_only: true
+  }
+
+  coupling contact_air {
+    from: physics.contact.energy
+    to: acoustic.source.energy
+    min: 0.01J
+  }
+  coupling heard_pressure {
+    from: acoustic.pressure
+    to: npc.hearing.pressure
+    min: 0.05Pa
+  }
+}

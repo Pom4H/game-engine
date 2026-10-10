@@ -23,10 +23,12 @@ export const WORLD_INTERACTION_LAWS=Object.freeze({
   impact:'scene.impact',
   fracture:'scene.fracture',
   mechanism:'scene.mechanism',
+  'acoustic-radiation':'acoustic.radiation',
+  hearing:'npc.hearing',
 } as const);
 export type WorldInteractionLaw=typeof WORLD_INTERACTION_LAWS[keyof typeof WORLD_INTERACTION_LAWS];
 
-export type WorldInteractionDomain='body'|'ground'|'surface'|'environment'|'entity';
+export type WorldInteractionDomain='body'|'ground'|'surface'|'environment'|'entity'|'acoustic'|'agent';
 export interface WorldInteractionRef {
   readonly domain:WorldInteractionDomain;
   readonly id:string;
@@ -66,8 +68,33 @@ export interface WorldEventEffect {
   /** Exactly the engine-committed event, shared by synthesis and replay. */
   readonly event:EngineEvent;
 }
+/** A physically bounded slice of NORMAL energy dissipated by a real contact
+ * that actually reached the pre-existing acoustic solver. */
+export interface WorldAcousticRadiationEffect {
+  readonly kind:'acoustic-radiation';
+  readonly pointM:Vec3;
+  readonly sourceRadiusM:number;
+  readonly contactEnergyJ:number;
+  readonly dissipatedNormalEnergyJ:number;
+  readonly acousticEnergyJ:number;
+  readonly transmissionFraction:number;
+  readonly affectedCells:number;
+  readonly peakPressurePa:number;
+  readonly fieldId:string;
+}
+/** RMS sound pressure sampled from the authoritative wave medium at a real
+ * listener position. No AI intent/decision is inferred from this observation. */
+export interface WorldHearingPressureEffect {
+  readonly kind:'hearing';
+  readonly positionM:Vec3;
+  readonly rmsPressurePa:number;
+  readonly peakAbsPressurePa:number;
+  readonly samples:number;
+  readonly fieldId:string;
+}
 export type WorldInteractionEffect=
-  |WorldContactEffect|WorldWeatherEffect|WorldSurfaceEffect|WorldEventEffect;
+  |WorldContactEffect|WorldWeatherEffect|WorldSurfaceEffect|WorldEventEffect
+  |WorldAcousticRadiationEffect|WorldHearingPressureEffect;
 
 export interface WorldInteraction {
   readonly schema:typeof WORLD_INTERACTION_IR_VERSION;
@@ -148,6 +175,25 @@ function validateEffect(effect:WorldInteractionEffect):void{
       finite(effect.workJ,'surface mechanical work');
       if(effect.workJ<0||!Number.isSafeInteger(effect.affectedCells)||effect.affectedCells<1)
         fail('invalid surface work');
+    }else if(effect.kind==='acoustic-radiation'){
+      vec3(effect.pointM,'radiation position');
+      id(effect.fieldId,'acoustic field');
+      for(const n of [effect.sourceRadiusM,effect.contactEnergyJ,
+        effect.dissipatedNormalEnergyJ,effect.acousticEnergyJ,
+        effect.transmissionFraction,effect.peakPressurePa])finite(n,'acoustic radiation');
+      if(effect.sourceRadiusM<=0||effect.acousticEnergyJ<=0||
+        effect.acousticEnergyJ>effect.dissipatedNormalEnergyJ+1e-9||
+        effect.dissipatedNormalEnergyJ>effect.contactEnergyJ+1e-9||
+        effect.transmissionFraction<0||effect.transmissionFraction>1||
+        effect.affectedCells<1||!Number.isSafeInteger(effect.affectedCells))
+        fail('acoustic radiation exceeds dissipated physical energy');
+    }else if(effect.kind==='hearing'){
+      vec3(effect.positionM,'listener position');
+      id(effect.fieldId,'acoustic field');
+      for(const n of [effect.rmsPressurePa,effect.peakAbsPressurePa])finite(n,'hearing pressure');
+      if(effect.rmsPressurePa<0||effect.peakAbsPressurePa<effect.rmsPressurePa-1e-8||
+        !Number.isSafeInteger(effect.samples)||effect.samples<1)
+        fail('invalid acoustic sensor pressure');
     }else if(effect.kind==='event'){
       finite(effect.event.time,'event time');
       vec3(effect.event.point,'event point');
@@ -188,11 +234,11 @@ export class WorldInteractionJournal {
     if(!Number.isSafeInteger(input.tick)||input.tick<0)fail('tick');
     finite(input.timeSeconds,'timeSeconds');
     id(input.source.id,'source');
-    if(!['body','ground','surface','environment','entity'].includes(input.source.domain))
+    if(!['body','ground','surface','environment','entity','acoustic','agent'].includes(input.source.domain))
       fail('unknown source domain');
     if(input.target){
       id(input.target.id,'target');
-      if(!['body','ground','surface','environment','entity'].includes(input.target.domain))
+      if(!['body','ground','surface','environment','entity','acoustic','agent'].includes(input.target.domain))
         fail('unknown target domain');
     }
     if(input.causeId&&!/^wi:1:[1-9][0-9]*$/.test(input.causeId))fail('invalid causal reference');
@@ -262,6 +308,40 @@ export class WorldInteractionJournal {
         frictionScale:actual.frictionScale,trafficHeatC:actual.trafficHeatC,
         dirt:actual.dirt,trackMelt:actual.trackMelt,
       }},
+    });
+  }
+
+  /** Called only after the acoustic medium accepted the actual energy packet.
+   * The acoustic system owns pressure; this ring only observes its commit. */
+  recordAcousticRadiation(
+    input:Omit<WorldAcousticRadiationEffect,'kind'>,
+    sourceBodyId:string,tick:number,timeSeconds:number,causeId:string,
+  ):WorldInteraction{
+    const couplingIds=this.couplings.filter(c=>
+      c.from==='physics.contact.energy'&&c.to==='acoustic.source.energy'&&
+      input.contactEnergyJ>=(c.min??0)).map(c=>c.id);
+    return this.append({
+      tick,timeSeconds,source:{domain:'body',id:sourceBodyId},
+      target:{domain:'acoustic',id:input.fieldId},causeId,
+      ...(couplingIds.length?{couplingIds}:{}),
+      effect:{kind:'acoustic-radiation',...input},
+    });
+  }
+
+  /** Wave RMS pressure is already computed from CFL-stable medium samples.
+   * It is a sensor reading, not a speculative NPC reaction. */
+  recordHearingPressure(
+    input:Omit<WorldHearingPressureEffect,'kind'>,
+    listenerId:string,tick:number,timeSeconds:number,
+  ):WorldInteraction{
+    const couplingIds=this.couplings.filter(c=>
+      c.from==='acoustic.pressure'&&c.to==='npc.hearing.pressure'&&
+      input.rmsPressurePa>=(c.min??0)).map(c=>c.id);
+    return this.append({
+      tick,timeSeconds,source:{domain:'acoustic',id:input.fieldId},
+      target:{domain:'agent',id:listenerId},
+      ...(couplingIds.length?{couplingIds}:{}),
+      effect:{kind:'hearing',...input},
     });
   }
 
@@ -336,11 +416,11 @@ export function validateWorldInteractionGraph(graph:WorldInteractionGraph):World
       ?WORLD_INTERACTION_LAWS[item.effect.event.type]:WORLD_INTERACTION_LAWS[item.effect.kind];
     if(item.law!==expectedLaw)fail('interaction law contradicts its committed effect');
     id(item.source.id,'graph source');
-    if(!['body','ground','surface','environment','entity'].includes(item.source.domain))
+    if(!['body','ground','surface','environment','entity','acoustic','agent'].includes(item.source.domain))
       fail('invalid graph source domain');
     if(item.target){
       id(item.target.id,'graph target');
-      if(!['body','ground','surface','environment','entity'].includes(item.target.domain))
+      if(!['body','ground','surface','environment','entity','acoustic','agent'].includes(item.target.domain))
         fail('invalid graph target domain');
     }
     finite(item.timeSeconds,'interaction time');
@@ -350,16 +430,35 @@ export function validateWorldInteractionGraph(graph:WorldInteractionGraph):World
        item.id!=='wi:1:'+item.sequence)fail('unordered or invalid interaction identity');
     if(item.tick>graph.tick||item.timeSeconds>graph.timeSeconds+1e-9)
       fail('interaction occurs after the graph');
+    if(item.effect.kind==='acoustic-radiation'&&(
+      !item.causeId||item.source.domain!=='body'||item.target?.domain!=='acoustic'||
+      item.target.id!==item.effect.fieldId))
+      fail('radiation must derive from a body contact into its actual wave field');
+    if(item.effect.kind==='hearing'&&(
+      item.source.domain!=='acoustic'||item.source.id!==item.effect.fieldId||
+      item.target?.domain!=='agent'))
+      fail('hearing must measure an acoustic field at a registered listener');
     if(item.couplingIds!==undefined){
-      if(item.effect.kind!=='event'||!item.causeId||!Array.isArray(item.couplingIds))
-        fail('realized coupling requires a committed event and cause');
-      const observedTarget=item.effect.event.type==='impact'?'audio.impact.energy':
-        item.effect.event.type==='fracture'?'material.fracture.energy':undefined;
+      if(!Array.isArray(item.couplingIds))
+        fail('realized coupling identifiers must form an array');
+      const effect=item.effect;
+      const observedTarget=effect.kind==='event'
+        ?effect.event.type==='impact'?'audio.impact.energy':
+          effect.event.type==='fracture'?'material.fracture.energy':undefined
+        :effect.kind==='acoustic-radiation'?'acoustic.source.energy'
+        :effect.kind==='hearing'?'npc.hearing.pressure':undefined;
+      const observedSource=effect.kind==='hearing'?'acoustic.pressure':'physics.contact.energy';
+      const measured=effect.kind==='event'?effect.event.energy:
+        effect.kind==='acoustic-radiation'?effect.contactEnergyJ:
+        effect.kind==='hearing'?effect.rmsPressurePa:-1;
+      if(!observedTarget||
+        effect.kind!=='hearing'&&!item.causeId)
+        fail('realized coupling requires a committed physical cause');
       const seenCouplingIds=new Set<string>();
       for(const id of item.couplingIds){
         const coupling=byCouplingId.get(id);
-        if(!coupling||seenCouplingIds.has(id)||coupling.from!=='physics.contact.energy'||
-          coupling.to!==observedTarget||item.effect.event.energy<(coupling.min??0))
+        if(!coupling||seenCouplingIds.has(id)||coupling.from!==observedSource||
+          coupling.to!==observedTarget||measured<(coupling.min??0))
           fail('unrealized or invalid coupling reference');
         seenCouplingIds.add(id);
       }

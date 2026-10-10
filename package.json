@@ -13,7 +13,8 @@
     "./meshwork": "./dist/meshwork/index.js",
     "./content": "./dist/content/index.js",
     "./storage": "./dist/storage/index.js",
-    "./world-ir": "./dist/world-ir/index.js"
+    "./world-ir": "./dist/world-ir/index.js",
+    "./scene/acoustic-coupling": "./dist/scene/acoustic-coupling.js"
   },
   "files": [
     "dist",

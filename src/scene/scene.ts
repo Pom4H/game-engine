@@ -16,6 +16,7 @@ import {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type ContactMode
 import {quaternionFromEuler,eulerFromQuaternion} from '../physics/rotation.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
 import {WorldInteractionJournal,type WorldInteractionGraph,type WorldInteractionStats} from '../world-ir/index.js';
+import type {BlastInjection} from '../physics/wave-field.js';
 import {FluidField} from '../physics/fluid.js';
 import {WindField} from '../physics/wind.js';
 import {SoilField,soilWheelSupport} from '../physics/soil.js';
@@ -49,6 +50,8 @@ export interface RuntimeEntity {
   scale:MutableVec3;
   /** Authoritative physical geometry; deformation may replace it. */
   mesh?:Primitive;
+  /** Visual-only entities never contribute physical or acoustic obstacles. */
+  readonly renderOnly?:boolean;
   /** Optional renderer-only high detail geometry, independent of mass/contact shape. */
   renderMesh?:Primitive;
   readonly material:RuntimeMaterial;
@@ -96,6 +99,7 @@ export class Scene {
   enableWorldInteractions(capacity=4096):void{
     if(this.worldInteractionJournal)throw new TypeError('World Interaction IR capture is already active');
     const journal=new WorldInteractionJournal(capacity,this.spec.couplings??[]);
+    this.contactRecordIds=new WeakMap();
     this.stopWorkObserver=this.surfaces.observeContactWork((work,energyJ,affectedCells,surface)=>{
       const at=this.captureStepTime??this.time;
       const tick=this.captureStepTime!==undefined?this.tick+1:this.tick;
@@ -113,6 +117,37 @@ export class Scene {
   disableWorldInteractions():void{
     this.stopWorkObserver?.();this.stopWorkObserver=undefined;
     this.worldInteractionJournal=undefined;
+    this.contactRecordIds=undefined;
+  }
+  /** @internal This records only energy already accepted by the physical
+   * acoustic medium. It cannot add pressure or affect rigid bodies. */
+  observeAcousticRadiation(input:{
+    readonly contact:Contact;readonly fieldId:string;readonly sourceRadiusM:number;
+    readonly dissipatedNormalEnergyJ:number;readonly acousticEnergyJ:number;
+    readonly transmissionFraction:number;readonly result:BlastInjection;
+  },at:number):void{
+    const journal=this.worldInteractionJournal,causeId=this.contactRecordIds?.get(input.contact);
+    if(!journal||!causeId)return;
+    journal.recordAcousticRadiation({
+      fieldId:input.fieldId,pointM:input.contact.point,
+      sourceRadiusM:input.sourceRadiusM,contactEnergyJ:input.contact.normalEnergy,
+      dissipatedNormalEnergyJ:input.dissipatedNormalEnergyJ,
+      acousticEnergyJ:input.acousticEnergyJ,
+      transmissionFraction:input.transmissionFraction,
+      peakPressurePa:input.result.peakPressurePa,
+      affectedCells:input.result.affectedCells,
+    },input.contact.a,this.tick+1,at,causeId);
+  }
+  /** @internal Sensor observes actual pressure, not an inferred NPC action. */
+  observeAcousticHearing(input:{
+    readonly fieldId:string;readonly listenerId:string;readonly positionM:Vec3;
+    readonly rmsPressurePa:number;readonly peakAbsPressurePa:number;readonly samples:number;
+  },at:number):void{
+    this.worldInteractionJournal?.recordHearingPressure({
+      fieldId:input.fieldId,positionM:input.positionM,
+      rmsPressurePa:input.rmsPressurePa,peakAbsPressurePa:input.peakAbsPressurePa,
+      samples:input.samples,
+    },input.listenerId,this.tick+1,at);
   }
   /** Scene-owned force-driver assemblies keyed by their authoritative entity/body id. */
   readonly assemblies=new Map<string,Vehicle>();
@@ -131,6 +166,7 @@ export class Scene {
   private readonly eventQueue:EngineEvent[]=[];
   /** Optional World IR observational stream. Never influences simulation laws. */
   private worldInteractionJournal:WorldInteractionJournal|undefined;
+  private contactRecordIds:WeakMap<Contact,string>|undefined;
   private stopWorkObserver:(()=>void)|undefined;
   private captureStepTime:number|undefined;
   private readonly impactCooldown=new Map<string,number>();
@@ -219,6 +255,7 @@ export class Scene {
     if(body){position=body.position;rotation=body.rotation;}
     const runtime:RuntimeEntity={
       id:spec.id,position,rotation,scale,
+      ...(spec.renderOnly?{renderOnly:true}:{})
       material:Object.freeze({...spec.material,...(spec.material?.texture?{texture:Object.freeze({...spec.material.texture})}:{}),kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
@@ -495,6 +532,7 @@ export class Scene {
   private emitContactEvents(at:number):void{
     for(const contact of this.physics.contacts){
       const causeId=this.worldInteractionJournal?.recordContact(contact,this.tick+1,at).id;
+      if(causeId)this.contactRecordIds?.set(contact,causeId);
       if(contact.normalEnergy<.005)continue;
       const key=contact.b==='ground'?`${contact.a}|ground`:contact.a<contact.b?`${contact.a}|${contact.b}`:`${contact.b}|${contact.a}`;
       const previous=this.impactCooldown.get(key)??-Infinity;
