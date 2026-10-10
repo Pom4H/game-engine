@@ -69,7 +69,10 @@ test('walkthrough uses synthetic provenance, stable paths and no private interna
  assert.ok(raw.events.every(x=>x.origin==='demo'));
  assert.ok(raw.events.every(x=>!x.causeId||journal.has(x.causeId)));
  assert.ok(raw.agents.length>=3);
- assert.equal(raw.capture.width,1280);
+ assert.equal(raw.capture.width,1920);
+ assert.equal(raw.capture.height,1080);
+ assert.equal(raw.capture.fps,24);
+ assert.ok(raw.capture.supersample>1);
 });
 
 test('cinematic replay keeps 24fps positions continuous and turns smooth',()=>{
