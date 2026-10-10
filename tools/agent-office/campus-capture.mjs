@@ -9,6 +9,7 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {once} from 'node:events';
 import {startCampusServer} from './campus-server.mjs';
+import {inspectPng} from '../character-creator/capture.mjs';
 
 const check=(yes,message)=>{if(!yes)throw new Error(message);};
 const delay=ms=>new Promise(done=>setTimeout(done,ms));
@@ -115,8 +116,12 @@ try{
   const png=Buffer.from(capture.data,'base64');
   if(frame===0||frame===Math.floor(frames/2)||frame===frames-1){
    const name=frame===0?'campus-start.png':frame===frames-1?'campus-end.png':'campus-middle.png';
+   const proof=inspectPng(png);
+   check(proof.width===width&&proof.height===height,'Browser screenshot resolution changed at '+frame);
+   check(proof.sampledColours>35&&proof.luminanceDeviation>24,
+     'Scene is clipped/flat at frame '+frame+': '+JSON.stringify(proof));
    await writeFile(join(dir,name),png);
-   previews.push({frame,time,name,sha256:sha(png),bytes:png.length,
+   previews.push({frame,time,name,sha256:sha(png),bytes:png.length,visualProof:proof,
     positions:state.agents.map(a=>({id:a.id,x:a.position[0],z:a.position[2],walking:a.traveling}))});
   }
   if(!encoder.stdin.write(png))await once(encoder.stdin,'drain');
