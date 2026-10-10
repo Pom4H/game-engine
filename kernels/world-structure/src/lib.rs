@@ -280,7 +280,7 @@ mod tests{
         s.floats[COMPLIANCE]=vec![1e-5];
         s.floats[YIELD_LIMIT]=vec![0.1];s.floats[BREAK_LIMIT]=vec![1.0];
         s.ia[0]=0;s.ib[0]=1;
-        for _ in 0..100{assert_eq!(s.step(8,1.0/120.0,V{x:0.,y:0.,z:0.},0.,1.,.001,10.,false),1);}
+        for _ in 0..100{assert_eq!(s.step(8,1.0/120.0,V{x:0.,y:0.,z:0.},0.,1.,0.001,10.,false),1);}
         assert!((s.floats[POSITION][0]-2.0*100.0/120.0).abs()<1e-10);
         assert!((s.floats[POSITION][3]-s.floats[POSITION][0]-1.0).abs()<1e-9);
     }
