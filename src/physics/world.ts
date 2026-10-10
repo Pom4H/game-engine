@@ -442,11 +442,9 @@ export class PhysicsWorld {
     // objects provably unable to touch this infinite ground plane this substep.
     // Use all three box half-extents (the broadphase XZ shapeRadius is NOT
     // conservative vertically), plus plastic-crush offset and angular motion.
-    const h=body.shape.kind==='box'?body.shape.half:undefined;
-    const radius=h?
-      Math.hypot(h[0],h[1],h[2])+
-        Math.hypot(body.collisionOffsetLocal[0],body.collisionOffsetLocal[1],body.collisionOffsetLocal[2]):
-      body.shape.radius;
+    const radius=body.shape.kind==='sphere'?body.shape.radius:
+      Math.hypot(body.shape.half[0],body.shape.half[1],body.shape.half[2])+
+        Math.hypot(body.collisionOffsetLocal[0],body.collisionOffsetLocal[1],body.collisionOffsetLocal[2]);
     const w=body.angularVelocity;
     const maxDownward=Math.max(0,-body.velocity[1])+
       (Math.abs(w[0])+Math.abs(w[1])+Math.abs(w[2]))*radius;
