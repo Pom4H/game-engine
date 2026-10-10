@@ -1,4 +1,5 @@
 name: Engine compare - Three Babylon JS Rust WebGPU
+
 on:
   push:
     branches: [main]
@@ -6,10 +7,14 @@ on:
       - '.github/workflows/engine-compare.yml'
       - 'tools/engine-compare/**'
       - 'kernels/bench-motion/**'
+      - 'src/render/**'
+      - 'src/runtime/browser.ts'
   workflow_dispatch:
+
 concurrency:
   group: engine-compare-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   cubes:
     runs-on: [self-hosted, Windows, X64]
@@ -22,7 +27,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - name: Rust WASM target on self-hosted Windows
+
+      - name: Rust/WASM on self-hosted Windows
         run: |
           $ErrorActionPreference='Stop'
           $cargoDir=Join-Path $env:USERPROFILE '.cargo\bin'
@@ -40,7 +46,8 @@ jobs:
           }
           rustup target add wasm32-unknown-unknown
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Install, build and compile motion kernel
+
+      - name: Build production engine and independent Rust motion kernel
         run: |
           bun install --frozen-lockfile
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -50,7 +57,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/bench-motion/Cargo.toml
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Pin external benchmark and install exact dependencies
+
+      - name: Pin upstream benchmark and install dependencies
         run: |
           $ErrorActionPreference='Stop'
           $upstream='artifacts/engine-compare/upstream'
@@ -60,21 +68,25 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm ci --prefix $upstream
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Prepare identical seeded cube workload
+
+      - name: Assemble common scene for six adapters
         run: |
           node tools/engine-compare/prepare.mjs artifacts/engine-compare/upstream
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Require numerical parity for 120 fixed ticks
+
+      - name: Enforce 120-tick JS/Rust reference parity
         run: |
           node tools/engine-compare/parity.mjs artifacts/engine-compare/upstream
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Compare all 6 GPU variants on installed Chrome
+
+      - name: Benchmark on installed Chrome with real WebGPU
         run: |
           Push-Location artifacts/engine-compare/upstream
           try {
             node tools/rom4-run.mjs --full
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           } finally { Pop-Location }
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

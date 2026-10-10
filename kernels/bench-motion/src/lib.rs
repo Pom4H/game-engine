@@ -1,5 +1,6 @@
-//! Upstream webgl-engine-bench Sim3D motion kernel; production renderer unchanged.
-//! https://github.com/KilledByAPixel/webgl-engine-bench (MIT).
+//! The webgl-engine-bench Sim3D update port. Rust owns the numeric loop only.
+//! The original benchmark spawns seeded objects; ROM4 WebGPU renders the outcome.
+//! Upstream simulation: https://github.com/KilledByAPixel/webgl-engine-bench (MIT).
 use std::cell::RefCell;
 
 const FIELDS: usize = 15;
@@ -10,7 +11,8 @@ thread_local! {
     static STORAGE: RefCell<Vec<f32>> = const { RefCell::new(Vec::new()) };
 }
 
-/// Persistent SoA arrays: x y z vx vy vz rx ry rz sx sy sz r g b.
+/// Allocate stable SoA f32 views for x/y/z, velocities, angles, angular rates, RGB.
+/// JS spawns directly into these buffers; no per-frame JS -> WASM copying.
 #[no_mangle]
 pub extern "C" fn reserve(capacity: u32) -> u32 {
     let cap = capacity as usize;
@@ -23,14 +25,15 @@ pub extern "C" fn reserve(capacity: u32) -> u32 {
 }
 
 fn bounded_step(data: &mut [f32], capacity: usize, count: usize) {
-    // JS typed-array writes round to f32, arithmetic runs in f64.
     for i in 0..count {
         for axis in 0..3 {
             let p = axis * capacity + i;
             let v = (axis + 3) * capacity + i;
-            let boundary = match axis { 0 => 28.0, 1 => 15.0, _ => 0.0 };
-            let min = if axis == 2 { -20.0 } else { -boundary };
-            let max = if axis == 2 { 8.0 } else { boundary };
+            let bound = match axis { 0 => 28.0, 1 => 15.0, _ => 0.0 };
+            let min = if axis == 2 { -20.0 } else { -bound };
+            let max = if axis == 2 { 8.0 } else { bound };
+            // JS Float32Array arithmetic promotes f32 inputs to f64,
+            // then rounds ONCE to f32 on assignment.
             let next = (data[p] as f64 + data[v] as f64 * DT) as f32;
             if next < min {
                 data[p] = min;
@@ -39,12 +42,13 @@ fn bounded_step(data: &mut [f32], capacity: usize, count: usize) {
                 data[p] = max;
                 data[v] = -data[v];
             } else { data[p] = next; }
-            let rotation = (axis + 6) * capacity + i;
-            let spin = (axis + 9) * capacity + i;
-            data[rotation] = (data[rotation] as f64 + data[spin] as f64 * DT) as f32;
+            let r = (axis + 6) * capacity + i;
+            let s = (axis + 9) * capacity + i;
+            data[r] = (data[r] as f64 + data[s] as f64 * DT) as f32;
         }
     }
 }
+
 #[no_mangle]
 pub extern "C" fn step(count: u32) -> u32 {
     STORAGE.with(|storage| {
@@ -55,11 +59,12 @@ pub extern "C" fn step(count: u32) -> u32 {
         1
     })
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
-    fn walls_reflect_and_tints_do_not_change() {
+    fn wall_bounces_but_tint_is_unchanged() {
         let mut arr = vec![0.0; 15 * 2];
         arr[0] = 27.99;
         arr[3 * 2] = 4.0;
@@ -70,7 +75,7 @@ mod tests {
         assert_eq!(arr[24], 0.8);
     }
     #[test]
-    fn rejected_capacities() {
+    fn bounds_checked() {
         assert_eq!(reserve(0), 0);
         assert_eq!(reserve((MAX_CAPACITY + 1) as u32), 0);
     }
