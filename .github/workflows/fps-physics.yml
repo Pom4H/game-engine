@@ -14,8 +14,8 @@ on:
   workflow_dispatch:
 jobs:
   physics-budget:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

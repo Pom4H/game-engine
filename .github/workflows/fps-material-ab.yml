@@ -1,31 +1,16 @@
-name: Effects GI A/B - native GPU and image parity
+name: Effects GI A/B - self-hosted RDNA3
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'tools/fps/compare-gpu-images.mjs'
-      - 'src/render/lighting.ts'
-      - '.github/workflows/fps-material-ab.yml'
   workflow_dispatch:
 concurrency:
   group: effects-gi-ab-${{ github.ref }}
   cancel-in-progress: false
-
 jobs:
   compare:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - label: windows-rdna3
-            runner: '["self-hosted", "Windows", "X64"]'
-          - label: apple-silicon
-            runner: '"macos-latest"'
-    runs-on: ${{ fromJSON(matrix.runner) }}
-    timeout-minutes: 28
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
     defaults:
       run:
-        shell: bash
+        shell: powershell
     env:
       BASELINE_SHA: c9c5ecbedd291df8ed1100e784c8038d4c9904ee
       RENDER_PROFILING: '1'
@@ -39,28 +24,38 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - name: Ensure ffmpeg for image comparison
-        if: runner.os == 'macOS'
-        run: brew list ffmpeg >/dev/null 2>&1 || brew install ffmpeg
-      - name: Render and profile original material shader
+      - name: Baseline GPU frame and reference images
         run: |
-          git -c advice.detachedHead=false checkout -f "$BASELINE_SHA"
+          $ErrorActionPreference='Stop'
+          git -c advice.detachedHead=false checkout -f $env:BASELINE_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           bun run build
-          RENDER_FPS_BENCH_LABEL=baseline node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
-          mkdir -p artifacts/fps/label-ab-baseline
-          cp artifacts/render34.png artifacts/render35.png artifacts/render36.png artifacts/render37.png artifacts/fps/label-ab-baseline/
-      - name: Render and profile optimized material shader
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:RENDER_FPS_BENCH_LABEL='baseline'
+          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force artifacts/fps/label-ab-baseline | Out-Null
+          Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png artifacts/fps/label-ab-baseline/ -Force
+      - name: Same-device optimized GPU frame and image equivalence
         run: |
-          git -c advice.detachedHead=false checkout -f "$GITHUB_SHA"
+          $ErrorActionPreference='Stop'
+          git -c advice.detachedHead=false checkout -f $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           bun run build
-          RENDER_FPS_BENCH_LABEL=optimized node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:RENDER_FPS_BENCH_LABEL='optimized'
+          node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/fps/compare-gpu-images.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: effects-gi-ab-${{ matrix.label }}
+          name: effects-gi-ab-rdna3
           path: |
             artifacts/fps/gpu-budget-baseline.json
             artifacts/fps/gpu-budget-optimized.json
