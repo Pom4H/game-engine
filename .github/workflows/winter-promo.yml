@@ -7,7 +7,7 @@ on:
       - 'src/scene/**'
       - 'src/audio/**'
       - 'tools/promo/**'
-   workflow_dispatch:
+  workflow_dispatch:
 
 concurrency:
   group: winter-promo-${{ github.ref }}
