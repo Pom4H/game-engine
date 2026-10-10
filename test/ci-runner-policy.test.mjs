@@ -35,3 +35,17 @@ test('performance and rendering CI use only our Windows self-hosted worker',()=>
     }
   }
 });
+
+test('every workflow runs on our self-hosted runners, never GitHub-hosted',()=>{
+  for(const file of files){
+    const source=load(file);
+    // Include all jobs (even manual and reusable workflows), not only
+    // performance benchmarks. Bolid is a separate repository and exempt.
+    const runnerValues=[...source.matchAll(/^\s*runs-on:\s*(.+)$/gm)]
+      .map(match=>match[1].trim()).filter(value=>!value.startsWith('#'));
+    for(const runner of runnerValues){
+      assert.match(runner,/\bself-hosted\b/i,file+': '+runner);
+      assert.doesNotMatch(runner,/\b(?:ubuntu-|windows-|macos-|ubuntu-latest|windows-latest|macos-latest)\b/i,file+': '+runner);
+    }
+  }
+});

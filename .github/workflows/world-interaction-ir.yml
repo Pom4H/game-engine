@@ -35,7 +35,7 @@ on:
       - '.github/workflows/world-interaction-ir.yml'
 jobs:
   causal-parity:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

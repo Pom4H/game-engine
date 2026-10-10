@@ -11,7 +11,7 @@ on:
 
 jobs:
   oracle:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

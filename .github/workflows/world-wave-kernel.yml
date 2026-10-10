@@ -24,7 +24,7 @@ on:
       - '.github/workflows/world-wave-kernel.yml'
 jobs:
   wasm-physics:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

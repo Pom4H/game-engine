@@ -54,7 +54,7 @@ jobs:
 
   prove:
     needs: calibrate
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

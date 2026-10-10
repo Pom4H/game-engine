@@ -28,7 +28,7 @@ on:
       - '.github/workflows/scene-acoustic-coupling.yml'
 jobs:
   acoustic-physical:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
