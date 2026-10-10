@@ -1,4 +1,5 @@
 import {performance} from 'node:perf_hooks';
+import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -65,6 +66,14 @@ function bench(input,quick=false){
 const quick=process.argv.includes('--quick');
 const results=cases.map(item=>({id:item.id,dynamic:item.dynamic,static:item.static,
  fingerprint:fingerprint(item),performance:bench(item,quick)}));
+// Reference fingerprints were captured from main BEFORE the fast ground path.
+const golden={
+ 'airborne-boxes-128':'628ec336922ff0b9a98156403ffe4100087cd7a22519402397bd8b9470ae4448',
+ 'ground-boxes-96':'98ac74c13b72b755e91b55c49a5a4225386e4e43ab0ec17e0a8841f402692686',
+ 'static-world-512':'cab98b9f89d44ae2a4c8bf259164a64de1d25e9097061114d0d0dc15627acdc7',
+};
+for(const result of results)assert.equal(result.fingerprint,golden[result.id],
+  'Physical replay changed in '+result.id+'; performance cannot override causality');
 const report={schema:1,commit:process.env.GITHUB_SHA??null,platform:process.platform,node:process.version,
  method:'PhysicsWorld 60Hz, 90 tick natural replay SHA256 of all body/contact states; timed rotating deterministic workload refresh; each round recreates physics world, 45 warmup ticks. CPU-only, not game FPS.',
  samples:results};

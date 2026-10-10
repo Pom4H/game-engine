@@ -438,6 +438,19 @@ export class PhysicsWorld {
   }
 
   private resolveGround(body:RigidBody,dt:number):void{
+    // Cheap conservative swept bound: do not build eight rotated corners for
+    // objects provably unable to touch this infinite ground plane this substep.
+    // Use all three box half-extents (the broadphase XZ shapeRadius is NOT
+    // conservative vertically), plus plastic-crush offset and angular motion.
+    const h=body.shape.kind==='box'?body.shape.half:undefined;
+    const radius=h?
+      Math.hypot(h[0],h[1],h[2])+
+        Math.hypot(body.collisionOffsetLocal[0],body.collisionOffsetLocal[1],body.collisionOffsetLocal[2]):
+      body.shape.radius;
+    const w=body.angularVelocity;
+    const maxDownward=Math.max(0,-body.velocity[1])+
+      (Math.abs(w[0])+Math.abs(w[1])+Math.abs(w[2]))*radius;
+    if(body.position[1]-radius-maxDownward*dt>this.ground+.0015)return;
     this.resolveHorizontalSurface(body,this.ground,this.groundMaterial,'ground',dt);
   }
 
@@ -717,8 +730,17 @@ function applyInertiaWorld(body:RigidBody,v:Vec3):MutableVec3{
 function groundSupportVector(body:RigidBody):MutableVec3{return groundContactManifold(body).points[0]??[0,groundContactManifold(body).lowest,0];}
 function groundContactManifold(body:RigidBody):{lowest:number;points:MutableVec3[]}{
   if(body.shape.kind==='sphere')return{lowest:-body.shape.radius,points:[[0,-body.shape.radius,0]]};
-  const h=boxHalf(body),offset=rotateLocal(body.rotation,body.collisionOffsetLocal),corners:MutableVec3[]=[];
-  for(const x of [-h[0],h[0]])for(const y of [-h[1],h[1]])for(const z of [-h[2],h[2]])corners.push(V3.add(offset,rotateLocal(body.rotation,[x,y,z])));
+  const h=boxHalf(body),basis=rotationBasis(body.rotation);
+  // A rigid body's orientation is constant for the contact manifold. The old
+  // loop rebuilt this trigonometric basis nine times per ground contact.
+  // Preserve the exact scalar arithmetic/order used by rotateLocal.
+  const rotate=(v:Vec3):MutableVec3=>[
+    basis[0][0]*v[0]+basis[1][0]*v[1]+basis[2][0]*v[2],
+    basis[0][1]*v[0]+basis[1][1]*v[1]+basis[2][1]*v[2],
+    basis[0][2]*v[0]+basis[1][2]*v[1]+basis[2][2]*v[2],
+  ];
+  const offset=rotate(body.collisionOffsetLocal),corners:MutableVec3[]=[];
+  for(const x of [-h[0],h[0]])for(const y of [-h[1],h[1]])for(const z of [-h[2],h[2]])corners.push(V3.add(offset,rotate([x,y,z])));
   let lowest=Infinity;for(const corner of corners)lowest=Math.min(lowest,corner[1]);
   const minHalf=Math.min(h[0],h[1],h[2]),band=Math.max(.0018,minHalf*.42);
   const points=corners.filter(corner=>corner[1]<=lowest+band).sort((a,b)=>a[1]-b[1]||a[0]-b[0]||a[2]-b[2]);
