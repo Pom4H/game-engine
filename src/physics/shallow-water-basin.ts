@@ -126,7 +126,7 @@ export class ShallowWaterBasin {
     };
     const h=field(this.depth);
     const localU=new Float64Array(4),localV=new Float64Array(4);
-    const cells=[[x0,z0],[x1,z0],[x0,z1],[x1,z1]];
+    const cells:readonly (readonly [number,number])[]=[[x0,z0],[x1,z0],[x0,z1],[x1,z1]];
     for(let k=0;k<4;k++){
       const [cx,cz]=cells[k]!;
       const px=cz*(nx+1)+cx,pz=cz*nx+cx;
