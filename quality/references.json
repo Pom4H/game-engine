@@ -55,6 +55,33 @@
       "license": "project-owned",
       "purpose": "Force-balance, energy ledger, conservation, timestep convergence; replay SHA alone is insufficient",
       "status": "active"
+    },
+    {
+      "id": "merl-brdf",
+      "domain": "image",
+      "kind": "measured BRDF of 100 real materials",
+      "url": "https://cdfg.mit.edu/wojciech/brdfdatabase/",
+      "license": "Research/academic-use only. Do not redistribute in commercial software without separate permission.",
+      "purpose": "Angular reflectance as independent physical oracle for rough/metal/dielectric material lobes; measure BRDF vs shader PBR law",
+      "status": "cataloged-not-calibrated"
+    },
+    {
+      "id": "mpi-sintel",
+      "domain": "image",
+      "kind": "reference motion vectors and image sequences",
+      "url": "https://sintel.is.tue.mpg.de/downloads",
+      "license": "Review MPI Sintel dataset and open-film redistribution terms before bundling.",
+      "purpose": "Ground truth motion vectors, occlusion, depth and temporal reconstruction artifacts (not a real-world photorealism oracle)",
+      "status": "cataloged-not-calibrated"
+    },
+    {
+      "id": "nlr-naca0012",
+      "domain": "physics",
+      "kind": "measured airfoil aerodynamic polar",
+      "url": "https://data.nlr.gov/submissions/311",
+      "license": "Review the dataset's individual license/terms before download or redistribution",
+      "purpose": "Lift/drag vs angle of attack and stall against experimental measurements; enforce same Reynolds number, geometry and airflow",
+      "status": "cataloged-not-calibrated"
     }
   ]
 }
