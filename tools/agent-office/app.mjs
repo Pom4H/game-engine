@@ -42,6 +42,7 @@ function refreshBounds(){
   else if(cursorMs<firstMs||cursorMs>lastMs)cursorMs=firstMs;
   $('#duration').textContent=time(lastMs-firstMs);
   $('#count').textContent=facts.length+' EVENTS';
+  $('#activity-count').textContent=facts.length+' EVENTS';
 }
 function viewCamera(){
   if(!office)return;
@@ -105,7 +106,7 @@ function renderUi(){
   const facts=journal.snapshot(),states=office?.project(facts,cursorMs)??[];
   slider.value=String(Math.max(0,(cursorMs-firstMs)/1000));
   $('#cursor').textContent=time(Math.max(0,cursorMs-firstMs));
-  $('#play').textContent=playing?'Ⅱ':'▶';
+  $('#play > span:first-child').textContent=playing?'Ⅱ':'▶';
   renderAgents(states);renderEvents(facts.filter(f=>f.atMs<=cursorMs));renderLineage();
   const tokens=states.reduce((s,a)=>s+a.tokens,0),cost=states.reduce((s,a)=>s+a.costUsd,0);
   $('#accounting').textContent=tokens.toLocaleString('en-US')+' TOKENS · $'+cost.toFixed(4);
@@ -138,7 +139,7 @@ async function init(){
   if(!response.ok)throw new Error('Cannot read activity snapshot: HTTP '+response.status);
   const snapshot=await response.json();mode=snapshot.mode;
   $('#mode').textContent=mode==='demo'?'REPLAY':'LIVE';
-  $('#provenance').textContent=mode==='demo'?'DEMONSTRATION · SYNTHETIC EVENTS':'OBSERVED EVENTS';
+  $('#provenance').textContent=mode==='demo'?'DEMO · SYNTHETIC':'OBSERVED DATA';
   journal.ingestMany(snapshot.events);refreshBounds();
   renderer=await WebGPURenderer.create(canvas);
   await rebuildIfNeeded();viewCamera();resize();renderUi();
@@ -163,7 +164,7 @@ function frame(now){
       renderer.render(office.scene);
       const stats=renderer.inspect();
       if(frameCount++%12===0){
-        $('#render-stats').textContent=(stats.drawCalls??0)+' DRAWS / '+(stats.triangles??0)+' TRIANGLES';
+        $('#render-stats').textContent='WEBGPU  ·  '+(stats.drawCalls??0)+' DRAWS  ·  '+(stats.triangles??0).toLocaleString('en-US')+' TRIS';
       }
     }catch(e){error(e);return;}
     dirty=false;

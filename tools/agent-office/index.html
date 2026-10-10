@@ -1,41 +1,48 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#161b1e">
-  <title>Toy Brick Office — The Engine</title>
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/tools/agent-office/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101c23">
+<title>The Engine — Agent Office</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/tools/agent-office/style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="identity"><span class="mark" aria-hidden="true">◩</span><strong>THE ENGINE</strong><span class="divider"></span><span>OBSERVATORY</span></div>
-    <div class="mode"><span id="connection" class="connection"></span><span id="mode">REPLAY</span><span id="count">0 EVENTS</span></div>
-  </header>
-  <main class="workspace">
-    <section class="stage" aria-label="Офис агентов — трёхмерная визуализация">
-      <canvas id="scene" aria-label="3D офис с агентами, их рабочими местами и индикаторами состояний"></canvas>
-      <div class="stage-heading"><span class="eyebrow">01 / CAUSAL WORLD</span><h1>Agent office</h1><p>Игрушечный мир реальных событий агентов</p></div>
-      <div class="stage-corner" id="stage-corner">TOY-BRICK / WEBGPU</div>
-      <div class="stage-footer"><span>Перетащите для вращения · Колесо для масштаба</span><span id="render-stats">—</span></div>
-      <div id="error" class="error" hidden></div>
-    </section>
-    <aside class="inspector">
-      <div class="panel-heading"><span>AGENTS</span><span id="agent-count">00</span></div>
-      <div class="agents" id="agents"></div>
-      <div class="panel-heading" id="activity-heading"><span>EVENTS</span><span>CAUSAL LOG</span></div>
-      <div class="events" id="events"></div>
-      <div class="lineage"><div class="panel-heading"><span>CAUSE CHAIN</span><span id="chain-count">—</span></div><div id="cause-chain" class="cause-chain">Выберите событие</div></div>
-    </aside>
-  </main>
-  <footer class="timeline">
-    <button id="play" aria-label="Пуск или пауза">▶</button>
-    <span class="timeline-label" id="cursor">00:00</span>
-    <input type="range" id="seek" min="0" max="1" step="0.05" value="0" aria-label="Положение воспроизведения">
-    <span class="timeline-label" id="duration">00:00</span>
-    <div class="timeline-meta"><span id="provenance">DEMO DATA</span><span id="accounting">0 TOKENS · $0.00</span></div>
-  </footer>
-  <script type="module" src="/tools/agent-office/app.mjs"></script>
+<header class="topbar">
+  <div class="identity" aria-label="The Engine Observatory">
+    <span class="mark" aria-hidden="true"></span>
+    <span class="identity-label"><strong>THE ENGINE</strong><small>OBSERVATORY / 01</small></span>
+  </div>
+  <div class="product-nav" aria-label="Текущее представление">
+    <span class="active">Office</span><span>Activity</span><span>Systems</span>
+  </div>
+  <div class="mode"><span id="connection" class="connection" aria-hidden="true"></span><span id="mode">REPLAY</span><span class="separator" aria-hidden="true"></span><span id="count">0 EVENTS</span></div>
+</header>
+<main class="workspace">
+ <section class="stage" aria-label="Визуализация офиса агентов">
+   <canvas id="scene" aria-label="3D-офис The Engine с минифигурками и рабочими местами; вращайте перетаскиванием" tabindex="0"></canvas>
+   <div class="stage-wash" aria-hidden="true"></div>
+   <div class="stage-heading"><span class="eyebrow">LIVE SYSTEM VISUALIZATION</span><h1>Agent office<span class="period">.</span></h1><p>Observe the work. Follow the cause.</p><div class="stage-submeta"><span>ONE CAUSAL WORLD</span><span>TOY-BRICK LOD</span></div></div>
+   <div class="stage-corner"><span class="stage-level active">World</span><span class="stage-level">Team</span><span class="stage-level">Agent</span></div>
+   <div class="stage-footer"><div class="stage-caption"><strong>Development team</strong><span>Перетащите для вращения · Колесо для масштаба</span></div><span id="render-stats" class="render-stats">WEBGPU</span></div>
+   <div id="error" class="error" hidden></div>
+ </section>
+ <aside class="inspector" aria-label="Данные об агентах">
+  <div class="panel-heading"><span>YOUR AGENTS</span><span id="agent-count">00</span></div>
+  <div id="agents" class="agents"></div>
+  <div class="panel-heading" id="activity-heading"><span>ACTIVITY / CAUSAL LOG</span><span id="activity-count">EVENTS</span></div>
+  <div id="events" class="events"></div>
+  <div class="lineage"><div class="panel-heading"><span>SELECTED TRACE</span><span id="chain-count">—</span></div><div id="cause-chain" class="cause-chain">Выберите событие, чтобы увидеть цепочку причин</div></div>
+ </aside>
+</main>
+<footer class="timeline">
+ <button id="play" aria-label="Воспроизвести / остановить"><span aria-hidden="true">▶</span> <span class="play-word">REPLAY</span></button>
+ <span id="cursor" class="timeline-label">00:00</span>
+ <input type="range" id="seek" min="0" max="1" step="0.05" value="0" aria-label="Время воспроизведения">
+ <span id="duration" class="timeline-label">00:00</span>
+ <div class="timeline-meta"><span id="provenance">SYNTHETIC REPLAY</span><span id="accounting">0 TOKENS · $0.00</span></div>
+</footer>
+<script type="module" src="/tools/agent-office/app.mjs"></script>
 </body>
 </html>
