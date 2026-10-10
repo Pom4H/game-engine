@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "description": "Independent reality sources. Catalog entries are NOT automatically accepted baselines; calibration/camera/geometry and provenance still required.",
+  "sources": [
+    {
+      "id": "stanford-orb",
+      "domain": "image",
+      "kind": "measured HDR photos",
+      "url": "https://github.com/StanfordORB/Stanford-ORB",
+      "license": "Review dataset terms for redistribution; do not assume CC0",
+      "purpose": "2795 HDR photographs, scanned geometry and aligned environment maps; relighting under known camera and lighting",
+      "status": "cataloged-not-calibrated"
+    },
+    {
+      "id": "polyhaven-hdri",
+      "domain": "image",
+      "kind": "HDR environment illumination",
+      "url": "https://polyhaven.com/hdris",
+      "license": "CC0",
+      "purpose": "Controlled environment-map illumination; alone NOT a photorealism oracle",
+      "status": "cataloged-not-calibrated"
+    },
+    {
+      "id": "khronos-clearcoat",
+      "domain": "image",
+      "kind": "automotive PBR material",
+      "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/ClearCoatCarPaint",
+      "license": "CC0 for this model, see model's own LICENSE.md",
+      "purpose": "Verify layered automotive paint vs matching reference-renderer camera/light",
+      "status": "cataloged-not-calibrated"
+    },
+    {
+      "id": "aachen-air",
+      "domain": "audio",
+      "kind": "measured binaural room impulse response",
+      "url": "https://www.iks.rwth-aachen.de/en/research/tools-downloads/databases/aachen-impulse-response-database",
+      "license": "MIT in original dataset",
+      "purpose": "Room reverberation, early reflections, binaural cues; measure with matching speaker and mic positions",
+      "status": "cataloged-not-calibrated"
+    },
+    {
+      "id": "but-reverbdb",
+      "domain": "audio",
+      "kind": "measured room impulse response",
+      "url": "https://speech.fit.vut.cz/software/but-speech-fit-reverb-database",
+      "license": "CC BY 4.0",
+      "purpose": "Independent measured reverb and room noise with location metadata",
+      "status": "cataloged-not-calibrated"
+    },
+    {
+      "id": "proving-ground-analytic",
+      "domain": "physics",
+      "kind": "independent physical equations",
+      "url": "https://github.com/Pom4H/game-engine/blob/main/docs/PHYSICS_ENERGY_ACCOUNTING.md",
+      "license": "project-owned",
+      "purpose": "Force-balance, energy ledger, conservation, timestep convergence; replay SHA alone is insufficient",
+      "status": "active"
+    }
+  ]
+}

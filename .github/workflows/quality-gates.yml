@@ -1,0 +1,121 @@
+name: Reality quality gates
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'compiler/**'
+      - 'kernels/**'
+      - 'tools/quality/**'
+      - 'tools/fps/**'
+      - 'tools/proving-ground/**'
+      - 'tools/acoustic-demo.mjs'
+      - 'tools/car-garage-audio-demo.mjs'
+      - 'tools/render-harness.mjs'
+      - 'tools/promo/**'
+      - 'test/**'
+      - 'quality/**'
+      - 'docs/QUALITY_REFERENCES.md'
+      - '.github/workflows/quality-gates.yml'
+  workflow_dispatch:
+    inputs:
+      strict_references:
+        description: 'Require approved real-world references for release'
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: reality-quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  physics-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Test physical laws and deterministic acoustic synthesis
+        run: node --test test/quality-gates.test.mjs test/proving-ground.test.mjs test/contact-laws.test.mjs test/audio-foundation.test.mjs test/acoustic-transfer.test.mjs test/wave-field.test.mjs test/shallow-water-basin.test.mjs
+      - name: Golden replay physics + measured 60Hz CPU cost
+        run: node tools/fps/physics-benchmark.mjs
+      - name: Physics experiment coverage
+        run: node tools/proving-ground/physics-exam.mjs
+      - name: Render acoustic experiments to WAV and transfer metadata
+        run: |
+          node tools/acoustic-demo.mjs
+          node tools/car-garage-audio-demo.mjs
+      - name: Physics / audio quality report
+        env:
+          QUALITY_STRICT: ${{ inputs.strict_references }}
+        run: |
+          if [ "$QUALITY_STRICT" = "true" ]; then
+            node tools/quality/gate.mjs cpu --strict-references
+          else
+            node tools/quality/gate.mjs cpu
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reality-physics-audio
+          retention-days: 21
+          path: |
+            artifacts/quality/
+            artifacts/fps/physics-budget.json
+            artifacts/proving-ground/physics-report.json
+            artifacts/acoustic-demo/
+            artifacts/car-garage-audio/
+  render-performance:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Regression metric tests
+        run: node --test test/quality-gates.test.mjs
+      - name: Locate Chrome and ffmpeg
+        run: |
+          $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe")
+          $chrome = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $chrome) { throw 'Chrome hardware browser unavailable' }
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) { throw 'ffmpeg unavailable' }
+          "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Real WebGPU 1080p (90 frames) and four M3 reference angles
+        env:
+          RENDER_PROFILING: '1'
+          RENDER_REQUIRE_HARDWARE: '1'
+          RENDER_FPS_BENCH_FRAMES: '90'
+          RENDER_WARMUP_FRAMES: '12'
+        run: node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+      - name: Profiled GPU / image quality gate
+        env:
+          QUALITY_STRICT: ${{ inputs.strict_references }}
+        run: |
+          $args = @('tools/quality/gate.mjs', 'gpu', '--profile=windows-hardware-1080p')
+          if ($env:QUALITY_STRICT -eq 'true') { $args += '--strict-references' }
+          node @args
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reality-gpu-1080p
+          retention-days: 21
+          path: |
+            artifacts/quality/
+            artifacts/fps/gpu-budget.json
+            artifacts/render-hud.json
+            artifacts/render34.png
+            artifacts/render35.png
+            artifacts/render36.png
+            artifacts/render37.png

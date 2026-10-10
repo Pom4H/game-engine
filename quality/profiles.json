@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "physics": {
+    "expectedFixtures": [
+      "airborne-boxes-128",
+      "ground-boxes-96",
+      "static-world-512"
+    ],
+    "maxMedianTickMs": 5,
+    "minimumExperiments": 4
+  },
+  "gpu": {
+    "windows-hardware-1080p": {
+      "platform": "win32",
+      "resolution": [
+        1920,
+        1080
+      ],
+      "minFrames": 90,
+      "minGpuFrames": 10,
+      "maxFrameIntervalP95Ms": 17.6,
+      "maxCpuFrameP95Ms": 16.667,
+      "maxGpuP95Ms": 16.667
+    },
+    "apple-silicon-1080p": {
+      "platform": "darwin",
+      "resolution": [
+        1920,
+        1080
+      ],
+      "minFrames": 90,
+      "minGpuFrames": 10,
+      "maxFrameIntervalP95Ms": 17.6,
+      "maxCpuFrameP95Ms": 16.667,
+      "maxGpuP95Ms": 16.667
+    }
+  },
+  "render": {
+    "minimumLumaStdDev": 0.025,
+    "minimumMeanEdge": 0.002,
+    "maximumBlackFraction": 0.94,
+    "maximumWhiteFraction": 0.94,
+    "minimumSSIM": 0.965,
+    "maximumAbsoluteLumaError": 0.025,
+    "scenes": [
+      {
+        "id": "clear-winter-m3",
+        "scene": "tools/promo/clear-day.scene.mjs",
+        "views": [
+          {
+            "name": "front-left",
+            "output": "artifacts/render34.png",
+            "baseline": null,
+            "referenceIds": [
+              "stanford-orb",
+              "polyhaven-hdri",
+              "khronos-clearcoat"
+            ]
+          },
+          {
+            "name": "rear-left",
+            "output": "artifacts/render35.png",
+            "baseline": null,
+            "referenceIds": [
+              "stanford-orb",
+              "khronos-clearcoat"
+            ]
+          },
+          {
+            "name": "rear-right",
+            "output": "artifacts/render36.png",
+            "baseline": null,
+            "referenceIds": [
+              "stanford-orb",
+              "khronos-clearcoat"
+            ]
+          },
+          {
+            "name": "front-right",
+            "output": "artifacts/render37.png",
+            "baseline": null,
+            "referenceIds": [
+              "stanford-orb",
+              "khronos-clearcoat"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "audio": {
+    "minimumRms": 0.000001,
+    "maximumPeak": 1.0001,
+    "maximumDcAbs": 0.1,
+    "maximumClippedFraction": 0.002,
+    "captures": [
+      "artifacts/acoustic-demo/door-open.wav",
+      "artifacts/acoustic-demo/door-closed.wav",
+      "artifacts/car-garage-audio/car-dry.wav",
+      "artifacts/car-garage-audio/car-into-garage.wav"
+    ],
+    "externalReference": null
+  }
+}
