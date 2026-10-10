@@ -36,9 +36,14 @@ function physics(){
 
 function audio(){
   const settings=config.audio,captures=[];
+  const isolated=json('artifacts/acoustic-demo/transfer.json').closed;
+  const perfectlyIsolated=isolated.direct.gain===0&&isolated.reflections.length===0&&(isolated.late?.gain??0)===0;
   for(const file of settings.captures){
     const metrics=audioFeatures(decodeWav(readFileSync(file))),name=file.split('/').at(-1),rms=Math.max(...metrics.channels.map(x=>x.rms));
-    assess('audio',[checkRange(name+' non-silent RMS',rms,settings.minimumRms,'min'),
+    const signalCheck=file.endsWith('/door-closed.wav')&&perfectlyIsolated
+      ?checkRange(name+' correctly silent ideal boundary',rms,settings.minimumRms)
+      :checkRange(name+' non-silent RMS',rms,settings.minimumRms,'min');
+    assess('audio',[signalCheck,
       checkRange(name+' peak',metrics.peak,settings.maximumPeak),
       checkRange(name+' clipped fraction',metrics.clippedFraction,settings.maximumClippedFraction),
       checkRange(name+' DC',Math.max(...metrics.channels.map(x=>Math.abs(x.dc))),settings.maximumDcAbs)]);
@@ -49,6 +54,7 @@ function audio(){
     'open='+door.open.direct.gain+' closed='+door.closed.direct.gain);
   const frames=json('artifacts/car-garage-audio/trajectory.json').transferFrames;
   check('audio','garage acoustic evolution',frames.length>=4&&new Set(frames.map(x=>Math.round(x.directGain*1000))).size>1);
+  if(perfectlyIsolated)missing('audio','real wall transmission','Our ideal sealed-boundary experiment transmits no sound; real finite-transmission walls require measured material data.');
   if(!settings.externalReference)missing('audio','real-room agreement','Pin an AIR/BUT measurement with matching room and source/listener geometry; signal sanity does not prove realism.');
   results.audio={captures,doorAttenuationRatio:door.comparison.directGainRatio,garageSnapshots:frames.length,externalReference:settings.externalReference};
 }
