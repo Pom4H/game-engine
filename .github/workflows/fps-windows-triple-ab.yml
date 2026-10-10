@@ -4,10 +4,14 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/fps-windows-triple-ab.yml'
+      - 'src/render/webgpu.ts'
+      - 'src/render/lighting.ts'
+      - 'test/shader-zero-contribution.test.mjs'
+      - 'tools/fps/compare-gpu-images.mjs'
   workflow_dispatch:
 concurrency:
   group: gpu-shader-triple-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   compare:
     runs-on: [self-hosted, Windows, X64]
@@ -19,6 +23,7 @@ jobs:
       RENDER_REQUIRE_HARDWARE: '1'
       RENDER_FPS_BENCH_FRAMES: '90'
       RENDER_WARMUP_FRAMES: '12'
+      GPU_AB_REQUIRE_TIMESTAMPS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,6 +74,8 @@ jobs:
           bun install --frozen-lockfile
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           bun run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test test/shader-zero-contribution.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Copy-Item artifacts/fps/gpu-budget-material.json artifacts/fps/gpu-budget-baseline.json -Force
           Copy-Item artifacts/fps/material-views/render34.png,artifacts/fps/material-views/render35.png,artifacts/fps/material-views/render36.png,artifacts/fps/material-views/render37.png artifacts/fps/label-ab-baseline/ -Force

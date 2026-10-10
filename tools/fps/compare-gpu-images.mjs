@@ -19,6 +19,13 @@ assert.deepEqual(current.resolution,expected);
 assert.equal(baseline.adapter?.vendor,current.adapter?.vendor,'different GPU vendors');
 assert.equal(baseline.adapter?.architecture,current.adapter?.architecture,'different GPU architectures');
 assert.equal(baseline.requestedFrames,current.requestedFrames);
+if(process.env.GPU_AB_REQUIRE_TIMESTAMPS==='1'){
+  for(const [label,sample] of [['baseline',baseline],['optimized',current]]){
+    assert.equal(sample.timestampQueries,true,label+' must expose real GPU timestamps');
+    assert.ok((sample.gpuFrames??0)>=10,label+' has insufficient GPU samples');
+    assert.ok(Number.isFinite(sample.gpu?.p95Ms)&&sample.gpu.p95Ms>0,label+' lacks p95 GPU timing');
+  }
+}
 function rgb(file){
  const p=resolve(root,file);
  const pixels=execFileSync('ffmpeg',['-hide_banner','-loglevel','error','-i',p,

@@ -373,11 +373,22 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     }
 
     let phaseWet=clamp(slush*.95+waterDepth/.0035*.42,0.0,1.0);
-    let laneWarp=(noise3(in.worldPos*vec3<f32>(.055,.02,.18)+seed*4.0)-.5)*.10;
-    let historicalRut=tyreTracks(in.worldPos.z+laneWarp)*smoothstep(.035,.22,phaseWet);
+    let rutGain=smoothstep(.035,.22,phaseWet);
+    var historicalRut=0.0;
+    // When no physical water/slush enables old tyre rut exposure, its
+    // contribution is identically zero. Do not fetch lane-warp noise.
+    if(rutGain>0.0){
+      let laneWarp=(noise3(in.worldPos*vec3<f32>(.055,.02,.18)+seed*4.0)-.5)*.10;
+      historicalRut=tyreTracks(in.worldPos.z+laneWarp)*rutGain;
+    }
     roadTrack=max(track,historicalRut*.72);
     let shoulderBand=smoothstep(.10,.48,historicalRut)*(1.0-smoothstep(.58,.94,historicalRut));
-    slushRidge=shoulderBand*slush*(.72+.55*noise3(in.worldPos*vec3<f32>(1.7,.1,5.2)+seed*7.0));
+    // An absent ridge cannot scatter slurry or perturb normals. Both
+    // noise fetches are causally unnecessary until a real ridge is present.
+    slushRidge=0.0;
+    if(shoulderBand>0.0&&slush>0.0){
+      slushRidge=shoulderBand*slush*(.72+.55*noise3(in.worldPos*vec3<f32>(1.7,.1,5.2)+seed*7.0));
+    }
     roadSlurry=clamp(slush*(.36+.42*(1.0-roadTrack))+slushRidge*.72,0.0,1.0);
 
     let slurryColor=mix(vec3<f32>(.34,.35,.35),vec3<f32>(.16,.135,.105),clamp(u.weather.x*1.5+.22,0.0,1.0));
@@ -386,8 +397,12 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     albedo=mix(albedo,albedo*.50,roadTrack*(.50+.28*phaseWet));
     albedo=mix(albedo,slurryColor*.92,slushRidge*.72);
     n=normalize(mix(n,geometricNormal,roadTrack*.42));
-    let ridgeNoise=noise3(in.worldPos*vec3<f32>(8,.2,18)+seed*11.0)-.5;
-    n=normalize(n+vec3<f32>(ridgeNoise*.05,0,ridgeNoise*.08)*slushRidge);
+    if(slushRidge>0.0){
+      let ridgeNoise=noise3(in.worldPos*vec3<f32>(8,.2,18)+seed*11.0)-.5;
+      n=normalize(n+vec3<f32>(ridgeNoise*.05,0,ridgeNoise*.08)*slushRidge);
+    }else{
+      n=normalize(n);
+    }
     track=roadTrack;
   }
 

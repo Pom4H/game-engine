@@ -69,3 +69,19 @@ material/GI experiment uses PowerShell, fixed 1920×1080 resolution and a
 sequential same-device baseline/optimized comparison. The historical Linux
 and Apple measurements listed in earlier experiment reports are not current
 performance baselines. Do not compare FPS across dissimilar machines.
+
+## Dry-rut/shader-noise zero-work fast path
+
+Asphalt grain is already antialias-gated. A complementary material shader
+shortcut uses `rutGain=smoothstep(.035,.22,phaseWet)`. If this authoritative
+water/slush response is exactly zero, historical wet tyre tracks cannot appear
+and no lane-warp noise texel needs sampling. A zero shoulder-band or snow slush
+similarly guarantees that slurry-ridge noise and its normal bump have zero
+contribution. All nonzero paths continue to use the existing shader equations
+and material/physics state. `test/shader-zero-contribution.test.mjs` exercises
+zero/nonzero algebra and proves noise is not read for zero contributions.
+
+The native Windows GPU A/B workflow compares full 1080p PNGs on four identical
+camera angles against archived source commits. GPU timing samples are required
+for a valid performance result; clean images alone cannot claim a speedup.
+Each commit updates only the implementation, not any scene LOD or weather.
