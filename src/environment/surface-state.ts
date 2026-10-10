@@ -77,7 +77,17 @@ export interface SurfaceContactWork {
   readonly normalLoadN:number;
   readonly frictionCoefficient:number;
 }
+/** Physical work notification occurs only after a successful authoritative
+ * field mutation. Listeners observe its committed result and never drive it. */
+export type SurfaceWorkCommitObserver=(
+  work:Readonly<SurfaceContactWork>,energyJ:number,touchedCells:number,actual:SurfaceEnvironmentState,
+)=>void;
 export class SurfaceEnvironmentSystem {
+  private readonly workObservers=new Set<SurfaceWorkCommitObserver>();
+  observeContactWork(observer:SurfaceWorkCommitObserver):()=>void{
+    this.workObservers.add(observer);
+    return()=>{this.workObservers.delete(observer);};
+  }
   readonly fields=new Map<string,SurfaceEnvironmentField>();
   private readonly claimedContactBodies=new Set<string>();
   remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);this.claimedContactBodies.delete(id);}
@@ -176,6 +186,7 @@ export class SurfaceEnvironmentSystem {
       bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*work.durationSeconds*(.09+.42*mud));
       bodyState.wetness=Math.min(1,bodyState.wetness+spray*work.durationSeconds*.15);
     }
+    if(sample)for(const observer of this.workObservers)observer(work,energy,touched.length,sample);
     return true;
   }
 

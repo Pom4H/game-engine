@@ -1,4 +1,5 @@
 import {renderModel,renderPrimitive} from '../render/frame.js';
+import {validateWorldInteractionGraph} from '../world-ir/index.js';
 import type {CameraSpec} from '../scene/types.js';
 import type {RuntimeEntity,Scene} from '../scene/scene.js';
 import {
@@ -28,6 +29,8 @@ export function localProgram(graph:ExecutionGraph,accelerator:ExecutionAccelerat
 
 export interface SceneRenderProjectionOptions{
   readonly epoch:bigint;readonly frame:bigint;readonly stochasticSequence?:bigint;readonly camera?:CameraSpec;readonly temporal?:TemporalInputs;
+  /** Opt-in link to World Interaction IR. No extra causal work by default. */
+  readonly includeInteractions?:boolean;
 }
 export interface ProjectedRenderFrame {readonly frame:PortableRenderFrame;readonly frameRef:ContentRef}
 export interface RenderSequenceCheckpoint {
@@ -90,6 +93,12 @@ export function projectSceneRenderFrame(scene:Scene,store:ContentAddressedReposi
     }));
   }
   const environment=store.put('environment',{state:scene.environment,rendering:scene.spec.rendering??null,clearColor:scene.spec.clearColor??null});refs.push(environment);
+  const interactionGraph=options.includeInteractions
+    ?scene.worldInteractionGraph():undefined;
+  if(options.includeInteractions&&!interactionGraph)
+    throw new TypeError('Enable World Interaction IR capture before projecting its graph');
+  const interactionGraphRef=interactionGraph?store.put('graph',validateWorldInteractionGraph(interactionGraph)):undefined;
+  if(interactionGraphRef)refs.push(interactionGraphRef);
   const observation=store.put('observation',defineCausalRenderObservation({
     schema:1,contractVersion:CAUSAL_RENDER_CONTRACT_VERSION,simulationTick:BigInt(scene.tick),simulationTimeSeconds:scene.time,
     world:Object.freeze({handedness:'right' as const,up:'+Y' as const,positionUnit:'m' as const,timeUnit:'s' as const,angleUnit:'rad' as const,radiance:'scene-linear' as const}),
@@ -97,6 +106,7 @@ export function projectSceneRenderFrame(scene:Scene,store:ContentAddressedReposi
   }));refs.push(observation);
   const frame=defineRenderFrame({
     schema:1,simulationTick:BigInt(scene.tick),frame:options.frame,camera:cameraData(camera),objects:Object.freeze(objects),lights:Object.freeze(lights),environment,observation,
+    ...(interactionGraphRef?{interactionGraph:interactionGraphRef}:{}),
     resources:store.manifest(refs),temporal:options.temporal??Object.freeze({}),
     determinism:Object.freeze({epoch:options.epoch,frame:options.frame,stochasticSequence:options.stochasticSequence??options.frame}),
   });

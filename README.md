@@ -107,3 +107,14 @@ commit/events → audio/render/network contract and its CI parity gates.
 A certified inert-contact subset of the built-in Scene material law can also
 use the Rust batch without disabling material/fracture/audio systems; the
 contract must be updated whenever contact material logic changes.
+
+## World Interaction IR (causal cross-domain contract)
+
+Opt-in `Scene.enableWorldInteractions()` captures immutable, bounded interactions
+from the authoritative weather, rigid contact, material/fragmentation event and
+surface-work commits. Interaction parents link actual contacts to emitted audio
+and fracture events. No interaction can drive a second physical world or mutate
+the render/audio/network projections. `projectSceneRenderFrame(...,
+{includeInteractions:true})` optionally includes one content-addressed `graph`
+resource; `eventsFromWorldInteractions` reuses exactly the committed audio events.
+See [docs/WORLD_INTERACTION_IR.md](docs/WORLD_INTERACTION_IR.md).

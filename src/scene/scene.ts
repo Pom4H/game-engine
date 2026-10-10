@@ -15,6 +15,7 @@ import {V3} from '../math.js';
 import {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type ContactModel} from '../physics/world.js';
 import {quaternionFromEuler,eulerFromQuaternion} from '../physics/rotation.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
+import {WorldInteractionJournal,type WorldInteractionGraph,type WorldInteractionStats} from '../world-ir/index.js';
 import {FluidField} from '../physics/fluid.js';
 import {WindField} from '../physics/wind.js';
 import {SoilField,soilWheelSupport} from '../physics/soil.js';
@@ -90,6 +91,29 @@ export class Scene {
   performanceReport():ScenePerformanceReport|undefined{return this.sceneProfiler?.report();}
   enablePerformanceProfiling(config:ScenePerformanceConfig):void{this.sceneProfiler=new ScenePerformanceProfiler(config);}
   disablePerformanceProfiling():void{this.sceneProfiler=undefined;}
+  /** Enable bounded typed causal records without creating a second world state.
+   * Capture runs after physical work, never during a collision decision. */
+  enableWorldInteractions(capacity=4096):void{
+    if(this.worldInteractionJournal)throw new TypeError('World Interaction IR capture is already active');
+    const journal=new WorldInteractionJournal(capacity);
+    this.stopWorkObserver=this.surfaces.observeContactWork((work,energyJ,affectedCells,surface)=>{
+      const at=this.captureStepTime??this.time;
+      const tick=this.captureStepTime!==undefined?this.tick+1:this.tick;
+      journal.recordSurfaceWork(work,energyJ,affectedCells,surface,tick,at);
+    });
+    this.worldInteractionJournal=journal;
+  }
+  /** Return immutable records; the original event stream remains undrained. */
+  worldInteractionGraph(afterSequence=0):WorldInteractionGraph|undefined{
+    return this.worldInteractionJournal?.snapshot(this.tick,this.time,afterSequence);
+  }
+  get worldInteractionStats():WorldInteractionStats|undefined{
+    return this.worldInteractionJournal?.stats;
+  }
+  disableWorldInteractions():void{
+    this.stopWorkObserver?.();this.stopWorkObserver=undefined;
+    this.worldInteractionJournal=undefined;
+  }
   /** Scene-owned force-driver assemblies keyed by their authoritative entity/body id. */
   readonly assemblies=new Map<string,Vehicle>();
   lastExecution:string[]=[];
@@ -105,6 +129,10 @@ export class Scene {
   private cameraRailEnabled=true;
   private eventSequence=0;
   private readonly eventQueue:EngineEvent[]=[];
+  /** Optional World IR observational stream. Never influences simulation laws. */
+  private worldInteractionJournal:WorldInteractionJournal|undefined;
+  private stopWorkObserver:(()=>void)|undefined;
+  private captureStepTime:number|undefined;
   private readonly impactCooldown=new Map<string,number>();
   private generatedSequence=0;
   private surfaceVisualSequence=0;
@@ -308,6 +336,7 @@ export class Scene {
       this.systemRuntime.measureSystems((action,ms)=>profiler.system(action,ms));
     }
     this.lastExecution=[];
+    if(this.worldInteractionJournal)this.captureStepTime=at;
     try {
       if(directPlan){
         for(const system of directPlan[(this.tick+1)%directPlan.length]!){
@@ -322,6 +351,7 @@ export class Scene {
         return {} as SceneModuleContext;
       }});
     } finally {
+      this.captureStepTime=undefined;
       if(sampled){
         this.systemRuntime.measureSystems(undefined);
         const stats=this.physics.stats;
@@ -346,7 +376,10 @@ export class Scene {
 
   private installSystemRuntime():void{
     this.systemRuntime
-      .use('weather',({at})=>{this.environment=resolveEnvironmentAt(this.spec.environment,at);})
+      .use('weather',({at})=>{
+        this.environment=resolveEnvironmentAt(this.spec.environment,at);
+        this.worldInteractionJournal?.recordWeather(this.environment,this.tick+1,at);
+      })
       .use('surfaces',({dt})=>{
         this.surfaces.step(dt,dt*environmentTimeScale(this.spec.environment),this.environment,this.entities);
         this.syncSurfaceVisuals();
@@ -461,6 +494,7 @@ export class Scene {
 
   private emitContactEvents(at:number):void{
     for(const contact of this.physics.contacts){
+      const causeId=this.worldInteractionJournal?.recordContact(contact,this.tick+1,at).id;
       if(contact.normalEnergy<.005)continue;
       const key=contact.b==='ground'?`${contact.a}|ground`:contact.a<contact.b?`${contact.a}|${contact.b}`:`${contact.b}|${contact.a}`;
       const previous=this.impactCooldown.get(key)??-Infinity;
@@ -475,7 +509,7 @@ export class Scene {
         ...(entityA?{surfaceA:surfaceAcoustics(this.surfaces.sample(entityA.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityA.id)??entityA.material.surface)}:{}),
         ...(entityB?{surfaceB:surfaceAcoustics(this.surfaces.sample(entityB.id,contact.point[0],contact.point[2])??this.surfaces.surface(entityB.id)??entityB.material.surface)}:{}),
         energy:contact.normalEnergy,impulse:contact.impulse,speed:contact.normalSpeed,size:Math.max(.02,Math.min(characteristicSize(a),b?characteristicSize(b):characteristicSize(a))),
-      });
+      },causeId);
     }
   }
 
@@ -486,7 +520,7 @@ export class Scene {
     this.pushEvent({
       type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
       energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:0,size,
-    });
+    },this.worldInteractionJournal?.contactForPair(fracture.body.id,fracture.other.id,this.tick+1));
   }
 
   private fracture(fracture:FractureDecision,at:number):void{
@@ -546,14 +580,18 @@ export class Scene {
     this.pushEvent({
       type:'fracture',id:++this.eventSequence,time:at,entity:entity.id,material:entity.material.kind,point:fracture.point,normal:fracture.normal,
       energy:fracture.availableEnergy,requiredEnergy:fracture.requiredEnergy,thickness:fracture.thickness,shardCount:pieces.length,size:Math.max(planar[0],planar[1]),
-    });
+    },this.worldInteractionJournal?.contactForPair(fracture.body.id,fracture.other.id,this.tick+1));
   }
 
   private cleanupGenerated(at:number):void{
     for(const entity of [...this.entities.values()])if(entity.expiresAt!==undefined&&entity.expiresAt<=at)this.remove(entity.id);
     for(const [key,time] of this.impactCooldown)if(at-time>2)this.impactCooldown.delete(key);
   }
-  private pushEvent(event:EngineEvent):void{this.eventQueue.push(event);if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);}
+  private pushEvent(event:EngineEvent,causeId?:string):void{
+    this.eventQueue.push(event);
+    if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);
+    this.worldInteractionJournal?.recordEvent(event,this.tick+1,causeId);
+  }
 }
 
 function dominantAxis(normal:Vec3):0|1|2{return Math.abs(normal[0])>=Math.abs(normal[1])&&Math.abs(normal[0])>=Math.abs(normal[2])?0:Math.abs(normal[1])>=Math.abs(normal[2])?1:2;}

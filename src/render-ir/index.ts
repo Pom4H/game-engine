@@ -136,7 +136,7 @@ export interface PortableRenderLight {readonly id:string;readonly kind:'directio
 export interface PortableRenderFrame {
   readonly schema:1;readonly simulationTick:bigint;readonly frame:bigint;readonly camera:readonly number[];
   readonly objects:readonly PortableRenderObject[];readonly lights:readonly PortableRenderLight[];readonly environment?:ContentRef;
-  readonly observation:ContentRef;readonly resources:ResourceManifest;readonly temporal:TemporalInputs;readonly determinism:RenderDeterminism;
+  readonly observation:ContentRef;readonly interactionGraph?:ContentRef;readonly resources:ResourceManifest;readonly temporal:TemporalInputs;readonly determinism:RenderDeterminism;
 }
 export type RenderPartitionability=
  |{readonly kind:'atomic'}
@@ -159,6 +159,10 @@ export function defineRenderFrame(value:PortableRenderFrame):PortableRenderFrame
   if(value.schema!==1)throw new TypeError('Unsupported portable render frame schema');
   if(value.simulationTick<0n||value.frame<0n||value.determinism.epoch<0n||value.determinism.frame!==value.frame)throw new RangeError('Invalid render frame identity');
   if(value.observation.kind!=='observation')throw new TypeError('Portable render frame requires a causal observation resource');
+  if(value.interactionGraph&&(
+    value.interactionGraph.kind!=='graph'||!value.resources.resources.some(ref=>
+      ref.kind==='graph'&&ref.hash===value.interactionGraph!.hash)
+  ))throw new TypeError('Interaction graph must be a declared graph resource');
   const ids=new Set<string>();for(const object of value.objects){if(!object.id||ids.has(object.id))throw new TypeError('Portable render objects require unique stable IDs');ids.add(object.id);if(object.transform.length!==16||object.transform.some(v=>!Number.isFinite(v)))throw new TypeError('Portable render object transform must be a finite mat4');}
   return deepFreeze(structuredClone(value));
 }

@@ -16,3 +16,5 @@ export {createWasmAcousticWaveField,uploadAcousticPressurePlane} from './physics
 export {createWasmStructuralBody,type RustStructuralStaticContacts} from './physics/structure-wasm.js';
 
 export {createWasmRigidContactKernel} from './physics/rigid-wasm.js';
+
+export {WorldInteractionJournal,eventsFromWorldInteractions,validateWorldInteractionGraph,WORLD_INTERACTION_IR_VERSION,WORLD_INTERACTION_LAWS,type WorldInteractionLaw,type WorldInteractionGraph,type WorldInteraction,type WorldInteractionEffect,type WorldInteractionDomain,type WorldInteractionRef} from './world-ir/index.js';

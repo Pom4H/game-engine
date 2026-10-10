@@ -137,3 +137,5 @@ export {STRUCTURAL_KERNEL_FIELDS,type StructuralNumericalKernel,type StructuralK
 export {createWasmStructuralBody,type RustStructuralStaticContacts} from './physics/structure-wasm.js';
 
 export {createWasmRigidContactKernel} from './physics/rigid-wasm.js';
+
+export {WorldInteractionJournal,eventsFromWorldInteractions,validateWorldInteractionGraph,WORLD_INTERACTION_IR_VERSION,WORLD_INTERACTION_LAWS,type WorldInteractionLaw,type WorldInteractionGraph,type WorldInteraction,type WorldInteractionEffect,type WorldInteractionDomain,type WorldInteractionRef,type WorldContactEffect,type WorldSurfaceEffect,type WorldWeatherEffect,type WorldEventEffect,type WorldInteractionStats} from './world-ir/index.js';

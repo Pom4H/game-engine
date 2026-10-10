@@ -12,7 +12,8 @@
     "./execution": "./dist/execution/index.js",
     "./meshwork": "./dist/meshwork/index.js",
     "./content": "./dist/content/index.js",
-    "./storage": "./dist/storage/index.js"
+    "./storage": "./dist/storage/index.js",
+    "./world-ir": "./dist/world-ir/index.js"
   },
   "files": [
     "dist",

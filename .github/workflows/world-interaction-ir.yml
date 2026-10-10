@@ -1,0 +1,50 @@
+name: World Interaction IR causal integration
+on:
+  push:
+    paths:
+      - 'src/world-ir/**'
+      - 'src/scene/scene.ts'
+      - 'src/environment/surface-state.ts'
+      - 'src/execution/index.ts'
+      - 'src/render-ir/index.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/world-interaction-ir.test.mjs'
+      - 'test/causal-render-contract.test.mjs'
+      - 'docs/WORLD_INTERACTION_IR.md'
+      - 'package.json'
+      - '.github/workflows/world-interaction-ir.yml'
+  pull_request:
+    paths:
+      - 'src/world-ir/**'
+      - 'src/scene/scene.ts'
+      - 'src/environment/surface-state.ts'
+      - 'src/execution/index.ts'
+      - 'src/render-ir/index.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/world-interaction-ir.test.mjs'
+      - 'docs/WORLD_INTERACTION_IR.md'
+      - 'package.json'
+      - '.github/workflows/world-interaction-ir.yml'
+jobs:
+  causal-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: |
+          rustup target add wasm32-unknown-unknown
+          cargo test --manifest-path compiler/Cargo.toml
+          cargo test --manifest-path kernels/world-rigid/Cargo.toml
+          cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-rigid/Cargo.toml
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Cross-domain physics material environment audio render Rust and network
+        run: node --test test/world-interaction-ir.test.mjs test/causal-render-contract.test.mjs test/contact-laws.test.mjs test/audio-foundation.test.mjs test/authority-ledger.test.mjs test/emergence-rigid-batch.test.mjs
+      - name: Bounded physical system and world code parity
+        run: node --test test/world-compiler.test.mjs test/scene-performance.test.mjs
