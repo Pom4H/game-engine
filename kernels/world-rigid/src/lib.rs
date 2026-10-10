@@ -94,7 +94,7 @@ impl Body {
         if self.shape==0{return self.pos.plus(dir.normalize().times(self.half.x))}
         let basis=self.basis();
         let mut point=self.center();
-        for i in 0..3{
+        for i in 0.0.3{
             let projection=dir.dot(basis[i]);
             if projection.abs()>1e-8{
                 let sign=if projection>0.0{1.0}else{-1.0};
@@ -138,7 +138,7 @@ fn projected_radius(half:V,basis:[V;3],axis:V)->f64{
 fn box_box(a:Body,b:Body)->Option<Hit>{
     let ab=a.basis();let bb=b.basis();
     let center=b.center().minus(a.center());
-    let mut axes=[V::ZERO;15];axes[..3].copy_from_slice(&ab);axes[3..6].copy_from_slice(&bb);
+    let mut axes=[V::ZERO;15];axes[.0.3].copy_from_slice(&ab);axes[3.0.6].copy_from_slice(&bb);
     let mut count=6usize;
     for aa in ab{for ba in bb{
         let cross=aa.cross(ba);
@@ -288,16 +288,16 @@ mod abi {
     #[no_mangle]pub extern "C" fn world_rigid_new()->u32{Box::into_raw(Box::new(Kernel::new())) as u32}
     #[no_mangle]pub unsafe extern "C" fn world_rigid_free(handle:u32){if handle!=0{drop(Box::from_raw(handle as *mut Kernel));}}
     #[no_mangle]pub unsafe extern "C" fn world_rigid_input(handle:u32)->u32{
-        if handle==0{return 0}(&mut *(handle as *mut Kernel)).input.as_mut_ptr() as u32
+        if handle==0{return 0;}(&mut *(handle as *mut Kernel)).input.as_mut_ptr() as u32
     }
     #[no_mangle]pub unsafe extern "C" fn world_rigid_output(handle:u32)->u32{
-        if handle==0{return 0}(&mut *(handle as *mut Kernel)).output.as_mut_ptr() as u32
+        if handle==0{return 0;}(&mut *(handle as *mut Kernel)).output.as_mut_ptr() as u32
     }
     #[no_mangle]pub unsafe extern "C" fn world_rigid_intersect(handle:u32)->u32{
-        if handle==0{return 0}(&mut *(handle as *mut Kernel)).test()
+        if handle==0{return 0;}(&mut *(handle as *mut Kernel)).test()
     }
     #[no_mangle]pub unsafe extern "C" fn world_rigid_resolve(handle:u32)->u32{
-        if handle==0{return 0}(&mut *(handle as *mut Kernel)).solve()
+        if handle==0{return 0;}(&mut *(handle as *mut Kernel)).solve()
     }
 }
 #[cfg(test)]
@@ -315,7 +315,7 @@ mod tests {
             shape:1,half:V{x:0.5,y:0.5,z:0.5},offset:V::ZERO,restitution:0.,friction:0.}
     }
     #[test]fn head_on_sphere_momentum(){
-        let a=ball(-.4,1.);let b=ball(.4,-1.);
+        let a=ball(-0.4,1.);let b=ball(0.4,-1.);
         let hit=intersect(a,b).expect("sphere collision");
         let (approach,mass,_)=contact_values(a,b,hit);
         let (a,b,j,_,_)=resolve(a,b,hit,approach,mass);
@@ -325,7 +325,7 @@ mod tests {
         assert!(a.velocity.x<0. && b.velocity.x>0.);
     }
     #[test]fn moving_boxes_with_off_center_impact(){
-        let mut a=box_body(-.45,.2);let mut b=box_body(.45,0.);
+        let mut a=box_body(-0.45,0.2);let mut b=box_body(0.45,0.);
         a.velocity.x=5.;b.velocity.x=-1.;
         let hit=intersect(a,b).expect("box overlap");
         let (approach,mass,_)=contact_values(a,b,hit);
@@ -336,8 +336,8 @@ mod tests {
     }
     #[test]fn rotated_obb_sat(){
         let mut rail=box_body(0.,0.);
-        rail.half=V{x:2.,y:.25,z:.25};rail.rotation.y=std::f64::consts::FRAC_PI_2;
-        let mut mover=box_body(.15,0.);
+        rail.half=V{x:2.,y:0.25,z:0.25};rail.rotation.y=std::f64::consts::FRAC_PI_2;
+        let mut mover=box_body(0.15,0.);
         mover.pos.z=1.7;
         assert!(intersect(rail,mover).is_some());
         mover.pos.x=3.;
@@ -345,7 +345,7 @@ mod tests {
     }
     #[test]fn sphere_inside_box_chooses_incoming_face(){
         let mut b=box_body(0.,0.);b.inv_mass=0.;
-        let mut s=ball(0.,2.);s.half.x=.25;
+        let mut s=ball(0.,2.);s.half.x=0.25;
         let hit=intersect(s,b).unwrap();
         assert!(hit.normal.x>0.);
     }
