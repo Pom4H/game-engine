@@ -132,3 +132,6 @@ export {canonicalContent,contentHash,MemoryContentStore as SharedContentStore,ty
 export {CausalStorage,MemoryScopeHeadStore,type CausalStorageKind,type CausalRef,type CausalMutation,type CausalCheckpoint,type CausalScopeHead,type ScopeHeadStore,type CausalAppendInput,type CausalAppendResult,type CausalCheckpointResult,type RestoredMutation,type CausalRestore,type CausalHydrationProof} from './storage/index.js';
 
 export {decodeWorldBinary,isWorldBinary,WORLD_BINARY_VERSION} from './scene/world-binary.js';
+
+export {STRUCTURAL_KERNEL_FIELDS,type StructuralNumericalKernel,type StructuralKernelField,type StructuralKernelBuffer} from './physics/structure.js';
+export {createWasmStructuralBody} from './physics/structure-wasm.js';

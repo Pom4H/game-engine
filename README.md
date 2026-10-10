@@ -73,3 +73,12 @@ pressure-slice staging for WebGPU r32float uploads. TypeScript remains the defau
 until the measured workload warrants enabling WASM. See
 [kernels/world-wave/README.md](kernels/world-wave/README.md) for build, use,
 parity gates and benchmark evidence.
+
+## Rust/WASM structural XPBD (opt in)
+
+Validated `StructuralBody` can specialize its active XPBD numerical loop with a
+Rust WebAssembly kernel, preserving node arrays, strain/plasticity/fracture and
+rigid bake. Existing JS path is still the default; user-defined contact
+projectors fall back to the JS solver on the same Wasm memory. End-to-end tests
+and whole-physics-tick measurements are in
+[kernels/world-structure/README.md](kernels/world-structure/README.md).

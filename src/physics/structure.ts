@@ -83,6 +83,24 @@ const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,valu
  * strain, never once per solver iteration. That keeps permanent set independent
  * from the chosen convergence iteration count.
  */
+/** Internal solver ABI. The body retains ownership of activation, contacts,
+ * force/impulse inputs, deformation, fracture and rigid bake. A numerical kernel
+ * can replace only the contiguous active step without changing these semantics. */
+export const STRUCTURAL_KERNEL_FIELDS=[
+  'position','previous','velocity','force','mass','inverseMass','originalPosition',
+  'kind','ia','ib','ic','id','originalRest','rest','compliance','yieldLimit',
+  'breakLimit','plasticity','yieldForce','lambda','predictedMeasure','impulseWeights','broken',
+] as const;
+export type StructuralKernelField=typeof STRUCTURAL_KERNEL_FIELDS[number];
+export type StructuralKernelBuffer=Float64Array|Uint16Array|Uint8Array;
+export interface StructuralNumericalKernel {
+  readonly buffers:Readonly<Record<StructuralKernelField,StructuralKernelBuffer>>;
+  solve(input:Readonly<{
+    dt:number;gravity:Vec3;iterations:number;damping:number;thermalScale:number;
+    sleepSpeed:number;sleepDelay:number;plasticWorkJ:number;quietTime:number;steps:number;
+  }>):Readonly<{plasticWorkJ:number;quietTime:number;steps:number;shouldBake:boolean}>;
+  dispose():void;
+}
 export class StructuralBody {
   readonly position:Float64Array;
   readonly previous:Float64Array;
@@ -122,6 +140,7 @@ export class StructuralBody {
   private dt=0;
   private thermalScaleValue=1;
   private pendingBake:BakedStructuralState|undefined;
+  private numericalKernel:StructuralNumericalKernel|null=null;
 
   constructor(readonly definition:StructuralDefinition){
     const nodeCount=definition.nodes.length, constraintCount=definition.constraints.length;
@@ -213,6 +232,41 @@ export class StructuralBody {
         this.yieldForce[i]=0;
       }
     }
+  }
+
+  /** Backend selection is per structural body, never a global physics override. */
+  get backend(): 'typescript'|'wasm' {return this.numericalKernel?'wasm':'typescript';}
+
+  /** Attach exactly once while dormant and before other systems cache array views. */
+  installKernel(kernel:StructuralNumericalKernel):void{
+    if(this.numericalKernel||this.mode!=='dormant'||this.steps!==0)
+      throw new Error('Structural numerical kernel must be installed on a new dormant body');
+    const target=this as unknown as Record<string,StructuralKernelBuffer>;
+    for(const key of STRUCTURAL_KERNEL_FIELDS){
+      const from=target[key],to=kernel.buffers[key];
+      if(!from||from.constructor!==to.constructor||from.length!==to.length)
+        throw new TypeError('Structural numerical ABI mismatch for '+key);
+      if(to.byteLength>0&&to.buffer.byteLength===0)throw new TypeError('Structural kernel memory is detached');
+    }
+    for(const key of STRUCTURAL_KERNEL_FIELDS){
+      const copied=target[key]!,to=kernel.buffers[key];
+      to.set(copied as never);
+      Object.defineProperty(this,key,{value:to,writable:true,enumerable:true,configurable:true});
+    }
+    this.numericalKernel=kernel;
+  }
+
+  /** Copy out once at an explicit lifecycle boundary and release Wasm memory. */
+  detachKernel():void{
+    const kernel=this.numericalKernel;if(!kernel)return;
+    const state=this as unknown as Record<string,StructuralKernelBuffer>;
+    for(const key of STRUCTURAL_KERNEL_FIELDS){
+      const old=state[key]!;
+      const detached=new (old.constructor as {new(array:StructuralKernelBuffer):StructuralKernelBuffer})(old);
+      Object.defineProperty(this,key,{value:detached,writable:true,enumerable:true,configurable:true});
+    }
+    this.numericalKernel=null;
+    kernel.dispose();
   }
 
   get nodeCount():number{return this.mass.length;}
@@ -343,6 +397,22 @@ export class StructuralBody {
     if(!Number.isFinite(dt)||dt<=0||dt>1/30)throw new RangeError('Structural dt must be in (0, 1/30]');
     if(!gravity.every(Number.isFinite))throw new TypeError('Structural gravity must be finite');
     this.dt=dt;
+    // Rust owns the complete arithmetic transition if there is no external
+    // per-iteration contact callback. A callback uses the original production
+    // solver on the very same memory, never a copied/mirrored physical state.
+    if(this.numericalKernel&&!contactProjector){
+      const result=this.numericalKernel.solve({
+        dt,gravity,iterations:this.iterations,damping:this.internalDamping,
+        thermalScale:this.thermalScaleValue,sleepSpeed:this.sleepSpeed,
+        sleepDelay:this.sleepDelay,plasticWorkJ:this.plasticWorkJ,
+        quietTime:this.quietTime,steps:this.steps,
+      });
+      this.plasticWorkJ=result.plasticWorkJ;
+      this.quietTime=result.quietTime;
+      this.steps=result.steps;
+      if(result.shouldBake)this.bake();
+      return;
+    }
     this.previous.set(this.position);
 
     for(let i=0;i<this.nodeCount;i++){

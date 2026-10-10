@@ -7,3 +7,5 @@ compiler/target/
 examples/worlds/*.wscn
 kernels/world-wave/target/
 kernels/world-wave/Cargo.lock
+kernels/world-structure/target/
+kernels/world-structure/Cargo.lock

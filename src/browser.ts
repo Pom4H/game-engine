@@ -12,3 +12,5 @@ export {connectAcousticWebAudio,type AcousticTransferObservation,type AcousticWe
 export {decodeWorldBinary,isWorldBinary,WORLD_BINARY_VERSION} from './scene/world-binary.js';
 export {AcousticWaveField,type AcousticWaveFieldSpec,type AcousticPressurePlane} from './physics/wave-field.js';
 export {createWasmAcousticWaveField,uploadAcousticPressurePlane} from './physics/wave-wasm.js';
+
+export {createWasmStructuralBody} from './physics/structure-wasm.js';

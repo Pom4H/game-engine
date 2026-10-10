@@ -30,7 +30,10 @@
     "world:test": "cargo test --manifest-path compiler/Cargo.toml",
     "wave:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-wave/Cargo.toml",
     "wave:test": "cargo test --manifest-path kernels/world-wave/Cargo.toml && bun run wave:build && bun run build && node --test test/wave-wasm.test.mjs",
-    "wave:bench": "node tools/world-wave/benchmark.mjs"
+    "wave:bench": "node tools/world-wave/benchmark.mjs",
+    "structure:rust:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-structure/Cargo.toml",
+    "structure:rust:test": "cargo test --manifest-path kernels/world-structure/Cargo.toml && bun run structure:rust:build && bun run build && node --test test/structure-rust-wasm.test.mjs",
+    "structure:rust:bench": "node tools/world-structure/benchmark.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

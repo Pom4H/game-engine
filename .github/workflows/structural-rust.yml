@@ -1,0 +1,53 @@
+name: Rust structural XPBD parity and world tick benchmark
+on:
+  push:
+    paths:
+      - 'kernels/world-structure/**'
+      - 'src/physics/structure.ts'
+      - 'src/physics/structure-wasm.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/structure-rust-wasm.test.mjs'
+      - 'tools/world-structure/**'
+      - 'package.json'
+      - '.github/workflows/structural-rust.yml'
+  pull_request:
+    paths:
+      - 'kernels/world-structure/**'
+      - 'src/physics/structure.ts'
+      - 'src/physics/structure-wasm.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/structure-rust-wasm.test.mjs'
+      - 'tools/world-structure/**'
+      - 'package.json'
+      - '.github/workflows/structural-rust.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Prepare Rust Wasm target and run native tests
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo test --manifest-path kernels/world-structure/Cargo.toml
+      - name: Compile optimized Rust XPBD to Wasm
+        run: cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-structure/Cargo.toml
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Test Rust vs production physical state, fracture, contact and lifecycle
+        run: node --test test/structure-rust-wasm.test.mjs test/vehicle-interaction.test.mjs test/contact-laws.test.mjs
+      - name: Measure structural kernel and complete simulated tick
+        run: node tools/world-structure/benchmark.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rust-structure-wasm-timings
+          path: |
+            kernels/world-structure/target/wasm32-unknown-unknown/release/world_structure_kernel.wasm
+            artifacts/world-structure/benchmark.json
+          retention-days: 30
