@@ -6,7 +6,7 @@
 import type {EnvironmentState} from './types.js';
 import type {RuntimeEntity} from '../scene/scene.js';
 import type {SurfaceUse} from '../scene/types.js';
-import {deriveSurfaceState} from '../materials/surface.js';
+import {deriveSurfaceState,type SurfaceState} from '../materials/surface.js';
 import {DeformableSurfaceField,surfaceFieldResolution} from './deformable-surface.js';
 
 export type SnowDiagnosticClass='fresh-dry'|'wind-packed'|'settled'|'compacted'|'wet'|'slush'|'crust'|'granular'|'dirty-road';
@@ -120,7 +120,8 @@ export class SurfaceEnvironmentSystem {
       for(const [id,state] of this.surfaces){
         const entity=entities.get(id);if(!entity)continue;
         this.stepSnowpack(state,step.durationSeconds,step.environment);
-        this.stepSurface(state,entity,0,step.durationSeconds,step.environment);
+        const exposure=deriveSurfaceState(entity.material.profile,entity.material,step.environment);
+        this.stepSurface(state,entity,0,step.durationSeconds,step.environment,exposure);
         this.reconcileSnowpack(state);
       }
     }
@@ -137,10 +138,25 @@ export class SurfaceEnvironmentSystem {
       const entity=entities.get(id);if(!entity)continue;
       const field=this.fields.get(id)!;
       this.stepSnowpack(state,worldSeconds,environment);
-      for(const cell of field.cells)this.stepSurface(cell,entity,dt,worldSeconds,environment);
+      // Material/weather exposure is identical for every spatial cell of this
+      // one surface during a step; calculate it once, never once per cell.
+      const exposure=deriveSurfaceState(entity.material.profile,entity.material,environment);
+      const sums=new Float64Array(SURFACE_AVERAGE_KEYS.length);
+      let maximumTrackMelt=-Infinity;
+      for(const cell of field.cells){
+        this.stepSurface(cell,entity,dt,worldSeconds,environment,exposure);
+        // Same per-key summation order as the original separate reduce() loops.
+        for(let i=0;i<SURFACE_AVERAGE_KEYS.length;i++){
+          const key=SURFACE_AVERAGE_KEYS[i]!;
+          sums[i]=sums[i]!+cell[key];
+        }
+        maximumTrackMelt=Math.max(maximumTrackMelt,cell.trackMelt);
+      }
       field.deformation.relax(dt,state.slush);
-      for(const key of SURFACE_AVERAGE_KEYS)state[key]=field.cells.reduce((sum,cell)=>sum+cell[key],0)/field.cells.length;
-      state.trackMelt=Math.max(...field.cells.map(cell=>cell.trackMelt));
+      for(let i=0;i<SURFACE_AVERAGE_KEYS.length;i++){
+        state[SURFACE_AVERAGE_KEYS[i]!]=sums[i]!/field.cells.length;
+      }
+      state.trackMelt=maximumTrackMelt;
       this.reconcileSnowpack(state);
     }
     for(const [id,state] of this.bodies){
@@ -311,7 +327,7 @@ export class SurfaceEnvironmentSystem {
     pack.classification=classifySnowpack(pack,state);
   }
 
-  private stepSurface(state:SurfaceEnvironmentState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState):void{
+  private stepSurface(state:SurfaceEnvironmentState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState,exposure:SurfaceState):void{
     const use=state.use;
     const drift=use==='curb'?1.9:use==='sidewalk'?1.2:use==='road'?.78:1;
     const wind=Math.hypot(environment.wind[0],environment.wind[2]),windDeposit=1+Math.min(.55,wind/12)*(use==='curb'?.8:use==='sidewalk'?.25:-.08);
@@ -361,7 +377,6 @@ export class SurfaceEnvironmentSystem {
     const retention=use==='road'?.55+state.trackMelt*.55:use==='curb'?.85:.66;
     state.puddle=Math.max(0,Math.min(1,state.waterDepthM/.006*retention));
 
-    const exposure=deriveSurfaceState(profile,entity.material,environment);
     const waterFactor=Math.min(1,state.waterDepthM/.003),snowFactor=Math.min(1,state.snowDepthM/.025),iceFactor=Math.min(1,state.iceDepthM/.003);
     state.wetness=Math.max(exposure.wetness,waterFactor,state.slush*.72);
     state.moss=exposure.moss;

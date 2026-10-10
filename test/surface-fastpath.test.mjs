@@ -45,5 +45,8 @@ function fingerprint(){
 test('surface phase evolution has a stable golden physical replay across 120 ticks',()=>{
   const a=fingerprint(),b=fingerprint();
   assert.equal(a,b,'surface evolution must be deterministic');
+  // Captured before the hoist, covering spatial traffic, snow, water, ice,
+  // prewarm initialization and 120 fixed ticks. No physical drift permitted.
+  assert.equal(a,'947c2e68442e3042c23629e8269b4a77446f54a78d702cfdb8fe924178f99380');
   console.log('SURFACE_GOLDEN_SHA256='+a);
 });
