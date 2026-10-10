@@ -7,6 +7,7 @@
  * Identical observations work for Rust-compiled .wscn and TS-authored scenes.
  */
 import type {EnvironmentState} from '../environment/types.js';
+import {compileWorldCouplings,type WorldCoupling} from './couplings.js';
 import type {SurfaceContactWork,SurfaceEnvironmentState} from '../environment/surface-state.js';
 import type {Vec3} from '../math.js';
 import type {Contact} from '../physics/world.js';
@@ -80,6 +81,9 @@ export interface WorldInteraction {
   readonly target?:WorldInteractionRef;
   /** IDs refer to committed World interactions, never to render pixels. */
   readonly causeId?:string;
+  /** IDs of compiled observation couplings realized by this committed effect.
+   * They never authorize or modify the original physical law. */
+  readonly couplingIds?:readonly string[];
   readonly effect:WorldInteractionEffect;
 }
 export interface WorldInteractionGraph {
@@ -92,6 +96,9 @@ export interface WorldInteractionGraph {
   readonly afterSequence:number;
   readonly nextSequence:number;
   readonly dropped:number;
+  /** Statically compiled observation DAG. Some connections may not yet have
+   * an executable domain law and therefore remain declarations only. */
+  readonly couplings?:readonly WorldCoupling[];
   readonly interactions:readonly WorldInteraction[];
 }
 export interface WorldInteractionStats {
@@ -163,13 +170,15 @@ export class WorldInteractionJournal {
   private dropped=0;
   private next=1;
   private readonly recentContacts=new Map<string,string>();
+  private readonly couplings:readonly WorldCoupling[];
   private recentTick=-1;
 
-  constructor(capacity=4096){
+  constructor(capacity=4096,couplings:readonly WorldCoupling[]=[]){
     if(!Number.isSafeInteger(capacity)||capacity<16||capacity>65_536)
       throw new RangeError('World Interaction IR capacity must be 16..65536');
     this.capacity=capacity;
     this.ring=new Array<WorldInteraction|undefined>(capacity);
+    this.couplings=compileWorldCouplings(couplings);
   }
   get stats():WorldInteractionStats{
     return Object.freeze({retained:this.count,capacity:this.capacity,dropped:this.dropped,nextSequence:this.next});
@@ -257,6 +266,14 @@ export class WorldInteractionJournal {
   }
 
   recordEvent(event:EngineEvent,tick:number,causeId?:string):WorldInteraction{
+    // Only these relations are already realized by authoritative Scene laws.
+    // Other typed ports (fluid, heat, wave pressure, NPC) remain descriptors:
+    // never fabricate physical transfers or simulated sensory input.
+    const observedTarget=event.type==='impact'?'audio.impact.energy':
+      event.type==='fracture'?'material.fracture.energy':undefined;
+    const couplingIds=causeId&&observedTarget
+      ?this.couplings.filter(c=>c.from==='physics.contact.energy'&&
+        c.to===observedTarget&&event.energy>=(c.min??0)).map(c=>c.id):[];
     const source:WorldInteractionRef=event.type==='fracture'
       ?{domain:'entity',id:event.entity}
       :event.type==='impact'
@@ -267,7 +284,9 @@ export class WorldInteractionJournal {
       ...(event.type==='impact'?{
         target:event.b==='ground'?{domain:'ground' as const,id:'ground'}:{domain:'body' as const,id:event.b},
       }:{}),
-      ...(causeId?{causeId}:{}),effect:{kind:'event',event},
+      ...(causeId?{causeId}:{}),
+      ...(couplingIds.length?{couplingIds}:{}),
+      effect:{kind:'event',event},
     });
   }
 
@@ -282,6 +301,7 @@ export class WorldInteractionJournal {
       schema:WORLD_INTERACTION_IR_VERSION,convention,tick,timeSeconds,
       firstSequence:this.count?this.ring[this.head]!.sequence:this.next,
       afterSequence,nextSequence:this.next,dropped:this.dropped,
+      ...(this.couplings.length?{couplings:this.couplings}:{}),
       interactions:Object.freeze(all),
     });
   }
@@ -305,6 +325,10 @@ export function validateWorldInteractionGraph(graph:WorldInteractionGraph):World
      !Number.isSafeInteger(graph.nextSequence)||graph.firstSequence>graph.nextSequence||
      !Number.isSafeInteger(graph.dropped)||graph.dropped<0)
     fail('invalid graph cursor');
+  const couplings=graph.couplings===undefined?[]:compileWorldCouplings(graph.couplings);
+  if(graph.couplings!==undefined&&couplings.some((c,i)=>c.id!==graph.couplings![i]!.id))
+    fail('coupling graph is not topologically ordered');
+  const byCouplingId=new Map(couplings.map(c=>[c.id,c]));
   let previous=0;
   const retained=new Set<number>();
   for(const item of graph.interactions){
@@ -326,6 +350,20 @@ export function validateWorldInteractionGraph(graph:WorldInteractionGraph):World
        item.id!=='wi:1:'+item.sequence)fail('unordered or invalid interaction identity');
     if(item.tick>graph.tick||item.timeSeconds>graph.timeSeconds+1e-9)
       fail('interaction occurs after the graph');
+    if(item.couplingIds!==undefined){
+      if(item.effect.kind!=='event'||!item.causeId||!Array.isArray(item.couplingIds))
+        fail('realized coupling requires a committed event and cause');
+      const observedTarget=item.effect.event.type==='impact'?'audio.impact.energy':
+        item.effect.event.type==='fracture'?'material.fracture.energy':undefined;
+      const seenCouplingIds=new Set<string>();
+      for(const id of item.couplingIds){
+        const coupling=byCouplingId.get(id);
+        if(!coupling||seenCouplingIds.has(id)||coupling.from!=='physics.contact.energy'||
+          coupling.to!==observedTarget||item.effect.event.energy<(coupling.min??0))
+          fail('unrealized or invalid coupling reference');
+        seenCouplingIds.add(id);
+      }
+    }
     if(item.causeId){
       const cause=Number(item.causeId.slice(5));
       if(!Number.isSafeInteger(cause)||cause>=item.sequence||

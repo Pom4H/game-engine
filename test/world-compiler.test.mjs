@@ -38,7 +38,7 @@ test('WSCN decoder rejects malformed and incompatible binary without allocating 
   const bad=new Uint8Array(160);
   new TextEncoder().encodeInto('WSCN',bad);
   const view=new DataView(bad.buffer);
-  view.setUint16(4,3,true);
+  view.setUint16(4,4,true);
   assert.throws(()=>decodeWorldBinary(bad),/unsupported ABI version/);
   view.setUint16(4,1,true);
   view.setUint16(6,160,true);

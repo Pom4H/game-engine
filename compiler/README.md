@@ -127,7 +127,15 @@ the existing KernelProgram. Use `scene.setSystemDispatch('kernel')` for an
 equivalent legacy execution path and A/B comparisons. Performance directives
 only enable sampling; they do not modify the execution mode.
 
-## WSCN ABI v1 / v2 (little endian)
+## Causal coupling graph in World (WSCN v3)
+
+Rust compiles dimension-checked observational connections across physical,
+thermal, acoustic, material, environment and NPC domains. Dependencies are
+sorted once, cycles rejected, with no frame-time language interpreter.
+A link does not fabricate an unimplemented physical law. See
+[World coupling ABI and example](../docs/WORLD_COUPLINGS.md).
+
+## WSCN ABI v1 / v2 / v3 (little endian)
 
 Fixed-width layouts make the decoder deterministic and extensible without
 injecting a VM into the render/simulation loop. Never reinterpret a different
@@ -138,7 +146,7 @@ Header: **160 bytes**:
 | Offset | Type | Content |
 | --- | --- | --- |
 | 0 | bytes[4] | `WSCN` |
-| 4 | u16 | ABI version (1) |
+| 4 | u16 | ABI version (1, 2, or 3) |
 | 6 | u16 | header length (160) |
 | 8 | u32 | record stride (160) |
 | 12 | u32 | entity count |
@@ -154,10 +162,11 @@ Header: **160 bytes**:
 | 120 | f64 | camera FOV (degrees, matches SceneSpec) |
 | 128 | f64 | temperature (°C) |
 | 136 | u32 | snowfall 0..3 |
+| 140 | u32 | v3 coupling-extension offset in string section (v1/v2 zero) |
 | 144 | u32 | world name offset relative to string table |
 | 148 | u32 | world name UTF-8 byte length |
-| 152 | u32 | v2 extension offset relative to string section (v1 zero) |
-| 156 | u32 | v2 extension byte length, exactly 16 (v1 zero) |
+| 152 | u32 | optional v2/v3 performance offset relative to string section |
+| 156 | u32 | optional performance byte length, 0 or 16 (v2 always 16) |
 
 Record: **160 bytes**, repeated in source order:
 

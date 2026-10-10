@@ -95,7 +95,7 @@ export class Scene {
    * Capture runs after physical work, never during a collision decision. */
   enableWorldInteractions(capacity=4096):void{
     if(this.worldInteractionJournal)throw new TypeError('World Interaction IR capture is already active');
-    const journal=new WorldInteractionJournal(capacity);
+    const journal=new WorldInteractionJournal(capacity,this.spec.couplings??[]);
     this.stopWorkObserver=this.surfaces.observeContactWork((work,energyJ,affectedCells,surface)=>{
       const at=this.captureStepTime??this.time;
       const tick=this.captureStepTime!==undefined?this.tick+1:this.tick;

@@ -183,6 +183,8 @@ export interface SceneVehicleAssemblySpec {
   readonly air?:VehicleAir;
 }
 export interface SceneSpec {
+  /** Statically checked causal observation DAG, compiled by Rust World v3. */
+  couplings?:readonly import('../world-ir/couplings.js').WorldCoupling[];
   /** Opt-in CPU profiler: diagnoses cost without changing physics or render quality. */
   performance?:import('./performance.js').ScenePerformanceConfig;
   /** Declarative rig/routes restored by Scene construction, URL loading and reset. */

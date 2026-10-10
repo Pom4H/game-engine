@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - 'src/world-ir/**'
+      - 'compiler/**'
+      - 'examples/worlds/coupled-glass.world'
+      - 'test/world-couplings.test.mjs'
       - 'src/scene/scene.ts'
       - 'src/environment/surface-state.ts'
       - 'src/execution/index.ts'
@@ -45,6 +48,6 @@ jobs:
       - run: bun run typecheck
       - run: bun run build
       - name: Cross-domain physics material environment audio render Rust and network
-        run: node --test test/world-interaction-ir.test.mjs test/causal-render-contract.test.mjs test/contact-laws.test.mjs test/audio-foundation.test.mjs test/authority-ledger.test.mjs test/emergence-rigid-batch.test.mjs
+        run: node --test test/world-interaction-ir.test.mjs test/world-couplings.test.mjs test/causal-render-contract.test.mjs test/contact-laws.test.mjs test/audio-foundation.test.mjs test/authority-ledger.test.mjs test/emergence-rigid-batch.test.mjs
       - name: Bounded physical system and world code parity
         run: node --test test/world-compiler.test.mjs test/scene-performance.test.mjs

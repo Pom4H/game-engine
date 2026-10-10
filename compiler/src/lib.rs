@@ -42,7 +42,7 @@ enum Kind {
     Ident(String),
     Number(f64, String),
     LBrace, RBrace, LParen, RParen, LBracket, RBracket,
-    Colon, Comma, Semi, Equal, Plus, Minus, Star, Slash, Eof,
+    Colon, Comma, Semi, Equal, Plus, Minus, Star, Slash, Dot, Eof,
 }
 #[derive(Clone, Debug)]
 struct Token { kind: Kind, at: usize }
@@ -66,7 +66,9 @@ fn lex(input: &str) -> Result<Vec<Token>> {
             ';' => Some(Kind::Semi), '=' => Some(Kind::Equal),
             '[' => Some(Kind::LBracket), ']' => Some(Kind::RBracket),
             '+' => Some(Kind::Plus), '-' => Some(Kind::Minus),
-            '*' => Some(Kind::Star), '/' => Some(Kind::Slash), _ => None,
+            '*' => Some(Kind::Star), '/' => Some(Kind::Slash),
+            '.' if !bytes.get(i+1).is_some_and(u8::is_ascii_digit) => Some(Kind::Dot),
+            _ => None,
         };
         if let Some(kind) = punctuation {
             tokens.push(Token { kind, at: i });
@@ -121,7 +123,7 @@ fn lex(input: &str) -> Result<Vec<Token>> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Dimension { Scalar, Length, Speed, Acceleration, Mass, Angle, Temperature, Time }
+enum Dimension { Scalar, Length, Speed, Acceleration, Mass, Angle, Temperature, Time, Energy, Pressure, Impulse }
 fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f64> {
     let factor = match (dimension, unit) {
         (Dimension::Scalar, "") => 1.0,
@@ -139,12 +141,21 @@ fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f6
         (Dimension::Time, "s") => 1.0,
         (Dimension::Time, "ms") => 0.001,
         (Dimension::Time, "us") => 0.000001,
+        (Dimension::Energy, "J") => 1.0,
+        (Dimension::Energy, "kJ") => 1000.0,
+        (Dimension::Pressure, "Pa") => 1.0,
+        (Dimension::Pressure, "kPa") => 1000.0,
+        (Dimension::Impulse, "Ns") => 1.0,
         _ => {
             let expected = match dimension {
                 Dimension::Scalar => "unitless", Dimension::Length => "m/cm/mm",
                 Dimension::Speed => "m/s or km/h", Dimension::Acceleration => "m/s2",
                 Dimension::Mass => "kg/g", Dimension::Angle => "deg/rad",
                 Dimension::Temperature => "C", Dimension::Time => "s/ms/us",
+        Dimension::Energy => "J/kJ", Dimension::Pressure => "Pa/kPa",
+        Dimension::Impulse => "Ns",
+                Dimension::Energy => "J/kJ", Dimension::Pressure => "Pa/kPa",
+                Dimension::Impulse => "Ns",
             };
             return Err(CompileError::new(at, format!("unit {unit:?} is invalid; expected {expected}")));
         }
@@ -178,10 +189,45 @@ fn literal(value: f64, unit: &str, at: usize) -> Result<Quantity> {
         "deg" | "rad" => Dimension::Angle,
         "C" | "°C" => Dimension::Temperature,
         "s" | "ms" | "us" => Dimension::Time,
+        "J" | "kJ" => Dimension::Energy,
+        "Pa" | "kPa" => Dimension::Pressure,
+        "Ns" => Dimension::Impulse,
         _ => return Err(CompileError::new(at, format!("unknown unit {unit:?}"))),
     };
     Ok(Quantity { value: convert(value, unit, dimension, at)?, dimension })
 }
+
+
+/** WSCN v3 World coupling signal tags. Order is ABI, mirrored in
+ * src/world-ir/couplings.ts. All edges are OBSERVATIONS, not force transfers. */
+const SIGNALS: [(&str, Dimension); 24] = [
+    ("physics.contact.energy", Dimension::Energy),   // 0
+    ("audio.impact.energy", Dimension::Energy),
+    ("material.fracture.energy", Dimension::Energy),
+    ("thermal.energy", Dimension::Energy),
+    ("acoustic.source.energy", Dimension::Energy),
+    ("fluid.pressure", Dimension::Pressure),          // 5
+    ("acoustic.pressure", Dimension::Pressure),
+    ("npc.hearing.pressure", Dimension::Pressure),
+    ("environment.temperature", Dimension::Temperature),
+    ("thermal.temperature", Dimension::Temperature),
+    ("surface.temperature", Dimension::Temperature), // 10
+    ("material.temperature", Dimension::Temperature),
+    ("fluid.depth", Dimension::Length),
+    ("surface.water.depth", Dimension::Length),
+    ("surface.friction", Dimension::Scalar),
+    ("physics.friction", Dimension::Scalar),          // 15
+    ("physics.contact.impulse", Dimension::Impulse),
+    ("acoustic.impulse", Dimension::Impulse),
+    ("environment.wind.speed", Dimension::Speed),
+    ("fluid.velocity.speed", Dimension::Speed),
+    ("npc.movement.speed", Dimension::Speed),         // 20
+    ("physics.body.speed", Dimension::Speed),
+    ("npc.intent.confidence", Dimension::Scalar),
+    ("material.damage.fraction", Dimension::Scalar),
+];
+const MAX_COUPLINGS: usize = 256;
+const COUPLING_RECORD_BYTES:usize = 32;
 
 #[derive(Default)]
 struct Camera { position: [f64; 3], target: [f64; 3], fov_deg: f64 }
@@ -203,15 +249,20 @@ impl Entity {
 }
 #[derive(Clone, Copy)]
 struct Performance {budget_ms:f64,sample_every:u32,history:u32}
+#[derive(Clone, Debug)]
+struct Coupling {
+    id:String, from:u8, to:u8, after:Option<String>, min:Option<f64>, at:usize,
+}
 struct World {
     name: String, seed: u32, gravity: [f64; 3], ground: f64,
     camera: Option<Camera>, temperature: Option<f64>, snowfall: Option<u32>,
-    performance: Option<Performance>, entities: Vec<Entity>,
+    performance: Option<Performance>, entities: Vec<Entity>, couplings:Vec<Coupling>,
 }
 impl World {
     fn new(name: String) -> Self {
         Self { name, seed: 0, gravity: [0.0, -9.81, 0.0], ground: 0.0,
-            camera: None, temperature: None, snowfall: None, performance: None, entities: Vec::new() }
+            camera: None, temperature: None, snowfall: None, performance: None, entities: Vec::new(),
+            couplings:Vec::new() }
     }
 }
 
@@ -356,6 +407,57 @@ impl Parser {
             "true" => Ok(true), "false" => Ok(false),
             _ => Err(CompileError::new(self.at(), "expected true or false")),
         }
+    }
+    fn signal_port(&mut self)->Result<(u8,Dimension)> {
+        let at=self.at();
+        let mut name=self.ident()?;
+        while self.eat(Kind::Dot) {
+            name.push('.');
+            name.push_str(&self.ident()?);
+        }
+        SIGNALS.iter().position(|(port,_)|*port==name).map(|tag|
+            (tag as u8,SIGNALS[tag].1)
+        ).ok_or_else(||CompileError::new(at,format!("unknown coupling signal {name}")))
+    }
+    fn coupling(&mut self,id:String,at:usize)->Result<Coupling> {
+        if id.as_bytes().len()>180 {return Err(CompileError::new(at,"coupling id exceeds 180 bytes"));}
+        self.expect(Kind::LBrace)?;
+        let mut seen=HashSet::new();
+        let mut from=None;let mut to=None;let mut after=None;let mut min=None;
+        while !self.eat(Kind::RBrace) {
+            let key=self.property()?;
+            self.unique(&mut seen,&key)?;
+            match key.as_str() {
+                "from"=>from=Some(self.signal_port()?),
+                "to"=>to=Some(self.signal_port()?),
+                "after"=>after=Some(self.ident()?),
+                "min"=>min=Some(self.expression()?),
+                _=>return Err(CompileError::new(self.at(),format!("unknown coupling field {key}"))),
+            }
+            self.end_field();
+        }
+        let (from,dimension)=from.ok_or_else(||CompileError::new(at,"coupling requires from"))?;
+        let (to,target_dimension)=to.ok_or_else(||CompileError::new(at,"coupling requires to"))?;
+        if dimension!=target_dimension {
+            return Err(CompileError::new(at,format!(
+                "coupling dimension mismatch: {} ({dimension:?}) -> {} ({target_dimension:?})",
+                SIGNALS[from as usize].0,SIGNALS[to as usize].0
+            )));
+        }
+        if from==to{return Err(CompileError::new(at,"coupling cannot feed the same signal"));}
+        if let Some(value)=min {
+            if value.dimension!=dimension {
+                return Err(CompileError::new(at,format!(
+                    "coupling min has {:?}; expected {}",
+                    value.dimension,unit_name(dimension)
+                )));
+            }
+            if value.value<0.0{return Err(CompileError::new(at,"coupling min must be nonnegative"));}
+        }
+        if after.as_ref().is_some_and(|name|name.as_bytes().len()>180){
+            return Err(CompileError::new(at,"coupling dependency id exceeds 180 bytes"));
+        }
+        Ok(Coupling{id,from,to,after,min:min.map(|q|q.value),at})
     }
     fn camera(&mut self) -> Result<Camera> {
         self.expect(Kind::LBrace)?;
@@ -585,6 +687,17 @@ impl Parser {
                     self.unique(&mut seen,"performance")?;
                     world.performance=Some(self.performance()?);
                 }
+                "coupling" => {
+                    let at=self.at();
+                    let id=self.ident()?;
+                    if world.couplings.len()>=MAX_COUPLINGS{
+                        return Err(CompileError::new(at,"too many World couplings (max 256)"));
+                    }
+                    if world.couplings.iter().any(|link|link.id==id) {
+                        return Err(CompileError::new(at,format!("duplicate World coupling {id}")));
+                    }
+                    world.couplings.push(self.coupling(id,at)?);
+                }
                 "camera" => {
                     self.unique(&mut seen, "camera")?;
                     world.camera = Some(self.camera()?);
@@ -614,8 +727,45 @@ impl Parser {
             self.end_field();
         }
         self.expect(Kind::Eof)?;
+        world.couplings=order_couplings(&world.couplings)?;
         Ok(world)
     }
+}
+
+
+/** Topological order: explicit after and producer.to -> consumer.from.
+ * Edges are resolved at compile time; no graph scheduler runs per frame. */
+fn order_couplings(input:&[Coupling])->Result<Vec<Coupling>>{
+    let mut order=Vec::with_capacity(input.len());
+    let mut incoming=vec![0usize;input.len()];
+    let mut arcs=vec![Vec::<usize>::new();input.len()];
+    for (j,next) in input.iter().enumerate(){
+        for (i,prev) in input.iter().enumerate(){
+            let follows=if let Some(name)=next.after.as_ref(){
+                prev.id==*name
+            }else{false};
+            let signal_edge=prev.to==next.from;
+            if follows||signal_edge {
+                if !arcs[i].contains(&j) {arcs[i].push(j);incoming[j]+=1;}
+            }
+        }
+        if let Some(name)=next.after.as_ref(){
+            if !input.iter().any(|c|c.id==*name){
+                return Err(CompileError::new(next.at,format!("unknown coupling dependency {name}")));
+            }
+        }
+    }
+    let mut used=vec![false;input.len()];
+    while order.len()<input.len(){
+        let Some(i)=(0..input.len()).find(|i|!used[*i]&&incoming[*i]==0) else{
+            let at=input.iter().enumerate().find(|(i,_)|!used[*i]).map(|(_,c)|c.at).unwrap_or(0);
+            return Err(CompileError::new(at,"cyclic World coupling dependency"));
+        };
+        used[i]=true;
+        order.push(input[i].clone());
+        for j in &arcs[i] {incoming[*j]-=1;}
+    }
+    Ok(order)
 }
 
 fn u16_at(bytes: &mut [u8], at: usize, number: u16) {
@@ -641,7 +791,9 @@ fn encode(world: World) -> Result<Vec<u8>> {
     strings.extend_from_slice(world.name.as_bytes());
     let name_length = strings.len();
     bytes[..4].copy_from_slice(b"WSCN");
-    u16_at(&mut bytes, 4, if world.performance.is_some(){2}else{1}); // v1 unprofiled, v2 profiled
+    // v1: entities only, v2: profile, v3: typed World coupling graph.
+    u16_at(&mut bytes, 4, if !world.couplings.is_empty(){3}
+        else if world.performance.is_some(){2}else{1});
     u16_at(&mut bytes, 6, HEADER_BYTES as u16);
     u32_at(&mut bytes, 8, RECORD_BYTES as u32);
     u32_at(&mut bytes, 12, world.entities.len() as u32);
@@ -706,13 +858,44 @@ fn encode(world: World) -> Result<Vec<u8>> {
         vec3_at(&mut bytes, base + 64, entity.scale);
         vec3_at(&mut bytes, base + 88, entity.dimensions);
     }
+    // Build compact graph records before the metadata section. All names are
+    // plain UTF-8 in the existing string region; tags are the stable signal ABI.
+    let mut coupling_records=Vec::with_capacity(world.couplings.len());
+    for coupling in &world.couplings {
+        let mut record=[0u8;COUPLING_RECORD_BYTES];
+        let at=strings.len();
+        strings.extend_from_slice(coupling.id.as_bytes());
+        u32_at(&mut record,0,at as u32);
+        u16_at(&mut record,4,coupling.id.len() as u16);
+        record[6]=coupling.from;record[7]=coupling.to;
+        if let Some(after)=&coupling.after {
+            let start=strings.len();
+            strings.extend_from_slice(after.as_bytes());
+            u32_at(&mut record,8,start as u32);
+            u16_at(&mut record,12,after.len() as u16);
+        }
+        if let Some(min)=coupling.min {
+            u16_at(&mut record,14,1);
+            f64_at(&mut record,24,min);
+        }
+        coupling_records.push(record);
+    }
     if let Some(performance)=world.performance {
-        // ABI v2 opt-in extension; never interpreted in the simulation hot path.
+        // v2-v3 explicit performance section, before the optional relation graph.
         u32_at(&mut bytes,152,strings.len() as u32);
         u32_at(&mut bytes,156,16);
         strings.extend_from_slice(&performance.budget_ms.to_le_bytes());
         strings.extend_from_slice(&performance.sample_every.to_le_bytes());
         strings.extend_from_slice(&performance.history.to_le_bytes());
+    }
+    if !coupling_records.is_empty() {
+        u32_at(&mut bytes,140,strings.len() as u32);
+        strings.extend_from_slice(b"WREL");
+        strings.extend_from_slice(&1u16.to_le_bytes());
+        strings.extend_from_slice(&(COUPLING_RECORD_BYTES as u16).to_le_bytes());
+        strings.extend_from_slice(&(coupling_records.len() as u32).to_le_bytes());
+        strings.extend_from_slice(&0u32.to_le_bytes()); // reserved flags
+        for record in coupling_records {strings.extend_from_slice(&record);}
     }
     let total = record_end + strings.len();
     if total > MAX_BYTES { return Err(CompileError::new(0, "compiled scene exceeds 32 MiB")); }
@@ -764,6 +947,47 @@ world Collision {
     restitution: 0.5
   }
 }"#;
+
+    #[test]
+    fn typed_world_couplings_encode_v3_with_topological_dependencies() {
+        let src = r#"
+world Coupled {
+  entity pane {mesh: box(1cm, 1m, 1m) body: static material: glass}
+  coupling listen {from: acoustic.pressure to: npc.hearing.pressure; after: wave; min: 1kPa}
+  coupling wave {from: fluid.pressure to: acoustic.pressure; min: 10Pa}
+  coupling hit {from: physics.contact.energy to: audio.impact.energy; min: 0.1kJ}
+}
+"#;
+        let bytes=compile(src).unwrap();
+        assert_eq!(u16::from_le_bytes(bytes[4..6].try_into().unwrap()),3);
+        let start=u32::from_le_bytes(bytes[20..24].try_into().unwrap()) as usize;
+        let offset=u32::from_le_bytes(bytes[140..144].try_into().unwrap()) as usize;
+        assert_eq!(&bytes[start+offset..start+offset+4],b"WREL");
+        assert_eq!(u32::from_le_bytes(bytes[start+offset+8..start+offset+12].try_into().unwrap()),3);
+        assert_eq!(bytes[start+offset+16+6],5); // fluid.pressure
+        assert_eq!(bytes[start+offset+16+7],6); // acoustic.pressure
+        assert_eq!(bytes[start+offset+16+32+6],6); // acoustic.pressure
+        assert_eq!(bytes[start+offset+16+32+7],7); // npc.hearing.pressure
+        assert_eq!(f64::from_le_bytes(bytes[start+offset+16+32+24..start+offset+16+32+32].try_into().unwrap()),1000.0);
+        assert_eq!(bytes,compile(src).unwrap());
+    }
+    #[test]
+    fn coupled_world_compiler_rejects_unsafe_relations() {
+        for (declaration,expected) in [
+            ("coupling bad {from: physics.contact.energy to: acoustic.pressure}", "dimension mismatch"),
+            ("coupling bad {from: physics.contact.energy to: audio.impact.energy min: 2Pa}", "coupling min"),
+            ("coupling bad {from: thermal.entropy to: surface.temperature}", "unknown coupling signal"),
+            ("coupling bad {from: fluid.pressure to: acoustic.pressure after: absent}", "unknown coupling dependency"),
+            ("coupling bad {from: fluid.pressure to: fluid.pressure}", "same signal"),
+            ("coupling a {from: fluid.pressure to: acoustic.pressure after: b} coupling b {from: acoustic.pressure to: fluid.pressure}", "cyclic"),
+            ("coupling a {from: fluid.pressure to: acoustic.pressure} coupling a {from: thermal.temperature to: surface.temperature}", "duplicate World coupling"),
+        ] {
+            let source=format!("world Bad {{ {declaration} }}");
+            let error=compile(&source).unwrap_err();
+            assert!(error.message.contains(expected),"{declaration}: {} (expected {expected})",error.message);
+            assert!(error.located(&source).contains(':'));
+        }
+    }
 
     #[test]
     fn deterministic_binary_with_versioned_abi() {

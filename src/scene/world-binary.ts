@@ -1,6 +1,7 @@
 import type {MaterialKind} from '../materials/catalog.js';
 import type {BodySpec,EntitySpec,Primitive,SceneSpec} from './types.js';
 import {validateScene} from './validate.js';
+import {WORLD_COUPLING_ABI_VERSION,WORLD_MAX_COUPLINGS,WORLD_SIGNAL_PORTS,compileWorldCouplings,type WorldCoupling} from '../world-ir/couplings.js';
 
 /**
  * World compiler binary ABI v1 (WSCN).
@@ -11,7 +12,7 @@ import {validateScene} from './validate.js';
  * This module executes only at scene load, never during simulation/render ticks.
  * Physics/renderer continue to consume the engine's native SceneSpec.
  */
-export const WORLD_BINARY_VERSION=2; // ABI v1 supported; v2 adds performance metadata
+export const WORLD_BINARY_VERSION=3; // v1 entities, v2 performance, v3 causal graph extension
 const HEADER_BYTES=160,RECORD_BYTES=160,MAX_BYTES=32*1024*1024,MAX_ENTITIES=20_000;
 const MATERIALS=['default','glass','steel','wood','concrete','asphalt','snow','rubber','plastic','aluminum','mirror'] as const satisfies readonly MaterialKind[];
 const SNOWFALL=['none','light','moderate','heavy'] as const;
@@ -36,7 +37,8 @@ export function decodeWorldBinary(input:ArrayBuffer|Uint8Array):SceneSpec{
     finite(f64(at),'vector'),finite(f64(at+8),'vector'),finite(f64(at+16),'vector'),
   ];
   const version=u16(4);
-  if(version!==1&&version!==WORLD_BINARY_VERSION)fail('unsupported ABI version');
+  if(version!==1&&version!==2&&version!==WORLD_BINARY_VERSION)fail('unsupported ABI version');
+  if(version<3&&u32(140)!==0)fail('unexpected coupling extension');
   if(version===1&&(u32(152)!==0||u32(156)!==0))fail('unexpected v1 extension');
   if(u16(6)!==HEADER_BYTES||u32(8)!==RECORD_BYTES)fail('unsupported record layout');
   const count=u32(12),recordsOffset=u32(16),stringsOffset=u32(20),total=u32(24),worldFlags=u32(28);
@@ -108,14 +110,64 @@ export function decodeWorldBinary(input:ArrayBuffer|Uint8Array):SceneSpec{
   }
   // Normal validator remains the single authority for physical/render invariants.
   scene.entities=entities;
-  if(version===2){
+  // ABI v3: static, typed and non-executing interaction descriptors.
+  // Values are observations/dependency metadata, never physical solver commands.
+  const graphOffset=version===3?u32(140):0;
+  if(version===3){
+    if(graphOffset<lastStringEnd||graphOffset+16>stringLength)fail('invalid coupling extension bounds');
+    const base=stringsOffset+graphOffset;
+    if(bytes[base]!==87||bytes[base+1]!==82||bytes[base+2]!==69||bytes[base+3]!==76)
+      fail('invalid coupling extension magic');
+    if(u16(base+4)!==WORLD_COUPLING_ABI_VERSION||u16(base+6)!==32||u32(base+12)!==0)
+      fail('unsupported coupling extension layout');
+    const count=u32(base+8);
+    if(count<1||count>WORLD_MAX_COUPLINGS||graphOffset+16+32*count!==stringLength)
+      fail('invalid coupling extension count or size');
+    const performanceOffset=u32(152),performanceLength=u32(156);
+    if(performanceLength!==0&&performanceLength!==16)fail('invalid v3 performance extension length');
+    if(performanceLength===0&&performanceOffset!==0)fail('unexpected v3 performance offset');
+    const stringLimit=performanceLength===16?performanceOffset:graphOffset;
+    const relationString=(start:number,size:number):string=>{
+      if(size<1||start>stringLimit||size>stringLimit-start)
+        fail('invalid coupling id bounds');
+      return readString(start,size);
+    };
+    const couplings:WorldCoupling[]=[];
+    for(let i=0;i<count;i++){
+      const at=base+16+i*32;
+      const id=relationString(u32(at),u16(at+4));
+      const from=WORLD_SIGNAL_PORTS[u8(at+6)]?.path;
+      const to=WORLD_SIGNAL_PORTS[u8(at+7)]?.path;
+      if(!from||!to)fail('invalid coupling signal tag');
+      const dependencyOffset=u32(at+8),dependencyLength=u16(at+12),flags=u16(at+14);
+      if(flags&~1)fail('unknown coupling flags');
+      if(f64(at+16)!==0)fail('invalid coupling reserved bytes');
+      if(!dependencyLength&&dependencyOffset!==0)fail('invalid coupling dependency offset');
+      const after=dependencyLength?relationString(dependencyOffset,dependencyLength):undefined;
+      const threshold=finite(f64(at+24),'coupling.min');
+      if(!(flags&1)&&threshold!==0)fail('unexpected coupling threshold');
+      lastStringEnd=Math.max(lastStringEnd,u32(at)+u16(at+4),dependencyOffset+dependencyLength);
+      couplings.push({id,from,to,...(after?{after}:{}),...(flags&1?{min:threshold}:{})});
+    }
+    if(lastStringEnd>stringLimit)fail('coupling strings overlap metadata');
+    const ordered=compileWorldCouplings(couplings);
+    if(ordered.some((relation,i)=>relation.id!==couplings[i]!.id))
+      fail('couplings are not in topological source order');
+    scene.couplings=ordered;
+  }
+  if(version===2||version===3&&u32(156)!==0){
     const offset=u32(152),length=u32(156);
-    if(length!==16||offset<lastStringEnd||offset+length!==stringLength)fail('invalid performance extension bounds');
+    const extensionEnd=version===2?stringLength:graphOffset;
+    if(length!==16||offset<lastStringEnd||offset+length!==extensionEnd)
+      fail('invalid performance extension bounds');
     const at=stringsOffset+offset;
     const budgetMs=finite(f64(at),'performance.tickBudgetMs');
     const sampleEvery=u32(at+8),history=u32(at+12);
-    if(budgetMs<.001||budgetMs>1000||sampleEvery<1||sampleEvery>1024||history<8||history>4096)fail('invalid performance settings');
+    if(budgetMs<.001||budgetMs>1000||sampleEvery<1||sampleEvery>1024||history<8||history>4096)
+      fail('invalid performance settings');
     scene.performance={tickBudgetMs:budgetMs,sampleEvery,history};
+  }else if(version===3&&graphOffset!==stringLength-(16+32*(scene.couplings?.length??0))){
+    fail('invalid coupling extension size');
   }
   return validateScene(scene);
 }

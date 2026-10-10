@@ -118,3 +118,12 @@ the render/audio/network projections. `projectSceneRenderFrame(...,
 {includeInteractions:true})` optionally includes one content-addressed `graph`
 resource; `eventsFromWorldInteractions` reuses exactly the committed audio events.
 See [docs/WORLD_INTERACTION_IR.md](docs/WORLD_INTERACTION_IR.md).
+
+## Rust World v3: type-checked causal connections
+
+World source files can declare a bounded dimension-checked coupling DAG
+connecting physics, sound, material, thermal, water, acoustic and NPC signal
+ports. The WSCN v3 extension is pure static metadata with no per-tick DSL
+interpreter. Only actual committed impact/fracture effects are linked at
+runtime; unimplemented links stay declarative. See
+[docs/WORLD_COUPLINGS.md](docs/WORLD_COUPLINGS.md).

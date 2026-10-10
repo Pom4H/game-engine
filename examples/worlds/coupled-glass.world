@@ -1,0 +1,76 @@
+# Typed causal graph: one physical world, explicit observation dependencies.
+# Declarations do not inject energy, forces, sound, heat or NPC decisions.
+# The existing engine domains own every actual mutation.
+world CoupledGlass {
+  seed: 42
+  ground: -100m
+  gravity: (0m/s2, 0m/s2, 0m/s2)
+
+  environment { temperature: -5C; snowfall: light }
+
+  entity glass {
+    position: (0m, 2m, 0m)
+    mesh: box(1cm, 1.4m, 1.2m)
+    material: glass
+    body: static
+  }
+  entity projectile {
+    position: (-1m, 2m, 0m)
+    mesh: sphere(11cm)
+    material: steel
+    body: dynamic(3.8kg)
+    velocity: (30m/s, 0m/s, 0m/s)
+  }
+
+  # Already committed engine causality: contact -> physical impact/fracture event.
+  coupling impact_sound {
+    from: physics.contact.energy
+    to: audio.impact.energy
+    min: 0.2J
+  }
+  coupling brittle_failure {
+    from: physics.contact.energy
+    to: material.fracture.energy
+    min: 1J
+  }
+
+  # Validated dependencies for future acoustic and AI physical laws.
+  # These have no runtime execution owner yet and remain descriptive.
+  coupling fluid_wave {
+    from: fluid.pressure
+    to: acoustic.pressure
+    min: 0Pa
+  }
+  coupling hearing {
+    from: acoustic.pressure
+    to: npc.hearing.pressure
+    after: fluid_wave
+    min: 10Pa
+  }
+
+  coupling weather_thermal {
+    from: environment.temperature
+    to: thermal.temperature
+  }
+  coupling hot_surface {
+    from: thermal.temperature
+    to: surface.temperature
+    after: weather_thermal
+  }
+  coupling material_temperature {
+    from: thermal.temperature
+    to: material.temperature
+  }
+  coupling fluid_level {
+    from: fluid.depth
+    to: surface.water.depth
+  }
+  coupling wheel_grip {
+    from: surface.friction
+    to: physics.friction
+  }
+  coupling wind_agent {
+    from: environment.wind.speed
+    to: npc.movement.speed
+  }
+}

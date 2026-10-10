@@ -1,6 +1,7 @@
 import {AnimationSystem,type WalkerSpec,type VehicleMotionSpec} from '../animation/locomotion.js';
 import {SnowSurface,type SnowSurfaceOptions} from '../environment/snow-surface.js';
 import {materialKinds} from '../materials/catalog.js';
+import {compileWorldCouplings} from '../world-ir/couplings.js';
 import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
 import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
@@ -193,7 +194,8 @@ export function validateScene(value:unknown):SceneSpec{
       if(probe.exclude!==undefined){const excluded=boundedArray(probe.exclude,'rendering.reflectionProbe.exclude',4096);for(const [i,value] of excluded.entries()){const id=stableId(value,`rendering.reflectionProbe.exclude[${i}]`);if(!ids.has(id))throw new TypeError(`rendering.reflectionProbe.exclude[${i}] references missing entity ${id}`);}}
     }
   }
-  return structuredClone(value) as SceneSpec;
+  const result=structuredClone(value) as SceneSpec;
+  return scene.couplings!==undefined?{...result,couplings:compileWorldCouplings(scene.couplings)}:result;
 }
 
 const HUMANOID_JOINTS=['root','pelvis','chest','neck','head','leftHip','rightHip','leftKnee','rightKnee','leftAnkle','rightAnkle','leftFoot','rightFoot','leftShoulder','rightShoulder','leftElbow','rightElbow','leftHand','rightHand'];

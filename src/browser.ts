@@ -17,4 +17,5 @@ export {createWasmStructuralBody,type RustStructuralStaticContacts} from './phys
 
 export {createWasmRigidContactKernel} from './physics/rigid-wasm.js';
 
+export {compileWorldCouplings,signalPortDimension,signalPortIndex,WORLD_SIGNAL_PORTS,WORLD_COUPLING_ABI_VERSION,type WorldSignalPort,type WorldCoupling,type WorldCouplingDimension} from './world-ir/couplings.js';
 export {WorldInteractionJournal,eventsFromWorldInteractions,validateWorldInteractionGraph,WORLD_INTERACTION_IR_VERSION,WORLD_INTERACTION_LAWS,type WorldInteractionLaw,type WorldInteractionGraph,type WorldInteraction,type WorldInteractionEffect,type WorldInteractionDomain,type WorldInteractionRef} from './world-ir/index.js';

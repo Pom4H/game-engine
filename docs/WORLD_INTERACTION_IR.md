@@ -122,3 +122,13 @@ collision backend.
 Future law extensions include typed force-driver/torque, acoustic pressure,
 NPC/agent decisions and distributed commit edges. Those must be sourced from
 their *existing authorities*, never invented inside the observer.
+
+## Typed AOT connections in WSCN v3
+
+World source can now declare typed couplings (from, to, optional min and
+named after dependency). Rust validates dimension equality and a directed
+acyclic dependency graph before storing a compact extension in WSCN v3.
+SceneSpec.couplings is metadata, and committed sound/fracture events can be
+annotated with realized coupling IDs. Fluid/acoustic/heat/NPC relations that
+lack an executing physical law remain declarative, not synthetic mutations.
+See [World coupling ABI](./WORLD_COUPLINGS.md).
