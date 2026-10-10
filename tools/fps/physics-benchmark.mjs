@@ -81,3 +81,6 @@ const report={schema:1,commit:process.env.GITHUB_SHA??null,platform:process.plat
 mkdirSync(resolve('artifacts/fps'),{recursive:true});
 writeFileSync(resolve('artifacts/fps/physics-budget.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));
+const violations=results.filter(sample=>!sample.performance.withinGoal);
+assert.equal(violations.length,0,
+  '60Hz physics CPU budget exceeded (5ms median per tick): '+JSON.stringify(violations.map(item=>({id:item.id,...item.performance}))));

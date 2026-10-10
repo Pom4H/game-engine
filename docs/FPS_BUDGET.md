@@ -1,0 +1,61 @@
+# Frame-rate performance contract
+
+**Target:** 60 FPS at 1920×1080 on the named GPU, without changing the
+physics state, causal ownership, shaders, camera, or visible quality. A complete
+60 Hz displayed frame has ~16.667 ms; CPU simulation, CPU render submission,
+GPU work and frame pacing must be measured **separately** because they can
+overlap and cannot simply be added as an FPS estimate.
+
+## Measurements
+
+| Gate | Evidence | Criterion |
+| --- | --- | --- |
+| CPU physics | `FPS budget - physics` hosted Linux | 5 ms median per 60 Hz tick for specified fixtures, strict SHA-256 physical replay |
+| Rendering | `FPS budget - hardware WebGPU` on named Mac/Windows hardware | 1920×1080 real Chrome WebGPU; frame interval and render CPU p50/p95/p99, per-pass GPU timestamp p50/p95 |
+| Physics integrity | `test/contact-laws.test.mjs`, proving-ground and golden replay | Same cause graph, body positions, impulses, contacts, and physical state |
+| Visual fidelity | Existing Render, Proving Ground and promoted scenes | No silent lower resolution, shader changes, removed physics or hidden objects to inflate FPS |
+
+Render-profile sampling is opt-in via `RENDER_PROFILING=1`, and the normal
+gameplay path is unchanged. GPU timestamp queries are only reported when
+supported. A null GPU sample is **missing evidence**, never a passed gate.
+The full frame-pacing benchmark intentionally renders 90 consecutive
+requestAnimationFrame callbacks, advancing a 60 Hz simulation tick before each
+render. It's a target-device smoke test, **not** a proof for all scenes/devices.
+
+Use:
+
+```sh
+bun run build
+node tools/fps/physics-benchmark.mjs
+RENDER_PROFILING=1 RENDER_REQUIRE_HARDWARE=1 RENDER_FPS_BENCH_FRAMES=90 \
+  RENDER_WARMUP_FRAMES=12 node tools/render-harness.mjs \
+  tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+```
+
+CI emits `artifacts/fps/physics-budget.json` and
+`artifacts/fps/gpu-budget.json`. The renderer also returns a bounded,
+inspectable `cpuStagingBytes` value. Compare p95 **on the same hardware**
+and check render shader/visual regressions. Inspect physics causal traces and
+per-system CPU sampling separately through the World `performance` directive;
+a measured speedup must preserve physics replay hashes.
+
+## Measurements observed before additional GPU optimisation
+
+Hosted Linux CPU 60 Hz physics-only fixtures (October 10, 2026):
+
+| Workload | Baseline ms/tick | Fast ground-path ms/tick |
+| --- | ---: | ---: |
+| 128 airborne dynamic boxes | 3.6201 | 1.8239 |
+| 96 near-ground dynamic boxes | 2.3988 | 1.2919 |
+| 512 static + 32 dynamic boxes | 2.8903 | 1.3131 |
+
+Different CI runs can vary due to contention, CPU clock and JIT. These are
+not total frame times. Golden replay hashes match for all 90 ticks. The
+attempted bulk spatial-hash rebuild was **reverted** after an interleaved
+A/B test showed 0.354 versus 0.319 ms for 544 entities (slower than the
+original algorithm). Prefer evidence over intuition.
+
+Previous separate Proving Ground 1600×900 14-frame profile: CPU render p95
+11.8 ms, GPU timestamp p95 7.12 ms, 632 draw calls. These do **not**
+measure actual game FPS or the 1920×1080 target, and do not include the
+latest per-object buffer reuse. Future conclusions must use the GPU gate.
