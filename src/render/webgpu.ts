@@ -252,7 +252,13 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let ndl=max(dot(n,light),0.0);
 
   var albedo=u.color.rgb*in.vertexColor.rgb;
-  let label=textureSample(labelTexture,labelSampler,in.uv);albedo=mix(albedo,label.rgb,label.a);
+  // No label is represented by an exactly transparent 1x1 texture.
+  // Skip the redundant fetch on every pixel of an unlabelled object.
+  // A real label (1024x128) keeps the original sampling/filtering equations.
+  if(textureDimensions(labelTexture).x>1u){
+    let label=textureSample(labelTexture,labelSampler,in.uv);
+    albedo=mix(albedo,label.rgb,label.a);
+  }
   let materialKind=select(u.weather.w,f32(MATERIAL_CLASS),MATERIAL_CLASS>=0);
   let surfaceUse=u.objectState.x;
   let treatment=u.objectState.y;
