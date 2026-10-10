@@ -152,8 +152,6 @@ fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f6
                 Dimension::Speed => "m/s or km/h", Dimension::Acceleration => "m/s2",
                 Dimension::Mass => "kg/g", Dimension::Angle => "deg/rad",
                 Dimension::Temperature => "C", Dimension::Time => "s/ms/us",
-        Dimension::Energy => "J/kJ", Dimension::Pressure => "Pa/kPa",
-        Dimension::Impulse => "Ns",
                 Dimension::Energy => "J/kJ", Dimension::Pressure => "Pa/kPa",
                 Dimension::Impulse => "Ns",
             };
@@ -177,6 +175,8 @@ fn unit_name(dimension: Dimension) -> &'static str {
         Dimension::Mass => "kg/g",
         Dimension::Angle => "deg/rad",
         Dimension::Temperature => "C", Dimension::Time => "s/ms/us",
+        Dimension::Energy => "J/kJ", Dimension::Pressure => "Pa/kPa",
+        Dimension::Impulse => "Ns",
     }
 }
 fn literal(value: f64, unit: &str, at: usize) -> Result<Quantity> {
