@@ -50,8 +50,11 @@ function advance(context){
 }
 async function setup(workload,backend){
  const state=createWorld(workload);
- const kernel=backend==='wasm'?await createWasmRigidContactKernel(module):null;
- state.world.setRigidContactKernel(kernel);
+ const kernel=backend==='typescript'?null:await createWasmRigidContactKernel(module);
+ const installed=backend==='wasm-serial'&&kernel?{
+  test:(a,b)=>kernel.test(a,b),resolve:contact=>kernel.resolve(contact),dispose:()=>{},
+ }:kernel;
+ state.world.setRigidContactKernel(installed);
  const context={state,kernel,backend,workload,contacts:0,samples:[]};
  for(let i=0;i<warmup;i++)advance(context);
  context.contacts=0;
@@ -67,24 +70,35 @@ for(const workload of workloads){
  try{
   contexts.typescript=await setup(workload,'typescript');
   contexts.wasm=await setup(workload,'wasm');
+  contexts.serial=await setup(workload,'wasm-serial');
   for(let round=0;round<rounds;round++){
    // Interleave backends to reduce CPU frequency/load/JIT ordering bias.
-   const order=round%2===0?['typescript','wasm']:['wasm','typescript'];
+   const order=round%2===0?['typescript','wasm-serial','wasm']:['wasm','wasm-serial','typescript'];
    for(const backend of order){
     const context=contexts[backend],start=performance.now();
     for(let tick=0;tick<ticks;tick++)advance(context);
     context.samples.push((performance.now()-start)/ticks);
    }
   }
-  const ts=contexts.typescript,wasm=contexts.wasm;
-  if(ts.contacts!==wasm.contacts)throw new Error('Contact replay count changed for '+workload.id+': '+ts.contacts+' vs '+wasm.contacts);
-  const jsMs=median(ts.samples),wasmMs=median(wasm.samples),speedup=jsMs/wasmMs;
-  console.log(workload.id+': JS '+jsMs.toFixed(4)+'ms/tick Rust '+
-   wasmMs.toFixed(4)+'ms/tick, ratio '+speedup.toFixed(2)+'x, contacts '+ts.contacts);
+  const ts=contexts.typescript,wasm=contexts.wasm,serial=contexts.serial;
+  if(ts.contacts!==wasm.contacts||ts.contacts!==serial.contacts)
+   throw new Error('Contact replay count changed for '+workload.id);
+  const jsMs=median(ts.samples),wasmMs=median(wasm.samples),serialMs=median(serial.samples);
+  const speedup=jsMs/wasmMs;
+  const calls=wasm.state.world.rigidContactDiagnostics;
+  if(!workload.material&&workload.count>2&&workload.spacing<10&&calls.calls===0)
+   throw new Error('Expected actual Rust batch execution in '+workload.id);
+  if(workload.material&&calls.calls!==0)
+   throw new Error('Material-coupled world was unsafely batched');
+  console.log(workload.id+': JS '+jsMs.toFixed(4)+'ms/tick, serial WASM '+
+   serialMs.toFixed(4)+'ms/tick, batched WASM '+wasmMs.toFixed(4)+
+   'ms/tick, vs JS '+speedup.toFixed(2)+'x, vs serial '+(serialMs/wasmMs).toFixed(2)+
+   'x, contacts '+ts.contacts);
   results.push({
    workload,typescript:{medianMs:jsMs,roundMsPerTick:ts.samples,contacts:ts.contacts},
+   serialWasm:{medianMs:serialMs,roundMsPerTick:serial.samples,contacts:serial.contacts},
    wasm:{medianMs:wasmMs,roundMsPerTick:wasm.samples,contacts:wasm.contacts},
-   speedup,
+   batch:calls,speedup,versusSerial:serialMs/wasmMs,
   });
  }finally{
   for(const context of Object.values(contexts)){
@@ -93,9 +107,9 @@ for(const workload of workloads){
  }
 }
 const report={
- schema:2,commit:process.env.GITHUB_SHA??null,node:process.version,platform:process.platform,machine:process.arch,
- method:'Production PhysicsWorld 120 Hz. Warmup outside timing; five alternating backend rounds of 180 ticks each. Per-tick cost includes optional scripted pose reset, existing broadphase, material callback (marked), narrowphase, pair impulses, and sleeping. Independent worlds with identical fixtures; contact counts must match exactly.',
- caveats:'Native kernel remains opt-in. Contact-heavy scripted replay repeats impacts for stress testing. Sparse case must have zero pair contacts and is an overhead control. Natural case may have no contacts after warmup. Report is not an FPS measurement.',
+ schema:3,commit:process.env.GITHUB_SHA??null,node:process.version,platform:process.platform,machine:process.arch,
+ method:'Production PhysicsWorld 120 Hz. Three backends (JS, serial WASM, batched WASM), warmup outside timing, five alternating rounds of 180 ticks each. Per-tick cost includes scripted reset where marked, original broadphase, material callback where marked, impulses and sleeping. Identical initial fixtures and contact counts.',
+ caveats:'Batch optimizes pure rigid contacts for each current A body. Material laws, causal traces, horizontal surfaces and oversized queries fall back to deterministic sequential code. Contact-heavy scripted replay repeats impacts; this is not an FPS measurement.',
  workloads:results,
 };
 mkdirSync(resolve(root,'artifacts/world-rigid'),{recursive:true});

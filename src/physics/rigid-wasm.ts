@@ -3,7 +3,7 @@ import type {RigidBody,ContactCandidate,CollisionHit,RigidContactKernel} from '.
 /** ABI for world-rigid Rust/WASM: two 32-f64 temporary body records,
  * one 16-f64 result record. The JS world remains the source of truth.
  * No interpreter or asynchronous work occurs during contact evaluation. */
-const STRIDE=32,RECORDS=2,RESULT=16;
+const STRIDE=32,RECORDS=2,RESULT=16,MAX_BATCH=256,BATCH_OUTPUT_STRIDE=16;
 
 interface WasmRigidExports{
   readonly memory:WebAssembly.Memory;
@@ -13,11 +13,15 @@ interface WasmRigidExports{
   world_rigid_output(handle:number):number;
   world_rigid_intersect(handle:number):number;
   world_rigid_resolve(handle:number):number;
+  world_rigid_batch_input(handle:number):number;
+  world_rigid_batch_output(handle:number):number;
+  world_rigid_batch_resolve(handle:number,count:number):number;
 }
 function rigidExports(instance:WebAssembly.Instance):WasmRigidExports{
   const e=instance.exports as Record<string,unknown>;
   if(!(e.memory instanceof WebAssembly.Memory))throw new TypeError('Rust rigid ABI missing linear memory');
-  for(const key of ['world_rigid_new','world_rigid_free','world_rigid_input','world_rigid_output','world_rigid_intersect','world_rigid_resolve'])
+  for(const key of ['world_rigid_new','world_rigid_free','world_rigid_input','world_rigid_output','world_rigid_intersect','world_rigid_resolve',
+    'world_rigid_batch_input','world_rigid_batch_output','world_rigid_batch_resolve'])
     if(typeof e[key]!=='function')throw new TypeError('Rust rigid ABI missing '+key);
   return instance.exports as unknown as WasmRigidExports;
 }
@@ -68,10 +72,50 @@ export async function createWasmRigidContactKernel(
     const memory=wasm.memory,buffer=memory.buffer;
     const input=finiteBuffer(wasm.world_rigid_input(handle)>>>0,STRIDE*RECORDS,buffer,'input');
     const output=finiteBuffer(wasm.world_rigid_output(handle)>>>0,RESULT,buffer,'output');
+    const batchInput=finiteBuffer(wasm.world_rigid_batch_input(handle)>>>0,(MAX_BATCH+1)*STRIDE,buffer,'batch input');
+    const batchOutput=finiteBuffer(wasm.world_rigid_batch_output(handle)>>>0,MAX_BATCH*BATCH_OUTPUT_STRIDE,buffer,'batch output');
     const check=()=>{if(disposed)throw new Error('Rust rigid contact kernel was disposed');
       if(memory.buffer!==buffer)throw new Error('Rust rigid contact memory grew during simulation');};
     const set=(a:RigidBody,b:RigidBody)=>{writeBody(input,0,a);writeBody(input,STRIDE,b);};
     return{
+      maxBatchSize:MAX_BATCH,
+      batch(a,others){
+        check();
+        if(others.length>MAX_BATCH)throw new RangeError('Rigid batch exceeds fixed solver capacity');
+        if(others.some(body=>body===a)||new Set(others).size!==others.length)
+          throw new TypeError('Rigid batches require distinct body candidates excluding A');
+        writeBody(batchInput,0,a);
+        for(let i=0;i<others.length;i++)writeBody(batchInput,(i+1)*STRIDE,others[i]!);
+        const count=wasm.world_rigid_batch_resolve(handle,others.length)>>>0;
+        if(count>others.length)throw new Error('Invalid Rust rigid batch hit count');
+        const result=[];
+        let hits=0,anyWakeA=false;
+        for(let i=0;i<others.length;i++){
+          const at=i*BATCH_OUTPUT_STRIDE;
+          if(batchOutput[at]!==1)continue;
+          hits++;
+          const b=others[i]!;
+          const hit:CollisionHit={
+            normal:[batchOutput[at+1]!,batchOutput[at+2]!,batchOutput[at+3]!],
+            penetration:batchOutput[at+4]!,
+            point:[batchOutput[at+5]!,batchOutput[at+6]!,batchOutput[at+7]!],
+            approachSpeed:batchOutput[at+8]!,
+            effectiveMass:batchOutput[at+13]!,
+            normalEnergy:batchOutput[at+9]!,
+          };
+          const impulse=batchOutput[at+10]!;
+          if(![...hit.normal,hit.penetration,...hit.point,hit.approachSpeed,hit.normalEnergy,impulse].every(Number.isFinite))
+            throw new Error('Nonfinite native batch contact');
+          readBody(batchInput,(i+1)*STRIDE,b);
+          if(batchOutput[at+12])b.wake();
+          anyWakeA||=batchOutput[at+11]!==0;
+          result.push({b,hit,impulse});
+        }
+        if(hits!==count)throw new Error('Rust rigid batch hit count mismatch');
+        if(hits)readBody(batchInput,0,a);
+        if(anyWakeA)a.wake();
+        return result;
+      },
       test(a,b){
         check();set(a,b);
         if(wasm.world_rigid_intersect(handle)!==1)return null;

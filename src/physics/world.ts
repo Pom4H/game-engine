@@ -146,10 +146,21 @@ export interface CollisionHit {
   readonly effectiveMass:number;
   readonly normalEnergy:number;
 }
+/** One contact from an ordered, policy-free batch. The caller owns every body. */
+export interface BatchedRigidContact {
+  readonly b:RigidBody;
+  readonly hit:CollisionHit;
+  readonly impulse:number;
+}
 /** Optional synchronous compiled narrowphase and sequential rigid impulse kernel. */
 export interface RigidContactKernel {
   test(a:RigidBody,b:RigidBody):CollisionHit|null;
   resolve(contact:ContactCandidate):number;
+  /** One A body against distinct B candidates, preserving their given order.
+   * The accelerated path is NEVER used with contact-law callbacks or cause tracing.
+   * Implementations must mutate original RigidBody arrays in-place before return. */
+  readonly maxBatchSize?:number;
+  batch?(a:RigidBody,others:readonly RigidBody[]):readonly BatchedRigidContact[];
   dispose():void;
 }
 
@@ -172,6 +183,10 @@ export class PhysicsWorld {
   private readonly collisionFamily=new CollisionSolverFamily();
   private collisionProgram:CollisionSolverProgram=this.collisionFamily.compile('detailed');
   private rigidContactKernel:RigidContactKernel|null=null;
+  private readonly rigidBatchStats={
+    calls:0,candidates:0,contacts:0,serialPairs:0,
+    policyFallbacks:0,traceFallbacks:0,staticSurfaceFallbacks:0,capacityFallbacks:0,
+  };
   private causeTrace:PhysicsCauseTrace|undefined;
   /** Proof-mode only: analytically predicted contact/solver energy transfer for the active substep. */
   private traceContactEnergy:Map<RigidBody,number>|undefined;
@@ -191,6 +206,11 @@ export class PhysicsWorld {
   useCollisionPlugin(plugin:CollisionSolverPlugin,profile:SimulationProfileInput='detailed'):this{this.collisionFamily.usePlugin(plugin);this.collisionProgram=this.collisionFamily.compile(profile);return this;}
   get collisionSolver():CollisionSolverProgram{return this.collisionProgram;}
   get rigidContactBackend():'typescript'|'wasm'{return this.rigidContactKernel?'wasm':'typescript';}
+  /** Cumulative dispatch counters, independent of the physical solver's state. */
+  get rigidContactDiagnostics():Readonly<{
+    backend:'typescript'|'wasm';calls:number;candidates:number;contacts:number;serialPairs:number;
+    policyFallbacks:number;traceFallbacks:number;staticSurfaceFallbacks:number;capacityFallbacks:number;
+  }>{return Object.freeze({backend:this.rigidContactBackend,...this.rigidBatchStats});}
   /** Install at a simulation boundary; ownership of the kernel remains with caller.
    * Causal tracing bypasses the kernel to preserve full force/energy provenance. */
   setRigidContactKernel(kernel:RigidContactKernel|null):this{
@@ -223,7 +243,7 @@ export class PhysicsWorld {
     return()=>{if(this.forceDrivers.get(body)===driver)this.forceDrivers.delete(body);};
   }
   remove(id:string):boolean{const body=this.bodies.get(id);if(body)this.forceDrivers.delete(body);this.gravityCauses.delete(id);this.contactCauses.delete(id);this.fluidCauses.delete(id);return this.bodies.delete(id);}
-  clear():void{this.forceDrivers.clear();this.bodies.clear();this.index.clear();this.contacts.length=0;this.gravityCauses.clear();this.contactCauses.clear();this.fluidCauses.clear();this.causeTrace=undefined;this.steps=0;this.substeps=0;this.time=0;}
+  clear():void{this.forceDrivers.clear();this.bodies.clear();this.index.clear();this.contacts.length=0;this.gravityCauses.clear();this.contactCauses.clear();this.fluidCauses.clear();this.causeTrace=undefined;this.steps=0;this.substeps=0;this.time=0;for(const key of Object.keys(this.rigidBatchStats) as (keyof typeof this.rigidBatchStats)[])this.rigidBatchStats[key]=0;}
 
   step(dt:number,contactModel?:ContactModel):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Physics dt must be in (0, 0.25]');
@@ -291,6 +311,46 @@ export class PhysicsWorld {
     for(const a of this.bodies.values()){
       if(!a.invMass||a.sleeping)continue;
       const radius=shapeRadius(a.shape),candidates=this.index.near(a.position[0],a.position[2],radius*2+2,scratch);
+      const native=this.rigidContactKernel;
+      // Batch is confined to ONE current A body. Processing A in Rust before
+      // asking SpatialHash for the next body preserves dynamic query positions,
+      // wakeups, the Seen order and the exact sequential impulse dependency.
+      // Cross-domain material callbacks may mutate arbitrary physical state:
+      // never precompute/commit their contacts as a batch.
+      if(native?.batch){
+        const policy=!!contactModel,traceEnabled=!!trace;
+        const capacity=candidates.length>(native.maxBatchSize??0)+1;
+        // Finite horizontal surfaces own their manifolds, friction and sleep
+        // policy in JS; a single such candidate opts this A out of batching.
+        const special=!policy&&!traceEnabled&&!capacity&&candidates.some(b=>
+          b!==a&&!b.invMass&&isHorizontalStaticSurface(b));
+        if(policy)this.rigidBatchStats.policyFallbacks++;
+        else if(traceEnabled)this.rigidBatchStats.traceFallbacks++;
+        else if(capacity)this.rigidBatchStats.capacityFallbacks++;
+        else if(special)this.rigidBatchStats.staticSurfaceFallbacks++;
+        else{
+          const accepted:RigidBody[]=[];
+          for(const b of candidates){
+            if(a===b||a.collisionClass==='debris'&&b.collisionClass==='debris')continue;
+            const key=a.id<b.id?`${a.id}\u0000${b.id}`:`${b.id}\u0000${a.id}`;
+            if(seen.has(key))continue;seen.add(key);
+            if(!a.invMass&&!b.invMass)continue;
+            accepted.push(b);
+          }
+          if(accepted.length){
+            const hits=native.batch(a,accepted);
+            this.rigidBatchStats.calls++;
+            this.rigidBatchStats.candidates+=accepted.length;
+            this.rigidBatchStats.contacts+=hits.length;
+            for(const {b,hit,impulse} of hits)this.contacts.push({
+              a:a.id,b:b.id,normal:hit.normal,point:hit.point,
+              penetration:hit.penetration,impulse,normalSpeed:hit.approachSpeed,
+              normalEnergy:hit.normalEnergy,mode:'resolve',
+            });
+          }
+          continue;
+        }
+      }
       for(const b of candidates){
         if(a===b||a.collisionClass==='debris'&&b.collisionClass==='debris')continue;
         const key=a.id<b.id?`${a.id}\u0000${b.id}`:`${b.id}\u0000${a.id}`;
@@ -300,15 +360,16 @@ export class PhysicsWorld {
         // The Rust kernel observes the current pair in the original broadphase
         // order. Material callbacks still decide penetration/fracture in JS.
         // Trace mode uses exactly the original engine collision path.
-        const native=this.rigidContactKernel&&!trace?this.rigidContactKernel:null;
-        if(native){
-          const hit=native.test(a,b);
+        const serial=this.rigidContactKernel&&!trace?this.rigidContactKernel:null;
+        if(serial){
+          this.rigidBatchStats.serialPairs++;
+          const hit=serial.test(a,b);
           if(!hit)continue;
           const candidate:ContactCandidate={a,b,...hit};
           const decision=contactModel?.(candidate)??{mode:'resolve' as const};
           if(decision.mode==='penetrate')this.resolvePenetration(candidate,Math.max(0,decision.energyLoss??0));
           else{
-            const impulse=native.resolve(candidate);
+            const impulse=serial.resolve(candidate);
             this.pushContact(candidate,impulse,'resolve');
           }
           continue;

@@ -8,11 +8,13 @@ fluid coupling, broadphase order and causal trace ownership remain with
 
 This is deliberately opt-in until the full-world, contact-heavy benchmark
 demonstrates an advantage. The module is called synchronously in the sequential
-contact loop; each candidate has a fixed 2×32-f64 scratch record plus a
-small output record, not a per-body Rust allocation or a second world state.
-Therefore the C++/WASM "zero-copy whole-world" claim would be false: the
-authoritative bodies remain in JavaScript, and the fixed scratch is refreshed
-for each narrowphase candidate. The renderer and public collision shape
+contact loop; the pure-rigid path additionally batches up to 256 candidates **for one A
+body** into one Rust call. The same A receives sequential impulses from B
+candidates in the exact SpatialHash order. Fixed Wasm scratch buffers are
+allocated once. This is not a second world state; the authoritative bodies
+remain in JavaScript and are updated before the next A query.
+The per-pair scratch path remains for coupled/material contacts; claiming
+"zero-copy whole-world" would be false. The renderer and public collision shape
 contracts are unchanged.
 
 ## Use
@@ -33,6 +35,10 @@ contracts are unchanged.
     // world.setRigidContactKernel(null); kernel.dispose() at teardown
 
 JS evaluates contact-specific material decisions with its original callback.
+The pure rigid fast path batches only when there is no contactModel, no trace,
+no finite static horizontal surface candidate and no more than 256 candidate
+pairs for one body. `PhysicsWorld.rigidContactDiagnostics` reports actual
+batch calls, attempted pairs and all reasons for sequential fallback.
 An actual fracture, penetration or energy-loss decision continues through the
 original TypeScript resolution routine. When causal tracing is enabled,
 collision calculations use the complete existing TS path so detailed energy
@@ -47,8 +53,11 @@ using world-space inverse inertia.
 CI compares complete `PhysicsWorld` states, per-step contact records, angular
 momentum and determinism against the original engine over real-time collision
 scenarios (head-on moving chassis, offset impacts, rotated OBB, sphere/box,
-material fracture, causal trace). A benchmark measures *full step cost* at
-different numbers and densities, separately from the Rust math kernels.
+material fracture, causal trace). A benchmark measures *full step cost* for TypeScript, per-pair Rust and
+per-A batched Rust, at different body counts and densities, with separate
+material-law and empty-contact controls. Read
+[the emergent execution contract](../../docs/EMERGENT_EXECUTION.md) for
+cross-domain invariants and mandatory fallback semantics.
 No coefficient tuning is permitted to make the two paths agree.
 
 The optional Rust implementation is not a replacement for the broadphase,

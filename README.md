@@ -93,3 +93,13 @@ floor manifolds and causal traces remain engine-owned. It is **opt in** because
 per-pair JS↔WASM scratch transfers can be slower than pure JS on sparse scenes.
 See [kernels/world-rigid/README.md](kernels/world-rigid/README.md) and its
 numerical parity and full-world tick benchmarks in GitHub Actions.
+
+## Emergent execution contract
+
+Acceleration is not a replacement for the engine's causal world model.
+The opt-in Rust rigid backend now supports ordered per-body contact batches,
+with strict fallback for fracture/deformation callbacks, causal traces,
+static road manifolds and oversized candidate sets. See
+[docs/EMERGENT_EXECUTION.md](docs/EMERGENT_EXECUTION.md) for the complete
+weather → surface → forces/contacts → fracture/deformation →
+commit/events → audio/render/network contract and its CI parity gates.

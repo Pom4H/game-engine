@@ -32,6 +32,8 @@ mod math {
 
 pub const STRIDE:usize=32;
 pub const RESULT_LEN:usize=16;
+pub const MAX_BATCH:usize=256;
+pub const BATCH_OUTPUT_STRIDE:usize=16;
 const EPSILON:f64=1e-12;
 
 #[derive(Clone,Copy,Debug)]
@@ -266,9 +268,19 @@ fn resolve(mut a:Body,mut b:Body,hit:Hit,approach:f64,effective_mass:f64)->(Body
     }
     (a,b,impulse,wake_a,wake_b)
 }
-pub struct Kernel {input:[f64;STRIDE*2],output:[f64;RESULT_LEN]}
+// One A body against its ordered broadphase candidates. Each B is distinct.
+ // Full sequential impulses are evaluated in Rust, but only when no contact
+ // policy/trace participates; coupled systems retain synchronous JS decisions.
+pub struct Kernel {
+    input:[f64;STRIDE*2],output:[f64;RESULT_LEN],
+    batch_input:Vec<f64>,batch_output:Vec<f64>,
+}
 impl Kernel {
-    fn new()->Self{Self{input:[0.0;STRIDE*2],output:[0.0;RESULT_LEN]}}
+    fn new()->Self{Self{
+        input:[0.0;STRIDE*2],output:[0.0;RESULT_LEN],
+        batch_input:vec![0.0;(MAX_BATCH+1)*STRIDE],
+        batch_output:vec![0.0;MAX_BATCH*BATCH_OUTPUT_STRIDE],
+    }}
     fn bodies(&self)->(Body,Body){(Body::read(&self.input[..STRIDE]),Body::read(&self.input[STRIDE..]))}
     fn test(&mut self)->u32{
         let (a,b)=self.bodies();
@@ -281,6 +293,41 @@ impl Kernel {
         self.output[7]=approach;self.output[8]=mass;self.output[9]=energy;
         1
     }
+    /// A's broadphase query has already been evaluated by the owning world.
+    /// Resolve B candidates in that *exact* sequence, updating A after every
+    /// contact. No allocations, callbacks, or growth during this call.
+    fn solve_batch(&mut self,count:usize)->u32{
+        if count>MAX_BATCH{return u32::MAX;}
+        let mut a=Body::read(&self.batch_input[..STRIDE]);
+        let mut hits=0u32;
+        for i in 0..count{
+            let base=(i+1)*STRIDE;
+            let result=i*BATCH_OUTPUT_STRIDE;
+            self.batch_output[result..result+BATCH_OUTPUT_STRIDE].fill(0.0);
+            let b=Body::read(&self.batch_input[base..base+STRIDE]);
+            if a.inv_mass+b.inv_mass<=0.0{continue;}
+            let Some(hit)=intersect(a,b)else{continue;};
+            let (approach,mass,energy)=contact_values(a,b,hit);
+            let (next_a,next_b,impulse,wake_a,wake_b)=resolve(a,b,hit,approach,mass);
+            a=next_a;
+            next_b.write(&mut self.batch_input[base..base+STRIDE]);
+            let output=&mut self.batch_output[result..result+BATCH_OUTPUT_STRIDE];
+            output[0]=1.0;
+            hit.normal.write(output,1);
+            output[4]=hit.penetration;
+            hit.point.write(output,5);
+            output[8]=approach;
+            output[9]=energy;
+            output[10]=impulse;
+            output[13]=mass;
+            output[11]=wake_a as u32 as f64;
+            output[12]=wake_b as u32 as f64;
+            hits+=1;
+        }
+        a.write(&mut self.batch_input[..STRIDE]);
+        hits
+    }
+
     fn solve(&mut self)->u32{
         let (a,b)=self.bodies();
         let hit=Hit{normal:V::from(&self.output,0),penetration:self.output[3],point:V::from(&self.output,4)};
@@ -308,6 +355,16 @@ mod abi {
     }
     #[no_mangle]pub unsafe extern "C" fn world_rigid_resolve(handle:u32)->u32{
         if handle==0{return 0;}(&mut *(handle as *mut Kernel)).solve()
+    }
+    #[no_mangle]pub unsafe extern "C" fn world_rigid_batch_input(handle:u32)->u32{
+        if handle==0{return 0;}(&mut *(handle as *mut Kernel)).batch_input.as_mut_ptr() as u32
+    }
+    #[no_mangle]pub unsafe extern "C" fn world_rigid_batch_output(handle:u32)->u32{
+        if handle==0{return 0;}(&mut *(handle as *mut Kernel)).batch_output.as_mut_ptr() as u32
+    }
+    #[no_mangle]pub unsafe extern "C" fn world_rigid_batch_resolve(handle:u32,count:u32)->u32{
+        if handle==0||count as usize>super::MAX_BATCH{return u32::MAX;}
+        (&mut *(handle as *mut Kernel)).solve_batch(count as usize)
     }
 }
 #[cfg(test)]
@@ -352,6 +409,37 @@ mod tests {
         assert!(intersect(rail,mover).is_some());
         mover.pos.x=3.;
         assert!(intersect(rail,mover).is_none());
+    }
+
+    #[test]fn batched_matches_ordered_pair_resolution_including_misses(){
+        let mut kern=Kernel::new();
+        let a=ball(-0.4,1.0);
+        let b=ball(0.4,-1.0);
+        let miss=ball(100.0,0.0);
+        // Third body is not a "B": it cannot share ownership of pair state.
+        let mut write=|index:usize, body:Body|{
+            let at=index*STRIDE;
+            body.pos.write(&mut kern.batch_input,at);
+            body.rotation.write(&mut kern.batch_input,at+3);
+            body.velocity.write(&mut kern.batch_input,at+6);
+            body.omega.write(&mut kern.batch_input,at+9);
+            kern.batch_input[at+12]=body.inv_mass;
+            body.inv_inertia.write(&mut kern.batch_input,at+13);
+            kern.batch_input[at+16]=body.shape as f64;
+            body.half.write(&mut kern.batch_input,at+17);
+            body.offset.write(&mut kern.batch_input,at+20);
+            kern.batch_input[at+23]=body.restitution;
+            kern.batch_input[at+24]=body.friction;
+        };
+        write(0,a);write(1,b);write(2,miss);
+        assert_eq!(kern.solve_batch(2),1);
+        assert_eq!(kern.batch_output[0],1.0);
+        assert_eq!(kern.batch_output[BATCH_OUTPUT_STRIDE],0.0);
+        let hit=intersect(a,b).unwrap();
+        let (approach,mass,_)=contact_values(a,b,hit);
+        let (expected_a,expected_b,_,_,_)=resolve(a,b,hit,approach,mass);
+        assert!((kern.batch_input[6]-expected_a.velocity.x).abs()<1e-12);
+        assert!((kern.batch_input[STRIDE+6]-expected_b.velocity.x).abs()<1e-12);
     }
     #[test]fn sphere_inside_box_chooses_incoming_face(){
         let mut b=box_body(0.,0.);b.inv_mass=0.;

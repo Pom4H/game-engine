@@ -45,3 +45,12 @@ execution / presentation
 - LOD/depth меняет представление или частоту вычисления, но не смысл причины.
 
 Связанные документы: [Causal render contract](./CAUSAL_RENDER_CONTRACT.md), [Server authority](./SERVER_AUTHORITY.md), [Distributed causal storage](./CAUSAL_STORAGE.md), [Infinite world](./INFINITE_WORLD.md), [Physics energy accounting](./PHYSICS_ENERGY_ACCOUNTING.md).
+
+## Accelerator boundary and emergent execution
+
+A Rust/WASM optimization must preserve the complete causal path and cross-domain
+order. The opt-in rigid solver batches only pure rigid contacts of one A body
+in broadphase order; material reactions, fractures, air/soil/fluid forces,
+weather, audio, render observations, network and storage retain their owners.
+See [Emergent World execution](./EMERGENT_EXECUTION.md) for the fallback rules,
+diagnostics and system-level regression gate.

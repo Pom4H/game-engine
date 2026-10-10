@@ -8,6 +8,8 @@ on:
       - 'src/index.ts'
       - 'src/browser.ts'
       - 'test/rigid-wasm.test.mjs'
+      - 'test/emergence-rigid-batch.test.mjs'
+      - 'docs/EMERGENT_EXECUTION.md'
       - 'tools/world-rigid/**'
       - 'package.json'
       - '.github/workflows/rigid-rust.yml'
@@ -41,8 +43,8 @@ jobs:
       - run: bun run typecheck
       - run: bun run build
       - name: Moving-body, material and causal parity
-        run: node --test test/rigid-wasm.test.mjs test/contact-laws.test.mjs test/vehicle-interaction.test.mjs
-      - name: Full PhysicsWorld tick microbenchmark
+        run: node --test test/rigid-wasm.test.mjs test/emergence-rigid-batch.test.mjs test/contact-laws.test.mjs test/vehicle-interaction.test.mjs
+      - name: Full PhysicsWorld tick benchmark — JS vs serial and batched Wasm
         run: node tools/world-rigid/benchmark.mjs
       - uses: actions/upload-artifact@v4
         with:
