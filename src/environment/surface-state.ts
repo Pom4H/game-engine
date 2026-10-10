@@ -82,6 +82,41 @@ export interface SurfaceContactWork {
 export type SurfaceWorkCommitObserver=(
   work:Readonly<SurfaceContactWork>,energyJ:number,touchedCells:number,actual:SurfaceEnvironmentState,
 )=>void;
+/** Per-material, per-weather-step coefficients. Every field cell observes the
+ * same law inputs; only its mutable local state differs. Calculated once per
+ * surface, not once per cell. Do not re-associate floating-point operations.
+ */
+interface SurfaceStepFactors {
+  readonly snowfallDelta:number;
+  readonly temperatureBase:number;
+  readonly thermalBlend:number;
+  readonly trafficHeatDecay:number;
+  readonly trackMeltDecay:number;
+  readonly drainageFraction:number;
+}
+function surfaceStepFactors(use:SurfaceUse,entity:RuntimeEntity,worldSeconds:number,environment:EnvironmentState):SurfaceStepFactors{
+  const drift=use==='curb'?1.9:use==='sidewalk'?1.2:use==='road'?.78:1;
+  const wind=Math.hypot(environment.wind[0],environment.wind[2]);
+  const windDeposit=1+Math.min(.55,wind/12)*(use==='curb'?.8:use==='sidewalk'?.25:-.08);
+  const coldSnow=environment.temperatureC<=1.2?1:Math.max(0,1-(environment.temperatureC-1.2)/2.5);
+  const profile=entity.material.profile,thermal=profile.thermal;
+  const volumetricCapacity=Math.max(1,profile.density*thermal.specificHeatJkgK);
+  const referenceCapacity=2_000_000;
+  const inertia=Math.sqrt(volumetricCapacity/referenceCapacity);
+  const solarGain=10*thermal.solarAbsorptivity/Math.max(.45,inertia);
+  const bulkCoupling=1+Math.sqrt(Math.max(.01,thermal.conductivityWmK))*.12;
+  const thermalTau=Math.max(180,900*inertia*bulkCoupling);
+  const drainageTau=use==='road'?2900:use==='sidewalk'?5200:use==='curb'?7600:4200;
+  return{
+    snowfallDelta:environment.snowfallRate*worldSeconds*drift*windDeposit*coldSnow,
+    temperatureBase:environment.temperatureC+environment.sunlight*solarGain,
+    thermalBlend:1-Math.exp(-worldSeconds/thermalTau),
+    trafficHeatDecay:Math.exp(-worldSeconds/950),
+    trackMeltDecay:Math.exp(-worldSeconds/5400),
+    drainageFraction:1-Math.exp(-worldSeconds/drainageTau),
+  };
+}
+
 export class SurfaceEnvironmentSystem {
   private readonly workObservers=new Set<SurfaceWorkCommitObserver>();
   observeContactWork(observer:SurfaceWorkCommitObserver):()=>void{
@@ -121,7 +156,8 @@ export class SurfaceEnvironmentSystem {
         const entity=entities.get(id);if(!entity)continue;
         this.stepSnowpack(state,step.durationSeconds,step.environment);
         const exposure=deriveSurfaceState(entity.material.profile,entity.material,step.environment);
-        this.stepSurface(state,entity,0,step.durationSeconds,step.environment,exposure);
+        const factors=surfaceStepFactors(state.use,entity,step.durationSeconds,step.environment);
+        this.stepSurface(state,entity,0,step.durationSeconds,step.environment,exposure,factors);
         this.reconcileSnowpack(state);
       }
     }
@@ -141,10 +177,11 @@ export class SurfaceEnvironmentSystem {
       // Material/weather exposure is identical for every spatial cell of this
       // one surface during a step; calculate it once, never once per cell.
       const exposure=deriveSurfaceState(entity.material.profile,entity.material,environment);
+      const factors=surfaceStepFactors(state.use,entity,worldSeconds,environment);
       const sums=new Float64Array(SURFACE_AVERAGE_KEYS.length);
       let maximumTrackMelt=-Infinity;
       for(const cell of field.cells){
-        this.stepSurface(cell,entity,dt,worldSeconds,environment,exposure);
+        this.stepSurface(cell,entity,dt,worldSeconds,environment,exposure,factors);
         // Same per-key summation order as the original separate reduce() loops.
         for(let i=0;i<SURFACE_AVERAGE_KEYS.length;i++){
           const key=SURFACE_AVERAGE_KEYS[i]!;
@@ -327,30 +364,16 @@ export class SurfaceEnvironmentSystem {
     pack.classification=classifySnowpack(pack,state);
   }
 
-  private stepSurface(state:SurfaceEnvironmentState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState,exposure:SurfaceState):void{
+  private stepSurface(state:SurfaceEnvironmentState,entity:RuntimeEntity,dt:number,worldSeconds:number,environment:EnvironmentState,exposure:SurfaceState,factors:SurfaceStepFactors):void{
     const use=state.use;
-    const drift=use==='curb'?1.9:use==='sidewalk'?1.2:use==='road'?.78:1;
-    const wind=Math.hypot(environment.wind[0],environment.wind[2]),windDeposit=1+Math.min(.55,wind/12)*(use==='curb'?.8:use==='sidewalk'?.25:-.08);
-    const coldSnow=environment.temperatureC<=1.2?1:Math.max(0,1-(environment.temperatureC-1.2)/2.5);
-    state.snowDepthM+=environment.snowfallRate*worldSeconds*drift*windDeposit*coldSnow;
-
-    // Thermal response is a consequence of material properties, never its name.
-    // solarAbsorptivity controls equilibrium gain; volumetric heat capacity and
-    // conductivity control how quickly the exposed layer approaches it.
-    const profile=entity.material.profile,thermal=profile.thermal;
-    const volumetricCapacity=Math.max(1,profile.density*thermal.specificHeatJkgK);
-    const referenceCapacity=2_000_000;
-    const inertia=Math.sqrt(volumetricCapacity/referenceCapacity);
-    const solarGain=10*thermal.solarAbsorptivity/Math.max(.45,inertia);
-    const target=environment.temperatureC+environment.sunlight*solarGain+state.trafficHeatC;
-    // Higher conductivity couples the exposed skin to more bulk material instead
-    // of making the surface magically absorb solar energy faster.
-    const bulkCoupling=1+Math.sqrt(Math.max(.01,thermal.conductivityWmK))*.12;
-    const thermalTau=Math.max(180,900*inertia*bulkCoupling);
-    const thermalBlend=1-Math.exp(-worldSeconds/thermalTau);
-    state.temperatureC+=(target-state.temperatureC)*thermalBlend;
-    state.trafficHeatC*=Math.exp(-worldSeconds/950);
-    state.trackMelt*=Math.exp(-worldSeconds/5400);
+    state.snowDepthM+=factors.snowfallDelta;
+    // Authoritative material thermal/solar laws were evaluated once for this
+    // surface. Applying the same coefficients to every cell preserves the
+    // original state transition and the exact order of floating arithmetic.
+    const target=factors.temperatureBase+state.trafficHeatC;
+    state.temperatureC+=(target-state.temperatureC)*factors.thermalBlend;
+    state.trafficHeatC*=factors.trafficHeatDecay;
+    state.trackMelt*=factors.trackMeltDecay;
 
     // Integrate phase change independently in each contacted grid cell.
     const positive=Math.max(0,state.temperatureC),trafficMelt=use==='road'?state.trackMelt*1.7e-5*worldSeconds:0;
@@ -371,8 +394,7 @@ export class SurfaceEnvironmentSystem {
 
     // Drainage leaves water in low procedural depressions; roads drain faster but
     // tyre ruts retain local puddles.
-    const drainageTau=use==='road'?2900:use==='sidewalk'?5200:use==='curb'?7600:4200;
-    const drained=state.waterDepthM*(1-Math.exp(-worldSeconds/drainageTau));
+    const drained=state.waterDepthM*factors.drainageFraction;
     state.waterDepthM=Math.max(0,state.waterDepthM-drained);
     const retention=use==='road'?.55+state.trackMelt*.55:use==='curb'?.85:.66;
     state.puddle=Math.max(0,Math.min(1,state.waterDepthM/.006*retention));
