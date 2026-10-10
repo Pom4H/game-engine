@@ -94,7 +94,7 @@ impl Body {
         if self.shape==0{return self.pos.plus(dir.normalize().times(self.half.x))}
         let basis=self.basis();
         let mut point=self.center();
-        for i in 0.0.3{
+        for i in 0..3{
             let projection=dir.dot(basis[i]);
             if projection.abs()>1e-8{
                 let sign=if projection>0.0{1.0}else{-1.0};
@@ -138,7 +138,7 @@ fn projected_radius(half:V,basis:[V;3],axis:V)->f64{
 fn box_box(a:Body,b:Body)->Option<Hit>{
     let ab=a.basis();let bb=b.basis();
     let center=b.center().minus(a.center());
-    let mut axes=[V::ZERO;15];axes[.0.3].copy_from_slice(&ab);axes[3.0.6].copy_from_slice(&bb);
+    let mut axes=[V::ZERO;15];axes[..3].copy_from_slice(&ab);axes[3..6].copy_from_slice(&bb);
     let mut count=6usize;
     for aa in ab{for ba in bb{
         let cross=aa.cross(ba);
