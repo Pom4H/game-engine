@@ -26,6 +26,7 @@
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.build.json && node --test test/*.test.mjs",
     "world:compile": "cargo run --manifest-path compiler/Cargo.toml -- compile",
+    "world:profile": "bun run build && node tools/world-language/profile.mjs",
     "world:test": "cargo test --manifest-path compiler/Cargo.toml",
     "wave:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-wave/Cargo.toml",
     "wave:test": "cargo test --manifest-path kernels/world-wave/Cargo.toml && bun run wave:build && bun run build && node --test test/wave-wasm.test.mjs",

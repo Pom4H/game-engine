@@ -116,7 +116,10 @@ cargo run --release --manifest-path compiler/Cargo.toml -- compile examples/worl
 
 This still checks the dimensional correctness of the source and emits ABI v1.
 Read `scene.performanceReport()` for tick p50/p95/max, system timing breakdown,
-CPU budget exceedances and workload counts. GPU measurements belong to the
+CPU budget exceedances and workload counts. For a reproducible headless trace,
+run `bun run world:profile` (or `node tools/world-language/profile.mjs
+examples/worlds/array.world 240 direct`). CI attaches JSON containing
+the slowest systems, exact sampled CPU costs and simulation workload. GPU measurements belong to the
 separate render profiler, not this diagnostic. The ordinary Kernel executor
 stays the default; `scene.setSystemDispatch('direct')` opts into the
 experimental compiled system schedule for A/B testing and is never silently

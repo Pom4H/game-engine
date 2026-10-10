@@ -53,7 +53,10 @@ jobs:
       - run: bun run tsc -p tools/world-language/tsconfig.json
       - run: node --test test/world-compiler.test.mjs test/world-direct-execution.test.mjs test/scene-performance.test.mjs
       - run: bun tools/world-language/benchmark.ts
+      - run: node tools/world-language/profile.mjs examples/worlds/array.world 240 direct
       - uses: actions/upload-artifact@v4
         with:
           name: world-language-benchmark
-          path: artifacts/world-language-benchmark.json
+          path: |
+            artifacts/world-language-benchmark.json
+            artifacts/world-performance-report.json
