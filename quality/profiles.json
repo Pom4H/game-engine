@@ -20,7 +20,9 @@
       "minGpuFrames": 10,
       "maxFrameIntervalP95Ms": 17.6,
       "maxCpuFrameP95Ms": 16.667,
-      "maxGpuP95Ms": 16.667
+      "maxGpuP95Ms": 16.667,
+      "adapterVendor": "amd",
+      "adapterArchitecture": "rdna-3"
     },
     "apple-silicon-1080p": {
       "platform": "darwin",
@@ -32,7 +34,8 @@
       "minGpuFrames": 10,
       "maxFrameIntervalP95Ms": 17.6,
       "maxCpuFrameP95Ms": 16.667,
-      "maxGpuP95Ms": 16.667
+      "maxGpuP95Ms": 16.667,
+      "adapterVendor": "apple"
     }
   },
   "render": {
