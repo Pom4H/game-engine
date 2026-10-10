@@ -193,7 +193,7 @@ export class SceneAcousticCoupling {
       for(let i=0;i<positions.length;i++){
         const position=positions[i];if(!position)continue;
         const pressure=this.field.pressureAt(position),magnitude=Math.abs(pressure);
-        total[i]+=pressure*pressure;peak[i]=Math.max(peak[i]!,magnitude);
+        total[i]=total[i]!+pressure*pressure;peak[i]=Math.max(peak[i]!,magnitude);
       }
     }
     let audibleSensorSamples=0;
