@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {PhysicsWorld,RigidBody} from '../../dist/physics/world.js';
+import {SpatialHash} from '../../dist/core/spatial-hash.js';
 
 const tickSeconds=1/60;
 const cases=[
@@ -74,9 +75,40 @@ const golden={
 };
 for(const result of results)assert.equal(result.fingerprint,golden[result.id],
   'Physical replay changed in '+result.id+'; performance cannot override causality');
+
+function benchmarkSpatialRebuild(){
+ const fixture=createWorld(cases[2]);
+ const items=[...fixture.world.bodies.values()];
+ const radius=body=>body.shape.kind==='sphere'?body.shape.radius:Math.hypot(body.shape.half[0],body.shape.half[2]);
+ const times={batch:[],bulk:[]},rounds=9,repeat=160;
+ const indexes={batch:new SpatialHash(8),bulk:new SpatialHash(8)};
+ for(let round=0;round<rounds;round++){
+  for(const name of round%2?['bulk','batch']:['batch','bulk']){
+   const index=indexes[name];
+   const t=performance.now();
+   for(let i=0;i<repeat;i++){
+    if(name==='bulk')index.rebuild(items,radius);
+    else{
+      index.clear();index.beginBatch();
+      for(const item of items)index.add(item,radius(item));
+      index.endBatch();
+    }
+   }
+   times[name].push((performance.now()-t)/repeat);
+  }
+ }
+ const mid=values=>[...values].sort((a,b)=>a-b)[Math.floor(values.length/2)];
+ const batch=mid(times.batch),bulk=mid(times.bulk);
+ const probes=[[0,0,3],[20,12,8],[40,40,1],[80,50,7]];
+ for(const [x,z,r] of probes)assert.deepEqual(indexes.bulk.near(x,z,r),indexes.batch.near(x,z,r));
+ return {items:items.length,medianBatchMs:batch,medianBulkMs:bulk,ratio:batch/bulk,
+  trials:times};
+}
+
+const broadphase=benchmarkSpatialRebuild();
 const report={schema:1,commit:process.env.GITHUB_SHA??null,platform:process.platform,node:process.version,
  method:'PhysicsWorld 60Hz, 90 tick natural replay SHA256 of all body/contact states; timed rotating deterministic workload refresh; each round recreates physics world, 45 warmup ticks. CPU-only, not game FPS.',
- samples:results};
+ samples:results,broadphase};
 mkdirSync(resolve('artifacts/fps'),{recursive:true});
 writeFileSync(resolve('artifacts/fps/physics-budget.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));
