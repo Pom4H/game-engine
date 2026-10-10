@@ -15,7 +15,7 @@ import {RenderProfiler} from './profiler.js';
 import {analyzeWGSL,buildRenderAtomReport,type ShaderProgramAtoms} from './atoms.js';
 import {buildSceneRadianceProbe} from './radiance.js';
 import {cameraProjection} from './calibrated-camera.js';
-import {renderPrimitive,renderModel,primitiveBaseScale,type RenderFrameIR} from './frame.js';
+import {renderPrimitive,renderModel,primitiveBaseScale,buildRenderFrame,type RenderFrameIR} from './frame.js';
 import {RenderFrameFamily,type RenderFrameBuilder} from './depth.js';
 import type {SimulationProfileInput} from '../core/depth.js';
 import {buildDiffuseIrradianceSH} from './irradiance.js';
@@ -777,6 +777,9 @@ export class WebGPURenderer implements Renderer{
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();
   private readonly instanceBatches=new Map<string,GPUInstanceBatch>();
+  // Stable render-only entities keep the same immutable material and frozen mesh
+  // until an actual appearance/geometry revision. Cache batch identity and seed.
+  private readonly instanceIdentity=new WeakMap<RuntimeEntity,{primitive:Primitive;material:RuntimeEntity['material'];key:string;seed:number}>();
   private instancingEnabled=true;private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;private renderFrame:RenderFrameIR|null=null;
@@ -931,7 +934,11 @@ export class WebGPURenderer implements Renderer{
   }
   render(scene:Scene,camera:CameraSpec=scene.camera):void{
     const frameId=this.profiler.beginFrame();
-    this.renderFrame=this.frameBuilder(scene,camera);
+    // Full-depth render IR is just per-entity renderModel() with an O(N)
+    // transient array+Map. This renderer only reads its per-entity model, so
+    // resolve that lazily for visible objects. Custom/proxy/dormant frame
+    // builders still run exactly as configured by the depth registry.
+    this.renderFrame=this.frameBuilder===buildRenderFrame?null:this.frameBuilder(scene,camera);
     const appearanceChanged=this.appearanceScene!==scene||this.appearanceRevision!==scene.appearanceRevision;
     if(appearanceChanged){
       this.appearanceScene=scene;this.appearanceRevision=scene.appearanceRevision;
@@ -1450,12 +1457,20 @@ export class WebGPURenderer implements Renderer{
     pass.drawIndexed(mesh.count,batch.items.length);
     this.drawCalls++;this.triangles+=mesh.triangles*batch.items.length;
   }
+  private instanceIdentityFor(entity:RuntimeEntity):{key:string;seed:number}{
+    const primitive=renderPrimitive(entity)!,material=entity.material;
+    let cached=this.instanceIdentity.get(entity);
+    if(cached&&cached.primitive===primitive&&cached.material===material)return cached;
+    cached={primitive,material,key:opaqueInstanceKey(entity),seed:stableSeed(entity.id)};
+    this.instanceIdentity.set(entity,cached);
+    return cached;
+  }
   private prepareInstanceBatches(entities:readonly RuntimeEntity[],modelFor:(e:RuntimeEntity)=>Mat4):
     {singles:RuntimeEntity[];batches:InstancePlan[];instances:number}{
     const singles:RuntimeEntity[]=[],groups=new Map<string,RuntimeEntity[]>();
     for(const entity of entities){
       if(!canBatchOpaque(entity)){singles.push(entity);continue;}
-      const key=opaqueInstanceKey(entity);
+      const key=this.instanceIdentityFor(entity).key;
       const list=groups.get(key);
       if(list)list.push(entity);else groups.set(key,[entity]);
     }
@@ -1477,7 +1492,7 @@ export class WebGPURenderer implements Renderer{
         const offset=i*40;
         data.set(current,offset);data.set(previous,offset+16);
         data.set(entity.material.color,offset+32);
-        data[offset+36]=stableSeed(entity.id);
+        data[offset+36]=this.instanceIdentityFor(entity).seed;
         data[offset+37]=0;data[offset+38]=0;data[offset+39]=0;
       }
       const bytes=data.subarray(0,items.length*40);
@@ -1560,9 +1575,10 @@ export class WebGPURenderer implements Renderer{
     ]}),object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label:letteringKey,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
-    const shared=this.renderFrame?.objectsById.get(entity.id),base=primitiveBaseScale(renderPrimitive(entity)),matrix=shared?.model??renderModel(entity);
+    const base=primitiveBaseScale(renderPrimitive(entity));
     const px=entity.position[0],py=entity.position[1],pz=entity.position[2],rx=entity.rotation[0],ry=entity.rotation[1],rz=entity.rotation[2],sx=entity.scale[0]*base[0],sy=entity.scale[1]*base[1],sz=entity.scale[2]*base[2],cached=this.modelCache.get(entity.id);
     if(cached&&cached.px===px&&cached.py===py&&cached.pz===pz&&cached.rx===rx&&cached.ry===ry&&cached.rz===rz&&cached.sx===sx&&cached.sy===sy&&cached.sz===sz)return cached.matrix;
+    const shared=this.renderFrame?.objectsById.get(entity.id),matrix=shared?.model??renderModel(entity);
     this.modelCache.set(entity.id,{px,py,pz,rx,ry,rz,sx,sy,sz,matrix});return matrix;
   }
 }
