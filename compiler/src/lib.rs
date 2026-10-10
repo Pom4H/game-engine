@@ -723,10 +723,16 @@ fn encode(world: World) -> Result<Vec<u8>> {
 
 /// Compile a World source file ahead of time. The engine consumes the binary at load,
 /// retaining its existing authoritative physics state and tick scheduler.
-pub fn compile(source: &str) -> Result<Vec<u8>> {
-    let tokens = lex(source)?;
-    let mut parser = Parser { tokens, index: 0, constants: HashMap::new(), entity_index: None };
-    encode(parser.world()?)
+pub fn compile(source: &str) -> Result<Vec<u8>> {compile_with_performance(source,true)}
+
+/// Release mode validates performance directives but removes profiling metadata.
+/// Produces ABI v1 with exactly the same physical entities and scheduling.
+pub fn compile_with_performance(source: &str, include_performance: bool) -> Result<Vec<u8>> {
+    let tokens=lex(source)?;
+    let mut parser=Parser {tokens,index:0,constants:HashMap::new(),entity_index:None};
+    let mut world=parser.world()?;
+    if !include_performance {world.performance=None;}
+    encode(world)
 }
 
 #[cfg(test)]
@@ -865,6 +871,7 @@ world Array {
         assert_eq!(u32::from_le_bytes(binary[start+8..start+12].try_into().unwrap()),4);
         assert_eq!(u32::from_le_bytes(binary[start+12..start+16].try_into().unwrap()),256);
         assert_eq!(binary,compile(&program).unwrap());
+        assert_eq!(compile_with_performance(&program,false).unwrap(),compile(EXAMPLE).unwrap());
         assert_eq!(u16::from_le_bytes(compile(EXAMPLE).unwrap()[4..6].try_into().unwrap()),1);
     }
     #[test]

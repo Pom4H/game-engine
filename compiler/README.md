@@ -107,7 +107,14 @@ Units are validated at compile time: `tick_budget` accepts ms/us/s,
 `history` is a bounded sample count. Profiling only observes runtime state:
 no LOD shortcuts and no differences in simulated physical outcomes.
 The performance block produces an ABI v2 WSCN profile extension; scenes
-without that block still generate ABI v1.
+without that block still generate ABI v1. A production build may keep the
+source directive but remove all profiler metadata and runtime sampling:
+
+```sh
+cargo run --release --manifest-path compiler/Cargo.toml -- compile examples/worlds/array.world --strip-performance
+```
+
+This still checks the dimensional correctness of the source and emits ABI v1.
 Read `scene.performanceReport()` for tick p50/p95/max, system timing breakdown,
 CPU budget exceedances and workload counts. GPU measurements belong to the
 separate render profiler, not this diagnostic. The ordinary Kernel executor

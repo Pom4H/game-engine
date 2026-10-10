@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 fn usage() -> &'static str {
-    "Usage: worldc compile <input.world> [-o output.wscn]\n       worldc check <input.world>"
+    "Usage: worldc compile <input.world> [-o output.wscn] [--strip-performance]\n       worldc check <input.world>"
 }
 fn run() -> Result<(), String> {
     let mut args = env::args().skip(1);
@@ -13,8 +13,10 @@ fn run() -> Result<(), String> {
     }
     let input = PathBuf::from(args.next().ok_or_else(|| usage().to_string())?);
     let mut output = None;
+    let mut strip_performance=false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
+            "--strip-performance" if command=="compile"&&!strip_performance=>strip_performance=true,
             "-o" | "--output" if command == "compile" && output.is_none() => {
                 output = Some(PathBuf::from(args.next().ok_or_else(|| usage().to_string())?));
             }
@@ -23,7 +25,7 @@ fn run() -> Result<(), String> {
     }
     let source = fs::read_to_string(&input)
         .map_err(|err| format!("{}: {err}", input.display()))?;
-    let bytes = worldc::compile(&source)
+    let bytes = worldc::compile_with_performance(&source,!strip_performance)
         .map_err(|err| format!("{}:{}", input.display(), err.located(&source)))?;
     if command == "compile" {
         let output = output.unwrap_or_else(|| input.with_extension("wscn"));
