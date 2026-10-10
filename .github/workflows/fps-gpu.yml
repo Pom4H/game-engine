@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - 'src/render/**'
+      - 'src/environment/**'
+      - 'src/physics/**'
+      - 'src/materials/**'
       - 'src/runtime/browser.ts'
       - 'src/scene/**'
       - 'tools/render-harness.mjs'
