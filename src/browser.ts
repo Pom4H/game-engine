@@ -9,3 +9,5 @@ export {humanoidMeasurements,type HumanoidMeasurements,type HumanoidProportions}
 
 export {connectAcousticWebAudio,type AcousticTransferObservation,type AcousticWebAudioGraph} from './audio/acoustic-transfer.js';
 export {decodeWorldBinary,isWorldBinary,WORLD_BINARY_VERSION} from './scene/world-binary.js';
+export {AcousticWaveField,type AcousticWaveFieldSpec,type AcousticPressurePlane} from './physics/wave-field.js';
+export {createWasmAcousticWaveField,uploadAcousticPressurePlane} from './physics/wave-wasm.js';

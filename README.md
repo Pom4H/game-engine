@@ -58,3 +58,13 @@ cargo run --manifest-path compiler/Cargo.toml -- compile examples/worlds/collisi
 Read [compiler/README.md](compiler/README.md) for the language, binary ABI,
 and `sceneFromURL` integration. `decodeWorldBinary()` is exported by both the
 core and browser packages.
+
+## Rust/WASM real-time acoustic kernel
+
+The production staggered FDTD acoustic wave solver has an optional Rust/WASM backend.
+Its physical state resides directly in persistent WASM f64 buffers: no per-tick state
+marshalling, one numerical call per step, original CFL/geometry semantics, and
+pressure-slice staging for WebGPU r32float uploads. TypeScript remains the default
+until the measured workload warrants enabling WASM. See
+[kernels/world-wave/README.md](kernels/world-wave/README.md) for build, use,
+parity gates and benchmark evidence.

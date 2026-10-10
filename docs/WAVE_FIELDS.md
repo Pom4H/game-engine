@@ -109,3 +109,10 @@ use triangle-vs-AABB SAT, so thin physical surfaces still occupy acoustic cells
 instead of leaking merely because no cell centre lies exactly on the surface.
 
 The projection is intentionally rebuildable. It owns no second scene truth.
+
+## Optional Rust/WASM acceleration
+
+An opt-in Rust FDTD backend reuses the same acoustic field and causal boundaries;
+see [kernels/world-wave/README.md](../kernels/world-wave/README.md).
+Its GPU staging path uploads f32 pressure slices without allocating JS copies
+per frame; it does not turn CPU and GPU memories into one address space.

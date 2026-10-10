@@ -5,3 +5,5 @@ artifacts/
 *.log
 compiler/target/
 examples/worlds/*.wscn
+kernels/world-wave/target/
+kernels/world-wave/Cargo.lock

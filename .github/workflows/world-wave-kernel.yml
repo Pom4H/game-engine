@@ -1,0 +1,53 @@
+name: World wave Rust/WASM parity and performance
+on:
+  push:
+    paths:
+      - 'kernels/world-wave/**'
+      - '.cargo/config.toml'
+      - 'src/physics/wave-field.ts'
+      - 'src/physics/wave-wasm.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/wave-wasm.test.mjs'
+      - 'tools/world-wave/**'
+      - '.github/workflows/world-wave-kernel.yml'
+  pull_request:
+    paths:
+      - 'kernels/world-wave/**'
+      - '.cargo/config.toml'
+      - 'src/physics/wave-field.ts'
+      - 'src/physics/wave-wasm.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/wave-wasm.test.mjs'
+      - 'tools/world-wave/**'
+      - '.github/workflows/world-wave-kernel.yml'
+jobs:
+  wasm-physics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Rust target and native correctness
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo test --manifest-path kernels/world-wave/Cargo.toml
+      - name: Compile rust FDTD to WASM
+        run: cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-wave/Cargo.toml
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: JS to Rust cross-language step parity + GPU staging
+        run: node --test test/wave-field.test.mjs test/wave-wasm.test.mjs test/acoustic-transfer.test.mjs
+      - name: Reproducible timing against production TS
+        run: node tools/world-wave/benchmark.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: world-wave-wasm-and-benchmark
+          path: |
+            kernels/world-wave/target/wasm32-unknown-unknown/release/world_wave_kernel.wasm
+            artifacts/world-wave/benchmark.json
+          retention-days: 30

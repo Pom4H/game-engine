@@ -1,0 +1,3 @@
+# Make Wasm export linear memory even when cargo runs from the repository root.
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "link-arg=--export-memory"]

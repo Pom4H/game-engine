@@ -18,6 +18,27 @@ export interface AcousticWaveStepStats {
   readonly courant:number;
 }
 
+/** Optional compiled kernel operating directly on its own Wasm-backed typed arrays.
+ * Buffer identity and ownership remain stable across simulation ticks. */
+export interface AcousticWaveKernel {
+  readonly pressurePa:Float64Array;
+  readonly velocityXMps:Float64Array;
+  readonly velocityYMps:Float64Array;
+  readonly velocityZMps:Float64Array;
+  readonly solid:Uint8Array;
+  readonly planeBytesPerRow:number;
+  step(velocityScale:number,velocityKick:number,pressureKick:number):void;
+  packPressurePlane(y:number):Float32Array;
+  dispose():void;
+}
+export interface AcousticPressurePlane {
+  /** r32float, X across columns, Z across rows, padded to 256 bytes/row for WebGPU. */
+  readonly data:Float32Array;
+  readonly width:number;
+  readonly height:number;
+  readonly bytesPerRow:number;
+}
+
 export interface BlastInjection {
   readonly acousticEnergyJ:number;
   readonly affectedCells:number;
@@ -65,8 +86,11 @@ export class AcousticWaveField {
   private readonly ny:number;
   private readonly nz:number;
   private solidCount=0;
+  private readonly numericalKernel?:AcousticWaveKernel;
+  private pressurePlaneScratch?:Float32Array;
+  private disposed=false;
 
-  constructor(spec:AcousticWaveFieldSpec){
+  constructor(spec:AcousticWaveFieldSpec,numericalKernel?:AcousticWaveKernel){
     const [nx,ny,nz]=spec.size;
     for(const value of [nx,ny,nz])if(!Number.isSafeInteger(value)||value<2||value>2048)throw new RangeError('Acoustic grid dimensions must be integers in 2..2048');
     const cells=nx*ny*nz;
@@ -86,13 +110,27 @@ export class AcousticWaveField {
     this.waveSpeedMps=spec.waveSpeedMps;
     this.densityKgM3=spec.densityKgM3;
     this.velocityDampingPerSecond=damping;
-    this.pressurePa=new Float64Array(cells);
-    this.velocityXMps=new Float64Array((nx+1)*ny*nz);
-    this.velocityYMps=new Float64Array(nx*(ny+1)*nz);
-    this.velocityZMps=new Float64Array(nx*ny*(nz+1));
-    this.solid=new Uint8Array(cells);
+    const vxCells=(nx+1)*ny*nz,vyCells=nx*(ny+1)*nz,vzCells=nx*ny*(nz+1);
+    if(numericalKernel){
+      const lengths=[
+        [numericalKernel.pressurePa,cells,'pressurePa'],
+        [numericalKernel.velocityXMps,vxCells,'velocityXMps'],
+        [numericalKernel.velocityYMps,vyCells,'velocityYMps'],
+        [numericalKernel.velocityZMps,vzCells,'velocityZMps'],
+        [numericalKernel.solid,cells,'solid'],
+      ] as const;
+      for(const [buffer,length,name] of lengths)if(buffer.length!==length)throw new RangeError('Acoustic kernel '+name+' length mismatch');
+      if(!Number.isSafeInteger(numericalKernel.planeBytesPerRow)||numericalKernel.planeBytesPerRow<nx*4||numericalKernel.planeBytesPerRow%256!==0)throw new RangeError('Acoustic kernel GPU row stride must be 256-byte aligned');
+    }
+    this.numericalKernel=numericalKernel;
+    this.pressurePa=numericalKernel?.pressurePa??new Float64Array(cells);
+    this.velocityXMps=numericalKernel?.velocityXMps??new Float64Array(vxCells);
+    this.velocityYMps=numericalKernel?.velocityYMps??new Float64Array(vyCells);
+    this.velocityZMps=numericalKernel?.velocityZMps??new Float64Array(vzCells);
+    this.solid=numericalKernel?.solid??new Uint8Array(cells);
   }
 
+  get backend(): 'typescript'|'wasm' {return this.numericalKernel?'wasm':'typescript';}
   get maxStableDt():number{return this.cellSizeM*CFL_3D/this.waveSpeedMps;}
   get solidCellCount():number{return this.solidCount;}
 
@@ -197,6 +235,12 @@ export class AcousticWaveField {
     const velocityKick=dt/(rho*h);
     const p=this.pressurePa,solid=this.solid;
     let velocityFaces=0;
+    if(this.numericalKernel){
+      const pressureKick=rho*this.waveSpeedMps*this.waveSpeedMps*dt/h;
+      this.numericalKernel.step(velocityScale,velocityKick,pressureKick);
+      velocityFaces=(this.nx-1)*this.ny*this.nz+this.nx*(this.ny-1)*this.nz+this.nx*this.ny*(this.nz-1);
+      return Object.freeze({pressureCells:p.length,velocityFaces,solidCells:this.solidCount,courant});
+    }
 
     for(let z=0;z<this.nz;z++)for(let y=0;y<this.ny;y++)for(let x=1;x<this.nx;x++){
       const face=this.vxIndex(x,y,z),left=this.pIndex(x-1,y,z),right=this.pIndex(x,y,z);velocityFaces++;
@@ -223,6 +267,33 @@ export class AcousticWaveField {
     }
 
     return Object.freeze({pressureCells:p.length,velocityFaces,solidCells:this.solidCount,courant});
+  }
+
+  /**
+   * Build a GPU-ready r32float XZ slice without allocations in a simulation tick.
+   * With the Wasm backend conversion/padding happens inside Rust-owned staging
+   * memory; upload can pass this view directly to GPUQueue.writeTexture.
+   */
+  pressurePlaneForGPU(y:number):AcousticPressurePlane{
+    if(!Number.isSafeInteger(y)||y<0||y>=this.ny)throw new RangeError('Acoustic GPU slice Y out of range');
+    const bytesPerRow=this.numericalKernel?.planeBytesPerRow??Math.ceil(this.nx*4/256)*256;
+    const stride=bytesPerRow/4;
+    const data=this.numericalKernel?.packPressurePlane(y)??this.pressurePlaneScratch??new Float32Array(stride*this.nz);
+    if(!this.numericalKernel){
+      this.pressurePlaneScratch=data;
+      for(let z=0;z<this.nz;z++)for(let x=0;x<this.nx;x++){
+        const index=this.pIndex(x,y,z);
+        data[z*stride+x]=this.solid[index]?0:this.pressurePa[index]!;
+      }
+    }
+    return{data,width:this.nx,height:this.nz,bytesPerRow};
+  }
+
+  /** Release an opt-in Rust kernel; never call this field after disposal. */
+  dispose():void{
+    if(this.disposed)return;
+    this.disposed=true;
+    this.numericalKernel?.dispose();
   }
 
   clearWaveState():void{

@@ -1,0 +1,17 @@
+[package]
+name = "world-wave-kernel"
+version = "0.1.0"
+edition = "2021"
+description = "Deterministic f64 staggered FDTD acoustic solver for World scenes"
+license = "MIT"
+
+[lib]
+name = "world_wave_kernel"
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
