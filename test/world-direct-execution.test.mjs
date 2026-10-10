@@ -13,6 +13,7 @@ test('direct program uses the exact selected kernel schedules and keeps state/ev
     const direct=new Scene(spec()),legacy=new Scene(spec());
     direct.setSimulationProfile(profile);
     legacy.setSimulationProfile(profile);
+    direct.setSystemDispatch('direct');
     assert.ok(compileDirectScenePlan(direct.kernel,direct.profile));
     for(let tick=0;tick<180;tick++){
       direct.step(1/60);

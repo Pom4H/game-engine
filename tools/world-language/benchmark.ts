@@ -45,23 +45,28 @@ try {
   const tsSource=readFileSync(tsFile);
   const json=Buffer.from(JSON.stringify(makeScene()));
 
-  const runTicks=(fast:boolean)=>{
-    const elapsed:number[]=[];
-    for(let trial=0;trial<7;trial++){
-      // Same SceneSpec and engine; only dispatch changes.
-      const scene=new Scene(makeScene());
-      for(let i=0;i<20;i++)scene.step(1/60,fast?undefined:'detailed');
-      const start=performance.now();
-      for(let i=0;i<180;i++)scene.step(1/60,fast?undefined:'detailed');
-      if(trial>0)elapsed.push(performance.now()-start);
+  const runTicks=(build:()=>Scene)=>{
+    const times:{kernel:number[],direct:number[]}={kernel:[],direct:[]};
+    for(let trial=0;trial<12;trial++){
+      // AB/BA interleaving reduces time-drift bias from measuring one mode first.
+      for(const mode of (trial%2===0?['kernel','direct']:['direct','kernel']) as ('kernel'|'direct')[]){
+        const scene=build();
+        scene.setSystemDispatch(mode);
+        for(let i=0;i<32;i++)scene.step(1/60);
+        const start=performance.now();
+        for(let i=0;i<200;i++)scene.step(1/60);
+        if(trial>=2)times[mode].push(performance.now()-start);
+      }
     }
-    return Number(median(elapsed).toFixed(3));
+    const kernel=Number(median(times.kernel).toFixed(3)),direct=Number(median(times.direct).toFixed(3));
+    return {ticks:200,dispatchDirectMs:direct,dispatchKernelMs:kernel,
+      speedup:Number((kernel/direct).toFixed(3))};
   };
-  const directTickMs=runTicks(true),kernelTickMs=runTicks(false);
+  const bodies=runTicks(()=>new Scene(makeScene()));
+  const empty=runTicks(()=>new Scene({version:1,entities:[]}));
   const report={
     comparableEntities:65, parityTicks:120,
-    runtime:{ticks:180,dispatchDirectMs:directTickMs,dispatchKernelMs:kernelTickMs,
-      speedup: Number((kernelTickMs/directTickMs).toFixed(3))},
+    runtime:{bodies65:bodies,emptyScene:empty,defaultMode:'kernel'},
     authoring:{worldBytes:source.length,typescriptBytes:tsSource.length,
       worldNonblankLines:source.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length,
       typescriptNonblankLines:tsSource.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length},

@@ -76,6 +76,12 @@ export class Scene {
   private simulationProfile:SimulationProfile=simulationProfile('detailed');
   private simulationProgram:KernelProgram<SceneModuleContext,InternalCommand>=this.kernel.compile(this.simulationProfile);
   private directSystemPlan:DirectScenePlan|undefined=compileDirectScenePlan(this.kernel,this.simulationProfile);
+  // Direct dispatch stays experimental until repeatable benches prove an improvement.
+  private dispatchMode:'kernel'|'direct'='kernel';
+  setSystemDispatch(mode:'kernel'|'direct'):void{
+    if(mode!=='kernel'&&mode!=='direct')throw new TypeError('Unknown system dispatch mode');
+    this.dispatchMode=mode;
+  }
   readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
   private sceneProfiler:ScenePerformanceProfiler|undefined;
@@ -294,13 +300,15 @@ export class Scene {
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
     const at=this.time+dt,profiler=this.sceneProfiler;
     const sampled=profiler!==undefined&&profiler.shouldSample(this.tick+1);
+    const substepsBefore=sampled?this.physics.substeps:0;
+    const direct=this.dispatchMode==='direct'&&profile===undefined&&this.directSystemPlan!==undefined;
     if(sampled){
       profiler.begin(this.tick+1);
       this.systemRuntime.measureSystems((action,ms)=>profiler.system(action,ms));
     }
     this.lastExecution=[];
     try {
-      if(profile===undefined&&this.directSystemPlan){
+      if(direct){
         for(const system of this.directSystemPlan[(this.tick+1)%this.directSystemPlan.length]!){
           this.lastExecution.push(system.id);
           this.systemRuntime.run(system.action,dt*60/system.rateHz,at);
@@ -318,7 +326,8 @@ export class Scene {
         const stats=this.physics.stats;
         profiler.end({
           entities:this.entities.size,bodies:stats.bodies,contacts:stats.contacts,
-          substeps:stats.substeps,collisionSurfaceIterations:stats.collisionSurfaceIterations,
+          substeps:stats.substeps-substepsBefore,collisionSurfaceIterations:stats.collisionSurfaceIterations,
+          dispatch:direct?'direct':'kernel',
         });
       }
     }

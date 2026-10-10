@@ -8,6 +8,7 @@ export interface PerformanceStats{
 export interface PerformanceWork{
   readonly entities:number;readonly bodies:number;readonly contacts:number;
   readonly substeps:number;readonly collisionSurfaceIterations:number;
+  readonly dispatch:'kernel'|'direct';
 }
 export interface ScenePerformanceSample{
   readonly tick:number;readonly totalMs:number;readonly overBudget:boolean;

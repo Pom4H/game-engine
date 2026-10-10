@@ -110,7 +110,10 @@ The performance block produces an ABI v2 WSCN profile extension; scenes
 without that block still generate ABI v1.
 Read `scene.performanceReport()` for tick p50/p95/max, system timing breakdown,
 CPU budget exceedances and workload counts. GPU measurements belong to the
-separate render profiler, not this diagnostic.
+separate render profiler, not this diagnostic. The ordinary Kernel executor
+stays the default; `scene.setSystemDispatch('direct')` opts into the
+experimental compiled system schedule for A/B testing and is never silently
+enabled by a performance directive.
 
 ## WSCN ABI v1 / v2 (little endian)
 
