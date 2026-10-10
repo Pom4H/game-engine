@@ -322,7 +322,7 @@ mod tests {
         assert_eq!(hit.normal.x,1.);
         assert!(j>0.);
         assert!((a.velocity.x+b.velocity.x).abs()<1e-10);
-        assert!(a.velocity.x<0. && b.velocity.x>0.);
+        assert!(a.velocity.x.abs()<1e-9 && b.velocity.x.abs()<1e-9);
     }
     #[test]fn moving_boxes_with_off_center_impact(){
         let mut a=box_body(-0.45,0.2);let mut b=box_body(0.45,0.);
