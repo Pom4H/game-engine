@@ -47,13 +47,13 @@ try {
   const report={
     comparableEntities:65, parityTicks:120,
     authoring:{worldBytes:source.length,typescriptBytes:tsSource.length,
-      worldNonblankLines:source.toString().split('\\n').filter(x=>x.trim()&&!x.trim().startsWith('//')).length,
-      typescriptNonblankLines:tsSource.toString().split('\\n').filter(x=>x.trim()&&!x.trim().startsWith('//')).length},
+      worldNonblankLines:source.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length,
+      typescriptNonblankLines:tsSource.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length},
     transport:{wscnBytes:binary.length,jsonBytes:json.length,wscnGzipBytes:gzipSync(binary).length,jsonGzipBytes:gzipSync(json).length},
     loadAndConstructMedianMs:{wscn:measure(()=>new Scene(binary)),typescript:measure(()=>new Scene(makeScene()))},
     warnings:['Runtime excludes import/IO; only median scene construction is measured','Physics tick implementation is identical and not claimed faster','Fixed-width WSCN can exceed JSON size'],
   };
   mkdirSync(join(root,'artifacts'),{recursive:true});
-  writeFileSync(join(root,'artifacts/world-language-benchmark.json'),JSON.stringify(report,null,2)+'\\n');
+  writeFileSync(join(root,'artifacts/world-language-benchmark.json'),JSON.stringify(report,null,2));
   console.log(JSON.stringify(report,null,2));
 }finally{rmSync(dir,{recursive:true,force:true});}

@@ -103,8 +103,11 @@ export class Scene {
   private readonly pluginRenderMovers=new Set<string>();
 
   constructor(input:SceneSpec|ArrayBuffer|Uint8Array){
-    const authored=input instanceof ArrayBuffer||input instanceof Uint8Array?decodeWorldBinary(input):input;
-    this.spec=validateScene(authored);
+    const binary=input instanceof ArrayBuffer||input instanceof Uint8Array;
+    // decodeWorldBinary already validates WSCN. Never validate the same 20k
+    // entities twice when the asset is fed directly to Scene.
+    const authored=binary?decodeWorldBinary(input):input;
+    this.spec=binary?authored:validateScene(authored);
     this.environment=resolveEnvironmentAt(this.spec.environment,0);
     this.physics=new PhysicsWorld(this.spec.gravity??[0,-9.81,0],this.spec.ground??0);
     this.fluids=new FluidField(this.spec.fluids??[]);this.physics.fluidAt=body=>this.fluids.sampleXZ(body.position[0],body.position[2]);

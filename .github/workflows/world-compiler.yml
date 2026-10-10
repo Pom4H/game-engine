@@ -5,6 +5,7 @@ on:
       - 'compiler/**'
       - 'examples/worlds/**'
       - 'tools/world-language/**'
+      - 'src/scene/scene.ts'
       - 'src/scene/world-binary.ts'
       - 'src/scene/url.ts'
       - 'src/browser.ts'
@@ -16,6 +17,8 @@ on:
     paths:
       - 'compiler/**'
       - 'examples/worlds/**'
+      - 'tools/world-language/**'
+      - 'src/scene/scene.ts'
       - 'src/scene/world-binary.ts'
       - 'src/scene/url.ts'
       - 'src/browser.ts'
@@ -35,6 +38,7 @@ jobs:
       - run: cargo --version && cargo test --manifest-path compiler/Cargo.toml
       - run: bun install --frozen-lockfile
       - run: bun run build
+      - run: bun run tsc -p tools/world-language/tsconfig.json
       - run: node --test test/world-compiler.test.mjs
       - run: bun tools/world-language/benchmark.ts
       - uses: actions/upload-artifact@v4
