@@ -1,0 +1,30 @@
+name: FPS budget - physics
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/physics/**'
+      - 'src/core/spatial-hash.ts'
+      - 'src/scene/scene.ts'
+      - 'src/scene/performance.ts'
+      - 'tools/fps/**'
+      - '.github/workflows/fps-physics.yml'
+  workflow_dispatch:
+jobs:
+  physics-budget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: node --test test/contact-laws.test.mjs test/world-direct-execution.test.mjs
+      - run: node tools/fps/physics-benchmark.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fps-physics-budget
+          path: artifacts/fps/physics-budget.json
