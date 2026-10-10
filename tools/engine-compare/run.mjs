@@ -202,6 +202,32 @@ try {
       }
     }
   }
+  // Diagnostic profiling is run AFTER all timed variants, never mixed into the
+  // primary FPS/CPU results. It is another run of the same physics/render path.
+  report.diagnostics = [];
+  for (const scene of ['rom4-js','rom4-js-baseline']) {
+    if (!screenshotValidated.has(scene)) continue;
+    try {
+      await navigate(page, scene, {mode:'fixed',n:'5000',quick:'1',diagnose:'1'});
+      const probe = await page.evaluate(() => window.__ENGINE_BENCH_DIAGNOSTICS?.() ?? null);
+      if (!probe?.profile?.cpuFrames) throw new Error('Renderer returned no CPU profiler samples');
+      const result = {
+        scene,n:5000,
+        cpuStages:probe.profile.cpu,
+        latestCpu:probe.profile.latestCpu,
+        latestGpu:probe.profile.latestGpu,
+        gpuTotal:probe.profile.gpuTotal,
+        work:probe.profile.latestCpu?.work,
+        inspected:probe.inspect
+      };
+      report.diagnostics.push(result);
+      console.log('ROM4_DIAG='+JSON.stringify(result));
+    } catch (error) {
+      report.failures.push({scene,phase:'diagnostic',error:String(error)});
+      console.error('ROM4_DIAG_FAIL='+scene,error);
+    }
+    await save();
+  }
   report.summary = Object.fromEntries(SCENES.map(scene => [scene,
     Object.fromEntries(LEVELS.map(n => {
       const runs = report.runs.filter(run => run.scene === scene && run.n === n);

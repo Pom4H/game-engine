@@ -26,7 +26,7 @@ function baseScene() {
     version: 1, seed: 1, clearColor: [0, 0, 0, 1],
     entities: [], camera,
     rendering: {
-      skyColor: [0, 0, 0], backgroundColor: [0, 0, 0], ambientIrradiance:[0.45,0.45,0.45], sunColor: [1, 1, 1],
+      skyColor: [0, 0, 0], backgroundColor: [0, 0, 0], ambientIrradiance:[0.33,0.33,0.33], sunColor: [1, 1, 1],
       sunDirection: [-0.3, 1, 0.5], sunIntensity: 1.8,
       fogDensity: 0, exposure: 1
     }
@@ -85,11 +85,17 @@ export function createRom4Scene(backend) {
       root.appendChild(canvas);
       runtime = await BrowserRuntime.create(canvas, baseScene(), {
         autoplay: false, audio: false, exposeBridge: false,
-        resolution: [WIDTH, HEIGHT], profiling: true
+        resolution: [WIDTH, HEIGHT], profiling: new URLSearchParams(location.search).has('diagnose')
       });
       // Identical production renderer can be run with instancing disabled for
       // a strict visual and performance A/B against its unbatched GPU path.
       if (backend === 'js-baseline') runtime.renderer.setInstancingEnabled(false);
+      if (new URLSearchParams(location.search).has('diagnose')) {
+        window.__ENGINE_BENCH_DIAGNOSTICS = () => ({
+          profile: runtime.renderer.profile(),
+          inspect: runtime.renderer.inspect()
+        });
+      }
       if (runtime.renderer.inspect().backend !== 'webgpu')
         throw new Error('ROM4 WebGPU hardware renderer required');
     },
