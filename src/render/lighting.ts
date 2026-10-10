@@ -131,21 +131,24 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
  let dims=vec2<i32>(textureDimensions(hdr));let size=vec2<f32>(dims);let uv=in.uv;let pixel=clamp(vec2<i32>(uv*size),vec2<i32>(0),dims-1);
  let d=textureLoad(depth,pixel,0);
- // Background with a pinhole camera cannot contribute AO/GI/SSR and has zero
- // circle-of-confusion. Return the mathematically identical HDR+bloom result
- // before normal/depth-neighbour work; large sky regions become almost free.
+ let offsets=array<vec2<f32>,12>(vec2<f32>(1,0),vec2<f32>(.5,.86),vec2<f32>(-.5,.86),vec2<f32>(-1,0),vec2<f32>(-.5,-.86),vec2<f32>(.5,-.86),vec2<f32>(.4,.3),vec2<f32>(-.4,.3),vec2<f32>(.4,-.3),vec2<f32>(-.4,-.3),vec2<f32>(0,.6),vec2<f32>(0,-.6));
+ // A sky sample cannot contribute screen-space AO, GI, SSR or material
+ // reflectance. Preserve the same nine-tap depth-of-field convolution if
+ // needed, and the exact bloom addition, without expensive normal/depth reads.
  if(d>=.99999){
   let backgroundZ=linearDepth(d);
   let backgroundCoc=min(6.0,abs(backgroundZ-f.params.z)/max(backgroundZ,.1)*f.params.w);
-  if(backgroundCoc<=.15){
-   let background=textureSampleLevel(hdr,linearSampler,uv,0).rgb+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.46;
-   return vec4<f32>(background,1);
+  var background=textureSampleLevel(hdr,linearSampler,uv,0).rgb;
+  if(backgroundCoc>.15){
+    var sum=background;
+    for(var k=0;k<8;k++){sum+=textureSampleLevel(hdr,linearSampler,uv+offsets[k]*backgroundCoc/size,0).rgb;}
+    background=sum/9.0;
   }
+  return vec4<f32>(background+textureSampleLevel(bloom,linearSampler,uv,0).rgb*.46,1);
  }
  let z=linearDepth(d);let pos=viewPos(uv,z);
  let normalSample=textureLoad(normals,pixel,0);let wn=normalSample.xyz*2.0-1.0;
  let n=viewNormal(wn);
- let offsets=array<vec2<f32>,12>(vec2<f32>(1,0),vec2<f32>(.5,.86),vec2<f32>(-.5,.86),vec2<f32>(-1,0),vec2<f32>(-.5,-.86),vec2<f32>(.5,-.86),vec2<f32>(.4,.3),vec2<f32>(-.4,.3),vec2<f32>(.4,-.3),vec2<f32>(-.4,-.3),vec2<f32>(0,.6),vec2<f32>(0,-.6));
  var occlusion=0.0;
  if(d<.99999){
   // Recover the geometric normal from the nearest same-surface neighbours.
