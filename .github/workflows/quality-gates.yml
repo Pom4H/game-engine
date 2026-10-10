@@ -131,8 +131,9 @@ jobs:
       - run: bun run build
       - name: Metrics regression
         run: node --test test/quality-gates.test.mjs
-      - name: Verify hardware capture tools
+      - name: Install and verify hardware capture tools
         run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then brew install ffmpeg; fi
           command -v ffmpeg
           test -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
       - name: Profile 1080p Chrome WebGPU and render reference views
