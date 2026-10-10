@@ -44,7 +44,9 @@
     "agent:proof": "bun run build && node --test test/agent-experiment.test.mjs test/agent-diagnose.test.mjs && node tools/agent/experiment.mjs examples/agent/glass.experiment.json",
     "office:demo": "bun run build && node tools/agent-office/server.mjs --demo",
     "office:live": "bun run build && node tools/agent-office/server.mjs --live",
-    "office:check": "bun run build && node --test test/agent-office.test.mjs"
+    "office:check": "bun run build && node --test test/agent-office.test.mjs",
+    "office:campus": "bun run build && node tools/agent-office/campus-server.mjs",
+    "office:campus:check": "bun run build && node --test test/agent-campus.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

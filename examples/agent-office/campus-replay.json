@@ -1,0 +1,286 @@
+{
+  "schema": "engine.office.campus-replay.v1",
+  "description": "Synthetic route event replay; not real Codex/ChatGPT agent travel",
+  "agents": [
+    {
+      "id": "researcher",
+      "name": "Research",
+      "home": "research"
+    },
+    {
+      "id": "builder",
+      "name": "Builder",
+      "home": "build"
+    },
+    {
+      "id": "coordinator",
+      "name": "Coordinator",
+      "home": "research"
+    },
+    {
+      "id": "validator",
+      "name": "Validator",
+      "home": "build"
+    }
+  ],
+  "events": [
+    {
+      "schema": "engine.activity.v1",
+      "id": "builder:started",
+      "atMs": 1791645000000,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Builder"
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "coordinator:started",
+      "atMs": 1791645000000,
+      "actor": {
+        "domain": "agent",
+        "id": "coordinator"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Coordinator"
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "researcher:started",
+      "atMs": 1791645000000,
+      "actor": {
+        "domain": "agent",
+        "id": "researcher"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Research"
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "validator:started",
+      "atMs": 1791645000000,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Validator"
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "researcher:task",
+      "atMs": 1791645000500,
+      "actor": {
+        "domain": "agent",
+        "id": "researcher"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "label": "Deliver research findings",
+      "causeId": "researcher:started",
+      "target": {
+        "domain": "task",
+        "id": "researcher-handoff"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "researcher:walk",
+      "atMs": 1791645000700,
+      "actor": {
+        "domain": "agent",
+        "id": "researcher"
+      },
+      "kind": "agent.move.started",
+      "origin": "demo",
+      "label": "Walking to build office",
+      "causeId": "researcher:task",
+      "target": {
+        "domain": "office",
+        "id": "build"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "builder:task",
+      "atMs": 1791645002100,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "label": "Review API with research",
+      "causeId": "builder:started",
+      "target": {
+        "domain": "task",
+        "id": "builder-handoff"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "builder:walk",
+      "atMs": 1791645002300,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.move.started",
+      "origin": "demo",
+      "label": "Walking to research office",
+      "causeId": "builder:task",
+      "target": {
+        "domain": "office",
+        "id": "research"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "coordinator:task",
+      "atMs": 1791645004100,
+      "actor": {
+        "domain": "agent",
+        "id": "coordinator"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "label": "Coordinate deployment",
+      "causeId": "coordinator:started",
+      "target": {
+        "domain": "task",
+        "id": "coordinator-handoff"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "coordinator:walk",
+      "atMs": 1791645004300,
+      "actor": {
+        "domain": "agent",
+        "id": "coordinator"
+      },
+      "kind": "agent.move.started",
+      "origin": "demo",
+      "label": "Walking to build office",
+      "causeId": "coordinator:task",
+      "target": {
+        "domain": "office",
+        "id": "build"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "researcher:arrived",
+      "atMs": 1791645008700,
+      "actor": {
+        "domain": "agent",
+        "id": "researcher"
+      },
+      "kind": "agent.move.completed",
+      "origin": "demo",
+      "label": "Arrived at build office",
+      "causeId": "researcher:walk",
+      "target": {
+        "domain": "office",
+        "id": "build"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "researcher:done",
+      "atMs": 1791645009100,
+      "actor": {
+        "domain": "agent",
+        "id": "researcher"
+      },
+      "kind": "agent.task.completed",
+      "origin": "demo",
+      "label": "Handoff delivered",
+      "causeId": "researcher:arrived",
+      "target": {
+        "domain": "task",
+        "id": "researcher-handoff"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "builder:arrived",
+      "atMs": 1791645011200,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.move.completed",
+      "origin": "demo",
+      "label": "Arrived at research office",
+      "causeId": "builder:walk",
+      "target": {
+        "domain": "office",
+        "id": "research"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "builder:done",
+      "atMs": 1791645011600,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.task.completed",
+      "origin": "demo",
+      "label": "Handoff delivered",
+      "causeId": "builder:arrived",
+      "target": {
+        "domain": "task",
+        "id": "builder-handoff"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "coordinator:arrived",
+      "atMs": 1791645012700,
+      "actor": {
+        "domain": "agent",
+        "id": "coordinator"
+      },
+      "kind": "agent.move.completed",
+      "origin": "demo",
+      "label": "Arrived at build office",
+      "causeId": "coordinator:walk",
+      "target": {
+        "domain": "office",
+        "id": "build"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "coordinator:done",
+      "atMs": 1791645013100,
+      "actor": {
+        "domain": "agent",
+        "id": "coordinator"
+      },
+      "kind": "agent.task.completed",
+      "origin": "demo",
+      "label": "Handoff delivered",
+      "causeId": "coordinator:arrived",
+      "target": {
+        "domain": "task",
+        "id": "coordinator-handoff"
+      }
+    }
+  ],
+  "capture": {
+    "durationSeconds": 13,
+    "fps": 12,
+    "width": 1280,
+    "height": 720
+  }
+}

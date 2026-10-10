@@ -1,0 +1,55 @@
+name: Agent Campus - real WebGPU MP4
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/observability/campus.ts'
+      - 'tools/agent-office/campus*'
+      - 'examples/agent-office/campus-replay.json'
+      - 'test/agent-campus.test.mjs'
+      - '.github/workflows/agent-campus.yml'
+      - 'package.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: agent-campus-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  campus-video:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Verify causal travel semantics and deterministic gait
+        run: node --test test/agent-campus.test.mjs
+      - name: Browser/encoder syntax and encoder presence
+        run: |
+          node --check tools/agent-office/campus-app.mjs
+          node --check tools/agent-office/campus-server.mjs
+          node --check tools/agent-office/campus-capture.mjs
+          ffmpeg -version
+      - name: Render agents walking between connected offices
+        env:
+          CAMPUS_REQUIRE_HARDWARE: '1'
+        run: node tools/agent-office/campus-capture.mjs
+      - name: Upload real MP4 and render evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-campus-video-${{ github.sha }}
+          path: |
+            artifacts/agent-campus/*.mp4
+            artifacts/agent-campus/*.png
+            artifacts/agent-campus/*.json
+          if-no-files-found: warn
+          retention-days: 14
