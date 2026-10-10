@@ -104,19 +104,20 @@ test('Rust World v3 contact -> physical wave -> actual NPC pressure reading and 
   fieldId:'outdoor-air',listeners:[{entityId:'listener'}],
  });
  let audible=false,emitted=false;
- const events=[];
+ const events=[],debug=[];
  for(let tick=0;tick<28;tick++){
   baseline.step(1/60);scene.step(1/60);
   assert.deepEqual(scene.snapshot(),baseline.snapshot(),
    'Acoustic coupling may not modify rigid body state at tick '+tick);
   const stats=coupled.diagnostics;
+  debug.push({tick,executed:scene.lastExecution.includes('engine:acoustic:outdoor-air'),contacts:scene.physics.contacts.map(c=>({a:c.a,b:c.b,mode:c.mode,normalEnergy:c.normalEnergy,impulse:c.impulse,normalSpeed:c.normalSpeed,point:c.point})),stats});
   assert.ok(stats.radiatedAcousticEnergyJ<=stats.contactDissipationBudgetJ+1e-9,
    'acoustics must never spend more than dissipated contact energy');
   emitted||=stats.injectedSources>0;
   audible||=stats.audibleSensorSamples>0;
   events.push(...scene.drainEvents());
  }
- assert.ok(emitted,'a real collision must excite the physical acoustic medium');
+ assert.ok(emitted,'a real collision must excite the physical acoustic medium: '+JSON.stringify(debug.filter(x=>x.contacts.length>0||x.stats.sourceContacts>0||!x.executed).slice(0,7)));
  assert.ok(audible,'registered NPC listener must measure a propagated wave');
  assert.ok(coupled.totalRadiatedEnergyJ>0);
  assert.ok(coupled.sourcesEverInjected>0);
