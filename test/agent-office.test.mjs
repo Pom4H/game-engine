@@ -62,14 +62,16 @@ test('actual Scene geometry, visual-only actors, and backward seek parity',()=>{
   assert.ok(office.scene.renderMoverIds().has('office-agent-0:top'));
   const start=office.project(journal.snapshot(),1000);
   const marker=office.scene.entities.get('office:status:0');
-  const first=[...marker.position];
+  const first=[...marker.position],firstColor=[...marker.material.color];
   const end=office.project(journal.snapshot(),6000);
-  const last=[...marker.position];
+  const last=[...marker.position],lastColor=[...marker.material.color];
   assert.notDeepEqual(first,last,'marker responds to a committed event');
+  assert.notDeepEqual(firstColor,lastColor,'office lights reflect observed status, not invented activity');
   assert.equal(start[0].phase,'idle');
   assert.equal(end[0].phase,'done');
   office.project(journal.snapshot(),1000);
   assert.deepEqual(marker.position,first,'backward seek does not accumulate transforms');
+  assert.deepEqual(marker.material.color,firstColor,'backward seek restores previous status light');
   assert.equal(office.scene.tick,0,'visual replay never advances authoritative physics ticks');
   assert.throws(()=>new AgentOffice(Array.from({length:9},(_,i)=>({id:String(i),name:'Agent '+i}))),/at most 8/);
 });

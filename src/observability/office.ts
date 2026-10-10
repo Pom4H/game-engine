@@ -48,11 +48,16 @@ export function projectOfficeAgents(
 }
 const INK:Color=[.115,.128,.14,1],STONE:Color=[.34,.35,.34,1],WARM:Color=[.57,.49,.39,1];
 const statusPositions:Record<OfficePhase,number>={offline:0,idle:1,working:2,tool:3,blocked:4,done:5};
+const statusColors:Record<OfficePhase,Color>={
+  offline:[.28,.32,.34,1],idle:[.70,.60,.32,1],working:[.28,.72,.74,1],
+  tool:[.37,.49,.82,1],blocked:[.86,.32,.25,1],done:[.38,.70,.37,1],
+};
 function seat(index:number):Vec3{return[-5.25+(index%4)*3.50,0,index<4?1.75:-2.35];}
 type ActorRecord={readonly id:string;readonly character:CompiledCharacter;readonly seat:Vec3;readonly marker:string};
 export class AgentOffice {
   readonly scene:Scene;
   private readonly actors:readonly ActorRecord[];
+  private readonly lastPhases:OfficePhase[]=[];
   readonly agents:readonly OfficeAgent[];
   constructor(roster:readonly OfficeAgent[]){
     if(roster.length>8)throw new RangeError('Office MVP supports at most 8 visible agents');
@@ -134,6 +139,7 @@ export class AgentOffice {
   project(facts:readonly ActivityFact[],atMs:number):readonly OfficeAgentState[]{
     if(!Number.isFinite(atMs)||atMs<0)throw new RangeError('Office projection time must be nonnegative');
     const states=projectOfficeAgents(this.agents,facts,atMs);
+    const materials:{id:string;set:{color:Color}}[]=[];
     for(let i=0;i<this.actors.length;i++){
       const a=this.actors[i]!,state=states[i]!;
       const pose=sampleCharacterPose(a.character.walker,
@@ -149,7 +155,12 @@ export class AgentOffice {
       marker.position[0]=a.seat[0]+.68+statusPositions[state.phase]*.13;
       marker.position[1]=.83;
       marker.position[2]=a.seat[2]+.30;
+      if(this.lastPhases[i]!==state.phase){
+        this.lastPhases[i]=state.phase;
+        materials.push({id:a.marker,set:{color:statusColors[state.phase]}});
+      }
     }
+    if(materials.length)this.scene.patchAppearance({materials});
     return states;
   }
 }
