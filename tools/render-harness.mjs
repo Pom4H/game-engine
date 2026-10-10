@@ -16,6 +16,9 @@ if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1)throw 
 const warmupFrames=Number(process.env.RENDER_WARMUP_FRAMES??0);
 if(!Number.isSafeInteger(warmupFrames)||warmupFrames<0||warmupFrames>512)throw new RangeError('RENDER_WARMUP_FRAMES must be in [0, 512]');
 const profiling=process.env.RENDER_PROFILING==='1',requireHardware=process.env.RENDER_REQUIRE_HARDWARE==='1';
+const fpsBenchFrames=Number(process.env.RENDER_FPS_BENCH_FRAMES??0);
+if(!Number.isSafeInteger(fpsBenchFrames)||fpsBenchFrames<0||fpsBenchFrames>240)throw new RangeError('RENDER_FPS_BENCH_FRAMES must be within 0..240');
+if(fpsBenchFrames&&(!profiling||!requireHardware))throw new Error('GPU FPS benchmark requires hardware and profiling enabled');
 const videoOutput=process.env.RENDER_VIDEO_OUTPUT??null,videoFps=Number(process.env.RENDER_VIDEO_FPS??30),videoStart=Number(process.env.RENDER_VIDEO_START??0),videoDuration=Number(process.env.RENDER_VIDEO_DURATION??0);
 if(videoOutput&&(!Number.isSafeInteger(videoFps)||videoFps<1||videoFps>60||!Number.isFinite(videoStart)||videoStart<0||!Number.isFinite(videoDuration)||videoDuration<=0||videoDuration>30))throw new RangeError('Invalid render video options');
 const scenePath=resolve(sceneFile);
@@ -188,6 +191,76 @@ try{
   const adapterResult=await send('Runtime.evaluate',{expression:'window.__RENDER_HARNESS__.adapterInfo',returnByValue:true});
 
   await mkdir(resolve('artifacts'),{recursive:true});
+  let fpsBenchmark=null;
+  if(fpsBenchFrames){
+    // A real Chrome animation-frame loop at the authored render resolution:
+    // scene.step + the production WebGPU renderer, without screenshot/readback per frame.
+    // GPU pass durations come from RenderProfiler timestamp queries, if supported.
+    const fpsExpression=String.raw`(async()=>{
+      const runtime=window.__RENDER_HARNESS__.runtime;
+      runtime.pause();
+      const requested=__FPS_FRAMES__;
+      const quantile=(values,q)=>{
+        if(!values.length)return null;
+        const ordered=[...values].sort((a,b)=>a-b);
+        return ordered[Math.floor((ordered.length-1)*q)];
+      };
+      const stats=values=>({samples:values.length,meanMs:values.length?values.reduce((a,b)=>a+b,0)/values.length:null,
+        p50Ms:quantile(values,.50),p95Ms:quantile(values,.95),p99Ms:quantile(values,.99),
+        maxMs:values.length?Math.max(...values):null});
+      const interval=[],frameCpu=[],simulationCpu=[],renderCpu=[];
+      runtime.resetProfile();
+      let previous=0;
+      await new Promise(resolve=>{
+        let done=0;
+        const frame=(timestamp)=>{
+          if(previous>0)interval.push(timestamp-previous);
+          previous=timestamp;
+          const a=performance.now();
+          runtime.scene.step(1/60);
+          const b=performance.now();
+          runtime.render();
+          const c=performance.now();
+          simulationCpu.push(b-a);
+          renderCpu.push(c-b);
+          frameCpu.push(c-a);
+          done++;
+          if(done>=requested)resolve();
+          else requestAnimationFrame(frame);
+        };
+        requestAnimationFrame(frame);
+      });
+      await runtime.drain();
+      // Let async GPU timestamp readbacks settle without adding simulated frames.
+      await new Promise(resolve=>setTimeout(resolve,30));
+      const gpuProfile=runtime.profile();
+      const budget=1000/60;
+      const pace=stats(interval),whole=stats(frameCpu),simulation=stats(simulationCpu),render=stats(renderCpu);
+      const gpuStats=gpuProfile.timestampQueries&&gpuProfile.gpuFrames>0?gpuProfile.gpuTotal??null:null;
+      const gpu= gpuStats?{...gpuStats,samples:gpuProfile.gpuFrames}:null;
+      const pass=(value)=>value!==null&&value<=budget;
+      return{
+        schema:1,requestedFrames:requested,resolution:[runtime.renderer.inspect().width,runtime.renderer.inspect().height],
+        budgetMs:budget,frameInterval:pace,frameCpu:whole,simulationCpu:simulation,renderCpu:render,
+        observedFps:pace.p50Ms?1000/pace.p50Ms:null,
+        gpu,
+        timestampQueries:gpuProfile.timestampQueries,
+        gpuFrames:gpuProfile.gpuFrames,
+        gpuPasses:gpuProfile.gpu,
+        cpuStages:gpuProfile.cpu,
+        renderWork:gpuProfile.latestCpu?.work??null,
+        validation:{cpuP95WithinBudget:pass(whole.p95Ms),
+          gpuP95WithinBudget:gpu?pass(gpu.p95Ms):null,
+          frameP95WithinBudget:pass(pace.p95Ms)}
+      };
+    })()`.replace('__FPS_FRAMES__',String(fpsBenchFrames));
+    const sampled=await send('Runtime.evaluate',{expression:fpsExpression,awaitPromise:true,returnByValue:true});
+    if(sampled.exceptionDetails||!sampled.result?.value)throw new Error('GPU benchmark failed: '+JSON.stringify(sampled.exceptionDetails??sampled));
+    fpsBenchmark={...sampled.result.value,adapter:adapterResult.result?.value};
+    await mkdir(resolve('artifacts/fps'),{recursive:true});
+    await writeFile(resolve('artifacts/fps/gpu-budget.json'),JSON.stringify(fpsBenchmark,null,2)+'\n');
+    console.log('GPU_FPS_BENCHMARK='+JSON.stringify(fpsBenchmark));
+  }
   let video=null;
   if(videoOutput){
     const output=resolve(videoOutput);await mkdir(join(output,'..'),{recursive:true});
@@ -234,7 +307,7 @@ try{
     console.log(JSON.stringify(results.at(-1),null,2));
   }
 
-  const hud={resolution:[width,height],warmupFrames,adapter:adapterResult.result?.value,video,views:results};
+  const hud={resolution:[width,height],warmupFrames,adapter:adapterResult.result?.value,fpsBenchmark,video,views:results};
   await writeFile(resolve('artifacts/render-hud.json'),JSON.stringify(hud,null,2));
   console.log(JSON.stringify({views:results.length,outputs:results.map(result=>result.output),hud:'artifacts/render-hud.json'},null,2));
 }finally{

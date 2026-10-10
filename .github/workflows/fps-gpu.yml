@@ -1,0 +1,41 @@
+name: FPS budget - hardware WebGPU
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/render/**'
+      - 'src/runtime/browser.ts'
+      - 'src/scene/**'
+      - 'tools/render-harness.mjs'
+      - 'tools/promo/**'
+      - '.github/workflows/fps-gpu.yml'
+  workflow_dispatch:
+concurrency:
+  group: fps-hardware-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  gpu-budget:
+    runs-on: self-hosted
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Measure complete 1080p scene and hardware GPU frame
+        shell: powershell
+        env:
+          RENDER_PROFILING: '1'
+          RENDER_REQUIRE_HARDWARE: '1'
+          RENDER_FPS_BENCH_FRAMES: '90'
+          RENDER_WARMUP_FRAMES: '12'
+        run: node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fps-webgpu-1080p
+          path: |
+            artifacts/fps/gpu-budget.json
+            artifacts/render-hud.json
