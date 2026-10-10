@@ -2,7 +2,7 @@
 // Real game-engine WebGPU capture. Every MP4 frame is a Chrome GPU canvas screenshot.
 import {createServer} from 'node:http';
 import {readFile,mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
-import {spawn} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 import {once} from 'node:events';
 import {resolve,extname,sep,join} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -79,7 +79,12 @@ try{
  if(adapter.isFallbackAdapter||/swiftshader|lavapipe|llvmpipe|software|microsoft basic render/i.test(JSON.stringify(adapter)))throw new Error('Hardware GPU required: '+JSON.stringify(adapter));
  const frames=Math.round(duration*fps);
  const mp4=join(output,'castle-jelly.mp4'),poster=join(output,'poster.png');
- encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','17','-pix_fmt','yuv420p','-movflags','+faststart',mp4],{stdio:['pipe','inherit','inherit']});
+ const available=spawnSync('ffmpeg',['-hide_banner','-encoders'],{encoding:'utf8'}).stdout||'';
+ const choices=['h264_nvenc','libx264','h264_mf','libopenh264','mpeg4'];
+ const codec=choices.find(name=>new RegExp('\\b'+name+'\\b').test(available));
+ if(!codec)throw new Error('No available FFmpeg MP4 codec: '+available.slice(-3000));
+ console.log('Castle video encoder: '+codec);
+ encoder=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','png','-framerate',String(fps),'-i','pipe:0','-an','-c:v',codec,'-pix_fmt','yuv420p','-movflags','+faststart',mp4],{stdio:['pipe','inherit','inherit']});
  const completed=once(encoder,'exit');completed.catch(()=>{});
  let encoderError;encoder.once('error',e=>{encoderError=e;});encoder.stdin.on('error',e=>{encoderError=e;});
  const samples=[];
