@@ -154,7 +154,8 @@ function frame(now){
   if(dirty&&office){
     try{
       office.project(journal.snapshot(),cursorMs);
-      const stats=renderer.render(office.scene);
+      renderer.render(office.scene);
+      const stats=renderer.inspect();
       if(frameCount++%12===0){
         $('#render-stats').textContent=(stats.drawCalls??0)+' DRAWS / '+(stats.triangles??0)+' TRIANGLES';
       }
