@@ -30,7 +30,7 @@ interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;coun
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4;
   /** Bounded staging buffers owned by a GPUObject and reused across frames. */
   uniformStaging?:Float32Array;surfaceStaging?:Float32Array;deformationStaging?:Float32Array;
-  lastSurfaceRevision?:number;
+  lastSurfaceRevision?:number|undefined;
 }
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
