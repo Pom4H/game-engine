@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +46,10 @@ jobs:
 
   hardware-editor:
     needs: validate
-    runs-on: macos-latest
+    runs-on: [self-hosted, Windows, X64]
+    defaults:
+      run:
+        shell: powershell
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -58,16 +61,6 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - name: Locate hardware Chrome
-        run: |
-          if [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
-            echo "CHROME_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" >> "$GITHUB_ENV"
-          elif [ -x "/Applications/Chromium.app/Contents/MacOS/Chromium" ]; then
-            echo "CHROME_PATH=/Applications/Chromium.app/Contents/MacOS/Chromium" >> "$GITHUB_ENV"
-          else
-            echo "Chrome/Chromium not found on GPU worker" >&2
-            exit 1
-          fi
       - name: Bundle the standalone character editor
         run: node tools/character-creator/bundle.mjs
       - name: Render editor and standalone file and verify actual controls

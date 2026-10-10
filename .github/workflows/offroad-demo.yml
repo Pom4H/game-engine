@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   physics:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -31,51 +31,8 @@ jobs:
       - run: bun run build
       - run: node --test test/offroad-vehicle.test.mjs
 
-  render-hosted-macos:
-    runs-on: macos-latest
-    timeout-minutes: 25
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - run: bun install --frozen-lockfile
-      - run: bun run build
-      - name: Install ffmpeg
-        run: brew install ffmpeg
-      - name: Locate Chrome
-        run: |
-          if [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
-            echo "CHROME_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" >> "$GITHUB_ENV"
-          elif [ -x "/Applications/Chromium.app/Contents/MacOS/Chromium" ]; then
-            echo "CHROME_PATH=/Applications/Chromium.app/Contents/MacOS/Chromium" >> "$GITHUB_ENV"
-          else
-            echo "Chrome not found" >&2
-            exit 1
-          fi
-      - name: Render hardware offroad fallback
-        env:
-          RENDER_REQUIRE_HARDWARE: '1'
-          RENDER_PROFILING: '1'
-          RENDER_WARMUP_FRAMES: '8'
-          RENDER_VIDEO_OUTPUT: 'artifacts/offroad-macos.mp4'
-          RENDER_VIDEO_FPS: '30'
-          RENDER_VIDEO_START: '0'
-          RENDER_VIDEO_DURATION: '7.5'
-        run: node tools/render-harness.mjs tools/offroad/scene.mjs tools/offroad/views.mjs 1600 900
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: offroad-macos-render
-          path: |
-            artifacts/offroad-macos.mp4
-            artifacts/offroad-*.png
-            artifacts/render-hud.json
-          retention-days: 14
-
   render:
-    runs-on: self-hosted
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4

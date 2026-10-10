@@ -10,8 +10,8 @@ overlap and cannot simply be added as an FPS estimate.
 
 | Gate | Evidence | Criterion |
 | --- | --- | --- |
-| CPU physics | `FPS budget - physics` hosted Linux | 5 ms median per 60 Hz tick for specified fixtures, strict SHA-256 physical replay |
-| Rendering | `FPS budget - hardware WebGPU` on named Mac/Windows hardware | 1920×1080 real Chrome WebGPU; frame interval and render CPU p50/p95/p99, per-pass GPU timestamp p50/p95 |
+| CPU physics | `FPS budget - physics` on self-hosted Windows RDNA3 | 5 ms median per 60 Hz tick for specified fixtures, strict SHA-256 physical replay |
+| Rendering | `FPS budget - hardware WebGPU` on self-hosted Windows RDNA3 | 1920×1080 real Chrome WebGPU; frame interval and render CPU p50/p95/p99, per-pass GPU timestamp p50/p95 |
 | Physics integrity | `test/contact-laws.test.mjs`, proving-ground and golden replay | Same cause graph, body positions, impulses, contacts, and physical state |
 | Visual fidelity | Existing Render, Proving Ground and promoted scenes | No silent lower resolution, shader changes, removed physics or hidden objects to inflate FPS |
 
@@ -59,3 +59,13 @@ Previous separate Proving Ground 1600×900 14-frame profile: CPU render p95
 11.8 ms, GPU timestamp p95 7.12 ms, 632 draw calls. These do **not**
 measure actual game FPS or the 1920×1080 target, and do not include the
 latest per-object buffer reuse. Future conclusions must use the GPU gate.
+
+## CI runner policy
+
+All new performance benchmarks, GPU rendering, FPS comparisons and quality
+checks in these workflows use the project's Windows x64 **self-hosted GPU
+runner**. No Apple Silicon or GitHub-hosted macOS job is scheduled. The
+material/GI experiment uses PowerShell, fixed 1920×1080 resolution and a
+sequential same-device baseline/optimized comparison. The historical Linux
+and Apple measurements listed in earlier experiment reports are not current
+performance baselines. Do not compare FPS across dissimilar machines.
