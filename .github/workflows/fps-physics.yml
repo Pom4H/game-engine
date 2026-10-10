@@ -10,7 +10,7 @@ on:
       - 'src/scene/scene.ts'
       - 'src/scene/performance.ts'
       - 'tools/fps/**'
-      - '.github/workflows/**'
+      - '.github/workflows/fps-physics.yml'
       - 'test/ci-runner-policy.test.mjs'
   workflow_dispatch:
 jobs:
