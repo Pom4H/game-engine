@@ -38,7 +38,8 @@
     "structure:rust:bench": "node tools/world-structure/benchmark.mjs",
     "rigid:rust:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-rigid/Cargo.toml",
     "rigid:rust:test": "cargo test --manifest-path kernels/world-rigid/Cargo.toml && bun run rigid:rust:build && bun run build && node --test test/rigid-wasm.test.mjs",
-    "rigid:rust:bench": "node tools/world-rigid/benchmark.mjs"
+    "rigid:rust:bench": "node tools/world-rigid/benchmark.mjs",
+    "world:acoustics:bench": "node tools/world-acoustics/benchmark.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

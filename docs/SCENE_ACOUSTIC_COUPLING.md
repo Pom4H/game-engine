@@ -142,3 +142,14 @@ The existing procedural audio synthesizer continues to be available for
 headphones/video; no automatic double-mixing of the two approaches occurs.
 Audio playback from the pressure field requires a sample-rate-correct
 receiver/downsampler and air/boundary calibration.
+
+## Performance profiling
+
+The CI run executes `node tools/world-acoustics/benchmark.mjs` and stores
+`artifacts/world-acoustics/benchmark.json` alongside the compiled Rust/WASM
+wave kernel. It compares identical World v3 scenes with the same KernelProgram
+dispatch: baseline without an acoustic field, CPU TypeScript wave solver and
+Rust/WASM wave solver. Results include per-tick p50/p95 CPU times, isolated
+acoustic system timing, fixed grid memory, CFL substeps, real injected energy
+and peak measured NPC RMS pressure. These are full Scene physics CPU timings,
+not graphical FPS, video latency or perceptual accuracy.
