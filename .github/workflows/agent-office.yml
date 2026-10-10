@@ -1,0 +1,57 @@
+name: Agent Office - causal WebGPU
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/observability/**'
+      - 'src/characters/**'
+      - 'src/render/**'
+      - 'src/scene/**'
+      - 'src/index.ts'
+      - 'tools/agent-office/**'
+      - 'examples/agent-office/**'
+      - 'test/agent-office.test.mjs'
+      - '.github/workflows/agent-office.yml'
+      - 'package.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: agent-office-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  prove:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Causal journal / office projection / live event ingest
+        run: node --test test/agent-office.test.mjs
+      - name: Syntax check browser and capture entrypoints
+        run: |
+          node --check tools/agent-office/app.mjs
+          node --check tools/agent-office/server.mjs
+          node --check tools/agent-office/capture.mjs
+      - name: Capture actual 3D office on GPU
+        env:
+          OFFICE_REQUIRE_HARDWARE: '1'
+        run: node tools/agent-office/capture.mjs
+      - name: Publish rendered office and GPU evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-office-${{ github.sha }}
+          path: |
+            artifacts/agent-office-*.png
+            artifacts/agent-office-*.json
+          if-no-files-found: warn
+          retention-days: 14

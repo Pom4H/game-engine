@@ -1,0 +1,409 @@
+{
+  "schema": "engine.office.replay.v1",
+  "description": "Synthetic multi-agent development trace. Not actual ChatGPT subagents.",
+  "events": [
+    {
+      "schema": "engine.activity.v1",
+      "id": "a0",
+      "atMs": 1791645000000,
+      "actor": {
+        "domain": "agent",
+        "id": "orchestrator"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Coordinator",
+      "usage": {
+        "tokens": 125,
+        "costUsd": 0.0007
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "a1",
+      "atMs": 1791645001500,
+      "actor": {
+        "domain": "agent",
+        "id": "research"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Researcher"
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "a2",
+      "atMs": 1791645002600,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Builder"
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "a3",
+      "atMs": 1791645003500,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.started",
+      "origin": "demo",
+      "label": "Validator",
+      "usage": {
+        "tokens": 218,
+        "costUsd": 0.00115
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "b0",
+      "atMs": 1791645004700,
+      "actor": {
+        "domain": "agent",
+        "id": "orchestrator"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "causeId": "a0",
+      "label": "Plan implementation",
+      "target": {
+        "domain": "task",
+        "id": "plan"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "b1",
+      "atMs": 1791645007200,
+      "actor": {
+        "domain": "agent",
+        "id": "research"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "causeId": "b0",
+      "label": "Inspect engine contracts",
+      "target": {
+        "domain": "task",
+        "id": "inspect"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "b2",
+      "atMs": 1791645008600,
+      "actor": {
+        "domain": "agent",
+        "id": "research"
+      },
+      "kind": "agent.tool.started",
+      "origin": "demo",
+      "causeId": "b1",
+      "label": "Read repository",
+      "target": {
+        "domain": "tool",
+        "id": "github-read"
+      },
+      "usage": {
+        "tokens": 311,
+        "costUsd": 0.0016
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "b3",
+      "atMs": 1791645011800,
+      "actor": {
+        "domain": "agent",
+        "id": "research"
+      },
+      "kind": "agent.tool.completed",
+      "origin": "demo",
+      "causeId": "b2",
+      "label": "Read completed",
+      "target": {
+        "domain": "tool",
+        "id": "github-read"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "b4",
+      "atMs": 1791645014100,
+      "actor": {
+        "domain": "agent",
+        "id": "research"
+      },
+      "kind": "agent.task.completed",
+      "origin": "demo",
+      "causeId": "b3",
+      "label": "Findings ready",
+      "target": {
+        "domain": "task",
+        "id": "inspect"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "c0",
+      "atMs": 1791645015300,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "causeId": "b4",
+      "label": "Implement office projection",
+      "target": {
+        "domain": "task",
+        "id": "implement"
+      },
+      "usage": {
+        "tokens": 404,
+        "costUsd": 0.00205
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "c1",
+      "atMs": 1791645017900,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.tool.started",
+      "origin": "demo",
+      "causeId": "c0",
+      "label": "Write source files",
+      "target": {
+        "domain": "tool",
+        "id": "github-write"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "c2",
+      "atMs": 1791645020300,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.tool.completed",
+      "origin": "demo",
+      "causeId": "c1",
+      "label": "Commit created",
+      "target": {
+        "domain": "tool",
+        "id": "github-write"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d0",
+      "atMs": 1791645021000,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "causeId": "c2",
+      "label": "Run tests",
+      "target": {
+        "domain": "task",
+        "id": "validation"
+      },
+      "usage": {
+        "tokens": 497,
+        "costUsd": 0.0025
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d1",
+      "atMs": 1791645023200,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.tool.started",
+      "origin": "demo",
+      "causeId": "d0",
+      "label": "Self-hosted CI",
+      "target": {
+        "domain": "tool",
+        "id": "github-actions"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d2",
+      "atMs": 1791645026600,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.tool.failed",
+      "origin": "demo",
+      "causeId": "d1",
+      "label": "Typecheck failed",
+      "target": {
+        "domain": "tool",
+        "id": "github-actions"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d3",
+      "atMs": 1791645028100,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.task.failed",
+      "origin": "demo",
+      "causeId": "d2",
+      "label": "Review required",
+      "target": {
+        "domain": "task",
+        "id": "validation"
+      },
+      "usage": {
+        "tokens": 590,
+        "costUsd": 0.00295
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "c3",
+      "atMs": 1791645030000,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.tool.started",
+      "origin": "demo",
+      "causeId": "d2",
+      "label": "Fix type error",
+      "target": {
+        "domain": "tool",
+        "id": "github-write"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "c4",
+      "atMs": 1791645032900,
+      "actor": {
+        "domain": "agent",
+        "id": "builder"
+      },
+      "kind": "agent.tool.completed",
+      "origin": "demo",
+      "causeId": "c3",
+      "label": "Fix committed",
+      "target": {
+        "domain": "tool",
+        "id": "github-write"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d4",
+      "atMs": 1791645034400,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.task.started",
+      "origin": "demo",
+      "causeId": "c4",
+      "label": "Re-run CI",
+      "target": {
+        "domain": "task",
+        "id": "validation-2"
+      },
+      "usage": {
+        "tokens": 683,
+        "costUsd": 0.0034
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d5",
+      "atMs": 1791645036700,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.tool.started",
+      "origin": "demo",
+      "causeId": "d4",
+      "label": "Self-hosted CI",
+      "target": {
+        "domain": "tool",
+        "id": "github-actions"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d6",
+      "atMs": 1791645040200,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.tool.completed",
+      "origin": "demo",
+      "causeId": "d5",
+      "label": "Checks passed",
+      "target": {
+        "domain": "tool",
+        "id": "github-actions"
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "d7",
+      "atMs": 1791645042300,
+      "actor": {
+        "domain": "agent",
+        "id": "validator"
+      },
+      "kind": "agent.task.completed",
+      "origin": "demo",
+      "causeId": "d6",
+      "label": "Validation completed",
+      "target": {
+        "domain": "task",
+        "id": "validation-2"
+      },
+      "usage": {
+        "tokens": 776,
+        "costUsd": 0.00385
+      }
+    },
+    {
+      "schema": "engine.activity.v1",
+      "id": "e0",
+      "atMs": 1791645044500,
+      "actor": {
+        "domain": "agent",
+        "id": "orchestrator"
+      },
+      "kind": "agent.task.completed",
+      "origin": "demo",
+      "causeId": "d7",
+      "label": "Feature ready",
+      "target": {
+        "domain": "task",
+        "id": "plan"
+      }
+    }
+  ]
+}

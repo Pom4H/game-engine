@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#161b1e">
+  <title>Agent Office — The Engine</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/tools/agent-office/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="identity"><span class="mark" aria-hidden="true">◩</span><strong>THE ENGINE</strong><span class="divider"></span><span>OBSERVATORY</span></div>
+    <div class="mode"><span id="connection" class="connection"></span><span id="mode">REPLAY</span><span id="count">0 EVENTS</span></div>
+  </header>
+  <main class="workspace">
+    <section class="stage" aria-label="Офис агентов — трёхмерная визуализация">
+      <canvas id="scene" aria-label="3D офис с агентами, их рабочими местами и индикаторами состояний"></canvas>
+      <div class="stage-heading"><span class="eyebrow">01 / CAUSAL WORLD</span><h1>Agent office</h1><p>Пространственная проекция событий оркестратора</p></div>
+      <div class="stage-corner" id="stage-corner">ENGINE / WEBGPU</div>
+      <div class="stage-footer"><span>Перетащите для вращения · Колесо для масштаба</span><span id="render-stats">—</span></div>
+      <div id="error" class="error" hidden></div>
+    </section>
+    <aside class="inspector">
+      <div class="panel-heading"><span>AGENTS</span><span id="agent-count">00</span></div>
+      <div class="agents" id="agents"></div>
+      <div class="panel-heading" id="activity-heading"><span>EVENTS</span><span>CAUSAL LOG</span></div>
+      <div class="events" id="events"></div>
+      <div class="lineage"><div class="panel-heading"><span>CAUSE CHAIN</span><span id="chain-count">—</span></div><div id="cause-chain" class="cause-chain">Выберите событие</div></div>
+    </aside>
+  </main>
+  <footer class="timeline">
+    <button id="play" aria-label="Пуск или пауза">▶</button>
+    <span class="timeline-label" id="cursor">00:00</span>
+    <input type="range" id="seek" min="0" max="1" step="0.05" value="0" aria-label="Положение воспроизведения">
+    <span class="timeline-label" id="duration">00:00</span>
+    <div class="timeline-meta"><span id="provenance">DEMO DATA</span><span id="accounting">0 TOKENS · $0.00</span></div>
+  </footer>
+  <script type="module" src="/tools/agent-office/app.mjs"></script>
+</body>
+</html>

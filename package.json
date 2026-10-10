@@ -14,7 +14,8 @@
     "./content": "./dist/content/index.js",
     "./storage": "./dist/storage/index.js",
     "./world-ir": "./dist/world-ir/index.js",
-    "./scene/acoustic-coupling": "./dist/scene/acoustic-coupling.js"
+    "./scene/acoustic-coupling": "./dist/scene/acoustic-coupling.js",
+    "./observability": "./dist/observability/activity.js"
   },
   "files": [
     "dist",
@@ -40,7 +41,10 @@
     "rigid:rust:test": "cargo test --manifest-path kernels/world-rigid/Cargo.toml && bun run rigid:rust:build && bun run build && node --test test/rigid-wasm.test.mjs",
     "rigid:rust:bench": "node tools/world-rigid/benchmark.mjs",
     "world:acoustics:bench": "node tools/world-acoustics/benchmark.mjs",
-    "agent:proof": "bun run build && node --test test/agent-experiment.test.mjs test/agent-diagnose.test.mjs && node tools/agent/experiment.mjs examples/agent/glass.experiment.json"
+    "agent:proof": "bun run build && node --test test/agent-experiment.test.mjs test/agent-diagnose.test.mjs && node tools/agent/experiment.mjs examples/agent/glass.experiment.json",
+    "office:demo": "bun run build && node tools/agent-office/server.mjs --demo",
+    "office:live": "bun run build && node tools/agent-office/server.mjs --live",
+    "office:check": "bun run build && node --test test/agent-office.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
