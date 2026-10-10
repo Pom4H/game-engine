@@ -301,15 +301,15 @@ export class Scene {
     const at=this.time+dt,profiler=this.sceneProfiler;
     const sampled=profiler!==undefined&&profiler.shouldSample(this.tick+1);
     const substepsBefore=sampled?this.physics.substeps:0;
-    const direct=this.dispatchMode==='direct'&&profile===undefined&&this.directSystemPlan!==undefined;
+    const directPlan=this.dispatchMode==='direct'&&profile===undefined?this.directSystemPlan:undefined;
     if(sampled){
       profiler.begin(this.tick+1);
       this.systemRuntime.measureSystems((action,ms)=>profiler.system(action,ms));
     }
     this.lastExecution=[];
     try {
-      if(direct){
-        for(const system of this.directSystemPlan[(this.tick+1)%this.directSystemPlan.length]!){
+      if(directPlan){
+        for(const system of directPlan[(this.tick+1)%directPlan.length]!){
           this.lastExecution.push(system.id);
           this.systemRuntime.run(system.action,dt*60/system.rateHz,at);
         }
@@ -327,7 +327,7 @@ export class Scene {
         profiler.end({
           entities:this.entities.size,bodies:stats.bodies,contacts:stats.contacts,
           substeps:stats.substeps-substepsBefore,collisionSurfaceIterations:stats.collisionSurfaceIterations,
-          dispatch:direct?'direct':'kernel',
+          dispatch:directPlan?'direct':'kernel',
         });
       }
     }

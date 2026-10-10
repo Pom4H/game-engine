@@ -31,7 +31,13 @@ const stats=(numbers:readonly number[]):PerformanceStats=>{
 export class ScenePerformanceProfiler{
   private readonly history:ScenePerformanceSample[]=[];
   private active:{tick:number;start:number;systems:Record<string,number>}|undefined;
-  constructor(readonly config:ScenePerformanceConfig){}
+  constructor(readonly config:ScenePerformanceConfig){
+    if(!Number.isFinite(config.tickBudgetMs)||config.tickBudgetMs<.001||config.tickBudgetMs>1000||
+       !Number.isInteger(config.sampleEvery)||config.sampleEvery<1||config.sampleEvery>1024||
+       !Number.isInteger(config.history)||config.history<8||config.history>4096){
+      throw new RangeError('Invalid scene performance budget, sampling interval or history');
+    }
+  }
   shouldSample(tick:number):boolean{return tick%this.config.sampleEvery===0;}
   begin(tick:number):void{
     if(this.active)throw new TypeError('Performance sample already active');
