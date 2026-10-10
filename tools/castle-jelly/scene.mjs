@@ -103,8 +103,11 @@ export class JellyWaves {
       const b=p(id(x,Math.max(0,z-1))),f=p(id(x,Math.min(H-1,z+1)));
       const dx=(r-l)/(2*D),dz=(f-b)/(2*D),mag=Math.hypot(dx,dz),curv=Math.abs(l+r+b+f-4*h)/(D*D);
       const shore=Math.max(0,1-Math.max(Math.abs(LEFT+x*D)-3.36,Math.abs(BACK+z*D)-2.75)/.45);
-      const foam=Math.min(.94,Math.max(0,mag-.045)*1.7+Math.max(0,curv-.18)*.065+(BACK+z*D>2.65&&Math.abs(LEFT+x*D)<.6?.09:0));
-      const base=[.91,.32,.55],light=[1,.89,.93],k=Math.max(0,Math.min(.94,foam+Math.max(0,shore)*.035));
+      const foam=Math.min(.94,Math.max(0,mag-.045)*2.7+Math.max(0,curv-.15)*.11+(BACK+z*D>2.65&&Math.abs(LEFT+x*D)<.6?.065:0));
+      // Glints follow actual crests and curvature from the wave solver.
+      const crest=Math.max(0,h-.008)*5.0;
+      const base=[.75,.18,.37],light=[1,.89,.94],
+        k=Math.max(0,Math.min(.94,foam+crest+Math.max(0,shore)*.028));
       positions.push(LEFT+x*D,waterLevel+h*2.6,BACK+z*D);
       const len=Math.hypot(dx*2.6,1,dz*2.6);
       normals.push(-dx*2.6/len,1/len,-dz*2.6/len);
@@ -227,7 +230,7 @@ export function createCastleJelly(){
  const waves=new JellyWaves();waves.advance(1.25,1.25);
  const scene=new Scene({...baseSpec,entities:[...entities,{
   id:'water-wave-mesh',position:[0,0,0],renderOnly:true,mesh:waves.surface(),
-  material:{kind:'default',color:[1,1,1,1],roughness:.17,clearcoat:1,clearcoatRoughness:.045}
+  material:{kind:'default',color:[1,1,1,1],roughness:.11,clearcoat:1,clearcoatRoughness:.027}
  }]});
  let tick=0;
  return {scene,waves,duration,step(time){
