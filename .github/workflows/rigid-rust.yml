@@ -1,0 +1,53 @@
+name: Rust rigid contacts and moving cars
+on:
+  push:
+    paths:
+      - 'kernels/world-rigid/**'
+      - 'src/physics/world.ts'
+      - 'src/physics/rigid-wasm.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/rigid-wasm.test.mjs'
+      - 'tools/world-rigid/**'
+      - 'package.json'
+      - '.github/workflows/rigid-rust.yml'
+  pull_request:
+    paths:
+      - 'kernels/world-rigid/**'
+      - 'src/physics/world.ts'
+      - 'src/physics/rigid-wasm.ts'
+      - 'src/index.ts'
+      - 'src/browser.ts'
+      - 'test/rigid-wasm.test.mjs'
+      - 'tools/world-rigid/**'
+      - 'package.json'
+      - '.github/workflows/rigid-rust.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Rust target and unit tests
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo test --manifest-path kernels/world-rigid/Cargo.toml
+      - name: Rust production WASM
+        run: cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-rigid/Cargo.toml
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Moving-body, material and causal parity
+        run: node --test test/rigid-wasm.test.mjs test/contact-laws.test.mjs test/vehicle-interaction.test.mjs
+      - name: Full PhysicsWorld tick microbenchmark
+        run: node tools/world-rigid/benchmark.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rigid-rust-wasm-benchmark
+          path: |
+            kernels/world-rigid/target/wasm32-unknown-unknown/release/world_rigid_kernel.wasm
+            artifacts/world-rigid/benchmark.json
+          retention-days: 30

@@ -14,3 +14,5 @@ export {AcousticWaveField,type AcousticWaveFieldSpec,type AcousticPressurePlane}
 export {createWasmAcousticWaveField,uploadAcousticPressurePlane} from './physics/wave-wasm.js';
 
 export {createWasmStructuralBody,type RustStructuralStaticContacts} from './physics/structure-wasm.js';
+
+export {createWasmRigidContactKernel} from './physics/rigid-wasm.js';

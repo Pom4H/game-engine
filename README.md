@@ -82,3 +82,14 @@ rigid bake. Existing JS path is still the default; user-defined contact
 projectors fall back to the JS solver on the same Wasm memory. End-to-end tests
 and whole-physics-tick measurements are in
 [kernels/world-structure/README.md](kernels/world-structure/README.md).
+
+## Optional Rust/WASM rigid collision kernel
+
+`PhysicsWorld.setRigidContactKernel(await createWasmRigidContactKernel(wasm))`
+accelerates (when measured faster) rigid sphere/box narrowphase and sequential
+point impulse resolution for moving bodies, including rotated OBB car chassis.
+Broadphase, contact order, force drivers, material decision callbacks, static
+floor manifolds and causal traces remain engine-owned. It is **opt in** because
+per-pair JS↔WASM scratch transfers can be slower than pure JS on sparse scenes.
+See [kernels/world-rigid/README.md](kernels/world-rigid/README.md) and its
+numerical parity and full-world tick benchmarks in GitHub Actions.

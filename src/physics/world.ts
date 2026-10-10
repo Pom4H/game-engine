@@ -136,6 +136,22 @@ export interface PhysicsForceDriver {
   declareCauses?(manifest:PhysicsCauseManifestWriter):void;
 }
 export interface PhysicsStats {steps:number;substeps:number;contacts:number;bodies:number;sleeping:number;collisionSurfaceIterations:number}
+/** Pre-contact contact data compiled by native rigid narrowphase.
+ * a/b stay engine-owned RigidBody objects, never mirrored persistent worlds. */
+export interface CollisionHit {
+  readonly normal:Vec3;
+  readonly point:Vec3;
+  readonly penetration:number;
+  readonly approachSpeed:number;
+  readonly effectiveMass:number;
+  readonly normalEnergy:number;
+}
+/** Optional synchronous compiled narrowphase and sequential rigid impulse kernel. */
+export interface RigidContactKernel {
+  test(a:RigidBody,b:RigidBody):CollisionHit|null;
+  resolve(contact:ContactCandidate):number;
+  dispose():void;
+}
 
 /** Deterministic rigid-body contact core. Material failure may replace bounce with energy-consuming penetration. */
 export class PhysicsWorld {
@@ -155,6 +171,7 @@ export class PhysicsWorld {
   private readonly forceDrivers=new Map<RigidBody,PhysicsForceDriver>();
   private readonly collisionFamily=new CollisionSolverFamily();
   private collisionProgram:CollisionSolverProgram=this.collisionFamily.compile('detailed');
+  private rigidContactKernel:RigidContactKernel|null=null;
   private causeTrace:PhysicsCauseTrace|undefined;
   /** Proof-mode only: analytically predicted contact/solver energy transfer for the active substep. */
   private traceContactEnergy:Map<RigidBody,number>|undefined;
@@ -173,6 +190,13 @@ export class PhysicsWorld {
   setSimulationProfile(profile:SimulationProfileInput):void{this.collisionProgram=this.collisionFamily.compile(profile);}
   useCollisionPlugin(plugin:CollisionSolverPlugin,profile:SimulationProfileInput='detailed'):this{this.collisionFamily.usePlugin(plugin);this.collisionProgram=this.collisionFamily.compile(profile);return this;}
   get collisionSolver():CollisionSolverProgram{return this.collisionProgram;}
+  get rigidContactBackend():'typescript'|'wasm'{return this.rigidContactKernel?'wasm':'typescript';}
+  /** Install at a simulation boundary; ownership of the kernel remains with caller.
+   * Causal tracing bypasses the kernel to preserve full force/energy provenance. */
+  setRigidContactKernel(kernel:RigidContactKernel|null):this{
+    this.rigidContactKernel=kernel;
+    return this;
+  }
 
   add(body:RigidBody):RigidBody{if(this.bodies.has(body.id))throw new TypeError(`Duplicate body ${body.id}`);this.bodies.set(body.id,body);if(this.causeTrace)this.declareBodyCauses(body,this.causeTrace);return body;}
   /** Enable complete force provenance. Existing bodies/drivers are registered immediately;
@@ -273,6 +297,22 @@ export class PhysicsWorld {
         if(seen.has(key))continue;seen.add(key);
         if(!a.invMass&&!b.invMass)continue;
         if(!b.invMass&&isHorizontalStaticSurface(b)&&this.resolveStaticHorizontalSurface(a,b,dt,contactModel))continue;
+        // The Rust kernel observes the current pair in the original broadphase
+        // order. Material callbacks still decide penetration/fracture in JS.
+        // Trace mode uses exactly the original engine collision path.
+        const native=this.rigidContactKernel&&!trace?this.rigidContactKernel:null;
+        if(native){
+          const hit=native.test(a,b);
+          if(!hit)continue;
+          const candidate:ContactCandidate={a,b,...hit};
+          const decision=contactModel?.(candidate)??{mode:'resolve' as const};
+          if(decision.mode==='penetrate')this.resolvePenetration(candidate,Math.max(0,decision.energyLoss??0));
+          else{
+            const impulse=native.resolve(candidate);
+            this.pushContact(candidate,impulse,'resolve');
+          }
+          continue;
+        }
         const hit=intersect(a,b);
         if(!hit)continue;
         const candidate=this.contactCandidate(a,b,hit),decision=contactModel?.(candidate)??{mode:'resolve' as const};
