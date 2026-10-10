@@ -6,8 +6,6 @@ on:
     paths:
       - 'tools/castle-jelly/**'
       - 'test/castle-jelly.test.mjs'
-      - '.github/workflows/castle-jelly.yml'
-      - 'src/render/**'
       - 'src/scene/**'
   workflow_dispatch:
 

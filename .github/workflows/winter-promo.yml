@@ -4,12 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/render/**'
       - 'src/scene/**'
       - 'src/audio/**'
       - 'tools/promo/**'
-      - '.github/workflows/winter-promo.yml'
-  workflow_dispatch:
+   workflow_dispatch:
 
 concurrency:
   group: winter-promo-${{ github.ref }}

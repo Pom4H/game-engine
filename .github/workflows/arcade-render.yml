@@ -3,15 +3,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/render/**'
       - 'src/scene/**'
       - 'tools/arcade/**'
-      - 'tools/render-harness.mjs'
       - 'test/arcade-motion-light.test.mjs'
       - 'test/height-fog.test.mjs'
       - 'test/label-color.test.mjs'
       - 'test/snowy-arcade.test.mjs'
-      - '.github/workflows/arcade-render.yml'
   workflow_dispatch:
 permissions:
   contents: write

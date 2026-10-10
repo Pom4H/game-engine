@@ -97,3 +97,17 @@ must pass SSIM and luma error checks. Paired A/B measurements avoid
 interpreting GPU heating/JIT/order drift as a performance improvement.
 Neither a passing A/B workflow nor a temporary >60 FPS median proves a
 stable p95 budget below 16.667 ms.
+
+## GPU runner scheduling for iterative shader experiments
+
+One self-hosted Windows GPU must not queue a 120-minute cinematic capture on
+every fragment-shader change. The continuous `Render`, `FPS budget`,
+`Reality quality gates` and `GPU shader crossover` workflows remain
+responsible for renderer code, physical replay, full-resolution performance
+and four-camera fidelity. Full `Winter Promo`, `Castle Jelly`, and
+`Snowy Arcade` video/release workflows continue to trigger from their
+**scene-specific source/test changes** or explicit `workflow_dispatch`.
+This avoids re-recording lengthy videos solely because a shader
+performance optimization was changed, while retaining GPU validation for
+shader modifications. Historical pending runs created before this policy
+are not silently reported as passing.
