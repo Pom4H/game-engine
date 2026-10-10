@@ -106,6 +106,19 @@ jobs:
           if ($env:QUALITY_STRICT -eq 'true') { $args += '--strict-references' }
           node @args
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reality-gpu-1080p
+          retention-days: 21
+          path: |
+            artifacts/quality/
+            artifacts/fps/gpu-budget.json
+            artifacts/render-hud.json
+            artifacts/render34.png
+            artifacts/render35.png
+            artifacts/render36.png
+            artifacts/render37.png
   render-performance-apple-silicon:
     runs-on: macos-latest
     timeout-minutes: 25
@@ -142,19 +155,6 @@ jobs:
         if: always()
         with:
           name: reality-gpu-apple-silicon
-          retention-days: 21
-          path: |
-            artifacts/quality/
-            artifacts/fps/gpu-budget.json
-            artifacts/render-hud.json
-            artifacts/render34.png
-            artifacts/render35.png
-            artifacts/render36.png
-            artifacts/render37.png
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: reality-gpu-1080p
           retention-days: 21
           path: |
             artifacts/quality/
