@@ -6,27 +6,47 @@ on:
     paths:
       - 'tools/agent/**'
       - 'examples/agent/**'
-      - 'test/agent-experiment.test.mjs'
+      - 'src/physics/**'
+      - 'src/scene/**'
+      - 'src/world-ir/**'
+      - 'src/environment/**'
+      - 'src/materials/**'
+      - 'src/core/**'
+      - 'compiler/**'
+      - 'kernels/**'
+      - 'test/agent-*.test.mjs'
       - '.github/workflows/agent-experiment.yml'
   workflow_dispatch:
 
+concurrency:
+  group: agent-proof-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   proof:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 18
+    defaults:
+      run:
+        shell: powershell
     steps:
       - uses: actions/checkout@v4
+      - name: Confirm self-hosted worker
+        run: |
+          if ($env:RUNNER_ENVIRONMENT -ne 'self-hosted') { throw 'A self-hosted runner is required' }
+          Write-Host "Agent proof on $env:RUNNER_NAME ($env:RUNNER_OS/$env:RUNNER_ARCH)"
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: node --test test/agent-experiment.test.mjs
-      - name: Reproduce causal glass fracture and CPU observations
+      - name: Reproducibility and diagnosis tests
+        run: node --test test/agent-experiment.test.mjs test/agent-diagnose.test.mjs
+      - name: Run causal experiment and produce diagnosis
         run: node tools/agent/experiment.mjs examples/agent/glass.experiment.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: agent-experiment-evidence
+          name: agent-experiment-${{ runner.name }}
           retention-days: 21
           path: artifacts/agent/**

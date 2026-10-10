@@ -65,3 +65,17 @@ for GPU/visual/audio release gates.
 The agent's loop should be: state a physical hypothesis, encode a scenario,
 run this command, inspect the first failure + cause, correct the physical law,
 then rerun. No test-specific coefficient tuning.
+
+
+## Self-hosted agent CI and repair loop
+
+The agent CLI also creates **diagnosis.json**, derived from the actual
+trace.jsonl records, their parent causeIds and measured CPU system costs.
+It ranks investigation candidates, links real implementation files and
+tests, and provides an identical retry command. These pointers are not
+proof that a particular law is defective: the agent must inspect the
+underlying physical model before editing it.
+
+The Agent Experiment workflow runs only on [self-hosted, Windows, X64].
+It never falls back to hosted CI; if the worker is offline, the job stays
+queued. Other repository workflows retain their own runner policies.

@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {basename, dirname, extname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {Scene} from '../../dist/scene/scene.js';
+import {diagnoseAgentReport} from './diagnose.mjs';
 import {validateWorldInteractionGraph} from '../../dist/world-ir/index.js';
 
 const root=resolve(fileURLToPath(new URL('../..',import.meta.url)));
@@ -244,7 +245,9 @@ async function main(){
     :join(root,'artifacts/agent',basename(file,'.experiment.json'));
   const result=runAgentExperiment(loadScene(resolve(dirname(file),scene)),
     {...settings,outputDirectory});
+  const diagnosis=await diagnoseAgentReport(result.artifacts.report,file);
   process.stdout.write(JSON.stringify({
+    diagnosis:diagnosis.artifact,
     status:result.status,firstFailure:result.firstFailure,
     report:result.artifacts.report,trace:result.artifacts.trace,
     stateParity:result.replay.stateParity,ticks:result.replay.ticksCompleted,
