@@ -1,0 +1,53 @@
+name: City Benchmark - JS vs Rust on self-hosted GPU
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/city-benchmark/**'
+      - 'test/city-benchmark.test.mjs'
+      - 'kernels/world-rigid/**'
+      - 'src/physics/rigid-wasm.ts'
+      - '.github/workflows/city-benchmark.yml'
+  workflow_dispatch:
+concurrency:
+  group: city-benchmark-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compare:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Compile authoritative Rust rigid contact kernel
+        run: |
+          cargo test --manifest-path kernels/world-rigid/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-rigid/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Validate city recipe and existing JS/Rust parity
+        run: |
+          node --test test/city-benchmark.test.mjs test/rigid-wasm.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Same authored City world and moving contacts in JS and Rust
+        run: |
+          node tools/city-benchmark/physics-benchmark.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: city-benchmark-js-rust
+          path: |
+            artifacts/city-benchmark/
+            kernels/world-rigid/target/wasm32-unknown-unknown/release/world_rigid_kernel.wasm
