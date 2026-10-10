@@ -134,6 +134,10 @@ export interface ReflectionProbeSpec {
 export interface RenderingSpec {
   sunDirection?:Vec3; sunColor?:Vec3; skyColor?:Vec3;
   sunIntensity?:number; fogDensity?:number; exposure?:number; shadowExtent?:number;
+  /** Linear diffuse irradiance, independent of the visible sky/background. */
+  ambientIrradiance?:Vec3;
+  /** Explicit camera backdrop. Does not affect world lighting or material energy. */
+  backgroundColor?:Vec3;
   /** In-scattered ambient radiance, independent of the sky background. */
   fogColor?:Vec3;
   /** Height-dependent extinction above fogBaseHeight; zero is homogeneous. */

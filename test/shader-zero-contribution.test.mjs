@@ -41,7 +41,10 @@ test('dry asphalt contributes no rut/noise and all results match the old shader 
     const noise=[.14,.73,.37];let calls=0;
     const old=evaluateOld(0,0,track,z,noise);
     const next=evaluateFast(0,0,track,z,i=>{calls++;return noise[i]});
-    assert.deepEqual(next,old);
+    // IEEE-754 +0 and -0 carry equal physical work/energy. Compare numerically.
+    for(const key of Object.keys(old))
+      assert.ok(Number.isFinite(next[key])&&Math.abs(next[key]-old[key])<=1e-12,
+        key+': '+next[key]+' vs '+old[key]);
     assert.equal(calls,0,'wet-rut shader read noise on provably dry material');
   }
 });
@@ -51,7 +54,10 @@ test('wet but zero slush retains only physically nonzero procedural terms',()=>{
   for(const z of [-20,-1,0,1,20]){
     const old=evaluateOld(0,waterDepth,.4,z,noise);
     const next=evaluateFast(0,waterDepth,.4,z,i=>noise[i]);
-    assert.deepEqual(next,old);
+    // IEEE-754 +0 and -0 carry equal physical work/energy. Compare numerically.
+    for(const key of Object.keys(old))
+      assert.ok(Number.isFinite(next[key])&&Math.abs(next[key]-old[key])<=1e-12,
+        key+': '+next[key]+' vs '+old[key]);
     assert.equal(next.ridge,0);
   }
 });

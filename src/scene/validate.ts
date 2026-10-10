@@ -169,7 +169,7 @@ export function validateScene(value:unknown):SceneSpec{
   if(scene.rendering!==undefined){
     const r=object(scene.rendering,'rendering');
     if(r.sunDirection!==undefined){vector(r.sunDirection,3,'rendering.sunDirection');if(Math.hypot(...r.sunDirection as number[])<1e-8)throw new TypeError('rendering.sunDirection must be nonzero');}
-    for(const key of ['sunColor','skyColor','fogColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);
+    for(const key of ['sunColor','skyColor','fogColor','ambientIrradiance','backgroundColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);
     optionalNumber(r,'fogHeightFalloff','rendering',0);optionalNumber(r,'fogBaseHeight','rendering');
     optionalNumber(r,'fogStartDistance','rendering',0);optionalNumber(r,'fogRampDistance','rendering',0);
     for(const key of ['sunIntensity','fogDensity','exposure'])optionalNumber(r,key,'rendering',0);

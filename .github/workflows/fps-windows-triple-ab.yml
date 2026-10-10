@@ -18,7 +18,7 @@ jobs:
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 45
     env:
-      BASELINE_SHA: 31d83a331aeb4063d27b7741f5f3b838a9df588e
+      BASELINE_SHA: b45c2d744f847f9750b75a8f2637e214f936981e
       RENDER_PROFILING: '1'
       RENDER_REQUIRE_HARDWARE: '1'
       RENDER_FPS_BENCH_FRAMES: '90'
@@ -49,12 +49,12 @@ jobs:
             node tools/render-harness.mjs tools/promo/clear-day.scene.mjs tools/promo/render-views.mjs 1920 1080
             CheckNativeExit "hardware capture $label"
           }
-          # A1: unchanged weather/material/GI with original asphalt noise.
+          # A1: pre-instancing production shader and its original physical scene.
           RunVariant $env:BASELINE_SHA 'a1'
           New-Item -ItemType Directory -Force artifacts/fps/label-ab-baseline | Out-Null
           Copy-Item artifacts/render34.png,artifacts/render35.png,artifacts/render36.png,artifacts/render37.png artifacts/fps/label-ab-baseline/ -Force
           Copy-Item artifacts/fps/gpu-budget-a1.json artifacts/fps/gpu-budget-baseline.json -Force
-          # B1: candidate dry-road noise fast path.
+          # B1: current production renderer with dynamic instancing/lighting improvements.
           RunVariant $env:GITHUB_SHA 'b1'
           node --test test/shader-zero-contribution.test.mjs
           CheckNativeExit 'zero-contribution algebra'

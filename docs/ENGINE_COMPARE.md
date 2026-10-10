@@ -16,8 +16,9 @@ differ; strict cross-engine pixel equality would be misleading and is NOT assert
 | `three-instanced-webgpu` | Three WebGPU | InstancedMesh | source JS Sim3D |
 | `babylon-instances-webgpu` | Babylon WebGPU | individual instance objects | source JS Sim3D |
 | `babylon-thin-webgpu` | Babylon WebGPU | thin instances | source JS Sim3D |
-| `rom4-js` | production ROM4 WebGPURenderer | individual render-only entities | source JS Sim3D |
-| `rom4-rust` | SAME ROM4 WebGPURenderer | same entities | Rust/WASM port of Sim3D.update |
+| `rom4-js` | production ROM4 WebGPURenderer | dynamic WebGPU instance batches | source JS Sim3D |
+| `rom4-rust` | SAME ROM4 WebGPURenderer | same batches | Rust/WASM port of Sim3D.update |
+| `rom4-js-baseline` | SAME ROM4 WebGPURenderer | per-object GPU draw (instancing off) | source JS Sim3D |
 
 Rust/WASM is **not** another GPU renderer. It only replaces the numerical update
 of the common simulation. The original JS Sim3D.spawn writes its seeded data
@@ -27,9 +28,13 @@ or second world state exists. We validate f32 parity against original JS at
 
 The ROM4 renderer is the production shader/light/shadow pipeline, so render
 costs include work not necessarily present in the reference Lambert scenes.
-The lack of a massive dynamic instancing fast path in ROM4 is a real
-optimization opportunity. Compare per-object paths with per-object paths;
-optimized instancing rows represent separate throughput ceilings.
+The renderer now groups matching opaque render-only geometry into WebGPU dynamic
+instance draws, retaining per-entity color, seed and previous transform. This
+changes the GPU projection only, not the authoritative Scene or physics.
+The unbatched ROM4 baseline is measured alongside it and checked for pixel
+similarity (mean RGB error, fraction of significantly changed pixels).
+The explicitly authored camera background and diffuse ambient irradiance can be
+calibrated independently; neither disables physically modeled PBR shading.
 
 ## Measurements and constraints
 
@@ -52,7 +57,7 @@ reported as GPU time. Comparing pure Rust vs native JS GPU-renderer implementati
 requires a separately implemented Rust GPU backend.
 
 Artifacts: `artifacts/engine-compare/results.json`, `parity.json`,
-and screenshots for all six variants, uploaded by GitHub Actions.
+and screenshots for all seven variants, uploaded by GitHub Actions.
 
 ## Local reproduction (Windows GPU)
 

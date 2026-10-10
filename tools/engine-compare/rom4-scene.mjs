@@ -26,7 +26,7 @@ function baseScene() {
     version: 1, seed: 1, clearColor: [0, 0, 0, 1],
     entities: [], camera,
     rendering: {
-      skyColor: [0, 0, 0], sunColor: [1, 1, 1],
+      skyColor: [0, 0, 0], backgroundColor: [0, 0, 0], ambientIrradiance:[0.45,0.45,0.45], sunColor: [1, 1, 1],
       sunDirection: [-0.3, 1, 0.5], sunIntensity: 1.8,
       fogDensity: 0, exposure: 1
     }

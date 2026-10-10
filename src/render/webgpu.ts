@@ -598,6 +598,9 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let horizonEnvironment=textureSampleLevel(environmentMap,reflectionSampler,normalize(n+viewDir*.18),5.4).rgb;
     diffuseIrradiance=mix(diffuseEnvironment,horizonEnvironment,.16)*.94;
   }
+  // Authored diffuse illumination is an independent source of incident energy.
+  // In particular, black camera backdrops do not require physically unlit objects.
+  diffuseIrradiance+=f.ambientIrradiance.rgb;
   // Filter the coat normal distribution too; a sharp second lobe must not
   // bypass the base layer's anti-aliasing on curved/subpixel panel edges.
   let paintCoatFloor=select(.0,.055,automotivePaint);
@@ -812,7 +815,7 @@ export class WebGPURenderer implements Renderer{
     const probeFrameLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}}]});
     const lightLayout=device.createBindGroupLayout({entries:[{binding:0,visibility:3,buffer:{type:'uniform'}},{binding:1,visibility:2,texture:{sampleType:'depth'}},{binding:2,visibility:2,sampler:{type:'comparison'}},{binding:3,visibility:2,texture:{sampleType:'float'}},{binding:4,visibility:2,sampler:{type:'filtering'}},{binding:5,visibility:3,buffer:{type:'read-only-storage'}},{binding:6,visibility:3,buffer:{type:'read-only-storage'}},{binding:7,visibility:2,texture:{viewDimension:'3d'}},{binding:8,visibility:2,sampler:{type:'filtering'}},{binding:9,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:10,visibility:2,texture:{sampleType:'float',viewDimension:'cube'}},{binding:11,visibility:2,texture:{sampleType:'depth'}},{binding:12,visibility:2,texture:{sampleType:'float'}}]});
     const lightBuffer=device.createBuffer({size:(4+MAX_RENDER_LIGHTS*LIGHT_SOURCE_FLOATS)*4,usage:0x80|0x08}),cellBuffer=device.createBuffer({size:LIGHT_GRID_SIDE**2*(LIGHTS_PER_CELL+1)*4,usage:0x80|0x08});
-    const frame=device.createBuffer({size:640,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
+    const frame=device.createBuffer({size:672,usage:0x40|0x08}),shadow=device.createTexture({size:[SHADOW_MAP_SIZE,SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04}),dynamicShadow=device.createTexture({size:[DYNAMIC_SHADOW_MAP_SIZE,DYNAMIC_SHADOW_MAP_SIZE],format:'depth32float',usage:0x10|0x04});
     const comparison=device.createSampler({compare:'less-equal',minFilter:'linear',magFilter:'linear'}),sampler=device.createSampler({minFilter:'linear',magFilter:'linear',mipmapFilter:'linear'});
     const noiseVolume=createNoiseVolume(device),noiseSampler=device.createSampler({minFilter:'linear',magFilter:'linear',addressModeU:'repeat',addressModeV:'repeat',addressModeW:'repeat'});
     const environmentMap=device.createTexture({label:'prefiltered environment',size:[256,256,6],mipLevelCount:9,format:'rgba16float',usage:0x04|0x02}),environmentView=environmentMap.createView({dimension:'cube'});
@@ -976,7 +979,7 @@ export class WebGPURenderer implements Renderer{
       const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),target:Vec3=[camera.target[0],4,camera.target[2]],extent=settings.shadowExtent??65;
       const lightVP=multiply4(orthographic(extent,1,400),lookAt(V3.add(target,V3.scale(sun,180)),target));
       lightVP[12]=Math.round(lightVP[12]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;lightVP[13]=Math.round(lightVP[13]!*SHADOW_MAP_SIZE)/SHADOW_MAP_SIZE;
-      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(V3.cross(forward,cameraUp)),up=V3.normalize(V3.cross(right,forward)),frame=new Float32Array(160);
+      const forward=V3.normalize(V3.sub(camera.target,camera.position)),right=V3.normalize(V3.cross(forward,cameraUp)),up=V3.normalize(V3.cross(right,forward)),frame=new Float32Array(168);
       const reflectionVP=multiply4(baseProjection,lookAt([camera.position[0],.03-camera.position[1],camera.position[2]],[camera.target[0],.03-camera.target[1],camera.target[2]],[cameraUp[0],-cameraUp[1],cameraUp[2]]));
       frame.set(lightVP);frame.set([...sun,settings.sunIntensity??scene.environment.sunlight*3],16);frame.set([...(settings.sunColor??[1,.87,.72]),settings.exposure??1],20);
       const [projectionX,projectionY,projectionOffsetX,projectionOffsetY]=projectionInfo.ray,tanY=1/projectionY,aspectLike=projectionY/projectionX;
@@ -985,6 +988,8 @@ export class WebGPURenderer implements Renderer{
       frame.set(vp,64);frame.set(this.previousVp??vp,80);frame.set([scene.environment.temperatureC,scene.environment.sunlight,scene.environment.hour/24,scene.environment.humidity],96);frame.set([projectionX,projectionY,projectionOffsetX,projectionOffsetY],100);frame.set(this.environmentIrradiance,104);if(this.localProbePosition&&this.localProbeBounds){frame.set([...this.localProbePosition,1],140);frame.set([...this.localProbeBounds.min,1],144);frame.set([...this.localProbeBounds.max,1],148);}else{frame.fill(0,140,152);}
       const fogColor=settings.fogColor??(settings.skyColor??[.26,.34,.47]).map((v,i)=>v*1.22+(settings.sunColor??[1,.87,.72])[i]!*(settings.sunIntensity??scene.environment.sunlight*3)*.027);
       frame.set([...fogColor,settings.fogBaseHeight??0],152);frame.set([settings.fogHeightFalloff??0,settings.fogColor?1:0,settings.fogStartDistance??0,settings.fogRampDistance??0],156);
+       frame.set([...(settings.ambientIrradiance??[0,0,0]),0],160);
+       frame.set([...(settings.backgroundColor??[0,0,0]),settings.backgroundColor?1:0],164);
       this.device.queue.writeBuffer(this.gpu.frame,0,frame);this.profiler.addUpload(frame.byteLength,'frame');
       return{vp,cullVP,reflectionVP,settings,lightVP,right,up,frame};
     });

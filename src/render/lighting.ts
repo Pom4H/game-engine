@@ -8,7 +8,8 @@ struct Frame {
  viewVP:mat4x4<f32>, previousVP:mat4x4<f32>, environment:vec4<f32>, projection:vec4<f32>,
  irradiance0:vec4<f32>, irradiance1:vec4<f32>, irradiance2:vec4<f32>, irradiance3:vec4<f32>, irradiance4:vec4<f32>,
  irradiance5:vec4<f32>, irradiance6:vec4<f32>, irradiance7:vec4<f32>, irradiance8:vec4<f32>,
- localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>, fogColor:vec4<f32>, fogMedium:vec4<f32>
+ localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>, fogColor:vec4<f32>, fogMedium:vec4<f32>,
+ ambientIrradiance:vec4<f32>, background:vec4<f32>
 }
 `;
 export const SKY_SHADER=FRAME_WGSL+FOG_MEDIUM_WGSL+`
@@ -18,6 +19,7 @@ struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 fn hash(p:vec2<f32>)->f32 {return fract(sin(dot(p,vec2<f32>(127.1,311.7)))*43758.54);}
 fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);return mix(mix(hash(i),hash(i+vec2<f32>(1,0)),q.x),mix(hash(i+vec2<f32>(0,1)),hash(i+vec2<f32>(1,1)),q.x),q.y);}
 @fragment fn fs(i:Out)->@location(0) vec4<f32>{
+ if(f.background.w>.5){return vec4<f32>(f.background.rgb,1.0);}
  let p=i.uv*2.0-1.0;let ray=normalize(f.forward.xyz+f.right.xyz*((p.x-f.projection.z)/f.projection.x)+f.up.xyz*((p.y-f.projection.w)/f.projection.y));
  let humidity=clamp(f.environment.w,0.0,1.0);
  let sunlight=clamp(f.environment.y,0.0,1.0);
