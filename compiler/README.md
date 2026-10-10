@@ -1,4 +1,4 @@
-# World compiler (Rust) — v0.1
+# World compiler (Rust) — v0.2 (authoring experiment)
 
 Native ahead-of-time scene compiler for the engine. The language describes
 authoritative entities/physics and camera/weather inputs. It is intentionally a
@@ -31,7 +31,7 @@ then uses the existing native Scene/PhysicsWorld/WebGPU code paths. This does
 **not** accelerate physics calculations or yet provide a zero-copy GPU upload.
 Measure that separately before proposing a native physics migration.
 
-## Syntax (v0.1)
+## Syntax (v0.1 ABI, v0.2 authoring)
 
 ```world
 world Demo {
@@ -57,8 +57,41 @@ Entity fields: `position`, `rotation` (deg/rad), `scale` (unitless),
 length (m/cm/mm), speed (m/s or km/h), gravity (m/s2), mass (kg/g),
 rotation/FOV (deg/rad), temperature (C), or unitless quantities.
 Semicolons optional; comments start with `//` or `#`.
-Only data is accepted: no code execution, imports, expression evaluation,
-timeline control or full vehicle/soft-body compilation in this version.
+v0.2 adds ahead-of-time constant expressions and indexed entity expansion; it
+still has no runtime VM, functions, imports, mutable variables or timeline control.
+Full vehicle/soft-body compilation remains unsupported. The ABI is still v1.
+
+### Compile-time language features (v0.2)
+
+```world
+world Array {
+  let spacing = 75cm
+  let radius = 1m / 2
+  entity ball[64] {
+    position: (index * spacing, 3m, 0m)
+    mesh: sphere(radius)
+    body: dynamic(3kg)
+  }
+}
+```
+
+- `let name = expression` is immutable and scoped to one world; declare before use.
+- Binary `+`, `-`, `*`, `/`, unary signs and parentheses are folded at compile time.
+- Addition/subtraction require matching dimensions. Multiplication permits one
+  dimensionless operand; division permits a dimensionless denominator or matching
+  dimensions (yielding a dimensionless result). Division by zero is an error.
+- `entity name[count]` expands into stable `name-0` through `name-(count-1)` IDs.
+  `index` is dimensionless and only defined within an indexed entity body.
+- No expressions or loops execute during a simulation tick; they compile to the
+  exact same `SceneSpec` and WSCN v1 layout as previously supported.
+- This is a targeted compiler prototype, not yet a general-purpose replacement
+  for TypeScript scene scripting.
+
+The apples-to-apples comparison lives in `examples/worlds/array.world`,
+`examples/worlds/array.scene.ts`, and `tools/world-language/benchmark.ts`.
+Run `bun run build && bun tools/world-language/benchmark.ts`. The benchmark
+compares source size, WSCN/JSON payload sizes, median Scene construction latency,
+and 120 deterministic physics ticks; it does not claim faster physics.
 
 ## WSCN ABI v1 (little endian)
 

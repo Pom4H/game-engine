@@ -46,9 +46,9 @@ See docs/INFINITE_WORLD.md.
 The experimental `worldc` compiler converts `.world` declarative scenes into a
 fixed-layout `.wscn` binary with SI units and stable entity IDs. It compiles
 **before** execution; scene loading hydrates the existing `SceneSpec` and
-preserves the engine's physics/render hot path. The v0.1 language currently
-covers entities, primitive physical geometry, camera, material, initial motion,
-and basic environment. It does not replace the existing TypeScript DSL.
+preserves the engine's physics/render hot path. The v0.2 authoring prototype adds typed constant folding, dimension-checked
+expressions, and compile-time indexed entity expansion on top of the v1 binary
+ABI. It remains an intentional subset of TypeScript scene authoring.
 
 ```sh
 cargo test --manifest-path compiler/Cargo.toml

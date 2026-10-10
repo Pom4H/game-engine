@@ -1,6 +1,6 @@
 //! World source -> versioned, little-endian WSCN. No runtime language evaluator.
 //! This compiler intentionally has no third-party dependencies.
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 pub const HEADER_BYTES: usize = 160;
@@ -41,7 +41,8 @@ type Result<T> = std::result::Result<T, CompileError>;
 enum Kind {
     Ident(String),
     Number(f64, String),
-    LBrace, RBrace, LParen, RParen, Colon, Comma, Semi, Eof,
+    LBrace, RBrace, LParen, RParen, LBracket, RBracket,
+    Colon, Comma, Semi, Equal, Plus, Minus, Star, Slash, Eof,
 }
 #[derive(Clone, Debug)]
 struct Token { kind: Kind, at: usize }
@@ -62,7 +63,10 @@ fn lex(input: &str) -> Result<Vec<Token>> {
             '{' => Some(Kind::LBrace), '}' => Some(Kind::RBrace),
             '(' => Some(Kind::LParen), ')' => Some(Kind::RParen),
             ':' => Some(Kind::Colon), ',' => Some(Kind::Comma),
-            ';' => Some(Kind::Semi), _ => None,
+            ';' => Some(Kind::Semi), '=' => Some(Kind::Equal),
+            '[' => Some(Kind::LBracket), ']' => Some(Kind::RBracket),
+            '+' => Some(Kind::Plus), '-' => Some(Kind::Minus),
+            '*' => Some(Kind::Star), '/' => Some(Kind::Slash), _ => None,
         };
         if let Some(kind) = punctuation {
             tokens.push(Token { kind, at: i });
@@ -80,8 +84,7 @@ fn lex(input: &str) -> Result<Vec<Token>> {
             tokens.push(Token { kind: Kind::Ident(input[start..i].to_string()), at: start });
             continue;
         }
-        if ch.is_ascii_digit() || ch == '-' || ch == '.' {
-            if ch == '-' { i += 1; }
+        if ch.is_ascii_digit() || ch == '.' {
             let mut digits = 0usize;
             while bytes.get(i).is_some_and(u8::is_ascii_digit) { i += 1; digits += 1; }
             if bytes.get(i) == Some(&b'.') {
@@ -102,8 +105,9 @@ fn lex(input: &str) -> Result<Vec<Token>> {
             let unit_start = i;
             while i < bytes.len() {
                 let next = input[i..].chars().next().unwrap();
-                if next.is_alphabetic() || next == '/' || next == '°' || next == '²'
-                    || (i > unit_start && next.is_ascii_digit()) {
+                if next.is_alphabetic() || next == '°' || next == '²'
+                    || (i > unit_start && next.is_ascii_digit())
+                    || (next == '/' && i > unit_start && bytes.get(i + 1).is_some_and(u8::is_ascii_alphabetic)) {
                     i += next.len_utf8();
                 } else { break; }
             }
@@ -116,7 +120,7 @@ fn lex(input: &str) -> Result<Vec<Token>> {
     Ok(tokens)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Dimension { Scalar, Length, Speed, Acceleration, Mass, Angle, Temperature }
 fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f64> {
     let factor = match (dimension, unit) {
@@ -145,6 +149,34 @@ fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f6
     let result = value * factor;
     if !result.is_finite() { return Err(CompileError::new(at, "unit conversion overflow")); }
     Ok(result)
+}
+
+#[derive(Clone, Copy, Debug)]
+struct Quantity { value: f64, dimension: Dimension }
+
+fn unit_name(dimension: Dimension) -> &'static str {
+    match dimension {
+        Dimension::Scalar => "unitless",
+        Dimension::Length => "m/cm/mm",
+        Dimension::Speed => "m/s or km/h",
+        Dimension::Acceleration => "m/s2",
+        Dimension::Mass => "kg/g",
+        Dimension::Angle => "deg/rad",
+        Dimension::Temperature => "C",
+    }
+}
+fn literal(value: f64, unit: &str, at: usize) -> Result<Quantity> {
+    let dimension = match unit {
+        "" => Dimension::Scalar,
+        "m" | "cm" | "mm" => Dimension::Length,
+        "m/s" | "km/h" => Dimension::Speed,
+        "m/s2" | "m/s²" => Dimension::Acceleration,
+        "kg" | "g" => Dimension::Mass,
+        "deg" | "rad" => Dimension::Angle,
+        "C" | "°C" => Dimension::Temperature,
+        _ => return Err(CompileError::new(at, format!("unknown unit {unit:?}"))),
+    };
+    Ok(Quantity { value: convert(value, unit, dimension, at)?, dimension })
 }
 
 #[derive(Default)]
@@ -177,7 +209,12 @@ impl World {
     }
 }
 
-struct Parser { tokens: Vec<Token>, index: usize }
+struct Parser {
+    tokens: Vec<Token>,
+    index: usize,
+    constants: HashMap<String, Quantity>,
+    entity_index: Option<usize>,
+}
 impl Parser {
     fn at(&self) -> usize { self.tokens[self.index].at }
     fn peek(&self) -> &Kind { &self.tokens[self.index].kind }
@@ -195,13 +232,93 @@ impl Parser {
             let result = value.clone(); self.index += 1; Ok(result)
         } else { Err(CompileError::new(at, "expected an identifier")) }
     }
+
+    fn checked(&self, value: f64, dimension: Dimension, at: usize) -> Result<Quantity> {
+        if value.is_finite() { Ok(Quantity { value, dimension }) }
+        else { Err(CompileError::new(at, "non-finite constant expression")) }
+    }
+    fn atom(&mut self) -> Result<Quantity> {
+        let at = self.at();
+        match self.peek().clone() {
+            Kind::Number(value, unit) => {
+                self.index += 1;
+                literal(value, &unit, at)
+            }
+            Kind::Ident(name) => {
+                self.index += 1;
+                if name == "index" {
+                    return self.entity_index
+                        .map(|index| Quantity { value: index as f64, dimension: Dimension::Scalar })
+                        .ok_or_else(|| CompileError::new(at, "index is only available in indexed entities"));
+                }
+                self.constants.get(&name).copied()
+                    .ok_or_else(|| CompileError::new(at, format!("unknown constant {name}")))
+            }
+            Kind::LParen => {
+                self.index += 1;
+                let value = self.expression()?;
+                self.expect(Kind::RParen)?;
+                Ok(value)
+            }
+            _ => Err(CompileError::new(at, "expected a number, constant, or expression")),
+        }
+    }
+    fn unary(&mut self) -> Result<Quantity> {
+        let at = self.at();
+        if self.eat(Kind::Minus) {
+            let value = self.unary()?;
+            self.checked(-value.value, value.dimension, at)
+        } else if self.eat(Kind::Plus) { self.unary() }
+        else { self.atom() }
+    }
+    fn product(&mut self) -> Result<Quantity> {
+        let mut lhs = self.unary()?;
+        loop {
+            let at = self.at();
+            let multiply = if self.eat(Kind::Star) { true }
+                else if self.eat(Kind::Slash) { false }
+                else { break };
+            let rhs = self.unary()?;
+            let dimension = if multiply {
+                if lhs.dimension == Dimension::Scalar { rhs.dimension }
+                else if rhs.dimension == Dimension::Scalar { lhs.dimension }
+                else { return Err(CompileError::new(at, "multiplication of two dimensional values is unsupported")); }
+            } else {
+                if rhs.value == 0.0 { return Err(CompileError::new(at, "division by zero")); }
+                if rhs.dimension == Dimension::Scalar { lhs.dimension }
+                else if lhs.dimension == rhs.dimension { Dimension::Scalar }
+                else { return Err(CompileError::new(at, "division has incompatible dimensions")); }
+            };
+            lhs = self.checked(if multiply { lhs.value * rhs.value } else { lhs.value / rhs.value }, dimension, at)?;
+        }
+        Ok(lhs)
+    }
+    fn expression(&mut self) -> Result<Quantity> {
+        let mut lhs = self.product()?;
+        loop {
+            let at = self.at();
+            let add = if self.eat(Kind::Plus) { true }
+                else if self.eat(Kind::Minus) { false }
+                else { break };
+            let rhs = self.product()?;
+            if lhs.dimension != rhs.dimension {
+                return Err(CompileError::new(at, format!(
+                    "cannot add or subtract {:?} and {:?}", lhs.dimension, rhs.dimension
+                )));
+            }
+            lhs = self.checked(if add { lhs.value + rhs.value } else { lhs.value - rhs.value }, lhs.dimension, at)?;
+        }
+        Ok(lhs)
+    }
     fn number(&mut self, dimension: Dimension) -> Result<f64> {
         let at = self.at();
-        if let Kind::Number(value, unit) = self.peek() {
-            let result = convert(*value, unit, dimension, at)?;
-            self.index += 1;
-            Ok(result)
-        } else { Err(CompileError::new(at, "expected a number")) }
+        let result = self.expression()?;
+        if result.dimension != dimension {
+            return Err(CompileError::new(at, format!(
+                "dimension {:?} is invalid; expected {}", result.dimension, unit_name(dimension)
+            )));
+        }
+        Ok(result.value)
     }
     fn vec3(&mut self, dimension: Dimension) -> Result<[f64; 3]> {
         self.expect(Kind::LParen)?;
@@ -311,8 +428,7 @@ impl Parser {
         }
         self.expect(Kind::RParen)
     }
-    fn entity(&mut self) -> Result<Entity> {
-        let id = self.ident()?;
+    fn entity(&mut self, id: String) -> Result<Entity> {
         if id.len() > 180 { return Err(CompileError::new(self.at(), "entity id exceeds 180 UTF-8 bytes")); }
         self.expect(Kind::LBrace)?;
         let mut entity = Entity::new(id);
@@ -391,15 +507,47 @@ impl Parser {
         while !self.eat(Kind::RBrace) {
             let key = self.ident()?;
             match key.as_str() {
-                "entity" => {
-                    let entity = self.entity()?;
-                    if !ids.insert(entity.id.clone()) {
-                        return Err(CompileError::new(self.at(), format!("duplicate entity {}", entity.id)));
+                "let" => {
+                    let name = self.ident()?;
+                    if name == "index" || self.constants.contains_key(&name) {
+                        return Err(CompileError::new(self.at(), format!("duplicate or reserved constant {name}")));
                     }
-                    if world.entities.len() == MAX_ENTITIES {
+                    self.expect(Kind::Equal)?;
+                    let value = self.expression()?;
+                    self.constants.insert(name, value);
+                }
+                "entity" => {
+                    let name = self.ident()?;
+                    let indexed = self.eat(Kind::LBracket);
+                    let count = if indexed {
+                        let at = self.at();
+                        let value = self.number(Dimension::Scalar)?;
+                        self.expect(Kind::RBracket)?;
+                        if value.fract() != 0.0 || !(1.0..=MAX_ENTITIES as f64).contains(&value) {
+                            return Err(CompileError::new(at, "entity count must be an integer in 1..=20000"));
+                        }
+                        value as usize
+                    } else { 1 };
+                    if world.entities.len() + count > MAX_ENTITIES {
                         return Err(CompileError::new(self.at(), "too many entities"));
                     }
-                    world.entities.push(entity);
+                    // The body is lexed once; constant expressions are folded for each
+                    // index at build time. No loops or expression VM reach Scene ticks.
+                    let body_start = self.index;
+                    let mut body_end = body_start;
+                    for i in 0..count {
+                        self.index = body_start;
+                        self.entity_index = if indexed { Some(i) } else { None };
+                        let id = if indexed { format!("{name}-{i}") } else { name.clone() };
+                        let entity = self.entity(id)?;
+                        if !ids.insert(entity.id.clone()) {
+                            return Err(CompileError::new(self.at(), format!("duplicate entity {}", entity.id)));
+                        }
+                        body_end = self.index;
+                        world.entities.push(entity);
+                    }
+                    self.entity_index = None;
+                    self.index = body_end;
                 }
                 "camera" => {
                     self.unique(&mut seen, "camera")?;
@@ -533,7 +681,7 @@ fn encode(world: World) -> Result<Vec<u8>> {
 /// retaining its existing authoritative physics state and tick scheduler.
 pub fn compile(source: &str) -> Result<Vec<u8>> {
     let tokens = lex(source)?;
-    let mut parser = Parser { tokens, index: 0 };
+    let mut parser = Parser { tokens, index: 0, constants: HashMap::new(), entity_index: None };
     encode(parser.world()?)
 }
 
@@ -603,4 +751,61 @@ world Collision {
         let error = compile("world X {\n  gravity: (1kg, 2m/s2, 3m/s2)\n}").unwrap_err();
         assert!(error.located("world X {\n  gravity: (1kg, 2m/s2, 3m/s2)\n}").starts_with("2:"));
     }
+
+    #[test]
+    fn constant_folding_indexed_entities_preserves_v1_abi() {
+        let src = r#"
+world Array {
+ let spacing = 75cm
+ let radius = 1m / 2
+ let count = 4
+ entity ball[count] {
+  position: (index * spacing, 3m + 20cm, 0m)
+  mesh: sphere(radius)
+  material: steel
+  body: dynamic(3kg)
+ }
+}"#;
+        let bytes = compile(src).unwrap();
+        assert_eq!(u32::from_le_bytes(bytes[12..16].try_into().unwrap()), 4);
+        assert_eq!(u16::from_le_bytes(bytes[4..6].try_into().unwrap()), 1);
+        for i in 0..4 {
+            let at = HEADER_BYTES + i * RECORD_BYTES;
+            let x = f64::from_le_bytes(bytes[at + 16..at + 24].try_into().unwrap());
+            let y = f64::from_le_bytes(bytes[at + 24..at + 32].try_into().unwrap());
+            let radius = f64::from_le_bytes(bytes[at + 88..at + 96].try_into().unwrap());
+            assert_eq!(x, i as f64 * 0.75);
+            assert_eq!(y, 3.2);
+            assert_eq!(radius, 0.5);
+        }
+        assert_eq!(bytes, compile(src).unwrap());
+    }
+    #[test]
+    fn expressions_reject_dimension_errors_division_by_zero_and_unknown_names() {
+        for (source, message) in [
+            ("let x = 2m + 3kg", "cannot add or subtract"),
+            ("let x = 2m * 3kg", "multiplication of two dimensional"),
+            ("let x = 2m / 0", "division by zero"),
+            ("let x = missing", "unknown constant"),
+            ("let index = 5", "duplicate or reserved constant"),
+            ("let x = 5; let x = 6", "duplicate or reserved constant"),
+            ("entity a[0] { mesh: sphere(1m) }", "entity count"),
+            ("entity a[2] { mesh: sphere(index) }", "expected m/cm/mm"),
+            ("entity a { mesh: sphere(index) }", "index is only available"),
+        ] {
+            let program = format!("world Bad {{ {source} }}");
+            assert!(compile(&program).unwrap_err().message.contains(message),
+                "unexpected diagnostic for {source}: {:?}", compile(&program));
+        }
+    }
+    #[test]
+    fn operators_keep_precedence_unary_signs_and_old_negative_literals() {
+        let src = "world X { let r = 2m + 3 * 1m; entity a { mesh: sphere(r / 5); position: (-1m, -(2m + 1m), +1m) } }";
+        let binary = compile(src).unwrap();
+        let at = HEADER_BYTES;
+        assert_eq!(f64::from_le_bytes(binary[at + 16..at + 24].try_into().unwrap()), -1.0);
+        assert_eq!(f64::from_le_bytes(binary[at + 24..at + 32].try_into().unwrap()), -3.0);
+        assert_eq!(f64::from_le_bytes(binary[at + 88..at + 96].try_into().unwrap()), 1.0);
+    }
+
 }

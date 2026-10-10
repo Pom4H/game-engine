@@ -1,0 +1,22 @@
+// Exactly the same 65 physical entities as array.scene.ts.
+world ArrayBenchmark {
+  let spacing = 75cm
+  let radius = 1m / 2
+  let ballMass = 3kg
+  seed: 42
+  gravity: (0m/s2, -9.81m/s2, 0m/s2)
+  ground: -100m
+
+  entity floor {
+    position: (0m, -0.1m, 0m)
+    mesh: box(100m, 0.2m, 10m)
+    material: concrete
+    body: static
+  }
+  entity ball[64] {
+    position: (index * spacing, 3m, 0m)
+    mesh: sphere(radius)
+    material: steel
+    body: dynamic(ballMass)
+  }
+}
