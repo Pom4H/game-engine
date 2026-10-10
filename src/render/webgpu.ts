@@ -30,6 +30,7 @@ interface GPUMesh{bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;coun
 interface GPUObject{uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4;
   /** Bounded staging buffers owned by a GPUObject and reused across frames. */
   uniformStaging?:Float32Array;surfaceStaging?:Float32Array;deformationStaging?:Float32Array;
+  lastSurfaceRevision?:number;
 }
 interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
@@ -861,7 +862,10 @@ export class WebGPURenderer implements Renderer{
       this.appearanceScene=scene;this.appearanceRevision=scene.appearanceRevision;
       // Material/exposure hypotheses only require uniform refresh and fresh TAA.
       // Keep geometry, shadow maps, environment cubemaps, probes and culling hot.
-      for(const object of this.objects.values())object.uniformReady=false;
+      for(const object of this.objects.values()){
+        object.uniformReady=false;
+        object.lastSurfaceRevision=undefined;
+      }
       this.historyValid=false;
     }
     const structureChanged=this.profiler.measure('lifecycle',()=>this.collect(scene));
@@ -1295,7 +1299,9 @@ export class WebGPURenderer implements Renderer{
     uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],80);
     const snowpack=surfaceState?.snowpack;
     uniform.set([snowpack?.freshness??0,snowpack?.liquidFraction??0,snowpack?.crust??0,Math.min(1,(snowpack?.grainSizeMm??0)/4.5)],84);
-    if(field){
+    // Authority revision comes from surface physics; two renders without a
+    // state transition must not re-upload hundreds of kilobytes of textures.
+    if(field&&object.lastSurfaceRevision!==field.revision){
       const size=object.width*object.height*4;
       const pixels=object.surfaceStaging?.length===size?object.surfaceStaging:(object.surfaceStaging=new Float32Array(size));
       const deformationPixels=object.deformationStaging?.length===size?object.deformationStaging:(object.deformationStaging=new Float32Array(size));
@@ -1313,6 +1319,7 @@ export class WebGPURenderer implements Renderer{
       this.device.queue.writeTexture({texture:object.texture},pixels,{bytesPerRow:object.width*16},[object.width,object.height]);
       this.device.queue.writeTexture({texture:object.deformationTexture},deformationPixels,{bytesPerRow:object.width*16},[object.width,object.height]);
       this.profiler.addUpload(pixels.byteLength+deformationPixels.byteLength,'surface');
+      object.lastSurfaceRevision=field.revision;
     }
     this.device.queue.writeBuffer(object.uniform,0,uniform);
     this.profiler.addUpload(uniform.byteLength,'uniform');

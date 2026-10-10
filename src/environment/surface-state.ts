@@ -64,7 +64,7 @@ export interface BodyEnvironmentState {
   directionZ:number;
 }
 
-export interface SurfaceEnvironmentField {readonly center:readonly[number,number];readonly size:readonly[number,number];readonly nx:number;readonly nz:number;readonly cells:SurfaceEnvironmentState[];readonly deformation:DeformableSurfaceField}
+export interface SurfaceEnvironmentField {readonly center:readonly[number,number];readonly size:readonly[number,number];readonly nx:number;readonly nz:number;readonly cells:SurfaceEnvironmentState[];readonly deformation:DeformableSurfaceField;revision:number}
 export interface SurfaceContactWork {
   readonly sourceId:string;
   readonly surfaceId:string;
@@ -164,6 +164,7 @@ export class SurfaceEnvironmentSystem {
     for(const [id,state] of this.surfaces){
       const field=this.fields.get(id);if(!field)continue;
       for(const cell of field.cells)copySurfaceState(state,cell);
+      field.revision++;
     }
   }
 
@@ -195,6 +196,7 @@ export class SurfaceEnvironmentSystem {
       }
       state.trackMelt=maximumTrackMelt;
       this.reconcileSnowpack(state);
+      field.revision++;
     }
     for(const [id,state] of this.bodies){
       const entity=entities.get(id);if(!entity?.body||( !entity.body.invMass&&!entity.body.kinematic)){this.bodies.delete(id);continue;}
@@ -239,6 +241,7 @@ export class SurfaceEnvironmentSystem {
       bodyState.roadDirt=Math.min(1,bodyState.roadDirt+spray*work.durationSeconds*(.09+.42*mud));
       bodyState.wetness=Math.min(1,bodyState.wetness+spray*work.durationSeconds*.15);
     }
+    field.revision++;
     for(const observer of this.workObservers)observer(work,energy,touched.length,sample??touched[0]!);
     return true;
   }
@@ -264,7 +267,7 @@ export class SurfaceEnvironmentSystem {
       }
       if(use&&!this.fields.has(entity.id)){
         const half=horizontalHalf(entity),size=[half[0]*2,half[1]*2] as const,[nx,nz]=surfaceFieldResolution(size),center=[entity.position[0],entity.position[2]] as const;
-        this.fields.set(entity.id,{center,size,nx,nz,cells:Array.from({length:nx*nz},()=>({...this.surfaces.get(entity.id)!})),deformation:new DeformableSurfaceField(center,size,nx,nz)});
+        this.fields.set(entity.id,{center,size,nx,nz,revision:0,cells:Array.from({length:nx*nz},()=>({...this.surfaces.get(entity.id)!})),deformation:new DeformableSurfaceField(center,size,nx,nz)});
       }
       if((entity.body?.invMass||entity.body?.kinematic)&&!this.bodies.has(entity.id)){
         this.bodies.set(entity.id,{id:entity.id,snowCoverage:0,rearSnow:0,wetness:0,roadDirt:0,directionX:1,directionZ:0});

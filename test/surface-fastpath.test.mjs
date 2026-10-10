@@ -50,3 +50,21 @@ test('surface phase evolution has a stable golden physical replay across 120 tic
   assert.equal(a,'947c2e68442e3042c23629e8269b4a77446f54a78d702cfdb8fe924178f99380');
   console.log('SURFACE_GOLDEN_SHA256='+a);
 });
+
+
+test('surface revisions mark authoritative weather and contact mutations for GPU uploads',()=>{
+  const scene=new Scene(sceneSpec());
+  const field=scene.surfaces.field('road');
+  assert.ok(field);
+  const before=field.revision;
+  scene.step(1/60);
+  assert.equal(field.revision,before,'no 30Hz surface tick at simulation tick 1');
+  scene.step(1/60);
+  assert.equal(field.revision,before+1,'one physical surface step invalidates texture exactly once');
+  const observed=field.revision;
+  assert.equal(scene.surfaces.applyContactWork({
+    sourceId:'test-wheel',surfaceId:'road',x:0,z:0,radiusM:.7,
+    durationSeconds:.03,speedMps:12,slipSpeedMps:2,normalLoadN:3600,frictionCoefficient:.7,
+  }),true);
+  assert.equal(field.revision,observed+1,'contact invalidates its field before rendering');
+});
