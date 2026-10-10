@@ -47,7 +47,7 @@ jobs:
           if (-not $chrome) { $chrome = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source }
           if (-not $chrome) { throw 'Hardware Chrome not found' }
           "CHROME_PATH=$chrome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          ffmpeg -version | Select-Object -First 1
+          ffmpeg -version > $null
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Render actual Game Engine WebGPU frames into MP4
         id: video
