@@ -44,14 +44,30 @@ try {
   const source=readFileSync(rustFile);
   const tsSource=readFileSync(tsFile);
   const json=Buffer.from(JSON.stringify(makeScene()));
+
+  const runTicks=(fast:boolean)=>{
+    const elapsed:number[]=[];
+    for(let trial=0;trial<7;trial++){
+      // Same SceneSpec and engine; only dispatch changes.
+      const scene=new Scene(makeScene());
+      for(let i=0;i<20;i++)scene.step(1/60,fast?undefined:'detailed');
+      const start=performance.now();
+      for(let i=0;i<180;i++)scene.step(1/60,fast?undefined:'detailed');
+      if(trial>0)elapsed.push(performance.now()-start);
+    }
+    return Number(median(elapsed).toFixed(3));
+  };
+  const directTickMs=runTicks(true),kernelTickMs=runTicks(false);
   const report={
     comparableEntities:65, parityTicks:120,
+    runtime:{ticks:180,dispatchDirectMs:directTickMs,dispatchKernelMs:kernelTickMs,
+      speedup: Number((kernelTickMs/directTickMs).toFixed(3))},
     authoring:{worldBytes:source.length,typescriptBytes:tsSource.length,
       worldNonblankLines:source.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length,
       typescriptNonblankLines:tsSource.toString().split(String.fromCharCode(10)).filter(x=>x.trim()&&!x.trim().startsWith('//')).length},
     transport:{wscnBytes:binary.length,jsonBytes:json.length,wscnGzipBytes:gzipSync(binary).length,jsonGzipBytes:gzipSync(json).length},
     loadAndConstructMedianMs:{wscn:measure(()=>new Scene(binary)),typescript:measure(()=>new Scene(makeScene()))},
-    warnings:['Runtime excludes import/IO; only median scene construction is measured','Physics tick implementation is identical and not claimed faster','Fixed-width WSCN can exceed JSON size'],
+    warnings:['Timing includes physics + dispatch, not GPU','Repeated trials on hosted CI are noisy and speedups are not guaranteed','Both paths share identical physics; do not attribute physics acceleration to Rust'],
   };
   mkdirSync(join(root,'artifacts'),{recursive:true});
   writeFileSync(join(root,'artifacts/world-language-benchmark.json'),JSON.stringify(report,null,2));
