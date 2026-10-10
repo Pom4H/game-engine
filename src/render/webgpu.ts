@@ -1,7 +1,7 @@
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
 import {buildDirectionalProxyTiles} from './proxy-tiles.js';
-import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
+import {meshBounds,intersectsClip,containsClipBounds,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
 import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL,LIGHT_SOURCE_FLOATS} from './light-grid.js';
 import {FOG_WGSL,FOG_MEDIUM_WGSL} from './fog.js';
@@ -1010,6 +1010,13 @@ export class WebGPURenderer implements Renderer{
     const frameModels=this.frameModels;frameModels.clear();
     const modelFor=(entity:RuntimeEntity):Mat4=>{let model=frameModels.get(entity.id);if(!model){model=this.model(entity);frameModels.set(entity.id,model);}return model;};
     const renderMoverIds=scene.renderMoverIds();
+    // Conservative envelope encloses every vertex of the moving render-only
+    // group, regardless of rotation. Skip individual visibility checks only
+    // when the complete envelope is strictly inside the relevant frustum.
+    const moverEnvelope=this.instancingEnabled&&renderMoverIds.size>=128?
+      this.opaqueMoverEnvelope(scene,renderMoverIds):null;
+    const moversInsideCamera=!!moverEnvelope&&containsClipBounds(moverEnvelope,cullVP);
+    const moversInsideShadow=!!moverEnvelope&&containsClipBounds(moverEnvelope,lightVP);
     const culled=this.profiler.measure('cull',()=>{
       const viewsChanged=!matrixEqual(this.cullCameraVP??undefined,cullVP)||!matrixEqual(this.cullLightVP??undefined,lightVP)||!matrixEqual(this.cullReflectionVP??undefined,reflectionVP);
       if(viewsChanged){
@@ -1020,7 +1027,11 @@ export class WebGPURenderer implements Renderer{
         const primitive=renderPrimitive(entity)!,model=modelFor(entity),cached=this.cullCache.get(entity.id);
         if(cached&&cached.primitive===primitive&&cached.model===model)return cached;
         const test=(matrix:Mat4)=>{multiply4Into(matrix,model,this.cullScratch);return intersectsClip(this.mesh(primitive).bounds,this.cullScratch);};
-        const value={primitive,model,camera:test(cullVP),shadow:test(lightVP),reflection:entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP)};
+        const mover=!!moverEnvelope&&renderMoverIds.has(entity.id);
+        const value={primitive,model,
+          camera:mover&&moversInsideCamera?true:test(cullVP),
+          shadow:mover&&moversInsideShadow?true:test(lightVP),
+          reflection:needsPlanarReflection&&entity.material.kind!=='snow'&&entity.material.kind!=='asphalt'&&test(reflectionVP)};
         this.cullCache.set(entity.id,value);return value;
       };
       const staticDirty=viewsChanged||this.staticCullRevision!==scene.renderStructureRevision;
@@ -1044,7 +1055,10 @@ export class WebGPURenderer implements Renderer{
         if(opaque&&visible.shadow)shadowCasters.push(entity);
         if(needsPlanarReflection&&opaque&&visible.reflection)reflectedObjects.push(entity);
       }
-      cameraOpaque.sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
+      // When all opaque movers are entirely in view, their instance draw is
+      // depth-tested and does not need a per-frame O(N log N) distance sort.
+      if(!(moversInsideCamera&&cameraOpaque.length===renderMoverIds.size))
+        cameraOpaque.sort((a,b)=>distance2(a.position,camera.position)-distance2(b.position,camera.position));
       cameraTransparent.sort((a,b)=>distance2(b.position,camera.position)-distance2(a.position,camera.position));
       return{cameraOpaque,cameraTransparent,shadowCasters,reflectedObjects};
     });
@@ -1456,6 +1470,27 @@ export class WebGPURenderer implements Renderer{
     pass.setIndexBuffer(mesh.index,mesh.format);
     pass.drawIndexed(mesh.count,batch.items.length);
     this.drawCalls++;this.triangles+=mesh.triangles*batch.items.length;
+  }
+  private opaqueMoverEnvelope(scene:Scene,movers:ReadonlySet<string>):MeshBounds|null{
+    const low:Vec3=[Infinity,Infinity,Infinity],high:Vec3=[-Infinity,-Infinity,-Infinity];
+    for(const id of movers){
+      const e=scene.entities.get(id);
+      if(!e||!canBatchOpaque(e))return null;
+      const primitive=renderPrimitive(e)!;
+      const bound=this.mesh(primitive).bounds,base=primitiveBaseScale(primitive);
+      // Exact orientation-independent sphere around the scaled local AABB,
+      // including any offset between object origin and mesh centroid.
+      const x=(Math.abs(bound.center[0])+bound.half[0])*Math.abs(e.scale[0]*base[0]);
+      const y=(Math.abs(bound.center[1])+bound.half[1])*Math.abs(e.scale[1]*base[1]);
+      const z=(Math.abs(bound.center[2])+bound.half[2])*Math.abs(e.scale[2]*base[2]);
+      const radius=Math.hypot(x,y,z);
+      for(let axis=0;axis<3;axis++){
+        low[axis]=Math.min(low[axis]!,e.position[axis]-radius);
+        high[axis]=Math.max(high[axis]!,e.position[axis]+radius);
+      }
+    }
+    return{center:[(high[0]+low[0])*.5,(high[1]+low[1])*.5,(high[2]+low[2])*.5],
+      half:[(high[0]-low[0])*.5,(high[1]-low[1])*.5,(high[2]-low[2])*.5]};
   }
   private instanceIdentityFor(entity:RuntimeEntity):{key:string;seed:number}{
     const primitive=renderPrimitive(entity)!,material=entity.material;

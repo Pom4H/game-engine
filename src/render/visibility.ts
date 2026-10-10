@@ -19,3 +19,19 @@ export function intersectsClip(bounds:MeshBounds,m:Mat4):boolean{
  }
  return true;
 }
+
+/** True ONLY when this whole world-space AABB is inside every WebGPU clip
+ * plane. The generous positive margin avoids unsafe visibility shortcuts. */
+export function containsClipBounds(bounds:MeshBounds,vp:Mat4):boolean{
+ for(let plane=0;plane<6;plane++){
+  const row=plane>>1,sign=(plane&1)?-1:1,near=plane===4;
+  const a=near?vp[2]!:vp[3]!+sign*vp[row]!;
+  const b=near?vp[6]!:vp[7]!+sign*vp[4+row]!;
+  const c=near?vp[10]!:vp[11]!+sign*vp[8+row]!;
+  const d=near?vp[14]!:vp[15]!+sign*vp[12+row]!;
+  const distance=a*bounds.center[0]+b*bounds.center[1]+c*bounds.center[2]+d;
+  const radius=Math.abs(a)*bounds.half[0]+Math.abs(b)*bounds.half[1]+Math.abs(c)*bounds.half[2];
+  if(distance-radius<1e-4)return false;
+ }
+ return true;
+}
