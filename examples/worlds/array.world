@@ -6,6 +6,7 @@ world ArrayBenchmark {
   seed: 42
   gravity: (0m/s2, -9.81m/s2, 0m/s2)
   ground: -100m
+  performance { tick_budget: 5ms; sample_every: 5; history: 120 }
 
   entity floor {
     position: (0m, -0.1m, 0m)

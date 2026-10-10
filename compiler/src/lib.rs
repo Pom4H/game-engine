@@ -121,7 +121,7 @@ fn lex(input: &str) -> Result<Vec<Token>> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Dimension { Scalar, Length, Speed, Acceleration, Mass, Angle, Temperature }
+enum Dimension { Scalar, Length, Speed, Acceleration, Mass, Angle, Temperature, Time }
 fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f64> {
     let factor = match (dimension, unit) {
         (Dimension::Scalar, "") => 1.0,
@@ -136,12 +136,15 @@ fn convert(value: f64, unit: &str, dimension: Dimension, at: usize) -> Result<f6
         (Dimension::Angle, "rad") => 1.0,
         (Dimension::Angle, "deg") => std::f64::consts::PI / 180.0,
         (Dimension::Temperature, "C" | "°C") => 1.0,
+        (Dimension::Time, "s") => 1.0,
+        (Dimension::Time, "ms") => 0.001,
+        (Dimension::Time, "us") => 0.000001,
         _ => {
             let expected = match dimension {
                 Dimension::Scalar => "unitless", Dimension::Length => "m/cm/mm",
                 Dimension::Speed => "m/s or km/h", Dimension::Acceleration => "m/s2",
                 Dimension::Mass => "kg/g", Dimension::Angle => "deg/rad",
-                Dimension::Temperature => "C",
+                Dimension::Temperature => "C", Dimension::Time => "s/ms/us", Dimension::Time => "s/ms/us",
             };
             return Err(CompileError::new(at, format!("unit {unit:?} is invalid; expected {expected}")));
         }
@@ -174,6 +177,7 @@ fn literal(value: f64, unit: &str, at: usize) -> Result<Quantity> {
         "kg" | "g" => Dimension::Mass,
         "deg" | "rad" => Dimension::Angle,
         "C" | "°C" => Dimension::Temperature,
+        "s" | "ms" | "us" => Dimension::Time,
         _ => return Err(CompileError::new(at, format!("unknown unit {unit:?}"))),
     };
     Ok(Quantity { value: convert(value, unit, dimension, at)?, dimension })
@@ -197,15 +201,17 @@ impl Entity {
         }
     }
 }
+#[derive(Clone, Copy)]
+struct Performance {budget_ms:f64,sample_every:u32,history:u32}
 struct World {
     name: String, seed: u32, gravity: [f64; 3], ground: f64,
     camera: Option<Camera>, temperature: Option<f64>, snowfall: Option<u32>,
-    entities: Vec<Entity>,
+    performance: Option<Performance>, entities: Vec<Entity>,
 }
 impl World {
     fn new(name: String) -> Self {
         Self { name, seed: 0, gravity: [0.0, -9.81, 0.0], ground: 0.0,
-            camera: None, temperature: None, snowfall: None, entities: Vec::new() }
+            camera: None, temperature: None, snowfall: None, performance: None, entities: Vec::new() }
     }
 }
 
@@ -393,6 +399,32 @@ impl Parser {
         }
         Ok(())
     }
+
+    fn performance(&mut self) -> Result<Performance> {
+        self.expect(Kind::LBrace)?;
+        let mut perf=Performance {budget_ms:0.0,sample_every:1,history:120};
+        let mut seen=HashSet::new();
+        while !self.eat(Kind::RBrace) {
+            let key=self.property()?; self.unique(&mut seen,&key)?;
+            match key.as_str() {
+                "tick_budget" => {
+                    let seconds=self.number(Dimension::Time)?;
+                    perf.budget_ms=self.bounded(seconds*1000.0,"tick_budget",0.001,1000.0)?;
+                },
+                "sample_every" | "history" => {
+                    let n=self.number(Dimension::Scalar)?;
+                    let (low,high)=if key=="sample_every" {(1.0,1024.0)} else {(8.0,4096.0)};
+                    self.bounded(n,&key,low,high)?;
+                    if n.fract()!=0.0 {return Err(CompileError::new(self.at(),format!("{key} must be an integer")));}
+                    if key=="sample_every" {perf.sample_every=n as u32;} else {perf.history=n as u32;}
+                },
+                _ => return Err(CompileError::new(self.at(),format!("unknown performance field {key}"))),
+            }
+            self.end_field();
+        }
+        if !seen.contains("tick_budget"){return Err(CompileError::new(self.at(),"performance requires tick_budget"));}
+        Ok(perf)
+    }
     fn mesh(&mut self, entity: &mut Entity) -> Result<()> {
         let kind = self.ident()?;
         self.expect(Kind::LParen)?;
@@ -549,6 +581,10 @@ impl Parser {
                     self.entity_index = None;
                     self.index = body_end;
                 }
+                "performance" => {
+                    self.unique(&mut seen,"performance")?;
+                    world.performance=Some(self.performance()?);
+                }
                 "camera" => {
                     self.unique(&mut seen, "camera")?;
                     world.camera = Some(self.camera()?);
@@ -605,7 +641,7 @@ fn encode(world: World) -> Result<Vec<u8>> {
     strings.extend_from_slice(world.name.as_bytes());
     let name_length = strings.len();
     bytes[..4].copy_from_slice(b"WSCN");
-    u16_at(&mut bytes, 4, 1); // ABI version
+    u16_at(&mut bytes, 4, if world.performance.is_some(){2}else{1}); // v1 unprofiled, v2 profiled
     u16_at(&mut bytes, 6, HEADER_BYTES as u16);
     u32_at(&mut bytes, 8, RECORD_BYTES as u32);
     u32_at(&mut bytes, 12, world.entities.len() as u32);
@@ -669,6 +705,14 @@ fn encode(world: World) -> Result<Vec<u8>> {
         vec3_at(&mut bytes, base + 40, entity.rotation);
         vec3_at(&mut bytes, base + 64, entity.scale);
         vec3_at(&mut bytes, base + 88, entity.dimensions);
+    }
+    if let Some(performance)=world.performance {
+        // ABI v2 opt-in extension; never interpreted in the simulation hot path.
+        u32_at(&mut bytes,152,strings.len() as u32);
+        u32_at(&mut bytes,156,16);
+        strings.extend_from_slice(&performance.budget_ms.to_le_bytes());
+        strings.extend_from_slice(&performance.sample_every.to_le_bytes());
+        strings.extend_from_slice(&performance.history.to_le_bytes());
     }
     let total = record_end + strings.len();
     if total > MAX_BYTES { return Err(CompileError::new(0, "compiled scene exceeds 32 MiB")); }
@@ -806,6 +850,40 @@ world Array {
         assert_eq!(f64::from_le_bytes(binary[at + 16..at + 24].try_into().unwrap()), -1.0);
         assert_eq!(f64::from_le_bytes(binary[at + 24..at + 32].try_into().unwrap()), -3.0);
         assert_eq!(f64::from_le_bytes(binary[at + 88..at + 96].try_into().unwrap()), 1.0);
+    }
+
+
+    #[test]
+    fn performance_block_preserves_entities_and_uses_explicit_v2_extension() {
+        let program=EXAMPLE.replace("  seed: 42", "  seed: 42\n  performance { tick_budget: 2.5ms; sample_every: 4; history: 256 }");
+        let binary=compile(&program).unwrap();
+        assert_eq!(u16::from_le_bytes(binary[4..6].try_into().unwrap()),2);
+        let start=u32::from_le_bytes(binary[20..24].try_into().unwrap()) as usize
+            +u32::from_le_bytes(binary[152..156].try_into().unwrap()) as usize;
+        assert_eq!(u32::from_le_bytes(binary[156..160].try_into().unwrap()),16);
+        assert_eq!(f64::from_le_bytes(binary[start..start+8].try_into().unwrap()),2.5);
+        assert_eq!(u32::from_le_bytes(binary[start+8..start+12].try_into().unwrap()),4);
+        assert_eq!(u32::from_le_bytes(binary[start+12..start+16].try_into().unwrap()),256);
+        assert_eq!(binary,compile(&program).unwrap());
+        assert_eq!(u16::from_le_bytes(compile(EXAMPLE).unwrap()[4..6].try_into().unwrap()),1);
+    }
+    #[test]
+    fn performance_settings_are_validated_with_dimensions() {
+        for (fields,message) in [
+            ("tick_budget: 3kg","expected s/ms/us"),
+            ("tick_budget: -1ms","tick_budget"),
+            ("tick_budget: 0ms","tick_budget"),
+            ("tick_budget: 5ms; sample_every: 0","sample_every"),
+            ("tick_budget: 5ms; history: 3","history"),
+            ("tick_budget: 5ms; history: 25.5","integer"),
+            ("tick_budget: 5ms; tick_budget: 6ms","duplicate field"),
+            ("sample_every: 2","requires tick_budget"),
+            ("tick_budget: 5ms; magic: 2","unknown performance field"),
+        ] {
+            let source=format!("world Error {{ performance {{ {fields} }} }}");
+            assert!(compile(&source).unwrap_err().message.contains(message),
+                "{fields}: {:?}",compile(&source));
+        }
     }
 
 }

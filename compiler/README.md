@@ -93,7 +93,26 @@ Run `bun run build && bun tools/world-language/benchmark.ts`. The benchmark
 compares source size, WSCN/JSON payload sizes, median Scene construction latency,
 and 120 deterministic physics ticks; it does not claim faster physics.
 
-## WSCN ABI v1 (little endian)
+## Profile CPU scene performance in World (ABI v2 opt-in)
+
+```world
+world Stress {
+  performance { tick_budget: 5ms; sample_every: 5; history: 120 }
+  entity ball[64] { mesh: sphere(25cm); body: dynamic(3kg) }
+}
+```
+
+Units are validated at compile time: `tick_budget` accepts ms/us/s,
+`sample_every` is the number of simulation ticks between samples and
+`history` is a bounded sample count. Profiling only observes runtime state:
+no LOD shortcuts and no differences in simulated physical outcomes.
+The performance block produces an ABI v2 WSCN profile extension; scenes
+without that block still generate ABI v1.
+Read `scene.performanceReport()` for tick p50/p95/max, system timing breakdown,
+CPU budget exceedances and workload counts. GPU measurements belong to the
+separate render profiler, not this diagnostic.
+
+## WSCN ABI v1 / v2 (little endian)
 
 Fixed-width layouts make the decoder deterministic and extensible without
 injecting a VM into the render/simulation loop. Never reinterpret a different
@@ -122,6 +141,8 @@ Header: **160 bytes**:
 | 136 | u32 | snowfall 0..3 |
 | 144 | u32 | world name offset relative to string table |
 | 148 | u32 | world name UTF-8 byte length |
+| 152 | u32 | v2 extension offset relative to string section (v1 zero) |
+| 156 | u32 | v2 extension byte length, exactly 16 (v1 zero) |
 
 Record: **160 bytes**, repeated in source order:
 
@@ -144,6 +165,8 @@ Record: **160 bytes**, repeated in source order:
 | 156 | f32 | restitution |
 
 The trailing string table stores concatenated UTF-8 world/entity identifiers.
+ABI v2 appends 16 bytes after the identifiers: f64 tick budget (milliseconds),
+u32 sample_every, and u32 history. Unknown/malformed versions are rejected.
 Rust and TypeScript implementations are tested together in CI. Stable entity
 identifiers preserve mapping to physics/renderer state. Binary records are
 hydrated into the **existing** `SceneSpec`, with authoritative physics geometry
