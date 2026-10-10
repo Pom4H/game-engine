@@ -56,8 +56,7 @@ export class JellyWaves {
       // Waterfall splash: repeatable continuous pressure-to-velocity coupling.
       this.inject(-.12,3.17,1.8/60,.50);
       // Boat displacement/wake moves around the base of the island.
-      const x=1.6+.42*Math.sin(now*.56),z=4.25+.14*Math.cos(now*.42);
-      this.inject(x-.18,z+.24,.46/60,.37);
+      this.inject(1.72,4.40,.46/60,.37);
       this.step(1/60);
     }
   }
@@ -68,7 +67,7 @@ export class JellyWaves {
       const l=p(id(Math.max(0,x-1),z)),r=p(id(Math.min(W-1,x+1),z));
       const b=p(id(x,Math.max(0,z-1))),f=p(id(x,Math.min(H-1,z+1)));
       const dx=(r-l)/(2*D),dz=(f-b)/(2*D),mag=Math.hypot(dx,dz),curv=Math.abs(l+r+b+f-4*h)/(D*D);
-      const shore=Math.max(0,1-Math.min(Math.abs(LEFT+x*D)-3.36,Math.abs(BACK+z*D)-2.75)/.7);
+      const shore=Math.max(0,1-Math.max(Math.abs(LEFT+x*D)-3.36,Math.abs(BACK+z*D)-2.75)/.7);
       const foam=Math.min(.83,Math.max(0,mag-.045)*2.4+Math.max(0,curv-.12)*.11+(BACK+z*D>2.65&&Math.abs(LEFT+x*D)<.7?.25:0));
       const base=[.86,.28,.48],light=[1,.78,.82],k=Math.max(0,Math.min(.86,foam+Math.max(0,shore)*.06));
       positions.push(LEFT+x*D,waterLevel+h*1.7,BACK+z*D);
@@ -207,9 +206,7 @@ export function createCastleJelly(){
    scene.remove('water-wave-mesh');
    scene.add({id:'water-wave-mesh',position:[0,0,0],renderOnly:true,mesh:waves.surface(),
     material:{kind:'glass',color:[.94,.36,.57,.88],roughness:.12,clearcoat:.9,clearcoatRoughness:.06}});
-   const boatX=1.6+.42*Math.sin(time*.56),boatZ=4.25+.14*Math.cos(time*.42);
-   for(const e of scene.entities.values())if(e.id.startsWith('boat-')){e.position[0]=boatX+(e.id==='boat-keel'||e.id==='boat-hull'||e.id==='boat-rim'?0:0);e.position[2]+=0;}
-   // Static background geometry remains fixed; water and ship are the moving causes.
+   // The ship floats in place. The wake is coupled to its authored hull.
   }
   return {tick,waterEnergy:waves.energy(),obstacleCells:waves.solid.reduce((n,v)=>n+v,0)};
  }};
