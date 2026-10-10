@@ -356,13 +356,21 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   var roadSlurry=0.0;
   var slushRidge=0.0;
   if(materialKind>4.5 && materialKind<5.5){
-    let aggregate=noise3(in.worldPos*37.0+seed);
+    // Grain is entirely subpixel when its analytic AA weight reaches zero.
+    // At that point *all five* noise texture fetches contribute exactly zero;
+    // preserve the .94 mean response and the original normal normalization.
     let grainAA=1.0-smoothstep(.6,2.0,max(length(dpdx(in.worldPos)),length(dpdy(in.worldPos)))*37.0);
-    albedo*=mix(.94,.70+aggregate*.46,grainAA);
-    let mineral=noise3(in.worldPos*95.0);albedo=mix(albedo,albedo*1.55,smoothstep(.72,.91,mineral)*.18*grainAA);
-    let scale=vec3<f32>(27,27,27);let gravel=noise3(in.worldPos*scale);
-    let gradient=vec3<f32>(noise3(in.worldPos*scale+vec3<f32>(.12,0,0))-gravel,0,noise3(in.worldPos*scale+vec3<f32>(0,0,.12))-gravel);
-    n=normalize(n+gradient*.42*grainAA);
+    if(grainAA<=0.0){
+      albedo*=.94;
+      n=normalize(n);
+    }else{
+      let aggregate=noise3(in.worldPos*37.0+seed);
+      albedo*=mix(.94,.70+aggregate*.46,grainAA);
+      let mineral=noise3(in.worldPos*95.0);albedo=mix(albedo,albedo*1.55,smoothstep(.72,.91,mineral)*.18*grainAA);
+      let scale=vec3<f32>(27,27,27);let gravel=noise3(in.worldPos*scale);
+      let gradient=vec3<f32>(noise3(in.worldPos*scale+vec3<f32>(.12,0,0))-gravel,0,noise3(in.worldPos*scale+vec3<f32>(0,0,.12))-gravel);
+      n=normalize(n+gradient*.42*grainAA);
+    }
 
     let phaseWet=clamp(slush*.95+waterDepth/.0035*.42,0.0,1.0);
     let laneWarp=(noise3(in.worldPos*vec3<f32>(.055,.02,.18)+seed*4.0)-.5)*.10;
