@@ -1,0 +1,66 @@
+// Physical baseline: deliberately simple rigid car proxy and static bridge.
+// Future world model may propose appearance, but cannot silently alter contacts.
+world Pereprava {
+  seed: 42
+  ground: -100m
+  camera { position: (-12m, 10m, 17m); target: (0m, 3m, 0m); fov: 55deg }
+  environment { temperature: 0C; snowfall: none }
+
+  entity northbank {
+    position: (0m, -0.9m, -10m)
+    mesh: box(65m, 2m, 16m)
+    material: snow
+    body: static
+  }
+  entity southbank {
+    position: (0m, -0.9m, 10m)
+    mesh: box(65m, 2m, 16m)
+    material: snow
+    body: static
+  }
+  entity deck {
+    position: (0m, 4m, 0m)
+    mesh: box(28m, 0.5m, 4m)
+    material: steel
+    body: static
+  }
+  entity railing-north {
+    position: (0m, 5.1m, -1.9m)
+    mesh: box(28m, 1.5m, 0.1m)
+    material: steel
+    body: static
+  }
+  entity railing-south {
+    position: (0m, 5.1m, 1.9m)
+    mesh: box(28m, 1.5m, 0.1m)
+    material: steel
+    body: static
+  }
+  entity pier-west {
+    position: (-12m, 1.8m, 0m)
+    mesh: box(1.5m, 3.8m, 3m)
+    material: concrete
+    body: static
+  }
+  entity pier-east {
+    position: (12m, 1.8m, 0m)
+    mesh: box(1.5m, 3.8m, 3m)
+    material: concrete
+    body: static
+  }
+  entity water {
+    position: (0m, 0m, 0m)
+    mesh: plane(80m, 20m)
+    material: mirror
+    render_only: true
+  }
+  // A physical BOX PROXY, not a car simulator or suspended chassis.
+  entity car {
+    position: (-10m, 5.5m, 0m)
+    mesh: box(4.8m, 1.8m, 2.1m)
+    material: steel
+    body: dynamic(2000kg)
+    velocity: (0m/s, 0m/s, 0m/s)
+    friction: 0.8
+  }
+}

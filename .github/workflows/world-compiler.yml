@@ -9,6 +9,9 @@ on:
       - 'examples/worlds/coupled-glass.world'
       - 'examples/worlds/**'
       - 'tools/world-language/**'
+      - 'tools/literature/**'
+      - 'src/literature/**'
+      - 'test/literature.test.mjs'
       - 'src/scene/scene.ts'
       - 'src/scene/modules.ts'
       - 'src/scene/system-runtime.ts'
@@ -28,6 +31,9 @@ on:
       - 'compiler/**'
       - 'examples/worlds/**'
       - 'tools/world-language/**'
+      - 'tools/literature/**'
+      - 'src/literature/**'
+      - 'test/literature.test.mjs'
       - 'src/scene/scene.ts'
       - 'src/scene/modules.ts'
       - 'src/scene/system-runtime.ts'
@@ -64,6 +70,8 @@ jobs:
       - run: bun run build
       - run: bun run tsc -p tools/world-language/tsconfig.json
       - run: node --test test/world-compiler.test.mjs test/world-couplings.test.mjs test/world-direct-execution.test.mjs test/scene-performance.test.mjs
+      - run: node --test test/literature.test.mjs
+      - run: node tools/literature/compile.mjs
       - run: bun tools/world-language/benchmark.ts
       - run: node tools/world-language/profile.mjs examples/worlds/array.world 240 direct
       - uses: actions/upload-artifact@v4
@@ -73,3 +81,4 @@ jobs:
           path: |
             artifacts/world-language-benchmark.json
             artifacts/world-performance-report.json
+            artifacts/literature/*.json

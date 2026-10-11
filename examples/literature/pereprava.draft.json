@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "source": "Температура воздуха −8 °C.\nИдёт умеренный снег.\nВнедорожник массой 2200 кг движется на восток со скоростью 36 км/ч.\nЛуна рассыпала серебро по чёрной воде.\nСтарый мост вздохнул под тяжестью машины.\nВдоль перил тянутся снежные гребни.",
+  "claims": [
+    {
+      "id": "temperature",
+      "quote": "Температура воздуха −8 °C.",
+      "reading": "literal"
+    },
+    {
+      "id": "snow",
+      "quote": "Идёт умеренный снег.",
+      "reading": "literal"
+    },
+    {
+      "id": "car-motion",
+      "quote": "Внедорожник массой 2200 кг движется на восток со скоростью 36 км/ч.",
+      "reading": "literal"
+    },
+    {
+      "id": "silver-water",
+      "quote": "Луна рассыпала серебро по чёрной воде.",
+      "reading": "figurative"
+    },
+    {
+      "id": "bridge-breath",
+      "quote": "Старый мост вздохнул под тяжестью машины.",
+      "reading": "figurative"
+    },
+    {
+      "id": "rail-snow",
+      "quote": "Вдоль перил тянутся снежные гребни.",
+      "reading": "literal"
+    }
+  ],
+  "facts": [
+    {
+      "claimId": "temperature",
+      "kind": "temperatureC",
+      "value": -8
+    },
+    {
+      "claimId": "snow",
+      "kind": "snowfall",
+      "value": "moderate"
+    },
+    {
+      "claimId": "car-motion",
+      "kind": "massKg",
+      "entityId": "car",
+      "value": 2200
+    },
+    {
+      "claimId": "car-motion",
+      "kind": "velocityX",
+      "entityId": "car",
+      "value": 10
+    }
+  ],
+  "visuals": [
+    {
+      "claimId": "silver-water",
+      "entity": {
+        "id": "water-glints",
+        "position": [
+          0,
+          0.04,
+          0
+        ],
+        "mesh": {
+          "kind": "plane",
+          "size": [
+            75,
+            19
+          ]
+        },
+        "material": {
+          "kind": "mirror",
+          "color": [
+            0.55,
+            0.6,
+            0.7,
+            1
+          ]
+        },
+        "renderOnly": true
+      }
+    },
+    {
+      "claimId": "rail-snow",
+      "entity": {
+        "id": "rail-snow-north",
+        "position": [
+          0,
+          5.88,
+          -1.9
+        ],
+        "mesh": {
+          "kind": "box",
+          "size": [
+            27.6,
+            0.12,
+            0.15
+          ]
+        },
+        "material": {
+          "kind": "snow"
+        },
+        "renderOnly": true
+      }
+    },
+    {
+      "claimId": "rail-snow",
+      "entity": {
+        "id": "rail-snow-south",
+        "position": [
+          0,
+          5.88,
+          1.9
+        ],
+        "mesh": {
+          "kind": "box",
+          "size": [
+            27.6,
+            0.12,
+            0.15
+          ]
+        },
+        "material": {
+          "kind": "snow"
+        },
+        "renderOnly": true
+      }
+    }
+  ],
+  "shots": [
+    {
+      "id": "driver",
+      "camera": {
+        "position": [
+          -13,
+          6.8,
+          0
+        ],
+        "target": [
+          9,
+          4.2,
+          0
+        ],
+        "fov": 65
+      }
+    },
+    {
+      "id": "observer",
+      "camera": {
+        "position": [
+          15,
+          19,
+          24
+        ],
+        "target": [
+          0,
+          3,
+          0
+        ],
+        "fov": 54
+      }
+    }
+  ]
+}

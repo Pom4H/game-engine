@@ -146,3 +146,5 @@ export {SceneAcousticCoupling,attachSceneAcoustics,type SceneAcousticCouplingOpt
 export {ACTIVITY_FACT_SCHEMA,validateActivityFact,ActivityJournal,type ActivityFact,type ActivityRef,type ActivityUsage,type ActivityLineage} from './observability/activity.js';
 export {AgentOffice,projectOfficeAgents,type OfficeAgent,type OfficeAgentState,type OfficePhase} from './observability/office.js';
 export {CodexActivityAdapter} from './observability/adapters/codex.js';
+
+export {compileLiteraryDraft,literaryView,LITERARY_DRAFT_VERSION,type LiteraryDraft,type LiteraryCompilation,type LiteraryClaim,type LiteraryFact,type LiteraryVisual,type LiteraryShot,type LiteraryReading} from './literature/index.js';
