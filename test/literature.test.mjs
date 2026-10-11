@@ -68,8 +68,14 @@ test('measured literary facts survive Rust World compilation and observers share
   assert.equal(result.provenance.ungrounded.includes('bridge-breath'),true);
   assert.equal(result.scene.entities.find(e=>e.id==='water-glints').renderOnly,true);
   assert.equal(result.shots.length,2);
-  const a=new Scene(literaryView(result.scene,result.shots[0]));
-  const b=new Scene(literaryView(result.scene,result.shots[1]));
+  const a=new Scene(result.scene);
+  const b=new Scene(result.scene);
+  const before=a.snapshot();
+  a.setCamera(result.shots[0].camera);
+  assert.deepEqual(a.snapshot(),before,'first observer must not mutate physical world');
+  a.setCamera(result.shots[1].camera);
+  assert.deepEqual(a.snapshot(),before,'changing the observer must not fork physical state');
+  assert.deepEqual(literaryView(result.scene,result.shots[0]).entities,result.scene.entities);
   for(let i=0;i<60;i++){a.step(1/60);b.step(1/60);}
   assert.deepEqual(a.snapshot(),b.snapshot(),'camera may not affect world progression');
 });

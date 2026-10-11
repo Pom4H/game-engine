@@ -15,7 +15,9 @@ node --test test/literature.test.mjs
 ```
 
 Output is `artifacts/literature/scene.json`, `provenance.json`, and the
-`driver.scene.json` and `observer.scene.json` camera projections.
+`driver.scene.json` and `observer.scene.json` camera projections. At runtime use **one** `Scene`
+and `Scene.setCamera(shot.camera)` to change observers; the per-shot JSONs are
+only convenient standalone captures.
 These are ordinary engine `SceneSpec` documents. Supply one to
 `sceneFromURL('?src=/artifacts/literature/observer.scene.json')`
 through an HTTP server, or `new Scene(spec)` headlessly. Browser rendering
@@ -51,6 +53,11 @@ existing high-fidelity vehicle assembly. "The bridge sighed" is retained
 as a figurative passage and does **not** apply arbitrary structural force.
 The light/snow are not neural renders, and a single generated illustration
 is not evidence of physical fidelity.
+
+Unit agreement is **not semantic proof** that a quotation describes a given
+entity. Entity grounding, geometry scale, identities across passages, and
+physical causality still need authoritative checks; this boundary does not
+pretend to solve natural-language understanding.
 
 For a book, the next layer is an adapter from a model's structured output
 to this contract, continuity across chapters, and cached visual assets.
