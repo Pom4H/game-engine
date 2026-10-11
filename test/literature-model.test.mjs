@@ -90,6 +90,15 @@ test('OpenAI-compatible model adapter sends original passage and parses strict J
   }),/HTTPS or loopback/);
 });
 
+test('offline sentence offsets remain exact when a poem repeats its refrain',()=>{
+  const original='Луна у воды.\nЛуна у воды.\n';
+  const draft=interpretOffline(original);
+  assert.equal(draft.claims.length,2);
+  assert.equal(draft.claims[0].offset,0);
+  assert.equal(draft.claims[1].offset,original.lastIndexOf('Луна у воды.'));
+  assert.equal(compileGeneratedLiterature(original,draft).provenance.claims[1].resolvedOffset,draft.claims[1].offset);
+});
+
 test('only known nouns are recognized offline; unrecognized text needs real model',()=>{
   const prose='Над городом лежала невероятная тишина.';
   const payload=interpretOffline(prose);

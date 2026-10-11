@@ -3,13 +3,21 @@
  * Only a smoke test of the prose -> guarded draft -> WebGPU plumbing.
  */
 export function interpretOffline(source,world={entities:[]}){
-  const lines=source.split('\n').map(line=>line.trim()).filter(Boolean);
-  const claims=lines.map((quote,i)=>({
-    id:'passage-'+i,quote,
-    reading:/рассыпал[аи]? серебро|вздохнул|плакал|шептал|ожил/u.test(quote.toLowerCase())
-      ?'figurative':'literal',
-    ...(source.indexOf(quote)!==source.lastIndexOf(quote)?{offset:source.indexOf(quote)}:{}),
-  }));
+  // Track UTF-16 source spans, including repeated lines and CRLF endings.
+  const claims=[];
+  let cursor=0;
+  for(const line of source.split('\n')){
+    const quote=line.trim();
+    if(quote){
+      const offset=cursor+line.indexOf(quote);
+      claims.push({
+        id:'passage-'+claims.length,quote,offset,
+        reading:/рассыпал[аи]? серебро|вздохнул|плакал|шептал|ожил/u.test(quote.toLowerCase())
+          ?'figurative':'literal',
+      });
+    }
+    cursor+=line.length+1;
+  }
   const facts=[],visuals=[];
   const find=re=>claims.find(claim=>re.test(claim.quote.toLowerCase()));
   const fact=(claim,kind,value,entityId)=>{
@@ -71,10 +79,9 @@ export function interpretOffline(source,world={entities:[]}){
     add(firs,id,[x,5,z],{kind:'cylinder',radius:1.45,height:10,topRadius:.05,segments:12},
       {kind:'wood',color:[.05,.13,.11,1],roughness:.96});
   }
-  const relevant=claims.filter(claim=>claims.some(item=>item.id===claim.id));
   const camera={position:[24,18,28],target:[0,4,0],fov:52};
   return {
-    version:1,source,claims:relevant,facts,visuals,
+    version:1,source,claims,facts,visuals,
     shots:[
       {id:'overview',camera},
       {id:'across-bridge',camera:{position:[-19,8,8],target:[6,4,0],fov:60}},
