@@ -59,4 +59,4 @@ jobs:
             artifacts/offroad.mp4
             artifacts/offroad-*.png
             artifacts/render-hud.json
-          retention-days: 14
+          retention-days: 1

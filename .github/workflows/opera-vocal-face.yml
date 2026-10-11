@@ -12,6 +12,11 @@ on:
       - '.github/workflows/opera-vocal-face.yml'
   workflow_dispatch:
 
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: opera-vocal-face-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   render:
     runs-on: [self-hosted, Linux, X64]
@@ -34,4 +39,4 @@ jobs:
             artifacts/opera-vocal-face/original-opera-full-voice.mp4
             artifacts/opera-vocal-face/poster.png
             artifacts/opera-vocal-face/evidence.json
-          retention-days: 14
+          retention-days: 1

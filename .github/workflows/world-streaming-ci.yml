@@ -2,6 +2,7 @@ name: World Streaming CI
 
 on:
   push:
+    branches: [main]
     paths:
       - 'src/scene/scene.ts'
       - 'src/core/**'

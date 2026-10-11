@@ -14,6 +14,11 @@ on:
       - '.github/workflows/structural-soft-mouth.yml'
   workflow_dispatch:
 
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: structural-soft-mouth-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   proof:
     runs-on: [self-hosted, Linux, X64]
@@ -36,4 +41,4 @@ jobs:
             artifacts/soft-mouth/continuous-perioral-soft-face.mp4
             artifacts/soft-mouth/poster.png
             artifacts/soft-mouth/evidence.json
-          retention-days: 14
+          retention-days: 1

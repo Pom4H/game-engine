@@ -1,6 +1,7 @@
 name: Audio foundation
 on:
   push:
+    branches: [main]
     paths:
       - 'src/index.ts'
       - 'src/scene/scene.ts'
@@ -36,6 +37,18 @@ on:
       - 'test/audio-foundation.test.mjs'
       - 'docs/AUDIO_FOUNDATION.md'
       - '.github/workflows/audio-foundation.yml'
+      - "tools/acoustic-demo.mjs"
+      - "tools/car-garage-audio-demo.mjs"
+      - "tools/vocal-tract-demo.mjs"
+      - "test/vocal-tract.test.mjs"
+      - "test/vocal-face.test.mjs"
+      - "test/vocal-source.test.mjs"
+      - "test/airway-geometry.test.mjs"
+      - "test/npc-speech.test.mjs"
+      - "test/acoustic-transfer.test.mjs"
+      - "src/scene/acoustic-boundary.ts"
+      - "src/physics/wave-field.ts"
+      - "test/browser-audio.test.mjs"
 
 concurrency:
   group: audio-foundation-${{ github.ref }}
@@ -61,15 +74,15 @@ jobs:
         with:
           name: acoustic-door-demo
           path: artifacts/acoustic-demo
-          retention-days: 14
+          retention-days: 1
       - uses: actions/upload-artifact@v4
         with:
           name: car-garage-audio-demo
           path: artifacts/car-garage-audio
-          retention-days: 14
+          retention-days: 1
 
       - uses: actions/upload-artifact@v4
         with:
           name: vocal-tract-demo
           path: artifacts/vocal-tract-demo
-          retention-days: 14
+          retention-days: 1

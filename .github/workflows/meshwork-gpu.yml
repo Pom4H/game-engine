@@ -56,7 +56,7 @@ jobs:
         with:
           name: hardware-accelerators
           path: artifacts/hardware/npu.json
-          retention-days: 14
+          retention-days: 1
       - name: Locate hardware Chrome
         run: |
           $candidates = @("$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe", "$env:ProgramFiles\Chromium\Application\chrome.exe")
@@ -83,7 +83,7 @@ jobs:
             artifacts/meshwork/calibration.json
             artifacts/meshwork/worker.png
             artifacts/render-hud.json
-          retention-days: 14
+          retention-days: 1
       - name: Capture continuous reference
         run: |
           New-Item -ItemType Directory -Force artifacts/meshwork-consistency | Out-Null
@@ -149,4 +149,4 @@ jobs:
             artifacts/meshwork-consistency/evidence.json
             artifacts/meshwork-consistency/ssim.log
             artifacts/meshwork-consistency/ssim-summary.txt
-          retention-days: 14
+          retention-days: 1

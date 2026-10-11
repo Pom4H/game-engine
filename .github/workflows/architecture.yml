@@ -1,6 +1,7 @@
 name: Engine architecture
 on:
   push:
+    branches: [main]
     paths:
       - 'src/audio/browser.ts'
       - 'src/render/webgpu.ts'

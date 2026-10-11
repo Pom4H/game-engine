@@ -8,6 +8,11 @@ on:
       - '.github/workflows/npc-mama-motor-search.yml'
   workflow_dispatch:
 
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: npc-mama-motor-search-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   search:
     runs-on: [self-hosted, Linux, X64]
@@ -40,4 +45,4 @@ jobs:
         with:
           name: npc-mama-motor-search
           path: artifacts/npc-motor-search/mama
-          retention-days: 14
+          retention-days: 1

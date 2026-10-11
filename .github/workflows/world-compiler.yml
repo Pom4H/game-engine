@@ -1,6 +1,7 @@
 name: World compiler (Rust / engine ABI)
 on:
   push:
+    branches: [main]
     paths:
       - 'compiler/**'
       - 'src/world-ir/couplings.ts'
@@ -41,6 +42,14 @@ on:
       - 'test/scene-performance.test.mjs'
       - 'package.json'
       - '.github/workflows/world-compiler.yml'
+      - "src/world-ir/couplings.ts"
+      - "test/world-couplings.test.mjs"
+      - "examples/worlds/coupled-glass.world"
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: world-compiler-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   compile-and-integrate:
     runs-on: [self-hosted, Windows, X64]
@@ -59,6 +68,7 @@ jobs:
       - run: node tools/world-language/profile.mjs examples/worlds/array.world 240 direct
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: world-language-benchmark
           path: |
             artifacts/world-language-benchmark.json

@@ -78,4 +78,4 @@ jobs:
             artifacts/character-creator-*.png
             artifacts/character-creator-*.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1

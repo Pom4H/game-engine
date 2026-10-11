@@ -4,8 +4,14 @@ on:
   push:
     paths:
       - '.github/workflows/m3-compression.yml'
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: m3-compression-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   measure:
+    timeout-minutes: 20
     runs-on: [self-hosted, Linux, X64]
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +55,7 @@ jobs:
           name: game-engine-render
           path: artifacts/render.png
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
       - name: Render CPU artifact from the same engine scene
         shell: bash
@@ -62,4 +68,4 @@ jobs:
           name: game-engine-render-cpu
           path: artifacts/render-cpu.png
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1

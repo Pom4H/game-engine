@@ -1,6 +1,7 @@
 name: World Interaction IR causal integration
 on:
   push:
+    branches: [main]
     paths:
       - 'src/world-ir/**'
       - 'compiler/**'
@@ -33,6 +34,12 @@ on:
       - 'docs/WORLD_INTERACTION_IR.md'
       - 'package.json'
       - '.github/workflows/world-interaction-ir.yml'
+      - "test/causal-render-contract.test.mjs"
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: world-interaction-ir-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   causal-parity:
     runs-on: [self-hosted, Windows, X64]

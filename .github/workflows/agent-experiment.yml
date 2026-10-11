@@ -48,5 +48,5 @@ jobs:
         if: always()
         with:
           name: agent-experiment-${{ runner.name }}
-          retention-days: 21
+          retention-days: 1
           path: artifacts/agent/**

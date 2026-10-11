@@ -56,4 +56,4 @@ jobs:
             artifacts/agent-office-*.png
             artifacts/agent-office-*.json
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1

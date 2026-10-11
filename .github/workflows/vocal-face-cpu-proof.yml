@@ -35,4 +35,4 @@ jobs:
             artifacts/vocal-face-cpu/i-am-alive-face.mp4
             artifacts/vocal-face-cpu/poster.png
             artifacts/vocal-face-cpu/evidence.json
-          retention-days: 14
+          retention-days: 1

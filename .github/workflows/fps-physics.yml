@@ -13,6 +13,11 @@ on:
       - '.github/workflows/fps-physics.yml'
       - 'test/ci-runner-policy.test.mjs'
   workflow_dispatch:
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: fps-physics-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   physics-budget:
     runs-on: [self-hosted, Windows, X64]
@@ -29,5 +34,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          retention-days: 1
           name: fps-physics-budget
           path: artifacts/fps/physics-budget.json

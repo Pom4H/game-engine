@@ -7,6 +7,11 @@ on:
       - 'tools/npc-speech-demo/whisper-batch.py'
       - '.github/workflows/vtl-syllable-oracle.yml'
   workflow_dispatch:
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: vtl-syllable-oracle-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   oracle:
     runs-on: [self-hosted, Linux, X64]
@@ -38,4 +43,4 @@ jobs:
         with:
           name: vtl-syllable-oracle
           path: artifacts/vtl-syllables
-          retention-days: 14
+          retention-days: 1

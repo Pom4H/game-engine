@@ -9,6 +9,11 @@ on:
       - '.github/workflows/vtl-npc-oracle.yml'
   workflow_dispatch:
 
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: vtl-npc-oracle-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   oracle:
     runs-on: [self-hosted, Linux, X64]
@@ -62,4 +67,4 @@ jobs:
         with:
           name: vtl-npc-oracle
           path: artifacts/vtl-oracle
-          retention-days: 14
+          retention-days: 1

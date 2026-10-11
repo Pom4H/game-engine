@@ -1,0 +1,97 @@
+# Temporary Actions artifacts are disposable; permanent releases use release assets.
+# Active workflow runs are protected even when their artifacts exceed the budget.
+name: Actions artifact storage budget
+on:
+  workflow_run:
+    workflows:
+      - Agent experiment contract
+      - Audio foundation
+      - Agent Office - causal WebGPU
+      - Agent Campus - cinematic supersampled WebGPU MP4
+      - Character Creator
+      - City Benchmark - JS vs Rust on self-hosted GPU
+      - FPS budget - hardware WebGPU
+      - Engine compare - Three Babylon JS Rust WebGPU
+      - Effects GI A/B - self-hosted RDNA3
+      - GPU shader crossover A-B-B-A - self-hosted RDNA3
+      - M3 compression benchmark
+      - FPS budget - physics
+      - Meshwork 3-worker proof
+      - Meshwork GPU conformance
+      - NPC Mama Motor Search
+      - NPC VTL Production Speech
+      - Offroad Demo
+      - NPC Speech Intelligibility
+      - Opera Vocal Face
+      - Physical Dialogue Face
+      - Reality quality gates
+      - Proving Ground
+      - Rust rigid contacts and moving cars
+      - Russian Vocal Face
+      - Emergent acoustic contact and NPC sensing
+      - Rust structural XPBD parity and world tick benchmark
+      - Structural Soft Mouth
+      - Vocal Face CPU Proof
+      - Structural JS-Wasm comparison
+      - Vocal Face Demo
+      - VTL NPC Oracle
+      - VTL Syllable Oracle
+      - World compiler (Rust / engine ABI)
+      - World wave Rust/WASM parity and performance
+    types:
+      - completed
+  schedule:
+    - cron: 37 3 * * *
+  workflow_dispatch: null
+permissions:
+  actions: write
+  contents: read
+concurrency:
+  group: actions-artifact-storage-budget
+  cancel-in-progress: false
+jobs:
+  cleanup:
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+    timeout-minutes: 10
+    env:
+      ARTIFACT_BUDGET_MIB: "256"
+    steps:
+      - name: Prune completed runs to the repository budget
+        uses: actions/github-script@v8
+        with:
+          script: |-
+            const { owner, repo } = context.repo;
+            const budget = Number(process.env.ARTIFACT_BUDGET_MIB) * 1024 * 1024;
+            if (!Number.isFinite(budget) || budget <= 0) throw new Error('Invalid artifact budget');
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, { owner, repo, per_page: 100 });
+            let total = artifacts.filter(a => !a.expired).reduce((n, a) => n + a.size_in_bytes, 0);
+            const runs = new Map();
+            let deleted = 0;
+            for (const artifact of artifacts.sort((a,b) => Date.parse(a.created_at) - Date.parse(b.created_at) || a.id - b.id)) {
+              if (!artifact.expired && total <= budget) continue;
+              const runId = artifact.workflow_run?.id;
+              // Never remove an input that another job or deployment still needs.
+              if (!runId) continue;
+              if (!runs.has(runId)) {
+                try {
+                  const { data } = await github.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
+                  runs.set(runId, data.status);
+                } catch (error) {
+                  if (error.status !== 404) throw error;
+                  runs.set(runId, 'missing');
+                }
+              }
+              if (!['completed', 'missing'].includes(runs.get(runId))) continue;
+              try {
+                await github.rest.actions.deleteArtifact({ owner, repo, artifact_id: artifact.id });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+              if (!artifact.expired) total -= artifact.size_in_bytes;
+              deleted++;
+            }
+            core.info(`Deleted ${deleted} artifacts; remaining ${(total/1024/1024).toFixed(1)} MiB; budget ${(budget/1024/1024).toFixed(0)} MiB`);
+            if (total > budget) core.warning('Active runs exceed the storage budget; cleanup will retry after completion.');

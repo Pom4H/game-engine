@@ -12,6 +12,11 @@ on:
       - '.github/workflows/physical-dialogue-face.yml'
   workflow_dispatch:
 
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: physical-dialogue-face-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   render:
     runs-on: [self-hosted, Linux, X64]
@@ -34,4 +39,4 @@ jobs:
             artifacts/physical-dialogue/two-people-funny-dialogue.mp4
             artifacts/physical-dialogue/poster.png
             artifacts/physical-dialogue/evidence.json
-          retention-days: 14
+          retention-days: 1

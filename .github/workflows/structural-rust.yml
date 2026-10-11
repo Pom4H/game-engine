@@ -1,6 +1,7 @@
 name: Rust structural XPBD parity and world tick benchmark
 on:
   push:
+    branches: [main]
     paths:
       - 'kernels/world-structure/**'
       - 'src/physics/structure.ts'
@@ -22,6 +23,11 @@ on:
       - 'tools/world-structure/**'
       - 'package.json'
       - '.github/workflows/structural-rust.yml'
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: structural-rust-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   verify:
     runs-on: [self-hosted, Windows, X64]
@@ -50,4 +56,4 @@ jobs:
           path: |
             kernels/world-structure/target/wasm32-unknown-unknown/release/world_structure_kernel.wasm
             artifacts/world-structure/benchmark.json
-          retention-days: 30
+          retention-days: 1

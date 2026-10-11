@@ -10,6 +10,11 @@ on:
         type: choice
         options: ['100','120']
 
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: meshwork-three-worker-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   calibrate:
     strategy:
@@ -50,7 +55,7 @@ jobs:
         with:
           name: meshwork-calibration-${{ matrix.slot }}
           path: artifacts/meshwork/calibration.json
-          retention-days: 14
+          retention-days: 1
 
   prove:
     needs: calibrate
@@ -74,4 +79,4 @@ jobs:
         with:
           name: meshwork-three-worker-proof
           path: artifacts/meshwork/three-worker-proof.json
-          retention-days: 30
+          retention-days: 1

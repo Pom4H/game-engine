@@ -182,4 +182,4 @@ jobs:
             artifacts/npc-speech/asr-word-am.json
             artifacts/npc-speech/asr-word-alive.json
             artifacts/npc-speech/probe
-          retention-days: 14
+          retention-days: 1

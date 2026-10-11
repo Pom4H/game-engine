@@ -1,6 +1,7 @@
 name: Network foundation
 on:
   push:
+    branches: [main]
     paths:
       - 'src/index.ts'
       - 'src/scene/scene.ts'
@@ -22,6 +23,8 @@ on:
       - 'docs/NETWORK_FOUNDATION.md'
       - 'package.json'
       - '.github/workflows/network-foundation.yml'
+      - "test/authority-ledger.test.mjs"
+      - "docs/SERVER_AUTHORITY.md"
 
 concurrency:
   group: network-foundation-${{ github.ref }}

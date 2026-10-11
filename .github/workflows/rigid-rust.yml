@@ -1,6 +1,7 @@
 name: Rust rigid contacts and moving cars
 on:
   push:
+    branches: [main]
     paths:
       - 'kernels/world-rigid/**'
       - 'src/physics/world.ts'
@@ -30,6 +31,11 @@ on:
       - 'docs/EMERGENT_EXECUTION.md'
       - 'package.json'
       - '.github/workflows/rigid-rust.yml'
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: rigid-rust-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   verify:
     runs-on: [self-hosted, Windows, X64]
@@ -58,4 +64,4 @@ jobs:
           path: |
             kernels/world-rigid/target/wasm32-unknown-unknown/release/world_rigid_kernel.wasm
             artifacts/world-rigid/benchmark.json
-          retention-days: 30
+          retention-days: 1

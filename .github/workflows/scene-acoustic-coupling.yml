@@ -1,6 +1,7 @@
 name: Emergent acoustic contact and NPC sensing
 on:
   push:
+    branches: [main]
     paths:
       - 'src/scene/acoustic-coupling.ts'
       - 'src/scene/acoustic-boundary.ts'
@@ -26,6 +27,17 @@ on:
       - 'test/scene-acoustic-coupling.test.mjs'
       - 'examples/worlds/physical-hearing.world'
       - '.github/workflows/scene-acoustic-coupling.yml'
+      - "src/world-ir/couplings.ts"
+      - "src/index.ts"
+      - "src/browser.ts"
+      - "package.json"
+      - "docs/SCENE_ACOUSTIC_COUPLING.md"
+      - "tools/world-acoustics/**"
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: scene-acoustic-coupling-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   acoustic-physical:
     runs-on: [self-hosted, Windows, X64]
@@ -59,4 +71,4 @@ jobs:
           path: |
             kernels/world-wave/target/wasm32-unknown-unknown/release/world_wave_kernel.wasm
             artifacts/world-acoustics/benchmark.json
-          retention-days: 30
+          retention-days: 1

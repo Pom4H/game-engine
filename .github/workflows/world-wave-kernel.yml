@@ -1,6 +1,7 @@
 name: World wave Rust/WASM parity and performance
 on:
   push:
+    branches: [main]
     paths:
       - 'kernels/world-wave/**'
       - '.cargo/config.toml'
@@ -22,6 +23,11 @@ on:
       - 'test/wave-wasm.test.mjs'
       - 'tools/world-wave/**'
       - '.github/workflows/world-wave-kernel.yml'
+# Keep only the newest automatic verification for each ref.
+concurrency:
+  group: world-wave-kernel-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   wasm-physics:
     runs-on: [self-hosted, Windows, X64]
@@ -50,4 +56,4 @@ jobs:
           path: |
             kernels/world-wave/target/wasm32-unknown-unknown/release/world_wave_kernel.wasm
             artifacts/world-wave/benchmark.json
-          retention-days: 30
+          retention-days: 1
