@@ -11,3 +11,7 @@ kernels/world-structure/target/
 kernels/world-structure/Cargo.lock
 kernels/world-rigid/target/
 kernels/world-rigid/Cargo.lock
+
+# Generated from text; never edit by hand
+tools/literature/generated.scene.mjs
+tools/literature/generated.views.mjs

@@ -135,3 +135,8 @@ runtime; unimplemented links stay declarative. See
 ## Self-hosted GPU render without GitHub Actions
 
 On our Windows/Linux GPU worker, run `node tools/agent-office/render-on-worker.mjs` in an up-to-date checkout. The command renders and verifies the real Agent Campus 1080p/24fps H.264 file using hardware WebGPU; `--publish` optionally uploads it to a private prerelease. See [Agent Campus](docs/AGENT_CAMPUS.md).
+
+
+## Russian literature pipeline
+
+Plain UTF-8 Russian prose to a guarded SceneSpec and WebGPU capture. Example: `node tools/literature/author.mjs examples/literature/pereprava.txt --provider offline --world examples/literature/pereprava.world`; then use `node tools/render-harness.mjs tools/literature/generated.scene.mjs tools/literature/generated.views.mjs 1280 720` on the GPU runner. Offline is deterministic non-LLM smoke test. For an actual model set `LITERATURE_MODEL_URL`, `LITERATURE_MODEL` and optionally `LITERATURE_API_KEY`, use `--provider model`. See docs/LITERATURE_WORLD.md.

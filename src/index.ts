@@ -148,3 +148,5 @@ export {AgentOffice,projectOfficeAgents,type OfficeAgent,type OfficeAgentState,t
 export {CodexActivityAdapter} from './observability/adapters/codex.js';
 
 export {compileLiteraryDraft,literaryView,LITERARY_DRAFT_VERSION,type LiteraryDraft,type LiteraryCompilation,type LiteraryClaim,type LiteraryFact,type LiteraryVisual,type LiteraryShot,type LiteraryReading} from './literature/index.js';
+
+export {compileGeneratedLiterature,type GenerativeLiteraryDraft} from './literature/generative.js';

@@ -64,3 +64,26 @@ to this contract, continuity across chapters, and cached visual assets.
 A model must not interpret its own guesses as physical measurements.
 The acceptance gate is two observers with identical physical replay,
 consistent identities over time, and evidence provenance.
+
+
+## Plain text to hardware WebGPU (second slice)
+
+The input is a UTF-8 Russian .txt, not an authored JSON draft. First run `bun run build`.
+
+```sh
+node tools/literature/author.mjs examples/literature/pereprava.txt --world examples/literature/pereprava.world --provider offline
+node tools/render-harness.mjs tools/literature/generated.scene.mjs tools/literature/generated.views.mjs 1280 720
+```
+
+The `--provider offline` interpreter covers a tiny fixed vocabulary, **not a language model**. It exists only to reproduce CI tests. For a real local vLLM or hosted Chat Completions compatible model, set environment variables and run:
+
+```sh
+export LITERATURE_MODEL_URL='http://127.0.0.1:8000/v1/chat/completions'
+export LITERATURE_MODEL='your-model-id'
+# export LITERATURE_API_KEY='...' # if required
+node tools/literature/author.mjs examples/literature/pereprava.txt --provider model --world examples/literature/pereprava.world
+```
+
+Omit `--world` to work with an empty baseline and model-authored renderOnly geometry: visible but **not physically collidable**. Use `--world` to import existing deterministic physical bodies via the Rust compiler; models may change physical measurements only if exact text evidence permits it. Model output is never executable code. Unknown properties, textures/URLs, collider creation, unbounded meshes and quotes absent from the exact original are rejected. A rejected model interpretation gets one retry, then fails. The renderer sees a validated `SceneSpec` shared between all camera views. Artifacts include `artifacts/literature/scene.json`, `draft.json`, `provenance.json`, and PNG views produced **only if** real GPU rendering succeeds. The self-hosted Windows `literature-world.yml` gate requires a hardware WebGPU adapter, does not use Apple and does not substitute CPU/SwiftShader.
+
+The current experiment cannot interpret every metaphor, cannot generate high-fidelity 3D assets and does not measure image quality. The example car is a Rust World rigid proxy; the helicopter, moon and snow rail caps are renderOnly representations. A screenshot is proof of rendering, not of complete scene simulation.
