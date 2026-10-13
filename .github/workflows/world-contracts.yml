@@ -1,0 +1,57 @@
+name: World contract semantics
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/examples/world-contract.rs'
+      - 'src/world-ir/tank-contract.ts'
+      - 'src/core/**'
+      - 'test/world-contract.test.mjs'
+      - 'examples/world-contracts/**'
+      - 'tools/world-contracts/**'
+      - '.github/workflows/world-contracts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: world-contracts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  semantics:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+    env:
+      WORLD_CONTRACT_COMPILER: '${{ github.workspace }}\compiler\target\debug\examples\world-contract.exe'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Rust dialect tests
+        run: cargo test --manifest-path compiler/Cargo.toml --example world-contract --target-dir compiler/target
+      - name: Build native dialect and independent reference
+        run: cargo build --manifest-path compiler/Cargo.toml --example world-contract --target-dir compiler/target
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - name: Mandatory cross-language and kernel contract tests
+        run: node --test test/world-contract.test.mjs
+      - name: Existing World ABI and scheduler regressions
+        run: cargo test --manifest-path compiler/Cargo.toml --lib --target-dir compiler/target
+      - name: Existing kernel depth regression
+        run: node --test test/kernel-depth.test.mjs
+      - name: Executable evidence
+        run: node tools/world-contracts/proof.mjs
+      - name: Job summary
+        shell: pwsh
+        run: |
+          '## World contract evidence' >> $env:GITHUB_STEP_SUMMARY
+          '```json' >> $env:GITHUB_STEP_SUMMARY
+          Get-Content artifacts/world-contracts/proof.json >> $env:GITHUB_STEP_SUMMARY
+          '```' >> $env:GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: world-contract-evidence
+          path: artifacts/world-contracts/proof.json
+          retention-days: 1

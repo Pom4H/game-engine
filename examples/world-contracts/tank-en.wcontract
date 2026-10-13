@@ -1,0 +1,12 @@
+# Controlled authoring syntax, not unconstrained natural language.
+contract FillTank {
+capacity: 200 L
+observed: 70 L
+error: 1 L
+source: level_sensor
+at: 0 s
+law: constant-inflow-no-outflow
+flow: 5 L/s
+start_delay: 0 s
+goal: reach 120 L within 30 s
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "world-contract/tank-affine@1",
+  "id": "FillTank",
+  "capacityUl": "200000000",
+  "observation": {
+    "volumeUl": "70000000",
+    "errorUl": "1000000",
+    "atUs": "0",
+    "source": "level_sensor"
+  },
+  "assumptions": {
+    "law": "constant-inflow-no-outflow",
+    "flowUlPerSecond": "5000000",
+    "startDelayUs": "0"
+  },
+  "goal": {
+    "kind": "reach",
+    "volumeUl": "120000000",
+    "withinUs": "30000000"
+  }
+}
