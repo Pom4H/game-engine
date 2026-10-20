@@ -236,3 +236,98 @@ Primary dependency API references:
 - https://bun.com/docs/runtime/node-api
 - https://bun.com/docs/bundler/executables
 - https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
+
+### Actual TheGame scene and browser comparison — 2026-10-20
+
+[Open the image comparison and frame-time chart](render-evidence/native-game-webgpu-20261020/index.html).
+The directory also contains both full GPU frames, an amplified difference image,
+the original game screenshot, raw per-frame reports and a separate live game run.
+All images come from this project's procedural game assets and actual hardware
+renders; none are generated illustrations.
+
+This comparison uses the **current local Engine build used by TheGame**, rather
+than the older renderer at this PR's base. Both runtimes load the same built JS
+and replay the same captured runtime scene (2,114 entities, 1,482 shared
+primitives, three decoded maps and three baked text labels). Current Engine and
+TheGame working trees contain local changes. Their HEADs, dirty flags, shared
+dist fingerprint, capture bundle, scene and compiled executable hashes are in
+`comparison.json`; these results cannot be reconstructed from the PR HEAD alone.
+The native host is from this branch. The comparison executable is a recorded
+scene harness, not a native implementation of the full TheGame client.
+
+Windows 11, Ryzen 5 7640HS / Radeon 760M, D3D12 driver 32.0.31041.1004,
+Bun 1.4.3, Chrome 155.0.8059.85. Both outputs and internal targets are
+1280×720, adaptive quality off, TAA on, bloom/motion blur/DOF off. Three
+repetitions of 180 measured frames follow 180 warmup frames each. Cases
+alternate order within each runtime; all native runs precede browser runs.
+
+| Recorded render case | Browser WebGPU FPS | Native WebGPU FPS | Browser / native p99 interval |
+| --- | ---: | ---: | ---: |
+| Fixed camera | 33.8 | 23.3 | 39.1 / 49.0 ms |
+| Moving camera | 19.1 | 7.5 | 156.4 / 775.0 ms |
+
+Native is slower in this protocol. Moving-camera 1% lows are 5.5 FPS in Chrome
+and 1.1 FPS natively; 74 and 166 of 540 intervals exceed 50 ms. The renderer's
+CPU profile records hundreds of milliseconds rebuilding/uploading synchronous
+environment maps on native camera-grid changes. These stalls remain present
+after path warmup and are included in the results. This is not a 60 FPS
+acceptance result or evidence that native improves gameplay smoothness.
+
+For deterministic parity **both** replay hosts use synchronous environment-map
+updates. The live browser normally uses a worker. Both replay loops wait for
+GPU completion: native then presents to SDL and uses its 60 Hz timer; browser
+waits for the next animation frame. Reported FPS/p95/p99 describe loop-start
+cadence, not external measurements of display presentation. GPU timestamps,
+CPU submission, all outliers and per-repetition statistics are retained. One
+machine and unrotated host order do not establish general performance rankings.
+
+After resetting temporal history and settling 64 frames, only 46 of 921,600
+RGB pixels differ, each by at most **1/255** in one channel. RGB MAE is
+0.00001664/255, PSNR 95.92 dB. The pair excludes the DOM HUD in both hosts;
+maps, text labels, geometry and material parameters are preserved. The harness
+uploads captured RGBA assets into the current renderer's caches; it does not
+add general native image decoding or Canvas2D support to the production launcher.
+
+Separately, the canonical **live browser game** with WebTransport/QUIC, normal
+workers, a standing player and isolated persistence measured 54.1 FPS over
+300 frames (180 warmup), p99 38.6 ms, zero intervals over 50 ms, at renderScale=1
+and 1280×720. Its scene/population and overlapping live frame loop differ from
+the recorded replay, so this is not a paired native/browser game comparison.
+The server reported 49.9 Hz at the final snapshot, below its target 60 Hz.
+
+Reproduce locally with compatible current Engine and TheGame checkouts:
+
+```powershell
+# Run these tools from the native branch. ENGINE_ROOT must match the game's
+# engine-source.ts, and its current src must already be built into dist/.
+$env:ENGINE_ROOT = 'C:\path\to\current\game-engine'
+$env:GAME_ROOT = 'C:\path\to\thegame'
+# Existing canonical game server on localhost:3007; export stages only the
+# local saved performance fixture. It does not connect/teleport a live player.
+bun tools/native/compare/export-game.mjs
+bun tools/native/compare/build.mjs
+$env:COMPARE_FRAMES = '180'
+$env:COMPARE_WARMUP = '180'
+$env:COMPARE_REPETITIONS = '3'
+$env:COMPARE_OUTPUT = "$env:ENGINE_ROOT\artifacts\native-game-compare\native-final"
+& "$env:ENGINE_ROOT\artifacts\native-game-compare\native-app\the-engine-game-compare.exe"
+# Finish native measurement before starting Chrome: do not load the GPU twice.
+$env:COMPARE_OUTPUT = "$env:ENGINE_ROOT\artifacts\native-game-compare\browser-final"
+$env:COMPARE_HEADFUL = '1'
+bun tools/native/compare/browser-run.mjs
+# Optional full live browser check: starts/stops its own canonical server and
+# creates an isolated save under artifacts, using the captured current bundle.
+bun tools/native/compare/live-game.mjs
+bun tools/native/compare/analyze.mjs
+node --test test/native-compare.test.mjs
+```
+
+Outputs are under `$env:ENGINE_ROOT/artifacts/native-game-compare/`. The recorded
+scene is about 13 MB gzip / 189 MB JSON and is not committed. Re-exporting uses
+the current game's saved performance fixture and may produce a different scene
+if either working tree changes. The old PR renderer lacks the current visual
+mover/worker/profiling APIs; tools reject it and require a compatible ENGINE_ROOT.
+The new statistics, pixel-diff and replay-contract tests pass (6); the full native
+tool contract subset passes (30 total). HTML images, slider and chart were
+checked in Chrome without JS exceptions. Full engine tests were not repeated
+for these tool/documentation-only additions.
