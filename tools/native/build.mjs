@@ -18,6 +18,8 @@ const result = await Bun.build({
   define: { __ENGINE_NATIVE_COMPILED__: 'true' },
 });
 if (!result.success) throw new AggregateError(result.logs, 'Native executable compilation failed');
+const worker = await Bun.build({ entrypoints: [join(nativeDir, 'environment-entry.mjs')], target: 'bun', format: 'esm', outdir: join(out, 'runtime'), naming: 'environment-worker.mjs' });
+if (!worker.success) throw new AggregateError(worker.logs, 'Native environment worker compilation failed');
 await cp(join(nativeDir, 'package.json'), join(out, 'runtime/package.json'));
 await cp(join(nativeDir, 'node_modules'), join(out, 'runtime/node_modules'), { recursive: true, dereference: true });
 if (process.platform === 'win32') prepareWindowsDawn(join(nativeDir, 'node_modules/@kmamal/gpu/dist/dawn.node'), executable, join(out, 'runtime/dawn-bun.node'));

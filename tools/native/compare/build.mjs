@@ -12,7 +12,10 @@ await writeFile(entry,`import {Scene} from ${JSON.stringify(rel(join(engine,'dis
 const executable=join(out,process.platform==='win32'?'the-engine-game-compare.exe':'the-engine-game-compare');
 const result=await Bun.build({entrypoints:[entry],target:'bun',compile:{outfile:executable},external:['@kmamal/gpu','@kmamal/sdl']});if(!result.success)throw new Error(result.logs.join('\n'));
 await mkdir(join(out,'runtime'),{recursive:true});await copyFile(join(root,'tools/native/package.json'),join(out,'runtime/package.json'));
+const workerEntry=join(out,'environment-entry.mjs');
+await writeFile(workerEntry,`import {bakeEnvironmentMap} from ${JSON.stringify(rel(join(engine,'dist/render/environment-map.js')))};\nimport {runEnvironmentThread} from ${JSON.stringify(rel(join(import.meta.dirname,'../environment-thread.mjs')))};\nrunEnvironmentThread(bakeEnvironmentMap);\n`);
+const workerBuild=await Bun.build({entrypoints:[workerEntry],target:'bun',format:'esm',outdir:join(out,'runtime'),naming:'environment-worker.mjs'});if(!workerBuild.success)throw new Error(workerBuild.logs.join('\n'));
 await cp(join(root,'tools/native/node_modules'),join(out,'runtime/node_modules'),{recursive:true,dereference:true});
 if(process.platform==='win32')prepareWindowsDawn(join(root,'tools/native/node_modules/@kmamal/gpu/dist/dawn.node'),executable,join(out,'runtime/dawn-bun.node'));
-await copyFile(join(engine,'artifacts/native-game-compare/game-scene.json.gz'),join(out,'game-scene.json.gz'));
+await copyFile(resolve(process.env.COMPARE_INPUT??join(engine,'artifacts/native-game-compare/game-scene.json.gz')),join(out,'game-scene.json.gz'));
 console.log(executable);

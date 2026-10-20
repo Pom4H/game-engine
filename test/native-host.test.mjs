@@ -16,6 +16,9 @@ test('CLI defaults and finite headless capture', () => {
   const opts = parseArgs(['--', '--headless', '--width', '65', '--height', '2']);
   assert.equal(opts.frames, 1); assert.equal(opts.width, 65); assert.ok(opts.output.endsWith('.png'));
   assert.equal(parseArgs(['--frames', '24', '--fps', '30']).frames, 24);
+  assert.equal(parseArgs(['--render-fps','0','--fps','60']).renderFps,0);
+  assert.equal(parseArgs(['--render-fps','144']).fps,60);
+  assert.throws(()=>parseArgs(['--render-fps','-1']),/render-fps/);
   for (const args of [['--x'], ['--width'], ['--width', '--height'], ['--fps', '0'], ['--frames', '-1'], ['--frames', '1.5'], ['--width', 'NaN']]) assert.throws(() => parseArgs(args));
 });
 

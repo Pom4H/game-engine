@@ -19,6 +19,7 @@ async function main() {
   bun run native:headless --frames 60 --output frame.png
   --width 960 --height 540 --fps 60 --frames N --report report.json
   --backend auto|d3d12|vulkan|metal       explicit supported hardware backend
+  --render-fps 0..240                   render cap, 0 = uncapped; --fps is simulation rate
   --frames 0: interactive realtime; positive N: deterministic fixed steps
   Image materials, painted labels, Web Audio and DOM UI are not ported yet.`);
     return;
@@ -41,7 +42,8 @@ async function main() {
         last = { ...pixelEvidence(rgba), sha256: hash(rgba), width, height, png: encodePNG(rgba, width, height) };
         first ??= last;
       }
-      await delay(options.headless ? 0 : Math.max(1, 1000 / options.fps - (performance.now() - start)));
+      const renderFps = options.renderFps ?? options.fps;
+      await delay(options.headless || renderFps === 0 ? 0 : Math.max(1, 1000 / renderFps - (performance.now() - start)));
     }
     if (options.frames && runtime.frames !== options.frames) throw new Error(`Capture interrupted at frame ${runtime.frames}/${options.frames}`);
     if (options.output && !options.frames && runtime.frames) {
@@ -68,7 +70,7 @@ async function main() {
     throw error;
   } finally {
     process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop);
-    runtime?.close();
+    await runtime?.close();
   }
 }
 

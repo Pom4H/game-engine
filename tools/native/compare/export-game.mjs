@@ -4,7 +4,7 @@ import {resolve,relative,join} from 'node:path';
 import {startBrowser} from './browser.mjs';
 
 const engine=resolve(process.env.ENGINE_ROOT??join(import.meta.dirname,'../../..')),game=resolve(process.env.GAME_ROOT??join(engine,'../thegame'));
-const out=resolve(engine,'artifacts/native-game-compare');await mkdir(out,{recursive:true});
+const out=resolve(process.env.COMPARE_EXPORT_DIR??join(engine,'artifacts/native-game-compare'));await mkdir(out,{recursive:true});
 const entry=join(out,'capture-entry.ts'),rel=p=>{let r=relative(out,p).replaceAll('\\','/');return r.startsWith('.')?r:'./'+r;};
 await writeFile(entry,`import {WebGPURenderer} from ${JSON.stringify(rel(join(engine,'src/render/webgpu.ts')))};\nimport {installCapture} from ${JSON.stringify(rel(join(import.meta.dirname,'export-hook.mjs')))};\ninstallCapture(WebGPURenderer);\nawait import(${JSON.stringify(rel(join(game,'src/game/client.ts')))});\n`);
 const build=await Bun.build({entrypoints:[entry],target:'browser',format:'esm',minify:true});if(!build.success)throw new Error(build.logs.join('\n'));

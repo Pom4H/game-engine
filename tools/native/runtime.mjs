@@ -3,6 +3,8 @@ import { WebGPURenderer } from '../../dist/render/webgpu.js';
 import { FixedClock } from '../../dist/core/fixed-clock.js';
 import { assertNativeScene } from './core.mjs';
 import { NativeHost } from './host.mjs';
+import { GPUFrameQueue } from './frame-queue.mjs';
+import { NativeEnvironmentWorker, nativeEnvironmentEntry } from './environment-worker.mjs';
 
 /** Общие Scene, физика, fixed clock, WGSL и WebGPURenderer; меняется только host. */
 export class NativeRuntime {
@@ -12,16 +14,20 @@ export class NativeRuntime {
     const scene = new Scene(structuredClone(spec));
     assertNativeScene(scene);
     const host = await NativeHost.create(options);
-    let renderer;
+    let renderer, environmentWorker;
     try {
       renderer = await WebGPURenderer.create(host.canvas, { profiling: false });
+      renderer.setBackgroundEnvironmentMaps(true, () => environmentWorker = new NativeEnvironmentWorker(nativeEnvironmentEntry(options.compiled), error => host.errors.push(error.message)));
+      if (renderer.inspect().environmentBaking?.failed) throw new Error('Native environment worker could not be created');
       renderer.setResolution(host.canvas.width, host.canvas.height);
       await renderer.prepareMaterials(scene);
       await renderer.flush();
       host.assertHealthy();
-      return new NativeRuntime(scene, renderer, host, options.fps ?? 60);
+      const runtime = new NativeRuntime(scene, renderer, host, options.fps ?? 60);
+      runtime.environmentWorker = environmentWorker;
+      return runtime;
     } catch (error) {
-      try { renderer?.dispose(); } finally { host.close(); }
+      try { renderer?.dispose(); await environmentWorker?.termination; } finally { host.close(); }
       throw error;
     }
   }
@@ -29,6 +35,7 @@ export class NativeRuntime {
   constructor(scene, renderer, host, fps) {
     this.scene = scene; this.renderer = renderer; this.host = host;
     this.stepSeconds = 1 / fps; this.clock = new FixedClock(1000 / fps);
+    this.gpuFrames = new GPUFrameQueue(host.device, 2);
     this.clock.reset(performance.now()); this.frames = 0; this.busy = false; this.closed = false;
   }
 
@@ -60,34 +67,46 @@ export class NativeRuntime {
     if (this.busy) throw new Error('Native frames must not overlap');
     if (steps !== undefined && (!Number.isInteger(steps) || steps < 0 || steps > 1000)) throw new RangeError('steps must be in [0, 1000]');
     this.busy = true;
+    this.frameDone = new Promise(resolve => { this.finishFrame = resolve; });
     try {
+      if (this.host.needsResize()) await this.gpuFrames.drain();
       if (!this.host.syncSize()) { this.clock.reset(performance.now()); return null; }
+      await this.gpuFrames.acquire();
+      if (this.closed) return null;
       if (steps === undefined) this.clock.advance(performance.now(), () => this.tick());
       else for (let i = 0; i < steps; i++) this.tick();
       assertNativeScene(this.scene);
       this.renderer.setResolution(this.host.canvas.width, this.host.canvas.height);
       this.renderer.setTimelineFrame(this.frames);
       this.renderer.render(this.scene);
+      this.gpuFrames.submittedFrame();
       // The swapchain image must be copied BEFORE present, not after swap().
       const pixels = capture ? await this.host.captureRGBA() : null;
-      await this.renderer.flush(); // bounds in-flight GPU work and surfaces validation errors
+      if (capture) { await this.gpuFrames.drain(); await this.renderer.flush(); }
       this.host.assertHealthy();
       const stats = this.renderer.inspect();
       if (stats.errors.length) throw new Error(stats.errors.join('\n'));
       this.host.present(); this.frames++;
       return { pixels, stats };
-    } finally { this.busy = false; }
+    } finally { this.busy = false; this.finishFrame(); this.frameDone = null; }
   }
 
   inspect() {
     return { runtime: 'bun', browser: false, mode: this.host.options.headless ? 'headless' : 'window', adapter: this.host.adapterInfo,
       nativeBinding: this.host.bindings.compatibility ?? null,
-      frames: this.frames, simulation: { tick: this.scene.tick, time: this.scene.time }, renderer: this.renderer.inspect() };
+      frames: this.frames, gpuQueue: this.gpuFrames.inspect(), environmentWorker: this.environmentWorker?.inspect(), simulation: { tick: this.scene.tick, time: this.scene.time }, renderer: this.renderer.inspect() };
   }
 
   close() {
-    if (this.closed) return;
+    if (this.closePromise) return this.closePromise;
     this.closed = true;
-    try { this.renderer.dispose(); } finally { this.host.close(); }
+    return this.closePromise = this.closeResources();
+  }
+  async closeResources() {
+    try { await this.frameDone; await this.gpuFrames.drain(); await this.renderer.flush(); }
+    finally {
+      try { this.renderer.dispose(); await this.environmentWorker?.termination; }
+      finally { this.host.close(); }
+    }
   }
 }

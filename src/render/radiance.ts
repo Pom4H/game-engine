@@ -91,6 +91,7 @@ export function buildSceneRadianceProbe(scene:Scene,origin:Vec3=scene.camera.tar
   return Object.freeze({origin:[...origin] as Vec3,background:backgroundColor,ground:groundColor,proxies});
 }
 
+const radianceMeshBounds=new WeakMap<readonly number[],readonly number[]>();
 function primitiveRadius(primitive:Primitive,scale:Vec3):number{
   const sx=Math.abs(scale[0]),sy=Math.abs(scale[1]),sz=Math.abs(scale[2]);
   if(primitive.kind==='sphere')return (primitive.radius??1)*Math.max(sx,sy,sz);
@@ -103,6 +104,17 @@ function primitiveRadius(primitive:Primitive,scale:Vec3):number{
   if(primitive.kind==='polygon-prism'){
     let r2=0;for(const p of primitive.points)r2=Math.max(r2,p[0]*p[0]+p[1]*p[1]);
     return Math.hypot(Math.sqrt(r2)*Math.max(sx,sy,sz),primitive.thickness*.5*Math.max(sx,sy,sz));
+  }
+  const positions=primitive.positions,cachedBounds=radianceMeshBounds.get(positions);
+  if(Number.isFinite(sx)&&Number.isFinite(sy)&&Number.isFinite(sz)&&(cachedBounds||Object.isFrozen(positions))){
+    let bounds=cachedBounds;
+    if(!bounds){
+      let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+      for(let i=0;i<positions.length;i+=3){minX=Math.min(minX,positions[i]!);minY=Math.min(minY,positions[i+1]!);minZ=Math.min(minZ,positions[i+2]!);maxX=Math.max(maxX,positions[i]!);maxY=Math.max(maxY,positions[i+1]!);maxZ=Math.max(maxZ,positions[i+2]!);}
+      bounds=[minX,minY,minZ,maxX,maxY,maxZ];radianceMeshBounds.set(positions,bounds);
+    }
+    const minX=bounds[0]!*sx;
+    return Number.isFinite(minX)?.5*Math.hypot(bounds[3]!*sx-minX,bounds[4]!*sy-bounds[1]!*sy,bounds[5]!*sz-bounds[2]!*sz):.5*Math.max(sx,sy,sz);
   }
   let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
   for(let i=0;i<primitive.positions.length;i+=3){

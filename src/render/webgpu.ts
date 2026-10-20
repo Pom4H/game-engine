@@ -1,6 +1,7 @@
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
-import {buildDirectionalProxyTiles} from './proxy-tiles.js';
+import {bakeEnvironmentMap,type EnvironmentMapData} from './environment-map.js';
+import {EnvironmentMapWorker,type EnvironmentWorker} from './environment-map-worker.js';
 import {meshBounds,intersectsClip,containsClipBounds,type MeshBounds} from './visibility.js';
 import {SurfaceTextures} from './surface-textures.js';
 import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_GRID_CELL,LIGHTS_PER_CELL,LIGHT_SOURCE_FLOATS} from './light-grid.js';
@@ -1282,18 +1283,28 @@ export class WebGPURenderer implements Renderer{
     const gpuObjects=[...this.objects.values()];
     const cpuStagingBytes=gpuObjects.reduce((sum,object)=>sum+
       (object.uniformStaging?.byteLength??0)+(object.surfaceStaging?.byteLength??0)+(object.deformationStaging?.byteLength??0),0);
-    return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10+this.gpu.probeFilterPasses.length,textures:gpuObjects.filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,cpuStagingBytes,errors:[...this.errors],
+    return{environmentBaking:this.environmentWorker?.inspect()??{active:false,queued:false,failed:false},backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+10+this.gpu.probeFilterPasses.length,textures:gpuObjects.filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+17,cpuStagingBytes,errors:[...this.errors],
       ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,invalidations:Object.fromEntries(this.environmentInvalidations)}}:{}),
       ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),profile:this.profiler.inspect()};
   }
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();}
-  dispose():void{if(this.disposed)return;this.disposed=true;for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
+  dispose():void{if(this.disposed)return;this.disposed=true;this.environmentWorker?.dispose();this.environmentMapCache?.clear();for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();this.profiler?.dispose();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const batch of this.shadowBatches?.values?.()??[])batch.buffer.destroy();for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();this.shadowBatches?.clear?.();}
+  private environmentWorker?:EnvironmentMapWorker;
+  private environmentRequestedKey='';
+  private environmentMapCache?:Map<string,EnvironmentMapData>;
+  setBackgroundEnvironmentMaps(enabled:boolean,create?:()=>EnvironmentWorker):void{
+    this.environmentWorker?.dispose();delete this.environmentWorker;this.environmentRequestedKey='';
+    if(this.disposed)return;
+    if(enabled&&(create||typeof Worker!=='undefined'))this.environmentWorker=new EnvironmentMapWorker((key,data)=>{if(!this.disposed)this.publishEnvironmentMap(key,data);},create);
+  }
+  async settleEnvironmentMaps():Promise<void>{await this.environmentWorker?.idle();await this.flush();}
   private updateEnvironmentMap(scene:Scene,origin:Vec3,localProbeOwnsNearby=false):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
-    if(this.environmentScene!==scene){this.environmentScene=scene;this.environmentKey='';}
+    if(this.environmentScene!==scene){this.environmentWorker?.reset();this.environmentRequestedKey='';this.environmentMapCache?.clear();this.environmentScene=scene;this.environmentKey='';}
     const measured=settings.environmentRadiance;
     if(measured){
+      if(this.environmentRequestedKey){this.environmentWorker?.reset();this.environmentRequestedKey='';}
       if(this.measuredRadianceSpec!==measured){this.measuredRadiance=decodeMeasuredRadiance(measured);this.measuredRadianceSpec=measured;}
       const source=this.measuredRadiance!;
       const m=measured.worldToEnvironment??[1,0,0,0,1,0,0,0,1],sampleKey=[measured.width,measured.height,measured.rgb16fBase64.length,measured.rgb16fBase64.slice(0,24),measured.rgb16fBase64.slice(-24),measured.convention??'latlong-y-up',measured.intensity??1,...m].join(':');
@@ -1333,7 +1344,8 @@ export class WebGPURenderer implements Renderer{
       Math.round(scene.environment.groundMoisture*20)/20,
       Math.round(scene.environment.snowfallRate*1e6)/1e6,
     ].map(value=>Number(value).toFixed(3)).join(':');
-    if(causeKey===this.environmentKey)return;
+    if(causeKey===this.environmentRequestedKey)return;
+    if(causeKey===this.environmentKey){if(this.environmentRequestedKey){this.environmentWorker?.reset();this.environmentRequestedKey='';}return;}
     if(this.profiler.enabled&&this.environmentKey){
       const causes=['entities','seed','sun.x','sun.y','sun.z','sunColor.r','sunColor.g','sunColor.b','sky.r','sky.g','sky.b','origin.x','origin.y','origin.z','intensity','sunlight','humidity','temperature','moisture','snowfall'];
       const before=this.environmentKey.split(':'),after=causeKey.split(':');
@@ -1342,60 +1354,19 @@ export class WebGPURenderer implements Renderer{
         this.environmentInvalidations.set(cause,(this.environmentInvalidations.get(cause)??0)+1);
       }
     }
-    const radiance=buildSceneRadianceProbe(scene,origin,128);
-    const urbanColor=radiance.background,groundColor=radiance.ground,probe=radiance.origin;
-    const proxies=radiance.proxies.map(proxy=>({dir:proxy.direction,color:proxy.color,threshold:proxy.threshold,strength:proxy.strength}));
-    // Diffuse IBL must integrate the whole incident hemisphere. Sampling one
-    // high cubemap mip along the surface normal loses bright ground/snow bounce
-    // on vertical panels and makes coated objects unnaturally dark. Project the
-    // same synthetic world-radiance representation into irradiance SH whenever
-    // that cached representation changes; this stays off the per-frame hot path.
-    const sampleSynthetic=(dir:Vec3):readonly[number,number,number]=>{
-      const up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
-      const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
-      const t=Math.sqrt(up);let base:[number,number,number]=down>0?[mix(horizon[0],ground[0],down),mix(horizon[1],ground[1],down),mix(horizon[2],ground[2],down)]:[mix(horizon[0],zenith[0],t),mix(horizon[1],zenith[1],t),mix(horizon[2],zenith[2],t)];
-      const horizontal=Math.pow(Math.max(0,1-Math.abs(dir[1])),3),urbanMix=horizontal*.28;
-      base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
-      let pr=0,pg=0,pb=0,total=0;
-      for(const proxy of proxies){
-        const alignment=V3.dot(dir,proxy.dir);if(alignment<=proxy.threshold)continue;
-        const q=(alignment-proxy.threshold)/Math.max(1e-5,1-proxy.threshold),weight=Math.pow(q,5.5)*proxy.strength;
-        pr+=proxy.color[0]*weight;pg+=proxy.color[1]*weight;pb+=proxy.color[2]*weight;total+=weight;
-      }
-      if(total>.001){const amount=Math.min(.86,total/(.58+total));base=[mix(base[0],pr/total,amount),mix(base[1],pg/total,amount),mix(base[2],pb/total,amount)];}
-      const sunDot=Math.max(0,dir[0]*sun[0]+dir[1]*sun[1]+dir[2]*sun[2]),sunLobe=Math.pow(sunDot,900)*intensity;
-      return[base[0]+sunColor[0]*sunLobe,base[1]+sunColor[1]*sunLobe,base[2]+sunColor[2]*sunLobe];
-    };
-    this.environmentIrradiance.set(buildDiffuseIrradianceSH(sampleSynthetic,512));
-    this.environmentKey=causeKey;this.environmentUpdates++;
-    const levels=9;
-    for(let mip=0;mip<levels;mip++){
-      const size=Math.max(1,256>>mip),roughness=mip/(levels-1),pixels=new Uint16Array(size*size*6*4);let offset=0;
-      const tiles=roughness<.74?buildDirectionalProxyTiles(proxies,size,cubeDirection):null;
-      for(let face=0;face<6;face++)for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-        const u=((x+.5)/size)*2-1,v=((y+.5)/size)*2-1,dir=cubeDirection(face,u,v),up=Math.max(dir[1],0),down=Math.max(-dir[1],0);
-        const horizon:[number,number,number]=[sky[0]*1.22,sky[1]*1.22,sky[2]*1.22],zenith:[number,number,number]=[sky[0]*.45,sky[1]*.45,sky[2]*.45],ground:[number,number,number]=[groundColor[0]*.62,groundColor[1]*.62,groundColor[2]*.62];
-        const t=Math.sqrt(up);let base:[number,number,number]=down>0?[mix(horizon[0],ground[0],down),mix(horizon[1],ground[1],down),mix(horizon[2],ground[2],down)]:[mix(horizon[0],zenith[0],t),mix(horizon[1],zenith[1],t),mix(horizon[2],zenith[2],t)];
-        const horizontal=Math.pow(Math.max(0,1-Math.abs(dir[1])),3)*(1-roughness*.72);
-        const urbanMix=horizontal*.28;
-        base=[mix(base[0],urbanColor[0]*.78,urbanMix),mix(base[1],urbanColor[1]*.78,urbanMix),mix(base[2],urbanColor[2]*.78,urbanMix)];
-        if(roughness<.74){
-          let pr=0,pg=0,pb=0,total=0;
-          const candidates=tiles!.buckets[(face*tiles!.side+(y>>4))*tiles!.side+(x>>4)]!;
-          for(const proxy of candidates){
-            const alignment=V3.dot(dir,proxy.dir);if(alignment<=proxy.threshold)continue;
-            const q=(alignment-proxy.threshold)/Math.max(1e-5,1-proxy.threshold),sharp=mix(5.5,1.2,roughness*roughness),weight=Math.pow(q,sharp)*proxy.strength*(1-roughness*.62);
-            pr+=proxy.color[0]*weight;pg+=proxy.color[1]*weight;pb+=proxy.color[2]*weight;total+=weight;
-          }
-          if(total>.001){const amount=Math.min(.86,total/(.58+total));base=[mix(base[0],pr/total,amount),mix(base[1],pg/total,amount),mix(base[2],pb/total,amount)];}
-        }
-        const sunDot=Math.max(0,dir[0]*sun[0]+dir[1]*sun[1]+dir[2]*sun[2]),exponent=mix(900,2.4,roughness*roughness),sunLobe=Math.pow(sunDot,exponent)*intensity*mix(1.0,.12,roughness);
-        const average:[number,number,number]=[mix(sky[0]*.62,urbanColor[0]*.55,.22),mix(sky[1]*.66,urbanColor[1]*.55,.22),mix(sky[2]*.72,urbanColor[2]*.55,.22)],blur=roughness*roughness*.68;
-        for(let channel=0;channel<3;channel++)pixels[offset++]=float16(mix(base[channel]!+sunColor[channel]!*sunLobe,average[channel]!,blur));
-        pixels[offset++]=float16(1);
-      }
-      const bytesPerRow=size*8,rowsPerImage=size;
-      this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow,rowsPerImage},[size,size,6]);this.profiler.addUpload(pixels.byteLength,'environment');
+    const cached=this.environmentMapCache?.get(causeKey);
+    if(cached){this.environmentWorker?.reset();this.environmentRequestedKey='';this.publishEnvironmentMap(causeKey,cached);return;}
+    const input={radiance:buildSceneRadianceProbe(scene,origin,128),sun,sunColor,sky,intensity};
+    if(this.environmentWorker&&this.environmentKey){this.environmentRequestedKey=causeKey;this.environmentWorker.request(causeKey,input);return;}
+    this.publishEnvironmentMap(causeKey,bakeEnvironmentMap(input));
+  }
+  private publishEnvironmentMap(key:string,data:EnvironmentMapData):void{
+    const maps=this.environmentMapCache??=new Map();maps.delete(key);maps.set(key,data);while(maps.size>4)maps.delete(maps.keys().next().value!);
+    this.environmentIrradiance.set(data.irradiance);this.environmentKey=key;this.environmentUpdates++;
+    if(this.environmentRequestedKey===key)this.environmentRequestedKey='';
+    for(let mip=0;mip<data.mips.length;mip++){
+      const size=Math.max(1,256>>mip),pixels=data.mips[mip]!;
+      this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow:size*8,rowsPerImage:size},[size,size,6]);this.profiler.addUpload(pixels.byteLength,'environment');
     }
   }
 

@@ -1,3 +1,4 @@
+import {GPUFrameQueue} from '../frame-queue.mjs';
 export function assertComparisonAPI(Scene,Renderer){
  if(typeof Scene.prototype.setVisualTransform!=='function'||['setBackgroundEnvironmentMaps','resetProfile','profileLatest','resetTemporalHistory','setTimelineFrame','flush'].some(key=>typeof Renderer.prototype[key]!=='function'))throw new Error('Comparison requires a current Engine build matching TheGame (visual movers, background environment maps and profiling). Set ENGINE_ROOT to that checkout and build its dist first; the older native PR renderer is not interchangeable.');
 }
@@ -48,26 +49,30 @@ export function summarize(samples){
  const stats=key=>{const v=samples.map(s=>s[key]).filter(Number.isFinite).sort((a,b)=>a-b);return v.length?{samples:v.length,mean:v.reduce((a,b)=>a+b,0)/v.length,p50:percentile(v,.5),p95:percentile(v,.95),p99:percentile(v,.99),max:v.at(-1)}:null;};
  const interval=stats('intervalMs'),sorted=samples.map(s=>s.intervalMs).sort((a,b)=>b-a),slow=sorted.slice(0,Math.max(1,Math.ceil(sorted.length*.01)));
  return {interval,averageFPS:1000/interval.mean,onePercentLowFPS:1000/(slow.reduce((a,b)=>a+b,0)/slow.length),framesOver33ms:samples.filter(s=>s.intervalMs>1000/30).length,
-  framesOver50ms:samples.filter(s=>s.intervalMs>50).length,cpuSubmit:stats('cpuSubmitMs'),completedFrame:stats('completedFrameMs'),gpuWait:stats('gpuWaitMs'),gpu:stats('gpuMs')};
+  framesOver50ms:samples.filter(s=>s.intervalMs>50).length,cpuSubmit:stats('cpuSubmitMs'),completedFrame:stats('completedFrameMs'),gpuWait:stats('gpuWaitMs'),queueWait:stats('queueWaitMs'),hostFrame:stats('hostFrameMs'),gpu:stats('gpuMs')};
 }
-export async function measure({scene,renderer,baseCamera,frames=180,warmup=60,moving=false,beforeFrame=async()=>{},present=()=>{},afterFrame=async()=>{}}){
+export async function measure({scene,renderer,baseCamera,frames=180,warmup=60,moving=false,pipelined=false,beforeFrame=async()=>{},present=()=>{},afterFrame=async()=>{}}){
  if(!Number.isInteger(frames)||frames<1||!Number.isInteger(warmup)||warmup<1)throw new RangeError('Measurement needs positive integer frames and warmup');
- renderer.resetTemporalHistory();renderer.resetProfile();const samples=[],gpuSeen=new Set();let previous;
+ renderer.resetTemporalHistory();renderer.resetProfile();const samples=[],gpuSeen=new Set(),queue=pipelined?new GPUFrameQueue(renderer.device,2):null;let previous;
  for(let i=0;i<frames+warmup;i++){
-  await beforeFrame();const start=performance.now();scene.camera=cameraAt(baseCamera,i,moving,frames);scene.time=moving?i/60:0;
+  await beforeFrame(queue);const waitBegan=performance.now();if(queue)await queue.acquire();const start=performance.now(),queueWaitMs=start-waitBegan;scene.camera=cameraAt(baseCamera,i,moving,frames);scene.time=moving?i/60:0;
   renderer.setTimelineFrame(i);renderer.render(scene);const submitted=performance.now();
-  await renderer.flush();const completed=performance.now();present();const presented=performance.now();
+  if(queue)queue.submittedFrame();else await renderer.flush();const completed=performance.now();present();const presented=performance.now();
   if(i>=warmup){const p=renderer.profileLatest?.(),gpu=p?.gpu;
-   samples.push({frame:i-warmup,intervalMs:start-previous,cpuSubmitMs:submitted-start,gpuWaitMs:completed-submitted,completedFrameMs:presented-start,
+   samples.push({frame:i-warmup,intervalMs:start-previous,cpuSubmitMs:submitted-start,queueWaitMs,hostFrameMs:presented-start,gpuWaitMs:queue?null:completed-submitted,completedFrameMs:queue?null:presented-start,
     gpuMs:gpu&&gpu.frame>=warmup&&!gpuSeen.has(gpu.frame)?gpu.totalMs:null,gpuFrame:gpu?.frame??null});if(gpu)gpuSeen.add(gpu.frame);
   }
-  previous=start;await afterFrame(start);
+  previous=start;await afterFrame(waitBegan);
  }
+ if(queue)await queue.drain();await renderer.flush();
  const stats=renderer.inspect();if(stats.errors.length)throw new Error(stats.errors.join('\n'));
- return {moving,frames,warmup,summary:summarize(samples),samples,renderer:stats};
+ if(stats.environmentBaking?.failed)throw new Error('Background environment worker failed');
+ return {moving,frames,warmup,completion:pipelined?'bounded-two-frames':'per-frame-wait',gpuQueue:queue?.inspect()??null,summary:summarize(samples),samples,renderer:stats};
 }
 export async function settleCanonical({scene,renderer,baseCamera,present=()=>{},beforeFrame=async()=>{}}){
- renderer.resetTemporalHistory();scene.camera=structuredClone(baseCamera);scene.time=0;
+ scene.camera=structuredClone(baseCamera);scene.time=0;
+ await beforeFrame();renderer.setTimelineFrame(0);renderer.render(scene);await renderer.flush();present();await renderer.settleEnvironmentMaps?.();
+ renderer.resetTemporalHistory();
  for(let i=0;i<64;i++){await beforeFrame();renderer.setTimelineFrame(i);renderer.render(scene);await renderer.flush();present();}
 }
 export async function readPresentation(device,texture,width,height,format='bgra8unorm'){

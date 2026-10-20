@@ -1,0 +1,350 @@
+{
+  "date": "2026-10-20T15:41:00.113Z",
+  "modes": [
+    {
+      "name": "headless",
+      "exitCode": 0,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "compiled": false,
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "gpuQueue": {
+        "capacity": 2,
+        "pending": 0,
+        "peak": 2,
+        "submitted": 24,
+        "waits": 0
+      },
+      "environmentWorker": {
+        "posted": 0,
+        "completed": 0,
+        "transferredBytes": 0,
+        "failed": false,
+        "disposed": false
+      },
+      "renderer": {
+        "drawCalls": 4,
+        "triangles": 1624,
+        "errors": []
+      },
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "frameChanged": true,
+      "fallingSphere": {
+        "id": "falling-sphere",
+        "position": [
+          0,
+          3.1824999999999997,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "velocity": [
+          0,
+          -3.924,
+          0
+        ],
+        "material": "steel"
+      }
+    },
+    {
+      "name": "window",
+      "exitCode": 0,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "compiled": false,
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "gpuQueue": {
+        "capacity": 2,
+        "pending": 0,
+        "peak": 1,
+        "submitted": 24,
+        "waits": 0
+      },
+      "environmentWorker": {
+        "posted": 0,
+        "completed": 0,
+        "transferredBytes": 0,
+        "failed": false,
+        "disposed": false
+      },
+      "renderer": {
+        "drawCalls": 4,
+        "triangles": 1624,
+        "errors": []
+      },
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "frameChanged": true,
+      "fallingSphere": {
+        "id": "falling-sphere",
+        "position": [
+          0,
+          3.1824999999999997,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "velocity": [
+          0,
+          -3.924,
+          0
+        ],
+        "material": "steel"
+      }
+    },
+    {
+      "name": "compiled-headless",
+      "exitCode": 0,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "compiled": true,
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "gpuQueue": {
+        "capacity": 2,
+        "pending": 0,
+        "peak": 2,
+        "submitted": 24,
+        "waits": 0
+      },
+      "environmentWorker": {
+        "posted": 0,
+        "completed": 0,
+        "transferredBytes": 0,
+        "failed": false,
+        "disposed": false
+      },
+      "renderer": {
+        "drawCalls": 4,
+        "triangles": 1624,
+        "errors": []
+      },
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "frameChanged": true,
+      "fallingSphere": {
+        "id": "falling-sphere",
+        "position": [
+          0,
+          3.1824999999999997,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "velocity": [
+          0,
+          -3.924,
+          0
+        ],
+        "material": "steel"
+      }
+    },
+    {
+      "name": "compiled-window",
+      "exitCode": 0,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "compiled": true,
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "gpuQueue": {
+        "capacity": 2,
+        "pending": 0,
+        "peak": 1,
+        "submitted": 24,
+        "waits": 0
+      },
+      "environmentWorker": {
+        "posted": 0,
+        "completed": 0,
+        "transferredBytes": 0,
+        "failed": false,
+        "disposed": false
+      },
+      "renderer": {
+        "drawCalls": 4,
+        "triangles": 1624,
+        "errors": []
+      },
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "frameChanged": true,
+      "fallingSphere": {
+        "id": "falling-sphere",
+        "position": [
+          0,
+          3.1824999999999997,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "velocity": [
+          0,
+          -3.924,
+          0
+        ],
+        "material": "steel"
+      }
+    }
+  ],
+  "portable": {
+    "status": "success",
+    "exitCode": 0,
+    "PATH": "C:\\Windows\\System32;C:\\Windows",
+    "exeSha256": "3b6ebfb51d47a9ca6e241a01ca6b89feaaecd619ebc425fb8d0920c739918c53",
+    "workerSha256": "60fd2639c3cbd8b68f65dd54fafb5c20afe300374b6bf76e63475a58b12c284a",
+    "frames": 24,
+    "errors": [],
+    "gpuQueue": {
+      "capacity": 2,
+      "pending": 0,
+      "peak": 2,
+      "submitted": 24,
+      "waits": 0
+    },
+    "environmentWorker": {
+      "posted": 0,
+      "completed": 0,
+      "transferredBytes": 0,
+      "failed": false,
+      "disposed": false
+    }
+  },
+  "validation": {
+    "engine": {
+      "passed": 528,
+      "skipped": 19
+    },
+    "nativeContracts": {
+      "passed": 40,
+      "skipped": 0
+    },
+    "currentEngineSubset": {
+      "passed": 15,
+      "skipped": 0
+    }
+  }
+}

@@ -36,6 +36,8 @@ async function run(mode) {
   }
   assert.ok(report.renderer.drawCalls > 0); assert.ok(report.renderer.triangles > 0);
   assert.deepEqual(report.renderer.errors, []);
+  assert.equal(report.gpuQueue.capacity,2);assert.ok(report.gpuQueue.peak<=2);
+  assert.equal(report.environmentWorker.failed,false);
   assert.equal(report.firstFrame.nonUniform, true); assert.equal(report.lastFrame.nonUniform, true);
   assert.equal(report.frameChanged, true);
   const firstY = report.initialSnapshot.entities.find(entity => entity.id === 'falling-sphere').position[1];

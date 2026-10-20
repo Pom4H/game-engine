@@ -394,3 +394,121 @@ the full engine test suite was not repeated for this host/tool change.
 
 Dawn's documented `backend=...` selector:
 https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/node/README.md
+
+### Native worker, bounded GPU overlap and geometry cache — 2026-10-20
+
+The native launcher now calculates environment maps in a Bun worker thread.
+The renderer accepts an optional `EnvironmentWorker` factory; browser module
+workers keep their existing default. One active bake and one latest replacement
+bound CPU work. Stale generations cannot publish after a scene change. The
+same bake produces irradiance plus nine specular mip levels, transferred to the
+render thread without copying their buffers. While a replacement is pending,
+the preceding complete map remains visible. Native worker failures are reported
+as failures, including in the replay benchmark.
+
+The launcher keeps at most two submitted GPU frames instead of flushing after
+each present. Capture still reads the swapchain before present; resize and
+asynchronous `runtime.close()` drain outstanding work before destroying resources.
+Callers must await `close()`. The compiled distribution includes the physical
+`runtime/environment-worker.mjs` alongside the existing native libraries.
+
+`--fps` retains its fixed simulation rate. `--render-fps` independently controls
+the render loop: omitted means the simulation rate, `0` removes the software
+cap, and `1..240` sets a cap. SDL FIFO presentation can still limit throughput.
+
+```powershell
+bun run native --render-fps 0
+# Or the compiled launcher, retaining the entire runtime/ directory:
+.\artifacts\native-app\the-engine.exe --render-fps 0
+```
+
+Profiling the actual recorded city exposed another CPU stall: `Object.isFrozen`
+was called before looking up already verified immutable mesh bounds. On Bun,
+the repeated integrity checks occupied 496.3 ms of a 499.1 ms instrumented probe
+preparation (928 calls). Looking up the weak cache first removes repeated checks;
+three warmed preparations then took 0.445 / 0.300 / 0.300 ms. Mutable arrays still
+use the original scan and direct edits remain observable. Full-precision extrema
+are multiplied before subtraction to preserve the original rounding. Scene
+already restores immutable ownership after loading JSON; the earlier hypothesis
+that JSON export lost that property was rejected. The final replay uses the
+original snapshot unchanged.
+
+Hardware comparison on Radeon 760M, D3D12, 1280×720, identical visual settings:
+
+| Render replay | Fixed camera FPS | Moving camera FPS | Moving p99 interval | Moving intervals >50 ms |
+| --- | ---: | ---: | ---: | ---: |
+| Native before | 23.32 | 7.51 | 775.04 ms | 166 / 540 |
+| Native after, software cap off | 39.99 | 40.17 | 27.61 ms | 0 / 540 |
+| Chrome after, same worker/queue policy | 92.51 | 85.77 | 15.40 ms | 0 / 540 |
+
+Native camera motion is about 5.3 times faster and its long CPU stalls are gone,
+but **native is still slower than Chrome**. This patch does not establish the
+goal of exceeding browser performance. Remaining native CPU submission and GPU
+times are larger; their exact host/driver causes have not been isolated. Moving
+native submission averages about 12–13 ms, GPU about 16 ms, compared with about
+3–4 / 9–10 ms in Chrome. Vulkan remains slower in the preceding diagnostic.
+
+Each case retains all three repetitions of 180 warmup + 180 measured intervals,
+with alternating case order; no first runs or outliers were removed. Native
+runs finish before Chrome starts. These are render-loop intervals, not measured
+physical display presentations. SDL FIFO and visible Chrome requestAnimationFrame
+have different pacing. One laptop, focus and thermals were not controlled.
+A separate capped native run varied from about 40 to 59 FPS between repetitions;
+it is preserved locally and is not substituted for the uncapped results above.
+The changes were measured together, so their individual FPS contributions cannot
+be inferred from this table. The old native 60 FPS cap exceeded its achieved FPS.
+
+The settled native RGB frame is **exactly identical before and after**. Relative
+to Chrome, 46 pixels differ by at most 1/255, RGB MAE 0.00001664/255. Geometry,
+textures, labels, shadows, TAA, postprocessing and render scale are preserved.
+This verifies a settled pose: during movement, background lighting may lag while
+the next complete map is calculated, equally in the new native/browser paths.
+The replay contains the actual game's recorded scene, not a complete native
+game client with its network, input, HUD and persistence.
+
+[Interactive report and frame comparison](render-evidence/native-pipeline-windows-20261020/index.html),
+[native / Chrome frames](render-evidence/native-pipeline-windows-20261020/native-browser.png),
+[raw summary and provenance](render-evidence/native-pipeline-windows-20261020/summary.json).
+The evidence directory includes complete per-frame reports, original game frame,
+integrity-check controls, portable-worker proof and the four GPU smoke results.
+The recorded scene SHA-256 is
+`bc756e10067471694444640530b245d4c06b1efdf11f8a00b4f5ea2f75fee573`.
+
+The PR's older renderer receives the worker API and safe mesh-bounds cache
+directly. The current local Engine used by TheGame contains other uncommitted
+renderer work; only the small factory hook and cache ordering were edited there.
+[Review patch for that current renderer](patches/current-engine-native-worker.patch)
+isolates those edits and their regression tests. It is not intended to apply
+on top of this PR's older renderer. The comparison harness builds both hosts
+from the same `ENGINE_ROOT/dist`, whose fingerprint is recorded in the report.
+
+Reproduce the updated comparison after building that compatible Engine:
+
+```powershell
+$env:COMPARE_MODE = 'pipelined'
+$env:COMPARE_RENDER_FPS = '0'
+$env:COMPARE_FRAMES = '180'
+$env:COMPARE_WARMUP = '180'
+$env:COMPARE_REPETITIONS = '3'
+$env:COMPARE_APP_DIR = "$env:ENGINE_ROOT\artifacts\native-game-compare\native-pipeline\uncapped-app"
+bun tools/native/compare/build.mjs
+$env:COMPARE_OUTPUT = "$env:ENGINE_ROOT\artifacts\native-game-compare\native-pipeline\final\native-uncapped"
+& "$env:COMPARE_APP_DIR\the-engine-game-compare.exe"
+$env:COMPARE_OUTPUT = "$env:ENGINE_ROOT\artifacts\native-game-compare\native-pipeline\final\browser"
+$env:COMPARE_HEADFUL = '1'
+bun tools/native/compare/browser-run.mjs
+bun tools/native/compare/analyze-pipeline.mjs
+```
+
+The analyzer additionally uses the retained baseline and integrity-check controls
+under the native worktree's artifacts directory. `baseline` and `worker` modes
+are available for diagnosis; the table uses `pipelined` only.
+
+Validation: strict TypeScript and full engine suite, **528 passed, 19 skipped**;
+the final native tool subset after close/pacing changes, **40 passed**. The current
+Engine adapter/bake/cache subset also passed (15). Four hardware smoke modes
+passed: source/compiled × window/headless, 24 fixed simulation steps each, actual
+nonuniform changing readbacks, matching source/compiled pixel hashes, moving
+physics, zero GPU errors and process exit 0. A relocated compiled application
+also passed headless with PATH restricted to Windows directories. A compiled
+worker probe completed a real nine-mip bake without installed Bun/Node on PATH.

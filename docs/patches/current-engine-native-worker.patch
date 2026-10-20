@@ -1,0 +1,74 @@
+diff --git a/src/render/webgpu.ts b/src/render/webgpu.ts
+index 64a8d40..6421b9a 100644
+--- a/src/render/webgpu.ts
++++ b/src/render/webgpu.ts
+@@ -9,7 +9,7 @@ import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
+ import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
+ import {ProbeCapture} from './probe-capture.js';
+ import {bakeEnvironmentMap,type EnvironmentMapData} from './environment-map.js';
+-import {EnvironmentMapWorker} from './environment-map-worker.js';
++import {EnvironmentMapWorker,type EnvironmentWorker} from './environment-map-worker.js';
+ import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
+ import {GpuVisibility,InstanceStream,INSTANCE_FLOATS,CURRENT_INSTANCE_FLOATS,VISIBILITY_SHADER,type VisibilityBatch,type VisibilityMode,type VisibilityRequest} from './gpu-visibility.js';
+ import {instancedMaterialShader,instancedReflectionShader,instancedShadowShader,ShadowInstanceIndices} from './instancing.js';
+@@ -1127,10 +1127,10 @@ export class WebGPURenderer implements Renderer{
+   private environmentWorker?:EnvironmentMapWorker;
+   private environmentRequestedKey='';
+   /** Background updates retain the preceding complete map until the next exact bake is ready. */
+-  setBackgroundEnvironmentMaps(enabled:boolean):void{
++  setBackgroundEnvironmentMaps(enabled:boolean,create?:()=>EnvironmentWorker):void{
+     this.environmentWorker?.dispose();delete this.environmentWorker;this.environmentRequestedKey='';
+     if(this.disposed)return;
+-    if(enabled&&typeof Worker!=='undefined')this.environmentWorker=new EnvironmentMapWorker((key,data)=>{if(!this.disposed)this.publishEnvironmentMap(key,data);});
++    if(enabled&&(create||typeof Worker!=='undefined'))this.environmentWorker=new EnvironmentMapWorker((key,data)=>{if(!this.disposed)this.publishEnvironmentMap(key,data);},create);
+   }
+   async settleEnvironmentMaps():Promise<void>{await this.environmentWorker?.idle();await this.flush();}
+   /** Align temporal sampling when separate workers render ranges of one timeline. */
+diff --git a/src/render/radiance.ts b/src/render/radiance.ts
+index ab9c914..6f2a7cf 100644
+--- a/src/render/radiance.ts
++++ b/src/render/radiance.ts
+@@ -206,15 +206,18 @@ function primitiveRadius(primitive:Primitive,scale:Vec3):number{
+     let r2=0;for(const p of primitive.points)r2=Math.max(r2,p[0]*p[0]+p[1]*p[1]);
+     return Math.hypot(Math.sqrt(r2)*Math.max(sx,sy,sz),primitive.thickness*.5*Math.max(sx,sy,sz));
+   }
+-  if(Number.isFinite(sx)&&Number.isFinite(sy)&&Number.isFinite(sz)&&Object.isFrozen(primitive.positions)){
+-    let bounds=radianceMeshBounds.get(primitive.positions);
++  const positions=primitive.positions,cachedBounds=radianceMeshBounds.get(positions);
++  // Once an array was verified frozen it stays frozen. In some JS runtimes
++  // Object.isFrozen walks every indexed property, even on a cache hit.
++  if(Number.isFinite(sx)&&Number.isFinite(sy)&&Number.isFinite(sz)&&(cachedBounds||Object.isFrozen(positions))){
++    let bounds=cachedBounds;
+     if(!bounds){
+       let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+-      for(let i=0;i<primitive.positions.length;i+=3){
+-        minX=Math.min(minX,primitive.positions[i]!);minY=Math.min(minY,primitive.positions[i+1]!);minZ=Math.min(minZ,primitive.positions[i+2]!);
+-        maxX=Math.max(maxX,primitive.positions[i]!);maxY=Math.max(maxY,primitive.positions[i+1]!);maxZ=Math.max(maxZ,primitive.positions[i+2]!);
++      for(let i=0;i<positions.length;i+=3){
++        minX=Math.min(minX,positions[i]!);minY=Math.min(minY,positions[i+1]!);minZ=Math.min(minZ,positions[i+2]!);
++        maxX=Math.max(maxX,positions[i]!);maxY=Math.max(maxY,positions[i+1]!);maxZ=Math.max(maxZ,positions[i+2]!);
+       }
+-      bounds=[minX,minY,minZ,maxX,maxY,maxZ];radianceMeshBounds.set(primitive.positions,bounds);
++      bounds=[minX,minY,minZ,maxX,maxY,maxZ];radianceMeshBounds.set(positions,bounds);
+     }
+     // Multiply the extrema before subtraction, just as the vertex scan does.
+     // Scaling a precomputed extent would round differently at large offsets.
+diff --git a/test/native-worker-adapter.test.mjs b/test/native-worker-adapter.test.mjs
+new file mode 100644
+--- /dev/null
++++ b/test/native-worker-adapter.test.mjs
+@@ -0,0 +1,14 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {Scene} from '../dist/scene/scene.js';
++import {WebGPURenderer} from '../dist/render/webgpu.js';
++import {buildSceneRadianceProbe} from '../dist/render/radiance.js';
++test('native environment factory starts without browser location and stops on disable',()=>{
++ const renderer=Object.create(WebGPURenderer.prototype),worker={onmessage:null,onerror:null,postMessage(){},terminated:false,terminate(){this.terminated=true;}};
++ renderer.setBackgroundEnvironmentMaps(true,()=>worker);assert.equal(renderer.environmentWorker.inspect().failed,false);renderer.setBackgroundEnvironmentMaps(false);assert.equal(worker.terminated,true);
++});
++test('cached immutable geometry avoids repeated integrity scans while retaining mutable edit observation',()=>{
++ const scene=new Scene({version:1,entities:[{id:'mesh',position:[60,0,0],mesh:{kind:'triangle-mesh',positions:[-1,-1,0,1,-1,0,0,1,0],normals:[0,0,1,0,0,1,0,0,1],indices:[0,1,2]}}]});
++ buildSceneRadianceProbe(scene,[0,0,0]);const original=Object.isFrozen;let checks=0;Object.isFrozen=v=>{checks++;return original(v);};try{buildSceneRadianceProbe(scene,[1,0,0]);}finally{Object.isFrozen=original;}assert.equal(checks,0);
++ const e=scene.entities.get('mesh');e.mesh={...e.mesh,positions:[...e.mesh.positions]};const before=buildSceneRadianceProbe(scene,[0,0,0]);e.mesh.positions[3]=5;assert.notDeepEqual(buildSceneRadianceProbe(scene,[0,0,0]),before);
++});

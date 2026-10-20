@@ -131,8 +131,8 @@ export function pixelEvidence(rgba) {
 }
 
 export function parseArgs(args) {
-  const options = { headless: false, width: 960, height: 540, frames: 0, fps: 60, output: null, report: null, scene: null, backend: 'auto', help: false };
-  const values = new Set(['width', 'height', 'frames', 'fps', 'output', 'report', 'scene', 'backend']);
+  const options = { headless: false, width: 960, height: 540, frames: 0, fps: 60, renderFps: null, output: null, report: null, scene: null, backend: 'auto', help: false };
+  const values = new Set(['width', 'height', 'frames', 'fps', 'render-fps', 'output', 'report', 'scene', 'backend']);
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--' && i === 0) continue;
     const key = args[i].replace(/^--/, '');
@@ -141,10 +141,11 @@ export function parseArgs(args) {
     if (!args[i].startsWith('--') || !values.has(key)) throw new Error(`Unknown argument: ${args[i]}`);
     const value = args[++i];
     if (value === undefined || value.startsWith('--')) throw new Error(`Missing value for --${key}`);
-    options[key] = ['width', 'height', 'frames', 'fps'].includes(key) ? Number(value) : value;
+    options[key === 'render-fps' ? 'renderFps' : key] = ['width', 'height', 'frames', 'fps', 'render-fps'].includes(key) ? Number(value) : value;
   }
   dimensions(options.width, options.height);
   resolveBackend(options.backend);
+  if (options.renderFps !== null && (!Number.isInteger(options.renderFps) || options.renderFps < 0 || options.renderFps > 240)) throw new RangeError('--render-fps must be an integer in [0, 240] (0 = uncapped)');
   if (!Number.isInteger(options.fps) || options.fps < 1 || options.fps > 240) throw new RangeError('--fps must be an integer in [1, 240]');
   if (!Number.isInteger(options.frames) || options.frames < 0 || options.frames > 1_000_000) throw new RangeError('--frames must be an integer in [0, 1000000]');
   if (options.headless && options.frames === 0) options.frames = 1;

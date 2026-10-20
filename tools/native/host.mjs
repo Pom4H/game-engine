@@ -120,6 +120,9 @@ export class NativeHost {
   }
 
   /** Нулевой размер/minimize не передаётся в GPU configure. */
+  needsResize() {
+    return !!this.window && (this.resizePending || this.window.pixelWidth !== this.canvas.width || this.window.pixelHeight !== this.canvas.height || this.window.minimized);
+  }
   syncSize() {
     if (!this.window) return true;
     if (this.window.destroyed) { this.shouldClose = true; return false; }

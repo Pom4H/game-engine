@@ -23,6 +23,7 @@ export function aggregate(report,moving){
  return {...summarize(runs.flatMap(r=>r.samples)),repetitions:runs.length,perRun:runs.map(r=>({repetition:r.repetition,frames:r.frames,warmup:r.warmup,averageFPS:r.summary.averageFPS,p99:r.summary.interval.p99}))};
 }
 const sha=b=>createHash('sha256').update(b).digest('hex');
+export {fingerprint};
 async function fingerprint(root){const hash=createHash('sha256');let files=0;async function walk(dir){for(const e of (await readdir(dir,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))){const p=join(dir,e.name);if(e.isDirectory())await walk(p);else if(e.name.endsWith('.js')){hash.update(relative(root,p).replaceAll('\\','/'));hash.update('\0');hash.update(await readFile(p));files++;}}}await walk(root);return {sha256:hash.digest('hex'),javascriptFiles:files};}
 function git(root){try{return {head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),dirty:!!execFileSync('git',['status','--porcelain','--untracked-files=no'],{cwd:root,encoding:'utf8'}).trim()};}catch{return null;}}
 const f=(v,n=1)=>Number(v).toFixed(n),esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
