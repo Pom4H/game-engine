@@ -81,6 +81,7 @@ export class NativeRuntime {
 
   inspect() {
     return { runtime: 'bun', browser: false, mode: this.host.options.headless ? 'headless' : 'window', adapter: this.host.adapterInfo,
+      nativeBinding: this.host.bindings.compatibility ?? null,
       frames: this.frames, simulation: { tick: this.scene.tick, time: this.scene.time }, renderer: this.renderer.inspect() };
   }
 

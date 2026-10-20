@@ -1,8 +1,9 @@
-import { spawn } from 'node:child_process';
-import { readFile, mkdir } from 'node:fs/promises';
-import { resolve, dirname } from 'node:path';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { resolve, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
+import { runNativeProcess } from './process.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const out = resolve(root, 'artifacts/native');
@@ -14,20 +15,25 @@ async function run(mode) {
   const name = `${compiled ? 'compiled-' : ''}${mode}`;
   const reportPath = resolve(out, `${name}.json`), imagePath = resolve(out, `${name}.png`);
   const args = [...prefix, ...(mode === 'headless' ? ['--headless'] : []), '--width', '320', '--height', '180', '--frames', '24', '--output', imagePath, '--report', reportPath];
-  await new Promise((resolveRun, reject) => {
-    // A different cwd also verifies that compiled addons are located relative
-    // to the executable, not accidentally in the development node_modules.
-    const child = spawn(executable, args, { cwd: compiled ? dirname(out) : root, stdio: 'inherit', shell: false });
-    const timer = setTimeout(() => { child.kill(); reject(new Error(`${name} did not finish within 180 seconds`)); }, 180000);
-    child.once('error', error => { clearTimeout(timer); reject(error); });
-    child.once('exit', (code, signal) => { clearTimeout(timer); code === 0 ? resolveRun() : reject(new Error(`${name} exited with ${code ?? signal}`)); });
-  });
+  // A different cwd verifies addon resolution outside the development tree.
+  const child = await runNativeProcess(executable, args, { cwd: compiled ? dirname(out) : root });
+  await writeFile(resolve(out, `${name}.process.json`), JSON.stringify({
+    ...child, mode, compiled, executable, args, platform: process.platform, arch: process.arch,
+  }, null, 2));
+  if (child.status !== 'success') throw new Error(`${name} failed (${child.timedOut ? 'timeout' : child.launchError ?? child.exitCode ?? child.signal}); see ${name}.process.json`);
   const report = JSON.parse(await readFile(reportPath, 'utf8'));
   assert.equal(report.status, 'success'); assert.equal(report.browser, false);
   assert.equal(report.runtime, 'bun'); assert.ok(report.bunVersion);
   assert.equal(report.compiled, compiled); assert.equal(report.mode, mode);
   assert.equal(report.frames, 24); assert.equal(report.simulation.tick, 24);
   assert.equal(report.renderer.backend, 'webgpu'); assert.equal(report.adapter.isFallbackAdapter, false);
+  if (process.platform === 'win32') {
+    assert.equal(report.nativeBinding.kind, 'windows-napi-import');
+    assert.equal(report.nativeBinding.hostName, basename(executable));
+    const original = await readFile(resolve(root, 'tools/native/node_modules/@kmamal/gpu/dist/dawn.node'));
+    assert.equal(report.nativeBinding.sourceSha256, createHash('sha256').update(original).digest('hex'));
+    assert.notEqual(report.nativeBinding.sha256, report.nativeBinding.sourceSha256);
+  }
   assert.ok(report.renderer.drawCalls > 0); assert.ok(report.renderer.triangles > 0);
   assert.deepEqual(report.renderer.errors, []);
   assert.equal(report.firstFrame.nonUniform, true); assert.equal(report.lastFrame.nonUniform, true);

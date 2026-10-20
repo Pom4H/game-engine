@@ -1472,7 +1472,7 @@ export class WebGPURenderer implements Renderer{
     this.drawCalls++;this.triangles+=mesh.triangles*batch.items.length;
   }
   private opaqueMoverEnvelope(scene:Scene,movers:ReadonlySet<string>):MeshBounds|null{
-    const low:Vec3=[Infinity,Infinity,Infinity],high:Vec3=[-Infinity,-Infinity,-Infinity];
+    const low:[number,number,number]=[Infinity,Infinity,Infinity],high:[number,number,number]=[-Infinity,-Infinity,-Infinity];
     for(const id of movers){
       const e=scene.entities.get(id);
       if(!e||!canBatchOpaque(e))return null;
@@ -1484,7 +1484,7 @@ export class WebGPURenderer implements Renderer{
       const y=(Math.abs(bound.center[1])+bound.half[1])*Math.abs(e.scale[1]*base[1]);
       const z=(Math.abs(bound.center[2])+bound.half[2])*Math.abs(e.scale[2]*base[2]);
       const radius=Math.hypot(x,y,z);
-      for(let axis=0;axis<3;axis++){
+      for(const axis of [0,1,2] as const){
         low[axis]=Math.min(low[axis]!,e.position[axis]-radius);
         high[axis]=Math.max(high[axis]!,e.position[axis]+radius);
       }

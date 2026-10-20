@@ -1,6 +1,9 @@
 import { createRequire } from 'node:module';
-import { dirname, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { dimensions, hardwareInfo, installNativeGlobals, readbackLayout, unpackRGBA } from './core.mjs';
+import { prepareWindowsDawn, verifyWindowsDawn } from './windows-napi.mjs';
 
 /** Native addons остаются внешними файлами рядом с compiled executable. */
 export function loadBindings(headless, compiled = false) {
@@ -8,11 +11,29 @@ export function loadBindings(headless, compiled = false) {
     ? join(dirname(process.execPath), 'runtime', 'package.json')
     : new URL('./package.json', import.meta.url));
   try {
-    const gpu = require('@kmamal/gpu');
-    const sdl = headless ? null : require('@kmamal/sdl');
-    return { gpu: gpu.default ?? gpu, sdl: sdl?.default ?? sdl };
+    // Compiled Bun can fail bare-package resolution outside its embedded FS.
+    // Resolve the pinned package's physical entry before loading its addon.
+    const load = name => {
+      if (!compiled) return require(name);
+      const folder = join(dirname(process.execPath), 'runtime', 'node_modules', name);
+      const metadata = JSON.parse(readFileSync(join(folder, 'package.json'), 'utf8'));
+      return require(join(folder, metadata.main));
+    };
+    let gpu, compatibility = null;
+    if (process.platform === 'win32') {
+      const nativeDir = compiled ? join(dirname(process.execPath), 'runtime') : fileURLToPath(new URL('.', import.meta.url));
+      const addon = join(nativeDir, 'node_modules', '@kmamal', 'gpu', 'dist', 'dawn.node');
+      const prepared = compiled ? join(nativeDir, 'dawn-bun.node') : join(nativeDir, '.runtime', basename(process.execPath) + '.node');
+      const metadata = compiled ? verifyWindowsDawn(prepared, process.execPath) : prepareWindowsDawn(addon, process.execPath, prepared);
+      const raw = require(prepared);
+      gpu = { ...raw, ...raw.globals };
+      compatibility = { kind: 'windows-napi-import', version: metadata.version, hostName: metadata.hostName,
+        sourceSha256: metadata.sourceSha256, sha256: metadata.sha256 };
+    } else gpu = load('@kmamal/gpu');
+    const sdl = headless ? null : load('@kmamal/sdl');
+    return { gpu: gpu.default ?? gpu, sdl: sdl?.default ?? sdl, compatibility };
   } catch (cause) {
-    throw new Error('Native addons could not be loaded. Run "bun run native:setup", or keep the executable beside its runtime/ directory.', { cause });
+    throw new Error(`Native addons could not be loaded: ${cause?.message ?? String(cause)}. Run "bun run native:setup", or keep the executable beside its runtime/ directory.`, { cause });
   }
 }
 

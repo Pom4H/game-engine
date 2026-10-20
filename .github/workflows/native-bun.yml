@@ -4,6 +4,8 @@ on:
     paths:
       - 'tools/native/**'
       - 'test/native-host.test.mjs'
+      - 'test/native-process.test.mjs'
+      - 'test/native-windows-napi.test.mjs'
       - 'src/**'
       - 'package.json'
       - 'bun.lock'
@@ -13,6 +15,8 @@ on:
     paths:
       - 'tools/native/**'
       - 'test/native-host.test.mjs'
+      - 'test/native-process.test.mjs'
+      - 'test/native-windows-napi.test.mjs'
       - '.github/workflows/native-bun.yml'
   workflow_dispatch:
 permissions:
@@ -35,11 +39,22 @@ jobs:
           bun-version: 1.4.3
       - name: Install engine dependencies
         run: bun install --frozen-lockfile
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Build WASM kernels used by engine tests
+        run: |
+          cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-rigid/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-wave/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-structure/Cargo.toml
+          exit $LASTEXITCODE
       - name: Engine typecheck and tests (including native contracts)
         run: bun run check
       - name: Install pinned native addons
         working-directory: tools/native
-        run: bun install
+        run: bun install --frozen-lockfile
       - name: Real Dawn render in Bun, offscreen and SDL3 window
         run: bun tools/native/smoke.mjs
       - name: Compile standalone Bun executable and copy native runtime
