@@ -5,7 +5,7 @@ import {assertComparisonAPI} from './common.mjs';
 import {pathToFileURL} from 'node:url';
 const engine=resolve(process.env.ENGINE_ROOT??join(import.meta.dirname,'../../..'));
 assertComparisonAPI((await import(pathToFileURL(join(engine,'dist/scene/scene.js')).href)).Scene,(await import(pathToFileURL(join(engine,'dist/render/webgpu.js')).href)).WebGPURenderer);
-const root=resolve(import.meta.dirname,'../../..'),out=resolve(engine,'artifacts/native-game-compare/native-app');await mkdir(out,{recursive:true});
+const root=resolve(import.meta.dirname,'../../..'),out=resolve(process.env.COMPARE_APP_DIR??join(engine,'artifacts/native-game-compare/native-app'));await mkdir(out,{recursive:true});
 const rel=p=>{const r=relative(out,p).replaceAll('\\','/');return r.startsWith('.')?r:'./'+r;};
 const entry=join(out,'entry.mjs');
 await writeFile(entry,`import {Scene} from ${JSON.stringify(rel(join(engine,'dist/scene/scene.js')))};\nimport {WebGPURenderer} from ${JSON.stringify(rel(join(engine,'dist/render/webgpu.js')))};\nimport {runNative} from ${JSON.stringify(rel(join(import.meta.dirname,'native-run.mjs')))};\ntry{await runNative({Scene,WebGPURenderer,compiled:true});}catch(e){console.error(e);process.exitCode=1;}finally{process.exit(process.exitCode??0);}\n`);

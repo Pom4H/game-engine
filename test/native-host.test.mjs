@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { inflateSync } from 'node:zlib';
-import { dimensions, hardwareInfo, assertNativeScene, installNativeGlobals, readbackLayout, unpackRGBA, encodePNG, pixelEvidence, parseArgs } from '../tools/native/core.mjs';
+import { dimensions, hardwareInfo, assertNativeScene, installNativeGlobals, readbackLayout, unpackRGBA, encodePNG, pixelEvidence, parseArgs, resolveBackend } from '../tools/native/core.mjs';
 import { NativeHost } from '../tools/native/host.mjs';
 
 // Эти тесты проверяют контракт host, НЕ являются доказательством GPU-рендера.
@@ -17,6 +17,16 @@ test('CLI defaults and finite headless capture', () => {
   assert.equal(opts.frames, 1); assert.equal(opts.width, 65); assert.ok(opts.output.endsWith('.png'));
   assert.equal(parseArgs(['--frames', '24', '--fps', '30']).frames, 24);
   for (const args of [['--x'], ['--width'], ['--width', '--height'], ['--fps', '0'], ['--frames', '-1'], ['--frames', '1.5'], ['--width', 'NaN']]) assert.throws(() => parseArgs(args));
+});
+
+test('backend selection preserves platform defaults and rejects typos or unsupported choices', () => {
+  assert.equal(resolveBackend('auto', 'win32'), 'd3d12');
+  assert.equal(resolveBackend('vulkan', 'win32'), 'vulkan');
+  assert.equal(resolveBackend('auto', 'darwin'), 'metal');
+  assert.equal(resolveBackend('auto', 'linux'), 'vulkan');
+  for (const [backend, platform] of [['vulcan','win32'],['metal','win32'],['d3d12','linux'],['vulkan','darwin'],['auto','unknown']]) assert.throws(() => resolveBackend(backend,platform), RangeError);
+  assert.equal(parseArgs(['--backend', 'auto']).backend, 'auto');
+  assert.throws(() => parseArgs(['--backend', 'vulcan']), /backend/);
 });
 test('hardware guard rejects software, fallback and unverifiable adapters', () => {
   for (const description of ['SwiftShader', 'llvmpipe', 'lavapipe', 'Microsoft Basic Render Driver', 'WARP', 'CPU rasterizer']) {
@@ -118,11 +128,17 @@ function fakeBindings({ mapFails = false, noAdapter = false, surfaceFormat = 'bg
   const adapter = { info: { vendor: 'test-vendor', description: 'Fake GPU for contract tests only' }, features: new Set(), async requestDevice() { return device; } };
   const surface = { getPreferredFormat: () => surfaceFormat, getCurrentTexture() { calls.push('surface.acquire'); return makeTexture(); }, swap() { calls.push('swap'); }, resize() { calls.push('resize'); } };
   const bindings = {
-    gpu: { create() { return { async requestAdapter() { return noAdapter ? null : adapter; } }; }, renderGPUDeviceToWindow() { calls.push('surface.create'); return surface; } },
+    gpu: { create(flags) { calls.push(...flags);return { async requestAdapter() { return noAdapter ? null : adapter; } }; }, renderGPUDeviceToWindow() { calls.push('surface.create'); return surface; } },
     sdl: { video: { createWindow() { calls.push('window.create'); return window; } } },
   };
   return { bindings, calls, window, device, error: message => deviceError({ error: { message } }) };
 }
+test('explicit Vulkan reaches Dawn without substituting a platform default', {skip:process.platform!=='win32'&&process.platform!=='linux'}, async()=>{
+  const fake=fakeBindings(),host=await NativeHost.create({width:65,height:2,headless:true,backend:'vulkan'},fake.bindings);
+  try {assert.ok(fake.calls.includes('backend=vulkan'));assert.equal(host.adapterInfo.backend,'vulkan');}finally{host.close();}
+  const missing=fakeBindings({noAdapter:true});await assert.rejects(()=>NativeHost.create({width:65,height:2,headless:true,backend:'vulkan'},missing.bindings),/No native vulkan GPU adapter/);
+  assert.equal(missing.calls.filter(c=>c.startsWith('backend=')).length,1);
+});
 async function configured(fake, headless = true) {
   const host = await NativeHost.create({ width: 65, height: 2, headless }, fake.bindings);
   try {

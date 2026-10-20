@@ -14,10 +14,10 @@ export async function runNative({Scene,WebGPURenderer,compiled=false}){
  const bytes=await readFile(input),packet=JSON.parse(gunzipSync(bytes)),width=1280,height=720;
  const scene=restoreScene(packet,Scene);let host,renderer;
  try{
-  host=await NativeHost.create({compiled,headless:false,width,height});
+  host=await NativeHost.create({compiled,headless:false,width,height,backend:process.env.COMPARE_BACKEND??'auto'});
   renderer=await WebGPURenderer.create(host.canvas,rendererOptions);renderer.setResolution(width,height);renderer.configurePostProcessing(postOptions);
   renderer.setBackgroundEnvironmentMaps(false);await installAssets(renderer,packet.assets);
-  const startupMs=performance.now()-began;console.log('native-game-ready',scene.entities.size,'startupMs',startupMs.toFixed(1));
+  const startupMs=performance.now()-began;console.log('native-game-ready',host.adapterInfo.backend,scene.entities.size,'startupMs',startupMs.toFixed(1));
   const runs=[];
   for(let repetition=0;repetition<Number(process.env.COMPARE_REPETITIONS??3);repetition++)for(const moving of repetition%2?[true,false]:[false,true]){
    const run=await measure({scene,renderer,baseCamera:packet.camera,frames:Number(process.env.COMPARE_FRAMES??180),warmup:Number(process.env.COMPARE_WARMUP??180),moving,
@@ -29,7 +29,7 @@ export async function runNative({Scene,WebGPURenderer,compiled=false}){
   renderer.setTimelineFrame(64);renderer.render(scene);const pixels=await host.captureRGBA();await renderer.flush();host.present();
   await writeFile(resolve(output,'frame.png'),encodePNG(pixels.rgba,width,height));
   await writeFile(resolve(output,'frame.rgba'),pixels.rgba);
-  const report={status:'success',runtime:'bun',bunVersion:Bun.version,compiled,width,height,startupMs,adapter:host.adapterInfo,nativeBinding:host.bindings.compatibility,
+  const report={status:'success',runtime:'bun',bunVersion:Bun.version,compiled,width,height,startupMs,adapter:host.adapterInfo,nativeBinding:host.bindings.compatibility,exeSha256:createHash('sha256').update(await readFile(process.execPath)).digest('hex'),
    sceneSha256:createHash('sha256').update(bytes).digest('hex'),entities:scene.entities.size,options:rendererOptions,postOptions,runs};
   await writeFile(resolve(output,'report.json'),JSON.stringify(report,null,2));
  }finally{try{renderer?.dispose();}finally{host?.close();}}

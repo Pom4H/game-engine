@@ -1,5 +1,14 @@
 import { deflateSync } from 'node:zlib';
 
+/** Explicit backends never silently fall back to another graphics API. */
+export function resolveBackend(requested = 'auto', platform = process.platform) {
+  const supported = platform === 'win32' ? ['d3d12', 'vulkan'] : platform === 'darwin' ? ['metal'] : platform === 'linux' ? ['vulkan'] : [];
+  if (!['auto', 'd3d12', 'vulkan', 'metal'].includes(requested)) throw new RangeError('GPU backend must be auto, d3d12, vulkan or metal');
+  const backend = requested === 'auto' ? supported[0] : requested;
+  if (!supported.includes(backend)) throw new RangeError(`GPU backend ${requested} is unsupported on ${platform}`);
+  return backend;
+}
+
 /** Проверка размеров до выделения памяти CPU/GPU. */
 export function dimensions(width, height) {
   for (const value of [width, height]) {
@@ -122,8 +131,8 @@ export function pixelEvidence(rgba) {
 }
 
 export function parseArgs(args) {
-  const options = { headless: false, width: 960, height: 540, frames: 0, fps: 60, output: null, report: null, scene: null, help: false };
-  const values = new Set(['width', 'height', 'frames', 'fps', 'output', 'report', 'scene']);
+  const options = { headless: false, width: 960, height: 540, frames: 0, fps: 60, output: null, report: null, scene: null, backend: 'auto', help: false };
+  const values = new Set(['width', 'height', 'frames', 'fps', 'output', 'report', 'scene', 'backend']);
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--' && i === 0) continue;
     const key = args[i].replace(/^--/, '');
@@ -135,6 +144,7 @@ export function parseArgs(args) {
     options[key] = ['width', 'height', 'frames', 'fps'].includes(key) ? Number(value) : value;
   }
   dimensions(options.width, options.height);
+  resolveBackend(options.backend);
   if (!Number.isInteger(options.fps) || options.fps < 1 || options.fps > 240) throw new RangeError('--fps must be an integer in [1, 240]');
   if (!Number.isInteger(options.frames) || options.frames < 0 || options.frames > 1_000_000) throw new RangeError('--frames must be an integer in [0, 1000000]');
   if (options.headless && options.frames === 0) options.frames = 1;

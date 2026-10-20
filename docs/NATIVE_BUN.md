@@ -29,6 +29,21 @@ bun run native --scene ./scene.json
 bun run native:headless --frames 60 --width 960 --height 540 --output artifacts/native/scene.png --report artifacts/native/scene.json
 ```
 
+Windows defaults to D3D12 and now also accepts an explicit Vulkan backend:
+
+```sh
+bun run native --backend vulkan
+bun run native:headless --backend vulkan --frames 60 --output artifacts/native/vulkan.png
+```
+
+`--backend auto` retains the platform default: D3D12 on Windows, Metal on
+macOS, Vulkan on Linux. Explicit choices are checked against the platform and
+passed to Dawn as `backend=...`; an unavailable adapter is an error, with no
+silent switch to another API or a software rasterizer. Backend selection is
+part of Dawn WebGPU, so the shared renderer and WGSL stay the same.
+Vulkan remains opt-in and experimental: the local game-scene test below is
+slower and does not establish image parity with D3D12.
+
 After `bun run build`, direct entry is `bun tools/native/main.mjs`. A leading
 `--` separator is accepted too. Headless mode does not import SDL or create a
 window; it renders into a GPU texture. Its default is one frame. Positive
@@ -49,7 +64,7 @@ PNG compression on CPU does not substitute a CPU rasterizer.
 SceneSpec -> shared Scene / physics / FixedClock (JavaScript in Bun)
           -> shared WebGPURenderer / WGSL
           -> @kmamal/gpu (Node-API / Dawn)
-          -> D3D12 on Windows / Metal on macOS / Vulkan on Linux
+          -> D3D12 or Vulkan on Windows / Metal on macOS / Vulkan on Linux
           -> SDL3 swapchain OR offscreen GPU texture
 ```
 
@@ -331,3 +346,51 @@ The new statistics, pixel-diff and replay-contract tests pass (6); the full nati
 tool contract subset passes (30 total). HTML images, slider and chart were
 checked in Chrome without JS exceptions. Full engine tests were not repeated
 for these tool/documentation-only additions.
+
+### Windows Vulkan / D3D12 diagnostic — 2026-10-20
+
+Vulkan is available in the pinned Dawn build on the same Radeon 760M. An
+initial Vulkan-only render/readback produced the expected RGBA pixel
+`[64,128,191,255]`. The actual game-scene replay then passed GPU error checks
+under both APIs, using the same compiled executable (SHA-256
+`4ba22b5bc9faaf8dd162d08f42c5d3496bd87a528bd9b4516043915bf826f8f0`),
+the same recorded scene and settings, and 180 warmup + 180 measured frames
+per case. Vulkan ran first; D3D12 was rerun immediately afterward.
+
+| Backend | Fixed camera FPS | Moving camera FPS | Moving CPU / GPU mean | Moving p99 interval |
+| --- | ---: | ---: | ---: | ---: |
+| D3D12 | 23.32 | 7.48 | 99.37 / 29.08 ms | 808.91 ms |
+| Vulkan | 19.97 | 6.78 | 106.95 / 35.81 ms | 956.26 ms |
+
+Switching to Vulkan did not improve this scene on this driver/build, and the
+large CPU stalls remain. D3D12 stays the Windows default. This is a diagnostic
+with one repetition per backend/case, not a general API performance ranking.
+Both retain the same synchronous environment baking and GPU-completion waits.
+
+Images are **not pixel-identical**: RGB MAE 1.0794/255, RMSE 5.3696/255,
+PSNR 33.53 dB, maximum difference 81/255; 20.695% of pixels differ in at least
+one RGB channel. There are visible local shading/depth-detail differences;
+their shader/driver cause has not been isolated. This does not establish
+Vulkan visual parity or justify an automatic backend switch.
+
+[Full D3D12 / Vulkan frames](render-evidence/native-backends-windows-20261020/d3d12-vulkan.png),
+[amplified difference](render-evidence/native-backends-windows-20261020/difference-x255.png),
+[summary and hashes](render-evidence/native-backends-windows-20261020/summary.json).
+The same directory retains each backend's raw frame-interval/GPU/renderer report.
+The driver reports D3D12 `32.0.31041.1004` and Vulkan
+`AMD proprietary driver: 26.8.1 (LLPC) 2.0.395`; both select the same physical
+Radeon 760M, with fallback adapters rejected.
+
+To repeat with the comparison harness, build once with `COMPARE_APP_DIR`
+pointing to a fresh application directory, then run that same executable twice
+with `COMPARE_BACKEND=vulkan` and `COMPARE_BACKEND=d3d12`. Set separate
+`COMPARE_OUTPUT` directories ending in `native-backends/vulkan` and
+`native-backends/d3d12`, with `COMPARE_FRAMES=180`, `COMPARE_WARMUP=180` and
+`COMPARE_REPETITIONS=1`. Finish each process before starting the next; then run
+`bun tools/native/compare/analyze-backends.mjs` with the same `ENGINE_ROOT`.
+The analyzer rejects mismatched executables, inputs, protocols and GPU errors.
+All 32 native tool contract tests pass after adding backend-selection coverage;
+the full engine test suite was not repeated for this host/tool change.
+
+Dawn's documented `backend=...` selector:
+https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/node/README.md

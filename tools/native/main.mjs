@@ -18,6 +18,7 @@ async function main() {
   bun run native --scene scene.json    existing procedural SceneSpec
   bun run native:headless --frames 60 --output frame.png
   --width 960 --height 540 --fps 60 --frames N --report report.json
+  --backend auto|d3d12|vulkan|metal       explicit supported hardware backend
   --frames 0: interactive realtime; positive N: deterministic fixed steps
   Image materials, painted labels, Web Audio and DOM UI are not ported yet.`);
     return;

@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dimensions, hardwareInfo, installNativeGlobals, readbackLayout, unpackRGBA } from './core.mjs';
+import { dimensions, hardwareInfo, installNativeGlobals, readbackLayout, unpackRGBA, resolveBackend } from './core.mjs';
 import { prepareWindowsDawn, verifyWindowsDawn } from './windows-napi.mjs';
 
 /** Native addons остаются внешними файлами рядом с compiled executable. */
@@ -75,8 +75,7 @@ export class NativeHost {
   }
 
   async initialize() {
-    const platform = process.platform;
-    const backend = platform === 'win32' ? 'd3d12' : platform === 'darwin' ? 'metal' : 'vulkan';
+    const backend = resolveBackend(this.options.backend);
     this.instance = this.bindings.gpu.create([`backend=${backend}`]);
     const adapter = await this.instance.requestAdapter({ powerPreference: 'high-performance', forceFallbackAdapter: false });
     if (!adapter) throw new Error(`No native ${backend} GPU adapter`);
