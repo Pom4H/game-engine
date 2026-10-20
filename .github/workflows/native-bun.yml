@@ -1,0 +1,64 @@
+name: Native Bun GPU (no browser)
+on:
+  pull_request:
+    paths:
+      - 'tools/native/**'
+      - 'test/native-host.test.mjs'
+      - 'src/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/native-bun.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/native/**'
+      - 'test/native-host.test.mjs'
+      - '.github/workflows/native-bun.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-bun-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  hardware:
+    # SDL needs an interactive desktop session, not a Windows service in session 0.
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+      - name: Install engine dependencies
+        run: bun install --frozen-lockfile
+      - name: Engine typecheck and tests (including native contracts)
+        run: bun run check
+      - name: Install pinned native addons
+        working-directory: tools/native
+        run: bun install
+      - name: Real Dawn render in Bun, offscreen and SDL3 window
+        run: bun tools/native/smoke.mjs
+      - name: Compile standalone Bun executable and copy native runtime
+        run: bun tools/native/build.mjs
+      - name: Real Dawn render from compiled executable in different cwd
+        run: bun tools/native/smoke.mjs --compiled
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-bun-gpu-proof
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            artifacts/native/*.json
+            artifacts/native/*.png
+            tools/native/bun.lock
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: the-engine-windows-x64
+          retention-days: 7
+          path: artifacts/native-app/

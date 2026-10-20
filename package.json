@@ -48,7 +48,12 @@
     "office:check": "bun run build && node --test test/agent-office.test.mjs",
     "office:campus": "bun run build && node tools/agent-office/campus-server.mjs",
     "office:campus:check": "bun run build && node --test test/agent-campus.test.mjs",
-    "office:campus:render:worker": "node tools/agent-office/render-on-worker.mjs"
+    "office:campus:render:worker": "node tools/agent-office/render-on-worker.mjs",
+    "native:setup": "cd tools/native && bun install",
+    "native": "bun run build && bun tools/native/main.mjs",
+    "native:headless": "bun run build && bun tools/native/main.mjs --headless",
+    "native:compile": "bun run build && bun tools/native/build.mjs",
+    "native:smoke": "bun run build && bun tools/native/smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
