@@ -15,8 +15,8 @@ async function main() {
   if (options.help) {
     console.log(`The Engine native · Bun + SDL3 + Dawn (no browser)
   bun run native                         SDL3 window; WASD / Q,E; Escape closes
-  bun run native -- --scene scene.json    existing procedural SceneSpec
-  bun run native:headless -- --frames 60 --output frame.png
+  bun run native --scene scene.json    existing procedural SceneSpec
+  bun run native:headless --frames 60 --output frame.png
   --width 960 --height 540 --fps 60 --frames N --report report.json
   --frames 0: interactive realtime; positive N: deterministic fixed steps
   Image materials, painted labels, Web Audio and DOM UI are not ported yet.`);
@@ -29,7 +29,7 @@ async function main() {
   process.on('SIGINT', stop); process.on('SIGTERM', stop);
   try {
     runtime = await NativeRuntime.create(spec, { ...options, compiled });
-    const initialSnapshot = runtime.scene.snapshot();
+    const initialSnapshot = structuredClone(runtime.scene.snapshot());
     console.log(JSON.stringify({ event: 'native-ready', ...runtime.inspect() }));
     while (!interrupted && !runtime.host.shouldClose && (!options.frames || runtime.frames < options.frames)) {
       const start = performance.now();

@@ -13,6 +13,7 @@ const executable = join(out, process.platform === 'win32' ? 'the-engine.exe' : '
 const result = await Bun.build({
   entrypoints: [join(nativeDir, 'main.mjs')], target: 'bun',
   compile: { outfile: executable },
+  external: ['@kmamal/gpu', '@kmamal/sdl'],
   define: { __ENGINE_NATIVE_COMPILED__: 'true' },
 });
 if (!result.success) throw new AggregateError(result.logs, 'Native executable compilation failed');
