@@ -1660,7 +1660,23 @@ export class WebGPURenderer implements Renderer{
   resetProfile():void{this.profiler.reset();this.gpu.visibility?.resetStats();}
   private clearCameraBatchTemporal():void{this.cameraBatchTemporalPending?.clear();this.cameraBatchTemporalNext?.clear();this.cameraBatchTemporalSeen?.clear();this.cameraBatchTemporalReset=true;}
   private clearPreparationCaches():void{this.frameCache?.clear();this.radianceProjection?.clear();this.visibilityPlan?.clear();this.renderFrame=null;this.cameraBatchCauses?.splice(0);this.cameraBatchPlans?.splice(0);this.cameraBatchScene=null;this.cameraBatchLocations?.clear();this.cameraBatchMaterialIds?.clear();this.clearCameraBatchTemporal();this.modelCache?.clear();this.previousModels?.clear();}
-  dispose():void{if(this.disposed)return;this.disposed=true;this.environmentWorker?.dispose();for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();for(const batch of this.shadowBatches.values())batch.buffer.destroy();this.shadowBatches.clear();this.clearPreparationCaches();this.environmentMapCache?.clear();this.profiler?.dispose();this.opaqueDepthTarget?.destroy();this.gpu.opaqueDepthEmpty?.destroy();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();this.gpu.visibility?.destroy();for(const batch of this.cameraBatches?.values?.()??[]){batch.visibility.destroy();batch.reflection?.visibility.destroy();for(const view of Object.values(batch.shadows??{}))view.destroy();batch.buffer.destroy();}this.cameraBatches?.clear?.();this.cameraBatchMembers?.clear?.();this.cameraBatchLocations?.clear();for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false)o.texture.destroy();}for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.blackBloom,this.motionHdr,this.gpu.motionParams,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.spotShadowMap,this.gpu.spotShadowParams,...this.gpu.spotFrames,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeCapture,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();this.labels.clear();this.meshes.clear();this.objects.clear();}
+  dispose():void{
+    if(this.disposed)return;this.disposed=true;this.environmentWorker?.dispose();delete this.environmentWorker;
+    for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();
+    for(const batch of this.shadowBatches.values())batch.buffer.destroy();this.shadowBatches.clear();
+    this.clearPreparationCaches();this.environmentMapCache?.clear();this.profiler?.dispose();this.opaqueDepthTarget?.destroy();this.gpu.opaqueDepthEmpty?.destroy();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();this.gpu.visibility?.destroy();
+    for(const batch of this.cameraBatches?.values?.()??[]){batch.visibility.destroy();batch.reflection?.visibility.destroy();for(const view of Object.values(batch.shadows??{}))view.destroy();batch.buffer.destroy();}
+    this.cameraBatches?.clear?.();this.cameraBatchMembers?.clear?.();this.cameraBatchLocations?.clear();
+    for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}
+    for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}}
+    for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.blackBloom,this.motionHdr,this.gpu.motionParams,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.spotShadowMap,this.gpu.spotShadowParams,...this.gpu.spotFrames,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeCapture,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();
+    this.labels.clear();this.meshes.clear();this.objects.clear();
+    // A disposed renderer can remain in application/debug state. Release scene
+    // roots as well as GPU resources; an offscreen entity may own a large mesh.
+    this.lastScene=null;this.collectedScene=null;this.appearanceScene=null;this.environmentScene=null;
+    this.collectedVisible=[];this.collectedOpaque=[];this.collectedTransparent=[];this.lastLights=[];this.spotShadows=[];
+    this.measuredRadianceSpec=null;this.measuredRadiance=null;this.environmentRequestedKey='';
+  }
   private updateEnvironmentMap(scene:Scene,origin:Vec3,localProbeOwnsNearby=false):void{
     const settings=scene.spec.rendering??{},sun=V3.normalize(settings.sunDirection??[-.55,.48,-.35]),sunColor=settings.sunColor??[1,.87,.72],sky=settings.skyColor??[.26,.34,.47],intensity=settings.sunIntensity??scene.environment.sunlight*3;
     if(this.environmentScene!==scene){this.environmentWorker?.reset();this.environmentRequestedKey='';this.environmentScene=scene;this.environmentKey='';this.environmentMapCache?.clear();}
@@ -1688,6 +1704,8 @@ export class WebGPURenderer implements Renderer{
       }
       return;
     }
+    // The synthetic environment does not use the former measured HDR source.
+    this.measuredRadianceSpec=null;this.measuredRadiance=null;
     // Check the authoritative causes before building the expensive scene-radiance proxy.
     // Nearby dynamic detail is handled by SSR/local probes; the distant fallback only
     // needs rebuilding when its world-space origin, atmosphere or scene identity changes.
@@ -2034,7 +2052,9 @@ export class WebGPURenderer implements Renderer{
     }
     const sceneChanged=this.collectedScene!==scene;
     this.collectedScene=scene;this.collectedRevision=scene.renderStructureRevision;
-    for(const [id,object]of this.objects)if(object.source!==scene.entities.get(id))object.uniformReady=false;
+    for(const [id,object]of this.objects)if(object.source!==scene.entities.get(id)){
+      object.uniformReady=false;delete object.source;delete object.material;
+    }
     if(sceneChanged){
       // Hot render-lab scene swaps deliberately retain GPU pipelines/mesh buffers,
       // but every scene-owned uniform/probe/culling cache must observe the new causes.
