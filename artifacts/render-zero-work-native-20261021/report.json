@@ -5021,5 +5021,6 @@
       "pngSha256": "0a887c4366c03b0b6f88e5989dadf88138a639df47af0634841ddd8578ea2d38"
     }
   ],
-  "errors": []
+  "errors": [],
+  "fixturePhysicsNote": "Legacy state.physics=0 is a rendering-only fixture flag, not a body count. Fixtures include rigid bodies for dynamic-shadow coverage; the driver never invokes Scene.step. Current driver reads/asserts scene.tick and reports physicsSteps directly."
 }

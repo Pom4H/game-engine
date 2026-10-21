@@ -11,7 +11,7 @@ import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filt
 import {ProbeCapture} from './probe-capture.js';
 import {bakeEnvironmentMap,type EnvironmentMapData} from './environment-map.js';
 import {EnvironmentMapWorker,type EnvironmentWorker} from './environment-map-worker.js';
-import {meshBounds,intersectsClip,type MeshBounds} from './visibility.js';
+import {meshBounds,intersectsClip,intersectsModelClip,type MeshBounds} from './visibility.js';
 import {GpuVisibility,InstanceStream,INSTANCE_FLOATS,CURRENT_INSTANCE_FLOATS,VISIBILITY_SHADER,type VisibilityBatch,type VisibilityMode,type VisibilityRequest} from './gpu-visibility.js';
 import {instancedMaterialShader,instancedReflectionShader,instancedShadowShader,ShadowInstanceIndices} from './instancing.js';
 import {RenderVisibilityPlan,castsRenderShadow} from './visibility-plan.js';
@@ -829,15 +829,20 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let planarRoad=asphalt&&abs(in.worldPos.y-.015)<.02&&geometricNormal.y>.999;
   if(planarRoad&&in.reflected==0u){
     let p=f.reflectionVP*vec4<f32>(in.worldPos,1);let uv=p.xy/p.w*vec2<f32>(.5,-.5)+.5;
-    let ripple=vec2<f32>(noise3(in.worldPos*vec3<f32>(7,1,3))-.5,noise3(in.worldPos*vec3<f32>(3,1,9)+9.0)-.5)*.000075;let blur=vec2<f32>(.0011,.0021)*(roughness+.2);var reflection=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.28;
-    for(var k=0;k<6;k++){let a=f32(k)*1.0472;reflection+=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple+vec2<f32>(cos(a),sin(a))*blur,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.12;}
     let icePatch=smoothstep(.58,.77,noise3(in.worldPos*vec3<f32>(.35,.1,1.1)))*clamp(u.surfacePhase.w/.002,0.0,1.0);
     let fres=.02+.96*pow(1.0-nv,5.0);
     // Damp aggregate is still rough: a small wetness value must not overlay a
     // sharp copy of the whole street before a smooth water/ice film forms.
     let roadReflection=max(waterCoverage*(1.0-roadSlurry*.72),icePatch*.45)*(1.0-smoothstep(.25,.55,roughness));
     let inBounds=p.w>0.0&&all(uv>vec2<f32>(.001))&&all(uv<vec2<f32>(.999));
-    color=mix(color,reflection,select(0.0,fres*roadReflection,inBounds));
+    let reflectionWeight=select(0.0,fres*roadReflection,inBounds);
+    // Preserve every original explicit-LOD sample for a contributing pixel.
+    // An exact zero mix weight cannot use the ripple or the seven map reads.
+    if(reflectionWeight!=0.0){
+    let ripple=vec2<f32>(noise3(in.worldPos*vec3<f32>(7,1,3))-.5,noise3(in.worldPos*vec3<f32>(3,1,9)+9.0)-.5)*.000075;let blur=vec2<f32>(.0011,.0021)*(roughness+.2);var reflection=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.28;
+    for(var k=0;k<6;k++){let a=f32(k)*1.0472;reflection+=textureSampleLevel(reflectionMap,reflectionSampler,clamp(uv+ripple+vec2<f32>(cos(a),sin(a))*blur,vec2<f32>(.001),vec2<f32>(.999)),0).rgb*.12;}
+    color=mix(color,reflection,reflectionWeight);
+    }
   }
   let fog=1.0-exp(-fogViewDepth(eye,in.worldPos,f.sky.w));
   color=mix(color,f.fogColor.rgb,clamp(fog,0.0,1.0));
@@ -1352,8 +1357,10 @@ export class WebGPURenderer implements Renderer{
     const spotPlans=this.spotShadows.map(spot=>{
       const candidates=classified.opaque.filter(entity=>{
         if(!castsRenderShadow(entity))return false;
-        multiply4Into(spot.matrix,modelFor(entity),this.cullScratch);
-        return intersectsClip(this.mesh(renderPrimitive(entity)!).bounds,this.cullScratch);
+        const model=modelFor(entity),bounds=this.mesh(renderPrimitive(entity)!).bounds;
+        // Renderer-owned scratch is distinct from the immutable frame model and
+        // light matrix; rejected leaves need not finish unused product rows.
+        return intersectsModelClip(bounds,spot.matrix,model,this.cullScratch);
       });
       const scope=spot.slot===0?'spot0':'spot1',shared=this.prepareSharedShadows(candidates,scope),plan=this.prepareShadowBatches(shared.singles,modelFor,scope);
       const spotFrame=frame.slice(),axis=V3.normalize(spot.source.light!.emission!.axis);

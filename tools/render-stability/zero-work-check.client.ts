@@ -1,5 +1,6 @@
 import {WebGPURenderer} from '../../src/render/webgpu.ts';
 import {WebGPURenderer as FrozenRenderer} from './fixtures/webgpu-before-zero-work.ts';
+import {WebGPURenderer as FrozenPlanarRenderer} from './fixtures/webgpu-before-planar-weight.ts';
 import {Scene} from '../../src/scene/scene.ts';
 import {gameLighting} from '../../../thegame/src/game/render/game-lighting.ts';
 import {resolveVisualState} from '../../../thegame/src/game/render/visual-state.ts';
@@ -19,8 +20,8 @@ function comparison(before:Float32Array,after:Float32Array){let changed=0,maxAbs
 function require(value:unknown,message:string):asserts value{if(!value)throw Error(message);}
 
 (window as any).renderVisual=async({name,baseline}:{name:string;baseline:boolean})=>{
- renderer?.dispose();const Type:any=baseline?FrozenRenderer:WebGPURenderer;
- renderer=await Type.create(canvas,{profiling:false,visibility:name==='cpu-instances'?'cpu':'gpu',opaqueDepthPrepass:true,logarithmicDepthFar:2000,features:{screenSpace:true,bloom:true,temporalAA:true,planarReflections:true,motionBlur:true}});
+ renderer?.dispose();const roadCase=name.startsWith('road-'),spotCase=name.startsWith('spot-'),Type:any=baseline?(roadCase||spotCase?FrozenPlanarRenderer:FrozenRenderer):WebGPURenderer;
+ renderer=await Type.create(canvas,{profiling:roadCase,visibility:name==='cpu-instances'?'cpu':'gpu',opaqueDepthPrepass:true,logarithmicDepthFar:2000,features:{screenSpace:true,bloom:true,temporalAA:true,planarReflections:true,motionBlur:true}});
  renderer.setResolution(width,height);renderer.setBackgroundEnvironmentMaps(true);renderer.configurePostProcessing({temporalAA:true,bloom:true,motionBlur:0});
  const zero=name.startsWith('zero-'),humidity=name==='zero-cloud'?.84:name==='cloud-threshold'?.48:name==='cloud-above'?.48001:.42;
  const scene=new Scene({version:1,seed:29,gravity:[0,0,0],camera:{position:[7,4,-8],target:[0,1,6],fov:60},environment:{sunlight:zero?0:.7,humidity,temperatureC:15,groundMoisture:.5,snowfall:'none'},rendering:{sunIntensity:zero?0:1.5,sunDirection:[-.5,.6,-.3],skyColor:[.18,.23,.32],fogDensity:.004,shadowExtent:65},entities:name==='sun-transition'?[{id:'physical-surface',mesh:{kind:'box',size:[4,.1,4]},position:[0,.03,.5],material:{kind:'snow'},environmental:{surfaceUse:'generic',fieldCellSizeM:.1}}]:[]});
@@ -31,7 +32,14 @@ function require(value:unknown,message:string):asserts value{if(!value)throw Err
  scene.add({id:'moving',mesh:{kind:'sphere',radius:.6},position:[2,.7,1],body:{mass:1},material:{kind:'steel',color:[.7,.2,.08,1],roughness:.2,clearcoat:1}});
  scene.add({id:'relief',mesh:{kind:'box',size:[2,2,.2]},position:[0,1,7],material:{kind:'concrete',texture:{url:heightUrl,heightUrl,heightScaleM:.04,sizeM:1},roughness:.6}});
  scene.add({id:'spot',position:[0,3,-2],light:{kind:'point',intensity:200,color:[1,.8,.6],range:22,castShadow:true,emission:{axis:[0,-.1,1],innerAngle:.1,outerAngle:.7}}});
- const road=()=>scene.add({id:'road',mesh:{kind:'plane',size:[7,24]},position:[0,.015,3],material:{kind:'asphalt',color:[.1,.1,.1,1],roughness:.18,surfaceAppearance:{wetness:1,darkening:.07}}});
+ if(spotCase)scene.add({id:'spot-right',position:[.7,3,-2],light:{kind:'point',intensity:180,color:[.8,.9,1],range:28,castShadow:true,emission:{axis:[0,-.1,1],innerAngle:.1,outerAngle:.7}}});
+ const snow={snowDepthM:0,waterDepthM:0,iceDepthM:0,slush:0,freshness:0,liquidFraction:0,crust:0,grainSizeMm:.5};
+ const wetness=name==='road-dry'||name==='road-ice'||name==='road-rain'?0:1,roughness=name==='road-dry'?.9:name==='road-threshold-below'?.5499:name==='road-threshold-exact'?.55:name==='road-threshold-above'?.5501:.18;
+ if(name==='road-ice')Object.assign(snow,{iceDepthM:.003,crust:1});
+ if(name==='road-slurry')Object.assign(snow,{snowDepthM:.004,waterDepthM:.001,slush:.8,freshness:.2,liquidFraction:.6,crust:.1});
+ if(name==='road-rain')scene.patchAppearance({rendering:{surfaceWeather:{rain:1}}});
+ if(name==='road-bounds')scene.setCamera({position:[0,.18,-1],target:[0,.18,9],fov:60});
+ const road=()=>scene.add({id:'road',mesh:{kind:'plane',size:name==='road-bounds'?[400,400]:[7,24]},position:[0,name==='road-elevated'?.35:.015,3],rotation:name==='road-sloped'?[.15,0,0]:[0,0,0],material:{kind:'asphalt',color:[.1,.1,.1,1],roughness,...(name==='road-rain'?{rainResponse:{kind:'ground'}}:{}),surfaceAppearance:{wetness,darkening:.07,...(name==='road-ice'||name==='road-slurry'?{snow}:{})}}});
  if(name!=='no-receiver'&&name!=='receiver-transition')road();
  if(name==='moon-override'){
   const visual=resolveVisualState('night');require(visual.sunIntensity===0,'moon fixture must begin with visual sun intensity zero');
@@ -41,7 +49,16 @@ function require(value:unknown,message:string):asserts value{if(!value)throw Err
  let frame=0;const frameUniforms:Float32Array[]=[],passLabels:string[]=[];
  const queue=renderer.device.queue,write=queue.writeBuffer.bind(queue);queue.writeBuffer=(buffer:any,offset:number,data:any,...rest:any[])=>{if(buffer===renderer.gpu.frame&&offset===0&&data instanceof Float32Array&&data.length===184)frameUniforms.push(data.slice());return write(buffer,offset,data,...rest);};
  const encode=renderer.device.createCommandEncoder.bind(renderer.device);renderer.device.createCommandEncoder=(descriptor:any)=>{const encoder=encode(descriptor),begin=encoder.beginRenderPass.bind(encoder);encoder.beginRenderPass=(d:any)=>{if(d.label)passLabels.push(d.label);return begin(d);};return encoder;};
- const draw=()=>{renderer.setTimelineFrame(frame++);scene.time=7;renderer.render(scene);};
+ const draw=()=>{
+  if(spotCase){
+   const phase=frame*.045,axis=name==='spot-turns'?[Math.sin(phase)*.15,-1,Math.cos(phase)*.15]:[Math.sin(phase)*.55,-.1,Math.cos(phase)];
+   for(const [id,offset]of [['spot',-.35],['spot-right',.35]] as const){const e=scene.entities.get(id)!;scene.setVisualTransform(id,[Math.sin(phase)*1.2+offset,3,-2+frame*.025]);e.light!.emission!.axis=axis as any;}
+   if(name==='spot-slots')scene.entities.get('spot')!.light!.intensity=frame%12<6?200:0;
+   scene.entities.get('moving')!.position[0]=Math.sin(phase)*1.2+2;
+   scene.entities.get('wall-0')!.rotation[1]=phase*.2;
+  }
+  renderer.setTimelineFrame(frame++);scene.time=7;renderer.render(scene);
+ };
  for(let n=0;n<16;n++){draw();await new Promise(requestAnimationFrame);}await renderer.settleEnvironmentMaps();renderer.resetTemporalHistory();
  for(let n=0;n<16;n++){draw();await new Promise(requestAnimationFrame);}await renderer.flush();
  const preparationBefore=renderer.inspect(false).preparation,checks:any[]=[];
@@ -68,10 +85,11 @@ function require(value:unknown,message:string):asserts value{if(!value)throw Err
  if(name==='moon-override')require(frameUniforms.at(-1)![19]===.125,'actual frame must contain the celestial moon override, not zero visual sunlight');
  // Final paired history begins only after all asynchronous exact environment
  // output is settled. First-transition snapshots above retain their own proof.
- await renderer.settleEnvironmentMaps();renderer.resetTemporalHistory();for(let n=0;n<16;n++){draw();await new Promise(requestAnimationFrame);}await renderer.flush();
+ await renderer.settleEnvironmentMaps();renderer.resetTemporalHistory();if(roadCase)renderer.resetProfile();for(let n=0;n<(roadCase?64:16);n++){draw();await new Promise(requestAnimationFrame);}await renderer.flush();
  passLabels.length=0;draw();const oracle=await capture('final'),report=renderer.inspect(false);
  require(!report.errors.length,JSON.stringify(report.errors));
+ require(scene.tick===0,'visual equivalence must not step the fixture simulation');
  for(const check of checks)if(!baseline)for(const [stage,value]of Object.entries(check.oracle) as any)require(value.changed===0,`${name}/${check.phase}/${stage} differs: ${JSON.stringify(value)}`);
- return{name,baseline,errors:report.errors,oracle:baseline?null:oracle,checks,physics:0,preparationBefore,preparationAfter:report.preparation,resolution:[width,height],profiled:renderer.profile().enabled};
+ const profile=renderer.profile();return{name,baseline,errors:report.errors,oracle:baseline?null:oracle,checks,physicsSteps:scene.tick,preparationBefore,preparationAfter:report.preparation,resolution:[width,height],profiled:profile.enabled,...(roadCase?{gpuDiagnostic:{frames:profile.gpuFrames,timestampQueries:profile.timestampQueries,gpu:profile.gpu,work:profile.latestCpu?.work}}:{})};
 };
 (window as any).ready=true;

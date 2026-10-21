@@ -259,3 +259,73 @@ This is image-equivalence proof, not a frame-pacing acceptance run. No achieved
 60FPS/no-freeze claim follows from it. OS remained in the existing Power Saver
 plan, matching the other native tests. Parent is taking an actual-car CPU trace
 before the separate approved planar zero-weight sampling experiment.
+
+Final approved planar-weight and spotlight work
+The original selected planar reflection coefficient is now calculated before
+the two ripple-noise and seven reflection-map reads. Only a coefficient exactly
+equal to zero bypasses them; every contributing sample keeps its original
+coordinates, arithmetic order and weights. Out-of-bounds selection remains the
+original zero. This changes no roughness/wetness/snow/ice/SSR/rain quality setting.
+
+Native road proof: artifacts/render-planar-weight-native-20261021/report.json,
+11 paired cases against a frozen complete ed58e9e renderer (before this shader
+change). Dry/wet/ice/slurry, .5499/.55/.5501 roughness, raised/sloped roads,
+viewport bounds and falling rain all match full HDR/depth/effects/TAA and entire
+PNG exactly, errors0. Both sides used identical timestamp profiling, 65 samples
+per variant except bounds62. Diagnostic main GPU mean dry2.209->2.124ms,
+wet2.167->2.237ms; other cases have small mixed changes. Concurrent Game tests
+and Power Saver mean these measurements do NOT establish an overall FPS gain
+or a stable wet-scene regression. The dry zero-work removal is proved; matched
+timing uncertainty stays visible rather than claiming a universal speedup.
+
+The later actual-car r7 CPU trace (parent/NPC artifact npc-profile-r7-analysis)
+identified moving headlights as an active cost: spotPlans329.4ms/180 frames,
+including opaque filtering273.2ms, alongside main cull400.8ms, camera prep354.9ms
+and frameIR275.8ms. These are inclusive samples and MUST NOT be added. It was a
+contended diagnostic, not performance acceptance. Actual leaf matrix/bounds
+inputs were not recorded; no honest actual-r7 replay can be reconstructed from
+the CPU call stacks and summary stats alone.
+
+Approved spotlight improvement is narrower than a spatial-distance approximation:
+intersectsModelClip computes only Float32 product rows that the original clip
+planes reach, preserving the original dot-expression and six plane predicates,
+including -1e-5. X rejection computes8 entries instead of16; Y12; visible leaves
+still compute all16 once. Only the spotlight leaf uses it. Eligibility, order,
+full models/bounds, clip distances, deformation envelope and all camera/sun
+paths retain their prior behavior. Scratch is renderer-owned >=16 floats and
+nonoverlapping, matching multiply4Into's preexisting explicit contract. No new
+world-bound cache or light-distance threshold was added.
+
+A first checked helper was rejected after a paired CPU regression: per-leaf
+TypedArray.buffer alias validation roughly doubled its cost. The accepted
+constant-row version has documented caller ownership, no hot validation and
+passes 7 focused tests with >23k frozen differential/corner cases: arbitrary and
+projective matrices, large/signed scales, all plane boundaries, nonfinite and
+subnormal values, direct row-bit proof, unchanged input arrays and separate
+scratch. Finite/infinity/signed-zero row bits match; NaNs retain old boolean and
+NaN behavior. Original intersectsClip itself is unchanged.
+
+Chrome156/V8 allocation-free proxy: artifacts/render-model-clip-v8-20261021/report.json.
+Both paths use one preallocated scratch; the baseline calls the unchanged
+production multiply4Into + intersectsClip. Frozen allocating reference functions
+are used only outside timed regions. Across25 alternating pairs, mixed65,536
+calls old median5.70ms/current2.70ms (paired median ratio.483); all-visible32,768
+calls3.20ms/2.00ms (ratio.625). This is SYNTHETIC input, not captured actual-r7,
+GPU timing, game FPS or isolated acceptance. The concurrent suite/unchanged
+Power Saver conditions and all raw samples are retained in the report.
+
+Native moving spotlight proof: artifacts/render-model-clip-native-20261021/report.json.
+Two moving headlights, near-vertical turns and slot on/off transitions, with
+direct static rotation and moving-body transforms: 3 paired cases, full1280x720,
+profilingOFF, complete HDR/depth/effects/TAA and PNG bit exact, errors0. This
+compares the frozen ed58e9e renderer with current production, complementing the
+independent row-level proof and separate road comparison.
+
+Final Engine verification: npm run check exit0, typecheck/build0; 913 tests,
+894 pass,19 intentional skips,0 fail in69.55s. Full log preserved as
+artifacts/engine-roi-final-check.log. Native proof coverage is10+11+3 paired
+scenes; shader fingerprints updated only after their independent comparison.
+No GPU jobs, game services, OS power-plan changes or original save writes remain
+active from this agent. Full Game regression and strict actual-car frame pacing
+remain parent-owned; synchronous durable-authority I/O is still a documented
+separate limitation. The renderer changes do not justify a no-freeze claim.
