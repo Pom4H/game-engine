@@ -36,14 +36,14 @@ export {M3_FBX_PARTS_FIDELITY,M3_FBX_PART_SOURCES,m3FbxParts,type M3FbxPartSourc
 export {decodePackedShell,type PackedShell} from './vehicles/packed-shell.js';
 export {encodePackedMesh,decodePackedMesh,type PackedMesh} from './assets/packed-mesh.js';
 export {ElasticPlasticPanelResponse,FourCornerSuspension,DoorHinge,M3InteractionRig,type PanelImpactInput,type PanelImpactResult,type SuspensionPose,type VehicleInteractionImpact,type VehicleInteractionState} from './vehicles/interaction-physics.js';
-export {Scene,type RuntimeEntity} from './scene/scene.js';
+export {Scene,type RuntimeEntity,type PreparedRenderEntitySpec,type PreparedRenderEntityUpdate,type RenderEntityPreparation} from './scene/scene.js';
 export {RenderMeshQuery,avoidCameraObstacles,type RenderMeshHit,type RenderMeshFilter,type CameraObstruction} from './render/mesh-ray.js';
 export {syncSceneAcousticBoundaries,type SceneAcousticBoundaryStats} from './scene/acoustic-boundary.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
 export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from './scene/url.js';
 export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,SceneVehicleAssemblySpec,SceneVehicleVisualSpec,Primitive,MaterialSpec,CameraSpec,CameraRailSpec,LightSpec,LightEmissionSpec,RenderingSpec,ReflectionProbeSpec,Color} from './scene/types.js';
-export {primitiveMesh,primitiveKey,surfaceGridPrimitive,compactTriangleMesh,isOwnedValidatedTriangleMesh,ownedTriangleMeshBounds,type MeshData,type CompactTriangleMeshInput} from './procedural/mesh.js';
+export {primitiveMesh,primitiveKey,surfaceGridPrimitive,compactTriangleMesh,prepareCopiedTriangleMesh,isOwnedValidatedTriangleMesh,ownedTriangleMeshBounds,type MeshData,type CompactTriangleMeshInput,type CopiedTriangleMeshPreparation} from './procedural/mesh.js';
 export {hillyTerrainHeight,hillyTerrainMesh,polygonSurfaceGrid,type HillyTerrainOptions,type TerrainCorridorSpec} from './procedural/terrain.js';
 export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/cloth.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';

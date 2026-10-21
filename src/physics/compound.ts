@@ -4,6 +4,7 @@ import { boxBoundsOverlap, withBoxBounds, boxesPenetrate, staticQueryRadius, STA
 // SI units, Y up. Convex boxes and finite planes; application policies are callbacks.
 // Sequential impulses, angular inertia, Coulomb friction, speculative contacts and motion substeps.
 import { SpatialHash } from '../core/spatial-hash.js';
+import {StaticGroupStorage,type StaticCollisionGroup} from './static-groups.js';
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
 export const COMPOUND_PHYSICS_BACKEND = 'the-engine-compound' as const;
 type Vector = readonly number[];
@@ -430,9 +431,8 @@ export class SolidWorld {
     gravity: Vector;
     iterations: number;
     bodies: SolidBody[];
-    statics: SolidBody[];
-    planes: SolidPlane[];
-    globalPlanes: SolidPlane[];
+    statics:SolidBody[];planes:SolidPlane[];globalPlanes:SolidPlane[];
+    private staticGroups:StaticGroupStorage<SolidBody|SolidPlane>|undefined;private currentStaticGroup:StaticCollisionGroup|undefined;
     staticIndex: SpatialHash<SolidBody | SolidPlane>;
     contacts: SolidContact[];
     joints: SolidJoint[];
@@ -457,22 +457,34 @@ export class SolidWorld {
 
     private readonly rayBoxCache = new WeakMap<SolidBody,QueryBoxEntry>();
     readonly policies: SolidPolicies;
+    /** Legacy worlds keep own mutable arrays. Only explicit grouped worlds use
+     * lazy ordinary ordered snapshots; internal physics never reads those. */
+    enableStaticGroups():void{if(this.staticGroups)return;const storage=new StaticGroupStorage<SolidBody|SolidPlane>(this.statics,this.planes,this.globalPlanes);this.staticIndex.enableGroups();this.staticGroups=storage;Object.defineProperties(this,{statics:{configurable:true,enumerable:true,get:()=>storage.snapshot('bodies')},planes:{configurable:true,enumerable:true,get:()=>storage.snapshot('planes')},globalPlanes:{configurable:true,enumerable:true,get:()=>storage.snapshot('globals')}});}
+    createStaticGroup():StaticCollisionGroup{this.enableStaticGroups();return this.staticGroups!.create();}
+    get staticGroup():StaticCollisionGroup|undefined{return this.currentStaticGroup;}
+    inspectStaticGroups(){return this.staticGroups?.inspect()??null;}
+    staticGroupOf(body:SolidBody|SolidPlane){return this.staticGroups?.groupOf(body);}
+    withStaticGroup<T>(group:StaticCollisionGroup|undefined,run:()=>T):T{if(group&&(!this.staticGroups?.owns(group)||!group.active))throw Error('Static group is inactive or belongs to another world');const previous=this.currentStaticGroup;this.currentStaticGroup=group;try{return run();}finally{this.currentStaticGroup=previous;}}
+    retireStaticGroup(group:StaticCollisionGroup):void{if(!this.staticGroups)throw Error('Static grouping is not enabled');if(this.staticGroups.deactivate(group))this.staticIndex.invalidateGroup();}
+    cleanupStaticGroup(group:StaticCollisionGroup,maxOperations=32):{done:boolean;operations:number}{if(!Number.isSafeInteger(maxOperations)||maxOperations<1||maxOperations>4096)throw RangeError('Invalid static cleanup budget');if(!this.staticGroups)throw Error('Static grouping is not enabled');this.staticIndex.beginBatch();try{return this.staticGroups.cleanup(group,maxOperations,item=>this.staticIndex.removeReference(item));}finally{this.staticIndex.endBatch();}}
+    /** Remove known static ownership without materializing public snapshots. */
+    removeStatics(items:Iterable<SolidBody|SolidPlane>):void{if(this.staticGroups){for(const item of items){this.staticGroups.remove(item);this.staticIndex.remove(item);}return;}const removed=new Set(items);this.statics=this.statics.filter(item=>!removed.has(item));let hasPlane=false;for(const item of removed)if(item.plane){hasPlane=true;break;}if(hasPlane){this.planes=this.planes.filter(item=>!removed.has(item));this.globalPlanes=this.globalPlanes.filter(item=>!removed.has(item));}for(const item of removed)this.staticIndex.remove(item);}
     constructor({ gravity = [0, -9.81, 0], iterations = 10, policies = {} }: SolidWorldOptions = {}) { this.gravity = gravity; this.iterations = iterations; this.policies = policies; this.bodies = []; this.statics = []; this.planes = []; this.globalPlanes = []; this.staticIndex = new SpatialHash(STATIC_COLLISION_CELL_SIZE, { cellOrder: true }); this.contacts = []; this.joints = []; this.events = []; this.metrics = { steps: 0, contacts: 0, maxPenetration: 0, ceilingContacts: 0, substeps: 0 }; this.beforeSubstep = null; this.groundFilter = null; }
     add<T extends SolidBody>(body: T): T { body.removed = false; if (body.invMass)
         this.bodies.push(body);
     else {
-        this.statics.push(body);
+        if(this.staticGroups)this.staticGroups.add(body,false,false,this.currentStaticGroup);else this.statics.push(body);
         body.cachedBoxes = body.boxes();
         body.indexRadius = staticQueryRadius(body.p, body.cachedBoxes);
         body.x = body.p[0]!;
         body.z = body.p[2]!;
-        this.staticIndex.add(body, body.indexRadius);
+        this.staticIndex.add(body, body.indexRadius,this.currentStaticGroup);
     } return body; }
     remove(body: SolidBody) { body.removed = true; this.bodies = this.bodies.filter(b => b !== body); this.joints = this.joints.filter(j => j.a !== body && j.b !== body); }
-    addPlane({ p, n = [0, 1, 0], u = [1, 0, 0], v = [0, 0, 1], hu = 1, hv = 1, tag = 'road', filter = null }: SolidPlaneOptions): SolidPlane { const plane: SolidPlane = { id: solidId++, plane: true, p, n: Vunit(n), u: Vunit(u), v: Vunit(v), hu, hv, tag, filter, x: p[0]!, z: p[2]!, radius: Math.hypot(hu, hv), body: null }; this.planes.push(plane); if (plane.radius > 256)
-        this.globalPlanes.push(plane);
+    addPlane({ p, n = [0, 1, 0], u = [1, 0, 0], v = [0, 0, 1], hu = 1, hv = 1, tag = 'road', filter = null }: SolidPlaneOptions): SolidPlane { const plane: SolidPlane = { id: solidId++, plane: true, p, n: Vunit(n), u: Vunit(u), v: Vunit(v), hu, hv, tag, filter, x: p[0]!, z: p[2]!, radius: Math.hypot(hu, hv), body: null };if(this.staticGroups)this.staticGroups.add(plane,true,plane.radius>256,this.currentStaticGroup);else this.planes.push(plane); if (plane.radius > 256){
+        if(!this.staticGroups)this.globalPlanes.push(plane);}
     else
-        this.staticIndex.add(plane, plane.radius); return plane; }
+        this.staticIndex.add(plane, plane.radius,this.currentStaticGroup); return plane; }
     joint(a: SolidBody, b: SolidBody, anchorA: Vector, anchorB: Vector) { const j: SolidJoint = { a, b, anchorA, anchorB }; a.ignore.add(b.id); b.ignore.add(a.id); this.joints.push(j); return j; }
     distanceJoint(a: SolidBody, b: SolidBody, length = Vlen(Vsub(a.p, b.p))) { const j: SolidJoint = { type: 'distance', a, b, length }; a.ignore.add(b.id); b.ignore.add(a.id); this.joints.push(j); return j; }
     rangeJoint(a: SolidBody, b: SolidBody, min: number, max: number) { if (!Number.isFinite(min) || !Number.isFinite(max) || min < 0 || max < min) throw new RangeError('Invalid joint range'); const j: SolidJoint = {type: 'range', a, b, min, max}; this.joints.push(j); return j; }
@@ -491,7 +503,7 @@ export class SolidWorld {
             : this.staticIndex.near(p[0]!, p[2]!, r, scratch, orderRadius);
         const out = slot.out;
         out.length = 0;
-        for (const plane of this.globalPlanes)
+        for (const plane of this.staticGroups?this.staticGroups.globalValues():this.globalPlanes)
             if (plane.enabled !== false)
                 out.push(plane);
         for (let i = 0; i < near.length; i++) {

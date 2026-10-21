@@ -1,4 +1,6 @@
 import type {Primitive} from '../scene/types.js';
+import {copiedTrianglePreparation,isCopiedTriangle,copiedTriangleBounds,copiedTriangleMeshData,copiedTrianglePacking,triangleMeshPacking,type CopiedTriangleMeshPreparation,type TriangleMeshPacking} from './copied-triangle.js';
+export type {CopiedTriangleMeshPreparation} from './copied-triangle.js';
 
 export interface MeshData {vertices:Float32Array;colors:Uint8Array;uvs?:Float32Array;variationSeeds?:Float32Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
 /** One vertex stream for albedo and authored UVs. Unauthored meshes retain the
@@ -94,9 +96,21 @@ export function compactTriangleMesh(input:CompactTriangleMeshInput):TriangleMesh
  registerTriangleKey(mesh,'dynamic:'+ ++dynamicPrimitiveId);return mesh;
 }
 /** An identity certificate for this factory, not public freezePrimitive inputs. */
-export function isOwnedValidatedTriangleMesh(value:unknown):value is TriangleMesh{return value!==null&&typeof value==='object'&&hasOwnedTriangle(value);}
+export function isOwnedValidatedTriangleMesh(value:unknown):value is TriangleMesh{return value!==null&&typeof value==='object'&&(hasOwnedTriangle(value)||isCopiedTriangle(value));}
 /** Original-double extrema; the small shared tuple is immutable, never a view. */
-export function ownedTriangleMeshBounds(value:unknown):TriangleBounds|undefined{return value!==null&&typeof value==='object'?getOwnedTriangle(value)?.bounds:undefined;}
+export function ownedTriangleMeshBounds(value:unknown):TriangleBounds|undefined{return value!==null&&typeof value==='object'?getOwnedTriangle(value)?.bounds??copiedTriangleBounds(value):undefined;}
+/** Opt-in staged snapshot. Inputs remain caller-owned and stable until the
+ * ticket completes. No scalar is trusted and no identity is issued early. */
+export function prepareCopiedTriangleMesh(input:CompactTriangleMeshInput):CopiedTriangleMeshPreparation{
+ return copiedTrianglePreparation(input,mesh=>registerTriangleKey(mesh,'dynamic:'+ ++dynamicPrimitiveId));
+}
+/** Renderer-internal packing stream. Blocks are fresh copies, never private
+ * storage views. Only either explicit validated factory identity is accepted. */
+export function prepareTriangleMeshPacking(primitive:Primitive):TriangleMeshPacking{
+ const copied=copiedTrianglePacking(primitive as object);if(copied)return copied;
+ const s=getOwnedTriangle(primitive as object);if(!s)throw new TypeError('Staged GPU preparation requires an owned validated triangle mesh');
+ return triangleMeshPacking((key,index)=>s[key]?.[index],s.positions.length/3,s.indices.length,s.uvs!==undefined,s.variationSeeds!==undefined);
+}
 function ownedTriangleMeshData(state:OwnedTriangle):MeshData{
  const p=state.positions,n=state.normals,sourceColors=state.colors,count=p.length/3,vertices=new TriangleFloat32(count*6),colors=new TriangleColor8(count*4);
  for(let i=0;i<count;i++){
@@ -137,6 +151,7 @@ export function surfaceGridPrimitive(size:readonly[number,number,number],segment
 
 export function primitiveMesh(primitive:Primitive):MeshData{
   const compact=getOwnedTriangle(primitive as object);if(compact)return ownedTriangleMeshData(compact);
+  const copied=copiedTriangleMeshData(primitive as object);if(copied)return copied;
   if(primitive.kind==='triangle-mesh')return {...pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined),...(primitive.uvs?{uvs:Float32Array.from(primitive.uvs)}:{}),...(primitive.variationSeeds?{variationSeeds:Float32Array.from(primitive.variationSeeds)}:{})};
   if(primitive.kind==='torus')return torusMesh(primitive.radius,primitive.tube,primitive.segments??40);
   if(primitive.kind==='cylinder')return cylinderMesh(primitive.radius,primitive.height,primitive.topRadius??primitive.radius,Math.round(primitive.segments??20));

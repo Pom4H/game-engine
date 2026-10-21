@@ -43,16 +43,21 @@ test('returning to the active cause drops a superseded queued input',()=>{
 test('dispose terminates worker and releases idle waiters without publishing stale results',async()=>{
  const h=harness();h.worker.request('a',input());const idle=h.worker.idle();h.worker.dispose();await idle;h.finish();assert.equal(h.native.terminated,true);assert.equal(h.published.length,0);h.worker.request('b',input());assert.equal(h.posted.length,1);
 });
-test('worker failure publishes the same exact bake and exposes synchronous fallback',()=>{
- const h=harness();h.worker.request('a',input());h.native.onerror({preventDefault(){}});assert.equal(h.native.terminated,true);assert.equal(h.worker.inspect().failed,true);assert.equal(digest(h.published[0].data),fixtures[0][1]);
- h.worker.request('b',input(fixtures[1][0]));assert.equal(digest(h.published[1].data),fixtures[1][1]);
+test('worker failure rejects readiness without baking on the caller or replacing its last complete map',async()=>{
+ const h=harness();h.worker.request('a',input());const idle=h.worker.idle();h.native.onerror({message:'injected worker failure',preventDefault(){}});assert.equal(h.native.terminated,true);assert.equal(h.worker.inspect().failed,true);assert.equal(h.published.length,0);await assert.rejects(idle,/injected worker failure/);await assert.rejects(h.worker.idle(),/injected worker failure/);
+ h.worker.request('b',input(fixtures[1][0]));assert.equal(h.published.length,0);assert.equal(h.posted.length,1);h.worker.dispose();
+});
+
+test('construction and postMessage failure never execute a synchronous fallback',async()=>{
+ let published=0;const unavailable=new EnvironmentMapWorker(()=>published++,()=>{throw Error('constructor blocked');});unavailable.request('a',input());await assert.rejects(unavailable.idle(),/constructor blocked/);assert.equal(published,0);unavailable.dispose();
+ const broken=new EnvironmentMapWorker(()=>published++,()=>({onmessage:null,onerror:null,postMessage(){throw Error('post blocked');},terminate(){}}));broken.request('b',input());await assert.rejects(broken.idle(),/post blocked/);assert.equal(published,0);broken.dispose();
 });
 test('renderer keeps a complete map during background baking and rejects a cached-return stale result',()=>{
  const scene=new Scene(fixtures[1][0]),uploads=[],native={onmessage:null,onerror:null,postMessage(){},terminate(){}};
  const renderer=Object.create(WebGPURenderer.prototype);
  Object.assign(renderer,{environmentIrradiance:new Float32Array(36),environmentUpdates:0,environmentKey:'',environmentRequestedKey:'',device:{queue:{writeTexture(_target,pixels){uploads.push(pixels.slice());}}},gpu:{environmentMap:{}},profiler:{enabled:false,addUpload(){}}});
  renderer.environmentWorker=new EnvironmentMapWorker((key,data)=>renderer.publishEnvironmentMap(key,data),()=>native);
- renderer.updateEnvironmentMap(scene,[1,2,3]);assert.equal(uploads.length,9);const original=renderer.environmentKey;
+ renderer.updateEnvironmentMap(scene,[1,2,3]);assert.equal(uploads.length,0,'the first bake must also stay off the caller');native.onmessage({data:bakeEnvironmentMap(input(fixtures[1][0]))});assert.equal(uploads.length,9);const original=renderer.environmentKey;
  scene.patchAppearance({rendering:{sunIntensity:2}});renderer.updateEnvironmentMap(scene,[1,2,3]);assert.equal(uploads.length,9,'render must not wait for the next bake');assert.equal(renderer.environmentKey,original);
  const pending=renderer.environmentRequestedKey;assert.notEqual(pending,original);
  scene.patchAppearance({rendering:{sunIntensity:1.7}});renderer.updateEnvironmentMap(scene,[1,2,3]);assert.equal(renderer.environmentRequestedKey,'');
@@ -67,6 +72,7 @@ test('continuously advancing cameras publish serialized progress without losing 
  Object.assign(renderer,{environmentIrradiance:new Float32Array(36),environmentUpdates:0,environmentKey:'',environmentRequestedKey:'',device:{queue:{writeTexture(_target,pixels){uploads.push(pixels);}}},gpu:{environmentMap:{}},profiler:{enabled:false,addUpload(){}}});
  renderer.environmentWorker=new EnvironmentMapWorker((key,data)=>renderer.publishEnvironmentMap(key,data),()=>native);
  renderer.updateEnvironmentMap(scene,[1,2,3]);
+ assert.equal(uploads.length,0);native.onmessage({data:bakeEnvironmentMap(posted.shift())});
  renderer.updateEnvironmentMap(scene,[2,2,3]);let active=renderer.environmentRequestedKey;
  for(let iteration=0;iteration<3;iteration++){
   renderer.updateEnvironmentMap(scene,[3+iteration*2,2,3]);renderer.updateEnvironmentMap(scene,[4+iteration*2,2,3]);const newest=renderer.environmentRequestedKey;

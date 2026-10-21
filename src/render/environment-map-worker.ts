@@ -1,4 +1,4 @@
-import {bakeEnvironmentMap,type EnvironmentMapInput,type EnvironmentMapData} from './environment-map.js';
+import {type EnvironmentMapInput,type EnvironmentMapData} from './environment-map.js';
 import {ModuleWorker as Worker} from './module-worker.js';
 
 type Job={key:string;generation:number;input:EnvironmentMapInput};
@@ -15,33 +15,32 @@ export class EnvironmentMapWorker {
   private generation=0;
   private idleDone:Promise<void>|null=null;
   private finishIdle:(()=>void)|null=null;
+  private rejectIdle:((error:Error)=>void)|null=null;
+  private failure:Error|null=null;
   private disposed=false;
   private worker:EnvironmentWorker|null;
   private failed=false;
   constructor(private readonly publish:(key:string,data:EnvironmentMapData)=>void,
     create:()=>EnvironmentWorker=()=>new Worker(new URL('./environment-map.worker.js',import.meta.url),{type:'module'})){
-    // Construction can throw synchronously (for example a cross-origin dev
-    // script). Use the same bake fallback as an asynchronous worker failure.
-    try{this.worker=create();}catch{this.worker=null;this.failed=true;return;}
-    this.worker.onmessage=event=>this.complete(event.data);
+    try{this.worker=create();}catch(error){this.worker=null;this.fail(error);return;}
+    this.worker.onmessage=event=>{try{this.complete(event.data);}catch(error){this.fail(error);}};
     this.worker.onerror=event=>{
-      event.preventDefault();this.worker?.terminate();this.worker=null;this.failed=true;
-      if(this.active)this.complete(bakeEnvironmentMap(this.active.input));
+      event.preventDefault();this.fail(new Error(event.message||'Environment worker failed'));
     };
   }
   request(key:string,input:EnvironmentMapInput):void{
-    if(this.disposed)return;
+    if(this.disposed||this.failed)return;
     if(this.active?.generation===this.generation&&this.active.key===key){this.queued=null;return;}
     const job={key,input,generation:this.generation};
     if(this.active)this.queued=job;else this.start(job);
   }
   reset():void{this.generation++;this.queued=null;}
   inspect(){return{active:this.active!==null,queued:this.queued!==null,failed:this.failed};}
-  idle():Promise<void>{return this.active?(this.idleDone??=new Promise(resolve=>{this.finishIdle=resolve;})):Promise.resolve();}
+  idle():Promise<void>{if(this.failure)return Promise.reject(this.failure);return this.active?(this.idleDone??=new Promise((resolve,reject)=>{this.finishIdle=resolve;this.rejectIdle=reject;})):Promise.resolve();}
   dispose():void{this.disposed=true;this.worker?.terminate();this.worker=null;this.active=this.queued=null;this.release();}
   private start(job:Job):void{
     this.active=job;
-    if(this.worker)this.worker.postMessage(job.input);else this.complete(bakeEnvironmentMap(job.input));
+    try{this.worker?.postMessage(job.input);}catch(error){this.fail(error);}
   }
   private complete(data:EnvironmentMapData):void{
     const job=this.active;this.active=null;
@@ -49,5 +48,6 @@ export class EnvironmentMapWorker {
     const next=this.queued;this.queued=null;
     if(next&&!this.disposed)this.start(next);else this.release();
   }
-  private release(){this.finishIdle?.();this.finishIdle=null;this.idleDone=null;}
+  private fail(cause:unknown){this.failure=cause instanceof Error?cause:new Error(String(cause));this.failed=true;try{this.worker?.terminate();}finally{this.worker=null;this.active=this.queued=null;this.rejectIdle?.(this.failure);this.finishIdle=this.rejectIdle=null;this.idleDone=null;}}
+  private release(){this.finishIdle?.();this.finishIdle=this.rejectIdle=null;this.idleDone=null;}
 }

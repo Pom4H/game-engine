@@ -24,7 +24,12 @@ import {buildLightGrid,LIGHT_GRID_WGSL,MAX_RENDER_LIGHTS,LIGHT_GRID_SIDE,LIGHT_G
 import {FOG_WGSL,FOG_MEDIUM_WGSL} from './fog.js';
 import {FRAME_UNIFORM_WORDS,FRAME_UNIFORM_BYTES,FRAME_WGSL,SKY_SHADER,EFFECTS_SHADER,PRESENT_SHADER,BLOOM_SHADER,TAA_SHADER} from './lighting.js';
 import {V3,compose,lookAt,multiply4,multiply4Into,perspective,type Mat4,type Vec3} from '../math.js';
-import {primitiveKey,primitiveMesh,meshVertexAttributes} from '../procedural/mesh.js';
+import {primitiveKey,primitiveMesh,meshVertexAttributes,prepareTriangleMeshPacking,isOwnedValidatedTriangleMesh} from '../procedural/mesh.js';
+import {StagedMeshLease,type MeshPreparationLease} from './mesh-preparation.js';
+export type {MeshPreparationLease} from './mesh-preparation.js';
+import {StagedEntityLease,type EntityPreparationLease} from './entity-preparation.js';
+export type {EntityPreparationLease} from './entity-preparation.js';
+import {isPreparedRenderEntity} from '../scene/render-entity-preparation.js';
 import type {Primitive,CameraSpec,SurfaceTextureSpec,EnvironmentRadianceSpec} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Renderer,RenderStats} from './types.js';
@@ -69,11 +74,13 @@ function materialTextureURLs(entities:readonly RuntimeEntity[],optionalMaterial=
  }
  return urls;
 }
+function withPreparedTextureURLs(urls:Set<string>,pins:ReadonlyMap<string,number>|undefined):Set<string>{for(const url of pins?.keys()??[])urls.add(url);return urls;}
 const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean;visibility?:VisibilityMode;features?:Partial<RenderFeatures>;logarithmicDepthFar?:number;opaqueDepthPrepass?:boolean}
-interface GPUMesh{key:string;bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number}
+interface GPUMesh{key:string;bounds:MeshBounds;vertex:GPUAny;color:GPUAny;index:GPUAny;count:number;format:'uint16'|'uint32';triangles:number;destroy?():void}
 interface GPUObject{source?:RuntimeEntity;material?:RuntimeEntity['material'];uniform:GPUAny;bind:GPUAny;texture:GPUAny;deformationTexture:GPUAny;width:number;height:number;owned?:boolean;label?:string;materialKey?:string;uniformReady?:boolean;lastModel?:Mat4;lastPrevModel?:Mat4;instancedMaterial?:boolean;
+  destroy?():void;preparedAdopted?:boolean;preparedTextureURLs?:readonly (string|undefined)[];preparedPrimitive?:Primitive;preparedMesh?:GPUMesh;
   materialTexture?:GPUAny;normalTexture?:GPUAny;ormTexture?:GPUAny;heightTexture?:GPUAny;labelTexture?:GPUAny;
   /** Bounded object staging buffers reused across frames. */
   uniformStaging?:Float32Array;surfaceStaging?:Float32Array;deformationStaging?:Float32Array;lastSurfaceRevision?:number|undefined;
@@ -984,6 +991,10 @@ export class WebGPURenderer implements Renderer{
   private fixedResolution:readonly [number,number]|undefined;
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();
+  private meshPreparationLeases=new Set<MeshPreparationLease>();private preparedMeshPins=new Map<GPUMesh,number>();
+  private entityPreparationLeases=new Set<EntityPreparationLease>();
+  private preparedEntityObjects=new WeakMap<RuntimeEntity,GPUObject>();
+  private preparedEntityTextureURLs=new Map<string,number>();
   private readonly instanceBatches=new Map<string,GPUInstanceBatch>();
   // Stable render-only entities keep the same immutable material and frozen mesh
   // until an actual appearance/geometry revision. Cache batch identity and seed.
@@ -1213,7 +1224,7 @@ export class WebGPURenderer implements Renderer{
   setBackgroundEnvironmentMaps(enabled:boolean,create?:()=>EnvironmentWorker):void{
     this.environmentWorker?.dispose();delete this.environmentWorker;this.environmentRequestedKey='';
     if(this.disposed)return;
-    if(enabled&&(create||typeof Worker!=='undefined'))this.environmentWorker=new EnvironmentMapWorker((key,data)=>{if(!this.disposed)this.publishEnvironmentMap(key,data);},create);
+    if(enabled)this.environmentWorker=new EnvironmentMapWorker((key,data)=>{if(!this.disposed)this.publishEnvironmentMap(key,data);},create);
   }
   async settleEnvironmentMaps():Promise<void>{await this.environmentWorker?.idle();await this.flush();}
   /** Align temporal sampling when separate workers render ranges of one timeline. */
@@ -1606,7 +1617,10 @@ export class WebGPURenderer implements Renderer{
   private queueMaterialLoads(scene:Scene):void{
     if(this.disposed)return;
     const urls=materialTextureURLs([...scene.entities.values()]);
-    this.surfaceTextures.retain?.(urls);
+    // Detached entities are not yet in the Scene snapshot. Keep their actual
+    // pending/ready assets at every retention boundary, without starting their
+    // loads here or changing the live URL iteration/default receiver contract.
+    this.surfaceTextures.retain?.(this.preparedEntityTextureURLs?.size?withPreparedTextureURLs(new Set(urls),this.preparedEntityTextureURLs):urls);
     for(const url of this.failedMaterials)if(!urls.has(url))this.failedMaterials.delete(url);
     for(const url of urls){
       if(this.surfaceTextures.get(url)||this.materialLoads.has(url)||this.failedMaterials.has(url))continue;
@@ -1688,14 +1702,14 @@ export class WebGPURenderer implements Renderer{
   private clearCameraBatchTemporal():void{this.cameraBatchTemporalPending?.clear();this.cameraBatchTemporalNext?.clear();this.cameraBatchTemporalSeen?.clear();this.cameraBatchTemporalReset=true;}
   private clearPreparationCaches():void{this.frameCache?.clear();this.radianceProjection?.clear();this.visibilityPlan?.clear();this.renderFrame=null;this.cameraBatchCauses?.splice(0);this.cameraBatchPlans?.splice(0);this.cameraBatchScene=null;this.cameraBatchLocations?.clear();this.cameraBatchMaterialIds?.clear();this.clearCameraBatchTemporal();this.modelCache?.clear();this.previousModels?.clear();}
   dispose():void{
-    if(this.disposed)return;this.disposed=true;this.environmentWorker?.dispose();delete this.environmentWorker;
+    if(this.disposed)return;this.disposed=true;for(const lease of this.entityPreparationLeases??[])lease.dispose();this.entityPreparationLeases?.clear();this.preparedEntityTextureURLs?.clear();this.preparedEntityObjects=new WeakMap();for(const lease of this.meshPreparationLeases??[])lease.dispose();this.meshPreparationLeases?.clear();this.preparedMeshPins?.clear();this.environmentWorker?.dispose();delete this.environmentWorker;
     for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();
     for(const batch of this.shadowBatches.values())batch.buffer.destroy();this.shadowBatches.clear();
     this.clearPreparationCaches();this.environmentMapCache?.clear();this.profiler?.dispose();this.opaqueDepthTarget?.destroy();this.gpu.opaqueDepthEmpty?.destroy();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();this.gpu.visibility?.destroy();
     for(const batch of this.cameraBatches?.values?.()??[]){batch.visibility.destroy();batch.reflection?.visibility.destroy();for(const view of Object.values(batch.shadows??{}))view.destroy();batch.buffer.destroy();}
     this.cameraBatches?.clear?.();this.cameraBatchMembers?.clear?.();this.cameraBatchLocations?.clear();
-    for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}
-    for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}}
+    for(const m of this.meshes.values()){if(m.destroy)m.destroy();else{m.vertex.destroy();m.color.destroy();m.index.destroy();}}
+    for(const o of this.objects.values())this.destroyObject(o,false);
     for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.blackBloom,this.motionHdr,this.gpu.motionParams,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.spotShadowMap,this.gpu.spotShadowParams,...this.gpu.spotFrames,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeCapture,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();
     this.labels.clear();this.labelUsers?.clear();this.meshes.clear();this.objects.clear();
     // A disposed renderer can remain in application/debug state. Release scene
@@ -1764,7 +1778,7 @@ export class WebGPURenderer implements Renderer{
     if(cachedMap&&this.environmentRequestedKey){this.environmentWorker?.reset();this.environmentRequestedKey='';}
     if(cachedMap){maps.delete(causeKey);maps.set(causeKey,cachedMap);this.environmentIrradiance.set(cachedMap.irradiance);for(let mip=0;mip<cachedMap.mips.length;mip++){const size=Math.max(1,256>>mip),pixels=cachedMap.mips[mip]!;this.device.queue.writeTexture({texture:this.gpu.environmentMap,mipLevel:mip,origin:[0,0,0]},pixels,{bytesPerRow:size*8,rowsPerImage:size},[size,size,6]);this.profiler.addUpload(pixels.byteLength,'environment');}this.environmentKey=causeKey;this.environmentUpdates++;return;}
     const input={radiance:buildSceneRadianceProbe(scene,localProbeOwnsNearby?origin:anchoredOrigin,128,true),sun,sunColor,sky,intensity};
-    if(this.environmentWorker&&this.environmentKey){this.environmentRequestedKey=causeKey;this.environmentWorker.request(causeKey,input);return;}
+    if(this.environmentWorker){this.environmentRequestedKey=causeKey;this.environmentWorker.request(causeKey,input);return;}
     const generated=bakeEnvironmentMap(input);
     this.publishEnvironmentMap(causeKey,generated);
 
@@ -1803,9 +1817,13 @@ export class WebGPURenderer implements Renderer{
     return !matrixEqual(object.lastModel,model)||!matrixEqual(object.lastPrevModel,previousModel);
   }
   private prepare(entity:RuntimeEntity,model:Mat4=this.model(entity),instanced=false):void{
+    this.adoptPreparedEntityObject(entity);
     const field=this.lastScene?.surfaces.field?.(entity.id),object=this.object(entity.id,field?.nx??0,field?.nz??0,entity.material.label??'',entity.material.texture,entity.material.labelColor);
     this.mesh(renderPrimitive(entity)!);
-    const surfaceState=this.lastScene?.surfaceStateForRender(entity.id),surface=surfaceState??entity.material.surface,body=this.lastScene?.surfaces.body(entity.id),previousModel=this.previousModels.get(entity.id,entity)??model;
+    this.writeObjectUniform(entity,object,model,instanced,this.lastScene,field);
+  }
+  private writeObjectUniform(entity:RuntimeEntity,object:GPUObject,model:Mat4,instanced:boolean,scene:Scene|null,field:ReturnType<Scene['surfaces']['field']>|undefined,preparedPrevious?:Mat4):void{
+    const surfaceState=scene?.surfaceStateForRender(entity.id),surface=surfaceState??entity.material.surface,body=scene?.surfaces.body(entity.id),previousModel=preparedPrevious??this.previousModels.get(entity.id,entity)??model;
     const dynamic=!!field||!!surfaceState||!!body,modelChanged=!matrixEqual(object.lastModel,model),previousChanged=!matrixEqual(object.lastPrevModel,previousModel);
     if(!dynamic&&object.uniformReady&&object.source===entity&&object.material===entity.material&&(object.instancedMaterial??false)===instanced&&(instanced||(!modelChanged&&!previousChanged)))return;
     // WebGPU.writeBuffer copies its input during the call. Keep one staging
@@ -2064,6 +2082,130 @@ export class WebGPURenderer implements Renderer{
       pass.setVertexBuffer(0,batch.mesh.vertex);pass.setIndexBuffer(batch.mesh.index,batch.mesh.format);pass.drawIndexed(batch.mesh.count,view.count);
     }
   }
+  /** Explicit opt-in cold admission. Live rendering only sees the resulting
+   * complete cached mesh; callers retain the lease through Scene publication. */
+  prepareMesh(primitive:Primitive):MeshPreparationLease{
+    if(this.disposed)throw new Error('Renderer has been disposed');
+    if(!isOwnedValidatedTriangleMesh(primitive))throw new TypeError('Staged GPU preparation requires an owned validated triangle mesh');
+    const key=primitiveKey(primitive),cached=this.meshes.get(key),packing=cached?undefined:prepareTriangleMeshPacking(primitive);
+    const leases=this.meshPreparationLeases??=new Set(),pins=this.preparedMeshPins??=new Map();
+    const lease=new StagedMeshLease(this.device,key,packing,{
+      lookup:()=>this.meshes.get(key),alive:()=>!this.disposed,
+      publish:mesh=>{try{this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);}catch(error){if(this.meshes.get(key)===mesh)this.meshes.delete(key);this.meshByPrimitive.delete(primitive as object);throw error;}},
+      unpublish:mesh=>{if(this.meshes.get(key)===mesh)this.meshes.delete(key);if(!this.meshByPrimitive.get||this.meshByPrimitive.get(primitive as object)===mesh)this.meshByPrimitive.delete(primitive as object);},
+      pin:(mesh,delta)=>{const next=(pins.get(mesh)??0)+delta;if(next>0)pins.set(mesh,next);else{pins.delete(mesh);this.collectedRevision=-1;}},
+      retire:entry=>leases.delete(entry),
+    },cached);
+    try{if(this.disposed)throw new Error('Renderer was disposed during mesh preparation');leases.add(lease);if(this.disposed)throw new Error('Renderer was disposed during mesh preparation');}catch(error){lease.dispose();throw error;}return lease;
+  }
+  /** Fixed-work detached entity prewarm. Mesh residency is a precondition, never
+   * a request to compile/upload geometry in the render path. Ordinary objects,
+   * physical surface fields and cold glyph rasterization retain their old API. */
+  prepareEntity(entity:RuntimeEntity):EntityPreparationLease{
+    if(this.disposed)throw new Error('Renderer has been disposed');
+    if(!isPreparedRenderEntity(entity))throw new TypeError('Entity prewarm requires Scene.prepareRenderEntity identity');
+    const primitive=renderPrimitive(entity),mesh=primitive&&this.meshByPrimitive.get(primitive as object);
+    if(!mesh||this.meshes.get(mesh.key)!==mesh)throw new Error('Entity prewarm requires an already resident mesh');
+    const letteringKey=labelKey(entity.material.label??'',entity.material.labelColor);
+    if(entity.material.label&&!this.labels.get(letteringKey))throw new Error('Entity prewarm requires an already resident label');
+    const leases=this.entityPreparationLeases??=new Set(),prepared=this.preparedEntityObjects??=new WeakMap(),urls=this.preparedEntityTextureURLs??=new Map(),pins=this.preparedMeshPins??=new Map();
+    const texture=entity.material.texture,heldURLs:string[]=[];
+    if(texture)for(const url of [texture.url,texture.normalUrl,texture.ormUrl,texture.heightUrl])if(url&&!heldURLs.includes(url))heldURLs.push(url);
+    for(const url of heldURLs)urls.set(url,(urls.get(url)??0)+1);pins.set(mesh,(pins.get(mesh)??0)+1);
+    const heldLabel=entity.material.label?this.labels.get(letteringKey):undefined;
+    if(heldLabel)this.labelUsers.set(heldLabel,(this.labelUsers.get(heldLabel)??0)+1);
+    const textureURLs=[texture?.url,texture?.normalUrl,texture?.ormUrl,texture?.heightUrl];
+    let retired=false,textureIndex=0,pendingTextures=0,textureFailure:unknown;const destroyed=new WeakSet<object>();
+    const destroy=(object:GPUObject)=>{if(destroyed.has(object))return;destroyed.add(object);try{object.uniform.destroy();}finally{this.releaseLabel(object.label,object.labelTexture);}};
+    const lease=new StagedEntityLease(this.device,{
+      alive:()=>!this.disposed,
+      prepare:()=>{
+        if(textureFailure)throw new Error('Prepared entity material texture failed: '+(textureFailure instanceof Error?textureFailure.message:String(textureFailure)),{cause:textureFailure});
+        if(textureIndex<heldURLs.length){
+          const url=heldURLs[textureIndex++]!;
+          if(!this.surfaceTextures.get(url)){
+            pendingTextures++;let loaded:Promise<void>;
+            try{loaded=Promise.resolve(this.surfaceTextures.load(url));}catch(error){pendingTextures--;throw error;}
+            void loaded.then(()=>{if(!retired&&!this.surfaceTextures.get(url))textureFailure??=new Error('Material texture did not become resident: '+url);},error=>{if(!retired)textureFailure??=error;}).finally(()=>{pendingTextures--;});
+          }
+          return false;
+        }
+        if(pendingTextures)return false;
+        for(const url of heldURLs)if(!this.surfaceTextures.get(url))throw new Error('Prepared material texture lost residency: '+url);
+        return true;
+      },
+      allocate:()=>{
+        const material=entity.material,texture=material.texture,materialTexture=texture?.url?this.surfaceTextures.get(texture.url):undefined,normalTexture=texture?.normalUrl?this.surfaceTextures.get(texture.normalUrl):undefined,ormTexture=texture?.ormUrl?this.surfaceTextures.get(texture.ormUrl):undefined,heightTexture=texture?.heightUrl?this.surfaceTextures.get(texture.heightUrl):undefined;
+        if(texture?.url!==textureURLs[0]||texture?.normalUrl!==textureURLs[1]||texture?.ormUrl!==textureURLs[2]||texture?.heightUrl!==textureURLs[3])throw new Error('Prepared entity texture source changed before allocation');
+        const key=labelKey(material.label??'',material.labelColor),labelTexture=material.label?this.labels.get(key):this.gpu.emptyLabel;
+        if(!labelTexture)throw new Error('Prepared entity label is no longer resident');
+        const materialKey=texture?[materialTexture&&texture.url?texture.url:'',normalTexture?texture.normalUrl:'',ormTexture?texture.ormUrl:'',heightTexture?texture.heightUrl:''].join('|'):undefined;
+        const uniform=this.device.createBuffer({label:'prepared entity uniform',size:MATERIAL_UNIFORM_BYTES,usage:0x40|0x08});
+        // Retain a label only after allocation succeeds. The lease immediately
+        // owns this returned object, before an error-scope callback can cancel.
+        if(labelTexture!==this.gpu.emptyLabel)this.labelUsers.set(labelTexture,(this.labelUsers.get(labelTexture)??0)+1);
+        const object:GPUObject={uniform,bind:undefined,texture:this.gpu.emptyField,deformationTexture:this.gpu.emptyField,width:0,height:0,owned:false,label:key,labelTexture,materialTexture,normalTexture,ormTexture,heightTexture,preparedTextureURLs:textureURLs,preparedPrimitive:primitive,preparedMesh:mesh,...(materialKey!==undefined?{materialKey}:{})};object.destroy=()=>destroy(object);return object;
+      },
+      bind:object=>{
+        const fallback=this.gpu.emptyLabel;
+        object.bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
+          {binding:0,resource:{buffer:object.uniform}},{binding:1,resource:object.texture.createView()},{binding:2,resource:object.labelTexture.createView()},{binding:3,resource:this.gpu.sampler},
+          {binding:4,resource:(object.materialTexture??fallback).createView()},{binding:5,resource:this.gpu.surfaceSampler},
+          {binding:6,resource:(object.normalTexture??fallback).createView()},{binding:7,resource:(object.ormTexture??fallback).createView()},{binding:8,resource:object.deformationTexture.createView()},{binding:9,resource:(object.heightTexture??fallback).createView()},
+        ]});
+      },
+      write:object=>{const model=renderModel(entity);this.writeObjectUniform(entity,object,model,false,null,undefined,model);},
+      valid:object=>this.preparedEntityBindingValid(entity,object),
+      publish:object=>{
+        if(prepared.has(entity))throw new Error('Entity already has a prepared binding');
+        // Moving poses/weather must not starve preparation. Reuse the complete
+        // binding and let the ordinary render upload its fixed 400-byte uniform.
+        if(object.material!==entity.material||!matrixEqual(object.lastModel,renderModel(entity)))object.uniformReady=false;
+        prepared.set(entity,object);
+      },
+      unpublish:object=>{if(prepared.get(entity)===object){prepared.delete(entity);destroy(object);}else if(!object.preparedAdopted)destroy(object);},
+      destroy,
+      retire:entry=>{
+        if(retired)return;retired=true;leases.delete(entry);
+        if(heldLabel)this.releaseLabel(letteringKey,heldLabel);
+        for(const url of heldURLs){const count=(urls.get(url)??0)-1;if(count>0)urls.set(url,count);else urls.delete(url);}
+        if(heldURLs.length)this.collectedRevision=-1;
+        const count=(pins.get(mesh)??0)-1;if(count>0)pins.set(mesh,count);else{pins.delete(mesh);this.collectedRevision=-1;}
+      },
+    });
+    try{if(this.disposed)throw new Error('Renderer was disposed during entity preparation');leases.add(lease);if(this.disposed)throw new Error('Renderer was disposed during entity preparation');}catch(error){lease.dispose();throw error;}return lease;
+  }
+  private preparedEntityBindingValid(entity:RuntimeEntity,object:GPUObject):boolean{
+    const texture=entity.material.texture;
+    const urls=object.preparedTextureURLs;
+    return (!object.preparedPrimitive||object.preparedPrimitive===renderPrimitive(entity)&&!!object.preparedMesh&&this.meshes.get(object.preparedMesh.key)===object.preparedMesh)
+      &&(!urls||urls[0]===texture?.url&&urls[1]===texture?.normalUrl&&urls[2]===texture?.ormUrl&&urls[3]===texture?.heightUrl)
+      &&object.label===labelKey(entity.material.label??'',entity.material.labelColor)&&object.labelTexture===(entity.material.label?this.labels.get(object.label!):this.gpu.emptyLabel)
+      &&object.materialTexture===(texture?.url?this.surfaceTextures.get(texture.url):undefined)&&object.normalTexture===(texture?.normalUrl?this.surfaceTextures.get(texture.normalUrl):undefined)
+      &&object.ormTexture===(texture?.ormUrl?this.surfaceTextures.get(texture.ormUrl):undefined)&&object.heightTexture===(texture?.heightUrl?this.surfaceTextures.get(texture.heightUrl):undefined);
+  }
+  /** Complete the cache transfer for every adopted cohort member, including
+   * offscreen entities which may not reach live prepare for many frames. This
+   * is an O(1) publication step with no allocation, bind or uniform upload. */
+  adoptPreparedEntity(scene:Scene,entity:RuntimeEntity):void{
+    if(this.disposed)throw new Error('Renderer has been disposed');
+    if(scene.entities.get(entity.id)!==entity)throw new Error('Prepared entity must be adopted by the target Scene first');
+    if(!this.preparedEntityObjects?.has(entity)){
+      const existing=this.objects.get(entity.id);if(existing?.preparedAdopted&&existing.source===entity)return;
+      throw new Error('Entity has no committed prepared binding');
+    }
+    this.adoptPreparedEntityObject(entity);
+  }
+  private adoptPreparedEntityObject(entity:RuntimeEntity):void{
+    const prepared=this.preparedEntityObjects,object=prepared?.get(entity);if(!object)return;
+    if(!this.preparedEntityBindingValid(entity,object))throw new Error('Prepared entity binding changed before live adoption');
+    const old=this.objects.get(entity.id);this.objects.set(entity.id,object);object.preparedAdopted=true;prepared.delete(entity);
+    if(old&&old!==object)this.destroyObject(old);
+  }
+  private destroyObject(object:GPUObject,releaseLabel=true):void{
+    if(object.destroy){object.destroy();return;}
+    object.uniform.destroy();if(object.owned!==false){object.texture.destroy();object.deformationTexture.destroy();}if(releaseLabel)this.releaseLabel(object.label,object.labelTexture);
+  }
   private mesh(primitive:Primitive):GPUMesh{
     const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity&&this.meshes.get(byIdentity.key)===byIdentity)return byIdentity;
     const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}
@@ -2106,14 +2248,16 @@ export class WebGPURenderer implements Renderer{
       this.previousModels?.clear();
       this.historyValid=false;this.previousVp=null;this.previousJitter=null;this.previousCamera=null;this.previousTarget=null;
     }
-    this.surfaceTextures?.retain(materialTextureURLs([...scene.entities.values()],true));
+    // Preserve optional receiver short-circuiting before evaluating public
+    // material getters or taking their Scene membership snapshot.
+    this.surfaceTextures?.retain(withPreparedTextureURLs(materialTextureURLs([...scene.entities.values()],true),this.preparedEntityTextureURLs));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);
     this.previousModels?.retain?.(scene.entities);
-    for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}this.releaseLabel(o.label,o.labelTexture);this.objects.delete(id);}
+    for(const [id,o] of this.objects)if(!ids.has(id)){this.destroyObject(o);this.objects.delete(id);}
     if(this.labels){const labels=new Set(live.map(e=>labelKey(e.material?.label??'',e.material?.labelColor)));for(const [key,t] of this.labels)if(!labels.has(key))this.discardUnusedLabel(key,t);}
     for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id))this.modelCache.delete(id);
-    for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.color.destroy();m.index.destroy();this.meshes.delete(key);}
+    for(const [key,m] of this.meshes)if(!keys.has(key)&&!this.preparedMeshPins?.has(m)){if(m.destroy)m.destroy();else{m.vertex.destroy();m.color.destroy();m.index.destroy();}this.meshes.delete(key);}
     return true;
   }
   private label(text:string,color?:Vec3):GPUAny{
@@ -2154,7 +2298,7 @@ export class WebGPURenderer implements Renderer{
     // Keep a shared glyph alive across a same-label bind rebuild. Only committed
     // object bindings own a reference; failed allocations leave the old binding intact.
     if(labelTexture!==this.gpu.emptyLabel)this.labelUsers.set(labelTexture,(this.labelUsers.get(labelTexture)??0)+1);
-    if(existing){existing.uniform.destroy();if(existing.owned!==false){existing.texture.destroy();existing.deformationTexture.destroy();}this.releaseLabel(existing.label,existing.labelTexture);}
+    if(existing)this.destroyObject(existing);
     const object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label:letteringKey,materialTexture,normalTexture,ormTexture,heightTexture,labelTexture,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{

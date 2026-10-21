@@ -37,6 +37,8 @@ import {decodeWorldBinary} from './world-binary.js';
 import {cameraOnRail} from './camera-rail.js';
 import {SceneSystemRuntime} from './system-runtime.js';
 import {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport} from './performance.js';
+import {createRenderEntityPreparation,type PreparedRenderEntitySpec,type RenderEntityPreparation} from './render-entity-preparation.js';
+export type {PreparedRenderEntitySpec,PreparedRenderEntityUpdate,RenderEntityPreparation} from './render-entity-preparation.js';
 
 // These values are observed numerically by frame uniforms and radiance caches.
 // Advancing daylight must not rebuild geometry membership or reset temporal AA.
@@ -253,6 +255,14 @@ export class Scene {
     if(this.spec.performance)this.enablePerformanceProfiling(this.spec.performance);
   }
 
+  /** Detached cold-only projection admission. Construct one entity per caller
+   * credit; adopt only after the whole replacement cohort is ready. */
+  prepareRenderEntity(spec:PreparedRenderEntitySpec):RenderEntityPreparation{
+    return createRenderEntityPreparation(spec,{environment:()=>this.environment,adopt:entity=>{
+      if(this.entities.has(entity.id))throw new TypeError(`Duplicate entity ${entity.id}`);
+      this.entities.set(entity.id,entity);this.renderStructureRevision++;
+    }});
+  }
   add(spec:EntitySpec):RuntimeEntity{
     spec=validateEntity(spec,false);
     const {mesh:authoredMesh,renderMesh:authoredRenderMesh,...authoring}=spec;
