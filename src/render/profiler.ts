@@ -6,7 +6,7 @@ export const RENDER_CPU_QUANTA = [
 export type RenderCpuQuantum=typeof RENDER_CPU_QUANTA[number];
 
 export const RENDER_GPU_QUANTA = [
-  'visibility','shadow','shadow.spot0','shadow.spot1','probe','reflection','main','main.transparent','bloom.downsample','bloom.horizontal','bloom.vertical','effects','taa','motionBlur','present',
+  'visibility','shadow','shadow.spot0','shadow.spot1','probe','reflection','opaque.depth','main','main.transparent','bloom.downsample','bloom.horizontal','bloom.vertical','effects','taa','motionBlur','present',
 ] as const;
 export type RenderGpuQuantum=typeof RENDER_GPU_QUANTA[number];
 
