@@ -1,6 +1,10 @@
 export {BrowserRuntime,type BrowserRuntimeOptions} from './runtime/browser.js';
-export {WebGPURenderer} from './render/webgpu.js';
+export {SpatialAudio} from './audio/spatial.js';
+export {WebGPURenderer,type WebGPURendererOptions} from './render/webgpu.js';
+export {RenderMeshQuery,avoidCameraObstacles,type RenderMeshHit,type RenderMeshFilter,type CameraObstruction} from './render/mesh-ray.js';
 export {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport} from './scene/performance.js';
+export type {RenderFeatures,RenderPipelinePlan} from './render/pipeline-plan.js';
+export type {VisibilityMode} from './render/gpu-visibility.js';
 export {sceneFromURL,sceneURL,encodeScene,decodeScene} from './scene/url.js';
 export {WalkWorld,walkerInput,type WalkBox} from './runtime/walker-motion.js';
 export {WalkerControls,type WalkerControlOptions} from './runtime/walker-controls.js';
@@ -21,3 +25,9 @@ export {compileWorldCouplings,signalPortDimension,signalPortIndex,WORLD_SIGNAL_P
 export {WorldInteractionJournal,eventsFromWorldInteractions,validateWorldInteractionGraph,WORLD_INTERACTION_IR_VERSION,WORLD_INTERACTION_LAWS,type WorldInteractionLaw,type WorldInteractionGraph,type WorldInteraction,type WorldInteractionEffect,type WorldInteractionDomain,type WorldInteractionRef} from './world-ir/index.js';
 
 export {SceneAcousticCoupling,attachSceneAcoustics,type SceneAcousticCouplingOptions,type AcousticListenerSpec,type AcousticSensorObservation,type AcousticCouplingStats} from './scene/acoustic-coupling.js';
+
+export {stepCharacterMotion,advanceCharacterMotion,CHARACTER_MOTION_MODE,CHARACTER_MOTION_EVENT,CHARACTER_MOTION_TUNING,CHARACTER_MOTION_BACKEND,type CharacterMotionState,type CharacterMotionInput,type CharacterMotionWorld,type CharacterMotionTuning} from './runtime/character-motion.js';
+
+export {SolidWorld,SolidBody,COMPOUND_PHYSICS_BACKEND,type SolidBodyOptions,type SolidWorldOptions,type SolidShape,type SolidBox,type SolidPlane,type SolidPlaneOptions,type SolidRayHit,type SolidContact,type SolidImpact,type SolidJoint,type SolidPolicies} from './physics/compound.js';
+
+export type {PostProcessingSettings} from './render/camera-post.js';

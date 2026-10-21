@@ -1,18 +1,23 @@
 import {AnimationSystem} from '../animation/locomotion.js';
 import {SurfaceContactSystem,type WheelSurfaceContact} from '../environment/surface-contacts.js';
-import {freezePrimitive,surfaceGridPrimitive} from '../procedural/mesh.js';
+import type {MaterialSpec} from './types.js';
+import {freezePrimitive,immutablePrimitive,surfaceGridPrimitive} from '../procedural/mesh.js';
 import {hashString,mulberry32} from '../core/random.js';
 import {environmentHistorySteps,environmentTimeScale,resolveEnvironmentAt,type EnvironmentState} from '../environment/types.js';
 import {SurfaceEnvironmentSystem} from '../environment/surface-state.js';
 import {surfaceFieldResolution} from '../environment/deformable-surface.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
-import {deriveSurfaceState,effectiveFriction,type SurfaceState} from '../materials/surface.js';
+import {validateFacade,validateFacadeNight} from '../render/facade-surface.js';
+import {validateGroundLitter,validateVariationSeed} from '../render/ground-litter.js';
+import {validateRainResponse,validateSurfaceWeather} from '../render/rain-surface.js';
+import {validateSurfaceTexture} from './validate.js';
+import {deriveSurfaceState,effectiveFriction,validateSurfaceAppearance,type SurfaceState} from '../materials/surface.js';
 import {evaluateFracture,type FractureDecision} from '../materials/fracture.js';
 import {transferFragmentMotion} from '../materials/fragment-motion.js';
 import {fracturePlate} from '../materials/glass-fracture.js';
 import type {MutableVec3,Vec3} from '../math.js';
 import {V3} from '../math.js';
-import {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type ContactModel} from '../physics/world.js';
+import {PhysicsWorld,RigidBody,type CollisionShape,type Contact,type ContactModel,type ContactCandidate} from '../physics/world.js';
 import {quaternionFromEuler,eulerFromQuaternion} from '../physics/rotation.js';
 import {PlasticDeformationSystem} from '../physics/deformation.js';
 import {WorldInteractionJournal,type WorldInteractionGraph,type WorldInteractionStats} from '../world-ir/index.js';
@@ -32,8 +37,17 @@ import {cameraOnRail} from './camera-rail.js';
 import {SceneSystemRuntime} from './system-runtime.js';
 import {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport} from './performance.js';
 
+// These values are observed numerically by frame uniforms and radiance caches.
+// Advancing daylight must not rebuild geometry membership or reset temporal AA.
+const CONTINUOUS_RENDERING_KEYS=new Set(['surfaceWeather','facadeNight','sunDirection','sunIntensity','sunColor','skyColor','ambientIrradiance']);
+const APPEARANCE_RENDERING_KEYS=new Set(['exposure','fogDensity','fogColor','fogHeightFalloff','fogBaseHeight','fogStartDistance','fogRampDistance']);
+
 export interface RuntimeMaterial {
   readonly kind:MaterialKind;
+  readonly decal?:MaterialSpec['decal'];
+  readonly surfaceAppearance?:MaterialSpec['surfaceAppearance'];
+  readonly rainResponse?:MaterialSpec['rainResponse'];
+  readonly facade?:MaterialSpec['facade'];readonly groundLitter?:MaterialSpec['groundLitter'];readonly variationSeed?:number;
   readonly labelColor?:Vec3;
   readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly clearcoat?:number;readonly clearcoatRoughness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';readonly finish?:import('../materials/surface.js').MaterialFinish;readonly ageYears?:number;readonly treatment?:import('../materials/surface.js').MaterialTreatment;
   readonly color:Color;
@@ -52,6 +66,8 @@ export interface RuntimeEntity {
   mesh?:Primitive;
   /** Visual-only entities never contribute physical or acoustic obstacles. */
   readonly renderOnly?:boolean;
+  renderVisible?:boolean;
+  renderCameraVisible?:boolean;
   /** Optional renderer-only high detail geometry, independent of mass/contact shape. */
   renderMesh?:Primitive;
   readonly material:RuntimeMaterial;
@@ -64,6 +80,8 @@ export interface RuntimeEntity {
 const DEFAULT_CAMERA:CameraSpec={position:[7,5,9],target:[0,1,0],fov:55};
 
 export class Scene {
+  profiling=false;
+  lastProfile:{tick:number;totalMs:number;systems:Record<string,number>}={tick:0,totalMs:0,systems:{}};
   readonly spec:SceneSpec;
   readonly entities=new Map<string,RuntimeEntity>();
   readonly physics:PhysicsWorld;
@@ -89,6 +107,9 @@ export class Scene {
   }
   readonly systemRuntime=new SceneSystemRuntime();
   readonly resources=new Map<string,unknown>();
+  /** Scenario-authored contacts join the native footprint/spray update once per tick. */
+  surfaceContactSource?:()=>{feet?:import('../environment/footprints.js').FootContact[];wheels?:WheelSurfaceContact[]};
+  private readonly posedVisuals=new Set<string>();
   private sceneProfiler:ScenePerformanceProfiler|undefined;
   /** CPU tick p50/p95, per-system costs, budget exceedances, live workload. */
   performanceReport():ScenePerformanceReport|undefined{return this.sceneProfiler?.report();}
@@ -155,6 +176,8 @@ export class Scene {
   private pendingFractures=new Map<string,FractureDecision>();
   environment:EnvironmentState;
   time=0;
+  /** Assembly-owned elastic/plastic response consumes the remaining normal energy once. */
+  contactEnergySource?: (contact:ContactCandidate,availableEnergyJ:number)=>number;
   tick=0;
   /** Changes only when renderer-owned structure/geometry membership changes, not on ordinary motion. */
   renderStructureRevision=0;
@@ -199,7 +222,7 @@ export class Scene {
     };
     this.camera=structuredClone(this.spec.camera??DEFAULT_CAMERA);
     if(this.spec.cameraRail)this.camera=cameraOnRail(this.camera,this.spec.cameraRail,0);
-    for(const entity of this.spec.entities)this.add(entity);
+    for(const entity of this.spec.entities){if(entity.mesh)freezePrimitive(entity.mesh);if(entity.renderMesh)freezePrimitive(entity.renderMesh);this.add(entity);}
     for(const assembly of this.spec.vehicleAssemblies??[]){
       const entity=this.entities.get(assembly.entityId);
       if(!entity?.body)throw new TypeError(`Vehicle assembly ${assembly.entityId} requires an authored Scene body`);
@@ -230,19 +253,21 @@ export class Scene {
   }
 
   add(spec:EntitySpec):RuntimeEntity{
-    spec=validateEntity(spec);
+    spec=validateEntity(spec,false);
+    const {mesh:authoredMesh,renderMesh:authoredRenderMesh,...authoring}=spec;
+    spec={...structuredClone(authoring),...(authoredMesh?{mesh:authoredMesh}:{}),...(authoredRenderMesh?{renderMesh:authoredRenderMesh}:{})};
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
-    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?freezePrimitive(structuredClone(spec.mesh)):undefined;
+    const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?immutablePrimitive(spec.mesh):undefined;
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
-    let renderMesh=spec.renderMesh?freezePrimitive(structuredClone(spec.renderMesh)):undefined;
+    let renderMesh=spec.renderMesh?immutablePrimitive(spec.renderMesh):undefined;
     if(!renderMesh&&spec.environmental?.surfaceUse==='road'&&mesh?.kind==='box'){
-      const size=mesh.size??[1,1,1],[nx,nz]=surfaceFieldResolution([size[0]*scale[0],size[2]*scale[2]]);
+      const size=mesh.size??[1,1,1],[nx,nz]=surfaceFieldResolution([size[0]*scale[0],size[2]*scale[2]],spec.environmental.fieldCellSizeM);
       renderMesh=freezePrimitive(surfaceGridPrimitive(size,nx,nz));
     }
     const surface=deriveSurfaceState(profile,spec.material??{},this.environment);
     let position:MutableVec3=[...(spec.position??[0,0,0])],rotation:MutableVec3=[...(spec.rotation??[0,0,0])];
     const dynamicHint=spec.body!==undefined&&(spec.body.velocity!==undefined||spec.body.angularVelocity!==undefined);
-    const shouldCollide=!spec.renderOnly&&(spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle);
+    const shouldCollide=!spec.renderOnly&&!spec.visualOnly&&(spec.body!==undefined||spec.environmental?.surfaceUse!==undefined||profile.mechanical.brittle);
     const mass=spec.body?.mass??(dynamicHint?inferMass(profile,mesh,scale):0);
     const body=shouldCollide?this.physics.add(new RigidBody({
       id:spec.id,position,rotation,mass,material:profile,shape:bodyShape(mesh,spec.body??{},scale),kinematic:spec.body?.motion==='kinematic',
@@ -256,7 +281,9 @@ export class Scene {
     const runtime:RuntimeEntity={
       id:spec.id,position,rotation,scale,
       ...(spec.renderOnly?{renderOnly:true}:{}),
-      material:Object.freeze({...spec.material,...(spec.material?.texture?{texture:Object.freeze({...spec.material.texture})}:{}),kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
+      ...(spec.renderVisible!==undefined?{renderVisible:spec.renderVisible}:{}),
+      ...(spec.renderCameraVisible!==undefined?{renderCameraVisible:spec.renderCameraVisible}:{}),
+      material:Object.freeze({...spec.material,...(spec.material?.facade?{facade:Object.freeze({...spec.material.facade})}:{}),...(spec.material?.groundLitter?{groundLitter:Object.freeze({...spec.material.groundLitter})}:{}),...(spec.material?.rainResponse?{rainResponse:Object.freeze({...spec.material.rainResponse})}:{}),...(spec.material?.surfaceAppearance?{surfaceAppearance:Object.freeze({...spec.material.surfaceAppearance,...(spec.material.surfaceAppearance.snow?{snow:Object.freeze({...spec.material.surfaceAppearance.snow})}:{})})}:{}),...(spec.material?.decal?{decal:Object.freeze({...spec.material.decal})}:{}),...(spec.material?.texture?{texture:Object.freeze({...spec.material.texture})}:{}),kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(spec.light?{light:structuredClone(spec.light)}:{}),
       ...(mesh?{mesh}:{}),...(renderMesh?{renderMesh}:{}),...(body?{body}:{})
@@ -302,10 +329,39 @@ export class Scene {
     for(const id of this.deformation.visualEntityIds())ids.add(id);
     for(const visual of this.spec.vehicleVisuals??[])ids.add(visual.entityId);
     for(const id of this.contacts?.controlledEntityIds()??[])ids.add(id);
+    for(const id of this.posedVisuals)if(this.entities.has(id))ids.add(id);
     this.renderMoverRevision=this.renderStructureRevision;this.renderMovers=ids;return ids;
+  }
+  /** Publish an authored visual pose without taking control of a physical body. */
+  setVisualTransform(id:string,position:Vec3,rotation:Vec3=[0,0,0],scale?:Vec3):void{
+    const entity=this.entities.get(id);
+    if(!entity||entity.body)throw new TypeError(`Visual pose requires a body-free entity: ${id}`);
+    const finite=(value:Vec3)=>value.length===3&&Number.isFinite(value[0])&&Number.isFinite(value[1])&&Number.isFinite(value[2]);
+    if(!finite(position)||!finite(rotation)||(scale&&!finite(scale)))throw new TypeError('Visual pose must be finite');
+    if(scale&&(scale[0]<=0||scale[1]<=0||scale[2]<=0))throw new RangeError('Visual scale must be positive');
+    // Validate every input before publishing any component. Preserve the live
+    // vector identities without allocating splice/spread arguments per pose.
+    entity.position[0]=position[0];entity.position[1]=position[1];entity.position[2]=position[2];
+    entity.rotation[0]=rotation[0];entity.rotation[1]=rotation[1];entity.rotation[2]=rotation[2];
+    if(scale){entity.scale[0]=scale[0];entity.scale[1]=scale[1];entity.scale[2]=scale[2];}
+    if(!this.posedVisuals.has(id)){this.posedVisuals.add(id);this.renderMoverRevision=-1;}
+  }
+  setRenderVisible(id:string,visible:boolean):void{
+    const entity=this.entities.get(id);if(!entity)throw new Error(`Unknown entity ${id}`);
+    if(typeof visible!=='boolean')throw new TypeError('Visual visibility must be boolean');
+    if((entity.renderVisible!==false)===visible)return;
+    entity.renderVisible=visible;this.renderStructureRevision++;
+  }
+  /** Mask a view subject without removing its light/reflection contribution. */
+  setRenderCameraVisible(id:string,visible:boolean):void{
+    const entity=this.entities.get(id);if(!entity)throw new Error(`Unknown entity ${id}`);
+    if(typeof visible!=='boolean')throw new TypeError('Camera visibility must be boolean');
+    if((entity.renderCameraVisible!==false)===visible)return;
+    entity.renderCameraVisible=visible;this.renderStructureRevision++;
   }
   remove(id:string):void{
     this.pluginRenderMovers.delete(id);
+    this.posedVisuals.delete(id);
     // Only exact owned objects are removed; an authored replacement under a
     // formerly generated ID must survive source deletion and weather cleanup.
     for(const [key,visual] of this.surfaceVisuals){
@@ -361,9 +417,21 @@ export class Scene {
     const source=this.surfaceVisualSources.get(entityId)??entityId;
     return this.surfaces.surface(source);
   }
+  private readonly renderSurfacePresence=(entityId:string):boolean=>{
+    const source=this.surfaceVisualSources.size?this.surfaceVisualSources.get(entityId):undefined;
+    if(source!==undefined&&source!==entityId)return !!(this.surfaces.fields.get(entityId)||this.surfaces.bodies.get(entityId)||this.surfaces.surfaces.get(source));
+    return this.surfaces.hasRenderState(entityId);
+  };
+  /** Standard physical registries publish their Map membership directly.
+   * Custom state readers keep their existing authoritative query path. */
+  get renderSurfaceStatePresence():((entityId:string)=>boolean)|undefined{
+    return this.surfaceStateForRender===Scene.prototype.surfaceStateForRender&&this.surfaces.field===SurfaceEnvironmentSystem.prototype.field&&this.surfaces.surface===SurfaceEnvironmentSystem.prototype.surface&&this.surfaces.body===SurfaceEnvironmentSystem.prototype.body?this.renderSurfacePresence:undefined;
+  }
   private context():SceneModuleContext{return{...this.snapshot(),environment:this.environment,resources:this.resources};}
   step(dt=1/60,profile?:SimulationProfileInput):void{
     if(!Number.isFinite(dt)||dt<=0||dt>.25)throw new RangeError('Scene step must be within (0, .25] seconds');
+    const profiling=this.profiling,start=profiling?performance.now():0,systems:Record<string,number>={};
+    this.systemRuntime.observe=profiling?(id,ms)=>{systems[id]=(systems[id]??0)+ms;}:undefined;
     const at=this.time+dt,profiler=this.sceneProfiler;
     const sampled=profiler!==undefined&&profiler.shouldSample(this.tick+1);
     const substepsBefore=sampled?this.physics.substeps:0;
@@ -383,12 +451,13 @@ export class Scene {
         return;
       }
       const program=profile===undefined?this.simulationProgram:this.kernel.compile(profile);
-      program.run(this.tick+1,{} as SceneModuleContext,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),commit:commands=>{
+      program.run(this.tick+1,{} as SceneModuleContext,{read:()=>this.context(),deltaSeconds:dt,onModule:m=>this.lastExecution.push(m.id),...(profiling?{onModuleTime:(m:import('../core/kernel.js').ModuleDescription,ms:number)=>{systems[m.id]=(systems[m.id]??0)+ms;}}:{}),commit:commands=>{
         for(const command of commands)this.commit(command,at);
         return {} as SceneModuleContext;
       }});
     } finally {
       this.captureStepTime=undefined;
+      this.systemRuntime.observe=undefined;
       if(sampled){
         this.systemRuntime.measureSystems(undefined);
         const stats=this.physics.stats;
@@ -398,9 +467,11 @@ export class Scene {
           dispatch:directPlan?'direct':'kernel',
         });
       }
+      if(profiling)this.lastProfile={tick:this.tick,totalMs:performance.now()-start,systems};
     }
   }
   private commit(command:InternalCommand,at:number):void{
+    if(command.type==='horn'){this.honk(command.id,command.durationSeconds,command.frequencyHz,at);return;}
     if(command.type==='spawn'){this.add(command.entity);return;}
     if(command.type==='remove'){this.remove(command.id);return;}
     if(command.type==='resource'){this.resources.set(command.key,structuredClone(command.value));return;}
@@ -431,8 +502,11 @@ export class Scene {
             this.pendingFractures.set(result.fracture.body.id,result.fracture);
             return result.decision;
           }
-          const plasticWork=this.deformation.absorbContact(contact,this.entities);
-          return plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
+          const plasticWork=this.deformation.absorbContact(contact,this.entities),available=Math.max(0,contact.normalEnergy-plasticWork);
+          const assemblyWork=this.contactEnergySource?.(contact,available)??0;
+          if(!Number.isFinite(assemblyWork)||assemblyWork<0||assemblyWork>available+1e-8)throw new RangeError('Assembly contact work exceeds normal energy budget');
+          const work=plasticWork+assemblyWork;
+          return assemblyWork>0?{mode:'resolve',energyLoss:work}:plasticWork>0?{mode:'penetrate',energyLoss:plasticWork}:result.decision;
         };
         // Exact engine-owned proof: neither body can fracture nor spend
         // plastic energy. The callback would return {mode:'resolve'} without
@@ -441,13 +515,14 @@ export class Scene {
         // If a new contact-dependent law is added here, update this predicate
         // or remove it: default behavior is always synchronous.
         law.canResolveWithoutCallback=(a,b)=>
+          this.contactEnergySource===undefined&&
           !a.material.mechanical.brittle&&!b.material.mechanical.brittle&&
           !this.deformation.hasContactBody(a.id)&&!this.deformation.hasContactBody(b.id);
         this.physics.step(dt,law);
       })
       .use('vehicle-visuals',()=>{this.syncVehicleVisuals();})
       .use('deformation',()=>{if(this.deformation.step(this.entities))this.renderStructureRevision++;})
-      .use('surface-contacts',({dt,at})=>{this.contacts.step(dt,at,this.animation.feet,this.assemblyWheelContacts());})
+      .use('surface-contacts',({dt,at})=>{const extra=this.surfaceContactSource?.();this.contacts.step(dt,at,extra?.feet?[...this.animation.feet,...extra.feet]:this.animation.feet,[...this.assemblyWheelContacts(),...(extra?.wheels??[])]);})
       .use('events',({at})=>{this.emitContactEvents(at);})
       .use('fracture-aggregate',({at})=>{for(const fracture of this.pendingFractures.values())this.fractureAggregate(fracture,at);})
       .use('fracture',({at})=>{for(const fracture of this.pendingFractures.values())this.fracture(fracture,at);})
@@ -462,24 +537,40 @@ export class Scene {
     }))};
   }
   drainEvents():EngineEvent[]{return this.eventQueue.splice(0);}
+  /** An explicit signal cause at the authoritative tick; presentation owns playback. */
+  honk(id:string,durationSeconds=.3,frequencyHz=330,at=this.time):void{
+    const entity=this.entities.get(id);if(!entity)throw new TypeError(`No horn source: ${id}`);
+    if(!Number.isFinite(durationSeconds)||durationSeconds<.06||durationSeconds>1.5||!Number.isFinite(frequencyHz)||frequencyHz<120||frequencyHz>800||!Number.isFinite(at)||at<0)throw new RangeError('Invalid horn signal');
+    this.pushEvent({type:'horn',id:++this.eventSequence,time:at,point:[...entity.position],entity:id,durationSeconds,frequencyHz});
+  }
   setCamera(camera:CameraSpec):void{this.cameraRailEnabled=false;this.camera=structuredClone(camera);}
   patchAppearance(patch:AppearancePatch):void{
+    // Validate external optical state before any part of the patch is applied.
+    if(patch.rendering?.surfaceWeather!==undefined)validateSurfaceWeather(patch.rendering.surfaceWeather);
+    if(patch.rendering?.facadeNight!==undefined)validateFacadeNight(patch.rendering.facadeNight);
+    for(const rule of patch.materials??[]){if(rule.set.texture!==undefined)validateSurfaceTexture(rule.set.texture);if(rule.set.surfaceAppearance!==undefined)validateSurfaceAppearance(rule.set.surfaceAppearance);if(rule.set.rainResponse!==undefined)validateRainResponse(rule.set.rainResponse);if(rule.set.facade!==undefined)validateFacade(rule.set.facade);if(rule.set.groundLitter!==undefined)validateGroundLitter(rule.set.groundLitter);if(rule.set.variationSeed!==undefined)validateVariationSeed(rule.set.variationSeed);}
     let appearanceChanged=false,structureChanged=false;
     if(patch.rendering){
-      const keys=Object.keys(patch.rendering);
+      const keys=Object.keys(patch.rendering),previousRendering=this.spec.rendering;
       this.spec.rendering={...(this.spec.rendering??{}),...structuredClone(patch.rendering)};
-      // Exposure/fog are frame uniforms. Lighting/probe/shadow authoring may
-      // change scene-derived caches and therefore takes the structural path.
-      if(keys.some(key=>!['exposure','fogDensity','fogColor','fogHeightFalloff','fogBaseHeight','fogStartDistance','fogRampDistance'].includes(key)))structureChanged=true;
-      else appearanceChanged=true;
+      // Light matrices, sky radiance and weather have their own numeric causes.
+      // Exposure/fog edits still invalidate history; other configuration keeps
+      // the existing structural invalidation contract.
+      for(const key of keys)if(!CONTINUOUS_RENDERING_KEYS.has(key)){
+        const before=previousRendering?.[key as keyof typeof previousRendering],after=patch.rendering[key as keyof typeof patch.rendering];
+        if(before===after||(Array.isArray(before)&&Array.isArray(after)&&before.length===after.length&&before.every((value,index)=>value===after[index])))continue;
+        if(APPEARANCE_RENDERING_KEYS.has(key))appearanceChanged=true;
+        else structureChanged=true;
+      }
     }
     for(const rule of patch.materials??[]){
-      for(const entity of this.entities.values()){
+      const target=rule.id===undefined?undefined:this.entities.get(rule.id);
+      for(const entity of rule.id===undefined?this.entities.values():target?[target]:[]){
         if(rule.id!==undefined&&entity.id!==rule.id)continue;
         if(rule.idPrefix!==undefined&&!entity.id.startsWith(rule.idPrefix))continue;
         if(rule.treatment!==undefined&&entity.material.treatment!==rule.treatment)continue;
         if(rule.set.color&&rule.set.color[3]!==entity.material.color[3])throw new TypeError('appearance patch cannot change material alpha/classification');
-        (entity as {material:RuntimeMaterial}).material=Object.freeze({...entity.material,...structuredClone(rule.set)});
+        (entity as {material:RuntimeMaterial}).material=Object.freeze({...entity.material,...structuredClone(rule.set),...(rule.set.texture?{texture:Object.freeze({...rule.set.texture})}:{}),...(rule.set.facade?{facade:Object.freeze({...rule.set.facade})}:{}),...(rule.set.groundLitter?{groundLitter:Object.freeze({...rule.set.groundLitter})}:{}),...(rule.set.rainResponse?{rainResponse:Object.freeze({...rule.set.rainResponse})}:{}),...(rule.set.surfaceAppearance?{surfaceAppearance:Object.freeze({...rule.set.surfaceAppearance,...(rule.set.surfaceAppearance.snow?{snow:Object.freeze({...rule.set.surfaceAppearance.snow})}:{})})}:{})});
         appearanceChanged=true;
       }
     }
@@ -628,7 +719,7 @@ export class Scene {
   private pushEvent(event:EngineEvent,causeId?:string):void{
     this.eventQueue.push(event);
     if(this.eventQueue.length>4096)this.eventQueue.splice(0,this.eventQueue.length-4096);
-    this.worldInteractionJournal?.recordEvent(event,this.tick+1,causeId);
+    this.worldInteractionJournal?.recordEvent(event,this.captureStepTime!==undefined?this.tick+1:this.tick,causeId);
   }
 }
 

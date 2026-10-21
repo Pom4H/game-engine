@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "status": "passed",
+  "generatedAt": "2026-10-18T01:28:32.082Z",
+  "command": "node tools/render-stability/verify.mjs",
+  "report": "artifacts/render-stability/report.json",
+  "image": "artifacts/render-stability/native-render.png",
+  "adapter": {"vendor":"amd","architecture":"rdna-3","isFallbackAdapter":false},
+  "method": "A compute shader nearest-samples all 192 by 192 mip-zero texel centers of each of the six published local-probe cube faces into a mapped buffer. It uses the existing TEXTURE_BINDING capability; production texture usage and rendering code are unchanged.",
+  "scene": "Static colored walls, wet ground, pillars and a reflective sphere excluded from its own local capture. Each sweep captures four faces followed by two faces. Separate scenarios hold the camera static, move the camera, and move the camera and capture origin together.",
+  "pixels": {
+    "readbacks": 17,
+    "checkedChannels": 15040512,
+    "nonFiniteChannels": 0,
+    "partialSweeps": {"cases":8,"changedChannels":0},
+    "sameOriginCompletedSweeps": {"cases":6,"changedChannels":0,"maxAbsError":0,"allowedMaxAbsError":0.000001},
+    "movedOriginCompletedSweeps": [
+      {"position":[0.7,1.1,0],"changedRgbChannels":58338,"changedPixels":19446,"maxRgbError":0.6201934814453125},
+      {"position":[1.4,1.1,0],"changedRgbChannels":54885,"changedPixels":18295,"maxRgbError":0.6201934814453125}
+    ]
+  },
+  "otherChecks": {"renderFrames":18,"taaCoordinateCases":24,"taaPoisonedInputCases":7,"rendererErrors":0,"browserErrors":0,"gpuValidationErrors":0},
+  "unitValidation": {"command":"node --test test/gpu-visibility.test.mjs test/probe-readback.test.mjs","passed":25,"failed":0},
+  "limits": "This fixture proves published mip-zero pixel stability across partial capture and deterministic static recapture on this native adapter. Filter cadence and finite final render targets are also checked. It does not establish canonical game FPS or prove every possible moving-scene reflection transition."
+}

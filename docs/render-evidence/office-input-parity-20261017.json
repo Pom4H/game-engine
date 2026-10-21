@@ -1,0 +1,5306 @@
+{
+  "date": "2026-10-17T13:29:28.123Z",
+  "classification": "progress",
+  "goalComplete": false,
+  "scope": "Original mouse/gamepad/camera input in the existing Office and canonical Game body. Vehicle special commands and remaining parity audit continue.",
+  "native": {
+    "date": "2026-10-17T13:20:31.300Z",
+    "ok": true,
+    "browserMode": "native-gpu",
+    "scope": "Trusted native browser mouse/keys and tab visibility, original camera mapping, authority-ACKed input, virtual Gamepad API, and separately labelled scripted window blur/focus events. Physical gamepad hardware and OS-window blur were not tested.",
+    "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+    "account": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+    "virtualGamepad": true,
+    "mouseChord": true,
+    "mouseLook": true,
+    "modalNeutral": true,
+    "trustedTabHiddenNeutral": true,
+    "scriptedWindowBlurNeutral": true,
+    "focusEvents": {
+      "blur": [
+        {
+          "trusted": false,
+          "at": 30221.899999976158
+        }
+      ],
+      "focus": [
+        {
+          "trusted": false,
+          "at": 30851
+        }
+      ],
+      "visibility": [
+        {
+          "hidden": true,
+          "trusted": true,
+          "at": 29553.19999998808
+        },
+        {
+          "hidden": false,
+          "trusted": true,
+          "at": 29890.69999998808
+        }
+      ]
+    },
+    "returnedToObserver": true,
+    "records": [
+      {
+        "name": "observer",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 44,
+          "desiredDistance": 44,
+          "hit": null,
+          "mode": "third-person",
+          "head": null,
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": null,
+          "yaw": 0.7407963267948965,
+          "pitch": 0.65,
+          "anchor": [
+            0,
+            0.16,
+            -0.2
+          ],
+          "position": [
+            23.639336979553484,
+            26.78820185238574,
+            25.648029195196212
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0,
+            "sprint": false,
+            "jump": false
+          },
+          "sent": null,
+          "pending": null,
+          "backpressured": false,
+          "network": "observer",
+          "ack": null,
+          "self": null,
+          "account": null,
+          "vehicle": null,
+          "instruments": null,
+          "transport": null,
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 0,
+            "sourceBuilds": 0
+          }
+        },
+        "walking": false,
+        "time": 873.1591999993819
+      },
+      {
+        "name": "controlled",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 8.000000000000007,
+          "desiredDistance": 8.000000000000007,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.00000000000006,
+            -8.189999999999998,
+            433.4
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.7407963267948965,
+          "pitch": 0.32,
+          "anchor": [
+            47.00000000000006,
+            -8.579999999999998,
+            433.4
+          ],
+          "position": [
+            52.12492779411969,
+            -6.063467515071056,
+            439.0037647485737
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 54
+          },
+          "pending": 6,
+          "backpressured": false,
+          "network": "online",
+          "ack": 48,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": false,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 0,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345,
+            "y": 0.16999999999999998,
+            "z": -66,
+            "vx": 0,
+            "vy": 0,
+            "vz": 0,
+            "yaw": 1.5707963267948966,
+            "lookYaw": 0,
+            "pitch": 0,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 0,
+            "speed": 0,
+            "stamina": 1,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 283703,
+              "replication": {
+                "frames": 1,
+                "playbackTime": 874.2833333327026,
+                "latestTime": 874.2833333327026,
+                "underrun": false,
+                "stalledEntities": 24,
+                "epoch": 426102697,
+                "entities": 24,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": -24.700000000000728,
+                "headroomMs": 0,
+                "selfApplied": 5,
+                "entitiesApplied": 24,
+                "stale": 0,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 5959,
+                "sentPackets": 31,
+                "replaced": 23,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 254
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": 24736.399999976158,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 0,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322293,
+              "time": 874.2833333327026,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 24736.399999976158,
+                "latestSeq": 54,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 24716,
+                "latestSeq": 48,
+                "forward": 0,
+                "history": [
+                  42,
+                  43,
+                  44,
+                  45,
+                  46,
+                  47,
+                  48
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 874.2833333327026
+      },
+      {
+        "name": "aim",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 6.473037656546606,
+          "desiredDistance": 8.000000000000007,
+          "hit": "canonical:scenery-source:chunk:-352:-96:2",
+          "mode": "third-person",
+          "head": [
+            47.00000000000006,
+            -8.20999961256981,
+            433.4
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.7407963267948965,
+          "pitch": 0.32,
+          "anchor": [
+            47.00000000000006,
+            -8.579999999999998,
+            433.4
+          ],
+          "position": [
+            51.146731324802396,
+            -6.543798807641519,
+            437.93417252949325
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 92
+          },
+          "pending": 8,
+          "backpressured": false,
+          "network": "online",
+          "ack": 84,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": true,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 0,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345,
+            "y": 0.16999999999999998,
+            "z": -66,
+            "vx": 0,
+            "vy": 0,
+            "vz": 0,
+            "yaw": 0.8700146679476171,
+            "lookYaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 0,
+            "speed": 0,
+            "stamina": 1,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 283703,
+              "replication": {
+                "frames": 1,
+                "playbackTime": 874.2833333327026,
+                "latestTime": 874.2833333327026,
+                "underrun": false,
+                "stalledEntities": 24,
+                "epoch": 426102697,
+                "entities": 24,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": -24.700000000000728,
+                "headroomMs": 0,
+                "selfApplied": 5,
+                "entitiesApplied": 24,
+                "stale": 0,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 11137,
+                "sentPackets": 49,
+                "replaced": 43,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 351
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": 25641.80000001192,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 0,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322360,
+              "time": 875.3938133327026,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 25641.80000001192,
+                "latestSeq": 92,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 25621.899999976158,
+                "latestSeq": 90,
+                "forward": 0,
+                "history": [
+                  82,
+                  83,
+                  84,
+                  85,
+                  86,
+                  87,
+                  88,
+                  89,
+                  90
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 875.3938133327026
+      },
+      {
+        "name": "mouse-look",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 6.968342462005295,
+          "desiredDistance": 8.000000000000009,
+          "hit": "canonical:scenery-source:chunk:-352:-96:2",
+          "mode": "third-person",
+          "head": [
+            47.00000000000006,
+            -8.20999961256981,
+            433.4
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.5327963267948963,
+          "pitch": 0.265,
+          "anchor": [
+            47.00000000000006,
+            -8.579999999999998,
+            433.4
+          ],
+          "position": [
+            51.149082459045516,
+            -6.5061415338287585,
+            438.6001944654135
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.5327963267948965,
+            "pitch": 0.265,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.5327963267948965,
+            "pitch": 0.265,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 103
+          },
+          "pending": 7,
+          "backpressured": false,
+          "network": "online",
+          "ack": 96,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": true,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 0,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345,
+            "y": 0.16999999999999998,
+            "z": -66,
+            "vx": 0,
+            "vy": 0,
+            "vz": 0,
+            "yaw": 0.7461248043043294,
+            "lookYaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 0,
+            "speed": 0,
+            "stamina": 1,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1075305,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 875.4883733327024,
+                "latestTime": 879.0333333326982,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 73,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 42.39999997615814,
+                "headroomMs": 3544.9599999958537,
+                "selfApplied": 87,
+                "entitiesApplied": 4392,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 13550,
+                "sentPackets": 58,
+                "replaced": 46,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 351
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322373,
+              "time": 875.6204933327023,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 25821.5,
+                "latestSeq": 103,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 25822.899999976158,
+                "latestSeq": 103,
+                "forward": 0,
+                "history": [
+                  94,
+                  95,
+                  96,
+                  97,
+                  98,
+                  99,
+                  100,
+                  101,
+                  102,
+                  103
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 875.6204933327023
+      },
+      {
+        "name": "attack-block",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 7.999999999999997,
+          "desiredDistance": 7.999999999999997,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.00000000000006,
+            -8.26499961256981,
+            433.4
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.5327963267948963,
+          "pitch": 0.265,
+          "anchor": [
+            47.00000000000006,
+            -8.579999999999998,
+            433.4
+          ],
+          "position": [
+            50.923558039612324,
+            -6.484131492999263,
+            440.04928774465026
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.5327963267948963,
+            "pitch": 0.265,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": true,
+            "kick": 0,
+            "block": true,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.5327963267948963,
+            "pitch": 0.265,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": true,
+            "kick": 0,
+            "block": true,
+            "forwardBrake": false,
+            "seq": 133
+          },
+          "pending": 7,
+          "backpressured": false,
+          "network": "online",
+          "ack": 126,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": true,
+            "blocking": true,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 0,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0.45,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345,
+            "y": 0.16999999999999998,
+            "z": -66,
+            "vx": 0,
+            "vy": 0,
+            "vz": 0,
+            "yaw": 0.5330693281217735,
+            "lookYaw": 0.5327963267948963,
+            "pitch": 0.265,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 0,
+            "speed": 0,
+            "stamina": 0.9862500000000003,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1075305,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 875.4883733327024,
+                "latestTime": 879.0333333326982,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 73,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 42.39999997615814,
+                "headroomMs": 3544.9599999958537,
+                "selfApplied": 87,
+                "entitiesApplied": 4392,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 18249,
+                "sentPackets": 74,
+                "replaced": 60,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 351
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322409,
+              "time": 876.2134133327021,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 26320.600000023842,
+                "latestSeq": 133,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 26320.80000001192,
+                "latestSeq": 133,
+                "forward": 0,
+                "history": [
+                  127,
+                  128,
+                  129,
+                  130,
+                  131,
+                  132,
+                  133
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 876.2134133327021
+      },
+      {
+        "name": "mouse-released",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 8.000000000000002,
+          "desiredDistance": 8.000000000000002,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.00000000000006,
+            -8.26499961256981,
+            433.4
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.5327963267948963,
+          "pitch": 0.265,
+          "anchor": [
+            47.00000000000006,
+            -8.579999999999998,
+            433.4
+          ],
+          "position": [
+            50.92174604789796,
+            -6.484712365481359,
+            440.05053965212073
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.5327963267948963,
+            "pitch": 0.265,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.5327963267948963,
+            "pitch": 0.265,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 149
+          },
+          "pending": 11,
+          "backpressured": false,
+          "network": "online",
+          "ack": 138,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": true,
+            "blocking": true,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 0,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0.45,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345,
+            "y": 0.16999999999999998,
+            "z": -66,
+            "vx": 0,
+            "vy": 0,
+            "vz": 0,
+            "yaw": 0.5328075843409794,
+            "lookYaw": 0.5327963267948963,
+            "pitch": 0.265,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 0,
+            "speed": 0,
+            "stamina": 0.9712500000000006,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1075305,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 875.4883733327024,
+                "latestTime": 879.0333333326982,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 73,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 42.39999997615814,
+                "headroomMs": 3544.9599999958537,
+                "selfApplied": 87,
+                "entitiesApplied": 4392,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 21850,
+                "sentPackets": 86,
+                "replaced": 64,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 351
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322428,
+              "time": 876.5404133327019,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 26587.399999976158,
+                "latestSeq": 149,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 26588.399999976158,
+                "latestSeq": 149,
+                "forward": 0,
+                "history": [
+                  139,
+                  140,
+                  141,
+                  142,
+                  143,
+                  144,
+                  145,
+                  146,
+                  147,
+                  148,
+                  149
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 876.5404133327019
+      },
+      {
+        "name": "gamepad-look",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 8.000000000000018,
+          "desiredDistance": 8.000000000000018,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.00000000000006,
+            -8.26499961256981,
+            433.4
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.39629632679489646,
+          "pitch": 0.21880000000000005,
+          "anchor": [
+            47.00000000000006,
+            -8.579999999999998,
+            433.4
+          ],
+          "position": [
+            50.474070056597554,
+            -6.665875310184785,
+            440.347442976642
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.3962963267948963,
+            "pitch": 0.21880000000000005,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.3962963267948963,
+            "pitch": 0.21880000000000005,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 169
+          },
+          "pending": 7,
+          "backpressured": false,
+          "network": "online",
+          "ack": 162,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": false,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 0,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0.1833333333333334,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345,
+            "y": 0.16999999999999998,
+            "z": -66,
+            "vx": 0,
+            "vy": 0,
+            "vz": 0,
+            "yaw": 0.5327973569508222,
+            "lookYaw": 0.5327963267948963,
+            "pitch": 0.265,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 0,
+            "speed": 0,
+            "stamina": 0.9612500000000008,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1294548,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 876.689813332702,
+                "latestTime": 879.9833333326974,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 73,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": -2.4000000238411303,
+                "headroomMs": 3293.5199999953966,
+                "selfApplied": 105,
+                "entitiesApplied": 5409,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 25600,
+                "sentPackets": 99,
+                "replaced": 71,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 390
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322452,
+              "time": 876.9391733327019,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 26929.899999976158,
+                "latestSeq": 169,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 26938.899999976158,
+                "latestSeq": 169,
+                "forward": 0,
+                "history": [
+                  160,
+                  161,
+                  162,
+                  163,
+                  164,
+                  165,
+                  166,
+                  167,
+                  168,
+                  169
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 876.9391733327019
+      },
+      {
+        "name": "gamepad",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 7.999999999999993,
+          "desiredDistance": 7.999999999999993,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.09800000000007,
+            -8.314999612569808,
+            433.097
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.39629632679489646,
+          "pitch": 0.21880000000000005,
+          "anchor": [
+            47.09800000000007,
+            -8.579999999999998,
+            433.097
+          ],
+          "position": [
+            50.112412031001156,
+            -6.843532856559702,
+            440.30102678833913
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0.7,
+            "right": 0.6,
+            "yaw": 0.39629632679489646,
+            "pitch": 0.21880000000000005,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": true,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 0.7,
+            "right": 0.6,
+            "yaw": 0.39629632679489646,
+            "pitch": 0.21880000000000005,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": true,
+            "handbrake": false,
+            "attack": true,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 243
+          },
+          "pending": 12,
+          "backpressured": false,
+          "network": "online",
+          "ack": 231,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": true,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 1,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0.349999999999999,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345.49357774544507,
+            "y": 0.16999999999999998,
+            "z": -64.47141493822843,
+            "vx": -0.665706596322295,
+            "vy": 0,
+            "vz": 2.0616593192301402,
+            "yaw": 0.39629662938757276,
+            "lookYaw": 0.39629632679489646,
+            "pitch": 0.21880000000000005,
+            "grounded": true,
+            "crouch": false,
+            "animation": "walk",
+            "phase": 9.637784296575292,
+            "speed": 2.166472806419323,
+            "stamina": 0.7629166666666674,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1478899,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 877.8959333327015,
+                "latestTime": 880.8333333326966,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 73,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 10.40000002384113,
+                "headroomMs": 2937.3999999951366,
+                "selfApplied": 120,
+                "entitiesApplied": 6175,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 45175,
+                "sentPackets": 152,
+                "replaced": 92,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 462
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 0,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322540,
+              "time": 878.4042533327013,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 28163.100000023842,
+                "latestSeq": 243,
+                "forward": 0.7
+              },
+              "submitted": {
+                "at": 28166.600000023842,
+                "latestSeq": 243,
+                "forward": 0.7,
+                "history": [
+                  232,
+                  233,
+                  234,
+                  235,
+                  236,
+                  237,
+                  238,
+                  239,
+                  240,
+                  241,
+                  242,
+                  243
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 878.4042533327013
+      },
+      {
+        "name": "modal-neutral",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 7.999999999999998,
+          "desiredDistance": 7.999999999999998,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.80200000000007,
+            -8.37999961808324,
+            430.916
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.39629632679489646,
+          "pitch": 0.21880000000000005,
+          "anchor": [
+            47.80200000000007,
+            -8.579999999999998,
+            430.916
+          ],
+          "position": [
+            50.816411954288284,
+            -6.8435328856206015,
+            438.1200268274433
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "sprint": false,
+            "jump": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "pitch": 0,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 307
+          },
+          "pending": 12,
+          "backpressured": false,
+          "network": "online",
+          "ack": 295,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": false,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 1,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345.80268261466665,
+            "y": 0.16999999999999998,
+            "z": -63.5141329497808,
+            "vx": -0.000007453318622548171,
+            "vy": 0,
+            "vz": 0.000023082546999321892,
+            "yaw": -0.2626154468252034,
+            "lookYaw": 0.39629632679489646,
+            "pitch": 0,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 15.673481979609049,
+            "speed": 0.000024256049374190584,
+            "stamina": 0.8560833333333333,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1603169,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 879.0997733327008,
+                "latestTime": 881.9833333326956,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 73,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 1.199999988079071,
+                "headroomMs": 2883.559999994759,
+                "selfApplied": 136,
+                "entitiesApplied": 6457,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 58799,
+                "sentPackets": 195,
+                "replaced": 112,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 462
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": 29220.600000023842,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322617,
+              "time": 879.6785333327007,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 29220.600000023842,
+                "latestSeq": 307,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 29208,
+                "latestSeq": 305,
+                "forward": 0,
+                "history": [
+                  296,
+                  297,
+                  298,
+                  299,
+                  300,
+                  301,
+                  302,
+                  303,
+                  304,
+                  305
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 879.6785333327007
+      },
+      {
+        "name": "tab-hidden-neutral",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 8.000000000000021,
+          "desiredDistance": 8.000000000000021,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.80300000000005,
+            -8.37999961808324,
+            430.914
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.39629632679489646,
+          "pitch": 0.21880000000000005,
+          "anchor": [
+            47.80300000000005,
+            -8.579999999999998,
+            430.914
+          ],
+          "position": [
+            50.8174119542882,
+            -6.843532885620627,
+            438.1180268274434
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "sprint": false,
+            "jump": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "pitch": 0,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 329
+          },
+          "pending": 7,
+          "backpressured": false,
+          "network": "online",
+          "ack": 322,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": false,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 1,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345.83480775514005,
+            "y": 0.16999999999999998,
+            "z": -63.435779743106394,
+            "vx": -0.5680393876740164,
+            "vy": 0,
+            "vz": 1.3854437447301517,
+            "yaw": -0.35559937503526967,
+            "lookYaw": 0.39629632679489646,
+            "pitch": 0.21880000000000005,
+            "grounded": true,
+            "crouch": false,
+            "animation": "walk",
+            "phase": 16.18158138720699,
+            "speed": 1.4973720699154214,
+            "stamina": 0.9145833333333329,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1603169,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 879.0997733327008,
+                "latestTime": 881.9833333326956,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 73,
+                "definitions": 73,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 1.199999988079071,
+                "headroomMs": 2883.559999994759,
+                "selfApplied": 136,
+                "entitiesApplied": 6457,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 64460,
+                "sentPackets": 213,
+                "replaced": 117,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 462
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.3999999761581421,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322641,
+              "time": 880.0768133327002,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 29593.600000023842,
+                "latestSeq": 329,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 29594.30000001192,
+                "latestSeq": 329,
+                "forward": 0,
+                "history": [
+                  320,
+                  321,
+                  322,
+                  323,
+                  324,
+                  325,
+                  326,
+                  327,
+                  328,
+                  329
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 880.0768133327002
+      },
+      {
+        "name": "focus-neutral",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 8.000000000000018,
+          "desiredDistance": 8.000000000000018,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.80300000000005,
+            -8.37999961808324,
+            430.914
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.39629632679489646,
+          "pitch": 0.21880000000000005,
+          "anchor": [
+            47.80300000000005,
+            -8.579999999999998,
+            430.914
+          ],
+          "position": [
+            50.81741195428819,
+            -6.843532885620627,
+            438.1180268274434
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "sprint": false,
+            "jump": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "pitch": 0,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 347
+          },
+          "pending": 10,
+          "backpressured": false,
+          "network": "online",
+          "ack": 337,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": false,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 1,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345.9154269976785,
+            "y": 0.16999999999999998,
+            "z": -63.239150024125486,
+            "vx": -0.027665449763015625,
+            "vy": 0,
+            "vz": 0.06747582140645415,
+            "yaw": -0.3884792846740271,
+            "lookYaw": 0.39629632679489646,
+            "pitch": 0,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 17.45667256494423,
+            "speed": 0.07292711145444603,
+            "stamina": 0.9470833333333326,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1852789,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 880.3301333327001,
+                "latestTime": 883.0333333326946,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 74,
+                "definitions": 74,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 16.499999988078343,
+                "headroomMs": 2703.1999999944674,
+                "selfApplied": 157,
+                "entitiesApplied": 7560,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 68111,
+                "sentPackets": 225,
+                "replaced": 123,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 462
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.800000011920929,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322659,
+              "time": 880.3884533327002,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 29894.30000001192,
+                "latestSeq": 347,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 29894.69999998808,
+                "latestSeq": 347,
+                "forward": 0,
+                "history": [
+                  338,
+                  339,
+                  340,
+                  341,
+                  342,
+                  343,
+                  344,
+                  345,
+                  346,
+                  347
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 880.3884533327002
+      },
+      {
+        "name": "blur-event-neutral",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 8.000000000000018,
+          "desiredDistance": 8.000000000000018,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.91900000000003,
+            -8.429999618083238,
+            430.62899999999996
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.39629632679489646,
+          "pitch": 0.21880000000000005,
+          "anchor": [
+            47.91900000000003,
+            -8.579999999999998,
+            430.62899999999996
+          ],
+          "position": [
+            50.933411954288175,
+            -6.843532885620627,
+            437.83302682744335
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "sprint": false,
+            "jump": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "pitch": 0,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 393
+          },
+          "pending": 8,
+          "backpressured": false,
+          "network": "online",
+          "ack": 385,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": false,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 1,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345.9891513674482,
+            "y": 0.16999999999999998,
+            "z": -63.05933684748966,
+            "vx": -0.002101175298930283,
+            "vy": 0,
+            "vz": 0.005124750558667922,
+            "yaw": -0.3890950369413397,
+            "lookYaw": 0.39629632679489646,
+            "pitch": 0,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 18.622712959970528,
+            "speed": 0.00553877296244199,
+            "stamina": 1,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 1852789,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 880.3301333327001,
+                "latestTime": 883.0333333326946,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 74,
+                "definitions": 74,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 16.499999988078343,
+                "headroomMs": 2703.1999999944674,
+                "selfApplied": 157,
+                "entitiesApplied": 7560,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 79866,
+                "sentPackets": 262,
+                "replaced": 132,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 462
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.800000011920929,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322722,
+              "time": 881.4263333327,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 30667.69999998808,
+                "latestSeq": 393,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 30668.80000001192,
+                "latestSeq": 393,
+                "forward": 0,
+                "history": [
+                  383,
+                  384,
+                  385,
+                  386,
+                  387,
+                  388,
+                  389,
+                  390,
+                  391,
+                  392,
+                  393
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 881.4263333327
+      },
+      {
+        "name": "focus-event-neutral",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 8.000000000000018,
+          "desiredDistance": 8.000000000000018,
+          "hit": null,
+          "mode": "third-person",
+          "head": [
+            47.98600000000004,
+            -8.429999618083238,
+            430.46799999999996
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+          "yaw": 0.39629632679489646,
+          "pitch": 0.21880000000000005,
+          "anchor": [
+            47.98600000000004,
+            -8.579999999999998,
+            430.46799999999996
+          ],
+          "position": [
+            51.00041195428818,
+            -6.843532885620627,
+            437.67202682744335
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "sprint": false,
+            "jump": false
+          },
+          "sent": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "pitch": 0,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 404
+          },
+          "pending": 10,
+          "backpressured": false,
+          "network": "online",
+          "ack": 394,
+          "self": {
+            "health": 100,
+            "mass": 80,
+            "balance": 1,
+            "balanceRest": 0,
+            "fighting": false,
+            "blocking": false,
+            "strike": 0,
+            "strikeTime": 0,
+            "strikeSerial": 1,
+            "stun": 0,
+            "impulseX": 0,
+            "impulseZ": 0,
+            "combatRest": 0,
+            "healthRest": 0,
+            "hurtTime": 0,
+            "hitSerial": 0,
+            "hitImpulse": 0,
+            "hitResult": null,
+            "tool": 0,
+            "id": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "x": -345.98924473676806,
+            "y": 0.16999999999999998,
+            "z": -63.05910912042919,
+            "vx": -0.00014121056332070666,
+            "vy": 0,
+            "vz": 0.0003444114889585968,
+            "yaw": -0.3890950369413397,
+            "lookYaw": 0.39629632679489646,
+            "pitch": 0,
+            "grounded": true,
+            "crouch": false,
+            "animation": "idle",
+            "phase": 18.624189709097045,
+            "speed": 0.0003722360768569577,
+            "stamina": 1,
+            "coyote": 0.1,
+            "jumpBuffer": 0,
+            "jumpHeld": false,
+            "landTime": 0,
+            "seat": null,
+            "seatId": null,
+            "seatRole": null,
+            "boarding": null,
+            "actionTime": 0,
+            "alive": true,
+            "color": [
+              0.23,
+              0.37,
+              0.42
+            ],
+            "residentManaged": true,
+            "indoors": false,
+            "transit": null,
+            "wait": 0,
+            "target": null,
+            "liftId": null,
+            "controlRevision": 0
+          },
+          "account": {
+            "version": 1,
+            "id": "b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "ownerActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "activeActorId": "resident:human:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "controlRevision": 0,
+            "bodyId": "player:b480dc8f-fc6b-4f51-82ec-43fe51b250ed",
+            "observingActorId": null,
+            "observingBodyId": null
+          },
+          "vehicle": null,
+          "instruments": null,
+          "transport": {
+            "stats": {
+              "receivedBytes": 2139733,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 881.5406933326999,
+                "latestTime": 884.0333333326937,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 426102697,
+                "entities": 74,
+                "definitions": 74,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 38.299999988077616,
+                "headroomMs": 2492.6399999937985,
+                "selfApplied": 177,
+                "entitiesApplied": 8902,
+                "stale": 88,
+                "awaitingDefinition": 1,
+                "pendingEvicted": 1,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 82530,
+                "sentPackets": 271,
+                "replaced": 134,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 462
+              },
+              "commands": {
+                "sentBytes": 56,
+                "sentPackets": 1,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 56
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.800000011920929,
+                "maxWriteWaitMs": 3644.899999976158
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 322735,
+              "time": 881.6549333326999,
+              "entities": 1,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 30850.5,
+                "latestSeq": 404,
+                "forward": 0
+              },
+              "submitted": {
+                "at": 30859.600000023842,
+                "latestSeq": 404,
+                "forward": 0,
+                "history": [
+                  395,
+                  396,
+                  397,
+                  398,
+                  399,
+                  400,
+                  401,
+                  402,
+                  403,
+                  404
+                ]
+              }
+            }
+          },
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "14791",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            },
+            {
+              "id": "16519",
+              "floor": 0,
+              "target": 0,
+              "elevation": 0,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": true,
+        "time": 881.6549333326999
+      },
+      {
+        "name": "returned",
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "camera": {
+          "distance": 43.48499623184735,
+          "desiredDistance": 43.48499623184735,
+          "hit": null,
+          "mode": "third-person",
+          "head": null,
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": null,
+          "yaw": 0.39629632679489646,
+          "pitch": 0.65,
+          "anchor": [
+            0,
+            0.16,
+            -0.2
+          ],
+          "position": [
+            13.424991703996689,
+            26.262486461254205,
+            31.883869710049613
+          ]
+        },
+        "control": {
+          "input": {
+            "forward": 0,
+            "right": 0,
+            "yaw": 0.39629632679489646,
+            "sprint": false,
+            "jump": false
+          },
+          "sent": null,
+          "pending": null,
+          "backpressured": false,
+          "network": "observer",
+          "ack": null,
+          "self": null,
+          "account": null,
+          "vehicle": null,
+          "instruments": null,
+          "transport": null,
+          "lifts": [
+            {
+              "id": "36117",
+              "floor": 3,
+              "target": 3,
+              "elevation": 9.899999999999999,
+              "door": 1,
+              "velocity": 0,
+              "phase": "idle"
+            }
+          ],
+          "liftView": {
+            "cachedPlans": 2,
+            "sourceBuilds": 1
+          }
+        },
+        "walking": false,
+        "time": 884.4666666660266
+      }
+    ]
+  },
+  "operation": {
+    "started": "2026-10-17T13:19:55.1803011+00:00",
+    "ended": "2026-10-17T13:20:32.3414291+00:00",
+    "exitCode": 0,
+    "command": "bun tools/capture.ts --office-entry",
+    "ui": "http://127.0.0.1:5173/",
+    "gpu": "1",
+    "label": "office-input-native-20261017-r7",
+    "debugPort": 3327,
+    "virtualGamepad": true
+  },
+  "cleanup": {
+    "ok": true,
+    "passed": true,
+    "players": 0
+  },
+  "preservation": {
+    "date": "2026-10-17T13:21:50.786Z",
+    "pid": 4296,
+    "beforeRows": 5340,
+    "afterRows": 5344,
+    "missingRows": 0,
+    "protectedRows": 326,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 24,
+        "after": 24,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 19,
+        "after": 19,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 17,
+        "after": 17,
+        "changedExisting": 0
+      }
+    },
+    "accounts": 68,
+    "integrity": "ok",
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    }
+  },
+  "checks": {
+    "adapter": {
+      "pass": 153,
+      "fail": 0,
+      "assertions": 7521,
+      "files": 15,
+      "seconds": 9.17
+    },
+    "originalInput": {
+      "pass": 2,
+      "fail": 0,
+      "assertions": 19
+    },
+    "types": {
+      "adapter": 0,
+      "game": 0,
+      "officeUi": 0
+    },
+    "builds": {
+      "game": 0,
+      "officeUi": 0
+    },
+    "mixedFlightSamples": 900
+  },
+  "runtime": {
+    "date": "2026-10-17T13:29:24.3160510+00:00",
+    "gamePid": 4296,
+    "vitePid": 21580,
+    "voicePid": 15312,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "hubRunning": false,
+    "speechRunning": false,
+    "savedAgents": 8,
+    "activeAgents": 0,
+    "manualResume": true,
+    "listeners": [
+      {
+        "LocalPort": 7860,
+        "OwningProcess": 12088
+      },
+      {
+        "LocalPort": 7860,
+        "OwningProcess": 18732
+      },
+      {
+        "LocalPort": 5173,
+        "OwningProcess": 21580
+      },
+      {
+        "LocalPort": 3007,
+        "OwningProcess": 4296
+      }
+    ]
+  },
+  "requirements": {
+    "date": "2026-10-17",
+    "classification": "progress",
+    "goalComplete": false,
+    "objective": "Preserve the original TheGame on The Engine and add the existing Office as another entry into the same metaverse, with account-owned businesses/harness and in-place control of autonomous NPC employees.",
+    "closedThisPhase": [
+      "Mouse buttons reach the original GameControlSampler and original GameNetwork; playing no longer invokes editor object selection or task-avatar context menus.",
+      "Browser gamepad readings are sampled each fixed tick, and original camera look reaches Office presentation.",
+      "Mouse release, body changes, modal dialogs, trusted tab hiding and scripted window blur neutralize input.",
+      "Vehicle aid commands are one-tick pulses validated against the current driver before the original server performs its own permission checks.",
+      "153 adapter tests pass, including 900 mixed flight-input comparisons; native R7 passes 14 recorded states and restores observer mode."
+    ],
+    "remaining": [
+      {
+        "id": "native-vehicle-special-actions",
+        "status": "pending",
+        "nextAction": "Run the original parked-vehicle route with current Office controls, verify ABS/ESP/gear-mode UI commands against authoritative vehicle state, and verify that car-specific controls are absent for a pilot. The transport QA camera mapper has been updated to the original Game sensitivity; that full rerun has not happened."
+      },
+      {
+        "id": "task-avatar-and-original-feature-audit",
+        "status": "pending",
+        "nextAction": "Audit the retained Office editor/task-avatar workflow and remaining original feature/parity gates against the canonical NPC/player authority. Preserve the requested full Game and existing Office workflow."
+      },
+      {
+        "id": "voice-8765",
+        "status": "earlier user question unanswered",
+        "nextAction": "Keep the hub off until the user answers the earlier microphone-related question. Independent game/editor work is available."
+      }
+    ],
+    "limits": [
+      "Gamepad API readings were virtual; physical hardware was not tested.",
+      "Real tab visibility used trusted browser events. The tested headless browser retained hasFocus=true while hidden and emitted no window blur. Separate window blur/focus events were scripted and explicitly labelled.",
+      "This phase does not claim fresh native car-aid/pilot acceptance or a new FPS measurement."
+    ],
+    "priorEvidence": [
+      "docs/render-evidence/original-feature-editor-20261017.json",
+      "docs/render-evidence/office-worker-rest-20261017.json",
+      "docs/render-evidence/fps-live-20261017-player-answer-r1.json"
+    ]
+  },
+  "reviewedImages": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/attack-block.png",
+      "bytes": 399680,
+      "sha256": "bb349f83f9c16fa77095caa45957f8715e469c8ca45a23f08f2f7d66a9217692",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/attack-block.png",
+      "reviewed": true
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/gamepad.png",
+      "bytes": 415154,
+      "sha256": "ee72abb484fbdc6f606e4f48e940ca6e0b151c002e12117ae4cc4747a14b14b6",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/gamepad.png",
+      "reviewed": true
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/modal-neutral.png",
+      "bytes": 211310,
+      "sha256": "12e995beec80bcfc8a6547410f07d3e716abf18880b9502e02476348084b9538",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/modal-neutral.png",
+      "reviewed": true
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/returned.png",
+      "bytes": 607380,
+      "sha256": "7580239f497f89e7cfa6b28bae66526c48fc2da83990a99bef949c53bce8dee4",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/returned.png",
+      "reviewed": true
+    }
+  ],
+  "failedProbes": [
+    "R1 used the wrong diagnostic view name; actual controlled rendering succeeded.",
+    "R2 checked smoothed movement before presentation caught up with the acknowledged authority state.",
+    "R3 had an invalid negative-coordinate expression in QA.",
+    "R4-R6 expected a window blur that this headless browser does not emit on tab hiding. R7 verifies trusted visibility and separately labelled scripted window events.",
+    "The intermediate passive close-client focus probe timed out after reading its own closed connection; the bounded follow-up records the result.",
+    "A QA-only TypeScript target-id guard was added after R7; the executed R7 helper is preserved."
+  ],
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-controls.ts",
+      "bytes": 1163,
+      "sha256": "32f43483c7815fed3e4da4e733f1c5c1fd67e990e5654467314fd1003e85fd43",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/client/canonical-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 39159,
+      "sha256": "32f9b7bc815e6a8de43555ffca7065a1ce5410a93598262097f3f75dec1949c3",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 57340,
+      "sha256": "1b9f98cf15e1f68e0295ebc643c8006daf5d1c8d673d982d7aa87e385554109e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/test/canonical-connection.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 6304,
+      "sha256": "22bea5663b5e3381c1133773ee0b8759e62b55ffbcb4208db194c1f57cdfb9bd",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 237591,
+      "sha256": "a278d3036f7690a5a6cafad16518078d24735f69d238a699df85d1dc0895dd30",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "bytes": 1094,
+      "sha256": "388246755b74d6924867f0b8e2fd67571d45c192041500b6459b86d8d9eb8184",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/office-controller.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/input-controls.ts",
+      "bytes": 3628,
+      "sha256": "18ec7f28c7ac2e504befd94faa0d95291e48be4bdf05e49113f9e375c9cdf81a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/input-controls.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/camera.ts",
+      "bytes": 2171,
+      "sha256": "9ce544ce39349c22d7bce255539d7a85a78dc7d7e2255cd6e3d63942fa2bfaff",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/camera.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/input.ts",
+      "bytes": 3942,
+      "sha256": "5516e1acf5e8bd1f0fb7d3ef55b9cfc9db0922023f88478735ae7008ba2b23c1",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/input.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-input.ts",
+      "bytes": 13999,
+      "sha256": "d0921a1b948a8614563ba3d926369150890a178b27be94df2a89f2619dd09b8f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/tools/qa-office-input.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 9005,
+      "sha256": "263fb22c699d1a66ef5c0fdde3cf92ab2651191c682fa009620fe246062d7374",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-transport.ts",
+      "bytes": 9870,
+      "sha256": "274bd5920524d3f6c62c7ce0bf151169148eb4877e2707bde3f5448280a4491e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/tools/qa-office-transport.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 870613,
+      "sha256": "61f6133dbe053214076997ff7b5e0e1d16a767d6d9dd5896cdf5df53dd7349e2",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1560598,
+      "sha256": "539fcddd37ee39fc1abed9f9f0845a9869d7a08a756d13420409e22608614d9b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 71422,
+      "sha256": "6fa5798fb1209274f66064b48540847740c44355da9401d5868ae4644de47bae",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60524,
+      "sha256": "65b1eb729492179ad60f11d75ca3c0a8e9b8dec39466db3e22d5832c2e898bbd",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 8645,
+      "sha256": "af80ca94eb5ecdf00a16a07888fd094dc057e3d6cd9c3d71d2337d10779827c6",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/game-controls.css",
+      "bytes": 363,
+      "sha256": "7039e2a04965df8f8ec4dc5bcd9338f0965bddabc16f9b4bb57c4a6d879d008b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/game-controls.css"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/compact.css",
+      "bytes": 5201,
+      "sha256": "f53eb2ab9f21546e369cee877262d1fae493dc0529f1db07665e3589a41b921c",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/compact.css"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 172373,
+      "sha256": "b2ce036c1a115aa79e9863eb82745f27ca501aa48a77912ca3cfe8998eb257dd",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "ed7b7df11f4a1cef320124a1f5354f21b8065268d050863e5cb5ff42532f6e3f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/dist/index.html"
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/adapter-full-check.log",
+      "bytes": 17333,
+      "sha256": "7f91dd96e3cb01551eead7be113bfc0d97a8ef3f60a328a2e38adfeedeff4e99",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/adapter-full-check.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/adapter-full-final.log",
+      "bytes": 17453,
+      "sha256": "e904c1667571da7d01b04349d70d5d3940b6a16ca8af4e3b437b1ac74d041c5f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/adapter-full-final.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/adapter-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/adapter-types.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/archive-evidence.ts",
+      "bytes": 6300,
+      "sha256": "87d735011ae89b60d5c8c04365362ff9b93a0ec45fd626787f5b4a904db78cc0",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/archive-evidence.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/engine/canonical-connection.test.ts",
+      "bytes": 52244,
+      "sha256": "7b33dd1a1dcda80e3c621de0c555c10458a9bc59ab75612a4ee5e692c28f515d",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/engine/canonical-connection.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/engine/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "62fa499151c4f9b0bac1a699be7fa4f924f9bfd698b75fc34260acca9597f71b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/engine/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/engine/canonical-controls.ts",
+      "bytes": 984,
+      "sha256": "cc2489dc84f9282c57eab62764c80d0242c0acf17d9ef1a2caab95e0002cd802",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/engine/canonical-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/game/camera.ts",
+      "bytes": 2171,
+      "sha256": "9ce544ce39349c22d7bce255539d7a85a78dc7d7e2255cd6e3d63942fa2bfaff",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/game/camera.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/game/input-controls.ts",
+      "bytes": 3628,
+      "sha256": "18ec7f28c7ac2e504befd94faa0d95291e48be4bdf05e49113f9e375c9cdf81a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/game/input-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/game/input.ts",
+      "bytes": 3942,
+      "sha256": "5516e1acf5e8bd1f0fb7d3ef55b9cfc9db0922023f88478735ae7008ba2b23c1",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/game/input.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/game/office-controller.ts",
+      "bytes": 1026,
+      "sha256": "aa517c69fdeec7f90e8121875a56df1a860304a9b737652f1aa978c178c8d441",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/game/office-controller.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/game/qa-office-transport.ts",
+      "bytes": 9861,
+      "sha256": "15ef0773e7c5cbd9b45df2e4529e7cbbe486668a5f419559e46467b9c269abfb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/game/qa-office-transport.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/office/GamePanel.tsx",
+      "bytes": 8138,
+      "sha256": "2058e0b650f0c7240bace6adbd89d3008e8e4e8d0b3f6de33e12103549e03002",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/office/GamePanel.tsx"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/office/Office.tsx",
+      "bytes": 60304,
+      "sha256": "136f5349ad25d501176e1e17f2698f9a427cd5fab4199231b333037103bd5f11",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/office/Office.tsx"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/before/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/before/office/scene.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/core-first.log",
+      "bytes": 5159,
+      "sha256": "848b815794c4f518f71bdf619bf2e2f5fb8ab50bb6688c91f0fb90ef546ec9c5",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/core-first.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/core-input-tests.log",
+      "bytes": 5496,
+      "sha256": "86556bb2de8bd7c86947f61de60161198a4afc5ceae086506932c9db24244826",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/core-input-tests.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/focus-probe-close.json",
+      "bytes": 1048,
+      "sha256": "314f0c452c84328a5214778e07124816e81ab480e4702055e6f71456f863d6cb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/focus-probe-close.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/focus-probe.json",
+      "bytes": 1446,
+      "sha256": "a98694cb95324a33d45737cd2dd38616f4ddb2970c971efd9d4af8882d00ec10",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/focus-probe.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/game-build.log",
+      "bytes": 619,
+      "sha256": "f25ebee4a944484a1a450e50257960b7437b803a86eb31c7eae85f9b420796c7",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/game-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/game-types-complete.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/game-types-complete.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/game-types-final.log",
+      "bytes": 260,
+      "sha256": "0ea6034da2328d04b3d329cb670a51d90fceb9f41b742ccade61dce9e853bd2c",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/game-types-final.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/game-types.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/game-types.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r1-operation.json",
+      "bytes": 322,
+      "sha256": "cfc5d92c05f089d47b1ce2a3c94a0754a25995b91547b2e825c0512135d2b928",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r1-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r1.log",
+      "bytes": 1342,
+      "sha256": "f7a0a62a84ab6d0d1c4266ff7840546709af89743c9ab107217f7fd3a2b2bb84",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r1.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r2-operation.json",
+      "bytes": 322,
+      "sha256": "61cc8b8035ff14e673519944f9db51c989d6f9f5bb77f5e697fc69436b6e888a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r2-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r2.log",
+      "bytes": 2392,
+      "sha256": "6eccfe19504cb94dcf776f899f6356614c091653b6cb8b0e10be943e283073ba",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r2.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r3-operation.json",
+      "bytes": 322,
+      "sha256": "6f76b80215c033bf0ca14e95b5dcad5f12b9e1e6193aabc97dddd45c1409703d",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r3-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r3.log",
+      "bytes": 2886,
+      "sha256": "44f73b9588a393b7b164cec7f831a6f7bc2a4e1a7f0e2183ba568f52f7c03102",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r3.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r4-operation.json",
+      "bytes": 322,
+      "sha256": "938e69405dd90fc57f12951ce50ffcbfd0481b23770abf7ab889a1d27ddfe467",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r4-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r4.log",
+      "bytes": 1324,
+      "sha256": "59061b49ce21112faca64fd2cd99bff88631ccf79f6bfd4dac23368dea6631ea",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r4.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r5-operation.json",
+      "bytes": 322,
+      "sha256": "15aa229fb191b5df1abc68c1afc32c059b9ef8f6a3ca44d183169501fe972bb6",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r5-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r5.log",
+      "bytes": 1324,
+      "sha256": "4768c41373bed80a4d56b08ee1c9f0942ae66a08b706969ba9fb054974109c12",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r5.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r6-operation.json",
+      "bytes": 322,
+      "sha256": "ba0327bf3b3741ec89046f67d77d78f0b50152cc0c6c18a217c014738026bedf",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r6-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r6.log",
+      "bytes": 1429,
+      "sha256": "79b3f814182e24c1ad3685336c592178f765e9851de5c0ee4d66f181a460ff6e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r6.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r7-operation.json",
+      "bytes": 322,
+      "sha256": "fa87e75fd9236e0e9304187fc644caaddd411491f223782c1cd9ad7f6e4b1f47",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r7-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/native-r7.log",
+      "bytes": 359,
+      "sha256": "96ce81a1cb6be71cc62e4e0697cfdbc61a93e15e5732b16aa29a733c5d575908",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/native-r7.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/original-input-tests.log",
+      "bytes": 349,
+      "sha256": "3166ef32cb1e9d638df7a79e505890998063aa9eeb1420f6bdc40a14bc429438",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/original-input-tests.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/probe-focus-close-result.ts",
+      "bytes": 3744,
+      "sha256": "ce49475af782c6b714a76ffdc84aff8fdeaa855a7dcd18d973e4d549378eec8a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/probe-focus-close-result.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/probe-focus-close.ts",
+      "bytes": 4105,
+      "sha256": "d47c67cb58e33ecf69a4df442bad31452ae1927b169fbd9e1b6daa235816c6b8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/probe-focus-close.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/probe-focus.ts",
+      "bytes": 3982,
+      "sha256": "c79831ca45e4f641cd44367e337616f99fbb018cdcdd152b40dc626db3a070e0",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/probe-focus.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r1.ts",
+      "bytes": 11166,
+      "sha256": "a4e8dcacb0091a8e78d2dfc0599faa9986f3d0f21f65aa957b6c261d18eac9b8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r1.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r2.ts",
+      "bytes": 11217,
+      "sha256": "27f01b849e0ea8de90c8086bcee1522142ff84e667d0a2648608b698df7c74a4",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r2.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r3.ts",
+      "bytes": 11368,
+      "sha256": "4f53245c8f762f1c7dd8a7e12a25769f29dadb7d1653b13b6a41156c4eec5215",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r3.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r4-before-focus.ts",
+      "bytes": 11402,
+      "sha256": "300a006c86940584875dd852796bce98feb14f69e61c623b5ea69617a593a2cb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r4-before-focus.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r4.ts",
+      "bytes": 11402,
+      "sha256": "300a006c86940584875dd852796bce98feb14f69e61c623b5ea69617a593a2cb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r4.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r5.ts",
+      "bytes": 12516,
+      "sha256": "8e380074ff98e5791199ea1fa9c009d08e353041eb32a36dceac34c9afed588e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r5.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r6.ts",
+      "bytes": 12926,
+      "sha256": "232489373cf975695aa2eb02b92d318f4dbb0503c658e5fd80320cb08fd982ba",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r6.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/qa-office-input-r7.ts",
+      "bytes": 13936,
+      "sha256": "559b93e3fc195dff795ae3fb8dd429c36e38d2e0fec371c7dd8700bd22a95609",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/qa-office-input-r7.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/requirements-current.json",
+      "bytes": 2652,
+      "sha256": "61a6b77e32e146bfe658f30c53c2aad17b918ab5e485c0a3b72aa42c8e6583a4",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/requirements-current.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/run-native-r1.ps1",
+      "bytes": 1419,
+      "sha256": "28e5e9b285363464ea73201e7f1de8c1eff76ceba66b3b0a7dc0477683dde99e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/run-native-r1.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/run-native-r2.ps1",
+      "bytes": 1419,
+      "sha256": "0f2de536c1f24a8312a2dba2ae4ed15255c3d183abcbf604c23cc8431bdd1b41",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/run-native-r2.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/run-native-r3.ps1",
+      "bytes": 1419,
+      "sha256": "834e6f07a461f2b1fa285f69e5d06dcad96a5e2b1c5aada6fe5088f2b2864875",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/run-native-r3.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/run-native-r4.ps1",
+      "bytes": 1419,
+      "sha256": "e3a300a9ce1c8a4bb910d2bb84e2755861005f1895391071b41323758559b40b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/run-native-r4.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/run-native-r5.ps1",
+      "bytes": 1419,
+      "sha256": "7881e6cbb522cf3cbb716e7f1a958e93bd11d645481699eac7ba8d53ec9b4019",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/run-native-r5.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/run-native-r6.ps1",
+      "bytes": 1419,
+      "sha256": "233dfed05721a1719cbcbe919f257d0c3032757ea916692b08fe9a797fd72541",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/run-native-r6.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/run-native-r7.ps1",
+      "bytes": 1419,
+      "sha256": "cbe95fc8801b0c2c5296f2d563748131e35c78c79447e3638dfb9714d87be0a6",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/run-native-r7.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/runtime-final.json",
+      "bytes": 643,
+      "sha256": "6e66e2e691b57545d0d586f6ec12fa035a3b53a603fc383e03d4ab37bf7f8c7c",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/runtime-final.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/ui-build-final.log",
+      "bytes": 889,
+      "sha256": "da6bb726de94d8b763ff9bde6bb87f48ce5cb2279cc1080c5bc7a6de6d4512d9",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/ui-build-final.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/ui-build.log",
+      "bytes": 889,
+      "sha256": "9dd54a11508c3e35b1553bc99102ca7cfae245819cef8404550abb9c80cb21e7",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/ui-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/ui-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/ui-types-final.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-input-parity-20261017/ui-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-input-parity-20261017/ui-types.log"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r1/cleanup.json",
+      "bytes": 51,
+      "sha256": "68719e7a2e36512b8ed9282bfdff91551177c4078bb1412f0be6b95db77aa8ec",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r1/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r1/failure.json",
+      "bytes": 1694,
+      "sha256": "fb25304d76e7b28153b0e014adf7f90f772491d35d546f905c87b0e8f122ed31",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r1/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r1/failure.png",
+      "bytes": 392203,
+      "sha256": "c0ba3f165d5c8bb45fb2ef167e2bf11b2e312c368e79db0e18aed864d86f28b8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r1/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r1/observer.png",
+      "bytes": 534030,
+      "sha256": "7a47e749f27fd0894a5acc69dbe07d30ccc54707149452a8fd29a799b8aaac24",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r1/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17646,
+      "sha256": "4dd27d864f9305439f0d2aa10a50508abdcb2f86fefc927a5897c9aece7cf6fb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r1/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r1/office-entry.json",
+      "bytes": 17807,
+      "sha256": "b1f9f31b42e6bf58ce2ff3c4a46a87e83a98f65635827cbe07ea487de0cbfbc2",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r1/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r1/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r1/office-entry.png"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r1/before.json",
+      "bytes": 1119,
+      "sha256": "2bd2c4c5bec4783e5e4c51c0bc28de5c36e42aee5f661d84d35e6eafabf0ff7b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r1/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r1/before.sqlite",
+      "bytes": 11177984,
+      "sha256": "046441002f4dc340009617524936ce4e473661e364228f1c577b0338df34a5a8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r1/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r1/after-audit.json",
+      "bytes": 725,
+      "sha256": "7bc197fb89ac09bf0444537d5cc4232541a02c97b9ab5b7ddd5c0d4fc1d24cf3",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r1/after-audit.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/aim.png",
+      "bytes": 295905,
+      "sha256": "dfc4f84b17381e1606b7d9920663cc29bcc4e80de33196531068ffcf1da00cd3",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/aim.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/attack-block.png",
+      "bytes": 322451,
+      "sha256": "c27cec5b76493e4993ee5570e7c473d8e17ffa1b058d212bbe0865bfd4da7fb9",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/attack-block.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/cleanup.json",
+      "bytes": 51,
+      "sha256": "68719e7a2e36512b8ed9282bfdff91551177c4078bb1412f0be6b95db77aa8ec",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/controlled.png",
+      "bytes": 268577,
+      "sha256": "772804719dfeeb71e78914842c164bce039d6bab65c2ff9752b9804629568459",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/controlled.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/failure.json",
+      "bytes": 77272,
+      "sha256": "dc570476089898976b71af3cf47e249bb6c8345f67b77bfe69f471dafd756e1d",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/failure.png",
+      "bytes": 348953,
+      "sha256": "22bdee93fe20c2327077e2e1d8ef5e79da875f402c82552897b3d5ac53cc83f8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/gamepad-look.png",
+      "bytes": 332358,
+      "sha256": "db5a61de190fee997106488173db4f67ecab8036e47aec7d7178497dd19562aa",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/gamepad-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/gamepad.png",
+      "bytes": 345315,
+      "sha256": "9ab4b0ff7f8fdb57c0848a0c7af7661625be0314158f354c117bf770f471d3e8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/gamepad.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/mouse-look.png",
+      "bytes": 312534,
+      "sha256": "37976283e90b74a85902905ff0995465cf4eb2c28b8d795909d2da4142e13b7e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/mouse-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/mouse-released.png",
+      "bytes": 331122,
+      "sha256": "a743325166248926fb5fcaee22efd18c2cdc0533fb42eee1e75641e35d41e16e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/mouse-released.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/nearby-actors.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/nearby-actors.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r2/observer.png",
+      "bytes": 565985,
+      "sha256": "2b3ad3ef7aea1a507e725ce41e7ffaed4c98a6f5598327577e43c69ca8bf40b5",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r2/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 17645,
+      "sha256": "c9196d3d6e106f3669f3362f8c5f88701a9cf1a6b45d203e444bbaed97d884b6",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r2/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r2/office-entry.json",
+      "bytes": 17806,
+      "sha256": "0c2ab5ed631409d49ba3c6c3022d44129bc9fcdb2fe0c1e8f8878b176aade06e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r2/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r2/office-entry.png",
+      "bytes": 549461,
+      "sha256": "304f639418acb3317166450cb4f6716c6a5995af3d14534e10750455404f9971",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r2/office-entry.png"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r2/before.json",
+      "bytes": 1119,
+      "sha256": "c4e0bcc6e524c2774f299f225638802af438e67a1dff3b94ee49c071a79e1813",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r2/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r2/before.sqlite",
+      "bytes": 11218944,
+      "sha256": "646a89ff24b275bfeeb1dff8b587a05cfefd98ababb0af7cb56d2c0ec77070b4",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r2/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r2/after-audit.json",
+      "bytes": 725,
+      "sha256": "37b432977c27906c42ec65cf463502b5cf0c1dade64fe6824d131936d11625ae",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r2/after-audit.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/aim.png",
+      "bytes": 354125,
+      "sha256": "0d4f221a683dc39dc64400e93540bf6bdaa5c3f5a0a0f2219474df199e182557",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/aim.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/attack-block.png",
+      "bytes": 366295,
+      "sha256": "a8a5421474f6c20518d62ae857b638226508003f2650a0f7aff957efbb66d025",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/attack-block.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/cleanup.json",
+      "bytes": 51,
+      "sha256": "68719e7a2e36512b8ed9282bfdff91551177c4078bb1412f0be6b95db77aa8ec",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/controlled.png",
+      "bytes": 324077,
+      "sha256": "9eb7ab9193f0e35ea9771c8401a423748b4242a9d7ff72553de2d321bc5f6199",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/controlled.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/failure.json",
+      "bytes": 69433,
+      "sha256": "5c16a9074aa3f9bbd8b8407ac19c3bff5c0eb4c1329f0d890b7103a768bb2b8e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/failure.png",
+      "bytes": 382640,
+      "sha256": "78a06e53bd8e72312fe3dbc427ec76d960719ffd29697bc1419386a5a5f4df9a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/gamepad-look.png",
+      "bytes": 381314,
+      "sha256": "aaee172492390ccf33628c4460262b8a7bb5a8027d5da76704f29a084fe0fa26",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/gamepad-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/mouse-look.png",
+      "bytes": 368606,
+      "sha256": "11aea5a4be07677d25b82772a095f8006b7fa41055e08388dcb3d63d22e62b2a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/mouse-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/mouse-released.png",
+      "bytes": 379583,
+      "sha256": "0a0c5bd8ca39a154e19fe910060ac10b50e627c08000fb44aade3e8e7f390db7",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/mouse-released.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/nearby-actors.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/nearby-actors.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r3/observer.png",
+      "bytes": 553388,
+      "sha256": "2527bbb7a597ce4ac589ab828d26e7a4a46c80e86e5289d284ef190da33ad39f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r3/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r3/office-entry-diagnostics.json",
+      "bytes": 17392,
+      "sha256": "3be336200aec4bbdd9bd294becdb8cb43a28ee2d9e1729f34a4206a8ddf831b1",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r3/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r3/office-entry.json",
+      "bytes": 17553,
+      "sha256": "04f7dc5683fc1cee41d694cce5dc3d573045c4ef57f814d5da94d6abf4970fa0",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r3/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r3/office-entry.png",
+      "bytes": 536479,
+      "sha256": "3d38cf53896a5f0f4a5c0616d6696de6b3311d69e94a861e4ee3066d124f985a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r3/office-entry.png"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r3/before.json",
+      "bytes": 1119,
+      "sha256": "f259beb22db08afc638b39a8d1d5a83fe79c5008f36dc13f78a99985a187dd20",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r3/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r3/before.sqlite",
+      "bytes": 11259904,
+      "sha256": "be29543b02832d902b70ea815ab108e4da538755353b0c5cc032773e195a22bc",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r3/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r3/after-audit.json",
+      "bytes": 725,
+      "sha256": "cefdb974a2b47b9bb67ea1c4cda221da22bf6a4ea0d957145f65ab13909e9da9",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r3/after-audit.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/aim.png",
+      "bytes": 365436,
+      "sha256": "5eba1d44e162391124a4e29ccf336e720214f83dc0f2321c3e4ac15fe7d04cf7",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/aim.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/attack-block.png",
+      "bytes": 369380,
+      "sha256": "7c296fb8ba2ad43d426f325ee8512c2472a4274ca81c67859a12bfbfa7bea22d",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/attack-block.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/cleanup.json",
+      "bytes": 51,
+      "sha256": "68719e7a2e36512b8ed9282bfdff91551177c4078bb1412f0be6b95db77aa8ec",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/controlled.png",
+      "bytes": 317412,
+      "sha256": "4ea36fdde158e2c23f22162221bc0159b612fb288314dff3bb7503746831a0e7",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/controlled.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/failure.json",
+      "bytes": 84106,
+      "sha256": "269878bb0dfd8792d3f889397e8dbf0bf80f94dd51942787ee7fababdfff4520",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/failure.png",
+      "bytes": 343033,
+      "sha256": "e5b089e89a3351aef43c5231517c50be672d28594d042257ddfa58735f8f3539",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/gamepad-look.png",
+      "bytes": 375500,
+      "sha256": "a07e55a8d950d3c83bb40049ed314f126be7e88be9beac991c41353cba9b367e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/gamepad-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/gamepad.png",
+      "bytes": 360852,
+      "sha256": "fdd9024e12fbe8d8504febdbefe85883a8052fd166d861b25f99268f26de4ce8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/gamepad.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/modal-neutral.png",
+      "bytes": 192182,
+      "sha256": "6f159593fccd1b6f751ccfe0b3b8dcca7e8aa8bf8c6de58c26347a03ef10cb86",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/modal-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/mouse-look.png",
+      "bytes": 381457,
+      "sha256": "e4074f677a5e8c1d2b4c82c3ccfe918e2ac6e97dc88141a82c39a4b3a7ab78ff",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/mouse-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/mouse-released.png",
+      "bytes": 379501,
+      "sha256": "e1f88ddfe0a7dabaf29a5b909f37b607cce81700bbbbd47b24f3ab139f9f83ed",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/mouse-released.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/nearby-actors.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/nearby-actors.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r4/observer.png",
+      "bytes": 543643,
+      "sha256": "db7c39cb06c3d9952e87bd4160d7c5704defb477b566e632c667cc45f35e4224",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r4/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r4/office-entry-diagnostics.json",
+      "bytes": 17634,
+      "sha256": "4d716308b51264e2a81bd05abdb212c59edbee8da5fd866531f4b873de323a7d",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r4/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r4/office-entry.json",
+      "bytes": 17795,
+      "sha256": "56e37c0d8fe073525c71118c56673bbca9e2b1e773743d40807d845182972d3b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r4/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r4/office-entry.png",
+      "bytes": 528632,
+      "sha256": "eba5925bd250d5909f60fcbbe367c369fbb7f703816809c5c69f6cce308ce94d",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r4/office-entry.png"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r4/before.json",
+      "bytes": 1119,
+      "sha256": "135267bb7cb1d31acf047438e75b0a9152457ef4412e95fe4ff11fb651a13b5c",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r4/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r4/before.sqlite",
+      "bytes": 11272192,
+      "sha256": "d959af9673eb561b70d4f5575c9b5dd607c1bcd01fc5469689fe23c8bf618fa8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r4/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r4/after-audit.json",
+      "bytes": 725,
+      "sha256": "bb1f3b73278652a4c4f4e9327a514b85e5c572d3dac05fbcdcb13c0ca5f3ab22",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r4/after-audit.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/aim.png",
+      "bytes": 347992,
+      "sha256": "95fd8bae800008f20b6026fccf1a7734ce7b1cb2308afb5057913ea80c65b81f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/aim.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/attack-block.png",
+      "bytes": 343833,
+      "sha256": "a93045ef3789b6f72322b2f5032165c27b654c6373cca461414cf0ae1804a875",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/attack-block.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/cleanup.json",
+      "bytes": 51,
+      "sha256": "68719e7a2e36512b8ed9282bfdff91551177c4078bb1412f0be6b95db77aa8ec",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/controlled.png",
+      "bytes": 336839,
+      "sha256": "ca4c0eccfb5e0153900c8df4a7fd4d8fb8f1e6d4ffc11b0ba9b20a0c367e1b7a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/controlled.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/failure.json",
+      "bytes": 83582,
+      "sha256": "9e85410d38ed428132da24ea794aad3656d03b6107025f4ad9019b98b54ae7ac",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/failure.png",
+      "bytes": 410941,
+      "sha256": "f0a5e5c5fb9fa0a244abf87aa2aaa1e7ee2c190b3a470d215d19774fde5ec4b3",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/gamepad-look.png",
+      "bytes": 357259,
+      "sha256": "04b6060bb386361e51dc0edf9c8f76d0cce80e254dcf18a382b0f1cd862ed5da",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/gamepad-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/gamepad.png",
+      "bytes": 361239,
+      "sha256": "070f7f78671cd81d58169f3a763cb7c4e99c8f88931a1daafd8d4f84971042f9",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/gamepad.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/modal-neutral.png",
+      "bytes": 191984,
+      "sha256": "170891fd900f3350833f2c419fa7a860b860f1a9fb3019dd89ce744ab7b83390",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/modal-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/mouse-look.png",
+      "bytes": 360494,
+      "sha256": "18303f98be9de8e8d111b988d9ec60a860d2a146e48ac46c9e00717b234f8dd8",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/mouse-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/mouse-released.png",
+      "bytes": 357802,
+      "sha256": "de782d1edfbbef4f5714c9ed5d7a32af5ef608c2cfcfc347fbee2336a751efab",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/mouse-released.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/nearby-actors.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/nearby-actors.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r5/observer.png",
+      "bytes": 594056,
+      "sha256": "983a30e163b3eb6f03a03561733ce698b64ea46d0c755c02ba2118b7aa620c08",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r5/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r5/office-entry-diagnostics.json",
+      "bytes": 17520,
+      "sha256": "c56528a4934f38bd0c13e690548f19b9136bf21d01452efcf2f572703dcec813",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r5/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r5/office-entry.json",
+      "bytes": 17681,
+      "sha256": "b8a340c5d96bdb0af2ef7b7bff78a7fafd518fbb0c947def822668a4a9f6e52c",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r5/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r5/office-entry.png",
+      "bytes": 575653,
+      "sha256": "e2d9481b437496383dc19bee4de12f2c7f52da7170d519dde5cfcd4848c34f10",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r5/office-entry.png"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r5/before.json",
+      "bytes": 1119,
+      "sha256": "cb20179295fd9df509a0420e8c838c5458371e7e285385c774481cd16037de37",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r5/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r5/before.sqlite",
+      "bytes": 11288576,
+      "sha256": "10e54672e751215be860f9808b066b92a4587b2482f818a9471f0ffb8d4a9d0a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r5/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r5/after-audit.json",
+      "bytes": 725,
+      "sha256": "d4d2a7ec59c6d733734f25542623fd32860a8139dd037f9c7fcba8f5dbe2efac",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r5/after-audit.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/aim.png",
+      "bytes": 479182,
+      "sha256": "1f8125b3196a1619c0c28f1531d075126a8e48f5bb5c98c5befdd752e339fb24",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/aim.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/attack-block.png",
+      "bytes": 481335,
+      "sha256": "8dff544aa8a7d7e4bc977a69cd6de6faea17e8f10ab20aaffeeb42f40e00a495",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/attack-block.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/cleanup.json",
+      "bytes": 51,
+      "sha256": "68719e7a2e36512b8ed9282bfdff91551177c4078bb1412f0be6b95db77aa8ec",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/controlled.png",
+      "bytes": 465407,
+      "sha256": "2c37aa0ba0b8caa371848049f444c934af9db0873a45acddf443da580095de25",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/controlled.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/failure.json",
+      "bytes": 84095,
+      "sha256": "6882e12636d235b07eec2e4bd465dd82c304621f143c469533aec1868e118d54",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/failure.png",
+      "bytes": 417305,
+      "sha256": "439d494190125899a029daf8ffd6f4bc7dd61a92a48c9f6bb87b73ca59b8cfbb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/gamepad-look.png",
+      "bytes": 484270,
+      "sha256": "49ab5c7042f27d434e475a785db1936d32e9d1f6f9672c72a02f3848a65c6d81",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/gamepad-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/gamepad.png",
+      "bytes": 479390,
+      "sha256": "10e7015ae1e1e65190c3f84686a4d03bbceb4bdb2a0dc340ecfa12f45c058765",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/gamepad.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/modal-neutral.png",
+      "bytes": 242287,
+      "sha256": "3c5ca6fc69f2c4e0099eabd69af0331f85b573e128be241c4fe483c3bf907f3a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/modal-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/mouse-look.png",
+      "bytes": 495087,
+      "sha256": "0421df90b6924906cf5cb929ccbab6edc7a31d4dd52278b3d423134d6800c28b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/mouse-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/mouse-released.png",
+      "bytes": 493060,
+      "sha256": "991c8447808c4387288c6b1942feefa3f86654494c8660b6b546bcd930d5e424",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/mouse-released.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/nearby-actors.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/nearby-actors.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r6/observer.png",
+      "bytes": 601915,
+      "sha256": "ff274fbd8a8b496bf21dfba440f44bc8b7711a1e0ea2dc39df966b45146102a5",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r6/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r6/office-entry-diagnostics.json",
+      "bytes": 17687,
+      "sha256": "27b4a242d1249e788e299ee27e6c437793164fced45757e344b363d860fa231a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r6/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r6/office-entry.json",
+      "bytes": 17848,
+      "sha256": "56b3cd2018d60cfeb33da814f6d18764be403ec74bee9f8dd20101aceffdfd34",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r6/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r6/office-entry.png",
+      "bytes": 588988,
+      "sha256": "cc5eb6114990b540c659c8911ce04fb157283891b187656b4f41e551f0f76f73",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r6/office-entry.png"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r6/before.json",
+      "bytes": 1119,
+      "sha256": "e172167824bb32d026a97662360b929b891a334c2079ac7eee978bc93901edeb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r6/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r6/before.sqlite",
+      "bytes": 11325440,
+      "sha256": "10d314166e5150dc5a91660db06e38152dcf5bfdfac2134b78fba37dfcea0a24",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r6/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r6/after-audit.json",
+      "bytes": 725,
+      "sha256": "51be07db1a52bd3ba208434160f08797ee936284753c3c5ac0d20b2f3f903c1f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r6/after-audit.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/aim.png",
+      "bytes": 395615,
+      "sha256": "ec70fb8026b5e5b4a9b3ebdb709f9e7a4e0b6c4a2ebe23c9733be4134f699d5f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/aim.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/attack-block.png",
+      "bytes": 399680,
+      "sha256": "bb349f83f9c16fa77095caa45957f8715e469c8ca45a23f08f2f7d66a9217692",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/attack-block.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/blur-event-neutral.png",
+      "bytes": 375602,
+      "sha256": "e3f5079960617955260cb2d46b5d005bf17b0a5b7efa79c878b83dc09917a1bf",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/blur-event-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/cleanup.json",
+      "bytes": 50,
+      "sha256": "2d4b13ad82e2b4403e8274b5fb7a70bd1a2accdecd87eb6347b75059012ea066",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/controlled.png",
+      "bytes": 388822,
+      "sha256": "ca54e7866a594fb2bd942d38e94eee2d40b6a422acc72403b5305e3deae964a0",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/controlled.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/focus-event-neutral.png",
+      "bytes": 365921,
+      "sha256": "c3901778d80cd7098d569125e69fec203621e1c0e3e5240be894df44c2f8b127",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/focus-event-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/focus-neutral.png",
+      "bytes": 381857,
+      "sha256": "4059104000473e940f38cddd63575a61c65303eac5bac0d3c56bd01f2358d3ba",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/focus-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/gamepad-look.png",
+      "bytes": 419461,
+      "sha256": "099fe6fc3d1ec213acdf3a8073e83cecdb6ad1ade918fed05e8242096b9ad325",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/gamepad-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/gamepad.png",
+      "bytes": 415154,
+      "sha256": "ee72abb484fbdc6f606e4f48e940ca6e0b151c002e12117ae4cc4747a14b14b6",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/gamepad.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/modal-neutral.png",
+      "bytes": 211310,
+      "sha256": "12e995beec80bcfc8a6547410f07d3e716abf18880b9502e02476348084b9538",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/modal-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/mouse-look.png",
+      "bytes": 414962,
+      "sha256": "1bcd7fe558df6aa5cb0dc690383df10cfbff32a75bc8a5f406cbf04f1127d17a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/mouse-look.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/mouse-released.png",
+      "bytes": 411821,
+      "sha256": "3eabbe233dfc45ce2328e1f5368a078496c6f3fd454ab70b6b5d885087350cb0",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/mouse-released.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/nearby-actors.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/nearby-actors.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/observer.png",
+      "bytes": 601531,
+      "sha256": "82c7d5b069ad8d7770a0d894d21aaca49010f53289c67cc9ba6cdd00778371e1",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/report.json",
+      "bytes": 91462,
+      "sha256": "04d5393ec4264f8124da5314390a4c8646e6bb52f01dfee99adcbbcf44dcf9c2",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/returned.png",
+      "bytes": 607380,
+      "sha256": "7580239f497f89e7cfa6b28bae66526c48fc2da83990a99bef949c53bce8dee4",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/returned.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-input/office-input-native-20261017-r7/tab-hidden-neutral.png",
+      "bytes": 390708,
+      "sha256": "b73aa1b671e528a655cc6d4962f52e4a2947979323cc3dfebcbf2606b9d6f4ca",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-input/office-input-native-20261017-r7/tab-hidden-neutral.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r7/office-entry-diagnostics.json",
+      "bytes": 17695,
+      "sha256": "28ea4ff124773bffce2b149e4d1cfb257b02d9a364acbf74a30d667a5b3db4d9",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r7/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r7/office-entry.json",
+      "bytes": 17856,
+      "sha256": "12d1c589156c3951399b30a972105b75beac6b8b7ab9795f11d3b655b44373b2",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r7/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-input-native-20261017-r7/office-entry.png",
+      "bytes": 572070,
+      "sha256": "89b659eed4df0b8178334309ab243c0a32b6f12921adeb781f94da16fcb89adf",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/artifacts/office-in-game/office-input-native-20261017-r7/office-entry.png"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r7/before.json",
+      "bytes": 1119,
+      "sha256": "b4dfb6b90a081edea2d01b5b277bf6134c68d5286a80ac18de3ac86ccab2bfcc",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r7/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r7/before.sqlite",
+      "bytes": 11350016,
+      "sha256": "ca4d70970c460f342ab7b0b768084978d0d0fa6498373d0a4b64e02d1bb6747c",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r7/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/office-input-native-20261017-r7/after-audit.json",
+      "bytes": 725,
+      "sha256": "0c82681ecb90f5df03f5c2e76571cb948ce6765c27143190caefea1564a3d6c2",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/artifacts/office-worker-rest/office-input-native-20261017-r7/after-audit.json"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-controls.ts",
+      "bytes": 1163,
+      "sha256": "32f43483c7815fed3e4da4e733f1c5c1fd67e990e5654467314fd1003e85fd43",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/client/canonical-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 39159,
+      "sha256": "32f9b7bc815e6a8de43555ffca7065a1ce5410a93598262097f3f75dec1949c3",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 57340,
+      "sha256": "1b9f98cf15e1f68e0295ebc643c8006daf5d1c8d673d982d7aa87e385554109e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/test/canonical-connection.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 6304,
+      "sha256": "22bea5663b5e3381c1133773ee0b8759e62b55ffbcb4208db194c1f57cdfb9bd",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 237591,
+      "sha256": "a278d3036f7690a5a6cafad16518078d24735f69d238a699df85d1dc0895dd30",
+      "archive": "artifacts/office-input-parity-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "bytes": 1094,
+      "sha256": "388246755b74d6924867f0b8e2fd67571d45c192041500b6459b86d8d9eb8184",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/office-controller.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/input-controls.ts",
+      "bytes": 3628,
+      "sha256": "18ec7f28c7ac2e504befd94faa0d95291e48be4bdf05e49113f9e375c9cdf81a",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/input-controls.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/camera.ts",
+      "bytes": 2171,
+      "sha256": "9ce544ce39349c22d7bce255539d7a85a78dc7d7e2255cd6e3d63942fa2bfaff",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/camera.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/input.ts",
+      "bytes": 3942,
+      "sha256": "5516e1acf5e8bd1f0fb7d3ef55b9cfc9db0922023f88478735ae7008ba2b23c1",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/src/game/input.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-input.ts",
+      "bytes": 13999,
+      "sha256": "d0921a1b948a8614563ba3d926369150890a178b27be94df2a89f2619dd09b8f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/tools/qa-office-input.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 9005,
+      "sha256": "263fb22c699d1a66ef5c0fdde3cf92ab2651191c682fa009620fe246062d7374",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-transport.ts",
+      "bytes": 9870,
+      "sha256": "274bd5920524d3f6c62c7ce0bf151169148eb4877e2707bde3f5448280a4491e",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/tools/qa-office-transport.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 870613,
+      "sha256": "61f6133dbe053214076997ff7b5e0e1d16a767d6d9dd5896cdf5df53dd7349e2",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1560598,
+      "sha256": "539fcddd37ee39fc1abed9f9f0845a9869d7a08a756d13420409e22608614d9b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/office-input-parity-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 71422,
+      "sha256": "6fa5798fb1209274f66064b48540847740c44355da9401d5868ae4644de47bae",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60524,
+      "sha256": "65b1eb729492179ad60f11d75ca3c0a8e9b8dec39466db3e22d5832c2e898bbd",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 8645,
+      "sha256": "af80ca94eb5ecdf00a16a07888fd094dc057e3d6cd9c3d71d2337d10779827c6",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/game-controls.css",
+      "bytes": 363,
+      "sha256": "7039e2a04965df8f8ec4dc5bcd9338f0965bddabc16f9b4bb57c4a6d879d008b",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/game-controls.css"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/compact.css",
+      "bytes": 5201,
+      "sha256": "f53eb2ab9f21546e369cee877262d1fae493dc0529f1db07665e3589a41b921c",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/src/office/compact.css"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 172373,
+      "sha256": "b2ce036c1a115aa79e9863eb82745f27ca501aa48a77912ca3cfe8998eb257dd",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "ed7b7df11f4a1cef320124a1f5354f21b8065268d050863e5cb5ff42532f6e3f",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/dist/index.html"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/dist/assets/environment-map.worker-D5wbJvIo.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/dist/assets/gesture.worker-BHWWTrrT.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-CVC0Rm7P.js",
+      "bytes": 1810450,
+      "sha256": "06c3aa7d1d89c2eb13e2e54000fb327442b7e65e830cb24b7041935e22cd1962",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/dist/assets/index-CVC0Rm7P.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-HqTEPpyb.css",
+      "bytes": 98764,
+      "sha256": "c63a613944c913a03ff857bd5475762faa27f44b027f9567bfcf17ec571538e2",
+      "archive": "artifacts/office-input-parity-evidence-20261017/office/ui/dist/assets/index-HqTEPpyb.css"
+    }
+  ],
+  "counts": {
+    "files": 214,
+    "bytes": 116319384,
+    "sources": 23,
+    "reviewedImages": 4
+  },
+  "limits": [
+    "Virtual gamepad, not physical gamepad hardware.",
+    "Trusted tab visibility is distinct from scripted window blur/focus; OS-window blur was not tested.",
+    "Native car-aid and pilot-specific UI acceptance remains pending.",
+    "Game bytecode remains unchanged; this is not a new FPS sample."
+  ]
+}

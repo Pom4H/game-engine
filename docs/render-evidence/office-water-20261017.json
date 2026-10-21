@@ -1,0 +1,2148 @@
+{
+  "date": "2026-10-17T08:10:46.901Z",
+  "capability": "original-residents-26",
+  "scope": "Original finite semantic terrain map and water optics in the shared Engine Game/Office renderer; no new world, actor simulation, collision, authority clock or water displacement.",
+  "implementation": [
+    "Explicit finite terrain-map texture projection; original level-zero linear/clamp sampling and map colours.",
+    "Original water mask, sine/cosine normal animation and roughness .075; wetness interpolation retained.",
+    "Absolute source X/Z UVs survive rebase, Office floor and yaw; derivative basis rotates waves.",
+    "Terrain and road source material 1 share a scene/world image with reference-counted URL ownership.",
+    "Actual main, reflection-LOD and six local probe face shader paths use the same source water rules."
+  ],
+  "tests": {
+    "regression": {
+      "command": "bun test --timeout 60000 ./apps/thegame/test ../thegame/test/ground-image.test.ts ../thegame/test/office-terrain-assets.test.ts ../thegame/test/office-road-assets.test.ts ../thegame/test/the-engine-renderer.test.ts ../thegame/test/render-presentation-clock.test.ts ../thegame/test/office-audio.test.ts ../thegame/test/office-rain.test.ts ../thegame/test/office-world.test.ts ../thegame/test/rendering.test.ts ../thegame/test/physics-materials.test.ts",
+      "cwd": "engine",
+      "pass": 225,
+      "fail": 0,
+      "assertions": 21951,
+      "files": 25,
+      "seconds": 29.05,
+      "log": "artifacts/office-water/logs/engine-office-water-regression-r2-20261017.log"
+    },
+    "engineCore": {
+      "command": "node --test test/terrain-map.test.mjs test/surface-appearance.test.mjs test/scene-appearance-target.test.mjs test/material-uniforms.test.mjs test/renderer-post.test.mjs test/rain-surface.test.mjs test/facade-surface.test.mjs test/shader-zero-contribution.test.mjs",
+      "pass": 32,
+      "fail": 0,
+      "files": 8,
+      "seconds": 0.3748811,
+      "log": "artifacts/office-water/logs/engine-office-water-engine-tests-r2-20261017.log"
+    },
+    "checks": [
+      {
+        "name": "Game typecheck final",
+        "exitCode": 0,
+        "log": "artifacts/office-water/logs/game-office-water-game-typecheck-final-20261017.log"
+      },
+      {
+        "name": "Engine app typecheck",
+        "exitCode": 0,
+        "log": "artifacts/office-water/logs/engine-office-water-app-typecheck-20261017.log"
+      },
+      {
+        "name": "Office UI typecheck r2",
+        "exitCode": 0,
+        "log": "artifacts/office-water/logs/engine-office-water-ui-typecheck-r2-20261017.log"
+      },
+      {
+        "name": "Engine build r3",
+        "exitCode": 0,
+        "log": "artifacts/office-water/logs/engine-office-water-engine-build-r3-20261017.log"
+      },
+      {
+        "name": "Game build r2",
+        "exitCode": 0,
+        "log": "artifacts/office-water/logs/game-office-water-game-build-r2-20261017.log"
+      },
+      {
+        "name": "Office UI build r2",
+        "exitCode": 0,
+        "log": "artifacts/office-water/logs/engine-office-water-ui-build-r2-20261017.log"
+      }
+    ]
+  },
+  "native": {
+    "label": "office-water-shared-map-20261017-r1",
+    "command": "artifacts/office-water/run-native.ps1 -DebugPort 3286 -Label office-water-shared-map-20261017-r1 -WaterProbe -StaticUi",
+    "exitCode": 0,
+    "browser": "native-gpu",
+    "scope": "Passive original terrain/map and actual Engine normal buffer against frozen pre-port Game water rules; local fixture time/camera/yaw/floor only, no canonical pose/clock changes or physics",
+    "report": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/report.json",
+    "sourceWater": {
+      "waterPixels": 43642,
+      "point": [
+        37.5,
+        -351.5
+      ],
+      "borderPixels": 20,
+      "width": 768,
+      "height": 768,
+      "size": 768
+    },
+    "waterPixels": 1140104,
+    "maxEncodedError": 0.0009765625,
+    "records": [
+      {
+        "mode": "game",
+        "yaw": 0,
+        "floor": 0,
+        "time": 1.25,
+        "far": false,
+        "origin": [
+          0,
+          0,
+          -384
+        ],
+        "waterPixels": 190108,
+        "maxNormalEncodedError": 0.00048828125,
+        "meanNormalEncodedError": 5.706220554018418e-7,
+        "negativeMean": 0.007381191916239716,
+        "negativeMax": 0.01708984375,
+        "meanRoughness": 0.07495756279921315,
+        "residentImages": 1,
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "errors": []
+      },
+      {
+        "mode": "game",
+        "yaw": 0,
+        "floor": 0,
+        "time": 2.25,
+        "far": false,
+        "origin": [
+          0,
+          0,
+          -384
+        ],
+        "waterPixels": 190108,
+        "maxNormalEncodedError": 0.00048828125,
+        "meanNormalEncodedError": 5.993029839179133e-7,
+        "negativeMean": 0.00693354811735851,
+        "negativeMax": 0.01708984375,
+        "meanRoughness": 0.07495740066635231,
+        "residentImages": 1,
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "errors": []
+      },
+      {
+        "mode": "office",
+        "yaw": 0,
+        "floor": 6.6,
+        "time": 1.25,
+        "far": false,
+        "origin": [
+          104,
+          6.6,
+          232
+        ],
+        "waterPixels": 189971,
+        "maxNormalEncodedError": 0.00048828125,
+        "meanNormalEncodedError": 0.0000014599267782977403,
+        "negativeMean": 0.007380958410126853,
+        "negativeMax": 0.01708984375,
+        "meanRoughness": 0.0749574559216234,
+        "residentImages": 1,
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "errors": []
+      },
+      {
+        "mode": "office",
+        "yaw": 0.71,
+        "floor": 9.9,
+        "time": 1.25,
+        "far": false,
+        "origin": [
+          104,
+          9.9,
+          232
+        ],
+        "waterPixels": 189971,
+        "maxNormalEncodedError": 0.00048828125,
+        "meanNormalEncodedError": 0.0000019088713979151204,
+        "negativeMean": 0.006547227983563939,
+        "negativeMax": 0.024169921875,
+        "meanRoughness": 0.07495745527905,
+        "residentImages": 1,
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "errors": []
+      },
+      {
+        "mode": "office",
+        "yaw": 3.141592653589793,
+        "floor": 6.6,
+        "time": 2.25,
+        "far": false,
+        "origin": [
+          104,
+          6.6,
+          232
+        ],
+        "waterPixels": 189971,
+        "maxNormalEncodedError": 0.00048828125,
+        "meanNormalEncodedError": 0.0000014573564846739766,
+        "negativeMean": 0.006934088445846121,
+        "negativeMax": 0.01708984375,
+        "meanRoughness": 0.0749573367242566,
+        "residentImages": 1,
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "errors": []
+      },
+      {
+        "mode": "office",
+        "yaw": 0.71,
+        "floor": 9.9,
+        "time": 1.25,
+        "far": true,
+        "origin": [
+          8192,
+          9.9,
+          -8192
+        ],
+        "waterPixels": 189975,
+        "maxNormalEncodedError": 0.0009765625,
+        "meanNormalEncodedError": 0.000038569442388252844,
+        "negativeMean": 0.00654697918037461,
+        "negativeMax": 0.0244140625,
+        "meanRoughness": 0.07495746125106922,
+        "residentImages": 1,
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "errors": []
+      }
+    ],
+    "sampler": {
+      "points": [
+        [
+          -1000000,
+          -1000000
+        ],
+        [
+          1000000,
+          1000000
+        ],
+        [
+          -384,
+          -384
+        ],
+        [
+          384,
+          384
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          -384.1,
+          0
+        ],
+        [
+          384.1,
+          0
+        ],
+        [
+          0,
+          -384.1
+        ],
+        [
+          0,
+          384.1
+        ],
+        [
+          34.75,
+          193.5
+        ],
+        [
+          34.75,
+          194.5
+        ],
+        [
+          36.75,
+          194.5
+        ],
+        [
+          34.75,
+          195.5
+        ],
+        [
+          36.75,
+          195.5
+        ],
+        [
+          34.75,
+          196.5
+        ],
+        [
+          36.75,
+          196.5
+        ],
+        [
+          34.75,
+          197.5
+        ],
+        [
+          36.75,
+          197.5
+        ],
+        [
+          34.75,
+          198.5
+        ],
+        [
+          36.75,
+          198.5
+        ],
+        [
+          34.75,
+          199.5
+        ],
+        [
+          36.75,
+          199.5
+        ],
+        [
+          34.75,
+          200.5
+        ],
+        [
+          36.75,
+          200.5
+        ],
+        [
+          34.75,
+          201.5
+        ],
+        [
+          36.75,
+          201.5
+        ],
+        [
+          34.75,
+          202.5
+        ],
+        [
+          36.75,
+          202.5
+        ],
+        [
+          34.75,
+          203.5
+        ],
+        [
+          36.75,
+          203.5
+        ],
+        [
+          34.75,
+          204.5
+        ],
+        [
+          36.75,
+          204.5
+        ],
+        [
+          34.75,
+          205.5
+        ],
+        [
+          36.75,
+          205.5
+        ],
+        [
+          34.75,
+          206.5
+        ],
+        [
+          36.75,
+          206.5
+        ],
+        [
+          34.75,
+          207.5
+        ],
+        [
+          36.75,
+          207.5
+        ],
+        [
+          34.75,
+          208.5
+        ],
+        [
+          36.75,
+          208.5
+        ],
+        [
+          34.75,
+          209.5
+        ],
+        [
+          36.75,
+          209.5
+        ],
+        [
+          34.75,
+          210.5
+        ],
+        [
+          36.75,
+          210.5
+        ],
+        [
+          34.75,
+          211.5
+        ],
+        [
+          36.75,
+          211.5
+        ],
+        [
+          34.75,
+          212.5
+        ],
+        [
+          36.75,
+          212.5
+        ],
+        [
+          34.75,
+          213.5
+        ],
+        [
+          36.75,
+          213.5
+        ],
+        [
+          34.75,
+          214.5
+        ],
+        [
+          36.75,
+          214.5
+        ],
+        [
+          34.75,
+          215.5
+        ],
+        [
+          36.75,
+          215.5
+        ],
+        [
+          34.75,
+          216.5
+        ],
+        [
+          36.75,
+          216.5
+        ],
+        [
+          34.75,
+          217.5
+        ]
+      ],
+      "channels": 228,
+      "maxError": 0,
+      "nearestNegativeMax": 0.02058824896812439,
+      "reflectionProbe": {
+        "validFaces": 6,
+        "complete": true,
+        "nextFace": 0,
+        "position": [
+          -11294.764599458958,
+          -8.9,
+          627.957802908459
+        ]
+      },
+      "errors": []
+    }
+  },
+  "audit": {
+    "date": "2026-10-17T07:58:37.466Z",
+    "pid": 13676,
+    "beforeRows": 4454,
+    "afterRows": 4454,
+    "missingRows": 0,
+    "protectedRows": 148,
+    "changedProtectedRows": 0,
+    "integrity": "ok",
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 54,
+    "geometryRevision": 1
+  },
+  "fpsAudit": {
+    "date": "2026-10-17T08:01:51.956Z",
+    "pid": 13676,
+    "beforeRows": 4454,
+    "afterRows": 4458,
+    "missingRows": 0,
+    "protectedRows": 148,
+    "changedProtectedRows": 0,
+    "integrity": "ok",
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 54,
+    "geometryRevision": 1
+  },
+  "accountsPreserved": 51,
+  "servedAssets": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "status": 200,
+      "bytes": 2506302,
+      "sha256": "1c1afe2c807bee165c15b7b0cb28ea9bf3f4e91a3a16f4a45265807939769399",
+      "archive": "artifacts/office-water/office-water-shared-map-20261017-r1/served-before/game.js",
+      "revalidatedAt": "2026-10-17T08:10:46.322Z"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "status": 200,
+      "bytes": 1556423,
+      "sha256": "444dae9db4f1051c2e38bdca7c42077c9567c636e8b8823da0d6ec48079e5d53",
+      "archive": "artifacts/office-water/office-water-shared-map-20261017-r1/served-before/office-controller.js",
+      "revalidatedAt": "2026-10-17T08:10:46.326Z"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/audio-worklet.js",
+      "status": 200,
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/office-water/office-water-shared-map-20261017-r1/served-before/audio-worklet.js",
+      "revalidatedAt": "2026-10-17T08:10:46.328Z"
+    }
+  ],
+  "builtOffice": [
+    {
+      "path": "index.html",
+      "archive": "artifacts/office-water/built-office-ui/index.html",
+      "bytes": 422,
+      "sha256": "321c6443f35bd1494503f7e466c6a0a55a491dc18c9ac1b6cf331fd21b97e18d",
+      "served": false
+    },
+    {
+      "path": "assets/index-DrGy9hGo.js",
+      "archive": "artifacts/office-water/built-office-ui/assets/index-DrGy9hGo.js",
+      "bytes": 1804986,
+      "sha256": "8c6ce864971f3813962778e4682f5660e35ffbe421b5a87e12f0e8742f787537",
+      "served": false
+    },
+    {
+      "path": "assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-water/built-office-ui/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec",
+      "served": false
+    }
+  ],
+  "reviewed": [
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/game-0.png",
+      "note": "Reviewed original coast and water image in the actual Engine fixture."
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-3.png",
+      "note": "Reviewed rotated/floor-shifted source coast; local probe includes water itself and shows a box-like self reflection. Fixed fixture lighting is not rotated with the geometry, so full colour/BRDF equality is not asserted."
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-5.png",
+      "note": "Reviewed rotated/floor-shifted source coast; local probe includes water itself and shows a box-like self reflection. Fixed fixture lighting is not rotated with the geometry, so full colour/BRDF equality is not asserted."
+    }
+  ],
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "src/render/terrain-map.ts",
+      "archive": "artifacts/office-water/final-source/engine/src/render/terrain-map.ts",
+      "bytes": 1238,
+      "sha256": "4cce764c5df621952c3bb8f9ffd113c323689a1d0947b857b18f97c84e065107"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/webgpu.ts",
+      "archive": "artifacts/office-water/final-source/engine/src/render/webgpu.ts",
+      "bytes": 193045,
+      "sha256": "b6eec30cbb5fbcc018521bc1fdda00f237a20c3998afb6bcc270a69f3221ec87"
+    },
+    {
+      "repo": "engine",
+      "path": "src/scene/types.ts",
+      "archive": "artifacts/office-water/final-source/engine/src/scene/types.ts",
+      "bytes": 14060,
+      "sha256": "be027723b7c488f6d3e6813a395f3b466a1759a89a5559faa969cb95a68398a2"
+    },
+    {
+      "repo": "engine",
+      "path": "src/scene/validate.ts",
+      "archive": "artifacts/office-water/final-source/engine/src/scene/validate.ts",
+      "bytes": 41853,
+      "sha256": "053d69597946d1da8e0349b8fdcdd57a253bcbba939cb8435e68a83e60b70b28"
+    },
+    {
+      "repo": "engine",
+      "path": "src/scene/scene.ts",
+      "archive": "artifacts/office-water/final-source/engine/src/scene/scene.ts",
+      "bytes": 52523,
+      "sha256": "40ab3486a98dde53a67317888c3bfd638c76c3ac447b70dfa9aafe361efd24ad"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-water/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "c0f66aca006419c739ec1f2ff464ee5b3fcd562b8d9b3e324346334ce77ee9fa"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-world-view.test.ts",
+      "archive": "artifacts/office-water/final-source/engine/apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 33577,
+      "sha256": "9b7f00c0914f205d4f0f1f79ae5ba1692cf0a9b96211caee51c386c2c7deae74"
+    },
+    {
+      "repo": "engine",
+      "path": "test/terrain-map.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/terrain-map.test.mjs",
+      "bytes": 2717,
+      "sha256": "4166197b3efc55db94b0dc60f7c74448f343c6a6e2d32c7622b27889308550d5"
+    },
+    {
+      "repo": "engine",
+      "path": "test/surface-appearance.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/surface-appearance.test.mjs",
+      "bytes": 4467,
+      "sha256": "a28893297b56eef6ec62b6b41ec936ccffe5d96ebff86bfbb93c32ae536c32c7"
+    },
+    {
+      "repo": "engine",
+      "path": "test/scene-appearance-target.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/scene-appearance-target.test.mjs",
+      "bytes": 1291,
+      "sha256": "b0d0d529ae5dc89985dd54864eae0938dde15ba61d68aff27ccd98aa54462653"
+    },
+    {
+      "repo": "engine",
+      "path": "test/material-uniforms.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/material-uniforms.test.mjs",
+      "bytes": 5258,
+      "sha256": "f2372501b063ced19443dfa5db2948dd99cd339c2a18fdfa4a229c345c27f6b0"
+    },
+    {
+      "repo": "engine",
+      "path": "test/renderer-post.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/renderer-post.test.mjs",
+      "bytes": 17903,
+      "sha256": "6a689d41f08919cac8ca5ab858668fdc14d689b3b88302c798d8dd46f6cff987"
+    },
+    {
+      "repo": "engine",
+      "path": "test/rain-surface.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/rain-surface.test.mjs",
+      "bytes": 4281,
+      "sha256": "f05ab9307c8fca03638717fadc9bf37c896f3a43a8725ba77b66df9ecc65f674"
+    },
+    {
+      "repo": "engine",
+      "path": "test/facade-surface.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/facade-surface.test.mjs",
+      "bytes": 5092,
+      "sha256": "794c1784211a284386df3f00839b699ff818dc3c30382ad1f254e004812aefb7"
+    },
+    {
+      "repo": "engine",
+      "path": "test/shader-zero-contribution.test.mjs",
+      "archive": "artifacts/office-water/final-source/engine/test/shader-zero-contribution.test.mjs",
+      "bytes": 3583,
+      "sha256": "0c5e4fa279ceace09d7f83eeda9330e4749879cee3f679765cc12adda5236065"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "archive": "artifacts/office-water/final-source/engine/apps/thegame/README.md",
+      "bytes": 3826,
+      "sha256": "9341d24342c58d4eb25868daa9ae32a06a369f6a994a5191e8a40e5db881b522"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-water/final-source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 208099,
+      "sha256": "f5091c6e1a16a472580c9b93048e4d3795355a00a6b61a27c98fdeef11bf784c"
+    },
+    {
+      "repo": "game",
+      "path": "AGENTS.md",
+      "archive": "artifacts/office-water/final-source/game/AGENTS.md",
+      "bytes": 5395,
+      "sha256": "67aec42c8d0f1c8a2a7be724a6e535ebd87a1ffe09426f45a5210ed30aa7893c"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-ground-image.ts",
+      "archive": "artifacts/office-water/final-source/game/src/game/render/the-engine-ground-image.ts",
+      "bytes": 1981,
+      "sha256": "ad79fb951743ecf4d853cfa5080dd8db986a59e573a1e48b055276092adb8260"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-geometry.ts",
+      "archive": "artifacts/office-water/final-source/game/src/game/render/the-engine-geometry.ts",
+      "bytes": 11275,
+      "sha256": "50a4a6705ec3d95460b428cd40c730ea3bfa3c13a5279e102d1c896b830a45c3"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-projection.ts",
+      "archive": "artifacts/office-water/final-source/game/src/game/render/the-engine-projection.ts",
+      "bytes": 17634,
+      "sha256": "c4c0fce3f9f678b8cd8185aa0ec3082b65cdc146ecfdbf7985637330e83121b5"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-terrain-assets.ts",
+      "archive": "artifacts/office-water/final-source/game/src/game/office-terrain-assets.ts",
+      "bytes": 8662,
+      "sha256": "0c04fbfb471f4a349a911da986a7fc4e8ca20e19ef1ed5c39249a152d13f6cf6"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-road-assets.ts",
+      "archive": "artifacts/office-water/final-source/game/src/game/office-road-assets.ts",
+      "bytes": 6620,
+      "sha256": "3f3734753928f24df6decaff45a852ed364082aefe871f85e3f71ceb06071528"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/shaders.ts",
+      "archive": "artifacts/office-water/final-source/game/src/game/render/shaders.ts",
+      "bytes": 33191,
+      "sha256": "7064c475086e31a22fdd9ad06f310cf25e644ae61ada518467298fd1d0b57e74"
+    },
+    {
+      "repo": "game",
+      "path": "test/ground-image.test.ts",
+      "archive": "artifacts/office-water/final-source/game/test/ground-image.test.ts",
+      "bytes": 2467,
+      "sha256": "826c5e75b191bfe46f8d9df32ce3cdaae6f885161cfea896252f871c6c10fe4c"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-terrain-assets.test.ts",
+      "archive": "artifacts/office-water/final-source/game/test/office-terrain-assets.test.ts",
+      "bytes": 9817,
+      "sha256": "9d4358f00e3dec9daa5c0baf2ca8b07bba4ceb602b18f18269caed77ad7beee0"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-road-assets.test.ts",
+      "archive": "artifacts/office-water/final-source/game/test/office-road-assets.test.ts",
+      "bytes": 6962,
+      "sha256": "5e28f04ef46c2216a89f80d754a07ccf152972e501c401665b02cde8a7848475"
+    },
+    {
+      "repo": "game",
+      "path": "test/the-engine-renderer.test.ts",
+      "archive": "artifacts/office-water/final-source/game/test/the-engine-renderer.test.ts",
+      "bytes": 25049,
+      "sha256": "3695d792662baf52d883e688d3166520c8967648654cb34d31997916591bae20"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/game-terrain-water.ts",
+      "archive": "artifacts/office-water/final-source/game/test/fixtures/game-terrain-water.ts",
+      "bytes": 630,
+      "sha256": "f58a00f0e713706ba58652c4b9d751880da7c589835a7f17649f3c568be1104b"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-water.ts",
+      "archive": "artifacts/office-water/final-source/game/tools/qa-office-water.ts",
+      "bytes": 5007,
+      "sha256": "0bf6fb05c0ff0114a80c3c3d1f88361b181504b0481e6bc41e9826d5c9c83b03"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "archive": "artifacts/office-water/final-source/game/tools/qa-office.ts",
+      "bytes": 8430,
+      "sha256": "5270c15c2377dde49185c57c069c6e14adcfd9fff5d4b12c816fff4374b28ffe"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "archive": "artifacts/office-water/final-source/game/tools/capture.ts",
+      "bytes": 34461,
+      "sha256": "051897ffb136ff3e29f4c7c6c42a1b18113756eb5cfdc211e36797f282675d2a"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-water/final-source/game/docs/VERIFICATION.md",
+      "bytes": 833997,
+      "sha256": "aea7c94c5277237acafe82805969c5504a5bd3782cce8427dde2adbfd6da756b"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-water/final-source/office/VERIFICATION.md",
+      "bytes": 142083,
+      "sha256": "a73756ff26a791f7e849811f2e924ac52c97f2cca45f9ade39b3652d47c0f485"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-water/final-source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "repo": "office",
+      "path": "ui/package.json",
+      "archive": "artifacts/office-water/final-source/office/ui/package.json",
+      "bytes": 885,
+      "sha256": "db3a56d0818e4d437513bb201b9658acdf3c30e6a53fed114b50c762007cada4"
+    }
+  ],
+  "fps": {
+    "manifest": "docs/render-evidence/fps-live-20261017-water-final.json",
+    "averageFPS": 64.33212531898012,
+    "p50Ms": 18.69999999999709,
+    "p95Ms": 28.299999999995634,
+    "frames": 900,
+    "warmupFrames": 180,
+    "hardware": [
+      {
+        "Name": "AMD Radeon 760M Graphics",
+        "DriverVersion": "32.0.31041.1004"
+      }
+    ],
+    "browser": {
+      "mode": "native-gpu",
+      "batterySaverRequested": "default",
+      "backend": "webgpu",
+      "width": 1280,
+      "height": 720,
+      "renderResolution": [
+        704,
+        396
+      ]
+    },
+    "settings": {
+      "environmentMode": "world",
+      "preset": "clear",
+      "hiz": false,
+      "taa": true,
+      "bloom": false,
+      "groundLitter": true,
+      "motionBlur": 0,
+      "dof": 0,
+      "renderScale": 0.55,
+      "drawDistance": 420,
+      "visual": {
+        "sunElevation": 0.9075712110370514,
+        "sunTemperature": 5700,
+        "skyTurbidity": 2.2,
+        "humidity": 0.42,
+        "cloudCoverage": 0.16,
+        "fogDensity": 0.00065,
+        "wetness": 0,
+        "exposureBias": -0.25,
+        "artificialLightIntensity": 0.02,
+        "sunIntensity": 4.2,
+        "skyIntensity": 0.7
+      }
+    },
+    "liveEnvironment": {
+      "worldMinute": 270082.4666468667,
+      "projectionHour": 13.375360781112493,
+      "facadeNight": 0,
+      "rain": 0,
+      "wetness": [
+        0,
+        0
+      ]
+    },
+    "sameFinalGameBundle": true,
+    "rendererErrors": [],
+    "limits": [
+      "Short stationary original Game measurement; not walking, vehicles, sustained-60 or Office UI performance.",
+      "1280x720 viewport, 704x396 internal rendering, TAA, 420 m, adaptive resolution disabled.",
+      "900 requestAnimationFrame intervals after 180 warmup frames; each benchmark discards 30 initial intervals. Not isolated GPU execution time. Interval sum derived from count/throughput.",
+      "Fixed requested visual settings do not freeze the live authority environment. Actual authority lighting and weather are recorded separately.",
+      "Independent live-world sample, not a paired benchmark of the Office trace integration. These measurements do not establish a performance improvement or regression."
+    ],
+    "earlierSample": "docs/render-evidence/fps-live-20261017-water.json"
+  },
+  "officeServices": {
+    "state": "artifacts/office-water/archive-service-state.json",
+    "installedCurrentUiVerified": false,
+    "builtUiOnly": true,
+    "noServiceRestartAttempted": true,
+    "priorInstalledUiProof": "docs/render-evidence/office-audio-20261017.json"
+  },
+  "limits": [
+    "Passive normal-buffer/source-map proof, not full-scene colour, BRDF, reflection-quality or installed Office UI end-to-end equivalence.",
+    "Normal components are measured after RGBA16F encoding; the larger .0009765625 error is in the 8 km host fixture.",
+    "Fixture lighting stays fixed while geometry is rotated. Its six-face local probe includes the water surface and shows box-like self-reflection structure.",
+    "The original outer clipped sea remains source material-10 glass; no new waves, displacement, buoyancy or water simulation were invented.",
+    "Office services 8765 and 7860 refused connections during this work. Current UI was built; a fresh installed-UI enter/possess/return run remains unverified.",
+    "FPS is a short idle Game sample at internal 704x396; it does not establish sustained 60 FPS, moving/vehicle/Office performance or improvement over separate earlier light/weather/bundle samples.",
+    "Full integration remains active: long routes/vehicles/aircraft, remaining temporal/surface patterns, own first-person shadows/reflections and final per-requirement audit are incomplete or unverified."
+  ],
+  "files": [
+    {
+      "path": "artifacts/office-water/add-sampler-check.ts",
+      "bytes": 1357,
+      "sha256": "aae1b616dbaf6e2249fe30c9c778da244132f010a113de871b8331bb49689e7d"
+    },
+    {
+      "path": "artifacts/office-water/archive-service-state.json",
+      "bytes": 8975,
+      "sha256": "dea4246a40ec8ba132c93274465326afec39d81b7798038ec8d5ebccd5d53cc5"
+    },
+    {
+      "path": "artifacts/office-water/audit-native.ts",
+      "bytes": 4566,
+      "sha256": "777b823fc02b28fff6ed7fb697f480060722b1bc3994c17453870af8841908a9"
+    },
+    {
+      "path": "artifacts/office-water/audit-source.ts",
+      "bytes": 4263,
+      "sha256": "237cb8abf75046e641cb7973081263ededaaeaa71fe08d2bca477617eecd68e3"
+    },
+    {
+      "path": "artifacts/office-water/backup.ts",
+      "bytes": 1192,
+      "sha256": "1a91dfb2d5f1cef474306418c67893bde0807769abd12f0b9c39a050e210d1fa"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "f8dd8313106d696e80f44b55aa669532c5e1a610d703b09a62882eb362b4e529"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 37475,
+      "sha256": "f9c8b24929f61b3ca83bc28bd93442d7987661d54ca8e6326176f0016b7d7535"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 33478,
+      "sha256": "b05e123160f64bedd9334320549512ce0e62ceca7b7ea89c89af10ca08d71298"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/src/render/lighting.ts",
+      "bytes": 20748,
+      "sha256": "df65300ecbbf39af2f7e5889e13e889e2af931587ad9a4e07a76dfa85ef58173"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/src/render/rain-surface.ts",
+      "bytes": 6971,
+      "sha256": "1d51ca053aff61a7b49cb43c0b026a2a350be6a32d0f7a7faa2c7f4a94e6db5e"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/src/render/surface-textures.ts",
+      "bytes": 5339,
+      "sha256": "d63c129dc1569a31928b40e9efdb190fce75772ec580fadd4c776c0c1ba8437c"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/src/render/webgpu.ts",
+      "bytes": 190949,
+      "sha256": "51e2af3215b9c2ce9e9cf0a56f3fee05325db1be02975b6dab988242644c1fab"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/src/scene/scene.ts",
+      "bytes": 52324,
+      "sha256": "77560b16a83b2f5a5fbf092863f5f2fa6b4e8097517af1d84edcd38503033cfd"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/src/scene/types.ts",
+      "bytes": 13849,
+      "sha256": "026b4a3f8d71fad0019800e5b48ce83229c4607cdd93bed5bce9252d8591b98c"
+    },
+    {
+      "path": "artifacts/office-water/before/engine/src/scene/validate.ts",
+      "bytes": 41340,
+      "sha256": "3f40f00bde51212bd89c061109449be621e14d5530e3544436c0ca03c7a50971"
+    },
+    {
+      "path": "artifacts/office-water/before/game/src/game/office-controller.ts",
+      "bytes": 1026,
+      "sha256": "aa517c69fdeec7f90e8121875a56df1a860304a9b737652f1aa978c178c8d441"
+    },
+    {
+      "path": "artifacts/office-water/before/game/src/game/office-road-assets.ts",
+      "bytes": 5999,
+      "sha256": "e3927cd128c98514ab751085e639f346324a311be15f36bdd1fd41e2f7505881"
+    },
+    {
+      "path": "artifacts/office-water/before/game/src/game/office-terrain-assets.ts",
+      "bytes": 8085,
+      "sha256": "2bdadde4cba0580e8e38888ab9d115d5a248650baa1d1343cfd173cb8c2e1fc4"
+    },
+    {
+      "path": "artifacts/office-water/before/game/src/game/render/shaders.ts",
+      "bytes": 33153,
+      "sha256": "cf2583670727e02806c69a5872ec7e998e785a7ab53b572171beed9fc453a286"
+    },
+    {
+      "path": "artifacts/office-water/before/game/src/game/render/the-engine-geometry.ts",
+      "bytes": 11023,
+      "sha256": "b70b41c697c48f5276aab0d66fc84f91d087020f2dd70589b502855e09868245"
+    },
+    {
+      "path": "artifacts/office-water/before/game/src/game/render/the-engine-ground.ts",
+      "bytes": 835,
+      "sha256": "355f8801eee1758ce3cb78cbd11d018337fc1792f0c7bbb6d3435d2686dfbc34"
+    },
+    {
+      "path": "artifacts/office-water/before/game/src/game/render/the-engine-projection.ts",
+      "bytes": 16099,
+      "sha256": "d5f17991df06e7ab84ec16e8ed8fd1a06f319ae9a99168c229c8c93e0a97eb10"
+    },
+    {
+      "path": "artifacts/office-water/before/game/test/office-road-assets.test.ts",
+      "bytes": 6807,
+      "sha256": "9a47e7e8a75ceadb3afce9f5c6c0f3662d9905da66786add92832fdfb9045894"
+    },
+    {
+      "path": "artifacts/office-water/before/game/test/office-terrain-assets.test.ts",
+      "bytes": 9530,
+      "sha256": "1fde3c98809f82c1078b4dc54222abd4fcbc030fb3c5ac12a9eed754563a068f"
+    },
+    {
+      "path": "artifacts/office-water/before/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "path": "artifacts/office-water/built-office-ui/assets/index-DrGy9hGo.js",
+      "bytes": 1804986,
+      "sha256": "8c6ce864971f3813962778e4682f5660e35ffbe421b5a87e12f0e8742f787537"
+    },
+    {
+      "path": "artifacts/office-water/built-office-ui/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "path": "artifacts/office-water/built-office-ui/index.html",
+      "bytes": 422,
+      "sha256": "321c6443f35bd1494503f7e466c6a0a55a491dc18c9ac1b6cf331fd21b97e18d"
+    },
+    {
+      "path": "artifacts/office-water/bump-capability.ts",
+      "bytes": 269,
+      "sha256": "54fb758e711750b943c6fee562785d954626565134192d87af431f654e4b0674"
+    },
+    {
+      "path": "artifacts/office-water/compare-road-corners.ts",
+      "bytes": 484,
+      "sha256": "8ea488e62c8c1c8fdce655f5eb361d82ebd3100fc512933be52387b60e600bec"
+    },
+    {
+      "path": "artifacts/office-water/failed-attempts.json",
+      "bytes": 949,
+      "sha256": "67db58aaa254bf06e76a08123b8e0c3de8a42402f8421bc3593f490c9a72981d"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "c0f66aca006419c739ec1f2ff464ee5b3fcd562b8d9b3e324346334ce77ee9fa"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/apps/thegame/README.md",
+      "bytes": 3826,
+      "sha256": "9341d24342c58d4eb25868daa9ae32a06a369f6a994a5191e8a40e5db881b522"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 33577,
+      "sha256": "9b7f00c0914f205d4f0f1f79ae5ba1692cf0a9b96211caee51c386c2c7deae74"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 208099,
+      "sha256": "f5091c6e1a16a472580c9b93048e4d3795355a00a6b61a27c98fdeef11bf784c"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/src/render/terrain-map.ts",
+      "bytes": 1238,
+      "sha256": "4cce764c5df621952c3bb8f9ffd113c323689a1d0947b857b18f97c84e065107"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/src/render/webgpu.ts",
+      "bytes": 193045,
+      "sha256": "b6eec30cbb5fbcc018521bc1fdda00f237a20c3998afb6bcc270a69f3221ec87"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/src/scene/scene.ts",
+      "bytes": 52523,
+      "sha256": "40ab3486a98dde53a67317888c3bfd638c76c3ac447b70dfa9aafe361efd24ad"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/src/scene/types.ts",
+      "bytes": 14060,
+      "sha256": "be027723b7c488f6d3e6813a395f3b466a1759a89a5559faa969cb95a68398a2"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/src/scene/validate.ts",
+      "bytes": 41853,
+      "sha256": "053d69597946d1da8e0349b8fdcdd57a253bcbba939cb8435e68a83e60b70b28"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/facade-surface.test.mjs",
+      "bytes": 5092,
+      "sha256": "794c1784211a284386df3f00839b699ff818dc3c30382ad1f254e004812aefb7"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/material-uniforms.test.mjs",
+      "bytes": 5258,
+      "sha256": "f2372501b063ced19443dfa5db2948dd99cd339c2a18fdfa4a229c345c27f6b0"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/rain-surface.test.mjs",
+      "bytes": 4281,
+      "sha256": "f05ab9307c8fca03638717fadc9bf37c896f3a43a8725ba77b66df9ecc65f674"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/renderer-post.test.mjs",
+      "bytes": 17903,
+      "sha256": "6a689d41f08919cac8ca5ab858668fdc14d689b3b88302c798d8dd46f6cff987"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/scene-appearance-target.test.mjs",
+      "bytes": 1291,
+      "sha256": "b0d0d529ae5dc89985dd54864eae0938dde15ba61d68aff27ccd98aa54462653"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/shader-zero-contribution.test.mjs",
+      "bytes": 3583,
+      "sha256": "0c5e4fa279ceace09d7f83eeda9330e4749879cee3f679765cc12adda5236065"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/surface-appearance.test.mjs",
+      "bytes": 4467,
+      "sha256": "a28893297b56eef6ec62b6b41ec936ccffe5d96ebff86bfbb93c32ae536c32c7"
+    },
+    {
+      "path": "artifacts/office-water/final-source/engine/test/terrain-map.test.mjs",
+      "bytes": 2717,
+      "sha256": "4166197b3efc55db94b0dc60f7c74448f343c6a6e2d32c7622b27889308550d5"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/AGENTS.md",
+      "bytes": 5395,
+      "sha256": "67aec42c8d0f1c8a2a7be724a6e535ebd87a1ffe09426f45a5210ed30aa7893c"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/docs/VERIFICATION.md",
+      "bytes": 833997,
+      "sha256": "aea7c94c5277237acafe82805969c5504a5bd3782cce8427dde2adbfd6da756b"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/src/game/office-road-assets.ts",
+      "bytes": 6620,
+      "sha256": "3f3734753928f24df6decaff45a852ed364082aefe871f85e3f71ceb06071528"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/src/game/office-terrain-assets.ts",
+      "bytes": 8662,
+      "sha256": "0c04fbfb471f4a349a911da986a7fc4e8ca20e19ef1ed5c39249a152d13f6cf6"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/src/game/render/shaders.ts",
+      "bytes": 33191,
+      "sha256": "7064c475086e31a22fdd9ad06f310cf25e644ae61ada518467298fd1d0b57e74"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/src/game/render/the-engine-geometry.ts",
+      "bytes": 11275,
+      "sha256": "50a4a6705ec3d95460b428cd40c730ea3bfa3c13a5279e102d1c896b830a45c3"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/src/game/render/the-engine-ground-image.ts",
+      "bytes": 1981,
+      "sha256": "ad79fb951743ecf4d853cfa5080dd8db986a59e573a1e48b055276092adb8260"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/src/game/render/the-engine-projection.ts",
+      "bytes": 17634,
+      "sha256": "c4c0fce3f9f678b8cd8185aa0ec3082b65cdc146ecfdbf7985637330e83121b5"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/test/fixtures/game-terrain-water.ts",
+      "bytes": 630,
+      "sha256": "f58a00f0e713706ba58652c4b9d751880da7c589835a7f17649f3c568be1104b"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/test/ground-image.test.ts",
+      "bytes": 2467,
+      "sha256": "826c5e75b191bfe46f8d9df32ce3cdaae6f885161cfea896252f871c6c10fe4c"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/test/office-road-assets.test.ts",
+      "bytes": 6962,
+      "sha256": "5e28f04ef46c2216a89f80d754a07ccf152972e501c401665b02cde8a7848475"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/test/office-terrain-assets.test.ts",
+      "bytes": 9817,
+      "sha256": "9d4358f00e3dec9daa5c0baf2ca8b07bba4ceb602b18f18269caed77ad7beee0"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/test/the-engine-renderer.test.ts",
+      "bytes": 25049,
+      "sha256": "3695d792662baf52d883e688d3166520c8967648654cb34d31997916591bae20"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/tools/capture.ts",
+      "bytes": 34461,
+      "sha256": "051897ffb136ff3e29f4c7c6c42a1b18113756eb5cfdc211e36797f282675d2a"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/tools/qa-office-water.ts",
+      "bytes": 5007,
+      "sha256": "0bf6fb05c0ff0114a80c3c3d1f88361b181504b0481e6bc41e9826d5c9c83b03"
+    },
+    {
+      "path": "artifacts/office-water/final-source/game/tools/qa-office.ts",
+      "bytes": 8430,
+      "sha256": "5270c15c2377dde49185c57c069c6e14adcfd9fff5d4b12c816fff4374b28ffe"
+    },
+    {
+      "path": "artifacts/office-water/final-source/office/ui/package.json",
+      "bytes": 885,
+      "sha256": "db3a56d0818e4d437513bb201b9658acdf3c30e6a53fed114b50c762007cada4"
+    },
+    {
+      "path": "artifacts/office-water/final-source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "path": "artifacts/office-water/final-source/office/VERIFICATION.md",
+      "bytes": 142083,
+      "sha256": "a73756ff26a791f7e849811f2e924ac52c97f2cca45f9ade39b3652d47c0f485"
+    },
+    {
+      "path": "artifacts/office-water/finish-road-fixture.ts",
+      "bytes": 426,
+      "sha256": "5eb4b4f2d8880d085ad5a4baccfa3771ec392000c487b3301e151280bdfa3197"
+    },
+    {
+      "path": "artifacts/office-water/fix-canonical-image-fixture.ts",
+      "bytes": 524,
+      "sha256": "23b385086c4035949ee0d79df9b1fcb70e9d54e5fc7c1f85bf6f19cbda3e6c3f"
+    },
+    {
+      "path": "artifacts/office-water/fps-final/browser.log",
+      "bytes": 72036,
+      "sha256": "c64ada9b689f441b089ff75e6fc68e0347af9b15162d7a3b1aa6fdc944c15c40"
+    },
+    {
+      "path": "artifacts/office-water/fps-final/fps-game.js",
+      "bytes": 2506302,
+      "sha256": "1c1afe2c807bee165c15b7b0cb28ea9bf3f4e91a3a16f4a45265807939769399"
+    },
+    {
+      "path": "artifacts/office-water/fps-final/fps-operation.json",
+      "bytes": 678,
+      "sha256": "a2c271ce40d684f32bbdb07cf72978d7db23d4f432f66493a9821adc3e1e5107"
+    },
+    {
+      "path": "artifacts/office-water/fps-final/fps-result.ts",
+      "bytes": 4002,
+      "sha256": "f064aead975db542a9adfb58a8d3759b0611b99af4f6c5496b9aaf650ee0f442"
+    },
+    {
+      "path": "artifacts/office-water/fps-final/measurement.json",
+      "bytes": 3618,
+      "sha256": "9fe2180e6749dabb5cc013b366b73c53b53356bc2935ca277049e8914475fb81"
+    },
+    {
+      "path": "artifacts/office-water/fps-final/raw-metrics.json",
+      "bytes": 234589,
+      "sha256": "bed66ca50eadc327bd1693a67827b9c330b0997ee481706710ffb96fa0225ccb"
+    },
+    {
+      "path": "artifacts/office-water/fps-final/run-fps.ps1",
+      "bytes": 1886,
+      "sha256": "85649a0288d6ccf7e5619b0acb1a1dcb2e7785743f167538eb679aba8c730376"
+    },
+    {
+      "path": "artifacts/office-water/fps/browser.log",
+      "bytes": 73584,
+      "sha256": "4615dd88d43b9085b56997040347e669bd6f18ccbcece70b512af16103dde0d7"
+    },
+    {
+      "path": "artifacts/office-water/fps/fps-game.js",
+      "bytes": 2506271,
+      "sha256": "040c7ccdade487fe90f81039ed75c9430c7b5a063e9fe0479696ba7b7b75e57b"
+    },
+    {
+      "path": "artifacts/office-water/fps/fps-operation.json",
+      "bytes": 666,
+      "sha256": "c26a784f23ef784597f97df018a650e4e2901201b583ea9990e41c189e036c20"
+    },
+    {
+      "path": "artifacts/office-water/fps/fps-result.ts",
+      "bytes": 3990,
+      "sha256": "38d785b8d2c470062c251cd0b31a3455ecb7c5e2f00c2fc7e39e718c0aae4f99"
+    },
+    {
+      "path": "artifacts/office-water/fps/measurement.json",
+      "bytes": 3589,
+      "sha256": "cebe190f0fed016522d94f69f9b4124a0fd38c9193205e6f8bfab3afe7733558"
+    },
+    {
+      "path": "artifacts/office-water/fps/raw-metrics.json",
+      "bytes": 244547,
+      "sha256": "4ed9dfec6109c54aec25dce6a8dc09817f0299c43a5e7a6889f14cfb783defb8"
+    },
+    {
+      "path": "artifacts/office-water/fps/run-fps.ps1",
+      "bytes": 1880,
+      "sha256": "3510f86b526eb5827d0e75fe31161ed9f957e7b7489749a52790ae9f5dbbf244"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/game-0-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "89f12a158c3df56b6e91cc8f1b0459373cd0b41894d0b31d34a608f5a26182cf"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/game-0-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "ffec09aab1a79f9c117ed9c71e7970d797d0e533ff4e62d69405f0868ce0a191"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/game-0.png",
+      "bytes": 100357,
+      "sha256": "69a3cf68f8f036f2cf6642fdc7f945da28612228ffc24cafcc33b2038abba86c"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/game-1-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "8ce1ad11672d1dcea3f484deae3785fa220ac6c53a040f60349f1596c9927856"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/game-1-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "249b7f90379726b7500dfd57456d99688cae9c999203b262deb7347d60c7e2f2"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/game-1.png",
+      "bytes": 100692,
+      "sha256": "772aab04eb38f67a901dae3d20e793d3294b892f950e3fd15466510eea82159c"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/native-probe.js",
+      "bytes": 906455,
+      "sha256": "e419195a30d71db167078dd78e5774b40e2642dbaf7d7d69a6a7c11f71512160"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/office-2-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "ac7fc3c0b9a9ccb0bbf152a98daea7e3e24ea4b5f0dea5b606efcc75e787a984"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/office-2-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "243f281ba5f2c085f86e91091da3f7cffe0286d263d8acb0ead03355053e2d60"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/office-2.png",
+      "bytes": 21534,
+      "sha256": "b36890f43313604fc8c7b4b50c7ff7251e9bcf1643675947e8adec560cf32284"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/progress.json",
+      "bytes": 17081,
+      "sha256": "3216b8fe5748c22c695201b7e3d39e3c41c9bb86ed75385c1354125517a08d10"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r2/source-frame.json",
+      "bytes": 13404811,
+      "sha256": "61c5c9c8d391488c303f98860399644653a2cabb005d1fa4a206ba764051541e"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/game-0-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "89f12a158c3df56b6e91cc8f1b0459373cd0b41894d0b31d34a608f5a26182cf"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/game-0-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "ffec09aab1a79f9c117ed9c71e7970d797d0e533ff4e62d69405f0868ce0a191"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/game-0.png",
+      "bytes": 100357,
+      "sha256": "69a3cf68f8f036f2cf6642fdc7f945da28612228ffc24cafcc33b2038abba86c"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/game-1-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "8ce1ad11672d1dcea3f484deae3785fa220ac6c53a040f60349f1596c9927856"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/game-1-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "249b7f90379726b7500dfd57456d99688cae9c999203b262deb7347d60c7e2f2"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/game-1.png",
+      "bytes": 100692,
+      "sha256": "772aab04eb38f67a901dae3d20e793d3294b892f950e3fd15466510eea82159c"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/native-probe.js",
+      "bytes": 906444,
+      "sha256": "7da74f6d1a5c36a72b4a127d92d4e520c12288038fff035004df7a277a86316c"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-2-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "5fab3b1951c4f9eed479276dc660c29e5f0c87df348fc4d65d25796af450f3cb"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-2-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "243f281ba5f2c085f86e91091da3f7cffe0286d263d8acb0ead03355053e2d60"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-2.png",
+      "bytes": 125690,
+      "sha256": "98eabf64a608915c7a0faf8ce2a68850faa9d7aec3d1a1c719fc1888a493bb14"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-3-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "037678883637fb50b253ca6bfbc3f16cb93c490ebcf5d6876d29bcbb8d1686cc"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-3-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "7b4017adb650fac811ed3fe067b8b313c236166ef3ac08bba71bc4614b5bf511"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-3.png",
+      "bytes": 133699,
+      "sha256": "bd33cae3c22ea44f50e9fb4bc63d94f6f19cbf4183207041b91ad604630d1cdc"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-4-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "274602a0646e3d11f3397fb0ca7bb036d4b9144c2018b55b59f7e24afb3096f1"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-4-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "eddaf05f8ff4c510c8fe0d8e1f3da236ec2f0a88da49c457e0bb3a7ae79facd7"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-4.png",
+      "bytes": 129965,
+      "sha256": "1a7864acc69c6b2fa8f4732a30c146565f70332e6e732ff64c63b2bd9c2cafaa"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-5-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "702d4f6ef40036a0d82e21cb8658d5e20f115cda5d8b02d2dfe2e5099cc702b3"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-5-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "dbc5154504ef04e387dc8f5968ba395437acd5129e63022fdbeb709b39d67342"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/office-5.png",
+      "bytes": 139307,
+      "sha256": "6ea5cf0fd435d72cfdf5c755f481039deaf13291fc83e0320d3df71954d563f8"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/progress.json",
+      "bytes": 34154,
+      "sha256": "688494daff1afdf54f9ee4270b36eb56b31347320034342bd0d60c3ed7799522"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/report.json",
+      "bytes": 34511,
+      "sha256": "f38194537552d79873a3607dbf0e7dfc89f34b25dfe39442908161779584e416"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-probe-20261017-r3/source-frame.json",
+      "bytes": 13400184,
+      "sha256": "7d6e14f846302c82acd37e879d20d67e1c29084ab318eb8a78b29e6baf1ed36a"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/map-sampler.f32",
+      "bytes": 2736,
+      "sha256": "d6b73967af628212385f50c8d01de10a76e17bc46f91d8c4c46c3252b7b95fd3"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/map-sampler.json",
+      "bytes": 2442,
+      "sha256": "4853eed31c81d0f151cfab7d6c3dd3afb579fdf1240329bd96d0926efde82ef9"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/native-probe.js",
+      "bytes": 910936,
+      "sha256": "40c7c7c1adfa41a8e34d03a53f24699fa3fdc9e53352db7cc139367bc74a61bd"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/office-0-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "037678883637fb50b253ca6bfbc3f16cb93c490ebcf5d6876d29bcbb8d1686cc"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/office-0-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "7b4017adb650fac811ed3fe067b8b313c236166ef3ac08bba71bc4614b5bf511"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/office-0.png",
+      "bytes": 126783,
+      "sha256": "b33d97657212cc2524072866b007454dfc9ce75b2aafe5d7f1f0fd906b2d5000"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/progress.json",
+      "bytes": 6101,
+      "sha256": "90f64c8847a777b7b2d172bf3de57e1db55a1ed68cff5c4eb296ba105dc6c70a"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/report.json",
+      "bytes": 9405,
+      "sha256": "03e99698ff3ef91f2d2524c7c5089f2131c145c534128068765ec883c7264dbc"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-sampler-20261017-r1/source-frame.json",
+      "bytes": 13400970,
+      "sha256": "be1367f1b44e5da3df5c984475ade45befc7f24e60ed2d29ea748f1725b72248"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/game-0-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "89f12a158c3df56b6e91cc8f1b0459373cd0b41894d0b31d34a608f5a26182cf"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/game-0-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "ffec09aab1a79f9c117ed9c71e7970d797d0e533ff4e62d69405f0868ce0a191"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/game-0.png",
+      "bytes": 101947,
+      "sha256": "7c5a682653ed7dbd26356f3d0fe96cc2f4065fc884e091ac44e76d162833b810"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/game-1-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "8ce1ad11672d1dcea3f484deae3785fa220ac6c53a040f60349f1596c9927856"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/game-1-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "249b7f90379726b7500dfd57456d99688cae9c999203b262deb7347d60c7e2f2"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/game-1.png",
+      "bytes": 101063,
+      "sha256": "f786eecfb10e714b84252eb0ffa6fee82e49a5ac9600805863bb92bac2698d8c"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/map-sampler.f32",
+      "bytes": 2736,
+      "sha256": "d6b73967af628212385f50c8d01de10a76e17bc46f91d8c4c46c3252b7b95fd3"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/map-sampler.json",
+      "bytes": 2441,
+      "sha256": "3673166a0f6ee45fe89d2d747e6805d19414f2ef22031ab7e6c90e43e525ffc5"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/native-probe.js",
+      "bytes": 911151,
+      "sha256": "e9e73ce84181571d9f07a9a3e0ec5821e3cdb5b1a082704809308ceb04665e38"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-2-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "675cc0fd6e405ca12415a178d036238ee6676df8368ef8d49ed3346b121b9643"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-2-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "fc553636c6bbd90271f59329ef46774a6e1082a6ff97b553af7e0bff6cee5b00"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-2.png",
+      "bytes": 155109,
+      "sha256": "bea50d737b452235988056bad1ea67180096ad2997e0a3297c395196c44fbdf4"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-3-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "5887745103ac908a9cc30737fa456af391297e72c896be29755db8b14582a276"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-3-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "0e0a93d72df0a724359dbc18ef35fd4148a2825636c5f56d96cc5c3b99ac2a59"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-3.png",
+      "bytes": 156414,
+      "sha256": "741471bba756c1d0545a1de39a4d0e66cef117a2105c79f4509b363d671b28a8"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-4-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "dd59d386c65e62a60b5ad1dabf1a91749092e197cf2dcdad4e33485c003712fc"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-4-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "027824943670b3aba6f182cb04a7748373bfb4d372d3bd8271ef587dd1bfcd7a"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-4.png",
+      "bytes": 159800,
+      "sha256": "a30c523597c933a06fa60a6b209cb8f4b2b2c84c7d12b09eb45b743ce38bb111"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-5-actual.rgba16f",
+      "bytes": 1843200,
+      "sha256": "51a164681caa23b1cc56c438c476f4bfc829e94d5a3e5bc871185e29ca5e08f2"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-5-reference.rgba16f",
+      "bytes": 1843200,
+      "sha256": "d2498120960027c40ae9762a88a8a4c87ff6884855481655d8db8dcb58aa4c23"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/office-5.png",
+      "bytes": 161725,
+      "sha256": "2b771172cac55c9b11727b14e863e9ad773cd79beafa18630908f06150eeab2a"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/progress.json",
+      "bytes": 35573,
+      "sha256": "4de7c7593158bf6324f4081c7961609236a24be6b42363b56a7507386e1d1a4c"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/report.json",
+      "bytes": 38876,
+      "sha256": "9a93ab9609637fcc7e1ee12fc8bfd2aace0b2f438f0932e7f4212684d8537dc5"
+    },
+    {
+      "path": "artifacts/office-water/game-water/office-water-shared-map-20261017-r1/source-frame.json",
+      "bytes": 13404930,
+      "sha256": "d198b5a474276cf36282e7693aeba007f6ea927fa4c7bcb7906523794e95867f"
+    },
+    {
+      "path": "artifacts/office-water/ground-image-before-pool.ts",
+      "bytes": 1191,
+      "sha256": "5412a861757e6ed50a6e7e24c8bb4427e3e8b058ab1d89eaaac22969709f54b2"
+    },
+    {
+      "path": "artifacts/office-water/inspect-material-scope.ts",
+      "bytes": 1700,
+      "sha256": "1ebb8b23077cbf87dc233dfde3d3ea2853a7db1a0ee47bebbb6fb6a0fa9848d5"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-app-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-engine-build-r1-20261017.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-engine-build-r2-20261017.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-engine-build-r3-20261017.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-engine-tests-r1-20261017.log",
+      "bytes": 1606,
+      "sha256": "f06a60fb6c60e61b9b9d45f92bd9d4a9cba04a3a8036ee22460dba7835ccc532"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-engine-tests-r2-20261017.log",
+      "bytes": 3484,
+      "sha256": "8682593bc8228321ffc27a504fd3beb1770a23c55034575a3fc7143aac0f9d1f"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-regression-r1-20261017.log",
+      "bytes": 27303,
+      "sha256": "ce4715c77b4aa9a4ad2f4817bb00a5a823b42a4cc894d7768cc1de09b1b85a3d"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-regression-r2-20261017.log",
+      "bytes": 25958,
+      "sha256": "7576c13edf5d22cdb1bfef0e0b2093145efec3da0f69f9692d04405c0b74d262"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-ui-build-r1-20261017.log",
+      "bytes": 876,
+      "sha256": "d65f87f292e910bf5a24a2aaf2761a9ada79d14ed5e156b6ac0d02ed37708313"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-ui-build-r2-20261017.log",
+      "bytes": 875,
+      "sha256": "ed0bf0d159862a572547a98250669a950c1f70cc690b887151e2b040e04b63b6"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-ui-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-water/logs/engine-office-water-ui-typecheck-r2-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-build-r1-20261017.log",
+      "bytes": 585,
+      "sha256": "c791c7cfc17b4af6fe67821a9e038e007c7685985af44a0bdab91f1013b2d68a"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-build-r2-20261017.log",
+      "bytes": 585,
+      "sha256": "2b73575e4ef8e319d12cae47a3e22b6e1a4cdfa1a510c369d9d833fa9bae34c5"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-tests-r1-20261017.log",
+      "bytes": 7143,
+      "sha256": "80a8929f48d82ce127c7e600f8c51a50de85ca764620fe27e34348ac54858847"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-tests-r2-20261017.log",
+      "bytes": 5342,
+      "sha256": "19713370a4a7c38c7af6d3e790279426c81fcfa4bc533f28432b2508d969b491"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-tests-r3-20261017.log",
+      "bytes": 3621,
+      "sha256": "95b073d7d57b386b58a38d8e8b122a7b26e758715235bfd5eff04e1bd19c6c0b"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-tests-r4-20261017.log",
+      "bytes": 6269,
+      "sha256": "dffd6d6433c81030738259933787d9e976d6a99103f72fd250dd9ef732fe17a6"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-typecheck-final-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-typecheck-r1-20261017.log",
+      "bytes": 715,
+      "sha256": "6a2731b0c7bb22a9c65fbdc93051465a2364a2ae6c0d37bc1316e1ff1240e373"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-game-typecheck-r4-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-probe-20261017-r2.log",
+      "bytes": 3212,
+      "sha256": "745be9e717ba29286d8d8dd31d227ba7b7309e3f4ad6ac250d8d9b43bba777f2"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-probe-20261017-r3.log",
+      "bytes": 127,
+      "sha256": "827fc726d0081f5f558e8dec658acf0a7ca08c7880b8dc6e52c45b577c83fd03"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-sampler-20261017-r1.log",
+      "bytes": 127,
+      "sha256": "613134f3511bf021030a846970c23ea70cd7369b71e1d8adbb4d7aa2909d5a79"
+    },
+    {
+      "path": "artifacts/office-water/logs/game-office-water-shared-map-20261017-r1.log",
+      "bytes": 127,
+      "sha256": "c188f042ef865f878e5cfb2a0f813f5c582b0c105d7fbfd833774c3e94e213cb"
+    },
+    {
+      "path": "artifacts/office-water/material-scope.json",
+      "bytes": 328,
+      "sha256": "e63f8da63077de2dc49b6d6f925d25a5c646bfad2316b15026c800f1592eb0a9"
+    },
+    {
+      "path": "artifacts/office-water/native-probe-before-camera-order.ts",
+      "bytes": 11138,
+      "sha256": "f1c0e0b39b45fd464126c8ce207b246b1ef6bc6a0d23a7e12d293fb05115359b"
+    },
+    {
+      "path": "artifacts/office-water/native-probe.ts",
+      "bytes": 15415,
+      "sha256": "d0a1e33fde6e41698fa58043cbb17e38b7ee4718ec144240c56d5c55f102a28d"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/after-audit.json",
+      "bytes": 314,
+      "sha256": "4cbdc104e3128d05836b1c90d2cfd7d5e2363fae4c1a9fb39eeb581a7e7c3686"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/before.json",
+      "bytes": 1861,
+      "sha256": "c6c472c6b18f840b0f179de9e1a8f333b8ff744151d15aeb1e94943aa1f4dfc8"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/before.sqlite",
+      "bytes": 9379840,
+      "sha256": "ce3ce8ac505ae47978f7460b231c5a47d6bebdff28ac3df644d82ae4be7a6d77"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/served-before/game.js",
+      "bytes": 2506271,
+      "sha256": "040c7ccdade487fe90f81039ed75c9430c7b5a063e9fe0479696ba7b7b75e57b"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/served-before/office-controller.js",
+      "bytes": 1555179,
+      "sha256": "6cb2caeab27253ad87c8aa300db8d461b51eb4cf32b7e54e2029bd6dcdd6d8f7"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/served-before/office-ui.js",
+      "bytes": 1804986,
+      "sha256": "b872cd7006c2dc9829c8f73d6185905f421a88476a814f4e096cdcfa111d9bb7"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-20261017-r1/served-before/office.html",
+      "bytes": 422,
+      "sha256": "46f1e0ed46236f12295480230f599283ccd7dcb9f991ce2dab5ce199b51aea85"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-final-20261017/after-audit.json",
+      "bytes": 314,
+      "sha256": "42323d44b9bfa7160a736cf85cf50fa00e9745f7266721f49992f0ac2c8c96d7"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-final-20261017/before.json",
+      "bytes": 1283,
+      "sha256": "9a58ddfd02b84c9a5e8e49186d713152b952f3ba989208c0978aa2422f46fb34"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-final-20261017/before.sqlite",
+      "bytes": 9428992,
+      "sha256": "65182496694614a47b10dbf0511371074cd001ec9aba23cc01fbc4f6c61ec33a"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-final-20261017/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-final-20261017/served-before/game.js",
+      "bytes": 2506302,
+      "sha256": "1c1afe2c807bee165c15b7b0cb28ea9bf3f4e91a3a16f4a45265807939769399"
+    },
+    {
+      "path": "artifacts/office-water/office-water-fps-final-20261017/served-before/office-controller.js",
+      "bytes": 1556423,
+      "sha256": "444dae9db4f1051c2e38bdca7c42077c9567c636e8b8823da0d6ec48079e5d53"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r1/before.sqlite",
+      "bytes": 9424896,
+      "sha256": "a5bf3816f7dedb2356386676bd798c90ff868badd6019ac474d96fc281a03984"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/after-audit.json",
+      "bytes": 314,
+      "sha256": "64e7a48420d5391efe60f00c4653a9a5a51db481fcc8593b2b06e14c9b11bc49"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/before.json",
+      "bytes": 1280,
+      "sha256": "8facc477a7428099626b125bbbaac9a88305ddc28069fcecb638ddf423141bcd"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/before.sqlite",
+      "bytes": 9424896,
+      "sha256": "a5bf3816f7dedb2356386676bd798c90ff868badd6019ac474d96fc281a03984"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/native-probe.js",
+      "bytes": 906455,
+      "sha256": "e419195a30d71db167078dd78e5774b40e2642dbaf7d7d69a6a7c11f71512160"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/served-before/game.js",
+      "bytes": 2506271,
+      "sha256": "040c7ccdade487fe90f81039ed75c9430c7b5a063e9fe0479696ba7b7b75e57b"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r2/served-before/office-controller.js",
+      "bytes": 1555179,
+      "sha256": "6cb2caeab27253ad87c8aa300db8d461b51eb4cf32b7e54e2029bd6dcdd6d8f7"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/after-audit.json",
+      "bytes": 314,
+      "sha256": "9f4a2009d20a8875c3dc22be2544c5a8173cce503ef983f82050a1601472f669"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/before.json",
+      "bytes": 1280,
+      "sha256": "7e06e5c746f462c6949faea54298d717139368eafa530b246f3e497cafff89cf"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/before.sqlite",
+      "bytes": 9428992,
+      "sha256": "10d36e6ac5e0da537cd565907751e077c5c7a86d07071c4b6d8f6a864f2d3c45"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/native-probe.js",
+      "bytes": 906444,
+      "sha256": "7da74f6d1a5c36a72b4a127d92d4e520c12288038fff035004df7a277a86316c"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/served-before/game.js",
+      "bytes": 2506271,
+      "sha256": "040c7ccdade487fe90f81039ed75c9430c7b5a063e9fe0479696ba7b7b75e57b"
+    },
+    {
+      "path": "artifacts/office-water/office-water-probe-20261017-r3/served-before/office-controller.js",
+      "bytes": 1555179,
+      "sha256": "6cb2caeab27253ad87c8aa300db8d461b51eb4cf32b7e54e2029bd6dcdd6d8f7"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/after-audit.json",
+      "bytes": 314,
+      "sha256": "940986f87ef556b18a8bd78bd33ea13ebf7a730380618534bb02fdb77259897b"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/before.json",
+      "bytes": 1286,
+      "sha256": "531f6156411f47c495c08caa261ace08b3283d5421f1ee2495dfa931d37510f8"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/before.sqlite",
+      "bytes": 9428992,
+      "sha256": "10e1b2a9e15b1c300243de9e78c97fdd5e02c8a63c8458dac6102655be85d2d1"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/native-probe.js",
+      "bytes": 910936,
+      "sha256": "40c7c7c1adfa41a8e34d03a53f24699fa3fdc9e53352db7cc139367bc74a61bd"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/served-before/game.js",
+      "bytes": 2506271,
+      "sha256": "040c7ccdade487fe90f81039ed75c9430c7b5a063e9fe0479696ba7b7b75e57b"
+    },
+    {
+      "path": "artifacts/office-water/office-water-sampler-20261017-r1/served-before/office-controller.js",
+      "bytes": 1555179,
+      "sha256": "6cb2caeab27253ad87c8aa300db8d461b51eb4cf32b7e54e2029bd6dcdd6d8f7"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/after-audit.json",
+      "bytes": 314,
+      "sha256": "ccffaa132c4737254e3e1a81a95a2d8c7a3b230a0dbac7c20dd0c644f1827cb2"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/before.json",
+      "bytes": 1295,
+      "sha256": "4c5a0ee081f7bce2bb1cc8d399ec71f5e217a006ceee5ea99a18c76cd7443be8"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/before.sqlite",
+      "bytes": 9428992,
+      "sha256": "d5d6f0641c27d3341eb5808c6975437764b135ca031911316394388f22cb14c5"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/fixture.html",
+      "bytes": 510,
+      "sha256": "fb0d354ecb4e2d25a47a9a8b1150ad39f2ba4c3fed12e92cd24fa9b936aea855"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/native-probe.js",
+      "bytes": 911151,
+      "sha256": "e9e73ce84181571d9f07a9a3e0ec5821e3cdb5b1a082704809308ceb04665e38"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/served-before/game.js",
+      "bytes": 2506302,
+      "sha256": "1c1afe2c807bee165c15b7b0cb28ea9bf3f4e91a3a16f4a45265807939769399"
+    },
+    {
+      "path": "artifacts/office-water/office-water-shared-map-20261017-r1/served-before/office-controller.js",
+      "bytes": 1556423,
+      "sha256": "444dae9db4f1051c2e38bdca7c42077c9567c636e8b8823da0d6ec48079e5d53"
+    },
+    {
+      "path": "artifacts/office-water/plan.json",
+      "bytes": 2085,
+      "sha256": "baffd3a5d6102f53cb1998673c560832b0d68de163b91c9cd3118ab5127f0ff9"
+    },
+    {
+      "path": "artifacts/office-water/preflight-r2/native-probe.js",
+      "bytes": 905664,
+      "sha256": "9c3795d773d53b60c88e5545498e215efc5b608f4a2e034f8390cbaf8b654271"
+    },
+    {
+      "path": "artifacts/office-water/prepare-final-fps.ts",
+      "bytes": 555,
+      "sha256": "41a8c767fc9ae5ad5828277447bc95354a26da041248f2cbf73ab91675d9b550"
+    },
+    {
+      "path": "artifacts/office-water/prepare-native.ts",
+      "bytes": 838,
+      "sha256": "ffd9eeeb0db3b2f968ba3c93c895a2307dbaebb9eeacd482ad5f37481e406d20"
+    },
+    {
+      "path": "artifacts/office-water/prepare-probe-runner.ts",
+      "bytes": 475,
+      "sha256": "90f9e17a32231c080061374014e9e5740d87265c2d1f9ca759c335d3a0d23662"
+    },
+    {
+      "path": "artifacts/office-water/prepare-source-only.ts",
+      "bytes": 2557,
+      "sha256": "1d59674d78f1be4753d10df82cacd1ef07bbd7bb05d4057bab52dab87bf442a6"
+    },
+    {
+      "path": "artifacts/office-water/publish-shared-map.ts",
+      "bytes": 1121,
+      "sha256": "2d41512f2d8342587c36742599893415d3696b154ff8efdb00e43cc3da247003"
+    },
+    {
+      "path": "artifacts/office-water/qa-before-sampler.ts",
+      "bytes": 4419,
+      "sha256": "8fec21a426aff953198680f85b0776691b99ffa8a43ac7967cbc3bb77207f6bf"
+    },
+    {
+      "path": "artifacts/office-water/reviewed.json",
+      "bytes": 873,
+      "sha256": "d256d65017064cac3585869b7f3d08ca0ea1b4590ce19906fd7855b1ec329eb5"
+    },
+    {
+      "path": "artifacts/office-water/run-native.ps1",
+      "bytes": 1999,
+      "sha256": "7fc19134ab22a8bc67598ae2780d20c9957425815c268368ab073cb103908942"
+    },
+    {
+      "path": "artifacts/office-water/service-state-final.json",
+      "bytes": 350,
+      "sha256": "0b05f79efc9734da77a25209f8e036ee6560ff095ad76133575131ebc73e0a4c"
+    },
+    {
+      "path": "artifacts/office-water/service-state.json",
+      "bytes": 423,
+      "sha256": "1d376e7f6870faf60df297d16f7e0253274ba6a0c077ebde4d4c4cdf4d2b2207"
+    },
+    {
+      "path": "artifacts/office-water/terrain-before-pool.ts",
+      "bytes": 8570,
+      "sha256": "d241d5a8305fd17a5d16ace5e5227916ee28d301311d011a84dd80f938102887"
+    },
+    {
+      "path": "artifacts/office-water/update-cpu-fixtures.ts",
+      "bytes": 956,
+      "sha256": "b9e232a8bfd71d4377ddf1db4a08f3a0f62fc5f6dfa028e51cec38a4a9ec18f6"
+    }
+  ],
+  "totals": {
+    "files": 247,
+    "bytes": 225676445,
+    "sourceFiles": 36,
+    "servedAssets": 3,
+    "builtOfficeAssets": 3,
+    "reviewedImages": 3
+  }
+}

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {ProceduralAudio} from '../dist/audio/browser.js';
 import {BrowserRuntime} from '../dist/runtime/browser.js';
 import {WebGPURenderer} from '../dist/render/webgpu.js';
-function parameter(value=0){return{value,setTargetAtTime(v){this.value=v;},setValueAtTime(v){this.value=v;},exponentialRampToValueAtTime(v){this.value=v;}};}
+function parameter(value=0){return{value,cancelScheduledValues(){},setTargetAtTime(v){this.value=v;},setValueAtTime(v){this.value=v;},exponentialRampToValueAtTime(v){this.value=v;}};}
 function webAudio(t){
  const original={AudioContext:globalThis.AudioContext,addEventListener:globalThis.addEventListener,removeEventListener:globalThis.removeEventListener},listeners=new Map(),contexts=[];
  class Node {constructor(){this.gain=parameter();this.frequency=parameter();this.pan=parameter();this.Q=parameter();this.delayTime=parameter();this.links=[];this.starts=[];this.stops=0;this.disconnects=0;this.onended=null;this.loop=false;}connect(n){this.links.push(n);return n;}disconnect(){this.disconnects++;}start(...args){this.starts.push(args);}stop(){this.stops++;}}
@@ -12,6 +12,37 @@ function webAudio(t){
  t.after(()=>Object.assign(globalThis,original));return{contexts,listeners};
 }
 const camera={position:[0,1,0],target:[0,1,5]},contact={time:1,position:[2,0,4],sequence:1,depth:.02};
+
+test('live horns use listener orientation, attenuation and elapsed playback; muting releases voices and ambient gain',async t=>{
+ const mock=webAudio(t),audio=new ProceduralAudio();await audio.unlock();const context=mock.contexts[0],initial=context.sources.length;
+ const horn={type:'horn',id:7,time:1,point:[5,1,5],entity:'taxi',durationSeconds:.3,frequencyHz:330};
+ audio.play([horn],camera,1.05);let voice=context.sources.at(-1);near(voice.starts[0][1],.05);
+ const energy=x=>x.reduce((s,v)=>s+v*v,0),left=voice.buffer.getChannelData(0),right=voice.buffer.getChannelData(1);
+ assert.ok(energy(left)>energy(right));const closeGain=voice.links[0].gain.value;
+ audio.play([{...horn,point:[50,1,50]}],camera,1.05);assert.ok(context.sources.at(-1).links[0].gain.value<closeGain*.15);
+ audio.play([horn],{...camera,target:[0,1,-5]},1.05);voice=context.sources.at(-1);assert.ok(energy(voice.buffer.getChannelData(1))>energy(voice.buffer.getChannelData(0)));
+ const count=context.sources.length;audio.play([horn],camera,2);assert.equal(context.sources.length,count);
+ audio.setMuted(true);assert.equal(audio.inspect().voices,0);assert.equal(audio.inspect().muted,true);audio.play([horn],camera,1.05);assert.equal(context.sources.length,count);
+ audio.setMuted(false);audio.play([horn],camera,1.05);assert.equal(context.sources.length,count+1);assert.ok(count>=initial+3);audio.dispose();
+});
+function near(a,b){assert.ok(Math.abs(a-b)<1e-8);}
+
+test('releasing walker controls stops the rig and leaves fixed cameras in control',()=>{
+ const renderer={render(){},inspect(){return{};},resize(){},dispose(){}};
+ const runtime=new BrowserRuntime({},{version:1,entities:[],animation:{walkers:[{id:'walker',root:[0,0,0],heading:0,speed:0}]}},renderer,{audio:false,autoplay:false});
+ runtime.scene.animation.driveWalker('walker',2,0);runtime.scene.step();const position=[...runtime.scene.animation.pose('walker').position];let disposed=0;
+ runtime.controls={setActive(active){assert.equal(active,false);},tick(scene,dt){assert.equal(dt,0);scene.animation.driveWalker('walker',0,0);},dispose(){disposed++;}};
+ runtime.releaseWalker();runtime.step();assert.equal(disposed,1);assert.deepEqual(runtime.scene.animation.pose('walker').position,position);
+ runtime.setCamera(camera);assert.deepEqual(runtime.scene.camera,camera);runtime.releaseWalker();runtime.dispose();
+});
+
+test('live scene replacement can submit without waiting for a GPU fence; default replacement still drains',async()=>{
+ let flushes=0,prepared=0;const renderer={async prepareMaterials(){prepared++;},render(){},inspect(){return{};},async flush(){flushes++;},resize(){},dispose(){}};
+ const runtime=new BrowserRuntime({},{version:1,entities:[]},renderer,{audio:false,autoplay:false});
+ await runtime.replaceScene({version:1,entities:[{id:'traffic'}]},false);assert.equal(flushes,0);assert.equal(prepared,1);assert.ok(runtime.scene.entities.has('traffic'));
+ runtime.reset();assert.ok(runtime.scene.entities.has('traffic'));
+ await runtime.replaceScene({version:1,entities:[{id:'courtyard'}]});assert.equal(flushes,1);assert.equal(prepared,2);assert.ok(runtime.scene.entities.has('courtyard'));runtime.dispose();
+});
 
 test('live footsteps synthesize stereo contact sound, preserve elapsed timing and suppress stale catch-up history',async t=>{
  const mock=webAudio(t),audio=new ProceduralAudio();audio.playFootsteps([contact],camera,1);assert.equal(mock.contexts.length,0);
@@ -50,6 +81,14 @@ test('BrowserRuntime creation failure cleans allocated GPU/audio listeners and p
  await assert.rejects(BrowserRuntime.create({},{version:1,entities:[]},{autoplay:false}),e=>e===error);
  assert.equal(disposals,1);assert.equal(renders,0);assert.equal(mock.listeners.size,0);assert.equal(globalThis.__GAME_ENGINE__,liveBridge);
  await assert.rejects(BrowserRuntime.create({},{version:99,entities:[]},{autoplay:false}),/Unsupported scene version/);assert.equal(disposals,2);assert.equal(mock.listeners.size,0);assert.equal(globalThis.__GAME_ENGINE__,liveBridge);
+});
+
+test('BrowserRuntime forwards an explicit logarithmic camera range without enabling audio or autoplay',async t=>{
+ const create=WebGPURenderer.create,calls=[];let renders=0,disposed=0;
+ WebGPURenderer.create=async(canvas,options)=>{calls.push(options);return{async prepareMaterials(){},render(){renders++;},inspect(){return{};},dispose(){disposed++;}};};
+ t.after(()=>{WebGPURenderer.create=create;});
+ const runtime=await BrowserRuntime.create({},{version:1,entities:[]},{audio:false,autoplay:false,exposeBridge:false,logarithmicDepthFar:2000});
+ assert.equal(calls.length,1);assert.equal(calls[0].logarithmicDepthFar,2000);assert.equal(runtime.audio,null);assert.equal(renders,1);runtime.dispose();assert.equal(disposed,1);
 });
 
 test('disposing one BrowserRuntime never removes a newer runtime bridge and releases its renderer once',async t=>{

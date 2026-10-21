@@ -9,12 +9,15 @@ export function meshBounds(vertices:Float32Array):MeshBounds{
 /** Conservative box/clip-plane test. WebGPU's near plane is z=0, not z=-w.
  * Test each pass independently: offscreen objects can still cast visible shadows
  * or appear in the mirrored camera. Straddling boxes must never disappear. */
-export function intersectsClip(bounds:MeshBounds,m:Mat4):boolean{
+export function intersectsClip(bounds:MeshBounds,m:Mat4,displacement?:{projection:Mat4;worldY:number}):boolean{
  for(let plane=0;plane<6;plane++){
   const row=plane>>1,sign=(plane&1)?-1:1,near=plane===4;
   const a=near?m[2]!:m[3]!+sign*m[row]!,b=near?m[6]!:m[7]!+sign*m[4+row]!,c=near?m[10]!:m[11]!+sign*m[8+row]!,d=near?m[14]!:m[15]!+sign*m[12+row]!;
   const distance=a*bounds.center[0]+b*bounds.center[1]+c*bounds.center[2]+d;
-  const radius=Math.abs(a)*bounds.half[0]+Math.abs(b)*bounds.half[1]+Math.abs(c)*bounds.half[2];
+  let radius=Math.abs(a)*bounds.half[0]+Math.abs(b)*bounds.half[1]+Math.abs(c)*bounds.half[2];
+  // displaceWorld moves vertices along world Y after applying the object model.
+  // Its clip-plane support comes from the view projection, without model scale.
+  if(displacement){const vp=displacement.projection;radius+=Math.abs(near?vp[6]!:vp[7]!+sign*vp[4+row]!)*displacement.worldY;}
   if(distance+radius < -1e-5)return false;
  }
  return true;

@@ -1,0 +1,630 @@
+{
+  "date": "2026-10-16T19:37:31.080Z",
+  "goalAchieved": false,
+  "phase": "Single-response authoritative geometry cache and observed-body replication priority",
+  "changes": [
+    "Client sends its opaque knownGeometryKey. The authority includes geometry on a miss in the same dynamic frame, omits geometry on a hit, and retains explicit geometry=1 and legacy-client fallback.",
+    "Geometry identity now includes world id, authority epoch and building as well as view cell, installation revision and loaded chunk set. Cache hints never choose the authenticated focus.",
+    "Observed NPC pose has priority 90 and survives outbox stalls; nearby state is ranked around that body. Actual self/ACK stays at priority 100 and its coordinates/ownership are unchanged. Missing/cleared focus falls back to self.",
+    "No entity caps, byte budgets, simulation rates or replica count increased. Before-fix regressions reproduced extra geometry round trips, cross-epoch cache collision and 150 ms observed-pose expiry."
+  ],
+  "native": {
+    "command": "CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3206 CAPTURE_GPU=1 PERF_LABEL=office-focus-priority-native-20261016 OFFICE_CAPTURE_LABEL=office-focus-priority-native-20261016 OFFICE_WALKING_QA=1 OFFICE_URBAN_QA=1 OFFICE_SCENERY_QA=1 OFFICE_CAMERA_QA=1 OFFICE_TRANSPORT_QA=1 OFFICE_RESIDENTS_QA=1 OFFICE_PRESENTATION_QA=1 OFFICE_PACKET_TRACE=1 OFFICE_EXIT_TRACE=1 OFFICE_EXIT_ASSERT=1 OFFICE_CONTROL_SOAK_MS=180000 bun tools/capture.ts --office",
+    "exitCode": 0,
+    "report": {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/report.json",
+      "bytes": 926464,
+      "sha256": "dc1866fbebaf5f3683ffc3f11e1efd6e152e9eb22e3aea7d293ee5761fece41b"
+    },
+    "residents": {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-report.json",
+      "bytes": 16276,
+      "sha256": "4eb9013fc3d47044ccfe4e2800168d92f43723390318e4389fd8dcf67f76871d"
+    },
+    "transport": {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-report.json",
+      "bytes": 506345,
+      "sha256": "9c7f288dadd1f02b9225c02ed11ca3554c16bc29eafb1edda3b239255b08c8ba"
+    },
+    "packetTrace": {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/packet-trace.json",
+      "bytes": 12708728,
+      "sha256": "cb1b90052b541768fff5181615ea06082a34ddd358580fe68438d455896fcc76"
+    },
+    "records": 31,
+    "traces": [
+      {
+        "name": "observe",
+        "file": {
+          "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/focus-observe.json",
+          "bytes": 59160,
+          "sha256": "1accb95016e730826ba905ab2a493d9589883e60face6341824bff1b0e130589"
+        },
+        "frames": 21,
+        "completedAtCopy": 19,
+        "firstFrame": 10861,
+        "firstFocusCompletedAtCopy": true,
+        "requests": 2,
+        "forcedGeometryRequests": 0,
+        "maxObservedUnchangedSceneTimeMs": 633.7999999821186
+      },
+      {
+        "name": "possess",
+        "file": {
+          "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/focus-possess.json",
+          "bytes": 55370,
+          "sha256": "88df213d676902caeb0431c9ea1cd4aa50092b23ceedf25e764c9c121892bcf5"
+        },
+        "frames": 19,
+        "completedAtCopy": 18,
+        "firstFrame": 10939,
+        "firstFocusCompletedAtCopy": true,
+        "requests": 1,
+        "forcedGeometryRequests": 0,
+        "maxObservedUnchangedSceneTimeMs": 35.400000005960464
+      },
+      {
+        "name": "return",
+        "file": {
+          "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/focus-return.json",
+          "bytes": 61224,
+          "sha256": "fa63218e0e97dfcefc473214419635934968776a9d48343073683edc1804bab3"
+        },
+        "frames": 23,
+        "completedAtCopy": 22,
+        "firstFrame": 11013,
+        "firstFocusCompletedAtCopy": true,
+        "requests": 2,
+        "forcedGeometryRequests": 0,
+        "maxObservedUnchangedSceneTimeMs": 1096.5
+      }
+    ],
+    "focusFrames": 63,
+    "focusCompletedAtCopy": 59,
+    "movement": 0.39337855180050485,
+    "stopSpeed": 0.05178249654575429,
+    "drive": [
+      {
+        "name": "drive",
+        "metres": 2.617782458494214
+      },
+      {
+        "name": "passenger",
+        "metres": 0
+      }
+    ],
+    "exit": {
+      "frames": 150,
+      "minBoom": 8.000000000000009
+    },
+    "idle": {
+      "milliseconds": 180000,
+      "samples": 176,
+      "ackBefore": 14158,
+      "ackAfter": 24591,
+      "minPending": 5,
+      "maxPending": 47
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    }
+  },
+  "httpProbe": {
+    "file": {
+      "path": "artifacts/office-focus-priority/http-probe.json",
+      "bytes": 936,
+      "sha256": "831e42405a6e99f3929814fec7279078b50ec693b6e2b229cb653495bcf71532"
+    },
+    "rows": [
+      {
+        "request": 1,
+        "known": null,
+        "returnedKey": "office:thegame:29:13:2021311543:36117:-298:370:1:-3:3,-2:3,-4:2,-4:3,-3:4,-2:4,-4:1,-1:3,-4:4",
+        "geometry": true,
+        "applicationBodyBytes": 577097,
+        "elapsedMs": 26.940800000000003
+      },
+      {
+        "request": 2,
+        "known": "office:thegame:29:13:2021311543:36117:-298:370:1:-3:3,-2:3,-4:2,-4:3,-3:4,-2:4,-4:1,-1:3,-4:4",
+        "returnedKey": "office:thegame:29:13:2021311543:36117:-298:370:1:-3:3,-2:3,-4:2,-4:3,-3:4,-2:4,-4:1,-1:3,-4:4",
+        "geometry": false,
+        "applicationBodyBytes": 25531,
+        "elapsedMs": 16.298299999999998
+      }
+    ]
+  },
+  "cacheOnlyBaseline": {
+    "report": {
+      "path": "../thegame/artifacts/office-walking/office-geometry-hint-native-20261016/report.json",
+      "bytes": 170839,
+      "sha256": "fcc26a359cf92f91534313d827d0b9b5160a18d079f97563a5ff4c56bb43214d"
+    },
+    "scope": "Earlier cache-hint-only native diagnostic on PID 17884. Different live world/body/route; no controlled speedup inference."
+  },
+  "checks": [
+    {
+      "name": "Game projection/installation/voice/accounts",
+      "pass": 36,
+      "assertions": 7917,
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/office-geometry-hint-tests.log",
+        "bytes": 5351,
+        "sha256": "3f2effc05f0fe11cfbc3ab99035598e3d6140ceb3c181fad3e23906920f3306c"
+      }
+    },
+    {
+      "name": "Game causal network and motion recovery",
+      "pass": 98,
+      "assertions": 660,
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/office-focus-priority-tests.log",
+        "bytes": 9503,
+        "sha256": "6209ba68bb256f539f6f5ba3e5893b6a5b102cf992e58dbd08ddb2f2883d22ae"
+      }
+    },
+    {
+      "name": "Engine Office app",
+      "pass": 131,
+      "assertions": 5297,
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-geometry-hint-app-tests.log",
+        "bytes": 14697,
+        "sha256": "6d6b3b80a679ae7d5c3add78c768ec4421d5a88def19d4b57966c37c1707ae59"
+      }
+    }
+  ],
+  "otherChecks": [
+    {
+      "name": "Game TypeScript",
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/office-focus-priority-typecheck.log",
+        "bytes": 22,
+        "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+      }
+    },
+    {
+      "name": "Game build",
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/office-focus-priority-build.log",
+        "bytes": 585,
+        "sha256": "a1dc8d521b953995ce732d74204c27379e8f3cf0dd08ac70ec2e37f96de9f04d"
+      }
+    },
+    {
+      "name": "Engine app TypeScript",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-geometry-hint-app-typecheck.log",
+        "bytes": 33,
+        "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+      }
+    },
+    {
+      "name": "Office UI TypeScript",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-geometry-hint-ui-typecheck.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "Office UI build",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-geometry-hint-ui-build.log",
+        "bytes": 889,
+        "sha256": "470dfd4d22ff627c830d72e1fba9ccfc3a065103b41b67fd8fecdce36f786e79"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "../thegame/src/game/office-world.ts",
+      "bytes": 9071,
+      "sha256": "ac31409b2c20c4bc6c66235b983a332ba70d2450b4ac71fa37a5f7c671c3870a"
+    },
+    {
+      "path": "../thegame/src/server/office-world.ts",
+      "bytes": 2527,
+      "sha256": "be32868be8b192c291132d86758f8b2f76e44ee7fdbc1b06e42cfc36c760847e"
+    },
+    {
+      "path": "../thegame/test/office-world.test.ts",
+      "bytes": 11946,
+      "sha256": "274350ef34884c6a2a807b662f4908ccc813c6a7a26709cffa922866f066fb3f"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/replication.ts",
+      "bytes": 31199,
+      "sha256": "de6d68628668d03d9a75d64441be5ad057b6634a64eb769955f61a4303b26b16"
+    },
+    {
+      "path": "../thegame/test/causal-network/replication.test.ts",
+      "bytes": 19771,
+      "sha256": "e1cf8c2f460c3f96a47816b2b0bab237cb607e08869bd9241ce99847ee71cd80"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/queues.ts",
+      "bytes": 7159,
+      "sha256": "72733bb0ec3d7ffca31e3d43cf0d2692c3c1c1a6a285d32acb9b868ea75fa914"
+    },
+    {
+      "path": "../thegame/tools/qa-office-focus.ts",
+      "bytes": 2921,
+      "sha256": "7779fda499ff5b7c032fd751e024d5eee6bee480326fddb30f90b913672166bc"
+    },
+    {
+      "path": "../thegame/tools/qa-office-residents.ts",
+      "bytes": 11745,
+      "sha256": "f717195c7e14198899703de38342c55d9b9ae15573d6dc58e3ba8604375fd824"
+    },
+    {
+      "path": "../thegame/tools/qa-office.ts",
+      "bytes": 7374,
+      "sha256": "5ec35235cbd67b498fee073f5c6fd7707c6bc50bea9b86e2672e2d2aafac70c2"
+    },
+    {
+      "path": "../thegame/tools/qa-office-transport.ts",
+      "bytes": 9861,
+      "sha256": "15ef0773e7c5cbd9b45df2e4529e7cbbe486668a5f419559e46467b9c269abfb"
+    },
+    {
+      "path": "../thegame/tools/capture.ts",
+      "bytes": 33107,
+      "sha256": "229a71a7b0b427f3896af18fa2ddcbacee1ab22c645e0e4c28aff9cfc244e1d3"
+    },
+    {
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 32725,
+      "sha256": "7b8b4c4598d1159a6f5606c74be6d1f559f4daf0200aaf6f561904496e4359d1"
+    },
+    {
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 42044,
+      "sha256": "5a9d7f5ca450f98781019fdd00d959c3dffadd11ad2ec4c1e88420e938ad1fa2"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/scene.ts",
+      "bytes": 62912,
+      "sha256": "f6d8f143a552abb21e784db8ee0c51cfeb6ced7330c026bb43da08f2c1ed67a3"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "../thegame/public/build/game.js",
+      "bytes": 2471113,
+      "sha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4",
+      "servedMatches": true
+    },
+    {
+      "path": "../thegame/public/build/office-controller.js",
+      "bytes": 1253347,
+      "sha256": "5fff416f59d7b040752681e7fa800dabf1968ff89207aa0f5aefa8f8b3463389",
+      "servedMatches": true
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61",
+      "servedMatches": null,
+      "scope": "UI production build; native Office uses Vite source."
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07",
+      "servedMatches": null,
+      "scope": "UI production build; native Office uses Vite source."
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/index-D8zC8rUM.js",
+      "bytes": 1774841,
+      "sha256": "0061e2a37b6fad7b64b745c9e5d5d98c48173bd8d43755e5d27f93800724c350",
+      "servedMatches": null,
+      "scope": "UI production build; native Office uses Vite source."
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/gesture/vision_wasm_module_internal.js",
+      "bytes": 335431,
+      "sha256": "70eff3956521b7de058d7173a4935c95e4a223c26ea624b9f5a936d3a043dcb0",
+      "servedMatches": null,
+      "scope": "UI production build; native Office uses Vite source."
+    }
+  ],
+  "pngs": [
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/controller-idle-after.png",
+      "bytes": 683437,
+      "sha256": "c80d62892701deca76b7e1f35ab4f7866400630b586183322024041828bb2fcf"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/entered.png",
+      "bytes": 316495,
+      "sha256": "e2cc130f0eaa0db3690e2206023f57339c8728be8694d001f187a8a92c6a69d4"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/observer.png",
+      "bytes": 902798,
+      "sha256": "43413adc8701a9870ca0acfbcb826564a7b303a08a4c5d88a26b518d121a376e"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/orbit-1.png",
+      "bytes": 370639,
+      "sha256": "88a518630366cc9f222a6f4d662991adcba3dc2e42a64962c3d143267e04d73b"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/orbit-2.png",
+      "bytes": 373919,
+      "sha256": "ef9d28a808300231ba62515b32df67e6b848f16f0416ae04eb3987ef4de81623"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/orbit-3.png",
+      "bytes": 341186,
+      "sha256": "e85a1bac03dd7d3bf444f1515f71752252de86c676802dbac0de34e9006d7473"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/orbit-4.png",
+      "bytes": 329498,
+      "sha256": "bc25bb0febb9cfe1af283af767f6b239b2b73a18aee8f442f10176e932382cbd"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-moved.png",
+      "bytes": 235292,
+      "sha256": "4a8aefdd357f25a1158c63ef7b07f68096fd8bfaf234c6038476bf119eb1e4e6"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-observed-scope.png",
+      "bytes": 233712,
+      "sha256": "c252dc67126d835aa753686c90a55a78008e50d79adcf0af7785fd4120436e2d"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-observing.png",
+      "bytes": 217129,
+      "sha256": "0d71eaf2c4fe12ab598cd7a882b377b21d6c60d810a903be42c646a8981a3f0e"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-panel.png",
+      "bytes": 131305,
+      "sha256": "5fd04e4714d1bab366a25f22029aa6cfd1f3635881fdf0df06e295e74f24dc6b"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-possessed.png",
+      "bytes": 235710,
+      "sha256": "9de9f6fa4252a3a7deddbd2d8a23f99866a11ebdfe2b3b79bcbb46834d5f5643"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-return-start.png",
+      "bytes": 483129,
+      "sha256": "ac272bc31b7ffddfcb2dbdf1699083196b96363a095441503312c99df8cacfc6"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-returned.png",
+      "bytes": 466921,
+      "sha256": "b200703338ab200bb4a17e62c42635582fe5ac811e7f5f7320508f937ce520aa"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-stopped.png",
+      "bytes": 220626,
+      "sha256": "93f020e04e6c502962f2039c28059e231c3365177094114231182ebe417e4ba8"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/returned-observer.png",
+      "bytes": 931021,
+      "sha256": "f9074767d649c8e1211a02ac18cb1c5d3245953dcdb4f8b409de3c7ec3864ca7"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-clearance-restored.png",
+      "bytes": 530125,
+      "sha256": "cdf5b100e472ec5fefae0c21fd3e55d063f952c03d8158eec116edb4e9fe79c4"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-driver.png",
+      "bytes": 351307,
+      "sha256": "f601f7baa04c9af72669523210890a97cc1d690035e4f27996ebc87b78d0b96b"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-driving.png",
+      "bytes": 409218,
+      "sha256": "72e7d3f741eb32c40ac05bcc990e2f35e3a8a329135ae788d4e7d8ec2e45f6b6"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-engine-off.png",
+      "bytes": 434107,
+      "sha256": "dff0815f4dcf043944a5d720a9306f6631c724eb9c1ff2d384981c174d821a4c"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-1.png",
+      "bytes": 536215,
+      "sha256": "bc47ad535d6180977a6b9982476e7989f0e230dc8e5addc7c470ca351c9070ba"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-2.png",
+      "bytes": 527149,
+      "sha256": "1dd54f8c87b8fc59efa9a0585102d795f1ae6f623665c914af5ccaf9d2bb11b1"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-3.png",
+      "bytes": 550297,
+      "sha256": "04eae9abe94ffb348f244e60422fa450572a01ac1b5dad37747f818b0bbdb6fa"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-4.png",
+      "bytes": 543511,
+      "sha256": "842c43a875f54a142deb8f868346889be54bd338bf6a832ef29791d1f9ae4f2e"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-5.png",
+      "bytes": 537037,
+      "sha256": "f0e4c328621d1e10ee2c2738d4ed8ab0eb28558672ae22c596893197e049cfde"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-6.png",
+      "bytes": 534621,
+      "sha256": "6a14eaeef870d1dec0d9ed228d268cb9e97cb7f97d2c86843fb5f01dd2c285b9"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-7.png",
+      "bytes": 535217,
+      "sha256": "842ca22fc31ed45c2b38dc35b6198783d27bc14403fc755a6d3f8637c4920ff1"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited-8.png",
+      "bytes": 559133,
+      "sha256": "2630e12c2b3f7253c70e951f3058897314c249857aaa161e32c85b0fa20a9e5e"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-exited.png",
+      "bytes": 547498,
+      "sha256": "17904b257e88c5c134d60357085b42910afaaf7f77aa8286d9258932e2f56bbc"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-passenger.png",
+      "bytes": 473609,
+      "sha256": "26633c35140b802c5c11278ad36fb7462db267f9a1fc9054d3ba10fd62c55ca5"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/walk-KeyW.png",
+      "bytes": 320959,
+      "sha256": "cfddcaf3eb300c5a45f30808925d7ee43b86033859b963e0611c65e496b4a775"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/office-focus-priority-native-20261016/canonical-lobby.png",
+      "bytes": 369082,
+      "sha256": "0a1e4ba23987ce9278c01a12dff387e7d0fd725378f6a083c96d84f4fd3f45f9"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/office-focus-priority-native-20261016/entrance.png",
+      "bytes": 476442,
+      "sha256": "009a0db29b2eeecc1afb607c0ec7bbe503be26296fcf15f3930efb0b8978d062"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/office-focus-priority-native-20261016/office-entry.png",
+      "bytes": 325643,
+      "sha256": "456b4363260907d600f0f87119e0e132e78e7c22d8a54f99ed9e2987566f0824"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/office-focus-priority-native-20261016/upper-office.png",
+      "bytes": 352020,
+      "sha256": "6c6fd2a7e61e8917c1a43874f94f3e471d3c27e10d7a9a9f9bf3ddfbaab49d59"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/office-focus-priority-native-20261016/workplaces.png",
+      "bytes": 534938,
+      "sha256": "2eec0087d72376b8d514f9e83aee6d3675e90ef079d1264a3406ee3cc839e6ae"
+    }
+  ],
+  "reviewedPngs": [
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-driver.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-driving.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/transport-clearance-restored.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-observing.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-possessed.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-moved.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/residents-return-start.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/controller-idle-after.png",
+    "../thegame/artifacts/office-walking/office-focus-priority-native-20261016/returned-observer.png",
+    "../thegame/artifacts/office-in-game/office-focus-priority-native-20261016/workplaces.png",
+    "../thegame/artifacts/office-in-game/office-focus-priority-native-20261016/upper-office.png"
+  ],
+  "audits": [
+    {
+      "date": "2026-10-16T19:12:34.807Z",
+      "oldPid": 10712,
+      "newPid": 17884,
+      "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; authoritative geometry cache hint and epoch key; Office/backend/microphone untouched",
+      "beforeRows": 2735,
+      "afterRows": 2735,
+      "missingRows": 0,
+      "protectedRows": 113,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 16,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1,
+      "file": {
+        "path": "artifacts/office-geometry-hint/restart-audit.json",
+        "bytes": 596,
+        "sha256": "b6fb83173c97440f3ffda63515b422e0d358e0086d41093c965bc4e7774b36fd"
+      },
+      "backup": {
+        "path": "artifacts/office-geometry-hint/restart-ready.sqlite",
+        "bytes": 6184960,
+        "sha256": "9fdbf3b723922a76ebaba4f29a9a48c91cd8e0ad0f2da704da3cc288bb1770ce"
+      }
+    },
+    {
+      "date": "2026-10-16T19:19:44.363Z",
+      "oldPid": 17884,
+      "newPid": 6448,
+      "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; observed-body replication priority; geometry hint retained; Office/backend/microphone untouched",
+      "beforeRows": 2777,
+      "afterRows": 2777,
+      "missingRows": 0,
+      "protectedRows": 114,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 17,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1,
+      "file": {
+        "path": "artifacts/office-focus-priority/restart-audit.json",
+        "bytes": 606,
+        "sha256": "a4b45baf86765bad7fefac4b2115f23dffb432b308cfbe18ffa1f8d66d03f33a"
+      },
+      "backup": {
+        "path": "artifacts/office-focus-priority/restart-ready.sqlite",
+        "bytes": 6262784,
+        "sha256": "5a1eee363e4c37c523985acc28fdbb47f63d021a90efdbb2f207b590a4fad250"
+      }
+    }
+  ],
+  "server": {
+    "pid": 6448,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "limits": [
+    "Native time traces are observations, not exact RPC latency or a controlled speedup. Input debt/prediction and switching latency still need broader validation.",
+    "Render trace records include trailing GPU promises still pending at copy; all first focus frames completed. Metadata coherence does not prove every pixel on every camera angle.",
+    "Resource timing capacity is raised for diagnostics without overriding requests, inputs or clocks; cross-origin timing details are not treated as precise network latency.",
+    "HTTP sizes count application JSON bytes, not TLS/QUIC/UDP bytes. Matching-cache responses already omitted geometry in older clients; the new change removes the extra metadata round trip on a cache miss.",
+    "Windows process-stop restarts followed fresh checkpoints/standalone SQLite backups. They were not graceful shutdowns. The first date-precheck failure happened before any process stop; its initial backup/log are preserved.",
+    "The native account has no funded business. Funded lease/employee/harness permissions remain separately covered by prior authority/API evidence.",
+    "No new average FPS, actual audio playback or microphone capture verified. UI production build keeps its existing large-chunk warning.",
+    "Trusted-key QA waits for ACK before its additional hold interval; driving distances and route duration are not calibrated physical key-hold or vehicle-performance benchmarks.",
+    "Exact original roads/terrain/water/climate rendering, Office material/lighting parity, broad gameplay/audio, and low-latency control remain incomplete. The overall integration goal is active."
+  ],
+  "visualObservations": [
+    "Reviewed native first observing and return frames have the correct body and surrounding terrain; original Game workplace furniture and the Office observer cutaway remain visible.",
+    "Ground and road appearance are still simplified, and faint temporal ghosting remains around moving bodies/vehicles. This phase does not claim visual parity or a TAA fix.",
+    "The first possession image can still retain the observation label briefly; the subsequent movement frame shows the correct controlled-body actions.",
+    "Native logs still include Office audio-reference WebSocket 503 responses and the C920 warning. Logical listener coherence is separate from working sound playback.",
+    "Lighting/world time differs between captures. Staged Game HUD FPS values are not a live or average FPS measurement."
+  ]
+}

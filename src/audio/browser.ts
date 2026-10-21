@@ -20,6 +20,7 @@ export class ProceduralAudio {
  private context:AudioContext|null=null;private unlocked=false;private disposed=false;private ambient:AmbientGraph|null=null;
  private readonly synthFamily=new AudioSynthFamily();private eventSynth:EventSynthesizer|undefined;
  private readonly voices=new Set<Voice>();private readonly maxVoices=48;
+ private muted=false;
  private readonly unlockGesture=()=>{void this.unlock();};
  constructor(profile:SimulationProfileInput='detailed'){
   this.eventSynth=this.synthFamily.compile(profile);
@@ -40,7 +41,7 @@ export class ProceduralAudio {
   if(wasActive&&!next)this.silence();
  }
  updateAmbient(state:AmbientAudioState):void{
-  if(!this.eventSynth||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
+  if(this.muted||!this.eventSynth||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
   const graph=this.ensureAmbient(context),now=context.currentTime,wind=clamp(state.windSpeed/12),snow=clamp(state.snowfall),traffic=clamp(state.trafficCount/5),speed=clamp(state.trafficSpeed/18),wet=clamp(state.contactWetness??state.roadWetness),slush=clamp(state.slush),rolling=traffic*speed;
   smooth(graph.windGain.gain,.010+wind*.10,now,.18);smooth(graph.windFilter.frequency,160+wind*260,now,.2);
   // Falling snow contributes very faint filtered air, never a high-pass hiss.
@@ -51,9 +52,23 @@ export class ProceduralAudio {
   // The same two low-pass stages as the offline tyre model round out the swish.
   smooth(graph.slushGain.gain,rolling*(wet*.095+slush*.035),now,.10);smooth(graph.slushFilter.frequency,950,now,.12);smooth(graph.slushSoft.frequency,700,now,.12);
  }
- play(events:readonly EngineEvent[]):void{
-  const synth=this.eventSynth;if(!synth||!events.length||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
-  for(const event of events){if(event.type==='impact'&&event.energy<.02)continue;this.playVoice(synth(event,context.sampleRate),.72,context.currentTime,0);}
+ setMuted(muted:boolean):void{this.muted=muted;if(muted)this.silence();}
+ play(events:readonly EngineEvent[],camera?:CameraSpec,simulationTime?:number):void{
+  const synth=this.eventSynth;if(this.muted||!synth||!events.length||!this.unlocked||this.disposed)return;const context=this.ensure();if(context.state!=='running')return;
+  for(const event of events){
+   if(event.type==='impact'&&event.energy<.02)continue;
+   let projected=event,level=.72,offset=0;
+   if(event.type==='horn'){
+    offset=Math.max(0,(simulationTime??event.time)-event.time);if(offset>=event.durationSeconds+.08)continue;
+    if(camera){
+     const dx=event.point[0]-camera.position[0],dy=event.point[1]-camera.position[1],dz=event.point[2]-camera.position[2],distance=Math.hypot(dx,dy,dz);
+     const fx=camera.target[0]-camera.position[0],fz=camera.target[2]-camera.position[2],length=Math.max(1e-9,Math.hypot(fx,fz));
+     const pan=Math.max(-.65,Math.min(.65,(-fz*dx+fx*dz)/length/Math.max(2,distance)));
+     projected={...event,point:[pan*25,0,0]};level=.82/(1+(distance/15)**1.6);
+    }
+   }
+   this.playVoice(synth(projected,context.sampleRate),level,context.currentTime,offset);
+  }
  }
  /** Play an already-synthesized voice through a control-rate acoustic transfer.
   * The wave solver has finished before this call; WebAudio only renders delays,
@@ -65,7 +80,7 @@ export class ProceduralAudio {
  /** Live playback reuses the same synthesis and contact records as an offline
   * capture. Catch-up ticks start at the elapsed sample; old seek history is silent. */
  playFootsteps(events:readonly FootstepSound[],camera:CameraSpec,simulationTime:number):void{
-  if(!this.eventSynth||!events.length||!this.unlocked||this.disposed)return;if(!Number.isFinite(simulationTime)||simulationTime<0)throw new RangeError('Invalid footstep simulation time');
+  if(this.muted||!this.eventSynth||!events.length||!this.unlocked||this.disposed)return;if(!Number.isFinite(simulationTime)||simulationTime<0)throw new RangeError('Invalid footstep simulation time');
   const context=this.ensure();if(context.state!=='running')return;
   for(const event of events){const age=simulationTime-event.time;if(age>=.38||age<-.25)continue;
    const voice=renderFootsteps([{...event,time:0}],[{time:0,listener:camera.position,target:camera.target,vehicle:event.position,speedMps:0}],.38,context.sampleRate);
@@ -93,7 +108,7 @@ export class ProceduralAudio {
    gain.cancelScheduledValues(now);gain.setValueAtTime(0,now);
   }
  }
- inspect(){return{enabled:this.eventSynth!==undefined,unlocked:this.unlocked,state:this.context?.state??'locked',ambient:this.ambient!==null,voices:this.voices.size};}
+ inspect(){return{enabled:this.eventSynth!==undefined,unlocked:this.unlocked,muted:this.muted,state:this.context?.state??'locked',ambient:this.ambient!==null,voices:this.voices.size};}
  dispose():void{
   if(this.disposed)return;this.disposed=true;this.unlocked=false;
   for(const event of ['pointerdown','touchstart','keydown'])removeEventListener(event,this.unlockGesture,true);

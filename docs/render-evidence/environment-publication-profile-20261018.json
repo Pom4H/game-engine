@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "diagnosed-no-change",
+  "trace": "../thegame/artifacts/stalls-render-stability-fixed-quality-20261018.cpuprofile",
+  "archivedSourceMap": "../thegame/artifacts/render-stability-fixed-quality-game.js.map",
+  "analysis": "artifacts/render-stability/environment-publication-fixed-quality-analysis.json",
+  "sourceMatches": "The archived source map contains the current packed-six-face, one-write-per-mip publication implementation.",
+  "sampledWork": {
+    "profileWallMs":32662.46,
+    "samples":20480,
+    "workerPublicationInclusiveMs":449.11,
+    "workerPublicationNativeWriteTextureSelfMs":441.999,
+    "otherNativeWriteTextureSelfMs":18.493,
+    "largestContiguousPublicationSampleMs":4.839,
+    "contiguousPublicationSampleRuns":173,
+    "meanContiguousPublicationSampleMs":2.5960115606936403
+  },
+  "callback": "EnvironmentMapWorker.worker.onmessage → complete → publish callback → WebGPURenderer.publishEnvironmentMap → GPUQueue.writeTexture. This asynchronous publication occurs outside Renderer.render CPU profiling.",
+  "existingUpload": {
+    "dimensions":[256,256,6],
+    "format":"rgba16float",
+    "mips":9,
+    "writeTextureCallsPerPublication":9,
+    "bytesPerPublication":4194288,
+    "packing":"Each mip already contains all six faces and is uploaded by one writeTexture call. The worker transfers the nine mip ArrayBuffers to the main thread."
+  },
+  "scheduling": {
+    "worker":"One active bake and one latest replacement; queued inputs do not form a backlog. Reset generations reject results from a previous scene/cause epoch. Serialized same-generation completions publish forward progress during continuous camera/light changes.",
+    "cache":"At most four complete CPU map results; a cached return resets any outstanding worker generation before publication.",
+    "causes":"Origin uses the configured environmentProbeGridM, default 0.5 m; local probes suppress that distant origin cause. Sun direction/color and sky are serialized to three decimal places. Intensity, sunlight, humidity and moisture use 0.05 steps, temperature uses 0.5 C steps, and snowfall uses 0.000001 steps. Static-radiance identity and seed also participate."
+  },
+  "assessment":"Native environment upload is most of the sampled publication work and can occupy a few milliseconds between render tasks. This profile does not identify publication as the cause of the 370.4 ms unprofiled maximum frame interval. Sampled contiguous runs are not exact invocation durations or a measured bake count. A staging-buffer upload experiment was deferred after the separate allocation/GC investigation became the priority.",
+  "changes":"No production source, texture quality, upload implementation or native GPU run changed for this assessment."
+}

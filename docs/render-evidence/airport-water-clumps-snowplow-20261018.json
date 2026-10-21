@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-18",
+  "scope": "Original Game renderer and actual authority snow. Presentation-only camera and noon lighting; no authority teleport/time acceleration. Not a performance measurement.",
+  "browserMode": "native-gpu",
+  "before": {
+    "x": -544,
+    "z": -136.00000000000003,
+    "base": 0.03,
+    "heightM": 8.053218171716875,
+    "massKg": 262790.1963993165,
+    "meltwaterKg": 166216.74752723667,
+    "waterVolumeM3": 166.2167475272365,
+    "runoffM3": 0,
+    "clumps": 0,
+    "clumpMassKg": 0,
+    "loadMassKg": 0,
+    "heatAddedJ": 55518133261.14828,
+    "revision": 3446522,
+    "minute": 3349.2666666641117
+  },
+  "after": {
+    "x": -544,
+    "z": -136.00000000000003,
+    "base": 0.03,
+    "heightM": 8.047631255208318,
+    "massKg": 262266.367094713,
+    "meltwaterKg": 166740.57683184036,
+    "waterVolumeM3": 166.7405768318408,
+    "runoffM3": 0,
+    "clumps": 0,
+    "clumpMassKg": 0,
+    "loadMassKg": 0,
+    "heatAddedJ": 55693092248.88539,
+    "revision": 3454579,
+    "minute": 3357.2666666641044
+  },
+  "snowService": {
+    "id": "vehicle:1022",
+    "kind": "vehicle",
+    "type": "snowplow",
+    "x": -524.955,
+    "y": 0.843,
+    "z": -164.066,
+    "yaw": -0.596,
+    "vx": 0.006,
+    "vy": 0.504,
+    "vz": -0.008,
+    "phase": 0.079,
+    "animation": "idle",
+    "q": [
+      -0.037,
+      -0.294,
+      -0.011,
+      0.955
+    ],
+    "extra": {
+      "plate": "T001022",
+      "ownerId": "city",
+      "ownerName": "Город",
+      "locked": false,
+      "compromised": false,
+      "contacts": [
+        [
+          12,
+          3,
+          -525.65,
+          0,
+          -159.93,
+          0,
+          0,
+          4,
+          2,
+          0,
+          0,
+          0,
+          0.001,
+          0,
+          0,
+          0
+        ],
+        [
+          13,
+          1,
+          -525.65,
+          0.03,
+          -159.93,
+          0,
+          0,
+          4,
+          1,
+          436.8335,
+          782.7302,
+          0.11,
+          4,
+          -527.26,
+          0.01,
+          -160.92
+        ]
+      ],
+      "snowLoadKg": 0,
+      "snowLoadVolumeM3": 0,
+      "engineRunning": false,
+      "siren": false,
+      "trafficState": null,
+      "ambient": false,
+      "steeringSide": "left",
+      "seats": {},
+      "reservedBy": null,
+      "integrity": 1,
+      "panels": {
+        "front": 0,
+        "rear": 0,
+        "left": 0,
+        "right": 0,
+        "roof": 0,
+        "_tyreFrame": [
+          0,
+          0,
+          1000,
+          0,
+          0,
+          0,
+          1000,
+          0,
+          148,
+          0,
+          609,
+          100,
+          148,
+          0,
+          609,
+          100
+        ],
+        "_tyreSerial": 18
+      },
+      "glass": 0,
+      "doorAngles": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "doors": 0,
+      "occupant": null,
+      "passengers": [],
+      "fallen": false,
+      "handbrake": false,
+      "burnout": false,
+      "abs": true,
+      "esp": true,
+      "manual": false,
+      "steer": 0,
+      "wheels": [
+        [
+          0,
+          0,
+          -0.24,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          -0.24,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          -0.061,
+          0.004,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          -0.061,
+          0.004,
+          0,
+          0
+        ]
+      ],
+      "service": null
+    }
+  },
+  "errors": [],
+  "tests": {
+    "gamePrimary": {
+      "pass": 54,
+      "fail": 0
+    },
+    "gameFinalOverlapping": {
+      "pass": 22,
+      "fail": 0
+    },
+    "engine": {
+      "pass": 29,
+      "fail": 0
+    },
+    "engineOpenBoundary": {
+      "pass": 3,
+      "fail": 0
+    },
+    "fullGameSuite": false
+  },
+  "limitations": [
+    "Water active region is 64 x 64 m; boundary outflow is retained in runoff ledger",
+    "Browser validates water and vehicle rendering; clump impacts and plow collection/unloading validated using actual Engine solver in tests",
+    "Presentation camera and noon lighting only",
+    "No FPS gate"
+  ]
+}

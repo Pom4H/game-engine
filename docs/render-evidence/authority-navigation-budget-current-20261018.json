@@ -1,0 +1,275 @@
+{
+  "date": "2026-10-18",
+  "status": "current diagnostic completed; observed navigation wall time exceeds requested soft budget",
+  "goalStatus": "active",
+  "performanceTargetMet": false,
+  "change": "No production server code was modified. Two single-process current-policy diagnostics replace unsupported assumptions about the remaining server bottleneck.",
+  "settings": {
+    "seed": 29,
+    "residentLimit": 80,
+    "workers": 0,
+    "populationHz": 30,
+    "physicsSubsteps": 2,
+    "snapshotHz": 20,
+    "vehicleInterestPeriod": 1,
+    "streamingPeriod": 2,
+    "worldInterestPeriod": 1,
+    "warmTicks": 120,
+    "scoredTicks": 300
+  },
+  "firstPhase": {
+    "report": {
+      "path": "../thegame/artifacts/network-stability-20261018/authority-phase-current-20261018.json",
+      "sha256": "352014eb5bb345c415f08147d5ba680fbacb886f3819e49d75b5719628c3acf4"
+    },
+    "driver": {
+      "path": "../thegame/artifacts/network-stability-20261018/authority-phase-current-20261018-driver.json",
+      "sha256": "8fa958d66278b1c0fd6f01a6d9566816c7521acaab0429312458b761d7776542"
+    },
+    "summary": {
+      "path": "../thegame/artifacts/network-stability-20261018/authority-phase-current-20261018-summary.json",
+      "sha256": "508edcb35cdf3cd636cb997f5e9175ade6bdd3dbd79ed66e1916e44d82ef6c6a"
+    },
+    "tick": {
+      "count": 300,
+      "meanMs": 13.75739766666669,
+      "p50Ms": 12.03690000000006,
+      "p95Ms": 26.856799999999566,
+      "p99Ms": 44.82999999999993,
+      "maxMs": 58.258200000000215,
+      "method": "sorted[floor(N*p)]"
+    },
+    "residentsStep": {
+      "calls": 300,
+      "totalMs": 2129.673899999987,
+      "maxPerTickMs": 36.65380000000005,
+      "activeTicks": 300,
+      "meanPerScoredTickMs": 7.098912999999957,
+      "perTick": {
+        "count": 300,
+        "meanMs": 7.098912999999957,
+        "p50Ms": 5.988999999999578,
+        "p95Ms": 13.177899999999681,
+        "p99Ms": 22.18000000000029,
+        "maxMs": 36.65380000000005,
+        "method": "sorted[floor(N*p)]"
+      }
+    },
+    "physics": {
+      "calls": 300,
+      "totalMs": 1261.3789999999874,
+      "maxPerTickMs": 26.975600000000668,
+      "activeTicks": 300,
+      "meanPerScoredTickMs": 4.204596666666625,
+      "perTick": {
+        "count": 300,
+        "meanMs": 4.204596666666625,
+        "p50Ms": 3.774699999999939,
+        "p95Ms": 6.236399999999776,
+        "p99Ms": 12.48279999999977,
+        "maxMs": 26.975600000000668,
+        "method": "sorted[floor(N*p)]"
+      }
+    },
+    "cohorts": {
+      "tickMultiple30": {
+        "ticks": 10,
+        "meanTickMs": 31.053999999999995,
+        "meanResidentsMs": 15.152159999999913,
+        "meanPhysicsMs": 6.965220000000045
+      },
+      "otherTicks": {
+        "ticks": 290,
+        "meanTickMs": 13.1609631034483,
+        "meanResidentsMs": 6.821214827586166,
+        "meanPhysicsMs": 4.109402758620645
+      }
+    },
+    "cohortLimit": "Only10 multiple30 observations and290 other observations in one real-budget run; calendar/property/minute association is a hypothesis, not causal attribution."
+  },
+  "nestedNavigation": {
+    "report": {
+      "path": "../thegame/artifacts/network-stability-20261018/authority-navigation-current-20261018.json",
+      "sha256": "99a7d6a50ae49cb79dfaa649b83369af6e4d15ee98223dce7deae2ee2555364f"
+    },
+    "driver": {
+      "path": "../thegame/artifacts/network-stability-20261018/authority-navigation-current-20261018-driver.json",
+      "sha256": "ec963937d9b17c412a6198e04c1a075e64997f3f44c836c627b33bc96aa4d9ee"
+    },
+    "tick": {
+      "count": 300,
+      "meanMs": 13.749612333333314,
+      "p50Ms": 12.117799999999988,
+      "p95Ms": 26.040399999999863,
+      "p99Ms": 43.95920000000024,
+      "maxMs": 58.09760000000006,
+      "method": "sorted[floor(N*p)]"
+    },
+    "navigation": {
+      "count": 300,
+      "meanMs": 5.2689973333333455,
+      "p50Ms": 4.558700000000499,
+      "p95Ms": 8.549700000000485,
+      "p99Ms": 18.739199999999983,
+      "maxMs": 24.906200000000354,
+      "method": "sorted[floor(N*p)]"
+    },
+    "otherResidents": {
+      "count": 300,
+      "meanMs": 2.0175106666666793,
+      "p50Ms": 1.5175000000008367,
+      "p95Ms": 3.3112999999993917,
+      "p99Ms": 18.461699999999837,
+      "maxMs": 28.8753999999999,
+      "method": "sorted[floor(N*p)]"
+    },
+    "argumentContract": {
+      "calls": 300,
+      "allHaveTwoArguments": true,
+      "allMaxWork24AndBudget3": true
+    },
+    "slowest": [
+      {
+        "scoredIndex": 239,
+        "tick": 360,
+        "startedMs": 7707.5961,
+        "endedMs": 7732.5023,
+        "totalMs": 24.906200000000354,
+        "argumentsProvided": 2,
+        "maxPerTick": 24,
+        "budgetMs": 3
+      },
+      {
+        "scoredIndex": 179,
+        "tick": 300,
+        "startedMs": 6846.7815,
+        "endedMs": 6866.0657,
+        "totalMs": 19.284200000000055,
+        "argumentsProvided": 2,
+        "maxPerTick": 24,
+        "budgetMs": 3
+      },
+      {
+        "scoredIndex": 247,
+        "tick": 368,
+        "startedMs": 7839.2908,
+        "endedMs": 7858.03,
+        "totalMs": 18.739199999999983,
+        "argumentsProvided": 2,
+        "maxPerTick": 24,
+        "budgetMs": 3
+      },
+      {
+        "scoredIndex": 199,
+        "tick": 320,
+        "startedMs": 7144.3469,
+        "endedMs": 7162.9272,
+        "totalMs": 18.580300000000534,
+        "argumentsProvided": 2,
+        "maxPerTick": 24,
+        "budgetMs": 3
+      },
+      {
+        "scoredIndex": 117,
+        "tick": 238,
+        "startedMs": 5916.4955,
+        "endedMs": 5933.5401,
+        "totalMs": 17.044600000000173,
+        "argumentsProvided": 2,
+        "maxPerTick": 24,
+        "budgetMs": 3
+      }
+    ],
+    "residualScope": "residentRestMs is enclosing residentsStep minus nested measured navigation duration; it includes every other resident operation AND observer bookkeeping outside the nested timing. It is not a pure actor-loop measurement."
+  },
+  "drivers": [
+    {
+      "path": "../thegame/artifacts/network-stability-20261018/profile-authority-phases-current.ts",
+      "sha256": "085be8d6e0a8bd95cc5e1bb0f590303540168658f4838cbbc4c67b2892b711b6"
+    },
+    {
+      "path": "../thegame/artifacts/network-stability-20261018/run-authority-phases-current.ts",
+      "sha256": "7f9bff494fd2b65a879da7be99d80d6837b7e139c640ccb99fb2e24d8ac1b1a9"
+    },
+    {
+      "path": "../thegame/artifacts/network-stability-20261018/authority-phase-profile-sources.ts",
+      "sha256": "76aebe50a3b87f0b2bd162ae524583b95940c2dc893d72de44f491d7bb3ad3a5"
+    },
+    {
+      "path": "../thegame/artifacts/network-stability-20261018/profile-authority-navigation-current.ts",
+      "sha256": "df2b27bf03d1b7b0fa5542d07fec3c802d0be94039b2d68a03d8ad425ea0c49c"
+    },
+    {
+      "path": "../thegame/artifacts/network-stability-20261018/run-authority-navigation-current.ts",
+      "sha256": "ede0bd4f1b4776151c36c76368ed36563c402eed0ba02ce6d6be862766ceb8af"
+    }
+  ],
+  "sourceHashes": {
+    "first": {
+      "src/game/authority.ts": "6665caddfd79c9b98142e6d126ba7fbede562e11176c4f142c277c578cdccfee",
+      "src/game/residents.ts": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745",
+      "src/game/resident-navigation.ts": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "src/game/resident-egress.ts": "d0d868a41ca78bb3ea32e4738b6ff51dea71143e3007d9e6191503d3ae1528dd",
+      "src/game/world.ts": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+      "src/game/snow-physics.ts": "2b573a44eb7675904ca8cf032d381203bef0ce80ab81dd4e4c929ec180ac5a22",
+      "src/game/actor-state.ts": "6e29fdb5d5e1a8f20ce52d4dd999bcc2eef245b577673d3b751648f50fd4e511",
+      "src/game/character.ts": "9116e5605f88ae4f41928f2a6e9a6fd7d5488be85069292c16304fbd4385684d",
+      "src/game/engine-motion.ts": "d8b51158c9d9e266fdd003ae5e968f6d5c107ee59636221cdc3352bab61d4724",
+      "src/game/runtime/physics.js": "d7db9c0eb33803d8674726d0521e79364675d91f0011216688cd5dcefcfe4201",
+      "src/game/runtime/dynamics.js": "13d5c88f43394ea2c2c551cde2f734d3296576bf040750bcc9acfda1ee9520b1",
+      "src/game/runtime/roads.js": "3274857d3ff1cdcdd36ad8f80f1395342a9e2ac7b0393ec61cae96816d49b492",
+      "src/shared/input-reorder.ts": "56ad7e52f46cc82cdee5a1d4d3548169c914b8c9ea79fdebd46d77dec7ffa222",
+      "src/shared/tick-profiler.ts": "da3e845d2d0d4701b544ef8601e88b8433769a5d4feb645125c69938981a2123",
+      "../game-engine/src/physics/compound.ts": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399",
+      "../game-engine/src/physics/box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+      "../game-engine/src/core/spatial-hash.ts": "b9602293a0fd8fc9446888b12c3915041f373deb6d198acf3347087e8bd5a5d8",
+      "../game-engine/src/runtime/character-motion.ts": "a5fcf68171fd1006db936441c593031e8eb1100f0f47e262883e5dbacd6fd4f3",
+      "artifacts/network-stability-20261018/authority-phase-profile-sources.ts": "76aebe50a3b87f0b2bd162ae524583b95940c2dc893d72de44f491d7bb3ad3a5",
+      "artifacts/network-stability-20261018/profile-authority-phases-current.ts": "085be8d6e0a8bd95cc5e1bb0f590303540168658f4838cbbc4c67b2892b711b6",
+      "artifacts/network-stability-20261018/run-authority-phases-current.ts": "7f9bff494fd2b65a879da7be99d80d6837b7e139c640ccb99fb2e24d8ac1b1a9"
+    },
+    "navigation": {
+      "src/game/authority.ts": "6665caddfd79c9b98142e6d126ba7fbede562e11176c4f142c277c578cdccfee",
+      "src/game/residents.ts": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745",
+      "src/game/resident-navigation.ts": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "src/game/resident-egress.ts": "d0d868a41ca78bb3ea32e4738b6ff51dea71143e3007d9e6191503d3ae1528dd",
+      "src/game/world.ts": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+      "src/game/snow-physics.ts": "2b573a44eb7675904ca8cf032d381203bef0ce80ab81dd4e4c929ec180ac5a22",
+      "src/game/actor-state.ts": "6e29fdb5d5e1a8f20ce52d4dd999bcc2eef245b577673d3b751648f50fd4e511",
+      "src/game/character.ts": "9116e5605f88ae4f41928f2a6e9a6fd7d5488be85069292c16304fbd4385684d",
+      "src/game/engine-motion.ts": "d8b51158c9d9e266fdd003ae5e968f6d5c107ee59636221cdc3352bab61d4724",
+      "src/game/runtime/physics.js": "d7db9c0eb33803d8674726d0521e79364675d91f0011216688cd5dcefcfe4201",
+      "src/game/runtime/dynamics.js": "13d5c88f43394ea2c2c551cde2f734d3296576bf040750bcc9acfda1ee9520b1",
+      "src/game/runtime/roads.js": "3274857d3ff1cdcdd36ad8f80f1395342a9e2ac7b0393ec61cae96816d49b492",
+      "src/shared/input-reorder.ts": "56ad7e52f46cc82cdee5a1d4d3548169c914b8c9ea79fdebd46d77dec7ffa222",
+      "src/shared/tick-profiler.ts": "da3e845d2d0d4701b544ef8601e88b8433769a5d4feb645125c69938981a2123",
+      "../game-engine/src/physics/compound.ts": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399",
+      "../game-engine/src/physics/box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+      "../game-engine/src/core/spatial-hash.ts": "b9602293a0fd8fc9446888b12c3915041f373deb6d198acf3347087e8bd5a5d8",
+      "../game-engine/src/runtime/character-motion.ts": "a5fcf68171fd1006db936441c593031e8eb1100f0f47e262883e5dbacd6fd4f3",
+      "artifacts/network-stability-20261018/authority-phase-profile-sources.ts": "76aebe50a3b87f0b2bd162ae524583b95940c2dc893d72de44f491d7bb3ad3a5",
+      "artifacts/network-stability-20261018/profile-authority-phases-current.ts": "085be8d6e0a8bd95cc5e1bb0f590303540168658f4838cbbc4c67b2892b711b6",
+      "artifacts/network-stability-20261018/run-authority-phases-current.ts": "7f9bff494fd2b65a879da7be99d80d6837b7e139c640ccb99fb2e24d8ac1b1a9",
+      "artifacts/network-stability-20261018/profile-authority-navigation-current.ts": "df2b27bf03d1b7b0fa5542d07fec3c802d0be94039b2d68a03d8ad425ea0c49c",
+      "artifacts/network-stability-20261018/run-authority-navigation-current.ts": "ede0bd4f1b4776151c36c76368ed36563c402eed0ba02ce6d6be862766ceb8af"
+    }
+  },
+  "next": "Inspect deadline checks and the indivisible work between them. Prepare a bounded per-expansion/query probe before choosing optimization or cooperative slicing. Preserve route validity, admission/fairness, physical world/readiness, rates/caps and actual3ms policy; do not reduce population or quality.",
+  "limits": [
+    "These are420tick offline authority fixtures with120warm+300score,80 configured cap,79 final active residents after one player peer, workers0/pop30/physics2/snapshot20/interest1,2,1 and real Date.now/performance.now/3ms navigation. No actual QUIC/native GPU/frame interval or server60Hz proof.",
+    "Existing TickProfiler per-score-tick total/call deltas avoid including construction/warm totals in scored rows. Parent/child phase totals overlap and must not be summed together.",
+    "Navigation observer forwards the original receiver and exactly24/3 arguments; it does not enforce a new deadline. Other resident residual includes observer bookkeeping.",
+    "Instrumentation/read/report arrays can affect JIT, later GC and amount of navigation work before real deadlines. There is no paired A/A or A/B, deterministic full-state stream, heap/GC attribution or causal comparison between the two runs.",
+    "Before/after fences cover21/23 explicit known source/script files, not an exhaustive runtime module graph. The failed earlier broad-world-hash diagnostic was not repeated."
+  ],
+  "currentNavigationExpansionDiagnostic": {
+    "evidence": "docs/render-evidence/authority-navigation-expansions-current-20261018.json",
+    "evidenceSha256": "e9069848b1319f4568230bd1aea7b8bb6184c8cb37fc17dc1c6dd50dc347b693",
+    "runId": "434de345-2d61-480e-b72b-68979fc1a8e9",
+    "navMeanMs": 5.716446333333303,
+    "expansionMaxMs": 38.02820000000065,
+    "segmentFractionOfNav": 0.916911199901063,
+    "productionChanged": false,
+    "next": "Stop timing subdivision. Validate one ignored exact-semantic MRU tile write-elision counterfactual with full frozen-class state/iterator/reentry oracles, then a bounded paired full-footing fixture; reject negligible gain. No native/client FPS claim."
+  }
+}

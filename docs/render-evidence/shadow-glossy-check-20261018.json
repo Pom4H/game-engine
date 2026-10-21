@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-18",
+  "change": {
+    "shadowFilter": "Replace the discontinuous half-metre-cell random PCF rotation with a centred symmetric four-tap footprint. Use four dynamic comparison samples instead of two; normalize each map separately as before.",
+    "receiverBias": "Use the geometric surface normal for the shadow receiver offset instead of material bump/rain normals.",
+    "cost": "Two additional dynamic comparison samples per shadow-receiving fragment; no shadow-map allocation or resolution increase. Performance not benchmarked."
+  },
+  "verification": {
+    "engineBuild": "bun run build: passed",
+    "engineTypes": "bun run typecheck: passed",
+    "gameBuild": "bun run build in ../thegame: passed; production browser tab reloaded and reconnected",
+    "tests": "node --test test/shadow-stability.test.mjs test/render-visibility-plan.test.mjs test/renderer-post.test.mjs: 30 passed",
+    "gpu": "tools/render-stability/shadow-reflection-check.html: six exact centroid/symmetry/coverage checks passed; production renderer errors empty",
+    "reflectionScene": "Production Engine shaders, smooth and rough steel spheres, local HDR probe capturing red and blue panels. Smooth sphere retains sharp panel reflections; rough sphere retains blurred versions. Both static box/panel and dynamic sphere shadows remain visible.",
+    "liveGame": "Inspected taxi, nearby pedestrian and building shadow at localhost:3007 with TAA enabled and clear-day lighting. Fixed filter is active. Manual inspection only; this is not a matched before/after replay or proof for every possible shadow artifact.",
+    "artifacts": [
+      "artifacts/reflection-qa/shadow-glossy-check.jpg",
+      "artifacts/reflection-qa/shadow-filter-gpu.json",
+      "artifacts/reflection-qa/game-shadows-fixed.jpg"
+    ]
+  }
+}

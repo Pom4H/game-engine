@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-14",
+  "url": "http://localhost:8765/",
+  "client": "Codex in-app browser, visible/focused document, WebGPU hardware timestamp queries available",
+  "resolution": [1728, 972],
+  "method": "Sequential observations in the live canonical Office world. Native GPU pass timestamps and bounded CPU profile history with profile=1; ordinary FPS first observed without profiling. The authority and residents continued moving; this is not a fixed replay or statistically paired benchmark.",
+  "before": {
+    "observedFps": [19, 21],
+    "cpuP95Ms": 163.7,
+    "environmentP95Ms": 157.9,
+    "gpuP95Ms": 18.02,
+    "drawCalls": 377
+  },
+  "afterDefaultCamera": {
+    "observedFps": 55.8,
+    "cpuP95Ms": 7.1,
+    "environmentP95Ms": 0.1,
+    "gpuP95Ms": 16.84,
+    "drawCalls": 384,
+    "workerFailed": false
+  },
+  "afterProfilingDisabled": {
+    "observedFps": 54.9,
+    "resolution": [1728, 972],
+    "workerFailed": false
+  },
+  "afterWarmupAndCameraDrag": {
+    "observedFps": 59.1,
+    "cpuP95Ms": 5.4,
+    "environmentP95Ms": 0.1,
+    "gpuP95Ms": 13.57,
+    "workerFailed": false
+  },
+  "changes": [
+    "At most two submitted Office frames instead of serial full-GPU completion between frames.",
+    "Opt-in Engine background synthetic environment-map baking, with one active input and one latest replacement.",
+    "Previous complete lighting retained until the new exact bake finishes; old scene/cache-return jobs cancelled by generation.",
+    "Shared algorithm produces the exact pre-change irradiance and all nine mip levels. No resolution or render pass reductions."
+  ],
+  "checks": {
+    "engineFocusedTests": 29,
+    "officeFocusedTests": 17,
+    "engineTypecheck": "passed",
+    "officeTypecheck": "passed",
+    "viteProductionBuild": "passed",
+    "lightingGoldenChecks": "two complete pre-change SHA-256 fixtures match, including an actual worker-thread transfer"
+  },
+  "limitations": [
+    "The initial map remains a synchronous bake; subsequent background maps can lag the current atmosphere by the bake duration.",
+    "Measured-radiance maps retain their synchronous path.",
+    "These observations do not establish sustained 60 FPS or a universal speedup on other GPUs."
+  ]
+}

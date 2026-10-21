@@ -1,0 +1,385 @@
+{
+  "date": "2026-10-16T19:01:43.077Z",
+  "goalAchieved": false,
+  "phase": "Coherent Office focus, geometry, camera and listener during NPC handoff",
+  "changes": [
+    "One complete previous presentation is retained until the selected body exists in the actual causal presentation and its authoritative controller geometry covers the new view cell.",
+    "Current authority account/body/actions remain accessible independently; invisible focus changes send neutral input until ready, while ordinary same-body travel retains held movement.",
+    "Same-cell possession commits immediately without another HTTP request. Geometry view changes reset HTTP interpolation even when tick is unchanged.",
+    "Office walking/observer camera mode waits for its matching presentation. Temporal identity changes at the presented handoff, not at latest-arrival authority state.",
+    "The logical WebAudio listener follows the displayed NPC/body from that same presentation.",
+    "Opt-in native frame diagnostics check body/geometry/camera/listener coherence. Labelled entry captures keep prior evidence PNGs intact."
+  ],
+  "native": {
+    "command": "CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3204 CAPTURE_GPU=1 PERF_LABEL=office-presentation-native-20261016 OFFICE_CAPTURE_LABEL=office-presentation-native-20261016 OFFICE_WALKING_QA=1 OFFICE_URBAN_QA=1 OFFICE_SCENERY_QA=1 OFFICE_CAMERA_QA=1 OFFICE_TRANSPORT_QA=0 OFFICE_RESIDENTS_QA=1 OFFICE_PRESENTATION_QA=1 OFFICE_PACKET_TRACE=1 OFFICE_CONTROL_SOAK_MS=180000 bun tools/capture.ts --office-entry",
+    "exitCode": 0,
+    "report": {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/report.json",
+      "bytes": 208335,
+      "sha256": "f7f2a1df8cb9bc7d59f57d08cee3e7a74bc7ababcd865a1ac173141272ff30af"
+    },
+    "residents": {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-report.json",
+      "bytes": 16157,
+      "sha256": "6265bf79579e0a06216940c42279455ab6bf39ef02581b11563a299da70d28a5"
+    },
+    "packetTrace": {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/packet-trace.json",
+      "bytes": 11945668,
+      "sha256": "88414dd5e3eac9cc5f2c4497bcc37e88bd534b46e7a3b5aaf8dbcc3702874b00"
+    },
+    "renderRecords": 17,
+    "focusFrames": 217,
+    "traces": [
+      {
+        "name": "observe",
+        "file": {
+          "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/focus-observe.json",
+          "bytes": 412351,
+          "sha256": "e258173a17951c977118f73ab863562e839e24257cc94976636fbb29a680a175"
+        },
+        "frames": 160,
+        "active": 160,
+        "completedAtCopy": 158,
+        "firstFrame": 855,
+        "firstBody": "resident:22089:1",
+        "firstFocusCompletedAtCopy": true,
+        "geometry": "controller:-320:64:1:-4:0,-4:-1,-4:1,-5:0,-4:-2,-4:2,-5:-1,-5:1",
+        "maxObservedUnchangedSceneTimeMs": 3225.699999988079
+      },
+      {
+        "name": "possess",
+        "file": {
+          "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/focus-possess.json",
+          "bytes": 48735,
+          "sha256": "932bc5b8547ffbfccb99993e1ead51660820dec6143c0c6e11845fda9e852631"
+        },
+        "frames": 18,
+        "active": 18,
+        "completedAtCopy": 17,
+        "firstFrame": 943,
+        "firstBody": "resident:22089:1",
+        "firstFocusCompletedAtCopy": true,
+        "geometry": "controller:-320:64:1:-4:0,-4:-1,-4:1,-5:0,-4:-2,-4:2,-5:-1,-5:1",
+        "maxObservedUnchangedSceneTimeMs": 54.29999998211861
+      },
+      {
+        "name": "return",
+        "file": {
+          "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/focus-return.json",
+          "bytes": 97567,
+          "sha256": "bc4abfc3fa7afe8a15604f80acc0f6eda878cd05504b0232f3cbc75eeccbc96b"
+        },
+        "frames": 39,
+        "active": 39,
+        "completedAtCopy": 37,
+        "firstFrame": 1056,
+        "firstBody": "player:61e08874-9f58-4dd5-903a-4775f2ba0d5a",
+        "firstFocusCompletedAtCopy": true,
+        "geometry": "controller:-320:-64:1:-4:-1,-4:-2,-4:0,-5:-1,-4:-3,-4:1,-5:-2,-5:0",
+        "maxObservedUnchangedSceneTimeMs": 1196.300000011921
+      }
+    ],
+    "actor": "resident:22089:1",
+    "metres": 0.7909060062367401,
+    "takeoverDistance": 0.8405164265942197,
+    "stopSpeed": 0.011167539978984458,
+    "soak": {
+      "ms": 180000,
+      "samples": 178,
+      "ackBefore": 1355,
+      "ackAfter": 11729,
+      "minPending": 1,
+      "maxPending": 46
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    }
+  },
+  "checks": [
+    {
+      "name": "Engine Office app tests",
+      "command": "bun test apps/thegame/test",
+      "exitCode": 0,
+      "pass": 130,
+      "assertions": 5291,
+      "log": {
+        "path": "artifacts/office-presentation-app-tests.log",
+        "bytes": 14595,
+        "sha256": "6f4a3aaf9c7f07b01299a03894ba4d5050f274ebf9dc12bdbfce8e9e7388cec6"
+      }
+    },
+    {
+      "name": "Game TypeScript",
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/office-presentation-game-typecheck.log",
+        "bytes": 22,
+        "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+      }
+    },
+    {
+      "name": "Engine app TypeScript",
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-presentation-app-typecheck.log",
+        "bytes": 33,
+        "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+      }
+    },
+    {
+      "name": "Office UI TypeScript",
+      "command": "bun x tsc --noEmit",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-presentation-ui-typecheck.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "Office UI production build",
+      "command": "bun run build",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-presentation-ui-build.log",
+        "bytes": 889,
+        "sha256": "3afb9100e00b62e6777db220ea90a27c3a8aa4971676183f76315e19846a253f"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 32581,
+      "sha256": "204ce089b542da051206ab62aa0a407f877cd440c3a5ef28ca7e612a96584343"
+    },
+    {
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 28425,
+      "sha256": "b0a13b24f0ca83b12cb052be7de28552ec1589cc3ce3a5ddbb3e0112439e7e1f"
+    },
+    {
+      "path": "apps/thegame/client/canonical-types.ts",
+      "bytes": 4216,
+      "sha256": "3a6e24802850320d99c61be1259af8bf4220b5885baaf5924146f5aa0168fe08"
+    },
+    {
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 40421,
+      "sha256": "686979bc048945ac2fe605ad950474546075a938dea91a34e05af6634c132472"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/scene.ts",
+      "bytes": 62912,
+      "sha256": "f6d8f143a552abb21e784db8ee0c51cfeb6ced7330c026bb43da08f2c1ed67a3"
+    },
+    {
+      "path": "../thegame/src/game/office-world.ts",
+      "bytes": 8734,
+      "sha256": "c3b13aca37822dfa52e3ca7f0d033a61aa7594d135f8b442fa92d8ec77703f12"
+    },
+    {
+      "path": "../thegame/src/server/office-world.ts",
+      "bytes": 2281,
+      "sha256": "7c7a86f3f94ade3e7d183cc59a7024b42b0cc20f41e1859f3c24ab9fe3a0dc22"
+    },
+    {
+      "path": "../thegame/tools/qa-office-focus.ts",
+      "bytes": 1994,
+      "sha256": "3138b064003dc038f31694372714547c8ea3b149d12b1326495ef72ab33675c9"
+    },
+    {
+      "path": "../thegame/tools/qa-office-residents.ts",
+      "bytes": 11745,
+      "sha256": "f717195c7e14198899703de38342c55d9b9ae15573d6dc58e3ba8604375fd824"
+    },
+    {
+      "path": "../thegame/tools/qa-office.ts",
+      "bytes": 7374,
+      "sha256": "5ec35235cbd67b498fee073f5c6fd7707c6bc50bea9b86e2672e2d2aafac70c2"
+    },
+    {
+      "path": "../thegame/tools/qa-office-walking.ts",
+      "bytes": 12658,
+      "sha256": "08d455585631787ed9897f9229ca2066346adb1ab36586157d14d503aa59448e"
+    },
+    {
+      "path": "../thegame/src/game/net/client.ts",
+      "bytes": 12876,
+      "sha256": "f6b212d640b0a103da8c3684ea7dbcb0c1ae0a4d197ee65fc1b6de1e5460dbe2"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "../thegame/public/build/game.js",
+      "bytes": 2471113,
+      "sha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4",
+      "servedMatches": true,
+      "unchangedSincePreviousNative": true
+    },
+    {
+      "path": "../thegame/public/build/office-controller.js",
+      "bytes": 1253347,
+      "sha256": "5fff416f59d7b040752681e7fa800dabf1968ff89207aa0f5aefa8f8b3463389",
+      "servedMatches": true,
+      "unchangedSincePreviousNative": true
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61",
+      "servedMatches": null,
+      "scope": "Production build; native capture uses Vite source."
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07",
+      "servedMatches": null,
+      "scope": "Production build; native capture uses Vite source."
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/index-C26t89pV.js",
+      "bytes": 1774717,
+      "sha256": "a03895797d7daeb18e47f34f87b822f369743ad036649ad4eaec6cafcfd65c59",
+      "servedMatches": null,
+      "scope": "Production build; native capture uses Vite source."
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/gesture/vision_wasm_module_internal.js",
+      "bytes": 335431,
+      "sha256": "70eff3956521b7de058d7173a4935c95e4a223c26ea624b9f5a936d3a043dcb0",
+      "servedMatches": null,
+      "scope": "Production build; native capture uses Vite source."
+    }
+  ],
+  "pngs": [
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/controller-idle-after.png",
+      "bytes": 357474,
+      "sha256": "3b754e31e2e92c24b77e3d0483e0b24e8762ec4928fe11e4e77eefed987785dd"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/entered.png",
+      "bytes": 681940,
+      "sha256": "7a890829bb76cd77805f908fdce1f8438a815ed19bdbe7dd6f9c8f32b50e3ddf"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/observer.png",
+      "bytes": 889932,
+      "sha256": "0360497592648a74883679a469625ffd2f95a35578cde31bc1412d3fbf0d7762"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/orbit-1.png",
+      "bytes": 653799,
+      "sha256": "ddf37185fb7ee831ec1fd1298a41fd089aa9276b08e6aaea6816cc7763a79e51"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/orbit-2.png",
+      "bytes": 561181,
+      "sha256": "7f2848fedf21d44b27b30607f0f52fe979329dcf3a6874f4586d19160ac82c13"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/orbit-3.png",
+      "bytes": 556036,
+      "sha256": "573a848c3c3abbba599580f139295874ab6d601f612283f9b0730c1e29f58ca6"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/orbit-4.png",
+      "bytes": 627152,
+      "sha256": "7e18ff9f48711c73effb171150604997d80ddbbf1eb5e45872808f4960f7bf25"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-moved.png",
+      "bytes": 460910,
+      "sha256": "c759a5cc46711d86f89b2bae2587b4a43a0bbbfcb4565b85f3336cea2e20cfb9"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-observed-scope.png",
+      "bytes": 459733,
+      "sha256": "c3c6a4d6ee80eb4d011d437861794d390e62fc769f9bb3945b755acf28219a56"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-observing.png",
+      "bytes": 504500,
+      "sha256": "d2a026f5b18c14d115d474058555956ebd7a73c1714c58fafec40b60dd8e53e0"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-panel.png",
+      "bytes": 180719,
+      "sha256": "1ec0afa1286d84d2a9b8bab3a420a588dbc034272ce672bf09d8fba2601c05b0"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-possessed.png",
+      "bytes": 499942,
+      "sha256": "dc4f430e8968f3d62180fa72335da417aef7b5e013fee8dfa144f09079c2eacf"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-return-start.png",
+      "bytes": 732697,
+      "sha256": "5cf4fbb6374e9f1ca94c73dcc48200f1bd95d7f767bc08d3eb82872cdb980ac8"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-returned.png",
+      "bytes": 732966,
+      "sha256": "8f3f572937638d5832e7dbc9069ef6ae002d4a7fd8308bd7d4beb3fc53e95ae6"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-stopped.png",
+      "bytes": 440996,
+      "sha256": "b7363f8cba18b2349c7429bd84771829a00607eea16ff2477c3685420deaab0a"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/returned-observer.png",
+      "bytes": 690351,
+      "sha256": "5991fe88af5e81a600f5d151d548ba3052c131965dbc5170b2663c9e23893da6"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-presentation-native-20261016/walk-KeyW.png",
+      "bytes": 628955,
+      "sha256": "c539f91109a501f497db8c0b3e40113eb8f820e80c293dda2ea3fcb41989a5a5"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/office-presentation-native-20261016/office-entry.png",
+      "bytes": 855410,
+      "sha256": "20c595f071e986f4e2ab4530248238e53d563f3734873e5d2c3bcf46e4438ce4"
+    }
+  ],
+  "reviewedPngs": [
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/entered.png",
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-observing.png",
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-possessed.png",
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-moved.png",
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-return-start.png",
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/residents-returned.png",
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/controller-idle-after.png",
+    "../thegame/artifacts/office-walking/office-presentation-native-20261016/returned-observer.png"
+  ],
+  "previousNativePngsPreserved": 36,
+  "server": {
+    "pid": 10712,
+    "restarted": false,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "limits": [
+    "The previous frame is held while data arrives. Retained frame traces observed unchanged canonical scene time for about 3.23 s on observe and 1.20 s on return. These are not exact RPC/network latency measurements; switch speed remains unfinished.",
+    "Only one native Office NPC route and its three-minute idle are verified here. The Game/vehicle route is historical evidence from the prior native phase, with unchanged Game bundles.",
+    "Of 217 submitted-frame records, 212 rendering promises had completed when traces were copied; five trailing promises were pending. All three first focus frames had completed. Metadata checks are distinct from full GPU pixel coverage.",
+    "First observing/return screenshots no longer show the prior mismatched-district terrain gaps in this run. This does not prove pixel coverage on every camera angle or all terrain cell boundaries.",
+    "The first possession screenshot can still briefly show the observation UI label before React updates; the subsequent movement frame has the correct controls.",
+    "Listener position was checked without sound playback or microphone capture. C920/reference audio integration is still unverified.",
+    "No new average FPS measured. Natural world time/lighting differs from prior captures; no controlled visual or speedup claim.",
+    "Idle input debt remains 1–46 samples. Low-latency prediction/control parity with the original Game remains unproven.",
+    "Funded company, lease, workforce and harness ownership are unchanged and covered by earlier authority/API tests; this native guest account has no funded company.",
+    "Exact original vector roads, outer terrain/water/climate appearance, Office lighting/material parity and broad gameplay/audio fidelity remain incomplete.",
+    "UI production build retains its preexisting large-chunk warning. Native uses Vite source, not the production bundle."
+  ],
+  "nextAction": "Reduce focus loading with a bounded server-authoritative geometry cache-key handshake, then inspect causal target-definition priority if latency remains; preserve this atomic presentation contract."
+}

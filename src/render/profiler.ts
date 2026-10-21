@@ -1,12 +1,12 @@
 import type {RenderAtomReport} from './atoms.js';
 export const RENDER_CPU_QUANTA = [
-  'lifecycle','resize','materials','lights','frame','environment','visibility','prepare','cull',
-  'encode.shadow','encode.probe','encode.reflection','encode.main','encode.bloom','encode.effects','encode.taa','encode.present','submit',
+  'projection','lifecycle','resize','materials','lights','frame','environment','visibility','prepare','cull','encode.visibility',
+  'encode.shadow','encode.probe','encode.reflection','encode.main','encode.bloom','encode.effects','encode.taa','encode.motionBlur','encode.present','submit',
 ] as const;
 export type RenderCpuQuantum=typeof RENDER_CPU_QUANTA[number];
 
 export const RENDER_GPU_QUANTA = [
-  'shadow','probe','reflection','main','main.transparent','bloom.downsample','bloom.horizontal','bloom.vertical','effects','taa','present',
+  'visibility','shadow','shadow.spot0','shadow.spot1','probe','reflection','main','main.transparent','bloom.downsample','bloom.horizontal','bloom.vertical','effects','taa','motionBlur','present',
 ] as const;
 export type RenderGpuQuantum=typeof RENDER_GPU_QUANTA[number];
 
@@ -15,11 +15,16 @@ export interface RenderWork {
   cameraOpaque:number;cameraTransparent:number;shadowCasters:number;reflected:number;
   drawCalls:number;triangles:number;snowInstances:number;shadowBatchedInstances:number;instancedOpaque:number;uploadBytes:number;
   uniformUploadBytes:number;surfaceUploadBytes:number;lightUploadBytes:number;frameUploadBytes:number;snowUploadBytes:number;environmentUploadBytes:number;instanceUploadBytes:number;
+  visibilityUploadBytes:number;mainIndirectDraws:number;mainIndirectCandidates:number;geometryCountBasis:'exact'|'candidate-upper-bound';
 }
 export interface QuantumStats {meanMs:number;p50Ms:number;p95Ms:number;maxMs:number}
 export interface RenderFrameTiming {
   readonly frame:number;
   readonly totalMs:number;
+  /** CPU submission interval in the host performance.now() clock, for both
+   * CPU and asynchronous GPU records. These are not GPU execution timestamps. */
+  readonly cpuStartedAtMs:number;
+  readonly cpuSubmittedAtMs:number;
   readonly quanta:Readonly<Record<string,number>>;
   readonly work:Readonly<RenderWork>;
 }
@@ -37,6 +42,7 @@ export interface RenderProfileSnapshot {
   readonly enabled:boolean;readonly cpuFrames:number;readonly gpuFrames:number;readonly timestampQueries:boolean;
   readonly gpuLagFrames:number|null;
   readonly latestCpu?:RenderFrameTiming;readonly latestGpu?:RenderFrameTiming;
+  readonly worstCpu:readonly RenderFrameTiming[];readonly worstGpu:readonly RenderFrameTiming[];
   readonly cpuTotal?:QuantumStats;readonly gpuTotal?:QuantumStats;
   readonly cpu:Readonly<Record<string,QuantumStats>>;
   readonly gpu:Readonly<Record<string,QuantumStats>>;
@@ -45,12 +51,19 @@ export interface RenderProfileSnapshot {
 }
 
 type GPUAny=any;
-interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null;usedMask:number}
+interface GpuSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;work:RenderWork|null;usedMask:number;cpuStartedAtMs:number;cpuSubmittedAtMs:number}
 interface OcclusionSlot{resolve:GPUAny;read:GPUAny;pending:boolean;frame:number;generation:number;usedMask:number}
-const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,shadowBatchedInstances:0,instancedOpaque:0,uploadBytes:0,uniformUploadBytes:0,surfaceUploadBytes:0,lightUploadBytes:0,frameUploadBytes:0,snowUploadBytes:0,environmentUploadBytes:0,instanceUploadBytes:0});
+const emptyWork=():RenderWork=>({entities:0,visible:0,opaque:0,transparent:0,cameraOpaque:0,cameraTransparent:0,shadowCasters:0,reflected:0,drawCalls:0,triangles:0,snowInstances:0,shadowBatchedInstances:0,instancedOpaque:0,uploadBytes:0,uniformUploadBytes:0,surfaceUploadBytes:0,lightUploadBytes:0,frameUploadBytes:0,snowUploadBytes:0,environmentUploadBytes:0,instanceUploadBytes:0,visibilityUploadBytes:0,mainIndirectDraws:0,mainIndirectCandidates:0,geometryCountBasis:'exact'});
 const percentile=(values:readonly number[],q:number)=>{if(!values.length)return 0;const a=[...values].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor((a.length-1)*q))]!;};
 const stats=(values:readonly number[]):QuantumStats=>({meanMs:values.length?values.reduce((a,b)=>a+b,0)/values.length:0,p50Ms:percentile(values,.5),p95Ms:percentile(values,.95),maxMs:values.length?Math.max(...values):0});
-const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work:RenderWork):RenderFrameTiming=>Object.freeze({frame,totalMs,quanta:Object.freeze({...quanta}),work:Object.freeze({...work})});
+const freezeFrame=(frame:number,totalMs:number,quanta:Record<string,number>,work:RenderWork,cpuStartedAtMs:number,cpuSubmittedAtMs:number):RenderFrameTiming=>Object.freeze({frame,totalMs,cpuStartedAtMs,cpuSubmittedAtMs,quanta:Object.freeze({...quanta}),work:Object.freeze({...work})});
+// Manual inspection only: retain existing frozen records, never sort or collect
+// additional frame data in the render/readback path.
+const worstFrames=(history:readonly RenderFrameTiming[]):readonly RenderFrameTiming[]=>{
+  const worst:RenderFrameTiming[]=[];
+  for(const frame of history){let index=0;while(index<worst.length&&worst[index]!.totalMs>=frame.totalMs)index++;if(index<8){worst.splice(index,0,frame);if(worst.length>8)worst.pop();}}
+  return Object.freeze(worst);
+};
 
 /** Low-overhead renderer profiler.
  * CPU quanta use performance.now(). GPU quanta use pass timestamp queries when
@@ -79,7 +92,7 @@ export class RenderProfiler {
     if(this.timestampQueries)for(let i=0;i<4;i++)this.slots.push({
       resolve:device.createBuffer({label:`render profile resolve ${i}`,size:this.queryBytes,usage:0x0200|0x0004}),
       read:device.createBuffer({label:`render profile readback ${i}`,size:this.queryBytes,usage:0x0001|0x0008}),
-      pending:false,frame:0,generation:0,work:null,usedMask:0,
+      pending:false,frame:0,generation:0,work:null,usedMask:0,cpuStartedAtMs:0,cpuSubmittedAtMs:0,
     });
   }
 
@@ -87,7 +100,7 @@ export class RenderProfiler {
     this.frame++;if(!this.enabled)return this.frame;this.frameStart=performance.now();this.cpuQuanta={};this.work=emptyWork();
     this.active=this.timestampQueries?(this.slots.find(slot=>!slot.pending)??null):null;
     this.activeOcclusion=this.enabled?(this.occlusionSlots.find(slot=>!slot.pending)??null):null;
-    if(this.active){this.active.frame=this.frame;this.active.generation=this.generation;this.active.work=null;this.active.usedMask=0;}
+    if(this.active){this.active.frame=this.frame;this.active.generation=this.generation;this.active.work=null;this.active.usedMask=0;this.active.cpuStartedAtMs=this.frameStart;this.active.cpuSubmittedAtMs=0;}
     if(this.activeOcclusion){this.activeOcclusion.frame=this.frame;this.activeOcclusion.generation=this.generation;this.activeOcclusion.usedMask=0;}
     return this.frame;
   }
@@ -96,7 +109,7 @@ export class RenderProfiler {
   setWork(work:Partial<RenderWork>):void{if(this.enabled)Object.assign(this.work,work);}
   setAtoms(atoms:RenderAtomReport):void{if(this.enabled)this.atoms=atoms;}
   currentWork():RenderWork{return{...this.work};}
-  addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'|'environment'|'instance'='uniform'):void{if(!this.enabled||!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else if(kind==='snow')this.work.snowUploadBytes+=bytes;else if(kind==='environment')this.work.environmentUploadBytes+=bytes;else this.work.instanceUploadBytes+=bytes;}
+  addUpload(bytes:number,kind:'uniform'|'surface'|'light'|'frame'|'snow'|'environment'|'instance'|'visibility'='uniform'):void{if(!this.enabled||!Number.isFinite(bytes)||bytes<=0)return;this.work.uploadBytes+=bytes;if(kind==='uniform')this.work.uniformUploadBytes+=bytes;else if(kind==='surface')this.work.surfaceUploadBytes+=bytes;else if(kind==='light')this.work.lightUploadBytes+=bytes;else if(kind==='frame')this.work.frameUploadBytes+=bytes;else if(kind==='snow')this.work.snowUploadBytes+=bytes;else if(kind==='environment')this.work.environmentUploadBytes+=bytes;else if(kind==='visibility')this.work.visibilityUploadBytes+=bytes;else this.work.instanceUploadBytes+=bytes;}
 
   occlusionSet():GPUAny|undefined{return this.activeOcclusion&&this.occlusionQuerySet?this.occlusionQuerySet:undefined;}
   beginOcclusion(pass:GPUAny,name:'shadow'|'reflection'|'mainOpaque'|'mainTransparent'|'snow'):boolean{
@@ -117,24 +130,26 @@ export class RenderProfiler {
     const occ=this.activeOcclusion;if(occ&&this.occlusionQuerySet){encoder.resolveQuerySet(this.occlusionQuerySet,0,5,occ.resolve,0);encoder.copyBufferToBuffer(occ.resolve,0,occ.read,0,this.occlusionBytes);}
   }
   submitted():void{
-    if(!this.enabled)return;const cpu=freezeFrame(this.frame,performance.now()-this.frameStart,this.cpuQuanta,this.work);
+    if(!this.enabled)return;const submittedAt=performance.now(),cpu=freezeFrame(this.frame,submittedAt-this.frameStart,this.cpuQuanta,this.work,this.frameStart,submittedAt);
     this.push(this.cpuHistory,cpu);
     const occ=this.activeOcclusion;this.activeOcclusion=null;
     if(occ&&this.occlusionQuerySet){occ.pending=true;void occ.read.mapAsync(0x0001).then(()=>{const raw=new BigUint64Array(occ.read.getMappedRange());const values=Array.from({length:5},(_,i)=>(occ.usedMask&(1<<i))?Number(raw[i]!):0),quantitative=values.some(value=>value>1);const raster:RasterSampleFrame={frame:occ.frame,quantitative,shadow:values[0]!,reflection:values[1]!,mainOpaque:values[2]!,mainTransparent:values[3]!,snow:values[4]!};occ.read.unmap();if(occ.generation===this.generation)this.latestRaster=Object.freeze(raster);occ.pending=false;}).catch(()=>{try{occ.read.unmap();}catch{}occ.pending=false;});}
     const slot=this.active;this.active=null;if(!slot||!this.querySet)return;
-    slot.pending=true;
+    slot.cpuSubmittedAtMs=submittedAt;slot.pending=true;
     void slot.read.mapAsync(0x0001).then(()=>{
       const raw=new BigUint64Array(slot.read.getMappedRange()),quanta:Record<string,number>={};let total=0;
       for(let i=0;i<RENDER_GPU_QUANTA.length;i++){
         const used=(slot.usedMask&(1<<i))!==0,begin=raw[i*2]!,end=raw[i*2+1]!,ms=used&&end>=begin?Number(end-begin)/1e6:0;
         quanta[RENDER_GPU_QUANTA[i]!]=ms;total+=ms;
       }
-      slot.read.unmap();if(slot.generation===this.generation)this.push(this.gpuHistory,freezeFrame(slot.frame,total,quanta,slot.work??emptyWork()));slot.pending=false;slot.work=null;
+      slot.read.unmap();if(slot.generation===this.generation)this.push(this.gpuHistory,freezeFrame(slot.frame,total,quanta,slot.work??emptyWork(),slot.cpuStartedAtMs,slot.cpuSubmittedAtMs));slot.pending=false;slot.work=null;
     }).catch(()=>{try{slot.read.unmap();}catch{}slot.pending=false;slot.work=null;});
   }
 
   reset():void{this.generation++;this.cpuHistory.length=0;this.gpuHistory.length=0;this.frame=0;this.cpuQuanta={};this.work=emptyWork();this.atoms=undefined;this.latestRaster=undefined;this.active=null;this.activeOcclusion=null;}
 
+  /** Constant-time telemetry for streaming. Never sort the history in a frame loop. */
+  latest(){return {enabled:this.enabled,timestampQueries:this.timestampQueries,cpu:this.cpuHistory.at(-1),gpu:this.gpuHistory.at(-1)};}
   inspect():RenderProfileSnapshot{
     const latestCpu=this.cpuHistory.at(-1),latestGpu=this.gpuHistory.at(-1);
     const aggregate=(history:readonly RenderFrameTiming[],names:readonly string[])=>Object.fromEntries(names.map(name=>[name,stats(history.map(frame=>frame.quanta[name]??0))]));
@@ -142,6 +157,7 @@ export class RenderProfiler {
       enabled:this.enabled,cpuFrames:this.cpuHistory.length,gpuFrames:this.gpuHistory.length,timestampQueries:this.timestampQueries,
       gpuLagFrames:latestCpu&&latestGpu?latestCpu.frame-latestGpu.frame:null,
       ...(latestCpu?{latestCpu}:{}),...(latestGpu?{latestGpu}:{}),
+      worstCpu:worstFrames(this.cpuHistory),worstGpu:worstFrames(this.gpuHistory),
       ...(this.cpuHistory.length?{cpuTotal:stats(this.cpuHistory.map(x=>x.totalMs))}:{}),
       ...(this.gpuHistory.length?{gpuTotal:stats(this.gpuHistory.map(x=>x.totalMs))}:{}),
       cpu:Object.freeze(aggregate(this.cpuHistory,RENDER_CPU_QUANTA)),

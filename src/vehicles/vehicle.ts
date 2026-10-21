@@ -15,7 +15,7 @@ export {vehicle,wheel,wing,rotor,type RotorSpec,type VehicleBlueprint,type Vehic
 export {PartCondition,type ConditionSpec} from './condition.js';
 export type {DeformationField} from '../physics/deformation-field.js';
 
-export interface VehicleControls {readonly handbrake?:number;readonly throttle?:number;readonly clutch?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;readonly spoiler?:number;readonly collective?:number;readonly yaw?:number;}
+export interface VehicleControls {readonly starter?:number;readonly handbrake?:number;readonly throttle?:number;readonly clutch?:number;readonly brake?:number;readonly steer?:number;readonly pitch?:number;readonly roll?:number;readonly flap?:number;readonly spoiler?:number;readonly collective?:number;readonly yaw?:number;}
 export interface VehicleAir {readonly densityKgM3:number;readonly wind:Vec3;readonly temperatureC?:number;}
 export interface VehiclePose {readonly position?:Vec3;readonly rotation?:Vec3;readonly velocity?:Vec3;readonly angularVelocity?:Vec3;}
 export interface PartSample {
@@ -60,7 +60,7 @@ export class Vehicle implements PhysicsForceDriver {
   private readonly parts:PartRuntime[];
   private readonly byId=new Map<string,PartRuntime>();
   private readonly views=new Map<string,PartSample>();
-  private readonly controls={handbrake:0,throttle:0,clutch:0,brake:0,steer:0,pitch:0,roll:0,flap:0,spoiler:0,collective:0,yaw:0};
+  private readonly controls={starter:0,handbrake:0,throttle:0,clutch:0,brake:0,steer:0,pitch:0,roll:0,flap:0,spoiler:0,collective:0,yaw:0};
   private air:VehicleAir={densityKgM3:1.225,wind:[0,0,0],temperatureC:20};
   private airOverride=false;
   private readonly unbind:()=>void;
@@ -115,7 +115,7 @@ export class Vehicle implements PhysicsForceDriver {
   get deformationBuilds():number{return this.parts.reduce((n,p)=>n+p.attachment.builds,0);}
   get deformationSamples():number{return this.parts.reduce((n,p)=>n+p.attachment.samples,0);}
   setControls(input:VehicleControls):void {
-    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'||key==='handbrake'||key==='collective'||key==='spoiler'||key==='clutch'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
+    for(const [key,value] of Object.entries(input))if(!Object.hasOwn(this.controls,key)||typeof value!=='number'||!Number.isFinite(value)||value < (key==='brake'||key==='handbrake'||key==='collective'||key==='spoiler'||key==='clutch'||key==='starter'?0:-1)||value>1)throw new RangeError(`Invalid control ${key}`);
     Object.assign(this.controls,input);if(Object.values(input).some(v=>v!==0))this.body.wake();
   }
   setGear(gear:number):void {if(!this.drivetrain)throw new Error('Vehicle has no drivetrain');this.drivetrain.setGear(gear);this.body.wake();}
@@ -150,7 +150,7 @@ export class Vehicle implements PhysicsForceDriver {
     this.frame.clear();if(!this.referenceFrame)this.frame.update(this.body.rotation);this.diagnostics.steps++;
     if(!this.airOverride&&this.world.airAt){const sampled=this.world.airAt(this.body.position);this.air={densityKgM3:sampled.densityKgM3,wind:[...sampled.wind],temperatureC:this.air.temperatureC??20};}
     const b=this.body,air=this.air,relativeAirSpeed=Math.hypot(b.velocity[0]-air.wind[0],b.velocity[1]-air.wind[1],b.velocity[2]-air.wind[2]);
-    if(this.drivetrain)this.drivetrain.step(dt,{throttle:Math.max(0,this.controls.throttle),clutch:this.controls.clutch,wheelOmega:id=>this.byId.get(id)?.omega??0,wheelInertia:id=>this.byId.get(id)?.compiled.inertia??1,ambientTemperatureC:air.temperatureC??20,airSpeedMps:relativeAirSpeed});
+    if(this.drivetrain)this.drivetrain.step(dt,{throttle:Math.max(0,this.controls.throttle),clutch:this.controls.clutch,starter:this.controls.starter,wheelOmega:id=>this.byId.get(id)?.omega??0,wheelInertia:id=>this.byId.get(id)?.compiled.inertia??1,ambientTemperatureC:air.temperatureC??20,airSpeedMps:relativeAirSpeed});
     this.shaftRemaining.clear();for(const shaft of this.blueprint.source.shafts??[])this.shaftRemaining.set(shaft.id,shaft.maxPowerW*(shaft.efficiency??1)*clamp(this.controls.throttle));
     const vx=b.velocity[0]-air.wind[0],vy=b.velocity[1]-air.wind[1],vz=b.velocity[2]-air.wind[2];
     const speed=Math.hypot(vx,vy,vz),drag=-.5*air.densityKgM3*(this.blueprint.source.chassis.dragAreaM2??0)*speed;

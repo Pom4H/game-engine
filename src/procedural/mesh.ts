@@ -1,14 +1,39 @@
 import type {Primitive} from '../scene/types.js';
 
-export interface MeshData {vertices:Float32Array;colors:Uint8Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
+export interface MeshData {vertices:Float32Array;colors:Uint8Array;uvs?:Float32Array;variationSeeds?:Float32Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
+/** One vertex stream for albedo and authored UVs. Unauthored meshes retain the
+ * former face projection, computed from the same float32 positions/normals. */
+export function meshVertexAttributes(mesh:MeshData):Uint8Array{
+ const count=mesh.vertices.length/6,bytes=new Uint8Array(count*16),floats=new Float32Array(bytes.buffer);
+ if(mesh.uvs&&(mesh.uvs.length!==count*2||!mesh.uvs.every(Number.isFinite)))throw new TypeError('Mesh requires finite UV pairs');
+ if(mesh.variationSeeds&&(mesh.variationSeeds.length!==count||!mesh.variationSeeds.every(Number.isFinite)))throw new TypeError('Mesh requires finite variation seeds');
+ for(let i=0;i<count;i++){
+  const source=i*4,target=i*16;bytes[target]=mesh.colors[source]!;bytes[target+1]=mesh.colors[source+1]!;bytes[target+2]=mesh.colors[source+2]!;bytes[target+3]=mesh.colors[source+3]!;
+  floats[i*4+1]=mesh.uvs?.[i*2]??(mesh.vertices[i*6+5]!<-.5?.5-mesh.vertices[i*6]!:mesh.vertices[i*6]!+.5);
+  floats[i*4+2]=mesh.uvs?.[i*2+1]??.5-mesh.vertices[i*6+1]!;
+  floats[i*4+3]=mesh.variationSeeds?.[i]??0;
+ }
+ return bytes;
+}
 const primitiveKeys=new WeakMap<Primitive,string>();
+const ownedFrozen=new WeakSet<object>();let dynamicPrimitiveId=0;
 export function primitiveKey(primitive:Primitive):string{return primitiveKeys.get(primitive)??JSON.stringify(primitive);}
 /** Called only on the scene's owned geometry copy. A shallow user freeze is not
  * sufficient for caching: nested authoring arrays could still change. */
-export function freezePrimitive(primitive:Primitive):Primitive{
- const freeze=(value:unknown):void=>{if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}};
- freeze(primitive);primitiveKeys.set(primitive,JSON.stringify(primitive));return primitive;
+export function freezePrimitive(primitive:Primitive,transient=false):Primitive{
+ if(primitiveKeys.has(primitive))return primitive;
+ const freeze=(value:unknown):void=>{
+  if(!value||typeof value!=='object'||ownedFrozen.has(value))return;
+  if(Array.isArray(value)){for(let i=0;i<value.length;i++){const child=value[i];if(child&&typeof child==='object')freeze(child);}}
+  else for(const child of Object.values(value))freeze(child);
+  Object.freeze(value);ownedFrozen.add(value);
+ };
+ // Changing render geometry is never deduplicated by contents. A small identity
+ // key avoids serialising a fresh damaged shell or snow tile on every frame.
+ freeze(primitive);primitiveKeys.set(primitive,transient?'dynamic:'+ ++dynamicPrimitiveId:JSON.stringify(primitive));return primitive;
 }
+/** Share only primitives made deeply immutable by this module. Mutable inputs stay isolated. */
+export function immutablePrimitive(primitive:Primitive):Primitive{return primitiveKeys.has(primitive)?primitive:freezePrimitive(structuredClone(primitive));}
 export function surfaceGridPrimitive(size:readonly[number,number,number],segmentsX:number,segmentsZ:number):Primitive{
   const nx=Math.max(1,Math.min(512,Math.round(segmentsX))),nz=Math.max(1,Math.min(256,Math.round(segmentsZ))),positions:number[]=[],normals:number[]=[],indices:number[]=[],y=size[1]/2;
   for(let iz=0;iz<=nz;iz++)for(let ix=0;ix<=nx;ix++){positions.push((ix/nx-.5)*size[0],y,(iz/nz-.5)*size[2]);normals.push(0,1,0);}
@@ -18,7 +43,7 @@ export function surfaceGridPrimitive(size:readonly[number,number,number],segment
 }
 
 export function primitiveMesh(primitive:Primitive):MeshData{
-  if(primitive.kind==='triangle-mesh')return pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined);
+  if(primitive.kind==='triangle-mesh')return {...pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined),...(primitive.uvs?{uvs:Float32Array.from(primitive.uvs)}:{}),...(primitive.variationSeeds?{variationSeeds:Float32Array.from(primitive.variationSeeds)}:{})};
   if(primitive.kind==='torus')return torusMesh(primitive.radius,primitive.tube,primitive.segments??40);
   if(primitive.kind==='cylinder')return cylinderMesh(primitive.radius,primitive.height,primitive.topRadius??primitive.radius,Math.round(primitive.segments??20));
   if(primitive.kind==='snowdrift')return snowDriftMesh(primitive.size,primitive.seed,primitive.segments??56,primitive.continuous??false,primitive.offset??0);

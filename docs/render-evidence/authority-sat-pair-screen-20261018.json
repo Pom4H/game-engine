@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "date": "2026-10-18",
+  "status": "invalid_screen_watchdog_no_comparison",
+  "scope": "One root-authorized A/A screening attempt for a possible full-authority SAT comparison. No A/B run or whole-authority performance result.",
+  "productionChanges": false,
+  "fixture": {
+    "seed": 29,
+    "store": "MemoryResidentStore",
+    "workers": 0,
+    "residentLimit": 80,
+    "populationHz": 30,
+    "physicsSubsteps": 2,
+    "snapshotHz": 20,
+    "vehicleInterestPeriod": 1,
+    "streamingPeriod": 2,
+    "worldInterestPeriod": 1,
+    "plannedTicksPerProcess": 720,
+    "plannedWarmTicks": 120,
+    "plannedMeasuredTicks": 600
+  },
+  "execution": {
+    "startedUtc": "2026-10-18T05:29:59.144Z",
+    "bunVersion": "1.4.2",
+    "cwd": "thegame",
+    "command": "SAT_AUTHORITY_BENCH_RELEASE=1 bun artifacts/network-stability-20261018/prepare-authority-sat-pairs.ts --screen-aa",
+    "driverExitCode": 1,
+    "firstChildVariant": "after/current",
+    "firstChildWatchdogMs": 40000,
+    "firstChildExitCode": 143,
+    "driverElapsedMs": 40201.0355,
+    "completedChildResults": 0,
+    "secondChildStarted": false,
+    "abPairsStarted": 0,
+    "firstDivergence": null,
+    "firstDivergenceReason": "No complete child state stream was saved; this is a timeout, not an observed A/A behavior mismatch.",
+    "childStdoutBytes": 0,
+    "childStderrBytes": 0,
+    "cleanup": "Owned child terminated by the watchdog, its exit awaited, driver exited; no active benchmark process remained."
+  },
+  "moduleOverridePlan": {
+    "target": "game-engine/src/physics/box-overlap.ts",
+    "scope": "Bun onLoad returns only frozen selected SAT module content under the original resolved module path, with a common one-time evaluation marker. No SAT-call wrapper or counter.",
+    "requiredProof": [
+      "Exactly one matching absolute-path onLoad hit",
+      "Selected frozen content hash",
+      "Module evaluation marker",
+      "Exact function identity through the Game box-overlap re-export"
+    ],
+    "actualModuleProofPersisted": false,
+    "actualModuleHitClaim": "Unverified: the attempt saved module proof only in its final result, which was not reached before termination. Do not infer a hit from the intended loader or elapsed runtime.",
+    "beforeSourceSha256": "e8ac0b4f840d46b3feaae2a93e615014ab1b037c6843616e60c4ee233c75d550",
+    "currentSourceSha256": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3"
+  },
+  "sourceFence": {
+    "productionCodeFiles": 1112,
+    "checkedBeforeChild": true,
+    "checkedAfterChildExit": true,
+    "matchedAtAttempt": true,
+    "historicalOnly": true,
+    "note": "Root released production edits after this failed screen. This manifest does not authorize or describe a subsequent run without a fresh source checkpoint. No production file was rewritten or rebuilt for this attempt."
+  },
+  "limitations": [
+    "ResidentPopulation.step calls navigation.step with an unchanged real3ms A* deadline. CPU, JIT, GC and diagnostic overhead can change expansion/completion work, then routes, motion, collision, snow and streaming. Identical whole-world A/A trajectories are not guaranteed.",
+    "Date.now remains real for transport ingress/lastSeen/gap timing and world.step. performance.now remains real. No clocks, rates, caps, physics duration or navigation deadline were changed.",
+    "The planned per-tick broad Float64 state hashes include actor records, navigation data/work, body/contact/event/sleep state, peer motor projection and causal snapshots. Those hashes run outside measured world.step but add CPU/allocation that can affect later scheduling. They are observational coverage, not a proof of every hidden world field.",
+    "The first process timed out. Hash overhead is a plausible diagnostic burden from source inspection, not a measured exclusive attribution of its40s runtime.",
+    "No completed720-tick stream, checksum comparison, first divergence, mean/p95/max authority timing or SAT speed benefit is established by this attempt.",
+    "No A/B pair, browser capture, native FPS, driver/hardware timing, Inspector, manual GC or source rebuild was run. Do not weaken the real deadline or replace clocks to force equality.",
+    "The independently saved captured-SAT-argument paired microbenchmark remains a separate valid narrow result; this failed full-authority screen neither extends nor invalidates that evidence."
+  ],
+  "artifacts": {
+    "base": "thegame/artifacts/network-stability-20261018/",
+    "manifest": {
+      "path": "authority-sat-paired/manifest.json",
+      "sha256": "0eaaed858f7b5db7fe6fd57bb20f9df518d075e130d688773751a2a60d8e26a5"
+    },
+    "screen": {
+      "path": "authority-sat-paired/screen-aa.json",
+      "sha256": "74ee5e299c81f8c88f24e3e5d0e16618b29daca4d45d7d5df6c40dd6b2a46053"
+    },
+    "harnessSha256": {
+      "authority-sat-pair-common.ts": "d4a4350e6fd1751f9c3397f6e0bd3a457a93e3701edf594b62e4408abb09a103",
+      "authority-sat-pair-child.ts": "66763b5a087c24eab7476b072da73a639a9d792825ea27d44dead041bc5b5a42",
+      "prepare-authority-sat-pairs.ts": "30ed04954953becfd191aa6a125ce06321e3aaa4f2cb2142addb389380d0d4f9"
+    },
+    "harnessNote": "The ignored scripts were restored to their exact executed hashes after an unused post-failure batching/progress draft was discarded; no rerun followed.",
+    "readme": "authority-sat-paired-README.md",
+    "narrowSatEvidence": "game-engine/docs/render-evidence/occupancy-sat-closure-hoist-20261018.json"
+  },
+  "validation": {
+    "prepareExitCode": 0,
+    "scopedStrictTypecheckExitCode": 0,
+    "scopedStrictTypecheckNote": "TypeScript7 CLI initially required --ignoreConfig for explicit file arguments; corrected command passed before the screen.",
+    "jsonParsed": true
+  }
+}

@@ -1,0 +1,528 @@
+{
+  "date": "2026-10-18",
+  "goalStatus": "active",
+  "performanceTargetMet": false,
+  "changes": [
+    "Connection-owned quiet80ms repair retransmits admitted motion history when ordinary frame generation is quiet. It creates no input, sequence, reliable command, motor step, presentation or renderer work.",
+    "A captured newest-row identity fence prevents an old onTake callback from moving a replacement body/revision/wrapped-sequence repair cursor.",
+    "GameNetwork rejects transport-local disconnection during handshake before reporting online or starting repair. Explicit close/new-connect generation cancellation still resolves as before.",
+    "Engine PlaybackClock ignores stale/equal sample timestamps without rolling back its host-time baseline; explicit Replica reverse seek remains supported."
+  ],
+  "sources": [
+    {
+      "path": "../thegame/src/game/net/client.ts",
+      "sha256": "2502b5ceb868d19ebc770d5160d0db4ed39ce3969604a65baafbadd5b82eb687"
+    },
+    {
+      "path": "../thegame/src/game/net/motion-repair.ts",
+      "sha256": "43e84c2bc079b2f91eb29e61548e64ac917d976abe5a0862f1adc285612dfc5d"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/browser.ts",
+      "sha256": "ffd809741b91db64826b6802259633e0fbdbe0fde10d96eebfe8eb98b336768c"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/motion-lifetime.ts",
+      "sha256": "ff50adcc3b005878103ed261de6f2205ecdeac2286fb616d98293b1fa63c0380"
+    },
+    {
+      "path": "src/network/playback.ts",
+      "sha256": "3affdc5bab26f17e2762ec0675ea57fb07994f19fc6bca2563e9553f042caff6"
+    },
+    {
+      "path": "dist/network/playback.js",
+      "sha256": "fab307fcab94d5d4afa6932c347026d2d48933d89a13b66903efaac052e429c0"
+    }
+  ],
+  "policy": {
+    "motionPacketLifetimeMs": 80,
+    "inputWindow": 48,
+    "quietTimer": "At most one pending timer; normal60Hz history regeneration moves its deadline and does not add a packet stream. Partial ACK does not postpone the deadline; empty ACK/close/disconnect/handoff cancel it. pagehide suspends; pageshow repairs retained admitted rows only.",
+    "history": "Original chronological range/newest inclusion, MTU shrink behavior and take-only range cycling preserved by byte comparison with independent frozen before sender. Errors from ordinary send remain synchronous; timer failure stops its own loop and reports once.",
+    "server": "No authority tick, physics cadence, timeout, duration, edge, population, AOI or quality reduction."
+  },
+  "tests": {
+    "repair": {
+      "path": "../thegame/test/game-network-motion-repair-loop.test.ts",
+      "sha256": "1aef6a500a9419a4086af2cc544162abf2dfdec94b94aa04b3e6fd67bfb296f2"
+    },
+    "handshake": {
+      "path": "../thegame/test/game-network-handshake-close.test.ts",
+      "sha256": "5f9f1e7893d4de57e95d4c6bb921a2c1f7c9f1ff28d9c81c4bdca457d9a33eda"
+    },
+    "beforeSender": {
+      "path": "../thegame/test/fixtures/motion-history-before-quiet-repair.ts",
+      "sha256": "4f8c350a4c137698183ace9b176a14aba3ca34d5685f764cfcf68042a73a817d"
+    },
+    "qa": {
+      "path": "../thegame/test/qa-motion-repairs.test.ts",
+      "sha256": "06d2c89d2d611f781bb4ee85e857768aa626acac8e982a39a3a95e98ce9cbf1b"
+    },
+    "playback": {
+      "path": "test/playback-monotonic-sample.test.mjs",
+      "sha256": "fd774e927b5dc92ef112e9c0e8f62eabec8847c796e88ff51c9e3ea988ebdf95"
+    },
+    "playbackFixture": {
+      "path": "test/fixtures/playback-clock-before-monotonic-sample.mjs",
+      "sha256": "e101bbe1723078308fc59f7235b4d246d891e9f1207fc7d5ce4286425360aa61"
+    },
+    "scope": "Permanent regressions cover blocked readiness, both80ms boundary orders, full48 history, MTU1200/512/256 exact wire bytes, seqwrap, ACK/handoff/ABA and onTake reentry, no normal60Hz extra stream, five failed/superseded/closed handshake controls, timers/listeners/readers/writers and QA false-positive controls. Playback has four new tests plus complete frozen-reference ordinary-clock/state and actual consumer comparisons."
+  },
+  "nativeNegativeControl": {
+    "exitCode": 0,
+    "report": {
+      "path": "../thegame/artifacts/motion-repairs-motion-repairs-canonical-baseline-20261018.json",
+      "sha256": "7a9beddf62b501827b05a8b5b398675c65fe75c66d917a56550b3fd5b64d2e24"
+    },
+    "log": {
+      "path": "../thegame/artifacts/motion-repairs-canonical-baseline-20261018.log",
+      "sha256": "e89d7a8a0c6dd2f8400da880634c1b95672c44b939ac046df7519921a96b33d2"
+    },
+    "gateAudit": {
+      "path": "../thegame/artifacts/motion-repairs-canonical-baseline-gate-audit-20261018.json",
+      "sha256": "e43acbb485e13c28b74879063f7734f3abffdf00b6f5720acefdaa869de35ced"
+    },
+    "game": {
+      "path": "../thegame/artifacts/render-stability-clock-axes-game.js",
+      "sha256": "633d37b05b8ea101b8f08103d0ff184ad7c0c16bbf95286206acc57d6faaea0f"
+    },
+    "result": {
+      "target": 48,
+      "waitMs": 3019.5,
+      "ack": [
+        47,
+        47
+      ],
+      "pending": [
+        0,
+        1,
+        1
+      ],
+      "transport": {
+        "holdUntil": 10656.900000035763,
+        "holds": 1,
+        "writeCalls": 0,
+        "writeCompletions": 0,
+        "events": [
+          {
+            "at": 10436.900000035763,
+            "kind": "armed",
+            "ms": 220
+          },
+          {
+            "at": 10437.600000023842,
+            "kind": "ready-hold",
+            "requestedMs": 219.30000001192093
+          },
+          {
+            "at": 10670,
+            "kind": "ready-release"
+          }
+        ]
+      }
+    },
+    "scope": "Real canonical native WebTransport/authority, one explicit paused step. Held writer.ready past existing80ms byte lifetime; old client leaves the target unacknowledged after3s while authority advances. Original report retained; stronger target-overlap gate was applied offline and still passes, without a second baseline capture."
+  },
+  "nativeRepairBeforeHandshakeLatch": {
+    "exitCode": 0,
+    "report": {
+      "path": "../thegame/artifacts/motion-repairs-render-stability-motion-playback-native-20261018.json",
+      "sha256": "d6bd7c31b639c46c7037f5a19cd2df20f50085de330e496394eeff59287eb9fc"
+    },
+    "sourceNetClientSha256": "8114f1c606c7748ce72c39ceaff3354f1fe651cd0c52ce4803099bbdf86d658c",
+    "bundle": {
+      "path": "../thegame/artifacts/render-stability-motion-playback-game.js",
+      "sha256": "eb59250d587a7d9dc9dc172f85399a96576572a41ef76d0919667bc7c3d7f350"
+    },
+    "target": 1446,
+    "waitMs": 393.0999999642372,
+    "pending": [
+      0,
+      1,
+      0
+    ],
+    "ack": [
+      1445,
+      1446
+    ],
+    "writes": 3,
+    "completedWrites": 3,
+    "qualifyingReadyRelease": 42291.30000001192,
+    "valid": true,
+    "matches": true,
+    "scope": "220ms datagram-writer readiness hold only; gameplay paused after one explicit step. Target stays constant, is submitted after qualifying release and cumulatively ACKs. This proves repair of already-admitted rows, not independent new input or an OS/GPU stall."
+  },
+  "actualAuthority": {
+    "report": {
+      "path": "../thegame/artifacts/network-stability-20261018/quiet-repair-authority-proof-20261018.json",
+      "sha256": "4288990be5bac7dd191ba779c3d70cb5f3e3bef8e96c8bd0d366807bc6feb6fa"
+    },
+    "driver": {
+      "path": "../thegame/artifacts/network-stability-20261018/quiet-repair-authority-proof-driver-20261018.json",
+      "sha256": "c6df7c871d8c2ad768f4fcaf348ac2433a293b0c9e3582335b26802b1180d8fc"
+    },
+    "proof": {
+      "path": "../thegame/artifacts/network-stability-20261018/quiet-repair-authority-proof.ts",
+      "sha256": "3e7448b22dada2e498d59faf65aa7f924bf1fe9c864b78777eb27f3a95d8c061"
+    },
+    "assertions": 331,
+    "sourceNetClientSha256": "8114f1c606c7748ce72c39ceaff3354f1fe651cd0c52ce4803099bbdf86d658c",
+    "datagrams": 13,
+    "quietAttempts": 12,
+    "commandSteps": 1,
+    "commandDurationSeconds": 0.016666666666666666,
+    "actions": {
+      "interact": 1,
+      "doorSearch": 1
+    },
+    "lastApplied": 1005,
+    "lastSeen": 1960,
+    "idleSteps": 45,
+    "pendingAfterAck": 0,
+    "scope": "Ignored bounded functional proof. Actual GameNetwork.send + production MotionRepairLoop + CausalBrowserConnection + DatagramOutbox + encode/decodeMotion feed actual GameAuthority.receiveInputs/applyPlayerInputs. Fake monotonic clock/readiness and explicit connected-state/lifecycle setup; flat collision and outward interaction effects isolated. No real QUIC, complete world/population/vehicle/combat loop, native timing, FPS or held vehicle-control claim."
+  },
+  "handshake": {
+    "minimalReconstruction": {
+      "path": "../thegame/artifacts/network-stability-20261018/handshake-close-minimal-reconstruction-20261018.json",
+      "sha256": "cffd38eb1686691877d8ce9751aa76e69b086bc0ee3c4e91e729a5d0f4afed27"
+    },
+    "targetedTests": {
+      "path": "../thegame/artifacts/network-stability-20261018/handshake-close-fixed-targeted-20261018.log",
+      "sha256": "3ed928fc098f21e95efb72e74369c780d82eead300eb49dac7cffa95bd88de2e"
+    },
+    "negativeControl": {
+      "path": "../thegame/artifacts/network-stability-20261018/quiet-repair-handshake-close-audit-20261018.json",
+      "sha256": "f106d8dec1210047537201e642ecb667ad96750ec28a6b7e84eb4f112075f5b9"
+    },
+    "negativeDriver": {
+      "path": "../thegame/artifacts/network-stability-20261018/quiet-repair-handshake-close-audit-driver-20261018.json",
+      "sha256": "c6df7c871d8c2ad768f4fcaf348ac2433a293b0c9e3582335b26802b1180d8fc"
+    },
+    "beforeSourceNetClientSha256": "8114f1c606c7748ce72c39ceaff3354f1fe651cd0c52ce4803099bbdf86d658c",
+    "before": "Actual GameNetwork+CausalBrowserConnection with already-resolved transport.closed: disconnected→connecting→disconnected→online, while browser connected=false/transport=null. One send admits pending input but never writes. Explicit outer close and successful connect controls distinguish the race.",
+    "after": "Connection-local disconnected latch is checked after await and after existing outer-generation cancellation. No public API change.",
+    "nativeCurrentFunctional": {
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-functional-20261018.log",
+        "sha256": "79810452960bf1024f0acfc632a403936604617ee8e463a59e224ecf16931f00"
+      },
+      "repair": {
+        "path": "../thegame/artifacts/motion-repairs-render-stability-motion-connect-functional-20261018.json",
+        "sha256": "a7bd1d8ceac9430f3af49ed07ae0cb9e4ccc61b3781e19e6e624879338310ccc"
+      },
+      "repairTarget": 54,
+      "repairWaitMs": 583,
+      "movement": {
+        "path": "../thegame/artifacts/movement-render-stability-motion-connect-functional-20261018.json",
+        "sha256": "3812228cd4cfdeb7771d2d9926c83867e945032ea37c9d1eaa9418b171251cee"
+      },
+      "movementSummary": {
+        "status": "online",
+        "frames": 346,
+        "distance": 14.651457099256248,
+        "backwardFrames": 0,
+        "maxBackward": 0,
+        "ticks": 552,
+        "maxPending": 48,
+        "alive": true
+      },
+      "overrides": {
+        "path": "../thegame/artifacts/capture-overrides-render-stability-motion-connect-functional-20261018.json",
+        "sha256": "e860654efc06b39291b5dad589c2568f83e48324f96be3811cc04820f781cab7"
+      },
+      "scope": "Fresh native functional capture of rebuilt post-latch client; no repeat900frame score."
+    }
+  },
+  "playback": {
+    "detail": "docs/render-evidence/playback-monotonic-sample-20261018.json",
+    "result": "Stale host timestamp [0,.02,.01,.03] previously double-counted the next interval: actual canonical projected x3.773248/RPM1457 instead of control/new x3.731424/RPM1456. Full ordinary timestamp output and own state remain byte-identical. Frequency of this callback ordering in real play was not measured."
+  },
+  "validation": {
+    "engine": {
+      "command": "node --test test/*.test.mjs",
+      "tests": 780,
+      "passed": 761,
+      "failed": 0,
+      "skipped": 19,
+      "log": {
+        "path": "artifacts/render-stability-motion-playback-engine-tests.log",
+        "sha256": "379002185a818d3cfefa8455f56a586bff01c4596434ea7980d8edeefff118ec"
+      },
+      "note": "Current unchanged Engine production source. Full suite was not repeated for Game-only handshake latch."
+    },
+    "gameBeforeLatch": {
+      "passed": 427,
+      "failed": 0,
+      "files": 54,
+      "bunExpectCalls": 84283,
+      "log": {
+        "path": "../thegame/artifacts/render-stability-motion-playback-game-tests.log",
+        "sha256": "cbccf477ad49124c17449b1cf73c82ec90e01cc3be483fa2e9358849da1f8bc3"
+      },
+      "coverage": {
+        "path": "../thegame/artifacts/render-stability-motion-playback-coverage-20261018.json",
+        "sha256": "a574dd89372f444c8802bb5d187c9c4eeb79535ef90f331fdccd11db36c19121"
+      }
+    },
+    "gameCurrent": {
+      "command": "bun test --timeout60000 <55 explicit ./test paths from manifest>",
+      "passed": 432,
+      "failed": 0,
+      "files": 55,
+      "bunExpectCalls": 84330,
+      "manifest": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-test-paths-20261018.json",
+        "sha256": "0bf72ed6a099376060309fed337082a8177eebd3c06a81d77c9695d9ee302230"
+      },
+      "log": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-game-tests.log",
+        "sha256": "cf6b9fda0810cd2446dc520ba350353b1c1add6d1a4097b7ac065150d77a084b"
+      },
+      "coverage": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-coverage-20261018.json",
+        "sha256": "3a0208cba66c1709719d2e360535ffe6ea28a5a3607320e1758565685aa0c7a7"
+      },
+      "allPrior427LabelsPreserved": true
+    },
+    "gameBuild": {
+      "path": "../thegame/artifacts/render-stability-motion-connect-build.log",
+      "sha256": "1c945f86f1dac2d5d38701cd22731a62931b73da19172c7e7d9a6728517a00ae"
+    },
+    "gameTypecheck": {
+      "path": "../thegame/artifacts/render-stability-motion-connect-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "currentBundles": [
+      {
+        "path": "../thegame/artifacts/render-stability-motion-connect-game.js",
+        "sha256": "312c87927afceab74e47e211b34391d2f218908084a70aa457d16549503f846f"
+      },
+      {
+        "path": "../thegame/artifacts/render-stability-motion-connect-game.js.map",
+        "sha256": "7bc770014ca37e5f2f2b3cacc675234033ab2524b99b668d2ac76f4a13532cd4"
+      },
+      {
+        "path": "../thegame/artifacts/render-stability-motion-connect-worker.js",
+        "sha256": "e8fa50aba6fa7260a71b04ac382baf67b5e33159ef7973bc5d17db137a5cb19b"
+      }
+    ],
+    "publicMatchesArchive": true,
+    "actualWorker": {
+      "report": {
+        "path": "../thegame/artifacts/body-worker-prototype/production-clock-axes-20261018/browser-report.json",
+        "sha256": "f989abf6def96a778fbed0c407876d1285b3ee48fc6d8a36de03b6aeca56643f"
+      },
+      "records": 222,
+      "scope": "Earlier actual Chrome CPU-only Worker byte/rest/key/service oracle still applies: current worker bundle is exactly unchanged e8fa50... . It was not rerun for unrelated Game network/clock code."
+    }
+  },
+  "nativeScoreBeforeHandshakeLatch": {
+    "exitCode": 0,
+    "report": {
+      "path": "../thegame/artifacts/performance-live-render-stability-motion-playback-native-20261018.json",
+      "sha256": "42cf92ec28fce017cfc4a905b47503e9351e51966531ea5986a2137b350613a5"
+    },
+    "log": {
+      "path": "../thegame/artifacts/render-stability-motion-playback-native-20261018.log",
+      "sha256": "8b2fc249b7d0d3316f8aa02324a49bd98407eefa0bdc749b9ed4ce310f68553d"
+    },
+    "bundle": {
+      "path": "../thegame/artifacts/render-stability-motion-playback-game.js",
+      "sha256": "eb59250d587a7d9dc9dc172f85399a96576572a41ef76d0919667bc7c3d7f350"
+    },
+    "sourceNetClientSha256": "8114f1c606c7748ce72c39ceaff3354f1fe651cd0c52ce4803099bbdf86d658c",
+    "overrides": {
+      "path": "../thegame/artifacts/capture-overrides-render-stability-motion-playback-native-20261018.json",
+      "sha256": "9aaa86ae8d8a864277f8c9cf85cadc63cfd2b6e8685da01cd5aaf8f15ed6dc3f"
+    },
+    "browserAudit": {
+      "path": "../thegame/artifacts/browser-audit-render-stability-motion-playback-native-20261018.json",
+      "sha256": "0e3423395d7edbf5fbf03e7f7aee96af14aac012e7f07f444d95772d010bff8b"
+    },
+    "independentAudit": {
+      "path": "artifacts/render-stability-motion-playback-native-20261018-independent-review.json",
+      "sha256": "663eb534097612a20bf816830e33d2b883883044a655563350e9cb3487d722db"
+    },
+    "profileLimit": "rendererProfileReset=false; renderer CPU/GPU profile aggregates can include warmup. Raw900 RAF intervals and separately measured body-worker deltas are the scored data. No CPU/GPU aggregate-window or hardware-duration attribution.",
+    "frames": 900,
+    "averageFPS": 59.35579180626269,
+    "p50Ms": 18.900000000001455,
+    "p95Ms": 29.599999999998545,
+    "maxMs": 341.1999999999971,
+    "framesOver33Ms": 19,
+    "framesOver50Ms": 2,
+    "browser": {
+      "mode": "native-gpu",
+      "batterySaverRequested": "off",
+      "backend": "webgpu",
+      "width": 1280,
+      "height": 720,
+      "renderResolution": [
+        704,
+        396
+      ]
+    },
+    "qualityLock": {
+      "enabled": true,
+      "requested": {
+        "adaptive": false,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "taa": true,
+        "bloom": false
+      },
+      "initial": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "actual": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "matches": true
+    },
+    "rendererErrors": [],
+    "inputWindow": {
+      "capacity": 48,
+      "minPending": 30,
+      "maxPending": 48,
+      "fullFrames": 344
+    },
+    "workerMeasured": {
+      "jobsDispatched": 39,
+      "jobsCompleted": 39,
+      "publications": 39,
+      "asyncPublications": 39,
+      "syncPublications": 0,
+      "asyncFirstSight": 8,
+      "asyncReplacement": 31,
+      "syncFirstSightPanel": 0,
+      "syncFirstSightOther": 0,
+      "syncReplacementPanel": 0,
+      "syncReplacementOther": 0,
+      "syncByType": {
+        "truck": 0,
+        "tram": 0,
+        "metro": 0,
+        "bus": 0,
+        "sedan": 0,
+        "sport": 0,
+        "bike": 0,
+        "kukuruznik": 0,
+        "monoplane": 0,
+        "hatch": 0,
+        "wagon": 0,
+        "coupe": 0,
+        "taxi": 0,
+        "suv": 0,
+        "van": 0,
+        "pickup": 0,
+        "classic": 0,
+        "cruiser": 0,
+        "scooter": 0,
+        "bicycle": 0,
+        "cargoBike": 0,
+        "kickScooter": 0,
+        "eScooter": 0,
+        "police": 0,
+        "compact": 0,
+        "crossover": 0,
+        "m3": 0,
+        "v6": 0
+      }
+    },
+    "windowVisibleFocusedStable": true,
+    "screenshot": {
+      "path": "../thegame/artifacts/performance-live-render-stability-motion-playback-native-20261018.png",
+      "sha256": "47393f47fb879c42efb7f8dc931ea25ea04488632c4a2bfbe87aba9cebad6b3a"
+    },
+    "imageScope": "Post-score screenshot visually inspected: avatar, other actors, vehicles, snow and buildings present. One image does not prove all-scene temporal continuity or shadow/reflection correctness.",
+    "comparison": "Single fresh-session native-profile score at704x396 internal pixels. Previous68.56FPS/311.9ms score has different live world history and15worker publications versus39here. No controlled causal FPS comparison, regression attribution, improvement or eliminated-freeze claim. It predates the handshake latch; current functional result is separate."
+  },
+  "inputClockBeforeHandshakeLatch": {
+    "bundle": {
+      "path": "../thegame/artifacts/render-stability-motion-playback-game.js",
+      "sha256": "eb59250d587a7d9dc9dc172f85399a96576572a41ef76d0919667bc7c3d7f350"
+    },
+    "report": {
+      "path": "../thegame/artifacts/input-clock-render-stability-motion-playback-native-20261018.json",
+      "sha256": "1d1b917ea2201906e43ac51d345d750e3132418fae6d018b4187940572824c2d"
+    },
+    "elapsedMs": 351.0999999642372,
+    "heartbeats": 56,
+    "seqAdvance": 0,
+    "submittedAdvance": 0,
+    "ackAdvance": 0,
+    "serverTickAdvance": 18,
+    "motorStepsDuringHold": 0,
+    "pending": [
+      0,
+      0
+    ],
+    "valid": true,
+    "matches": true,
+    "scope": "Captured EB client before handshake latch; not rerun in current functional-only capture. Future application RAF callbacks held350ms with live timers/authority. New input generation remains RAF-owned despite quiet repair. Not OS/GPU stall/FPS evidence."
+  },
+  "movementBeforeHandshakeLatch": {
+    "report": {
+      "path": "../thegame/artifacts/movement-render-stability-motion-playback-native-20261018.json",
+      "sha256": "b1d0e03415fbd4ae37ebe262600807f701932fada2032e583313387074a8abe1"
+    },
+    "status": "online",
+    "frames": 528,
+    "distance": 11.024671811544358,
+    "backwardFrames": 0,
+    "maxBackward": 0,
+    "ticks": 396,
+    "maxPending": 48,
+    "alive": true
+  },
+  "remaining": [
+    "341.2ms native maximum frame and saturated48-input window persist. No full1080p or freeze-free target reached.",
+    "New input creation still depends on RAF. Complete timer admission/frame-owned prediction/visual checkpoint patch remains ignored until full lifecycle/collider/manual/audio review and real canonical gates pass.",
+    "No new all-scene temporal pixel/occlusion proof. Browser audio autoplay remained locked; audible output was not verified."
+  ]
+}

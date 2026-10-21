@@ -1,0 +1,2432 @@
+{
+  "date": "2026-10-17T01:09:21.825Z",
+  "scope": "Office uses original lift proximity and tracked command IDs; authority passenger and cabin state share one causal presentation; NPC takeover, real call/ride/exit and return through the installed Office",
+  "capability": "original-residents-17",
+  "tests": {
+    "game": {
+      "pass": 122,
+      "assertions": 23251,
+      "files": 11,
+      "log": "artifacts/office-lifts-causal-tests-r2-20261017.log"
+    },
+    "integration": {
+      "pass": 140,
+      "assertions": 6297,
+      "files": 14,
+      "log": "artifacts/office-lifts-app-tests-r4-20261017.log"
+    }
+  },
+  "native": {
+    "label": "office-lifts-native-20261017-r9",
+    "actor": "resident:15621:0",
+    "building": "15621",
+    "fromFloor": 1,
+    "toFloor": 2,
+    "takeoverDistance": 6.979559468664724e-10,
+    "maxPresentedAlignment": 0.00033333333335594517,
+    "rideSamples": 37,
+    "walkingPulses": 37,
+    "states": 14,
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "rightsBefore": {
+      "accountId": "e11d2ebc-bf6d-45fc-995d-875b858a6f09",
+      "companies": [],
+      "leases": []
+    },
+    "rightsAfter": {
+      "accountId": "e11d2ebc-bf6d-45fc-995d-875b858a6f09",
+      "companies": [],
+      "leases": []
+    }
+  },
+  "wireAudit": {
+    "date": "2026-10-17T01:07:05.045Z",
+    "scope": "Deterministic publisher payload audit using the native hall body and real moving lift record; not live aggregate bandwidth",
+    "actor": "resident:15621:0",
+    "baseEntityBytes": 106,
+    "attachedEntityBytes": 154,
+    "addedEntityBytes": 48,
+    "definitionBytesBefore": 104,
+    "definitionBytesAfter": 104,
+    "negotiatedMtu": 1200
+  },
+  "archivedSources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/shared.ts",
+      "archive": "artifacts/office-lifts/final-sources/engine/apps/thegame/shared.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-lifts.ts",
+      "archive": "artifacts/office-lifts/final-sources/engine/apps/thegame/client/canonical-lifts.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-lifts/final-sources/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "archive": "artifacts/office-lifts/final-sources/engine/apps/thegame/test/canonical-connection.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-lifts/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/plan.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/buildings/plan.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/lifts.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/buildings/lifts.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/authority.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-lift-view.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/office-lift-view.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/office-controller.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/office-world.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/client.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/net/client.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/causal/replication.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/net/causal/replication.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/lift-presentation.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/src/game/net/lift-presentation.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/lift-proximity-before.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/test/fixtures/lift-proximity-before.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-lift-view.test.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/test/office-lift-view.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/lift-presentation.test.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/test/lift-presentation.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/building-storeys.test.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/test/building-storeys.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-world.test.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/test/office-world.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/causal-network/replication.test.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/test/causal-network/replication.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/tools/qa-office-walking.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lifts.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/tools/qa-office-lifts.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-route.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/tools/qa-office-lift-route.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/tools/qa-office-terrain.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "archive": "artifacts/office-lifts/final-sources/game/tools/qa-office-interiors.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-lifts/final-sources/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "archive": "artifacts/office-lifts/final-sources/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "archive": "artifacts/office-lifts/final-sources/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-lifts/final-sources/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-lifts/final-sources/office/VERIFICATION.md"
+    }
+  ],
+  "audits": [
+    {
+      "date": "2026-10-17T00:28:12.894Z",
+      "oldPid": 22524,
+      "newPid": 24340,
+      "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; source lift proximity and tracked reliable lift commands; saved NPC and account ownership retained; Office/backend/microphone untouched",
+      "beforeRows": 3276,
+      "afterRows": 3276,
+      "missingRows": 0,
+      "protectedRows": 122,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 25,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1
+    },
+    {
+      "date": "2026-10-17T00:50:43.059Z",
+      "oldPid": 24340,
+      "newPid": 22240,
+      "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; causal passenger lift records share the authoritative body clock; source interaction and saved ownership retained; Office/backend/microphone untouched",
+      "beforeRows": 3407,
+      "afterRows": 3407,
+      "missingRows": 0,
+      "protectedRows": 127,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 30,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1
+    },
+    {
+      "date": "2026-10-17T00:59:23.106Z",
+      "oldPid": 22240,
+      "newPid": 25316,
+      "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; source passenger presentation attachment starts with closing doors; motor and ownership rules retained; Office/backend/microphone untouched",
+      "beforeRows": 3465,
+      "afterRows": 3465,
+      "missingRows": 0,
+      "protectedRows": 128,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 31,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "bytes": 2488444,
+      "sha256": "1bf36bb798d321159dcea5214d162883de0166ce4fa72871363c8d2e0facc9b9"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-17",
+      "bytes": 1355052,
+      "sha256": "e172ab44e9513a6f720598ad51762cc239a8e9b844b2b4c549b433daafaa6985"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DKGy9aTV.js",
+      "bytes": 1788974,
+      "sha256": "a06177844b9b60c9a61b07c52d2e8bc53799cc1301cfab5ba9a2fae9a3e3c4c0"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    }
+  ],
+  "reviewed": [
+    "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-call-panel.png",
+    "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-floor-panel.png",
+    "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-moving.png",
+    "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-arrived.png",
+    "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-exited.png"
+  ],
+  "health": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "debug": [
+    {
+      "port": 3236,
+      "live": false
+    },
+    {
+      "port": 3237,
+      "live": false
+    },
+    {
+      "port": 3238,
+      "live": false
+    },
+    {
+      "port": 3239,
+      "live": false
+    },
+    {
+      "port": 3240,
+      "live": false
+    },
+    {
+      "port": 3241,
+      "live": false
+    },
+    {
+      "port": 3242,
+      "live": false
+    },
+    {
+      "port": 3243,
+      "live": false
+    },
+    {
+      "port": 3244,
+      "live": false
+    }
+  ],
+  "limits": [
+    "Earlier r1-r3 inspector failures involved a stale Vite transformed scene; module timestamps refreshed without restarting Vite. r4 had a QA expression quoting failure. r5 exposed the original two-clock cabin/rider mismatch.",
+    "r6 was a successful earlier ground-floor ride with 0.11 m initial attachment discrepancy; final closing-door attachment was added afterward. Earlier attempt bundles are not represented by final source/bundle hashes.",
+    "r7 exposed a saved NPC inside a shaft between floors after cabin reset. That persistence/recovery defect remains open; final candidate selection requires a valid landing and never teleports a body. r8 had a QA cursor-scan omission.",
+    "Native ownership views belong to a guest account and contain empty company/lease lists; this is not a new nonempty-business ownership proof.",
+    "Tight cabin camera can move too close to the NPC back. Outer static scenery still uses nine chunks; other selected-Office floors, long routes, lighting/temporal/water/audio fidelity and saved-shaft recovery remain incomplete.",
+    "No FPS was measured for this final bundle; the prior 60.7115 FPS report belongs to its archived earlier build. No physical microphone capture/playback."
+  ],
+  "files": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/shared.ts",
+      "bytes": 5382,
+      "sha256": "6867e919e8d6e047a637c8f16cac8bf5ef5319f7f828670342018bccc1e731cd"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/engine/apps/thegame/shared.ts",
+      "bytes": 5382,
+      "sha256": "6867e919e8d6e047a637c8f16cac8bf5ef5319f7f828670342018bccc1e731cd"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-lifts.ts",
+      "bytes": 555,
+      "sha256": "69006a108de182e09dd881b9ce7235b20d6370388d6eed66e970bfdc49f2b808"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/engine/apps/thegame/client/canonical-lifts.ts",
+      "bytes": 555,
+      "sha256": "69006a108de182e09dd881b9ce7235b20d6370388d6eed66e970bfdc49f2b808"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "2b9d61cc65b0225e8e1e98f188f428880c8f0a8f776f28acb86bc7d49fff4ce3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "2b9d61cc65b0225e8e1e98f188f428880c8f0a8f776f28acb86bc7d49fff4ce3"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 48244,
+      "sha256": "6d548bdbe4cfb8f8fa202b806f9b905d203438b4f97dbeddd967093027b1e3bd"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/engine/apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 48244,
+      "sha256": "6d548bdbe4cfb8f8fa202b806f9b905d203438b4f97dbeddd967093027b1e3bd"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 179095,
+      "sha256": "6f0c9c4a384e6a663d3a3414c822905bbb606752435e15bf40cba2cff1172e0f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 179095,
+      "sha256": "6f0c9c4a384e6a663d3a3414c822905bbb606752435e15bf40cba2cff1172e0f"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/plan.ts",
+      "bytes": 18894,
+      "sha256": "bdef3c0a9883bfaad147f2c83ea4a34fe7749e98e29fc8d6525118e2fe04a5f1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/buildings/plan.ts",
+      "bytes": 18894,
+      "sha256": "bdef3c0a9883bfaad147f2c83ea4a34fe7749e98e29fc8d6525118e2fe04a5f1"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/lifts.ts",
+      "bytes": 9669,
+      "sha256": "6b4d1b798572b6e55db1745cc2b2b8f66d7a2573a9212b16ab4510090bd84c58"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/buildings/lifts.ts",
+      "bytes": 9669,
+      "sha256": "6b4d1b798572b6e55db1745cc2b2b8f66d7a2573a9212b16ab4510090bd84c58"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "bytes": 65306,
+      "sha256": "ea2eaefd6c91d7d31f1b56607159c6df6877a948567409a3d296e277ee88544e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/authority.ts",
+      "bytes": 65306,
+      "sha256": "ea2eaefd6c91d7d31f1b56607159c6df6877a948567409a3d296e277ee88544e"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-lift-view.ts",
+      "bytes": 3321,
+      "sha256": "abbdcbf46814bbaeaad430b087c9b4f5d3b35ed6d60e94c670aeb9ebb9f31265"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/office-lift-view.ts",
+      "bytes": 3321,
+      "sha256": "abbdcbf46814bbaeaad430b087c9b4f5d3b35ed6d60e94c670aeb9ebb9f31265"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "bytes": 842,
+      "sha256": "c8d02b62b38dc1c6664c9e24b246b893d9616d6bce79ce1db71ab2ed2d13e85e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/office-controller.ts",
+      "bytes": 842,
+      "sha256": "c8d02b62b38dc1c6664c9e24b246b893d9616d6bce79ce1db71ab2ed2d13e85e"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "bytes": 10379,
+      "sha256": "a14603db1eacd2a54eae6f24d5cecd5de07504160b612d0f229519075f71f238"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/office-world.ts",
+      "bytes": 10379,
+      "sha256": "a14603db1eacd2a54eae6f24d5cecd5de07504160b612d0f229519075f71f238"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/client.ts",
+      "bytes": 13209,
+      "sha256": "5e1fc501fd8c32f592526dd2d7fcf17964e4766837a14f3bfd159ca953045b91"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/net/client.ts",
+      "bytes": 13209,
+      "sha256": "5e1fc501fd8c32f592526dd2d7fcf17964e4766837a14f3bfd159ca953045b91"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/causal/replication.ts",
+      "bytes": 31597,
+      "sha256": "f4999f5440d1b3b0badae68f6273abddc8beff2177db73af615398ec4f14ce61"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/net/causal/replication.ts",
+      "bytes": 31597,
+      "sha256": "f4999f5440d1b3b0badae68f6273abddc8beff2177db73af615398ec4f14ce61"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/lift-presentation.ts",
+      "bytes": 2508,
+      "sha256": "2ade5c6052a9a7c01b45851c513a9e10da6650face0737287259a011b75a5d00"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/src/game/net/lift-presentation.ts",
+      "bytes": 2508,
+      "sha256": "2ade5c6052a9a7c01b45851c513a9e10da6650face0737287259a011b75a5d00"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/lift-proximity-before.ts",
+      "bytes": 776,
+      "sha256": "03b7d7bfe4b188eb931bb7038230f8737f551382b37db16584eb063a585a63ec"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/test/fixtures/lift-proximity-before.ts",
+      "bytes": 776,
+      "sha256": "03b7d7bfe4b188eb931bb7038230f8737f551382b37db16584eb063a585a63ec"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-lift-view.test.ts",
+      "bytes": 5190,
+      "sha256": "ffec14f3a389c89a784ce63a9168e90c6280f2e90d184450431db22ec10c01b4"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/test/office-lift-view.test.ts",
+      "bytes": 5190,
+      "sha256": "ffec14f3a389c89a784ce63a9168e90c6280f2e90d184450431db22ec10c01b4"
+    },
+    {
+      "repo": "game",
+      "path": "test/lift-presentation.test.ts",
+      "bytes": 2308,
+      "sha256": "125b96801141b9ccb7ebe1af98a43c965e032faf980b5c432f52eaa46f06d7d5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/test/lift-presentation.test.ts",
+      "bytes": 2308,
+      "sha256": "125b96801141b9ccb7ebe1af98a43c965e032faf980b5c432f52eaa46f06d7d5"
+    },
+    {
+      "repo": "game",
+      "path": "test/building-storeys.test.ts",
+      "bytes": 6653,
+      "sha256": "1058bc413403bf3a6dcece35343600e8630d029dbde3df201096d62c5b2561b1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/test/building-storeys.test.ts",
+      "bytes": 6653,
+      "sha256": "1058bc413403bf3a6dcece35343600e8630d029dbde3df201096d62c5b2561b1"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-world.test.ts",
+      "bytes": 14192,
+      "sha256": "0699ed90b0bc0b76b30f3566953268a8e2e1736a1042e8c300d16f5431b1ca59"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/test/office-world.test.ts",
+      "bytes": 14192,
+      "sha256": "0699ed90b0bc0b76b30f3566953268a8e2e1736a1042e8c300d16f5431b1ca59"
+    },
+    {
+      "repo": "game",
+      "path": "test/causal-network/replication.test.ts",
+      "bytes": 21047,
+      "sha256": "e0a599a4dac2cca9aba8b9dc7fc63874abe71a5abd9b177feda5f82685c10817"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/test/causal-network/replication.test.ts",
+      "bytes": 21047,
+      "sha256": "e0a599a4dac2cca9aba8b9dc7fc63874abe71a5abd9b177feda5f82685c10817"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 7423,
+      "sha256": "ffa958d5bbd72d197c0442270e20d32136acb032cb40b0b68788bbf5b1d03567"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/tools/qa-office.ts",
+      "bytes": 7423,
+      "sha256": "ffa958d5bbd72d197c0442270e20d32136acb032cb40b0b68788bbf5b1d03567"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 14701,
+      "sha256": "566148c6ed087ed8d82044fc17867c24e564ba47e45c066acdd91c05c61da4ee"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/tools/qa-office-walking.ts",
+      "bytes": 14701,
+      "sha256": "566148c6ed087ed8d82044fc17867c24e564ba47e45c066acdd91c05c61da4ee"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lifts.ts",
+      "bytes": 14307,
+      "sha256": "0ed4b27959dd7bdf4b4545674edb1602bf31646b06ec3b8cdaedd6ac56ef3ab2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/tools/qa-office-lifts.ts",
+      "bytes": 14307,
+      "sha256": "0ed4b27959dd7bdf4b4545674edb1602bf31646b06ec3b8cdaedd6ac56ef3ab2"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-route.ts",
+      "bytes": 3255,
+      "sha256": "66899fbcd43271fac9154534fffef80507ff1983d71aff72b840d40cceddc3e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/tools/qa-office-lift-route.ts",
+      "bytes": 3255,
+      "sha256": "66899fbcd43271fac9154534fffef80507ff1983d71aff72b840d40cceddc3e6"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "bfcfbe3355b61de6c691c166e36180c974d0d64bcadf33d91874e146518a314a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "bfcfbe3355b61de6c691c166e36180c974d0d64bcadf33d91874e146518a314a"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "b2bfbb8d6ec4994d95b82347d7a1437e5fd1f7d2da10c679588a95860387daee"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "b2bfbb8d6ec4994d95b82347d7a1437e5fd1f7d2da10c679588a95860387daee"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 763559,
+      "sha256": "4206c320e79e250ca8d93e4d10a56292e3c3ff4e49bbd5779ae139be53143776"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/game/docs/VERIFICATION.md",
+      "bytes": 763559,
+      "sha256": "4206c320e79e250ca8d93e4d10a56292e3c3ff4e49bbd5779ae139be53143776"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60189,
+      "sha256": "af16a56ffbcb96ccd5ec6ddec56a298775357706daaaf37a636d9e2a3a827262"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/office/ui/src/office/Office.tsx",
+      "bytes": 60189,
+      "sha256": "af16a56ffbcb96ccd5ec6ddec56a298775357706daaaf37a636d9e2a3a827262"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 8138,
+      "sha256": "2058e0b650f0c7240bace6adbd89d3008e8e4e8d0b3f6de33e12103549e03002"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/office/ui/src/office/GamePanel.tsx",
+      "bytes": 8138,
+      "sha256": "2058e0b650f0c7240bace6adbd89d3008e8e4e8d0b3f6de33e12103549e03002"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 63841,
+      "sha256": "f5a42c08f42be3fc6107d3f1e5084e7d75c8af1c61f82992386874728f21264f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/office/ui/src/office/scene.ts",
+      "bytes": 63841,
+      "sha256": "f5a42c08f42be3fc6107d3f1e5084e7d75c8af1c61f82992386874728f21264f"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 120971,
+      "sha256": "d3dc4f4f292bc6f98e429e95c8029a09db0ae57d5b6db834866d06761a3a3605"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-sources/office/VERIFICATION.md",
+      "bytes": 120971,
+      "sha256": "d3dc4f4f292bc6f98e429e95c8029a09db0ae57d5b6db834866d06761a3a3605"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-bundles/game.js",
+      "bytes": 2488444,
+      "sha256": "1bf36bb798d321159dcea5214d162883de0166ce4fa72871363c8d2e0facc9b9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-bundles/office-controller.js",
+      "bytes": 1355052,
+      "sha256": "e172ab44e9513a6f720598ad51762cc239a8e9b844b2b4c549b433daafaa6985"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-bundles/index-DKGy9aTV.js",
+      "bytes": 1788974,
+      "sha256": "a06177844b9b60c9a61b07c52d2e8bc53799cc1301cfab5ba9a2fae9a3e3c4c0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/canonical-controller-source.json",
+      "bytes": 907012,
+      "sha256": "ff14a4c837757f09090da3c15bed0b764c7b5e296da4adc1f803106086f65cfa"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/entered.png",
+      "bytes": 451212,
+      "sha256": "4ba8cfa54a8555f00ea2928054d6f7f13abe7b55aa487bd299bf0637a1441f62"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/failure.png",
+      "bytes": 317484,
+      "sha256": "3525a5fbc12104aa4355e7a7a2a5883f36f8aad13c643b508c0691caed99edeb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/lifts-candidates.json",
+      "bytes": 4509,
+      "sha256": "e8957a8fdfcc8c1961637dced35af9762d5e1d495c6588d50a2c04bfbfa2f9d7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/lifts-controlled.png",
+      "bytes": 137291,
+      "sha256": "0e879c79177fbdd90addb613f2a6a29f56fd791ca68d735f7d0633c32a842857"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/lifts-directory.png",
+      "bytes": 192717,
+      "sha256": "8532ab1677121f4d301cbd4561cccb4976709cf39404068dc3829a52918a2148"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/lifts-failure.json",
+      "bytes": 27547,
+      "sha256": "2229fdb8e6888dc0517a867f444b51fe2f743b4bcd21edb86144a9b8065aa90a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/lifts-failure.png",
+      "bytes": 317403,
+      "sha256": "66f37e8fb63b33540699b7a2d6507e6c2e191bf99f5247965dba43dbd7fa17cf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/lifts-returned.png",
+      "bytes": 317473,
+      "sha256": "730f7a6c483baf3dad038bce46cbef5d9d1c1d76cb4f0a2f34bf8d8e01f121af"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/lifts-source.json",
+      "bytes": 1780294,
+      "sha256": "0c52e0f8e456eefc1a70105751bef8698eabfeaeb84a1c429356bcd62d5b6f6b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/observer.png",
+      "bytes": 688650,
+      "sha256": "e16f269aabb1385f2f95464d2c540395508a4629b78393a01bf05a17646f64d1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/orbit-1.png",
+      "bytes": 502451,
+      "sha256": "4cd916acd4259c6b6e9aeea184914fc997e330e7778c999499259485eaf06ef6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/orbit-2.png",
+      "bytes": 436956,
+      "sha256": "20daa8455740c64f5debd74e3d5f7e27c42b3531f29952543b56017a77eaba60"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/orbit-3.png",
+      "bytes": 321717,
+      "sha256": "28f6b7b4f2c89edc694a4673b60b570bb706b4f3db03885b9f5fd2558acb2135"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/orbit-4.png",
+      "bytes": 425825,
+      "sha256": "97873020527a33012cb9bb1fdd44f19bebc7004eaa22b62694407d943883e88b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/report.json",
+      "bytes": 134326,
+      "sha256": "38e9d1bd1083be48b8634c05699953aad4ee54409f5e0991cc266b2def6ba2c7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/returned-observer.png",
+      "bytes": 654524,
+      "sha256": "f16a9c0e150a30f57fecb9da01c6fb6a365633d5ad740b56077c253d850f5db2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r1/walk-KeyW.png",
+      "bytes": 443962,
+      "sha256": "4d84a73d81a6f79101ae4bec4592e11c9cfbeba5ca499809016ed05f18730371"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/canonical-lobby.png",
+      "bytes": 407634,
+      "sha256": "8da637d610d4e16b68880e5cd65920e3bfb1843420fe0f06ec832351a4ca0b20"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/entrance.png",
+      "bytes": 467555,
+      "sha256": "c25bb4b97186e1d4d9ad51789440662086f9597e7c3c98024a8024bdba0a1123"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 15212,
+      "sha256": "9a70594fa372e8797b6d2d2b5c63d61a880185001744a0cb26367256cd004537"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/office-entry.json",
+      "bytes": 15373,
+      "sha256": "bd185c0d22274e7acaf53c0d0f98af19ffaf2cefdf5006caddd97848422be2d6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/office-entry.png",
+      "bytes": 666313,
+      "sha256": "3590461c6d0cddd7af8ad40c2fcd92741762641bc7a25e677c0e19e807fb01be"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/report.json",
+      "bytes": 79194,
+      "sha256": "f0c87ccb1ffc6ce106e73112b5933073d704ec26301e9f554b277500b4feeb03"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/upper-office.png",
+      "bytes": 360159,
+      "sha256": "31be1aa6ad29baeb47540b62b23d25a0c24b02393a615699db5b4a5b32204954"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r1/workplaces.png",
+      "bytes": 532810,
+      "sha256": "37c984354d7e3c6261d4fbb64dfe843d7f65c98bb11b129f16cc3ed5d4ac8aa0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/canonical-controller-source.json",
+      "bytes": 901369,
+      "sha256": "d1fcea28891c6b56f5fab92f3acd38b5cc5dbd7a6ed48e375fc7d424f4bafd3f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/entered.png",
+      "bytes": 494773,
+      "sha256": "153602ed2c279fd532b697611c261f4d07341a206a56b2be075ff022015144e5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/failure.png",
+      "bytes": 365452,
+      "sha256": "6f99b1505be6037ad91972d3f5f9c9eca28e08fb8948617e27f9a3190c903c25"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-candidates.json",
+      "bytes": 5316,
+      "sha256": "78f0596ee82ecbdcfd3c96a6124f576b38c437444c502f19ef97729076ca23dc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-controlled.png",
+      "bytes": 331473,
+      "sha256": "ce06c03cb40b78ca2f2e320d4b7c1612cdaa5360a4f15397323d7da7bdfbef45"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-directory.png",
+      "bytes": 197162,
+      "sha256": "3bf07df7bdd2c39ad888d0f286ac180e8d5e7079b55d8752dfe289ba84d1cff7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-failure.json",
+      "bytes": 23309,
+      "sha256": "2394c797192a297d09d953cf0665e1107407a7fb9aa1c8cb63c32f3266dd5d58"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-failure.png",
+      "bytes": 372337,
+      "sha256": "3e1ee519245fed83993c6a615ad9d2c4447ecc325e9c39b7130b5f2831b064b0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-hall-source.json",
+      "bytes": 829820,
+      "sha256": "7e605da6bf1d4a19877f3e65fdc681a8f0f0bdd8fb517b10071a792ccf7841d2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-returned.png",
+      "bytes": 368176,
+      "sha256": "c37afa8047735eaea147b71df5121a3812a33291bd1fc60e05c93b8bf830a9e8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/lifts-source.json",
+      "bytes": 1783239,
+      "sha256": "88ecf159fa1db624e093d978905545826413686c207adc5a12d21c405ec016bf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/observer.png",
+      "bytes": 678990,
+      "sha256": "5ec15c4949ab0058ce88110a1aab97104fffd651809727c6b8c4d80d91018248"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/report.json",
+      "bytes": 98411,
+      "sha256": "156aa8ef3c5abc39f200112ce53accc048130c207765574cecf099f679e25687"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/returned-observer.png",
+      "bytes": 685607,
+      "sha256": "ae6d497dfcc33dcb607abc9c28f855b38dc79165f031e074a622ee0124b0433c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r2/walk-KeyW.png",
+      "bytes": 459924,
+      "sha256": "a619473c6ed4a0612b0059a47649cf7162a5598d2ea871324e7ed3e74e9f7b98"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 15538,
+      "sha256": "945ae9eaf3d886679a91b3e4968d8fb140848374e32d07ad82edc48e228a575a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r2/office-entry.json",
+      "bytes": 15699,
+      "sha256": "3f954a3f239bd4ef38d9db6aaecf1e63e1db838bb73504155d9b5e7295c24cbd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r2/office-entry.png",
+      "bytes": 658953,
+      "sha256": "1de4436b5ee1327bfffd86ddb7773059d62b4756b45b2f377fb1bc6fe6c3c375"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/canonical-controller-source.json",
+      "bytes": 903019,
+      "sha256": "2657d124babeb27bea1c9b12d650389b9b4572928fc0e7ba8a5a2c71e7a16446"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/entered.png",
+      "bytes": 440207,
+      "sha256": "ce663e956048ae13d06b1cab9082caee2c695c54ab4bb5fe6ce075e9069f079c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/failure.png",
+      "bytes": 436664,
+      "sha256": "7e0fe00019cc3745364640995b6497d83242d0cf9ff6563326c9ea1ee5b0b55a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-candidates.json",
+      "bytes": 3666,
+      "sha256": "3ad1f4a66991ad3e999a8361bdebfcdc8834d62cf4029eb5a284cf4d8461a70d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-controlled.png",
+      "bytes": 264912,
+      "sha256": "e558656440df1e0dfb685e005a2e4bf9615ffb2b6ab15132599b63d43b01776b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-directory.png",
+      "bytes": 200377,
+      "sha256": "adc9e49d36be74f25845b3f0fc7d35baf7e4235370ad0b90e5479174c6522d62"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-failure.json",
+      "bytes": 31337,
+      "sha256": "783fdb3ed23b67356a2d7c8944b7f0b06982f5425c73ab74cda76e3e5d41317f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-failure.png",
+      "bytes": 369762,
+      "sha256": "2ab68cbe8121e9b47606403a1fc0cfb666406132fa2966504b300060aa76bf32"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-hall-source.json",
+      "bytes": 940944,
+      "sha256": "dfa36a6aa77616bedfde29e111ade8aae4d383ff3cc7a4646117f6389ea005d8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-returned.png",
+      "bytes": 370744,
+      "sha256": "68177f12e7d2aec22f0b5f4891aeaa3a0dab63750e25c966732edf6ee7f27352"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/lifts-source.json",
+      "bytes": 1783785,
+      "sha256": "e71b712ad6bffdbb5a3a1fe2413537335624fa5513f09c6bcddd2aa71e47710f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/observer.png",
+      "bytes": 687537,
+      "sha256": "4f548fe17f7d637abc13a345b1ccfe0ec4112c2ae0cfb86ad07f30b6357ec5c3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/report.json",
+      "bytes": 110787,
+      "sha256": "c67a7125add8fd2e9f385d772e03cac5cb97caef1136543156e9ef99572e29ef"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/returned-observer.png",
+      "bytes": 791886,
+      "sha256": "73fd81cb3a704853cc78584238abfdec711213f7af77ff2685a8dd955ddb41d7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r3/walk-KeyW.png",
+      "bytes": 418186,
+      "sha256": "429e816c34c9527030f5a3483159ef311ea227d2333a853042bae1db1cf91315"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r3/office-entry-diagnostics.json",
+      "bytes": 15592,
+      "sha256": "8860711e7911b08848751c6d616c0918e25afee9bba953bbb219862ded082f91"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r3/office-entry.json",
+      "bytes": 15753,
+      "sha256": "2eeab55deeb2a5fe9a70b1e14a300dbc562e8789e24531c04d0ccc32995da544"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r3/office-entry.png",
+      "bytes": 665540,
+      "sha256": "535c93bd759ede200b3e785b32e80ff263cb159239c80fbf51c8b90a083404eb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/canonical-controller-source.json",
+      "bytes": 897761,
+      "sha256": "3739403b155f3f2e39f06a9e153629479e2997dea41f0e6b9cdc6fd397f7808b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/entered.png",
+      "bytes": 281492,
+      "sha256": "406530be9340f2ded5600893e9985ee0ebcff1fb1f27930c2f3de44ecf2095b0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/failure.png",
+      "bytes": 111329,
+      "sha256": "8f9eee160b18664b9915ce861132f03811de9c5bed026b8a23d1ab24db1cbdef"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-at-door.png",
+      "bytes": 214559,
+      "sha256": "914b8dd9986976ecb713033f24b1ff4b588a491c745a5b78463f61d86b6aa9db"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-candidates.json",
+      "bytes": 2525,
+      "sha256": "b85def2168f68e67275cf68cb1e1c2e32ba322fba1cacb6685283824d425094a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-cleanup-failure.json",
+      "bytes": 148,
+      "sha256": "55129be17e92775b4dadb6608b5f81696f45d2b65c3d73fbfa2c24acdb541a3e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-controlled.png",
+      "bytes": 180342,
+      "sha256": "bf3d0b575df20f0243998e63c8f3c836f797a13f26ff302b01d0cd973e8fb434"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-directory.png",
+      "bytes": 155106,
+      "sha256": "8e5a3400927e1caa15e71cb9e2c159688eb92d348e27a6cce8f105a7a38b6242"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-failure.json",
+      "bytes": 22224,
+      "sha256": "60bc191e185a645c6d915e9c293836d8cf82da5d2cb74ed470f5c74a0e602343"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-failure.png",
+      "bytes": 111604,
+      "sha256": "576f7c607d32f168111abad209a40bea838dcc9e3b77fbe7bd676e321c52be45"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-hall-source.json",
+      "bytes": 941590,
+      "sha256": "88df3ccf8eeca9cc856d1aca1a7905398dfa783c938dedb4dded87c91dfebdc4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/lifts-source.json",
+      "bytes": 1783328,
+      "sha256": "99985fbb6130df8216475f5a51c5cb007d59494f6216913a394d1a5acb46510b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/observer.png",
+      "bytes": 619334,
+      "sha256": "b9685b9ae3c93528ea662bf592a3191232b562f331e04779c9540fd7a9dff87b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/report.json",
+      "bytes": 103419,
+      "sha256": "90903d4d010042fd3334c5c82a260127408cf010a70a8e78be1c991a802549e9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/returned-observer.png",
+      "bytes": 226972,
+      "sha256": "6a56fbe3749a92fefab19197eef073debea9123c946fa38291f5d168677294ce"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r4/walk-KeyW.png",
+      "bytes": 263576,
+      "sha256": "a5825b4cf4daecfa4f41f0ae042512c78ac81af1b3d2e92c098cb6f6aea118e3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r4/office-entry-diagnostics.json",
+      "bytes": 15565,
+      "sha256": "38fc1a498d404b2c5ecb41bcc1609bd7a392ef0aed154346c7a0a0d1e1daa03a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r4/office-entry.json",
+      "bytes": 15736,
+      "sha256": "d4d9e164c616db0e273681f32a412779aea66016ea550767df407c99a14ae93a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r4/office-entry.png",
+      "bytes": 656781,
+      "sha256": "bb2f36194306772f376c1b40630f8b8b3fc35b2d4966a89986c3add98fd0faa9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/canonical-controller-source.json",
+      "bytes": 901073,
+      "sha256": "f15f54a9bb9be65e6a89934f2948d632b44381e32bb3a86cca53620cafd3923f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/entered.png",
+      "bytes": 240861,
+      "sha256": "b866c9e4757977340a75545fdb573d5fcba6b2bf71dbbd24172e550203919d0f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/failure.png",
+      "bytes": 311606,
+      "sha256": "5f70dec220e02ff77ba6b084da38732d92d17ccb3338700ab20b86bc713cf6bf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-at-door.png",
+      "bytes": 203302,
+      "sha256": "c66773a488e8e010c0bcbdde413b3b61a380b97a5da443437e7046d7f3e18151"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-call-panel.png",
+      "bytes": 107841,
+      "sha256": "3a221f9b1cf8903df075a2dea5880677493f99fd03a4bf1a81fe43b8ef7f51a6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-candidates.json",
+      "bytes": 2524,
+      "sha256": "b2972c57e7086c46382704dd1dca8cc6d56f37dba1611e8e00727fa4429c0004"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-controlled.png",
+      "bytes": 169848,
+      "sha256": "0a14352415f91d8576d61c8d12f48942b93089e1476c758fa940d968986d5baa"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-directory.png",
+      "bytes": 137866,
+      "sha256": "658501062069a284cd7d1df4d9a2c52b409f6aed1f21731e9b8bbc27a8f2b45a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-failure.json",
+      "bytes": 27841,
+      "sha256": "de38eb2626ea5bb76396deea4b265a47aac85daf90add53da4372f3a45e82e36"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-failure.png",
+      "bytes": 301607,
+      "sha256": "c3deed844bb7275d34a481ea40ca1b809d50daebbb58ae3d7f982f3f458d0617"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-floor-panel.png",
+      "bytes": 98889,
+      "sha256": "9df41d3b4eb0d9648d3b1563a68b2f1a4fa03cda449b778efa4f1226f2a11145"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-hall-source.json",
+      "bytes": 939227,
+      "sha256": "9ee9ddf9c2e97f40c47ac46d6c320bcd51284e5a1b3f69455f8f416639fdd813"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-in-cabin.png",
+      "bytes": 193789,
+      "sha256": "f94e260f7b08c347d78ce80de0a3647f89da3211de8382c134cf963201ff2d67"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-returned.png",
+      "bytes": 303146,
+      "sha256": "d65cb0ab9defd3c369fe4988a1ae23bab1692bf6a05cb8dfdc786976e9ac7995"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/lifts-source.json",
+      "bytes": 1777974,
+      "sha256": "072887d1ef35df2b3a5fc29c53e843139c13439c00da441b2b59eb549c0bc0cf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/observer.png",
+      "bytes": 583146,
+      "sha256": "e22e2f54114bbbc5d0074d7523f5e9b425b7778b23aceec37ba07a1a24106f5f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/report.json",
+      "bytes": 145659,
+      "sha256": "045388966da077166ad8ba4a9129557fa34d8450b9d96f87f9f9d79a859febb3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/returned-observer.png",
+      "bytes": 532633,
+      "sha256": "3df7d7675f7861d56e61eed802fb59895deae9b5b0e8bafb42565ddf8b1cfef5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r5/walk-KeyW.png",
+      "bytes": 234484,
+      "sha256": "64d222cd68b1ebb5c3608d56e9d3412fe74459f23deb5654d644b330a869a31b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r5/office-entry-diagnostics.json",
+      "bytes": 15509,
+      "sha256": "d7ae98ef72d4173874255a39982c582d0923437b6f88fe20680b333adbd67b3a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r5/office-entry.json",
+      "bytes": 15670,
+      "sha256": "41f0fbfa231c8e236c630e5004a33a4db732cad09feaf55568c40a108a4e048f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r5/office-entry.png",
+      "bytes": 648530,
+      "sha256": "ca7e6282bf01eb371027f1bcb7a360a6cd2d56a2ea739423a01508733e87b002"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/canonical-controller-source.json",
+      "bytes": 907019,
+      "sha256": "2fe728c432ed267159c05094df7bb5a79eb02e83d46492b5928a0d81e1219b8f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/entered.png",
+      "bytes": 292056,
+      "sha256": "e14c42f6d421ce2f1362a1ff86f478a8b22b3f40498c4c7d30ebc3e2b8befab2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-arrived.png",
+      "bytes": 255996,
+      "sha256": "b37e8bd3428363234bc9514b9af6b52910c4cfef74f0e54a007762f730a4594a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-at-door.png",
+      "bytes": 312584,
+      "sha256": "04160b84677ab573733b22ae62ad151de0991435c4c0ed3277b32480a02afe47"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-call-panel.png",
+      "bytes": 162217,
+      "sha256": "55a95562d597ac558a3144a43668ecc79f2b7a7e9e1f3cac1145ad87d8da89c4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-candidates.json",
+      "bytes": 1832,
+      "sha256": "5622d38e2c5e766f16ed7e168f828b2d47d2ac7877e3214fb90f35bd374cc8c2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-controlled.png",
+      "bytes": 228168,
+      "sha256": "a27e879e26e682242059a78363d04f6482bda49e55a5fa12473469496dbf6c72"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-directory.png",
+      "bytes": 148460,
+      "sha256": "3c3ad5b3b1eb78f554772c84ec06fb3fddce2b63a720ff3c85822861091d43ca"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-exited.png",
+      "bytes": 285529,
+      "sha256": "88e16853099739f82dd51d165d72f7a1ccaeac3ccf4f3cc722759f6f2135f2c5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-floor-panel.png",
+      "bytes": 118309,
+      "sha256": "fab814cd327a2d897e8e0140990ac6f52e3c3ce6328014e4cef6bdab575462f2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-hall-source.json",
+      "bytes": 814734,
+      "sha256": "4ae7a85348e22056c047f2445b0ad124a8b927858a0d0e4b491f543dbf9b7a30"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-in-cabin.png",
+      "bytes": 237673,
+      "sha256": "460c6302ca77a0df0d835b6bcf40d71ad3b789b00a8f18a10db3ef8c3cf831f9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-moving.png",
+      "bytes": 356584,
+      "sha256": "34821cec2fb70082eccf7ff897b1d678439d8fa1726bed59389e3be311bb85f4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-report.json",
+      "bytes": 47870,
+      "sha256": "782e540e50edf494d324d45cab3465d6c7bf70de88d32229971fb53cc4de5464"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-returned.png",
+      "bytes": 299151,
+      "sha256": "2d8e6d48d6a0874f84e6cad0882b11c9405f47ece8854dd502f4686b91a94aff"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/lifts-source.json",
+      "bytes": 1785314,
+      "sha256": "af9d0782152f7d330fdfa24189e360e7bcdec3473239ca68da9de9c6c635cb8c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/observer.png",
+      "bytes": 604071,
+      "sha256": "55a7e7ec85d238e6d4e3cba7e302b896aa0aa7b251b720d187e8ba939a0c23be"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/report.json",
+      "bytes": 212852,
+      "sha256": "8e2a92d1bcaef8767619a7f0473f5b03bb6001b456dfe891dfed866888dd2976"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/returned-observer.png",
+      "bytes": 638068,
+      "sha256": "8f87337451d48c721c66903cc9149f631270b56d7281a356b0f65bd2679b639a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r6/walk-KeyW.png",
+      "bytes": 264496,
+      "sha256": "be8ae11e709a8f200243cb25406e662c4dc99eb67fa5993f89f18a2f4fb44559"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r6/office-entry-diagnostics.json",
+      "bytes": 15517,
+      "sha256": "945a456ee85f4bc47425f79d50f7579d6ee6ddb4ef7c5df08abb38ba90b152d1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r6/office-entry.json",
+      "bytes": 15678,
+      "sha256": "e4339a7b2f2d1f00637336d0317c200948a630fcd4db5c56ea8fba85c96d8636"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r6/office-entry.png",
+      "bytes": 585418,
+      "sha256": "3d454393ee344936ebc55f6b0fa22329f4bf4bdc46574f73c1ea13b608932d24"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/canonical-controller-source.json",
+      "bytes": 906945,
+      "sha256": "8954052053fed0d3255ba733f58030464ce87566cc07ea7d46ffd56c1f8508b6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/entered.png",
+      "bytes": 281213,
+      "sha256": "59c47c41590fe53fc43ee2ab07cce091e0271d9c3f73d0408df44e5a6f5ce05b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/failure.png",
+      "bytes": 356721,
+      "sha256": "f0e86c1d62513fb06050955f3e7e6c1dbce8911062da30151c6dfc1e9cbcbd08"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/lifts-candidates.json",
+      "bytes": 669,
+      "sha256": "c066e930ab04ff29fc0120f65fbaafe583d8e875cd09a04d264c016f6a58ebf1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/lifts-controlled.png",
+      "bytes": 233470,
+      "sha256": "c8805526abf1e6ba4e70431d21bc45b959a7c8c8fcfbda5423c7c91b38a7e282"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/lifts-directory.png",
+      "bytes": 141743,
+      "sha256": "cb787638279668e15701c1f44de023edb9ce25b1d850a895b0f68fa1d462f010"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/lifts-failure.json",
+      "bytes": 24954,
+      "sha256": "1b2b2da28a9040e8e96c14d4374af8b469754ad943190037851bd505983fc9f5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/lifts-failure.png",
+      "bytes": 355553,
+      "sha256": "dd47f5f884d6a9f3cf1cd75dd8750081424ff50174713489b90f463dd8121f0d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/lifts-returned.png",
+      "bytes": 354423,
+      "sha256": "e1228b4b327668a5e4ac82ac5210fe647756026ffbae59a06de8caa9e383d5f4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/lifts-source.json",
+      "bytes": 1785267,
+      "sha256": "7ca7505453c6e07296128ea216d60e06156aa2e6b6477e43a0ee5a6e5b13a84c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/observer.png",
+      "bytes": 620097,
+      "sha256": "2706664a5c445bd9597d3d4ecb3c41c701f2824e3923d920840b49a250dbf73d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/report.json",
+      "bytes": 95354,
+      "sha256": "3de1c4f855ebef5fd26f3832919da0716f768d5a1ffe6bba3b5808c7afef93ab"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/returned-observer.png",
+      "bytes": 481409,
+      "sha256": "0da851bbd26e21124ed00aabaa769e33e8898557be40d635b3b07a3028daa58c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r7/walk-KeyW.png",
+      "bytes": 284960,
+      "sha256": "3bee6d9e3190e85e5c56a401e611c4527c4a82bec2f930580ada0ba4adac38c8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r7/office-entry-diagnostics.json",
+      "bytes": 15489,
+      "sha256": "2c7e3a741322d3400a8c8920f3f2230a545e68cf345694a7575647486fadcba7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r7/office-entry.json",
+      "bytes": 15650,
+      "sha256": "bfe1b27791662751276de324b39787940ee79ad71cdaad6dcfff8d1bf8f17555"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r7/office-entry.png",
+      "bytes": 667757,
+      "sha256": "276625fda2c90dd789a76030545035109da4a23593845377fac9bb07c4fdd153"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/canonical-controller-source.json",
+      "bytes": 906508,
+      "sha256": "720db0e964179debefea5f4b9dadcd07f0bfecd3a40f4ce110c6320dfdd374e1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/entered.png",
+      "bytes": 319031,
+      "sha256": "9a344c4a063ef3eb6101203962abdee363293be08413a4f5d71ba3dd3f41c145"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/failure.png",
+      "bytes": 367169,
+      "sha256": "01320ae270edc8a76575e6c5a39676a2b13427d2efd1dfc0032e7c26e91c9eb1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/lifts-candidates.json",
+      "bytes": 23753,
+      "sha256": "21494f0b38f1e192cdda7b7494089027e27fe5b8f93d690f367ee0444af63b53"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/lifts-directory.png",
+      "bytes": 169601,
+      "sha256": "d1a2d3e84588ebd396fe0f22d3856104997f136b03c9149a371c62ef2cbcd377"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/lifts-failure.json",
+      "bytes": 21732,
+      "sha256": "a11227fc387ba8833c685e5daed76d138792e08788ff747e1b0e24e32a0c4503"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/lifts-failure.png",
+      "bytes": 169654,
+      "sha256": "73695995b77847a2202ed3c1f3892250e83f24f11c5b1341b319fbda28b242cb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/lifts-source.json",
+      "bytes": 1785318,
+      "sha256": "4101f31a4654b92d1645d881ae518c515672e6b459927dd02fc0b67816d5fd9e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/observer.png",
+      "bytes": 694983,
+      "sha256": "a7a918d698b5b6848b3e1a941a9e4a28a667afc32d25cffa662d3c280b814012"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/report.json",
+      "bytes": 70690,
+      "sha256": "6c4237cfc76e59cbdf9682587284b2640edcdf2d8189ca7fb0f0092e41f0248d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/returned-observer.png",
+      "bytes": 716210,
+      "sha256": "8d4541f988dfc92578791b513490ee0488510849639dd396c22e0a64a109f567"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r8/walk-KeyW.png",
+      "bytes": 319379,
+      "sha256": "94291d33f8732ca3e5d83d61cd84b9d0fc3a111ae26dec4db231ec1f3d8b995a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r8/office-entry-diagnostics.json",
+      "bytes": 15530,
+      "sha256": "2a5967407de0b2ea7012b2ca6a6c799bf3f8c9ba0ef55ce1487fea1dbd722091"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r8/office-entry.json",
+      "bytes": 15691,
+      "sha256": "1795c5267121c9e7230048864578fad89bd0f69cb172907ac0f593079db3fd6a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r8/office-entry.png",
+      "bytes": 694516,
+      "sha256": "6d1fc1bf12f6f4dfadf70e235d5ca614d69c6ba7d24cd60150d219b39d074c1b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/canonical-controller-source.json",
+      "bytes": 898844,
+      "sha256": "7496067457c4fe6ce45317ee6d565f15da8dadbcd332879701d946dfd18cd42c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/entered.png",
+      "bytes": 474259,
+      "sha256": "c02a8aa2469c044848206fe07eb0b952187c81100d72c613b4e1e962939eff76"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-arrived.png",
+      "bytes": 305900,
+      "sha256": "fd7151950e1714ddcdf456147da37d61b3f89bcf8f5b831570b93edabae73133"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-at-door.png",
+      "bytes": 257976,
+      "sha256": "e955d17b2cbe28c6a01fdaf80814ed2230425a374724d3500ff5b5c1613f1e5d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-call-panel.png",
+      "bytes": 151084,
+      "sha256": "5a94e2e45d95607536e70f4bc5b897486493fdeb1f22a8534df404f8447ff156"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-candidates.json",
+      "bytes": 23797,
+      "sha256": "6f37f09498188d1450ee0470ef9c5f16ce4685da60b774651ba699c44ba821ea"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-controlled.png",
+      "bytes": 242858,
+      "sha256": "78e07db065f1281902fd8a5dade934ff84d64385f659a2f531d61b0f3678feb9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-directory.png",
+      "bytes": 159426,
+      "sha256": "75b9c9c2458ad55e64bf3cf31685e1a3decd0c05ea588d8b3aab912f99b9b2d6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-exited.png",
+      "bytes": 285204,
+      "sha256": "e7c65850989d36f63bb602e427cd5a89bbd70f0e0e54a326572578ae27f0da88"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-floor-panel.png",
+      "bytes": 133494,
+      "sha256": "f2d3991c99ad9d7d9800ca2f6af1bbe2cdb0907844a8a8f45fc4f875ace51b41"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-hall-source.json",
+      "bytes": 821389,
+      "sha256": "d8a583282c76fc3ce99605c5c89743431a6364b25ec3b4eab4aa4de636bd05be"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-in-cabin.png",
+      "bytes": 260805,
+      "sha256": "03c3e281606d50539f39eeedf2ebf613c361af6d45a12b89973b420516fb0236"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-moving.png",
+      "bytes": 350194,
+      "sha256": "25f69e963f807df39d9656698f87ea89d5a9efa172d70ffd08ee9521f4e0ab33"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-report.json",
+      "bytes": 38761,
+      "sha256": "0e0de33d9b8cfdc57606b923c473215e2fcd6fd22f7e854987ed9feed5843f64"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-returned.png",
+      "bytes": 315339,
+      "sha256": "97e02eed343766441504000586eda647632112456f5c97ecd76c4083557641f8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/lifts-source.json",
+      "bytes": 1769276,
+      "sha256": "9a831b4262475e9eeaa1af0e4084b4ebaa7bd8388252cef26980db01a8c26aa8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/observer.png",
+      "bytes": 703697,
+      "sha256": "4255647417365b2c8d29d7c1c55fc634c00e004c2a6b4358ab47643e3c79c637"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/report.json",
+      "bytes": 204168,
+      "sha256": "2330c36a715c72a643092369513a67a7c3f391a273c7f9125f4270e7e656a0fb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/returned-observer.png",
+      "bytes": 748393,
+      "sha256": "c26aa28442daad6cfb77a9e025919e0b65207e19056aa7ffbea5b94c7a50b1dd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lifts-native-20261017-r9/walk-KeyW.png",
+      "bytes": 460428,
+      "sha256": "ad3c2c227d16bfd3151c3cee8532fdb15f9b3d57b79f57424f875e7973ec47fc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r9/office-entry-diagnostics.json",
+      "bytes": 15539,
+      "sha256": "9fe0d7d0d97960dc6b9e50678484172dba2fd3c4079876fd555f918b088d2573"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r9/office-entry.json",
+      "bytes": 15700,
+      "sha256": "c959a73eae9b09482af11d33120f38e0ffd42ec4c737294f36a161d013bc92e4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lifts-native-20261017-r9/office-entry.png",
+      "bytes": 678755,
+      "sha256": "7e34b8aee72ffe95739fda0e8d57c66f17e1b815cc231af9aaf2e77acdaae069"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-app-tests-r1-20261017.log",
+      "bytes": 15665,
+      "sha256": "f128ad233e24d597ad485cb2aa27be48909dc43a1b2a43f30f052ec8805b6ebf"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-app-tests-r2-20261017.log",
+      "bytes": 17587,
+      "sha256": "e7329e1e921d9486bdc59b1ba93778c0c08230570069b1d2530c3e8be942e0fb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-app-tests-r3-20261017.log",
+      "bytes": 15771,
+      "sha256": "ca5c679d843469e646d8535de4e23b4aa404dd5619ffd3c9b78dd214398bfa19"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-app-tests-r4-20261017.log",
+      "bytes": 15785,
+      "sha256": "a12a170aa683ebb04c8950df1228e866b5f2f832d381b237feac944651aa9c99"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-app-typecheck-r1-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-app-typecheck-r2-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-app-typecheck-r3-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-connection-tests-r1-20261017.log",
+      "bytes": 4244,
+      "sha256": "876a3040ae0eeb9096a61ff92c96fdaa7a91bcd346e780dd479b929fa89f5823"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-connection-tests-r2-20261017.log",
+      "bytes": 4586,
+      "sha256": "99b43279d37b2b5d3c02cf3922e287a6376570d9c0bb97e92b784e5d1792629a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-connection-tests-r3-20261017.log",
+      "bytes": 4699,
+      "sha256": "cddf42f990d5a6910863e3c3bf18efeae3cbd5a43cd5415aa698b955579a9b7b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-ui-build-r1-20261017.log",
+      "bytes": 889,
+      "sha256": "e0e3b805f86b2d6f288717d0941fba79d084851e5bb4486505bd4c180319e0a0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-ui-build-r2-20261017.log",
+      "bytes": 889,
+      "sha256": "c07d121aef2e63f93ae5b6c5e88715a41650887aec823c0fb87f3f0dcc34350f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-ui-build-r3-20261017.log",
+      "bytes": 889,
+      "sha256": "c219f39e8f07ffa66195090412f12b414bd7c90425e91bef041ed13f5445d70c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-ui-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-ui-typecheck-r2-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-ui-typecheck-r3-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-build-r1-20261017.log",
+      "bytes": 585,
+      "sha256": "0e9d77fa8505848d052a326b41d82de964611045574cbd47e119eefdf846b574"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-build-r2-20261017.log",
+      "bytes": 585,
+      "sha256": "afbb816cefb926a6408c39faa31bc19d19ffa1b7b8e1dfa120c6d8619ca845b1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-build-r3-20261017.log",
+      "bytes": 585,
+      "sha256": "0e9d77fa8505848d052a326b41d82de964611045574cbd47e119eefdf846b574"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-build-r4-20261017.log",
+      "bytes": 585,
+      "sha256": "1e601bb6f657ebcafcc89fb2cbb0ed61378f5dcd58597b573b0c1e98983348e0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-build-r5-20261017.log",
+      "bytes": 585,
+      "sha256": "32215e5158126618c81a7e0a6baa2d1e70706f0d0293c32da4b7c8ace15a6448"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-causal-tests-r1-20261017.log",
+      "bytes": 12359,
+      "sha256": "6c8b71745c261e76da5f2bdcdd26ca7e93d5d12c46fd854646f23b25ab55c4c7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-causal-tests-r2-20261017.log",
+      "bytes": 12363,
+      "sha256": "6ed2cedf9ab9228765dcab784d0336df4686f15367d3956fa0f81730c0c0adbc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r1.log",
+      "bytes": 9557,
+      "sha256": "b53d8fd04772ac0821f846a75472406660d9fa03c3ada3ccce908d4c07018540"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r2.log",
+      "bytes": 1407,
+      "sha256": "c059f3918fc087cef69bfea0f440343c04ac5778fbb6dba0f4e55494f3ab6550"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r3.log",
+      "bytes": 1501,
+      "sha256": "42abe84ad098c08703dae54efa4d7c33f1b7b007ad0f3a25ffd5780b9b596fc6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r4.log",
+      "bytes": 2983,
+      "sha256": "96283c0d4a864ea960a892a1b97772ef38533ddf18cfaa267e84c0e33677ad43"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r5.log",
+      "bytes": 3757,
+      "sha256": "028cb77fc0bf66a37dc0c9b2eca024bc031caf8eeb8e93da036743c6ee58c2fd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r6.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r7.log",
+      "bytes": 2476,
+      "sha256": "67b2feb9b5843b4d461a2b935b657bee47bb7f0c5477c919a6d8cfd38798c85e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r8.log",
+      "bytes": 3040,
+      "sha256": "6dfd4e5f4c8cce5cb5bf8286ba63d9c18c08c3942de6620b4763979c6e2c36ea"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-native-20261017-r9.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-tests-r1-20261017.log",
+      "bytes": 1498,
+      "sha256": "c8cd4e6cce47155b0a1b27e5925bd37b7cbaddb948341b9f080344d7092e16b3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-tests-r2-20261017.log",
+      "bytes": 1498,
+      "sha256": "a145e7eb9e79b39dbf339c881d8903840867fffe5ccd8831c1d5279782052380"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-typecheck-r4-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lifts-typecheck-r5-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/audit-restart.ts",
+      "bytes": 3033,
+      "sha256": "58b15193035a70c3fe487c2f545733d2c018416f3841759845c934fff7e270a4"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/backup.log",
+      "bytes": 171,
+      "sha256": "e02b4cab400308b6fe90eadae3faf40435463464756ffb010408518b5d669f72"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/backup.ts",
+      "bytes": 2453,
+      "sha256": "b31a2e04c067f68a9f98f8672fce73fe2b812fca4ac92d439cd1a29050f91a41"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/candidate-routes.json",
+      "bytes": 4718,
+      "sha256": "4194d8402140a2c56a024633568f0fed1120a23f29c7012214f60d95ae40e451"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/candidates.json",
+      "bytes": 10474,
+      "sha256": "5b76d1ecec703f04cbc24e7d3584dc74769125d50d2552666692da0cca30dd6d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/check-served.ts",
+      "bytes": 507,
+      "sha256": "cd30020b418a195f189b9d5b828053172bcf1b17342f5e5d44da6b9f20dcc434"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/check-vite.ts",
+      "bytes": 567,
+      "sha256": "842020246618574b093a5a1b3e46ab2a0f8bdaa4fc38b040defdd0799fb040d2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/diagnose-state.ts",
+      "bytes": 1173,
+      "sha256": "07d21bc7be32337c155a34fd779b41b5593fd5537a99e6c22a6f63355fab17e0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/documentation.ts",
+      "bytes": 11464,
+      "sha256": "48577986739ee4d67a1f0dac5f8222348f9be71671989dce412f7a64ef78a632"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/evidence.ts",
+      "bytes": 8586,
+      "sha256": "fe50b87ea1f8645415d7744bb841cc4828738dfa6e25b96fb08ee918936d43d8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/expanded-candidates.json",
+      "bytes": 24661,
+      "sha256": "76424d1753fdb9d028de376f06430702daa424bcd16d32d3a6ce57ffd7348614"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/inspect-candidates.ts",
+      "bytes": 1897,
+      "sha256": "477743dbf89913d06151e40906e746af4f4cd75cb49ec726a921a1ef376004d8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/inspect-expanded.ts",
+      "bytes": 1587,
+      "sha256": "bc423b6341f95e053f42f782a410287a254f0a9027565bf9d93395b120fdfa50"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/inspect-routes.ts",
+      "bytes": 1003,
+      "sha256": "6d260a55dee1d4a307bc2892c657abb373b3eb689355f878839394bb6bd351d7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/live-diagnostic-3238.json",
+      "bytes": 2221,
+      "sha256": "55ea974a28f32d7c1f20ac02e74a79f1e21190aa6b373173aa1f2c6ca995144a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/live-diagnostic-3241.json",
+      "bytes": 1170,
+      "sha256": "c4c8d68aee02aad249fa81736f8d21ffbdda9a81d4374ad6c28692b255b2dd21"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/packet-audit.json",
+      "bytes": 378,
+      "sha256": "0b5c0b4aba365de5402ca38212b83a5b58eff3aa97161d99e1fef17710bd24cc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/packet-audit.ts",
+      "bytes": 1587,
+      "sha256": "d57cca1282b6c4bc6ccd5e6a3ff3a18e5afe069ac4968838097afc2a83236ab4"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/replay-hall.ts",
+      "bytes": 987,
+      "sha256": "044c551248fdc2f9653b7a9283e81246616dfb68c06c289c779bd4af5e69d40d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/restart-audit.json",
+      "bytes": 647,
+      "sha256": "f224e24987d67d4db31d7ecbcaacb1b6924dfd32aa74342c92f7e82a0bb8a065"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/restart-audit.log",
+      "bytes": 557,
+      "sha256": "df07ce232065a820dade8258ecea293d70872fabfa316c00014f22b9670cb69c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/restart-operation.json",
+      "bytes": 316,
+      "sha256": "de05edefeb4914e81023e274d55839e48a2cb55363d5686efdc87247a5bb87c8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/restart-ready.json",
+      "bytes": 16680,
+      "sha256": "d3c5ef5e28a6d17ab8629e020d0b11a38aae07d4c8047544817666af16fdfe95"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/restart-ready.sqlite",
+      "bytes": 7372800,
+      "sha256": "2a2836aba22a3f1bf6ad7ecef39becfb2a39fb1b938252be1c1e22cfa07a2f94"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/restart.log",
+      "bytes": 144,
+      "sha256": "9ee6cde7427af597c46096c1b31faed83dc5e46b01b6be85b5c94b0502a1e63a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/restart.ps1",
+      "bytes": 2783,
+      "sha256": "d3ffa95283ebfa19b7a9f051c52756c5e0a45ff51d3fd5ba26e013ceb55ab46c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/run-native.ps1",
+      "bytes": 1554,
+      "sha256": "f245acf7f15c0819c03c0a973755ba3a4ccc6b2c90c1a31cc7ad43f20e6d2a3b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/served-connection.js",
+      "bytes": 116771,
+      "sha256": "8fd5e60c3abee427bb162c447544364a2d0ba050d07f56fd6af72d89f5b010af"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/served-scene-after.js",
+      "bytes": 213893,
+      "sha256": "dda93924cbff356e3cac985bdc6bb9bd6b2d44ffa534619abeeabdd3e4a6029d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/served-scene.js",
+      "bytes": 213750,
+      "sha256": "5d835faa7ff4f75c0a94fd25fe928f4abdbd823bfd7155540f60e0c7d9631818"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/server-before.err.log",
+      "bytes": 5365,
+      "sha256": "7f3d9cb376e42da2f845757aa0468f54eef48d93ee30ad493aab4c1e24a56f3f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/server-before.log",
+      "bytes": 723,
+      "sha256": "476405de8ec630ab3a188a0319e945f84a430ff553c9a054ad6a46fac9d00212"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/verify-evidence.ts",
+      "bytes": 693,
+      "sha256": "b696c2abed44466c9745d101ce4dc2b9b0767d083afc76802aa51ad38bc4dbd7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts/vite-cache-refresh.json",
+      "bytes": 282,
+      "sha256": "6d1d7722318c6820a2f9fc3581fa57dea1787ad0e0d1b023b585623437ef5149"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/audit-restart.ts",
+      "bytes": 3047,
+      "sha256": "a185c39bb6e40d418203874ffa8ede647e66092d0f009752475401917849deec"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/backup.log",
+      "bytes": 178,
+      "sha256": "f22ee80d495b1be8e51aa405886bd96b7d9bc5af32b351b83bdd17aa03a8b530"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/backup.ts",
+      "bytes": 2467,
+      "sha256": "40a54a596da89281555a0156d0185d60c98f6626e9e77260bd752ad32021091f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/restart-audit.json",
+      "bytes": 662,
+      "sha256": "2de04e9591c4abcaface4fdbd4bd4788c8e6da39c8b8e644baf3da16f8e2edf7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/restart-audit.log",
+      "bytes": 572,
+      "sha256": "8eab1911081ddc4de8b9499fce4f701ff74bb0b08802a3a4a37da40a1e43a526"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/restart-operation.json",
+      "bytes": 331,
+      "sha256": "05a7356406c39f543f21ceebcc6fb03f2c75754eccb0d9874a3f746b31e601b5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/restart-ready.json",
+      "bytes": 19472,
+      "sha256": "fe9e9465a1752df9bcb7968d732fb3a4305d017933f6db72b12ab4e36d6207ff"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/restart-ready.sqlite",
+      "bytes": 7671808,
+      "sha256": "db240be08b811d9f4b0f5d371ce1bdb8216d0f3f77f236bc9fd54f3c24736e49"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/restart.log",
+      "bytes": 144,
+      "sha256": "674971826134beac8b369f8a11092763556d89259a5f3255249da6fd17296820"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/restart.ps1",
+      "bytes": 2805,
+      "sha256": "cfd30c04b4f0196b35b76e2def7bb6fda84714688dd97f982d0f92324c791dd7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/server-before.err.log",
+      "bytes": 6568,
+      "sha256": "7ca76147e571f556a3344fa1b05ca4d4c6b93c00d2016dd4c3f78fe2ff5f0534"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-causal/server-before.log",
+      "bytes": 723,
+      "sha256": "50b7777987f53ef373fc62cda7763bc4c91e342911a6ec570c716f54f13e4e70"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/audit-restart.ts",
+      "bytes": 3051,
+      "sha256": "cd86645e3d595ebdc0a16748f01c7e9e2761f2afe66ecb86a93ca995cb509f65"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/backup.log",
+      "bytes": 181,
+      "sha256": "2401cc8d474d1b4e64aaed8a3be635544ad3d879a3026238ab2e5edf422b8bdb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/backup.ts",
+      "bytes": 2471,
+      "sha256": "bff302c64835e7838e795c23ca9e2ca0a9c88f8aa0535b55104a09177724142b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/restart-audit.json",
+      "bytes": 651,
+      "sha256": "6ff27361f56ccc7b0c2fc8ead72ecd834a3227de8b7557ec7eb4865a39689739"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/restart-audit.log",
+      "bytes": 561,
+      "sha256": "ada078c253d837afcfe1583c4b22c847c6e809dc447c65e7d1bef7d68376ef3f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/restart-operation.json",
+      "bytes": 320,
+      "sha256": "3f941c8b43364f95290a1dc99074e96121a22b86e6ef4f82ea4e5bc0c5ef2fb2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/restart-ready.json",
+      "bytes": 6162,
+      "sha256": "4104155261c42309b4cda3654323ccd22afcb0e437cea0f37e0fb7604e20b0f9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/restart-ready.sqlite",
+      "bytes": 7782400,
+      "sha256": "71f57e4fcd5c2f8d3f68005d2798ceeb3a67f2ec5c440143dc13d6f410e0f3f2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/restart.log",
+      "bytes": 144,
+      "sha256": "0bd23305949fe4aec6f71c4a55f50f7b4ab6e76b1ea2081c8e48414d49384676"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/restart.ps1",
+      "bytes": 2796,
+      "sha256": "7470ff05769e64a19851b48d32cf3f10b3381014066020b60affd4f3c24b9707"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/server-before.err.log",
+      "bytes": 1105,
+      "sha256": "35db6f4054a2b73609a643037226408922b11f6292c22ce021b86ea22452de9f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lifts-boarding/server-before.log",
+      "bytes": 723,
+      "sha256": "11242701afc752e54b99441995bbb578b22fc3de2f13dfe2e9807a65eacb5d80"
+    }
+  ]
+}

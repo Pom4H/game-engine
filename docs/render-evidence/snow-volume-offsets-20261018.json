@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Canonical Game snow-volume preparation only; private invariant traversal reuse, with unchanged geometry, physical sampling, cache policy and four-build admission.",
+  "status": "Adopted; frozen-class/full-focused Game correctness, TypeScript, build and one fixed-quality native live/movement check passed. Long frames remain.",
+  "change": {
+    "source": "../thegame/src/game/render/snow-volume.ts",
+    "sourceSha256": "ace716910a6ddc8188fe2628c21bd345a761a785790d822e547fb296f0c278b1",
+    "beforeSourceSha256": "d795b84c00403fff99c38d44019708b973b9f74b4b0994c4d6bc41e9c690b82b",
+    "implementation": "Compute the 225 offsets once in a module-private constant, preserving the original z-major then x-major insertion and Math.hypot stable sort. Freeze every pair and the outer array. update() traverses that constant in the original order.",
+    "unchanged": [
+      "Every sourceAt, coldAt, columnSignature, substrate and sample observation in update",
+      "Tile and base cache identity, residency and invalidation",
+      "Four geometry builds per update",
+      "Four-step or forty-step tessellation policy, all triangle rejection rules and normal arithmetic",
+      "Geometry values, tile publication order and enabled/clear behavior"
+    ]
+  },
+  "independentOracle": {
+    "fixture": "../thegame/test/fixtures/snow-volume-before-offsets.ts",
+    "fixtureSha256": "625340a088ba2a3550adfa30f3a523928ea0765abbc05717004956af819777c3",
+    "frozenRestoreProof": "Only the two relative imports were rebased. Reversing those path substitutions restores the exact original source SHA256 d795b84c00403fff99c38d44019708b973b9f74b4b0994c4d6bc41e9c690b82b.",
+    "test": "../thegame/test/snow-volume-offsets.test.ts",
+    "testSha256": "0471a0c41b107da78f71135af4eb57ca7a9e42240ad8d2f3c6c9e9fcad622fca",
+    "newTests": 3,
+    "pairedUpdates": 81,
+    "pairedUpdateBreakdown": {
+      "residencyAndStateTransitions": 70,
+      "independentVolumeLifetimes": 10,
+      "mechanismComparison": 1
+    },
+    "comparisons": [
+      "Every position, normal and index as exact Float64 bytes, including signed zero",
+      "Tile metadata and order, mesh property shape and retained tile object identity",
+      "Complete source callback, method accessor, enabled accessor, substrate-hit getter and sample-height getter observation sequence"
+    ],
+    "scenarios": [
+      "225-tile complete residency, stable cache hits and independent radial tie-order assertion",
+      "Forty-step edit, same-resolution edit with cached substrate, source identity replacement and cold-state change",
+      "Neighborhood movement, remote teleport and residency pruning",
+      "Disabled clearing, re-enable, explicit clear and independent volume caches",
+      "Invalid substrate hits and elevation discontinuities retained by full mesh comparison"
+    ],
+    "mechanism": {
+      "beforeTwoArgumentHypotCallsPerTestUpdate": ">225",
+      "afterTwoArgumentHypotCallsPerTestUpdate": 0,
+      "geometryThreeArgumentHypotCallsBefore": 100,
+      "geometryThreeArgumentHypotCallsAfter": 100,
+      "meaning": "The repeated radial sort is removed; all tested geometry normal work and complete outputs remain identical. This is a deterministic mechanism assertion, not a timing measurement."
+    }
+  },
+  "validation": {
+    "runtime": "Bun 1.4.2 (744846f84)",
+    "command": "bun test ./test/snow-volume-offsets.test.ts ./test/snow-physics.test.ts ./test/snow-cover.test.ts",
+    "files": 3,
+    "testsPassed": 14,
+    "testsFailed": 0,
+    "bunExpectCalls": 221,
+    "additionalAssertions": "Node strict full-byte, metadata, cache identity and complete observation-order comparisons are additional to Bun's expect count.",
+    "log": "../thegame/artifacts/snow-volume-offset-prototype/focused-tests.log",
+    "logSha256": "38b667e1fb7436feaf42a8995ba7491b121086fa81ae4776bf27bc5796be92ae",
+    "typecheck": {
+      "command": "bun x tsc --noEmit",
+      "exitCode": 0,
+      "log": "../thegame/artifacts/snow-volume-offset-prototype/typecheck.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "integrationBuild": {
+      "owner": "Root agent; build completed separately after source freeze",
+      "exitCode": 0,
+      "log": "../thegame/artifacts/render-stability-snow-offsets-build.log",
+      "bundle": "../thegame/artifacts/render-stability-snow-offsets-game.js",
+      "bundleSha256": "86f7694aaa9c3cce3bdefdf75436791d599196518359d3e60d21f29e50e7d41c",
+      "map": "../thegame/artifacts/render-stability-snow-offsets-game.js.map",
+      "mapSha256": "c7b17155a0a66e36e0bfd72b8ec498191afb20732820b90e01a946108c0392ca",
+      "worker": "../thegame/artifacts/render-stability-snow-offsets-worker.js",
+      "unchangedWorkerSha256": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693"
+    }
+  },
+  "reasonForInvestigation": {
+    "profile": "../thegame/artifacts/stalls-browser-mode-worker13-sat-20261018-a1.cpuprofile",
+    "profileSha256": "0a77a15dd9ef9302de9ba59fa6784fd9177789b632b7b615ff6a98b1fa01d78e",
+    "matchingBundleSha256": "1a3a65fe8dab9873e9c5dd1225272daff5f6de9b76af2678d433668e041f4013",
+    "matchingMapSha256": "e0c5eb5e46121e5691ec1129e95557b94aca754b27a2322bdb5c62327dcb6fb0",
+    "analysis": "../thegame/artifacts/stalls-browser-mode-worker13-sat-20261018-a1-hotpaths-reflection.json",
+    "analysisSha256": "43a3e30928f474f13edac50822ce03516400ee635c317449ac8c32aa40a8d71d",
+    "mappedComparator": "src/game/render/snow-volume.ts:14, before adoption",
+    "scoredWindowMs": 30082.09999998808,
+    "comparatorSelfMs": 103.548,
+    "comparatorInclusiveMs": 103.548,
+    "comparatorSelfSamples": 66,
+    "comparatorInclusiveSamples": 66,
+    "interpretation": "Sample counts are CPU observations, not invocation counts or allocation bytes. This identifies already-repeated invariant work; it does not measure the adopted change's time savings. The traced run also contains console.timeStamp instrumentation overhead, and is not an unprofiled FPS comparison."
+  },
+  "limits": [
+    "No native capture or FPS benchmark was executed for this scoped change by the implementing agent.",
+    "No allocation byte, GC reduction, frame-stall removal, GPU improvement or whole-server gain claim follows from this evidence.",
+    "Root's wider integration tests and upcoming native capture are separate evidence and were not pending-result assumptions in this record."
+  ],
+  "updatedUtc": "2026-10-18T05:39:36.320Z",
+  "widerValidation": {
+    "passed": 356,
+    "failed": 0,
+    "bunExpectCalls": 70630,
+    "explicitFiles": 46,
+    "parts": [
+      {
+        "passed": 338,
+        "files": 45,
+        "log": "../thegame/artifacts/render-stability-snow-offsets-game-tests.log"
+      },
+      {
+        "passed": 18,
+        "files": 1,
+        "log": "../thegame/artifacts/render-stability-snow-offsets-roads-tests.log"
+      }
+    ],
+    "manifest": "../thegame/artifacts/render-stability-snow-offsets-test-paths-20261018.json",
+    "scope": "The prior43-suite manifest included roads.test.js. Initial header extraction selected42 TS files, then three snow files; missing18 road test labels were identified by multiset comparison and run separately. All342 previous labels plus14 snow labels passed across the two commands.",
+    "buildLog": "../thegame/artifacts/render-stability-snow-offsets-build.log",
+    "buildExitCode": 0
+  },
+  "native": {
+    "label": "render-stability-snow-offsets-native-20261018",
+    "captureExitCode": 0,
+    "profiled": false,
+    "frames": 900,
+    "warmupFramesRequested": 600,
+    "warmupScope": "Each benchmarkLive invocation also includes its existing30 internal settle frames; no claim of exactly600 physical warmup frames.",
+    "averageFps": 68.77526535789885,
+    "p95Ms": 28.399999999997817,
+    "maxMs": 185.90000000000146,
+    "framesOver33Ms": 15,
+    "framesOver50Ms": 3,
+    "browser": {
+      "mode": "native-gpu",
+      "batterySaverRequested": "off",
+      "backend": "webgpu",
+      "width": 1280,
+      "height": 720,
+      "renderResolution": [
+        704,
+        396
+      ]
+    },
+    "qualityMatches": true,
+    "qualityActual": {
+      "environmentMode": "world",
+      "preset": "clear",
+      "hiz": false,
+      "taa": true,
+      "bloom": false,
+      "groundLitter": true,
+      "motionBlur": 0,
+      "dof": 0,
+      "renderScale": 0.55,
+      "drawDistance": 420,
+      "visual": {
+        "sunElevation": 0.9075712110370514,
+        "sunTemperature": 5700,
+        "skyTurbidity": 2.2,
+        "humidity": 0.42,
+        "cloudCoverage": 0.16,
+        "fogDensity": 0.00065,
+        "wetness": 0,
+        "exposureBias": -0.25,
+        "artificialLightIntensity": 0.02,
+        "sunIntensity": 4.2,
+        "skyIntensity": 0.7
+      }
+    },
+    "rendererErrors": [],
+    "workerReady": true,
+    "workerFailures": 0,
+    "workerMeasured": {
+      "jobsDispatched": 18,
+      "jobsCompleted": 18,
+      "publications": 18,
+      "asyncPublications": 18,
+      "syncPublications": 0,
+      "asyncFirstSight": 18,
+      "asyncReplacement": 0,
+      "syncFirstSightPanel": 0,
+      "syncFirstSightOther": 0,
+      "syncReplacementPanel": 0,
+      "syncReplacementOther": 0,
+      "syncByType": {
+        "truck": 0,
+        "tram": 0,
+        "metro": 0,
+        "bus": 0,
+        "sedan": 0,
+        "sport": 0,
+        "bike": 0,
+        "kukuruznik": 0,
+        "monoplane": 0,
+        "hatch": 0,
+        "wagon": 0,
+        "coupe": 0,
+        "taxi": 0,
+        "suv": 0,
+        "van": 0,
+        "pickup": 0,
+        "classic": 0,
+        "cruiser": 0,
+        "scooter": 0,
+        "bicycle": 0,
+        "cargoBike": 0,
+        "kickScooter": 0,
+        "eScooter": 0,
+        "police": 0,
+        "compact": 0,
+        "crossover": 0,
+        "m3": 0,
+        "v6": 0
+      }
+    },
+    "inputWindow": {
+      "capacity": 48,
+      "minPending": 41,
+      "maxPending": 48,
+      "fullFrames": 362
+    },
+    "windowVisibleFocusedStable": true,
+    "movement": {
+      "status": "online",
+      "frames": 676,
+      "distance": 8.619390615658993,
+      "backwardFrames": 0,
+      "maxBackward": 0,
+      "ticks": 342,
+      "maxPending": 48,
+      "alive": true
+    },
+    "scope": "One current-branch fresh-session native-profile score/movement check; scene history differs from earlier scores. It is not a causal snow-offset FPS comparison, a full-resolution1080p result or an eliminated-freeze claim. Audio autoplay remains locked without user gesture; diagnostic adapter request is separate from the private Engine adapter."
+  },
+  "artifactHashes": {
+    "../thegame/artifacts/performance-live-render-stability-snow-offsets-native-20261018.json": "6149dd59be3d6d84e9860d24b7619cfcd2fbab7271ff52b6f42f96c2c5a8b5da",
+    "../thegame/artifacts/movement-render-stability-snow-offsets-native-20261018.json": "97222b6c344c9b56cc389fc40841817347caf06bf3a79eb7bbe6307681491f48",
+    "../thegame/artifacts/browser-audit-render-stability-snow-offsets-native-20261018.json": "3d05bb0c830226767fc68da79bf0c03643daff2a67c1d50b9506ef5448c9f75b",
+    "../thegame/artifacts/capture-overrides-render-stability-snow-offsets-native-20261018.json": "7a06a350ca49160aba3120271638820f2b0363ca869dc67ff99ce5b1f7bc87ee",
+    "../thegame/artifacts/render-stability-snow-offsets-game.js": "86f7694aaa9c3cce3bdefdf75436791d599196518359d3e60d21f29e50e7d41c",
+    "../thegame/artifacts/render-stability-snow-offsets-game.js.map": "c7b17155a0a66e36e0bfd72b8ec498191afb20732820b90e01a946108c0392ca",
+    "../thegame/artifacts/render-stability-snow-offsets-worker.js": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+    "../thegame/artifacts/render-stability-snow-offsets-game-tests.log": "576e347134082d9ce051ecda509ad9c5f5d9e7218e5d0c559f315b8870d197fa",
+    "../thegame/artifacts/render-stability-snow-offsets-roads-tests.log": "7ef7dd93547eff619b702435d074ac224c87f6b2dee8e72a454f1e049e89e61e"
+  },
+  "supersededPublicBuild": {
+    "detail": "docs/render-evidence/clock-axes-integration-20261018.json",
+    "note": "Its recorded source, bundles, public/archive matches and native score are historical checkpoint facts. Current public Game/map/worker are the clock/axes/ID build; old archives are retained unchanged."
+  }
+}

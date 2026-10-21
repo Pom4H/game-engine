@@ -1,0 +1,1339 @@
+{
+  "date": "2026-10-16T08:44:23.683Z",
+  "status": "Facade material/topology migration verified; full integration/performance goal remains active",
+  "scope": "Actual Game at its sole root entry; original city/Office building surfaces, original authority and physics. No substitute models or playable world.",
+  "implementation": {
+    "material": "Optional owned/validated MaterialSpec.facade {kind: masonry|glazed, night?:0..1}. Explicit source variation seed; generic Engine/Office materials retain defaults.",
+    "formula": "Original metre-based window grid, facade construction colour/mortar/courses/sills, pane recess/mullions/blinds, room colour/emission. Shared architecture kernel is reexported by the diagnostic legacy renderer. Full Engine facade surface restores original filtered micro-normal, dirt and wet response.",
+    "topology": "Removed approximate CPU window clipping and its 101/102/103 pane/frame materials. Original triangles, normals, colours, UVs and variation survive into indexed Engine meshes. Preserve material boundaries and index bounds. No new physics or shadows/colliders.",
+    "gpu": "Main, CPU-instanced, GPU-instanced, planar LOD reflection and probe paths consume authored seeds and facade surface. Reflection instance conversion reads per-instance seed. Emission is added as base*emission before fog.",
+    "abi": {
+      "materialWords": 100,
+      "materialBytes": 400,
+      "frameWords": 180,
+      "frameBytes": 720,
+      "vertexAttributesBytes": 16,
+      "addedUniformBytes": 0,
+      "controls": "Reserved groundDetail.z/w carry facade kind/night; existing offsets and non-facade values preserved."
+    },
+    "knownLimits": [
+      "The adapter retains the existing 20-step night material update bands; continuous source clock fidelity is not proved by endpoint day/night checks.",
+      "The probe shader uses the same facade kernel with rain=0 because its current P frame lacks rain. Wetness/architecture/emission remain supplied; full rainy-probe parity is not claimed.",
+      "Whole-scene lighting, sky, ground materials and reflections still visibly differ from the source renderer."
+    ]
+  },
+  "hashes": {
+    "src/render/facade-surface.ts": "f020bb834c0986562f016f97afa0913937b60a84d4673c741ef1e147c26e82a1",
+    "src/render/webgpu.ts": "a8706e82b0ff72c5e29ae66c6271e56cd2afd1631ee6833012d73f35982be994",
+    "src/render/instancing.ts": "dfe8bd19cb2a0025d6b3a1195c19c48eedde81f517e5bc55a688df9d3dac5535",
+    "test/fixtures/game-facade.wgsl": "14b5705eb0f7401aa353d627780707ca290e780df63a53369b8b46c141e40d92",
+    "test/fixtures/game-facade-material.wgsl": "46c32b73dafdb0d4f2fd909e582350620119cf5caa7af3df1cd0f36c5101393d",
+    "../thegame/src/game/render/the-engine-geometry.ts": "86e73c051f0048ff646f7e3056ed353da0ff51bf4918f5c4b33dcbc62a02204e",
+    "../thegame/src/game/render/the-engine-projection.ts": "2494c46b12c511f74c95a4eeb844d8858ff72811a42b60e77df825cf1401e74f",
+    "performance-scene.json": "5e5b065816d95af73fedf40c12e855960986b61462c76cd7a384259faaa8e0e1"
+  },
+  "commands": {
+    "engine": "bun run typecheck; bun run build; node --test test/mesh-validation.test.mjs test/facade-surface.test.mjs test/ground-litter.test.mjs test/authored-mesh-uv.test.mjs test/material-uniforms.test.mjs test/surface-appearance.test.mjs test/rain-surface.test.mjs test/gpu-visibility.test.mjs test/renderer-post.test.mjs test/canonical-summary.test.mjs test/render-pipeline-plan.test.mjs test/render-visibility-plan.test.mjs test/render-radiance-projection.test.mjs test/scene-appearance-target.test.mjs",
+    "game": "bun run typecheck; bun run build; bun test test/the-engine-renderer.test.ts test/ground-litter-wind.test.ts test/rendering.test.ts test/render-frame.test.ts test/render-presentation-clock.test.ts test/rain-ripples.test.ts",
+    "topology": "bun tools/qa-facade-topology.ts artifacts/geometry-before-facade.mjs",
+    "nativeFacade": "CAPTURE_GPU=1 CAPTURE_PORT=3187 CAPTURE_DEBUG_PORT=3188 THEGAME_CPU_BUDGET=2 ACTIVE_RESIDENT_LIMIT=48 bun tools/capture.ts --engine-facade",
+    "nativeReference": "Same native options, CAPTURE_RENDERER=legacy-webgpu FACADE_REFERENCE=1 bun tools/capture.ts --engine-facade",
+    "nativeRegression": "Same native options, COATING_REUSE_FIXTURE=1 bun tools/capture.ts --engine-litter --engine-rain --engine-coating",
+    "nativePerformance": "Same native options, PERF_LABEL=facade-before PERF_WARMUP_FRAMES=120 PERF_LIVE_FRAMES=180 bun tools/capture.ts --perf --live; after: PERF_LABEL=facade-after PERF_WARMUP_FRAMES=180 PERF_LIVE_FRAMES=900",
+    "nativeProfile": "Same native options, PERF_LABEL=facade-diagnosis PERF_WARMUP_FRAMES=180 PERF_LIVE_FRAMES=300 PERF_PROFILE=1 bun tools/capture.ts --live",
+    "canonicalOffice": "apps/thegame: bun run typecheck; bun test test/canonical-world-view.test.ts",
+    "officeUI": "Installed local tsc --noEmit; vite build"
+  },
+  "checks": {
+    "engine": {
+      "pass": 91,
+      "fail": 0,
+      "log": "artifacts/facade-tests-final.log"
+    },
+    "game": {
+      "pass": 41,
+      "fail": 0,
+      "assertions": 6441,
+      "log": "../thegame/artifacts/facade-tests.log"
+    },
+    "canonicalOffice": {
+      "pass": 11,
+      "fail": 0,
+      "assertions": 4137,
+      "log": "artifacts/facade-office-tests.log"
+    },
+    "typesAndBuilds": "Engine, Game, canonical adapter and Office UI passed. Existing Office Vite large-chunk warning. Targeted suites only."
+  },
+  "topology": {
+    "date": "2026-10-16T08:30:22.042Z",
+    "scope": "Same original MeshBuilder facade/paving/road fixture, Bun compiler and calculated arrays; not native FPS or whole-world RAM acceptance",
+    "baselineSha256": "bf61e82d3a5aa670d96e021a812a040d21d55472a3b4f2f790c08735530e3430",
+    "sourceTriangles": 6012,
+    "before": {
+      "parts": 19,
+      "vertices": 395053,
+      "triangles": 265058,
+      "gpuBytes": 17392468,
+      "numbers": 5538210,
+      "compileMs": 2554.3671999999997
+    },
+    "after": {
+      "parts": 4,
+      "vertices": 12076,
+      "triangles": 6038,
+      "gpuBytes": 519268,
+      "numbers": 175026,
+      "compileMs": 63.797199999999975
+    },
+    "originalFacadeTriangles": 4800,
+    "preservedFacadeGpuSha256": "ca65f3aa49c1b1c4143eab87e28d61c938ea7ef8ddc4fca01d66ed418489de99",
+    "exactSourceFacadeGpuAttributes": true,
+    "exactUnaffectedGpuAttributes": true
+  },
+  "baselineProvenance": {
+    "source": "artifacts/game-before-facade.js",
+    "sha256": "a130f3c09d55d651681e3953ea48e62d56311ad48151b4625ad934e5d77c3eb1",
+    "method": "Extracted unchanged facade/geometry module section from frozen pre-change browser bundle. Shared mesh/material/road helpers import the unchanged implementations. Initial Bun.build outfile option did not persist its output; no baseline is inferred from modified source."
+  },
+  "native": {
+    "facade": {
+      "path": "../thegame/artifacts/engine-facade/report.json",
+      "date": "2026-10-16T08:31:49.745Z",
+      "scope": "Original Office building facade in production Game entry; staged day/night/wet/restored views. Whole lighting changes with presets; differences do not isolate facade emission. Not FPS acceptance or whole renderer parity.",
+      "referenceMode": false,
+      "buildingId": "36117",
+      "view": {
+        "position": [
+          -298,
+          0.04,
+          392.2642122947145
+        ],
+        "eye": [
+          -304.0928635133896,
+          8.25,
+          404.2642122947145
+        ],
+        "target": [
+          -294.34428189196626,
+          8.25,
+          382.2642122947145
+        ]
+      },
+      "kernels": {
+        "samples": 8192,
+        "max": 0,
+        "maxByChannel": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lit": [
+          450,
+          703
+        ]
+      },
+      "differences": {
+        "nightDifference": {
+          "max": 2.2053375244140625,
+          "mean": 0.3378873229958117,
+          "changed": 4096
+        },
+        "wetDifference": {
+          "max": 0.534149169921875,
+          "mean": 0.038742007687687874,
+          "changed": 3348
+        },
+        "restoredDifference": {
+          "max": 0,
+          "mean": 0,
+          "changed": 0
+        }
+      },
+      "stages": [
+        {
+          "name": "day",
+          "preset": "clear",
+          "wetness": 0,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 66,
+            "glazed": 49
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 765652392,
+            "totalSize": 832180224,
+            "embedderHeapUsedSize": 6947720,
+            "backingStorageSize": 70132772
+          }
+        },
+        {
+          "name": "night",
+          "preset": "night",
+          "wetness": 0,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 66,
+            "glazed": 49
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 770089844,
+            "totalSize": 833228800,
+            "embedderHeapUsedSize": 8374616,
+            "backingStorageSize": 74420380
+          }
+        },
+        {
+          "name": "wet",
+          "preset": "clear",
+          "wetness": 0.75,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 66,
+            "glazed": 49
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 783611828,
+            "totalSize": 835588096,
+            "embedderHeapUsedSize": 10041768,
+            "backingStorageSize": 78777032
+          }
+        },
+        {
+          "name": "restored",
+          "preset": "clear",
+          "wetness": 0,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 66,
+            "glazed": 49
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 766960560,
+            "totalSize": 838733824,
+            "embedderHeapUsedSize": 11718664,
+            "backingStorageSize": 83188942
+          }
+        }
+      ]
+    },
+    "reference": {
+      "path": "../thegame/artifacts/engine-facade-reference/report.json",
+      "date": "2026-10-16T08:33:44.770Z",
+      "scope": "Original Office building facade in production Game entry; staged day/night/wet/restored views. Whole lighting changes with presets; differences do not isolate facade emission. Not FPS acceptance or whole renderer parity.",
+      "referenceMode": true,
+      "buildingId": "36117",
+      "view": {
+        "position": [
+          -298,
+          0.04,
+          392.2642122947145
+        ],
+        "eye": [
+          -304.0928635133896,
+          8.25,
+          404.2642122947145
+        ],
+        "target": [
+          -294.34428189196626,
+          8.25,
+          382.2642122947145
+        ]
+      },
+      "kernels": {
+        "samples": 8192,
+        "max": 0,
+        "maxByChannel": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lit": [
+          450,
+          703
+        ]
+      },
+      "differences": {
+        "nightDifference": null,
+        "wetDifference": null,
+        "restoredDifference": null
+      },
+      "stages": [
+        {
+          "name": "day",
+          "preset": "clear",
+          "wetness": 0,
+          "heap": {
+            "usedSize": 870948760,
+            "totalSize": 940699648,
+            "embedderHeapUsedSize": 5254480,
+            "backingStorageSize": 78226107
+          }
+        },
+        {
+          "name": "night",
+          "preset": "night",
+          "wetness": 0,
+          "heap": {
+            "usedSize": 885653408,
+            "totalSize": 941223936,
+            "embedderHeapUsedSize": 5379184,
+            "backingStorageSize": 78317714
+          }
+        },
+        {
+          "name": "wet",
+          "preset": "clear",
+          "wetness": 0.75,
+          "heap": {
+            "usedSize": 871451872,
+            "totalSize": 941748224,
+            "embedderHeapUsedSize": 5628408,
+            "backingStorageSize": 78342151
+          }
+        },
+        {
+          "name": "restored",
+          "preset": "clear",
+          "wetness": 0,
+          "heap": {
+            "usedSize": 883904448,
+            "totalSize": 941748224,
+            "embedderHeapUsedSize": 6010632,
+            "backingStorageSize": 78420854
+          }
+        }
+      ]
+    },
+    "litterRegression": {
+      "path": "../thegame/artifacts/engine-litter/report.json",
+      "date": "2026-10-16T08:35:12.004Z",
+      "scope": "sole Game entry; original pinned world/vehicle and recorded visible paved-patch camera; manual clear weather; litter/wind/time only; Engine 4096 HDR samples, legacy PNGs only; not whole-renderer parity or FPS acceptance",
+      "referenceMode": false,
+      "view": {
+        "position": [
+          -299.6,
+          0.465,
+          -165
+        ],
+        "eye": [
+          -306.6,
+          2.465,
+          -158
+        ],
+        "target": [
+          -309.6,
+          0.515,
+          -160
+        ]
+      },
+      "kernels": {
+        "samples": 12288,
+        "max": 0,
+        "visible": [
+          6,
+          59,
+          144
+        ]
+      },
+      "differences": {
+        "litterDifference": {
+          "max": 1.426025390625,
+          "mean": 0.0022239387035369873,
+          "changed": 11
+        },
+        "windDifference": {
+          "max": 1.426025390625,
+          "mean": 0.004862308502197266,
+          "changed": 28
+        },
+        "timeDifference": {
+          "max": 1.28955078125,
+          "mean": 0.002748161554336548,
+          "changed": 18
+        },
+        "restoredDifference": {
+          "max": 0,
+          "mean": 0,
+          "changed": 0
+        }
+      },
+      "stages": [
+        {
+          "name": "off",
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 97,
+            "glazed": 74
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 930719920,
+            "totalSize": 1006612480,
+            "embedderHeapUsedSize": 24333728,
+            "backingStorageSize": 80369365
+          }
+        },
+        {
+          "name": "on",
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 93,
+            "glazed": 74
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 919927888,
+            "totalSize": 1008316416,
+            "embedderHeapUsedSize": 25601328,
+            "backingStorageSize": 80417491
+          }
+        },
+        {
+          "name": "wind",
+          "time": 7,
+          "wind": [
+            5,
+            -3
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 93,
+            "glazed": 74
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 937144504,
+            "totalSize": 1009037312,
+            "embedderHeapUsedSize": 27032880,
+            "backingStorageSize": 80524301
+          }
+        },
+        {
+          "name": "later",
+          "time": 17,
+          "wind": [
+            5,
+            -3
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 93,
+            "glazed": 74
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 925371448,
+            "totalSize": 1009561600,
+            "embedderHeapUsedSize": 28592680,
+            "backingStorageSize": 80655730
+          }
+        },
+        {
+          "name": "restored",
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 93,
+            "glazed": 74
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 942305552,
+            "totalSize": 1010085888,
+            "embedderHeapUsedSize": 29764944,
+            "backingStorageSize": 80682347
+          }
+        }
+      ]
+    },
+    "rainRegression": {
+      "path": "../thegame/artifacts/engine-rain/report.json",
+      "date": "2026-10-16T08:35:16.248Z",
+      "scope": "sole Game entry; original pinned vehicle/world; wetness and lighting fixed; surface-only staged rain/flow/time, no streak geometry or authority motion; native kernel oracle; Engine 4096 HDR samples, legacy reference PNGs only; not full visual parity/FPS acceptance",
+      "referenceMode": false,
+      "kernels": {
+        "samples": 8192,
+        "max": 0,
+        "nonzeroGround": 518,
+        "nonzeroPaint": 665
+      },
+      "differences": {
+        "rainDifference": {
+          "max": 0.824371337890625,
+          "mean": 0.0027940180152654648,
+          "changed": 131
+        },
+        "flowDifference": {
+          "max": 0.715240478515625,
+          "mean": 0.0003847777843475342,
+          "changed": 21
+        },
+        "timeDifference": {
+          "max": 1.318603515625,
+          "mean": 0.003520360216498375,
+          "changed": 141
+        },
+        "restoredDifference": {
+          "max": 0,
+          "mean": 0,
+          "changed": 0
+        }
+      },
+      "stages": [
+        {
+          "name": "wet-no-rain",
+          "time": 7,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 96,
+            "glazed": 74
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "falling",
+          "time": 7,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 95,
+            "glazed": 74
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "flow",
+          "time": 7,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 95,
+            "glazed": 74
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "later",
+          "time": 7.7,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 95,
+            "glazed": 74
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "restored",
+          "time": 7,
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 95,
+            "glazed": 74
+          },
+          "coatingOverlays": 0
+        }
+      ]
+    },
+    "coatingRegression": {
+      "path": "../thegame/artifacts/engine-coating/report.json",
+      "date": "2026-10-16T08:35:06.566Z",
+      "scope": "sole Game entry, original vehicle and paintSurface geometry, actual Engine HDR; fixed presentation only, no authority pose change; not a performance/full parity gate",
+      "differences": {
+        "diff": {
+          "samples": 4096,
+          "max": 0.2313232421875,
+          "mean": 0.0003630947321653366,
+          "changed": 17
+        }
+      },
+      "stages": [
+        {
+          "name": "clean",
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 95,
+            "glazed": 74
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "scrape",
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 95,
+            "glazed": 74
+          },
+          "coatingOverlays": 1
+        },
+        {
+          "name": "scrape-open",
+          "physicalBodies": 0,
+          "errors": [],
+          "facades": {
+            "masonry": 95,
+            "glazed": 74
+          },
+          "coatingOverlays": 1
+        }
+      ]
+    },
+    "oracle": "8192 native compute samples: both facade kinds; signed metre UVs; four footprints, normals, night/wet/rain values and 16 seeds. All eight channels matched exactly; 450 masonry and 703 glazed samples emitted.",
+    "hdr": "4096 Engine HDR positions per staged view. Night/wet presets alter whole scene lighting; their differences do not isolate facade emission. Restored samples matched exactly. Legacy PNG-only comparison.",
+    "visualReview": {
+      "count": 21,
+      "facadeEngine": [
+        "day",
+        "night",
+        "wet",
+        "restored"
+      ],
+      "facadeLegacy": [
+        "day",
+        "night",
+        "wet",
+        "restored"
+      ],
+      "litter": [
+        "off",
+        "on",
+        "wind",
+        "later",
+        "restored"
+      ],
+      "rain": [
+        "wet-no-rain",
+        "falling",
+        "flow",
+        "later",
+        "restored"
+      ],
+      "coating": [
+        "clean",
+        "scrape",
+        "scrape-open"
+      ],
+      "result": "Window grid, shutters, trim and lit room placement agree with original. Lighting/night brightness and other materials still differ. Paper advects; rain updates; scrape remains attached to the opened original door."
+    }
+  },
+  "performance": {
+    "before": {
+      "path": "../thegame/artifacts/performance-live-facade-before.json",
+      "frames": 180,
+      "averageFPS": 25.878056845464855,
+      "estimatedMeasuredSeconds": 6.955700000000005,
+      "intervalP50Ms": 38.30000000000291,
+      "intervalP95Ms": 58.599999999998545,
+      "browser": {
+        "mode": "native-gpu",
+        "batterySaverRequested": "default",
+        "backend": "webgpu",
+        "width": 1280,
+        "height": 720,
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "settings": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "projection": {
+        "chunks": 127,
+        "entities": 3509
+      },
+      "network": {
+        "status": "online",
+        "transport": "WebTransport / QUIC",
+        "tick": 3813,
+        "serverHz": 55.942683285569295
+      },
+      "gpuErrors": [],
+      "physicalBodies": 0
+    },
+    "after": {
+      "path": "../thegame/artifacts/performance-live-facade-after.json",
+      "frames": 900,
+      "averageFPS": 27.0160745643658,
+      "estimatedMeasuredSeconds": 33.3135,
+      "intervalP50Ms": 37.400000000001455,
+      "intervalP95Ms": 58,
+      "browser": {
+        "mode": "native-gpu",
+        "batterySaverRequested": "default",
+        "backend": "webgpu",
+        "width": 1280,
+        "height": 720,
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "settings": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "projection": {
+        "chunks": 127,
+        "entities": 3026,
+        "facades": {
+          "masonry": 92,
+          "glazed": 72
+        }
+      },
+      "network": {
+        "status": "online",
+        "transport": "WebTransport / QUIC",
+        "tick": 3888,
+        "serverHz": 58.19592628516004
+      },
+      "gpuErrors": [],
+      "physicalBodies": 0
+    },
+    "stagedBefore": {
+      "path": "../thegame/artifacts/performance-facade-before.json",
+      "frames": 60,
+      "summary": {
+        "dynamicMs": {
+          "p50": 1.0999999940395355,
+          "p95": 2
+        },
+        "renderMs": {
+          "p50": 13.099999994039536,
+          "p95": 473.09999999403954
+        },
+        "totalMs": {
+          "p50": 14.300000011920929,
+          "p95": 475.40000000596046
+        },
+        "intervalMs": {
+          "p50": 18.89999999999418,
+          "p95": 514.7000000000044
+        }
+      },
+      "gpu": {
+        "triangles": 1472035,
+        "drawCalls": 567
+      },
+      "browser": {
+        "mode": "native-gpu",
+        "batterySaverRequested": "default",
+        "backend": "webgpu",
+        "width": 1280,
+        "height": 720,
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "settings": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "projection": {
+        "chunks": 127,
+        "entities": 2315
+      },
+      "gpuErrors": [],
+      "physicalBodies": 0
+    },
+    "stagedAfter": {
+      "path": "../thegame/artifacts/performance-facade-after.json",
+      "frames": 60,
+      "summary": {
+        "dynamicMs": {
+          "p50": 1,
+          "p95": 1.4000000059604645
+        },
+        "renderMs": {
+          "p50": 7.5999999940395355,
+          "p95": 38.80000001192093
+        },
+        "totalMs": {
+          "p50": 9,
+          "p95": 40.400000005960464
+        },
+        "intervalMs": {
+          "p50": 10.299999999999272,
+          "p95": 39.400000000001455
+        }
+      },
+      "gpu": {
+        "triangles": 262929,
+        "drawCalls": 359
+      },
+      "browser": {
+        "mode": "native-gpu",
+        "batterySaverRequested": "default",
+        "backend": "webgpu",
+        "width": 1280,
+        "height": 720,
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "settings": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 340,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "projection": {
+        "chunks": 127,
+        "entities": 1887,
+        "facades": {
+          "masonry": 92,
+          "glazed": 72
+        }
+      },
+      "gpuErrors": [],
+      "physicalBodies": 0
+    },
+    "interpretation": "Ordinary live 900-frame observation is 27.02 FPS, p50 37.4 ms/p95 58 ms, about 33.31 measured seconds; not sustained 60 FPS. Before 180-frame observation was 25.88 FPS. These sequential moving worlds differ in population and warmup/sample lengths; no statistical speedup claim. The short staged after run ended with adaptive draw distance 340 m vs before 420 m, and includes streaming/cold work; its CPU timings/triangle counts are not a controlled comparison. Live after ended at 420 m, but adaptive quality was enabled and per-frame distance was not recorded.",
+    "fixtureUnchanged": true,
+    "profile": {
+      "date": "2026-10-16T08:41:42.103Z",
+      "durationMs": 10697.694,
+      "samples": 6265,
+      "self": [
+        {
+          "name": "(program)",
+          "ms": 1613.5369999999987,
+          "url": "",
+          "line": -1,
+          "column": -1
+        },
+        {
+          "name": "update",
+          "ms": 510.6389999999995,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 42839,
+          "column": 8,
+          "source": {
+            "generatedLine": 42839,
+            "generatedColumn": 8,
+            "originalSource": "../../src/game/render/the-engine-projection.ts",
+            "originalLine": 90,
+            "originalColumn": 7
+          }
+        },
+        {
+          "name": "(garbage collector)",
+          "ms": 509.1029999999999,
+          "url": "",
+          "line": -1,
+          "column": -1
+        },
+        {
+          "name": "prepareCameraBatches",
+          "ms": 337.7069999999997,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 41888,
+          "column": 22,
+          "source": {
+            "generatedLine": 41888,
+            "generatedColumn": 22,
+            "originalSource": "../../../game-engine/src/render/webgpu.ts",
+            "originalLine": 1688,
+            "originalColumn": 30
+          }
+        },
+        {
+          "name": "near",
+          "ms": 295.38500000000016,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 5802,
+          "column": 6,
+          "source": {
+            "generatedLine": 5802,
+            "generatedColumn": 6,
+            "originalSource": "../../../game-engine/src/core/spatial-hash.ts",
+            "originalLine": 41,
+            "originalColumn": 6
+          }
+        },
+        {
+          "name": "ellipsoid",
+          "ms": 236.6499999999998,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 20335,
+          "column": 11,
+          "source": {
+            "generatedLine": 20335,
+            "generatedColumn": 11,
+            "originalSource": "../../src/game/runtime/render.js",
+            "originalLine": 24,
+            "originalColumn": 13
+          }
+        },
+        {
+          "name": "rayBox3",
+          "ms": 234.47700000000006,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 6132,
+          "column": 16,
+          "source": {
+            "generatedLine": 6132,
+            "generatedColumn": 16,
+            "originalSource": "../../../game-engine/src/physics/compound.ts",
+            "originalLine": 358,
+            "originalColumn": 23
+          }
+        },
+        {
+          "name": "buildProjection",
+          "ms": 228.29799999999997,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 37747,
+          "column": 17,
+          "source": {
+            "generatedLine": 37747,
+            "generatedColumn": 17,
+            "originalSource": "../../../game-engine/src/render/frame.ts",
+            "originalLine": 86,
+            "originalColumn": 25
+          }
+        },
+        {
+          "name": "appendOversized",
+          "ms": 222.75099999999995,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 5813,
+          "column": 28,
+          "source": {
+            "generatedLine": 5813,
+            "generatedColumn": 28,
+            "originalSource": "../../../game-engine/src/core/spatial-hash.ts",
+            "originalLine": 46,
+            "originalColumn": 26
+          }
+        },
+        {
+          "name": "same",
+          "ms": 188.22199999999987,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 42716,
+          "column": 11,
+          "source": {
+            "generatedLine": 42716,
+            "generatedColumn": 11,
+            "originalSource": "../../src/game/render/the-engine-projection.ts",
+            "originalLine": 12,
+            "originalColumn": 11
+          }
+        },
+        {
+          "name": "writeTexture",
+          "ms": 172.35599999999994,
+          "url": "",
+          "line": -1,
+          "column": -1
+        },
+        {
+          "name": "gameInstancePose",
+          "ms": 170.06399999999996,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 42681,
+          "column": 25,
+          "source": {
+            "generatedLine": 42681,
+            "generatedColumn": 25,
+            "originalSource": "../../src/game/render/the-engine-geometry.ts",
+            "originalLine": 101,
+            "originalColumn": 32
+          }
+        },
+        {
+          "name": "collect",
+          "ms": 165.546,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 42086,
+          "column": 9,
+          "source": {
+            "generatedLine": 42086,
+            "generatedColumn": 9,
+            "originalSource": "../../../game-engine/src/render/webgpu.ts",
+            "originalLine": 1783,
+            "originalColumn": 17
+          }
+        },
+        {
+          "name": "needsPrepare",
+          "ms": 155.436,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 41650,
+          "column": 14,
+          "source": {
+            "generatedLine": 41650,
+            "generatedColumn": 14,
+            "originalSource": "../../../game-engine/src/render/webgpu.ts",
+            "originalLine": 1540,
+            "originalColumn": 22
+          }
+        }
+      ],
+      "inclusive": [
+        {
+          "name": "(root)",
+          "ms": 10694.645,
+          "url": "",
+          "line": -1,
+          "column": -1
+        },
+        {
+          "name": "frame",
+          "ms": 7995.996000000002,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 47586,
+          "column": 16,
+          "source": {
+            "generatedLine": 47586,
+            "generatedColumn": 16,
+            "originalSource": "../../src/game/client.ts",
+            "originalLine": 300,
+            "originalColumn": 15
+          }
+        },
+        {
+          "name": "drawStage",
+          "ms": 7454.121000000002,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 47523,
+          "column": 20,
+          "source": {
+            "generatedLine": 47523,
+            "generatedColumn": 20,
+            "originalSource": "../../src/game/client.ts",
+            "originalLine": 259,
+            "originalColumn": 19
+          }
+        },
+        {
+          "name": "render",
+          "ms": 4584.105000000001,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 43926,
+          "column": 8,
+          "source": {
+            "generatedLine": 43926,
+            "generatedColumn": 8,
+            "originalSource": "../../src/game/render/renderer.ts",
+            "originalLine": 144,
+            "originalColumn": 7
+          }
+        },
+        {
+          "name": "render",
+          "ms": 4576.843000000002,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 43074,
+          "column": 8,
+          "source": {
+            "generatedLine": 43074,
+            "generatedColumn": 8,
+            "originalSource": "../../src/game/render/the-engine-renderer.ts",
+            "originalLine": 39,
+            "originalColumn": 7
+          }
+        },
+        {
+          "name": "render",
+          "ms": 3163.553000000001,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 40889,
+          "column": 8,
+          "source": {
+            "generatedLine": 40889,
+            "generatedColumn": 8,
+            "originalSource": "../../../game-engine/src/render/webgpu.ts",
+            "originalLine": 1128,
+            "originalColumn": 8
+          }
+        },
+        {
+          "name": "measure",
+          "ms": 2922.404,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 38839,
+          "column": 9,
+          "source": {
+            "generatedLine": 38839,
+            "generatedColumn": 9,
+            "originalSource": "../../../game-engine/src/render/profiler.ts",
+            "originalLine": 94,
+            "originalColumn": 12
+          }
+        },
+        {
+          "name": "(program)",
+          "ms": 1613.5369999999987,
+          "url": "",
+          "line": -1,
+          "column": -1
+        },
+        {
+          "name": "dynamicScene",
+          "ms": 1612.7769999999998,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 24824,
+          "column": 21,
+          "source": {
+            "generatedLine": 24824,
+            "generatedColumn": 21,
+            "originalSource": "../../src/game/presentation.ts",
+            "originalLine": 222,
+            "originalColumn": 28
+          }
+        },
+        {
+          "name": "update",
+          "ms": 1276.3579999999995,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 42839,
+          "column": 8,
+          "source": {
+            "generatedLine": 42839,
+            "generatedColumn": 8,
+            "originalSource": "../../src/game/render/the-engine-projection.ts",
+            "originalLine": 90,
+            "originalColumn": 7
+          }
+        },
+        {
+          "name": "drawCachedVehicle",
+          "ms": 1215.113,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 24707,
+          "column": 26,
+          "source": {
+            "generatedLine": 24707,
+            "generatedColumn": 26,
+            "originalSource": "../../src/game/presentation.ts",
+            "originalLine": 160,
+            "originalColumn": 26
+          }
+        },
+        {
+          "name": "drawVehicle",
+          "ms": 1153.753,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 24230,
+          "column": 20,
+          "source": {
+            "generatedLine": 24230,
+            "generatedColumn": 20,
+            "originalSource": "../../src/game/runtime/scene.js",
+            "originalLine": 126,
+            "originalColumn": 27
+          }
+        },
+        {
+          "name": "drawAircraft",
+          "ms": 1031.216,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 22051,
+          "column": 21,
+          "source": {
+            "generatedLine": 22051,
+            "generatedColumn": 21,
+            "originalSource": "../../src/game/flight/model.ts",
+            "originalLine": 24,
+            "originalColumn": 28
+          }
+        },
+        {
+          "name": "draw",
+          "ms": 958.0210000000003,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 17481,
+          "column": 6,
+          "source": {
+            "generatedLine": 17481,
+            "generatedColumn": 6,
+            "originalSource": "../../src/game/render/rain.ts",
+            "originalLine": 15,
+            "originalColumn": 5
+          }
+        },
+        {
+          "name": "floor",
+          "ms": 953.3680000000003,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 44827,
+          "column": 7,
+          "source": {
+            "generatedLine": 44827,
+            "generatedColumn": 7,
+            "originalSource": "../../src/game/world.ts",
+            "originalLine": 246,
+            "originalColumn": 6
+          }
+        },
+        {
+          "name": "(anonymous)",
+          "ms": 953.3680000000003,
+          "url": "http://127.0.0.1:3187/build/game.js?v=1gpmv-mvapw0yl",
+          "line": 47556,
+          "column": 192,
+          "source": {
+            "generatedLine": 47556,
+            "generatedColumn": 192,
+            "originalSource": "../../src/game/client.ts",
+            "originalLine": 274,
+            "originalColumn": 177
+          }
+        }
+      ]
+    },
+    "profileScope": "Separate 300-frame CPU-sampled diagnostic run, not an unprofiled FPS score. Next targets: dynamic aircraft reconstruction, Engine projection/batch preparation, spatial/compound queries and rain floor queries."
+  },
+  "failuresAndRepairs": [
+    "Initial standalone WGSL oracle wrapper reused the rain parameter name and did not compile. Diagnostic messages now retain text/line instead of empty GPUCompilationMessage objects.",
+    "Second oracle found only normal error <=1.1920929e-7. Source wet response always renormalizes its normal even at zero facade puddle coverage; restoring that operation gave exact eight-channel agreement.",
+    "Initial Bun.build outfile option did not persist the compiler module. The durable baseline is the unchanged module section extracted from the frozen pre-change browser bundle, with unchanged shared mesh/road helpers; provenance and SHA are recorded.",
+    "First canonical Office check did not run because its redirected relative log directory was absent. Corrected path then passed typecheck and all 11 tests."
+  ],
+  "canonical": {
+    "checkedAt": "2026-10-16T08:44:23.702Z",
+    "seed": 29,
+    "revision": 13,
+    "players": 0,
+    "characterMotor": "the-engine",
+    "rigidBodySolver": "the-engine-compound",
+    "vehicleStepHz": 120,
+    "servedBundleSha256": "2202bac80e9d4354f105f65f2d172f5ff2f61e7b1b1dc34c05e87e7735f37e09",
+    "diskBundleSha256": "2202bac80e9d4354f105f65f2d172f5ff2f61e7b1b1dc34c05e87e7735f37e09",
+    "serverRestarted": false
+  },
+  "remaining": [
+    "Live game frame time remains roughly 37 ms; 60 FPS not achieved.",
+    "Continuous facade night/rain-probe inputs and complete scene visual parity.",
+    "Actual Office GUI GPU/FPS and physical microphone/new native audio service verification were not part of this pass.",
+    "Full original Game/Engine/Office integration acceptance remains unproven; goal stays active."
+  ]
+}

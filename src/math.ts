@@ -25,6 +25,11 @@ export function multiply4(a: ArrayLike<number>, b: ArrayLike<number>): Mat4 {
   return out;
 }
 
+/** Writes into renderer-owned scratch memory; out must not alias either input. */
+export function multiply4Into(a:ArrayLike<number>,b:ArrayLike<number>,out:Float32Array):void{
+  for(let column=0;column<4;column++)for(let row=0;row<4;row++)out[column*4+row]=a[row]!*b[column*4]!+a[4+row]!*b[column*4+1]!+a[8+row]!*b[column*4+2]!+a[12+row]!*b[column*4+3]!;
+}
+
 export function perspective(fovRadians: number, aspect: number, near = 0.05, far = 10_000): Mat4 {
   const f = 1 / Math.tan(fovRadians / 2), range = 1 / (near - far);
   return new Float32Array([f / aspect,0,0,0, 0,f,0,0, 0,0,far*range,-1, 0,0,near*far*range,0]);

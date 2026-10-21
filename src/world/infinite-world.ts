@@ -31,6 +31,7 @@ interface Entry<T>{
 
 export class InfiniteWorld<T>{
   private readonly entries=new Map<string,Entry<T>>();
+  private readonly failed=new Set<string>();
   private wanted:readonly WorldTileDemand[]=[];
   private deferredCount=0;
   private updateId=0;
@@ -50,9 +51,10 @@ export class InfiniteWorld<T>{
   update(demands:readonly WorldTileDemand[]):InfiniteWorldStats{
     if(this.disposed)throw new Error('InfiniteWorld is disposed');
     this.updateId++;
+    this.failed.clear();
     const unique=new Set<string>();
     for(const demand of demands){if(unique.has(demand.key))throw new TypeError('duplicate tile demand: '+demand.key);unique.add(demand.key);}
-    this.wanted=Object.freeze([...demands].sort((a,b)=>b.priority-a.priority||a.distanceM-b.distanceM||a.key<b.key?-1:a.key>b.key?1:0).slice(0,this.maxResident));
+    this.wanted=Object.freeze([...demands].sort((a,b)=>b.priority-a.priority||a.distanceM-b.distanceM||(a.key<b.key?-1:a.key>b.key?1:0)).slice(0,this.maxResident));
     this.deferredCount=Math.max(0,demands.length-this.wanted.length);
     const admitted=new Set(this.wanted.map(d=>d.key));
     for(const demand of this.wanted){
@@ -106,16 +108,22 @@ export class InfiniteWorld<T>{
     let pending=0;for(const entry of this.entries.values())if(entry.state==='loading')pending++;
     for(const demand of this.wanted){
       if(pending>=this.maxConcurrent||this.entries.size>=this.maxResident)break;
-      if(this.entries.has(demand.key))continue;
+      if(this.entries.has(demand.key)||this.failed.has(demand.key))continue;
       const controller=new AbortController(),generation=++this.generation,entry:Entry<T>={demand,state:'loading',lastWanted:this.updateId,generation,controller};
       this.entries.set(demand.key,entry);pending++;
-      entry.task=Promise.resolve(this.hooks.generate(demand,controller.signal)).then(value=>{
+      entry.task=Promise.resolve().then(()=>this.hooks.generate(demand,controller.signal)).then(value=>{
         if(this.disposed||controller.signal.aborted||this.entries.get(demand.key)!==entry||entry.generation!==generation)return;
-        entry.value=value;entry.state='ready';delete entry.task;this.hooks.install?.(entry.demand,value);
+        entry.value=value;entry.state='ready';this.hooks.install?.(entry.demand,value);
       }).catch(error=>{
         if(this.entries.get(demand.key)===entry)this.entries.delete(demand.key);
-        if(!controller.signal.aborted)this.hooks.onError?.(demand,error);
-      }).finally(()=>{if(this.entries.get(demand.key)===entry&&entry.state==='loading')this.entries.delete(demand.key);this.startMore();});
+        if(!controller.signal.aborted){this.failed.add(demand.key);this.hooks.onError?.(demand,error);}
+      }).finally(()=>{
+        // Keep the task visible until the next generation batch has been started,
+        // otherwise flush can finish in the gap between then and finally.
+        delete entry.task;
+        if(this.entries.get(demand.key)===entry&&entry.state==='loading')this.entries.delete(demand.key);
+        this.startMore();
+      });
     }
   }
   private evict(key:string,entry:Entry<T>):void{

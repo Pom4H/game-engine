@@ -3,7 +3,10 @@ import type {SnowContactSurfaceOptions} from '../environment/surface-contacts.js
 import type {Vec3} from '../math.js';
 import type {MaterialKind} from '../materials/catalog.js';
 import type {EnvironmentSpec} from '../environment/types.js';
-import type {MaterialFinish,MaterialTreatment} from '../materials/surface.js';
+import type {MaterialFinish,MaterialTreatment,SurfaceAppearance} from '../materials/surface.js';
+import type {FacadeSpec} from '../render/facade-surface.js';
+import type {GroundLitterSpec} from '../render/ground-litter.js';
+import type {RainResponse,SurfaceWeatherSpec} from '../render/rain-surface.js';
 import type {SceneDeformationSpec} from '../physics/deformation.js';
 import type {FluidVolumeSpec} from '../physics/fluid.js';
 import type {WindVolumeSpec} from '../physics/wind.js';
@@ -13,7 +16,7 @@ import type {VehicleAir,VehicleControls,VehicleSpec} from '../vehicles/vehicle.j
 export type Color = readonly [number,number,number,number];
 export type Primitive =
   | {kind:'box'; size?:Vec3}
-  | {kind:'triangle-mesh';positions:readonly number[];normals:readonly number[];indices:readonly number[]; /** Optional sRGB vertex albedo, RGBA per vertex in [0,1]. */ colors?:readonly number[]}
+  | {kind:'triangle-mesh';positions:readonly number[];normals:readonly number[];indices:readonly number[]; /** Optional authored UV pairs, including signed coordinates. */ uvs?:readonly number[]; /** Additive procedural variation, one value per vertex. */ variationSeeds?:readonly number[]; /** Optional sRGB vertex albedo, RGBA per vertex in [0,1]. */ colors?:readonly number[]}
   | {kind:'torus';radius:number;tube:number;segments?:number}
   | {kind:'cylinder'; radius:number; height:number; topRadius?:number; segments?:number}
   | {kind:'snowdrift'; size:Vec3; seed:number; segments?:number; continuous?:boolean; offset?:number}
@@ -26,7 +29,10 @@ export type Primitive =
  * Relative URLs resolve against the document URL. The renderer owns image/GPU
  * loading and cache lifetime; authoring code supplies only this descriptor. */
 export interface SurfaceTextureSpec {
-  /** Optional albedo/height image. At least one map URL must be present. */
+  /** Finite source terrain uses absolute authored X/Z UVs and its water mask.
+   * The default retains the existing world triplanar image path. */
+  readonly projection?:'triplanar'|'terrain-map';
+  /** Optional albedo image. At least one map URL must be present. */
   readonly url?:string;
   /** World-space repeat size in metres; defaults to 1. */
   readonly sizeM?:number;
@@ -35,15 +41,18 @@ export interface SurfaceTextureSpec {
   /** Blend of image albedo with the base material; defaults to 1. */
   readonly albedoStrength?:number;
   /** Optional tangent-space normal detail, projected with the same world scale. */
+  readonly heightUrl?:string;
+  /** Inward distance from the raster shell, in metres. White=0, black=-scale. */
+  readonly heightScaleM?:number;
   readonly normalUrl?:string;
   readonly normalStrength?:number;
   /** Optional glTF-style ORM map: R=occlusion, G=roughness, B=metalness. */
   readonly ormUrl?:string;
   readonly ormStrength?:number;
 }
-export interface MaterialSpec { texture?:SurfaceTextureSpec; label?:string; /** Painted lettering in sRGB; defaults to the existing pale gold. */ labelColor?:readonly[number,number,number]; roughness?:number; metalness?:number; /** Dielectric top-coat intensity independent of the base layer. */ clearcoat?:number; clearcoatRoughness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
+export interface MaterialSpec { facade?:FacadeSpec; /** Authored procedural seed; otherwise derived from entity identity. */ variationSeed?:number; groundLitter?:GroundLitterSpec; /** Optical rain kernels; absent keeps the existing material path. */ rainResponse?:RainResponse; /** Final optical state from an external simulation; never advances surface physics. */ surfaceAppearance?:SurfaceAppearance; /** UV-space coating overlay. Its supporting surface supplies collision and shadow. */ decal?:{kind:'coating-loss';severity:number;seed:number}; texture?:SurfaceTextureSpec; label?:string; /** Painted lettering in sRGB; defaults to the existing pale gold. */ labelColor?:readonly[number,number,number]; roughness?:number; metalness?:number; /** Dielectric top-coat intensity independent of the base layer. */ clearcoat?:number; clearcoatRoughness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
 export type SurfaceUse='generic'|'road'|'sidewalk'|'curb';
-export interface EnvironmentalSpec { /** Appearance inherited by engine-generated snow cover; the base surface retains its own material. */ snowMaterial?:MaterialSpec; surfaceUse?:SurfaceUse; /** Initial settled snow, in metres. */ snowDepthM?:number; iceDepthM?:number; waterDepthM?:number }
+export interface EnvironmentalSpec { /** Appearance inherited by engine-generated snow cover; the base surface retains its own material. */ snowMaterial?:MaterialSpec; surfaceUse?:SurfaceUse; /** Initial settled snow, in metres. */ snowDepthM?:number; iceDepthM?:number; waterDepthM?:number; /** Weather/contact field spacing; detailed SnowSurface impressions keep their own resolution. */ fieldCellSizeM?:number }
 export interface BodySpec {
   /** 0 is static. Dynamic mass may be explicit; material density is available to engine-generated fragments. */
   mass?:number;
@@ -59,6 +68,8 @@ export interface BodySpec {
   fluid?:{readonly enclosedVolumeM3:number;readonly leakAreaM2?:number};
 }
 export interface EntitySpec {
+  /** Attached render geometry whose collision is owned by its parent assembly. */
+  visualOnly?:boolean;
   id:string;
   position?:Vec3;
   rotation?:Vec3;
@@ -69,6 +80,10 @@ export interface EntitySpec {
   renderMesh?:Primitive;
   /** Pure projection entity. It never creates a collider, even for brittle visual materials such as glass. */
   renderOnly?:boolean;
+  /** Visual visibility only. Hiding never moves an entity or removes its collider. */
+  renderVisible?:boolean;
+  /** Primary camera only; shadows, reflections and physical state are retained. */
+  renderCameraVisible?:boolean;
   material?:MaterialSpec;
   environmental?:EnvironmentalSpec;
   light?:LightSpec;
@@ -82,7 +97,7 @@ export interface LightEmissionSpec {
   /** Rectangular glass enclosure centred on the emitter; top/bottom are opaque. */
   boxHalfSize?:Vec3; frameWidthM?:number;
 }
-export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number; emission?:LightEmissionSpec }
+export interface LightSpec { kind:'point'; color?:readonly[number,number,number]; intensity?:number; range?:number; emission?:LightEmissionSpec; /** Opt into a bounded nearby spotlight shadow map. Requires a polar emission cone narrower than 90 degrees. */ castShadow?:boolean }
 export interface CameraIntrinsicsSpec {
   /** Focal lengths in pixels of the calibration image. */
   fx:number; fy:number;
@@ -132,6 +147,10 @@ export interface ReflectionProbeSpec {
   boxHalfExtents?:Vec3;
 }
 export interface RenderingSpec {
+  /** Rain input from the presented simulation frame, with absolute render origin. */
+  surfaceWeather?:SurfaceWeatherSpec;
+  /** Continuous presented night factor for architectural materials; absent keeps each material's night. */
+  facadeNight?:number;
   sunDirection?:Vec3; sunColor?:Vec3; skyColor?:Vec3;
   sunIntensity?:number; fogDensity?:number; exposure?:number; shadowExtent?:number;
   /** Linear diffuse irradiance, independent of the visible sky/background. */
@@ -145,6 +164,9 @@ export interface RenderingSpec {
   /** Clear near zone, then a linear extinction ramp along the viewing ray. */
   fogStartDistance?:number; fogRampDistance?:number;
   reflectionProbe?:ReflectionProbeSpec;
+  /** World grid for the synthetic distant reflection proxy; defaults to 0.5 m.
+   * Nearby reflections continue to use SSR and explicit local probes. */
+  environmentProbeGridM?:number;
   /** Measured HDR environment. When present it replaces the synthetic distant-radiance proxy. */
   environmentRadiance?:EnvironmentRadianceSpec;
 }
@@ -152,7 +174,7 @@ export interface AppearanceMaterialPatch {
   readonly id?:string;
   readonly idPrefix?:string;
   readonly treatment?:MaterialTreatment;
-  readonly set:Readonly<Pick<MaterialSpec,'color'|'roughness'|'metalness'|'clearcoat'|'clearcoatRoughness'>>;
+  readonly set:Readonly<Pick<MaterialSpec,'color'|'roughness'|'metalness'|'clearcoat'|'clearcoatRoughness'|'emissive'|'surfaceAppearance'|'rainResponse'|'groundLitter'|'variationSeed'|'facade'|'texture'>>;
 }
 export interface AppearancePatch {
   readonly rendering?:Partial<RenderingSpec>;

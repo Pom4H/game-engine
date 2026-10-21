@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-18",
+  "problem": "The shared Engine game backend projected vehicle headlight cones as local lights but had no local-light occlusion maps. Previous shadow filtering fixes covered sun shadows only.",
+  "implementation": {
+    "optIn": "LightSpec.castShadow on polar cones; TheGame enables it for full headlamps and excludes aggregate diffuse-only lights.",
+    "budget": "Two nearby independent 512x512 depth layers; stable source slots, distance fade at 25..45m; 2 MiB depth storage.",
+    "casters": "Separate light-frustum culling, same opacity/decal/emission eligibility as sun shadows, ordinary and relief geometry, shared GPU instance streams and independent per-light instance lists.",
+    "receivers": "Depth comparisons attenuate diffuse, specular and coat direct-light terms together, leaving unrelated lights and environment reflections intact.",
+    "lifecycle": "Removed/off lights clear grid slots; map/frame/receiver buffers are disposed; GPU timestamps include both local shadow passes. Allocation/pass counts are included in renderer diagnostics.",
+    "limits": "Only the nearest two opted-in beams cast local shadows. Volumetric fog transport is not shadowed. Native performance was not benchmarked."
+  },
+  "verification": {
+    "engineTypesAndBuild": "bun run typecheck; bun run build: passed",
+    "engineTests": "node --test test/spot-shadow.test.mjs test/render-pipeline-readiness.test.mjs test/shadow-stability.test.mjs test/render-visibility-plan.test.mjs test/render-pipeline-plan.test.mjs test/renderer-post.test.mjs test/render-profiler.test.mjs: 50 passed",
+    "gameTypes": "bun run typecheck in ../thegame: passed",
+    "gameTests": "bun test ./test/the-engine-renderer.test.ts ./test/headlight-shadows.test.ts: 27 passed / 3267 assertions",
+    "gameBuild": "bun run build in ../thegame: passed; production user tab reloaded and reconnected",
+    "gpuRegression": {
+      "fixture": "tools/render-stability/headlight-shadow-check.html",
+      "status": "passed",
+      "checks": 6,
+      "sameWallPointUnshadowedRedHDR": 0.5810546875,
+      "sameWallPointBlockedRedHDR": 0.01129913330078125,
+      "sameWallPointAfterMovingBlockerRedHDR": 0.57763671875,
+      "unobstructedControlBeforeAndAfter": [0.53125, 0.53125],
+      "sharedGPUInstancing": true,
+      "rendererErrors": []
+    },
+    "liveGame": "Viewed current taxi and nearby traffic in night preset with TAA enabled, no captured browser error logs. Frame retained; quantitative light/blocker verification belongs to the controlled production-renderer fixture, not a pixel-matched live traffic replay.",
+    "descriptorReference": "Refreshed shader/layout fingerprints for the intentional new shadow bindings. Previous reference retained at artifacts/reflection-qa/pipeline-descriptors-before-spot-shadows.json and recorded by previousReferenceSha256.",
+    "artifacts": ["artifacts/reflection-qa/headlight-occlusion.jpg", "artifacts/reflection-qa/headlight-occlusion-final.json", "artifacts/reflection-qa/headlights-game-night.jpg"]
+  }
+}

@@ -1,0 +1,314 @@
+{
+  "date": "2026-10-18",
+  "status": "source_frozen_focused_correctness_passed_integrated_native_pending",
+  "change": "Hoist only the capturing passes function from occupancy boxesPenetrate into a private noncapturing passesAxis helper. Retain exact arithmetic, [a.axes,b.axes] outer array, iteration/read/coercion order and short circuits. No new cache, geometry, policy, rates, caps or navigation budget.",
+  "source": "../game-engine/src/physics/box-overlap.ts",
+  "sourceBeforeSha256": "e8ac0b4f840d46b3feaae2a93e615014ab1b037c6843616e60c4ee233c75d550",
+  "hashes": {
+    "../game-engine/src/physics/box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+    "../game-engine/dist/physics/box-overlap.js": "ad64dbbfea51fbec5adda62752ec4582a7fcc020e75b3be483eb0d1e79989288",
+    "../game-engine/test/box-overlap-axis-closure.test.mjs": "7d08664b670810b187f4aa3fe2f680685c93b61e2a5a59f7df001bb0a90a2c5b",
+    "../game-engine/test/fixtures/box-overlap-before-axis-closure.mjs": "594f3c1bc448e57fc9fc75e39ae28f208e0877ef328767254e24273bab7c4ac2",
+    "artifacts/network-stability-20261018/authority-allocation-candidate-counts-current-20261018.json": "90d7c1a72f05f65df3e1f849713472650751e8741e32715a68c98f01698553ba",
+    "artifacts/network-stability-20261018/sat-canonical-arguments-current-20261018.json": "a362671e80e33c0fbdbddfd108f0930f7af2f9f847f1396fff5a848cac34f198",
+    "artifacts/network-stability-20261018/sat-canonical-arguments-current-20261018-paired-benchmark.json": "b00c1a28b477719a222522b04002e3765717b9dc7481239516546065406f87d3"
+  },
+  "productionFunctionBodiesMatchMeasuredPrototype": true,
+  "counts": {
+    "scope": "Instrumented unchanged80-resident/720tick authority fixture,120warm/600measured; no timing or allocation-byte attribution.",
+    "measured": {
+      "satCalls": 2419250,
+      "satTrue": 1462,
+      "satFalse": 2417788,
+      "footingCalls": 49684,
+      "nonemptyActiveSnapshots": 49684,
+      "activeSnapshotReferences": 519010,
+      "maxActiveSnapshot": 18
+    },
+    "measuredPhases": {
+      "population/residentsStep": {
+        "satCalls": 2351188,
+        "satTrue": 1393,
+        "satFalse": 2349795,
+        "footingCalls": 48980,
+        "nonemptyActiveSnapshots": 48980,
+        "activeSnapshotReferences": 511576,
+        "maxActiveSnapshot": 18
+      },
+      "population/traffic": {
+        "satCalls": 59544,
+        "satTrue": 22,
+        "satFalse": 59522,
+        "footingCalls": 2,
+        "nonemptyActiveSnapshots": 2,
+        "activeSnapshotReferences": 24,
+        "maxActiveSnapshot": 12
+      },
+      "population": {
+        "satCalls": 7290,
+        "satTrue": 47,
+        "satFalse": 7243,
+        "footingCalls": 98,
+        "nonemptyActiveSnapshots": 98,
+        "activeSnapshotReferences": 1080,
+        "maxActiveSnapshot": 14
+      },
+      "players": {
+        "satCalls": 1228,
+        "satTrue": 0,
+        "satFalse": 1228,
+        "footingCalls": 604,
+        "nonemptyActiveSnapshots": 604,
+        "activeSnapshotReferences": 6330,
+        "maxActiveSnapshot": 18
+      },
+      "outside-profile-phase": {
+        "satCalls": 0,
+        "satTrue": 0,
+        "satFalse": 0,
+        "footingCalls": 0,
+        "nonemptyActiveSnapshots": 0,
+        "activeSnapshotReferences": 0,
+        "maxActiveSnapshot": 0
+      }
+    },
+    "sourceHashesUnchanged": true
+  },
+  "argumentCapture": {
+    "path": "artifacts/network-stability-20261018/sat-canonical-arguments-current-20261018.json",
+    "calls": 2428263,
+    "trueCalls": 1523,
+    "rejectedSamples": 0,
+    "pools": {
+      "uniform": {
+        "path": "artifacts/network-stability-20261018/sat-canonical-arguments-current-20261018-uniform.f64",
+        "rows": 4096,
+        "rowWidth": 32,
+        "sha256": "0ab1911c2aaa2150966623eee9963915306399afc8a68133ee4c6a0e01291b8c",
+        "trueRows": 2,
+        "encoding": "Native little-endian Float64 rows: a[p3,half3,axes9],b[p3,half3,axes9],depth,result01. Binary preserves signed zero."
+      },
+      "hits": {
+        "path": "artifacts/network-stability-20261018/sat-canonical-arguments-current-20261018-hits.f64",
+        "rows": 256,
+        "rowWidth": 32,
+        "sha256": "55e647cca22798f450c26226755db75d1acd96070868bb8cb3bda48858328921",
+        "trueRows": 256,
+        "encoding": "Native little-endian Float64 rows: a[p3,half3,axes9],b[p3,half3,axes9],depth,result01. Binary preserves signed zero."
+      }
+    },
+    "note": "Reservoir instrumentation can affect existing navigation deadline work; no trajectory/performance comparison."
+  },
+  "pairedCpuMicrobenchmark": {
+    "runtime": {
+      "bunVersion": "1.4.2",
+      "bunRevision": "744846f844374847c902b5e7fd59b4342a51ef99",
+      "cpuModel": "AMD Ryzen 5 7640HS w/ Radeon 760M Graphics     "
+    },
+    "scope": "One exclusive isolated-call paired Bun run on bounded captured canonical numeric arguments; not wholeauthority/browser timing or allocation measurement.",
+    "path": "artifacts/network-stability-20261018/sat-canonical-arguments-current-20261018-paired-benchmark.json",
+    "results": [
+      {
+        "name": "canonical uniform reservoir",
+        "rows": 4096,
+        "trueRows": 2,
+        "warmIterations": 65536,
+        "warmRounds": 4,
+        "calibration": {
+          "before": {
+            "milliseconds": 5.896300000000011,
+            "checksum": 3701436416
+          },
+          "candidate": {
+            "milliseconds": 3.742999999999995,
+            "checksum": 3701436416
+          }
+        },
+        "iterationsPerVariantPerPair": 3399417,
+        "pairs": 7,
+        "samples": [
+          {
+            "pair": 0,
+            "order": "before,candidate",
+            "beforeMs": 326.6498,
+            "candidateMs": 186.24149999999997,
+            "speedup": 1.7539044734927505,
+            "beforeChecksum": 2776044032,
+            "candidateChecksum": 2776044032
+          },
+          {
+            "pair": 1,
+            "order": "candidate,before",
+            "beforeMs": 319.3066000000001,
+            "candidateMs": 187.48209999999995,
+            "speedup": 1.7031311255847903,
+            "beforeChecksum": 2776044032,
+            "candidateChecksum": 2776044032
+          },
+          {
+            "pair": 2,
+            "order": "before,candidate",
+            "beforeMs": 312.42820000000006,
+            "candidateMs": 182.34890000000019,
+            "speedup": 1.7133539056171974,
+            "beforeChecksum": 2776044032,
+            "candidateChecksum": 2776044032
+          },
+          {
+            "pair": 3,
+            "order": "candidate,before",
+            "beforeMs": 305.98659999999995,
+            "candidateMs": 181.40460000000007,
+            "speedup": 1.6867631802060137,
+            "beforeChecksum": 2776044032,
+            "candidateChecksum": 2776044032
+          },
+          {
+            "pair": 4,
+            "order": "before,candidate",
+            "beforeMs": 313.2343000000001,
+            "candidateMs": 193.07969999999978,
+            "speedup": 1.6223057110612895,
+            "beforeChecksum": 2776044032,
+            "candidateChecksum": 2776044032
+          },
+          {
+            "pair": 5,
+            "order": "candidate,before",
+            "beforeMs": 308.3270000000002,
+            "candidateMs": 186.51170000000002,
+            "speedup": 1.6531241739794351,
+            "beforeChecksum": 2776044032,
+            "candidateChecksum": 2776044032
+          },
+          {
+            "pair": 6,
+            "order": "before,candidate",
+            "beforeMs": 321.7080000000001,
+            "candidateMs": 183.90160000000014,
+            "speedup": 1.7493485646671907,
+            "beforeChecksum": 2776044032,
+            "candidateChecksum": 2776044032
+          }
+        ],
+        "beforeMedianMs": 313.2343000000001,
+        "candidateMedianMs": 186.24149999999997,
+        "ratioOfMedians": 1.6818716558876519,
+        "medianPairedSpeedup": 1.7031311255847903,
+        "pairedRatioMedianAbsoluteDeviation": 0.04621743908240039,
+        "pairedRatioMin": 1.6223057110612895,
+        "pairedRatioMax": 1.7539044734927505
+      },
+      {
+        "name": "true-hit stress reservoir",
+        "rows": 256,
+        "trueRows": 256,
+        "warmIterations": 65536,
+        "warmRounds": 4,
+        "calibration": {
+          "before": {
+            "milliseconds": 25.222099999999955,
+            "checksum": 3725590528
+          },
+          "candidate": {
+            "milliseconds": 21.261399999999867,
+            "checksum": 3725590528
+          }
+        },
+        "iterationsPerVariantPerPair": 422963,
+        "pairs": 3,
+        "samples": [
+          {
+            "pair": 0,
+            "order": "before,candidate",
+            "beforeMs": 155.1646999999998,
+            "candidateMs": 144.35239999999976,
+            "speedup": 1.074902114547455,
+            "beforeChecksum": 2092631841,
+            "candidateChecksum": 2092631841
+          },
+          {
+            "pair": 1,
+            "order": "candidate,before",
+            "beforeMs": 158.6932999999999,
+            "candidateMs": 135.69850000000042,
+            "speedup": 1.1694550787223101,
+            "beforeChecksum": 2092631841,
+            "candidateChecksum": 2092631841
+          },
+          {
+            "pair": 2,
+            "order": "before,candidate",
+            "beforeMs": 154.96560000000045,
+            "candidateMs": 132.8738999999996,
+            "speedup": 1.1662606426092779,
+            "beforeChecksum": 2092631841,
+            "candidateChecksum": 2092631841
+          }
+        ],
+        "beforeMedianMs": 155.1646999999998,
+        "candidateMedianMs": 135.69850000000042,
+        "ratioOfMedians": 1.1434518436091727,
+        "medianPairedSpeedup": 1.1662606426092779,
+        "pairedRatioMedianAbsoluteDeviation": 0.003194436113032273,
+        "pairedRatioMin": 1.074902114547455,
+        "pairedRatioMax": 1.1694550787223101
+      }
+    ],
+    "limitations": [
+      "Both functions are isolated microbenchmark imports using saved plain numeric boxes. This cannot establish whole-authority, native FPS or GC benefit.",
+      "A JIT may already eliminate the original closure. Fixed separate monomorphic call sites and warmup reduce but do not remove tiering/inlining/order noise.",
+      "Per-row exact saved-output oracle runs before timing; timed result checksums must match every pair.",
+      "Reservoir argument capture was instrumented and may alter navigation progress; it is not a world-trajectory comparison.",
+      "True-hit stress is reported separately and does not represent the mostly-false canonical workload.",
+      "No production edits or adoption; require repeated material benefit and permanent/full physics correctness checks before integration."
+    ]
+  },
+  "validation": [
+    {
+      "command": "bun run build",
+      "cwd": "game-engine",
+      "exit": 0,
+      "log": "artifacts/sat-axis-closure-build.log"
+    },
+    {
+      "command": "node --test test/box-overlap-axis-closure.test.mjs test/compound-physics.test.mjs test/compound-plane-ray.test.mjs test/compound-ray-cache.test.mjs test/spatial-broadphase.test.mjs test/contact-laws.test.mjs test/character-motion.test.mjs",
+      "cwd": "game-engine",
+      "exit": 0,
+      "tests": 36,
+      "passed": 36,
+      "failed": 0,
+      "log": "artifacts/sat-axis-closure-focused-tests.log"
+    },
+    {
+      "command": "bun test --timeout 60000 ./test/the-engine-compound.test.ts ./test/physics.test.js ./test/scooter-clearance.test.ts ./test/sleeping.test.ts ./test/wheel-contact.test.ts ./test/vehicle-crash-regression.test.ts",
+      "cwd": "thegame",
+      "exit": 0,
+      "tests": 45,
+      "passed": 45,
+      "failed": 0,
+      "assertions": 8838,
+      "log": "artifacts/network-stability-20261018/sat-axis-closure-canonical-physics-tests.log"
+    }
+  ],
+  "permanentOracle": {
+    "tests": 4,
+    "frozenBefore": "test/fixtures/box-overlap-before-axis-closure.mjs",
+    "numericCases": 12081,
+    "getterIteratorMutationReentryThrowCases": 388,
+    "depthCoercionCases": 4,
+    "actualWorldOccupancyCases": 1000,
+    "note": "Actual dist export is tested against frozen pre-change implementation, including exact getter/iterator traces and abrupt completions. Existing canonical compound test compares1200former physical state/contact/impulse steps."
+  },
+  "independentReviews": [
+    "Root reviewed lexical argument evaluation before adoption.",
+    "Shadow read-only review found no change to geometry reads, arithmetic or reentry semantics.",
+    "Reflection read-only production/permanent-oracle review found no issue; added explicit depth-coercion mutation/reentry/throw coverage after its suggestion."
+  ],
+  "limitations": [
+    "Measured speedups apply only to the isolated Bun call microbenchmark; JIT behavior differs across runtimes/contexts.",
+    "The source removes a per-call closure construction, but actual allocated bytes and heap/GC effects have not been measured.",
+    "Natural Inspector events remain in an unverified clock domain relative to process ticks. Tick240 is not attributed to GC or this allocation owner.",
+    "No new wholeauthority timing, native FPS or TLS verification in this change; parent owns integrated full-suite/build/native validation."
+  ]
+}

@@ -1,0 +1,1180 @@
+{
+  "date": "2026-10-16T22:45:51.113Z",
+  "scope": "Original hub buildings, trees and street source at 420 m in the passive Office view; stable NPC selection in Game and Office. Full integration remains active.",
+  "capability": "original-residents-14",
+  "implementation": {
+    "source": "Authority supplies original parcel/entrance inputs and the already chosen building kind. Client replays the same generateBuilding and drawBuilding functions, with no second CityMap, NPC logic or physics.",
+    "coverage": "Hub is no longer limited by the legacy 32-plan / 144 m view. Legacy outer scenery still comes from at most nine supplied loaded chunks and requires further work.",
+    "cache": "Decoded exterior plans use an LRU bounded at 256. Equal source responses and floor/origin moves preserve immutable meshes; yaw/content/view changes recompile.",
+    "selection": "Resident choices retain displayed order. Native interaction is not overwritten by 200 ms data refresh; lost AOI rows keep the chosen actor ID pending instead of selecting another body."
+  },
+  "oracle": {
+    "buildings": 380,
+    "corners": 1395534,
+    "kinds": 13,
+    "sourceBytes": 131516,
+    "facadeBytes": 7392904
+  },
+  "liveSourceBytes": 131518,
+  "checks": [
+    {
+      "command": "bun test test/scenery-records.test.ts test/office-scenery-assets.test.ts test/office-urban-assets.test.ts test/office-world.test.ts",
+      "pass": 26,
+      "assertions": 2133,
+      "exitCode": 0
+    },
+    {
+      "command": "bun test test/resident-selection.test.ts test/resident-business-management.test.ts",
+      "pass": 6,
+      "assertions": 39,
+      "exitCode": 0
+    },
+    {
+      "command": "bun test apps/thegame/test",
+      "pass": 135,
+      "assertions": 5523,
+      "exitCode": 0
+    },
+    {
+      "command": "Game/app/UI typechecks and Game/UI production builds",
+      "exitCode": 0,
+      "note": "UI large-chunk warning remains; an initial .ts value-import extension was caught by the UI typecheck and corrected to the shared .js module path."
+    }
+  ],
+  "restart": {
+    "date": "2026-10-16T22:21:12.283Z",
+    "oldPid": 6776,
+    "newPid": 23624,
+    "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; original hub scenery recipes and 420 m city view; geometry hint and causal priority retained; Office/backend/microphone untouched",
+    "beforeRows": 3049,
+    "afterRows": 3049,
+    "missingRows": 0,
+    "protectedRows": 119,
+    "changedProtectedRows": 0,
+    "ownerDifferences": 0,
+    "accounts": 22,
+    "accountDifferences": 0,
+    "integrity": "ok",
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 53,
+    "geometryRevision": 1
+  },
+  "native": {
+    "label": "office-hub-scenery-native-20261017-r2",
+    "command": "bun tools/capture.ts --office",
+    "debugPort": 3223,
+    "exitCode": 0,
+    "environment": {
+      "CAPTURE_EXISTING": "1",
+      "CAPTURE_PORT": "3007",
+      "CAPTURE_GPU": "1",
+      "PERF_LABEL": "office-hub-scenery-native-20261017-r2",
+      "OFFICE_CAPTURE_LABEL": "office-hub-scenery-native-20261017-r2",
+      "OFFICE_WALKING_QA": "1",
+      "OFFICE_URBAN_QA": "1",
+      "OFFICE_SCENERY_QA": "1",
+      "OFFICE_ROADS_QA": "1",
+      "OFFICE_TERRAIN_QA": "1",
+      "OFFICE_CAMERA_QA": "1",
+      "OFFICE_RESIDENTS_QA": "1",
+      "OFFICE_PRESENTATION_QA": "1",
+      "OFFICE_FOCUS_FORCE_CROSSING": "1",
+      "OFFICE_HUB_SCENERY_QA": "1",
+      "OFFICE_PICKER_QA": "1"
+    },
+    "states": 16,
+    "sourceBuildings": 380,
+    "minRenderedSourceRecords": 111,
+    "maxRenderedSourceRecords": 236,
+    "maxCachedBuildings": 247,
+    "sourceBuilds": 1,
+    "zeroGpuErrors": true,
+    "zeroLocalPhysics": true,
+    "walking": {
+      "inputPulses": 25,
+      "distance": 41.52733053388818,
+      "health": 100
+    },
+    "resident": {
+      "target": "resident:14791:0",
+      "takeoverDistance": 0.8444992110801806,
+      "takeoverNote": "Compared with a prior live NPC sample; the NPC can move before acknowledged possession.",
+      "moved": 0.3556063159429371,
+      "stopSpeed": 0.08698132483073664,
+      "returnedOriginalBody": true,
+      "rightsUnchanged": true,
+      "fundedBusinesses": false
+    },
+    "picker": {
+      "chosen": "resident:14791:0",
+      "opened": [
+        "resident:14791:0",
+        "resident:14791:1",
+        "resident:26758:25508",
+        "resident:18054:1",
+        "resident:22089:1",
+        "resident:18054:0",
+        "resident:22089:0"
+      ],
+      "after": [
+        "resident:14791:0",
+        "resident:14791:1",
+        "resident:26758:25508",
+        "resident:18054:1",
+        "resident:22089:1",
+        "resident:18054:0",
+        "resident:22089:0"
+      ],
+      "holdMs": 600
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    }
+  },
+  "assets": {
+    "label": "office-hub-scenery-assets-20261017",
+    "command": "bun tools/capture.ts --office-entry",
+    "debugPort": 3221,
+    "exitCode": 0,
+    "environment": {
+      "CAPTURE_EXISTING": "1",
+      "CAPTURE_PORT": "3007",
+      "CAPTURE_GPU": "1",
+      "PERF_LABEL": "office-hub-scenery-assets-20261017",
+      "OFFICE_TERRAIN_ASSET_ONLY": "1",
+      "OFFICE_TERRAIN_ASSET_QA": "1",
+      "OFFICE_HUB_SCENERY_ASSET_QA": "1"
+    },
+    "views": 5,
+    "texture": {
+      "width": 768,
+      "height": 768,
+      "bytes": 2359296,
+      "mismatches": 0,
+      "checksum": 2121544030
+    },
+    "records": [
+      {
+        "name": "hub-office-south",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 111,
+          "props": 15,
+          "trees": 34,
+          "airportBoxes": 0,
+          "meshes": 378,
+          "geometryBuilds": 47,
+          "sourceBuilds": 1,
+          "sourceBuildings": 380,
+          "cachedBuildings": 104
+        },
+        "streets": {
+          "source": "thegame",
+          "meshes": 43,
+          "records": 76,
+          "geometryBuilds": 15
+        },
+        "errors": [],
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        }
+      },
+      {
+        "name": "hub-office-north",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 111,
+          "props": 15,
+          "trees": 34,
+          "airportBoxes": 0,
+          "meshes": 378,
+          "geometryBuilds": 47,
+          "sourceBuilds": 1,
+          "sourceBuildings": 380,
+          "cachedBuildings": 104
+        },
+        "streets": {
+          "source": "thegame",
+          "meshes": 43,
+          "records": 76,
+          "geometryBuilds": 15
+        },
+        "errors": [],
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        }
+      },
+      {
+        "name": "hub-spawn-east",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 234,
+          "props": 0,
+          "trees": 34,
+          "airportBoxes": 0,
+          "meshes": 580,
+          "geometryBuilds": 115,
+          "sourceBuilds": 1,
+          "sourceBuildings": 380,
+          "cachedBuildings": 247
+        },
+        "streets": {
+          "source": "thegame",
+          "meshes": 42,
+          "records": 73,
+          "geometryBuilds": 25
+        },
+        "errors": [],
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        }
+      },
+      {
+        "name": "hub-spawn-west",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 234,
+          "props": 0,
+          "trees": 34,
+          "airportBoxes": 0,
+          "meshes": 580,
+          "geometryBuilds": 115,
+          "sourceBuilds": 1,
+          "sourceBuildings": 380,
+          "cachedBuildings": 247
+        },
+        "streets": {
+          "source": "thegame",
+          "meshes": 42,
+          "records": 73,
+          "geometryBuilds": 25
+        },
+        "errors": [],
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        }
+      },
+      {
+        "name": "hub-office-floor-3",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 111,
+          "props": 15,
+          "trees": 34,
+          "airportBoxes": 0,
+          "meshes": 378,
+          "geometryBuilds": 162,
+          "sourceBuilds": 1,
+          "sourceBuildings": 380,
+          "cachedBuildings": 247
+        },
+        "streets": {
+          "source": "thegame",
+          "meshes": 43,
+          "records": 76,
+          "geometryBuilds": 40
+        },
+        "errors": [],
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        }
+      }
+    ],
+    "scope": "Non-playable passive source terrain/road/hub scenery asset fixture; live entry and possession are separate evidence. Fixed fixture daylight, no gameplay, physics, audio, microphone or FPS measurement."
+  },
+  "initialFailure": {
+    "label": "office-hub-scenery-native-20261017",
+    "error": "AssertionError [ERR_ASSERTION]: Native select keyboard must choose the canonical resident\n+ actual - expected\n\n+ 'resident:14791:0'\n- 'resident:14791:1'\n                  ^\n",
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "disposition": "Preserved. The shared resident picker was corrected and meaningful unit/native interaction checks added; the selected-ID assertion remains exact."
+  },
+  "fps": "docs/render-evidence/fps-live-20261017-hub-scenery.json",
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-types.ts",
+      "bytes": 5243,
+      "sha256": "d67bdeea8796424ffe69f5c1382c554700b9c9eecd5dde10cf8a8246d09f9b4b"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-scenery.ts",
+      "bytes": 667,
+      "sha256": "bd8d3a956f81982ad9f55e1a5bce3fe5f5a71cf8ba9c3d4b88ccf7da33c670c0"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 30936,
+      "sha256": "6e6424bafd50b9cb319eaa981c0df195961d1338cb88c7b07d5b2a997bfa1653"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 33463,
+      "sha256": "2f3468e67b71011b5c1710fe6352afa81e3dfca303393620a6f256a88ffa3161"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/evidence.ts",
+      "bytes": 14030,
+      "sha256": "9991efd31a76391ca3a349de02ee80a0af8065eb9abeb24a6d5d44aa5b5a91e6"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/scenery-records.ts",
+      "bytes": 5567,
+      "sha256": "9165fcaaadedb66bc06b0abc82eee9d7217e4e97a4e308a82f41801f3737f7ab"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-records.ts",
+      "bytes": 1067,
+      "sha256": "1e30b862ab5998c1b72d5b85750b28e7605f9215803d9b7c323c6c75c2b44ded"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-chunk-placement.ts",
+      "bytes": 823,
+      "sha256": "f8ddcd8f1d4d6e0faf6dfa5fb50c7874cf172cd9dbc9381aed5ff4c754466b22"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "bytes": 9963,
+      "sha256": "359e1f945ecfa718019b5387b9f62d1edc0e50ad88d305337a7f0f991e7bf41f"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-assets.ts",
+      "bytes": 6630,
+      "sha256": "b6aba5edc7f534c323329ea05be79c122abed2264510e25800a26a4b777539cc"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-urban-assets.ts",
+      "bytes": 4755,
+      "sha256": "cf563b59c599ef33b4266deaac1783ce661250999754519f710fc56cd646a073"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-selection.ts",
+      "bytes": 1090,
+      "sha256": "8c3a9c9f46e1694d6f0a4f857d885102d8232237aee8ecf669d230ed6ada5cb4"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-panel.ts",
+      "bytes": 10613,
+      "sha256": "2ad002289bffe70cca8e8ed0ac8b057077afa814d2dbbb78e79ad1377309db60"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/plan.ts",
+      "bytes": 18874,
+      "sha256": "1138ff1ed2c478069d405d23af2fcd8c80f300bcee3dcfd94b8d6950bf2f415c"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/vertical.ts",
+      "bytes": 13814,
+      "sha256": "2f3d31552ee5870ae3340d03bd9ea8a59e357959c4f458eff5fb2110dc8f8ab0"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/world.ts",
+      "bytes": 8414,
+      "sha256": "efdf3cc8294141d731ba0a3b3dd4130d23953f6355ef4d23c4f1427957f08835"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/visibility.ts",
+      "bytes": 2069,
+      "sha256": "e5b3b172fc5f27192a0671bdfd39bbb8e8e6ef2b175b8be12ce5612dbe1a336d"
+    },
+    {
+      "repo": "game",
+      "path": "test/scenery-records.test.ts",
+      "bytes": 4723,
+      "sha256": "34912eaee6cc848a24a10df2216699e090cb964d304abf5c8f8b239b18d0a5d2"
+    },
+    {
+      "repo": "game",
+      "path": "test/resident-selection.test.ts",
+      "bytes": 1640,
+      "sha256": "bf95646da7d472c15444d7225e6d36d615b5e449af5132f3d2c54be64bde15e5"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-scenery-assets.test.ts",
+      "bytes": 8466,
+      "sha256": "6e3af02e4d12fb1f0ce75c58d8ce7996558c81d5aeee0f323d625392c9b7e7ea"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-urban-assets.test.ts",
+      "bytes": 6509,
+      "sha256": "77de85a4e7df08478723a4b14af7a4b44561696500f649c3b339369bf9e35d16"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-world.test.ts",
+      "bytes": 13479,
+      "sha256": "895702df3d5eb54f87b2de79765d8efb7651fadd5896b9e1d2523de24cffad5a"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "985383fd6ddc5f099527bb1e65dd1e456cb44846ed20f6ae71c228648bc343a9"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 14535,
+      "sha256": "66461d788810cdf5d2fd06c4d6949b73a3d2fcfbf45e0d0d768f8d45f27845e5"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 12428,
+      "sha256": "63de812e48f6048a3a029cf3517186ec4553b274f05a071941492138cbc51119"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/ResidentsDialog.tsx",
+      "bytes": 3012,
+      "sha256": "7f2d7964502f6833ecc7929a3db5cdf2348ccf170eeeae231b3305ea6a9092fb"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 63718,
+      "sha256": "20fafbfe0f2ecebfd8b795cb87046778e13f0637b6aa26dbf38fb28308cecd43"
+    }
+  ],
+  "bundles": [
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2476892,
+      "sha256": "490006513f7485d7af62b3ea1cdacd675d762375c759c92d22f56304edc5079b"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1337451,
+      "sha256": "7082e5a32c8774ce697ef604b9f98ccff2d8a15027118e3347125cdb40d20e71"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-B27BM9A3.js",
+      "bytes": 1779920,
+      "sha256": "c7fd4f667a12c025aee41c4667d09a0478183be5bcd0a8e695826ef9330102d8"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-CmdiYlhj.css",
+      "bytes": 97764,
+      "sha256": "f616fcf9ea5c97e442d047738d763e61cd5524bf7da04c3e4a32c2702799101a"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "status": 200,
+      "bytes": 2476892,
+      "sha256": "490006513f7485d7af62b3ea1cdacd675d762375c759c92d22f56304edc5079b"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "status": 200,
+      "bytes": 1337451,
+      "sha256": "7082e5a32c8774ce697ef604b9f98ccff2d8a15027118e3347125cdb40d20e71"
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery-app-tests-20261017.log",
+      "bytes": 15199,
+      "sha256": "6e17555f826bb2bcbe25d91328ea2018b11a156f514e44f2747a7c2ea729f34b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery-app-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "81138ff993acb25b822ef0b054af7feacc639412a7f03eda45ab4eef4a4a55da"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery-ui-build-r3-20261017.log",
+      "bytes": 889,
+      "sha256": "1deba7780754adc7c5d1e27b919cb38f405ce96a1ff86cdbfa33ea286ff6b1cc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery-ui-typecheck-r2-20261017.log",
+      "bytes": 170,
+      "sha256": "c3e347c6455c78f0f168cae4d33a3e440fdab5cbe4127ad81efb188527180ccd"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery-ui-typecheck-r3-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/audit-restart.ts",
+      "bytes": 3045,
+      "sha256": "abec2bd48c709f82cbaca1af3b4f38e4139fd9b4f99da66ce902e617ea9cbe13"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/audit.log",
+      "bytes": 550,
+      "sha256": "2f10007071551e264afc875893eb6134604527f47e6370b36372e98010f70d04"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/backup.log",
+      "bytes": 177,
+      "sha256": "fb6621f70791ea7d69343791de54fe3f2f7656745ea20cb8e577026c3bc8cd40"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/backup.ts",
+      "bytes": 2465,
+      "sha256": "52974d7448c0d916eaff8aabafb846b3c8202e9a5ac8743446c3af4634fdcb94"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/restart-audit.json",
+      "bytes": 640,
+      "sha256": "ef307627eff477275a37247d9486d60826a905bfcd300cc0aca690d12e818c3f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/restart-operation.json",
+      "bytes": 309,
+      "sha256": "6abab37316e5576a9456682f1966dc75f83a18335bc0967885da7a8cd0362a1c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/restart-ready.json",
+      "bytes": 16748,
+      "sha256": "be2368305bc35aebad7f07bafe56b14b2be53afed5c0a4036553977e294787bf"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/restart-ready.sqlite",
+      "bytes": 6852608,
+      "sha256": "13f5c68b59249562f7139bb8b93a0e28e1dd92341f9f21b17b5e8fb5e47d4ae4"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/restart.log",
+      "bytes": 143,
+      "sha256": "41531b236b8912d85dd829ab3a3b9c430495658ee2800696796f75bd4216899c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/restart.ps1",
+      "bytes": 2776,
+      "sha256": "8e61492663205538422c5cd2f96a67c1436d6b7a3333c131bf12a590f817e1f5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/server-before.err.log",
+      "bytes": 5459,
+      "sha256": "5f4f419255b4c3916df8dc43df63b6aefccac075c438470e1b4f64c456d25792"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-hub-scenery/server-before.log",
+      "bytes": 723,
+      "sha256": "a8b04250ed7dff844821dbdaec9e84cce6041d62cf18fbdf8b5e62ee0b4fa959"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-assets-20261017.log",
+      "bytes": 120,
+      "sha256": "740208862502838d8fb5277b40ace8e4043f92b1c5acf9bf167046caac63ccf3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-game-build-20261017.log",
+      "bytes": 585,
+      "sha256": "0f9050625ee657b1ec6568ae097e676ff38e657ad2db6636fc0d484280f92816"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-game-build-r2-20261017.log",
+      "bytes": 585,
+      "sha256": "04b9fe66f4b3ad8850b11cde7185070d45412d96f8b355b1f9233fe58e2229b6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-game-build-r3-20261017.log",
+      "bytes": 585,
+      "sha256": "04b9fe66f4b3ad8850b11cde7185070d45412d96f8b355b1f9233fe58e2229b6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-native-20261017-r2.log",
+      "bytes": 17795,
+      "sha256": "daca200752d00626c638875458fad2534630808237330810c0f07ccec5735c64"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-native-20261017.log",
+      "bytes": 9521,
+      "sha256": "3927b9b18de6f9b84007a2c3f162b30762c59c417c7991426ec783f9d198b411"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-selection-tests-20261017.log",
+      "bytes": 814,
+      "sha256": "8397d3d441600f65d34dc444d05452c67f82c6197325e76306333bb672a2ca2b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-tests-20261017.log",
+      "bytes": 2905,
+      "sha256": "62b229fb6d4c4878c88c35596ebaa8e1df76f217f00332ec018085dfc1bdd059"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-tests-r2-20261017.log",
+      "bytes": 3289,
+      "sha256": "a475540bd75be4a541448f533a6e1ccad5defa210d1e23b3473a0cdf82af674d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-typecheck-r4-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-hub-scenery-typecheck-r5-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/fixture.html",
+      "bytes": 3519,
+      "sha256": "868bf9cf19eb22b1efa53f0136a8acead3d63ca1fc757dfd7681e4eccbed7e32"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-office-floor-3.png",
+      "bytes": 306083,
+      "sha256": "d1a3e8ed4479bb112c71b584141b61e3e5de4bf58ce9eb29c9a30320cd62a93a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-office-north.png",
+      "bytes": 250251,
+      "sha256": "b5211f5a0f3a09779b7624cb523cab7e21c5dc7c64e97f5a263861bd3d015b0e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-office-south.png",
+      "bytes": 380140,
+      "sha256": "0365d4edfe6e22415c2815db535378ab2b27ef5f2e3179a37cc2ac7e3138cc98"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-spawn-east.png",
+      "bytes": 720113,
+      "sha256": "4b29c2d4c664eae716c9e7c55eb13dd7b545872f0a6a2c736c94e9db4cebacfe"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-spawn-west.png",
+      "bytes": 536005,
+      "sha256": "ad811b4ff5820ecec3ffaf13a68243e5d7e62ca0f730380170b30c26e2352cf0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/report.json",
+      "bytes": 11122,
+      "sha256": "3d7152e493e3f0a0c113cd16bb89d0229ba910189f6ecd9a2f2006a6c78bb4ba"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/source-frame.json",
+      "bytes": 720145,
+      "sha256": "78d1dbdacaedb157f637dd595bc27d9a46013f1707b673d13e1f7889f08dac9c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/texture-check.entry.js",
+      "bytes": 2346,
+      "sha256": "2f12d8f6d364532bfe69559a9b6c1b87cecdffcfd6f7ff266e58ccaab232b0a9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/canonical-controller-source.json",
+      "bytes": 898113,
+      "sha256": "b6b2ac0a9a2f79d7204286416dd806bab50f3012b0c52e3c3a4b829eb568bd85"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/canonical-residents-observed-source.json",
+      "bytes": 897465,
+      "sha256": "95e7edef7a9791159c1f11d80e6f9718d446887154e79de958832796125fe01e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/entered.png",
+      "bytes": 515295,
+      "sha256": "0eb43527099013d024bb1f0584fa742a647448ae50224b8048be6389e07ae9a7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/focus-observe.json",
+      "bytes": 429101,
+      "sha256": "b7771181edc08a1484b2e4662078ec52798d3680f6533f3c81a1d66e5d3df1d0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/focus-possess.json",
+      "bytes": 27966,
+      "sha256": "9450e774d2baef0b6d5d23b3189468d00499a487290a530f69882c8591e8da30"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/focus-return.json",
+      "bytes": 62469,
+      "sha256": "fe34d6bea0d733cca8bb6fb6090fe7a55b4d5abca15261da225c133d164f5100"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/focus-setup.json",
+      "bytes": 9740,
+      "sha256": "b72384f3ac08b37e83f7693d7e012b79c1ff177ed9124e3abfffd3cd55d136f3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/observer.png",
+      "bytes": 625948,
+      "sha256": "f5a9691a13a0611114ba9091dd8b0a7c9892c9b428b6a31133c5b9dc802e3eaa"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/orbit-1.png",
+      "bytes": 543883,
+      "sha256": "2a30b7a235ced69cdcdce8b2d0ba4a9651257e0ace2e69c9f0c2d6de8d6d7bff"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/orbit-2.png",
+      "bytes": 475914,
+      "sha256": "8b875a376e4e829e01e23e89362d550d7a3433290f10c0262521dc6c32651d76"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/orbit-3.png",
+      "bytes": 400534,
+      "sha256": "0204a956dc169f183829e134ed8580fcdfd073b61dcb92917ce977d790872fbf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/orbit-4.png",
+      "bytes": 535328,
+      "sha256": "017cb9f26d50bcfe43067ee3d07e3e2a4afc18c9ce243758b2cf92e8ee9ff71a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/report.json",
+      "bytes": 177815,
+      "sha256": "af8e8dc9e2a155887280ddff64acb1bd3d840f46147702b4051ddfe9f70cf609"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-before-movement.json",
+      "bytes": 4852,
+      "sha256": "c54e2e314e737df001cba4ed28d302d0739e01ca022d1a42762df18a83d44bc4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-moved.png",
+      "bytes": 150343,
+      "sha256": "16830c6e4db9932358874464f4d9c438bb11aa6ebdebe1dff43347e12aff6418"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-movement.json",
+      "bytes": 9766,
+      "sha256": "ce8f736c8b017cdf680514291958cb37d5d1a02a6d8f8cf3d4634a8f48760cbd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-observed-scope.png",
+      "bytes": 165313,
+      "sha256": "a549045c6049a5677473ac6fddb914ec0cebbc2d120384736947bf9abbf482f1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-observing.png",
+      "bytes": 160540,
+      "sha256": "5218e9f08341e5ae87819aee1912dc066d7a697b6d78090d81755c3def305330"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-panel.png",
+      "bytes": 84736,
+      "sha256": "a9caa1cd6985a4923565860b07c0f03d5d1b1d98b609010dc99f6d6372fc9349"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-picker-trace.json",
+      "bytes": 430,
+      "sha256": "f1c7b810e120182ee8c8b9b0a20f1f80dc894033ec299912ae90b4f3d3f66280"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-possessed.png",
+      "bytes": 154781,
+      "sha256": "e80bc12ec3689a4bd1b82096fc99972cd16a7522ca384fb0f4f4bc6f1fb91d37"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-report.json",
+      "bytes": 12685,
+      "sha256": "6286cf82d9af55853ed97cfdd4a2108d17fd75628c4099e646f6b9b5784fa4c8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-return-start.png",
+      "bytes": 120651,
+      "sha256": "cc89088a37ccbe6063e4d1027a948a756c3b0b1b1f1b5ca6eb0af43ba4abbcdb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-returned.png",
+      "bytes": 123494,
+      "sha256": "71a88e49528366fcd1f0452e41245cf21138fb2d02d707fdb148cbc7cafc707e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-selection.json",
+      "bytes": 1292,
+      "sha256": "90de2fdbb32e24194dc2b00f1a3737f84cbb2478461f43edf50d1541eb9b05fa"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-stopped.png",
+      "bytes": 157786,
+      "sha256": "415dcca06f621a6347646c8bfeceba945c6a757486be351426e56497ba859e9c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/returned-observer.png",
+      "bytes": 561625,
+      "sha256": "58aef2721821a15241d3282af9a5dd5fcd5115cd196e6042888ea1e96ad18f27"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017-r2/walk-KeyW.png",
+      "bytes": 540833,
+      "sha256": "e42e1245653247d3482fb2a450a7f2ab8c39399632bc2d52c4690379f4274a80"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/canonical-lobby.png",
+      "bytes": 384196,
+      "sha256": "cfeb641ed7a10496b035b849e3c93baf76d556ec4f6a38b9af31f59e1eb77337"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/entrance.png",
+      "bytes": 467463,
+      "sha256": "0ed563eadf0a361fba777b1b493d4d4e5cb4706d85cbb949253b652be4392f79"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 14982,
+      "sha256": "1de41089cdc9ed0d2009cc0ed5a7305228d04148f0fbb7395c96b27786d153bf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/office-entry.json",
+      "bytes": 15143,
+      "sha256": "91048d3805566fbe9ec411b67c3aa8bc8717c9fbd7976db0012e6840d0e62c9d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/office-entry.png",
+      "bytes": 626668,
+      "sha256": "085bd59c7e0ddf16e01887f2e4907e059e0765efdba20c9c3c34a5b7a053b883"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/report.json",
+      "bytes": 78425,
+      "sha256": "2d9849f796937badcfa49b77c2df8571d7f5e2e720d17a9e0e2f67222c37921f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/upper-office.png",
+      "bytes": 338893,
+      "sha256": "0bf73249a15853e611814c3a9cea1c7f44ca36016e0c778a944a39f27314119e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017-r2/workplaces.png",
+      "bytes": 519324,
+      "sha256": "6579c4df07f3360444f4386b744e3d93dfdbddb1becef204b61fb86b1f3e0d5d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/canonical-controller-source.json",
+      "bytes": 907263,
+      "sha256": "2292412c474f85d55672a308538c02efe16a1608f08f5671f8f6ca8f8e6bd4c8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/entered.png",
+      "bytes": 375877,
+      "sha256": "24bd327e502cb6a16029de117b39bcde216b4e4a7f752ef90fb033ebea379a4c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/failure.png",
+      "bytes": 84102,
+      "sha256": "a22875e30e146b524317f0d989b3dafd076fb16dff1247a1c5e7cde96885e537"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/focus-setup.json",
+      "bytes": 7805,
+      "sha256": "4342ede672814c8741c11d432641b597e88599ff33675c316863aaa05e2fa330"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/observer.png",
+      "bytes": 666617,
+      "sha256": "9cfe26ffcb2b1b2cab73a0a98f0c9464e4da5d269aa6eeb216935eff10073997"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/orbit-1.png",
+      "bytes": 379586,
+      "sha256": "836d70c1835cfb763b9561d558bfd3e8f0f2c25af3f224ef0f668cf75b532b80"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/orbit-2.png",
+      "bytes": 443074,
+      "sha256": "754845a0341ac58e1dbd286e6a16d7648915b0d4ce69aacb48f3efd715906d0b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/orbit-3.png",
+      "bytes": 328370,
+      "sha256": "867c8fb098f2a638f2d09f82e443f7cf415a03b3778516543e4d28be1c6fca94"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/orbit-4.png",
+      "bytes": 364817,
+      "sha256": "7d34c2c347edf95131501a438f9c1be90ac07b0ea7508b78ae01f6318656e33e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/report.json",
+      "bytes": 86767,
+      "sha256": "0ffcb533cf030b149c594e3da88a93196246111e4bc34b923d32638fcc17b032"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/residents-selection.json",
+      "bytes": 1286,
+      "sha256": "c2caa9ffa483ad6de15b3cbb7028e3786906ae471356061bb02504d8c22cebb2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/returned-observer.png",
+      "bytes": 531637,
+      "sha256": "ab66574055289ff6ebd84f58e07a1047c6c6b63e6ed9a203b0667eb046227597"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-hub-scenery-native-20261017/walk-KeyW.png",
+      "bytes": 353416,
+      "sha256": "4a6c5f766373f860addeda4c8936c5f4eaf3b58e7483e2fec8bab4d940b9a86d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/canonical-lobby.png",
+      "bytes": 368259,
+      "sha256": "47559526601cf7d18d9fc7d33264add59fa7b8a76be7b73037aec409a8e8b87f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/entrance.png",
+      "bytes": 475653,
+      "sha256": "0fa8bd46376a590da449c84034c7237286f4a7287733c4d1be246c2e9fa6bc95"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/office-entry-diagnostics.json",
+      "bytes": 14937,
+      "sha256": "a80912d11c7b2657ac0f755f93702e35fe7108b2b01789419f9398122244fb5e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/office-entry.json",
+      "bytes": 15098,
+      "sha256": "737cecd798a5bd60202593c5ea5df624037ff0d069e92e991cb3f5bf448c0d21"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/office-entry.png",
+      "bytes": 632461,
+      "sha256": "de122360cddee052b20623a7c0bc90ab101b5c4d7b58396d351e7f5386e36bb4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/report.json",
+      "bytes": 77976,
+      "sha256": "e5f0fd52a6eb82ab8647783974c4298e33b5d8fc0b3a3e061dd94677ec915e6b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/upper-office.png",
+      "bytes": 352077,
+      "sha256": "b36972d5a6bbbfd0040c064d9cb496ba8336030df81db77a7bd82c1c92f53342"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-hub-scenery-native-20261017/workplaces.png",
+      "bytes": 534758,
+      "sha256": "27563049a6d32eec01013694291814cf5dd8fb68f03a49507f98445430c0abae"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/performance-live-fps-live-20261017-hub-scenery.json",
+      "bytes": 229600,
+      "sha256": "cbebe6a170e6e239c4534486298d594edf3883d23bc552a46a62b7fae0fb8b67"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/fps-live-20261017-hub-scenery.log",
+      "bytes": 71347,
+      "sha256": "29e8cf39158d0eeab57d050eb88b0a4676eac6eaba26a399fe2e900eb17dbdb6"
+    }
+  ],
+  "visualReview": {
+    "reviewedPngs": [
+      "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-office-south.png",
+      "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-office-north.png",
+      "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-spawn-east.png",
+      "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-spawn-west.png",
+      "artifacts/office-terrain-assets/office-hub-scenery-assets-20261017/hub-office-floor-3.png",
+      "artifacts/office-walking/office-hub-scenery-native-20261017-r2/entered.png",
+      "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-moved.png",
+      "artifacts/office-walking/office-hub-scenery-native-20261017-r2/residents-returned.png"
+    ],
+    "notes": [
+      "All five passive source views were reviewed. The hub now contains the original facade skyline in both directions and through the floor-3 yaw/height transform.",
+      "Outer biome props/buildings still have the legacy nine-loaded-chunk budget. Bounded terrain edges and original road/terrain intersections remain visible in aerial views."
+    ]
+  },
+  "limits": [
+    "This restores hub source coverage, not complete outer-world static streaming or all non-Office building interiors/lifts. Those remain part of the full goal.",
+    "New stationary FPS is not an Office or moving-game benchmark.",
+    "Native guest companies/leases are empty; unchanged rights do not replace prior funded-business tests.",
+    "Audio-reference WebSocket 503 / C920 warning persists. No physical microphone capture or playback was performed.",
+    "Remaining camera/lighting/water optics, gameplay, transport, network and audio verification still require completion."
+  ],
+  "priorEvidence": [
+    "docs/render-evidence/office-source-boundary-20261017.json",
+    "docs/render-evidence/office-camera-depth-20261017.json"
+  ],
+  "serverAfter": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "counts": {
+    "sources": 27,
+    "bundles": 4,
+    "artifacts": 101,
+    "pngs": 40,
+    "reviewedPngs": 8
+  }
+}

@@ -38,6 +38,23 @@ const near=(a,b,label)=>assert.ok(
   Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1e-9+Math.max(Math.abs(a),Math.abs(b))*1e-9,
   label+': '+a+' vs '+b
 );
+
+test('horn capture preserves explicit signal events without inventing contact energy or wave transfers',()=>{
+ const scene=new Scene({version:1,entities:[{id:'car',position:[1,2,3],mesh:{kind:'box'}}]});
+ scene.enableWorldInteractions(16);scene.honk('car',.4,440);
+ const graph=scene.worldInteractionGraph(),events=scene.drainEvents();
+ validateWorldInteractionGraph(graph);
+ assert.equal(graph.interactions.length,1);const [record]=graph.interactions;
+ assert.equal(record.law,'scene.horn');assert.equal(record.tick,scene.tick);assert.deepEqual(record.source,{domain:'entity',id:'car'});
+ assert.equal(record.causeId,undefined);assert.equal(record.couplingIds,undefined);assert.equal(record.effect.event.energy,undefined);
+ assert.deepEqual(eventsFromWorldInteractions(graph),events);assert.deepEqual(record.effect.event.point,[1,2,3]);
+ assert.deepEqual(renderAudio(eventsFromWorldInteractions(graph),1,16000),renderAudio(events,1,16000));
+ const invalid=structuredClone(graph);invalid.interactions[0].effect.event.frequencyHz=NaN;
+ assert.throws(()=>validateWorldInteractionGraph(invalid),/finite/);
+ const invalidDuration=structuredClone(graph);invalidDuration.interactions[0].effect.event.durationSeconds=2;
+ assert.throws(()=>validateWorldInteractionGraph(invalidDuration),/horn signal/);
+});
+
 test('World IR remains an opt-in observation: full simulation and legacy event stream are unchanged',()=>{
  const reference=fixture(),observed=fixture();
  assert.equal(reference.worldInteractionGraph(),undefined);

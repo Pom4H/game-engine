@@ -4,6 +4,27 @@ import type {PhysicalMaterial} from './catalog.js';
 export type MaterialFinish='raw'|'rough'|'smooth'|'polished'|'weathered';
 export type MaterialTreatment='none'|'sealed'|'biocide'|'galvanized'|'painted';
 
+/** GPU optical wetness supplied by another simulation. No contact/friction state
+ * is changed; an authored material roughness is already the final wet roughness. */
+/** Read-only projection of the native surface model, including its snowpack history. */
+export interface SurfaceSnowAppearance {
+ readonly snowDepthM:number;readonly waterDepthM:number;readonly iceDepthM:number;readonly slush:number;
+ readonly freshness:number;readonly liquidFraction:number;readonly crust:number;readonly grainSizeMm:number;
+}
+export interface SurfaceAppearance {readonly wetness:number;readonly darkening:number;readonly snow?:SurfaceSnowAppearance}
+export function validateSurfaceAppearance(value:unknown):asserts value is SurfaceAppearance{
+ if(!value||typeof value!=='object'||Array.isArray(value))throw new TypeError('surfaceAppearance must be an object');
+ const fields=value as Record<string,unknown>;
+ if(Object.keys(fields).some(key=>key!=='wetness'&&key!=='darkening'&&key!=='snow'))throw new TypeError('surfaceAppearance contains an unknown optical field');
+ for(const key of ['wetness','darkening']){const n=fields[key];if(typeof n!=='number'||!Number.isFinite(n)||n<0||n>1)throw new TypeError(`surfaceAppearance.${key} must be finite within 0..1`);}
+ if(fields.snow!==undefined){
+  if(!fields.snow||typeof fields.snow!=='object'||Array.isArray(fields.snow))throw new TypeError('surfaceAppearance.snow must be an object');
+  const snow=fields.snow as Record<string,unknown>,depths=['snowDepthM','waterDepthM','iceDepthM','grainSizeMm'],fractions=['slush','freshness','liquidFraction','crust'];
+  if(Object.keys(snow).some(key=>!depths.includes(key)&&!fractions.includes(key)))throw new TypeError('surfaceAppearance.snow contains an unknown field');
+  for(const key of [...depths,...fractions]){const n=snow[key];if(typeof n!=='number'||!Number.isFinite(n)||n<0||n>(depths.includes(key)?100:1))throw new TypeError(`Invalid surfaceAppearance.snow.${key}`);}
+ }
+}
+
 export interface MaterialSurfaceSpec {
   finish?:MaterialFinish;
   /** Existing exposure history. The environment determines what that history produced. */

@@ -12,7 +12,7 @@ export function snowfallUniform(vp:Mat4,current:SnowCamera,intensity:number,wind
  return data;
 }
 
-export const SNOWFALL_WGSL=`
+export function snowfallShader(logarithmic=false):string{return `
 @group(1) @binding(0) var<uniform> f:Frame;
 struct S {vp:mat4x4<f32>,camera:vec4<f32>,params:vec4<f32>,right:vec4<f32>,up:vec4<f32>,previousCamera:vec4<f32>,previousRight:vec4<f32>,previousUp:vec4<f32>}
 @group(0) @binding(0) var<uniform> s:S;
@@ -42,11 +42,12 @@ fn corner(q:vec2<f32>,i:u32,t:f32)->vec2<f32>{let a=t*.45+hash1(i*47u)*6.2831853
  let transmittance=exp(-fogViewDepth(s.camera.xyz,world,f.sky.w));
  out.tone=mix(vec3<f32>(.86,.92,1)*incident*(.77+hash1(i*7u)*.23),f.fogColor.rgb,1.0-transmittance);return out;
 }
-struct F {@location(0) color:vec4<f32>,@location(3) velocity:vec4<f32>}
+struct F {@location(0) color:vec4<f32>,@location(3) velocity:vec4<f32>${logarithmic?',@builtin(frag_depth) depth:f32':''}}
 @fragment fn fs(in:O)->F{
  let r=length(in.uv);let lobes=.84+.06*cos(atan2(in.uv.y,in.uv.x)*6.0);let alpha=in.alpha*(1.0-smoothstep(.15,lobes,r));
  if(alpha<.005){discard;}
  let now=in.currentClip.xy/max(in.currentClip.w,.001);let before=in.previousClip.xy/max(in.previousClip.w,.001);
- var out:F;out.color=vec4<f32>(in.tone,alpha);out.velocity=vec4<f32>((now-before)*vec2<f32>(.5,-.5),0,alpha);return out;
+ var out:F;out.color=vec4<f32>(in.tone,alpha);out.velocity=vec4<f32>((now-before)*vec2<f32>(.5,-.5),0,alpha);${logarithmic?'out.depth=logarithmicCameraDepth(in.currentClip.w,f.cameraDepth.x);':''}return out;
 }
-`;
+`;}
+export const SNOWFALL_WGSL=snowfallShader();

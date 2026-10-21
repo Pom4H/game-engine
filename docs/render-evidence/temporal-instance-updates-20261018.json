@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "passed",
+  "problem": "The built-in RenderFrameCache certifies changed entity poses, but temporal GPU batches still queried current and previous models for every member on every frame, including unchanged records.",
+  "change": {
+    "file": "src/render/webgpu.ts",
+    "behavior": "Stable temporal batches visit certified current changes and the preceding unsettled records. A stopped object's previous model catches up on its next admitted render observation. Work is keyed by RuntimeEntity identity and validated against the current ID-to-slot generation.",
+    "fallbacks": ["membership, material or geometry regrouping", "uncertified custom projection", "explicit temporal history reset", "failed preparation or upload"],
+    "lifetime": "Reusable pending, next and visited sets are bounded by current batch membership, discard stale generations after regrouping, and clear on scene swap, history reset and preparation/disposal cleanup.",
+    "preserved": "Full end-of-frame history commits, independent camera/reflection/shadow visibility, compact non-temporal updates, rendered geometry, shader math and GPU quality settings."
+  },
+  "oracle": {
+    "test": "test/temporal-batch-updates.test.mjs",
+    "reference": "test/fixtures/temporal-batch-reference.mjs",
+    "referenceOrigin": "Frozen built prepareCameraBatches immediately before this optimization",
+    "states": 60,
+    "comparison": "Exact live current/previous/color/weather buffer bytes and exact uploaded byte ranges and contents across both 160-byte temporal and 96-byte compact records",
+    "coverage": ["motion and one-frame settling", "simultaneous changed and settling entities", "Float32-equal full-precision pose changes", "temporal history reset", "offscreen motion and reentry", "camera-mask changes", "replacement under the same ID while unsettled", "material and geometry splits", "buffer capacity growth", "custom builder fallback and return", "frame cache reset", "scene swap with reused IDs", "empty and repopulated scenes"],
+    "temporalModelLookups": {"reference":2122,"optimized":872},
+    "compactModelLookups": {"reference":808,"optimized":808},
+    "additionalFailureCase": "An injected GPU upload exception forces a full fallback with current=current previous model before incremental updates resume."
+  },
+  "validation": {
+    "typecheck": "passed",
+    "engineBuild": "passed",
+    "focusedTests": {"passed":54,"failed":0},
+    "finalOracleRerun": {"passed":3,"failed":0},
+    "nativeGpu": {
+      "generatedAt": "2026-10-18T01:46:33.04Z",
+      "adapter": {"vendor":"amd","architecture":"rdna-3","isFallbackAdapter":false},
+      "report": "artifacts/render-stability/report.json",
+      "image": "artifacts/render-stability/native-render.png",
+      "renderFrames":18,
+      "publishedCubeReadbacks":17,
+      "finiteCubeChannels":15040512,
+      "partialSweepsWithNoChangedChannels":8,
+      "sameOriginCompletedSweeps":6,
+      "sameOriginMaxAbsError":0,
+      "movedOriginCompletedSweepsWithChangedRadiance":2,
+      "taaCoordinateCases":24,
+      "taaFiniteInputCases":7,
+      "browserErrors":0,
+      "rendererErrors":0,
+      "gpuValidationErrors":0
+    }
+  },
+  "limits": "Model lookup counts establish removed bookkeeping in this regression workload. They do not measure saved wall time or establish canonical game FPS. Fixed-quality live measurements are separate."
+}

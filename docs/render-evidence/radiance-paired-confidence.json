@@ -1,0 +1,302 @@
+{
+  "status": "paired-mean-uncertainty-observation",
+  "method": "Deterministic circular block bootstrap of sequential per-pair combined host-time differences; percentile 95% intervals. Block sizes 2/8/16 are sensitivity analyses. LCG full-word fractions select indices; low-bit modulo selection is excluded and short-cycle resampling is checked.",
+  "results": [
+    {
+      "report": "artifacts/engine-compare/radiance-cause-plan-paired/report.json",
+      "sourceState": {
+        "srcSha256": "f06c0f7309bb092d6e52168ce48ce640468f80f58564153b22a9d3a8c67ea8f4",
+        "distSha256": "3785a3ebd24226ba30d4552b51ec237b614c0636e536d7f7abc2747dd6f093b2",
+        "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+        "diagnosticSha256": "9e7064a3e985f0e406184e301c106b35f30c802fdb49e2795759c7fc72698159"
+      },
+      "routes": [
+        {
+          "scenario": "static",
+          "pairs": 128,
+          "meanMs": 0.1023437506519258,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19921,
+              "lowerMs": 0.03671875409781933,
+              "upperMs": 0.17187500232830644
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19923,
+              "lowerMs": 0.033593752421438694,
+              "upperMs": 0.1749999988824129
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19920,
+              "lowerMs": 0.034375003539025784,
+              "upperMs": 0.17421875149011612
+            }
+          ]
+        },
+        {
+          "scenario": "camera-motion",
+          "pairs": 128,
+          "meanMs": 0.0226562456227839,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19915,
+              "lowerMs": -0.033593753818422556,
+              "upperMs": 0.0757812480442226
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19901,
+              "lowerMs": -0.025000007823109627,
+              "upperMs": 0.06874999776482582
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19905,
+              "lowerMs": -0.02109375735744834,
+              "upperMs": 0.06484374823048711
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "report": "artifacts/engine-compare/radiance-emission-demand-paired/report.json",
+      "sourceState": {
+        "srcSha256": "cb8dfd5d4ba4c2952ae8bd7dcf5dea99aa8646ea2bcc713b9e3a891b8b905587",
+        "distSha256": "a97d177a662f7b1058c9580c97293deeecc017159fcd0ce23f87085c6c48a148",
+        "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+        "diagnosticSha256": "9e7064a3e985f0e406184e301c106b35f30c802fdb49e2795759c7fc72698159"
+      },
+      "routes": [
+        {
+          "scenario": "static",
+          "pairs": 128,
+          "meanMs": -0.04374999925494194,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19921,
+              "lowerMs": -0.10312499850988388,
+              "upperMs": 0.022656251210719347
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19923,
+              "lowerMs": -0.09765624813735485,
+              "upperMs": 0.01015625149011612
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19920,
+              "lowerMs": -0.08828125381842256,
+              "upperMs": -0.0015624980442225933
+            }
+          ]
+        },
+        {
+          "scenario": "camera-motion",
+          "pairs": 128,
+          "meanMs": -0.04453124711290002,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19915,
+              "lowerMs": -0.10234375111758709,
+              "upperMs": 0.016406248323619366
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19901,
+              "lowerMs": -0.0914062513038516,
+              "upperMs": 0.005468751769512892
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19905,
+              "lowerMs": -0.08203125093132257,
+              "upperMs": -0.0015624957159161568
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "report": "artifacts/engine-compare/radiance-membership-paired/report.json",
+      "sourceState": {
+        "srcSha256": "117362617d0cacc35908c49a8dc4a01851d0e945f9b1e4c24c4fae44002e1d51",
+        "distSha256": "432e3a5b4c768830ada604472c27b5b64d9d40c17c9608763df7d79234bd0142",
+        "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+        "diagnosticSha256": "9e7064a3e985f0e406184e301c106b35f30c802fdb49e2795759c7fc72698159"
+      },
+      "routes": [
+        {
+          "scenario": "static",
+          "pairs": 128,
+          "meanMs": -0.03359374776482582,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19921,
+              "lowerMs": -0.09999999683350325,
+              "upperMs": 0.030468750279396772
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19923,
+              "lowerMs": -0.09921875037252903,
+              "upperMs": 0.033593755681067705
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19920,
+              "lowerMs": -0.0789062469266355,
+              "upperMs": 0.012500000651925802
+            }
+          ]
+        },
+        {
+          "scenario": "camera-motion",
+          "pairs": 128,
+          "meanMs": -0.08281249832361937,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19915,
+              "lowerMs": -0.1445312462747097,
+              "upperMs": -0.02421874599531293
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19901,
+              "lowerMs": -0.14609374525025487,
+              "upperMs": -0.02109375037252903
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19905,
+              "lowerMs": -0.14765625074505806,
+              "upperMs": -0.01328124850988388
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "report": "artifacts/engine-compare/radiance-membership-paired-512/report.json",
+      "sourceState": {
+        "srcSha256": "117362617d0cacc35908c49a8dc4a01851d0e945f9b1e4c24c4fae44002e1d51",
+        "distSha256": "432e3a5b4c768830ada604472c27b5b64d9d40c17c9608763df7d79234bd0142",
+        "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+        "diagnosticSha256": "3514a96d9b2f42826e505ad4a16a6e2f9a933a4cc3c48b1835c24f35111d0adb"
+      },
+      "routes": [
+        {
+          "scenario": "static",
+          "pairs": 512,
+          "meanMs": 0.013085937942378223,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": -0.026171877630986273,
+              "upperMs": 0.05664062732830644
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": -0.02519530861172825,
+              "upperMs": 0.05292968708090484
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": -0.023632811149582267,
+              "upperMs": 0.050390625023283064
+            }
+          ]
+        },
+        {
+          "scenario": "camera-motion",
+          "pairs": 512,
+          "meanMs": 0.027343747788108885,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": -0.005078126909211278,
+              "upperMs": 0.05976562306750566
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": -0.005078128422610462,
+              "upperMs": 0.06054687488358468
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": -0.003320316900499165,
+              "upperMs": 0.05800781073048711
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "These intervals quantify sampling sensitivity of these captures; they do not isolate external clock/load or establish native frame-rate improvement.",
+    "No image, physical-state or frame-budget gate is relaxed. A negative mean alone is insufficient to establish a repeatable speed gain."
+  ]
+}

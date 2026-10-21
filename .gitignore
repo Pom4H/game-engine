@@ -1,6 +1,8 @@
 node_modules/
 dist/
 artifacts/
+apps/thegame/data/
+apps/thegame/public/
 .DS_Store
 *.log
 compiler/target/

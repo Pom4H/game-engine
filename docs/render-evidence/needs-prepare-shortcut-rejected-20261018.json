@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-18",
+  "status": "Rejected before production adoption",
+  "scope": "Ignored prototype replacing only WebGPURenderer.needsPrepare's state-query prefix with the existing default-reader presence guard. No production source change, timing benchmark or allocation measurement.",
+  "oracle": {
+    "command": "node artifacts/needs-prepare-presence-prototype/verify.mjs",
+    "exitCode": 0,
+    "reference": "Actual WebGPURenderer.prototype.needsPrepare on actual Scene entities; candidate retains the compiled method tail and its original helpers. Each control constructs independent equivalent fixtures.",
+    "controls": 8,
+    "equalControls": 5,
+    "observableDifferences": 3,
+    "artifacts": {
+      "artifacts/needs-prepare-presence-prototype/verify.mjs": "3919579b926b738c45c959f6c4c47623e1c19637b21acc07ac7a75b6f6a4bad4",
+      "artifacts/needs-prepare-presence-prototype/candidate.mjs": "1224dd5a63d080600d3a169ad1f8155ef23b586b4e9b207d7da90b50a5894019",
+      "artifacts/needs-prepare-presence-prototype/report.json": "8b8b2d0a072ba8945c82717b3ca1e2043bdc2e321984600a0eb5fd8d618ffd12",
+      "artifacts/needs-prepare-presence-prototype/verify.log": "8b8b2d0a072ba8945c82717b3ca1e2043bdc2e321984600a0eb5fd8d618ffd12"
+    }
+  },
+  "sourceSha256": {
+    "src/render/webgpu.ts": "d4b6d0471139d70785d351861c11abe6433a28293b230b699b42389b69c24c71",
+    "dist/render/webgpu.js": "87c6a94be7b2ea4b9fbf3abdeb57c0d0dfa9b66bfc3ad9b454b0bea7704ee962",
+    "src/scene/scene.ts": "1d54b2c12e8c8b253f7a5574e2509fa9dbfda4552f2f952aa17c033405bcf525",
+    "src/environment/surface-state.ts": "f3f9ad56c0552594b150c65e64443d4cb388154011b29fd59bb6774d00ea26a0"
+  },
+  "controls": [
+    {"case": "Ordinary empty default registries", "equal": true, "result": false},
+    {"case": "Default public fields insertion", "equal": true, "result": true},
+    {"case": "Default public surfaces insertion", "equal": true, "result": true},
+    {"case": "Default public bodies insertion", "equal": true, "result": true},
+    {"case": "Ordinary overridden function readers", "equal": true, "result": true, "observations": "Original field -> state -> body fallback retained, including a field reader inserting state before the state query."},
+    {"case": "Accessors returning native reader functions", "equal": false, "observations": "Original getter order field -> surfaceStateForRender -> surface -> body becomes surfaceStateForRender -> field -> surface -> body."},
+    {"case": "Native-returning field accessor and custom public fields.get", "equal": false, "observations": "Original invokes fields.get and returns true for its truthy result. Candidate skips the reader because membership is empty and returns false."},
+    {"case": "Throwing custom getter prefix", "equal": false, "observations": "Original first throws Error('field first'); candidate first throws Error('state first')."}
+  ],
+  "conclusion": "Reader function identity does not certify side-effect-free property access or public registry Map.get behavior. The shortcut changes read/error order and can change the Boolean preparation decision. Existing default reader implementations return direct Map.get results (plus the surface source-link lookup); this experiment establishes no reader-only allocation amount, timing saving, FPS improvement or GPU effect."
+}

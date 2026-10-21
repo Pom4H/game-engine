@@ -1,0 +1,2375 @@
+{
+  "date": "2026-10-16T23:54:56.842Z",
+  "scope": "Original Game rooms/stairs/lift geometry in Office; city-wide paged resident search; saved NPC observation/possession at its existing position. Full project goal remains in progress.",
+  "tests": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-tests-r3-20261017.log",
+      "passed": 34,
+      "assertions": 20130
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-tests-r3-20261017.log",
+      "passed": 19,
+      "assertions": 7942
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-life-tests-r2-20261017.log",
+      "passed": 99,
+      "assertions": 13581
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory-app-tests-20261017.log",
+      "passed": 136,
+      "assertions": 6275
+    }
+  ],
+  "native": {
+    "assets": {
+      "root": "artifacts/office-interiors/office-interiors-assets-20261017-r7",
+      "views": 5,
+      "originalControls": 5,
+      "rgba": "exact",
+      "postProcessing": "disabled only in passive fixture",
+      "liveLiftRide": false
+    },
+    "indoor": {
+      "root": "artifacts/office-walking/office-interiors-native-20261017-r2",
+      "states": 18,
+      "target": "resident:10243:0",
+      "building": "10243",
+      "takeoverDistance": 0.1022904986296365,
+      "move": 0.3644859977517347,
+      "stoppedSpeed": 0.04995806346075144
+    },
+    "neighbors": {
+      "root": "artifacts/office-walking/office-interiors-neighbors-20261017",
+      "states": 16,
+      "pickerHoldMs": 600,
+      "focusSteps": 25
+    },
+    "reviewedImages": [
+      "artifacts/office-interiors/office-interiors-assets-20261017-r7/house-ground-office.png",
+      "artifacts/office-interiors/office-interiors-assets-20261017-r7/office-upper-office.png",
+      "artifacts/office-interiors/office-interiors-assets-20261017-r7/apartments-stairs-office.png",
+      "artifacts/office-interiors/office-interiors-assets-20261017-r7/lift-lobby-sample-office.png",
+      "artifacts/office-interiors/office-interiors-assets-20261017-r7/outer-house-office.png",
+      "artifacts/office-walking/office-interiors-native-20261017-r2/residents-directory.png",
+      "artifacts/office-walking/office-interiors-native-20261017-r2/residents-interior-possessed.png",
+      "artifacts/office-walking/office-interiors-native-20261017-r2/residents-moved.png"
+    ]
+  },
+  "directory": {
+    "date": "2026-10-16T23:41:51.484Z",
+    "ok": true,
+    "scope": "Live read-only directory pagination/search/filter, not character activation or isolated CPU timing",
+    "residents": 1499,
+    "pages": 63,
+    "maxRecords": 24,
+    "maxBytes": 7483,
+    "latencyMs": {
+      "average": 4.476899999999999,
+      "max": 6.087699999999998
+    },
+    "playersBefore": 0,
+    "playersAfter": 0,
+    "requests": [
+      {
+        "bytes": 6857,
+        "ms": 5.169500000000003,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7252,
+        "ms": 5.156600000000001,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7149,
+        "ms": 5.054100000000002,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7024,
+        "ms": 3.622399999999999,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7015,
+        "ms": 4.345799999999997,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7150,
+        "ms": 4.4435,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6727,
+        "ms": 4.175600000000003,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7033,
+        "ms": 5.270499999999998,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6956,
+        "ms": 5.387099999999997,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6937,
+        "ms": 4.5837999999999965,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7011,
+        "ms": 5.528900000000007,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7362,
+        "ms": 5.9051000000000045,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7191,
+        "ms": 6.087699999999998,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6962,
+        "ms": 4.467799999999997,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7282,
+        "ms": 4.9833,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7009,
+        "ms": 5.425899999999999,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7239,
+        "ms": 5.412400000000005,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6943,
+        "ms": 4.3035,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7099,
+        "ms": 4.186099999999996,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7184,
+        "ms": 5.437399999999997,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7158,
+        "ms": 5.619700000000009,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7125,
+        "ms": 5.3374999999999915,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7036,
+        "ms": 3.935299999999984,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7317,
+        "ms": 4.067399999999992,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7408,
+        "ms": 4.502399999999994,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7422,
+        "ms": 4.1464,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6904,
+        "ms": 4.070600000000013,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6972,
+        "ms": 4.126900000000006,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7071,
+        "ms": 4.046600000000012,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7061,
+        "ms": 4.298599999999993,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7285,
+        "ms": 5.555099999999982,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7371,
+        "ms": 4.528699999999986,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7287,
+        "ms": 4.278400000000005,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7185,
+        "ms": 5.480500000000006,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6968,
+        "ms": 4.01939999999999,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7117,
+        "ms": 4.390900000000016,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7138,
+        "ms": 4.304100000000005,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6878,
+        "ms": 4.77709999999999,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7068,
+        "ms": 4.02200000000002,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7433,
+        "ms": 4.641999999999996,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7483,
+        "ms": 4.703800000000001,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7099,
+        "ms": 5.395499999999998,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6844,
+        "ms": 4.14609999999999,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7176,
+        "ms": 3.971499999999992,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6977,
+        "ms": 4.9964999999999975,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7232,
+        "ms": 4.508999999999986,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7327,
+        "ms": 3.9769000000000005,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7085,
+        "ms": 4.419299999999993,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7292,
+        "ms": 4.357900000000001,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7190,
+        "ms": 4.430499999999995,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7242,
+        "ms": 5.180499999999995,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7168,
+        "ms": 4.1107000000000085,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7171,
+        "ms": 4.642899999999997,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7174,
+        "ms": 3.9131999999999607,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7096,
+        "ms": 4.025500000000022,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7289,
+        "ms": 4.764099999999985,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7020,
+        "ms": 4.278999999999996,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7153,
+        "ms": 3.5588000000000193,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6763,
+        "ms": 3.4791999999999916,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6863,
+        "ms": 2.917599999999993,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 7009,
+        "ms": 2.485900000000015,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 6963,
+        "ms": 2.1517000000000053,
+        "people": 24,
+        "scanned": 24
+      },
+      {
+        "bytes": 3173,
+        "ms": 2.5319999999999823,
+        "people": 11,
+        "scanned": 97
+      }
+    ]
+  },
+  "restarts": [
+    {
+      "date": "2026-10-16T23:06:09.193Z",
+      "oldPid": 23624,
+      "newPid": 23676,
+      "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; original interiors and lift snapshot interest; geometry hint and causal priority retained; Office/backend/microphone untouched",
+      "beforeRows": 3122,
+      "afterRows": 3122,
+      "missingRows": 0,
+      "protectedRows": 120,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 23,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1
+    },
+    {
+      "date": "2026-10-16T23:35:53.938Z",
+      "oldPid": 23676,
+      "newPid": 22524,
+      "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; paged resident directory and saved NPC activation; original interiors; geometry hint and causal priority retained; Office/backend/microphone untouched",
+      "beforeRows": 3182,
+      "afterRows": 3182,
+      "missingRows": 0,
+      "protectedRows": 120,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 23,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1
+    }
+  ],
+  "fps": {
+    "path": "docs/render-evidence/fps-live-20261017-interiors-directory.json",
+    "averageFPS": 60.711539239891515,
+    "conditions": [
+      "Short stationary original Game measurement; not walking, vehicles, sustained-60 or Office UI performance.",
+      "1280x720 viewport, 704x396 internal rendering, TAA, 420 m, adaptive resolution disabled.",
+      "900 requestAnimationFrame intervals after 180 warmup frames; benchmark additionally discards its first 30 intervals. Not isolated GPU execution time. Interval sum is derived from count/throughput.",
+      "Different live world state and bundle from the earlier 49.682 FPS sample; these unpaired samples do not establish a performance improvement or regression."
+    ]
+  },
+  "sources": [
+    {
+      "repo": "game",
+      "path": "src/game/scenery-records.ts",
+      "bytes": 5697,
+      "sha256": "bbe7372fee3639f19a9e767fcadcbd5dd2785353a7f9109632f4a40bdb72d048"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-interior-assets.ts",
+      "bytes": 7217,
+      "sha256": "acae63ed4e8b5a3bfb2ceb2bc3340b23a67bc80d0c6ee5cd2c7563f2a02407f6"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-assets.ts",
+      "bytes": 6965,
+      "sha256": "43cab986edcdf1961b008a357c7a4e0ded7b32219a22cf942057b5ea4143878e"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "bytes": 10379,
+      "sha256": "a14603db1eacd2a54eae6f24d5cecd5de07504160b612d0f229519075f71f238"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/world.ts",
+      "bytes": 8713,
+      "sha256": "29a956e781cea1603aa26a824d7a0adbafd95fedb8c606573653137da55df754"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/lifts.ts",
+      "bytes": 7970,
+      "sha256": "5b85669deac7a41fccd56b01366860cb17c9cc6c64769a441591cc07b85e1267"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/visibility.ts",
+      "bytes": 2069,
+      "sha256": "e5b3b172fc5f27192a0671bdfd39bbb8e8e6ef2b175b8be12ce5612dbe1a336d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/vertical.ts",
+      "bytes": 13814,
+      "sha256": "2f3d31552ee5870ae3340d03bd9ea8a59e357959c4f458eff5fb2110dc8f8ab0"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/buildings/plan.ts",
+      "bytes": 18874,
+      "sha256": "1138ff1ed2c478069d405d23af2fcd8c80f300bcee3dcfd94b8d6950bf2f415c"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/primitive-instances.ts",
+      "bytes": 5346,
+      "sha256": "9633ae53b7d6f4a5be9abdb76bfff0cb826715b3c761d844c744c0802484beab"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-projection.ts",
+      "bytes": 15359,
+      "sha256": "a5db4efee8c1e43594506be4f5fe3d9dc5b08b39f71265f3e8a4cd7a96b0473d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-geometry.ts",
+      "bytes": 11023,
+      "sha256": "b70b41c697c48f5276aab0d66fc84f91d087020f2dd70589b502855e09868245"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-model.ts",
+      "bytes": 1539,
+      "sha256": "7a9f85bb3463219782c5a589e9773141044db1237b53ac40552a76737761006a"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-directory.ts",
+      "bytes": 2559,
+      "sha256": "361e3b54e9eadcfc7354c3810a4bf6e3f8f1846d20679616d681ada2b4c43707"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-panel.ts",
+      "bytes": 17428,
+      "sha256": "594941d614956cd91906b9e6ae6253b04703f9d7160a27f4ea0ef97b97d6dcfd"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-selection.ts",
+      "bytes": 1090,
+      "sha256": "8c3a9c9f46e1694d6f0a4f857d885102d8232237aee8ecf669d230ed6ada5cb4"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/residents.ts",
+      "bytes": 48942,
+      "sha256": "355374ad7354480ecdac940f2b54580b8479b3d3df236c5e9552f6d184e28298"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/account-control.ts",
+      "bytes": 6966,
+      "sha256": "5f093c9317bf7bf7a3931fed8ad32217f1dc5848ab988cf4eeaf7ed2e4dedb1b"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "bytes": 65222,
+      "sha256": "49db112033aeae695eeb72848c31f0b59bcfaa0604e93bed9e41cdf54e25932b"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/index.ts",
+      "bytes": 14286,
+      "sha256": "d42b9f470e7907407fbc19a72f43994ad84d2ed0fcd9daa1826151856263ea88"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/resident-directory.ts",
+      "bytes": 1446,
+      "sha256": "f3dcc6026077fc32e6a005d8f19f4647484694a2d74adedb3f37371ae1c5e553"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-world.ts",
+      "bytes": 2527,
+      "sha256": "be32868be8b192c291132d86758f8b2f76e44ee7fdbc1b06e42cfc36c760847e"
+    },
+    {
+      "repo": "game",
+      "path": "public/style.css",
+      "bytes": 50598,
+      "sha256": "ee99c30c0ab3718cb6ee235a2e2cb3dd2b83722e4d84f8038bb89515065326d1"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/building-interiors-before.ts",
+      "bytes": 3326,
+      "sha256": "70447734969a274d09671fa05fd3d60da300091d9a64bbc8b95d142672ef27d2"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-interior-assets.test.ts",
+      "bytes": 10385,
+      "sha256": "39616c9a28ee903cab84bd7f11908a12b2b769403d67a948926e8c3ec888ebed"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-world.test.ts",
+      "bytes": 14192,
+      "sha256": "0699ed90b0bc0b76b30f3566953268a8e2e1736a1042e8c300d16f5431b1ca59"
+    },
+    {
+      "repo": "game",
+      "path": "test/resident-directory.test.ts",
+      "bytes": 5877,
+      "sha256": "2fb5b3863523e790a3a6df65e268919a01394935c17ffbbd3c3373743de8d1c2"
+    },
+    {
+      "repo": "game",
+      "path": "test/account-control.test.ts",
+      "bytes": 23131,
+      "sha256": "4bb14ec618d41f3385825ef43b121dd45bf21872a6ff5bbcf879ddd20a86943e"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "ff2b21eeff67317968b4e466fb2dfcbf0ab79192d15b67a3bbcdb8f59770d098"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 15792,
+      "sha256": "73f88392cbef6d6a6e2d8fc6a0c24c32064fb66980b32c3074f9c6ab020a67a3"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "3ea9ab8fd2667048b9cd8dfe46f0a1581b094ccdc51880bf9ea03a944915e2a3"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 33879,
+      "sha256": "3b3e57cfa3d804c5391f73c4bd86a18d1f7a7a13b47241720cbe073543953f7b"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 758713,
+      "sha256": "fc8a1d31e848ecd5e3a06d88df295192bd90c86dd08909b75286868e9873a4f3"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-scenery.ts",
+      "bytes": 1307,
+      "sha256": "736caec38a485a85dc73426a4be25e4ea8fb47a3bcc75f72207081f4a440da7f"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 32485,
+      "sha256": "b93ac0f0077460613ab149b6f4515639c520a351c043f59146e9bb12601b2e9f"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 34202,
+      "sha256": "7fd417f069f8e1578e9fe1d0f76f21a38565f949fc1ca58236c9aa4f0ef622d4"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 32216,
+      "sha256": "b1064755f152d24dcae80a0733aa39a5cc5dc14476b5b505bfb9fc240d6e5e37"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/mesh-ray.ts",
+      "bytes": 8798,
+      "sha256": "72f4c930ea460f5fc964c1d4cd9070624c6c8d0eb180348885347d6ad97123da"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/camera-post.ts",
+      "bytes": 3309,
+      "sha256": "e639c9f5a2c25adc83c6d5f5123faeced19a5c0572e45e5c58ce5b73c5c0b6b6"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/webgpu.ts",
+      "bytes": 190949,
+      "sha256": "51e2af3215b9c2ce9e9cf0a56f3fee05325db1be02975b6dab988242644c1fab"
+    },
+    {
+      "repo": "engine",
+      "path": "src/runtime/browser.ts",
+      "bytes": 11736,
+      "sha256": "433854e03b867d8c06dd39249b8b1466ff9ca3c8f04155dca01dcb56933603b9"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 176013,
+      "sha256": "29c8dcae277b03650d9227d209474a1e06abf39c4d517c16ede924b7e4d39061"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 63792,
+      "sha256": "33bcd5bae11085f567bc11daa2937736851b0b10fb3e984116d19b585318d427"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/ResidentsDialog.tsx",
+      "bytes": 3189,
+      "sha256": "72e9e4741eea2df3f6303e230d8ff9a2280a47bc1ca418c9a884ca1a82705cd8"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/residents-dialog.css",
+      "bytes": 3660,
+      "sha256": "9876ae94e892183178277ecda122ec1fe4a39e01e951b888532fc820a1a81c31"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 118703,
+      "sha256": "38b76d096c6a369ee8f4571ba0ad4c6e7ecbe0d107f5f64b2dfa92ba0355e225"
+    }
+  ],
+  "bundles": [
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2484349,
+      "sha256": "a3439114f4122890507ebd52e54f1420ed0b3e178322d61ea50882e03df0263a",
+      "archive": "artifacts/office-interiors/final-bundles/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1347701,
+      "sha256": "7caae2e8928c7f2eea26728cd949ae71fb03faaa25fa6a7e98a8a8550d3befce",
+      "archive": "artifacts/office-interiors/final-bundles/office-controller.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-BUDkjkvw.js",
+      "bytes": 1787152,
+      "sha256": "bd62ca9830202c32f80dc5739c4c7493c59446f7d34ba38816dc914b92a950f5",
+      "archive": "artifacts/office-interiors/final-bundles/index-BUDkjkvw.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec",
+      "archive": "artifacts/office-interiors/final-bundles/index-DyZZt9W9.css"
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017/fixture.html",
+      "bytes": 5838,
+      "sha256": "1862d0b24b405da5fef4fbb101195b67b76a27efa467b23bbf38e76f59e4d7df"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017/house-ground-original.png",
+      "bytes": 162199,
+      "sha256": "aa0e3fd90b271a7dcfa72d6b9156c2cd82abbfe607fe36afa55c7db7ca9bb8a4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017/reference.entry.js",
+      "bytes": 972717,
+      "sha256": "a409df018e8ce03aa44ef5d9927cf5306d078aa8f3d10d98aee77a23c5a6963a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017/source-frame.json",
+      "bytes": 722351,
+      "sha256": "b3b87b4531ee91fea0260f9bfa443c09fc6d16456abeb88abf0c6712c873bf77"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r2/failure.json",
+      "bytes": 3137,
+      "sha256": "66e551d20b0aa576c5d26e7d2a30d45db8acf976f56df03be65c64c8244ea070"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r2/fixture.html",
+      "bytes": 6406,
+      "sha256": "00c00434fc363c57ac8a03f79b6e4671572dfd0fe319eb43f947e8cf65c872ca"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r2/house-ground-office.png",
+      "bytes": 158877,
+      "sha256": "54ab5fa603faef46f9f019d6fcef876071481b141cb4a2d6196835067460c6e8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r2/house-ground-original.png",
+      "bytes": 161359,
+      "sha256": "a9239747acb469fed5e576210fd09d5624b61517a323b04d098a88c2261262b4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r2/progress.json",
+      "bytes": 2602,
+      "sha256": "b22b30d5b2d7a0bc75d89cafe0bc0c8dfa9f0e8a65166ca1de048790023b581d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r2/reference.entry.js",
+      "bytes": 972717,
+      "sha256": "a409df018e8ce03aa44ef5d9927cf5306d078aa8f3d10d98aee77a23c5a6963a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r2/source-frame.json",
+      "bytes": 720671,
+      "sha256": "7036af83efefb2496eea08a70ad54c648b3c6338d80eb5d93d36c9928b1edbce"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/failure.json",
+      "bytes": 4971,
+      "sha256": "448ffdc26b726f209ace3e99bf57e6383dc288105964f19d69f61206073a280a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/fixture.html",
+      "bytes": 6525,
+      "sha256": "297b861b7400b593ec6db26a3bf56421295f510fadfb6c0fb337b14930459ac6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/house-ground-office.png",
+      "bytes": 155878,
+      "sha256": "30c0f54854b9622cc4ffeba3c59aff25817de4d169e3044612cccb288cb78879"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/house-ground-original-control.png",
+      "bytes": 156304,
+      "sha256": "2ecbf3d6939621c801ef2f58888c6797f023b2a3cfe0b86c7998dc449f11ec5c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/house-ground-original.png",
+      "bytes": 159186,
+      "sha256": "0215a6fdc180e7b79170b364d1b06499fff5035855691e12f9de87550f0b980f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/progress.json",
+      "bytes": 4054,
+      "sha256": "5b1decf2cb098d4a89fd7e6fb5ef64e4c0b38f5bde6a2a301d821de000fa2521"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/reference.entry.js",
+      "bytes": 972717,
+      "sha256": "a409df018e8ce03aa44ef5d9927cf5306d078aa8f3d10d98aee77a23c5a6963a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r3/source-frame.json",
+      "bytes": 721397,
+      "sha256": "b3b9f2f72f5a2ea0dbc956b346616be4e0722f3b31bdab6e1946da4fd874df69"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/failure.json",
+      "bytes": 5243,
+      "sha256": "b8d13dc4f915cccd5070a9a13ea71db9f5ac1bfbc2a019a4a5b72969c1c3de57"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/fixture.html",
+      "bytes": 7545,
+      "sha256": "ed1b80e21b7e1ce7bc068d26890cd024862af514d7f37b40725c8479c0052fcb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/house-ground-office.png",
+      "bytes": 155018,
+      "sha256": "3c610d4b79a146d01e918f432e1c40361383e1b61dd372273ee62da63bb14170"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/house-ground-original-control.png",
+      "bytes": 156051,
+      "sha256": "fde12d734c37e31b74cdf203c5f47cacd918f6af6372aed0b06375707f187602"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/house-ground-original.png",
+      "bytes": 158283,
+      "sha256": "bf7d816c4dfbfa542881210b0aebc7c4f27a981472f54431ec257c95c35af511"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/progress.json",
+      "bytes": 4319,
+      "sha256": "60d4c6c5051b5b7938aed7ad2551c85cfe86b87aa71069010af3103df21a93cc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/reference.entry.js",
+      "bytes": 972717,
+      "sha256": "a409df018e8ce03aa44ef5d9927cf5306d078aa8f3d10d98aee77a23c5a6963a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r4/source-frame.json",
+      "bytes": 722990,
+      "sha256": "5513f574e297ca2dcef7984e1dde3c481b50b17a7dc3267208c991bc9f1222e9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/apartments-stairs-office.png",
+      "bytes": 338164,
+      "sha256": "a92cf6f1de314a3a16b37039e5fba07c2fe1e9d17a5ac4bbc7678a68d2b1e8d8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/apartments-stairs-original-control.png",
+      "bytes": 338164,
+      "sha256": "a92cf6f1de314a3a16b37039e5fba07c2fe1e9d17a5ac4bbc7678a68d2b1e8d8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/apartments-stairs-original.png",
+      "bytes": 338164,
+      "sha256": "a92cf6f1de314a3a16b37039e5fba07c2fe1e9d17a5ac4bbc7678a68d2b1e8d8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/fixture.html",
+      "bytes": 7688,
+      "sha256": "fd2d10699bf926262b83e9c77b8bee1e0a9f00a7468e423117b535a37a6da76a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/house-ground-office.png",
+      "bytes": 178434,
+      "sha256": "1be0a1465c38182d8fc493951c40619fd5f27002e2d2bbd57af02650a81d3ec2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/house-ground-original-control.png",
+      "bytes": 178434,
+      "sha256": "1be0a1465c38182d8fc493951c40619fd5f27002e2d2bbd57af02650a81d3ec2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/house-ground-original.png",
+      "bytes": 178434,
+      "sha256": "1be0a1465c38182d8fc493951c40619fd5f27002e2d2bbd57af02650a81d3ec2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/lift-lobby-sample-office.png",
+      "bytes": 272850,
+      "sha256": "e657a891ae0fa6bdb5967ec301d48ca77c0bffe147c66d8e7a3315cd2ce8503c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/lift-lobby-sample-original-control.png",
+      "bytes": 272850,
+      "sha256": "e657a891ae0fa6bdb5967ec301d48ca77c0bffe147c66d8e7a3315cd2ce8503c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/lift-lobby-sample-original.png",
+      "bytes": 272850,
+      "sha256": "e657a891ae0fa6bdb5967ec301d48ca77c0bffe147c66d8e7a3315cd2ce8503c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/office-upper-office.png",
+      "bytes": 131738,
+      "sha256": "83e575da14165a10479ae02e130eb91b18f1a1adb989c3e4896c9a5c4b7fd7d3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/office-upper-original-control.png",
+      "bytes": 131738,
+      "sha256": "83e575da14165a10479ae02e130eb91b18f1a1adb989c3e4896c9a5c4b7fd7d3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/office-upper-original.png",
+      "bytes": 131738,
+      "sha256": "83e575da14165a10479ae02e130eb91b18f1a1adb989c3e4896c9a5c4b7fd7d3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/outer-house-office.png",
+      "bytes": 160188,
+      "sha256": "4e2a0a5c82819ec2aaa4fa24c91ad2e3701be24b4bf5175f6614adf517f73adf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/outer-house-original-control.png",
+      "bytes": 160188,
+      "sha256": "4e2a0a5c82819ec2aaa4fa24c91ad2e3701be24b4bf5175f6614adf517f73adf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/outer-house-original.png",
+      "bytes": 160188,
+      "sha256": "4e2a0a5c82819ec2aaa4fa24c91ad2e3701be24b4bf5175f6614adf517f73adf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/progress.json",
+      "bytes": 23310,
+      "sha256": "ccfdb9505bcbf2bfc40f59e7acf497af1aaa2f3d0c185ee074fed315b83b1985"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/reference.entry.js",
+      "bytes": 972717,
+      "sha256": "a409df018e8ce03aa44ef5d9927cf5306d078aa8f3d10d98aee77a23c5a6963a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/report.json",
+      "bytes": 25799,
+      "sha256": "2c0729927c748a42135f5bbac017ce06c828e374703643163d9102dadbbd1284"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r5/source-frame.json",
+      "bytes": 721602,
+      "sha256": "abcf1a989bed9254b5734b8debd12912f80a5b8011b3dcf67597575c99019a1a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/apartments-stairs-office.png",
+      "bytes": 336302,
+      "sha256": "cabe9bcacbd8dc3191ee4e6d33b29f9761ab6eb9481ff2d923d0682b301abb58"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/apartments-stairs-original-control.png",
+      "bytes": 336302,
+      "sha256": "cabe9bcacbd8dc3191ee4e6d33b29f9761ab6eb9481ff2d923d0682b301abb58"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/apartments-stairs-original.png",
+      "bytes": 336302,
+      "sha256": "cabe9bcacbd8dc3191ee4e6d33b29f9761ab6eb9481ff2d923d0682b301abb58"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/fixture.html",
+      "bytes": 7688,
+      "sha256": "fd2d10699bf926262b83e9c77b8bee1e0a9f00a7468e423117b535a37a6da76a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/house-ground-office.png",
+      "bytes": 178146,
+      "sha256": "f4cc3fcc81c26470f4793f4fe010015db3d1b09a5779864b4a1ce6c30349a2c6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/house-ground-original-control.png",
+      "bytes": 178146,
+      "sha256": "f4cc3fcc81c26470f4793f4fe010015db3d1b09a5779864b4a1ce6c30349a2c6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/house-ground-original.png",
+      "bytes": 178146,
+      "sha256": "f4cc3fcc81c26470f4793f4fe010015db3d1b09a5779864b4a1ce6c30349a2c6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/lift-lobby-sample-office.png",
+      "bytes": 271823,
+      "sha256": "2f59af26ae9a1aba739a6bd9e4de728d01617745a48d31dfe26b6d74d02b1bd0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/lift-lobby-sample-original-control.png",
+      "bytes": 271823,
+      "sha256": "2f59af26ae9a1aba739a6bd9e4de728d01617745a48d31dfe26b6d74d02b1bd0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/lift-lobby-sample-original.png",
+      "bytes": 271823,
+      "sha256": "2f59af26ae9a1aba739a6bd9e4de728d01617745a48d31dfe26b6d74d02b1bd0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/office-upper-office.png",
+      "bytes": 127569,
+      "sha256": "b2a196542a4ded94601cb2360becdaddb5b635c97533625621f5ec99588d9d55"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/office-upper-original-control.png",
+      "bytes": 127569,
+      "sha256": "b2a196542a4ded94601cb2360becdaddb5b635c97533625621f5ec99588d9d55"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/office-upper-original.png",
+      "bytes": 127569,
+      "sha256": "b2a196542a4ded94601cb2360becdaddb5b635c97533625621f5ec99588d9d55"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/outer-house-office.png",
+      "bytes": 159117,
+      "sha256": "ca1f961dc58082e047f71bf0da0a69572a133d842812f9138e2a2cdef042ccdd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/outer-house-original-control.png",
+      "bytes": 159117,
+      "sha256": "ca1f961dc58082e047f71bf0da0a69572a133d842812f9138e2a2cdef042ccdd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/outer-house-original.png",
+      "bytes": 159117,
+      "sha256": "ca1f961dc58082e047f71bf0da0a69572a133d842812f9138e2a2cdef042ccdd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/progress.json",
+      "bytes": 23310,
+      "sha256": "6c4aa5a558a76dc33270292beb01829aacf83d655a7bd5eed5d47bfdb8091fa8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/reference.entry.js",
+      "bytes": 972717,
+      "sha256": "a409df018e8ce03aa44ef5d9927cf5306d078aa8f3d10d98aee77a23c5a6963a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/report.json",
+      "bytes": 25833,
+      "sha256": "836d5b37a911b30d2936916df28024dadd48f4541e20779f44031da107697bcf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r6/source-frame.json",
+      "bytes": 713741,
+      "sha256": "df5a1a5c42a1335f56cabc1541d793d81cdce7c3132b1d83b199bb96dc25e421"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/apartments-stairs-office.png",
+      "bytes": 336302,
+      "sha256": "cabe9bcacbd8dc3191ee4e6d33b29f9761ab6eb9481ff2d923d0682b301abb58"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/apartments-stairs-original-control.png",
+      "bytes": 336302,
+      "sha256": "cabe9bcacbd8dc3191ee4e6d33b29f9761ab6eb9481ff2d923d0682b301abb58"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/apartments-stairs-original.png",
+      "bytes": 336302,
+      "sha256": "cabe9bcacbd8dc3191ee4e6d33b29f9761ab6eb9481ff2d923d0682b301abb58"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/fixture.html",
+      "bytes": 7752,
+      "sha256": "647f72f8983098c047af9d8f7d20c5b54429591412bc8632b772deaf19580fdb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/house-ground-office.png",
+      "bytes": 224956,
+      "sha256": "828800a2a45b5d922938714dc4428b5a7d617eedd46fa6f6b03580303ac20aa6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/house-ground-original-control.png",
+      "bytes": 224956,
+      "sha256": "828800a2a45b5d922938714dc4428b5a7d617eedd46fa6f6b03580303ac20aa6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/house-ground-original.png",
+      "bytes": 224956,
+      "sha256": "828800a2a45b5d922938714dc4428b5a7d617eedd46fa6f6b03580303ac20aa6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/lift-lobby-sample-office.png",
+      "bytes": 271823,
+      "sha256": "2f59af26ae9a1aba739a6bd9e4de728d01617745a48d31dfe26b6d74d02b1bd0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/lift-lobby-sample-original-control.png",
+      "bytes": 271823,
+      "sha256": "2f59af26ae9a1aba739a6bd9e4de728d01617745a48d31dfe26b6d74d02b1bd0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/lift-lobby-sample-original.png",
+      "bytes": 271823,
+      "sha256": "2f59af26ae9a1aba739a6bd9e4de728d01617745a48d31dfe26b6d74d02b1bd0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/office-upper-office.png",
+      "bytes": 156864,
+      "sha256": "0478c143c9a7aaf459244b701962031338387a49ec38db6236b5f592a85dfa45"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/office-upper-original-control.png",
+      "bytes": 156864,
+      "sha256": "0478c143c9a7aaf459244b701962031338387a49ec38db6236b5f592a85dfa45"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/office-upper-original.png",
+      "bytes": 156864,
+      "sha256": "0478c143c9a7aaf459244b701962031338387a49ec38db6236b5f592a85dfa45"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/outer-house-office.png",
+      "bytes": 219859,
+      "sha256": "700b0121a54db1ceb674e9b21284567fa9da9f338e44a964b4bead9eb1577b08"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/outer-house-original-control.png",
+      "bytes": 219859,
+      "sha256": "700b0121a54db1ceb674e9b21284567fa9da9f338e44a964b4bead9eb1577b08"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/outer-house-original.png",
+      "bytes": 219859,
+      "sha256": "700b0121a54db1ceb674e9b21284567fa9da9f338e44a964b4bead9eb1577b08"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/progress.json",
+      "bytes": 23304,
+      "sha256": "b19b2f95bcd683b35a5f4cf4ad70478e4438e8b1f0c88a1045a1969a8eb486fc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/reference.entry.js",
+      "bytes": 972717,
+      "sha256": "a409df018e8ce03aa44ef5d9927cf5306d078aa8f3d10d98aee77a23c5a6963a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/report.json",
+      "bytes": 25827,
+      "sha256": "57db558a00f8b3ac4ef6bd01398b43521ffae617174cd2b5703be2bea0cd2c52"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors/office-interiors-assets-20261017-r7/source-frame.json",
+      "bytes": 723393,
+      "sha256": "95270be13876598d7180ea7347cee88a9eff295c56979b0b08faef9053300e06"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/canonical-controller-source.json",
+      "bytes": 903589,
+      "sha256": "538866ded06926442e363b6e24be5b0287fbd65d9de054a2a724318d6f845637"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/entered.png",
+      "bytes": 297135,
+      "sha256": "7f187eabe0b8d1309b52a4fbab73b1d4757c256f4723b679701c3134ad4bd805"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/failure.png",
+      "bytes": 144303,
+      "sha256": "b269fd2bcaf14ccf0ef6d42e2c58ca40f9f096dade2bc71d611add187988e36b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/observer.png",
+      "bytes": 626525,
+      "sha256": "6df17c44e6b8ba3682a8eed0b96e9f44789f72190eb066557daa3c9f3dc8d93f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/orbit-1.png",
+      "bytes": 369100,
+      "sha256": "af779363422ba79608e431804923d5ed910b58fddb6e9b12121a852d009553d3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/orbit-2.png",
+      "bytes": 304489,
+      "sha256": "21790816493b696f2b45e7deed986ce1434e68624d75094a7d496a491fb0cd33"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/orbit-3.png",
+      "bytes": 212328,
+      "sha256": "fc8c07f00d8538e67047dce6ac22e91541dfdc6bece28b6ecb394ec301c75e3f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/orbit-4.png",
+      "bytes": 298277,
+      "sha256": "1d2574779d3d187cae5221fefa825c85e26ade767f5673e359afe1090430d83a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/report.json",
+      "bytes": 88823,
+      "sha256": "46dae16c4cde49e1786147dfe508dbc1a6c999f6f691ed3fc4dcbf9e66e5a458"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/returned-observer.png",
+      "bytes": 583323,
+      "sha256": "11175012987b3b5feae742fc600c63264124bc80e41866762f0c665260fbf54f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017/walk-KeyW.png",
+      "bytes": 294233,
+      "sha256": "861db8b8f42cc4bae26e628eca596e110771ccb4ead37e64756d74b08005aef0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/canonical-controller-source.json",
+      "bytes": 906047,
+      "sha256": "508134e7816797644d3b0303844ceaf369bb88279e6b9012359fd0bcab937531"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/canonical-residents-observed-source.json",
+      "bytes": 832046,
+      "sha256": "787f1583616effb8734b58e48f6f125477b217845ebddb09e488c17ddd56df26"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/entered.png",
+      "bytes": 231890,
+      "sha256": "fc8e8acb4c997dfb3d871c19cda85f49a0c690af4014d2ae5c87581863634be6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/observer.png",
+      "bytes": 608307,
+      "sha256": "5f5e55f966c0d628e70fffdbf77a15b7c9a5a8f258a2faaa02a33ba945b143d4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/orbit-1.png",
+      "bytes": 243715,
+      "sha256": "9b0130769ca1069a264e0b530779a2f28f056462e47c14fa7701a8de460960b2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/orbit-2.png",
+      "bytes": 285900,
+      "sha256": "f50c4c064e98ed2f810824454406d1d1fb28e5226b304316c5933c61944f5186"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/orbit-3.png",
+      "bytes": 200513,
+      "sha256": "f0a26c6a0224b3f17a8e6df1da0fdb04cf4d3ffaf1d88dc2c9bf3b76defc262a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/orbit-4.png",
+      "bytes": 235130,
+      "sha256": "6df1503036c77fb82abfc58ea6f1c79fa0802200bfba30ae8b7b442a361b0bdf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/report.json",
+      "bytes": 208480,
+      "sha256": "c4f043aabca6771596d871de5d3df275ae117f653271405352166b464c2a6f43"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-before-movement.json",
+      "bytes": 4689,
+      "sha256": "0c5f70f1af69af1575696b11911a167cd27750064572d773654bf2ac8ec9ef2a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-directory-source.json",
+      "bytes": 10078,
+      "sha256": "aae42c816ead3b8e19de3a5d2e129bf0e8ef1d85650594b8aaa63fb1a495b188"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-directory.png",
+      "bytes": 155284,
+      "sha256": "cabb8e3fda0d91d30014c2ccc98e6debb9e8a561338a32dbce04aa0d9c6e8da1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-interior-observed.png",
+      "bytes": 153484,
+      "sha256": "d341f62d4a0c1f8e46fa2e91a62f18c56505493ee27f69dae5f4deeeb82217fe"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-interior-possessed.png",
+      "bytes": 143836,
+      "sha256": "74f447f455d9d0c5dadfcde8b803112e6d6c4a40ad030730b1c47da71c766971"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-interior-report.json",
+      "bytes": 728,
+      "sha256": "3fd75f11c72937aee5f6b280396681a9b987e9de687771e9460202da06044014"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-moved.png",
+      "bytes": 144456,
+      "sha256": "229073c16959b0a1e46ef35945f8c02bdf27b8f9a8cf5e638e5a9af7840fc3ec"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-movement.json",
+      "bytes": 13140,
+      "sha256": "4fdc59d696dfb6c59440f6fbe7a083a9f27f2b9fc9a98a3258344ee4d364a584"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-observed-scope.png",
+      "bytes": 148386,
+      "sha256": "a9553dfb55895197443cf7cfa9e1dee0eea60349aa739975c545d10137646885"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-observing.png",
+      "bytes": 154926,
+      "sha256": "f49ba0aa93dea8876a31827a9ed0679f25b4253dc08ad26a68278011c08fe2c6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-possessed.png",
+      "bytes": 144870,
+      "sha256": "826c1625f0d38480e48304befc02ff5e6e0f33c0bd74db6d9e6bb3f36c73884b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-report.json",
+      "bytes": 15513,
+      "sha256": "878042398b1b691f8f109e3e7c9498d73b337515c3d538c7392370b6823da395"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-return-start.png",
+      "bytes": 224248,
+      "sha256": "ed4952664c01b64a891fb9a28f4ba4e41ca925d2c58047b9ec3ea841098219b3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-returned.png",
+      "bytes": 230418,
+      "sha256": "88fc2ae1f4d8182e0a7736405768f8baca66c736ec441499f87dfff9f824ae91"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-selection.json",
+      "bytes": 1301,
+      "sha256": "139165e56d670de15a209994b7261d8cd66dd64f5a2b397d7537e337203841f8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/residents-stopped.png",
+      "bytes": 135021,
+      "sha256": "46503d21e2a35adc6e9eee7af750c58fbf68d58050c600ad8ce84c963f4b7622"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/returned-observer.png",
+      "bytes": 586334,
+      "sha256": "f721d7571f69120ae6dbcbc7f4ac1ecf3e2783ea8fc5ad1acf70704f60f0ae49"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-native-20261017-r2/walk-KeyW.png",
+      "bytes": 221582,
+      "sha256": "485849a2c66d67885c19b5e881f13754e554d12dae5def68d97738c1a39bcd86"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/canonical-controller-source.json",
+      "bytes": 898194,
+      "sha256": "17e199d25ec10937dafe46f63a3f8226168212193ba7b6222c0ef67f2bf8da3d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/canonical-residents-observed-source.json",
+      "bytes": 895314,
+      "sha256": "86bcd5683e95c73860878222b9b46a6307ae95e3ee369cece75a1d1ea9dc8094"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/entered.png",
+      "bytes": 226083,
+      "sha256": "c5345b8f9fced1a37b65a098549902230f5e26359235cb3f34f99c97a0971cdf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/focus-observe.json",
+      "bytes": 36203,
+      "sha256": "0f873a2bccded5b87af4e29ecba4d91443f8a62f9afa309a287ed1072dcc68b4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/focus-possess.json",
+      "bytes": 31519,
+      "sha256": "f4c408ddaf778ab0cfb50bd3b8775c4cfe01059cd949cf7cbb88364c6a893bd7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/focus-return.json",
+      "bytes": 24417,
+      "sha256": "967ae2158a622f3708292d82b7e7915041dc8b2104b8f800b3c3ca400728a82b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/focus-setup.json",
+      "bytes": 9757,
+      "sha256": "7c4c11279eacbe90642373a1163a00cfe400cae3ac08db0524f2f6abe350bb82"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/observer.png",
+      "bytes": 611685,
+      "sha256": "e5af4b4a4edfd49f829cd17eba2b1b7695f84b5b4dba28b3a5c55c9b75f7a927"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/orbit-1.png",
+      "bytes": 247657,
+      "sha256": "e1d5ca977f3eb46b73f89425f578296b70ee08429ee48e1fc299f9fd15fb2cb0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/orbit-2.png",
+      "bytes": 292113,
+      "sha256": "dde490a5efaf2cf53ca378f743d744553bb21fde9fa873a7c0bac37a6c17818e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/orbit-3.png",
+      "bytes": 201114,
+      "sha256": "a174f44be671eef1c3696da1e866c75f20ddf6aa5090b62352ad3bfeeb04ac3a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/orbit-4.png",
+      "bytes": 236852,
+      "sha256": "f68096ac21561ac641ccc5decd721047705b1d9399840b2c3c2aa9b63e4d06ac"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/report.json",
+      "bytes": 181053,
+      "sha256": "7e990e1121d03fae86d88a4d2155acb6117ecf242b036b9fcef326f89b259162"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-before-movement.json",
+      "bytes": 3939,
+      "sha256": "613e919e2439b56011878f643ed32435224dc1d924a532303f2008f2b7fb2552"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-moved.png",
+      "bytes": 162939,
+      "sha256": "316a8d489294f6f7f99ca0441453bfd68cd65f083bebcc609fdd5cc524938521"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-movement.json",
+      "bytes": 9597,
+      "sha256": "383e5f797f9da91e3738084d9cb33a7f02f40e40a88239e93f6fae98faf1ee20"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-observed-scope.png",
+      "bytes": 166765,
+      "sha256": "fc2b046b128d7c2d7c352832f6d1d200fd4a711eb2689bf628c536f2e3520b43"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-observing.png",
+      "bytes": 143667,
+      "sha256": "21dc7f233774b413e78042d821c2a1da3bf1e423e6c0393cadd1e2b2afca7734"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-panel.png",
+      "bytes": 68964,
+      "sha256": "d1d8c0af8b5fea139f5ac16fd94f41cc88c88ddcc1ea6134d7d7cc70e74985d9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-picker-trace.json",
+      "bytes": 430,
+      "sha256": "aee63e071e92c21936b4de73238cc23963794ecf33b926199d1c4acc3d75b215"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-possessed.png",
+      "bytes": 165433,
+      "sha256": "7046a015a33822e81a433390c45062e0e498b1f3c7461bae946d6051fb60e7fc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-report.json",
+      "bytes": 12493,
+      "sha256": "b67df7c4ec8ad80bb602c6943f349ab437c3fa091109836a18c4cad957c99e73"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-return-start.png",
+      "bytes": 64861,
+      "sha256": "a6f03c4fe084f0b8a381d557b75bf00f03288ddc580cd766980822a412d8528a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-returned.png",
+      "bytes": 60601,
+      "sha256": "7eb09515457a6c50d52fcf8e903a817a301370fd2aead92fd0604e849d8d093a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-selection.json",
+      "bytes": 1408,
+      "sha256": "f02f606b772a4bdce31c7da6549f08d19a94ee4a09c43fa299613323beaa4ec2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/residents-stopped.png",
+      "bytes": 133306,
+      "sha256": "671387dabb393f7d866b07970d34d56f6b12831cf45b1fedb948ffdb403a43de"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/returned-observer.png",
+      "bytes": 488716,
+      "sha256": "5f08db0f58cf3182794641bd76704a4ddaf7bfde6938661102bdbdf4f782fd88"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-interiors-neighbors-20261017/walk-KeyW.png",
+      "bytes": 222927,
+      "sha256": "f3ed35409291db91aca82ae2dd237ae89fff556649c8efb4962f3a59e44ed984"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/canonical-lobby.png",
+      "bytes": 368328,
+      "sha256": "75f42fee327581e7cac4d036547c717b53226e4f13a71713244e964f421924a8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/entrance.png",
+      "bytes": 475999,
+      "sha256": "7409b0a99398831dbd3f1dcb2b507c8826d49c220de395d04f806eafe03a5a96"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/office-entry-diagnostics.json",
+      "bytes": 15166,
+      "sha256": "62de71ba73e9aaa025ee74da995d41a1100ce4a6f421c0d8bfd395951a23574b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/office-entry.json",
+      "bytes": 15327,
+      "sha256": "c19b435dbc5aee4beab97203811204a5ef38f40a2e4bdfed178493154c8b946b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/office-entry.png",
+      "bytes": 594377,
+      "sha256": "55dd2fc1ff5d0b399d53d0a975166bf201de6c844e45ad9576b9d694ddbb68a8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/report.json",
+      "bytes": 79033,
+      "sha256": "5a06384a6f4b3ec97d2f302c755a85c5ed3061df4b1b6721ed017ad56ee33605"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/upper-office.png",
+      "bytes": 352063,
+      "sha256": "fdfd73dac663b485854185a3121061fd1546eb773842bfdb0d90884d7e6a8b0c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017/workplaces.png",
+      "bytes": 534917,
+      "sha256": "c1b002db1b72ca8d431ca132f550d1c885474b0262068455a53432929575a4bf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/canonical-lobby.png",
+      "bytes": 396069,
+      "sha256": "dd2bd411b4130766bcc4299f4dae8cc8ab075593f00615d1821e57bcbe5a8e17"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/entrance.png",
+      "bytes": 468392,
+      "sha256": "4088bb64fcc20be095cfd7b08d1e6928abcb581aca4f388de6992b6d7d40c8b6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 15164,
+      "sha256": "6f0e5c468e1a57c9447055e6808f9aa99adef9f247e398e33d5a1be9e650c30d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/office-entry.json",
+      "bytes": 15325,
+      "sha256": "1642cd70be1beb9926cf3da019267e00a64880d822afc552d10b72109d11b8ba"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/office-entry.png",
+      "bytes": 666435,
+      "sha256": "b90050f0013b469424c0f5c390ad46a7b095d667ef319cc828425c5d0f5eed24"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/report.json",
+      "bytes": 79459,
+      "sha256": "4056b961153ce10bc8602812275b5f6a9d933856f25bd0f280ac3188f83a682d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/upper-office.png",
+      "bytes": 360448,
+      "sha256": "823305fcb4dc8d4277a77100566c6fefef58e3c74d7401eec905198e02ba5074"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-native-20261017-r2/workplaces.png",
+      "bytes": 568070,
+      "sha256": "6e84241c68f4d1eeccc05d555f70d709bd8c12cf340b0919c46200216404793a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/canonical-lobby.png",
+      "bytes": 397855,
+      "sha256": "4cdbb335a46e82c03d00690cc17928a071f8086fab772be36d0e517c8c224a8d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/entrance.png",
+      "bytes": 446727,
+      "sha256": "f0397a4358af719a1ec3db5896ab4729a1cd58162b88aa127d8b986c5a324734"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/office-entry-diagnostics.json",
+      "bytes": 15165,
+      "sha256": "93baeee128479d9ca23013201f421903965d86808d9d81ddf0cd2e47fc1b14ce"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/office-entry.json",
+      "bytes": 15326,
+      "sha256": "0027fc567f0c2ba0b930478d3eee902713a9e7061d7693e3f4c29e38b9b5fb8e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/office-entry.png",
+      "bytes": 589785,
+      "sha256": "05ccd0bfaf194a051b9e2b5191449bc575416e71af3349a99c30714766f6ce63"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/report.json",
+      "bytes": 78968,
+      "sha256": "394007eeecbc9ca9cd5b7904aa9a4788a1f314e29a654b583f208fda4cb10e9d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/upper-office.png",
+      "bytes": 356953,
+      "sha256": "b8d6bd62f346b922bdbf7354e25802d4d144641e8f6163382301ed9cac58a1e2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-interiors-neighbors-20261017/workplaces.png",
+      "bytes": 552128,
+      "sha256": "825adc70239bc7b6eb586fb0b03157b04d460c84bf37a88a8a10aa63831366d3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-assets-20261017-r2.log",
+      "bytes": 1982,
+      "sha256": "1f2b95cf2ba039281a852863c7b0ca30455064a3ce8bb6ea75751b961fe3ef48"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-assets-20261017-r3.log",
+      "bytes": 2309,
+      "sha256": "d44710cf621e4e1211b224086b731b3907df5eb43a7cb097f367be33ce30d8da"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-assets-20261017-r4.log",
+      "bytes": 2633,
+      "sha256": "e06fa9d5b5d0216f8117501c3644944dea66a8112abb762c715e472e13ca7423"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-assets-20261017-r5.log",
+      "bytes": 110,
+      "sha256": "6fb6d56fe7eacef7dcfcd0dc89dbf805f002a8abc1243ea31a6621845658b3a0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-assets-20261017-r6.log",
+      "bytes": 132,
+      "sha256": "39c84e8494b384a7844af9749a07b4844f3dfad713f9933c4ab8bdf11255c9b8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-assets-20261017-r7.log",
+      "bytes": 132,
+      "sha256": "39c84e8494b384a7844af9749a07b4844f3dfad713f9933c4ab8bdf11255c9b8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-assets-20261017.log",
+      "bytes": 1928,
+      "sha256": "c0b7c924a10f924fe84a9bddfb28a7774bb2fb9471b652c36631b959e831d623"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-game-build-20261017.log",
+      "bytes": 585,
+      "sha256": "478d021c1285573d3a85578a41467676bff778d7ce29d5baa56dcad29042a6ed"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-game-build-final-20261017.log",
+      "bytes": 585,
+      "sha256": "ee4830bc008ca8b64929abc4e5897af8175ac256c1108321930d76b93427a931"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-life-tests-20261017.log",
+      "bytes": 14929,
+      "sha256": "c591917dddf5c88589897ac560e6f6d5d9c5946f0948ff87e6793a9dd53f24f1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-life-tests-r2-20261017.log",
+      "bytes": 14317,
+      "sha256": "2af08b8acea909ad56bf8a60bdc1b0f61e7f9844d6a13651ae77dc2b4e0e6707"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-tests-r1-20261017.log",
+      "bytes": 3382,
+      "sha256": "de749fd99fa038058514c713854503c5dc6d8cb1f6ad797172f68d898be6ad89"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-tests-r2-20261017.log",
+      "bytes": 5321,
+      "sha256": "5e871da2af18294b9bc3725c51455e88f0c397d7c9b9f19a8b9c3de8cac8ea4f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-tests-r3-20261017.log",
+      "bytes": 3659,
+      "sha256": "1f964c06ea180c320ae3eeab6a9861d62cc2193f54f2ccf691a178f1d170ef0d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-typecheck-final-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-directory-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-game-build-20261017.log",
+      "bytes": 585,
+      "sha256": "3906addd6606f1bf8eac0d1dc1ed45fa5171eff2408281fca613aaa6ac6d5b30"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-initial-tests-20261017.log",
+      "bytes": 3290,
+      "sha256": "e0bafed064537b8d6b848da49de33a34ee8f8fc9d946bbeb77aee4f3255fbf85"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-initial-typecheck-20261017.log",
+      "bytes": 351,
+      "sha256": "285076e56f4c3f06ee165fefd4731dff521ab8ea5ed2185c6a9da472ac956fa6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-native-20261017-r2.log",
+      "bytes": 11601,
+      "sha256": "e7152bc8584c73405f309c9318d661860cc91487ef7a6f7d58bb934d06ed0c5c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-native-20261017.log",
+      "bytes": 9328,
+      "sha256": "7b4e35b8ff9d0f6ed464841c32e459a832c71f2493595aac73571403abcedca2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-neighbors-20261017.log",
+      "bytes": 17942,
+      "sha256": "d11c312f370afdcee953988b590e762152e392b6169da4ed1c9a688345311bfd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-tests-r1-20261017.log",
+      "bytes": 3348,
+      "sha256": "2c386c08a65d5886e3988cc938298682864ea8c012fb396a8fc4329d15b2b110"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-tests-r2-20261017.log",
+      "bytes": 4188,
+      "sha256": "e95028250efbfed33bf56979ee37b1c61c8578b23345a84a83f59210fa1f16b0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-tests-r3-20261017.log",
+      "bytes": 4309,
+      "sha256": "2ea2d6dc2c438a1a6cb4059e93b53df09ee43b3cc886c10a3f073d6c5c902bd4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-interiors-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-app-tests-r1-20261017.log",
+      "bytes": 15323,
+      "sha256": "2c8336825fb3532e4d4fe01f90b74f4283139fff4ac121ad4fbdf95fbea0f775"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-app-tests-r2-20261017.log",
+      "bytes": 15320,
+      "sha256": "958baeda466f182422f0fb57ebfdd5fb8c0ce81748c879e362f024797e0f3a95"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-app-typecheck-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-app-typecheck-final-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory-app-tests-20261017.log",
+      "bytes": 15317,
+      "sha256": "de4e51c067d56a5ca63e30b65e0d4d1ba0da48b40d19e1fac6f4cb4013eb2a71"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory-app-typecheck-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "a76f6fd5b6573830633af121ff8da0f4675cb9c9011ef496ffa5597101f040df"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory-ui-build-final-20261017.log",
+      "bytes": 889,
+      "sha256": "a3d270e6f7642025e4bf0b92de49c0bdb3729cbd5d1bb06988fe49f0c7f6b27c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory-ui-typecheck-final-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-ui-build-20261017.log",
+      "bytes": 890,
+      "sha256": "d392c55abe481dfaba5d21270d66cede529405952d89b83929997d81cf8f2512"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/audit-restart.ts",
+      "bytes": 3041,
+      "sha256": "e04132854ef5b1558b31857aa49d63ec627270e77e88d8e65d54f4dc6bfcf20f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/backup.log",
+      "bytes": 175,
+      "sha256": "9535694c2b93d996da6ca63400ce98c3c1ddae0cbe4f81219c296e3b2f7ce332"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/backup.ts",
+      "bytes": 2461,
+      "sha256": "f3c8f438bef0d45ad32c0402d5389d6033c8a341bc3632cf5023e6ef27299432"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/evidence.ts",
+      "bytes": 10094,
+      "sha256": "182d3a8cde8523ba2ad9a2c01844cb195a580cdbfecc038d5ac0f9448b55e483"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/final-bundles/game.js",
+      "bytes": 2484349,
+      "sha256": "a3439114f4122890507ebd52e54f1420ed0b3e178322d61ea50882e03df0263a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/final-bundles/index-BUDkjkvw.js",
+      "bytes": 1787152,
+      "sha256": "bd62ca9830202c32f80dc5739c4c7493c59446f7d34ba38816dc914b92a950f5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/final-bundles/office-controller.js",
+      "bytes": 1347701,
+      "sha256": "7caae2e8928c7f2eea26728cd949ae71fb03faaa25fa6a7e98a8a8550d3befce"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/inspect-residents.ts",
+      "bytes": 1354,
+      "sha256": "3c18901feb01ecafc832d867e1db4d33a607cc225462c6c38ba6ec44cb7554a9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/resident-inspection.json",
+      "bytes": 336937,
+      "sha256": "938261ca0e44a16352bc572f0f6030fc311af918ff938b51491d611c679a02e0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/restart-audit.json",
+      "bytes": 638,
+      "sha256": "dfd108c310150f75a9ed560a8437793938833a1558609bafd2d262a61dada85f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/restart-audit.log",
+      "bytes": 548,
+      "sha256": "2d7e3caff53b57cb8ee383de5f1b3d0ee49bc823528670f48f285623e80842ba"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/restart-operation.json",
+      "bytes": 307,
+      "sha256": "dd4efbda65862eb8d350f21853cd3dae773c8c9213f833316e0c0327cfd42641"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/restart-ready.json",
+      "bytes": 16713,
+      "sha256": "aa06ba57b3419c8208a11293bed77f3065c3880c4c7294e6aa6492f0e8887084"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/restart.log",
+      "bytes": 144,
+      "sha256": "139c85acff0f02457f3ee429feaee67868e661ebc6131582cbb1c4bea7f5b6f4"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/restart.ps1",
+      "bytes": 2778,
+      "sha256": "92cf8b29e893017334ae6bfdd64fa6c74d2bf49805351c6e33b05f8e79927464"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/server-before.err.log",
+      "bytes": 5434,
+      "sha256": "2da51f79f16127898c3ec96586b1085d0322ab9ad4914118505cc96987b11886"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/server-before.log",
+      "bytes": 723,
+      "sha256": "3e2d2bcdb73d6a6199a77a9482ca68d138ca3920f7ba77cce9b01843a07eb651"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors/write-fps.ts",
+      "bytes": 3439,
+      "sha256": "3d21af0cd784744a599375f3604a024fcb1be9932bce9bd9a01110b86a17e7f8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/api-audit.json",
+      "bytes": 6969,
+      "sha256": "5458113fa867f337d45dbbe190e6605446683465fa6121d62c32666b69996982"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/api-audit.log",
+      "bytes": 317,
+      "sha256": "c9c7d2d0e938c3f9820db83dc30a3ccda4227ab97ae4a671b3357dadc59f67b5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/api-audit.ts",
+      "bytes": 2571,
+      "sha256": "e1f15f81c7c0194a67d3e22e1b911b447954963abaf79c95290c96e7a79ff0c6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/audit-restart.ts",
+      "bytes": 3061,
+      "sha256": "c9e460e15e817289ffb19fd1a01c6945ac1211d158e5d7eaed3780007279128c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/backup.log",
+      "bytes": 184,
+      "sha256": "6f9839490c66c015b3a4ffd8a1badd21c2a26537a291275be6079a4e20e61a25"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/backup.ts",
+      "bytes": 2481,
+      "sha256": "434016338fe7352dfa971ec96e23f5727b5cd0d3abdee210c6cd1a760323fcb3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/fps-game.js",
+      "bytes": 2484349,
+      "sha256": "a3439114f4122890507ebd52e54f1420ed0b3e178322d61ea50882e03df0263a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/restart-audit.json",
+      "bytes": 662,
+      "sha256": "9a0494c36de28325f30393aafccddc17d1e90fb462d068952ef6c2120c0114d5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/restart-audit.log",
+      "bytes": 572,
+      "sha256": "7d64ad0d1ee4ce77174c557bb63730e8678ba1079ef1ff841c77a6845e931c60"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/restart-operation.json",
+      "bytes": 331,
+      "sha256": "a35cecd5e5f9a44adec527acdcbb461134e9fe808543b055aa98f7aec87a0c0a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/restart-ready.json",
+      "bytes": 8791,
+      "sha256": "d673b97167b35cd76b3ee1972f11c23adb957a7b40b959efd61c70ffbd1882f9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/restart.log",
+      "bytes": 144,
+      "sha256": "e4fa704697b7aa9bd653684a48d0467e756d42d3b32a78c9a46fbd4c8ad5a6f3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/restart.ps1",
+      "bytes": 2812,
+      "sha256": "78690d010175412b5ebf0c2e66d829834c49c3a6451f73e6f42a5f1ed1d1fb49"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/server-before.err.log",
+      "bytes": 2167,
+      "sha256": "ca9baa29adb5ecf10e13400e85eecbdf9153b56f8223e1a5ccc89d45e3fb32c1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-interiors-directory/server-before.log",
+      "bytes": 723,
+      "sha256": "c4f0c809dffa7215d932f588e84d3e2ef7db7c4f2cf63f5fdb0a3f9df87cb965"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-interiors-directory.json",
+      "bytes": 3210,
+      "sha256": "2bdf71f7a7ae7d0f94534219e3cbb27f9b630281704a56e8a840b796890ad6d1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/performance-live-fps-live-20261017-interiors-directory.json",
+      "bytes": 247115,
+      "sha256": "d359e546b4f46e2a8d56e070a361b8c95215bf3fef2097aa99cc2a8451817722"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/fps-live-20261017-interiors-directory.log",
+      "bytes": 70860,
+      "sha256": "553eb6df8f505709ca2937f14ce3c42207b00a2e2512840b4ac56766dc216e35"
+    }
+  ],
+  "remaining": [
+    "Outer static scenery still limited to nine supplied loaded chunks",
+    "Other-building lift controls and live rides",
+    "Selected Office floors outside its native editor cutaway",
+    "Long-distance travel, lighting, temporal/water and audio parity; audio-reference 503 remains"
+  ],
+  "healthAfter": {
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  }
+}

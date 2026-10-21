@@ -1,0 +1,2071 @@
+{
+  "date": "2026-10-17T15:49:44.116Z",
+  "classification": "progress",
+  "goalComplete": false,
+  "scope": "Engine ownership of active NPC/location scheduling and fenced worker orchestration in the original Game, preserving Game policy and the existing Office entry.",
+  "requirements": [
+    {
+      "requirement": "Use Engine for active simulation interest and location work allocation",
+      "status": "proved",
+      "evidence": "Game facades inherit the Engine implementations. Differential legacy oracle covers policy, history, observer/body churn, job budgets, oldest due work and large ticks. Live engine.planning confirms the actual instances."
+    },
+    {
+      "requirement": "Use Engine for copied bounded worker orchestration, preserving Game codec and authority commit",
+      "status": "proved-with-explicit-live-scope",
+      "evidence": "Engine owns workers, queue, cancellation, timeout and all five token fields; Game owns the same simulation program and codec, and the dispatch/commit body is byte-identical. Actual Bun workers and separate Node workers pass. The live selected native scenario constructs the pool but submits no coarse jobs."
+    },
+    {
+      "requirement": "Keep original Game, Office entry, saved NPC body and account-owned business/harness behavior",
+      "status": "proved-for-current-change",
+      "evidence": "Complete Game gate 1524 pass / 7 PostgreSQL skips; Engine 678 pass / 19 skips; adapter 155 pass. Four original Game Office views and twelve actual Office control states pass with one body, saved-NPC possession, ACK movement and clean observer return. Nonempty business/harness ownership is covered by the complete Game tests, not the fresh empty native account."
+    },
+    {
+      "requirement": "Preserve original live persisted world during the managed update",
+      "status": "proved-for-persisted-records",
+      "evidence": "Consistent SQLite snapshot, zero missing old rows and changed protected values, every old company ledger item unchanged, integrity ok, seed/revision 29/13, editor/geometry 62/9. Unrelated Vite/voice process identities and editor token preserved."
+    },
+    {
+      "requirement": "Complete the full Engine replacement and original-feature audit",
+      "status": "not-yet-achieved",
+      "evidence": "Active duplicate clock/spatial and material/contact/structural mechanisms remain under the old Game implementation. Production-calendar, blueprint identity and persistence boundaries also need a reasoned audit. The presence of unused compatibility helpers alone does not establish another live engine."
+    }
+  ],
+  "checks": {
+    "date": "2026-10-17T15:39:33.0458387+00:00",
+    "engineExitCode": 0,
+    "gameExitCode": 0,
+    "gameBuildExitCode": 0,
+    "officeBuildExitCode": 0,
+    "officeTypesExitCode": 0,
+    "adapterExitCode": 0,
+    "engine": {
+      "pass": 678,
+      "fail": 0,
+      "seconds": 67.280236,
+      "skip": 19,
+      "sessionId": 34622
+    },
+    "game": {
+      "assertions": 6148239,
+      "files": 237,
+      "pass": 1524,
+      "fail": 0,
+      "sessionId": 94379,
+      "seconds": 765.56,
+      "skip": 7
+    },
+    "adapter": {
+      "assertions": 7543,
+      "files": 15,
+      "pass": 155,
+      "sessionId": 43381,
+      "seconds": 10.66,
+      "fail": 0
+    },
+    "officeBuild": {
+      "seconds": 8.87,
+      "sessionId": 45827,
+      "entry": "index-PtG9U8WP.js"
+    },
+    "productionSources": [
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\core\\kernel.ts",
+        "sha256": "58cfbed34b21e787f664c8a45c413c65daa82ba268844d3de434b4d4a3d54023"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\world\\simulation-interest.ts",
+        "sha256": "c70b78dfa541292fc527ac2256bcc93df8847de604a88e6c1f23919887bf4fc1"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\world\\location-work.ts",
+        "sha256": "023bdf9e5dd8002cd98b8bb5ba973da8b5ac6a87562ffce0e2031650fa6232e4"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\world\\location-worker-pool.ts",
+        "sha256": "af4c9c88c652a0afbfc5107bab5f1b55f9ed5b54e01dd96e051dbbc889cf62f5"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\index.ts",
+        "sha256": "031879207242f671ce3e13bfee4864ad97c4eea7f5689e4368a6b0a41ca2d150"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\engine\\world\\interest.ts",
+        "sha256": "f0f2dc447ceeae7919f026b058c5ece41909879bb5da85339a2c032781459f0d"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\engine\\world\\scheduler.ts",
+        "sha256": "35b4eb2f4becfe6b4eab886e9d2805f87bc6fbed040b5cec69810221a9964303"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\engine\\workers\\location-pool.ts",
+        "sha256": "1c73ab47f3c9b4709ea196ea8c93dd13ddddb910fa5a2461296e169c51d2aa7a"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\world-runtime.ts",
+        "sha256": "0337c3cab72ea961d86382ed632e0e026a6eb3b77cbea1146210d107ca9b9e2f"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\server\\index.ts",
+        "sha256": "d1371d7449fb75d4be224aa855afc79be4ccf1520c8d25331e71d3edb647981e"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\authority.ts",
+        "sha256": "21563783b8dccfb9aa23218054708ee08647aa74ae02706bb36067ba300c0f03"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\authority-pipeline.ts",
+        "sha256": "04066fc0c022758b4813021400dca143ce080156bdf46775dfc8cfc7b669932f"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\engine-kernel.ts",
+        "sha256": "c5839d2910e587e9513194e8c1ecf34d5ca3ad2f827eaf6f3ae924fe533e61f7"
+      }
+    ]
+  },
+  "operations": {
+    "classification": "progress",
+    "previousGoalTurnClassification": "progress",
+    "fullEngine": {
+      "command": "bun run check",
+      "sessionId": 34622,
+      "exitCode": 0
+    },
+    "fullGame": {
+      "command": "bun run game:check",
+      "sessionId": 94379,
+      "exitCode": 0
+    },
+    "adapter": {
+      "command": "bun run game:office:check",
+      "sessionId": 43381,
+      "exitCode": 0
+    },
+    "gameBuild": {
+      "command": "bun run build",
+      "cwd": "C:/Users/Roman/Documents/thegame",
+      "exitCode": 0
+    },
+    "officeBuild": {
+      "sessionId": 45827,
+      "exitCode": 0
+    },
+    "restart": {
+      "command": "powershell -File artifacts/world-planning-engine-20261017/restart-game.ps1",
+      "sessionId": 64421,
+      "exitCode": 0
+    },
+    "native": {
+      "command": "bun tools/capture.ts --office",
+      "script": "artifacts/world-planning-engine-20261017/run-native.ps1",
+      "sessionId": 71902,
+      "exitCode": 0,
+      "environment": {
+        "CAPTURE_EXISTING": "1",
+        "CAPTURE_GPU": "1",
+        "CAPTURE_PORT": "3007",
+        "CAPTURE_DEBUG_PORT": "3330",
+        "OFFICE_WALKING_QA": "1",
+        "OFFICE_RESIDENTS_QA": "1",
+        "OFFICE_RESIDENT_ACTOR": "resident:building:-4:1:1:27462",
+        "PERF_LABEL": "world-planning-engine-native-20261017-r1",
+        "OFFICE_CAPTURE_LABEL": "world-planning-engine-native-20261017-r1"
+      }
+    },
+    "fps": {
+      "sessionId": 50295,
+      "exitCode": 0,
+      "manifest": "docs/render-evidence/fps-live-20261017-world-planning-r1.json"
+    },
+    "gameWorldRuntimeOperationalBodyUnchanged": true
+  },
+  "runtime": {
+    "date": "2026-10-17T15:45:05.4586975+00:00",
+    "gamePid": 25404,
+    "vitePid": 21580,
+    "voicePid": 15312,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "kernel": {
+      "backend": "the-engine",
+      "engineKernel": true,
+      "resourceOrder": "id",
+      "modules": 6,
+      "slots": 6,
+      "cachedProfiles": 1,
+      "compileBuilds": 1,
+      "compileHits": 0,
+      "plugins": 0,
+      "compiledPrograms": 1
+    },
+    "planning": {
+      "backend": "the-engine",
+      "residents": true,
+      "locations": true,
+      "workScheduler": true,
+      "workerPool": true
+    },
+    "workers": {
+      "submitted": 0,
+      "completed": 0,
+      "cancelled": 0,
+      "failed": 0,
+      "rejected": 0,
+      "maxInFlight": 0,
+      "maxQueue": 0,
+      "workers": 1,
+      "inFlight": 0,
+      "queued": 0,
+      "pending": 0,
+      "closed": false
+    },
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "hubListening": false,
+    "captureListening": false,
+    "savedAgents": 8,
+    "activeAgents": 0,
+    "manualResume": true,
+    "listeners": [
+      {
+        "LocalPort": 7860,
+        "OwningProcess": 12088
+      },
+      {
+        "LocalPort": 7860,
+        "OwningProcess": 18732
+      },
+      {
+        "LocalPort": 5173,
+        "OwningProcess": 21580
+      },
+      {
+        "LocalPort": 3007,
+        "OwningProcess": 25404
+      }
+    ]
+  },
+  "restart": {
+    "date": "2026-10-17T15:39:52.2571043+00:00",
+    "previousPid": 18304,
+    "pid": 25404,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "kernel": {
+      "backend": "the-engine",
+      "engineKernel": true,
+      "resourceOrder": "id",
+      "modules": 6,
+      "slots": 6,
+      "cachedProfiles": 1,
+      "compileBuilds": 1,
+      "compileHits": 0,
+      "plugins": 0,
+      "compiledPrograms": 1
+    },
+    "planning": {
+      "backend": "the-engine",
+      "residents": true,
+      "locations": true,
+      "workScheduler": true,
+      "workerPool": true
+    },
+    "protectedProcesses": [
+      {
+        "pid": 21580,
+        "started": "639275591521337931"
+      },
+      {
+        "pid": 15312,
+        "started": "639275788185556123"
+      }
+    ],
+    "editorTokenUnchanged": true
+  },
+  "restartAudit": {
+    "date": "2026-10-17T15:40:21.982Z",
+    "pid": 25404,
+    "beforeRows": 5516,
+    "afterRows": 5530,
+    "missingRows": 0,
+    "protectedRows": 328,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 24,
+        "after": 24,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 19,
+        "after": 19,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 17,
+        "after": 17,
+        "changedExisting": 0
+      }
+    },
+    "accounts": 70,
+    "integrity": "ok",
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13,
+      "kernel": {
+        "backend": "the-engine",
+        "engineKernel": true,
+        "resourceOrder": "id",
+        "modules": 6,
+        "slots": 6,
+        "cachedProfiles": 1,
+        "compileBuilds": 1,
+        "compileHits": 0,
+        "plugins": 0,
+        "compiledPrograms": 1
+      },
+      "planning": {
+        "backend": "the-engine",
+        "residents": true,
+        "locations": true,
+        "workScheduler": true,
+        "workerPool": true
+      }
+    }
+  },
+  "nativeAudit": {
+    "date": "2026-10-17T15:42:36.027Z",
+    "pid": 25404,
+    "beforeRows": 5530,
+    "afterRows": 5551,
+    "missingRows": 0,
+    "protectedRows": 328,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 24,
+        "after": 24,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 19,
+        "after": 19,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 17,
+        "after": 17,
+        "changedExisting": 0
+      }
+    },
+    "accounts": 70,
+    "integrity": "ok",
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    }
+  },
+  "preservation": {
+    "date": "2026-10-17T15:43:59.110Z",
+    "beforeRows": 5516,
+    "afterRows": 5553,
+    "missingRows": 0,
+    "protectedRows": 328,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 24,
+        "after": 24,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 19,
+        "after": 19,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 17,
+        "after": 17,
+        "changedExisting": 0
+      }
+    },
+    "integrity": "ok",
+    "players": 0,
+    "kernel": {
+      "backend": "the-engine",
+      "engineKernel": true,
+      "resourceOrder": "id",
+      "modules": 6,
+      "slots": 6,
+      "cachedProfiles": 1,
+      "compileBuilds": 1,
+      "compileHits": 0,
+      "plugins": 0,
+      "compiledPrograms": 1
+    },
+    "planning": {
+      "backend": "the-engine",
+      "residents": true,
+      "locations": true,
+      "workScheduler": true,
+      "workerPool": true
+    },
+    "editorRevision": 62,
+    "geometryRevision": 9
+  },
+  "boundaries": {
+    "date": "2026-10-17T15:34:34.939Z",
+    "goalComplete": false,
+    "remaining": [
+      {
+        "path": "src/server/fixed-clock.ts",
+        "role": "Active realtime authority accumulator",
+        "status": "duplicate-engine-core",
+        "next": "Use existing Engine FixedClock; its advance debt/catch-up body already matches the original valid-input behavior. Retain Game router/wire policy.",
+        "sha256": "637cfc004cb231db0f80650fadca3ad02d5b02360b24c6e28dc5831b09fd4f26",
+        "bytes": 790
+      },
+      {
+        "path": "src/engine/world/spatial-index.ts",
+        "role": "Active X/Z broad phase exported by Game runtime/math.js",
+        "status": "duplicate-engine-core",
+        "next": "Adapt to existing Engine SpatialHash with stable cell order. Preserve legacy key(), zero-size default radius, owned output arrays and query ordering; compare against frozen original, including oversized items.",
+        "sha256": "bb128cb5f6fe5d400199b8acab9e8ee9f949d0b6724b25a279304bf5effaf02c",
+        "bytes": 5227
+      },
+      {
+        "path": "src/engine/simulation/material-mechanics.ts",
+        "role": "Generic SI elastic/plate/contact math consumed by Game physical materials and impact sound",
+        "status": "active-game-owned-core",
+        "next": "Move reusable model to Engine, keeping identical material values and Game callers.",
+        "sha256": "28a56af8b879ee3a86f3699495f26eeea08cd2bfbf13c9f6f5127c8ca6f46a1c",
+        "bytes": 2290
+      },
+      {
+        "path": "src/engine/simulation/contact-excitation.ts",
+        "role": "Generic solver-contact envelope and finite audio-rate pulse math",
+        "status": "active-game-owned-core",
+        "next": "Move common physical excitation to Engine, preserve contact/manifold timing and impulse/energy limits. Game sound categories and mixing policy remain application code.",
+        "sha256": "26c51f1585fb670d1ce6e29f9c5f33e064302e3c48b4fc71d8f1b7adee0baa2d",
+        "bytes": 5984
+      },
+      {
+        "path": "src/engine/simulation/structure.ts",
+        "role": "Generic structural graph solver consumed by vehicle deformation and tyre carcass",
+        "status": "active-game-owned-core",
+        "next": "Move generic solver to Engine while keeping vehicle graph definitions and calibration in Game.",
+        "sha256": "1e488252e7eae5633ca911b185d21ab0fc2b62b48a27c45ad8a3d4263f0d83ce",
+        "bytes": 12954
+      },
+      {
+        "path": "src/engine/world/causal.ts",
+        "role": "Production event calendar and dependency index",
+        "status": "boundary-audit-open",
+        "next": "Its active caller is Game ProductionRuntime, not the 60 Hz authority executor. Decide and document reusable calendar ownership versus production-domain policy before whole-objective completion.",
+        "sha256": "f15735b14952d2d94e0f3e8fa60e4c0a65e382690c4c4ac33fd156a7ebcbb283",
+        "bytes": 7643
+      },
+      {
+        "path": "src/engine/world/blueprints.ts",
+        "role": "Canonical immutable vehicle-definition identity and registry",
+        "status": "boundary-audit-open",
+        "next": "Inspect the stable Game design ID/digest contract and Engine asset/content facilities; preserve existing design references.",
+        "sha256": "c742e9324dba4eea36761306f3013f9c8d218d5ea3e9b9fe3a7e63ae616de880",
+        "bytes": 4647
+      },
+      {
+        "path": "src/engine/storage/sqlite-location-store.ts",
+        "role": "Live SQLite host persistence for original resident/account/business records",
+        "status": "host-adapter-audit-open",
+        "next": "Keep the original saved data and ownership transactions; distinguish application persistence from Engine simulation. Optional PostgreSQL is not the active server backend.",
+        "sha256": "e44ecbe11a7027855e0a18e16930a797863492669d527f419b32c94832ff104d",
+        "bytes": 11681
+      }
+    ],
+    "clockAdvanceBodyMatches": true,
+    "scope": "Read-only inventory during full Game regression. No further production source edits while that check runs. Unused compatibility/demo helpers are not assumed to own the active Game merely because they remain under src/engine.",
+    "portedThisPhase": [
+      "SimulationInterestPlanner",
+      "LocationWorkScheduler",
+      "LocationWorkerPool"
+    ],
+    "gamePolicyPreserved": [
+      "70/240/900 m interest radii and 180 tick delay",
+      "60/60/300/1800 GameWorldRuntime work periods",
+      "same Game location codec and worker program",
+      "authority commit still checks current ownership and canonical records"
+    ]
+  },
+  "nativeSummary": {
+    "browserMode": "native-gpu",
+    "states": 12,
+    "entryContinuity": {
+      "expectedActorId": "player:23d48f02-5402-49a5-8df3-2b904145ecc7",
+      "actor": "player:23d48f02-5402-49a5-8df3-2b904145ecc7",
+      "matched": true
+    },
+    "walkingDistance": 1.9811645565171967,
+    "residents": {
+      "body": "resident:building:-4:1:1:27462",
+      "takeoverDistance": 0.18078636414095922,
+      "moved": 0.5050656541399645,
+      "returnedBody": "player:23d48f02-5402-49a5-8df3-2b904145ecc7",
+      "rightsBefore": {
+        "accountId": "23d48f02-5402-49a5-8df3-2b904145ecc7",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "23d48f02-5402-49a5-8df3-2b904145ecc7",
+        "companies": [],
+        "leases": []
+      }
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "inGameOfficeViews": 4
+  },
+  "fps": {
+    "manifest": "docs/render-evidence/fps-live-20261017-world-planning-r1.json",
+    "averageFPS": 50.09350788137858,
+    "p50Ms": 19.099999999998545,
+    "p95Ms": 30.099999999998545,
+    "actualLiveEnvironment": {
+      "worldMinute": 283309.1333104538,
+      "projectionHour": 17.82222184089575,
+      "facadeNight": 0.7670641050950622,
+      "rain": 0,
+      "wetness": [
+        0,
+        0
+      ]
+    },
+    "gameBundle": {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/world-planning-engine-20261017/fps/game.js"
+    }
+  },
+  "reviewedImages": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/workplaces.png",
+      "bytes": 537437,
+      "sha256": "8a5e55de8eea13fa5cb2c83e6ef980e9ff8a86e4fbfe383a75ec3391ecd7f60d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/workplaces.png",
+      "reviewed": true,
+      "note": "Actual installed Office desks/furniture in the original Game; staged frame, not FPS."
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-possessed.png",
+      "bytes": 215210,
+      "sha256": "4f5315a1a29daf3d95d94666fe310cf606d8483aa9265dd86b46644b9e704a8b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-possessed.png",
+      "reviewed": true,
+      "note": "Same existing saved NPC body with the return-to-owner UI action."
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/returned-observer.png",
+      "bytes": 568499,
+      "sha256": "2b23f55b5dcf56759cd41274c3db81091a4ffeedbdc6e9c4c951909cd54617bb",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/returned-observer.png",
+      "reviewed": true,
+      "note": "Actual Office observer restored after controller shutdown."
+    }
+  ],
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "bytes": 43529,
+      "sha256": "4cb278d3abe67b1a0b0d84e1f67d0d101a1cf291586d5664c11e649cad9d3346",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "package.json",
+      "bytes": 4210,
+      "sha256": "181903dd17dafeccd8db2b5d4545649a0688827d9d7ebaf9191bc6311543a524",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/package.json"
+    },
+    {
+      "repo": "engine",
+      "path": "src/index.ts",
+      "bytes": 22933,
+      "sha256": "031879207242f671ce3e13bfee4864ad97c4eea7f5689e4368a6b0a41ca2d150",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/index.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/core/kernel.ts",
+      "bytes": 21302,
+      "sha256": "58cfbed34b21e787f664c8a45c413c65daa82ba268844d3de434b4d4a3d54023",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/core/kernel.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/world/simulation-interest.ts",
+      "bytes": 5091,
+      "sha256": "c70b78dfa541292fc527ac2256bcc93df8847de604a88e6c1f23919887bf4fc1",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/world/simulation-interest.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/world/location-work.ts",
+      "bytes": 3361,
+      "sha256": "023bdf9e5dd8002cd98b8bb5ba973da8b5ac6a87562ffce0e2031650fa6232e4",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/world/location-work.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/world/location-worker-pool.ts",
+      "bytes": 10036,
+      "sha256": "af4c9c88c652a0afbfc5107bab5f1b55f9ed5b54e01dd96e051dbbc889cf62f5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/world/location-worker-pool.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/simulation-interest.js",
+      "bytes": 4265,
+      "sha256": "c45602b478f2eff65491aa6f95327c6ea2cd28b542b9a08c83e26b05532aee0a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/simulation-interest.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/simulation-interest.d.ts",
+      "bytes": 1570,
+      "sha256": "3fa917f2a83870b28e3b2d1ffed5bc02f8907678dae298876cda48d425336d7b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/simulation-interest.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-work.js",
+      "bytes": 2877,
+      "sha256": "36f6ba438c9cc52c6fdbbb87a59498ec73b0a67d6237a95b1dfcbea9ff878e57",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-work.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-work.d.ts",
+      "bytes": 1095,
+      "sha256": "dd6d037c0189569cd075c9594acb4660ba7c6cce9346d52f88b74ab7e6cafee5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-work.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-worker-pool.js",
+      "bytes": 8734,
+      "sha256": "f47d4f2caa4b81a19f882a902a51f8de199aad2f20404bad83538d01e42d3b81",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-worker-pool.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-worker-pool.d.ts",
+      "bytes": 3842,
+      "sha256": "d179cb91c20969a4b6c8089d8fb6b783dc654d19997c419802720815cf30aa8f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-worker-pool.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "test/world-planning.test.mjs",
+      "bytes": 4207,
+      "sha256": "05d8e153adbc11bffb7f701afb0a353d457c814a52f1060d5d9451919b626a50",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/test/world-planning.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "test/location-worker-pool.test.mjs",
+      "bytes": 5411,
+      "sha256": "45e170d03736436e0cfc2c17b7f6f654d2476350265643393c4c0337e6379ce3",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/test/location-worker-pool.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 9258,
+      "sha256": "af2fed962db1a5acf5e837766bda3f54921bf7cffcdb21ee0bb680be5e3c8629",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 40961,
+      "sha256": "510b452076324866bcf6f4bb421129da555e646c3c78583d041eaf3f8147ab7a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 264907,
+      "sha256": "a8743f98de923fb746c7eff2edab3c12dd7e245748d66760516e31c2110eeb6e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-world-planning-r1.json",
+      "bytes": 3657,
+      "sha256": "7bae30eaf002ce673c370f829ccd4ac9184f8710c434874a45fbf0a7965ffe06",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/docs/render-evidence/fps-live-20261017-world-planning-r1.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/audit.ts",
+      "bytes": 4585,
+      "sha256": "ff8300d1511d22d239f797dcf923bbeabbab16299b1f30268dd954b57234993d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/audit.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/interest.ts",
+      "bytes": 749,
+      "sha256": "f0f2dc447ceeae7919f026b058c5ece41909879bb5da85339a2c032781459f0d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/world/interest.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/scheduler.ts",
+      "bytes": 8562,
+      "sha256": "35b4eb2f4becfe6b4eab886e9d2805f87bc6fbed040b5cec69810221a9964303",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/world/scheduler.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-pool.ts",
+      "bytes": 1405,
+      "sha256": "1c73ab47f3c9b4709ea196ea8c93dd13ddddb910fa5a2461296e169c51d2aa7a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/workers/location-pool.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-wire.ts",
+      "bytes": 4422,
+      "sha256": "90f175d8114d3a6dfb9f7b52aedcfce2dc831cd7507eeaf940cfb2c5c397ece4",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/workers/location-wire.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-worker.ts",
+      "bytes": 718,
+      "sha256": "c1879c0abfceae380c6892fd9096b9799cc5ad014aa6ee42f65c5fd33e86b580",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/workers/location-worker.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/simulation/location.ts",
+      "bytes": 9202,
+      "sha256": "c655617bc80445f8ab3b3fe6af9ab2ec018ee7a4ec45801f283eda3b884dc293",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/simulation/location.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/simulation/aggregate-needs.ts",
+      "bytes": 2479,
+      "sha256": "fe4dadab343aa6cf4769aff4bf66077e803a36b60edbd99fe0c9ecda31103747",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/simulation/aggregate-needs.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-runtime.ts",
+      "bytes": 14863,
+      "sha256": "0337c3cab72ea961d86382ed632e0e026a6eb3b77cbea1146210d107ca9b9e2f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/world-runtime.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "bytes": 67663,
+      "sha256": "21563783b8dccfb9aa23218054708ee08647aa74ae02706bb36067ba300c0f03",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/authority.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority-pipeline.ts",
+      "bytes": 4072,
+      "sha256": "04066fc0c022758b4813021400dca143ce080156bdf46775dfc8cfc7b669932f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/authority-pipeline.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/engine-kernel.ts",
+      "bytes": 1697,
+      "sha256": "c5839d2910e587e9513194e8c1ecf34d5ca3ad2f827eaf6f3ae924fe533e61f7",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/engine-kernel.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/index.ts",
+      "bytes": 14376,
+      "sha256": "d1371d7449fb75d4be224aa855afc79be4ccf1520c8d25331e71d3edb647981e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/server/index.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/engine-world-planning.test.ts",
+      "bytes": 3563,
+      "sha256": "1271b99fa53dcf3ef41e0d5fdb2162f900e3d73905143f5f3d21e6228435ea21",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/engine-world-planning.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/original-world-planners.ts",
+      "bytes": 8747,
+      "sha256": "eb77ae2302ed787163f8d7cb015572e90452419de0ba19100b97c9a67c30a1dd",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/fixtures/original-world-planners.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/engine-world.test.ts",
+      "bytes": 11534,
+      "sha256": "1854ce9e7c42ef4d3a12be58cda21b579b7ee76dc0257284847cf1d8c927d0d3",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/engine-world.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/world-runtime.test.ts",
+      "bytes": 11877,
+      "sha256": "8a858fef9f9573d1c5d7e5965cec391219b782b869a43b2d8784812f42fb958e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/world-runtime.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/engine-workers.test.ts",
+      "bytes": 8039,
+      "sha256": "8290182494aeaa2c2f5960ec733e730ee8df1eef7586cc4b1ae1eb398d97c21c",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/engine-workers.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/account-control.test.ts",
+      "bytes": 23152,
+      "sha256": "48058f66b8d21c588ed77cb82b2fe76fa5d0adb0e61f79b424cd654df082c9f1",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/account-control.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/company-api.test.ts",
+      "bytes": 5471,
+      "sha256": "43b2b8eb4ae2ffed62169cf1afe31b6da96a30d3a97a1a3145d060ef9b71fe6e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/company-api.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/workforce-harness.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 34968,
+      "sha256": "8ca9e555f5951bba93dc037c67f0521e297de76c18f471cffedb4761f407a418",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 9353,
+      "sha256": "872eb55e2b7d6d614ff0f97464a22eced2df029cc94d52390fb37dd09c08c49d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 18456,
+      "sha256": "05209b27741b6ed7f9a10dd4df3fa8d1ee5d7763794cf5fc2b86a692deedfd5e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/qa-office-walking.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/qa-office-residents.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 889046,
+      "sha256": "5d95fbc646804ef1f4251e75eec116eb366621218fd966fe2de344f7afabcf0a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 184033,
+      "sha256": "013e604e21c27096022b28d2cd0d3597f5fc6114b84046f602321352ade557d6",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60524,
+      "sha256": "65b1eb729492179ad60f11d75ca3c0a8e9b8dec39466db3e22d5832c2e898bbd",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 71819,
+      "sha256": "c2d195f269a1aeaf52b2538ffcf9609a83438295f5298283d6ee2bbbcbd9380c",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 10019,
+      "sha256": "f821a0614b0d4ee8c1b47fecc27d570cb0853467f104f4961309b7d604056721",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "3cddc50072b5cd352ec96d90c2311b7b1850ed3265d83b3f0fde6aee85206992",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/dist/index.html"
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/adapter-full.log",
+      "bytes": 17694,
+      "sha256": "ae803dbd535b5a34392e86a24adcbdb47e71b3146c330e7ed1feaf54057207b3",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/adapter-full.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/archive-evidence.ts",
+      "bytes": 14155,
+      "sha256": "b4b9a62c2654dbba20f7ef9038792ebb107d72222e324f7ef4b3a505a1be4e00",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/archive-evidence.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/audit-boundaries.ts",
+      "bytes": 3981,
+      "sha256": "ade6c3b002bb57e665fc47db30caef432b459a9d3aad016be904cdbc1edf050d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/audit-boundaries.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/audit-restart.ts",
+      "bytes": 5273,
+      "sha256": "a268381341db9bdf4cb78f8a59eafd4761799a0c31ffbde489a2408460ee802a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/audit-restart.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/engine/index-after-planners.ts",
+      "bytes": 22617,
+      "sha256": "7a8862e7fd0972e18e4be17cc2b02091efef475b7a4e543f2ba4e3bafdbac1b9",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/engine/index-after-planners.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/engine/index.ts",
+      "bytes": 22291,
+      "sha256": "b38d0f494c88bdc3cace5ec85ea3317b49451ee21053afd224b394cc1e1d69c5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/engine/index.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/location-pool.ts",
+      "bytes": 7910,
+      "sha256": "62b30f743819fb9cec168c4e06ab7230e60ad428831496ec515a81134aa1283b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/location-pool.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/src/engine/world/contracts.ts",
+      "bytes": 2048,
+      "sha256": "93f8d55ad440b667883233332f7a2a42dc6f05a30b98be526fb69247b6d41fd5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/src/engine/world/contracts.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/src/engine/world/interest.ts",
+      "bytes": 5022,
+      "sha256": "04963d99e6767e327c5bf2278722bb23d8d7aa6553f8c996117b91ed4164aef4",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/src/engine/world/interest.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/src/engine/world/locations.ts",
+      "bytes": 3652,
+      "sha256": "df0a0f1d7bddd285250bb26285fbca9e06ff8161c6e73906fc220ac443fa9e9f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/src/engine/world/locations.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/src/engine/world/scheduler.ts",
+      "bytes": 11089,
+      "sha256": "637f3b8d0eed7e6941bb75c489c1c29026d0eec5b3a0501939d9fb694e8b3e97",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/src/engine/world/scheduler.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/src/game/world-runtime.ts",
+      "bytes": 14282,
+      "sha256": "ed5c140a4da8a0cb9527b6098745d5661b23cb4ae638fbe68fad9353f9326f8d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/src/game/world-runtime.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/test/engine-world.test.ts",
+      "bytes": 11534,
+      "sha256": "1854ce9e7c42ef4d3a12be58cda21b579b7ee76dc0257284847cf1d8c927d0d3",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/test/engine-world.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/test/world-runtime.test.ts",
+      "bytes": 11743,
+      "sha256": "a1589d9440ebc4fb2e94af22c031449828eab43615813785e83b3e3b0adddc0f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/test/world-runtime.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before/game/world-runtime-after-planners.ts",
+      "bytes": 14699,
+      "sha256": "c4c051bc859b0f57076b1bcefea8b096a43b1f3f7c96b9b33a9f7342dc580a81",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before/game/world-runtime-after-planners.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before-canonical-server.err.log",
+      "bytes": 3265,
+      "sha256": "4fb92502c78c6ef6157009d1af3e23bb1edb45c60ef553957baec19a8de755cb",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before-canonical-server.err.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/before-canonical-server.log",
+      "bytes": 723,
+      "sha256": "bd6eda1e44a7ae4e7cd81e6e1786333e2f440b6871d9a964970d4d8c6944f760",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/before-canonical-server.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/checks.json",
+      "bytes": 3190,
+      "sha256": "0fe7580978b461b06ca0564b24508f395a48670adf2d449b1d3a4ad827423b78",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/checks.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/engine-build-pool.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/engine-build-pool.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/engine-build.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/engine-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/engine-focused.log",
+      "bytes": 491,
+      "sha256": "a855bc4b72904516414123d0c8992d114a5021edaf3a4b0d146b797a93362950",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/engine-focused.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/engine-full.log",
+      "bytes": 67343,
+      "sha256": "944113bc9028c62a556318935f58089d25a927ee3e3c652ddb170f72b2f7c411",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/engine-full.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/engine-planning-workers.log",
+      "bytes": 897,
+      "sha256": "9dbbc61c9d40e8bdf7e7e6341d523aaf99be816d9b8d089a6f3313bf9e69a7dd",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/engine-planning-workers.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/engine-types-pool.log",
+      "bytes": 33,
+      "sha256": "d66548006c5c7c54f315f252a8864713f539323f6c6187c23bb7db83274361fa",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/engine-types-pool.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/engine-types.log",
+      "bytes": 33,
+      "sha256": "d66548006c5c7c54f315f252a8864713f539323f6c6187c23bb7db83274361fa",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/engine-types.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/final-preservation.json",
+      "bytes": 1032,
+      "sha256": "5642e496ab96221087c5cd306020575c7120bc7d24be8b4a3dc8a5a4dddffc28",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/final-preservation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/final-preservation.ts",
+      "bytes": 2537,
+      "sha256": "cf7ec6886db60400b5dab09096d0a6da8c3977a771e853aa5a274dbcf2d0b704",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/final-preservation.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/fps/capture.log",
+      "bytes": 145144,
+      "sha256": "14b1a980dbb75c2c1caa1e5ff68e213b2d966fe75ef9caa822c04d17013cf781",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/fps/capture.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/fps/fps-result.ts",
+      "bytes": 4014,
+      "sha256": "54c757b5f06f3689cf3ff8ba7b559df8dba009a5e80b0374a53423ab5a43fcd4",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/fps/fps-result.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/fps/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/fps/game.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/fps/health-before.json",
+      "bytes": 24208,
+      "sha256": "4c965554f0ede9b436e4dacd0571562e1486b4606286150ea5320727d9540d2a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/fps/health-before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/fps/operation.json",
+      "bytes": 1010,
+      "sha256": "53bdeb7d7ad565ec42af5c99eafe2842104291bef97dabb767c518408dcb892f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/fps/operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/fps/run-fps.ps1",
+      "bytes": 2148,
+      "sha256": "0114a4ce62d8a7162a111d62fee4f2654527abbb9f2da0ec02ac3d88e74a9be7",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/fps/run-fps.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/game-build.log",
+      "bytes": 585,
+      "sha256": "0002b2c3e9b5b23d1b49a4afc853f6a0cb893bd3f6ead0a74afdc31ce6144df5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/game-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/game-focused.log",
+      "bytes": 4709,
+      "sha256": "8382d523f87eb83bc4361edeea8e3c1d4429c4a0641e78236c28da8abc0ddbb0",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/game-focused.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/game-full.log",
+      "bytes": 171547,
+      "sha256": "e0a7a752c2e013d46625c84883ae8fa79ad2c7e4b4dacb59d288083626268d06",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/game-full.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/game-types-pool.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/game-types-pool.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/game-types-tests.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/game-types-tests.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/game-types.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/game-types.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/game-workers-pool.log",
+      "bytes": 2703,
+      "sha256": "1d13a0499a1b4f881f727b3863080fc8044addc7f4aee84549fee6170a56a1cc",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/game-workers-pool.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/health-before-restart.json",
+      "bytes": 32840,
+      "sha256": "4e559d308691a3a27c0b37a9983a48f254659a6008b371a6991af0695fae2868",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/health-before-restart.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/migrate-planners.ts",
+      "bytes": 7059,
+      "sha256": "075f83538a7d4d58b2ebab18bfb5cda251010a1d7c00b4d5d7b0ac8f310c9b22",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/migrate-planners.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/migrate-worker-pool.ts",
+      "bytes": 3248,
+      "sha256": "4dfc2c27a1c1d4f72be25b1ab61b6b76c558eaf681caa403dd83e7c547932ab7",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/migrate-worker-pool.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/migration.json",
+      "bytes": 496,
+      "sha256": "7aed1ef8b215d79528cb9583f617240d540df8dfd8ea4cf62c93d37310c35bd5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/migration.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/native-r1.log",
+      "bytes": 16834,
+      "sha256": "f7e1044371917691c999e20bbb39ec621ebb7748a94b85697e7db603c4dd446d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/native-r1.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/office-build.log",
+      "bytes": 889,
+      "sha256": "c13d3c3ef2c7599a9b1a2f514a7132cb1c6efac4296246d2ee73f3335105ebef",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/office-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/office-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/office-types.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/operations.json",
+      "bytes": 1517,
+      "sha256": "238228a525f45ad71d032737e24db52eb73069e222c5e7cebe6912068e4c05b5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/operations.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/remaining-core-audit.json",
+      "bytes": 4405,
+      "sha256": "9d3f7b36458170d7d58f5cb37c0dc6fead6836ea52526ce129db990855b4a4cc",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/remaining-core-audit.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/requirements-current.json",
+      "bytes": 2267,
+      "sha256": "ff18ae513e59ef36bb07317766cf40452fe036069ae6d9220c187fca691f9213",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/requirements-current.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart/r1/after-audit.json",
+      "bytes": 1160,
+      "sha256": "fe5d308554939e5aa5688141d2f3fd8934e210ee0c2230dee4f820be3daa9594",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart/r1/after-audit.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart/r1/before.json",
+      "bytes": 1389,
+      "sha256": "cba7e9022aac02e0571200fb01b1881b1686a25e695b7bb16a4a0cb7a0d786c9",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart/r1/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart/r1/before.sqlite",
+      "bytes": 11726848,
+      "sha256": "59ecd1484452da75514596dec3dbff69883ffb59ce8a374f3c8b318a1930a54c",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart/r1/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart/r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart/r1/served-before/audio-worklet.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart/r1/served-before/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart/r1/served-before/game.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart/r1/served-before/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart/r1/served-before/office-controller.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart-game.ps1",
+      "bytes": 5333,
+      "sha256": "b707191d258c1459a7f6e00f64df777e0fa459b882b662660a85b37b6acc9312",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart-game.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/restart.json",
+      "bytes": 1340,
+      "sha256": "4624d78d20c5dbc3765aadaabf08f13fce9989a3af52da680f785b5fb58d207d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/restart.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/run-native.ps1",
+      "bytes": 1132,
+      "sha256": "64ad28259d010d99c7c05a4a6a21436f8772ec472e54f6cd63542df4067c1815",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/run-native.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/runtime-final.json",
+      "bytes": 1328,
+      "sha256": "4f459c9613cb25a3bfa10b395a4a7b5ab50e3e6f49098829c96608399280cb7c",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/runtime-final.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/verification-status.json",
+      "bytes": 3190,
+      "sha256": "0fe7580978b461b06ca0564b24508f395a48670adf2d449b1d3a4ad827423b78",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/verification-status.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/world-planning-engine-20261017/verify-evidence.ts",
+      "bytes": 1376,
+      "sha256": "91529797faebdfb8618b70ef703cc8f581300a31efc825cc5539dd5c14f3df7d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/world-planning-engine-20261017/verify-evidence.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/after-audit.json",
+      "bytes": 726,
+      "sha256": "0749e90840bddff1d203041e38dce036f017e3e754b17183409c82d991226eea",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/after-audit.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/before.json",
+      "bytes": 1147,
+      "sha256": "7ffba4701c210845d161373269687ac3313d967feac69cd32896288b234ecbc9",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/before.sqlite",
+      "bytes": 11747328,
+      "sha256": "28cac82a0e69730b0a0d41da537e8035cdd0c07c6e741019f23d38715f0ce96b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/served-before/audio-worklet.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/served-before/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/served-before/game.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/served-before/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/world-planning-engine-native-20261017-r1/served-before/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/canonical-lobby.png",
+      "bytes": 371151,
+      "sha256": "05e45c67cb58a1422930179d82382cd22fd583523f68a4f2554c4f55b04ab5a7",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/canonical-lobby.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/entrance.png",
+      "bytes": 478665,
+      "sha256": "39c2c8f83a678839993f06dd1d48a86adeee3e09c45335848af4994fbbbc9448",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/entrance.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17850,
+      "sha256": "639754f583df8aac1229e10623b2304da9b17620cd7299a834809182e15f1cc0",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/office-entry.json",
+      "bytes": 18011,
+      "sha256": "90e35651e7eb75a332918322cab347f48893b47ecd4a2fe9388e9510ae25bb05",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/office-entry.png",
+      "bytes": 538408,
+      "sha256": "92c066e37e60a1374fb229300906981c0d99fe6073cfae2a10779807f1470197",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/office-entry.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/report.json",
+      "bytes": 80685,
+      "sha256": "c74d5d0dd9ba765a37c2a6a5978f0022a31d93c35735e36ad42ba028c9f17093",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/upper-office.png",
+      "bytes": 355374,
+      "sha256": "0065f42846e03c803b1158c38056ef08ca053323fa5228f7a8fce71a90c245ae",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/upper-office.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/world-planning-engine-native-20261017-r1/workplaces.png",
+      "bytes": 537437,
+      "sha256": "8a5e55de8eea13fa5cb2c83e6ef980e9ff8a86e4fbfe383a75ec3391ecd7f60d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-in-game/world-planning-engine-native-20261017-r1/workplaces.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/canonical-residents-observed-source.json",
+      "bytes": 13606239,
+      "sha256": "08a206c2976d9917feb54a34bbc2d424a57151d0db187121f3fd48c61faf8dae",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/canonical-residents-observed-source.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/entered.png",
+      "bytes": 358145,
+      "sha256": "19bb5515caf430954342f07d31b10160fd81f42b12ddf19311c01ec44f087045",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/entered.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/observer.png",
+      "bytes": 541890,
+      "sha256": "93ee19f263e6e51e6e69b702800081de49fdac217c8e83b058320c4520d28df1",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/report.json",
+      "bytes": 182860,
+      "sha256": "67ed998f0365b94beb07a5f0bf92fd62a62de7d889708e896bce85ff839f57be",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-before-movement.json",
+      "bytes": 4913,
+      "sha256": "f94ac27c28e57fb1a168a8f36004652ed206dea1434a640f3c44f3d8b756a137",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-before-movement.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-directory-pages.json",
+      "bytes": 78,
+      "sha256": "bb5bdd3bde3510dd3fb1f0e080c695d073c58518430f5bac6b1f81019c52ba0d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-directory-pages.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-directory.png",
+      "bytes": 175893,
+      "sha256": "6fbfe797025b73b2426631d7355c3af299a65c15281a3b474d01eebff217680b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-directory.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-moved.png",
+      "bytes": 212022,
+      "sha256": "9ddf3b9575baffdd958501a88ddca44a349b6c8e208f3c8de86fc7fc6bea3fa1",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-moved.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-movement.json",
+      "bytes": 19535,
+      "sha256": "49088dc2b4514899b840a1d872be16aaee1d78b38e302c1879542a7d7a5bc5a1",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-movement.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-observed-scope.png",
+      "bytes": 183173,
+      "sha256": "6c05a5ce11885876c9b06026d78574c2779620bc8487a3dc619b37552dd42247",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-observed-scope.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-observing.png",
+      "bytes": 181243,
+      "sha256": "607d78b5c4c5fd26a28cce4cbf4104444514cdf9fd00f4d824d1bf17fcf947bc",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-observing.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-possessed.png",
+      "bytes": 215210,
+      "sha256": "4f5315a1a29daf3d95d94666fe310cf606d8483aa9265dd86b46644b9e704a8b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-possessed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-report.json",
+      "bytes": 22719,
+      "sha256": "8268a9a6635032967de83e330070032b2ef3d1f23da901549369b4bacbcc9933",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-return-start.png",
+      "bytes": 399618,
+      "sha256": "a4b1b45fbd7fb0e689a67c10eff543ddecf5ab32c079964d9afc44c87ddd1e04",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-return-start.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-returned.png",
+      "bytes": 417722,
+      "sha256": "18075275b3e211f4964fa6f0d91e493ec650241a7228b6e331ff7bd81d9df691",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-returned.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-selection.json",
+      "bytes": 1743,
+      "sha256": "a575b75304e33dfc71c2801fc74912e4cfd37040c65b4b3ea23ad3f1dab1ffa2",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-selection.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-stopped.png",
+      "bytes": 194117,
+      "sha256": "c53be8198667e5e5f1d8bb8a62c9f1a8477d3e6738510b1ccec45e1e7a401a7b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-stopped.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-takeover-source.json",
+      "bytes": 25802,
+      "sha256": "b7c53b584cd2b140a4c6a1955e977124866a1f29f4b9cdb073f02a12cd24f1b4",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/residents-takeover-source.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/returned-observer.png",
+      "bytes": 568499,
+      "sha256": "2b23f55b5dcf56759cd41274c3db81091a4ffeedbdc6e9c4c951909cd54617bb",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/returned-observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/world-planning-engine-native-20261017-r1/walk-KeyW.png",
+      "bytes": 423231,
+      "sha256": "648e55b9448d9c22b47399e7233dcaa3f17c69608489fb519dfd758b8d5511b8",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/office-walking/world-planning-engine-native-20261017-r1/walk-KeyW.png"
+    },
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "bytes": 43529,
+      "sha256": "4cb278d3abe67b1a0b0d84e1f67d0d101a1cf291586d5664c11e649cad9d3346",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "package.json",
+      "bytes": 4210,
+      "sha256": "181903dd17dafeccd8db2b5d4545649a0688827d9d7ebaf9191bc6311543a524",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/package.json"
+    },
+    {
+      "repo": "engine",
+      "path": "src/index.ts",
+      "bytes": 22933,
+      "sha256": "031879207242f671ce3e13bfee4864ad97c4eea7f5689e4368a6b0a41ca2d150",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/index.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/core/kernel.ts",
+      "bytes": 21302,
+      "sha256": "58cfbed34b21e787f664c8a45c413c65daa82ba268844d3de434b4d4a3d54023",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/core/kernel.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/world/simulation-interest.ts",
+      "bytes": 5091,
+      "sha256": "c70b78dfa541292fc527ac2256bcc93df8847de604a88e6c1f23919887bf4fc1",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/world/simulation-interest.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/world/location-work.ts",
+      "bytes": 3361,
+      "sha256": "023bdf9e5dd8002cd98b8bb5ba973da8b5ac6a87562ffce0e2031650fa6232e4",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/world/location-work.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/world/location-worker-pool.ts",
+      "bytes": 10036,
+      "sha256": "af4c9c88c652a0afbfc5107bab5f1b55f9ed5b54e01dd96e051dbbc889cf62f5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/src/world/location-worker-pool.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/simulation-interest.js",
+      "bytes": 4265,
+      "sha256": "c45602b478f2eff65491aa6f95327c6ea2cd28b542b9a08c83e26b05532aee0a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/simulation-interest.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/simulation-interest.d.ts",
+      "bytes": 1570,
+      "sha256": "3fa917f2a83870b28e3b2d1ffed5bc02f8907678dae298876cda48d425336d7b",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/simulation-interest.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-work.js",
+      "bytes": 2877,
+      "sha256": "36f6ba438c9cc52c6fdbbb87a59498ec73b0a67d6237a95b1dfcbea9ff878e57",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-work.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-work.d.ts",
+      "bytes": 1095,
+      "sha256": "dd6d037c0189569cd075c9594acb4660ba7c6cce9346d52f88b74ab7e6cafee5",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-work.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-worker-pool.js",
+      "bytes": 8734,
+      "sha256": "f47d4f2caa4b81a19f882a902a51f8de199aad2f20404bad83538d01e42d3b81",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-worker-pool.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/world/location-worker-pool.d.ts",
+      "bytes": 3842,
+      "sha256": "d179cb91c20969a4b6c8089d8fb6b783dc654d19997c419802720815cf30aa8f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/dist/world/location-worker-pool.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "test/world-planning.test.mjs",
+      "bytes": 4207,
+      "sha256": "05d8e153adbc11bffb7f701afb0a353d457c814a52f1060d5d9451919b626a50",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/test/world-planning.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "test/location-worker-pool.test.mjs",
+      "bytes": 5411,
+      "sha256": "45e170d03736436e0cfc2c17b7f6f654d2476350265643393c4c0337e6379ce3",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/test/location-worker-pool.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 9258,
+      "sha256": "af2fed962db1a5acf5e837766bda3f54921bf7cffcdb21ee0bb680be5e3c8629",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 40961,
+      "sha256": "510b452076324866bcf6f4bb421129da555e646c3c78583d041eaf3f8147ab7a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 264907,
+      "sha256": "a8743f98de923fb746c7eff2edab3c12dd7e245748d66760516e31c2110eeb6e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-world-planning-r1.json",
+      "bytes": 3657,
+      "sha256": "7bae30eaf002ce673c370f829ccd4ac9184f8710c434874a45fbf0a7965ffe06",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/docs/render-evidence/fps-live-20261017-world-planning-r1.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/audit.ts",
+      "bytes": 4585,
+      "sha256": "ff8300d1511d22d239f797dcf923bbeabbab16299b1f30268dd954b57234993d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/engine/artifacts/office-worker-rest/audit.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/interest.ts",
+      "bytes": 749,
+      "sha256": "f0f2dc447ceeae7919f026b058c5ece41909879bb5da85339a2c032781459f0d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/world/interest.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/scheduler.ts",
+      "bytes": 8562,
+      "sha256": "35b4eb2f4becfe6b4eab886e9d2805f87bc6fbed040b5cec69810221a9964303",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/world/scheduler.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-pool.ts",
+      "bytes": 1405,
+      "sha256": "1c73ab47f3c9b4709ea196ea8c93dd13ddddb910fa5a2461296e169c51d2aa7a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/workers/location-pool.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-wire.ts",
+      "bytes": 4422,
+      "sha256": "90f175d8114d3a6dfb9f7b52aedcfce2dc831cd7507eeaf940cfb2c5c397ece4",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/workers/location-wire.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-worker.ts",
+      "bytes": 718,
+      "sha256": "c1879c0abfceae380c6892fd9096b9799cc5ad014aa6ee42f65c5fd33e86b580",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/workers/location-worker.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/simulation/location.ts",
+      "bytes": 9202,
+      "sha256": "c655617bc80445f8ab3b3fe6af9ab2ec018ee7a4ec45801f283eda3b884dc293",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/simulation/location.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/simulation/aggregate-needs.ts",
+      "bytes": 2479,
+      "sha256": "fe4dadab343aa6cf4769aff4bf66077e803a36b60edbd99fe0c9ecda31103747",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/engine/simulation/aggregate-needs.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-runtime.ts",
+      "bytes": 14863,
+      "sha256": "0337c3cab72ea961d86382ed632e0e026a6eb3b77cbea1146210d107ca9b9e2f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/world-runtime.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "bytes": 67663,
+      "sha256": "21563783b8dccfb9aa23218054708ee08647aa74ae02706bb36067ba300c0f03",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/authority.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority-pipeline.ts",
+      "bytes": 4072,
+      "sha256": "04066fc0c022758b4813021400dca143ce080156bdf46775dfc8cfc7b669932f",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/authority-pipeline.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/engine-kernel.ts",
+      "bytes": 1697,
+      "sha256": "c5839d2910e587e9513194e8c1ecf34d5ca3ad2f827eaf6f3ae924fe533e61f7",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/game/engine-kernel.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/index.ts",
+      "bytes": 14376,
+      "sha256": "d1371d7449fb75d4be224aa855afc79be4ccf1520c8d25331e71d3edb647981e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/src/server/index.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/engine-world-planning.test.ts",
+      "bytes": 3563,
+      "sha256": "1271b99fa53dcf3ef41e0d5fdb2162f900e3d73905143f5f3d21e6228435ea21",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/engine-world-planning.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/original-world-planners.ts",
+      "bytes": 8747,
+      "sha256": "eb77ae2302ed787163f8d7cb015572e90452419de0ba19100b97c9a67c30a1dd",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/fixtures/original-world-planners.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/engine-world.test.ts",
+      "bytes": 11534,
+      "sha256": "1854ce9e7c42ef4d3a12be58cda21b579b7ee76dc0257284847cf1d8c927d0d3",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/engine-world.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/world-runtime.test.ts",
+      "bytes": 11877,
+      "sha256": "8a858fef9f9573d1c5d7e5965cec391219b782b869a43b2d8784812f42fb958e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/world-runtime.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/engine-workers.test.ts",
+      "bytes": 8039,
+      "sha256": "8290182494aeaa2c2f5960ec733e730ee8df1eef7586cc4b1ae1eb398d97c21c",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/engine-workers.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/account-control.test.ts",
+      "bytes": 23152,
+      "sha256": "48058f66b8d21c588ed77cb82b2fe76fa5d0adb0e61f79b424cd654df082c9f1",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/account-control.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/company-api.test.ts",
+      "bytes": 5471,
+      "sha256": "43b2b8eb4ae2ffed62169cf1afe31b6da96a30d3a97a1a3145d060ef9b71fe6e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/company-api.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/test/workforce-harness.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 34968,
+      "sha256": "8ca9e555f5951bba93dc037c67f0521e297de76c18f471cffedb4761f407a418",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 9353,
+      "sha256": "872eb55e2b7d6d614ff0f97464a22eced2df029cc94d52390fb37dd09c08c49d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 18456,
+      "sha256": "05209b27741b6ed7f9a10dd4df3fa8d1ee5d7763794cf5fc2b86a692deedfd5e",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/qa-office-walking.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/tools/qa-office-residents.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 889046,
+      "sha256": "5d95fbc646804ef1f4251e75eec116eb366621218fd966fe2de344f7afabcf0a",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/performance-live-fps-live-20261017-world-planning-r1.json",
+      "bytes": 253642,
+      "sha256": "507f7efdc19406499b842be1d2239d75459917e6736823be9df4b90a92081dee",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/game/artifacts/performance-live-fps-live-20261017-world-planning-r1.json"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 184033,
+      "sha256": "013e604e21c27096022b28d2cd0d3597f5fc6114b84046f602321352ade557d6",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60524,
+      "sha256": "65b1eb729492179ad60f11d75ca3c0a8e9b8dec39466db3e22d5832c2e898bbd",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 71819,
+      "sha256": "c2d195f269a1aeaf52b2538ffcf9609a83438295f5298283d6ee2bbbcbd9380c",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 10019,
+      "sha256": "f821a0614b0d4ee8c1b47fecc27d570cb0853467f104f4961309b7d604056721",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "3cddc50072b5cd352ec96d90c2311b7b1850ed3265d83b3f0fde6aee85206992",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/dist/index.html"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/dist/assets/environment-map.worker-D5wbJvIo.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/dist/assets/gesture.worker-BHWWTrrT.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-BSSF13Sx.css",
+      "bytes": 99413,
+      "sha256": "40b0ef39c25cfb723b7e8e2ff7a225ec20b8a41a5011bcb91b36e54b96604657",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/dist/assets/index-BSSF13Sx.css"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-PtG9U8WP.js",
+      "bytes": 1814523,
+      "sha256": "f2f7a573896dc2ac51d11bbe2c7cb25c87a242371b667ab441a528c856f52565",
+      "archive": "artifacts/world-planning-engine-evidence-20261017/office/ui/dist/assets/index-PtG9U8WP.js"
+    }
+  ],
+  "counts": {
+    "files": 154,
+    "bytes": 63579057,
+    "sources": 53,
+    "reviewedImages": 3
+  },
+  "limits": [
+    "The whole objective is still active: identified generic core mechanisms and subsystem ownership boundaries remain.",
+    "Live native scope has no coarse worker submission; actual background execution, transfer, fencing and lifecycle are verified by real Bun and independent Node workers.",
+    "Fresh native account has no company or lease; nonempty ownership/harness continuity is covered by current complete Game regressions and earlier dedicated live business proof.",
+    "FPS is an independent stationary live-world evening sample at 704x396 internal rendering, not a paired comparison or sustained-60/Office/moving benchmark. The client bundles are unchanged.",
+    "No microphone or voice transport proof. Browser diagnostics retain autoplay/powerPreference warnings, Vite debug/events/favicon 404s and a controller-world 403; the observer returned connected with empty GPU errors and no Office physics."
+  ]
+}

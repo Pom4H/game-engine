@@ -1,0 +1,3839 @@
+{
+  "date": "2026-10-17T06:55:12.776Z",
+  "scope": "Original Game audio adapters and shared acoustic state in the existing Office entry; no additional physics or NPC simulation",
+  "capability": "original-residents-24",
+  "tests": {
+    "regression": {
+      "pass": 225,
+      "assertions": 13128,
+      "files": 21,
+      "seconds": 18.01,
+      "log": "artifacts/office-audio/logs/engine-office-audio-regression-final-20261017.log"
+    },
+    "officeSounds": {
+      "pass": 6,
+      "assertions": 32,
+      "files": 2,
+      "seconds": 0.06,
+      "log": "artifacts/office-audio/logs/engine-office-audio-sound-tests-final-20261017.log"
+    },
+    "gameFocused": {
+      "pass": 21,
+      "assertions": 457,
+      "files": 3,
+      "overlapsRegression": true
+    },
+    "engineCore": {
+      "pass": 20,
+      "log": "artifacts/office-audio/logs/engine-office-audio-engine-core-tests-r2-20261017.log"
+    },
+    "typecheckAndBuild": [
+      "Game typecheck r6",
+      "Engine app typecheck r2",
+      "Office final typecheck",
+      "Engine build r3",
+      "Game build r4",
+      "Office final build"
+    ]
+  },
+  "probe": {
+    "label": "office-audio-probe-20261017-r5",
+    "browser": "native-gpu",
+    "scope": "Native OfflineAudioContext/AudioWorklet, same seeded source DSP and same shared-context bus envelope; no hardware playback/capture, synthetic passive source controls only",
+    "totalRawSamples": 576000,
+    "exactSamplesAfter100ms": 537600,
+    "records": [
+      {
+        "scenario": "ambient",
+        "rate": 48000,
+        "seconds": 1.5,
+        "updates": 21,
+        "samples": 144000,
+        "changed": 0,
+        "max": 0,
+        "firstChanged": -1,
+        "lastChanged": -1,
+        "settledChanged": 0,
+        "settledMax": 0,
+        "warmupSeconds": 0.1,
+        "comparedSamples": 134400,
+        "sourceRms": 0.01008815191820778,
+        "referenceRms": 0.01008815191820778,
+        "sourceHash": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00",
+        "referenceHash": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00",
+        "source": {
+          "source": "thegame",
+          "time": 2,
+          "tick": 120,
+          "enabled": true,
+          "ready": true,
+          "listener": [
+            0,
+            1.7,
+            0
+          ],
+          "target": [
+            0,
+            1.7,
+            1
+          ],
+          "audio": {
+            "vehicleId": null,
+            "active": 0,
+            "retiring": 0,
+            "createdVoices": 0,
+            "reusedVoices": 0,
+            "recoveredVoices": 0,
+            "lastRecovery": null,
+            "voiceEvents": [],
+            "badControlFrames": 0,
+            "dspBudgetUsed": 0,
+            "budgetOmitted": 0,
+            "voices": [],
+            "outputProgress": {
+              "ratio": null,
+              "windows": 0,
+              "slowWindows": 0,
+              "recentSlowWindows": []
+            },
+            "renderBudget": {
+              "capacity": 5,
+              "ceiling": 5,
+              "vehicleCapacity": 4,
+              "worldReserved": 1,
+              "worldUsed": 0,
+              "worldSources": 0,
+              "reductions": 0,
+              "increases": 0,
+              "denied": 0
+            },
+            "sources": [],
+            "state": "closed",
+            "ready": true,
+            "volume": 0.65,
+            "error": null,
+            "contextRestarts": 0,
+            "graphRecoveries": 0,
+            "lastGraphRecovery": null,
+            "outputRecoveries": 0,
+            "lastOutputRecovery": null,
+            "manualResets": 0,
+            "outputClock": {
+              "supported": false,
+              "samples": 0,
+              "advances": 0,
+              "stalls": 0,
+              "staleForMs": 0,
+              "lagMs": 0,
+              "lastTimestamp": null,
+              "lastStallAt": null,
+              "restarting": false
+            },
+            "stagePeaks": {
+              "powertrain": 0,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.011490331031382084,
+              "master": 0.015504488721489906,
+              "actors": 0
+            },
+            "postSpatialSilentForMs": 0,
+            "masterSilentForMs": 0,
+            "inactiveSince": null,
+            "lastResumeAttempt": null,
+            "mixer": {
+              "actors": 1,
+              "energy": 1,
+              "busGain": 0.8,
+              "badEnergyCount": 0,
+              "enclosure": 0,
+              "reverbEnabled": true,
+              "reverb": 0,
+              "powertrain": 1,
+              "surface": 1,
+              "aero": 0.8999999761581421,
+              "mechanical": 0.8999999761581421,
+              "ambient": 1,
+              "volume": 0.6499999761581421,
+              "peaks": {
+                "powertrain": 0,
+                "surface": 0,
+                "aero": 0,
+                "mechanical": 0,
+                "ambient": 0.015934433788061142,
+                "master": 0.01943993754684925,
+                "actors": 0
+              },
+              "meters": {
+                "actors": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "powertrain": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "surface": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "aero": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "mechanical": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "ambient": {
+                  "peak": 0.015934433788061142,
+                  "maxPeak": 0.021074390038847923,
+                  "nonFinite": 0
+                },
+                "master": {
+                  "peak": 0.01943993754684925,
+                  "maxPeak": 0.025198811665177345,
+                  "nonFinite": 0
+                }
+              }
+            },
+            "transients": {
+              "active": 0,
+              "played": 0,
+              "dropped": 0,
+              "errors": 0,
+              "cachedBuffers": 0,
+              "cachedSamples": 0,
+              "warmBuffers": 0,
+              "warmBuilds": 0,
+              "warmHits": 0,
+              "limits": {
+                "steps": 6,
+                "hits": 4,
+                "collision": 8,
+                "glass": 6
+              },
+              "startsPerWindow": 8,
+              "buildsPerWindow": 2,
+              "groups": {
+                "steps": 0,
+                "hits": 0,
+                "collision": 0,
+                "glass": 0
+              }
+            },
+            "actors": {
+              "active": 0,
+              "played": 0
+            },
+            "glass": {
+              "active": 0,
+              "played": 0,
+              "warmup": {
+                "queued": 0,
+                "pending": false,
+                "errors": 0
+              }
+            },
+            "collisions": {
+              "contactPlayed": 0,
+              "deformationPlayed": 0,
+              "jouncePlayed": 0,
+              "scrapeErrors": 0,
+              "impacts": 0,
+              "scrapes": 0,
+              "retiringScrapes": 0,
+              "maxScrapes": 8,
+              "played": 0
+            },
+            "environment": {
+              "destroyed": false,
+              "posts": 21
+            },
+            "environmentRecoveries": 0,
+            "cpu": {
+              "orchMs": 0.09999999403953552,
+              "envMs": 0.09999999403953552,
+              "prepareMs": 0,
+              "mainMs": 0.19999998807907104,
+              "orchP95Ms": 0.19999998807907104,
+              "envP95Ms": 0.10000002384185791,
+              "prepareP95Ms": 0,
+              "mainP95Ms": 0.30000001192092896,
+              "synthRealtime": null,
+              "voices": 0,
+              "dspBudgetUsed": 0,
+              "budgetOmitted": 0
+            },
+            "settings": {
+              "enabled": true,
+              "volume": 0.65,
+              "quality": "high"
+            }
+          }
+        },
+        "reference": {
+          "vehicleId": null,
+          "active": 0,
+          "retiring": 0,
+          "createdVoices": 0,
+          "reusedVoices": 0,
+          "recoveredVoices": 0,
+          "lastRecovery": null,
+          "voiceEvents": [],
+          "badControlFrames": 0,
+          "dspBudgetUsed": 0,
+          "budgetOmitted": 0,
+          "voices": [],
+          "outputProgress": {
+            "ratio": null,
+            "windows": 0,
+            "slowWindows": 0,
+            "recentSlowWindows": []
+          },
+          "renderBudget": {
+            "capacity": 5,
+            "ceiling": 5,
+            "vehicleCapacity": 4,
+            "worldReserved": 1,
+            "worldUsed": 0,
+            "worldSources": 0,
+            "reductions": 0,
+            "increases": 0,
+            "denied": 0
+          },
+          "sources": [],
+          "state": "closed",
+          "ready": true,
+          "volume": 0.65,
+          "error": null,
+          "contextRestarts": 0,
+          "graphRecoveries": 0,
+          "lastGraphRecovery": null,
+          "outputRecoveries": 0,
+          "lastOutputRecovery": null,
+          "manualResets": 0,
+          "outputClock": {
+            "supported": false,
+            "samples": 0,
+            "advances": 0,
+            "stalls": 0,
+            "staleForMs": 0,
+            "lagMs": 0,
+            "lastTimestamp": null,
+            "lastStallAt": null,
+            "restarting": false
+          },
+          "stagePeaks": {
+            "powertrain": 0,
+            "surface": 0,
+            "aero": 0,
+            "mechanical": 0,
+            "ambient": 0.011490331031382084,
+            "master": 0.015504488721489906,
+            "actors": 0
+          },
+          "postSpatialSilentForMs": 0,
+          "masterSilentForMs": 0,
+          "inactiveSince": null,
+          "lastResumeAttempt": null,
+          "mixer": {
+            "actors": 1,
+            "energy": 1,
+            "busGain": 0.8,
+            "badEnergyCount": 0,
+            "enclosure": 0,
+            "reverbEnabled": true,
+            "reverb": 0,
+            "powertrain": 1,
+            "surface": 1,
+            "aero": 0.8999999761581421,
+            "mechanical": 0.8999999761581421,
+            "ambient": 1,
+            "volume": 0.6499999761581421,
+            "peaks": {
+              "powertrain": 0,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.015934433788061142,
+              "master": 0.01943993754684925,
+              "actors": 0
+            },
+            "meters": {
+              "actors": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "powertrain": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "surface": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "aero": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "mechanical": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "ambient": {
+                "peak": 0.015934433788061142,
+                "maxPeak": 0.021074390038847923,
+                "nonFinite": 0
+              },
+              "master": {
+                "peak": 0.01943993754684925,
+                "maxPeak": 0.025198811665177345,
+                "nonFinite": 0
+              }
+            }
+          },
+          "transients": {
+            "active": 0,
+            "played": 0,
+            "dropped": 0,
+            "errors": 0,
+            "cachedBuffers": 0,
+            "cachedSamples": 0,
+            "warmBuffers": 0,
+            "warmBuilds": 0,
+            "warmHits": 0,
+            "limits": {
+              "steps": 6,
+              "hits": 4,
+              "collision": 8,
+              "glass": 6
+            },
+            "startsPerWindow": 8,
+            "buildsPerWindow": 2,
+            "groups": {
+              "steps": 0,
+              "hits": 0,
+              "collision": 0,
+              "glass": 0
+            }
+          },
+          "actors": {
+            "active": 0,
+            "played": 0
+          },
+          "glass": {
+            "active": 0,
+            "played": 0,
+            "warmup": {
+              "queued": 0,
+              "pending": false,
+              "errors": 0
+            }
+          },
+          "collisions": {
+            "contactPlayed": 0,
+            "deformationPlayed": 0,
+            "jouncePlayed": 0,
+            "scrapeErrors": 0,
+            "impacts": 0,
+            "scrapes": 0,
+            "retiringScrapes": 0,
+            "maxScrapes": 8,
+            "played": 0
+          },
+          "environment": {
+            "destroyed": false,
+            "posts": 21
+          },
+          "environmentRecoveries": 0,
+          "cpu": {
+            "orchMs": 0.10000002384185791,
+            "envMs": 0,
+            "prepareMs": 0,
+            "mainMs": 0.10000002384185791,
+            "orchP95Ms": 0.20000001788139343,
+            "envP95Ms": 0.09999999403953552,
+            "prepareP95Ms": 0,
+            "mainP95Ms": 0.30000001192092896,
+            "synthRealtime": null,
+            "voices": 0,
+            "dspBudgetUsed": 0,
+            "budgetOmitted": 0
+          },
+          "settings": {
+            "enabled": true,
+            "volume": 0.65,
+            "quality": "high"
+          }
+        },
+        "nativeState": "closed"
+      },
+      {
+        "scenario": "storm",
+        "rate": 48000,
+        "seconds": 1.5,
+        "updates": 21,
+        "samples": 144000,
+        "changed": 0,
+        "max": 0,
+        "firstChanged": -1,
+        "lastChanged": -1,
+        "settledChanged": 0,
+        "settledMax": 0,
+        "warmupSeconds": 0.1,
+        "comparedSamples": 134400,
+        "sourceRms": 0.025821854734953333,
+        "referenceRms": 0.025821854734953333,
+        "sourceHash": "96545e2107b002ac3972268e74e2e86a89776a9ff5b254db7b9175410589e6d2",
+        "referenceHash": "96545e2107b002ac3972268e74e2e86a89776a9ff5b254db7b9175410589e6d2",
+        "source": {
+          "source": "thegame",
+          "time": 2,
+          "tick": 120,
+          "enabled": true,
+          "ready": true,
+          "listener": [
+            0,
+            1.7,
+            0
+          ],
+          "target": [
+            0,
+            1.7,
+            1
+          ],
+          "audio": {
+            "vehicleId": null,
+            "active": 0,
+            "retiring": 0,
+            "createdVoices": 0,
+            "reusedVoices": 0,
+            "recoveredVoices": 0,
+            "lastRecovery": null,
+            "voiceEvents": [],
+            "badControlFrames": 0,
+            "dspBudgetUsed": 0,
+            "budgetOmitted": 0,
+            "voices": [],
+            "outputProgress": {
+              "ratio": null,
+              "windows": 0,
+              "slowWindows": 0,
+              "recentSlowWindows": []
+            },
+            "renderBudget": {
+              "capacity": 5,
+              "ceiling": 5,
+              "vehicleCapacity": 4,
+              "worldReserved": 1,
+              "worldUsed": 0,
+              "worldSources": 0,
+              "reductions": 0,
+              "increases": 0,
+              "denied": 0
+            },
+            "sources": [],
+            "state": "closed",
+            "ready": true,
+            "volume": 0.65,
+            "error": null,
+            "contextRestarts": 0,
+            "graphRecoveries": 0,
+            "lastGraphRecovery": null,
+            "outputRecoveries": 0,
+            "lastOutputRecovery": null,
+            "manualResets": 0,
+            "outputClock": {
+              "supported": false,
+              "samples": 0,
+              "advances": 0,
+              "stalls": 0,
+              "staleForMs": 0,
+              "lagMs": 0,
+              "lastTimestamp": null,
+              "lastStallAt": null,
+              "restarting": false
+            },
+            "stagePeaks": {
+              "powertrain": 0,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.02991294302046299,
+              "master": 0.04117221385240555,
+              "actors": 0
+            },
+            "postSpatialSilentForMs": 0,
+            "masterSilentForMs": 0,
+            "inactiveSince": null,
+            "lastResumeAttempt": null,
+            "mixer": {
+              "actors": 1,
+              "energy": 1,
+              "busGain": 0.8,
+              "badEnergyCount": 0,
+              "enclosure": 1,
+              "reverbEnabled": true,
+              "reverb": 0.599668025970459,
+              "powertrain": 1,
+              "surface": 1,
+              "aero": 0.8999999761581421,
+              "mechanical": 0.8999999761581421,
+              "ambient": 1,
+              "volume": 0.6499999761581421,
+              "peaks": {
+                "powertrain": 0,
+                "surface": 0,
+                "aero": 0,
+                "mechanical": 0,
+                "ambient": 0.035525836050510406,
+                "master": 0.050245046615600586,
+                "actors": 0
+              },
+              "meters": {
+                "actors": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "powertrain": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "surface": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "aero": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "mechanical": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "ambient": {
+                  "peak": 0.035525836050510406,
+                  "maxPeak": 0.051458969712257385,
+                  "nonFinite": 0
+                },
+                "master": {
+                  "peak": 0.050245046615600586,
+                  "maxPeak": 0.06643879413604736,
+                  "nonFinite": 0
+                }
+              }
+            },
+            "transients": {
+              "active": 0,
+              "played": 0,
+              "dropped": 0,
+              "errors": 0,
+              "cachedBuffers": 0,
+              "cachedSamples": 0,
+              "warmBuffers": 0,
+              "warmBuilds": 0,
+              "warmHits": 0,
+              "limits": {
+                "steps": 6,
+                "hits": 4,
+                "collision": 8,
+                "glass": 6
+              },
+              "startsPerWindow": 8,
+              "buildsPerWindow": 2,
+              "groups": {
+                "steps": 0,
+                "hits": 0,
+                "collision": 0,
+                "glass": 0
+              }
+            },
+            "actors": {
+              "active": 0,
+              "played": 0
+            },
+            "glass": {
+              "active": 0,
+              "played": 0,
+              "warmup": {
+                "queued": 0,
+                "pending": false,
+                "errors": 0
+              }
+            },
+            "collisions": {
+              "contactPlayed": 0,
+              "deformationPlayed": 0,
+              "jouncePlayed": 0,
+              "scrapeErrors": 0,
+              "impacts": 0,
+              "scrapes": 0,
+              "retiringScrapes": 0,
+              "maxScrapes": 8,
+              "played": 0
+            },
+            "environment": {
+              "destroyed": false,
+              "posts": 21
+            },
+            "environmentRecoveries": 0,
+            "cpu": {
+              "orchMs": 0,
+              "envMs": 0,
+              "prepareMs": 0,
+              "mainMs": 0,
+              "orchP95Ms": 0.09999999403953552,
+              "envP95Ms": 0.09999999403953552,
+              "prepareP95Ms": 0,
+              "mainP95Ms": 0.19999998807907104,
+              "synthRealtime": null,
+              "voices": 0,
+              "dspBudgetUsed": 0,
+              "budgetOmitted": 0
+            },
+            "settings": {
+              "enabled": true,
+              "volume": 0.65,
+              "quality": "high"
+            }
+          }
+        },
+        "reference": {
+          "vehicleId": null,
+          "active": 0,
+          "retiring": 0,
+          "createdVoices": 0,
+          "reusedVoices": 0,
+          "recoveredVoices": 0,
+          "lastRecovery": null,
+          "voiceEvents": [],
+          "badControlFrames": 0,
+          "dspBudgetUsed": 0,
+          "budgetOmitted": 0,
+          "voices": [],
+          "outputProgress": {
+            "ratio": null,
+            "windows": 0,
+            "slowWindows": 0,
+            "recentSlowWindows": []
+          },
+          "renderBudget": {
+            "capacity": 5,
+            "ceiling": 5,
+            "vehicleCapacity": 4,
+            "worldReserved": 1,
+            "worldUsed": 0,
+            "worldSources": 0,
+            "reductions": 0,
+            "increases": 0,
+            "denied": 0
+          },
+          "sources": [],
+          "state": "closed",
+          "ready": true,
+          "volume": 0.65,
+          "error": null,
+          "contextRestarts": 0,
+          "graphRecoveries": 0,
+          "lastGraphRecovery": null,
+          "outputRecoveries": 0,
+          "lastOutputRecovery": null,
+          "manualResets": 0,
+          "outputClock": {
+            "supported": false,
+            "samples": 0,
+            "advances": 0,
+            "stalls": 0,
+            "staleForMs": 0,
+            "lagMs": 0,
+            "lastTimestamp": null,
+            "lastStallAt": null,
+            "restarting": false
+          },
+          "stagePeaks": {
+            "powertrain": 0,
+            "surface": 0,
+            "aero": 0,
+            "mechanical": 0,
+            "ambient": 0.02991294302046299,
+            "master": 0.04117221385240555,
+            "actors": 0
+          },
+          "postSpatialSilentForMs": 0,
+          "masterSilentForMs": 0,
+          "inactiveSince": null,
+          "lastResumeAttempt": null,
+          "mixer": {
+            "actors": 1,
+            "energy": 1,
+            "busGain": 0.8,
+            "badEnergyCount": 0,
+            "enclosure": 1,
+            "reverbEnabled": true,
+            "reverb": 0.599668025970459,
+            "powertrain": 1,
+            "surface": 1,
+            "aero": 0.8999999761581421,
+            "mechanical": 0.8999999761581421,
+            "ambient": 1,
+            "volume": 0.6499999761581421,
+            "peaks": {
+              "powertrain": 0,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.035525836050510406,
+              "master": 0.050245046615600586,
+              "actors": 0
+            },
+            "meters": {
+              "actors": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "powertrain": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "surface": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "aero": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "mechanical": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "ambient": {
+                "peak": 0.035525836050510406,
+                "maxPeak": 0.051458969712257385,
+                "nonFinite": 0
+              },
+              "master": {
+                "peak": 0.050245046615600586,
+                "maxPeak": 0.06643879413604736,
+                "nonFinite": 0
+              }
+            }
+          },
+          "transients": {
+            "active": 0,
+            "played": 0,
+            "dropped": 0,
+            "errors": 0,
+            "cachedBuffers": 0,
+            "cachedSamples": 0,
+            "warmBuffers": 0,
+            "warmBuilds": 0,
+            "warmHits": 0,
+            "limits": {
+              "steps": 6,
+              "hits": 4,
+              "collision": 8,
+              "glass": 6
+            },
+            "startsPerWindow": 8,
+            "buildsPerWindow": 2,
+            "groups": {
+              "steps": 0,
+              "hits": 0,
+              "collision": 0,
+              "glass": 0
+            }
+          },
+          "actors": {
+            "active": 0,
+            "played": 0
+          },
+          "glass": {
+            "active": 0,
+            "played": 0,
+            "warmup": {
+              "queued": 0,
+              "pending": false,
+              "errors": 0
+            }
+          },
+          "collisions": {
+            "contactPlayed": 0,
+            "deformationPlayed": 0,
+            "jouncePlayed": 0,
+            "scrapeErrors": 0,
+            "impacts": 0,
+            "scrapes": 0,
+            "retiringScrapes": 0,
+            "maxScrapes": 8,
+            "played": 0
+          },
+          "environment": {
+            "destroyed": false,
+            "posts": 21
+          },
+          "environmentRecoveries": 0,
+          "cpu": {
+            "orchMs": 0,
+            "envMs": 0.10000002384185791,
+            "prepareMs": 0,
+            "mainMs": 0.10000002384185791,
+            "orchP95Ms": 0.10000002384185791,
+            "envP95Ms": 0.10000002384185791,
+            "prepareP95Ms": 0,
+            "mainP95Ms": 0.20000004768371582,
+            "synthRealtime": null,
+            "voices": 0,
+            "dspBudgetUsed": 0,
+            "budgetOmitted": 0
+          },
+          "settings": {
+            "enabled": true,
+            "volume": 0.65,
+            "quality": "high"
+          }
+        },
+        "nativeState": "closed"
+      },
+      {
+        "scenario": "vehicle",
+        "rate": 48000,
+        "seconds": 1.5,
+        "updates": 21,
+        "samples": 144000,
+        "changed": 405,
+        "max": 0.000027867150492966175,
+        "firstChanged": 2458,
+        "lastChanged": 2685,
+        "settledChanged": 0,
+        "settledMax": 0,
+        "warmupSeconds": 0.1,
+        "comparedSamples": 134400,
+        "sourceRms": 0.0548003935722254,
+        "referenceRms": 0.05480039353695852,
+        "sourceHash": "927854cdf75f534dd1da5ef27bc2db71f90280b9e07ab9ef7f2403a53608c290",
+        "referenceHash": "f07e9dfeaeaa0cbea9951e522e7373d3cfad878377be3be85f2bba11b276942f",
+        "source": {
+          "source": "thegame",
+          "time": 2,
+          "tick": 120,
+          "enabled": true,
+          "ready": true,
+          "listener": [
+            0,
+            1.7,
+            0
+          ],
+          "target": [
+            0,
+            1.7,
+            1
+          ],
+          "audio": {
+            "vehicleId": null,
+            "active": 1,
+            "retiring": 0,
+            "createdVoices": 1,
+            "reusedVoices": 0,
+            "recoveredVoices": 0,
+            "lastRecovery": null,
+            "voiceEvents": [
+              {
+                "at": 1780,
+                "kind": "create",
+                "id": "vehicle:77"
+              }
+            ],
+            "badControlFrames": 0,
+            "dspBudgetUsed": 1,
+            "budgetOmitted": 0,
+            "voices": [
+              {
+                "id": "vehicle:77",
+                "profile": "ordinary",
+                "rpm": 2200,
+                "gear": 2,
+                "startTick": 0,
+                "reverseSpeed": 0,
+                "reverseRpm": 2200,
+                "tires": [],
+                "blocked": false,
+                "paths": {
+                  "engine": {
+                    "distance": 14.97861475571089,
+                    "gain": 0.2864083274699587,
+                    "delay": 0.04366943077466732,
+                    "cutoff": 11469.950511828714
+                  },
+                  "exhaust": {
+                    "distance": 13.145341380123988,
+                    "gain": 0.38018679724148846,
+                    "delay": 0.03832461043767926,
+                    "cutoff": 11946.878428766186
+                  },
+                  "tires": [
+                    {
+                      "distance": 14.82758240577337,
+                      "gain": 0.37834893420087495,
+                      "delay": 0.043229103223829064,
+                      "cutoff": 11508.511488006348
+                    },
+                    {
+                      "distance": 15.482157472393826,
+                      "gain": 0.36235259911308676,
+                      "delay": 0.045137485342256055,
+                      "cutoff": 11342.319041529194
+                    },
+                    {
+                      "distance": 13.43492463693042,
+                      "gain": 0.4175684011340877,
+                      "delay": 0.03916887649250851,
+                      "cutoff": 11870.244913833285
+                    },
+                    {
+                      "distance": 14.154052423246142,
+                      "gain": 0.39635291944986184,
+                      "delay": 0.04126545895990129,
+                      "cutoff": 11682.05874106726
+                    }
+                  ],
+                  "aero": {
+                    "distance": 14.968132816086316,
+                    "gain": 0.26456205651410114,
+                    "delay": 0.04363887118392512,
+                    "cutoff": 11472.62254143415
+                  },
+                  "transmission": {
+                    "distance": 14.450259513240585,
+                    "gain": 0.2740435212510546,
+                    "delay": 0.042129036481750974,
+                    "cutoff": 11605.415517980724
+                  }
+                },
+                "destroyed": false,
+                "worklet": {
+                  "heartbeatAgeMs": 160.2999999821186,
+                  "telemetryCount": 3,
+                  "frames": 48256,
+                  "controls": 22,
+                  "peak": 0.3430815041065216,
+                  "peaks": {
+                    "engineBay": 0.016106370836496353,
+                    "exhaust": 0.3430815041065216,
+                    "tireFL": 0,
+                    "tireFR": 0,
+                    "tireRL": 0,
+                    "tireRR": 0,
+                    "aero": 0,
+                    "transmission": 0
+                  },
+                  "silentForMs": 0,
+                  "expectedAudible": true,
+                  "maxHeartbeatGapMs": 207.09999999403954,
+                  "heartbeatGaps": 0,
+                  "lastHeartbeatGapAt": null,
+                  "maxSilentMs": 0,
+                  "lastSilentAt": null,
+                  "zeroTelemetryReports": 0,
+                  "nonFiniteSamples": 0,
+                  "nonFinite": {
+                    "engineBay": 0,
+                    "exhaust": 0,
+                    "tireFL": 0,
+                    "tireFR": 0,
+                    "tireRL": 0,
+                    "tireRR": 0,
+                    "aero": 0,
+                    "transmission": 0
+                  },
+                  "lastNonFiniteAt": null,
+                  "recoveryThresholdMs": 1100
+                }
+              }
+            ],
+            "outputProgress": {
+              "ratio": null,
+              "windows": 0,
+              "slowWindows": 0,
+              "recentSlowWindows": []
+            },
+            "renderBudget": {
+              "capacity": 5,
+              "ceiling": 5,
+              "vehicleCapacity": 4,
+              "worldReserved": 1,
+              "worldUsed": 0,
+              "worldSources": 0,
+              "reductions": 0,
+              "increases": 0,
+              "denied": 0
+            },
+            "sources": [],
+            "state": "closed",
+            "ready": true,
+            "volume": 0.65,
+            "error": null,
+            "contextRestarts": 0,
+            "graphRecoveries": 0,
+            "lastGraphRecovery": null,
+            "outputRecoveries": 0,
+            "lastOutputRecovery": null,
+            "manualResets": 0,
+            "outputClock": {
+              "supported": false,
+              "samples": 0,
+              "advances": 0,
+              "stalls": 0,
+              "staleForMs": 0,
+              "lagMs": 0,
+              "lastTimestamp": null,
+              "lastStallAt": null,
+              "restarting": false
+            },
+            "stagePeaks": {
+              "powertrain": 0.0727611854672432,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.011490331031382084,
+              "master": 0.0954919382929802,
+              "actors": 0
+            },
+            "postSpatialSilentForMs": 0,
+            "masterSilentForMs": 0,
+            "inactiveSince": null,
+            "lastResumeAttempt": null,
+            "mixer": {
+              "actors": 1,
+              "energy": 1,
+              "busGain": 0.8,
+              "badEnergyCount": 0,
+              "enclosure": 0,
+              "reverbEnabled": true,
+              "reverb": 0,
+              "powertrain": 1,
+              "surface": 1,
+              "aero": 0.8999999761581421,
+              "mechanical": 0.8999999761581421,
+              "ambient": 1,
+              "volume": 0.6499999761581421,
+              "peaks": {
+                "powertrain": 0.049553945660591125,
+                "surface": 0,
+                "aero": 0,
+                "mechanical": 0,
+                "ambient": 0.015934433788061142,
+                "master": 0.07416923344135284,
+                "actors": 0
+              },
+              "meters": {
+                "actors": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "powertrain": {
+                  "peak": 0.049553945660591125,
+                  "maxPeak": 0.08501479029655457,
+                  "nonFinite": 0
+                },
+                "surface": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "aero": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "mechanical": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "ambient": {
+                  "peak": 0.015934433788061142,
+                  "maxPeak": 0.021074390038847923,
+                  "nonFinite": 0
+                },
+                "master": {
+                  "peak": 0.07416923344135284,
+                  "maxPeak": 0.09633421152830124,
+                  "nonFinite": 0
+                }
+              }
+            },
+            "transients": {
+              "active": 0,
+              "played": 0,
+              "dropped": 0,
+              "errors": 0,
+              "cachedBuffers": 0,
+              "cachedSamples": 0,
+              "warmBuffers": 0,
+              "warmBuilds": 0,
+              "warmHits": 0,
+              "limits": {
+                "steps": 6,
+                "hits": 4,
+                "collision": 8,
+                "glass": 6
+              },
+              "startsPerWindow": 8,
+              "buildsPerWindow": 2,
+              "groups": {
+                "steps": 0,
+                "hits": 0,
+                "collision": 0,
+                "glass": 0
+              }
+            },
+            "actors": {
+              "active": 0,
+              "played": 0
+            },
+            "glass": {
+              "active": 0,
+              "played": 0,
+              "warmup": {
+                "queued": 0,
+                "pending": false,
+                "errors": 0
+              }
+            },
+            "collisions": {
+              "contactPlayed": 0,
+              "deformationPlayed": 0,
+              "jouncePlayed": 0,
+              "scrapeErrors": 0,
+              "impacts": 0,
+              "scrapes": 0,
+              "retiringScrapes": 0,
+              "maxScrapes": 8,
+              "played": 0
+            },
+            "environment": {
+              "destroyed": false,
+              "posts": 21
+            },
+            "environmentRecoveries": 0,
+            "cpu": {
+              "orchMs": 0.20000001788139343,
+              "envMs": 0,
+              "prepareMs": 0,
+              "mainMs": 0.20000001788139343,
+              "orchP95Ms": 0.5,
+              "envP95Ms": 0.10000002384185791,
+              "prepareP95Ms": 0,
+              "mainP95Ms": 0.6000000238418579,
+              "synthRealtime": null,
+              "voices": 1,
+              "dspBudgetUsed": 1,
+              "budgetOmitted": 0
+            },
+            "settings": {
+              "enabled": true,
+              "volume": 0.65,
+              "quality": "high"
+            }
+          }
+        },
+        "reference": {
+          "vehicleId": null,
+          "active": 1,
+          "retiring": 0,
+          "createdVoices": 1,
+          "reusedVoices": 0,
+          "recoveredVoices": 0,
+          "lastRecovery": null,
+          "voiceEvents": [
+            {
+              "at": 1783,
+              "kind": "create",
+              "id": "vehicle:77"
+            }
+          ],
+          "badControlFrames": 0,
+          "dspBudgetUsed": 1,
+          "budgetOmitted": 0,
+          "voices": [
+            {
+              "id": "vehicle:77",
+              "profile": "ordinary",
+              "rpm": 2200,
+              "gear": 2,
+              "startTick": 0,
+              "reverseSpeed": 0,
+              "reverseRpm": 2200,
+              "tires": [],
+              "blocked": false,
+              "paths": {
+                "engine": {
+                  "distance": 14.97861475571089,
+                  "gain": 0.2864083274699587,
+                  "delay": 0.04366943077466732,
+                  "cutoff": 11469.950511828714
+                },
+                "exhaust": {
+                  "distance": 13.145341380123988,
+                  "gain": 0.38018679724148846,
+                  "delay": 0.03832461043767926,
+                  "cutoff": 11946.878428766186
+                },
+                "tires": [
+                  {
+                    "distance": 14.82758240577337,
+                    "gain": 0.37834893420087495,
+                    "delay": 0.043229103223829064,
+                    "cutoff": 11508.511488006348
+                  },
+                  {
+                    "distance": 15.482157472393826,
+                    "gain": 0.36235259911308676,
+                    "delay": 0.045137485342256055,
+                    "cutoff": 11342.319041529194
+                  },
+                  {
+                    "distance": 13.43492463693042,
+                    "gain": 0.4175684011340877,
+                    "delay": 0.03916887649250851,
+                    "cutoff": 11870.244913833285
+                  },
+                  {
+                    "distance": 14.154052423246142,
+                    "gain": 0.39635291944986184,
+                    "delay": 0.04126545895990129,
+                    "cutoff": 11682.05874106726
+                  }
+                ],
+                "aero": {
+                  "distance": 14.968132816086316,
+                  "gain": 0.26456205651410114,
+                  "delay": 0.04363887118392512,
+                  "cutoff": 11472.62254143415
+                },
+                "transmission": {
+                  "distance": 14.450259513240585,
+                  "gain": 0.2740435212510546,
+                  "delay": 0.042129036481750974,
+                  "cutoff": 11605.415517980724
+                }
+              },
+              "destroyed": false,
+              "worklet": {
+                "heartbeatAgeMs": 159.90000000596046,
+                "telemetryCount": 3,
+                "frames": 48256,
+                "controls": 22,
+                "peak": 0.3430815041065216,
+                "peaks": {
+                  "engineBay": 0.016106370836496353,
+                  "exhaust": 0.3430815041065216,
+                  "tireFL": 0,
+                  "tireFR": 0,
+                  "tireRL": 0,
+                  "tireRR": 0,
+                  "aero": 0,
+                  "transmission": 0
+                },
+                "silentForMs": 0,
+                "expectedAudible": true,
+                "maxHeartbeatGapMs": 207.19999998807907,
+                "heartbeatGaps": 0,
+                "lastHeartbeatGapAt": null,
+                "maxSilentMs": 0,
+                "lastSilentAt": null,
+                "zeroTelemetryReports": 0,
+                "nonFiniteSamples": 0,
+                "nonFinite": {
+                  "engineBay": 0,
+                  "exhaust": 0,
+                  "tireFL": 0,
+                  "tireFR": 0,
+                  "tireRL": 0,
+                  "tireRR": 0,
+                  "aero": 0,
+                  "transmission": 0
+                },
+                "lastNonFiniteAt": null,
+                "recoveryThresholdMs": 1100
+              }
+            }
+          ],
+          "outputProgress": {
+            "ratio": null,
+            "windows": 0,
+            "slowWindows": 0,
+            "recentSlowWindows": []
+          },
+          "renderBudget": {
+            "capacity": 5,
+            "ceiling": 5,
+            "vehicleCapacity": 4,
+            "worldReserved": 1,
+            "worldUsed": 0,
+            "worldSources": 0,
+            "reductions": 0,
+            "increases": 0,
+            "denied": 0
+          },
+          "sources": [],
+          "state": "closed",
+          "ready": true,
+          "volume": 0.65,
+          "error": null,
+          "contextRestarts": 0,
+          "graphRecoveries": 0,
+          "lastGraphRecovery": null,
+          "outputRecoveries": 0,
+          "lastOutputRecovery": null,
+          "manualResets": 0,
+          "outputClock": {
+            "supported": false,
+            "samples": 0,
+            "advances": 0,
+            "stalls": 0,
+            "staleForMs": 0,
+            "lagMs": 0,
+            "lastTimestamp": null,
+            "lastStallAt": null,
+            "restarting": false
+          },
+          "stagePeaks": {
+            "powertrain": 0.0727611854672432,
+            "surface": 0,
+            "aero": 0,
+            "mechanical": 0,
+            "ambient": 0.011490331031382084,
+            "master": 0.0954919382929802,
+            "actors": 0
+          },
+          "postSpatialSilentForMs": 0,
+          "masterSilentForMs": 0,
+          "inactiveSince": null,
+          "lastResumeAttempt": null,
+          "mixer": {
+            "actors": 1,
+            "energy": 1,
+            "busGain": 0.8,
+            "badEnergyCount": 0,
+            "enclosure": 0,
+            "reverbEnabled": true,
+            "reverb": 0,
+            "powertrain": 1,
+            "surface": 1,
+            "aero": 0.8999999761581421,
+            "mechanical": 0.8999999761581421,
+            "ambient": 1,
+            "volume": 0.6499999761581421,
+            "peaks": {
+              "powertrain": 0.049553945660591125,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.015934433788061142,
+              "master": 0.07416923344135284,
+              "actors": 0
+            },
+            "meters": {
+              "actors": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "powertrain": {
+                "peak": 0.049553945660591125,
+                "maxPeak": 0.08501479029655457,
+                "nonFinite": 0
+              },
+              "surface": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "aero": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "mechanical": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "ambient": {
+                "peak": 0.015934433788061142,
+                "maxPeak": 0.021074390038847923,
+                "nonFinite": 0
+              },
+              "master": {
+                "peak": 0.07416923344135284,
+                "maxPeak": 0.09633421152830124,
+                "nonFinite": 0
+              }
+            }
+          },
+          "transients": {
+            "active": 0,
+            "played": 0,
+            "dropped": 0,
+            "errors": 0,
+            "cachedBuffers": 0,
+            "cachedSamples": 0,
+            "warmBuffers": 0,
+            "warmBuilds": 0,
+            "warmHits": 0,
+            "limits": {
+              "steps": 6,
+              "hits": 4,
+              "collision": 8,
+              "glass": 6
+            },
+            "startsPerWindow": 8,
+            "buildsPerWindow": 2,
+            "groups": {
+              "steps": 0,
+              "hits": 0,
+              "collision": 0,
+              "glass": 0
+            }
+          },
+          "actors": {
+            "active": 0,
+            "played": 0
+          },
+          "glass": {
+            "active": 0,
+            "played": 0,
+            "warmup": {
+              "queued": 0,
+              "pending": false,
+              "errors": 0
+            }
+          },
+          "collisions": {
+            "contactPlayed": 0,
+            "deformationPlayed": 0,
+            "jouncePlayed": 0,
+            "scrapeErrors": 0,
+            "impacts": 0,
+            "scrapes": 0,
+            "retiringScrapes": 0,
+            "maxScrapes": 8,
+            "played": 0
+          },
+          "environment": {
+            "destroyed": false,
+            "posts": 21
+          },
+          "environmentRecoveries": 0,
+          "cpu": {
+            "orchMs": 0.09999999403953552,
+            "envMs": 0,
+            "prepareMs": 0,
+            "mainMs": 0.09999999403953552,
+            "orchP95Ms": 0.30000001192092896,
+            "envP95Ms": 0.09999999403953552,
+            "prepareP95Ms": 0,
+            "mainP95Ms": 0.4000000059604645,
+            "synthRealtime": null,
+            "voices": 1,
+            "dspBudgetUsed": 1,
+            "budgetOmitted": 0
+          },
+          "settings": {
+            "enabled": true,
+            "volume": 0.65,
+            "quality": "high"
+          }
+        },
+        "nativeState": "closed"
+      },
+      {
+        "scenario": "steps",
+        "rate": 48000,
+        "seconds": 1.5,
+        "updates": 21,
+        "samples": 144000,
+        "changed": 0,
+        "max": 0,
+        "firstChanged": -1,
+        "lastChanged": -1,
+        "settledChanged": 0,
+        "settledMax": 0,
+        "warmupSeconds": 0.1,
+        "comparedSamples": 134400,
+        "sourceRms": 0.010639430245470108,
+        "referenceRms": 0.010639430245470108,
+        "sourceHash": "7ec2f20b41a79f7f4886f70bb7434ed90402a59a95229a6af3ba95b651edb83a",
+        "referenceHash": "7ec2f20b41a79f7f4886f70bb7434ed90402a59a95229a6af3ba95b651edb83a",
+        "source": {
+          "source": "thegame",
+          "time": 2,
+          "tick": 120,
+          "enabled": true,
+          "ready": true,
+          "listener": [
+            0,
+            1.7,
+            0
+          ],
+          "target": [
+            0,
+            1.7,
+            1
+          ],
+          "audio": {
+            "vehicleId": null,
+            "active": 0,
+            "retiring": 0,
+            "createdVoices": 0,
+            "reusedVoices": 0,
+            "recoveredVoices": 0,
+            "lastRecovery": null,
+            "voiceEvents": [],
+            "badControlFrames": 0,
+            "dspBudgetUsed": 0,
+            "budgetOmitted": 0,
+            "voices": [],
+            "outputProgress": {
+              "ratio": null,
+              "windows": 0,
+              "slowWindows": 0,
+              "recentSlowWindows": []
+            },
+            "renderBudget": {
+              "capacity": 5,
+              "ceiling": 5,
+              "vehicleCapacity": 4,
+              "worldReserved": 1,
+              "worldUsed": 0,
+              "worldSources": 0,
+              "reductions": 0,
+              "increases": 0,
+              "denied": 0
+            },
+            "sources": [],
+            "state": "closed",
+            "ready": true,
+            "volume": 0.65,
+            "error": null,
+            "contextRestarts": 0,
+            "graphRecoveries": 0,
+            "lastGraphRecovery": null,
+            "outputRecoveries": 0,
+            "lastOutputRecovery": null,
+            "manualResets": 0,
+            "outputClock": {
+              "supported": false,
+              "samples": 0,
+              "advances": 0,
+              "stalls": 0,
+              "staleForMs": 0,
+              "lagMs": 0,
+              "lastTimestamp": null,
+              "lastStallAt": null,
+              "restarting": false
+            },
+            "stagePeaks": {
+              "powertrain": 0,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.011490331031382084,
+              "master": 0.015504569746553898,
+              "actors": 2.278391164622917e-8
+            },
+            "postSpatialSilentForMs": 0,
+            "masterSilentForMs": 0,
+            "inactiveSince": null,
+            "lastResumeAttempt": null,
+            "mixer": {
+              "actors": 1,
+              "energy": 1,
+              "busGain": 0.8,
+              "badEnergyCount": 0,
+              "enclosure": 0,
+              "reverbEnabled": true,
+              "reverb": 0,
+              "powertrain": 1,
+              "surface": 1,
+              "aero": 0.8999999761581421,
+              "mechanical": 0.8999999761581421,
+              "ambient": 1,
+              "volume": 0.6499999761581421,
+              "peaks": {
+                "powertrain": 0,
+                "surface": 0,
+                "aero": 0,
+                "mechanical": 0,
+                "ambient": 0.015934433788061142,
+                "master": 0.01943993754684925,
+                "actors": 0
+              },
+              "meters": {
+                "actors": {
+                  "peak": 0,
+                  "maxPeak": 0.01081320270895958,
+                  "nonFinite": 0
+                },
+                "powertrain": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "surface": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "aero": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "mechanical": {
+                  "peak": 0,
+                  "maxPeak": 0,
+                  "nonFinite": 0
+                },
+                "ambient": {
+                  "peak": 0.015934433788061142,
+                  "maxPeak": 0.021074390038847923,
+                  "nonFinite": 0
+                },
+                "master": {
+                  "peak": 0.01943993754684925,
+                  "maxPeak": 0.03763643652200699,
+                  "nonFinite": 0
+                }
+              }
+            },
+            "transients": {
+              "active": 0,
+              "played": 5,
+              "dropped": 0,
+              "errors": 0,
+              "cachedBuffers": 3,
+              "cachedSamples": 47520,
+              "warmBuffers": 0,
+              "warmBuilds": 0,
+              "warmHits": 0,
+              "limits": {
+                "steps": 6,
+                "hits": 4,
+                "collision": 8,
+                "glass": 6
+              },
+              "startsPerWindow": 8,
+              "buildsPerWindow": 2,
+              "groups": {
+                "steps": 0,
+                "hits": 0,
+                "collision": 0,
+                "glass": 0
+              }
+            },
+            "actors": {
+              "active": 0,
+              "played": 5
+            },
+            "glass": {
+              "active": 0,
+              "played": 0,
+              "warmup": {
+                "queued": 0,
+                "pending": false,
+                "errors": 0
+              }
+            },
+            "collisions": {
+              "contactPlayed": 0,
+              "deformationPlayed": 0,
+              "jouncePlayed": 0,
+              "scrapeErrors": 0,
+              "impacts": 0,
+              "scrapes": 0,
+              "retiringScrapes": 0,
+              "maxScrapes": 8,
+              "played": 0
+            },
+            "environment": {
+              "destroyed": false,
+              "posts": 21
+            },
+            "environmentRecoveries": 0,
+            "cpu": {
+              "orchMs": 0.19999998807907104,
+              "envMs": 0.10000002384185791,
+              "prepareMs": 0,
+              "mainMs": 0.30000001192092896,
+              "orchP95Ms": 1.399999976158142,
+              "envP95Ms": 0.09999999403953552,
+              "prepareP95Ms": 0,
+              "mainP95Ms": 1.4999999701976776,
+              "synthRealtime": null,
+              "voices": 0,
+              "dspBudgetUsed": 0,
+              "budgetOmitted": 0
+            },
+            "settings": {
+              "enabled": true,
+              "volume": 0.65,
+              "quality": "high"
+            }
+          }
+        },
+        "reference": {
+          "vehicleId": null,
+          "active": 0,
+          "retiring": 0,
+          "createdVoices": 0,
+          "reusedVoices": 0,
+          "recoveredVoices": 0,
+          "lastRecovery": null,
+          "voiceEvents": [],
+          "badControlFrames": 0,
+          "dspBudgetUsed": 0,
+          "budgetOmitted": 0,
+          "voices": [],
+          "outputProgress": {
+            "ratio": null,
+            "windows": 0,
+            "slowWindows": 0,
+            "recentSlowWindows": []
+          },
+          "renderBudget": {
+            "capacity": 5,
+            "ceiling": 5,
+            "vehicleCapacity": 4,
+            "worldReserved": 1,
+            "worldUsed": 0,
+            "worldSources": 0,
+            "reductions": 0,
+            "increases": 0,
+            "denied": 0
+          },
+          "sources": [],
+          "state": "closed",
+          "ready": true,
+          "volume": 0.65,
+          "error": null,
+          "contextRestarts": 0,
+          "graphRecoveries": 0,
+          "lastGraphRecovery": null,
+          "outputRecoveries": 0,
+          "lastOutputRecovery": null,
+          "manualResets": 0,
+          "outputClock": {
+            "supported": false,
+            "samples": 0,
+            "advances": 0,
+            "stalls": 0,
+            "staleForMs": 0,
+            "lagMs": 0,
+            "lastTimestamp": null,
+            "lastStallAt": null,
+            "restarting": false
+          },
+          "stagePeaks": {
+            "powertrain": 0,
+            "surface": 0,
+            "aero": 0,
+            "mechanical": 0,
+            "ambient": 0.011490331031382084,
+            "master": 0.015504569746553898,
+            "actors": 2.278391164622917e-8
+          },
+          "postSpatialSilentForMs": 0,
+          "masterSilentForMs": 0,
+          "inactiveSince": null,
+          "lastResumeAttempt": null,
+          "mixer": {
+            "actors": 1,
+            "energy": 1,
+            "busGain": 0.8,
+            "badEnergyCount": 0,
+            "enclosure": 0,
+            "reverbEnabled": true,
+            "reverb": 0,
+            "powertrain": 1,
+            "surface": 1,
+            "aero": 0.8999999761581421,
+            "mechanical": 0.8999999761581421,
+            "ambient": 1,
+            "volume": 0.6499999761581421,
+            "peaks": {
+              "powertrain": 0,
+              "surface": 0,
+              "aero": 0,
+              "mechanical": 0,
+              "ambient": 0.015934433788061142,
+              "master": 0.01943993754684925,
+              "actors": 0
+            },
+            "meters": {
+              "actors": {
+                "peak": 0,
+                "maxPeak": 0.01081320270895958,
+                "nonFinite": 0
+              },
+              "powertrain": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "surface": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "aero": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "mechanical": {
+                "peak": 0,
+                "maxPeak": 0,
+                "nonFinite": 0
+              },
+              "ambient": {
+                "peak": 0.015934433788061142,
+                "maxPeak": 0.021074390038847923,
+                "nonFinite": 0
+              },
+              "master": {
+                "peak": 0.01943993754684925,
+                "maxPeak": 0.03763643652200699,
+                "nonFinite": 0
+              }
+            }
+          },
+          "transients": {
+            "active": 0,
+            "played": 5,
+            "dropped": 0,
+            "errors": 0,
+            "cachedBuffers": 3,
+            "cachedSamples": 47520,
+            "warmBuffers": 0,
+            "warmBuilds": 0,
+            "warmHits": 0,
+            "limits": {
+              "steps": 6,
+              "hits": 4,
+              "collision": 8,
+              "glass": 6
+            },
+            "startsPerWindow": 8,
+            "buildsPerWindow": 2,
+            "groups": {
+              "steps": 0,
+              "hits": 0,
+              "collision": 0,
+              "glass": 0
+            }
+          },
+          "actors": {
+            "active": 0,
+            "played": 5
+          },
+          "glass": {
+            "active": 0,
+            "played": 0,
+            "warmup": {
+              "queued": 0,
+              "pending": false,
+              "errors": 0
+            }
+          },
+          "collisions": {
+            "contactPlayed": 0,
+            "deformationPlayed": 0,
+            "jouncePlayed": 0,
+            "scrapeErrors": 0,
+            "impacts": 0,
+            "scrapes": 0,
+            "retiringScrapes": 0,
+            "maxScrapes": 8,
+            "played": 0
+          },
+          "environment": {
+            "destroyed": false,
+            "posts": 21
+          },
+          "environmentRecoveries": 0,
+          "cpu": {
+            "orchMs": 0.09999999403953552,
+            "envMs": 0,
+            "prepareMs": 0,
+            "mainMs": 0.09999999403953552,
+            "orchP95Ms": 1.2000000178813934,
+            "envP95Ms": 0,
+            "prepareP95Ms": 0,
+            "mainP95Ms": 1.2000000178813934,
+            "synthRealtime": null,
+            "voices": 0,
+            "dspBudgetUsed": 0,
+            "budgetOmitted": 0
+          },
+          "settings": {
+            "enabled": true,
+            "volume": 0.65,
+            "quality": "high"
+          }
+        },
+        "nativeState": "closed"
+      }
+    ]
+  },
+  "native": {
+    "label": "office-audio-walking-20261017-r2",
+    "browser": "native-gpu",
+    "states": [
+      "observer",
+      "entered",
+      "walk-KeyW",
+      "residents-panel",
+      "residents-observing",
+      "residents-observed-scope",
+      "residents-possessed",
+      "residents-moved",
+      "residents-stopped",
+      "residents-return-start",
+      "residents-returned",
+      "audio-restored",
+      "returned-observer"
+    ],
+    "walkedM": 2.3159555263432785,
+    "actor": "resident:14791:0",
+    "takeoverDifferenceM": 0.00043101658037556905,
+    "takeoverSpeed": 0,
+    "npcMovedM": 0.5448218085786046,
+    "rightsUnchanged": true,
+    "liveGuestHasNoCompaniesOrLeases": true,
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "audioLifecycle": {
+      "muted": false,
+      "sharedContext": "running",
+      "restored": true,
+      "contextRestarts": 0,
+      "graphRecoveries": 0
+    }
+  },
+  "audit": {
+    "date": "2026-10-17T06:52:01.991Z",
+    "pid": 13676,
+    "beforeRows": 4433,
+    "afterRows": 4440,
+    "missingRows": 0,
+    "protectedRows": 147,
+    "changedProtectedRows": 0,
+    "integrity": "ok",
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 54,
+    "geometryRevision": 1
+  },
+  "served": [
+    {
+      "url": "http://127.0.0.1:8765/?ui=static",
+      "status": 200,
+      "bytes": 422,
+      "sha256": "a23168dae824a483be928e445ef6e1f8cef1781cd8d9bd8daa83c9ee7bb6f858",
+      "archive": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/office.html"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-Dw3r4BeJ.js",
+      "status": 200,
+      "bytes": 1801471,
+      "sha256": "858a111f576960822c316cc57dfb63652debdcc533db3e31f3c0b8b007fd055e",
+      "archive": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/office-ui.js"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "status": 200,
+      "bytes": 2500129,
+      "sha256": "493f15f40ead0150a6b3cdd0ac89c64509cb49ce06634d75d691f6883fd5fecb",
+      "archive": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/game.js"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "status": 200,
+      "bytes": 1550002,
+      "sha256": "4e452f3ab26da3164caf3abcbe5834616490fc5e5490b8e7cd50ab77ea0038b8",
+      "archive": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/office-controller.js"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/audio-worklet.js",
+      "status": 200,
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/audio-worklet.js"
+    }
+  ],
+  "sources": [
+    {
+      "repo": "game",
+      "path": "src/game/audio/audio-engine.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/audio/audio-engine.ts",
+      "bytes": 22629,
+      "sha256": "56871963aa932d6ee2a1a854bffe8422cce6db2d452b26896caed822b211f66f"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/audio/transient-audio.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/audio/transient-audio.ts",
+      "bytes": 8171,
+      "sha256": "51cee8dbf7c20f9900633608a3d9bcffa7fab5b9e0e595fcb95d389248586d3d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/audio/world-controls.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/audio/world-controls.ts",
+      "bytes": 1353,
+      "sha256": "4cdedcff8854e982bf0557427b3f41e3d3bde180473750a8426bb59ff3c58463"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/audio/vehicle-sound-state.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/audio/vehicle-sound-state.ts",
+      "bytes": 7937,
+      "sha256": "288f634dbbbb90a8ee32fdd9c3a3e0173640ea6a92657ab2283db6a121b14820"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/client.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/client.ts",
+      "bytes": 49573,
+      "sha256": "f17380aba8eb6b87c9cb3615cea0d2e2abbcfd6d66daa9fb36336a0af1c179dc"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/authority.ts",
+      "bytes": 66869,
+      "sha256": "1ab55db370ad4685ac380e6aee8e657ca0967ef351ba781aaf72bc68c5e3204f"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/office-world.ts",
+      "bytes": 11438,
+      "sha256": "d81f840f2ec69a635e0f0061e304fe6f20b4199572957c983fdc2de85686d43d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-audio.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/office-audio.ts",
+      "bytes": 3881,
+      "sha256": "b306f7e82d75bebc929654de644b5d866c6db9666431cbe2d1e851c03bd57813"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/office-controller.ts",
+      "bytes": 1026,
+      "sha256": "aa517c69fdeec7f90e8121875a56df1a860304a9b737652f1aa978c178c8d441"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/causal/replication.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/net/causal/replication.ts",
+      "bytes": 29274,
+      "sha256": "4d57387edf6d0519948809694520984ad7855cdee3d4540aa78855bad40228e2"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/rain-roof.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/game/render/rain-roof.ts",
+      "bytes": 1798,
+      "sha256": "8d89d97177ab54af87ddbd9e2e022a79028057f24eb83b022dbbf234b32f5993"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/index.ts",
+      "archive": "artifacts/office-audio/final-source/game/src/server/index.ts",
+      "bytes": 14346,
+      "sha256": "22eaa25ac54848d8049e4efd43853c2f79bb9582034f230784c53977e0bdcbd1"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-audio.test.ts",
+      "archive": "artifacts/office-audio/final-source/game/test/office-audio.test.ts",
+      "bytes": 6209,
+      "sha256": "722b8ffd6f6f4be8b6d0476c6a00e6fb5ac17349d5003dce2b5551fc879d056b"
+    },
+    {
+      "repo": "game",
+      "path": "test/audio-engine-lifecycle.test.ts",
+      "archive": "artifacts/office-audio/final-source/game/test/audio-engine-lifecycle.test.ts",
+      "bytes": 7472,
+      "sha256": "18217bdbb5ff22a94f3976b40b026ef62df123ab634d587a6e706055a2606c2d"
+    },
+    {
+      "repo": "game",
+      "path": "test/world-audio.test.ts",
+      "archive": "artifacts/office-audio/final-source/game/test/world-audio.test.ts",
+      "bytes": 10944,
+      "sha256": "5a21d2bb0a3c72c339898e9033c39ae5b6515973516418dad3fed6a1a6d2e076"
+    },
+    {
+      "repo": "game",
+      "path": "test/causal-network/replication.test.ts",
+      "archive": "artifacts/office-audio/final-source/game/test/causal-network/replication.test.ts",
+      "bytes": 21047,
+      "sha256": "e0a599a4dac2cca9aba8b9dc7fc63874abe71a5abd9b177feda5f82685c10817"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-rain.test.ts",
+      "archive": "artifacts/office-audio/final-source/game/test/office-rain.test.ts",
+      "bytes": 10676,
+      "sha256": "baa97363b756246a9d334a50c4a1ea62987683efbadbe88730fee3f666de99d2"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-world.test.ts",
+      "archive": "artifacts/office-audio/final-source/game/test/office-world.test.ts",
+      "bytes": 16143,
+      "sha256": "dcc6127d13263ff38008170430cdf4cf8cd3e0388fb172f69d2b20eb386bf57e"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-audio.ts",
+      "archive": "artifacts/office-audio/final-source/game/tools/qa-office-audio.ts",
+      "bytes": 8486,
+      "sha256": "00539bb6353f23400ddf95b3330568f8a8af48a62890fab15adee8b6664be522"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "archive": "artifacts/office-audio/final-source/game/tools/qa-office-walking.ts",
+      "bytes": 18456,
+      "sha256": "05209b27741b6ed7f9a10dd4df3fa8d1ee5d7763794cf5fc2b86a692deedfd5e"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "archive": "artifacts/office-audio/final-source/game/tools/qa-office.ts",
+      "bytes": 8266,
+      "sha256": "a3b0d3f08e9ce501c6e5a0073a816a90bf34e59dfef27a659862687498d7731d"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "archive": "artifacts/office-audio/final-source/game/tools/capture.ts",
+      "bytes": 34215,
+      "sha256": "8253a480720f00eaa82ebbecf590e454b4646336ef51590b816bf64c7d708978"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-audio/final-source/game/docs/VERIFICATION.md",
+      "bytes": 827599,
+      "sha256": "2010d82dbf4c9c2f09efc679dfd5aa30c84b75506f70119b89621260d8bd7619"
+    },
+    {
+      "repo": "engine",
+      "path": "src/network/causal-acoustics.ts",
+      "archive": "artifacts/office-audio/final-source/engine/src/network/causal-acoustics.ts",
+      "bytes": 3430,
+      "sha256": "ef64d65bc5c10ff3a9bce076d199c3470943bbcf5ef1b33c9e863defa377efcb"
+    },
+    {
+      "repo": "engine",
+      "path": "src/audio/spatial.ts",
+      "archive": "artifacts/office-audio/final-source/engine/src/audio/spatial.ts",
+      "bytes": 15777,
+      "sha256": "93aa138bbde68920496254bd65fe8924d751e022c1918360de4029be1bdf6024"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/subject-camera.ts",
+      "archive": "artifacts/office-audio/final-source/engine/src/render/subject-camera.ts",
+      "bytes": 1795,
+      "sha256": "a62ba4ab226747668c759249accaa540883527e2d5f4fb426e64f98e4a282902"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-audio.ts",
+      "archive": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-audio.ts",
+      "bytes": 2341,
+      "sha256": "ef67210b77f8226d320c161cd436545b08442b6c1b5e49e8b4dacf43c74ee8aa"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-types.ts",
+      "archive": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 6232,
+      "sha256": "37ef9eb03dcad27ff0f3bf888c40e9d07c96e3bec1fae2ed8cfa0432a51c73b9"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "f8dd8313106d696e80f44b55aa669532c5e1a610d703b09a62882eb362b4e529"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "archive": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 37475,
+      "sha256": "f9c8b24929f61b3ca83bc28bd93442d7987661d54ca8e6326176f0016b7d7535"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "archive": "artifacts/office-audio/final-source/engine/apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 52244,
+      "sha256": "7b33dd1a1dcda80e3c621de0c555c10458a9bc59ab75612a4ee5e692c28f515d"
+    },
+    {
+      "repo": "engine",
+      "path": "test/spatial-audio.test.mjs",
+      "archive": "artifacts/office-audio/final-source/engine/test/spatial-audio.test.mjs",
+      "bytes": 17149,
+      "sha256": "6247628b3a37fafc6cd3007a38211e6a0b80c44f68e3e09196a62dde0fd81b8c"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-audio/final-source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/audio-guard.ts",
+      "archive": "artifacts/office-audio/final-source/office/ui/src/office/audio-guard.ts",
+      "bytes": 1616,
+      "sha256": "a65add69346507c9e335e4443b86a4ac80e517d05bd90bcec5a112dc97598c4a"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/sounds.ts",
+      "archive": "artifacts/office-audio/final-source/office/ui/src/office/sounds.ts",
+      "bytes": 5448,
+      "sha256": "0caa4922683d8382518663c42344573afb32d986dab5c9911a33214bceb8120e"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "archive": "artifacts/office-audio/final-source/office/ui/src/office/Office.tsx",
+      "bytes": 60218,
+      "sha256": "74d93ec5b7fc096221e7a2cf1980a1f60905478cd3232b66740bb5ab643ec09d"
+    },
+    {
+      "repo": "office",
+      "path": "scripts/office-sound.test.ts",
+      "archive": "artifacts/office-audio/final-source/office/scripts/office-sound.test.ts",
+      "bytes": 5783,
+      "sha256": "ddcfa47abb0b87b22d6c23ca7a5b6ac2b6ab2118331e52fc3c163c674c188e17"
+    },
+    {
+      "repo": "office",
+      "path": "scripts/office-audio-guard.test.ts",
+      "archive": "artifacts/office-audio/final-source/office/scripts/office-audio-guard.test.ts",
+      "bytes": 2106,
+      "sha256": "bed2cd3bd26ee66a4d700109982a55d2436a6e97c02e819754105c56592e5170"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-audio/final-source/office/VERIFICATION.md",
+      "bytes": 139699,
+      "sha256": "4147a11e683d0c27b956802761fe07fcb1f581518090e7ede41b23ad052b9deb"
+    }
+  ],
+  "reviewed": [
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/entered.png",
+      "note": "Actual installed Office UI; reviewed pixels."
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-possessed.png",
+      "note": "Immediate takeover HUD still briefly displays the preceding observe label; the stopped capture confirms the playable HUD and canonical account/control already match at takeover."
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-stopped.png",
+      "note": "Actual installed Office UI; reviewed pixels."
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/audio-muted.png",
+      "note": "Actual installed Office UI; reviewed pixels."
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/audio-restored.png",
+      "note": "Actual installed Office UI; reviewed pixels."
+    }
+  ],
+  "failedAttempts": {
+    "labels": [
+      "office-audio-probe-20261017-r1",
+      "office-audio-probe-20261017-r2",
+      "office-audio-probe-20261017-r3",
+      "office-audio-probe-20261017-r4"
+    ],
+    "reasons": [
+      "Initial source worklet lacked the embedded Office CORS header",
+      "Offline graph setup needed settled native message/control processing",
+      "Vehicle worklet initial graph scheduling can differ before 100 ms",
+      "Original transient pool rejected offline suspended-block scheduling, producing no steps"
+    ],
+    "preserved": true
+  },
+  "fps": {
+    "manifest": "docs/render-evidence/fps-live-20261017-current.json",
+    "average": 40.894406099627865,
+    "testedGameBytes": 2499934,
+    "currentGameBytes": 2500129,
+    "sameBundle": false,
+    "scope": "Earlier short stationary native night sample; no FPS claimed for the final Office audio UI"
+  },
+  "limits": [
+    "Native PCM is synthetic passive offline browser output, not physical speaker/microphone/AEC quality or recorded live traffic sound.",
+    "Of 576,000 raw paired samples, 537,600 after 100 ms are exact; 405 early vehicle samples differ with max 0.0000278672. All raw buffers and failures are retained.",
+    "A real-world guest account has no businesses/leases; existing protected ownership records remain unchanged, with positive entitlement/control cases covered by the regression tests.",
+    "The source Game audio model/DSP is reused; this does not establish new acoustic occlusion fidelity for every bridge/tree/vehicle configuration.",
+    "Original source worklet full PCM/DSP coefficients are not changed; transient context admission is extended only to offline scheduling.",
+    "Standalone Game keeps owning its context; Office host graphs never suspend/close the shared voice context.",
+    "The full Engine/Game/Office integration remains active; water/temporal fidelity, long routes and own first-person shadows/reflections remain incomplete or unaudited."
+  ],
+  "files": [
+    {
+      "path": "artifacts/office-audio/audit-native.ts",
+      "bytes": 4566,
+      "sha256": "22f668be870a0e0c82b377d351fb6bb0a417c38283297fb7321aee2dad93735e"
+    },
+    {
+      "path": "artifacts/office-audio/audit-restart.log",
+      "bytes": 552,
+      "sha256": "b564d9d22e0c06a7df022f1d62fec02fd35b3dadc3982e451db81ef579700275"
+    },
+    {
+      "path": "artifacts/office-audio/audit-restart.ts",
+      "bytes": 3033,
+      "sha256": "707ed7a554452790a78419df42ac10350bf5ec228f7276cd888406be4464ded5"
+    },
+    {
+      "path": "artifacts/office-audio/backup-runtime.log",
+      "bytes": 172,
+      "sha256": "eda3be7ca06713de34ce7385b4d57654752b20ed0ecca2bc66e79bf35216890f"
+    },
+    {
+      "path": "artifacts/office-audio/backup-runtime.ts",
+      "bytes": 2453,
+      "sha256": "36f92cbe7f95c85a3d6dbed0d800b7f3177a780436f768090dae42e9d2c3f02f"
+    },
+    {
+      "path": "artifacts/office-audio/backup.ts",
+      "bytes": 1030,
+      "sha256": "1c9d8c4502f652afc324679daefd3ece98256a44f8d38a4fc67eaf09d7083f79"
+    },
+    {
+      "path": "artifacts/office-audio/before-final-startup/office-sound.test.ts",
+      "bytes": 1575,
+      "sha256": "d5969132b4076632276ee3b5d967d7e291cc2bb8a7b9855492f527f67dde7a5f"
+    },
+    {
+      "path": "artifacts/office-audio/before-final-startup/qa-office-audio.ts",
+      "bytes": 8486,
+      "sha256": "00539bb6353f23400ddf95b3330568f8a8af48a62890fab15adee8b6664be522"
+    },
+    {
+      "path": "artifacts/office-audio/before-final-startup/scene.ts",
+      "bytes": 69012,
+      "sha256": "34971232a2d717ad1ae1439c1a04097e02d5a835425596c981424b819468cc43"
+    },
+    {
+      "path": "artifacts/office-audio/before-final-startup/sounds.ts",
+      "bytes": 5066,
+      "sha256": "5604a0112d0d1e08d7950809a2b1dc03eeb0e24f0ced98d14ab74bba4b38e14d"
+    },
+    {
+      "path": "artifacts/office-audio/before-final-startup/transient-audio.ts",
+      "bytes": 7842,
+      "sha256": "17aebd8188a0ffe553a106c2a3ec7a64c41fdf55b7ac20a0f8c79d2ac314f0ba"
+    },
+    {
+      "path": "artifacts/office-audio/before-final-startup/world-audio.test.ts",
+      "bytes": 9937,
+      "sha256": "8484c345ea2f2b61f54630666a0d983e5c4f5e2204cb967c8ff1fdb9a24f862f"
+    },
+    {
+      "path": "artifacts/office-audio/before/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 36727,
+      "sha256": "14905ced2d8b737ad2452e7d041b102fffd0ef75c9abbcb8db49c15471d1e72f"
+    },
+    {
+      "path": "artifacts/office-audio/before/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 6170,
+      "sha256": "d78b065ed05a32b604a4b7d1f237c739e2855014abdb3d30b2565c343d3393e7"
+    },
+    {
+      "path": "artifacts/office-audio/before/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 36953,
+      "sha256": "62ed3cf4c935bc3daed0094008d9927a1c232fd85d65e37d10d24b61b5633ea4"
+    },
+    {
+      "path": "artifacts/office-audio/before/engine/src/audio/spatial.ts",
+      "bytes": 14501,
+      "sha256": "566eb2ce7c4d600b52c97d31c889b42009e8d52e8a858d0dcafb82294fa6705e"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/audio/audio-engine.ts",
+      "bytes": 20974,
+      "sha256": "107bffe2f9174aa75c499b0d13ab16037d9ea7d975b439a0b384419adfcb1156"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/audio/vehicle-sound-state.ts",
+      "bytes": 7715,
+      "sha256": "7d6696dfc0dd1dd73d4b8f9600f1d8212148e96a71408ca066eb7c5ae7a8c471"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/authority.ts",
+      "bytes": 66493,
+      "sha256": "790257fb421747a706531c95d91e432ecd15c745bd2caf7aef2be3d39eb834ed"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/client.ts",
+      "bytes": 50637,
+      "sha256": "421af7487993f7c04ed9ffc3054f1e888ee99ecc92106be1f46cef37c5a16ef6"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/net/causal/replication.ts",
+      "bytes": 31597,
+      "sha256": "f4999f5440d1b3b0badae68f6273abddc8beff2177db73af615398ec4f14ce61"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/office-controller.ts",
+      "bytes": 973,
+      "sha256": "9d31dbcd5e338f08261f2c8b2d6182a167b3f30b3c8c79cac3fd6ace394e99b8"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/office-world.ts",
+      "bytes": 11302,
+      "sha256": "e3fe20a3e0195522d400ddb2be5a9dfac259e3f08e424b8bf0749359cd4890cd"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/game/render/rain-roof.ts",
+      "bytes": 1589,
+      "sha256": "89aed061e2146a974ff922f28b7ab4e3d1eef97f0be3c2f265729628bbda8319"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/server/index.ts",
+      "bytes": 14286,
+      "sha256": "d42b9f470e7907407fbc19a72f43994ad84d2ed0fcd9daa1826151856263ea88"
+    },
+    {
+      "path": "artifacts/office-audio/before/game/src/server/office-world.ts",
+      "bytes": 3426,
+      "sha256": "6ce366b11d8b86a94e3cc906e24472ee360bf0c1e81174a360f23769d4630b99"
+    },
+    {
+      "path": "artifacts/office-audio/before/office/ui/src/office/scene.ts",
+      "bytes": 66172,
+      "sha256": "b9b375fbe2421ef03f3234d4fd60896b24260860a2151b463489bbc06ad6c473"
+    },
+    {
+      "path": "artifacts/office-audio/before/office/ui/src/office/sounds.ts",
+      "bytes": 5066,
+      "sha256": "5604a0112d0d1e08d7950809a2b1dc03eeb0e24f0ced98d14ab74bba4b38e14d"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17601,
+      "sha256": "191917ac96c1f9587c6589c123073d52756d3a27852ff59ff9b3644d89694e76"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r1/office-entry.json",
+      "bytes": 17772,
+      "sha256": "fa4c8e2f7a2385224ccddd56ca21ccfa917f141ea492ddf1c8d247d8f8c47286"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r1/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 17606,
+      "sha256": "f125a0994ac5500dc8f781a423fc71d4a2e3d9008f18aa6007be8baa26424466"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r2/office-entry.json",
+      "bytes": 17777,
+      "sha256": "7b86703b257001e8fa07ee374fde4b5d8d4d475185c3061983a4ed8a0c6364cd"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r2/office-entry.png",
+      "bytes": 584730,
+      "sha256": "bacda2d4338e0dfa42d0084ae615aef0a912ed2ef5afb4f69e9b4d7fa2c8a7ab"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r3/office-entry-diagnostics.json",
+      "bytes": 17355,
+      "sha256": "2584a81abdfe7dc9331474a1bc30d27f3aaa528eb8274ea059dde2c61d4d574f"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r3/office-entry.json",
+      "bytes": 17526,
+      "sha256": "5d0bf02486c39bc81a6840a31c6eaa4dcbf3d25e114cb2e209631bc03ac3e6b8"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r3/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r4/office-entry-diagnostics.json",
+      "bytes": 17604,
+      "sha256": "7356a2ee96eeeda8daef889d163a87921c4f5b865fdab5ae3b8b8b6ba006867f"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r4/office-entry.json",
+      "bytes": 17775,
+      "sha256": "d41203c0cd88231251440645ecad67678b25f2dea339bfaa7a50222a76c4bc1e"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r4/office-entry.png",
+      "bytes": 585048,
+      "sha256": "db75ca35e26b07438fa4b2f96f1cc3cd9ac45e32fe8b3a65cc1c743b77b47afa"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r5/office-entry-diagnostics.json",
+      "bytes": 14695,
+      "sha256": "5a01b68a375a14aab239c9c24827ffa5b20d847d2d7c30cf4fb5d9e75b443d9f"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r5/office-entry.json",
+      "bytes": 14866,
+      "sha256": "f19d0aee9405fe0ba54e896f7dcabeb29a7f5db86a7ab449eae945a3c9b179a3"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-probe-20261017-r5/office-entry.png",
+      "bytes": 739871,
+      "sha256": "1421948abe031461b616795a422444229fe907bdb3949a6d5c3f6f12d6b17a28"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-walking-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17642,
+      "sha256": "f24fbe387b553c2fb2da70b24ee6968151b46b25c21e09c92ceef835a2c5ccf7"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-walking-20261017-r1/office-entry.json",
+      "bytes": 17813,
+      "sha256": "b7c908de5f4839e4b54beae2fba6f38f4ee4c5a889a8836f060ae3aa053bb91a"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-walking-20261017-r1/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-walking-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 14754,
+      "sha256": "e98ab3f329fb7cc59215d3521e648c1d1e390f6adf5d7b8f56d2c8b11d8c4fdf"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-walking-20261017-r2/office-entry.json",
+      "bytes": 14925,
+      "sha256": "c7a54cb1633bf718c218193ab1d9fa08c489fe91ed8078f370f8edb3e288c618"
+    },
+    {
+      "path": "artifacts/office-audio/entry/office-audio-walking-20261017-r2/office-entry.png",
+      "bytes": 802978,
+      "sha256": "da4f057b556182b21017d480c615970c7cb1e5786c50f817ba5b098c649d60b0"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-audio.ts",
+      "bytes": 2341,
+      "sha256": "ef67210b77f8226d320c161cd436545b08442b6c1b5e49e8b4dacf43c74ee8aa"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "f8dd8313106d696e80f44b55aa669532c5e1a610d703b09a62882eb362b4e529"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 6232,
+      "sha256": "37ef9eb03dcad27ff0f3bf888c40e9d07c96e3bec1fae2ed8cfa0432a51c73b9"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 37475,
+      "sha256": "f9c8b24929f61b3ca83bc28bd93442d7987661d54ca8e6326176f0016b7d7535"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 52244,
+      "sha256": "7b33dd1a1dcda80e3c621de0c555c10458a9bc59ab75612a4ee5e692c28f515d"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/src/audio/spatial.ts",
+      "bytes": 15777,
+      "sha256": "93aa138bbde68920496254bd65fe8924d751e022c1918360de4029be1bdf6024"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/src/network/causal-acoustics.ts",
+      "bytes": 3430,
+      "sha256": "ef64d65bc5c10ff3a9bce076d199c3470943bbcf5ef1b33c9e863defa377efcb"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/src/render/subject-camera.ts",
+      "bytes": 1795,
+      "sha256": "a62ba4ab226747668c759249accaa540883527e2d5f4fb426e64f98e4a282902"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/engine/test/spatial-audio.test.mjs",
+      "bytes": 17149,
+      "sha256": "6247628b3a37fafc6cd3007a38211e6a0b80c44f68e3e09196a62dde0fd81b8c"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/docs/VERIFICATION.md",
+      "bytes": 827599,
+      "sha256": "2010d82dbf4c9c2f09efc679dfd5aa30c84b75506f70119b89621260d8bd7619"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/audio/audio-engine.ts",
+      "bytes": 22629,
+      "sha256": "56871963aa932d6ee2a1a854bffe8422cce6db2d452b26896caed822b211f66f"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/audio/transient-audio.ts",
+      "bytes": 8171,
+      "sha256": "51cee8dbf7c20f9900633608a3d9bcffa7fab5b9e0e595fcb95d389248586d3d"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/audio/vehicle-sound-state.ts",
+      "bytes": 7937,
+      "sha256": "288f634dbbbb90a8ee32fdd9c3a3e0173640ea6a92657ab2283db6a121b14820"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/audio/world-controls.ts",
+      "bytes": 1353,
+      "sha256": "4cdedcff8854e982bf0557427b3f41e3d3bde180473750a8426bb59ff3c58463"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/authority.ts",
+      "bytes": 66869,
+      "sha256": "1ab55db370ad4685ac380e6aee8e657ca0967ef351ba781aaf72bc68c5e3204f"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/client.ts",
+      "bytes": 49573,
+      "sha256": "f17380aba8eb6b87c9cb3615cea0d2e2abbcfd6d66daa9fb36336a0af1c179dc"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/net/causal/replication.ts",
+      "bytes": 29274,
+      "sha256": "4d57387edf6d0519948809694520984ad7855cdee3d4540aa78855bad40228e2"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/office-audio.ts",
+      "bytes": 3881,
+      "sha256": "b306f7e82d75bebc929654de644b5d866c6db9666431cbe2d1e851c03bd57813"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/office-controller.ts",
+      "bytes": 1026,
+      "sha256": "aa517c69fdeec7f90e8121875a56df1a860304a9b737652f1aa978c178c8d441"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/office-world.ts",
+      "bytes": 11438,
+      "sha256": "d81f840f2ec69a635e0f0061e304fe6f20b4199572957c983fdc2de85686d43d"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/game/render/rain-roof.ts",
+      "bytes": 1798,
+      "sha256": "8d89d97177ab54af87ddbd9e2e022a79028057f24eb83b022dbbf234b32f5993"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/src/server/index.ts",
+      "bytes": 14346,
+      "sha256": "22eaa25ac54848d8049e4efd43853c2f79bb9582034f230784c53977e0bdcbd1"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/test/audio-engine-lifecycle.test.ts",
+      "bytes": 7472,
+      "sha256": "18217bdbb5ff22a94f3976b40b026ef62df123ab634d587a6e706055a2606c2d"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/test/causal-network/replication.test.ts",
+      "bytes": 21047,
+      "sha256": "e0a599a4dac2cca9aba8b9dc7fc63874abe71a5abd9b177feda5f82685c10817"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/test/office-audio.test.ts",
+      "bytes": 6209,
+      "sha256": "722b8ffd6f6f4be8b6d0476c6a00e6fb5ac17349d5003dce2b5551fc879d056b"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/test/office-rain.test.ts",
+      "bytes": 10676,
+      "sha256": "baa97363b756246a9d334a50c4a1ea62987683efbadbe88730fee3f666de99d2"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/test/office-world.test.ts",
+      "bytes": 16143,
+      "sha256": "dcc6127d13263ff38008170430cdf4cf8cd3e0388fb172f69d2b20eb386bf57e"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/test/world-audio.test.ts",
+      "bytes": 10944,
+      "sha256": "5a21d2bb0a3c72c339898e9033c39ae5b6515973516418dad3fed6a1a6d2e076"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/tools/capture.ts",
+      "bytes": 34215,
+      "sha256": "8253a480720f00eaa82ebbecf590e454b4646336ef51590b816bf64c7d708978"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/tools/qa-office-audio.ts",
+      "bytes": 8486,
+      "sha256": "00539bb6353f23400ddf95b3330568f8a8af48a62890fab15adee8b6664be522"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/tools/qa-office-walking.ts",
+      "bytes": 18456,
+      "sha256": "05209b27741b6ed7f9a10dd4df3fa8d1ee5d7763794cf5fc2b86a692deedfd5e"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/game/tools/qa-office.ts",
+      "bytes": 8266,
+      "sha256": "a3b0d3f08e9ce501c6e5a0073a816a90bf34e59dfef27a659862687498d7731d"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/office/scripts/office-audio-guard.test.ts",
+      "bytes": 2106,
+      "sha256": "bed2cd3bd26ee66a4d700109982a55d2436a6e97c02e819754105c56592e5170"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/office/scripts/office-sound.test.ts",
+      "bytes": 5783,
+      "sha256": "ddcfa47abb0b87b22d6c23ca7a5b6ac2b6ab2118331e52fc3c163c674c188e17"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/office/ui/src/office/audio-guard.ts",
+      "bytes": 1616,
+      "sha256": "a65add69346507c9e335e4443b86a4ac80e517d05bd90bcec5a112dc97598c4a"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/office/ui/src/office/Office.tsx",
+      "bytes": 60218,
+      "sha256": "74d93ec5b7fc096221e7a2cf1980a1f60905478cd3232b66740bb5ab643ec09d"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/office/ui/src/office/sounds.ts",
+      "bytes": 5448,
+      "sha256": "0caa4922683d8382518663c42344573afb32d986dab5c9911a33214bceb8120e"
+    },
+    {
+      "path": "artifacts/office-audio/final-source/office/VERIFICATION.md",
+      "bytes": 139699,
+      "sha256": "4147a11e683d0c27b956802761fe07fcb1f581518090e7ede41b23ad052b9deb"
+    },
+    {
+      "path": "artifacts/office-audio/finish-speech-guards.ts",
+      "bytes": 774,
+      "sha256": "8d917c046456635e2010ee0381a1f34879eb2606ad9db25c750b119c5f88bead"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r1/fixture.html",
+      "bytes": 4505,
+      "sha256": "0551c8f88f9b7a41efcf935dbd5fdebce30f613181141fd1227f1ce6c265eab9"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r1/reference.entry.js",
+      "bytes": 515606,
+      "sha256": "4017dca8d268ffdd90b3e0c4c93711e5f3285d81822b0f9e9e14b8f59a557a9e"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r1/source-frame.json",
+      "bytes": 26583,
+      "sha256": "db2fa08d675d1aca19262b2d65a8553bd859fba128b29ca4bd33c74b6e8d7ff0"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r2/ambient.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r2/fixture.html",
+      "bytes": 4505,
+      "sha256": "0551c8f88f9b7a41efcf935dbd5fdebce30f613181141fd1227f1ce6c265eab9"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r2/progress.json",
+      "bytes": 20804,
+      "sha256": "822cabfed5f2289d3b25f559229d3abdcf310d2754f1fb04c740625b179f28ed"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r2/reference.entry.js",
+      "bytes": 515606,
+      "sha256": "4017dca8d268ffdd90b3e0c4c93711e5f3285d81822b0f9e9e14b8f59a557a9e"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r2/source-frame.json",
+      "bytes": 25603,
+      "sha256": "f7ae67405e9d5c3f511776321d8e749fb81911bc2d20defd3a6e10a0ce423d42"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r2/storm.f32le",
+      "bytes": 576000,
+      "sha256": "30fafbdc0facf210a26498db982f7ff8ad1e0b9a805816731c72e356a768c162"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r3/ambient.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r3/fixture.html",
+      "bytes": 4565,
+      "sha256": "b68394c92afd69c5bd69e1db43fb8c8441cada606743b81b5b8886cdd1114356"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r3/progress.json",
+      "bytes": 38767,
+      "sha256": "46dc87404a8ea4634abb77b4ab9ce7a5518a7b4f7d7fbcd824ca1d033296a8f4"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r3/reference.entry.js",
+      "bytes": 515606,
+      "sha256": "4017dca8d268ffdd90b3e0c4c93711e5f3285d81822b0f9e9e14b8f59a557a9e"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r3/source-frame.json",
+      "bytes": 28534,
+      "sha256": "050728af42195c4d910c2c9c20abdcac4184599f8ceeafc55078fa3ba1b02be2"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r3/storm.f32le",
+      "bytes": 576000,
+      "sha256": "96545e2107b002ac3972268e74e2e86a89776a9ff5b254db7b9175410589e6d2"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r3/vehicle.f32le",
+      "bytes": 576000,
+      "sha256": "a9011e0957c82b04548f8a0a9f5fb721eb97390524516d65e8bfcfc874048041"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/ambient-reference.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/ambient.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/fixture.html",
+      "bytes": 4953,
+      "sha256": "b04dfa6bc257940e6c6c1b0c7f14f6fde67e1845f4f9f6405e4b397010360568"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/progress.json",
+      "bytes": 50328,
+      "sha256": "842cdc3c7696ef5045bc646596c7cf2271bc79123a4bd26710da08dcf30d4228"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/reference.entry.js",
+      "bytes": 515899,
+      "sha256": "9f7a25a5a50e2c23296d63fe4a8477472f0231d908acc45eb7d78cd7e3cc73b7"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/source-frame.json",
+      "bytes": 33594,
+      "sha256": "f95f9b5e4e88f79e7da992adc742cfd364ba7925a5ee3dc8969ae3b1edbd8401"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/steps-reference.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/steps.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/storm-reference.f32le",
+      "bytes": 576000,
+      "sha256": "96545e2107b002ac3972268e74e2e86a89776a9ff5b254db7b9175410589e6d2"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/storm.f32le",
+      "bytes": 576000,
+      "sha256": "96545e2107b002ac3972268e74e2e86a89776a9ff5b254db7b9175410589e6d2"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/vehicle-reference.f32le",
+      "bytes": 576000,
+      "sha256": "f07e9dfeaeaa0cbea9951e522e7373d3cfad878377be3be85f2bba11b276942f"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r4/vehicle.f32le",
+      "bytes": 576000,
+      "sha256": "f07e9dfeaeaa0cbea9951e522e7373d3cfad878377be3be85f2bba11b276942f"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/ambient-reference.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/ambient.f32le",
+      "bytes": 576000,
+      "sha256": "673b18cf0fad68ed9111eeb8912e111e321c538c33858a7414da655f94533a00"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/fixture.html",
+      "bytes": 4953,
+      "sha256": "b04dfa6bc257940e6c6c1b0c7f14f6fde67e1845f4f9f6405e4b397010360568"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/progress.json",
+      "bytes": 50487,
+      "sha256": "3755bda8dbebb1e67e3f019eb1f5a92b570077bbe4e328fec21add354e2dd8ac"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/reference.entry.js",
+      "bytes": 516094,
+      "sha256": "0afbde390576265cd030b737d02fe911c98b36ee0c7bec88ad0cfd2bda9cc929"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/report.json",
+      "bytes": 54794,
+      "sha256": "382f1f896852ff014154bdd3f8a9b675472cceb0c9c49784412ae4eb33b9efe9"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/source-frame.json",
+      "bytes": 37022,
+      "sha256": "60760589411b414da94e88cec9195ea96daecb8b68658fae1bfce7497e862618"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/steps-reference.f32le",
+      "bytes": 576000,
+      "sha256": "7ec2f20b41a79f7f4886f70bb7434ed90402a59a95229a6af3ba95b651edb83a"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/steps.f32le",
+      "bytes": 576000,
+      "sha256": "7ec2f20b41a79f7f4886f70bb7434ed90402a59a95229a6af3ba95b651edb83a"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/storm-reference.f32le",
+      "bytes": 576000,
+      "sha256": "96545e2107b002ac3972268e74e2e86a89776a9ff5b254db7b9175410589e6d2"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/storm.f32le",
+      "bytes": 576000,
+      "sha256": "96545e2107b002ac3972268e74e2e86a89776a9ff5b254db7b9175410589e6d2"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/vehicle-reference.f32le",
+      "bytes": 576000,
+      "sha256": "f07e9dfeaeaa0cbea9951e522e7373d3cfad878377be3be85f2bba11b276942f"
+    },
+    {
+      "path": "artifacts/office-audio/game-audio/office-audio-probe-20261017-r5/vehicle.f32le",
+      "bytes": 576000,
+      "sha256": "927854cdf75f534dd1da5ef27bc2db71f90280b9e07ab9ef7f2403a53608c290"
+    },
+    {
+      "path": "artifacts/office-audio/layout-before.json",
+      "bytes": 7338,
+      "sha256": "73bb42033247a823f210ab2b57aad0e55b6df27068b9167f896c713288873bdb"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-build-20261017.log",
+      "bytes": 599,
+      "sha256": "6087af166535a0cd9b33cf27e8b54240503748787d1b28ea9196a94a4e8f36e7"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-build-r2-20261017.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-build-r3-20261017.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-core-tests-20261017.log",
+      "bytes": 2172,
+      "sha256": "ba3d3bfebc3657b4d00e30e75dff3b634f816134b3921f516c22c03e200f40f7"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-core-tests-r2-20261017.log",
+      "bytes": 2294,
+      "sha256": "4999c5c767d72572c9f71fa184851cfac1e100076371f99c0fa4b2544e71ee4c"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-tests-r1-20261017.log",
+      "bytes": 19293,
+      "sha256": "e7c411fe1a6c0ae06a43595a5e882378324bb0419aaf3ba5ee392430a82d1f5c"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-tests-r2-20261017.log",
+      "bytes": 16771,
+      "sha256": "9e01f84db468ad7651999608b3350e20d3579180277e832b058f5889a5d6722b"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-typecheck-r1-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-engine-typecheck-r2-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-office-sounds-test-20261017.log",
+      "bytes": 255,
+      "sha256": "6be6fdde654a1e898bafba8759f9aaebe398bfba1577313d532396e784cf8f8b"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-regression-20261017.log",
+      "bytes": 24925,
+      "sha256": "96f57fbf86488b797ea352487c4526ce9b4cd020010940eaa1521217b40d6661"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-regression-final-20261017.log",
+      "bytes": 25154,
+      "sha256": "90392a703e783156df56f15cf92727636df5c921c4a1bd6fd08cfbabcabf5b4c"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-sound-tests-final-20261017.log",
+      "bytes": 830,
+      "sha256": "2c1d884bbf405227ea43458306f15d8656b74bd2df5526e337ac464284c3b681"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-sound-tests-r2-20261017.log",
+      "bytes": 754,
+      "sha256": "e61be15f83892ccfbc115543dccea2059fe63c59547be1726856b217bb6266bc"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "05b0d229a9a8a4ced306561a87caf3496d6955e8eb7b86e98c00f697e8a1d96e"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-build-final-20261017.log",
+      "bytes": 875,
+      "sha256": "3ef5bdae6c905433bfe6fc0789776f8045ff1d861ed258c16a46708e20da5354"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-build-r2-20261017.log",
+      "bytes": 889,
+      "sha256": "5a0018863b3939318b6ccd291f87d51c2db0665e6f7192bf22467f68a3fc4a92"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-build-r3-20261017.log",
+      "bytes": 889,
+      "sha256": "07d68b271720b94defa0330ae92fecdab7739f4f645e285332f26fc02f8a6651"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-build-r4-20261017.log",
+      "bytes": 876,
+      "sha256": "eeab44955f8fe4a8b036fe08baee19191d221b7c48975b90c62a8293831150dc"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-typecheck-final-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-typecheck-r2-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-audio/logs/engine-office-audio-ui-typecheck-r3-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-focused-final-20261017.log",
+      "bytes": 2376,
+      "sha256": "bd163e3bb42fec1127c9ea34391fe303d342b6776cfd624b077fb5ef915a9504"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-focused-r1-20261017.log",
+      "bytes": 6544,
+      "sha256": "df2be4885026e82a2b4908905597f612eec1367f53fb5436ba44b4b504734562"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-focused-r2-20261017.log",
+      "bytes": 5195,
+      "sha256": "997481a2de975a41d84461bee5f91950d04ad4d9af6bf729767c209fc26c1061"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-focused-r3-20261017.log",
+      "bytes": 701,
+      "sha256": "008b03d518b2a993ab507672d602f3383dc103c34818c5b1f14de8a63e7f478e"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-build-20261017.log",
+      "bytes": 585,
+      "sha256": "a4cff925b0c2e2b194fecb5257c7254a220b37120393af0a2d27a8966cac6491"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-build-r2-20261017.log",
+      "bytes": 585,
+      "sha256": "80d64c7b3160be5067453c6344fece5743cb028033e13ac3084a16175e2a4e74"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-build-r3-20261017.log",
+      "bytes": 585,
+      "sha256": "c9d9d5350f34191e1deefb19cc3c1f227562fa4dc5179ce6c7e8fdf1c5fd0eea"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-build-r4-20261017.log",
+      "bytes": 585,
+      "sha256": "2e7d1db9aab8d34149cbe6f53e02f8d1fab354612a4438fe653b20f88410582f"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-typecheck-r1-20261017.log",
+      "bytes": 3054,
+      "sha256": "3416901ba1931a6b87a5e0d6829e9bfb298d48c7ecd0ee57d28f4d5937cf68cd"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-typecheck-r4-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-typecheck-r5-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-game-typecheck-r6-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-probe-20261017-r1.log",
+      "bytes": 3224,
+      "sha256": "4c17301283b124ad6e4b1fcb27249600268c01dfb023aa404ccfdb8532d6e0f3"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-probe-20261017-r2.log",
+      "bytes": 4101,
+      "sha256": "a208d592817822eb5d09d412c39899a2226ed33724c29bf2ddf33a2cc996ad66"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-probe-20261017-r3.log",
+      "bytes": 4118,
+      "sha256": "787854618a24c55873920eda9e2dd3dd21f08c6614dc05218acf460a97d79998"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-probe-20261017-r4.log",
+      "bytes": 5344,
+      "sha256": "3aeb8a437a615ba95056b25e5f79d5a455a37cdc1ccd86646761762d7c9d027b"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-probe-20261017-r5.log",
+      "bytes": 207,
+      "sha256": "7b7e69812155ad5e8fdd2b537db5078d05637bd6477f42fccb1a3bcb8ba40cba"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-source-r1-20261017.log",
+      "bytes": 32856,
+      "sha256": "7a9b44eaf44c3ed050aae121d05fe380984b11593f55f9ca04ec2da02f6694b3"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-source-r2-20261017.log",
+      "bytes": 4677,
+      "sha256": "19f48c3f1516dfb5ef9381a512066aed112e09fbf736d89900eb2f0e01084c41"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-walking-20261017-r1.log",
+      "bytes": 96,
+      "sha256": "24833b70b295c3c7e4279a06c093988830b56d924f57dc4b34c6adda9d3b34f2"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-walking-20261017-r2.log",
+      "bytes": 96,
+      "sha256": "24833b70b295c3c7e4279a06c093988830b56d924f57dc4b34c6adda9d3b34f2"
+    },
+    {
+      "path": "artifacts/office-audio/logs/game-office-audio-world-alone-20261017.log",
+      "bytes": 2156,
+      "sha256": "046d284a484214db6a6631cea4859be84d9a42a7244872321208c1755bf23f3f"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/audio-muted.png",
+      "bytes": 397884,
+      "sha256": "f64e84aeebbe0878dcd3ad0278f6d810920581768a39da144117d8a08c94904d"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/audio-restored.png",
+      "bytes": 401443,
+      "sha256": "d295683816300b4ee54ee2aa9458749219c7cd29fc0fa010830678de8703bae4"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/canonical-controller-source.json",
+      "bytes": 13525275,
+      "sha256": "df9b632c9128722ff964f6340bb40e775f8a916030333f5cee0fdccd519b6c29"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/canonical-residents-observed-source.json",
+      "bytes": 13532721,
+      "sha256": "2328999b009feaba70e7d2d1b92acdc108e9c3dfa9f729215da6c87e93eb6949"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/entered.png",
+      "bytes": 400936,
+      "sha256": "23181b5b64a580ca320bd3e70478d2855ff9c953a20fbf6790a7691850dfe55f"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/observer.png",
+      "bytes": 549911,
+      "sha256": "82c297dcecf4c855b0dadac83cf7bb808006910a505b157ef62af743e293a0fb"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/rain-render-frames.json",
+      "bytes": 1529981,
+      "sha256": "db847c955323376934ae47afabdf73195aa28166b5517878d609f043e32ad3f3"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/report.json",
+      "bytes": 432899,
+      "sha256": "d5bf9baf19a0b38a3206dfd4dd629cebc6241bce876fec9c52e2f6b40cc97cc9"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-before-movement.json",
+      "bytes": 4635,
+      "sha256": "1210bdc79ba6a330759fd7b1b4d2b40f171adee126cf94def0845bb3a65bcfd7"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-moved.png",
+      "bytes": 132339,
+      "sha256": "0fbeedb6a957df7befba13e6ab917196a192dcf9f55216d0878f5a687864d4f6"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-movement.json",
+      "bytes": 26298,
+      "sha256": "2b03d0f28b56cd7ca210a16583a89d003c1c99745dbba40114bda24ff7e5abe0"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-observed-scope.png",
+      "bytes": 119078,
+      "sha256": "097102d8778b563cb0b7eb681c9a0638b6eea8df124346d83abf538eb8cd17cc"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-observing.png",
+      "bytes": 117666,
+      "sha256": "be5edc0566939f953d09ddf5425b013f294c5af99f56117bbed6067c67565fbb"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-panel.png",
+      "bytes": 152552,
+      "sha256": "e358e2b9838dc41a2d731be2dca37a7233d3db4c98fe920eb3200b8147a4b814"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-possessed.png",
+      "bytes": 133340,
+      "sha256": "47c78c2dbe5cef1fdcaecee33c8c4302aab9a6194071c92fda0543dabca2ad45"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-report.json",
+      "bytes": 30032,
+      "sha256": "7c91451d85dd48f3192a3ff101b5871debb7e65c0e8fc9cb1a2555de63427b82"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-return-start.png",
+      "bytes": 357545,
+      "sha256": "972c21e21c93d1d1c154cf97b219965ce9a5ff1c2f20d5115b9cd3f457f9bfd2"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-returned.png",
+      "bytes": 390284,
+      "sha256": "9546b76059360cf29ee41c58535b3b4c701affdf184fa6331078cf56196c2dae"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-selection.json",
+      "bytes": 1832,
+      "sha256": "9108aef64d3ba30635e560d269f66a6087d718a57ef2a7efcc758776f093a3e1"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/residents-stopped.png",
+      "bytes": 144068,
+      "sha256": "f62e56fb6f5f9d046508fd1ede637bc83bdfef2212ab8462a2ad30909046e93e"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/returned-observer.png",
+      "bytes": 591965,
+      "sha256": "98f3c776a516ba10601bc7175a4f88563f2aa03f3e448d72448e19bab1fa09f7"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r1/walk-KeyW.png",
+      "bytes": 358191,
+      "sha256": "1790d0de67b8c3e3c6bc16d53379f1cfbdec3df1dfeabde20e70b80fef599c88"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/audio-muted.png",
+      "bytes": 439810,
+      "sha256": "897a0dcc68228e35167bd966c4d01e11899a16b0e54ac557f7f3996b0feb6594"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/audio-restored.png",
+      "bytes": 442929,
+      "sha256": "3cd20b442d0c9300e4381235b0127e45c261ff0a4276a0a9687ed67074e9689b"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/canonical-controller-source.json",
+      "bytes": 13526901,
+      "sha256": "ce3e32fe119ac3588a73dfa96bf781bd0ccea10c4115ffbee01f22e0d5928384"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/canonical-residents-observed-source.json",
+      "bytes": 13522305,
+      "sha256": "e459783c06b4d179e079dc6e5e4b1a1c60e5f0bdab177e983ecbfab6f1c2ece2"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/entered.png",
+      "bytes": 381704,
+      "sha256": "476563be30367b2b8ade0136c52f45ee17d69efb0ab3b8a0f4509c84b61d0b1e"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/observer.png",
+      "bytes": 602399,
+      "sha256": "dd24dea3096a9ae71e75ae02114d8f7af6568a1ff9cd2f5c5e25c75c4cf6f537"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/rain-render-frames.json",
+      "bytes": 1414613,
+      "sha256": "8ffe335a1179d6885106faed2340b19c8e1aabcf9b25c8c22851151529adf9f0"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/report.json",
+      "bytes": 416844,
+      "sha256": "6a4f73eaf03ed18a36d9461b39ac805ea4705fa238bb2ee62aa4107f9a02ef17"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-before-movement.json",
+      "bytes": 5152,
+      "sha256": "f793af40db94cb6b91544e9a84777e7d8eb208c8bdb510eb8a19a44268abfe87"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-moved.png",
+      "bytes": 222305,
+      "sha256": "04e910b00b8922f46ae0a94a4e09beb6bd23e8cb2c937e6ae7bccbe71b41840e"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-movement.json",
+      "bytes": 16411,
+      "sha256": "7bee007a3b34bbdcee2d62d91793173ca86b748bd9f8861c87bd79a0ac98b459"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-observed-scope.png",
+      "bytes": 279657,
+      "sha256": "a3ca0f94ba59e30160187306756034677322b7a92132068a63ae69e55109d6ea"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-observing.png",
+      "bytes": 263648,
+      "sha256": "ef63ffd1a4177d06071d383c1f46e4107daaf459df3486cdb823c360477a3ee6"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-panel.png",
+      "bytes": 168446,
+      "sha256": "4c673e64441bb764572c9c8ee933b13f17d71695f9273af8f0dfe8fa5bc76640"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-possessed.png",
+      "bytes": 273435,
+      "sha256": "1b2a957184486b47497900cb5f4071dda1a25bca27cb2d937a8390e8a37cb54b"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-report.json",
+      "bytes": 19267,
+      "sha256": "7218287cb988afb0e9b8092091f785db2d0cd510771779bcd669331ee3e1cfc3"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-return-start.png",
+      "bytes": 420857,
+      "sha256": "cec3fd96a1df2563b15552d927b25e0641b9b5eb8260621ae5814d6acebbabdb"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-returned.png",
+      "bytes": 426427,
+      "sha256": "37163a0097139e8f085986daa8a5ef89c9e38b4869dfcd08862f6806782e6183"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-selection.json",
+      "bytes": 1423,
+      "sha256": "9b01cfd02055f2e4ffb85d87fb68cb201b71c5ca91b064b468bea93a5b35379f"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/residents-stopped.png",
+      "bytes": 215070,
+      "sha256": "d7635fb89076d5547751da0633673d033f63e7090ec66d00172d293323e11797"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/returned-observer.png",
+      "bytes": 600681,
+      "sha256": "170bc9fa92f70f4e2f183fbffffcbd5cae2ba54481ff807dd09906a94754b17b"
+    },
+    {
+      "path": "artifacts/office-audio/native-walking/office-audio-walking-20261017-r2/walk-KeyW.png",
+      "bytes": 356823,
+      "sha256": "f7988d4d637c81e4c279d946869ad81e3fb7199772dd235224fecf9e556bf2e5"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r1/fixture.html",
+      "bytes": 4505,
+      "sha256": "0551c8f88f9b7a41efcf935dbd5fdebce30f613181141fd1227f1ce6c265eab9"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r1/reference.entry.js",
+      "bytes": 515606,
+      "sha256": "4017dca8d268ffdd90b3e0c4c93711e5f3285d81822b0f9e9e14b8f59a557a9e"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r1/reference.entry.ts",
+      "bytes": 370,
+      "sha256": "2296c50808d1952e5b67475d98405b6892785b8a39491174f8dbea8f1a76c01b"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r2/fixture.html",
+      "bytes": 4505,
+      "sha256": "0551c8f88f9b7a41efcf935dbd5fdebce30f613181141fd1227f1ce6c265eab9"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r2/reference.entry.js",
+      "bytes": 515606,
+      "sha256": "4017dca8d268ffdd90b3e0c4c93711e5f3285d81822b0f9e9e14b8f59a557a9e"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r2/reference.entry.ts",
+      "bytes": 370,
+      "sha256": "2296c50808d1952e5b67475d98405b6892785b8a39491174f8dbea8f1a76c01b"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r3/fixture.html",
+      "bytes": 4565,
+      "sha256": "b68394c92afd69c5bd69e1db43fb8c8441cada606743b81b5b8886cdd1114356"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r3/reference.entry.js",
+      "bytes": 515606,
+      "sha256": "4017dca8d268ffdd90b3e0c4c93711e5f3285d81822b0f9e9e14b8f59a557a9e"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r3/reference.entry.ts",
+      "bytes": 370,
+      "sha256": "2296c50808d1952e5b67475d98405b6892785b8a39491174f8dbea8f1a76c01b"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r4/fixture.html",
+      "bytes": 4953,
+      "sha256": "b04dfa6bc257940e6c6c1b0c7f14f6fde67e1845f4f9f6405e4b397010360568"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r4/reference.entry.js",
+      "bytes": 515899,
+      "sha256": "9f7a25a5a50e2c23296d63fe4a8477472f0231d908acc45eb7d78cd7e3cc73b7"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r4/reference.entry.ts",
+      "bytes": 370,
+      "sha256": "2296c50808d1952e5b67475d98405b6892785b8a39491174f8dbea8f1a76c01b"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r5/after-audit.json",
+      "bytes": 314,
+      "sha256": "6d1bb3a09e343eb3b23f3c81ebdf0603bf5308f6d6ebc751e2c324822b5417cb"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r5/before.json",
+      "bytes": 353,
+      "sha256": "e39b6c19719910c9d1c0ae6ba25278bdcded04cc9674b143cae60bf878bb6515"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r5/before.sqlite",
+      "bytes": 9322496,
+      "sha256": "cb7b427c91276dc60f6c37abfa1612257e2e05f5a9838f3dbf317005e764c472"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r5/fixture.html",
+      "bytes": 4953,
+      "sha256": "b04dfa6bc257940e6c6c1b0c7f14f6fde67e1845f4f9f6405e4b397010360568"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r5/reference.entry.js",
+      "bytes": 516094,
+      "sha256": "0afbde390576265cd030b737d02fe911c98b36ee0c7bec88ad0cfd2bda9cc929"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-probe-20261017-r5/reference.entry.ts",
+      "bytes": 370,
+      "sha256": "2296c50808d1952e5b67475d98405b6892785b8a39491174f8dbea8f1a76c01b"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r1/after-audit.json",
+      "bytes": 314,
+      "sha256": "5cf6971e7e6003caa6afa29c2c749e7c9dd6dd46c116a5ab614f159fbf0fd056"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r1/before.json",
+      "bytes": 353,
+      "sha256": "f519864e2d1f1ac4ca9d7b375513ce68a30da8c888fd93888a760ffe71ce91be"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r1/before.sqlite",
+      "bytes": 9338880,
+      "sha256": "632919733b8ff56f31ceb427d02fb03dd36eae68c2df94de98b710c8154aa1c1"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/after-audit.json",
+      "bytes": 314,
+      "sha256": "f7bc945396f584362b109645e41ea40412f41701c5306884e1385d35c2957775"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/before.json",
+      "bytes": 1881,
+      "sha256": "6cf767a53619fbf14f79d75ae7cf7bac1a9a1a0ca15d4ca9571cb7fe47a5b440"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/before.sqlite",
+      "bytes": 9383936,
+      "sha256": "de156706925dd28b6029bb906d30ba78a67a0a5d7bf16673652a3d9a8426e744"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/game.js",
+      "bytes": 2500129,
+      "sha256": "493f15f40ead0150a6b3cdd0ac89c64509cb49ce06634d75d691f6883fd5fecb"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/office-controller.js",
+      "bytes": 1550002,
+      "sha256": "4e452f3ab26da3164caf3abcbe5834616490fc5e5490b8e7cd50ab77ea0038b8"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/office-ui.js",
+      "bytes": 1801471,
+      "sha256": "858a111f576960822c316cc57dfb63652debdcc533db3e31f3c0b8b007fd055e"
+    },
+    {
+      "path": "artifacts/office-audio/office-audio-walking-20261017-r2/served-before/office.html",
+      "bytes": 422,
+      "sha256": "a23168dae824a483be928e445ef6e1f8cef1781cd8d9bd8daa83c9ee7bb6f858"
+    },
+    {
+      "path": "artifacts/office-audio/prepare-runtime.ts",
+      "bytes": 1208,
+      "sha256": "340b1663ff14bc5a04bc708a15fbbbb27ad5ca488588c68968e443ee8e82a4b6"
+    },
+    {
+      "path": "artifacts/office-audio/qa-before-offline-setup.ts",
+      "bytes": 7694,
+      "sha256": "8723dc6340e6ddd1ca32893ed307c0bbc3bb5ad3e733873d7b6df5ba7a8a59a9"
+    },
+    {
+      "path": "artifacts/office-audio/qa-before-pcm-window.ts",
+      "bytes": 7754,
+      "sha256": "e14c7951abc09d31ba1c9b3b4cebe8c3674cf82a3cebc30bf639017442bd3455"
+    },
+    {
+      "path": "artifacts/office-audio/restart-audit.json",
+      "bytes": 642,
+      "sha256": "984e3cbe9e838bcf668e56770d84e0e94f0d4c9afd0adadeb35158f1233ead5c"
+    },
+    {
+      "path": "artifacts/office-audio/restart-operation.json",
+      "bytes": 311,
+      "sha256": "fa3e77315799ddc3cd1f80ce55398773d015f959076ac5d618ca074f730aee91"
+    },
+    {
+      "path": "artifacts/office-audio/restart-ready.json",
+      "bytes": 11425,
+      "sha256": "e8a95fa9dfe1428d54fa5b8c21e3d9dc3a6b5455e526f2e710dfda97ba1b3754"
+    },
+    {
+      "path": "artifacts/office-audio/restart-ready.sqlite",
+      "bytes": 9150464,
+      "sha256": "9b6a162e074696fdb0a40cd53cfd240274cafea18b88f42ed9c98bf6d37317b1"
+    },
+    {
+      "path": "artifacts/office-audio/restart.log",
+      "bytes": 144,
+      "sha256": "2293dfc68ad15f20ab0e8045f9152e04d56ae556dc5b40becdaa664f95fd92d2"
+    },
+    {
+      "path": "artifacts/office-audio/restart.ps1",
+      "bytes": 2778,
+      "sha256": "446b0690c64ccdb1132b3320acb638e39148de9d76dff2f043c96c7feaefc83d"
+    },
+    {
+      "path": "artifacts/office-audio/reviewed.json",
+      "bytes": 998,
+      "sha256": "e9d6981a337ad1e905fba1234ca232d06c7c180170171762231850e670888ab6"
+    },
+    {
+      "path": "artifacts/office-audio/run-native.ps1",
+      "bytes": 1913,
+      "sha256": "bcbe65d488efcc885bc02919bf323a535ab48f336bfece576c05f46bb773fda0"
+    },
+    {
+      "path": "artifacts/office-audio/server-before.err.log",
+      "bytes": 3262,
+      "sha256": "babd1926e06accee17df39abc2d86e983e7368910c6e96abbb95f6360cfe4945"
+    },
+    {
+      "path": "artifacts/office-audio/server-before.log",
+      "bytes": 723,
+      "sha256": "8412d9d6dc936edab6873835f9ee135ba52181e55c431b2200f71f8b91e3582f"
+    },
+    {
+      "path": "artifacts/office-audio/shared-source.ts",
+      "bytes": 2619,
+      "sha256": "da0c63098b6a93ea87617c1b331f493729eab72a44673091c44e10666a374ae5"
+    },
+    {
+      "path": "artifacts/office-audio/subject-camera-before.ts",
+      "bytes": 1770,
+      "sha256": "9089ae50f74f866936ea2f30cd0402a4ac0b07974f3b3e2441c6dc8b105a7aae"
+    },
+    {
+      "path": "artifacts/office-audio/wire-ui.ts",
+      "bytes": 5101,
+      "sha256": "8345b5135d5ce393e8e055cb01494ac748a6c6269a4d3dfbc9e474b0ca574ea0"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/audit-restart.ts",
+      "bytes": 3059,
+      "sha256": "194e1d4c6b88bc62d47ff3022a46006c5dd333181aa5fbde2cbee2ebe58b278e"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/audit.log",
+      "bytes": 526,
+      "sha256": "378bf6611e93a1a69306d18895ee80d0a7c1e5fa09ebb87972f4686593fde208"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/backup-runtime.ts",
+      "bytes": 2479,
+      "sha256": "cb15deb37e4ea1341f38874c9e0dd51ee5d1bcfcf6711849bc677108f76ef1e9"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/backup.log",
+      "bytes": 185,
+      "sha256": "23e1ea63c5e69180a010fd9a2fc12fef6a15c7511f684790d57bee0d6dcf383c"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/restart-audit.json",
+      "bytes": 616,
+      "sha256": "5abca849844eae401165b4f88136bbce679ced779e68e721f425c528689d41a9"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/restart-operation.json",
+      "bytes": 285,
+      "sha256": "0811e35f35b4218a29eee590988e8bb7709117fac57f4e0606db1a4b88254b2b"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/restart-ready.json",
+      "bytes": 3472,
+      "sha256": "f09742bab1619a8e9f7e04d1cd804382b7a855f43e12dbb5413af033412f384e"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/restart-ready.sqlite",
+      "bytes": 9203712,
+      "sha256": "cf8477ec6488841933736ff4bfda97b83be24b39d8275682f3342671e9b5bc05"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/restart.log",
+      "bytes": 144,
+      "sha256": "2d41462ed08b4e2b84026ab2a6c46373be62e9ef757e3da406d4b843cf1abed2"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/restart.ps1",
+      "bytes": 2765,
+      "sha256": "155d79f96c76f57f702f3a17c4675693d2abcb5f61c2ed904f17d30f07aec40b"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/server-before.err.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-audio/worklet-cors/server-before.log",
+      "bytes": 723,
+      "sha256": "99d9c835fdfc6f30f24ee378fbe5164636d4cbb1687fe766305df2bdd6542411"
+    }
+  ],
+  "totals": {
+    "files": 279,
+    "bytes": 143367900,
+    "sourceFiles": 39,
+    "servedAssets": 5,
+    "reviewedImages": 5
+  }
+}

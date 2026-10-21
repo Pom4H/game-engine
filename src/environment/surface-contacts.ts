@@ -18,6 +18,8 @@ export interface WheelSurfaceContact {
  readonly id:string;
  /** Owning dynamic body when id names a logical wheel rather than a Scene entity. */
  readonly bodyId?:string;
+ /** Owning chassis supplied by scenario-authored assembly contacts. */
+ readonly sourceBodyId?:string;
  /** Position of the bottom of the tyre, in world metres. */
  readonly position:Vec3;
  readonly velocity:Vec3;
@@ -133,6 +135,7 @@ export class SurfaceContactSystem {
  step(dt:number,at:number,feet:readonly FootContact[]=[],wheelContacts:readonly WheelSurfaceContact[]=[]):void{
   if(!Number.isFinite(dt)||dt<=0||dt>.25||!Number.isFinite(at)||at<this.time)throw new RangeError('Invalid surface contact time');
   const contacts=[...this.boundWheels(),...wheelContacts],ids=new Set<string>();
+  for(const wheel of contacts){if(wheel.sourceBodyId!==undefined&&(typeof wheel.sourceBodyId!=='string'||!this.host.entities.get(wheel.sourceBodyId)?.body))throw new TypeError('Invalid assembly wheel contact');}
   for(const wheel of contacts){if(!wheel.id||wheel.bodyId!==undefined&&!wheel.bodyId||ids.has(wheel.id)||!finiteVec(wheel.position)||!finiteVec(wheel.velocity)||typeof wheel.grounded!=='boolean'||wheel.radius!==undefined&&(!Number.isFinite(wheel.radius)||wheel.radius<=0)||wheel.angularSpeed!==undefined&&(!Number.isFinite(wheel.angularSpeed)||wheel.angularSpeed<0)||wheel.normalLoadN!==undefined&&(!Number.isFinite(wheel.normalLoadN)||wheel.normalLoadN<0)||wheel.lateral&&!finiteVec(wheel.lateral))throw new TypeError('Invalid wheel surface contact');ids.add(wheel.id);}
   // SnowFootprints validates the entire foot batch before touching persistent state.
   const created=this.footprints.update(at,feet,p=>{const s=this.sample(p);return s?{height:s.height,snowDepth:s.snowDepth}:undefined;});
@@ -169,7 +172,7 @@ export class SurfaceContactSystem {
    live.add(wheel.id);
    const speed=Math.hypot(wheel.velocity[0],wheel.velocity[2]),surface=wheel.grounded&&Math.abs(wheel.velocity[1])<.25?this.sample(wheel.position):undefined;
    if(surface){
-    const sourceId=wheel.bodyId??wheel.id,source=this.host.entities.get(sourceId),body=source?.body,surfaceEntity=this.host.entities.get(surface.surfaceId),radius=wheel.radius??(source?.mesh?.kind==='sphere'?(source.mesh.radius??1)*source.scale[1]:.3);
+    const sourceId=wheel.bodyId??wheel.sourceBodyId??wheel.id,source=this.host.entities.get(sourceId),body=source?.body,surfaceEntity=this.host.entities.get(surface.surfaceId),radius=wheel.radius??(source?.mesh?.kind==='sphere'?(source.mesh.radius??1)*source.scale[1]:.3);
     if(body&&surfaceEntity?.body){
      const rollingSpeed=(wheel.angularSpeed??Math.hypot(...body.angularVelocity))*radius,lateral=wheel.lateral,lateralSpeed=lateral?Math.abs(wheel.velocity[0]*lateral[0]+wheel.velocity[2]*lateral[2]):0;
      const slipSpeed=Math.hypot(Math.abs(speed-rollingSpeed),lateralSpeed),friction=Math.sqrt(Math.max(0,body.friction*surfaceEntity.body.friction));

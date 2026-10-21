@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>TAA coordinate regression</title></head>
+<body><h1>TAA coordinate regression</h1><button id="run">Run WebGPU checks</button><pre id="result">Ready</pre>
+<script type="module">
+import {TAA_SHADER} from '/dist/render/lighting.js';
+import {verifyTemporalResolve} from './taa-resolve-check.mjs';
+import {verifyTemporalFinite} from './taa-finite-check.mjs';
+const button=document.querySelector('#run'),result=document.querySelector('#result');
+button.onclick=async()=>{button.disabled=true;let device;
+ try{result.textContent='Running';const adapter=await navigator.gpu?.requestAdapter();if(!adapter)throw Error('WebGPU unavailable');device=await adapter.requestDevice();result.textContent=JSON.stringify({coordinates:await verifyTemporalResolve(device,TAA_SHADER),finiteInputs:await verifyTemporalFinite(device,TAA_SHADER)},null,2);}
+ catch(error){result.textContent=JSON.stringify({status:'failed',error:String(error.message??error)},null,2);}
+ finally{device?.destroy();button.disabled=false;}
+};
+</script></body></html>

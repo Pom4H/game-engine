@@ -1,0 +1,961 @@
+{
+  "date": "2026-10-16T10:04:15.764Z",
+  "scope": "Apply verified Engine physics to the persisted canonical Game, reduce repeated render preparation, and verify the actual Game and installed Office entry against the same world.",
+  "restart": {
+    "date": "2026-10-16T09:46:41.875Z",
+    "beforePid": 3040,
+    "afterPid": 8820,
+    "stop": {
+      "oldPid": 3040,
+      "signal": "ctrl-c-sent",
+      "forcedFallback": false,
+      "stopped": true,
+      "date": "2026-10-16T09:45:13.6185499Z"
+    },
+    "rowsBefore": 1756,
+    "rowsAfter": 1778,
+    "missingRows": 0,
+    "accountCompanyHarnessLoginRowsUnchanged": 131,
+    "officeBindingExceptProcessEpochExact": true,
+    "oldEpoch": 2958020360,
+    "newEpoch": 1835750694,
+    "officeInstallationExact": true,
+    "officeObjects": 45,
+    "editorRevision": 53,
+    "servedBundleSha256": "8d6edb1377a692f39a447a58c622a2e8264863c7719cfb3b4bcb5c0ab8e033ec",
+    "health": {
+      "ok": true,
+      "seed": 29,
+      "revision": 13,
+      "players": 0,
+      "capacity": {
+        "cpuBudget": 2,
+        "maxPlayers": 16,
+        "workers": 1,
+        "physicsSubsteps": 2,
+        "snapshotHz": 20,
+        "populationHz": 30,
+        "vehicleInterestPeriod": 2,
+        "streamingPeriod": 3,
+        "worldInterestPeriod": 3,
+        "residentLimit": 48
+      },
+      "tick": 4784,
+      "simulationTime": 29.16666666666565,
+      "engine": {
+        "committed": 18,
+        "cancelled": 2,
+        "failed": 0,
+        "deferred": 0,
+        "simulatedResidents": 41,
+        "cohorts": 41,
+        "unmetFoodDemand": 1,
+        "catalogOverflow": 0,
+        "migratedHomes": 0,
+        "locations": 11,
+        "pending": 0,
+        "trackedResidents": 852,
+        "reservedTreasury": 0,
+        "tiers": {
+          "detailed": 15,
+          "active": 20,
+          "aggregate": 12,
+          "dormant": 0
+        },
+        "production": {
+          "factories": 0,
+          "orders": 0,
+          "units": 0,
+          "nextDueMinute": null
+        },
+        "workers": {
+          "submitted": 20,
+          "completed": 20,
+          "cancelled": 0,
+          "failed": 0,
+          "rejected": 0,
+          "maxInFlight": 1,
+          "maxQueue": 1,
+          "workers": 1,
+          "inFlight": 0,
+          "queued": 0,
+          "pending": 0,
+          "closed": false
+        },
+        "vehicles": {
+          "sleeps": 45,
+          "wakes": 8,
+          "pinned": 9,
+          "total": 47,
+          "active": 9,
+          "hibernating": 38,
+          "tracked": 47
+        }
+      },
+      "residents": {
+        "active": 47,
+        "limit": 48,
+        "minute": 251917.9333177626,
+        "navigation": {
+          "expanded": 2861,
+          "completed": 7,
+          "failed": 87,
+          "maxWork": 18,
+          "dynamicRoutes": 3,
+          "pending": 0,
+          "cachedCells": 4209
+        }
+      },
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 3500,
+        "vehicleStepHz": 120,
+        "bodies": 47,
+        "sleeping": 33,
+        "awake": 4,
+        "maxSpeed": 4.2158242999818265,
+        "substeps": 4120,
+        "bodySubsteps": 35527,
+        "islands": 7,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 0
+      },
+      "timing": {
+        "steps": 4784,
+        "lastStepMs": 4.310299999997369,
+        "maxStepMs": 334.48489999999947,
+        "meanStepMs": 0.024129166666655995,
+        "p95StepMs": 0.04619999999704305,
+        "droppedMs": 699.1179000000016
+      },
+      "network": {
+        "receivedPackets": 0,
+        "receivedBytes": 0,
+        "submittedPackets": 0,
+        "submittedBytes": 0,
+        "sendErrors": 0,
+        "closedSessions": 0,
+        "transports": {
+          "webtransport": 0
+        },
+        "queuedBytes": 0,
+        "replaced": 0,
+        "expired": 0,
+        "scope": "application framing; send attempts, not delivered QUIC/UDP bytes"
+      },
+      "webTransport": 3009
+    },
+    "note": "Bun received a console Ctrl-C in a console verified to contain only the server and signalling helper. Shutdown exited without forced fallback. A read-only SQLite serialize backup passed integrity_check. All 131 account/company/harness/login rows and every original record key survived. The process epoch changed as intended; Office binding otherwise and installation matched exactly. New population records can appear during normal startup."
+  },
+  "changes": {
+    "gameProjection": "Compare owned numeric material ID, normalized parameter, tint components and the existing wet/night bands instead of allocating and joining a material identity string for every instance on every frame. Original selection/invalidation rules are preserved.",
+    "engineLabels": "Reuse the exact precomputed JSON key for an empty label with the default color. Nonempty text, custom color values, mutating colors and texture ownership keep their existing path.",
+    "diagnostics": "The stall recorder retains every frame interval but limits full inspections to one per second. The CPU profile is diagnostic. A new Node SourceMap summary maps sampled frames to actual source positions; inclusive costs overlap."
+  },
+  "oracle": {
+    "date": "2026-10-16T10:02:36.749Z",
+    "states": 80,
+    "entityStates": 6479,
+    "exact": true,
+    "scope": "Frozen original projection vs current numeric material identity; exact entity IDs, poses, mesh attributes, material values and visibility across tint/seed/material/weather/night changes, counts, custom meshes and origin rebases.",
+    "baselineSha256": "a53bc476340e4149f4a4a335157edfc46d7ec1211c030d5dbdf447e2f724f688",
+    "benchmark": {
+      "scope": "Warmed Bun CPU projection updates only; no GPU, frame loop or FPS claim. Same 1536 source instances, 90 updates per run, interleaved order.",
+      "instances": 1536,
+      "frames": 90,
+      "beforeMs": [
+        176.90110000000004,
+        171.3999,
+        189.40190000000007,
+        198.18340000000012,
+        230.46759999999995
+      ],
+      "afterMs": [
+        86.71460000000002,
+        77.31020000000001,
+        77.25499999999988,
+        98.64870000000019,
+        81.0625
+      ],
+      "beforeMeanMs": 193.27078000000003,
+      "afterMeanMs": 84.19820000000001
+    }
+  },
+  "cpuDiagnosis": {
+    "durationMs": 42335.112,
+    "samples": 27858,
+    "sourceMapForCapturedBundle": "thegame/artifacts/game-before-instance-keys.js.map",
+    "self": [
+      {
+        "name": "prepareCameraBatches",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 41922,
+        "column": 22,
+        "source": {
+          "generatedLine": 41922,
+          "generatedColumn": 22,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1688,
+          "originalColumn": 30
+        },
+        "selfMs": 2997.8979999999906,
+        "inclusiveMs": 4465.822999999999
+      },
+      {
+        "name": "update",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 42880,
+        "column": 8,
+        "source": {
+          "generatedLine": 42880,
+          "generatedColumn": 8,
+          "originalSource": "../../src/game/render/the-engine-projection.ts",
+          "originalLine": 95,
+          "originalColumn": 7
+        },
+        "selfMs": 2853.936999999999,
+        "inclusiveMs": 6466.629000000014
+      },
+      {
+        "name": "(program)",
+        "url": "",
+        "line": -1,
+        "column": -1,
+        "selfMs": 2024.7649999999992,
+        "inclusiveMs": 2024.7649999999992
+      },
+      {
+        "name": "(garbage collector)",
+        "url": "",
+        "line": -1,
+        "column": -1,
+        "selfMs": 1485.7190000000016,
+        "inclusiveMs": 1485.7190000000016
+      },
+      {
+        "name": "buildProjection",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 37781,
+        "column": 17,
+        "source": {
+          "generatedLine": 37781,
+          "generatedColumn": 17,
+          "originalSource": "../../../game-engine/src/render/frame.ts",
+          "originalLine": 86,
+          "originalColumn": 25
+        },
+        "selfMs": 1389.9189999999996,
+        "inclusiveMs": 1985.6110000000017
+      },
+      {
+        "name": "collect",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 42120,
+        "column": 9,
+        "source": {
+          "generatedLine": 42120,
+          "generatedColumn": 9,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1783,
+          "originalColumn": 17
+        },
+        "selfMs": 1129.7320000000002,
+        "inclusiveMs": 2420.9640000000013
+      },
+      {
+        "name": "writeTexture",
+        "url": "",
+        "line": -1,
+        "column": -1,
+        "selfMs": 1043.824,
+        "inclusiveMs": 1043.824
+      },
+      {
+        "name": "labelKey",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 39676,
+        "column": 15,
+        "source": {
+          "generatedLine": 39676,
+          "generatedColumn": 15,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 38,
+          "originalColumn": 15
+        },
+        "selfMs": 848.608,
+        "inclusiveMs": 848.608
+      },
+      {
+        "name": "finite",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 36245,
+        "column": 19,
+        "source": {
+          "generatedLine": 36245,
+          "generatedColumn": 19,
+          "originalSource": "../../../game-engine/src/scene/scene.ts",
+          "originalLine": 330,
+          "originalColumn": 17
+        },
+        "selfMs": 767.851999999999,
+        "inclusiveMs": 767.851999999999
+      },
+      {
+        "name": "gameInstancePose",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 42715,
+        "column": 25,
+        "source": {
+          "generatedLine": 42715,
+          "generatedColumn": 25,
+          "originalSource": "../../src/game/render/the-engine-geometry.ts",
+          "originalLine": 101,
+          "originalColumn": 32
+        },
+        "selfMs": 761.7549999999997,
+        "inclusiveMs": 761.7549999999997
+      },
+      {
+        "name": "prepare",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 37974,
+        "column": 9,
+        "source": {
+          "generatedLine": 37974,
+          "generatedColumn": 9,
+          "originalSource": "../../../game-engine/src/render/visibility-plan.ts",
+          "originalLine": 82,
+          "originalColumn": 9
+        },
+        "selfMs": 756.17,
+        "inclusiveMs": 1050.5989999999993
+      },
+      {
+        "name": "setVisualTransform",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 36241,
+        "column": 20,
+        "source": {
+          "generatedLine": 36241,
+          "generatedColumn": 20,
+          "originalSource": "../../../game-engine/src/scene/scene.ts",
+          "originalLine": 327,
+          "originalColumn": 20
+        },
+        "selfMs": 741.4109999999997,
+        "inclusiveMs": 1509.2629999999988
+      },
+      {
+        "name": "percentile2",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 38789,
+        "column": 18,
+        "source": {
+          "generatedLine": 38789,
+          "generatedColumn": 18,
+          "originalSource": "../../../game-engine/src/render/profiler.ts",
+          "originalLine": 51,
+          "originalColumn": 17
+        },
+        "selfMs": 723.1040000000008,
+        "inclusiveMs": 1157.4129999999993
+      },
+      {
+        "name": "mesh",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 42100,
+        "column": 6,
+        "source": {
+          "generatedLine": 42100,
+          "generatedColumn": 6,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1781,
+          "originalColumn": 14
+        },
+        "selfMs": 622.4289999999994,
+        "inclusiveMs": 855.2519999999988
+      },
+      {
+        "name": "setBindGroup",
+        "url": "",
+        "line": -1,
+        "column": -1,
+        "selfMs": 585.4890000000001,
+        "inclusiveMs": 585.4890000000001
+      }
+    ],
+    "inclusive": [
+      {
+        "name": "(root)",
+        "url": "",
+        "line": -1,
+        "column": -1,
+        "selfMs": 0,
+        "inclusiveMs": 42333.21199999959
+      },
+      {
+        "name": "frame",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 47631,
+        "column": 16,
+        "source": {
+          "generatedLine": 47631,
+          "generatedColumn": 16,
+          "originalSource": "../../src/game/client.ts",
+          "originalLine": 300,
+          "originalColumn": 15
+        },
+        "selfMs": 66.18,
+        "inclusiveMs": 35801.68599999986
+      },
+      {
+        "name": "drawStage",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 47568,
+        "column": 20,
+        "source": {
+          "generatedLine": 47568,
+          "generatedColumn": 20,
+          "originalSource": "../../src/game/client.ts",
+          "originalLine": 259,
+          "originalColumn": 19
+        },
+        "selfMs": 86.78100000000003,
+        "inclusiveMs": 32396.433999999965
+      },
+      {
+        "name": "render",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 43971,
+        "column": 8,
+        "source": {
+          "generatedLine": 43971,
+          "generatedColumn": 8,
+          "originalSource": "../../src/game/render/renderer.ts",
+          "originalLine": 144,
+          "originalColumn": 7
+        },
+        "selfMs": 33.917,
+        "inclusiveMs": 26227.776999999925
+      },
+      {
+        "name": "render",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 43119,
+        "column": 8,
+        "source": {
+          "generatedLine": 43119,
+          "generatedColumn": 8,
+          "originalSource": "../../src/game/render/the-engine-renderer.ts",
+          "originalLine": 39,
+          "originalColumn": 7
+        },
+        "selfMs": 418.733,
+        "inclusiveMs": 25559.636999999926
+      },
+      {
+        "name": "render",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 40923,
+        "column": 8,
+        "source": {
+          "generatedLine": 40923,
+          "generatedColumn": 8,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1128,
+          "originalColumn": 8
+        },
+        "selfMs": 264.5559999999999,
+        "inclusiveMs": 18310.063000000064
+      },
+      {
+        "name": "measure",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 38873,
+        "column": 9,
+        "source": {
+          "generatedLine": 38873,
+          "generatedColumn": 9,
+          "originalSource": "../../../game-engine/src/render/profiler.ts",
+          "originalLine": 94,
+          "originalColumn": 12
+        },
+        "selfMs": 117.69500000000002,
+        "inclusiveMs": 17191.673000000075
+      },
+      {
+        "name": "update",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 42880,
+        "column": 8,
+        "source": {
+          "generatedLine": 42880,
+          "generatedColumn": 8,
+          "originalSource": "../../src/game/render/the-engine-projection.ts",
+          "originalLine": 95,
+          "originalColumn": 7
+        },
+        "selfMs": 2853.936999999999,
+        "inclusiveMs": 6466.629000000014
+      },
+      {
+        "name": "(anonymous)",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 41036,
+        "column": 59,
+        "source": {
+          "generatedLine": 41036,
+          "generatedColumn": 59,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1202,
+          "originalColumn": 56
+        },
+        "selfMs": 554.4830000000002,
+        "inclusiveMs": 5023.677000000005
+      },
+      {
+        "name": "prepareCameraBatches",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 41922,
+        "column": 22,
+        "source": {
+          "generatedLine": 41922,
+          "generatedColumn": 22,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1688,
+          "originalColumn": 30
+        },
+        "selfMs": 2997.8979999999906,
+        "inclusiveMs": 4465.822999999999
+      },
+      {
+        "name": "dynamicScene",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 24862,
+        "column": 21,
+        "source": {
+          "generatedLine": 24862,
+          "generatedColumn": 21,
+          "originalSource": "../../src/game/presentation.ts",
+          "originalLine": 227,
+          "originalColumn": 28
+        },
+        "selfMs": 108.37199999999999,
+        "inclusiveMs": 3390.4119999999953
+      },
+      {
+        "name": "(anonymous)",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 41039,
+        "column": 49,
+        "source": {
+          "generatedLine": 41039,
+          "generatedColumn": 49,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1205,
+          "originalColumn": 46
+        },
+        "selfMs": 61.777000000000015,
+        "inclusiveMs": 2630.9590000000017
+      },
+      {
+        "name": "(anonymous)",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 40936,
+        "column": 64,
+        "source": {
+          "generatedLine": 40936,
+          "generatedColumn": 64,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1142,
+          "originalColumn": 61
+        },
+        "selfMs": 147.591,
+        "inclusiveMs": 2568.5550000000017
+      },
+      {
+        "name": "collect",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 42120,
+        "column": 9,
+        "source": {
+          "generatedLine": 42120,
+          "generatedColumn": 9,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1783,
+          "originalColumn": 17
+        },
+        "selfMs": 1129.7320000000002,
+        "inclusiveMs": 2420.9640000000013
+      },
+      {
+        "name": "(anonymous)",
+        "url": "http://127.0.0.1:3187/build/game.js?v=1grj4-mvasd5c0",
+        "line": 40925,
+        "column": 59,
+        "source": {
+          "generatedLine": 40925,
+          "generatedColumn": 59,
+          "originalSource": "../../../game-engine/src/render/webgpu.ts",
+          "originalLine": 1130,
+          "originalColumn": 56
+        },
+        "selfMs": 3.192,
+        "inclusiveMs": 2324.3800000000006
+      }
+    ],
+    "route": {
+      "start": {
+        "x": -345,
+        "z": -66,
+        "chunks": 2
+      },
+      "final": {
+        "x": -439.63743274675625,
+        "z": -32.282448291680005,
+        "chunks": 36
+      },
+      "crossedBoundary": true,
+      "intervals": {
+        "count": 2188,
+        "averageFPS": 54.24730622953873,
+        "p50": 18.599999999998545,
+        "p95": 37.400000000001455,
+        "max": 114
+      },
+      "longTasks": 19,
+      "maxLongTaskMs": 105
+    },
+    "scope": "Before the material/key change, main-thread profile during a real networked walk across x=-384; no authority teleport. Profiling and periodic inspection add overhead. Its 54.25 diagnostic FPS is not an unprofiled score or a before/after speedup."
+  },
+  "nativeCanonicalGame": {
+    "entry": "http://127.0.0.1:3007/",
+    "pid": 8820,
+    "frames": 900,
+    "averageFPS": 40.717901851759684,
+    "measuredSeconds": 22.103300000000004,
+    "p50IntervalMs": 19.80000000000291,
+    "p95IntervalMs": 39.099999999998545,
+    "warmupFrames": 180,
+    "profiled": false,
+    "browser": {
+      "mode": "native-gpu",
+      "batterySaverRequested": "default",
+      "backend": "webgpu",
+      "width": 1280,
+      "height": 720,
+      "renderResolution": [
+        704,
+        396
+      ]
+    },
+    "settings": {
+      "environmentMode": "world",
+      "preset": "clear",
+      "hiz": false,
+      "taa": true,
+      "bloom": false,
+      "groundLitter": true,
+      "motionBlur": 0,
+      "dof": 0,
+      "renderScale": 0.55,
+      "drawDistance": 420,
+      "visual": {
+        "sunElevation": 0.9075712110370514,
+        "sunTemperature": 5700,
+        "skyTurbidity": 2.2,
+        "humidity": 0.42,
+        "cloudCoverage": 0.16,
+        "fogDensity": 0.00065,
+        "wetness": 0,
+        "exposureBias": -0.25,
+        "artificialLightIntensity": 0.02,
+        "sunIntensity": 4.2,
+        "skyIntensity": 0.7
+      }
+    },
+    "network": "online",
+    "errors": [],
+    "sceneSha256": "5e5b065816d95af73fedf40c12e855960986b61462c76cd7a384259faaa8e0e1",
+    "staged": {
+      "frames": 60,
+      "summary": {
+        "dynamicMs": {
+          "p50": 0.800000011920929,
+          "p95": 1.2000000178813934
+        },
+        "renderMs": {
+          "p50": 4.199999988079071,
+          "p95": 5.600000023841858
+        },
+        "totalMs": {
+          "p50": 5.299999982118607,
+          "p95": 6.9000000059604645
+        },
+        "intervalMs": {
+          "p50": 9.399999999997817,
+          "p95": 10
+        }
+      }
+    },
+    "limits": "Current persisted canonical world, not the earlier isolated save. The earlier 43.93 FPS is a different run/world, not a paired comparison. No native speedup, sustained 60 FPS, whole-route minimum or 1080p claim."
+  },
+  "nativeOffice": {
+    "game": {
+      "entry": "http://127.0.0.1:3007/?agent=1&debug=1",
+      "geometryRevision": 1,
+      "editorRevision": 53,
+      "building": "36117",
+      "floors": [
+        {
+          "id": "floor-1",
+          "index": 2
+        },
+        {
+          "id": "floor-6f9957e6d4",
+          "index": 3
+        }
+      ],
+      "parts": 231,
+      "errors": []
+    },
+    "office": {
+      "entry": "http://127.0.0.1:8765/",
+      "browser": "native-gpu",
+      "editorRevision": 53,
+      "objects": 45,
+      "backend": "webgpu",
+      "resolution": [
+        1280,
+        720
+      ],
+      "errors": [],
+      "connected": true,
+      "geometryRevision": 1,
+      "projection": {
+        "source": "thegame",
+        "chunks": 9,
+        "actors": 12,
+        "traffic": 3,
+        "facade": 53,
+        "core": 12,
+        "cityVisible": true,
+        "presentedTime": 133.03333333337667,
+        "lightingUpdates": 1
+      },
+      "gamePlayers": 0,
+      "physicsSteps": 0
+    },
+    "reviewedImages": [
+      {
+        "file": "thegame/artifacts/office-in-game/workplaces.png",
+        "sha256": "18f4d37d382a35edd62180812d82f972904e62b562596d51f9fa764f6f506623"
+      },
+      {
+        "file": "thegame/artifacts/office-in-game/entrance.png",
+        "sha256": "60ae65c1088c7537900ea93356a633e3ef478bc68e474fbf553ca59996308cfd"
+      },
+      {
+        "file": "thegame/artifacts/office-in-game/canonical-lobby.png",
+        "sha256": "6790670e5382bc5c2cf183f46d24ae2f92267899d53838674d54aeebd56155b8"
+      },
+      {
+        "file": "thegame/artifacts/office-in-game/upper-office.png",
+        "sha256": "3aae48dddf3f435f155b721dc6f5932170e1fd9a9d98ee13b9cf0e26f66f7ba2"
+      },
+      {
+        "file": "thegame/artifacts/office-in-game/office-entry.png",
+        "sha256": "98e090eb8d608b70ae6b4de8f967fb33b2c92a4a68e565550b002f27cf2bc116"
+      }
+    ],
+    "scope": "Four Game presentation cameras and the actual installed Office UI native WebGPU entry were inspected. The read-only Office entry receives canonical actors, facade, core, lift and geometry without creating a Game player or running a second physics simulation. This is not Office GUI FPS, walking/harness action or physical microphone acceptance. Before-change images/reports preserved in thegame/artifacts/office-before-instance-keys.",
+    "browserDiagnostics": "Autoplay and Windows powerPreference warnings, existing atomFamily deprecation, and a resource 404 were logged. Only zero Engine GPU errors are claimed; the 404 URL was not captured by this harness."
+  },
+  "validation": {
+    "engine": {
+      "typecheck": true,
+      "build": true,
+      "tests": 65,
+      "log": "game-engine/artifacts/stream-keys-engine-tests.log",
+      "command": "node --test test/label-color.test.mjs test/render-preparation-cache.test.mjs test/render-visibility-plan.test.mjs test/render-surface-presence.test.mjs test/render-model-history.test.mjs test/render-radiance-projection.test.mjs test/render-pipeline-plan.test.mjs test/render-output-contract.test.mjs test/render-cpu-phases.test.mjs test/gpu-visibility.test.mjs"
+    },
+    "game": {
+      "typecheck": true,
+      "build": true,
+      "tests": 69,
+      "assertions": 20358,
+      "log": "thegame/artifacts/stream-keys-game-tests.log"
+    },
+    "officeProjection": {
+      "typecheck": true,
+      "tests": 11,
+      "assertions": 4137,
+      "log": "game-engine/artifacts/stream-keys-office-tests.log"
+    },
+    "installedOfficeUI": {
+      "typecheck": true,
+      "viteBuild": true,
+      "log": "game-engine/artifacts/stream-keys-office-ui-build.log",
+      "existingWarning": "chunk larger than 1500 kB"
+    },
+    "failure": "The first Game typecheck rejected a static import of the ignored frozen oracle bundle. The QA tool now dynamically imports its exact file URL without adding product declaration stubs; final Game typecheck passed."
+  },
+  "commands": {
+    "capture": "CAPTURE_GPU=1 CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3298 PERF_FIXED_SETTINGS=1 PERF_STAGE_WARMUP_FRAMES=120 PERF_WARMUP_FRAMES=180 PERF_LIVE_FRAMES=900 PERF_LABEL=canonical-instance-keys bun tools/capture.ts --perf --live --office",
+    "diagnosis": "CAPTURE_GPU=1 CAPTURE_PORT=3187 CAPTURE_DEBUG_PORT=3188 THEGAME_CPU_BUDGET=2 ACTIVE_RESIDENT_LIMIT=48 PERF_FIXED_SETTINGS=1 STALL_STREAMING=1 STALL_SECONDS=40 PERF_LABEL=streaming-current bun tools/capture.ts --stalls",
+    "oracle": "bun tools/qa-instance-key-oracle.ts --bench",
+    "profileSummary": "node tools/summarize-cpu-profile.mjs artifacts/stalls-streaming-current.cpuprofile public/build/game.js.map artifacts/streaming-current-profile-summary.json"
+  },
+  "finalRuntime": {
+    "pid": 8820,
+    "health": {
+      "ok": true,
+      "seed": 29,
+      "revision": 13,
+      "players": 0,
+      "capacity": {
+        "cpuBudget": 2,
+        "maxPlayers": 16,
+        "workers": 1,
+        "physicsSubsteps": 2,
+        "snapshotHz": 20,
+        "populationHz": 30,
+        "vehicleInterestPeriod": 2,
+        "streamingPeriod": 3,
+        "worldInterestPeriod": 3,
+        "residentLimit": 48
+      },
+      "tick": 67712,
+      "simulationTime": 148.53333333336258,
+      "engine": {
+        "committed": 84,
+        "cancelled": 3,
+        "failed": 0,
+        "deferred": 0,
+        "simulatedResidents": 170,
+        "cohorts": 170,
+        "unmetFoodDemand": 3,
+        "catalogOverflow": 0,
+        "migratedHomes": 0,
+        "locations": 11,
+        "pending": 0,
+        "trackedResidents": 870,
+        "reservedTreasury": 0,
+        "tiers": {
+          "detailed": 12,
+          "active": 22,
+          "aggregate": 14,
+          "dormant": 0
+        },
+        "production": {
+          "factories": 0,
+          "orders": 0,
+          "units": 0,
+          "nextDueMinute": null
+        },
+        "workers": {
+          "submitted": 87,
+          "completed": 86,
+          "cancelled": 1,
+          "failed": 0,
+          "rejected": 0,
+          "maxInFlight": 1,
+          "maxQueue": 1,
+          "workers": 1,
+          "inFlight": 0,
+          "queued": 0,
+          "pending": 0,
+          "closed": false
+        },
+        "vehicles": {
+          "sleeps": 150,
+          "wakes": 110,
+          "pinned": 8,
+          "total": 49,
+          "active": 8,
+          "hibernating": 41,
+          "tracked": 49
+        }
+      },
+      "residents": {
+        "active": 48,
+        "limit": 48,
+        "minute": 252156.66665104034,
+        "navigation": {
+          "expanded": 12382,
+          "completed": 44,
+          "failed": 272,
+          "maxWork": 24,
+          "dynamicRoutes": 25,
+          "pending": 0,
+          "cachedCells": 12961
+        }
+      },
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 17824,
+        "vehicleStepHz": 120,
+        "bodies": 56,
+        "sleeping": 44,
+        "awake": 0,
+        "maxSpeed": 0,
+        "substeps": 20794,
+        "bodySubsteps": 154622,
+        "islands": 5,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 3
+      },
+      "timing": {
+        "steps": 67712,
+        "lastStepMs": 0.02850000001490116,
+        "maxStepMs": 380.8743999999715,
+        "meanStepMs": 0.02348916666038955,
+        "p95StepMs": 0.04249999998137355,
+        "droppedMs": 5102.31089999991
+      },
+      "network": {
+        "receivedPackets": 1166,
+        "receivedBytes": 330394,
+        "submittedPackets": 13937,
+        "submittedBytes": 13157410,
+        "sendErrors": 2,
+        "closedSessions": 2,
+        "transports": {
+          "webtransport": 0
+        },
+        "queuedBytes": 0,
+        "replaced": 0,
+        "expired": 0,
+        "scope": "application framing; send attempts, not delivered QUIC/UDP bytes"
+      },
+      "webTransport": 3009
+    },
+    "servedBundleSha256": "22ef64a480c69a7b32832f94206071739e14e22d4584af67e9938d947d93332e",
+    "nativeOfficeServicesRestarted": false
+  },
+  "hashes": {
+    "src/render/webgpu.ts": "9f0fa3ced9f4fd16003439140ec5cf84fcd48d595af08d561e25c2a377ccbf29",
+    "src/core/spatial-hash.ts": "80736eba14ea5a2e9f06daf102037ef191322ac775bce31c4d778edb12ded2e1",
+    "src/physics/compound.ts": "25ee902142be8142d3510bf0cbbc27459a2d68c7a1ff5c89a1bc8705287865d3",
+    "../thegame/src/game/render/the-engine-projection.ts": "b71b1919f7200390ca4401eb7e9a76786ddb66667579f265f84c599700b101a1",
+    "../thegame/tools/qa-instance-key-oracle.ts": "3ffa5521d763cf8e6bc87cf35a50ecd6e6c0221dae29342ed24b0532c67255f7",
+    "../thegame/tools/qa-frame-stalls.ts": "0882363478a3f1239964b54f359228dea454a460f7165348abf900c9a1a8932f",
+    "../thegame/tools/summarize-cpu-profile.mjs": "5b4b0af4a285f749b94c01d06ebddc8c5c794015568f8d475ed3e514c339d3e8",
+    "../thegame/public/build/game.js": "22ef64a480c69a7b32832f94206071739e14e22d4584af67e9938d947d93332e",
+    "../thegame/artifacts/game-before-instance-keys.js": "8d6edb1377a692f39a447a58c622a2e8264863c7719cfb3b4bcb5c0ab8e033ec",
+    "../thegame/artifacts/game-before-instance-keys.js.map": "da0c200ce1abc56285cfa123e4b70b02068cdb108c4db706871685e445f020bc"
+  },
+  "remaining": [
+    "Whole-scene original material/lighting/sky/fog parity and continuous facade night/probe rain fidelity",
+    "Sustained world/streaming performance, including camera-batch and projection/model CPU work",
+    "Actual Office GUI FPS, fresh interactive Office walking/harness regression and physical microphone verification",
+    "Identify the resource 404 without treating it as a GPU error"
+  ],
+  "goal": "active"
+}

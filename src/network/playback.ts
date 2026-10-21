@@ -14,6 +14,7 @@ export class PlaybackClock{
  }
  sample(now:number):number{
   if(!Number.isFinite(now))throw new TypeError('Invalid presentation timestamp');if(this.received===null)return 0;
+  if(this.sampled!==null&&now<=this.sampled)return this.value!;
   const target=Math.max(0,Math.min(this.latest,this.latest-this.delaySeconds+Math.max(0,now-this.received)*this.rate)),previous=this.value;
   if(previous===null)this.value=target;
   else{const dt=Math.max(0,now-(this.sampled??now)),correction=Math.max(.25,Math.min(1.25,1+(target-previous)*6));this.value=dt>1?Math.max(previous,target):Math.max(previous,Math.min(this.latest,previous+dt*this.rate*correction));if(this.value<=previous+1e-10&&dt>0)this.heldFrames++;}

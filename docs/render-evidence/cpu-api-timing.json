@@ -1,0 +1,1393 @@
+{
+  "status": "native-cpu-api-timing-observation",
+  "reports": {
+    "off": "artifacts/engine-compare/surface-presence-cpu-api-off/report.json",
+    "on": "artifacts/engine-compare/surface-presence-cpu-api-on/report.json"
+  },
+  "sourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "057bfee76859632c9ce6c6fae404c50a0865c711fad633a1e24c90649482b475"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "scope": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "scenario": "static",
+    "repetitionsPerCondition": 3,
+    "backends": [
+      "engine",
+      "three",
+      "babylon"
+    ],
+    "freshDevices": 18,
+    "measuredFrames": 4320,
+    "productionSourceUnchanged": true,
+    "productionShadersUnmodified": true
+  },
+  "gates": {
+    "archivesVerified": true,
+    "physicalReplay": true,
+    "sourceGeometryEnvironmentAgreement": true,
+    "timestampCoverage": true,
+    "cpuApiAccounting": true,
+    "canonicalPixelsExact": true,
+    "equalPixelQualityEstablished": false,
+    "competitiveAdvantageEstablished": false,
+    "observerOverheadIsolated": false
+  },
+  "rows": [
+    {
+      "backend": "engine",
+      "framesPerCondition": 720,
+      "off": {
+        "cpuMs": {
+          "samples": 720,
+          "p50": 5.400000035762787,
+          "p95": 7.699999988079071,
+          "mean": 5.661250000033114
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 9.87668,
+          "p95": 10.77436,
+          "mean": 10.067359972222214
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20,
+          "mean": 12.378521617852163
+        },
+        "gpuPasses": [
+          {
+            "name": "render:render.main.opaque",
+            "samples": 720,
+            "meanMs": 5.000372569444445,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 4.8884,
+                "p95": 5.01888,
+                "mean": 4.903927499999998
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 4.9298,
+                "p95": 5.52892,
+                "mean": 5.055642166666669
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 4.90288,
+                "p95": 5.04128,
+                "mean": 5.041548041666668
+              }
+            ]
+          },
+          {
+            "name": "render:render.effects",
+            "samples": 720,
+            "meanMs": 2.816387555555557,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 2.7378,
+                "p95": 2.89952,
+                "mean": 2.761659166666667
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 2.77972,
+                "p95": 3.20468,
+                "mean": 2.8579920000000008
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 2.74892,
+                "p95": 2.92988,
+                "mean": 2.8295115000000037
+              }
+            ]
+          },
+          {
+            "name": "render:render.taa",
+            "samples": 720,
+            "meanMs": 0.621577611111111,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.60892,
+                "p95": 0.64592,
+                "mean": 0.6148443333333337
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.62332,
+                "p95": 0.67892,
+                "mean": 0.629909833333333
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.61336,
+                "p95": 0.65092,
+                "mean": 0.6199786666666665
+              }
+            ]
+          },
+          {
+            "name": "render:render.main.transparent",
+            "samples": 720,
+            "meanMs": 0.3447981666666667,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.3418,
+                "p95": 0.35532,
+                "mean": 0.3424181666666665
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.3458,
+                "p95": 0.37488,
+                "mean": 0.3492233333333333
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.3422,
+                "p95": 0.35948,
+                "mean": 0.3427530000000002
+              }
+            ]
+          },
+          {
+            "name": "render:render.present",
+            "samples": 720,
+            "meanMs": 0.3234862777777778,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.31524,
+                "p95": 0.33996,
+                "mean": 0.3199560000000002
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.32332,
+                "p95": 0.36116,
+                "mean": 0.3281861666666666
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.31728,
+                "p95": 0.34124,
+                "mean": 0.32231666666666664
+              }
+            ]
+          },
+          {
+            "name": "render:render.bloom.vertical",
+            "samples": 720,
+            "meanMs": 0.26264733333333334,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.25628,
+                "p95": 0.27012,
+                "mean": 0.25782750000000004
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.26008,
+                "p95": 0.29996,
+                "mean": 0.26735000000000003
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.25612,
+                "p95": 0.27152,
+                "mean": 0.2627645
+              }
+            ]
+          },
+          {
+            "name": "render:render.bloom.horizontal",
+            "samples": 720,
+            "meanMs": 0.2532842222222221,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.24732,
+                "p95": 0.25616,
+                "mean": 0.24792383333333315
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.2504,
+                "p95": 0.28548,
+                "mean": 0.25708999999999993
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.24872,
+                "p95": 0.25944,
+                "mean": 0.25483883333333324
+              }
+            ]
+          },
+          {
+            "name": "render:render.bloom.downsample",
+            "samples": 720,
+            "meanMs": 0.2095769027777778,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.206,
+                "p95": 0.21724,
+                "mean": 0.20652783333333333
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.20856,
+                "p95": 0.23396,
+                "mean": 0.2115640000000001
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.20644,
+                "p95": 0.22336,
+                "mean": 0.21063887499999995
+              }
+            ]
+          },
+          {
+            "name": "render:render.reflection",
+            "samples": 720,
+            "meanMs": 0.20442777777777785,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.20192,
+                "p95": 0.21208,
+                "mean": 0.20388499999999993
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.20496,
+                "p95": 0.22496,
+                "mean": 0.20665883333333337
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.20164,
+                "p95": 0.21208,
+                "mean": 0.20273950000000016
+              }
+            ]
+          },
+          {
+            "name": "compute:render.visibility",
+            "samples": 720,
+            "meanMs": 0.030301555555555554,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.02992,
+                "p95": 0.0314,
+                "mean": 0.030032999999999983
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.03036,
+                "p95": 0.03468,
+                "mean": 0.030898666666666665
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.0296,
+                "p95": 0.03192,
+                "mean": 0.029973000000000014
+              }
+            ]
+          },
+          {
+            "name": "render:render.shadow.dynamic",
+            "samples": 720,
+            "meanMs": 0.0005000000000000001,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.00036,
+                "p95": 0.00052,
+                "mean": 0.000359833333333333
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.00028,
+                "p95": 0.0024,
+                "mean": 0.000589333333333334
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.00036,
+                "p95": 0.00232,
+                "mean": 0.0005508333333333334
+              }
+            ]
+          }
+        ]
+      },
+      "on": {
+        "cpuMs": {
+          "samples": 720,
+          "p50": 7.599999964237213,
+          "p95": 10.900000035762787,
+          "mean": 7.781388888259729
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 10.077200000000001,
+          "p95": 10.617320000000001,
+          "mean": 10.130749611111105
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20,
+          "mean": 11.978661087866115
+        },
+        "cpuApiMs": {
+          "samples": 720,
+          "p50": 0.30000007152557373,
+          "p95": 0.6000000238418579,
+          "mean": 0.35222221968902484
+        },
+        "cpuRemainingMs": {
+          "samples": 720,
+          "p50": 7.200000107288361,
+          "p95": 10.600000023841858,
+          "mean": 7.429166668570704
+        },
+        "apiShareOfMeanCpu": 0.04526469821093824,
+        "methods": [
+          {
+            "method": "beginRenderPass",
+            "callsPerFrame": 10,
+            "exclusiveMeanMs": 0.07402777837382422,
+            "inclusiveMeanMs": 0.07402777837382422
+          },
+          {
+            "method": "writeBuffer",
+            "callsPerFrame": 15,
+            "exclusiveMeanMs": 0.06694444318612416,
+            "inclusiveMeanMs": 0.06694444318612416
+          },
+          {
+            "method": "createView",
+            "callsPerFrame": 18,
+            "exclusiveMeanMs": 0.0336111097700066,
+            "inclusiveMeanMs": 0.0336111097700066
+          },
+          {
+            "method": "setBindGroup",
+            "callsPerFrame": 44,
+            "exclusiveMeanMs": 0.03208333369758394,
+            "inclusiveMeanMs": 0.03208333369758394
+          },
+          {
+            "method": "submit",
+            "callsPerFrame": 1,
+            "exclusiveMeanMs": 0.029861110945542654,
+            "inclusiveMeanMs": 0.029861110945542654
+          },
+          {
+            "method": "createCommandEncoder",
+            "callsPerFrame": 1,
+            "exclusiveMeanMs": 0.02166666719648573,
+            "inclusiveMeanMs": 0.02166666719648573
+          },
+          {
+            "method": "setVertexBuffer",
+            "callsPerFrame": 48,
+            "exclusiveMeanMs": 0.0205555549926228,
+            "inclusiveMeanMs": 0.0205555549926228
+          },
+          {
+            "method": "setPipeline",
+            "callsPerFrame": 23,
+            "exclusiveMeanMs": 0.018055555472771326,
+            "inclusiveMeanMs": 0.018055555472771326
+          },
+          {
+            "method": "setIndexBuffer",
+            "callsPerFrame": 28,
+            "exclusiveMeanMs": 0.014722221593062083,
+            "inclusiveMeanMs": 0.014722221593062083
+          },
+          {
+            "method": "beginComputePass",
+            "callsPerFrame": 1,
+            "exclusiveMeanMs": 0.012222222321563296,
+            "inclusiveMeanMs": 0.012222222321563296
+          },
+          {
+            "method": "drawIndexed",
+            "callsPerFrame": 26,
+            "exclusiveMeanMs": 0.011249999867545234,
+            "inclusiveMeanMs": 0.011249999867545234
+          },
+          {
+            "method": "finish",
+            "callsPerFrame": 1,
+            "exclusiveMeanMs": 0.005416666633552975,
+            "inclusiveMeanMs": 0.005416666633552975
+          },
+          {
+            "method": "end",
+            "callsPerFrame": 11,
+            "exclusiveMeanMs": 0.004722222768598133,
+            "inclusiveMeanMs": 0.004722222768598133
+          },
+          {
+            "method": "draw",
+            "callsPerFrame": 8,
+            "exclusiveMeanMs": 0.0044444440967506835,
+            "inclusiveMeanMs": 0.0044444440967506835
+          },
+          {
+            "method": "dispatchWorkgroups",
+            "callsPerFrame": 2,
+            "exclusiveMeanMs": 0.0015277778108914693,
+            "inclusiveMeanMs": 0.0015277778108914693
+          },
+          {
+            "method": "drawIndexedIndirect",
+            "callsPerFrame": 2,
+            "exclusiveMeanMs": 0.0011111109620994992,
+            "inclusiveMeanMs": 0.0011111109620994992
+          }
+        ],
+        "cpuP95Frame": {
+          "repetition": 1,
+          "index": 164,
+          "cpuMs": 10.900000035762787,
+          "apiMs": 0.3999999761581421,
+          "remainingMs": 10.500000059604645,
+          "methods": {
+            "writeBuffer": {
+              "calls": 15,
+              "exclusiveMs": 0.19999998807907104,
+              "inclusiveMs": 0.19999998807907104,
+              "maxInclusiveMs": 0.10000002384185791
+            },
+            "createCommandEncoder": {
+              "calls": 1,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "beginComputePass": {
+              "calls": 1,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setPipeline": {
+              "calls": 23,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setBindGroup": {
+              "calls": 44,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "dispatchWorkgroups": {
+              "calls": 2,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "end": {
+              "calls": 11,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "createView": {
+              "calls": 18,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "beginRenderPass": {
+              "calls": 10,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setVertexBuffer": {
+              "calls": 48,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setIndexBuffer": {
+              "calls": 28,
+              "exclusiveMs": 0.09999996423721313,
+              "inclusiveMs": 0.09999996423721313,
+              "maxInclusiveMs": 0.09999996423721313
+            },
+            "drawIndexed": {
+              "calls": 26,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "drawIndexedIndirect": {
+              "calls": 2,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "draw": {
+              "calls": 8,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "finish": {
+              "calls": 1,
+              "exclusiveMs": 0.10000002384185791,
+              "inclusiveMs": 0.10000002384185791,
+              "maxInclusiveMs": 0.10000002384185791
+            },
+            "submit": {
+              "calls": 1,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            }
+          }
+        }
+      },
+      "interpretation": "Off/on captures are sequential blocks with rotated backend order and fresh devices. Their difference includes run variation and is not an isolated observer-overhead or production optimization result."
+    },
+    {
+      "backend": "three",
+      "framesPerCondition": 720,
+      "off": {
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.300000011920929,
+          "mean": 0.795555555406544
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.65808,
+          "p95": 5.84968,
+          "mean": 5.669765555555557
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.86066945606696
+        },
+        "gpuPasses": [
+          {
+            "name": "render:",
+            "samples": 2160,
+            "meanMs": 1.8899218518518524,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 720,
+                "p50": 0.69644,
+                "p95": 4.59744,
+                "mean": 1.8862501666666671
+              },
+              {
+                "repetition": 1,
+                "samples": 720,
+                "p50": 0.74228,
+                "p95": 4.64068,
+                "mean": 1.9091307222222218
+              },
+              {
+                "repetition": 2,
+                "samples": 720,
+                "p50": 0.69676,
+                "p95": 4.57616,
+                "mean": 1.8743846666666677
+              }
+            ]
+          }
+        ]
+      },
+      "on": {
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.800000011920929,
+          "p95": 1.399999976158142,
+          "mean": 0.898750000860956
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.62464,
+          "p95": 5.826479999999999,
+          "mean": 5.617523722222217
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 9.900000000000546,
+          "p95": 10.100000000000364,
+          "mean": 9.79693165969318
+        },
+        "cpuApiMs": {
+          "samples": 720,
+          "p50": 0.19999998807907104,
+          "p95": 0.49999988079071045,
+          "mean": 0.20819444283843042
+        },
+        "cpuRemainingMs": {
+          "samples": 720,
+          "p50": 0.6999999284744263,
+          "p95": 1.100000023841858,
+          "mean": 0.6905555580225256
+        },
+        "apiShareOfMeanCpu": 0.23164889306146416,
+        "methods": [
+          {
+            "method": "submit",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.057361109968688755,
+            "inclusiveMeanMs": 0.057361109968688755
+          },
+          {
+            "method": "beginRenderPass",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.04375,
+            "inclusiveMeanMs": 0.04375
+          },
+          {
+            "method": "createCommandEncoder",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.02319444434510337,
+            "inclusiveMeanMs": 0.02319444434510337
+          },
+          {
+            "method": "setVertexBuffer",
+            "callsPerFrame": 23,
+            "exclusiveMeanMs": 0.016111111061440572,
+            "inclusiveMeanMs": 0.016111111061440572
+          },
+          {
+            "method": "setBindGroup",
+            "callsPerFrame": 14,
+            "exclusiveMeanMs": 0.015694444792138204,
+            "inclusiveMeanMs": 0.015694444792138204
+          },
+          {
+            "method": "setPipeline",
+            "callsPerFrame": 8,
+            "exclusiveMeanMs": 0.012361110829644733,
+            "inclusiveMeanMs": 0.012361110829644733
+          },
+          {
+            "method": "writeBuffer",
+            "callsPerFrame": 2,
+            "exclusiveMeanMs": 0.011666666716337204,
+            "inclusiveMeanMs": 0.011666666716337204
+          },
+          {
+            "method": "finish",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.009166666368643443,
+            "inclusiveMeanMs": 0.009166666368643443
+          },
+          {
+            "method": "setIndexBuffer",
+            "callsPerFrame": 7,
+            "exclusiveMeanMs": 0.007777777396970325,
+            "inclusiveMeanMs": 0.007777777396970325
+          },
+          {
+            "method": "drawIndexed",
+            "callsPerFrame": 7,
+            "exclusiveMeanMs": 0.006388889335923725,
+            "inclusiveMeanMs": 0.006388889335923725
+          },
+          {
+            "method": "end",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.0019444444941149818,
+            "inclusiveMeanMs": 0.0019444444941149818
+          },
+          {
+            "method": "setViewport",
+            "callsPerFrame": 1,
+            "exclusiveMeanMs": 0.0018055554065439436,
+            "inclusiveMeanMs": 0.0018055554065439436
+          },
+          {
+            "method": "draw",
+            "callsPerFrame": 1,
+            "exclusiveMeanMs": 0.0009722221228811475,
+            "inclusiveMeanMs": 0.0009722221228811475
+          }
+        ],
+        "cpuP95Frame": {
+          "repetition": 0,
+          "index": 168,
+          "cpuMs": 1.399999976158142,
+          "apiMs": 0.09999996423721313,
+          "remainingMs": 1.300000011920929,
+          "methods": {
+            "createCommandEncoder": {
+              "calls": 3,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "beginRenderPass": {
+              "calls": 3,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setPipeline": {
+              "calls": 8,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setBindGroup": {
+              "calls": 14,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setIndexBuffer": {
+              "calls": 7,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setVertexBuffer": {
+              "calls": 23,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "drawIndexed": {
+              "calls": 7,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setViewport": {
+              "calls": 1,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "writeBuffer": {
+              "calls": 2,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "end": {
+              "calls": 3,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "finish": {
+              "calls": 3,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "submit": {
+              "calls": 3,
+              "exclusiveMs": 0.09999996423721313,
+              "inclusiveMs": 0.09999996423721313,
+              "maxInclusiveMs": 0.09999996423721313
+            },
+            "draw": {
+              "calls": 1,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            }
+          }
+        }
+      },
+      "interpretation": "Off/on captures are sequential blocks with rotated backend order and fresh devices. Their difference includes run variation and is not an isolated observer-overhead or production optimization result."
+    },
+    {
+      "backend": "babylon",
+      "framesPerCondition": 720,
+      "off": {
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.199999988079071,
+          "mean": 0.7708333343267441
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.6471599999999995,
+          "p95": 5.67276,
+          "mean": 5.650581555555557
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.850069735006972
+        },
+        "gpuPasses": [
+          {
+            "name": "render:MainRenderPass",
+            "samples": 1440,
+            "meanMs": 2.5015781388888887,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 480,
+                "p50": 0.00004,
+                "p95": 5.01688,
+                "mean": 2.504907416666666
+              },
+              {
+                "repetition": 1,
+                "samples": 480,
+                "p50": 0.00004,
+                "p95": 5.0138,
+                "mean": 2.5035282500000013
+              },
+              {
+                "repetition": 2,
+                "samples": 480,
+                "p50": 0.00004,
+                "p95": 4.99804,
+                "mean": 2.4962987499999993
+              }
+            ]
+          },
+          {
+            "name": "render:sun_shadowMap - RenderPass",
+            "samples": 720,
+            "meanMs": 0.6474252777777778,
+            "perRepetition": [
+              {
+                "repetition": 0,
+                "samples": 240,
+                "p50": 0.64536,
+                "p95": 0.66124,
+                "mean": 0.6481453333333334
+              },
+              {
+                "repetition": 1,
+                "samples": 240,
+                "p50": 0.64488,
+                "p95": 0.66272,
+                "mean": 0.652788166666667
+              },
+              {
+                "repetition": 2,
+                "samples": 240,
+                "p50": 0.64008,
+                "p95": 0.65232,
+                "mean": 0.6413423333333331
+              }
+            ]
+          }
+        ]
+      },
+      "on": {
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.9000000357627869,
+          "p95": 1.4000000357627869,
+          "mean": 1.0019444458186626
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.67028,
+          "p95": 5.711720000000001,
+          "mean": 5.661296833333344
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 9.900000000001455,
+          "p95": 10.100000000000364,
+          "mean": 9.830962343096234
+        },
+        "cpuApiMs": {
+          "samples": 720,
+          "p50": 0.19999992847442627,
+          "p95": 0.3999999761581421,
+          "mean": 0.1712500018378099
+        },
+        "cpuRemainingMs": {
+          "samples": 720,
+          "p50": 0.800000011920929,
+          "p95": 1.2000000476837158,
+          "mean": 0.8306944439808528
+        },
+        "apiShareOfMeanCpu": 0.17091766170517167,
+        "methods": [
+          {
+            "method": "beginRenderPass",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.0530555569463306,
+            "inclusiveMeanMs": 0.0530555569463306
+          },
+          {
+            "method": "submit",
+            "callsPerFrame": 1,
+            "exclusiveMeanMs": 0.031111112154192395,
+            "inclusiveMeanMs": 0.031111112154192395
+          },
+          {
+            "method": "writeBuffer",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.01652777741352717,
+            "inclusiveMeanMs": 0.01652777741352717
+          },
+          {
+            "method": "createCommandEncoder",
+            "callsPerFrame": 2,
+            "exclusiveMeanMs": 0.013055556101931466,
+            "inclusiveMeanMs": 0.013055556101931466
+          },
+          {
+            "method": "setVertexBuffer",
+            "callsPerFrame": 20,
+            "exclusiveMeanMs": 0.012499999586078855,
+            "inclusiveMeanMs": 0.012499999586078855
+          },
+          {
+            "method": "setBindGroup",
+            "callsPerFrame": 14,
+            "exclusiveMeanMs": 0.01222222281826867,
+            "inclusiveMeanMs": 0.01222222281826867
+          },
+          {
+            "method": "setIndexBuffer",
+            "callsPerFrame": 7,
+            "exclusiveMeanMs": 0.010277777744664086,
+            "inclusiveMeanMs": 0.010277777744664086
+          },
+          {
+            "method": "finish",
+            "callsPerFrame": 2,
+            "exclusiveMeanMs": 0.007500000049670537,
+            "inclusiveMeanMs": 0.007500000049670537
+          },
+          {
+            "method": "drawIndexed",
+            "callsPerFrame": 7,
+            "exclusiveMeanMs": 0.004999999701976776,
+            "inclusiveMeanMs": 0.004999999701976776
+          },
+          {
+            "method": "setPipeline",
+            "callsPerFrame": 7,
+            "exclusiveMeanMs": 0.004305555091963874,
+            "inclusiveMeanMs": 0.004305555091963874
+          },
+          {
+            "method": "setViewport",
+            "callsPerFrame": 2,
+            "exclusiveMeanMs": 0.0029166665342119005,
+            "inclusiveMeanMs": 0.0029166665342119005
+          },
+          {
+            "method": "end",
+            "callsPerFrame": 3,
+            "exclusiveMeanMs": 0.0027777776949935488,
+            "inclusiveMeanMs": 0.0027777776949935488
+          }
+        ],
+        "cpuP95Frame": {
+          "repetition": 2,
+          "index": 191,
+          "cpuMs": 1.4000000357627869,
+          "apiMs": 0.09999996423721313,
+          "remainingMs": 1.3000000715255737,
+          "methods": {
+            "beginRenderPass": {
+              "calls": 3,
+              "exclusiveMs": 0.09999996423721313,
+              "inclusiveMs": 0.09999996423721313,
+              "maxInclusiveMs": 0.09999996423721313
+            },
+            "writeBuffer": {
+              "calls": 3,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "end": {
+              "calls": 3,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setViewport": {
+              "calls": 2,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setPipeline": {
+              "calls": 7,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setIndexBuffer": {
+              "calls": 7,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setVertexBuffer": {
+              "calls": 20,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "setBindGroup": {
+              "calls": 14,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "drawIndexed": {
+              "calls": 7,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "finish": {
+              "calls": 2,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "submit": {
+              "calls": 1,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            },
+            "createCommandEncoder": {
+              "calls": 2,
+              "exclusiveMs": 0,
+              "inclusiveMs": 0,
+              "maxInclusiveMs": 0
+            }
+          }
+        }
+      },
+      "interpretation": "Off/on captures are sequential blocks with rotated backend order and fresh devices. Their difference includes run variation and is not an isolated observer-overhead or production optimization result."
+    }
+  ],
+  "pixels": [
+    {
+      "backend": "engine",
+      "mode": "off",
+      "repetition": 0,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-engine-r0.png",
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "engine",
+      "mode": "off",
+      "repetition": 1,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-engine-r1.png",
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "engine",
+      "mode": "off",
+      "repetition": 2,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-engine-r2.png",
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "engine",
+      "mode": "on",
+      "repetition": 0,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-engine-r0.png",
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "engine",
+      "mode": "on",
+      "repetition": 1,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-engine-r1.png",
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "engine",
+      "mode": "on",
+      "repetition": 2,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-engine-r2.png",
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "three",
+      "mode": "off",
+      "repetition": 0,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-three-r0.png",
+      "pngSha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "three",
+      "mode": "off",
+      "repetition": 1,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-three-r1.png",
+      "pngSha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "three",
+      "mode": "off",
+      "repetition": 2,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-three-r2.png",
+      "pngSha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "three",
+      "mode": "on",
+      "repetition": 0,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-three-r0.png",
+      "pngSha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "three",
+      "mode": "on",
+      "repetition": 1,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-three-r1.png",
+      "pngSha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "three",
+      "mode": "on",
+      "repetition": 2,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-three-r2.png",
+      "pngSha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "babylon",
+      "mode": "off",
+      "repetition": 0,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-babylon-r0.png",
+      "pngSha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "babylon",
+      "mode": "off",
+      "repetition": 1,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-babylon-r1.png",
+      "pngSha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "babylon",
+      "mode": "off",
+      "repetition": 2,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-babylon-r2.png",
+      "pngSha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "babylon",
+      "mode": "on",
+      "repetition": 0,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-babylon-r0.png",
+      "pngSha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "babylon",
+      "mode": "on",
+      "repetition": 1,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-babylon-r1.png",
+      "pngSha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    },
+    {
+      "backend": "babylon",
+      "mode": "on",
+      "repetition": 2,
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-on/images/2026-10-12T05-28-44.928Z/10000-static-babylon-r2.png",
+      "pngSha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "coordinates": []
+    }
+  ],
+  "visualInspection": [
+    {
+      "backend": "engine",
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-engine-r0.png",
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "observation": "Personally inspected the original 1920x1080 canonical capture: smoother cube edges and softer distant detail, lighter atmospheric haze, lower contrast and visible bloom around bright surfaces.",
+      "competitiveQualityAdvantageEstablished": false,
+      "scope": "Static canonical image inspection only; no motion-quality assessment."
+    },
+    {
+      "backend": "three",
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-three-r0.png",
+      "pngSha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "observation": "Personally inspected the original 1920x1080 canonical capture: sharper, higher-contrast cube boundaries, pronounced stair-step edges in distant rows and a different sky/background response.",
+      "competitiveQualityAdvantageEstablished": false,
+      "scope": "Static canonical image inspection only; no motion-quality assessment."
+    },
+    {
+      "backend": "babylon",
+      "file": "artifacts/engine-compare/surface-presence-cpu-api-off/images/2026-10-12T05-21-10.743Z/10000-static-babylon-r0.png",
+      "pngSha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "observation": "Personally inspected the original 1920x1080 canonical capture: darker ground and foreground cube faces, sharp cube boundaries and visible distant aliasing; lighting and sky differ from the engine.",
+      "competitiveQualityAdvantageEstablished": false,
+      "scope": "Static canonical image inspection only; no motion-quality assessment."
+    }
+  ],
+  "tests": {
+    "command": "npm run check",
+    "passed": 312,
+    "failed": 0,
+    "log": "artifacts/cpu-api-timing-check.log"
+  },
+  "limitations": [
+    "Native API time is synchronous host wall time, not GPU execution time. Remaining CPU time includes JS, instrumentation overhead and uncovered APIs, including GPUCanvasContext.getCurrentTexture.",
+    "Only static 10k/1080p cases are measured here. This does not replace the broader 5k/10k static/moving benchmark or resolve known intermittent shading differences.",
+    "The canonical pixel gate covers these final captures only. It does not establish temporal determinism or equal visual quality across different native render pipelines.",
+    "Per-method p95 values cannot be added to form overall CPU p95. Mean method shares and the methods in an actual overall-p95 sample are retained instead.",
+    "Browser performance.now quantization makes many individual fast-call samples zero. Pooled method means are observations at this clock resolution, not precise single-call latency estimates."
+  ]
+}

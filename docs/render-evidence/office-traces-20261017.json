@@ -1,0 +1,1072 @@
+{
+  "date": "2026-10-17T05:44:31.599Z",
+  "scope": "Original canonical tyre traces rendered in both Game/Office on the shared presentation clock, production NPC control, independent fresh Game FPS",
+  "capability": "original-residents-22",
+  "tests": {
+    "pass": 189,
+    "assertions": 8454,
+    "files": 22,
+    "seconds": 21.53,
+    "log": "artifacts/office-traces-regression-20261017.log",
+    "vertices": 108,
+    "maxInversePositionErrorM": 1.8047785488306545e-12
+  },
+  "restart": {
+    "date": "2026-10-17T05:39:23.993Z",
+    "oldPid": 8436,
+    "newPid": 16680,
+    "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; original authoritative tyre stamps in Office read model; existing AOI caps and source simulation unchanged; Office/backend/microphone untouched",
+    "beforeRows": 4238,
+    "afterRows": 4238,
+    "missingRows": 0,
+    "protectedRows": 144,
+    "changedProtectedRows": 0,
+    "ownerDifferences": 0,
+    "accounts": 47,
+    "accountDifferences": 0,
+    "integrity": "ok",
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 54,
+    "geometryRevision": 1
+  },
+  "probe": {
+    "label": "office-traces-probe-20261017-r1",
+    "scope": "Passive original stamp generator and drawer versus served Office factory; synthetic wheel contacts, no canonical vehicle drive, actor staging or clock mutation; GPU yaw zero, separate CPU inverse-basis test covers rotations",
+    "browser": "native-gpu",
+    "sourceInfo": {
+      "contacts": "synthetic inputs to the original TireMarks.step",
+      "marks": 60
+    },
+    "scenarios": [
+      {
+        "name": "future",
+        "time": 0,
+        "origin": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "fresh",
+        "time": 4,
+        "origin": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "fading",
+        "time": 43,
+        "origin": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "expired",
+        "time": 50,
+        "origin": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "floor-rebase",
+        "time": 4,
+        "origin": [
+          0,
+          9.9,
+          0
+        ]
+      },
+      {
+        "name": "distant-rebase",
+        "time": 4,
+        "origin": [
+          8192,
+          20,
+          -8192
+        ]
+      }
+    ],
+    "captures": 18,
+    "comparisons": 12,
+    "channelsPerComparison": 3686400,
+    "changedChannels": 0
+  },
+  "native": {
+    "label": "office-traces-native-20261017-r1",
+    "states": 12,
+    "actor": "resident:14791:1012",
+    "body": "resident:14791:1012",
+    "takeoverReference": {
+      "time": 81.25000000001073,
+      "tick": 5611,
+      "position": [
+        -299.274,
+        0.17,
+        15.395
+      ]
+    },
+    "takeoverDistance": 0.18090698193616012,
+    "takeoverSpeed": 1.8085510775203448,
+    "moved": 0.2969264059471038,
+    "inputToMovementMs": 597,
+    "rightsBefore": {
+      "accountId": "fea3e848-2300-424c-9f3b-5d09834d1427",
+      "companies": [],
+      "leases": []
+    },
+    "rightsAfter": {
+      "accountId": "fea3e848-2300-424c-9f3b-5d09834d1427",
+      "companies": [],
+      "leases": []
+    },
+    "returnedBody": "player:fea3e848-2300-424c-9f3b-5d09834d1427",
+    "maxReceived": 128,
+    "maxCached": 369,
+    "maxDrawn": 214,
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    }
+  },
+  "fps": {
+    "manifest": "docs/render-evidence/fps-live-20261017-office-traces.json",
+    "averageFPS": 52.86219413347118,
+    "p50Ms": 19.099999999998545,
+    "p95Ms": 29.899999999997817,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "actualLiveEnvironment": {
+      "worldMinute": 268794.4666471666,
+      "projectionHour": 15.90974745277587,
+      "facadeNight": 0,
+      "rain": 0,
+      "wetness": [
+        0,
+        0
+      ]
+    }
+  },
+  "health": {
+    "pid": 16680,
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "editor": 54,
+    "geometry": 1
+  },
+  "debug": {
+    "ports": [
+      3267,
+      3268,
+      3269
+    ],
+    "livePorts": []
+  },
+  "sources": [
+    {
+      "repo": "game",
+      "path": "src/game/office-surface-effects.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/office-surface-effects.ts",
+      "bytes": 2339,
+      "sha256": "2bcb1e2fdd63cc7b0e92b0e2d4bc8b29a4871009e9accf992b64720aae221f39"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/office-world.ts",
+      "bytes": 11302,
+      "sha256": "e3fe20a3e0195522d400ddb2be5a9dfac259e3f08e424b8bf0749359cd4890cd"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/office-controller.ts",
+      "bytes": 973,
+      "sha256": "9d31dbcd5e338f08261f2c8b2d6182a167b3f30b3c8c79cac3fd6ace394e99b8"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/net/client.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/net/client.ts",
+      "bytes": 13293,
+      "sha256": "10f39cdfc4d57c0201855820addf5f67d312e08ae8ebb1612e0b4fff01b4e5cd"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/client.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/client.ts",
+      "bytes": 50908,
+      "sha256": "8bfbdb6ff8818c48a0b93478206fc419e7c1db1f37de98eaafb46cf3d9236fa3"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/tire-marks.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/tire-marks.ts",
+      "bytes": 4613,
+      "sha256": "079bd726b63f36722de88dff0f915cd058e2a8ce6fe1447fc7396afc55896c2c"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-projection.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/render/the-engine-projection.ts",
+      "bytes": 16099,
+      "sha256": "d5f17991df06e7ab84ec16e8ed8fd1a06f319ae9a99168c229c8c93e0a97eb10"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-geometry.ts",
+      "archive": "artifacts/office-traces/final-source/game/src/game/render/the-engine-geometry.ts",
+      "bytes": 11023,
+      "sha256": "b70b41c697c48f5276aab0d66fc84f91d087020f2dd70589b502855e09868245"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/runtime/render.js",
+      "archive": "artifacts/office-traces/final-source/game/src/game/runtime/render.js",
+      "bytes": 29428,
+      "sha256": "2ce569531ef18c791773dc3eb34c34da683bc8287acb6d12dac074364a7bca9d"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/tire-marks.ts",
+      "archive": "artifacts/office-traces/final-source/game/test/fixtures/tire-marks.ts",
+      "bytes": 633,
+      "sha256": "cd024edd1f9945d0cec93508d498a382be25475891c0c3f26aeaac458686ba7e"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-surface-effects.test.ts",
+      "archive": "artifacts/office-traces/final-source/game/test/office-surface-effects.test.ts",
+      "bytes": 9257,
+      "sha256": "47522eb81e82f5d856594322b39f94153ecab5d65afca6dc7be67978a1f1d6c2"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-tire-marks.test.ts",
+      "archive": "artifacts/office-traces/final-source/game/test/office-tire-marks.test.ts",
+      "bytes": 1552,
+      "sha256": "fc862d8ee2832aa035be0e46c153c73240c6346cbe51f14f464155c3088f73e3"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-traces.ts",
+      "archive": "artifacts/office-traces/final-source/game/tools/qa-office-traces.ts",
+      "bytes": 8125,
+      "sha256": "5f97e38c9acee18a48da1791b77991556ec32c7c279b9fa1cd1f9b5e5cbc0b8b"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "archive": "artifacts/office-traces/final-source/game/tools/qa-office.ts",
+      "bytes": 7942,
+      "sha256": "e50a5272940f66723585cb0f5d25efd89bedb55335deed636c7d9b026a6a7910"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "archive": "artifacts/office-traces/final-source/game/tools/qa-office-walking.ts",
+      "bytes": 15406,
+      "sha256": "0add9282ae2e5cdb1b0853ec9d15d9e6c37db56768b50eb6ea8f2c9d7811f8a5"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "archive": "artifacts/office-traces/final-source/game/tools/qa-office-residents.ts",
+      "bytes": 16767,
+      "sha256": "fe784f7ff593657b4a17e7dffdda5afe1339aecff2f1a743ad2016e62f6bcba8"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "archive": "artifacts/office-traces/final-source/game/tools/capture.ts",
+      "bytes": 34215,
+      "sha256": "8253a480720f00eaa82ebbecf590e454b4646336ef51590b816bf64c7d708978"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-traces/final-source/game/docs/VERIFICATION.md",
+      "bytes": 813319,
+      "sha256": "1aece003bf73b868cbe87fcd224dffe68242a6ca81497751254a01c5482952dd"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-surface-effects.ts",
+      "archive": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-surface-effects.ts",
+      "bytes": 1742,
+      "sha256": "0f0c66082f834ee291c0a357d4d52017667da58475cc828c1445ff43d74bc18c"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-types.ts",
+      "archive": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 6170,
+      "sha256": "d78b065ed05a32b604a4b7d1f237c739e2855014abdb3d30b2565c343d3393e7"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 36727,
+      "sha256": "2b5472421d31b412f9ce6eee05c2a1d056b6bdfb7c07f4528f6f1a4596007f6b"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "archive": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 35758,
+      "sha256": "24bdf8f3a666a8bc894defdb79db8475df5a8d75e45e46871bd71f62af7aae1a"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "archive": "artifacts/office-traces/final-source/engine/apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 50973,
+      "sha256": "ca585a22435f068e82428655c92bbe8e11be2ae3d87e5ed797ec68fef2fb2207"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-traces/final-source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 201733,
+      "sha256": "8ef9f113f6646cb9951fd93353cf7222a1df163311adb4254649260649f861dd"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-traces/final-source/office/ui/src/office/scene.ts",
+      "bytes": 65978,
+      "sha256": "767cd1334b80cb330435e742d2736555faab6fc273d46d620ccffd26590ec6f5"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-traces/final-source/office/VERIFICATION.md",
+      "bytes": 135267,
+      "sha256": "dd1039f6f81131a1d2a030d0afd7ed8d781f4db935d26f964125eaa7f88d6372"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "archive": "artifacts/office-traces/final-bundles/game.js",
+      "bytes": 2496135,
+      "sha256": "e84d40f25542b5caf30d6f1a9e96956b3c923b7e42c80092505bbf903fe3a566"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-22",
+      "archive": "artifacts/office-traces/final-bundles/office-controller.js",
+      "bytes": 1387328,
+      "sha256": "f67923342dda6c76cc7a328546b6166aceec4deb97b3e65d8546854d4bd9805a"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-CbCC952K.js",
+      "archive": "artifacts/office-traces/final-bundles/index-CbCC952K.js",
+      "bytes": 1794445,
+      "sha256": "f4cba73d4fd659e803e08cf89db542f32437b9eadc8204fbf22656d4e4012238"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-traces/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    }
+  ],
+  "reviewed": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-traces/office-traces-probe-20261017-r1/fresh-office.png",
+      "archive": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fresh-office.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-traces/office-traces-probe-20261017-r1/fading-office.png",
+      "archive": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fading-office.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-traces/office-traces-probe-20261017-r1/distant-rebase-office.png",
+      "archive": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/distant-rebase-office.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-traces/office-traces-probe-20261017-r1/expired-office.png",
+      "archive": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/expired-office.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-traces-native-20261017-r1/residents-possessed.png",
+      "archive": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-possessed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-traces-native-20261017-r1/returned-observer.png",
+      "archive": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/returned-observer.png"
+    }
+  ],
+  "limits": [
+    "Passive GPU proof uses original stamp generation driven by synthetic contacts, yaw-zero projection and a simple source ground. It does not prove a live driven vehicle or complete city-image equality; inverse CPU checks cover yaw transforms.",
+    "Real native traffic supplied source marks, but count/mesh diagnostics do not prove visible pixels for every individual live mark.",
+    "Native guest has empty business rights. Immediate real-save protected-record audit and prior nonempty company/account tests are separate ownership evidence.",
+    "Fresh 52.9 FPS is a short stationary original Game live sample at 704x396 internal rendering; no paired gain/regression, sustained 60 FPS, Office/vehicle/moving performance claim.",
+    "Rain/roof/wetness/water and remaining temporal effects, physical audio quality, complete long-route/weather coverage and first-person own shadows/reflections remain incomplete or unverified. The full integration goal remains active."
+  ],
+  "files": [
+    {
+      "path": "artifacts/office-traces/audit-restart.log",
+      "bytes": 564,
+      "sha256": "78edfba5df2aa4b441d1f2160feef405ed2a005137c8972af85e8e85d91d88d9"
+    },
+    {
+      "path": "artifacts/office-traces/audit-restart.ts",
+      "bytes": 3035,
+      "sha256": "b48a4b02581c62e1d81e20bdf501135e431becc41a22fa3d4e882fece1c09334"
+    },
+    {
+      "path": "artifacts/office-traces/backup-runtime.log",
+      "bytes": 172,
+      "sha256": "74c99a9464cc5f9d453d60553c3abc6d80011ae9bf2c85d71bc8b59061f65975"
+    },
+    {
+      "path": "artifacts/office-traces/backup-runtime.ts",
+      "bytes": 2455,
+      "sha256": "cb9b69fc559ccd2eb14445226041b4c61a0c0e2db37bf075bacc1200293ab453"
+    },
+    {
+      "path": "artifacts/office-traces/backup.ts",
+      "bytes": 898,
+      "sha256": "b5b4c5b6d1c0bc0f66d79d571d3f3950afdf3ed0b85491cb74acf07b05845966"
+    },
+    {
+      "path": "artifacts/office-traces/before/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 36136,
+      "sha256": "46cd43aef3c4bbc37267c1f6338502704b19c529eb7482d2fd4c43de3e1dd0eb"
+    },
+    {
+      "path": "artifacts/office-traces/before/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 5992,
+      "sha256": "51725379bd7320267f6cba05fe5878af873afb82bd8efc4359e5100f675931f7"
+    },
+    {
+      "path": "artifacts/office-traces/before/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 34554,
+      "sha256": "b5a120ae1b3f68c69593f6f987590c450174ad3d246bdff0b2c092aa7e44452d"
+    },
+    {
+      "path": "artifacts/office-traces/before/game/src/game/client.ts",
+      "bytes": 50793,
+      "sha256": "7d649b7e574a48e068d8f61462748931a1d679999a94ecfa65ed89ea03a4c29b"
+    },
+    {
+      "path": "artifacts/office-traces/before/game/src/game/net/client.ts",
+      "bytes": 13209,
+      "sha256": "5e1fc501fd8c32f592526dd2d7fcf17964e4766837a14f3bfd159ca953045b91"
+    },
+    {
+      "path": "artifacts/office-traces/before/game/src/game/office-controller.ts",
+      "bytes": 901,
+      "sha256": "9d4eee45593e7d581ea48fd7d5d773fae5fe3300862181f80b3734cfef164f9f"
+    },
+    {
+      "path": "artifacts/office-traces/before/game/src/game/office-world.ts",
+      "bytes": 11162,
+      "sha256": "3e4f9e941d40ceabd92bf968126dae1fd407a9494492a14fa30e73062a07e450"
+    },
+    {
+      "path": "artifacts/office-traces/before/office/ui/src/office/scene.ts",
+      "bytes": 65642,
+      "sha256": "55be2e1b85077c2f2c10818fecbf1eb76c9f818d05b5b6a4bd401fe20a755587"
+    },
+    {
+      "path": "artifacts/office-traces/captured/engine/artifacts/office-traces-read-model-20261017.log",
+      "bytes": 285,
+      "sha256": "76be083a7f6588e0a6b378d710fe97fed72a0163a630b8e80f44dc3f537e48e6"
+    },
+    {
+      "path": "artifacts/office-traces/captured/engine/artifacts/office-traces-regression-20261017.log",
+      "bytes": 22094,
+      "sha256": "3fd561040c24b89dde321e3bc0fb858ab002143ab3cbead201860da4187fcc41"
+    },
+    {
+      "path": "artifacts/office-traces/captured/engine/artifacts/office-traces-tests-r3-20261017.log",
+      "bytes": 22235,
+      "sha256": "adcd72adb07b36e6b4ab7ca67baed5996ec87a672b423ab64d4d60b5dfb503a4"
+    },
+    {
+      "path": "artifacts/office-traces/captured/engine/artifacts/office-traces-typecheck-engine-20261017.log",
+      "bytes": 768,
+      "sha256": "477a49bfd1f3554797e24c266c3e3fdad028f3a4ab4993fbc6535e1c136bff49"
+    },
+    {
+      "path": "artifacts/office-traces/captured/engine/artifacts/office-traces-typecheck-engine-r2-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "path": "artifacts/office-traces/captured/engine/artifacts/office-traces-typecheck-office-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-traces/captured/engine/artifacts/office-traces-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "e9f49314450f014ac45b692213ac73789c7bf35a1e76e3e4b8a5bfb46e481763"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/fps-live-20261017-office-traces.log",
+      "bytes": 73730,
+      "sha256": "f1d533a857bdb754484ea7093a31cca0b688f5b0ec6a4d2d9baadaedcc604218"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-in-game/office-traces-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17404,
+      "sha256": "076f1838c0d50ed7d2287a3907ed4ecd661397f4ce755d45cee9ef40266bd27b"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-in-game/office-traces-native-20261017-r1/office-entry.json",
+      "bytes": 17575,
+      "sha256": "8e2cad0e468bca5fe951fb9e34f7b5b90239e70aaaf3fc84228df59f9a114874"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-in-game/office-traces-native-20261017-r1/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-before-20261017.log",
+      "bytes": 46347,
+      "sha256": "b85c5db9be483473545a24d383ce0620848730c12072a41266c70c49cb01af43"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-game-build-20261017.log",
+      "bytes": 585,
+      "sha256": "a10d7a11bd11d5e56e18474671cd9b21e617bca744ce5e56d49edf1ca08a2ef7"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-native-20261017-r1.log",
+      "bytes": 96,
+      "sha256": "24833b70b295c3c7e4279a06c093988830b56d924f57dc4b34c6adda9d3b34f2"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-probe-20261017-r1.log",
+      "bytes": 246,
+      "sha256": "89682755ffb6c791b7f97aef366f90fc64a0a0a3db2aae468c245c93a8258aeb"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-tests-r1-20261017.log",
+      "bytes": 5262,
+      "sha256": "1113387f52dfcbe4199a98e3f13394bb31ccf9e1d87f8880248fd294791afe80"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-tests-r2-20261017.log",
+      "bytes": 3767,
+      "sha256": "56aacb01a4415c8bb3288bd296a949635e420fd1e619edda9b2fb08376988ee4"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-tests-r4-20261017.log",
+      "bytes": 3707,
+      "sha256": "bd8f72618587095ef82c33bd8c347d6eb63b7a21c4df9c9a0eaf0a0946396e99"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-tests-r5-20261017.log",
+      "bytes": 1038,
+      "sha256": "0a059a9c15c668d344a38498caffb291fda2976418ce9dd705de0d22ac66e9b1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/distant-rebase-office.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/distant-rebase-original-control.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/distant-rebase-original.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/expired-office.png",
+      "bytes": 56753,
+      "sha256": "5212e42f91e26908399f489c703c1b00dfaaf80274e82f1595cf5a452234ec43"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/expired-original-control.png",
+      "bytes": 56753,
+      "sha256": "5212e42f91e26908399f489c703c1b00dfaaf80274e82f1595cf5a452234ec43"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/expired-original.png",
+      "bytes": 56753,
+      "sha256": "5212e42f91e26908399f489c703c1b00dfaaf80274e82f1595cf5a452234ec43"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fading-office.png",
+      "bytes": 75811,
+      "sha256": "afb8784f55eafd3c0d5c8f733ebdeadd923df2afdf70bfc97108d84aebe8f059"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fading-original-control.png",
+      "bytes": 75811,
+      "sha256": "afb8784f55eafd3c0d5c8f733ebdeadd923df2afdf70bfc97108d84aebe8f059"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fading-original.png",
+      "bytes": 75811,
+      "sha256": "afb8784f55eafd3c0d5c8f733ebdeadd923df2afdf70bfc97108d84aebe8f059"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fixture.html",
+      "bytes": 3448,
+      "sha256": "146366cd9ce03265343d999e929ff6ca318a0e669399e1332029c0018d36bdf8"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/floor-rebase-office.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/floor-rebase-original-control.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/floor-rebase-original.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fresh-office.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fresh-original-control.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/fresh-original.png",
+      "bytes": 75421,
+      "sha256": "76d363a1d4d6ef1d61c7af24aa6fc582d0c070ebcbe7e8ea9dc873f1239fadb1"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/future-office.png",
+      "bytes": 56753,
+      "sha256": "5212e42f91e26908399f489c703c1b00dfaaf80274e82f1595cf5a452234ec43"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/future-original-control.png",
+      "bytes": 56753,
+      "sha256": "5212e42f91e26908399f489c703c1b00dfaaf80274e82f1595cf5a452234ec43"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/future-original.png",
+      "bytes": 56753,
+      "sha256": "5212e42f91e26908399f489c703c1b00dfaaf80274e82f1595cf5a452234ec43"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/progress.json",
+      "bytes": 13745,
+      "sha256": "04b0069c19a6051e52b300003ac7fb090864d678391d5a9f6b268ac9507d1317"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/reference.entry.js",
+      "bytes": 922221,
+      "sha256": "0ca9d55a2f193ba8c8bd574d131d8eaf80075f6bc224775d66147d4da7f9a43a"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/report.json",
+      "bytes": 16438,
+      "sha256": "aecc604da39836a9d6ae5088001333866b033f6ddf48fe3ff34e909d481ee577"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-traces/office-traces-probe-20261017-r1/source-frame.json",
+      "bytes": 25672,
+      "sha256": "5825b94d490692081b872bbcef09ec95e47885f57a6a1067f8cb7cdb710dbae2"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/canonical-controller-source.json",
+      "bytes": 13538589,
+      "sha256": "88091b4b64bc47a05912bec99d22000fc0485182c33aae0ad6172ab20b93485e"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/canonical-residents-observed-source.json",
+      "bytes": 13570913,
+      "sha256": "ea736e87c6d48d46209b659f9a61a926d7fa569fa3e1e82e54fefb1a5960079b"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/entered.png",
+      "bytes": 432756,
+      "sha256": "1c64cce8e5cdf289c15ed2f2d2bf11e2bf4257cabcf640b8ca786fb585e097aa"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/observer.png",
+      "bytes": 535851,
+      "sha256": "b664e80724e5c9e961cdafdf89246c4f052fc4706bcd3732d8c8de5aa9ab5be8"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/report.json",
+      "bytes": 174933,
+      "sha256": "cbe616ed31f25452c2e851615c85a4f6631b4a029f9870e6486e47f8c6bfcd55"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-before-movement.json",
+      "bytes": 5169,
+      "sha256": "b5693d134f40891fb20370b27c39770561a148cafdc6b7bbffcbc9d235625051"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-moved.png",
+      "bytes": 422565,
+      "sha256": "3effd3d11a573f52daa88ae2154546e659ce64e7843a01bc674f25f043061fff"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-movement.json",
+      "bytes": 16381,
+      "sha256": "4779dffe191d0c2d967e46c8915b2a7c45a015fbb2737853e7e32adff8632d94"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-observed-scope.png",
+      "bytes": 505291,
+      "sha256": "5deae6c23e495c2559c0be93d3e3440ae73b48ba5000c24bc46d1ef5c548c8db"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-observing.png",
+      "bytes": 523132,
+      "sha256": "be06b67f951cd662d3f65c76a8e541e96d650a71245a3419c1ca104e362eac40"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-panel.png",
+      "bytes": 171474,
+      "sha256": "5760fd35aff1c7289182097bc457ea1b7057768bed97aca6d14eea52d3386242"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-possessed.png",
+      "bytes": 456505,
+      "sha256": "234432b59b3c561111b0d1fd4b411278428bd3b1762c8af91384762b79b13706"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-report.json",
+      "bytes": 19261,
+      "sha256": "eb437659d562056d7d84ed0754b76506e94dde84b5024675166f1ccd626b9b45"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-return-start.png",
+      "bytes": 384216,
+      "sha256": "a1c8f71b7d1877c35ac55047e7bf5d7f4a94cda67acde64da4057c3831167d5a"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-returned.png",
+      "bytes": 397410,
+      "sha256": "b1f394db2f1d7f2d062bd98f1ab882d9240ebb9f42f6f41e042198bb47270f44"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-selection.json",
+      "bytes": 1743,
+      "sha256": "6cd99b77bcd1fa4672829ce48c83ad3ba6acac0bd4fadd66cec1ddb02a23cc69"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/residents-stopped.png",
+      "bytes": 370430,
+      "sha256": "12c641c9b8672627aec3093438025b8e8e9ab53505a4ab6f222b6eed5bb1f2dd"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/returned-observer.png",
+      "bytes": 559467,
+      "sha256": "dcf1fa1925c8d4fd22ba72c149354be6ce4aeef04a51dfde3ff251592f647d79"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/office-walking/office-traces-native-20261017-r1/walk-KeyW.png",
+      "bytes": 449327,
+      "sha256": "1e4f1a48350de47aa4ab1eaa7819976ba6c248fe4a9a649dbc7e59f9fcaa638b"
+    },
+    {
+      "path": "artifacts/office-traces/captured/game/artifacts/performance-live-fps-live-20261017-office-traces.json",
+      "bytes": 388422,
+      "sha256": "3580c82cab124eae0eda97cf95a58a71d28a73199f6af60f657e8a75ff8a64d5"
+    },
+    {
+      "path": "artifacts/office-traces/complete-evidence.ts",
+      "bytes": 22872,
+      "sha256": "bf95a98968fd3e5e509ea232320496b8907fa7da0ce303f7735da5a7cf9a743c"
+    },
+    {
+      "path": "artifacts/office-traces/final-bundles/game.js",
+      "bytes": 2496135,
+      "sha256": "e84d40f25542b5caf30d6f1a9e96956b3c923b7e42c80092505bbf903fe3a566"
+    },
+    {
+      "path": "artifacts/office-traces/final-bundles/index-CbCC952K.js",
+      "bytes": 1794445,
+      "sha256": "f4cba73d4fd659e803e08cf89db542f32437b9eadc8204fbf22656d4e4012238"
+    },
+    {
+      "path": "artifacts/office-traces/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "path": "artifacts/office-traces/final-bundles/office-controller.js",
+      "bytes": 1387328,
+      "sha256": "f67923342dda6c76cc7a328546b6166aceec4deb97b3e65d8546854d4bd9805a"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 36727,
+      "sha256": "2b5472421d31b412f9ce6eee05c2a1d056b6bdfb7c07f4528f6f1a4596007f6b"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-surface-effects.ts",
+      "bytes": 1742,
+      "sha256": "0f0c66082f834ee291c0a357d4d52017667da58475cc828c1445ff43d74bc18c"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 6170,
+      "sha256": "d78b065ed05a32b604a4b7d1f237c739e2855014abdb3d30b2565c343d3393e7"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 35758,
+      "sha256": "24bdf8f3a666a8bc894defdb79db8475df5a8d75e45e46871bd71f62af7aae1a"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/engine/apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 50973,
+      "sha256": "ca585a22435f068e82428655c92bbe8e11be2ae3d87e5ed797ec68fef2fb2207"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 201733,
+      "sha256": "8ef9f113f6646cb9951fd93353cf7222a1df163311adb4254649260649f861dd"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/docs/VERIFICATION.md",
+      "bytes": 813319,
+      "sha256": "1aece003bf73b868cbe87fcd224dffe68242a6ca81497751254a01c5482952dd"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/client.ts",
+      "bytes": 50908,
+      "sha256": "8bfbdb6ff8818c48a0b93478206fc419e7c1db1f37de98eaafb46cf3d9236fa3"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/net/client.ts",
+      "bytes": 13293,
+      "sha256": "10f39cdfc4d57c0201855820addf5f67d312e08ae8ebb1612e0b4fff01b4e5cd"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/office-controller.ts",
+      "bytes": 973,
+      "sha256": "9d31dbcd5e338f08261f2c8b2d6182a167b3f30b3c8c79cac3fd6ace394e99b8"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/office-surface-effects.ts",
+      "bytes": 2339,
+      "sha256": "2bcb1e2fdd63cc7b0e92b0e2d4bc8b29a4871009e9accf992b64720aae221f39"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/office-world.ts",
+      "bytes": 11302,
+      "sha256": "e3fe20a3e0195522d400ddb2be5a9dfac259e3f08e424b8bf0749359cd4890cd"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/render/the-engine-geometry.ts",
+      "bytes": 11023,
+      "sha256": "b70b41c697c48f5276aab0d66fc84f91d087020f2dd70589b502855e09868245"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/render/the-engine-projection.ts",
+      "bytes": 16099,
+      "sha256": "d5f17991df06e7ab84ec16e8ed8fd1a06f319ae9a99168c229c8c93e0a97eb10"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/runtime/render.js",
+      "bytes": 29428,
+      "sha256": "2ce569531ef18c791773dc3eb34c34da683bc8287acb6d12dac074364a7bca9d"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/src/game/tire-marks.ts",
+      "bytes": 4613,
+      "sha256": "079bd726b63f36722de88dff0f915cd058e2a8ce6fe1447fc7396afc55896c2c"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/test/fixtures/tire-marks.ts",
+      "bytes": 633,
+      "sha256": "cd024edd1f9945d0cec93508d498a382be25475891c0c3f26aeaac458686ba7e"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/test/office-surface-effects.test.ts",
+      "bytes": 9257,
+      "sha256": "47522eb81e82f5d856594322b39f94153ecab5d65afca6dc7be67978a1f1d6c2"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/test/office-tire-marks.test.ts",
+      "bytes": 1552,
+      "sha256": "fc862d8ee2832aa035be0e46c153c73240c6346cbe51f14f464155c3088f73e3"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/tools/capture.ts",
+      "bytes": 34215,
+      "sha256": "8253a480720f00eaa82ebbecf590e454b4646336ef51590b816bf64c7d708978"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/tools/qa-office-residents.ts",
+      "bytes": 16767,
+      "sha256": "fe784f7ff593657b4a17e7dffdda5afe1339aecff2f1a743ad2016e62f6bcba8"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/tools/qa-office-traces.ts",
+      "bytes": 8125,
+      "sha256": "5f97e38c9acee18a48da1791b77991556ec32c7c279b9fa1cd1f9b5e5cbc0b8b"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/tools/qa-office-walking.ts",
+      "bytes": 15406,
+      "sha256": "0add9282ae2e5cdb1b0853ec9d15d9e6c37db56768b50eb6ea8f2c9d7811f8a5"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/game/tools/qa-office.ts",
+      "bytes": 7942,
+      "sha256": "e50a5272940f66723585cb0f5d25efd89bedb55335deed636c7d9b026a6a7910"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/office/ui/src/office/scene.ts",
+      "bytes": 65978,
+      "sha256": "767cd1334b80cb330435e742d2736555faab6fc273d46d620ccffd26590ec6f5"
+    },
+    {
+      "path": "artifacts/office-traces/final-source/office/VERIFICATION.md",
+      "bytes": 135267,
+      "sha256": "dd1039f6f81131a1d2a030d0afd7ed8d781f4db935d26f964125eaa7f88d6372"
+    },
+    {
+      "path": "artifacts/office-traces/fps-game.js",
+      "bytes": 2496135,
+      "sha256": "e84d40f25542b5caf30d6f1a9e96956b3c923b7e42c80092505bbf903fe3a566"
+    },
+    {
+      "path": "artifacts/office-traces/fps-manifest.json",
+      "bytes": 3613,
+      "sha256": "646d161874d5f3776a9775fa45db42582b4cdb07e495763771f9eb3930a8863f"
+    },
+    {
+      "path": "artifacts/office-traces/fps-operation.json",
+      "bytes": 682,
+      "sha256": "80225b27fec772071edd1743aadcb29589653849cb9d7ac677d34ff31848766d"
+    },
+    {
+      "path": "artifacts/office-traces/fps-result.ts",
+      "bytes": 3995,
+      "sha256": "b1d05aa61adefb8ab5f33274fcf5800353bfba6449d912d5c4b3a78ff59bf127"
+    },
+    {
+      "path": "artifacts/office-traces/layout-before.json",
+      "bytes": 7338,
+      "sha256": "73bb42033247a823f210ab2b57aad0e55b6df27068b9167f896c713288873bdb"
+    },
+    {
+      "path": "artifacts/office-traces/office-traces-probe-20261017-r1/fixture.html",
+      "bytes": 3448,
+      "sha256": "146366cd9ce03265343d999e929ff6ca318a0e669399e1332029c0018d36bdf8"
+    },
+    {
+      "path": "artifacts/office-traces/office-traces-probe-20261017-r1/reference.entry.js",
+      "bytes": 922221,
+      "sha256": "0ca9d55a2f193ba8c8bd574d131d8eaf80075f6bc224775d66147d4da7f9a43a"
+    },
+    {
+      "path": "artifacts/office-traces/office-traces-probe-20261017-r1/reference.entry.ts",
+      "bytes": 488,
+      "sha256": "0ac95dead48b7e16ffa58ad8b92fe5a8a9a8de40f341edcd40369f2e87495e9b"
+    },
+    {
+      "path": "artifacts/office-traces/prepare-runtime.ts",
+      "bytes": 1530,
+      "sha256": "06f2b5bc243475f8c610e318459f512271f757177685ca81310519bc71cc79e0"
+    },
+    {
+      "path": "artifacts/office-traces/restart-audit.json",
+      "bytes": 654,
+      "sha256": "a1b8501ca314625a1cae33d963d3d4afd14c67c0d5f54d5da70a53068eff50d1"
+    },
+    {
+      "path": "artifacts/office-traces/restart-operation.json",
+      "bytes": 323,
+      "sha256": "cef46093bd1c92fa28d81c35b1dce770878a32a42175a0d631115fe57b95d63d"
+    },
+    {
+      "path": "artifacts/office-traces/restart-ready.json",
+      "bytes": 24733,
+      "sha256": "c6f8d3a9502a1aa7d5e2e7ad1dcdd909caf419919f200081ad776e63b00f4b6e"
+    },
+    {
+      "path": "artifacts/office-traces/restart-ready.sqlite",
+      "bytes": 8978432,
+      "sha256": "fa28ae6fd26d4313564186fc42417aa2abc9fab5f22f1c4d892a70f37e61ce82"
+    },
+    {
+      "path": "artifacts/office-traces/restart.log",
+      "bytes": 143,
+      "sha256": "ca5e1fd9f09669cdcacae9866344a1a0ff020508da202822a75590a875d9e553"
+    },
+    {
+      "path": "artifacts/office-traces/restart.ps1",
+      "bytes": 2785,
+      "sha256": "88f9707d108636b2dce6a8fc446a94b64ef3db2d1dd947432c116918e6ee1f3f"
+    },
+    {
+      "path": "artifacts/office-traces/run-fps.ps1",
+      "bytes": 1877,
+      "sha256": "407574fd8431cbc2818b57875dad33af38c1a7991d88e86ad07def474f1e1c8f"
+    },
+    {
+      "path": "artifacts/office-traces/run-native.ps1",
+      "bytes": 1801,
+      "sha256": "f5dc6fc555f018fd2e849688c115d01c86c4a42f3dde38b105e5ad1140e6f5ae"
+    },
+    {
+      "path": "artifacts/office-traces/server-before.err.log",
+      "bytes": 12075,
+      "sha256": "bd697a993aa3279a11e5bc3cc76f970796821c226d380a5c87129422aa3323a3"
+    },
+    {
+      "path": "artifacts/office-traces/server-before.log",
+      "bytes": 723,
+      "sha256": "3e08d59c8f432bd107b18fc55654f1c9a63bec2dd94be390be32a08c6574a6b6"
+    },
+    {
+      "path": "artifacts/office-traces/wire-r2.ts",
+      "bytes": 5659,
+      "sha256": "4a2ed39078333a4dbff9468b39ca5b0cb6508ba1d6cb75724a9dc26e7968dfef"
+    },
+    {
+      "path": "artifacts/office-traces/wire.ts",
+      "bytes": 5859,
+      "sha256": "4be03ab723559f0294d8ef6f2676f8ecc4288404c397ea1afe086c8bc7e93a52"
+    }
+  ]
+}

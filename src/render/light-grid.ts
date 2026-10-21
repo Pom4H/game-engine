@@ -32,7 +32,7 @@ export function lightEmissionWeight(profile:LightEmissionSpec|undefined,fromLigh
  const rib=smooth(width*.5,width*1.5,Math.abs(wrapped)),radial=smooth(.04,.18,Math.hypot(x,y));
  return polar*(1-radial*(1-rib));
 }
-export function buildLightGrid(sources:readonly RenderLight[],eye:Vec3):{lights:Float32Array;cells:Uint32Array;count:number;overflow:number}{
+export function buildLightGrid(sources:readonly RenderLight[],eye:Vec3,shadowSlots:ReadonlyMap<RenderLight,number>=new Map()):{lights:Float32Array;cells:Uint32Array;count:number;overflow:number}{
  const originX=(Math.floor(eye[0]/LIGHT_GRID_CELL)-LIGHT_GRID_SIDE/2)*LIGHT_GRID_CELL;
  const originZ=(Math.floor(eye[2]/LIGHT_GRID_CELL)-LIGHT_GRID_SIDE/2)*LIGHT_GRID_CELL;
  const ranked=sources.filter(s=>s.light&&(s.light.intensity??1)>0).map((s,index)=>{
@@ -46,6 +46,7 @@ export function buildLightGrid(sources:readonly RenderLight[],eye:Vec3):{lights:
   const l=s.light!,range=l.range??12,p=l.emission,offset=4+index*LIGHT_SOURCE_FLOATS;lights.set([...s.position,range,...(l.color??[1,.78,.5]),l.intensity??1],offset);
   if(p){lights.set([...V3.normalize(p.axis),Math.cos(p.outerAngle)],offset+8);lights.set([Math.cos(p.innerAngle),p.panelCount??0,p.panelRotation??0,p.frameWidth??0],offset+12);}
   if(p?.boxHalfSize)lights.set([...p.boxHalfSize,p.frameWidthM??.015],offset+16);
+  else if(shadowSlots.has(s))lights[offset+19]=shadowSlots.get(s)!+1;
   const minX=Math.max(0,Math.floor((s.position[0]-range-originX)/LIGHT_GRID_CELL)),maxX=Math.min(LIGHT_GRID_SIDE-1,Math.floor((s.position[0]+range-originX)/LIGHT_GRID_CELL));
   const minZ=Math.max(0,Math.floor((s.position[2]-range-originZ)/LIGHT_GRID_CELL)),maxZ=Math.min(LIGHT_GRID_SIDE-1,Math.floor((s.position[2]+range-originZ)/LIGHT_GRID_CELL));
   for(let z=minZ;z<=maxZ;z++)for(let x=minX;x<=maxX;x++){

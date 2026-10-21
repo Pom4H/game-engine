@@ -1,0 +1,2101 @@
+{
+  "date": "2026-10-17T12:46:49.409Z",
+  "classification": "progress",
+  "goalComplete": false,
+  "scope": "Full original Game regression baseline and restoration of the existing Office editor in the canonical world, preserving saved task configuration.",
+  "originalGame": {
+    "date": "2026-10-17T12:32:28.783Z",
+    "ok": true,
+    "scope": "The three originally failing value assertions were reproduced on the independent original HEAD snapshot; production audio samples, boarding outcome and crash cage geometry remain identical after the engine migration.",
+    "originalCommit": "702bc303569a1802e80689948205a1847c03dde4",
+    "allDiagnosticOutputsDeepEqual": true,
+    "diagnosticFields": [
+      "audio",
+      "boarding",
+      "crash"
+    ],
+    "tests": [
+      {
+        "name": "collision-audio.test.ts",
+        "originalSha256": "427ffb506d1207c0e9814bfb62dcd5aa9e94730083b9f7c0be51c1c265692013",
+        "correctedSha256": "71ff2ddcb01790d1c993bfb2a1850241c966b04f305eb9a9f06c9bd3298bb738",
+        "originalBackupVerified": true
+      },
+      {
+        "name": "damaged-vehicle-entry.test.ts",
+        "originalSha256": "1ff7c02845935c77e2fe48a462a4d34bf3e1a25ae7d90f074ef82fa583c1b301",
+        "correctedSha256": "7bd270303da9f773aacabbb01e0e7f5843c2732ca4f3bf880e8724cf44a9df01",
+        "originalBackupVerified": true
+      },
+      {
+        "name": "docs-crash-temporal-damage.test.ts",
+        "originalSha256": "de6633cf90272f31936f36067fe49dd8e01753a31955398a944f5e01128cf591",
+        "correctedSha256": "98e319c766602361b0d4b1994ebcc781a44b15fe3b9cfb03a852f93b339e620d",
+        "originalBackupVerified": true
+      }
+    ],
+    "fullCheck": {
+      "command": "bun run game:check",
+      "observedExitCode": 0,
+      "pass": 1518,
+      "skip": 7,
+      "fail": 0,
+      "assertions": 6103730,
+      "files": 235,
+      "seconds": 721.84,
+      "log": "artifacts/original-feature-full-game-check-20261017.log"
+    },
+    "focused": {
+      "pass": 36,
+      "fail": 0,
+      "assertions": 4565,
+      "files": 8,
+      "seconds": 4.47
+    },
+    "limits": [
+      "Full Game check preceded subsequent QA-only Office editor tooling; the Game production source and game.js did not change.",
+      "Seven optional PostgreSQL integration tests were skipped.",
+      "The current Office editor browser run is recorded separately."
+    ]
+  },
+  "editor": {
+    "date": "2026-10-17T12:40:59.790Z",
+    "ok": true,
+    "browserMode": "native-gpu",
+    "scope": "Real Office UI palette, authority acknowledgement, undo and reload; no agent jobs or player controllers",
+    "floorId": "floor-6f9957e6d4",
+    "originalColour": "#a7d6c8",
+    "canaryColour": "#f5c9a3",
+    "initialRevision": 60,
+    "finalRevision": 62,
+    "initialGeometry": 7,
+    "editedGeometry": 8,
+    "finalGeometry": 9,
+    "restoredContent": true,
+    "newDocumentConfirmed": true,
+    "savedAgents": 8,
+    "activeAgents": 0,
+    "players": 0,
+    "reloadTransientErrors": [],
+    "records": [
+      {
+        "name": "before",
+        "sha256": "9ebac20de8ac38d754ae1868a0442021b9d6a78de59e9cf822f9c45a7a283a51",
+        "editorRevision": 60,
+        "geometryRevision": 7,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "backend": "webgpu",
+        "entry": "http://127.0.0.1:5173/"
+      },
+      {
+        "name": "changed",
+        "sha256": "803997a4d66c8dff37ebc3848f6a0e55ec1b72ea5d3c812f29469eb3a1041d6d",
+        "editorRevision": 61,
+        "geometryRevision": 8,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "backend": "webgpu",
+        "entry": "http://127.0.0.1:5173/"
+      },
+      {
+        "name": "restored",
+        "sha256": "675c220c0c0a833d83e4da5cc87263f2c5926ca6a044805a2928731298f72cfb",
+        "editorRevision": 62,
+        "geometryRevision": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "backend": "webgpu",
+        "entry": "http://127.0.0.1:5173/"
+      },
+      {
+        "name": "reloaded",
+        "sha256": "66edc554c1d018b93e4866c80f64e463c28c5ed855724c057d28aa4c4d780ba9",
+        "editorRevision": 62,
+        "geometryRevision": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "rendererErrors": [],
+        "backend": "webgpu",
+        "entry": "http://127.0.0.1:5173/"
+      }
+    ]
+  },
+  "preservation": {
+    "date": "2026-10-17T12:42:58.776Z",
+    "ok": true,
+    "scope": "Read-only transactional Office database snapshot; all previous configuration, history, work, decisions, issues and pet-care rows preserved. Editor revision counters and presentation poses changed, and the current unavailable-voice diagnostic was added.",
+    "unchangedTables": [
+      "office_agent_activity",
+      "office_decisions",
+      "office_history",
+      "office_pet_care",
+      "office_preferences",
+      "office_residents",
+      "office_work"
+    ],
+    "issues": {
+      "previousPreserved": 8,
+      "added": [
+        {
+          "id": "c03a271b517da4dd9d89897f",
+          "source": "office-ui",
+          "message": "Голосовое устройство недоступно",
+          "status": "open"
+        }
+      ]
+    },
+    "initialRevision": 54,
+    "finalRevision": 62,
+    "geometryRevision": 9,
+    "layoutContentUnchanged": true,
+    "canonicalLayoutMatches": true,
+    "historyRows": 29,
+    "savedAgents": 8,
+    "savedConfigurationSha256": "65871b87f2fde913e2dc9c9cead8a3358634e94f7f29cddfb81f82d69818cfda",
+    "activeAgents": 0,
+    "presentationPoses": {
+      "before": 8,
+      "after": 8
+    }
+  },
+  "runtime": {
+    "date": "2026-10-17T12:46:45.9570362+00:00",
+    "gamePid": 4296,
+    "game": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "backend": {
+      "containerId": "563a1e1ddde934edbd5017bb20148304aaf8cd59c0362a39d9b7c681e5cb7c4c",
+      "image": "sha256:5b0d343788b93c80de3da99414a79942a39a2c44485ef213ad10bedb071b2693",
+      "startedAt": "2026-10-17T12:24:39.290354327Z",
+      "running": true,
+      "manualResumeConfigured": true
+    },
+    "hubRunning": false,
+    "speechRunning": false,
+    "nativeVoicePid": 15312,
+    "vitePid": 21580,
+    "savedAgents": 8,
+    "activeAgents": 0,
+    "listeners": [
+      {
+        "LocalAddress": "127.0.0.1",
+        "LocalPort": 7860,
+        "OwningProcess": 12088
+      },
+      {
+        "LocalAddress": "0.0.0.0",
+        "LocalPort": 7860,
+        "OwningProcess": 18732
+      },
+      {
+        "LocalAddress": "0.0.0.0",
+        "LocalPort": 5173,
+        "OwningProcess": 21580
+      },
+      {
+        "LocalAddress": "0.0.0.0",
+        "LocalPort": 3007,
+        "OwningProcess": 4296
+      }
+    ]
+  },
+  "requirements": {
+    "date": "2026-10-17",
+    "objective": "Original TheGame on The Engine, plus the existing Office as another entry into the same metaverse; account-owned business and harness, autonomous NPC employees and in-place observation/possession.",
+    "complete": false,
+    "previousGoalTurn": "progress",
+    "verifiedThisPhase": {
+      "originalGameCheck": {
+        "pass": 1518,
+        "skip": 7,
+        "fail": 0,
+        "assertions": 6103730,
+        "files": 235,
+        "exitCode": 0
+      },
+      "originalFailureBaseline": "Independent original HEAD produces the same three failures; diagnostic audio, boarding and crash results are deep-identical. Corrected assertions retain physical and temporal coverage.",
+      "officeBackend": {
+        "url": "http://127.0.0.1:7860",
+        "tests": 73,
+        "exitCode": 0,
+        "savedAgents": 8,
+        "activeAgents": 0,
+        "automaticResume": false
+      },
+      "defaultOfficeEntry": {
+        "command": "bun run game:office",
+        "game": "http://127.0.0.1:3007",
+        "office": "http://127.0.0.1:5173",
+        "reusesRunningProcesses": true
+      },
+      "nativeEditor": {
+        "capture": "office-editor-20261017-r6",
+        "exitCode": 0,
+        "states": 4,
+        "palette": true,
+        "authorityAcknowledgement": true,
+        "uiUndo": true,
+        "newDocumentReload": true,
+        "rendererErrors": 0,
+        "officePhysicsSteps": 0,
+        "officePhysicsBodies": 0,
+        "players": 0
+      },
+      "preservation": {
+        "initialRevision": 54,
+        "finalRevision": 62,
+        "finalGeometry": 9,
+        "layoutContentUnchanged": true,
+        "historyRows": 29,
+        "savedAgentConfigurationUnchanged": true,
+        "previousIssuesPreserved": 8,
+        "newDiagnostic": "Voice device unavailable"
+      }
+    },
+    "priorEvidence": [
+      "docs/render-evidence/office-worker-rest-20261017.json",
+      "docs/render-evidence/office-worker-autonomy-water-20261017.json",
+      "docs/render-evidence/office-business-loop-20261017.json"
+    ],
+    "remaining": [
+      {
+        "id": "remaining-office-game-controls",
+        "status": "incomplete verification",
+        "nextAction": "Compare the current Office input/controller bridge with the original Game input for pointer combat, gamepad, aircraft and special transport actions, repair actual omissions and verify the real canonical body. Existing keyboard and wagon evidence cannot prove these remaining paths."
+      },
+      {
+        "id": "office-task-avatar-boundary",
+        "status": "audit required",
+        "nextAction": "Inspect the retained decorative task-avatar/editor orders against the single-world requirement. Preserve the existing Office task/editor workflow and canonical Game residents; do not substitute task projections for the requested NPC workers or possession."
+      },
+      {
+        "id": "remaining-original-feature-parity",
+        "status": "completion unproven",
+        "nextAction": "Match current production sources and native evidence against the remaining original feature/render/network gates. The editor cycle and full CPU suite are scoped evidence, not complete gameplay/visual acceptance."
+      },
+      {
+        "id": "voice-8765",
+        "status": "held for earlier user question",
+        "nextAction": "Do not start the hub while the already-running native microphone client is attached unless the user answers the pending explicit question. Independent game/editor work remains available."
+      }
+    ],
+    "latestGameFps": {
+      "manifest": "docs/render-evidence/fps-live-20261017-player-answer-r1.json",
+      "average": 65.94227852553067,
+      "scope": "Short stationary original Game sample, Radeon 760M, viewport 1280x720, internal 704x396. No stable-60 or editor FPS claim."
+    }
+  },
+  "failedProbes": [
+    "First Python run imported cached /app modules; rerun with -P used /app/source and passed.",
+    "Initial launcher HTML readiness required UseBasicParsing in Windows PowerShell; backend was already healthy.",
+    "Native R1 exposed missing allowed origin 5173.",
+    "Native R2 needed to scroll the existing palette into view.",
+    "Native R3 exposed the error notification covering Undo; its own edit was restored via API.",
+    "Native R4 and R5 exposed reload-readiness races in QA; R6 confirms a new document and passes."
+  ],
+  "reviewedImages": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/before.png",
+      "bytes": 544836,
+      "sha256": "9ebac20de8ac38d754ae1868a0442021b9d6a78de59e9cf822f9c45a7a283a51",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/before.png",
+      "reviewed": true
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/changed.png",
+      "bytes": 496650,
+      "sha256": "803997a4d66c8dff37ebc3848f6a0e55ec1b72ea5d3c812f29469eb3a1041d6d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/changed.png",
+      "reviewed": true
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/restored.png",
+      "bytes": 500922,
+      "sha256": "675c220c0c0a833d83e4da5cc87263f2c5926ca6a044805a2928731298f72cfb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/restored.png",
+      "reviewed": true
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/reloaded.png",
+      "bytes": 536474,
+      "sha256": "66edc554c1d018b93e4866c80f64e463c28c5ed855724c057d28aa4c4d780ba9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/reloaded.png",
+      "reviewed": true
+    }
+  ],
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "package.json",
+      "bytes": 4210,
+      "sha256": "181903dd17dafeccd8db2b5d4545649a0688827d9d7ebaf9191bc6311543a524",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/package.json"
+    },
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "bytes": 41414,
+      "sha256": "f932576e092257d02e52c372fea8acddc6fcc4194072c046e6355333d5b35e06",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 233011,
+      "sha256": "8ad7778b94dda76b83c8c5af46fd45fd218867cb954f911ca984d10913d935a9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 5630,
+      "sha256": "ad305b6dffe3918ffd2cddad114ed0a4e6a8314df84fded048c235f005955446",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-controls.ts",
+      "bytes": 984,
+      "sha256": "cc2489dc84f9282c57eab62764c80d0242c0acf17d9ef1a2caab95e0002cd802",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/apps/thegame/client/canonical-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "tools/start-game-office.ps1",
+      "bytes": 3324,
+      "sha256": "d52b57f72f58c6f6303a2c5d091c182536ab5f511febfc59b4f1c6555365b3cb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/tools/start-game-office.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "tools/start-office-entry.ps1",
+      "bytes": 645,
+      "sha256": "18cdf07a2a28e801db370c259cbd51c8e66dbd9569e366ffff6ba1ef7df7eff2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/tools/start-office-entry.ps1"
+    },
+    {
+      "repo": "game",
+      "path": "README.md",
+      "bytes": 47487,
+      "sha256": "7dc9fe6776db318d941ca3d15ed3b03e06ee738b46590acd1f71a0ab8864ffee",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/README.md"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 866010,
+      "sha256": "6a4bc3d5f856a42b5066f6e032ee20652687b47807ab24b50155296a1a2e000f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "test/collision-audio.test.ts",
+      "bytes": 3048,
+      "sha256": "71ff2ddcb01790d1c993bfb2a1850241c966b04f305eb9a9f06c9bd3298bb738",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/test/collision-audio.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/damaged-vehicle-entry.test.ts",
+      "bytes": 3098,
+      "sha256": "7bd270303da9f773aacabbb01e0e7f5843c2732ca4f3bf880e8724cf44a9df01",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/test/damaged-vehicle-entry.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/docs-crash-temporal-damage.test.ts",
+      "bytes": 2419,
+      "sha256": "98e319c766602361b0d4b1994ebcc781a44b15fe3b9cfb03a852f93b339e620d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/test/docs-crash-temporal-damage.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 8841,
+      "sha256": "24cfab5832065c2f69aa15f8167248648a06663e5d8802e21be661b68e7fb80a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-editor.ts",
+      "bytes": 8557,
+      "sha256": "c419c0fcfcf91d8cd87b00837bf24d475b7c3566b77c0ff8ac445906641c16f6",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/tools/qa-office-editor.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 34968,
+      "sha256": "8ca9e555f5951bba93dc037c67f0521e297de76c18f471cffedb4761f407a418",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "bytes": 1026,
+      "sha256": "aa517c69fdeec7f90e8121875a56df1a860304a9b737652f1aa978c178c8d441",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/game/office-controller.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/input.ts",
+      "bytes": 3942,
+      "sha256": "5516e1acf5e8bd1f0fb7d3ef55b9cfc9db0922023f88478735ae7008ba2b23c1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/game/input.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-installation.ts",
+      "bytes": 8571,
+      "sha256": "c4732d36c41f9fa1a8d654322b641c5a42171cd258f91d7460cfbf0c0f304822",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/game/office-installation.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-layout.ts",
+      "bytes": 6419,
+      "sha256": "257abade69755f670d6f8ace27945602d80156774c2507380c86a66ac7ac01e2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/server/office-layout.ts"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "office",
+      "path": "README.md",
+      "bytes": 29741,
+      "sha256": "f47ef69e40674f76397954e60568550abe2eeef6f2c7088a4c891605417ca3e6",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/README.md"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 167763,
+      "sha256": "aa736050e026bc4b99108dbd231561790c8d25c3e77fa4abdc52d386674f40af",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "compose.office-editor.yaml",
+      "bytes": 124,
+      "sha256": "2a58da56c0e8290a95300fe800eee852da412d0e5bb16f05179775d3156413ca",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/compose.office-editor.yaml"
+    },
+    {
+      "repo": "office",
+      "path": "compose.office-dev.yaml",
+      "bytes": 767,
+      "sha256": "2c770f6886c69fe6070b2c620c3bec4b8c22e808d5c7913cdc8545d8a83c0efd",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/compose.office-dev.yaml"
+    },
+    {
+      "repo": "office",
+      "path": "scripts/start-office-editor.ps1",
+      "bytes": 4678,
+      "sha256": "727d542bc89ae3edaae0e925d9504d0c10beceedcd9e981bd22ec82ac87ff659",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/scripts/start-office-editor.ps1"
+    },
+    {
+      "repo": "office",
+      "path": "backend/app.py",
+      "bytes": 86826,
+      "sha256": "867dd52281e04a1f954ef1f362209ebe4655da9a7fe42d1b5b9313a20d55d5d8",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/app.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office.py",
+      "bytes": 42744,
+      "sha256": "3a55aec3063d881d43f44990ec8d86d110fbf7518dd46a1d43cc20f8865bce48",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_game.py",
+      "bytes": 6178,
+      "sha256": "7f48ae93f8d8616b9d343ab56fc7bb308554b4ea78875d9a9d68f537b0b0ec08",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office_game.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_life.py",
+      "bytes": 9592,
+      "sha256": "e043637ff6c1f5bae3eee7e3cdbc9178b6fb4df8f7382b6a4b857010b905dc59",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office_life.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_origin.py",
+      "bytes": 702,
+      "sha256": "6320b50683838597d27544c96877acca9442044b90f8a4d82d988a15f995b956",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office_origin.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office.py",
+      "bytes": 11589,
+      "sha256": "6e80abb625789062a68c26638410b6ff7b3fffd3423f7a94a735e265d6e4a90b",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_game.py",
+      "bytes": 12869,
+      "sha256": "808f4d7c92b2c2cd8c6407be5f30e98b0f2ab9ee664417d89860bc6258d0bceb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_game.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_dsl.py",
+      "bytes": 4684,
+      "sha256": "17cd50f827bf76f91c42afff316ae0a0d333e98edb087ed8a529b6b824640efc",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_dsl.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_construction.py",
+      "bytes": 6837,
+      "sha256": "09e854a727d659242b5c25e4daca099c7d206e488ee176360a1e36e8c7f5c108",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_construction.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_life.py",
+      "bytes": 4573,
+      "sha256": "5cdd089ad0a2b160154bbd70754303ffb26215728c180c5e085ab97abdd1c71d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_life.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_api.py",
+      "bytes": 20745,
+      "sha256": "f18058e4b7a5c6044e8360c9fdb75694affc113eb15126d6294b351828697f8e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_api.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_secretary.py",
+      "bytes": 2705,
+      "sha256": "fbe339229ce4d778144a0e5d80c9daaebe242caea7b404542f5e33419abf5b05",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_secretary.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_origin.py",
+      "bytes": 1215,
+      "sha256": "bfdd2a53caa3ace1bc7fc67b25a178cf8580f90da6cb452b679e47a96c53b9ea",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_origin.py"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60304,
+      "sha256": "136f5349ad25d501176e1e17f2698f9a427cd5fab4199231b333037103bd5f11",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/unit-orders.ts",
+      "bytes": 9455,
+      "sha256": "467b3feacaed17a025e6536ab3d182bc5bc2da17ca7a5dc01a5f33c7b26cc871",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/unit-orders.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/agent-labels.ts",
+      "bytes": 1544,
+      "sha256": "469690f58c369e7a15d78fa45658682813ec767379dbf6191b034799cadfe3e1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/agent-labels.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/types.ts",
+      "bytes": 1457,
+      "sha256": "75c1df512c2dbd04f29da8e840e4c7a655da705b2bf5e347e9a342e38654c932",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/types.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/compact.css",
+      "bytes": 5201,
+      "sha256": "f53eb2ab9f21546e369cee877262d1fae493dc0529f1db07665e3589a41b921c",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/compact.css"
+    },
+    {
+      "repo": "office",
+      "path": "scripts/office-agent-autonomy.test.ts",
+      "bytes": 1085,
+      "sha256": "e5a371d7621ba43567339471f137c3fd1053c8709fb390a9ff97ff9832f8969f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/scripts/office-agent-autonomy.test.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "d7ab4c1965e1317e028770933eb95d031a1ed924cc1e01715c524c4a1ef30049",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/index.html"
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/archive-evidence.ts",
+      "bytes": 7235,
+      "sha256": "4a2414c9de1e3e3417dc4b112d48c8d9b1a8251816c46579e2c35a25858850a9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/archive-evidence.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/backend-tests-source-cors.log",
+      "bytes": 332,
+      "sha256": "35d407c1091e3341a77b7340ac18909ef040023f08fe47afe8dcbc6cb8ba218c",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/backend-tests-source-cors.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/backend-tests-source.log",
+      "bytes": 332,
+      "sha256": "86b776049da3545391a677000964a249db7ce7619afefde2b5a251787d0d4415",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/backend-tests-source.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/backend-tests.log",
+      "bytes": 13652,
+      "sha256": "615fa318b8569708b2aebc56ad43a84ea3d4c0c97dd7050391e6553f55d44720",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/backend-tests.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/backup-editor-state.py",
+      "bytes": 2982,
+      "sha256": "ce59a3547e3d33c9e23fcdc08f69ea75acd306081bda6a52faf0a45cb6d23220",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/backup-editor-state.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/backend/app.py",
+      "bytes": 86699,
+      "sha256": "bd3a5ee81a9fc899dc191f6759be6526481792f3359e572481e863215548c88e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/backend/app.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/backend/office_life.py",
+      "bytes": 9071,
+      "sha256": "b7c949474f1d2aa477a98668d735be9fcef62dd5516e91e8df14e34b83421796",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/backend/office_life.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/backend/test_office_life.py",
+      "bytes": 2622,
+      "sha256": "c4246383f7753a12fe23eb5346daba94010932ce2e9e45091329511f422c9e0f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/backend/test_office_life.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/compact.css",
+      "bytes": 5199,
+      "sha256": "4e1feaf64c366529733cf47e559e7cd32cbbac19334e46d580eb795bfa092d5e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/compact.css"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/office_origin.py",
+      "bytes": 690,
+      "sha256": "5999df480a98698880b3c08add33607bed096aa9bbc5c2b010f11c4a7b5f5312",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/office_origin.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/test_office_api.py",
+      "bytes": 18347,
+      "sha256": "84abef580b818c9deb4cfd37d49352e4245411e69160abff1200df05b3d7a21d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/test_office_api.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/test_office_origin.py",
+      "bytes": 778,
+      "sha256": "e9408b2c399b7fcd02d283a835f6dc1481ad3e604c0e629ab216fa7aaf5ca90e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/test_office_origin.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/ui/src/office/agent-labels.ts",
+      "bytes": 1175,
+      "sha256": "e44f87beec846a36f76951b5aadecdf29d25d3f44ff5afb2ab1f5cf0bc26cedb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/ui/src/office/agent-labels.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/ui/src/office/Office.tsx",
+      "bytes": 60275,
+      "sha256": "1893f31f64583cbff7d3169a7dbf70664eb6b1da57d38b38cf9770bfd9bb9e25",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-office/ui/src/office/types.ts",
+      "bytes": 1441,
+      "sha256": "56699e429f1ff092d3e19aeac7c2bf895f22262c599d3b0e5fbf963163cd4896",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-office/ui/src/office/types.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/before-qa-office.ts",
+      "bytes": 8430,
+      "sha256": "5270c15c2377dde49185c57c069c6e14adcfd9fff5d4b12c816fff4374b28ffe",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/before-qa-office.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/canonical-office-before.json",
+      "bytes": 12998,
+      "sha256": "7c098d01c0bbd63aaea0b8452fbeb928ee4c4d12a74755582237ee4856edf519",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/canonical-office-before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/canonical-prestart.json",
+      "bytes": 14151,
+      "sha256": "34febc8f8be0aa4ebd71d350b16e8848bd69689eaa4836761c279c19e5d2f377",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/canonical-prestart.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/check-editor-http.ts",
+      "bytes": 1638,
+      "sha256": "5ab91f543af7554bebd4dca02aa6e3c579af238cbe4cc8d54b262f042b07ba50",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/check-editor-http.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-entry-final.log",
+      "bytes": 305,
+      "sha256": "1974499b309b41035b7689ce1a30eeb20efaa3c07a81c91492d96d094854f1fe",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-entry-final.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-http.json",
+      "bytes": 578,
+      "sha256": "209ca8cc880ba5da5ef3ac033d4fbca98a8c8df3f9a46af5c1d0048d3f0d59d9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-http.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-preservation.json",
+      "bytes": 1143,
+      "sha256": "8443457ae67a33172759a02782bddeeed4721dbc241ae006f5c89de6cd00251e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-preservation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-prestart-check.json",
+      "bytes": 693,
+      "sha256": "2d99d16f842f06754be4d4c268d3de2fe81b7d2a583d4b1dda06673114d51a5f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-prestart-check.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-reuse-operation.json",
+      "bytes": 303,
+      "sha256": "2ec158301f2b6529f7894fa1f104c2759c0327c3afeee2d73a5aa6fc9bc7483f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-reuse-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-reuse.log",
+      "bytes": 304,
+      "sha256": "879824c6431a09f845ec7eb93f6100bf0fb64f22f523b14855f29d98dc8e00c2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-reuse.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-start.log",
+      "bytes": 1302,
+      "sha256": "9d0f337bed342656185e9fa1969894a5bd3846dbb303ac94b04875e35fa42d7d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-start.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/editor-state-before.json",
+      "bytes": 717,
+      "sha256": "6506dc971eb7f191ca93626057d3185f8dd34f532b885978b9bb234644ca955b",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/editor-state-before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/game-typecheck-editor-complete.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/game-typecheck-editor-complete.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/game-typecheck-editor-final.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/game-typecheck-editor-final.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/game-typecheck-editor.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/game-typecheck-editor.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r1-operation.json",
+      "bytes": 310,
+      "sha256": "657b0e6b351f77b551600fc0b41b258b93be2b94a7458363ea5d02fbc18b0df5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r1-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r1.log",
+      "bytes": 640,
+      "sha256": "ff8a2e818b4a87f967e66738c403c68a2ca0a904fbcd0188b7f86159cba9b1b4",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r1.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r2-operation.json",
+      "bytes": 310,
+      "sha256": "87fb6bd0be3f8ee6e3d2e58ea0bf029223a82f41e13f26a0ae41da9dc7c045ae",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r2-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r2.log",
+      "bytes": 2011,
+      "sha256": "bd91ab3bd10d66883dc3fb9ab3519708f17f4a1128cb4ce0efd12fa0a79fd500",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r2.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r3-operation.json",
+      "bytes": 310,
+      "sha256": "44d4ec9afca8f38b160e41b6eb2c218c5bf8d4f56c989d849aa7c5ee451394af",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r3-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r3.log",
+      "bytes": 2102,
+      "sha256": "c99154f16418775bf061ba087e78b70f31b1c11d028630320d050424a9d65796",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r3.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r4-operation.json",
+      "bytes": 310,
+      "sha256": "273b4c8271fa789b54197b9e3d6e10a078319e70548a41e007652b3cc573dc1c",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r4-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r4.log",
+      "bytes": 2443,
+      "sha256": "9a07df58b0e7623ebf4140b27d8786da1ba0257c2ed6d42516ab4a31719e3a2d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r4.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r5-operation.json",
+      "bytes": 310,
+      "sha256": "79ae17e29b8efacd4f507c03c8affc6feb03bc92a650575e4d20b1fc1f866ce2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r5-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r5.log",
+      "bytes": 2982,
+      "sha256": "75c1a376b7d7e1ebd86d77f1943f01a48b9e2bee9fb66333bb9627dbe5fd3c45",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r5.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r6-operation.json",
+      "bytes": 310,
+      "sha256": "30bf890cb88d22dbe2955f74b841f1c713535c646a9cae5ab142d1627453cf8a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r6-operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/native-editor-r6.log",
+      "bytes": 1860,
+      "sha256": "595a94dff9de793faad6230ae01108394812ef41466a8be69b6fcd7ca6c7b6f9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/native-editor-r6.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/office-tables-after.json",
+      "bytes": 400017,
+      "sha256": "f4dcbc0a0b205fa3c4d4111861b874f752c720bbde4cbcd19332b944ca3cc329",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/office-tables-after.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/office-tables-before.json",
+      "bytes": 399885,
+      "sha256": "e18590bf9f24851b420d1e4c08c78e7265ad61a1878c69ba4e43f0df230be812",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/office-tables-before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/office-ui-build-final.log",
+      "bytes": 889,
+      "sha256": "698928676d2ae92717b0cf62ce37978628d91b9d23535ff72dd2c08d7841855e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/office-ui-build-final.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/office-ui-typecheck-complete.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/office-ui-typecheck-complete.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/original-baseline-verification.json",
+      "bytes": 1985,
+      "sha256": "e16232956170afb25f132f43d28e77b2f388108eb72cd97c9011f6f7802b60e7",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/original-baseline-verification.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/probe-editor-state.py",
+      "bytes": 2222,
+      "sha256": "c9259986be74b63c9c7ffa225c13daa02d2fef25b411b9056d5fd12939fa6644",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/probe-editor-state.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/qa-office-editor-r2.ts",
+      "bytes": 8037,
+      "sha256": "3a41a5b4d11240d9e772797972b88803c38ff756996f61c9cc4323e3fcc7ca98",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/qa-office-editor-r2.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/qa-office-editor-r3.ts",
+      "bytes": 8109,
+      "sha256": "386fe7ab39402f23609f7138a3d299dc504a585815955417f3be2ee7c17cdd6a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/qa-office-editor-r3.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/qa-office-editor-r4.ts",
+      "bytes": 8109,
+      "sha256": "386fe7ab39402f23609f7138a3d299dc504a585815955417f3be2ee7c17cdd6a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/qa-office-editor-r4.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/qa-office-editor-r5.ts",
+      "bytes": 8427,
+      "sha256": "f0e0ed673f3d89750b665be77bf94ea4fed58c8b6a40d4b88537aa33fbc05fd9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/qa-office-editor-r5.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/read-editor-tables.py",
+      "bytes": 648,
+      "sha256": "b093377649b758d448d55dfe7bc60645003e867d2df17131842ba5f656a308cd",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/read-editor-tables.py"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/requirements-current.json",
+      "bytes": 3418,
+      "sha256": "c295382c1263246ef90d185252031f561e0abd19874c2ddcf71a9650fd3c0832",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/requirements-current.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/run-editor-qa-r2.ps1",
+      "bytes": 1430,
+      "sha256": "187b0243a88ca33b1ef817ac1a12c3df9f06c02c59253cb9fbcea7bdb1961c47",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/run-editor-qa-r2.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/run-editor-qa-r3.ps1",
+      "bytes": 1430,
+      "sha256": "64df234f4230d3907afea047bc61432a1a01e5aaa0ba7b24cdb75766787cbf02",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/run-editor-qa-r3.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/run-editor-qa-r4.ps1",
+      "bytes": 1430,
+      "sha256": "74139d88ea64e4722c87296d63ece7a8ddece60a65c3132dc129aec8b4015486",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/run-editor-qa-r4.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/run-editor-qa-r5.ps1",
+      "bytes": 1430,
+      "sha256": "c38fe9bd0128d2739aa59341f3d1839931b4fd9507f6b0da28b3a03a57f241bd",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/run-editor-qa-r5.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/run-editor-qa-r6.ps1",
+      "bytes": 1430,
+      "sha256": "a5178bec948d429640bb097ed77bfc90001a3018f11e024402e8da55c4a9b2c9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/run-editor-qa-r6.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/run-editor-qa.ps1",
+      "bytes": 1430,
+      "sha256": "53b1b82fa269a7135617b6df43fdf27569b37a38ddbb0cb827895136aec5efa1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/run-editor-qa.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/runtime-final.json",
+      "bytes": 1095,
+      "sha256": "4ddc66bc756cce8115054aff923ecbab8513d45010195c507677edfd71f4422e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/runtime-final.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/start-editor.ps1",
+      "bytes": 3324,
+      "sha256": "60681b3447dd8e2978386b121cd1f9836b990e5b6859fa21aaf718646ee8070f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/start-editor.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/verify-editor-preservation.ts",
+      "bytes": 3049,
+      "sha256": "39c2faf9c38a275e11f7f1f05382fdbe04e53b8cc621382c5b3e26a54b981b99",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/verify-editor-preservation.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-integration/verify-original-baseline.ts",
+      "bytes": 2785,
+      "sha256": "a506d9c4c2f411aad02f18323837dcc4fb1fe66be852e7cda7684cfa78eee027",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-integration/verify-original-baseline.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-current.json",
+      "bytes": 2699,
+      "sha256": "f7bc410b5afe4466f45037879d889b10606603e27c18d5bc5e637857fe51766b",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-current.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-baseline.json",
+      "bytes": 2740,
+      "sha256": "5eb665e3d06ff4802b3aaf4dfdcf6e67baba5d6441f90c533a636c9d8309e45a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-baseline.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-diagnostics.ts",
+      "bytes": 4722,
+      "sha256": "3708c7b140e075b06a9dd589447679fafd963756892426e1c88148aad0663a04",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-diagnostics.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-current-diagnostic.log",
+      "bytes": 1926,
+      "sha256": "b30a40690400a861ae55804cb0c503b7dccb69b4be4de3ed24d9267d7175f9a7",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-current-diagnostic.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-baseline-diagnostic.log",
+      "bytes": 1927,
+      "sha256": "90ef4fef6ba6c1007c15e4451fcb0ca0c5ba9f336160168c7a217e8ef3c06f0d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-baseline-diagnostic.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-full-game-check-20261017.log",
+      "bytes": 170727,
+      "sha256": "a1956b27ddb209f5efc60c5c0a3ea6b1608552a4d3ff14cc6ac94cff92298af1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-full-game-check-20261017.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-office-life-tests-20261017.log",
+      "bytes": 109,
+      "sha256": "ef8b6be13eafed5769f5b4675184f06f6051ede8eae5340b294b1d2938fb3569",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-office-life-tests-20261017.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-office-autonomy-ui-tests-20261017.log",
+      "bytes": 244,
+      "sha256": "a7d2bcda432e331d85ce27b81a28cb7cd0ce56000469df6061cbe14ab8c1def5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-office-autonomy-ui-tests-20261017.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-office-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-office-ui-typecheck-20261017.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/original-feature-office-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "50c81d5e4dba77d980f1d70845924522fb59e50555d128ab793adc6301e9a6c0",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/artifacts/original-feature-office-ui-build-20261017.log"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-baseline-head.zip",
+      "bytes": 1351197,
+      "sha256": "c150deea26524ea194ba36150b788f8a483649884e9185a5649fc78682f38ea4",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-baseline-head.zip"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-baseline-head-commit.txt",
+      "bytes": 42,
+      "sha256": "ee7f41915c0612f35b2a1c390b860060a1c077d77facc55750fbfd71ae380317",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-baseline-head-commit.txt"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-baseline-head/baseline-tests.log",
+      "bytes": 3835,
+      "sha256": "421d6232428a6b81cb1f0a49e5ddd64693037fa509f840dac6949e3be386cc8f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-baseline-head/baseline-tests.log"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-regression-repro-20261017.log",
+      "bytes": 3712,
+      "sha256": "e10f7e7e104ce1a97fb83120248e99067adf4e309fd43568aec6cae0bafd934b",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-regression-repro-20261017.log"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-regression-corrected-20261017.log",
+      "bytes": 11507,
+      "sha256": "e78cb5988b337e7fb04bf07f24c166dd3e3a04f76dd6010ceca79c67d198e3d6",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-regression-corrected-20261017.log"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-regression-scoped-20261017.log",
+      "bytes": 3912,
+      "sha256": "f2316132f09e3340251fdd8e327280830d6db0d8c83322153f4d87b562445b2c",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-regression-scoped-20261017.log"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-checks/collision-audio.test.ts",
+      "bytes": 2878,
+      "sha256": "427ffb506d1207c0e9814bfb62dcd5aa9e94730083b9f7c0be51c1c265692013",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-checks/collision-audio.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-checks/damaged-vehicle-entry.test.ts",
+      "bytes": 2633,
+      "sha256": "1ff7c02845935c77e2fe48a462a4d34bf3e1a25ae7d90f074ef82fa583c1b301",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-checks/damaged-vehicle-entry.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/original-feature-checks/docs-crash-temporal-damage.test.ts",
+      "bytes": 1610,
+      "sha256": "de6633cf90272f31936f36067fe49dd8e01753a31955398a944f5e01128cf591",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/original-feature-checks/docs-crash-temporal-damage.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17638,
+      "sha256": "65fa8bb7595af75c21ec8a967660a053a5cf54e14682ed6b7f55d0b4b97d6cc5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r1/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 17803,
+      "sha256": "93a87b780f344cb6d37dd4722217fb813c1550d59a90c4311931720777ddef93",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r2/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r2/office-entry.json",
+      "bytes": 17964,
+      "sha256": "41166514ea32b7621ebb625f97d673f3c0c0ac2045cfcdac116bd35b67009647",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r2/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r2/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r2/office-entry.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r2/before.json",
+      "bytes": 26416,
+      "sha256": "c00b5a97c034f37bc014fd3ffda77becc844e057b30a96bbef6161bf74523e22",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r2/before.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r2/before.png",
+      "bytes": 583502,
+      "sha256": "da9c7aec0c6e4021d6900d1899e485dbd9ff758bda4323da0ff5e42fcbe6635d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r2/before.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r2/cleanup.json",
+      "bytes": 55,
+      "sha256": "d1ba67914a8f6e5b134dad8d1b2a2b705db098ff8be05bc23ba6d4beb2aea924",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r2/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r2/failure.json",
+      "bytes": 625,
+      "sha256": "85a5fa616593bd817f744aae8a032cc16cd212fb8e9276aa719e7220fb8a3ef5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r2/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r2/failure.png",
+      "bytes": 560661,
+      "sha256": "fb6f4e5154814a64023107eb15250ab9105ed39532d1bc510fa931b6438dead5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r2/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r3/office-entry-diagnostics.json",
+      "bytes": 17837,
+      "sha256": "dbe59fcaed4698ff87343d7cb896a5483f782194700239487305ec2edcf4043b",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r3/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r3/office-entry.json",
+      "bytes": 17998,
+      "sha256": "ddeb8909cbdf89e23b44a8bb35b29795fec35665685a08e049257e8859d86ee6",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r3/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r3/office-entry.png",
+      "bytes": 587699,
+      "sha256": "12d315ac3170203b6ca7407eec0b0d6ca6987a6514049b0d5bed1dea8296ec3e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r3/office-entry.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r3/before.json",
+      "bytes": 26416,
+      "sha256": "c00b5a97c034f37bc014fd3ffda77becc844e057b30a96bbef6161bf74523e22",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r3/before.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r3/before.png",
+      "bytes": 586421,
+      "sha256": "79c92588b5163fd7367dbc5790aadc7d500685e399ba9b1a256de844dcd83420",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r3/before.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r3/changed.png",
+      "bytes": 541500,
+      "sha256": "63811b884d149d0d9d547eaa93cac43913781aa2d517834bcf659cb9b8aae7cb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r3/changed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r3/cleanup.json",
+      "bytes": 61,
+      "sha256": "f5f6aab6987406eba04812f2f4f529511a0bd42307209d6bb4843a4cc6a650f4",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r3/cleanup.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r3/failure.json",
+      "bytes": 1096,
+      "sha256": "b041a9432eb509398dc50d10d3724848e28728215acf57e0156593e06ecdedbe",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r3/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r3/failure.png",
+      "bytes": 550114,
+      "sha256": "bb3787c0dd7d69eb80760240f698008e96e0249149a0ccc40381af14733bc211",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r3/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r4/office-entry-diagnostics.json",
+      "bytes": 17840,
+      "sha256": "105eb60905cd53816d791fc7980b1f2989c5b3d7e1e14ba0d5a3647d22e17949",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r4/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r4/office-entry.json",
+      "bytes": 18001,
+      "sha256": "7909cf5752173c7743ff75c96f9bc6e381222f55c0045bd71bfbb700ae494745",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r4/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r4/office-entry.png",
+      "bytes": 647217,
+      "sha256": "351c4f8f907ae539f053f1593f2037e2699a2b292e020844875d9a8758be80c5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r4/office-entry.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r4/before.json",
+      "bytes": 26416,
+      "sha256": "49ce4a8571b4aed2dac96f497330d580b59f26c33a40b09c9f7193445807eae7",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r4/before.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r4/before.png",
+      "bytes": 590470,
+      "sha256": "03f7a46a3ec5c7230f431ee9b836f6153a01cb5e99ae328fad18aa3d504839e2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r4/before.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r4/changed.png",
+      "bytes": 538297,
+      "sha256": "d9777bd56f12c4e7f70224bb3b5279a3bc3f1a819104251469adaad6e6c0a394",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r4/changed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r4/failure.json",
+      "bytes": 1474,
+      "sha256": "2c81bac14b80ef2697b453101c4bdebe6e773f546e48124f5bb866c903851ffa",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r4/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r4/restored.png",
+      "bytes": 533221,
+      "sha256": "05f8c8012a45e08e1110ceb19ce731a487a6f3c2da36fbbb6d904ff7402fee68",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r4/restored.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r5/office-entry-diagnostics.json",
+      "bytes": 17775,
+      "sha256": "a1b2d3bda5dc1545918493a23d6899ef058a9a3c5d7df33d716df1af47378512",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r5/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r5/office-entry.json",
+      "bytes": 17936,
+      "sha256": "b0bafb706263a328e50db1b10ed2b9ce26724525aa50b70a77b6ea360b84e99d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r5/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r5/office-entry.png",
+      "bytes": 547000,
+      "sha256": "acaf750048e14838dae9765b7dffec3b63d725853df1345a440947b8209671a7",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r5/office-entry.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r5/before.json",
+      "bytes": 26416,
+      "sha256": "809a8c988045f8e88b8553064bb0ee1c12e4e801693b6c96bf5aee3b2199b2f8",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r5/before.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r5/before.png",
+      "bytes": 545517,
+      "sha256": "e941b53c1c2e3df3ad84d28020211c95f11f53383b8916f8c29c2fcd6ff60627",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r5/before.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r5/changed.png",
+      "bytes": 499172,
+      "sha256": "f375b84eb3eb5f365575e85aa25e02ba4474ae653511ad1129a83ac8140f39f2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r5/changed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r5/failure.json",
+      "bytes": 1529,
+      "sha256": "cba6241d5818445f38757ee0179f92d52862dc65102ba3701bf4b5580d0853ec",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r5/failure.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r5/failure.png",
+      "bytes": 4254,
+      "sha256": "3878570f4a62a0d65f57cf1754e0269e56ec797f4e36e26b44c172eb6e800401",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r5/failure.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r5/restored.png",
+      "bytes": 551938,
+      "sha256": "eb7fa26fec5ac745ca4966af5c38d5a4af2e0a04d90a70a540307aea18ea3b63",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r5/restored.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r6/office-entry-diagnostics.json",
+      "bytes": 17752,
+      "sha256": "7704c73deefc38c7ec754d567232153db9daa7464077a8d6a96a758caf0dcc64",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r6/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r6/office-entry.json",
+      "bytes": 17913,
+      "sha256": "14950a8165564741546fbfb49822f07fb67eed805e0ccf98666807bfa10f67ca",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r6/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-editor-20261017-r6/office-entry.png",
+      "bytes": 580899,
+      "sha256": "40f581ea8cd8deb215deb86f81537cba9bbc9a6233cfe6ded632e3f484880027",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-in-game/office-editor-20261017-r6/office-entry.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/before.json",
+      "bytes": 26416,
+      "sha256": "0ec7fdcf2d9f5c1b89b4872b6113584b32e1147482a480ebd999dcb31c8077c2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/before.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/before.png",
+      "bytes": 544836,
+      "sha256": "9ebac20de8ac38d754ae1868a0442021b9d6a78de59e9cf822f9c45a7a283a51",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/before.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/changed.png",
+      "bytes": 496650,
+      "sha256": "803997a4d66c8dff37ebc3848f6a0e55ec1b72ea5d3c812f29469eb3a1041d6d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/changed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/reloaded.png",
+      "bytes": 536474,
+      "sha256": "66edc554c1d018b93e4866c80f64e463c28c5ed855724c057d28aa4c4d780ba9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/reloaded.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/report.json",
+      "bytes": 2388,
+      "sha256": "68d5e8eca5a617e820f7d79a271f31e5eb135e039cb7afd73c1184ffa43841b8",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-editor/office-editor-20261017-r6/restored.png",
+      "bytes": 500922,
+      "sha256": "675c220c0c0a833d83e4da5cc87263f2c5926ca6a044805a2928731298f72cfb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/artifacts/office-editor/office-editor-20261017-r6/restored.png"
+    },
+    {
+      "repo": "engine",
+      "path": "package.json",
+      "bytes": 4210,
+      "sha256": "181903dd17dafeccd8db2b5d4545649a0688827d9d7ebaf9191bc6311543a524",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/package.json"
+    },
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "bytes": 41414,
+      "sha256": "f932576e092257d02e52c372fea8acddc6fcc4194072c046e6355333d5b35e06",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 233011,
+      "sha256": "8ad7778b94dda76b83c8c5af46fd45fd218867cb954f911ca984d10913d935a9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 5630,
+      "sha256": "ad305b6dffe3918ffd2cddad114ed0a4e6a8314df84fded048c235f005955446",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-controls.ts",
+      "bytes": 984,
+      "sha256": "cc2489dc84f9282c57eab62764c80d0242c0acf17d9ef1a2caab95e0002cd802",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/apps/thegame/client/canonical-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "tools/start-game-office.ps1",
+      "bytes": 3324,
+      "sha256": "d52b57f72f58c6f6303a2c5d091c182536ab5f511febfc59b4f1c6555365b3cb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/tools/start-game-office.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "tools/start-office-entry.ps1",
+      "bytes": 645,
+      "sha256": "18cdf07a2a28e801db370c259cbd51c8e66dbd9569e366ffff6ba1ef7df7eff2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/tools/start-office-entry.ps1"
+    },
+    {
+      "repo": "game",
+      "path": "README.md",
+      "bytes": 47487,
+      "sha256": "7dc9fe6776db318d941ca3d15ed3b03e06ee738b46590acd1f71a0ab8864ffee",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/README.md"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 866010,
+      "sha256": "6a4bc3d5f856a42b5066f6e032ee20652687b47807ab24b50155296a1a2e000f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "test/collision-audio.test.ts",
+      "bytes": 3048,
+      "sha256": "71ff2ddcb01790d1c993bfb2a1850241c966b04f305eb9a9f06c9bd3298bb738",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/test/collision-audio.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/damaged-vehicle-entry.test.ts",
+      "bytes": 3098,
+      "sha256": "7bd270303da9f773aacabbb01e0e7f5843c2732ca4f3bf880e8724cf44a9df01",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/test/damaged-vehicle-entry.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/docs-crash-temporal-damage.test.ts",
+      "bytes": 2419,
+      "sha256": "98e319c766602361b0d4b1994ebcc781a44b15fe3b9cfb03a852f93b339e620d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/test/docs-crash-temporal-damage.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 8841,
+      "sha256": "24cfab5832065c2f69aa15f8167248648a06663e5d8802e21be661b68e7fb80a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-editor.ts",
+      "bytes": 8557,
+      "sha256": "c419c0fcfcf91d8cd87b00837bf24d475b7c3566b77c0ff8ac445906641c16f6",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/tools/qa-office-editor.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 34968,
+      "sha256": "8ca9e555f5951bba93dc037c67f0521e297de76c18f471cffedb4761f407a418",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "bytes": 1026,
+      "sha256": "aa517c69fdeec7f90e8121875a56df1a860304a9b737652f1aa978c178c8d441",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/game/office-controller.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/input.ts",
+      "bytes": 3942,
+      "sha256": "5516e1acf5e8bd1f0fb7d3ef55b9cfc9db0922023f88478735ae7008ba2b23c1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/game/input.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-installation.ts",
+      "bytes": 8571,
+      "sha256": "c4732d36c41f9fa1a8d654322b641c5a42171cd258f91d7460cfbf0c0f304822",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/game/office-installation.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-layout.ts",
+      "bytes": 6419,
+      "sha256": "257abade69755f670d6f8ace27945602d80156774c2507380c86a66ac7ac01e2",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/src/server/office-layout.ts"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "office",
+      "path": "README.md",
+      "bytes": 29741,
+      "sha256": "f47ef69e40674f76397954e60568550abe2eeef6f2c7088a4c891605417ca3e6",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/README.md"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 167763,
+      "sha256": "aa736050e026bc4b99108dbd231561790c8d25c3e77fa4abdc52d386674f40af",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "compose.office-editor.yaml",
+      "bytes": 124,
+      "sha256": "2a58da56c0e8290a95300fe800eee852da412d0e5bb16f05179775d3156413ca",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/compose.office-editor.yaml"
+    },
+    {
+      "repo": "office",
+      "path": "compose.office-dev.yaml",
+      "bytes": 767,
+      "sha256": "2c770f6886c69fe6070b2c620c3bec4b8c22e808d5c7913cdc8545d8a83c0efd",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/compose.office-dev.yaml"
+    },
+    {
+      "repo": "office",
+      "path": "scripts/start-office-editor.ps1",
+      "bytes": 4678,
+      "sha256": "727d542bc89ae3edaae0e925d9504d0c10beceedcd9e981bd22ec82ac87ff659",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/scripts/start-office-editor.ps1"
+    },
+    {
+      "repo": "office",
+      "path": "backend/app.py",
+      "bytes": 86826,
+      "sha256": "867dd52281e04a1f954ef1f362209ebe4655da9a7fe42d1b5b9313a20d55d5d8",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/app.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office.py",
+      "bytes": 42744,
+      "sha256": "3a55aec3063d881d43f44990ec8d86d110fbf7518dd46a1d43cc20f8865bce48",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_game.py",
+      "bytes": 6178,
+      "sha256": "7f48ae93f8d8616b9d343ab56fc7bb308554b4ea78875d9a9d68f537b0b0ec08",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office_game.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_life.py",
+      "bytes": 9592,
+      "sha256": "e043637ff6c1f5bae3eee7e3cdbc9178b6fb4df8f7382b6a4b857010b905dc59",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office_life.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_origin.py",
+      "bytes": 702,
+      "sha256": "6320b50683838597d27544c96877acca9442044b90f8a4d82d988a15f995b956",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/office_origin.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office.py",
+      "bytes": 11589,
+      "sha256": "6e80abb625789062a68c26638410b6ff7b3fffd3423f7a94a735e265d6e4a90b",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_game.py",
+      "bytes": 12869,
+      "sha256": "808f4d7c92b2c2cd8c6407be5f30e98b0f2ab9ee664417d89860bc6258d0bceb",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_game.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_dsl.py",
+      "bytes": 4684,
+      "sha256": "17cd50f827bf76f91c42afff316ae0a0d333e98edb087ed8a529b6b824640efc",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_dsl.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_construction.py",
+      "bytes": 6837,
+      "sha256": "09e854a727d659242b5c25e4daca099c7d206e488ee176360a1e36e8c7f5c108",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_construction.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_life.py",
+      "bytes": 4573,
+      "sha256": "5cdd089ad0a2b160154bbd70754303ffb26215728c180c5e085ab97abdd1c71d",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_life.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_api.py",
+      "bytes": 20745,
+      "sha256": "f18058e4b7a5c6044e8360c9fdb75694affc113eb15126d6294b351828697f8e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_api.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_secretary.py",
+      "bytes": 2705,
+      "sha256": "fbe339229ce4d778144a0e5d80c9daaebe242caea7b404542f5e33419abf5b05",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_secretary.py"
+    },
+    {
+      "repo": "office",
+      "path": "backend/test_office_origin.py",
+      "bytes": 1215,
+      "sha256": "bfdd2a53caa3ace1bc7fc67b25a178cf8580f90da6cb452b679e47a96c53b9ea",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/backend/test_office_origin.py"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60304,
+      "sha256": "136f5349ad25d501176e1e17f2698f9a427cd5fab4199231b333037103bd5f11",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/unit-orders.ts",
+      "bytes": 9455,
+      "sha256": "467b3feacaed17a025e6536ab3d182bc5bc2da17ca7a5dc01a5f33c7b26cc871",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/unit-orders.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/agent-labels.ts",
+      "bytes": 1544,
+      "sha256": "469690f58c369e7a15d78fa45658682813ec767379dbf6191b034799cadfe3e1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/agent-labels.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/types.ts",
+      "bytes": 1457,
+      "sha256": "75c1df512c2dbd04f29da8e840e4c7a655da705b2bf5e347e9a342e38654c932",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/types.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/compact.css",
+      "bytes": 5201,
+      "sha256": "f53eb2ab9f21546e369cee877262d1fae493dc0529f1db07665e3589a41b921c",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/src/office/compact.css"
+    },
+    {
+      "repo": "office",
+      "path": "scripts/office-agent-autonomy.test.ts",
+      "bytes": 1085,
+      "sha256": "e5a371d7621ba43567339471f137c3fd1053c8709fb390a9ff97ff9832f8969f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/scripts/office-agent-autonomy.test.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "d7ab4c1965e1317e028770933eb95d031a1ed924cc1e01715c524c4a1ef30049",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/index.html"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/environment-map.worker-D5wbJvIo.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture/hand_landmarker.task",
+      "bytes": 7819105,
+      "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/gesture/hand_landmarker.task"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture/LICENSE",
+      "bytes": 12331,
+      "sha256": "8707eef0533987efc5b155d64761eeb6e20793f50b9bd1a68dad1cf4719d0ed8",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/gesture/LICENSE"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture/SOURCE.txt",
+      "bytes": 577,
+      "sha256": "ab2e23cdb35cd000d6d69213e10f8ce85a0eea9b22cdd199c6b97de6b58947b5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/gesture/SOURCE.txt"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture/vision_wasm_module_internal.js",
+      "bytes": 335431,
+      "sha256": "70eff3956521b7de058d7173a4935c95e4a223c26ea624b9f5a936d3a043dcb0",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/gesture/vision_wasm_module_internal.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture/vision_wasm_module_internal.wasm",
+      "bytes": 12997272,
+      "sha256": "ee03b14a878e6c3c053a1bfa62e166dc45244be54dc0bbe61c578f710b771f6a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/gesture/vision_wasm_module_internal.wasm"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/gesture.worker-BHWWTrrT.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-BKUNw4vW.css",
+      "bytes": 98405,
+      "sha256": "705c6d07c6473759ef7abd4f8e2b0dbe73e14de20fda9de0c724c484e2ef5a2b",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/index-BKUNw4vW.css"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-DFJTjlwJ.js",
+      "bytes": 1806908,
+      "sha256": "87331a88ec75547abf0f14abd2d9ba18c56128e0f490033a2fd20efdc8d33910",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/index-DFJTjlwJ.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/materials/linen.png",
+      "bytes": 24461,
+      "sha256": "7e308fdaecaf3a2a4c0e6bc83ce6cd7863d1ba6523db630df40746659cdb573f",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/materials/linen.png"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/materials/oak.png",
+      "bytes": 66380,
+      "sha256": "1d3077e3c473b06b0eec13464fdc1bd149123be4eedcc87ccf907058df8fe278",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/materials/oak.png"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/LICENSE-CC-BY-NC-4.0.txt",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/LICENSE-CC-BY-NC-4.0.txt"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/openpeon.json",
+      "bytes": 5843,
+      "sha256": "0abbe1af9c2808707a3a026ec5937f27436b6492525c00d578819070639929b4",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/openpeon.json"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonDeath.wav",
+      "bytes": 81530,
+      "sha256": "c46dd952a4dca36cc3e71b5594d6b102ad8366380ca411190e38290090d258c8",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonDeath.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonJobDone.wav",
+      "bytes": 75866,
+      "sha256": "e950bae3f85c89bdc87a2826f7fa251c4afb7b2258fe49441a2b9aa5361c30a1",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonJobDone.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonReady1.wav",
+      "bytes": 76100,
+      "sha256": "62722dd2c0d3050cc8fae615ec28e1b43456779c9e45462bd936afcc439c667a",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonReady1.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonWhat1.wav",
+      "bytes": 50304,
+      "sha256": "c5d28882c40411154649980d367331b9aff81bd3fb685819c1e9fc0a2e0d6d39",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonWhat1.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonWhat2.wav",
+      "bytes": 53254,
+      "sha256": "9d5ab770416487154e5ae915aaecec137ada0aef71d2d9e6f8b342787edc89dd",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonWhat2.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonWhat3.wav",
+      "bytes": 69590,
+      "sha256": "84873648d16be9390246fca859683e6d2bb091b80afebcac84cd8c23faa86097",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonWhat3.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonYes1.wav",
+      "bytes": 70826,
+      "sha256": "64b85316710c976aaa498839c93ada4496e73fd8a75daa1886f934b393ae2858",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonYes1.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/PeonYes2.wav",
+      "bytes": 68580,
+      "sha256": "807e072eed2d68543b0e67e1c4f4897da5d78aa3b6fd3fba06a111aae2a353de",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/PeonYes2.wav"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/peon/SOURCE.txt",
+      "bytes": 712,
+      "sha256": "51179d8d8a707a1b546eb5babf00abeaeedfdfbc593eb739e9acffff63ea62c5",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/office/ui/dist/assets/peon/SOURCE.txt"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-player-answer-r1.json",
+      "bytes": 3629,
+      "sha256": "e35af3fec4610050a669f1757910e74f47efa3287ae60d657e49878b6b4feaa9",
+      "archive": "artifacts/original-feature-editor-evidence-20261017/engine/docs/render-evidence/fps-live-20261017-player-answer-r1.json"
+    }
+  ],
+  "counts": {
+    "files": 198,
+    "bytes": 43667296,
+    "sources": 48,
+    "reviewedImages": 4
+  },
+  "limits": [
+    "Full Game CPU/typecheck results do not establish every remaining interactive Office path or all temporal visual fidelity.",
+    "Task-avatar and remaining original control/feature audit remain active.",
+    "Voice hub 8765 was not started; the earlier user question is unanswered.",
+    "Native editor run is not an FPS benchmark. The latest separate Game FPS manifest is included."
+  ]
+}
