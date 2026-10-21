@@ -61,7 +61,7 @@ export function buildDormantRenderFrame(scene:Scene,camera:CameraSpec=scene.came
   return{scene,camera,objects:Object.freeze([]),objectsById:new Map(),lights:Object.freeze([])};
 }
 
-interface CachedRenderObject {entity:RuntimeEntity;primitive:Primitive;base:readonly [number,number,number];slot:number;seen:number;pose:Float64Array;object:RenderObjectIR;geometryRevision:number}
+interface CachedRenderObject {entity:RuntimeEntity;primitive:Primitive;base:readonly [number,number,number];slot:number;seen:number;pose:Float64Array;object:RenderObjectIR;geometryRevision:number;isStream:boolean}
 /** Dependent projections consume the same freshly observed transform stream.
  * Only the built-in live projections certify pose observations; custom builders
  * and dormant frames require a consumer's authoritative Scene fallback. */
@@ -104,14 +104,15 @@ export class RenderFrameCache {
       if(entity.renderVisible===false)continue;
       if(entity.light)this.lights[lightIndex++]=entity;
       const primitive=primitiveFor(entity);if(!primitive)continue;
-      let entry=this.entriesByEntity.get(entity);
+      let entry=this.entries[index];if(entry?.entity!==entity)entry=this.entriesByEntity.get(entity);
       if(!entry){
         const slot=this.freePoseSlots.pop()??this.poseSlots++;
         this.reservePoses(slot+1);
-        entry={entity,primitive,base:primitiveBaseScale(primitive),slot,seen:observation,pose:new Float64Array(this.poses.buffer,slot*9*8,9).fill(NaN),object:null!,geometryRevision:triangleStreamRevision(primitive)};
+        const isStream=isTriangleStream(primitive);
+        entry={entity,primitive,base:primitiveBaseScale(primitive),slot,seen:observation,pose:new Float64Array(this.poses.buffer,slot*9*8,9).fill(NaN),object:null!,geometryRevision:isStream?triangleStreamRevision(primitive):0,isStream};
         this.entriesByEntity.set(entity,entry);
       }else if(entry.primitive!==primitive){
-        entry.primitive=primitive;entry.base=primitiveBaseScale(primitive);entry.pose.fill(NaN);topologyChanged=true;
+        entry.primitive=primitive;entry.base=primitiveBaseScale(primitive);entry.isStream=isTriangleStream(primitive);entry.geometryRevision=entry.isStream?triangleStreamRevision(primitive):0;entry.pose.fill(NaN);topologyChanged=true;
       }
       // Source order controls coplanar ties, but removing an earlier entity must
       // not manufacture motion or replace the immutable matrices of survivors.
@@ -124,14 +125,14 @@ export class RenderFrameCache {
         let model:Mat4;
         if(linearChanged)model=compose(p,r,[s[0]*entry.base[0],s[1]*entry.base[1],s[2]*entry.base[2]]);
         else{model=new Float32Array(entry.object.model);model[12]=p[0];model[13]=p[1];model[14]=p[2];this.translationUpdates++;}
-        entry.object={entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,...(isTriangleStream(primitive)?{geometryRevision:triangleStreamRevision(primitive)}:{}),model};this.modelUpdates++;
+        entry.object={entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,...(entry.isStream?{geometryRevision:triangleStreamRevision(primitive)}:{}),model};this.modelUpdates++;
         this.changed.push(entry.object);
         this.objectsById.set(entity.id,entry.object);
       }else if(entry.object.physicalPrimitive!==entity.mesh){
-        entry.object={entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,model:entry.object.model};
+        entry.object={entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,...(entry.isStream?{geometryRevision:entry.geometryRevision}:{}),model:entry.object.model};
         this.objectsById.set(entity.id,entry.object);
       }
-      const geometryRevision=triangleStreamRevision(primitive);
+      const geometryRevision=entry.isStream?triangleStreamRevision(primitive):0;
       if(entry.geometryRevision!==geometryRevision){entry.geometryRevision=geometryRevision;entry.object={...entry.object,geometryRevision};this.objectsById.set(entity.id,entry.object);this.changed.push(entry.object);}
       this.objects[index++]=entry.object;
       observer?.observe(entity,entry.object.model);
