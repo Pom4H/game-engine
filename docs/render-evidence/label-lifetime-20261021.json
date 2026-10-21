@@ -1,0 +1,531 @@
+{
+  "status": "pass",
+  "scope": "One tiny deterministic native headless hardware WebGPU renderer A/B d020079→65962bb7. Exact full1280×720 PNG, full rgba16float HDR bytes and full depth32float readback hashes. No FPS or frame-profile claim; no world/save/Office server.",
+  "elapsedMs": 8983.0874,
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "baselineWebgpuSha256": "316b4714a7024b2877bda0c2cd797ca59f4426718c4e9c486f17cc5baef5be2a",
+  "currentWebgpuSha256": "6938c948dca577e2b66f2ad07d6e276135b3bff725bbbac0ba6c20516d5b51e1",
+  "visibleLabelsChanged": true,
+  "comparisons": [
+    {
+      "name": "initial-shared-a",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "beforeLabelBytes": 524288,
+      "afterLabelBytes": 524288
+    },
+    {
+      "name": "split-b",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "beforeLabelBytes": 1048576,
+      "afterLabelBytes": 1048576
+    },
+    {
+      "name": "returned-a",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "beforeLabelBytes": 1048576,
+      "afterLabelBytes": 524288
+    },
+    {
+      "name": "offscreen-replacement",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "beforeLabelBytes": 1048576,
+      "afterLabelBytes": 524288
+    },
+    {
+      "name": "replacement-return",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "beforeLabelBytes": 1048576,
+      "afterLabelBytes": 1048576
+    },
+    {
+      "name": "churn-final-a",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "beforeLabelBytes": 13631488,
+      "afterLabelBytes": 524288
+    },
+    {
+      "name": "removed",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "beforeLabelBytes": 524288,
+      "afterLabelBytes": 524288
+    }
+  ],
+  "records": [
+    {
+      "mode": "before",
+      "name": "initial-shared-a",
+      "pngSha256": "7c54cb841ae0ffa0fd1319a10e2c7512b7bd66ddb64ad062031d724e79b5e6e1",
+      "pngBytes": 93280,
+      "targets": {
+        "hdrSha256": "1fca71680a8dd793d839cc49f79add4de94a3a169810ba12ce1d313bbad1e0b9",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 1,
+        "live": 1,
+        "retainedBytes": 524288,
+        "cache": 1,
+        "users": null,
+        "maxDestroys": 0
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 3,
+      "physics": 0
+    },
+    {
+      "mode": "before",
+      "name": "split-b",
+      "pngSha256": "3c07545ce62498691763ce1a159e1adffbd4acfd29d6440ee4e8278889683efa",
+      "pngBytes": 93145,
+      "targets": {
+        "hdrSha256": "3e5bccc695336bebd1abd0d2a1b8d21058b19230f3decb74f8d768f21773de81",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 2,
+        "live": 2,
+        "retainedBytes": 1048576,
+        "cache": 2,
+        "users": null,
+        "maxDestroys": 0
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 3,
+      "physics": 0
+    },
+    {
+      "mode": "before",
+      "name": "returned-a",
+      "pngSha256": "7c54cb841ae0ffa0fd1319a10e2c7512b7bd66ddb64ad062031d724e79b5e6e1",
+      "pngBytes": 93280,
+      "targets": {
+        "hdrSha256": "1fca71680a8dd793d839cc49f79add4de94a3a169810ba12ce1d313bbad1e0b9",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 2,
+        "live": 2,
+        "retainedBytes": 1048576,
+        "cache": 2,
+        "users": null,
+        "maxDestroys": 0
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 3,
+      "physics": 0
+    },
+    {
+      "mode": "before",
+      "name": "offscreen-replacement",
+      "pngSha256": "567961945214496913b0053c6a3585508ac1ed2009ba5447925b5c18330be378",
+      "pngBytes": 83208,
+      "targets": {
+        "hdrSha256": "d68d322c14b0fc3c5c3fb0f0420e1626ddce538727029d1735eb0a4cd086442d",
+        "depthSha256": "aec8400d69c9b07f688f59b1bec29b847c8943fed17a6dbfdbd3d4571020158c",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 415691
+      },
+      "errors": [],
+      "labels": {
+        "created": 2,
+        "live": 2,
+        "retainedBytes": 1048576,
+        "cache": 2,
+        "users": null,
+        "maxDestroys": 0
+      },
+      "drawCalls": 2,
+      "triangles": 24,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 5,
+      "physics": 0
+    },
+    {
+      "mode": "before",
+      "name": "replacement-return",
+      "pngSha256": "a40bc279d643e3f0ac93c3ac00a2876ce0fbe8433960129a886fd5c06aa1e0fc",
+      "pngBytes": 93796,
+      "targets": {
+        "hdrSha256": "912670d90d7fe7451b66c40be57f0bbe106a4c88c27adbea5e0436b72669954d",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 2,
+        "live": 2,
+        "retainedBytes": 1048576,
+        "cache": 2,
+        "users": null,
+        "maxDestroys": 0
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 5,
+      "physics": 0
+    },
+    {
+      "mode": "before",
+      "name": "churn-final-a",
+      "pngSha256": "f0410f7492ca9a0967ffe87569b8803ecac4091143cf92760c07cae18e1ae2dd",
+      "pngBytes": 93905,
+      "targets": {
+        "hdrSha256": "5336bdb4f176f0a00e151b2a31ab708c62cb04698f0a8251557a33e919b711ab",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 26,
+        "live": 26,
+        "retainedBytes": 13631488,
+        "cache": 26,
+        "users": null,
+        "maxDestroys": 0
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 5,
+      "physics": 0
+    },
+    {
+      "mode": "before",
+      "name": "removed",
+      "pngSha256": "567961945214496913b0053c6a3585508ac1ed2009ba5447925b5c18330be378",
+      "pngBytes": 83208,
+      "targets": {
+        "hdrSha256": "d68d322c14b0fc3c5c3fb0f0420e1626ddce538727029d1735eb0a4cd086442d",
+        "depthSha256": "aec8400d69c9b07f688f59b1bec29b847c8943fed17a6dbfdbd3d4571020158c",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 415691
+      },
+      "errors": [],
+      "labels": {
+        "created": 26,
+        "live": 1,
+        "retainedBytes": 524288,
+        "cache": 1,
+        "users": null,
+        "maxDestroys": 1
+      },
+      "drawCalls": 2,
+      "triangles": 24,
+      "objects": 2,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 6,
+      "physics": 0
+    },
+    {
+      "mode": "after",
+      "name": "initial-shared-a",
+      "pngSha256": "7c54cb841ae0ffa0fd1319a10e2c7512b7bd66ddb64ad062031d724e79b5e6e1",
+      "pngBytes": 93280,
+      "targets": {
+        "hdrSha256": "1fca71680a8dd793d839cc49f79add4de94a3a169810ba12ce1d313bbad1e0b9",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 1,
+        "live": 1,
+        "retainedBytes": 524288,
+        "cache": 1,
+        "users": 2,
+        "maxDestroys": 0
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 3,
+      "physics": 0
+    },
+    {
+      "mode": "after",
+      "name": "split-b",
+      "pngSha256": "3c07545ce62498691763ce1a159e1adffbd4acfd29d6440ee4e8278889683efa",
+      "pngBytes": 93145,
+      "targets": {
+        "hdrSha256": "3e5bccc695336bebd1abd0d2a1b8d21058b19230f3decb74f8d768f21773de81",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 2,
+        "live": 2,
+        "retainedBytes": 1048576,
+        "cache": 2,
+        "users": 2,
+        "maxDestroys": 0
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 3,
+      "physics": 0
+    },
+    {
+      "mode": "after",
+      "name": "returned-a",
+      "pngSha256": "7c54cb841ae0ffa0fd1319a10e2c7512b7bd66ddb64ad062031d724e79b5e6e1",
+      "pngBytes": 93280,
+      "targets": {
+        "hdrSha256": "1fca71680a8dd793d839cc49f79add4de94a3a169810ba12ce1d313bbad1e0b9",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 2,
+        "live": 1,
+        "retainedBytes": 524288,
+        "cache": 1,
+        "users": 2,
+        "maxDestroys": 1
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 3,
+      "physics": 0
+    },
+    {
+      "mode": "after",
+      "name": "offscreen-replacement",
+      "pngSha256": "567961945214496913b0053c6a3585508ac1ed2009ba5447925b5c18330be378",
+      "pngBytes": 83208,
+      "targets": {
+        "hdrSha256": "d68d322c14b0fc3c5c3fb0f0420e1626ddce538727029d1735eb0a4cd086442d",
+        "depthSha256": "aec8400d69c9b07f688f59b1bec29b847c8943fed17a6dbfdbd3d4571020158c",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 415691
+      },
+      "errors": [],
+      "labels": {
+        "created": 2,
+        "live": 1,
+        "retainedBytes": 524288,
+        "cache": 1,
+        "users": 2,
+        "maxDestroys": 1
+      },
+      "drawCalls": 2,
+      "triangles": 24,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 5,
+      "physics": 0
+    },
+    {
+      "mode": "after",
+      "name": "replacement-return",
+      "pngSha256": "a40bc279d643e3f0ac93c3ac00a2876ce0fbe8433960129a886fd5c06aa1e0fc",
+      "pngBytes": 93796,
+      "targets": {
+        "hdrSha256": "912670d90d7fe7451b66c40be57f0bbe106a4c88c27adbea5e0436b72669954d",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 3,
+        "live": 2,
+        "retainedBytes": 1048576,
+        "cache": 2,
+        "users": 2,
+        "maxDestroys": 1
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 5,
+      "physics": 0
+    },
+    {
+      "mode": "after",
+      "name": "churn-final-a",
+      "pngSha256": "f0410f7492ca9a0967ffe87569b8803ecac4091143cf92760c07cae18e1ae2dd",
+      "pngBytes": 93905,
+      "targets": {
+        "hdrSha256": "5336bdb4f176f0a00e151b2a31ab708c62cb04698f0a8251557a33e919b711ab",
+        "depthSha256": "9a5f013deaa9332076430f924f3ce0d4bd6cd2f66025fdefca9fe4909fe4ee9d",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 459696
+      },
+      "errors": [],
+      "labels": {
+        "created": 27,
+        "live": 1,
+        "retainedBytes": 524288,
+        "cache": 1,
+        "users": 2,
+        "maxDestroys": 1
+      },
+      "drawCalls": 3,
+      "triangles": 36,
+      "objects": 3,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 5,
+      "physics": 0
+    },
+    {
+      "mode": "after",
+      "name": "removed",
+      "pngSha256": "567961945214496913b0053c6a3585508ac1ed2009ba5447925b5c18330be378",
+      "pngBytes": 83208,
+      "targets": {
+        "hdrSha256": "d68d322c14b0fc3c5c3fb0f0420e1626ddce538727029d1735eb0a4cd086442d",
+        "depthSha256": "aec8400d69c9b07f688f59b1bec29b847c8943fed17a6dbfdbd3d4571020158c",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 415691
+      },
+      "errors": [],
+      "labels": {
+        "created": 27,
+        "live": 1,
+        "retainedBytes": 524288,
+        "cache": 1,
+        "users": 1,
+        "maxDestroys": 1
+      },
+      "drawCalls": 2,
+      "triangles": 24,
+      "objects": 2,
+      "meshCount": 1,
+      "resolution": [
+        1280,
+        720
+      ],
+      "structureRevision": 6,
+      "physics": 0
+    }
+  ],
+  "errors": []
+}
