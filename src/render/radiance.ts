@@ -3,6 +3,7 @@ import {V3} from '../math.js';
 import type {Primitive} from '../scene/types.js';
 import type {RuntimeEntity,Scene} from '../scene/scene.js';
 import type {RenderFrameObserver} from './frame.js';
+import {ownedTriangleMeshBounds} from '../procedural/mesh.js';
 
 export interface RadianceProxy {
   readonly direction:Vec3;
@@ -205,6 +206,11 @@ function primitiveRadius(primitive:Primitive,scale:Vec3):number{
   if(primitive.kind==='polygon-prism'){
     let r2=0;for(const p of primitive.points)r2=Math.max(r2,p[0]*p[0]+p[1]*p[1]);
     return Math.hypot(Math.sqrt(r2)*Math.max(sx,sy,sz),primitive.thickness*.5*Math.max(sx,sy,sz));
+  }
+  const ownedBounds=ownedTriangleMeshBounds(primitive);
+  if(ownedBounds&&Number.isFinite(sx)&&Number.isFinite(sy)&&Number.isFinite(sz)){
+    const minX=ownedBounds[0]*sx;
+    return Number.isFinite(minX)?.5*Math.hypot(ownedBounds[3]*sx-minX,ownedBounds[4]*sy-ownedBounds[1]*sy,ownedBounds[5]*sz-ownedBounds[2]*sz):.5*Math.max(sx,sy,sz);
   }
   const positions=primitive.positions,cachedBounds=radianceMeshBounds.get(positions);
   // Once an array was verified frozen it stays frozen. In some JS runtimes

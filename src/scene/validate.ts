@@ -9,6 +9,7 @@ import {validateRainResponse,validateSurfaceWeather} from '../render/rain-surfac
 import {compileWorldCouplings} from '../world-ir/couplings.js';
 import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
+import {isOwnedValidatedTriangleMesh} from '../procedural/mesh.js';
 import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
 import {validateWindVolume,type WindVolumeSpec} from '../physics/wind.js';
 import {validateSoilVolume,type SoilVolumeSpec} from '../physics/soil.js';
@@ -338,6 +339,7 @@ function numericValues(values:readonly unknown[],path:string,min=-Infinity,max=I
  for(let i=0;i<values.length;i++){const value=values[i];if(typeof value!=='number'||!Number.isFinite(value)||value<min||value>max)number(value,`${path}[${i}]`,min,max);}
 }
 function primitiveSpec(value:unknown,path:string):void{
+  if(isOwnedValidatedTriangleMesh(value))return;
   const m=object(value,path);
   if(m.uvs!==undefined){if(m.kind!=='triangle-mesh'||!Array.isArray(m.positions)||!Array.isArray(m.uvs)||m.uvs.length!==m.positions.length/3*2)throw new TypeError(`${path}.uvs requires one authored pair per triangle-mesh vertex`);numericValues(m.uvs,`${path}.uvs`);}
   if(m.variationSeeds!==undefined){if(m.kind!=='triangle-mesh'||!Array.isArray(m.positions)||!Array.isArray(m.variationSeeds)||m.variationSeeds.length!==m.positions.length/3)throw new TypeError(`${path}.variationSeeds requires one value per vertex`);m.variationSeeds.forEach(validateVariationSeed);}
