@@ -56,7 +56,7 @@ export function buildDormantRenderFrame(scene:Scene,camera:CameraSpec=scene.came
   return{scene,camera,objects:Object.freeze([]),objectsById:new Map(),lights:Object.freeze([])};
 }
 
-interface CachedRenderObject {entity:RuntimeEntity;primitive:Primitive;base:readonly [number,number,number];pose:Float64Array;object:RenderObjectIR}
+interface CachedRenderObject {entity:RuntimeEntity;primitive:Primitive;base:readonly [number,number,number];slot:number;seen:number;pose:Float64Array;object:RenderObjectIR}
 /** Dependent projections consume the same freshly observed transform stream.
  * Only the built-in live projections certify pose observations; custom builders
  * and dormant frames require a consumer's authoritative Scene fallback. */
@@ -72,7 +72,11 @@ export class RenderFrameCache {
   private scene:Scene|null=null;
   private builder:typeof buildRenderFrame|null=null;
   private entries:CachedRenderObject[]=[];
+  private entriesByEntity=new Map<RuntimeEntity,CachedRenderObject>();
   private poses=new Float64Array(0);
+  private poseSlots=0;
+  private freePoseSlots:number[]=[];
+  private observation=0;
   private objects:RenderObjectIR[]=[];
   private objectsById=new Map<string,RenderObjectIR>();
   private lights:RuntimeEntity[]=[];
@@ -90,15 +94,24 @@ export class RenderFrameCache {
     if(builder!==buildDormantRenderFrame)this.reservePoses(scene.entities.size);
     const primitiveFor=builder===buildProxyRenderFrame?renderProxyPrimitive:renderPrimitive;
     let index=0,lightIndex=0,topologyChanged=false;
+    const observation=++this.observation;
     if(builder!==buildDormantRenderFrame)for(const entity of scene.entities.values()){
       if(entity.renderVisible===false)continue;
       if(entity.light)this.lights[lightIndex++]=entity;
       const primitive=primitiveFor(entity);if(!primitive)continue;
-      let entry=this.entries[index];
-      if(!entry||entry.entity!==entity||entry.primitive!==primitive){
-        this.reservePoses(index+1);
-        entry={entity,primitive,base:primitiveBaseScale(primitive),pose:new Float64Array(this.poses.buffer,index*9*8,9).fill(NaN),object:null!};this.entries[index]=entry;topologyChanged=true;
+      let entry=this.entriesByEntity.get(entity);
+      if(!entry){
+        const slot=this.freePoseSlots.pop()??this.poseSlots++;
+        this.reservePoses(slot+1);
+        entry={entity,primitive,base:primitiveBaseScale(primitive),slot,seen:observation,pose:new Float64Array(this.poses.buffer,slot*9*8,9).fill(NaN),object:null!};
+        this.entriesByEntity.set(entity,entry);
+      }else if(entry.primitive!==primitive){
+        entry.primitive=primitive;entry.base=primitiveBaseScale(primitive);entry.pose.fill(NaN);topologyChanged=true;
       }
+      // Source order controls coplanar ties, but removing an earlier entity must
+      // not manufacture motion or replace the immutable matrices of survivors.
+      if(this.entries[index]!==entry)topologyChanged=true;
+      this.entries[index]=entry;entry.seen=observation;
       const p=entity.position,r=entity.rotation,s=entity.scale,pose=entry.pose;
       const linearChanged=pose[3]!==r[0]||pose[4]!==r[1]||pose[5]!==r[2]||pose[6]!==s[0]||pose[7]!==s[1]||pose[8]!==s[2];
       if(linearChanged||pose[0]!==p[0]||pose[1]!==p[1]||pose[2]!==p[2]){
@@ -116,9 +129,14 @@ export class RenderFrameCache {
       this.objects[index++]=entry.object;
       observer?.observe(entity,entry.object.model);
     }
-    if(this.entries.length!==index)topologyChanged=true;
+    if(this.entries.length!==index||this.entriesByEntity.size!==index)topologyChanged=true;
     this.entries.length=index;this.objects.length=index;this.lights.length=lightIndex;
-    if(topologyChanged){this.objectsById.clear();for(const object of this.objects)this.objectsById.set(object.entity.id,object);this.builds++;}
+    if(topologyChanged){
+      // Strong identity keys are retained only for this completed projection.
+      // Recycle their numeric rows; the arena stays bounded by peak live demand.
+      for(const [entity,entry] of this.entriesByEntity)if(entry.seen!==observation){this.entriesByEntity.delete(entity);this.freePoseSlots.push(entry.slot);}
+      this.objectsById.clear();for(const object of this.objects)this.objectsById.set(object.entity.id,object);this.builds++;
+    }
     return{scene,camera,objects:this.objects,objectsById:this.objectsById,lights:this.lights};
   }
   inspect(){return{entries:this.entries.length,lights:this.lights.length,builds:this.builds,modelUpdates:this.modelUpdates,translationUpdates:this.translationUpdates};}
@@ -128,7 +146,7 @@ export class RenderFrameCache {
     if(count*9<=this.poses.length)return;
     const capacity=this.poses.length?Math.max(count,this.poses.length/9*2):Math.max(4,count);
     const next=new Float64Array(capacity*9);next.set(this.poses);this.poses=next;
-    for(let index=0;index<this.entries.length;index++)this.entries[index]!.pose=new Float64Array(next.buffer,index*9*8,9);
+    for(const entry of this.entriesByEntity.values())entry.pose=new Float64Array(next.buffer,entry.slot*9*8,9);
   }
-  clear():void{this.scene=null;this.builder=null;this.entries.length=0;this.poses=new Float64Array(0);this.objects.length=0;this.objectsById.clear();this.lights.length=0;this.changed.length=0;this.observed=false;}
+  clear():void{this.scene=null;this.builder=null;this.entries.length=0;this.entriesByEntity.clear();this.poses=new Float64Array(0);this.poseSlots=0;this.freePoseSlots.length=0;this.observation=0;this.objects.length=0;this.objectsById.clear();this.lights.length=0;this.changed.length=0;this.observed=false;}
 }

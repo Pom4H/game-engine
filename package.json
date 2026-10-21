@@ -16,8 +16,7 @@
     "./storage": "./dist/storage/index.js",
     "./world-ir": "./dist/world-ir/index.js",
     "./scene/acoustic-coupling": "./dist/scene/acoustic-coupling.js",
-    "./observability": "./dist/observability/activity.js",
-    "./acting": "./dist/acting/index.js"
+    "./observability": "./dist/observability/activity.js"
   },
   "files": [
     "dist",
