@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-21",
+  "scope": "Isolated migration candidate only. Production shared Engine source, original Game compact body/driver/light mapping. Full-game frame pacing and world/Office persistence acceptance belong to the integration report.",
+  "source": {
+    "spotShadowSha256": "1e0cd13d68a55112cf550c2f1c886d6957ea59b6d03aec4b192abaed2ced4872",
+    "gameMaterialSha256": "98bac5b875da42e5fc9517eae843b1dde4455949ab51fddd07a1fddb86099098"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "glass": {
+    "diagnostic": "engineGameMaterial(10) used alpha=1, routing physical glass to cameraOpaque before the opaque-scene copy. A real RenderVisibilityPlan regression failed before the fix.",
+    "fix": "Use the canonical Engine glass alpha=.28; preserve tint, optical transmission, IOR, geometry and physical ownership.",
+    "regression": "../thegame/test/engine-glass-pass.test.ts",
+    "paired": {
+      "camera": "fixed",
+      "time": 7,
+      "resolution": [
+        1280,
+        720
+      ],
+      "body": "actual Game compact",
+      "actor": "actual seated shared humanoid",
+      "before": "artifacts/glass-spot-production-native-20261021/glass-before.png",
+      "after": "artifacts/glass-spot-production-native-20261021/glass-after.png",
+      "beforeSha256": "a6174472143a4e922e5086188aba70dfc99a077b3bbc45f7156f3bb00e7f7d3b",
+      "afterSha256": "d4c7447a9f0d27fc3743a22be2a1d9a8555522f1a3999091224a994f7dc12c32"
+    },
+    "observed": "Before: opaque black windshield. After: steering wheel, seats and driver visible. Native errors=[], projection physicalBodies=0."
+  },
+  "spotShadow": {
+    "diagnostic": "Original four linear-PCF taps compared one centre receiver depth against neighbouring texel depths. A grazing empty ground plane was falsely shadowed.",
+    "fix": "Analytically project the local receiver plane, compare every original PCF texel at its centre, retain four bilinear taps, 512px maps, frame layouts and .000002 bias. Clear far texels stay unoccluded.",
+    "nativeRegression": {
+      "tool": "tools/render-stability/run-spot-receiver-check.ts",
+      "samples": 3506,
+      "oldFalseShadow": 3284,
+      "newFalseShadow": 0,
+      "newOccluderLeaks": 0,
+      "visibilityRanges": {
+        "old": [
+          0.328125,
+          1
+        ],
+        "corrected": [
+          1,
+          1
+        ],
+        "occluded": [
+          0,
+          0
+        ]
+      },
+      "shaderCompileErrors": [],
+      "validationErrors": [],
+      "planeOracle": "Three independently projected world points define raster depth; compute invokes original/current WGSL against actual depth texture. Occluder depth remains darker in every sample."
+    },
+    "productionScene": {
+      "before": "artifacts/glass-spot-production-native-20261021/road-before.png",
+      "after": "artifacts/glass-spot-production-native-20261021/road-after.png",
+      "activeHeadlights": 2,
+      "resolution": [
+        1280,
+        720
+      ],
+      "errors": [],
+      "limitation": "This near camera does not expose the original visible stripes. Do not use it as proof of city-wide shadow quality."
+    }
+  },
+  "remaining": {
+    "fullGameQuality": "Not claimed. Native city/high-speed performance and temporal QA remain integration work.",
+    "carry": "Natural waist-height bent elbows verified by physical solver tests and native r2 screenshots. Rapid yaw presentation may still place the spring-driven load sideways.",
+    "weather": "Seven-state live-authority/controlled-staging native capture passed without disabling fog/rain assertions; actual persisted weather timeline is used."
+  },
+  "verification": {
+    "engineFull": {
+      "command": "npm run check",
+      "tests": 888,
+      "passed": 869,
+      "skipped": 19,
+      "failed": 0,
+      "log": "../../engine-final-visual-check.log"
+    },
+    "gameFocused": {
+      "passed": 53,
+      "failed": 0,
+      "assertions": 6312,
+      "timeoutMs": 60000,
+      "log": "../../game-visual-focused-final.log"
+    },
+    "gameTypecheck": "pass",
+    "descriptors": {
+      "canonical": {
+        "total": 101,
+        "changed": 78
+      },
+      "minimal": {
+        "total": 74,
+        "changed": 54
+      },
+      "proof": "Replacing only the current spot-shadow WGSL block with exact HEAD source recovers every old frozen descriptor hash. Layouts/options/counts unchanged."
+    }
+  }
+}

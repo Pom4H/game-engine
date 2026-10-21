@@ -1,5 +1,6 @@
 export {type FacadeSpec} from './render/facade-surface.js';
 export {rareWindGust,type GroundLitterSpec} from './render/ground-litter.js';
+export type {GroundCover} from './render/ground-cover.js';
 export type {RainResponse,SurfaceWeatherSpec} from './render/rain-surface.js';
 export {FixedClock} from './core/fixed-clock.js';
 export {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport,type ScenePerformanceSample} from './scene/performance.js';

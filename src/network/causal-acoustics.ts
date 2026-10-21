@@ -3,7 +3,7 @@ export type Sound=[id:string,rpm:number,load:number,tires:number[][],gear:number
 type Entity={id:string;x:number;y:number;z:number;yaw:number;vx:number;vy:number;vz:number;phase:number;animation:string;q?:number[];extra?:Record<string,unknown>};
 const finite=(v:unknown):number=>{if(typeof v!=='number'||!Number.isFinite(v))throw TypeError('Expected finite number');return v;};
 const integer=(v:unknown):number=>{const n=finite(v);if(!Number.isInteger(n)||n<0||n>0xffffffff)throw TypeError('Expected uint32');return n;};
-const dynamicKeys = new Set(('flight wheels doorAngles doors steer contacts jounce engineRunning handbrake burnout grounded crouch lookYaw pitch alive '+
+const dynamicKeys = new Set(('social footMaterial footSupportId damage bodyRevision throwAction strikeAim impact thrownItem grab grabbedBy fighting blocking health balance stamina flight wheels doorAngles doors steer contacts jounce engineRunning handbrake burnout grounded crouch lookYaw pitch alive '+
  'boarding lift phase strike strikeSerial strikeTime stun impulseX impulseZ speed points tool').split(' '));
 export const causalPoseKeys = ['x', 'y', 'z', 'yaw', 'vx', 'vy', 'vz', 'phase'] as const;
 const coreKeys = new Set<string>([...causalPoseKeys, 'animation', 'q', 'id', 'extra']);

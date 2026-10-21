@@ -1,6 +1,7 @@
 import {MATERIAL_UNIFORM_WORDS,MATERIAL_UNIFORM_BYTES} from './material-layout.js';
 import {FACADE_SURFACE_WGSL} from './facade-surface.js';
 import {GROUND_LITTER_WGSL} from './ground-litter.js';
+import {GROUND_COVER_WGSL} from './ground-cover.js';
 import {RAIN_SURFACE_WGSL,writeSurfaceWeather,writeProbeSurfaceWeather} from './rain-surface.js';
 import {TERRAIN_MAP_WGSL} from './terrain-map.js';
 import {COATING_LOSS_WGSL} from './coating-loss.js';
@@ -60,7 +61,7 @@ interface GPUShadowBatch{buffer:GPUAny;capacity:number;data?:Float32Array}
 interface GPUInstanceBatch{buffer:GPUAny;capacity:number;data:Float32Array}
 interface InstancePlan{key:string;items:RuntimeEntity[];first:RuntimeEntity;culled:boolean;buffer:GPUAny}
 interface ShadowBatchPlan{key:string;items:RuntimeEntity[];culled:boolean;buffer:GPUAny}
-const materialShader=(reflection=false,relief=false,coating=false,logarithmic=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+RAIN_SURFACE_WGSL+TERRAIN_MAP_WGSL+GROUND_LITTER_WGSL+FACADE_SURFACE_WGSL+(coating?COATING_LOSS_WGSL:'')+`
+const materialShader=(reflection=false,relief=false,coating=false,logarithmic=false)=>FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+RAIN_SURFACE_WGSL+TERRAIN_MAP_WGSL+GROUND_LITTER_WGSL+GROUND_COVER_WGSL+FACADE_SURFACE_WGSL+(coating?COATING_LOSS_WGSL:'')+`
 override MATERIAL_CLASS:i32=-1;
 struct U {
   model: mat4x4<f32>,
@@ -185,10 +186,15 @@ fn tyreTracks(z:f32)->f32{
   return 1.0-smoothstep(0.065,0.13,repeated);
 }
 
+fn grassWorld(world:vec4f,uv:vec2f)->vec4f {
+ var result=world;
+ if(u.groundDetail.x>4.5){result.y-=uv.y*smoothstep(3.5,6.5,distance(world.xz,f.eye.xz));}
+ return result;
+}
 @vertex fn vs(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>, @location(6) vertexColor:vec4<f32>, @location(13) authoredUV:vec2<f32>, @location(14) authoredSeed:f32) -> VOut {
   var out: VOut;out.reflected=0u;out.vertexColor=vertexColor;out.localPos=position;out.tint=u.color;out.instanceSeed=u.weather.z;out.variationSeed=authoredSeed+u.weather.z;
-  let world=displaceWorld(u.model*vec4<f32>(position,1.0));
-  out.position=f.viewVP*world;${logarithmic?'out.cameraDepth=out.position.w;':''}let previous=f.previousVP*displaceWorld(u.prevModel*vec4<f32>(position,1.0));
+  let world=grassWorld(displaceWorld(u.model*vec4<f32>(position,1.0)),authoredUV);
+  out.position=f.viewVP*world;${logarithmic?'out.cameraDepth=out.position.w;':''}let previous=f.previousVP*grassWorld(displaceWorld(u.prevModel*vec4<f32>(position,1.0)),authoredUV);
   let currentNdc=out.position.xy/max(abs(out.position.w),.00001);let previousNdc=previous.xy/max(abs(previous.w),.00001);
   out.velocity=vec2<f32>((currentNdc.x-previousNdc.x)*.5,(previousNdc.y-currentNdc.y)*.5);
   out.worldPos=world.xyz;out.uv=authoredUV;
@@ -206,9 +212,9 @@ fn tyreTracks(z:f32)->f32{
 )->VOut{
  let m=mat4x4<f32>(m0,m1,m2,m3);let pm=mat4x4<f32>(p0,p1,p2,p3);
  var out:VOut;out.reflected=0u;out.vertexColor=vertexColor;out.localPos=position;out.tint=tint;out.instanceSeed=seed.x;out.variationSeed=authoredSeed+seed.x;
- let world=displaceWorld(m*vec4<f32>(position,1.0));
+ let world=grassWorld(displaceWorld(m*vec4<f32>(position,1.0)),authoredUV);
  out.position=f.viewVP*world;${logarithmic?'out.cameraDepth=out.position.w;':''}
- let previous=f.previousVP*displaceWorld(pm*vec4<f32>(position,1.0));
+ let previous=f.previousVP*grassWorld(displaceWorld(pm*vec4<f32>(position,1.0)),authoredUV);
  let currentNdc=out.position.xy/max(abs(out.position.w),.00001);
  let previousNdc=previous.xy/max(abs(previous.w),.00001);
  out.velocity=vec2<f32>((currentNdc.x-previousNdc.x)*.5,(previousNdc.y-currentNdc.y)*.5);
@@ -218,19 +224,24 @@ fn tyreTracks(z:f32)->f32{
  return out;
 }
 @vertex fn reflectionVS(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>,@location(6) vertexColor:vec4<f32>,@location(13) authoredUV:vec2f,@location(14) authoredSeed:f32)->VOut{
- var out:VOut;out.vertexColor=vertexColor;out.localPos=position;out.tint=u.color;out.instanceSeed=u.weather.z;out.variationSeed=authoredSeed+u.weather.z;let world=displaceWorld(u.model*vec4<f32>(position,1));out.position=f.reflectionVP*world;${logarithmic?'out.cameraDepth=out.position.w;':''}out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=authoredUV;out.reflected=1u;out.velocity=vec2<f32>(0);return out;
+ var out:VOut;out.vertexColor=vertexColor;out.localPos=position;out.tint=u.color;out.instanceSeed=u.weather.z;out.variationSeed=authoredSeed+u.weather.z;let world=grassWorld(displaceWorld(u.model*vec4<f32>(position,1)),authoredUV);out.position=f.reflectionVP*world;${logarithmic?'out.cameraDepth=out.position.w;':''}out.worldPos=world.xyz;let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);out.uv=authoredUV;out.reflected=1u;out.velocity=vec2<f32>(0);return out;
 }
 
 fn pointLight(source:PointSource,world:vec3<f32>,n:vec3<f32>,geometric:vec3<f32>,viewDir:vec3<f32>,roughness:f32,base:vec3<f32>,f0:vec3<f32>,metal:f32,coat:f32,coatRoughness:f32)->vec3<f32>{
  let delta=source.position.xyz-world;let dist=length(delta);if(dist>=source.position.w){return vec3<f32>(0);}
- let l=delta/max(dist,.001);let nl=max(dot(n,l),0.0);let nv=max(dot(n,viewDir),.001);
+ let l=delta/max(dist,.001);let nl=max(dot(n,l),0.0);
+ // These factors multiply the complete BRDF by exact zero. Reject before
+ // specular evaluation and shadow PCF; retain every nonzero contribution.
+ if(nl<=0.0){return vec3<f32>(0);}
+ let emission=emissionWeight(source,-delta);if(emission<=0.0){return vec3<f32>(0);}
+ let nv=max(dot(n,viewDir),.001);
  let halfVector=l+viewDir;let h=halfVector*inverseSqrt(max(dot(halfVector,halfVector),1e-12));
  // Finite lamp size keeps specular stable at subpixel scale.
  let r=max(roughness,.08+.18/max(dist,1.0));let a2=pow(r,4.0);let nh=max(dot(n,h),0.0);
  let d=a2/(3.14159*pow(nh*nh*(a2-1.0)+1.0,2.0));let k=pow(r+1.0,2.0)/8.0;
  let g=nv/(nv*(1.0-k)+k)*nl/(nl*(1.0-k)+k);
  let fr=f0+(1.0-f0)*pow(1.0-max(dot(viewDir,h),0.0),5.0);
- let atten=pow(max(0.0,1.0-pow(dist/source.position.w,4.0)),2.0)/(1.0+dist*dist*.18)*emissionWeight(source,-delta)*spotShadowVisibility(source,world,geometric);
+ let atten=pow(max(0.0,1.0-pow(dist/source.position.w,4.0)),2.0)/(1.0+dist*dist*.18)*emission*spotShadowVisibility(source,world,geometric);
  if(coat<=0.0){return (base*(1.0-fr)*(1.0-metal)/3.14159+d*g*fr/max(4.0*nv*nl,.001))*source.color.rgb*source.color.w*atten*nl;}
  let coatF=coat*(.04+.96*pow(1.0-max(dot(viewDir,h),0.0),5.0));
  let cr=max(coatRoughness,.08+.18/max(dist,1.0));let ca2=pow(cr,4.0);
@@ -572,6 +583,14 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
     let peelGrad=vec3<f32>(peelX,peelY,peelZ);
     n=normalize(n+(peelGrad-n*dot(peelGrad,n))*.0025);
   }
+  // Ground cover is world-anchored and footprint filtered. The terrain water mask,
+  // geometric orientation and green albedo prevent painting grass onto water or walls.
+  let turfPosition=in.worldPos.xz+f.renderOrigin.xz;
+  let turfFootprint=max(length(facadeDpX.xz),length(facadeDpY.xz))*.5;
+  if(u.groundDetail.x>3.5&&u.groundDetail.x<4.5&&geometricNormal.y>.8&&terrainWater<.5&&albedo.g>albedo.r*1.08&&albedo.g>albedo.b*1.10){
+    albedo=turf(turfPosition,albedo,turfFootprint);
+  }
+  if(u.groundDetail.x>4.5){n=normalize(mix(n,vec3f(0,1,0),.55));}
   if(u.groundDetail.z>.5){
     let facade=facadeMaterial(in.uv,facadeDpX,facadeDpY,facadeUvX,facadeUvY,geometricNormal,in.worldPos.y+f.renderOrigin.y,in.variationSeed,u.groundDetail.z>1.5,resolveFacadeNight(u.groundDetail.w,f.surfaceRain.w,f.renderOrigin.w),u.surface.y,f.surfaceRain.x,in.tint.rgb*in.vertexColor.rgb);
     albedo=facade.color;roughness=facade.roughness;n=facade.normal;facadeEmission=facade.emission;
@@ -629,7 +648,7 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   let litterUV=select(in.uv,absoluteLitter.xz+absoluteLitter.yy*.37,u.groundDetail.x<2.5);
   let litterFootprint=max(length(dpdx(litterUV)),length(dpdy(litterUV)));
   let litterHorizontal=smoothstep(.65,.96,geometricNormal.y);
-  if(u.groundDetail.x>.5&&f.groundLitter.z>.5&&litterHorizontal>.25){
+  if(u.groundDetail.x>.5&&u.groundDetail.x<3.5&&f.groundLitter.z>.5&&litterHorizontal>.25){
     let paving=u.groundDetail.x>1.5;let tile=u.groundDetail.x>2.5;
     let chance=select(select(.018,.08,paving),.18,tile)*(1.-f.surfaceRain.x*.92);
     let cellSize=select(select(2.8,1.6,paving),1.1,tile);
@@ -835,7 +854,7 @@ function materialShaderForPlan(source:string,plan:RenderPipelinePlan):string{
   return source.replace('let planarRoad=asphalt&&','let planarRoad=false&&asphalt&&');
 }
 
-const reflectionLodShader=(logarithmic=false)=>FRAME_WGSL+COATING_LOSS_WGSL+FACADE_SURFACE_WGSL+TERRAIN_MAP_WGSL+`
+const reflectionLodShader=(logarithmic=false)=>FRAME_WGSL+COATING_LOSS_WGSL+FACADE_SURFACE_WGSL+TERRAIN_MAP_WGSL+GROUND_COVER_WGSL+`
 struct U {
   model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
   surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
@@ -845,9 +864,14 @@ struct U {
 @group(0) @binding(4) var surfaceTexture:texture_2d<f32>;
 @group(0) @binding(5) var surfaceSampler:sampler;
 @group(1) @binding(0) var<uniform> f:Frame;
+fn grassWorld(world:vec4f,uv:vec2f)->vec4f {
+ var result=world;
+ if(u.groundDetail.x>4.5){result.y-=uv.y*smoothstep(3.5,6.5,distance(world.xz,f.eye.xz));}
+ return result;
+}
 struct O {@builtin(position) position:vec4<f32>,@location(0) normal:vec3<f32>,@location(1) worldPos:vec3<f32>,@location(2) vertexColor:vec3<f32>,@location(4) uv:vec2f,@location(5) @interpolate(flat) seed:f32${logarithmic?',@location(6) cameraDepth:f32':''}}
 @vertex fn reflectionVS(@location(0) position:vec3<f32>,@location(1) normal:vec3<f32>,@location(6) vertexColor:vec4<f32>,@location(13) authoredUV:vec2f,@location(14) authoredSeed:f32)->O{
-  let world=u.model*vec4<f32>(position,1);let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;
+  let world=grassWorld(u.model*vec4<f32>(position,1),authoredUV);let a=u.model[0].xyz;let b=u.model[1].xyz;let c=u.model[2].xyz;
   var out:O;out.seed=authoredSeed+u.weather.z;out.uv=authoredUV;out.position=f.reflectionVP*world;${logarithmic?'out.cameraDepth=out.position.w;':''}out.worldPos=world.xyz;out.vertexColor=vertexColor.rgb;
   out.normal=normalize(mat3x3<f32>(a/dot(a,a),b/dot(b,b),c/dot(c,c))*normal);return out;
 }
@@ -861,6 +885,12 @@ ${logarithmic?'struct ReflectionOutput {@location(0) color:vec4<f32>,@builtin(fr
   if(u.texture.w>1.5){let color=textureSampleLevel(surfaceTexture,surfaceSampler,terrainMapUV(in.uv,u.texture.x,textureDimensions(surfaceTexture)),0).rgb;base=pow(max(color*(1.-select(0.,u.surface.w,u.surfaceOverride.x>.5)),vec3f(0)),vec3f(2.2));if(terrainWaterMask(color)>.5){n=terrainWaterNormal(n,in.uv,f.up.w,terrainSourceAxes(facadeDpX,facadeDpY,facadeUvX,facadeUvY));}}
   if(u.relief.z>=0.){let loss=coatingLoss(in.uv,coatingWidth,u.relief.w,u.relief.z);if(loss.x<.015){discard;}base=mix(mix(base,pow(mix(u.color.rgb*in.vertexColor*.48,vec3f(.24,.25,.24),.65),vec3f(2.2)),loss.x),pow(vec3f(.46,.47,.48),vec3f(2.2)),loss.y);}
   if(u.groundDetail.z>.5){let facade=facadeMaterial(in.uv,facadeDpX,facadeDpY,facadeUvX,facadeUvY,n,in.worldPos.y+f.renderOrigin.y,in.seed,u.groundDetail.z>1.5,resolveFacadeNight(u.groundDetail.w,f.surfaceRain.w,f.renderOrigin.w),u.surface.y,f.surfaceRain.x,u.color.rgb*in.vertexColor);base=pow(max(facade.color,vec3f(0)),vec3f(2.2));n=facade.normal;facadeEmission=facade.emission;}
+  if(u.groundDetail.x>3.5&&u.groundDetail.x<4.5){
+    let coverColor=pow(max(base,vec3f(0)),vec3f(1./2.2));
+    let coverFootprint=max(length(facadeDpX.xz),length(facadeDpY.xz))*.5;
+    if(n.y>.8&&terrainWaterMask(coverColor)<.5&&coverColor.g>coverColor.r*1.08&&coverColor.g>coverColor.b*1.10){base=pow(max(turf(in.worldPos.xz+f.renderOrigin.xz,coverColor,coverFootprint),vec3f(0)),vec3f(2.2));}
+  }
+  if(u.groundDetail.x>4.5){n=normalize(mix(n,vec3f(0,1,0),.55));}
   let ndl=max(dot(n,f.sun.xyz),0.0);
   let sky=f.sky.rgb*(.18+.60*max(n.y,0.0));
   let direct=f.sunColor.rgb*f.sun.w*ndl*.318309886;
@@ -869,7 +899,7 @@ ${logarithmic?'struct ReflectionOutput {@location(0) color:vec4<f32>,@builtin(fr
 }
 `;
 
-const PROBE_SHADER=COATING_LOSS_WGSL+FACADE_SURFACE_WGSL+TERRAIN_MAP_WGSL+`
+const PROBE_SHADER=COATING_LOSS_WGSL+FACADE_SURFACE_WGSL+TERRAIN_MAP_WGSL+GROUND_COVER_WGSL+`
 struct U {
   model:mat4x4<f32>,prevModel:mat4x4<f32>,color:vec4<f32>,surface:vec4<f32>,weather:vec4<f32>,
   surfacePhase:vec4<f32>,surfaceDynamics:vec4<f32>,motion:vec4<f32>,objectState:vec4<f32>,
@@ -892,6 +922,12 @@ struct O {@builtin(position) position:vec4<f32>,@location(0) normal:vec3<f32>,@l
  if(u.texture.w>1.5){let color=textureSampleLevel(surfaceTexture,surfaceSampler,terrainMapUV(in.uv,u.texture.x,textureDimensions(surfaceTexture)),0).rgb;base=pow(max(color*(1.-select(0.,u.surface.w,u.surfaceOverride.x>.5)),vec3f(0)),vec3f(2.2));if(terrainWaterMask(color)>.5){n=terrainWaterNormal(n,in.uv,p.surfaceFrame.x,terrainSourceAxes(facadeDpX,facadeDpY,facadeUvX,facadeUvY));}}
  if(u.relief.z>=0.){let loss=coatingLoss(in.uv,coatingWidth,u.relief.w,u.relief.z);if(loss.x<.015){discard;}base=mix(mix(base,pow(mix(u.color.rgb*in.vertexColor*.48,vec3f(.24,.25,.24),.65),vec3f(2.2)),loss.x),pow(vec3f(.46,.47,.48),vec3f(2.2)),loss.y);}
  if(u.groundDetail.z>.5){let facade=facadeMaterial(in.uv,facadeDpX,facadeDpY,facadeUvX,facadeUvY,n,in.worldPos.y+p.renderOrigin.y,in.seed,u.groundDetail.z>1.5,resolveFacadeNight(u.groundDetail.w,p.sky.w,p.renderOrigin.w),u.surface.y,p.sunColor.w,u.color.rgb*in.vertexColor);base=pow(max(facade.color,vec3f(0)),vec3f(2.2));n=facade.normal;facadeEmission=facade.emission;}
+ if(u.groundDetail.x>3.5&&u.groundDetail.x<4.5){
+   let coverColor=pow(max(base,vec3f(0)),vec3f(1./2.2));
+   let coverFootprint=max(length(facadeDpX.xz),length(facadeDpY.xz))*.5;
+   if(n.y>.8&&terrainWaterMask(coverColor)<.5&&coverColor.g>coverColor.r*1.08&&coverColor.g>coverColor.b*1.10){base=pow(max(turf(in.worldPos.xz+p.renderOrigin.xz,coverColor,coverFootprint),vec3f(0)),vec3f(2.2));}
+ }
+ if(u.groundDetail.x>4.5){n=normalize(mix(n,vec3f(0,1,0),.55));}
  let ndl=max(dot(n,p.sun.xyz),0.0);let up=.35+1.15*max(n.y,0.0);
  let radiance=base*(p.sky.rgb*up+p.sunColor.rgb*p.sun.w*ndl*.72+facadeEmission)+u.emission.rgb;
  return vec4<f32>(radiance,1);
@@ -1685,7 +1721,7 @@ export class WebGPURenderer implements Renderer{
     uniform.set([texture?.normalStrength??1,normalReady?1:0,texture?.ormStrength??1,ormReady?1:0],80);
     uniform.set([texture?.heightScaleM??0,texture?.heightUrl&&this.surfaceTextures.get(texture.heightUrl)?1:0,entity.material.decal?.severity??-1,entity.material.decal?.seed??0],88);
     uniform.set([appearance?1:0,appearance&&entity.material.roughness!==undefined?1:0,entity.material.rainResponse?.kind==='ground'?1:entity.material.rainResponse?.kind==='paint'?2:0,entity.material.rainResponse?.kind==='paint'?(entity.material.rainResponse.mirrorX?-1:1):0],92);
-    uniform.set([entity.material.groundLitter?.kind==='asphalt'?1:entity.material.groundLitter?.kind==='paving'?2:entity.material.groundLitter?.kind==='tile'?3:0,entity.material.groundLitter?.baseRoughness??-1,entity.material.facade?.kind==='masonry'?1:entity.material.facade?.kind==='glazed'?2:0,entity.material.facade?.night??0],96);
+    uniform.set([entity.material.groundCover==='turf'?4:entity.material.groundCover==='grass-blade'?5:entity.material.groundLitter?.kind==='asphalt'?1:entity.material.groundLitter?.kind==='paving'?2:entity.material.groundLitter?.kind==='tile'?3:0,entity.material.groundLitter?.baseRoughness??-1,entity.material.facade?.kind==='masonry'?1:entity.material.facade?.kind==='glazed'?2:0,entity.material.facade?.night??0],96);
     const snowpack=surfaceState?.snowpack??appearance?.snow;
     uniform.set([snowpack?.freshness??0,snowpack?.liquidFraction??0,snowpack?.crust??0,Math.min(1,(snowpack?.grainSizeMm??0)/4.5)],84);
     // Authority revision comes from surface physics; two renders without a
@@ -2127,7 +2163,7 @@ function opaqueInstanceKey(e:RuntimeEntity):string{
   // material identity seed; those travel in the GPU instance stream.
   return JSON.stringify([primitiveKey(renderPrimitive(e)!),canCullBack(e),
     m.kind,m.roughness,m.metalness,m.clearcoat,m.clearcoatRoughness,
-    m.pattern,m.finish,m.ageYears,m.treatment,m.profile.optical,m.surface,m.surfaceAppearance,m.rainResponse,m.groundLitter,m.facade]);
+    m.pattern,m.finish,m.ageYears,m.treatment,m.profile.optical,m.surface,m.surfaceAppearance,m.rainResponse,m.groundLitter,m.groundCover,m.facade]);
 }
 function materialPipelineGroups(entities:readonly RuntimeEntity[]):Array<[[number,boolean],RuntimeEntity[]]>{
   const groups=new Map<string,{key:[number,boolean];items:RuntimeEntity[]}>();

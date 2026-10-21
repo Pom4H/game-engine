@@ -129,6 +129,33 @@ export function applyStructuralImpulse(template:StructuralTemplate,state:Structu
  wakeStructure(state);state.revision++;
 }
 
+// Finite-duration contact delivery ported from game-engine 7a02ee1. Total impulse
+// is conserved; a collision callback queues work and never advances physical time.
+type ImpulsePulse={point:StructureV3;remaining:StructureV3;radius:number;seconds:number};
+const impulsePulses=new WeakMap<StructuralState,ImpulsePulse[]>();
+export function pendingStructuralImpulses(state:StructuralState){return impulsePulses.get(state)?.length??0;}
+export function scheduleStructuralImpulse(template:StructuralTemplate,state:StructuralState,point:readonly number[],impulse:readonly number[],radius:number,seconds=.12){
+ if(!finite3(point)||!finite3(impulse)||!Number.isFinite(radius)||radius<=0||!Number.isFinite(seconds)||seconds<=0||seconds>.5)throw new TypeError('Invalid structural impulse pulse');
+ let pulses=impulsePulses.get(state);if(!pulses){pulses=[];impulsePulses.set(state,pulses);}
+ // Bound collision bursts without dropping momentum: deliver the oldest residual.
+ if(pulses.length>=32){const oldest=pulses.shift()!;applyStructuralImpulse(template,state,oldest.point,oldest.remaining,oldest.radius);}
+ pulses.push({point:clone3(point),remaining:clone3(impulse),radius,seconds});wakeStructure(state);
+}
+function advanceImpulses(template:StructuralTemplate,state:StructuralState,dt:number){
+ const pulses=impulsePulses.get(state);if(!pulses)return;
+ for(let i=pulses.length-1;i>=0;i--){const p=pulses[i]!,fraction=Math.min(1,dt/p.seconds),delivered=p.remaining.map(v=>v*fraction) as StructureV3;
+  applyStructuralImpulse(template,state,p.point,delivered,p.radius);
+  for(let k=0;k<3;k++)p.remaining[k]!-=delivered[k]!;p.seconds-=dt;if(p.seconds<=1e-9)pulses.splice(i,1);
+ }
+}
+function prepareLinkPlasticity(template:StructuralTemplate,state:StructuralState,index:number){
+ if(state.broken[index])return;
+ const link=template.links[index]!,material=link.material,length=distance(state.positions[link.a]!,state.positions[link.b]!),rest=Math.max(EPS,state.restLengths[index]!),strain=(length-rest)/rest;
+ if(strain>material.fractureTension||-strain>material.fractureCompression){state.broken[index]=1;state.revision++;return;}
+ const tension=strain>=0,yieldStrain=tension?material.yieldTension:material.yieldCompression;
+ if(Math.abs(strain)>yieldStrain&&material.plasticity>0){const target=tension?length/(1+yieldStrain):length/(1-yieldStrain),next=rest+(target-rest)*material.plasticity;if(Math.abs(next-rest)>1e-7){state.restLengths[index]=next;state.revision++;}}
+}
+
 function dampLinkVelocity(template:StructuralTemplate,state:StructuralState,index:number){
  if(state.broken[index])return;const link=template.links[index]!,material=link.material;if(material.damping<=0)return;
  const a=state.positions[link.a]!,b=state.positions[link.b]!,va=state.velocities[link.a]!,vb=state.velocities[link.b]!,na=template.nodes[link.a]!,nb=template.nodes[link.b]!,dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],length=Math.hypot(dx,dy,dz)||1,ux=dx/length,uy=dy/length,uz=dz/length,relative=(vb[0]-va[0])*ux+(vb[1]-va[1])*uy+(vb[2]-va[2])*uz,invA=na.mass>0?1/na.mass:0,invB=nb.mass>0?1/nb.mass:0,sum=invA+invB;
@@ -138,12 +165,6 @@ function dampLinkVelocity(template:StructuralTemplate,state:StructuralState,inde
 
 function solveLink(template:StructuralTemplate,state:StructuralState,index:number){
  if(state.broken[index])return false;const link=template.links[index]!,a=state.positions[link.a]!,b=state.positions[link.b]!,na=template.nodes[link.a]!,nb=template.nodes[link.b]!,material=link.material,dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],length=Math.hypot(dx,dy,dz)||EPS,rest=Math.max(EPS,state.restLengths[index]!),strain=(length-rest)/rest;
- if(strain>material.fractureTension||-strain>material.fractureCompression){state.broken[index]=1;state.revision++;return true;}
- const tension=strain>=0,yieldStrain=tension?material.yieldTension:material.yieldCompression;
- if(Math.abs(strain)>yieldStrain&&material.plasticity>0){
-  const target=tension?length/(1+yieldStrain):length/(1-yieldStrain),next=rest+(target-rest)*material.plasticity;
-  if(Math.abs(next-rest)>1e-7){state.restLengths[index]=next;state.revision++;}
- }
  const currentRest=Math.max(EPS,state.restLengths[index]!),error=length-currentRest;if(Math.abs(error)<1e-8||material.stiffness<=0)return false;
  const invA=na.mass>0?1/na.mass:0,invB=nb.mass>0?1/nb.mass:0,sum=invA+invB;if(sum<=0)return false;
  const scale=error/length*material.stiffness,shareA=scale*invA/sum,shareB=scale*invB/sum;
@@ -161,6 +182,7 @@ export function structuralMetrics(template:StructuralTemplate,state:StructuralSt
 export function stepStructuralGraph(template:StructuralTemplate,state:StructuralState,dt:number,options:StructuralStepOptions={}):StructuralMetrics{
  if(!Number.isFinite(dt)||dt<=0||dt>1/20)throw new RangeError('Structural step requires 0 < dt <= 1/20');
  if(state.positions.length!==template.nodes.length||state.velocities.length!==template.nodes.length||state.restLengths.length!==template.links.length||state.broken.length!==template.links.length)throw new RangeError('Structural state does not match template');
+ advanceImpulses(template,state,dt);
  if(state.sleeping)return structuralMetrics(template,state);
  const gravity=options.gravity??[0,0,0],iterations=Math.max(1,Math.min(12,Math.trunc(options.iterations??4)));
  let before=previousPositions.get(state);if(!before||before.length!==state.positions.length){before=state.positions.map(clone3);previousPositions.set(state,before);}else for(let i=0;i<before.length;i++){const p=state.positions[i]!,b=before[i]!;b[0]=p[0];b[1]=p[1];b[2]=p[2];}
@@ -170,13 +192,16 @@ export function stepStructuralGraph(template:StructuralTemplate,state:Structural
   const node=template.nodes[i]!,v=state.velocities[i]!,p=state.positions[i]!;if(!(node.mass>0)){v[0]=v[1]=v[2]=0;continue;}
   v[0]+=(gravity[0]??0)*dt;v[1]+=(gravity[1]??0)*dt;v[2]+=(gravity[2]??0)*dt;p[0]+=v[0]*dt;p[1]+=v[1]*dt;p[2]+=v[2]*dt;
  }
- for(let pass=0;pass<iterations;pass++)for(let i=0;i<template.links.length;i++)solveLink(template,state,i);
+ // Return mapping runs once per step. Preserve the migrated graph's first-pass
+ // contact/neighbor projection order, then solve elastic constraints only.
+ for(let i=0;i<template.links.length;i++){prepareLinkPlasticity(template,state,i);solveLink(template,state,i);}
+ for(let pass=1;pass<iterations;pass++)for(let i=0;i<template.links.length;i++)solveLink(template,state,i);
  for(let i=0;i<template.nodes.length;i++){
   const node=template.nodes[i]!,v=state.velocities[i]!,p=state.positions[i]!,prev=before[i]!;if(!(node.mass>0)){v[0]=v[1]=v[2]=0;continue;}
   v[0]=(p[0]-prev[0])/dt;v[1]=(p[1]-prev[1])/dt;v[2]=(p[2]-prev[2])/dt;
  }
  const metrics=structuralMetrics(template,state),sleepSpeed=Math.max(0,options.sleepSpeed??.015),sleepStrain=Math.max(0,options.sleepStrain??.002),sleepAfter=Math.max(0,options.sleepAfter??.5);
- if(metrics.maxSpeed<=sleepSpeed&&metrics.maxStrain<=sleepStrain){state.quietTime+=dt;if(state.quietTime>=sleepAfter){state.sleeping=true;for(const velocity of state.velocities){velocity[0]=velocity[1]=velocity[2]=0;}}}else state.quietTime=0;
+ if(!pendingStructuralImpulses(state)&&metrics.maxSpeed<=sleepSpeed&&metrics.maxStrain<=sleepStrain){state.quietTime+=dt;if(state.quietTime>=sleepAfter){state.sleeping=true;for(const velocity of state.velocities){velocity[0]=velocity[1]=velocity[2]=0;}}}else state.quietTime=0;
  return state.sleeping?{...metrics,sleeping:true,maxSpeed:0,kineticEnergy:0}:metrics;
 }
 

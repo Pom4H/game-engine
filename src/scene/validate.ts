@@ -4,6 +4,7 @@ import {materialKinds} from '../materials/catalog.js';
 import {validateSurfaceAppearance} from '../materials/surface.js';
 import {validateFacade,validateFacadeNight} from '../render/facade-surface.js';
 import {validateGroundLitter,validateVariationSeed} from '../render/ground-litter.js';
+import {validateGroundCover} from '../render/ground-cover.js';
 import {validateRainResponse,validateSurfaceWeather} from '../render/rain-surface.js';
 import {compileWorldCouplings} from '../world-ir/couplings.js';
 import {finiteVec3} from '../math.js';
@@ -315,7 +316,7 @@ function materialSpec(value:unknown,path:string):void{
   const m=object(value,path);
   if(m.surfaceAppearance!==undefined)validateSurfaceAppearance(m.surfaceAppearance);
   if(m.rainResponse!==undefined)validateRainResponse(m.rainResponse);
-  if(m.facade!==undefined)validateFacade(m.facade);if(m.groundLitter!==undefined)validateGroundLitter(m.groundLitter);if(m.variationSeed!==undefined)validateVariationSeed(m.variationSeed);
+  if(m.groundCover!==undefined)validateGroundCover(m.groundCover);if(m.facade!==undefined)validateFacade(m.facade);if(m.groundLitter!==undefined)validateGroundLitter(m.groundLitter);if(m.variationSeed!==undefined)validateVariationSeed(m.variationSeed);
   if(m.decal!==undefined){const d=object(m.decal,`${path}.decal`);if(d.kind!=='coating-loss')throw new TypeError(`${path}.decal.kind is unknown`);number(d.severity,`${path}.decal.severity`,0,1);number(d.seed,`${path}.decal.seed`,0,1023);if(!Number.isInteger(d.seed))throw new TypeError(`${path}.decal.seed must be integer`);}
   if(m.decal!==undefined&&(m.kind==='glass'||Array.isArray(m.color)&&Number(m.color[3])<.98||object(m.texture??{},`${path}.texture`).heightUrl!==undefined))throw new TypeError(`${path}.decal requires an opaque supporting overlay without height displacement`);
   if(m.texture!==undefined)validateSurfaceTexture(m.texture,`${path}.texture`);

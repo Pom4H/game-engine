@@ -9,10 +9,12 @@ const clamp=(v:number,a=0,b=1)=>Math.max(a,Math.min(b,v));
 export class SoilHydrologyGrid{
  readonly water:ShallowWaterBasin;
  readonly soil:Float64Array;readonly ground:Float64Array;readonly ice:Float64Array;readonly snow:Float64Array;
+ private readonly groundwaterTransfer:Float64Array;
  inputM3=0;evaporatedM3=0;boundaryNetM3=0;revision=0;
  constructor(readonly profiles:readonly SoilProfile[],bed:Float64Array,readonly columns:number,readonly cellM:number,solid?:Uint8Array){
   if(profiles.length!==bed.length||bed.length%columns||profiles.some(p=>![p.depthM,p.porosity,p.fieldCapacity,p.conductivityMps,p.fineFraction,p.rootCover].every(Number.isFinite)||p.depthM<0||p.porosity<0||p.porosity>1||p.fieldCapacity<0||p.fieldCapacity>p.porosity||p.conductivityMps<0))throw RangeError('Invalid soil field');
   this.soil=new Float64Array(bed.length);this.ground=new Float64Array(bed.length);this.ice=new Float64Array(bed.length);this.snow=new Float64Array(bed.length);
+  this.groundwaterTransfer=new Float64Array(bed.length);
   this.water=new ShallowWaterBasin({columns,rows:bed.length/columns,widthM:columns*cellM,lengthM:bed.length/columns*cellM,depthM:0,bed,...(solid?{solid}:{}),dampingPerSecond:2});
  }
  addWater(index:number,volumeM3:number){if(!Number.isSafeInteger(index)||index<0||index>=this.soil.length||!Number.isFinite(volumeM3)||volumeM3<0)throw RangeError('Invalid hydrology source');this.water.depth[index]!+=volumeM3/this.cellM**2;this.inputM3+=volumeM3;this.revision++;}
@@ -41,8 +43,9 @@ export class SoilHydrologyGrid{
   if(!Number.isFinite(seconds)||seconds<=0||seconds>300)throw RangeError('Invalid terrain flow step');
   let remaining=seconds;while(remaining>1e-8){let depth=0;for(const h of this.water.depth)depth=Math.max(depth,h);const dt=Math.min(remaining,10,.4*this.cellM/Math.max(.001,Math.sqrt(9.81*depth)));this.water.step(dt,0);remaining-=dt;}
   // Darcy-like interflow carries retained water downslope after rain stops.
-  const transfer=new Float64Array(this.ground.length),n=this.columns;
-  for(let i=0;i<this.ground.length;i++)for(const j of [i%n<n-1?i+1:-1,i+n<this.ground.length?i+n:-1]){
+  const transfer=this.groundwaterTransfer,n=this.columns;transfer.fill(0);
+  for(let i=0;i<this.ground.length;i++)for(let direction=0;direction<2;direction++){
+   const j=direction===0?(i%n<n-1?i+1:-1):(i+n<this.ground.length?i+n:-1);
    if(j<0||this.water.solid[i]||this.water.solid[j])continue;const a=this.profiles[i]!,b=this.profiles[j]!;
    const ha=this.water.bed[i]!-a.depthM+this.ground[i]!/Math.max(.05,a.porosity),hb=this.water.bed[j]!-b.depthM+this.ground[j]!/Math.max(.05,b.porosity),from=ha>hb?i:j,to=ha>hb?j:i;
    const amount=Math.min(this.ground[from]!*.2,Math.abs(ha-hb)/this.cellM*Math.min(a.conductivityMps,b.conductivityMps)*seconds);transfer[from]!-=amount;transfer[to]!+=amount;

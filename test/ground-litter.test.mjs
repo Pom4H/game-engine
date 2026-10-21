@@ -13,7 +13,7 @@ import {FRAME_UNIFORM_WORDS} from '../dist/render/lighting.js';
 
 const mesh=()=>({kind:'triangle-mesh',positions:[0,0,0,1,0,0,0,0,1],normals:[0,1,0,0,1,0,0,1,0],indices:[0,1,2],variationSeeds:[-3,.375,7.25]});
 test('litter kernel and gust cadence retain the original Game algorithms',()=>{
- const original=readFileSync(new URL('./fixtures/game-ground-litter.wgsl',import.meta.url),'utf8');assert.ok(GROUND_LITTER_WGSL.endsWith(original.replace(/\bhash\(/g,'litterHash(').replace(/\bnoise\(/g,'litterNoise(')));
+ const original=readFileSync(new URL('./fixtures/game-ground-litter.wgsl',import.meta.url),'utf8');assert.ok(GROUND_LITTER_WGSL.replace(/\r\n/g,'\n').endsWith(original.replace(/\r\n/g,'\n').replace(/\bhalf\b/g,'halfExtent').replace(/\bhash\(/g,'litterHash(').replace(/\bnoise\(/g,'litterNoise(')));
  for(const wind of [[0,0],[3,4],[-6,2]])for(const gust of [0,.01,.5,1])for(let i=0;i<800;i++)assert.deepEqual(rareWindGust(wind,gust,i*.37),originalWind(wind,gust,i*.37));
 });
 test('signed per-vertex variation survives owned meshes, GPU attributes and packed assets',()=>{

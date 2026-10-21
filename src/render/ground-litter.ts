@@ -53,13 +53,13 @@ fn groundLitter(p:vec2f,cellSize:f32,chance:f32,footprint:f32,seed:f32,wind:vec2
  var cover=0.;var tint=vec3f(.55);
  if(kind<.18){
   // Folded newspaper / flyer: thin rectangle with print grain.
-  let half=vec2f(.10+.04*litterHash(cell+17.),.14+.05*litterHash(cell+19.));
-  let box=max(abs(q.x)-half.x,abs(q.y)-half.y);cover=1.-smoothstep(-aa,aa,box);
+  let halfExtent=vec2f(.10+.04*litterHash(cell+17.),.14+.05*litterHash(cell+19.));
+  let box=max(abs(q.x)-halfExtent.x,abs(q.y)-halfExtent.y);cover=1.-smoothstep(-aa,aa,box);
   let print=smoothstep(.35,.75,litterNoise(q*48.+cell));tint=mix(vec3f(.78,.76,.70),vec3f(.42,.40,.36),print*.55);
  }else if(kind<.78){
   // Leaf / dry leaf cluster: soft ellipse, olive→brown.
-  let half=vec2f(.045+.035*litterHash(cell+23.),.07+.04*litterHash(cell+29.));
-  let d=length(q/max(half,vec2f(.02)));cover=1.-smoothstep(1.-aa*8.,1.+aa*8.,d);
+  let halfExtent=vec2f(.045+.035*litterHash(cell+23.),.07+.04*litterHash(cell+29.));
+  let d=length(q/max(halfExtent,vec2f(.02)));cover=1.-smoothstep(1.-aa*8.,1.+aa*8.,d);
   tint=mix(vec3f(.34,.42,.18),vec3f(.42,.28,.12),litterHash(cell+31.));
  }else{
   // Crumpled scrap / wrapper: small irregular blob.

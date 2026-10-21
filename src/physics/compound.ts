@@ -117,6 +117,12 @@ export type SolidJoint = {
     b: SolidBody;
     length: number;
 } | {
+    type: 'range';
+    a: SolidBody;
+    b: SolidBody;
+    min: number;
+    max: number;
+} | {
     type?: undefined;
     a: SolidBody;
     b: SolidBody;
@@ -469,6 +475,7 @@ export class SolidWorld {
         this.staticIndex.add(plane, plane.radius); return plane; }
     joint(a: SolidBody, b: SolidBody, anchorA: Vector, anchorB: Vector) { const j: SolidJoint = { a, b, anchorA, anchorB }; a.ignore.add(b.id); b.ignore.add(a.id); this.joints.push(j); return j; }
     distanceJoint(a: SolidBody, b: SolidBody, length = Vlen(Vsub(a.p, b.p))) { const j: SolidJoint = { type: 'distance', a, b, length }; a.ignore.add(b.id); b.ignore.add(a.id); this.joints.push(j); return j; }
+    rangeJoint(a: SolidBody, b: SolidBody, min: number, max: number) { if (!Number.isFinite(min) || !Number.isFinite(max) || min < 0 || max < min) throw new RangeError('Invalid joint range'); const j: SolidJoint = {type: 'range', a, b, min, max}; this.joints.push(j); return j; }
     candidates(p: Vector, r: number, orderRadius = r): (SolidBody | SolidPlane)[] {
         const candidateState = this.candidateState(), depth = candidateState.depth;
         let slot = candidateState.slots[depth];
@@ -495,14 +502,14 @@ export class SolidWorld {
         return out;
         } finally { candidateState.depth = depth; }
     }
-    overlapsBox(p: Vector, half: Vector, ignore: SolidBody | null = null) {
+    overlapsBox(p: Vector, half: Vector, ignore: SolidBody | null = null, filter?: ((body: SolidBody) => boolean) | null) {
         const box = { p, half, axes: [[1, 0, 0], [0, 1, 0], [0, 0, 1]] }, radius = Vlen(half), candidates = this.candidates(p, radius);
         const candidateState = this.candidateState(), candidateDepth = candidateState.depth;
         candidateState.depth = candidateDepth + 1;
         try {
         for (let i = 0; i < candidates.length; i++) {
             const b = candidates[i]!;
-            if (b.plane || !b.enabled || b === ignore)
+            if (b.plane || !b.enabled || b === ignore || filter && !filter(b))
                 continue;
             const dx = b.p[0]! - p[0]!, dy = b.p[1]! - p[1]!, dz = b.p[2]! - p[2]!;
             if (dx * dx + dy * dy + dz * dz >= (b.radius + radius) * (b.radius + radius))
@@ -512,7 +519,7 @@ export class SolidWorld {
         }
         } finally { candidateState.depth = candidateDepth; }
         for (const b of this.bodies) {
-            if (b.plane || !b.enabled || b === ignore)
+            if (b.plane || !b.enabled || b === ignore || filter && !filter(b))
                 continue;
             const dx = b.p[0]! - p[0]!, dy = b.p[1]! - p[1]!, dz = b.p[2]! - p[2]!;
             if (dx * dx + dy * dy + dz * dz >= (b.radius + radius) * (b.radius + radius))
@@ -537,7 +544,7 @@ export class SolidWorld {
         this.rayBoxCache.set(body,{p:[...body.p],q:[...body.q],half:[...body.half],tag:body.tag,sources:body.shapes,boxes,shapes:body.shapes.map(shape=>({source:shape,half:shape.half,offset:shape.offset,q:shape.q,halfValues:[...shape.half],offsetValues:shape.offset?[...shape.offset]:undefined,qValues:shape.q?[...shape.q]:undefined,tag:shape.tag,structureNode:shape.structureNode,structureBeam:shape.structureBeam}))});
         return boxes;
     }
-    ray(origin: Vector, dir: Vector, maxDistance: number, ignore: SolidBody | null = null): SolidRayHit | null {
+    ray(origin: Vector, dir: Vector, maxDistance: number, ignore: SolidBody | null = null, filter?: ((body: SolidBody) => boolean) | null): SolidRayHit | null {
         let best: SolidRayHit | null = null;
         const mx = origin[0]! + dir[0]! * maxDistance * .5, my = origin[1]! + dir[1]! * maxDistance * .5, mz = origin[2]! + dir[2]! * maxDistance * .5;
         // The broad phase is X/Z. Vertical distance must not expand a roof/floor
@@ -551,6 +558,7 @@ export class SolidWorld {
         try {
         for (let i = 0; i < candidates.length; i++) {
             const item = candidates[i]!;
+            if (item === ignore || !item.plane && filter && !filter(item)) continue;
             if (item.plane) {
                 const dn = Vdot(dir, item.n);
                 if (dn >= -1e-8)
@@ -582,7 +590,7 @@ export class SolidWorld {
         } finally { candidateState.depth = candidateDepth; }
         const maxR = maxDistance;
         for (const body of this.bodies) {
-            if (body === ignore || !body.enabled || ignore?.ignore.has(body.id) || this.policies.rayBody?.(body, ignore) === false)
+            if (body === ignore || !body.enabled || filter && !filter(body) || ignore?.ignore.has(body.id) || this.policies.rayBody?.(body, ignore) === false)
                 continue;
             const dx = body.p[0]! - origin[0]!, dy = body.p[1]! - origin[1]!, dz = body.p[2]! - origin[2]!;
             if (dx * dx + dy * dy + dz * dz > (maxR + body.radius) * (maxR + body.radius))
@@ -643,8 +651,11 @@ export class SolidWorld {
                 b.impulse(Vscale(jt, -1), p);
         }
     }
-    solveJoint(j: SolidJoint, h: number) { if (j.type === 'distance') {
-        const { a, b } = j, d = Vsub(a.p, b.p), len = Vlen(d), n = Vscale(d, 1 / Math.max(len, 1e-8)), rv = Vdot(Vsub(a.v, b.v), n), k = a.invMass + b.invMass, force = -(rv + (len - j.length) * .22 / h) / k, J = Vscale(n, clamp(force, -300, 300));
+    solveJoint(j: SolidJoint, h: number) { if (j.type === 'distance' || j.type === 'range') {
+        const { a, b } = j, d = Vsub(a.p, b.p), len = Vlen(d), n = Vscale(d, 1 / Math.max(len, 1e-8)), rv = Vdot(Vsub(a.v, b.v), n), k = a.invMass + b.invMass;
+        if (k <= 0) return;
+        const target = j.type === 'range' ? clamp(len, j.min, j.max) : j.length;
+        const force = j.type === 'range' && len === target ? 0 : -(rv + (len - target) * .22 / h) / k, J = Vscale(n, clamp(force, -300, 300));
         a.impulse(J);
         b.impulse(Vscale(J, -1));
         return;

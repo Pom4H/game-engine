@@ -5,6 +5,9 @@ import {PlaybackClock as BeforeClock} from './fixtures/playback-clock-before-mon
 
 const bits=values=>Buffer.from(Float64Array.from(values).buffer).toString('hex');
 function run(Clock,timestamps){const clock=new Clock(.1);clock.observe(1,0);return timestamps.map(now=>clock.sample(now));}
+// Diagnostic counters are additive; the retained clock and interpolation state
+// must still match the frozen reference bit for bit on admitted timestamps.
+function retainedClock(clock){const {heldSince,advancing,...state}=clock;return state;}
 
 test('a stale playback sample does not consume its interval again on the next frame',()=>{
  const control=run(BeforeClock,[0,.02,.03]),before=run(BeforeClock,[0,.02,.01,.03]),actual=run(PlaybackClock,[0,.02,.01,.03]);
@@ -24,11 +27,18 @@ test('ordinary increasing/equal playback timelines retain exact frozen clock sta
    const j=i%900,now=j/120+(j>650?3:0);
    if(j>2&&j%3===0){simulation+=(now-lastObserved)*(j<300?.55:j<600?.85:1.1);lastObserved=now;before.observe(simulation,now);actual.observe(simulation,now);}
    const expected=before.sample(now),value=actual.sample(now);
-   assert.equal(bits([value]),bits([expected]));assert.deepEqual({...actual},{...before});
+   assert.equal(bits([value]),bits([expected]));assert.deepEqual(retainedClock(actual),{...before});
    assert.equal(bits([actual.sample(now)]),bits([before.sample(now)]));
-   assert.deepEqual({...actual},{...before});
+   assert.deepEqual(retainedClock(actual),{...before});
   }
  }
+});
+
+test('held presentation duration is observable without advancing past the newest cause and resets cleanly',()=>{
+ const clock=new PlaybackClock(0);clock.observe(1,0);assert.equal(clock.sample(0),1);clock.sample(.1);clock.sample(.35);
+ assert.equal(clock.inspect(.35).heldMs,350);assert.equal(clock.inspect(.35).heldFrames,2);
+ clock.observe(2,.4);assert.ok(clock.sample(.4)>1);assert.equal(clock.inspect(.4).heldMs,0);
+ clock.reset();assert.deepEqual(clock.inspect(1),{playbackRate:1,advancingFrames:0,heldFrames:0,heldMs:0});
 });
 
 const schema=projection('playback-stale-timestamp/v1',{position:vector3()});

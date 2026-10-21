@@ -1,4 +1,4 @@
-param([int]$Port=3007,[int]$RealtimePort=3009,[string]$BindHost='0.0.0.0',[string]$GameRoot='C:\Users\Roman\Documents\thegame')
+param([int]$Port=3007,[int]$RealtimePort=3009,[string]$BindHost='0.0.0.0',[string]$GameRoot=(Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'thegame'))
 $ErrorActionPreference='Stop'
 $engineRoot=Split-Path -Parent $PSScriptRoot
 $gamePath=(Resolve-Path -LiteralPath $GameRoot).Path

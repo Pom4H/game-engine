@@ -49,6 +49,7 @@ export class ShallowWaterBasin {
   readonly dampingPerSecond:number;
   private readonly transportX:Float64Array;
   private readonly transportZ:Float64Array;
+  private readonly outflowLimits:Float64Array;
   readonly initialVolumeM3:number;
   tiltRad=0;
   escapedVolumeM3=0;
@@ -76,6 +77,7 @@ export class ShallowWaterBasin {
     this.faceZ=new Float64Array((nz+1)*nx);
     this.transportX=new Float64Array(this.faceX.length);
     this.transportZ=new Float64Array(this.faceZ.length);
+    this.outflowLimits=new Float64Array(this.depth.length);
     this.initialVolumeM3=this.volumeM3();
   }
   index(x:number,z:number):number{return z*this.columns+x;}
@@ -98,14 +100,29 @@ export class ShallowWaterBasin {
     finitePositive(dt,'dt');
     if(!Number.isFinite(rollRad)||Math.abs(rollRad)>.45)throw new RangeError('Invalid tank roll');
     const nx=this.columns,nz=this.rows,h=this.depth,solid=this.solid;
-    let maxH=0;
-    for(let i=0;i<h.length;i++)if(h[i]!>maxH)maxH=h[i]!;
+    let maxH=0,dry=true;
+    for(let i=0;i<h.length;i++){if(h[i]!>maxH)maxH=h[i]!;if(h[i]!==0||!Number.isFinite(this.bed[i]))dry=false;}
     if(Math.sqrt(G*maxH)*dt/Math.min(this.dx,this.dz)>.45)
       throw new RangeError('Shallow water CFL limit exceeded');
-    const axial=-G*Math.sin(rollRad),normal=G*Math.cos(rollRad);
-    const attenuation=Math.exp(-this.dampingPerSecond*dt);
     const ux=this.faceX,uz=this.faceZ,fx=this.transportX,fz=this.transportZ;
     fx.fill(0);fz.fill(0);
+    // A genuinely empty free surface cannot exchange mass or carry an
+    // interior velocity, irrespective of finite substrate slope or tank roll.
+    // Preserve boundary velocities, signed transport zeros, solid cells and
+    // the exact clock increment of the ordinary solver (including wet→dry).
+    if(dry){
+      for(let z=0;z<nz;z++)ux.fill(0,z*(nx+1)+1,z*(nx+1)+nx);
+      uz.fill(0,nx,nz*nx);
+      for(let i=0;i<h.length;i++)if(!solid[i])h[i]=0;
+      if(this.openBoundary){
+        for(let z=0;z<nz;z++)fx[z*(nx+1)]=-0;
+        for(let x=0;x<nx;x++)fz[x]=-0;
+        this.escapedVolumeM3+=0;
+      }
+      this.tiltRad=rollRad;this.timeS+=dt;return;
+    }
+    const axial=-G*Math.sin(rollRad),normal=G*Math.cos(rollRad);
+    const attenuation=Math.exp(-this.dampingPerSecond*dt);
     if(this.openBoundary){
       for(let z=0;z<nz;z++){const a=z*nx,b=a+nx-1;fx[z*(nx+1)]=-h[a]!*Math.sqrt(G*h[a]!);fx[z*(nx+1)+nx]=h[b]!*Math.sqrt(G*h[b]!);}
       for(let x=0;x<nx;x++){fz[x]=-h[x]!*Math.sqrt(G*h[x]!);const i=(nz-1)*nx+x;fz[nz*nx+x]=h[i]!*Math.sqrt(G*h[i]!);}
@@ -128,7 +145,7 @@ export class ShallowWaterBasin {
     }
     // A dry front may request more outflow than a cell contains. Limit all
     // outgoing faces together; the identical shared flux enters its neighbour.
-    const limits=new Float64Array(h.length);limits.fill(1);
+    const limits=this.outflowLimits;limits.fill(1);
     for(let z=0;z<nz;z++)for(let x=0;x<nx;x++){
       const i=z*nx+x,out=(Math.max(0,fx[z*(nx+1)+x+1]!)+Math.max(0,-fx[z*(nx+1)+x]!))/this.dx+(Math.max(0,fz[(z+1)*nx+x]!)+Math.max(0,-fz[z*nx+x]!))/this.dz;
       if(out>0)limits[i]=Math.min(1,h[i]!/(dt*out));

@@ -8,7 +8,7 @@ import {MAX_SURFACE_DISPLACEMENT_M} from '../environment/deformable-surface.js';
 const CAMERA_OPAQUE=1,CAMERA_TRANSPARENT=2,REFLECTION=4,STATIC_SHADOW=8,DYNAMIC_SHADOW=16,ALL=31;
 export function castsRenderShadow(entity:RuntimeEntity):boolean{
  const emission=entity.material.emissive;
- return entity.material.color[3]>=.98&&!entity.material.decal&&!(emission&&Math.max(...emission)>1);
+ return entity.material.color[3]>=.98&&entity.material.groundCover!=='grass-blade'&&!entity.material.decal&&!(emission&&Math.max(...emission)>1);
 }
 interface Entry {entity:RuntimeEntity;primitive:Primitive;model:Mat4;roles:number;mover:boolean;deformed:boolean;heightUrl:string|undefined;reliefDepth:number;reliefSize:number}
 type BoundsFor=(primitive:Primitive)=>MeshBounds;

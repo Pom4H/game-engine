@@ -10,7 +10,7 @@ import {FRAME_UNIFORM_WORDS,FRAME_UNIFORM_BYTES} from '../dist/render/lighting.j
 test('Engine retains the original ground rings and paint drop kernels',()=>{
  const original=readFileSync(new URL('./fixtures/game-rain-surface.wgsl',import.meta.url),'utf8');
  const hash='\nfn rainHash(p:vec2f)->f32 {return fract(sin(dot(p,vec2f(127.1,311.7)))*43758.5453);}\n';
- assert.equal(RAIN_SURFACE_WGSL,hash+original.replace(/\bhash\(/g,'rainHash('));
+ assert.equal(RAIN_SURFACE_WGSL.replace(/\r\n/g,'\n'),hash+original.replace(/\r\n/g,'\n').replace(/\bhash\(/g,'rainHash('));
 });
 
 test('ground and mirrored paint select actual object uniforms without changing body state',()=>{

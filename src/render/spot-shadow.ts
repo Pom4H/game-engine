@@ -35,8 +35,41 @@ fn spotShadowVisibility(source:PointSource,world:vec3<f32>,normal:vec3<f32>)->f3
  if(clip.w<=0.0){return 1.0;}
  let ndc=clip.xyz/clip.w;let uv=ndc.xy*vec2<f32>(.5,-.5)+.5;
  if(any(uv<vec2<f32>(0))||any(uv>vec2<f32>(1))||ndc.z<0.0||ndc.z>1.0){return 1.0;}
- let texel=1.0/vec2<f32>(textureDimensions(spotShadowMap));var visibility=0.0;
- for(var i=0u;i<4u;i++){visibility+=textureSampleCompareLevel(spotShadowMap,shadowSampler,uv+SHADOW_TAPS[i]*texel,slot,ndc.z-.000002);}
+ // A grazing receiver changes depth even inside one hardware-linear PCF
+ // sample. Compare against its plane at each gathered texel centre, retaining
+ // the same four bilinear taps without a slope-dependent light-leaking bias.
+ // Analytic tangents work inside the divergent, bounded local-light loop;
+ // screen derivatives there would violate WebGPU derivative uniformity.
+ let tangent=normalize(cross(normal,select(vec3<f32>(0,1,0),vec3<f32>(1,0,0),abs(normal.y)>.9)));
+ let bitangent=cross(normal,tangent);
+ let dx=shadow.vp*vec4<f32>(tangent,0);let dy=shadow.vp*vec4<f32>(bitangent,0);
+ let px=(dx.xyz*clip.w-clip.xyz*dx.w)/(clip.w*clip.w);
+ let py=(dy.xyz*clip.w-clip.xyz*dy.w)/(clip.w*clip.w);
+ let gradient=shadowReceiverGradient(vec3<f32>(px.xy*vec2<f32>(.5,-.5),px.z),vec3<f32>(py.xy*vec2<f32>(.5,-.5),py.z));
+ let size=vec2<f32>(textureDimensions(spotShadowMap));let texel=1.0/size;var visibility=0.0;
+ for(var i=0u;i<4u;i++){
+  let sampleUV=uv+SHADOW_TAPS[i]*texel;let pixel=sampleUV*size-.5;let base=floor(pixel);let blend=fract(pixel);
+  let low=clamp(vec2<i32>(base),vec2<i32>(0),vec2<i32>(size)-1);
+  let high=clamp(vec2<i32>(base)+1,vec2<i32>(0),vec2<i32>(size)-1);
+  // Depth gather requires a non-filtering sampler. Explicit loads preserve the
+  // existing frame bind layout and all 16 depth texels of the old linear PCF.
+  let depths=vec4<f32>(
+   textureLoad(spotShadowMap,vec2<i32>(low.x,high.y),slot,0),
+   textureLoad(spotShadowMap,high,slot,0),
+   textureLoad(spotShadowMap,vec2<i32>(high.x,low.y),slot,0),
+   textureLoad(spotShadowMap,low,slot,0)
+  );
+  let refs=vec4<f32>(
+   dot(gradient,(vec2<f32>(f32(low.x),f32(high.y))+.5)*texel-uv),
+   dot(gradient,(vec2<f32>(high)+.5)*texel-uv),
+   dot(gradient,(vec2<f32>(f32(high.x),f32(low.y))+.5)*texel-uv),
+   dot(gradient,(vec2<f32>(low)+.5)*texel-uv)
+  )+ndc.z-.000002;
+  // A cleared far texel contains no occluder. A receiver plane extrapolated
+  // past the light's far plane must not turn that empty texel into a shadow.
+  let lit=select(select(vec4<f32>(0),vec4<f32>(1),refs<=depths),vec4<f32>(1),depths>=vec4<f32>(1));
+  visibility+=mix(mix(lit.w,lit.z,blend.x),mix(lit.x,lit.y,blend.x),blend.y);
+ }
  return mix(1.0,visibility*.25,shadow.params.x);
 }
 `;

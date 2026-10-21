@@ -6,6 +6,7 @@ import type {EnvironmentSpec} from '../environment/types.js';
 import type {MaterialFinish,MaterialTreatment,SurfaceAppearance} from '../materials/surface.js';
 import type {FacadeSpec} from '../render/facade-surface.js';
 import type {GroundLitterSpec} from '../render/ground-litter.js';
+import type {GroundCover} from '../render/ground-cover.js';
 import type {RainResponse,SurfaceWeatherSpec} from '../render/rain-surface.js';
 import type {SceneDeformationSpec} from '../physics/deformation.js';
 import type {FluidVolumeSpec} from '../physics/fluid.js';
@@ -50,7 +51,7 @@ export interface SurfaceTextureSpec {
   readonly ormUrl?:string;
   readonly ormStrength?:number;
 }
-export interface MaterialSpec { facade?:FacadeSpec; /** Authored procedural seed; otherwise derived from entity identity. */ variationSeed?:number; groundLitter?:GroundLitterSpec; /** Optical rain kernels; absent keeps the existing material path. */ rainResponse?:RainResponse; /** Final optical state from an external simulation; never advances surface physics. */ surfaceAppearance?:SurfaceAppearance; /** UV-space coating overlay. Its supporting surface supplies collision and shadow. */ decal?:{kind:'coating-loss';severity:number;seed:number}; texture?:SurfaceTextureSpec; label?:string; /** Painted lettering in sRGB; defaults to the existing pale gold. */ labelColor?:readonly[number,number,number]; roughness?:number; metalness?:number; /** Dielectric top-coat intensity independent of the base layer. */ clearcoat?:number; clearcoatRoughness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
+export interface MaterialSpec { /** Optional optical vegetation; groundLitter remains for hard surfaces. */ groundCover?:GroundCover; facade?:FacadeSpec; /** Authored procedural seed; otherwise derived from entity identity. */ variationSeed?:number; groundLitter?:GroundLitterSpec; /** Optical rain kernels; absent keeps the existing material path. */ rainResponse?:RainResponse; /** Final optical state from an external simulation; never advances surface physics. */ surfaceAppearance?:SurfaceAppearance; /** UV-space coating overlay. Its supporting surface supplies collision and shadow. */ decal?:{kind:'coating-loss';severity:number;seed:number}; texture?:SurfaceTextureSpec; label?:string; /** Painted lettering in sRGB; defaults to the existing pale gold. */ labelColor?:readonly[number,number,number]; roughness?:number; metalness?:number; /** Dielectric top-coat intensity independent of the base layer. */ clearcoat?:number; clearcoatRoughness?:number; emissive?:readonly[number,number,number]; pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';  kind?:MaterialKind; color?:Color; finish?:MaterialFinish; ageYears?:number; treatment?:MaterialTreatment }
 export type SurfaceUse='generic'|'road'|'sidewalk'|'curb';
 export interface EnvironmentalSpec { /** Appearance inherited by engine-generated snow cover; the base surface retains its own material. */ snowMaterial?:MaterialSpec; surfaceUse?:SurfaceUse; /** Initial settled snow, in metres. */ snowDepthM?:number; iceDepthM?:number; waterDepthM?:number; /** Weather/contact field spacing; detailed SnowSurface impressions keep their own resolution. */ fieldCellSizeM?:number }
 export interface BodySpec {
@@ -174,7 +175,7 @@ export interface AppearanceMaterialPatch {
   readonly id?:string;
   readonly idPrefix?:string;
   readonly treatment?:MaterialTreatment;
-  readonly set:Readonly<Pick<MaterialSpec,'color'|'roughness'|'metalness'|'clearcoat'|'clearcoatRoughness'|'emissive'|'surfaceAppearance'|'rainResponse'|'groundLitter'|'variationSeed'|'facade'|'texture'>>;
+  readonly set:Readonly<Pick<MaterialSpec,'color'|'roughness'|'metalness'|'clearcoat'|'clearcoatRoughness'|'emissive'|'surfaceAppearance'|'rainResponse'|'groundLitter'|'groundCover'|'variationSeed'|'facade'|'texture'>>;
 }
 export interface AppearancePatch {
   readonly rendering?:Partial<RenderingSpec>;

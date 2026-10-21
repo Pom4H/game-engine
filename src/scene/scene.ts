@@ -9,6 +9,7 @@ import {surfaceFieldResolution} from '../environment/deformable-surface.js';
 import {material,type MaterialKind,type PhysicalMaterial} from '../materials/catalog.js';
 import {validateFacade,validateFacadeNight} from '../render/facade-surface.js';
 import {validateGroundLitter,validateVariationSeed} from '../render/ground-litter.js';
+import {validateGroundCover} from '../render/ground-cover.js';
 import {validateRainResponse,validateSurfaceWeather} from '../render/rain-surface.js';
 import {validateSurfaceTexture} from './validate.js';
 import {deriveSurfaceState,effectiveFriction,validateSurfaceAppearance,type SurfaceState} from '../materials/surface.js';
@@ -47,7 +48,7 @@ export interface RuntimeMaterial {
   readonly decal?:MaterialSpec['decal'];
   readonly surfaceAppearance?:MaterialSpec['surfaceAppearance'];
   readonly rainResponse?:MaterialSpec['rainResponse'];
-  readonly facade?:MaterialSpec['facade'];readonly groundLitter?:MaterialSpec['groundLitter'];readonly variationSeed?:number;
+  readonly groundCover?:MaterialSpec['groundCover'];readonly facade?:MaterialSpec['facade'];readonly groundLitter?:MaterialSpec['groundLitter'];readonly variationSeed?:number;
   readonly labelColor?:Vec3;
   readonly label?:string;readonly roughness?:number;readonly metalness?:number;readonly clearcoat?:number;readonly clearcoatRoughness?:number;readonly emissive?:Vec3;readonly pattern?:'plain'|'brick'|'plaster'|'rubber'|'window'|'fabric';readonly finish?:import('../materials/surface.js').MaterialFinish;readonly ageYears?:number;readonly treatment?:import('../materials/surface.js').MaterialTreatment;
   readonly color:Color;
@@ -548,7 +549,7 @@ export class Scene {
     // Validate external optical state before any part of the patch is applied.
     if(patch.rendering?.surfaceWeather!==undefined)validateSurfaceWeather(patch.rendering.surfaceWeather);
     if(patch.rendering?.facadeNight!==undefined)validateFacadeNight(patch.rendering.facadeNight);
-    for(const rule of patch.materials??[]){if(rule.set.texture!==undefined)validateSurfaceTexture(rule.set.texture);if(rule.set.surfaceAppearance!==undefined)validateSurfaceAppearance(rule.set.surfaceAppearance);if(rule.set.rainResponse!==undefined)validateRainResponse(rule.set.rainResponse);if(rule.set.facade!==undefined)validateFacade(rule.set.facade);if(rule.set.groundLitter!==undefined)validateGroundLitter(rule.set.groundLitter);if(rule.set.variationSeed!==undefined)validateVariationSeed(rule.set.variationSeed);}
+    for(const rule of patch.materials??[]){if(rule.set.texture!==undefined)validateSurfaceTexture(rule.set.texture);if(rule.set.surfaceAppearance!==undefined)validateSurfaceAppearance(rule.set.surfaceAppearance);if(rule.set.rainResponse!==undefined)validateRainResponse(rule.set.rainResponse);if(rule.set.facade!==undefined)validateFacade(rule.set.facade);if(rule.set.groundLitter!==undefined)validateGroundLitter(rule.set.groundLitter);if(rule.set.groundCover!==undefined)validateGroundCover(rule.set.groundCover);if(rule.set.variationSeed!==undefined)validateVariationSeed(rule.set.variationSeed);}
     let appearanceChanged=false,structureChanged=false;
     if(patch.rendering){
       const keys=Object.keys(patch.rendering),previousRendering=this.spec.rendering;
@@ -570,6 +571,7 @@ export class Scene {
         if(rule.idPrefix!==undefined&&!entity.id.startsWith(rule.idPrefix))continue;
         if(rule.treatment!==undefined&&entity.material.treatment!==rule.treatment)continue;
         if(rule.set.color&&rule.set.color[3]!==entity.material.color[3])throw new TypeError('appearance patch cannot change material alpha/classification');
+        if(('groundCover' in rule.set)&&((entity.material.groundCover==='grass-blade')!==(rule.set.groundCover==='grass-blade')))structureChanged=true;
         (entity as {material:RuntimeMaterial}).material=Object.freeze({...entity.material,...structuredClone(rule.set),...(rule.set.texture?{texture:Object.freeze({...rule.set.texture})}:{}),...(rule.set.facade?{facade:Object.freeze({...rule.set.facade})}:{}),...(rule.set.groundLitter?{groundLitter:Object.freeze({...rule.set.groundLitter})}:{}),...(rule.set.rainResponse?{rainResponse:Object.freeze({...rule.set.rainResponse})}:{}),...(rule.set.surfaceAppearance?{surfaceAppearance:Object.freeze({...rule.set.surfaceAppearance,...(rule.set.surfaceAppearance.snow?{snow:Object.freeze({...rule.set.surfaceAppearance.snow})}:{})})}:{})});
         appearanceChanged=true;
       }

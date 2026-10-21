@@ -2,20 +2,22 @@
  * Source SHA-256 04951e21553dd62bd1561bb7c79dc90311a8f2b69e6da88f13d3ece44b3850de. Metres/seconds, +Y up, yaw 0 faces +Z; Y is feet.
  * The owning application supplies action locks and applies jump gameplay effects. */
 export const CHARACTER_MOTION_BACKEND='the-engine' as const;
-export const CHARACTER_MOTION_MODE={LOCKED:1,IMMOBILIZED:2,BRACING:4,STRIKING:8,LOOK_HEADING:16} as const;
+export const CHARACTER_MOTION_MODE={LOCKED:1,IMMOBILIZED:2,BRACING:4,STRIKING:8,LOOK_HEADING:16,SPRINT_AIM:32,FULL_AIM_SPEED:64,FORCE_SPRINT:128} as const;
 export const CHARACTER_MOTION_EVENT={JUMPED:1} as const;
 export interface CharacterMotionInput{readonly forward:number;readonly right:number;readonly yaw:number;readonly sprint:boolean;readonly jump:boolean;readonly pitch?:number;readonly crouch?:boolean;readonly aim?:boolean;}
 export interface CharacterMotionState{
  x:number;y:number;z:number;vx:number;vy:number;vz:number;yaw:number;lookYaw:number;grounded:boolean;phase:number;speed:number;coyote:number;jumpBuffer:number;jumpHeld:boolean;landTime:number;
  pitch?:number;crouch?:boolean;animation?:string;stamina?:number;impulseX?:number;impulseZ?:number;
+ footMaterial?:unknown;footSupportId?:string;
 }
+export interface CharacterMotionSupport{y:number;normal:readonly [number,number,number];walkable?:boolean;material?:unknown;supportId?:string;}
 export interface CharacterMotionWorld{
  blocked(x:number,y:number,z:number,height:number,radius:number):boolean;
- floor(x:number,y:number,z:number,range:number):{y:number;normal:readonly [number,number,number]}|null;
- footing?(x:number,y:number,z:number,range:number):{y:number;normal:readonly [number,number,number]}|null;
+ floor(x:number,y:number,z:number,range:number):CharacterMotionSupport|null;
+ footing?(x:number,y:number,z:number,range:number):CharacterMotionSupport|null;
  recover?(x:number,y:number,z:number,height:number,radius:number):{x:number;y:number;z:number}|null;
 }
-export interface CharacterMotionTuning{readonly walkSpeed:number;readonly runSpeed:number;readonly gravity:number;readonly jumpSpeed:number;}
+export interface CharacterMotionTuning{readonly walkSpeed:number;readonly runSpeed:number;readonly gravity:number;readonly jumpSpeed:number;readonly staminaCapacity?:number;}
 export const CHARACTER_MOTION_TUNING:CharacterMotionTuning=Object.freeze({walkSpeed:3.35,runSpeed:6.8,gravity:16,jumpSpeed:5.4});
 const clamp=(v:number,min:number,max:number)=>Math.max(min,Math.min(max,v));
 const damp=(a:number,b:number,rate:number,dt:number)=>a+(b-a)*(1-Math.exp(-rate*dt));
@@ -26,15 +28,16 @@ export function stepCharacterMotion(p:CharacterMotionState,input:CharacterMotion
  if(mode&CHARACTER_MOTION_MODE.IMMOBILIZED)input={forward:0,right:0,sprint:false,crouch:false,jump:false,aim:false,yaw:p.lookYaw,pitch:p.pitch??0};
  const floorAt=(x:number,y:number,z:number,range:number)=>world.footing?world.footing(x,y,z,range):world.floor(x,y,z,range);
  p.lookYaw=input.yaw;if(input.pitch!==undefined)p.pitch=clamp(input.pitch,-1.15,1.15);
- if(mode&CHARACTER_MOTION_MODE.LOCKED){p.vx=p.vz=0;return 0;}
+ if(mode&CHARACTER_MOTION_MODE.LOCKED){delete p.footMaterial;delete p.footSupportId;p.vx=p.vz=0;return 0;}
  let events=0;p.impulseX??=0;p.impulseZ??=0;
  if(input.jump&&!p.jumpHeld)p.jumpBuffer=.12;p.jumpHeld=input.jump;p.jumpBuffer=Math.max(0,p.jumpBuffer-dt);
  p.coyote=p.grounded?.1:Math.max(0,p.coyote-dt);
  const standingBlocked=world.blocked(p.x,p.y,p.z,1.8,.29);
  // A restored body under a low ceiling can adopt a legal posture before gravity
  // runs. An unresolved standing overlap must not send it through its floor.
- p.crouch=(!input.aim&&!!input.crouch)||(standingBlocked&&((p.crouch??false)||!world.blocked(p.x,p.y,p.z,1.15,.29)));
- const height=p.crouch?1.15:1.8,magnitude=Math.min(1,Math.hypot(input.forward,input.right)),norm=Math.max(1,Math.hypot(input.forward,input.right)),running=input.sprint&&!input.aim&&!p.crouch&&(p.stamina??1)>.04&&magnitude>.1,top=mode&CHARACTER_MOTION_MODE.IMMOBILIZED?0:mode&CHARACTER_MOTION_MODE.BRACING?1.15:input.aim&&p.grounded?2.35:p.crouch?1.65:running?tuning.runSpeed:tuning.walkSpeed;
+ p.crouch=(!input.aim&&!!input.crouch)||(standingBlocked&&((p.crouch??false)||!input.jump&&!world.blocked(p.x,p.y,p.z,1.15,.29)));
+ const capacity=tuning.staminaCapacity??1;
+ const height=p.crouch?1.15:1.8,magnitude=Math.min(1,Math.hypot(input.forward,input.right)),norm=Math.max(1,Math.hypot(input.forward,input.right)),running=(input.sprint&&(!input.aim||!!(mode&CHARACTER_MOTION_MODE.SPRINT_AIM))||!!(mode&CHARACTER_MOTION_MODE.FORCE_SPRINT))&&!p.crouch&&(p.stamina??1)>.04/capacity&&magnitude>.1,top=mode&CHARACTER_MOTION_MODE.IMMOBILIZED?0:mode&CHARACTER_MOTION_MODE.BRACING?1.15:input.aim&&p.grounded&&!(mode&CHARACTER_MOTION_MODE.FULL_AIM_SPEED)?2.35:p.crouch?1.65:running?tuning.runSpeed:tuning.walkSpeed;
  if(world.recover&&(p.crouch?world.blocked(p.x,p.y,p.z,height,.29):standingBlocked)){
   const free=world.recover(p.x,p.y,p.z,height,.29);
   if(free){p.x=free.x;p.y=free.y;p.z=free.z;}
@@ -42,14 +45,14 @@ export function stepCharacterMotion(p:CharacterMotionState,input:CharacterMotion
  const fx=Math.sin(input.yaw),fz=Math.cos(input.yaw),rx=-fz,rz=fx;
  p.vx=damp(p.vx,(fx*input.forward+rx*input.right)/norm*top,p.grounded?((mode&CHARACTER_MOTION_MODE.STRIKING)&&!input.aim?3:magnitude>0?12:18):input.aim?.35:3.2,dt);
  p.vz=damp(p.vz,(fz*input.forward+rz*input.right)/norm*top,p.grounded?((mode&CHARACTER_MOTION_MODE.STRIKING)&&!input.aim?3:magnitude>0?12:18):input.aim?.35:3.2,dt);
- if(running&&p.stamina!==undefined)p.stamina=clamp(p.stamina-.09*dt,0,1);
- if(p.jumpBuffer>0&&p.coyote>0&&!p.crouch&&(p.stamina??1)>=.08){if(p.stamina!==undefined)p.stamina-=.08;events|=CHARACTER_MOTION_EVENT.JUMPED;p.vy=tuning.jumpSpeed;p.grounded=false;p.coyote=0;p.jumpBuffer=0;}
+ if(running&&p.stamina!==undefined)p.stamina=clamp(p.stamina-.09*dt/capacity,0,1);
+ if(p.jumpBuffer>0&&p.coyote>0&&!p.crouch&&(p.stamina??1)>=.08/capacity){if(p.stamina!==undefined)p.stamina-=.08/capacity;events|=CHARACTER_MOTION_EVENT.JUMPED;p.vy=tuning.jumpSpeed;p.grounded=false;p.coyote=0;p.jumpBuffer=0;}
  const beforeX=p.x,beforeZ=p.z,steps=Math.max(1,Math.ceil(Math.hypot(p.vx+p.impulseX,p.vz+p.impulseZ)*dt/.10));
  for(let i=0;i<steps;i++){
   const dx=(p.vx+p.impulseX)*dt/steps,dz=(p.vz+p.impulseZ)*dt/steps;
   if(!world.blocked(p.x+dx,p.y,p.z+dz,height,.29)){p.x+=dx;p.z+=dz;continue;}
   const step=floorAt(p.x+dx,p.y+.34,p.z+dz,.38);
-  if(p.grounded&&step&&step.normal[1]>.65&&step.y>p.y+.005&&step.y<=p.y+.32&&!world.blocked(p.x+dx,step.y+.015,p.z+dz,height,.29)){p.x+=dx;p.z+=dz;p.y=step.y;continue;}
+  if(p.grounded&&step&&(step.walkable??step.normal[1]>.65)&&step.y>p.y+.005&&step.y<=p.y+.32&&!world.blocked(p.x+dx,step.y+.015,p.z+dz,height,.29)){p.x+=dx;p.z+=dz;p.y=step.y;continue;}
   if(!world.blocked(p.x+dx,p.y,p.z,height,.29))p.x+=dx;else {p.vx=0;p.impulseX=0;}
   if(!world.blocked(p.x,p.y,p.z+dz,height,.29))p.z+=dz;else {p.vz=0;p.impulseZ=0;}
  }
@@ -61,7 +64,9 @@ export function stepCharacterMotion(p:CharacterMotionState,input:CharacterMotion
  // A head/body overlap cannot remove the floor's vertical constraint. Recovery
  // handles that overlap independently; rejecting support here lets an already
  // intersecting restored body fall through an otherwise solid ground plane.
- if(floor&&floor.normal[1]>.62&&p.vy<=0&&floor.y>=y-.13&&floor.y<=oldY+.32){y=floor.y;p.vy=0;p.grounded=true;}
+ // A newly attempted jump against an overhang remains airborne for this
+ // duration. Ordinary restored overlaps retain the ground constraint above.
+ if(floor&&(floor.walkable??floor.normal[1]>.62)&&p.vy<=0&&floor.y>=y-.13&&floor.y<=oldY+.32&&(!(events&CHARACTER_MOTION_EVENT.JUMPED)||!world.blocked(p.x,floor.y,p.z,height,.29))){y=floor.y;p.vy=0;p.grounded=true;}
  // The centre floor ray can miss the edge of a bench/table under the actor's footprint.
  // Sweep the full body vertically so gravity cannot insert it into that edge.
  if(y<oldY){
@@ -76,6 +81,7 @@ export function stepCharacterMotion(p:CharacterMotionState,input:CharacterMotion
    break;
   }
  }
+ if(p.grounded&&floor&&Math.abs(floor.y-y)<.05){if(floor.material!==undefined)p.footMaterial=floor.material;else delete p.footMaterial;if(floor.supportId!==undefined)p.footSupportId=floor.supportId;else delete p.footSupportId;}else{delete p.footMaterial;delete p.footSupportId;}
  p.y=y;if(p.grounded&&!wasGrounded)p.landTime=.12;p.landTime=Math.max(0,p.landTime-dt);
  p.speed=Math.hypot(p.x-beforeX,p.z-beforeZ)/dt;const heading=(input.aim||!!(mode&CHARACTER_MOTION_MODE.LOOK_HEADING))?input.yaw:p.speed>.06?Math.atan2(p.x-beforeX,p.z-beforeZ):p.yaw;
  p.yaw+=angleDelta(p.yaw,heading)*Math.min(1,dt*14);p.phase+=p.speed*dt*(p.crouch?7:running?5:6);

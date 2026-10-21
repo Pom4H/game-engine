@@ -15,5 +15,6 @@ export class FixedClock {
     let count = 0; while (this.debt + 1e-6 >= this.stepMs && count < this.maxSteps) { if (count > 0 && continueCatchUp && !continueCatchUp()) break; this.debt -= this.stepMs; step(); count++; }
     return count;
   }
+  get backlogMs(): number { return Math.max(0, this.debt); }
   get delay(): number { return Math.max(0, this.stepMs - this.debt); }
 }
