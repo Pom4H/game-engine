@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-21",
+  "scope": "Game-design review of visible contribution per rendering cost. Read-only; no extra GPU runs or production quality cuts.",
+  "evidence": {
+    "observed": [
+      "../thegame/artifacts/performance-live-migration-car-functional-r3.png",
+      "artifacts/grass-patch-review-20261021/coplanar-order-before.png",
+      "artifacts/grass-patch-review-20261021/coplanar-order-after.png",
+      "artifacts/grass-patch-review-20261021/grass-rebase-after.png",
+      "artifacts/grass-patch-review-20261021/motion-after.png"
+    ],
+    "camera": "Game camera vertical FOV .94 to1.09rad, depending on speed;720px height.",
+    "limits": "Except grass, feature costs have not been isolated by feature-off A/B. Ranking is a review priority, not a claimed FPS saving. The real car screenshot is night/dry; weather-state conclusions also use source and prior environment QA."
+  },
+  "priorities": [
+    {
+      "feature": "Near grass",
+      "priority": 1,
+      "visible": "Blade widths6-12mm give roughly0.5-1.7pixels at5-7m with the game720p camera. Silhouettes and wind are visible close up; in the actual night-driving screenshot their contrast is low.",
+      "cost": "Clock-aligned driving samples showed substantial dynamic primitive compilation and GC; immutable per-patch fix directly removes aggregate churn.",
+      "action": "Keep original density, range, geometry and wind. Preserve immutable patch identity through movement and membership changes.",
+      "status": "Implemented and visually reviewed; see grass-per-patch-20261021.json."
+    },
+    {
+      "feature": "Turf microdetail",
+      "priority": 2,
+      "visible": "Sub-millimetre to millimetre strokes are predominantly below one pixel beyond close range. Broad color/dryness variation is visible over large ground regions.",
+      "action": "Preserve broad variation; inspect existing exact-zero footprint return before proposing work. Existing detail fade covers .006-.038m footprints.",
+      "cost": "Not isolated after the current fixes."
+    },
+    {
+      "feature": "Ground litter",
+      "priority": 3,
+      "visible": "Leaves about9-16cm and papers20-28cm across can read clearly while walking or under headlights, while contributing little during fast night driving.",
+      "action": "QA paired day/night and low-angle views first. Prefer avoiding work only when current analytic coverage is exactly zero. Keep authored wind and ground identity.",
+      "cost": "Not isolated; existing footprint fade reaches zero between .035 and .2m."
+    },
+    {
+      "feature": "Reflections",
+      "priority": 4,
+      "visible": "High value on wet roads, clear-coated vehicles and glass; lower contribution on dry rough ground.",
+      "action": "Investigate exact receiver eligibility and avoid a pass only when its contribution is zero. Do not lower reflection resolution, distance or wet-road readability without paired review.",
+      "cost": "Earlier720p instrumented diagnostic reflection mean about.4ms; current car GPU timing absent."
+    },
+    {
+      "feature": "Bloom",
+      "priority": 5,
+      "visible": "Headlight and lamp bloom helps nighttime brightness cues; daylight low-emission scenes may have a smaller response.",
+      "action": "Retain nighttime light appearance. Measure actual empty-source/bright-region work before changing implementation.",
+      "cost": "Earlier720p instrumented diagnostic bloom passes total about.5ms; half-resolution targets already used."
+    },
+    {
+      "feature": "Shadows and headlights",
+      "priority": 6,
+      "visible": "High contribution to contact, shape, night navigation and road depth. Missing or striped shadows are immediately visible.",
+      "action": "Preserve contact and beam occlusion. Focus on redundant matrix, caster and buffer work, keeping the corrected receiver-plane PCF.",
+      "cost": "Current car has two active spotlight shadows; no measured per-feature car GPU cost yet."
+    },
+    {
+      "feature": "Rain, wetness and snow",
+      "priority": 7,
+      "visible": "Large visible weather changes and surface response communicate world conditions. Tiny far droplets may be below a pixel but wetness and road reflections are not.",
+      "action": "Prefer exact dry/occluded/empty work elimination. Measure rain-state A/B separately; do not dilute weather to obtain a higher score.",
+      "cost": "Not isolated in the dry-night car run."
+    },
+    {
+      "feature": "Temporal AA",
+      "priority": 8,
+      "visible": "High value for thin grass, road paint, distant edges and camera movement; removing it risks visible shimmer.",
+      "action": "Retain temporal stability and history correctness. Optimize allocation/history work instead of disabling AA.",
+      "cost": "Earlier720p instrumented diagnostic TAA mean about.29ms."
+    }
+  ],
+  "acceptance": "Compare the same camera/time/weather at full720p with movement and correct vehicle control. Distinguish a tiny numeric representation change reviewed in all raw images from an unreviewed quality reduction. Rare freezes remain a separate acceptance failure."
+}

@@ -1636,6 +1636,9 @@ export class WebGPURenderer implements Renderer{
       ...(this.profiler.enabled?{environmentCache:{updates:this.environmentUpdates,invalidations:Object.fromEntries(this.environmentInvalidations),...(this.lastScene?{causes:distantRadianceCacheStats(this.lastScene)}:{})}}:{}),
       ...(this.localProbeKey?{reflectionProbe:{validFaces,complete:this.localProbeMask===63,nextFace:this.localProbeFace,...(this.localProbePosition?{position:[...this.localProbePosition] as [number,number,number]}:{})}}:{}),...(includeProfile?{profile:this.profiler.inspect()}:{})};
   }
+  /** Allocation-free counters for live presentation; inspect() builds diagnostic snapshots. */
+  get frameDrawCalls():number{return this.drawCalls;}
+  get frameTriangles():number{return this.triangles;}
   profileLatest(){return this.profiler.latest();}
   profile(){return this.profiler.inspect();}
   resetProfile():void{this.profiler.reset();this.gpu.visibility?.resetStats();}
