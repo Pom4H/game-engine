@@ -9,6 +9,7 @@ import {SURFACE_HIT_WGSL,surfacePassShader} from './surface-hit.js';
 import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
 import {ProbeCapture} from './probe-capture.js';
+import {RenderAttachmentViews} from './attachment-views.js';
 import {bakeEnvironmentMap,type EnvironmentMapData} from './environment-map.js';
 import {EnvironmentMapWorker,type EnvironmentWorker} from './environment-map-worker.js';
 import {meshBounds,intersectsClip,intersectsModelClip,type MeshBounds} from './visibility.js';
@@ -976,6 +977,7 @@ struct O {@builtin(position) position:vec4<f32>,@location(0) normal:vec3<f32>,@l
 `;
 
 export class WebGPURenderer implements Renderer{
+  private readonly attachmentViews=new RenderAttachmentViews();
   private readonly cameraBatches=new Map<string,GPUCameraBatch>();
   private readonly cameraBatchMembers=new Set<string>();
   private cameraBatchLocations=new Map<string,{batch:GPUCameraBatch;index:number}>();
@@ -1259,7 +1261,7 @@ export class WebGPURenderer implements Renderer{
     const ratio=Math.max(1,Math.min(2,devicePixelRatio||1)),width=this.fixedResolution?.[0]??Math.max(1,Math.floor(this.canvas.clientWidth*ratio)),height=this.fixedResolution?.[1]??Math.max(1,Math.floor(this.canvas.clientHeight*ratio));
     if(this.depthW===width&&this.depthH===height)return;
     this.canvas.width=width;this.canvas.height=height;this.depthW=width;this.depthH=height;
-    for(const target of [this.opaqueDepthTarget,this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB,this.blackBloom,this.motionHdr])target?.destroy();
+    for(const target of [this.opaqueDepthTarget,this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB,this.blackBloom,this.motionHdr])if(target){this.attachmentViews?.forget(target);target.destroy();}
     const texture=(format:string,count:number)=>this.device.createTexture({size:[width,height],format,sampleCount:count,usage:0x10|0x04|(format==='rgba16float'?0x01:0)});
     const plan=this.pipelinePlan??compileRenderPipeline();
     this.opaqueDepthTarget=this.opaqueDepthPrepass?texture('depth32float',1):null;this.depth=texture('depth32float',1);this.hdr=texture('rgba16float',1);this.opaqueScene=texture('rgba16float',1);this.normal=plan.features.screenSpace?texture('rgba16float',1):null;this.specular=plan.features.screenSpace?texture('rgba8unorm',1):null;this.velocity=plan.motionVectors?texture('rg16float',1):null;
@@ -1436,7 +1438,7 @@ export class WebGPURenderer implements Renderer{
     this.profiler.measure('encode.shadow',()=>{
       if(shadowDirty){
         const timing=this.profiler.timestampWrites('shadow');
-        const staticPass=encoder.beginRenderPass({label:'render.shadow.static',...(timing?{timestampWrites:timing}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.shadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+        const staticPass=encoder.beginRenderPass({label:'render.shadow.static',...(timing?{timestampWrites:timing}:{}),colorAttachments:[],depthStencilAttachment:{view:this.attachmentViews.default(this.gpu.shadow),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
         staticPass.setBindGroup(1,this.gpu.frameBind);
         for(const [culled,group] of partitionByCull(staticShadowPlan.singles)){
           staticPass.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);
@@ -1451,7 +1453,7 @@ export class WebGPURenderer implements Renderer{
       }
       if(sunShadowActive){
       const timing=shadowDirty?undefined:this.profiler.timestampWrites('shadow'),occlusion=this.profiler.occlusionSet();
-      const dynamicPass=encoder.beginRenderPass({label:'render.shadow.dynamic',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.dynamicShadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      const dynamicPass=encoder.beginRenderPass({label:'render.shadow.dynamic',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[],depthStencilAttachment:{view:this.attachmentViews.default(this.gpu.dynamicShadow),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       dynamicPass.setBindGroup(1,this.gpu.frameBind);const query=this.profiler.beginOcclusion(dynamicPass,'shadow');
       for(const [culled,group] of partitionByCull(dynamicShadowPlan.singles)){
         dynamicPass.setPipeline(culled?this.gpu.shadowCulled:this.gpu.shadowDouble);
@@ -1466,7 +1468,7 @@ export class WebGPURenderer implements Renderer{
       }
       for(const {spot,shared,plan} of spotPlans){
         const timing=this.profiler.timestampWrites(spot.slot===0?'shadow.spot0':'shadow.spot1');
-        const pass=encoder.beginRenderPass({label:`render.shadow.spot.${spot.slot}`,...(timing?{timestampWrites:timing}:{}),depthStencilAttachment:{view:this.gpu.spotShadowMap.createView({dimension:'2d',baseArrayLayer:spot.slot,arrayLayerCount:1}),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'},colorAttachments:[]});
+        const pass=encoder.beginRenderPass({label:`render.shadow.spot.${spot.slot}`,...(timing?{timestampWrites:timing}:{}),depthStencilAttachment:{view:this.attachmentViews.spot(this.gpu.spotShadowMap,spot.slot),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'},colorAttachments:[]});
         pass.setBindGroup(1,this.gpu.spotFrameBinds[spot.slot]);
         for(const [culled,group]of partitionByCull(plan.singles))this.drawGroup(pass,group,culled?this.gpu.shadowCulled:this.gpu.shadowDouble,this.gpu.surfacePasses['shadow:'+(culled?'back':'none')],false,false);
         for(const batch of plan.batches){pass.setPipeline(batch.culled?this.gpu.shadowCulledInstanced:this.gpu.shadowDoubleInstanced);this.drawShadowBatch(pass,batch);}
@@ -1477,8 +1479,8 @@ export class WebGPURenderer implements Renderer{
       const settings=scene.spec.rendering??{},sky=settings.skyColor??[.26,.34,.47];
       for(let index=0;index<probeFaces.length;index++){
         const capture=probeFaces[index]!,timing=index===0?this.profiler.timestampWrites('probe'):undefined;
-        const view=this.gpu.localProbeCapture.createView({dimension:'2d',baseArrayLayer:capture.face,arrayLayerCount:1,baseMipLevel:0,mipLevelCount:1});
-        const pass=encoder.beginRenderPass({label:`render.probe.${capture.face}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view,clearValue:{r:sky[0]*1.05,g:sky[1]*1.05,b:sky[2]*1.05,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.gpu.localProbeDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
+        const view=this.attachmentViews.probe(this.gpu.localProbeCapture,capture.face);
+        const pass=encoder.beginRenderPass({label:`render.probe.${capture.face}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view,clearValue:{r:sky[0]*1.05,g:sky[1]*1.05,b:sky[2]*1.05,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.attachmentViews.default(this.gpu.localProbeDepth),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
         pass.setBindGroup(1,this.gpu.probeFrameBinds[capture.face]);
         for(const [culled,group] of partitionByCull(capture.entities)){pass.setPipeline(culled?this.gpu.probeCulled:this.gpu.probeDouble);this.drawGroup(pass,group,culled?this.gpu.probeCulled:this.gpu.probeDouble,this.gpu.surfacePasses['probe:'+(culled?'back':'none')],false);}
         pass.end();
@@ -1496,7 +1498,7 @@ export class WebGPURenderer implements Renderer{
       });
     }
     if(needsPlanarReflection)this.profiler.measure('encode.reflection',()=>{
-      const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
+      const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.attachmentViews.default(this.reflection),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.attachmentViews.default(this.reflectionDepth),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
       reflect.setBindGroup(1,this.gpu.reflectionBind);const query=this.profiler.beginOcclusion(reflect,'reflection');
       for(const [key,group] of materialPipelineGroups(culled.reflectedObjects)){const [code,culled]=key;reflect.setPipeline((culled?this.gpu.reflectedCulled:this.gpu.reflectedDouble).get(code)!);this.drawGroup(reflect,group,(culled?this.gpu.reflectedCulled:this.gpu.reflectedDouble).get(code)!,this.gpu.surfacePasses['reflection:'+(culled?'back':'none')],false);}
       for(const batch of reflectionBatches){
@@ -1507,7 +1509,7 @@ export class WebGPURenderer implements Renderer{
     });
     if(this.opaqueDepthPrepass){
       const timing=this.profiler.timestampWrites('opaque.depth');
-      const pass=encoder.beginRenderPass({label:'render.opaque.depth',...(timing?{timestampWrites:timing}:{}),colorAttachments:[],depthStencilAttachment:{view:this.opaqueDepthTarget.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      const pass=encoder.beginRenderPass({label:'render.opaque.depth',...(timing?{timestampWrites:timing}:{}),colorAttachments:[],depthStencilAttachment:{view:this.attachmentViews.default(this.opaqueDepthTarget),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       pass.setBindGroup(1,this.gpu.frameBind);
       const eligible=(entity:RuntimeEntity)=>!entity.material.decal&&!entity.material.texture?.heightUrl;
       for(const [back,group]of partitionByCull(opaquePlan.singles.filter(eligible))){
@@ -1528,7 +1530,7 @@ export class WebGPURenderer implements Renderer{
     }
     let snowInstances=0;
     this.profiler.measure('encode.main',()=>{
-      const timing=this.profiler.timestampWrites('main'),occlusion=this.profiler.occlusionSet(),pass=encoder.beginRenderPass({label:'render.main.opaque',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.opaqueScene.createView(),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'store'},this.normal?{view:this.normal.createView(),clearValue:{r:.5,g:.5,b:1,a:1},loadOp:'clear',storeOp:'store'}:null,this.specular?{view:this.specular.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'}:null,this.velocity?{view:this.velocity.createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'}:null],depthStencilAttachment:{view:this.depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      const timing=this.profiler.timestampWrites('main'),occlusion=this.profiler.occlusionSet(),pass=encoder.beginRenderPass({label:'render.main.opaque',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.attachmentViews.default(this.opaqueScene),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'store'},this.normal?{view:this.attachmentViews.default(this.normal),clearValue:{r:.5,g:.5,b:1,a:1},loadOp:'clear',storeOp:'store'}:null,this.specular?{view:this.attachmentViews.default(this.specular),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'}:null,this.velocity?{view:this.attachmentViews.default(this.velocity),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'}:null],depthStencilAttachment:{view:this.attachmentViews.default(this.depth),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       pass.setPipeline(this.gpu.sky);pass.setBindGroup(0,this.gpu.frameBind);pass.draw(3);
       this.drawCalls=0;this.triangles=0;pass.setBindGroup(1,this.gpu.lightBind);const query=this.profiler.beginOcclusion(pass,'mainOpaque');
       for(const [key,group] of materialPipelineGroups(opaquePlan.singles)){const [code,culled]=key;pass.setPipeline((culled?this.gpu.opaqueCulled:this.gpu.opaqueDouble).get(code)!);this.drawGroup(pass,group,(culled?this.gpu.opaqueCulled:this.gpu.opaqueDouble).get(code)!,culled?this.gpu.reliefCulled:this.gpu.reliefDouble,true,true,true);}
@@ -1545,7 +1547,7 @@ export class WebGPURenderer implements Renderer{
       this.profiler.endOcclusion(pass,query);pass.end();
     });
     this.profiler.measure('encode.main',()=>{
-      const timing=this.profiler.timestampWrites('main.transparent'),occlusion=this.profiler.occlusionSet(),pass=encoder.beginRenderPass({label:'render.main.transparent',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.hdr.createView(),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'store'},this.normal?{view:this.normal.createView(),loadOp:'load',storeOp:'store'}:null,this.specular?{view:this.specular.createView(),loadOp:'load',storeOp:'store'}:null,this.velocity?{view:this.velocity.createView(),loadOp:'load',storeOp:'store'}:null],depthStencilAttachment:{view:this.depth.createView(),depthLoadOp:'load',depthStoreOp:'store'}});
+      const timing=this.profiler.timestampWrites('main.transparent'),occlusion=this.profiler.occlusionSet(),pass=encoder.beginRenderPass({label:'render.main.transparent',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.attachmentViews.default(this.hdr),clearValue:{r:0,g:0,b:0,a:1},loadOp:'clear',storeOp:'store'},this.normal?{view:this.attachmentViews.default(this.normal),loadOp:'load',storeOp:'store'}:null,this.specular?{view:this.attachmentViews.default(this.specular),loadOp:'load',storeOp:'store'}:null,this.velocity?{view:this.attachmentViews.default(this.velocity),loadOp:'load',storeOp:'store'}:null],depthStencilAttachment:{view:this.attachmentViews.default(this.depth),depthLoadOp:'load',depthStoreOp:'store'}});
       pass.setPipeline(this.gpu.blit);pass.setBindGroup(0,this.opaqueBind);pass.draw(3);
       pass.setBindGroup(1,this.gpu.transparentLightBind);let query=this.profiler.beginOcclusion(pass,'mainTransparent');
       pass.setPipeline(this.gpu.glass);for(const e of culled.cameraTransparent)if(e.material.kind==='glass')this.draw(pass,e,true);
@@ -1563,22 +1565,22 @@ export class WebGPURenderer implements Renderer{
     });
     if(this.postProcessing.bloom)this.profiler.measure('encode.bloom',()=>{
       const stages=[['bloom.downsample',this.bloomA,this.gpu.bloomDown,this.bloomDownBind],['bloom.horizontal',this.bloomB,this.gpu.bloomHorizontal,this.bloomHorizontalBind],['bloom.vertical',this.bloomA,this.gpu.bloomVertical,this.bloomVerticalBind]] as const;
-      for(const [name,target,pipeline,bind] of stages){const timing=this.profiler.timestampWrites(name),bloomPass=encoder.beginRenderPass({label:`render.${name}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:target.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});bloomPass.setPipeline(pipeline);bloomPass.setBindGroup(0,bind);bloomPass.draw(3);bloomPass.end();}
+      for(const [name,target,pipeline,bind] of stages){const timing=this.profiler.timestampWrites(name),bloomPass=encoder.beginRenderPass({label:`render.${name}`,...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.attachmentViews.default(target),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});bloomPass.setPipeline(pipeline);bloomPass.setBindGroup(0,bind);bloomPass.draw(3);bloomPass.end();}
     });
     if(this.pipelinePlan.effects)this.profiler.measure('encode.effects',()=>{
-      const timing=this.profiler.timestampWrites('effects'),effectsPass=encoder.beginRenderPass({label:'render.effects',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.effectsHdr.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
+      const timing=this.profiler.timestampWrites('effects'),effectsPass=encoder.beginRenderPass({label:'render.effects',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.attachmentViews.default(this.effectsHdr),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
       effectsPass.setPipeline(this.gpu.effects);effectsPass.setBindGroup(0,this.postProcessing.bloom?this.effectsBind:this.effectsBindNoBloom);effectsPass.draw(3);effectsPass.end();
     });
     const taaOutputIndex=this.taaHistoryIndex===0?1:0;
     if(this.postProcessing.temporalAA)this.device.queue.writeBuffer(this.gpu.taaParams,0,new Float32Array([this.historyValid?1:0,0,0,0,...jitterUV,...(this.previousJitter??jitterUV)]));
     if(this.postProcessing.temporalAA)this.profiler.measure('encode.taa',()=>{
-      const timing=this.profiler.timestampWrites('taa'),target=taaOutputIndex===0?this.taaA:this.taaB,taaPass=encoder.beginRenderPass({label:'render.taa',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:target.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
+      const timing=this.profiler.timestampWrites('taa'),target=taaOutputIndex===0?this.taaA:this.taaB,taaPass=encoder.beginRenderPass({label:'render.taa',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.attachmentViews.default(target),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
       taaPass.setPipeline(this.gpu.taa);taaPass.setBindGroup(0,this.taaHistoryIndex===0?this.taaBindAB:this.taaBindBA);taaPass.draw(3);taaPass.end();
     });
     const motionEnabled=this.postProcessing.motionBlur>0;
     if(motionEnabled)this.profiler.measure('encode.motionBlur',()=>{
       this.device.queue.writeBuffer(this.gpu.motionParams,0,new Float32Array([this.postProcessing.motionBlur,this.historyValid?1:0,this.depthConfiguration.logarithmicDenominator,0,...jitterUV,...(this.previousJitter??jitterUV),...frameState.depthProjection]));this.profiler.addUpload(48,'frame');
-      const timing=this.profiler.timestampWrites('motionBlur'),pass=encoder.beginRenderPass({label:'render.motionBlur',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.motionHdr.createView(),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
+      const timing=this.profiler.timestampWrites('motionBlur'),pass=encoder.beginRenderPass({label:'render.motionBlur',...(timing?{timestampWrites:timing}:{}),colorAttachments:[{view:this.attachmentViews.default(this.motionHdr),loadOp:'clear',clearValue:{r:0,g:0,b:0,a:1},storeOp:'store'}]});
       pass.setPipeline(this.gpu.motionBlur);pass.setBindGroup(0,this.postProcessing.temporalAA?(taaOutputIndex===0?this.motionBindA:this.motionBindB):this.motionBindDirect);pass.draw(3);pass.end();
     });
     this.profiler.measure('encode.present',()=>{
@@ -1708,6 +1710,7 @@ export class WebGPURenderer implements Renderer{
   private clearPreparationCaches():void{this.frameCache?.clear();this.radianceProjection?.clear();this.visibilityPlan?.clear();this.renderFrame=null;this.cameraBatchCauses?.splice(0);this.cameraBatchPlans?.splice(0);this.cameraBatchScene=null;this.cameraBatchLocations?.clear();this.cameraBatchMaterialIds?.clear();this.clearCameraBatchTemporal();this.modelCache?.clear();this.previousModels?.clear();}
   dispose():void{
     if(this.disposed)return;this.disposed=true;
+    this.attachmentViews?.clear();
     for(const preparation of this.triangleStreamPreparations??[])preparation.dispose();for(const stream of this.triangleStreams??[])stream.dispose();this.triangleStreamPreparations?.clear();this.triangleStreams?.clear();
     for(const lease of this.entityPreparationLeases??[])lease.dispose();this.entityPreparationLeases?.clear();this.preparedEntityTextureURLs?.clear();this.preparedEntityObjects=new WeakMap();for(const lease of this.meshPreparationLeases??[])lease.dispose();this.meshPreparationLeases?.clear();this.preparedMeshPins?.clear();this.environmentWorker?.dispose();delete this.environmentWorker;
     for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();
