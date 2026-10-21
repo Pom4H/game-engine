@@ -10,6 +10,8 @@ import {createNoiseVolume,NOISE_VOLUME_SIZE} from './noise-volume.js';
 import {PROBE_MIP_LEVELS,PROBE_FILTER_SHADER,probeFilterPlan} from './probe-filter.js';
 import {ProbeCapture} from './probe-capture.js';
 import {RenderAttachmentViews} from './attachment-views.js';
+import {htmlCanvasTarget,type EngineCanvasTarget} from './canvas-target.js';
+export type {EngineCanvasTarget,EngineCanvasViewport} from './canvas-target.js';
 import {bakeEnvironmentMap,type EnvironmentMapData} from './environment-map.js';
 import {EnvironmentMapWorker,type EnvironmentWorker} from './environment-map-worker.js';
 import {meshBounds,intersectsClip,intersectsModelClip,type MeshBounds} from './visibility.js';
@@ -1023,9 +1025,9 @@ export class WebGPURenderer implements Renderer{
   private motionHdr:GPUAny=null;private motionBindA:GPUAny=null;private motionBindB:GPUAny=null;private motionBindDirect:GPUAny=null;private presentBindMotion:GPUAny=null;
   private readonly shaderAtoms:Readonly<Record<string,ShaderProgramAtoms>>;
   private opaqueDepthTarget:GPUAny=null;
-  private constructor(private readonly canvas:HTMLCanvasElement,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean,private readonly visibilityMode:VisibilityMode='cpu',private readonly pipelinePlan:RenderPipelinePlan=compileRenderPipeline(),private readonly depthConfiguration:CameraDepthConfiguration=cameraDepthConfiguration(),private readonly opaqueDepthPrepass=false){
+  private constructor(private readonly canvas:HTMLCanvasElement|OffscreenCanvas,private readonly device:GPUAny,private readonly context:GPUAny,private readonly format:string,private readonly gpu:GPUAny,profiling:boolean,timestampQueries:boolean,private readonly visibilityMode:VisibilityMode='cpu',private readonly pipelinePlan:RenderPipelinePlan=compileRenderPipeline(),private readonly depthConfiguration:CameraDepthConfiguration=cameraDepthConfiguration(),private readonly opaqueDepthPrepass=false,private canvasTarget?:EngineCanvasTarget){
     this.postProcessing={temporalAA:pipelinePlan.features.temporalAA,bloom:pipelinePlan.features.bloom,motionBlur:pipelinePlan.features.motionBlur?.25:0};
-    this.surfaceTextures=new SurfaceTextures(device);this.profiler=new RenderProfiler(device,{enabled:profiling,timestampQueries});
+    this.surfaceTextures=new SurfaceTextures(device,canvasTarget?.assetBase);this.profiler=new RenderProfiler(device,{enabled:profiling,timestampQueries});
     const logarithmic=depthConfiguration.encoding==='logarithmic',materialSource=opaqueDepthPrepassShader(materialShaderForPlan(materialShader(false,false,false,logarithmic),pipelinePlan),opaqueDepthPrepass),reflectionSource=reflectionLodShader(logarithmic);
     this.shaderAtoms=profiling?Object.freeze({
       material:analyzeWGSL('material',materialSource,['vs','fs','shadowVS']),
@@ -1042,12 +1044,16 @@ export class WebGPURenderer implements Renderer{
     device.addEventListener?.('uncapturederror',(event:any)=>{const message=event?.error?.message??String(event?.error);this.errors.push(message);console.error('Game Engine WebGPU:',message);});device.lost?.then((info:any)=>this.errors.push(`Device lost: ${info?.message??'unknown'}`));
   }
   static async create(canvas:HTMLCanvasElement,options:WebGPURendererOptions={}):Promise<WebGPURenderer>{
+    return this.createForTarget(htmlCanvasTarget(canvas),options);
+  }
+  /** Explicit worker-safe render target; UI/control ownership remains with the host. */
+  static async createForTarget(target:EngineCanvasTarget,options:WebGPURendererOptions={}):Promise<WebGPURenderer>{
     const depthConfiguration=cameraDepthConfiguration(options.logarithmicDepthFar),logarithmic=depthConfiguration.encoding==='logarithmic';
     const opaqueDepthPrepass=opaqueDepthPrepassEnabled(options.opaqueDepthPrepass,depthConfiguration,1);
     const pipelinePlan=compileRenderPipeline(options.features);
     const visibilityMode=options.visibility??'cpu';
     if(!['cpu','cpu-batched','gpu'].includes(visibilityMode))throw new RangeError('Invalid visibility mode');
-    const gpu=(navigator as any).gpu;if(!gpu)throw new Error('WebGPU unavailable');
+    const canvas=target.canvas,gpu=(navigator as any).gpu;if(!gpu)throw new Error('WebGPU unavailable');
     const adapter=await gpu.requestAdapter({powerPreference:'high-performance'});if(!adapter)throw new Error('No WebGPU adapter');
     const profiling=options.profiling??false,timestampQueries=profiling&&!!adapter.features?.has?.('timestamp-query');
     const device=await adapter.requestDevice(timestampQueries?{requiredFeatures:['timestamp-query']}:undefined),context=canvas.getContext('webgpu') as any,format=gpu.getPreferredCanvasFormat();
@@ -1215,7 +1221,7 @@ export class WebGPURenderer implements Renderer{
     const pipelineErrors=(await Promise.all(pipelineChecks)).filter((error):error is string=>!!error);
     const initializationError=await device.popErrorScope();initializationScopeOpen=false;
     if(pipelineErrors.length||initializationError)throw new Error(`WebGPU initialization: ${pipelineErrors.join('; ')||initializationError.message}`);
-    return new WebGPURenderer(canvas,device,context,format,{opaqueDepthEmpty,spotShadowMap,spotShadowParams,spotFrames,spotFrameBinds,coatingCulled,coatingDouble,visibility,instanceLayout,instanceCulled,instanceDouble,reflectedInstancesCulled,reflectedInstancesDouble,surfacePasses,reliefCulled,reliefDouble,probeFilter,probeFilterPasses,localProbeMap,localProbeCapture,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,opaqueInstancedCulled,opaqueInstancedDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,shadowSharedCulled,shadowSharedDouble,sky,effects,taa,taaParams,motionBlur,motionParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind,...readyPipelines},profiling,timestampQueries,visibilityMode,pipelinePlan,depthConfiguration,opaqueDepthPrepass);
+    return new WebGPURenderer(canvas,device,context,format,{opaqueDepthEmpty,spotShadowMap,spotShadowParams,spotFrames,spotFrameBinds,coatingCulled,coatingDouble,visibility,instanceLayout,instanceCulled,instanceDouble,reflectedInstancesCulled,reflectedInstancesDouble,surfacePasses,reliefCulled,reliefDouble,probeFilter,probeFilterPasses,localProbeMap,localProbeCapture,localProbeView,localProbeDepth,probeFrames,probeFrameBinds,probeCulled,probeDouble,noiseVolume,noiseSampler,environmentMap,environmentView,surfaceSampler,lightBuffer,cellBuffer,emptyField,emptyLabel,objectLayout,lightLayout,comparison,frame,shadow,dynamicShadow,sampler,frameBind,reflectionBind,reflectedCulled,reflectedDouble,lightBind:null,transparentLightBind:null,opaqueCulled,opaqueDouble,opaqueInstancedCulled,opaqueInstancedDouble,transparent,glass,blit,shadowCulled,shadowDouble,shadowCulledInstanced,shadowDoubleInstanced,shadowSharedCulled,shadowSharedDouble,sky,effects,taa,taaParams,motionBlur,motionParams,present,bloomLayout,bloomDown,bloomHorizontal,bloomVertical,snow,snowUniform,snowBind,...readyPipelines},profiling,timestampQueries,visibilityMode,pipelinePlan,depthConfiguration,opaqueDepthPrepass,target);
     }catch(error){
       try{if(initializationScopeOpen)await device.popErrorScope();}
       catch{/* Preserve the original initialization failure if the device is lost. */}
@@ -1258,7 +1264,7 @@ export class WebGPURenderer implements Renderer{
     this.fixedResolution=[width,height];this.resize();
   }
   resize():void{
-    const ratio=Math.max(1,Math.min(2,devicePixelRatio||1)),width=this.fixedResolution?.[0]??Math.max(1,Math.floor(this.canvas.clientWidth*ratio)),height=this.fixedResolution?.[1]??Math.max(1,Math.floor(this.canvas.clientHeight*ratio));
+    const viewport=this.canvasTarget?.viewport,ratio=Math.max(1,Math.min(2,(viewport?viewport.pixelRatio:devicePixelRatio)||1)),width=this.fixedResolution?.[0]??Math.max(1,Math.floor((viewport?viewport.cssWidth:(this.canvas as HTMLCanvasElement).clientWidth)*ratio)),height=this.fixedResolution?.[1]??Math.max(1,Math.floor((viewport?viewport.cssHeight:(this.canvas as HTMLCanvasElement).clientHeight)*ratio));
     if(this.depthW===width&&this.depthH===height)return;
     this.canvas.width=width;this.canvas.height=height;this.depthW=width;this.depthH=height;
     for(const target of [this.opaqueDepthTarget,this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.reflection,this.reflectionDepth,this.bloomA,this.bloomB,this.blackBloom,this.motionHdr])if(target){this.attachmentViews?.forget(target);target.destroy();}
@@ -1710,7 +1716,7 @@ export class WebGPURenderer implements Renderer{
   private clearPreparationCaches():void{this.frameCache?.clear();this.radianceProjection?.clear();this.visibilityPlan?.clear();this.renderFrame=null;this.cameraBatchCauses?.splice(0);this.cameraBatchPlans?.splice(0);this.cameraBatchScene=null;this.cameraBatchLocations?.clear();this.cameraBatchMaterialIds?.clear();this.clearCameraBatchTemporal();this.modelCache?.clear();this.previousModels?.clear();}
   dispose():void{
     if(this.disposed)return;this.disposed=true;
-    this.attachmentViews?.clear();
+    this.attachmentViews?.clear();this.canvasTarget=undefined;
     for(const preparation of this.triangleStreamPreparations??[])preparation.dispose();for(const stream of this.triangleStreams??[])stream.dispose();this.triangleStreamPreparations?.clear();this.triangleStreams?.clear();
     for(const lease of this.entityPreparationLeases??[])lease.dispose();this.entityPreparationLeases?.clear();this.preparedEntityTextureURLs?.clear();this.preparedEntityObjects=new WeakMap();for(const lease of this.meshPreparationLeases??[])lease.dispose();this.meshPreparationLeases?.clear();this.preparedMeshPins?.clear();this.environmentWorker?.dispose();delete this.environmentWorker;
     for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();
@@ -2284,7 +2290,7 @@ export class WebGPURenderer implements Renderer{
   }
   private label(text:string,color?:Vec3):GPUAny{
     if(!text)return this.gpu.emptyLabel;const key=labelKey(text,color),cached=this.labels.get(key);if(cached)return cached;
-    const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle=color?`rgb(${color.map(v=>Math.round(v*255)).join(',')})`:'#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
+    const canvas=this.canvasTarget?this.canvasTarget.createLabelCanvas(1024,128):htmlCanvasTarget(this.canvas as HTMLCanvasElement).createLabelCanvas(1024,128),ctx=canvas.getContext('2d') as CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D|null;if(!ctx)throw new Error('Label canvas has no 2D context');ctx.clearRect(0,0,1024,128);ctx.fillStyle=color?`rgb(${color.map(v=>Math.round(v*255)).join(',')})`:'#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
     const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});try{this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);}catch(error){texture.destroy();throw error;}this.labels.set(key,texture);return texture;
   }
   private discardUnusedLabel(key:string|undefined,texture:GPUAny):void{

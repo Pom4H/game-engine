@@ -1,6 +1,6 @@
 export {BrowserRuntime,type BrowserRuntimeOptions} from './runtime/browser.js';
 export {SpatialAudio} from './audio/spatial.js';
-export {WebGPURenderer,type WebGPURendererOptions} from './render/webgpu.js';
+export {WebGPURenderer,type WebGPURendererOptions,type EngineCanvasTarget,type EngineCanvasViewport} from './render/webgpu.js';
 export {RenderMeshQuery,avoidCameraObstacles,type RenderMeshHit,type RenderMeshFilter,type CameraObstruction} from './render/mesh-ray.js';
 export {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport} from './scene/performance.js';
 export type {RenderFeatures,RenderPipelinePlan} from './render/pipeline-plan.js';
