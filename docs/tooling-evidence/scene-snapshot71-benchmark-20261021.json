@@ -1,0 +1,557 @@
+{
+  "mode": "benchmark",
+  "timestamp": "2026-10-21T17:03:59.085Z",
+  "node": "v24.21.0",
+  "typescript": "7.1.0-beta",
+  "compilerSourceSha": "40ba6730197556278738a9185d45340d151ba938e2112ad6075eecaae5d83565",
+  "bridgeSourceSha": "0d0c0ee958255dbe060e8992419f4a5f7b888d112d8be40f3739f16d4b56e5ad",
+  "compilerArchitecture": "Rust remains parser, semantic and WSCN authority. TS only checks a deliberately partial editor projection. No runtime import or emit.",
+  "coldApiAndDiagnosticsMs": 618.5412,
+  "firstOneFileSnapshotUpdateMs": 28.622499999999945,
+  "cases": [
+    {
+      "name": "array",
+      "sourceSha": "b0066ae3fc9db46de4ab5bab47157231cc76c6adf28f4ec91615555bd5ca2950",
+      "rust": {
+        "ok": true,
+        "wscnSha": "cdb362905a3159ee427f1173aef09ba209d6c99e67821cca516ef7aca79fb6e5"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "collision",
+      "sourceSha": "a88dbb8a2d9d6fb28f5e75e76fa6210846626ea764c1a81ef38d25920df8ac34",
+      "rust": {
+        "ok": true,
+        "wscnSha": "9b7b3df8e1ce8285488576ba9bafa76823626c77f78ea7a13860f9e506938e43"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "coupled-glass",
+      "sourceSha": "1c1866c2d3c32a76e83a94402f08315bdbe358f32949488e8abdf49e4e588dca",
+      "rust": {
+        "ok": true,
+        "wscnSha": "afee70ff0f3766a072949c987e7263db30955427e12c5016c3e9aa3aed7b11de"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "physical-hearing",
+      "sourceSha": "3463b642304afdbc76b1de3ac62e22bd77eebc8bf9fd0dbd928f80560a017868",
+      "rust": {
+        "ok": true,
+        "wscnSha": "4ef639eee3cacecd39b96c8b7b04537d1256b4eabd3a2f9724a3b890fcdc9ae2"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid",
+      "sourceSha": "42361f4fcbac950d440b29ec51bb65132bc6643c8d147c37c026f53c933c42af",
+      "rust": {
+        "ok": true,
+        "wscnSha": "7e9243d830663dca3788b0887f1841932cadc60a047e7294ffc3e05233599c02"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-generated-name",
+      "sourceSha": "49c12642fa0060e3f7eb88440fab4242af02a5b03dfa14d021c913da2dc2d1c3",
+      "rust": {
+        "ok": true,
+        "wscnSha": "28b83d116c0dce55913b13fd5d6053b53f6cdcc3823aa42c27b89c5197183f4b"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-semicolon-free",
+      "sourceSha": "a67a6666f44e699db8dd864ef8845ece858795f0ccd4e8e902ea5fb5ff20ba29",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-unicode-binding",
+      "sourceSha": "fa63308894d88e556395cb51ce3e5f3feaf13dbc70f5c0f59ce747b3e5c7e338",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-hyphen-binding",
+      "sourceSha": "d1b105be62d01f200dfcf21676b937e4de22523b146d2f3c47920c9a55b02d25",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-strict-bindings",
+      "sourceSha": "74e5a74b1a302c9fba2e8422470c3a2415909bb2425ac53b142e3e930869e655",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-leading-zero",
+      "sourceSha": "b21db4d6fac2a332f82e37a2a5903f0e721dabcbeb4c676ee2f2f8072a3f7fcf",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "unknown-symbol",
+      "sourceSha": "b7ac5ae5c915fa069a304f8985e8e9cae2a2de65d103c0ebbc3a8b7414456020",
+      "rust": {
+        "ok": false,
+        "at": 88,
+        "message": "unknown constant missing"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/unknown-symbol.scene",
+          "pos": 80,
+          "end": 81,
+          "startPosition": {
+            "line": 3,
+            "character": 15
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "unknown constant missing"
+        },
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/unknown-symbol.scene",
+          "pos": 80,
+          "end": 87,
+          "startPosition": {
+            "line": 3,
+            "character": 15
+          },
+          "code": 2304,
+          "text": "Cannot find name 'missing'."
+        }
+      ]
+    },
+    {
+      "name": "material-type",
+      "sourceSha": "7912e6cff96d46c1c291a9af3c631d1532110de83ba06c5ca318160e8c7c723c",
+      "rust": {
+        "ok": false,
+        "at": 159,
+        "message": "unknown material banana"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/material-type.scene",
+          "pos": 151,
+          "end": 152,
+          "startPosition": {
+            "line": 4,
+            "character": 59
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "unknown material banana"
+        },
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/material-type.scene",
+          "pos": 145,
+          "end": 151,
+          "startPosition": {
+            "line": 4,
+            "character": 53
+          },
+          "code": 2322,
+          "text": "Type '\"banana\"' is not assignable to type '__WorldMaterial'."
+        }
+      ]
+    },
+    {
+      "name": "dimension",
+      "sourceSha": "1f9cb5b5de5f0b70c9a6857e79bffc60d343b68d9d7bdcec8010f925294dc703",
+      "rust": {
+        "ok": false,
+        "at": 96,
+        "message": "cannot add or subtract Length and Mass"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/dimension.scene",
+          "pos": 88,
+          "end": 89,
+          "startPosition": {
+            "line": 3,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "cannot add or subtract Length and Mass"
+        }
+      ]
+    },
+    {
+      "name": "division-zero",
+      "sourceSha": "11fa8fe63194f14919fbf4f0b75357a934653a47864e53383c22e52e270e5fb0",
+      "rust": {
+        "ok": false,
+        "at": 96,
+        "message": "division by zero"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/division-zero.scene",
+          "pos": 88,
+          "end": 89,
+          "startPosition": {
+            "line": 3,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "division by zero"
+        }
+      ]
+    },
+    {
+      "name": "parse",
+      "sourceSha": "70a6e9a3f05dd19c353f945a9a2497407c3fe48416c158245994db27fca97909",
+      "rust": {
+        "ok": false,
+        "at": 50,
+        "message": "expected LBrace, got LParen"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/parse.scene",
+          "pos": 42,
+          "end": 43,
+          "startPosition": {
+            "line": 1,
+            "character": 13
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "expected LBrace, got LParen"
+        }
+      ]
+    },
+    {
+      "name": "coupling-cycle",
+      "sourceSha": "9a228fb5cbaaa87fc42f6c283cfb82a0f496fb9d8b4fda306009ea878c4e5b70",
+      "rust": {
+        "ok": false,
+        "at": 23,
+        "message": "cyclic World coupling dependency"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/coupling-cycle.scene",
+          "pos": 23,
+          "end": 24,
+          "startPosition": {
+            "line": 0,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "cyclic World coupling dependency"
+        }
+      ]
+    },
+    {
+      "name": "coupling-type",
+      "sourceSha": "6ce39bf2bf1d1939ee8ff112cf8db706b3e670389f73a6d450bba94778990964",
+      "rust": {
+        "ok": false,
+        "at": 23,
+        "message": "coupling dimension mismatch: physics.contact.energy (Energy) -> acoustic.pressure (Pressure)"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/coupling-type.scene",
+          "pos": 23,
+          "end": 24,
+          "startPosition": {
+            "line": 0,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "coupling dimension mismatch: physics.contact.energy (Energy) -> acoustic.pressure (Pressure)"
+        }
+      ]
+    },
+    {
+      "name": "duplicate-id",
+      "sourceSha": "3fa763e2f6047376102f9416c5f0a7b6e9ffe815862ccd763b2d385cc3cdf6fc",
+      "rust": {
+        "ok": false,
+        "at": 74,
+        "message": "duplicate entity pane"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/duplicate-id.scene",
+          "pos": 74,
+          "end": 75,
+          "startPosition": {
+            "line": 0,
+            "character": 74
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "duplicate entity pane"
+        }
+      ]
+    }
+  ],
+  "incremental": {
+    "beforeSnapshot": 1,
+    "afterSnapshot": 2,
+    "stableProgramId": "c:/users/roman/documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/tsconfig.json",
+    "oldSnapshotUnchanged": true,
+    "remappedFiles": [
+      "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/unknown-symbol.scene"
+    ],
+    "beforeDiagnosticCount": 10,
+    "afterDiagnosticCount": 8
+  },
+  "toolingSources": [
+    {
+      "name": "bridge.rs",
+      "sha256": "0d0c0ee958255dbe060e8992419f4a5f7b888d112d8be40f3739f16d4b56e5ad",
+      "lines": 55
+    },
+    {
+      "name": "mapper.mjs",
+      "sha256": "8507ef6adcef662047f70b8fb7cc378b91a7bfe5d64fe4c930ab653d42331002",
+      "lines": 68
+    },
+    {
+      "name": "projection.mjs",
+      "sha256": "cc5efef537f55bb73f40a6ce312a15563f4eb999b9b25c59ad168f14785ae9c2",
+      "lines": 104
+    },
+    {
+      "name": "run.ts",
+      "sha256": "3bd354097058717d014d956841fbab0f100b31399920b2b44cea0fa86660ed39",
+      "lines": 155
+    }
+  ],
+  "diagnosticCoverage": {
+    "invalidCases": 8,
+    "rustDetected": 8,
+    "typescriptAloneDetected": 2,
+    "combinedDetected": 8,
+    "validCases": 11
+  },
+  "benchmark": {
+    "fixtureFiles": 19,
+    "oneFileBytes": 177,
+    "samples": [
+      {
+        "mode": "fresh",
+        "ms": 36.66610000000014,
+        "sourceSha": "c5bd06464221b401957b1f1b9fe4fec8f28ca1e0546f6fa6eed403b149089538",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 32.25400000000013,
+        "sourceSha": "b0afde78f2131870408aa37160c8256f09cc15d08c3d127bcb668ebb2ad183ba",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 27.88059999999996,
+        "sourceSha": "5db9a01ba81620b70b51e735547e6fb44d1d280213a98edc5cf03a9fe5f8565d",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 33.99270000000001,
+        "sourceSha": "0abbe8bc95089670c2d9ac15a33e059bdb9d77d15faa7f6d1dbd1c767bc180ee",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 32.89930000000004,
+        "sourceSha": "7fcb83284366db1917e71ab319848cead1691b09b4273a35590b80fb58f7d406",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 28.1391000000001,
+        "sourceSha": "dcd7aa6b98b81bc877ef074c06dec17e61e9e73cc24cec49ccdb016deed22699",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 27.741600000000062,
+        "sourceSha": "d19169364bc6c79f65ee9de2ec45d6ad625dc1fbd34fb6775f02204cdd28bf73",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 37.880100000000084,
+        "sourceSha": "e309036d9e5220beb34b29952460f6cb058467237ded7bb817229e8fd6a78f2f",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 42.915899999999965,
+        "sourceSha": "f783b9c0cbbd797d94971a6f3d94e33a404085349dd71f3ee1458362723242d6",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 30.92730000000006,
+        "sourceSha": "48127c009ae4bc5bf8ec0ca10eb3822d0b0d9b82d9f8e46c574fe04659ec3521",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 28.165100000000166,
+        "sourceSha": "c43799a8d6404ca730c54f0af18a0621a277637eb3603c5e1c4dc17c61acbdd9",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 33.23609999999985,
+        "sourceSha": "c4eca43d2ec29a595c5b360c24ff6ee043aa776d2632630d9c6ef15ce50b0922",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 34.92439999999988,
+        "sourceSha": "f1f54e862d40780533f83652e5378538884027cde6853778be08e32e17c13026",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 33.52690000000007,
+        "sourceSha": "1c1399ff38002e911d3cae2ecaa0512a62a7925e344b455826d5e75f83bee28f",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 27.03099999999995,
+        "sourceSha": "f40b24b83fb29c554499f4d7cb546f022669373a51293d16eb2e869240805675",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 35.19730000000004,
+        "sourceSha": "b999c0aa2c7931730041c829af38eb7da786db05693faca650f73e5d7da39dec",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 38.183899999999994,
+        "sourceSha": "19dc461032113a3e06abfca2bca4bfb1e96b0b7410bdbf22939b05a1479ea23a",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 37.427400000000034,
+        "sourceSha": "8417de36034ea284b15cbe1cdc8a8c65603e62683d82bae157d1f3dbf5f84fad",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 31.61559999999986,
+        "sourceSha": "cb5e468cb477fc9c6613d174c6236cd354ea5cd9608250758f03992f58125199",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 34.68439999999987,
+        "sourceSha": "51cd0f5cb032015d8d0dd8e2b05b14fb3a41800066504f2cc1a3b12ca6674757",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 36.13749999999982,
+        "sourceSha": "ce370d79fbaf4a14384de14ceb95f23af7ebca5670f3abe1611854c630c0af36",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 26.791999999999916,
+        "sourceSha": "8b625dbe9409ef57748d102a6f34fd491b78e931c86ac4fb7ec860bb7f856f93",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "update",
+        "ms": 34.9991,
+        "sourceSha": "8289907f9bd6ed4d1dad4fecbc782db6ee1111f78ff9efeb3cec49067f118250",
+        "mapperCalls": 1
+      },
+      {
+        "mode": "fresh",
+        "ms": 45.03890000000001,
+        "sourceSha": "6b99b0c5e8f376699ee44139ff9dece6bb240840136804914fa3e379fe41cc7a",
+        "mapperCalls": 1
+      }
+    ],
+    "rustCliProcessAndCompileMs": [
+      25.92970000000014,
+      23.66300000000001,
+      23.673099999999977,
+      23.283600000000206,
+      24.31690000000026,
+      23.151000000000295,
+      23.63239999999996,
+      31.294500000000426,
+      29.344700000000103,
+      22.643800000000283,
+      25.288699999999608,
+      30.402999999999793
+    ],
+    "rustCompileOnlyNanos": [
+      37000,
+      7300,
+      5300,
+      4200,
+      4500,
+      3900,
+      4000,
+      3700,
+      3800,
+      8100,
+      4600,
+      4200,
+      3900,
+      3700,
+      3800,
+      3600,
+      3700,
+      3700,
+      3500,
+      3600,
+      3600,
+      3500,
+      3600,
+      3500,
+      3800,
+      3500,
+      3500,
+      3700,
+      3700,
+      3500,
+      3700,
+      3400
+    ],
+    "notes": "Small editor experiment, not game FPS or a production-scale project. Fresh snapshots use the same live API process; coldApiAndDiagnosticsMs includes API startup. Rust compile-only values exclude process/JSON/projection/TS costs. Both warm cohorts get unique one-file semantic edits (spacing changed), confirmed by exactly one new mapper invocation. Each derives from the same before snapshot, not a typing time series."
+  }
+}
