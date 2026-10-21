@@ -109,17 +109,18 @@ test('offscreen A to B to A material reloads rebind current image and label gene
  const scene=new Scene({version:1,entities:[{id:'panel',position:[0,1,0],mesh:{kind:'box'},renderOnly:true,material:material('A')}]});
  await renderer.prepareMaterials(scene);renderer.render(scene);const first=renderer.objects.get('panel'),oldImages=[first.materialTexture,first.normalTexture,first.ormTexture,first.heightTexture],oldLabel=first.labelTexture;
  scene.setVisualTransform('panel',[10000,1,10000]);scene.patchAppearance({materials:[{id:'panel',set:material('B')}]});scene.add({id:'collection-trigger'});renderer.render(scene);await settle();
- assert.equal(renderer.objects.get('panel'),first,'an object outside every view retains its old binding until needed');assert.ok(oldImages.every(image=>image.destroys===1));assert.equal(oldLabel.destroys,1);
+ assert.equal(renderer.objects.get('panel'),first,'an object outside every view retains its old binding until needed');assert.ok(oldImages.every(image=>image.destroys===1));assert.equal(first.labelTexture,oldLabel);assert.equal(renderer.labelUsers.get(oldLabel),1);assert.equal(oldLabel.destroys,0,'a still-bound offscreen glyph retains its object owner');
  scene.patchAppearance({materials:[{id:'panel',set:material('A')}]});renderer.render(scene);await settle();
  assert.equal(renderer.objects.get('panel'),first);scene.setVisualTransform('panel',[0,1,0]);renderer.render(scene);
- const current=renderer.objects.get('panel');assert.notEqual(current,first);assert.notEqual(current.labelTexture,oldLabel);assert.equal(current.labelTexture.destroys,0);
+ const current=renderer.objects.get('panel');assert.notEqual(current,first);assert.equal(current.labelTexture,oldLabel,'A to B to A reuses the glyph retained by its offscreen binding');assert.equal(renderer.labelUsers.get(oldLabel),1);assert.equal(current.labelTexture.destroys,0);
  for(const [property,binding,url]of [['materialTexture',4,'/A-color.png'],['normalTexture',6,'/A-normal.png'],['ormTexture',7,'/A-orm.png'],['heightTexture',9,'/A-height.png']]){
   assert.equal(current[property],loaded.get(url));assert.equal(current.bind.entries.find(entry=>entry.binding===binding).resource.texture,loaded.get(url));
   // URL, material identity and pose can all stay unchanged while residency
   // supplies a new physical image. The preparation check must still observe it.
   const previous=renderer.objects.get('panel');loaded.get(url).destroy();loaded.set(url,texture(url));renderer.render(scene);assert.notEqual(renderer.objects.get('panel'),previous);assert.equal(renderer.objects.get('panel')[property],loaded.get(url));
  }
- const previous=renderer.objects.get('panel');previous.labelTexture.destroy();renderer.labels.delete(previous.label);renderer.render(scene);assert.notEqual(renderer.objects.get('panel'),previous);assert.equal(renderer.objects.get('panel').labelTexture.destroys,0);
+ const previous=renderer.objects.get('panel');previous.labelTexture.destroy();renderer.labels.delete(previous.label);renderer.render(scene);const replacement=renderer.objects.get('panel');assert.notEqual(replacement,previous);assert.equal(previous.labelTexture.destroys,1,'releasing an already evicted generation must not destroy it twice');assert.equal(replacement.labelTexture.destroys,0);assert.equal(renderer.labelUsers.has(previous.labelTexture),false);assert.equal(renderer.labelUsers.get(replacement.labelTexture),1);
+ scene.remove('panel');renderer.collect(scene);assert.equal(replacement.labelTexture.destroys,1);assert.equal(oldLabel.destroys,1);assert.equal(renderer.labelUsers.size,0);assert.equal(renderer.labels.size,0);
 });
 
 test('all quality combinations route production textures correctly and release each resize generation once',async t=>{

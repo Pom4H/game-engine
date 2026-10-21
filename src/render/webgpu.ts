@@ -966,6 +966,7 @@ export class WebGPURenderer implements Renderer{
   // until an actual appearance/geometry revision. Cache batch identity and seed.
   private readonly instanceIdentity=new WeakMap<RuntimeEntity,{primitive:Primitive;material:RuntimeEntity['material'];key:string;seed:number}>();
   private instancingEnabled=true;private readonly errors:string[]=[];private readonly labels=new Map<string,GPUAny>();
+  private readonly labelUsers=new Map<GPUAny,number>();
   private readonly surfaceTextures:SurfaceTextures;
   private appearanceScene:Scene|null=null;private appearanceRevision=-1;private renderFrame:RenderFrameIR|null=null;
   private readonly frameFamily=new RenderFrameFamily();private frameBuilder:RenderFrameBuilder=this.frameFamily.compile('detailed');
@@ -1670,7 +1671,7 @@ export class WebGPURenderer implements Renderer{
     for(const m of this.meshes.values()){m.vertex.destroy();m.color.destroy();m.index.destroy();}
     for(const o of this.objects.values()){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}}
     for(const target of [this.depth,this.hdr,this.opaqueScene,this.normal,this.specular,this.velocity,this.effectsHdr,this.taaA,this.taaB,this.bloomA,this.bloomB,this.blackBloom,this.motionHdr,this.gpu.motionParams,this.gpu.taaParams,this.gpu.lightBuffer,this.gpu.cellBuffer,this.gpu.shadow,this.gpu.dynamicShadow,this.gpu.frame,this.gpu.snowUniform,this.gpu.spotShadowMap,this.gpu.spotShadowParams,...this.gpu.spotFrames,this.gpu.emptyField,this.gpu.emptyLabel,this.gpu.noiseVolume,this.gpu.environmentMap,this.gpu.localProbeMap,this.gpu.localProbeCapture,this.gpu.localProbeDepth,...this.gpu.probeFrames,...this.gpu.probeFilterPasses.map((pass:{params:GPUAny})=>pass.params),this.reflection,this.reflectionDepth,...this.labels.values()])target?.destroy();
-    this.labels.clear();this.meshes.clear();this.objects.clear();
+    this.labels.clear();this.labelUsers?.clear();this.meshes.clear();this.objects.clear();
     // A disposed renderer can remain in application/debug state. Release scene
     // roots as well as GPU resources; an offscreen entity may own a large mesh.
     this.lastScene=null;this.collectedScene=null;this.appearanceScene=null;this.environmentScene=null;
@@ -2070,8 +2071,8 @@ export class WebGPURenderer implements Renderer{
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);
     this.previousModels?.retain?.(scene.entities);
-    if(this.labels){const labels=new Set(live.map(e=>labelKey(e.material?.label??'',e.material?.labelColor)));for(const [key,t] of this.labels)if(!labels.has(key)){t.destroy();this.labels.delete(key);}}
-    for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}this.objects.delete(id);}
+    for(const [id,o] of this.objects)if(!ids.has(id)){o.uniform.destroy();if(o.owned!==false){o.texture.destroy();o.deformationTexture.destroy();}this.releaseLabel(o.label,o.labelTexture);this.objects.delete(id);}
+    if(this.labels){const labels=new Set(live.map(e=>labelKey(e.material?.label??'',e.material?.labelColor)));for(const [key,t] of this.labels)if(!labels.has(key))this.discardUnusedLabel(key,t);}
     for(const id of this.modelCache?.keys?.()??[])if(!ids.has(id))this.modelCache.delete(id);
     for(const [key,m] of this.meshes)if(!keys.has(key)){m.vertex.destroy();m.color.destroy();m.index.destroy();this.meshes.delete(key);}
     return true;
@@ -2079,7 +2080,17 @@ export class WebGPURenderer implements Renderer{
   private label(text:string,color?:Vec3):GPUAny{
     if(!text)return this.gpu.emptyLabel;const key=labelKey(text,color),cached=this.labels.get(key);if(cached)return cached;
     const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,1024,128);ctx.fillStyle=color?`rgb(${color.map(v=>Math.round(v*255)).join(',')})`:'#e2d9bc';ctx.font='58px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,64,940);
-    const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);this.labels.set(key,texture);return texture;
+    const texture=this.device.createTexture({size:[1024,128],format:'rgba8unorm',usage:0x04|0x02|0x10});try{this.device.queue.copyExternalImageToTexture({source:canvas},{texture},[1024,128]);}catch(error){texture.destroy();throw error;}this.labels.set(key,texture);return texture;
+  }
+  private discardUnusedLabel(key:string|undefined,texture:GPUAny):void{
+    if(!texture||texture===this.gpu.emptyLabel||this.labelUsers?.get(texture)||key===undefined||this.labels.get(key)!==texture)return;
+    this.labels.delete(key);texture.destroy();
+  }
+  private releaseLabel(key:string|undefined,texture:GPUAny):void{
+    if(!texture||texture===this.gpu.emptyLabel)return;
+    const users=this.labelUsers?.get(texture)??0;
+    if(users>1){this.labelUsers.set(texture,users-1);return;}
+    this.labelUsers?.delete(texture);this.discardUnusedLabel(key,texture);
   }
   private object(id:string,width:number,height:number,label:string,textureSpec?:SurfaceTextureSpec,labelColor?:Vec3):GPUObject{
     const materialTexture=textureSpec?.url?this.surfaceTextures.get(textureSpec.url):undefined;
@@ -2091,14 +2102,21 @@ export class WebGPURenderer implements Renderer{
     // Residency may release and reload the same URL/label while this object is
     // outside every view. Reusing its old bind group would sample dead textures.
     const existing=this.objects.get(id);if(existing&&existing.width===width&&existing.height===height&&existing.label===letteringKey&&existing.materialKey===materialKey&&existing.materialTexture===materialTexture&&existing.normalTexture===normalTexture&&existing.ormTexture===ormTexture&&existing.heightTexture===heightTexture&&existing.labelTexture===labelTexture)return existing;
-    if(existing){existing.uniform.destroy();if(existing.owned!==false){existing.texture.destroy();existing.deformationTexture.destroy();}}
-    const uniform=this.device.createBuffer({size:MATERIAL_UNIFORM_BYTES,usage:0x40|0x08}),texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField,deformationTexture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
-    const fallback=this.gpu.emptyLabel;
-    const bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
+    let uniform:GPUAny,texture:GPUAny,deformationTexture:GPUAny,bind:GPUAny;
+    try{
+      uniform=this.device.createBuffer({size:MATERIAL_UNIFORM_BYTES,usage:0x40|0x08});texture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;deformationTexture=width?this.device.createTexture({size:[width,height],format:'rgba32float',usage:0x04|0x02}):this.gpu.emptyField;
+      const fallback=this.gpu.emptyLabel;
+      bind=this.device.createBindGroup({layout:this.gpu.objectLayout,entries:[
       {binding:0,resource:{buffer:uniform}},{binding:1,resource:texture.createView()},{binding:2,resource:labelTexture.createView()},{binding:3,resource:this.gpu.sampler},
       {binding:4,resource:(materialTexture??fallback).createView()},{binding:5,resource:this.gpu.surfaceSampler},
       {binding:6,resource:(normalTexture??fallback).createView()},{binding:7,resource:(ormTexture??fallback).createView()},{binding:8,resource:deformationTexture.createView()},{binding:9,resource:(heightTexture??fallback).createView()},
-    ]}),object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label:letteringKey,materialTexture,normalTexture,ormTexture,heightTexture,labelTexture,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
+      ]});
+    }catch(error){uniform?.destroy();if(width){texture?.destroy();deformationTexture?.destroy();}this.discardUnusedLabel(letteringKey,labelTexture);throw error;}
+    // Keep a shared glyph alive across a same-label bind rebuild. Only committed
+    // object bindings own a reference; failed allocations leave the old binding intact.
+    if(labelTexture!==this.gpu.emptyLabel)this.labelUsers.set(labelTexture,(this.labelUsers.get(labelTexture)??0)+1);
+    if(existing){existing.uniform.destroy();if(existing.owned!==false){existing.texture.destroy();existing.deformationTexture.destroy();}this.releaseLabel(existing.label,existing.labelTexture);}
+    const object={uniform,bind,texture,deformationTexture,width,height,owned:width>0,label:letteringKey,materialTexture,normalTexture,ormTexture,heightTexture,labelTexture,...(materialKey!==undefined?{materialKey}:{})};this.objects.set(id,object);return object;
   }
   private model(entity:RuntimeEntity):Mat4{
     const shared=this.renderFrame?.objectsById.get(entity.id);if(shared)return shared.model;
