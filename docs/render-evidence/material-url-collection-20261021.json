@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "scope": "Owned native headless Chrome CPU/allocation material URL kernel only. No Game entry/world, authority, save, renderer, WebGPU/canvas or RAF/FPS acceptance. Timings unprofiled; heap collection-inclusive fixed workloads; raw CPU samples are diagnostic.",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "identity": [
+    {
+      "name": "none",
+      "entities": 2600,
+      "textureFraction": 0,
+      "before": [],
+      "candidate": []
+    },
+    {
+      "name": "sparse",
+      "entities": 2600,
+      "textureFraction": 0.05,
+      "before": [
+        "/color0",
+        "/normal0",
+        "/color1",
+        "/normal1",
+        "/height",
+        "/color2",
+        "/normal2",
+        "/color3",
+        "/normal3",
+        "/color4",
+        "/color5",
+        "/color6",
+        "/color7"
+      ],
+      "candidate": [
+        "/color0",
+        "/normal0",
+        "/color1",
+        "/normal1",
+        "/height",
+        "/color2",
+        "/normal2",
+        "/color3",
+        "/normal3",
+        "/color4",
+        "/color5",
+        "/color6",
+        "/color7"
+      ]
+    },
+    {
+      "name": "all",
+      "entities": 2600,
+      "textureFraction": 1,
+      "before": [
+        "/color0",
+        "/normal0",
+        "/color1",
+        "/normal1",
+        "/height",
+        "/color2",
+        "/normal2",
+        "/color3",
+        "/normal3",
+        "/color4",
+        "/color5",
+        "/color6",
+        "/color7"
+      ],
+      "candidate": [
+        "/color0",
+        "/normal0",
+        "/color1",
+        "/normal1",
+        "/height",
+        "/color2",
+        "/normal2",
+        "/color3",
+        "/normal3",
+        "/color4",
+        "/color5",
+        "/color6",
+        "/color7"
+      ]
+    }
+  ],
+  "requested": {
+    "samplingInterval": 8192,
+    "includeObjectsCollectedByMajorGC": true,
+    "includeObjectsCollectedByMinorGC": true
+  },
+  "acceptedSamples": 6,
+  "timing": [
+    {
+      "name": "none",
+      "entities": 2600,
+      "callsPerBatch": 400,
+      "pairs": 5,
+      "beforeMedianMs": 9.899999976158142,
+      "candidateMedianMs": 3.899999976158142
+    },
+    {
+      "name": "sparse",
+      "entities": 2600,
+      "callsPerBatch": 400,
+      "pairs": 5,
+      "beforeMedianMs": 12.799999952316284,
+      "candidateMedianMs": 4.5
+    },
+    {
+      "name": "all",
+      "entities": 2600,
+      "callsPerBatch": 400,
+      "pairs": 5,
+      "beforeMedianMs": 79.70000004768372,
+      "candidateMedianMs": 17.199999928474426
+    }
+  ],
+  "allocation": {
+    "scope": "Three alternating pairs; each sample performs200calls in each ofnone/sparse/all cohorts. Allocated, not retained, bytes for600mixed calls.",
+    "beforeMeanBytes": 126388912,
+    "candidateMeanBytes": 6457496,
+    "samples": [
+      {
+        "pair": 0,
+        "variant": "before",
+        "totalSelfBytes": 127629700,
+        "sampleCount": 14217
+      },
+      {
+        "pair": 0,
+        "variant": "candidate",
+        "totalSelfBytes": 6524136,
+        "sampleCount": 457
+      },
+      {
+        "pair": 1,
+        "variant": "candidate",
+        "totalSelfBytes": 6452460,
+        "sampleCount": 456
+      },
+      {
+        "pair": 1,
+        "variant": "before",
+        "totalSelfBytes": 125723656,
+        "sampleCount": 14000
+      },
+      {
+        "pair": 2,
+        "variant": "before",
+        "totalSelfBytes": 125813380,
+        "sampleCount": 13990
+      },
+      {
+        "pair": 2,
+        "variant": "candidate",
+        "totalSelfBytes": 6395892,
+        "sampleCount": 453
+      }
+    ]
+  },
+  "errors": [],
+  "rawReportSHA256": "f732ab86fbd3fea7cf217ce74a5d2e31521edbb3783b622053fe90a4122461b2",
+  "rawEvidence": "artifacts/material-url-collection-prototype/",
+  "reproduce": "bun artifacts/material-url-collection-prototype/chrome-run.ts",
+  "limits": "Generated fixed2600-source cohorts and ready texture cache; no image loading, real-city distribution, total-game allocation reduction or FPS/freeze gain established."
+}

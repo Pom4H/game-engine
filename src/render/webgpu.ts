@@ -46,6 +46,17 @@ type GPUAny=any;
 const defaultLabelColor:Vec3=[226/255,217/255,188/255];
 const emptyLabelKey=JSON.stringify(['',defaultLabelColor]);
 const labelKey=(text:string,color?:Vec3)=>text===''&&color===undefined?emptyLabelKey:JSON.stringify([text,color??defaultLabelColor]);
+/** The caller captures membership before any public texture getter runs. */
+function materialTextureURLs(entities:readonly RuntimeEntity[],optionalMaterial=false):Set<string>{
+ const urls=new Set<string>();
+ for(const entity of entities){
+  const texture=optionalMaterial?entity.material?.texture:entity.material.texture;
+  if(!texture)continue;
+  const url=texture.url,normalUrl=texture.normalUrl,ormUrl=texture.ormUrl,heightUrl=texture.heightUrl;
+  if(url)urls.add(url);if(normalUrl)urls.add(normalUrl);if(ormUrl)urls.add(ormUrl);if(heightUrl)urls.add(heightUrl);
+ }
+ return urls;
+}
 const SHADOW_MAP_SIZE=2048;
 const DYNAMIC_SHADOW_MAP_SIZE=1024;
 export interface WebGPURendererOptions {profiling?:boolean;visibility?:VisibilityMode;features?:Partial<RenderFeatures>;logarithmicDepthFar?:number;opaqueDepthPrepass?:boolean}
@@ -1582,7 +1593,7 @@ export class WebGPURenderer implements Renderer{
   }
   private queueMaterialLoads(scene:Scene):void{
     if(this.disposed)return;
-    const urls=new Set([...scene.entities.values()].flatMap(e=>{const t=e.material.texture;return t?[t.url,t.normalUrl,t.ormUrl,t.heightUrl].filter((url):url is string=>!!url):[];}));
+    const urls=materialTextureURLs([...scene.entities.values()]);
     this.surfaceTextures.retain?.(urls);
     for(const url of this.failedMaterials)if(!urls.has(url))this.failedMaterials.delete(url);
     for(const url of urls){
@@ -1603,7 +1614,7 @@ export class WebGPURenderer implements Renderer{
     this.shadowValid=false;this.historyValid=false;this.probeCapture?.reset();
   }
   async prepareMaterials(scene:Scene):Promise<void>{
-    const urls=new Set([...scene.entities.values()].flatMap(e=>{const t=e.material.texture;return t?[t.url,t.normalUrl,t.ormUrl,t.heightUrl].filter((url):url is string=>!!url):[];}));
+    const urls=materialTextureURLs([...scene.entities.values()]);
     await Promise.all([...urls].map(async url=>{
       const ready=!!this.surfaceTextures.get(url);
       await this.surfaceTextures.load(url);this.failedMaterials.delete(url);
@@ -2067,7 +2078,7 @@ export class WebGPURenderer implements Renderer{
       this.previousModels?.clear();
       this.historyValid=false;this.previousVp=null;this.previousJitter=null;this.previousCamera=null;this.previousTarget=null;
     }
-    this.surfaceTextures?.retain(new Set([...scene.entities.values()].flatMap(e=>{const t=e.material?.texture;return t?[t.url,t.normalUrl,t.ormUrl,t.heightUrl].filter((url):url is string=>!!url):[];})));
+    this.surfaceTextures?.retain(materialTextureURLs([...scene.entities.values()],true));
     const live=[...scene.entities.values()].filter(e=>renderPrimitive(e)),ids=new Set(live.map(e=>e.id)),keys=new Set(live.map(e=>primitiveKey(renderPrimitive(e)!)));
     this.collectedVisible=live;this.collectedOpaque=live.filter(e=>e.material.color[3]>=.98);this.collectedTransparent=live.filter(e=>e.material.color[3]<.98);
     this.previousModels?.retain?.(scene.entities);

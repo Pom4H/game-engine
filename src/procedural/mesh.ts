@@ -90,7 +90,7 @@ export function compactTriangleMesh(input:CompactTriangleMeshInput):TriangleMesh
   }});
  }
  freezeTriangle(mesh);setOwnedTriangle(mesh,state);
- // Preserve the common sequence: instance/procedural seeds depend on these keys.
+ // Preserve the common sequence used by mesh caching and opaque instance keys.
  registerTriangleKey(mesh,'dynamic:'+ ++dynamicPrimitiveId);return mesh;
 }
 /** An identity certificate for this factory, not public freezePrimitive inputs. */

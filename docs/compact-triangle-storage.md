@@ -29,7 +29,10 @@ view of private storage. `ownedTriangleMeshBounds` exposes only a frozen
 six-number tuple of original-double extrema for exact radiance calculations;
 GPU bounds continue to use packed Float32 positions. Factory keys consume the
 same `dynamic:N` sequence as `freezePrimitive(mesh, true)`, preserving instance
-and procedural seed ordering.
+cache key uniqueness and allocation order. These keys do not determine shader
+variation seeds: the renderer uses the material's explicit seed or the stable
+entity ID. Asynchronous geometry staging must preserve entity IDs and draw order;
+it does not require reserving mesh keys to preserve shader seeds.
 
 The ignored feasibility experiment at the Game workspace's
 `artifacts/compact-triangle-prototype/` ran Node 24.21.0 / V8 13.6. For one
