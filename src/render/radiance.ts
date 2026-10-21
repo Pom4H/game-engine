@@ -4,6 +4,7 @@ import type {Primitive} from '../scene/types.js';
 import type {RuntimeEntity,Scene} from '../scene/scene.js';
 import type {RenderFrameObserver} from './frame.js';
 import {ownedTriangleMeshBounds} from '../procedural/mesh.js';
+import {triangleStreamState,triangleStreamRevision} from '../procedural/triangle-stream.js';
 
 export interface RadianceProxy {
   readonly direction:Vec3;
@@ -22,7 +23,7 @@ export interface SceneRadianceProbe {
 /** Distant fallback lighting follows static radiance causes. Transient actors
  * and snowballs are already represented by the main/reflection/probe passes. */
 const radianceGeometryIds=new WeakMap<object,number>();let nextRadianceGeometryId=1;
-interface RadianceCause {entity:RuntimeEntity;primitive:Primitive;values:Float64Array;emissive:boolean;model?:Mat4|undefined}
+interface RadianceCause {entity:RuntimeEntity;primitive:Primitive;values:Float64Array;emissive:boolean;model?:Mat4|undefined;geometryRevision?:number}
 interface RadianceCauses {entries:RadianceCause[];hash:number;rebuilds:number;dirty:boolean}
 const radianceCauses=new WeakMap<Scene,RadianceCauses>();
 /** Compare numeric causes in place. Serializing and hashing thousands of static
@@ -51,6 +52,7 @@ function causesFor(scene:Scene):RadianceCauses{
 function observeCause(cache:RadianceCauses,index:number,entity:RuntimeEntity,model?:Mat4):boolean{
   const primitive=entity.renderMesh??entity.mesh!;let entry=cache.entries[index],changed=false;
   if(!entry||entry.entity!==entity||entry.primitive!==primitive){entry={entity,primitive,values:new Float64Array(19),emissive:false};cache.entries[index]=entry;changed=true;}
+  const revision=triangleStreamRevision(primitive);if(entry.geometryRevision!==revision){entry.geometryRevision=revision;if(revision)changed=true;}
   return updateRadianceCause(entry,model)||changed;
 }
 export function distantRadianceCacheStats(scene:Scene):{entries:number;rebuilds:number}{const cache=radianceCauses.get(scene);return{entries:cache?.entries.length??0,rebuilds:cache?.rebuilds??0};}
@@ -71,7 +73,7 @@ function commitCauses(cache:RadianceCauses,index:number,changed:boolean):number{
   for(const {entity,primitive} of cache.entries){
     let geometry=radianceGeometryIds.get(primitive);if(!geometry){geometry=nextRadianceGeometryId++;radianceGeometryIds.set(primitive,geometry);}
     const material=entity.material;
-    const cause=[entity.id,geometry,...entity.position,...entity.rotation,...entity.scale,...material.color,...material.emissive??[],material.metalness??material.profile.optical.metalness,material.roughness??material.surface.roughness,material.surface.wetness].join(':');
+    const cause=[entity.id,geometry,...entity.position,...entity.rotation,...entity.scale,...material.color,...material.emissive??[],material.metalness??material.profile.optical.metalness,material.roughness??material.surface.roughness,material.surface.wetness].join(':')+(primitive.kind==='triangle-stream'?':stream:'+triangleStreamRevision(primitive):'');
     for(let n=0;n<cause.length;n++)hash=Math.imul(hash^cause.charCodeAt(n),16777619);
   }
   cache.rebuilds++;cache.dirty=false;return cache.hash=hash>>>0;
@@ -195,6 +197,7 @@ export function buildSceneRadianceProbe(scene:Scene,origin:Vec3=scene.camera.tar
 // take the original scan so direct edits remain observable.
 const radianceMeshBounds=new WeakMap<readonly number[],readonly number[]>();
 function primitiveRadius(primitive:Primitive,scale:Vec3):number{
+  if(primitive.kind==='triangle-stream'){const stream=triangleStreamState(primitive);if(!stream)throw new TypeError('Unowned triangle stream');return Math.hypot(stream.bounds.half[0]*Math.abs(scale[0]),stream.bounds.half[1]*Math.abs(scale[1]),stream.bounds.half[2]*Math.abs(scale[2]));}
   const sx=Math.abs(scale[0]),sy=Math.abs(scale[1]),sz=Math.abs(scale[2]);
   if(primitive.kind==='sphere')return (primitive.radius??1)*Math.max(sx,sy,sz);
   if(primitive.kind==='torus')return (primitive.radius+primitive.tube)*Math.max(sx,sy,sz);

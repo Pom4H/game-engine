@@ -11,6 +11,7 @@ export type LinearPixelStage='hdr'|'reflection'|'effects'|'taa'|'motionBlur';
 export interface LinearPixelSample {x:number;y:number;rgba:readonly[number,number,number,number]}
 export interface RenderTargetInfo {width:number;height:number;format:string}
 export interface RenderStats {environmentBaking?:{active:boolean;queued:boolean;failed:boolean}}
+export interface RenderStats {triangleStreams?:{resident:number;pendingPreparations:number;capacityTriangles:number;activeTriangles:number;cpuBytes:number;gpuBytes:number}}
 export interface RenderStats {postProcessing?:Readonly<import('./camera-post.js').PostProcessingSettings>}
 export interface RenderStats {cameraDepth?:Readonly<import('./camera-depth.js').CameraDepthConfiguration>}
 export interface RenderStats {opaqueDepthPrepass?:{enabled:boolean;sampleCount:number;encoding:'perspective'|'logarithmic';excluded:readonly string[]}}

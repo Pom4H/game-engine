@@ -1,4 +1,5 @@
 import {isOwnedValidatedTriangleMesh} from '../procedural/mesh.js';
+import {isTriangleStream} from '../procedural/triangle-stream.js';
 import {material} from '../materials/catalog.js';
 import {deriveSurfaceState} from '../materials/surface.js';
 import type {EnvironmentState} from '../environment/types.js';
@@ -55,7 +56,8 @@ export function createRenderEntityPreparation(input:PreparedRenderEntitySpec,ini
  const source=record(input);
  if(source.renderOnly!==true||source.body!==undefined||source.environmental!==undefined||source.light!==undefined||source.visualOnly!==undefined)throw new TypeError('Prepared entities require renderOnly without physical, surface or light state');
  const id=scalar(source.id),mesh=source.mesh,renderMesh=source.renderMesh;
- if((mesh===undefined&&renderMesh===undefined)||(mesh!==undefined&&!isOwnedValidatedTriangleMesh(mesh))||(renderMesh!==undefined&&!isOwnedValidatedTriangleMesh(renderMesh)))throw new TypeError('Prepared entities require owned validated triangle geometry');
+ const accepted=(value:unknown)=>isOwnedValidatedTriangleMesh(value)||isTriangleStream(value);
+ if((mesh===undefined&&renderMesh===undefined)||(mesh!==undefined&&!accepted(mesh))||(renderMesh!==undefined&&!accepted(renderMesh)))throw new TypeError('Prepared entities require owned validated triangle geometry');
  const spec:Record<string,unknown>={id,renderOnly:true,...(mesh!==undefined?{mesh}:{}),...(renderMesh!==undefined?{renderMesh}:{})};
  for(const key of ['position','rotation','scale'] as const){const v=source[key];if(v!==undefined)spec[key]=vector(v,3);}
  for(const key of ['renderVisible','renderCameraVisible'] as const){const v=source[key];if(v!==undefined)spec[key]=scalar(v);}

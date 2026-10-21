@@ -1,12 +1,13 @@
 import {V3,type Vec3,type MutableVec3} from '../math.js';
 import {primitiveMesh,type MeshData} from '../procedural/mesh.js';
+import {triangleStreamRevision} from '../procedural/triangle-stream.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {CameraSpec,Primitive} from '../scene/types.js';
 import {renderModel,renderPrimitive} from './frame.js';
 
 export interface RenderMeshHit {readonly entity:RuntimeEntity;readonly distance:number;readonly point:Vec3;readonly triangle:number;}
 export type RenderMeshFilter=(entity:RuntimeEntity)=>boolean;
-type Geometry={mesh:MeshData;bounds:Float64Array};
+type Geometry={mesh:MeshData;bounds:Float64Array;revision:number};
 type Prepared={primitive:Primitive;geometry:Geometry;pose:Float64Array;model:Float32Array;origin:Float64Array;inverse:Float64Array;bounds:Float64Array;valid:boolean};
 
 function edgeDistance2(p:Vec3,a:Vec3,b:Vec3):number{
@@ -38,13 +39,14 @@ export class RenderMeshQuery{
  constructor(private readonly scene:Scene){}
  private prepare(entity:RuntimeEntity,primitive:Primitive):Prepared{
   let g=this.geometry.get(primitive);
-  if(!g){const mesh=primitiveMesh(primitive),bounds=new Float64Array([Infinity,Infinity,Infinity,-Infinity,-Infinity,-Infinity]);
+  const revision=triangleStreamRevision(primitive);
+  if(!g||g.revision!==revision){const mesh=primitiveMesh(primitive),bounds=new Float64Array([Infinity,Infinity,Infinity,-Infinity,-Infinity,-Infinity]);
    for(let i=0;i<mesh.vertices.length;i+=6)for(let a=0;a<3;a++){const v=mesh.vertices[i+a]!;bounds[a]=Math.min(bounds[a]!,v);bounds[a+3]=Math.max(bounds[a+3]!,v);}
-   g={mesh,bounds};this.geometry.set(primitive,g);
+   g={mesh,bounds,revision};this.geometry.set(primitive,g);
   }
   let p=this.prepared.get(entity);
   if(!p){p={primitive,geometry:g,pose:new Float64Array(9).fill(NaN),model:new Float32Array(16),origin:new Float64Array(3),inverse:new Float64Array(9),bounds:new Float64Array(6),valid:false};this.prepared.set(entity,p);}
-  let changed=p.primitive!==primitive;
+  let changed=p.primitive!==primitive||p.geometry!==g;
   for(let i=0;i<9;i++){const value=i<3?entity.position[i]!:i<6?entity.rotation[i-3]!:entity.scale[i-6]!;if(p.pose[i]!==value){p.pose[i]=value;changed=true;}}
   if(!changed)return p;
   p.primitive=primitive;p.geometry=g;const m=renderModel(entity),inv=p.inverse;p.model.set(m);p.origin.set(m.subarray(12,15));

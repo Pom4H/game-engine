@@ -749,6 +749,7 @@ function meshVolume(mesh:Primitive|undefined,scale:Vec3):number{
   const d=meshDimensions(mesh,scale);return d[0]*d[1]*d[2]*(mesh.kind==='shard'?.5:1);
 }
 function meshDimensions(mesh:Primitive,scale:Vec3):MutableVec3{
+  if(mesh.kind==='triangle-stream')throw new TypeError('Triangle streams cannot own physical dimensions');
   if(mesh.kind==='triangle-mesh'){const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];mesh.positions.forEach((v,i)=>{const a=i%3;lo[a]=Math.min(lo[a]!,v);hi[a]=Math.max(hi[a]!,v);});return[(hi[0]!-lo[0]!)*scale[0],(hi[1]!-lo[1]!)*scale[1],(hi[2]!-lo[2]!)*scale[2]];}
   if(mesh.kind==='torus')return[(mesh.radius+mesh.tube)*2*scale[0],mesh.tube*2*scale[1],(mesh.radius+mesh.tube)*2*scale[2]];
   if(mesh.kind==='cylinder'){const r=Math.max(mesh.radius,mesh.topRadius??mesh.radius);return[r*2*scale[0],mesh.height*scale[1],r*2*scale[2]];};

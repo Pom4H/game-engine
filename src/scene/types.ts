@@ -17,6 +17,7 @@ import type {VehicleAir,VehicleControls,VehicleSpec} from '../vehicles/vehicle.j
 export type Color = readonly [number,number,number,number];
 export type Primitive =
   | {kind:'box'; size?:Vec3}
+  | import('../procedural/triangle-stream.js').TriangleStreamPrimitive
   | {kind:'triangle-mesh';positions:readonly number[];normals:readonly number[];indices:readonly number[]; /** Optional authored UV pairs, including signed coordinates. */ uvs?:readonly number[]; /** Additive procedural variation, one value per vertex. */ variationSeeds?:readonly number[]; /** Optional sRGB vertex albedo, RGBA per vertex in [0,1]. */ colors?:readonly number[]}
   | {kind:'torus';radius:number;tube:number;segments?:number}
   | {kind:'cylinder'; radius:number; height:number; topRadius?:number; segments?:number}

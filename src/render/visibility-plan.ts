@@ -4,13 +4,14 @@ import type {Primitive} from '../scene/types.js';
 import {renderPrimitive,type RenderObjectIR} from './frame.js';
 import {intersectsClip,type MeshBounds} from './visibility.js';
 import {MAX_SURFACE_DISPLACEMENT_M} from '../environment/deformable-surface.js';
+import {triangleStreamRevision} from '../procedural/triangle-stream.js';
 
 const CAMERA_OPAQUE=1,CAMERA_TRANSPARENT=2,REFLECTION=4,STATIC_SHADOW=8,DYNAMIC_SHADOW=16,ALL=31;
 export function castsRenderShadow(entity:RuntimeEntity):boolean{
  const emission=entity.material.emissive;
  return entity.material.color[3]>=.98&&entity.material.groundCover!=='grass-blade'&&!entity.material.decal&&!(emission&&Math.max(...emission)>1);
 }
-interface Entry {entity:RuntimeEntity;primitive:Primitive;model:Mat4;roles:number;mover:boolean;deformed:boolean;heightUrl:string|undefined;reliefDepth:number;reliefSize:number;observation:number}
+interface Entry {entity:RuntimeEntity;primitive:Primitive;model:Mat4;roles:number;mover:boolean;deformed:boolean;heightUrl:string|undefined;reliefDepth:number;reliefSize:number;observation:number;geometryRevision:number}
 type BoundsFor=(primitive:Primitive)=>MeshBounds;
 const sameMatrix=(a:Mat4|null,b:Mat4)=>a!==null&&a.every((value,index)=>value===b[index]);
 const staticRoles=(roles:number,mover:boolean)=>roles&(mover?STATIC_SHADOW:ALL^DYNAMIC_SHADOW);
@@ -109,15 +110,16 @@ export class RenderVisibilityPlan {
       // Move it out of the resident static map once; subsequent stamps and
       // relaxation then reach the dynamic map without redrawing other statics.
       const staticCaster=!mover&&!deformed&&(!entity.body||(!entity.body.kinematic&&entity.body.invMass===0));
-      const roles=(batched||entity.renderCameraVisible===false?0:opaque?CAMERA_OPAQUE:CAMERA_TRANSPARENT)|(!batched&&opaque&&kind!=='snow'&&kind!=='asphalt'?REFLECTION:0)|(castsShadow?(staticCaster?STATIC_SHADOW:DYNAMIC_SHADOW):0);
+      const roles=primitive.kind==='triangle-stream'&&primitive.triangleCount===0?0:(batched||entity.renderCameraVisible===false?0:opaque?CAMERA_OPAQUE:CAMERA_TRANSPARENT)|(!batched&&opaque&&kind!=='snow'&&kind!=='asphalt'?REFLECTION:0)|(castsShadow?(staticCaster?STATIC_SHADOW:DYNAMIC_SHADOW):0);
       let entry=existing;
       if(!entry){
-        entry={entity,primitive,model,roles,mover,deformed,heightUrl,reliefDepth,reliefSize,observation};membershipDirty|=roles;
+        entry={entity,primitive,model,roles,mover,deformed,heightUrl,reliefDepth,reliefSize,observation,geometryRevision:triangleStreamRevision(primitive)};membershipDirty|=roles;
         this.entriesByEntity.set(entity,entry);
       }else{
         membershipDirty|=entry.roles^roles;
         if(entry.mover!==mover)membershipDirty|=(entry.roles|roles)&(CAMERA_OPAQUE|CAMERA_TRANSPARENT|REFLECTION);
         if(entry.model!==model||entry.primitive!==primitive||entry.deformed!==deformed)staticDirty|=staticRoles(entry.roles,entry.mover)|staticRoles(roles,mover);
+        const geometryRevision=triangleStreamRevision(primitive);if(entry.geometryRevision!==geometryRevision){staticDirty|=staticRoles(entry.roles,entry.mover)|staticRoles(roles,mover);entry.geometryRevision=geometryRevision;}
         if(entry.heightUrl!==heightUrl||entry.reliefDepth!==reliefDepth||entry.reliefSize!==reliefSize)staticDirty|=(entry.roles|roles)&STATIC_SHADOW;
         entry.primitive=primitive;entry.model=model;entry.roles=roles;entry.mover=mover;entry.deformed=deformed;
         entry.heightUrl=heightUrl;entry.reliefDepth=reliefDepth;entry.reliefSize=reliefSize;

@@ -26,6 +26,8 @@ import {FRAME_UNIFORM_WORDS,FRAME_UNIFORM_BYTES,FRAME_WGSL,SKY_SHADER,EFFECTS_SH
 import {V3,compose,lookAt,multiply4,multiply4Into,perspective,type Mat4,type Vec3} from '../math.js';
 import {primitiveKey,primitiveMesh,meshVertexAttributes,prepareTriangleMeshPacking,isOwnedValidatedTriangleMesh} from '../procedural/mesh.js';
 import {StagedMeshLease,type MeshPreparationLease} from './mesh-preparation.js';
+import {PreparedTriangleStream,type TriangleStreamPreparation,type TriangleStreamOptions} from './triangle-stream-preparation.js';
+import type {AggregateTriangleStream} from '../procedural/triangle-stream.js';
 export type {MeshPreparationLease} from './mesh-preparation.js';
 import {StagedEntityLease,type EntityPreparationLease} from './entity-preparation.js';
 export type {EntityPreparationLease} from './entity-preparation.js';
@@ -992,6 +994,7 @@ export class WebGPURenderer implements Renderer{
   private bloomA:GPUAny=null;private bloomB:GPUAny=null;private bloomDownBind:GPUAny=null;private bloomHorizontalBind:GPUAny=null;private bloomVerticalBind:GPUAny=null;
   private readonly meshes=new Map<string,GPUMesh>();private readonly meshByPrimitive=new WeakMap<object,GPUMesh>();private readonly objects=new Map<string,GPUObject>();private readonly shadowBatches=new Map<string,GPUShadowBatch>();
   private meshPreparationLeases=new Set<MeshPreparationLease>();private preparedMeshPins=new Map<GPUMesh,number>();
+  private triangleStreamPreparations=new Set<TriangleStreamPreparation>();private triangleStreams=new Set<AggregateTriangleStream>();
   private entityPreparationLeases=new Set<EntityPreparationLease>();
   private preparedEntityObjects=new WeakMap<RuntimeEntity,GPUObject>();
   private preparedEntityTextureURLs=new Map<string,number>();
@@ -1680,9 +1683,11 @@ export class WebGPURenderer implements Renderer{
   inspect(includeProfile=true):RenderStats{
     const validFaces=[0,1,2,3,4,5].reduce((count,face)=>count+((this.localProbeMask>>face)&1),0);
     const gpuObjects=[...this.objects.values()];
-    const cpuStagingBytes=gpuObjects.reduce((sum,object)=>sum+
+    const triangleStreams={resident:0,pendingPreparations:this.triangleStreamPreparations?.size??0,capacityTriangles:0,activeTriangles:0,cpuBytes:0,gpuBytes:0};
+    for(const stream of this.triangleStreams??[]){triangleStreams.resident++;triangleStreams.capacityTriangles+=stream.capacityTriangles;triangleStreams.activeTriangles+=stream.triangleCount;triangleStreams.cpuBytes+=stream.capacityTriangles*144;triangleStreams.gpuBytes+=stream.capacityTriangles*198+(stream.capacityTriangles%2?2:0);}
+    const cpuStagingBytes=triangleStreams.cpuBytes+gpuObjects.reduce((sum,object)=>sum+
       (object.uniformStaging?.byteLength??0)+(object.surfaceStaging?.byteLength??0)+(object.deformationStaging?.byteLength??0),0);
-    return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,geometryCountBasis:this.visibilityMode==='gpu'&&this.cameraBatches.size?'candidate-upper-bound':'exact',meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+this.objects.size+this.shadowBatches.size+this.instanceBatches.size+this.cameraBatches.size*4+[...this.cameraBatches.values()].reduce((sum,batch)=>sum+Object.keys(batch.shadows??{}).length,0)+[...this.cameraBatches.values()].filter(batch=>batch.reflection).length*3+13+this.gpu.probeFilterPasses.length,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+18,cpuStagingBytes,errors:[...this.errors],
+    return{backend:'webgpu',width:this.canvas.width,height:this.canvas.height,drawCalls:this.drawCalls,triangles:this.triangles,geometryCountBasis:this.visibilityMode==='gpu'&&this.cameraBatches.size?'candidate-upper-bound':'exact',meshes:this.meshes.size,objects:this.objects.size,pointLights:this.pointLights,lightOverflow:this.lightOverflow,materialTextures:this.surfaceTextures.size,buffers:this.meshes.size*3+triangleStreams.resident+this.objects.size+this.shadowBatches.size+this.instanceBatches.size+this.cameraBatches.size*4+[...this.cameraBatches.values()].reduce((sum,batch)=>sum+Object.keys(batch.shadows??{}).length,0)+[...this.cameraBatches.values()].filter(batch=>batch.reflection).length*3+13+this.gpu.probeFilterPasses.length,textures:[...this.objects.values()].filter(o=>o.owned).length+this.labels.size+this.surfaceTextures.size+18,cpuStagingBytes,triangleStreams,errors:[...this.errors],
       visibility:{mode:this.visibilityMode,batches:this.cameraBatches.size,candidates:[...this.cameraBatches.values()].reduce((sum,batch)=>sum+batch.items.length,0),currentVisible:this.batchVisible,...(this.gpu.visibility?{diagnostics:this.gpu.visibility.snapshot(),reflection:{batches:[...this.cameraBatches.values()].filter(batch=>batch.reflection).length,candidates:[...this.cameraBatches.values()].reduce((sum,batch)=>sum+(batch.reflection?batch.items.length:0),0),currentVisible:this.visibilityMode==='gpu'?null:[...this.cameraBatches.values()].reduce((sum,batch)=>sum+(batch.reflection?.visibility.cpuVisibleCount??0),0)}}:{})},
       preparation:{...this.frameCache.inspect(),radiance:this.radianceProjection.inspect(),batchPlanBuilds:this.cameraBatchPlanBuilds,batchCauseEntries:this.cameraBatchCauses.length,modelHistory:this.previousModels.inspect(),visibilityPlan:this.visibilityPlan.inspect()},pipeline:this.pipelinePlan,postProcessing:{...this.postProcessing},
       environmentBaking:this.environmentWorker?.inspect()??{active:false,queued:false,failed:false},
@@ -1702,7 +1707,9 @@ export class WebGPURenderer implements Renderer{
   private clearCameraBatchTemporal():void{this.cameraBatchTemporalPending?.clear();this.cameraBatchTemporalNext?.clear();this.cameraBatchTemporalSeen?.clear();this.cameraBatchTemporalReset=true;}
   private clearPreparationCaches():void{this.frameCache?.clear();this.radianceProjection?.clear();this.visibilityPlan?.clear();this.renderFrame=null;this.cameraBatchCauses?.splice(0);this.cameraBatchPlans?.splice(0);this.cameraBatchScene=null;this.cameraBatchLocations?.clear();this.cameraBatchMaterialIds?.clear();this.clearCameraBatchTemporal();this.modelCache?.clear();this.previousModels?.clear();}
   dispose():void{
-    if(this.disposed)return;this.disposed=true;for(const lease of this.entityPreparationLeases??[])lease.dispose();this.entityPreparationLeases?.clear();this.preparedEntityTextureURLs?.clear();this.preparedEntityObjects=new WeakMap();for(const lease of this.meshPreparationLeases??[])lease.dispose();this.meshPreparationLeases?.clear();this.preparedMeshPins?.clear();this.environmentWorker?.dispose();delete this.environmentWorker;
+    if(this.disposed)return;this.disposed=true;
+    for(const preparation of this.triangleStreamPreparations??[])preparation.dispose();for(const stream of this.triangleStreams??[])stream.dispose();this.triangleStreamPreparations?.clear();this.triangleStreams?.clear();
+    for(const lease of this.entityPreparationLeases??[])lease.dispose();this.entityPreparationLeases?.clear();this.preparedEntityTextureURLs?.clear();this.preparedEntityObjects=new WeakMap();for(const lease of this.meshPreparationLeases??[])lease.dispose();this.meshPreparationLeases?.clear();this.preparedMeshPins?.clear();this.environmentWorker?.dispose();delete this.environmentWorker;
     for(const batch of this.instanceBatches.values())batch.buffer.destroy();this.instanceBatches.clear();
     for(const batch of this.shadowBatches.values())batch.buffer.destroy();this.shadowBatches.clear();
     this.clearPreparationCaches();this.environmentMapCache?.clear();this.profiler?.dispose();this.opaqueDepthTarget?.destroy();this.gpu.opaqueDepthEmpty?.destroy();this.materialLoads.clear();this.failedMaterials.clear();this.surfaceTextures.dispose();this.gpu.visibility?.destroy();
@@ -2084,6 +2091,17 @@ export class WebGPURenderer implements Renderer{
   }
   /** Explicit opt-in cold admission. Live rendering only sees the resulting
    * complete cached mesh; callers retain the lease through Scene publication. */
+  prepareTriangleStream(options:TriangleStreamOptions):TriangleStreamPreparation{
+    if(this.disposed)throw new Error('Renderer has been disposed');
+    const preparations=this.triangleStreamPreparations??=new Set(),streams=this.triangleStreams??=new Set(),pins=this.preparedMeshPins??=new Map();
+    const preparation=new PreparedTriangleStream(this.device,options,{
+      alive:()=>!this.disposed,
+      publish:(primitive,mesh)=>{try{this.meshes.set(mesh.key,mesh);this.meshByPrimitive.set(primitive,mesh);}catch(error){if(this.meshes.get(mesh.key)===mesh)this.meshes.delete(mesh.key);this.meshByPrimitive.delete(primitive);throw error;}},
+      unpublish:(primitive,mesh)=>{if(this.meshes.get(mesh.key)===mesh)this.meshes.delete(mesh.key);this.meshByPrimitive.delete(primitive);},
+      pin:(mesh,delta)=>{const count=(pins.get(mesh)??0)+delta;if(count>0)pins.set(mesh,count);else{pins.delete(mesh);this.collectedRevision=-1;}},
+      retire:lease=>preparations.delete(lease),adopted:stream=>streams.add(stream),released:stream=>streams.delete(stream),
+    });try{if(this.disposed)throw new Error('Renderer was disposed during triangle stream preparation');preparations.add(preparation);if(this.disposed)throw new Error('Renderer was disposed during triangle stream preparation');}catch(error){preparation.dispose();throw error;}return preparation;
+  }
   prepareMesh(primitive:Primitive):MeshPreparationLease{
     if(this.disposed)throw new Error('Renderer has been disposed');
     if(!isOwnedValidatedTriangleMesh(primitive))throw new TypeError('Staged GPU preparation requires an owned validated triangle mesh');
@@ -2209,6 +2227,7 @@ export class WebGPURenderer implements Renderer{
   private mesh(primitive:Primitive):GPUMesh{
     const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity&&this.meshes.get(byIdentity.key)===byIdentity)return byIdentity;
     const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}
+    if(primitive.kind==='triangle-stream')throw new Error('Triangle stream is not resident in this renderer');
     // ES2022 lowering creates its helper stack at this lexical block's entry.
     // Keep it below both cache returns, including the identity-independent hit.
     {

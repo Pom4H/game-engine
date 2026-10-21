@@ -3,6 +3,7 @@ import {primitiveMesh,type MeshData} from '../procedural/mesh.js';
 import type {CameraSpec} from '../scene/types.js';
 import type {Scene,RuntimeEntity} from '../scene/scene.js';
 import type {Primitive} from '../scene/types.js';
+import {isTriangleStream,triangleStreamRevision,triangleStreamSnapshot} from '../procedural/triangle-stream.js';
 
 export interface RenderObjectIR{
   readonly entity:RuntimeEntity;
@@ -12,6 +13,8 @@ export interface RenderObjectIR{
   readonly physicalPrimitive?:Primitive;
   /** Selected visible representation for the compiled render depth. */
   readonly primitive:Primitive;
+  /** Live stream observation. Pure builders capture an immutable mesh instead. */
+  readonly geometryRevision?:number;
   readonly mesh?:MeshData;
   readonly model:Mat4;
 }
@@ -40,9 +43,11 @@ function buildFrame(scene:Scene,camera:CameraSpec,primitiveFor:(entity:RuntimeEn
   for(const entity of scene.entities.values()){
     if(entity.renderVisible===false)continue;
     if(entity.light)lights.push(entity);
-    const primitive=primitiveFor(entity);if(!primitive)continue;
+    const source=primitiveFor(entity);if(!source)continue;
+    const primitive=isTriangleStream(source)?triangleStreamSnapshot(source):source;if(!primitive)continue;
     const base=primitiveBaseScale(primitive),model=primitive===renderPrimitive(entity)?renderModel(entity):compose(entity.position,entity.rotation,[entity.scale[0]*base[0],entity.scale[1]*base[1],entity.scale[2]*base[2]]);
-    objects.push({entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,...(includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model});
+    const physical=entity.mesh===source?primitive:isTriangleStream(entity.mesh)?triangleStreamSnapshot(entity.mesh):entity.mesh;
+    objects.push({entity,surfaceId:entity.id,...(physical?{physicalPrimitive:physical}:{}),primitive,...(isTriangleStream(source)?{geometryRevision:triangleStreamRevision(source)}:{}),...(includeMeshes?{mesh:primitiveMesh(primitive)}:{}),model});
   }
   return{scene,camera,objects,objectsById:new Map(objects.map(object=>[object.entity.id,object] as const)),lights};
 }
@@ -56,7 +61,7 @@ export function buildDormantRenderFrame(scene:Scene,camera:CameraSpec=scene.came
   return{scene,camera,objects:Object.freeze([]),objectsById:new Map(),lights:Object.freeze([])};
 }
 
-interface CachedRenderObject {entity:RuntimeEntity;primitive:Primitive;base:readonly [number,number,number];slot:number;seen:number;pose:Float64Array;object:RenderObjectIR}
+interface CachedRenderObject {entity:RuntimeEntity;primitive:Primitive;base:readonly [number,number,number];slot:number;seen:number;pose:Float64Array;object:RenderObjectIR;geometryRevision:number}
 /** Dependent projections consume the same freshly observed transform stream.
  * Only the built-in live projections certify pose observations; custom builders
  * and dormant frames require a consumer's authoritative Scene fallback. */
@@ -103,7 +108,7 @@ export class RenderFrameCache {
       if(!entry){
         const slot=this.freePoseSlots.pop()??this.poseSlots++;
         this.reservePoses(slot+1);
-        entry={entity,primitive,base:primitiveBaseScale(primitive),slot,seen:observation,pose:new Float64Array(this.poses.buffer,slot*9*8,9).fill(NaN),object:null!};
+        entry={entity,primitive,base:primitiveBaseScale(primitive),slot,seen:observation,pose:new Float64Array(this.poses.buffer,slot*9*8,9).fill(NaN),object:null!,geometryRevision:triangleStreamRevision(primitive)};
         this.entriesByEntity.set(entity,entry);
       }else if(entry.primitive!==primitive){
         entry.primitive=primitive;entry.base=primitiveBaseScale(primitive);entry.pose.fill(NaN);topologyChanged=true;
@@ -119,13 +124,15 @@ export class RenderFrameCache {
         let model:Mat4;
         if(linearChanged)model=compose(p,r,[s[0]*entry.base[0],s[1]*entry.base[1],s[2]*entry.base[2]]);
         else{model=new Float32Array(entry.object.model);model[12]=p[0];model[13]=p[1];model[14]=p[2];this.translationUpdates++;}
-        entry.object={entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,model};this.modelUpdates++;
+        entry.object={entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,...(isTriangleStream(primitive)?{geometryRevision:triangleStreamRevision(primitive)}:{}),model};this.modelUpdates++;
         this.changed.push(entry.object);
         this.objectsById.set(entity.id,entry.object);
       }else if(entry.object.physicalPrimitive!==entity.mesh){
         entry.object={entity,surfaceId:entity.id,...(entity.mesh?{physicalPrimitive:entity.mesh}:{}),primitive,model:entry.object.model};
         this.objectsById.set(entity.id,entry.object);
       }
+      const geometryRevision=triangleStreamRevision(primitive);
+      if(entry.geometryRevision!==geometryRevision){entry.geometryRevision=geometryRevision;entry.object={...entry.object,geometryRevision};this.objectsById.set(entity.id,entry.object);this.changed.push(entry.object);}
       this.objects[index++]=entry.object;
       observer?.observe(entity,entry.object.model);
     }

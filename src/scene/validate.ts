@@ -10,6 +10,7 @@ import {compileWorldCouplings} from '../world-ir/couplings.js';
 import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
 import {isOwnedValidatedTriangleMesh} from '../procedural/mesh.js';
+import {isTriangleStream,triangleStreamState} from '../procedural/triangle-stream.js';
 import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
 import {validateWindVolume,type WindVolumeSpec} from '../physics/wind.js';
 import {validateSoilVolume,type SoilVolumeSpec} from '../physics/soil.js';
@@ -339,6 +340,7 @@ function numericValues(values:readonly unknown[],path:string,min=-Infinity,max=I
  for(let i=0;i<values.length;i++){const value=values[i];if(typeof value!=='number'||!Number.isFinite(value)||value<min||value>max)number(value,`${path}[${i}]`,min,max);}
 }
 function primitiveSpec(value:unknown,path:string):void{
+  if(isTriangleStream(value)){const state=triangleStreamState(value)!;if(!state.ready||state.disposed)throw new TypeError(`${path} triangle stream is not resident`);return;}
   if(isOwnedValidatedTriangleMesh(value))return;
   const m=object(value,path);
   if(m.uvs!==undefined){if(m.kind!=='triangle-mesh'||!Array.isArray(m.positions)||!Array.isArray(m.uvs)||m.uvs.length!==m.positions.length/3*2)throw new TypeError(`${path}.uvs requires one authored pair per triangle-mesh vertex`);numericValues(m.uvs,`${path}.uvs`);}
@@ -362,6 +364,10 @@ function primitiveSpec(value:unknown,path:string):void{
 
 export function validateEntity(value:unknown,clone=true):EntitySpec{
   const e=object(value,'entity'),id=e.id;
+  if(isTriangleStream(e.mesh)||isTriangleStream(e.renderMesh)){
+    if(clone)throw new TypeError('Live triangle streams cannot be cloned; use Scene.add or prepareRenderEntity');
+    if(e.renderOnly!==true||e.body!==undefined||e.environmental!==undefined)throw new TypeError('Triangle streams require renderOnly without physics or environmental state');
+  }
   if(typeof id!=='string'||!id||id.length>180)throw new TypeError('entity requires a stable id');
   if(e.visualOnly!==undefined&&typeof e.visualOnly!=='boolean')throw new TypeError(`${id}.visualOnly must be boolean`);
   if(e.visualOnly&&(e.body!==undefined||e.environmental!==undefined))throw new TypeError(`${id}.visualOnly cannot own a physical body or surface`);

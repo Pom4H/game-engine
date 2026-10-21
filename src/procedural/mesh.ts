@@ -1,4 +1,5 @@
 import type {Primitive} from '../scene/types.js';
+import {triangleStreamState,triangleStreamMesh,isTriangleStream} from './triangle-stream.js';
 import {copiedTrianglePreparation,isCopiedTriangle,copiedTriangleBounds,copiedTriangleMeshData,copiedTrianglePacking,triangleMeshPacking,type CopiedTriangleMeshPreparation,type TriangleMeshPacking} from './copied-triangle.js';
 export type {CopiedTriangleMeshPreparation} from './copied-triangle.js';
 
@@ -124,10 +125,11 @@ function ownedTriangleMeshData(state:OwnedTriangle):MeshData{
  if(state.variationSeeds){result.variationSeeds=new TriangleFloat32(state.variationSeeds.length);for(let i=0;i<state.variationSeeds.length;i++)result.variationSeeds[i]=state.variationSeeds[i]!;}
  return result;
 }
-export function primitiveKey(primitive:Primitive):string{return primitiveKeys.get(primitive)??JSON.stringify(primitive);}
+export function primitiveKey(primitive:Primitive):string{return triangleStreamState(primitive)?.key??primitiveKeys.get(primitive)??JSON.stringify(primitive);}
 /** Called only on the scene's owned geometry copy. A shallow user freeze is not
  * sufficient for caching: nested authoring arrays could still change. */
 export function freezePrimitive(primitive:Primitive,transient=false):Primitive{
+ if(isTriangleStream(primitive))throw new TypeError('A live triangle stream cannot become an immutable primitive');
  if(primitiveKeys.has(primitive))return primitive;
  const freeze=(value:unknown):void=>{
   if(!value||typeof value!=='object'||ownedFrozen.has(value))return;
@@ -140,7 +142,7 @@ export function freezePrimitive(primitive:Primitive,transient=false):Primitive{
  freeze(primitive);primitiveKeys.set(primitive,transient?'dynamic:'+ ++dynamicPrimitiveId:JSON.stringify(primitive));return primitive;
 }
 /** Share only primitives made deeply immutable by this module. Mutable inputs stay isolated. */
-export function immutablePrimitive(primitive:Primitive):Primitive{return primitiveKeys.has(primitive)?primitive:freezePrimitive(structuredClone(primitive));}
+export function immutablePrimitive(primitive:Primitive):Primitive{if(isTriangleStream(primitive)){const state=triangleStreamState(primitive)!;if(!state.ready||state.disposed)throw new Error('Triangle stream is not resident');return primitive;}return primitiveKeys.has(primitive)?primitive:freezePrimitive(structuredClone(primitive));}
 export function surfaceGridPrimitive(size:readonly[number,number,number],segmentsX:number,segmentsZ:number):Primitive{
   const nx=Math.max(1,Math.min(512,Math.round(segmentsX))),nz=Math.max(1,Math.min(256,Math.round(segmentsZ))),positions:number[]=[],normals:number[]=[],indices:number[]=[],y=size[1]/2;
   for(let iz=0;iz<=nz;iz++)for(let ix=0;ix<=nx;ix++){positions.push((ix/nx-.5)*size[0],y,(iz/nz-.5)*size[2]);normals.push(0,1,0);}
@@ -150,6 +152,7 @@ export function surfaceGridPrimitive(size:readonly[number,number,number],segment
 }
 
 export function primitiveMesh(primitive:Primitive):MeshData{
+  if(isTriangleStream(primitive))return triangleStreamMesh(primitive);
   const compact=getOwnedTriangle(primitive as object);if(compact)return ownedTriangleMeshData(compact);
   const copied=copiedTriangleMeshData(primitive as object);if(copied)return copied;
   if(primitive.kind==='triangle-mesh')return {...pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined),...(primitive.uvs?{uvs:Float32Array.from(primitive.uvs)}:{}),...(primitive.variationSeeds?{variationSeeds:Float32Array.from(primitive.variationSeeds)}:{})};
