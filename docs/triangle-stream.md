@@ -102,6 +102,16 @@ scene hashes remain unchanged. Explicit CPU mesh queries take fresh snapshots
 on new revisions so they cannot retain stale triangles; that optional query work
 is not part of the normal GPU render-frame cache.
 
+For legacy aggregate transparency, render-only entities can opt into
+`transparentSort: {anchor:[0,0,0], phase:'static-tail', ordinal:pageIndex}`. The
+anchor affects only the primary transparent-camera distance sort, independently
+of the actual model/culling transform. Equal-distance ties retain ordinary
+statics, then these tails in ordinal order, then ordinary movers. Other passes
+and actual mover classification remain unchanged. This preserves the former
+raw aggregate's static/local-origin ordering when a held complete source frame
+requires an origin-offset model transform. Scene/detached preparation validates
+and freezes the metadata; public and cached frame records snapshot its values.
+
 `test/triangle-stream.test.mjs` covers packed output/order, source isolation,
 maximum-page bounds, failures/cancellation/reentry, cold GPU acknowledgments,
 resource transfer, snapshot independence, visibility, queries, and detached

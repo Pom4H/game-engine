@@ -1,4 +1,5 @@
 import {AnimationSystem} from '../animation/locomotion.js';
+import {snapshotTransparentSort,validateTransparentSort} from '../render/transparent-sort.js';
 import {SurfaceContactSystem,type WheelSurfaceContact} from '../environment/surface-contacts.js';
 import type {MaterialSpec} from './types.js';
 import {freezePrimitive,immutablePrimitive,surfaceGridPrimitive} from '../procedural/mesh.js';
@@ -71,6 +72,7 @@ export interface RuntimeEntity {
   readonly renderOnly?:boolean;
   renderVisible?:boolean;
   renderCameraVisible?:boolean;
+  transparentSort?:import('./types.js').TransparentSortSpec;
   /** Optional renderer-only high detail geometry, independent of mass/contact shape. */
   renderMesh?:Primitive;
   readonly material:RuntimeMaterial;
@@ -267,6 +269,8 @@ export class Scene {
     spec=validateEntity(spec,false);
     const {mesh:authoredMesh,renderMesh:authoredRenderMesh,...authoring}=spec;
     spec={...structuredClone(authoring),...(authoredMesh?{mesh:authoredMesh}:{}),...(authoredRenderMesh?{renderMesh:authoredRenderMesh}:{})};
+    // Validate the actual owned metadata, not an earlier public getter result.
+    if(spec.transparentSort!==undefined){if(spec.renderOnly!==true)throw new TypeError('transparentSort requires renderOnly');validateTransparentSort(spec.transparentSort);}
     if(this.entities.has(spec.id))throw new TypeError(`Duplicate entity ${spec.id}`);
     const profile=material(spec.material?.kind??'default'),mesh=spec.mesh?immutablePrimitive(spec.mesh):undefined;
     const scale:MutableVec3=[...(spec.scale??[1,1,1])];
@@ -294,6 +298,7 @@ export class Scene {
       ...(spec.renderOnly?{renderOnly:true}:{}),
       ...(spec.renderVisible!==undefined?{renderVisible:spec.renderVisible}:{}),
       ...(spec.renderCameraVisible!==undefined?{renderCameraVisible:spec.renderCameraVisible}:{}),
+      ...(spec.transparentSort?{transparentSort:snapshotTransparentSort(spec.transparentSort)!}:{}),
       material:Object.freeze({...spec.material,...(spec.material?.facade?{facade:Object.freeze({...spec.material.facade})}:{}),...(spec.material?.groundLitter?{groundLitter:Object.freeze({...spec.material.groundLitter})}:{}),...(spec.material?.rainResponse?{rainResponse:Object.freeze({...spec.material.rainResponse})}:{}),...(spec.material?.surfaceAppearance?{surfaceAppearance:Object.freeze({...spec.material.surfaceAppearance,...(spec.material.surfaceAppearance.snow?{snow:Object.freeze({...spec.material.surfaceAppearance.snow})}:{})})}:{}),...(spec.material?.decal?{decal:Object.freeze({...spec.material.decal})}:{}),...(spec.material?.texture?{texture:Object.freeze({...spec.material.texture})}:{}),kind:profile.kind,color:spec.material?.color??profile.color,profile,surface}),
       ...(spec.environmental?{environmental:structuredClone(spec.environmental)}:{}),
       ...(spec.light?{light:structuredClone(spec.light)}:{}),

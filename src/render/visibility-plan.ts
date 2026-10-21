@@ -11,7 +11,7 @@ export function castsRenderShadow(entity:RuntimeEntity):boolean{
  const emission=entity.material.emissive;
  return entity.material.color[3]>=.98&&entity.material.groundCover!=='grass-blade'&&!entity.material.decal&&!(emission&&Math.max(...emission)>1);
 }
-interface Entry {entity:RuntimeEntity;primitive:Primitive;model:Mat4;roles:number;mover:boolean;deformed:boolean;heightUrl:string|undefined;reliefDepth:number;reliefSize:number;observation:number;geometryRevision:number}
+interface Entry {entity:RuntimeEntity;primitive:Primitive;model:Mat4;roles:number;mover:boolean;deformed:boolean;heightUrl:string|undefined;reliefDepth:number;reliefSize:number;observation:number;geometryRevision:number;sortTail:boolean;sortOrdinal:number}
 type BoundsFor=(primitive:Primitive)=>MeshBounds;
 const sameMatrix=(a:Mat4|null,b:Mat4)=>a!==null&&a.every((value,index)=>value===b[index]);
 const staticRoles=(roles:number,mover:boolean)=>roles&(mover?STATIC_SHADOW:ALL^DYNAMIC_SHADOW);
@@ -35,10 +35,10 @@ class VisibilityPass {
     const statics:Entry[]=[],movers:Entry[]=[];
     for(const entry of entries){
       if(!(entry.roles&this.role))continue;
-      const moving=this.role===DYNAMIC_SHADOW||(this.role!==STATIC_SHADOW&&entry.mover);
+      const moving=this.role===DYNAMIC_SHADOW||(this.role!==STATIC_SHADOW&&entry.mover)||(this.role===CAMERA_TRANSPARENT&&entry.sortTail);
       (moving?movers:statics).push(entry);
     }
-    movers.sort((a,b)=>(moverOrder.get(a.entity.id)??-1)-(moverOrder.get(b.entity.id)??-1));
+    movers.sort((a,b)=>this.role===CAMERA_TRANSPARENT&&(a.sortTail||b.sortTail)?Number(b.sortTail)-Number(a.sortTail)||(a.sortTail&&b.sortTail?a.sortOrdinal-b.sortOrdinal:0):(moverOrder.get(a.entity.id)??-1)-(moverOrder.get(b.entity.id)??-1));
     const sameEntries=(a:readonly Entry[],b:readonly Entry[])=>a.length===b.length&&a.every((entry,index)=>entry===b[index]);
     // A different source pass may insert/remove a visual without changing this
     // pass's ordered candidates. Keep both its projection and source certificate.
@@ -105,6 +105,7 @@ export class RenderVisibilityPlan {
       const kind=entity.material.kind,emission=entity.material.emissive;
       const texture=entity.material.texture,heightUrl=texture?.heightUrl,reliefDepth=heightUrl?texture?.heightScaleM??0:0,reliefSize=heightUrl?texture?.sizeM??1:1;
       const castsShadow=castsRenderShadow(entity);
+      const sortTail=entity.transparentSort?.phase==='static-tail',sortOrdinal=sortTail?entity.transparentSort!.ordinal:0;
       const deformed=!!scene.surfaces.field?.(entity.id)?.deformation.hasStampedDeformation;
       // Stamped surface geometry keeps evolving without a model/mesh revision.
       // Move it out of the resident static map once; subsequent stamps and
@@ -113,10 +114,11 @@ export class RenderVisibilityPlan {
       const roles=primitive.kind==='triangle-stream'&&primitive.triangleCount===0?0:(batched||entity.renderCameraVisible===false?0:opaque?CAMERA_OPAQUE:CAMERA_TRANSPARENT)|(!batched&&opaque&&kind!=='snow'&&kind!=='asphalt'?REFLECTION:0)|(castsShadow?(staticCaster?STATIC_SHADOW:DYNAMIC_SHADOW):0);
       let entry=existing;
       if(!entry){
-        entry={entity,primitive,model,roles,mover,deformed,heightUrl,reliefDepth,reliefSize,observation,geometryRevision:triangleStreamRevision(primitive)};membershipDirty|=roles;
+        entry={entity,primitive,model,roles,mover,deformed,heightUrl,reliefDepth,reliefSize,observation,geometryRevision:triangleStreamRevision(primitive),sortTail,sortOrdinal};membershipDirty|=roles;
         this.entriesByEntity.set(entity,entry);
       }else{
         membershipDirty|=entry.roles^roles;
+        if(entry.sortTail!==sortTail||entry.sortOrdinal!==sortOrdinal){membershipDirty|=CAMERA_TRANSPARENT;entry.sortTail=sortTail;entry.sortOrdinal=sortOrdinal;}
         if(entry.mover!==mover)membershipDirty|=(entry.roles|roles)&(CAMERA_OPAQUE|CAMERA_TRANSPARENT|REFLECTION);
         if(entry.model!==model||entry.primitive!==primitive||entry.deformed!==deformed)staticDirty|=staticRoles(entry.roles,entry.mover)|staticRoles(roles,mover);
         const geometryRevision=triangleStreamRevision(primitive);if(entry.geometryRevision!==geometryRevision){staticDirty|=staticRoles(entry.roles,entry.mover)|staticRoles(roles,mover);entry.geometryRevision=geometryRevision;}
@@ -142,9 +144,9 @@ export class RenderVisibilityPlan {
     for(const pass of this.passes)if(pass.role&staticDirty)pass.invalidateStatics();
   }
   project(views:{camera:Mat4;reflection:Mat4|null;light:Mat4|null},position:Vec3,boundsFor:BoundsFor){
-    const distance=(entity:RuntimeEntity)=>(entity.position[0]-position[0])**2+(entity.position[1]-position[1])**2+(entity.position[2]-position[2])**2;
+    const distance=(entity:RuntimeEntity,transparent=false)=>{const anchor=transparent?entity.transparentSort?.anchor??entity.position:entity.position;return(anchor[0]-position[0])**2+(anchor[1]-position[1])**2+(anchor[2]-position[2])**2;};
     const cameraOpaque=this.cameraOpaque.project(views.camera,boundsFor).slice().sort((a,b)=>distance(a)-distance(b));
-    const cameraTransparent=this.cameraTransparent.project(views.camera,boundsFor).slice().sort((a,b)=>distance(b)-distance(a));
+    const cameraTransparent=this.cameraTransparent.project(views.camera,boundsFor).slice().sort((a,b)=>distance(b,true)-distance(a,true));
     if(!views.reflection)this.reflection.skip();
     if(!views.light){this.staticShadow.skip();this.dynamicShadow.skip();}
     const reflectedObjects=views.reflection?this.reflection.project(views.reflection,boundsFor):[];

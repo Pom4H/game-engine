@@ -69,6 +69,8 @@ export interface BodySpec {
   /** Hollow internal volume used for water ingress. External buoyancy follows collision geometry. */
   fluid?:{readonly enclosedVolumeM3:number;readonly leakAreaM2?:number};
 }
+/** Optional transparent-camera ordering, independent of visual transform/culling. */
+export interface TransparentSortSpec {readonly anchor:Vec3;readonly phase:'static-tail';readonly ordinal:number}
 export interface EntitySpec {
   /** Attached render geometry whose collision is owned by its parent assembly. */
   visualOnly?:boolean;
@@ -86,6 +88,8 @@ export interface EntitySpec {
   renderVisible?:boolean;
   /** Primary camera only; shadows, reflections and physical state are retained. */
   renderCameraVisible?:boolean;
+  /** Render-only opt-in: static sources, these ordinal tails, then movers break equal-distance ties. */
+  transparentSort?:TransparentSortSpec;
   material?:MaterialSpec;
   environmental?:EnvironmentalSpec;
   light?:LightSpec;

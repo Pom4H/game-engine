@@ -6,6 +6,7 @@ import type {EnvironmentState} from '../environment/types.js';
 import type {RuntimeEntity,RuntimeMaterial} from './scene.js';
 import type {EntitySpec,MaterialSpec} from './types.js';
 import {validateEntity} from './validate.js';
+import {snapshotTransparentSort} from '../render/transparent-sort.js';
 
 /** Explicit cold projection input. Physical/surface/light registration remains
  * on Scene.add; only fully validated, identity-owned meshes are accepted here. */
@@ -61,9 +62,10 @@ export function createRenderEntityPreparation(input:PreparedRenderEntitySpec,ini
  const spec:Record<string,unknown>={id,renderOnly:true,...(mesh!==undefined?{mesh}:{}),...(renderMesh!==undefined?{renderMesh}:{})};
  for(const key of ['position','rotation','scale'] as const){const v=source[key];if(v!==undefined)spec[key]=vector(v,3);}
  for(const key of ['renderVisible','renderCameraVisible'] as const){const v=source[key];if(v!==undefined)spec[key]=scalar(v);}
+ const sort=source.transparentSort;if(sort!==undefined){const recordSort=record(sort);spec.transparentSort={phase:scalar(recordSort.phase),ordinal:scalar(recordSort.ordinal),anchor:vector(recordSort.anchor,3)};}
  if(source.material!==undefined)spec.material=snapshotMaterial(source.material);
  const checked=validateEntity(spec,false);
- let entity:RuntimeEntity|undefined={id:checked.id,position:[...(checked.position??[0,0,0])],rotation:[...(checked.rotation??[0,0,0])],scale:[...(checked.scale??[1,1,1])],renderOnly:true,...(checked.renderVisible!==undefined?{renderVisible:checked.renderVisible}:{}),...(checked.renderCameraVisible!==undefined?{renderCameraVisible:checked.renderCameraVisible}:{}),material:runtimeMaterial(checked.material,owner.environment()),...(checked.mesh?{mesh:checked.mesh}:{}),...(checked.renderMesh?{renderMesh:checked.renderMesh}:{})};
+ let entity:RuntimeEntity|undefined={id:checked.id,position:[...(checked.position??[0,0,0])],rotation:[...(checked.rotation??[0,0,0])],scale:[...(checked.scale??[1,1,1])],renderOnly:true,...(checked.renderVisible!==undefined?{renderVisible:checked.renderVisible}:{}),...(checked.renderCameraVisible!==undefined?{renderCameraVisible:checked.renderCameraVisible}:{}),...(checked.transparentSort?{transparentSort:snapshotTransparentSort(checked.transparentSort)!}:{}),material:runtimeMaterial(checked.material,owner.environment()),...(checked.mesh?{mesh:checked.mesh}:{}),...(checked.renderMesh?{renderMesh:checked.renderMesh}:{})};
  let adopted=false;
  preparedAdd(preparedEntities,entity);
  const current=()=>{if(!entity)throw new Error('Entity preparation was disposed');return entity;};

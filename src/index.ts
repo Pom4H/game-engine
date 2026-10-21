@@ -42,7 +42,7 @@ export {syncSceneAcousticBoundaries,type SceneAcousticBoundaryStats} from './sce
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
 export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from './scene/url.js';
-export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,SceneVehicleAssemblySpec,SceneVehicleVisualSpec,Primitive,MaterialSpec,CameraSpec,CameraRailSpec,LightSpec,LightEmissionSpec,RenderingSpec,ReflectionProbeSpec,Color} from './scene/types.js';
+export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,SceneVehicleAssemblySpec,SceneVehicleVisualSpec,Primitive,MaterialSpec,CameraSpec,CameraRailSpec,LightSpec,LightEmissionSpec,RenderingSpec,ReflectionProbeSpec,Color,TransparentSortSpec} from './scene/types.js';
 export {primitiveMesh,primitiveKey,surfaceGridPrimitive,compactTriangleMesh,prepareCopiedTriangleMesh,isOwnedValidatedTriangleMesh,ownedTriangleMeshBounds,type MeshData,type CompactTriangleMeshInput,type CopiedTriangleMeshPreparation} from './procedural/mesh.js';
 export type {AggregateTriangleStream,TriangleStreamPrimitive,TriangleStreamUpdate} from './procedural/triangle-stream.js';
 export type {TriangleStreamOptions,TriangleStreamPreparation} from './render/triangle-stream-preparation.js';

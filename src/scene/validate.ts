@@ -11,6 +11,7 @@ import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
 import {isOwnedValidatedTriangleMesh} from '../procedural/mesh.js';
 import {isTriangleStream,triangleStreamState} from '../procedural/triangle-stream.js';
+import {validateTransparentSort} from '../render/transparent-sort.js';
 import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
 import {validateWindVolume,type WindVolumeSpec} from '../physics/wind.js';
 import {validateSoilVolume,type SoilVolumeSpec} from '../physics/soil.js';
@@ -377,6 +378,7 @@ export function validateEntity(value:unknown,clone=true):EntitySpec{
   if(e.renderOnly!==undefined&&typeof e.renderOnly!=='boolean')throw new TypeError(`${id}.renderOnly must be boolean`);
   if(e.renderVisible!==undefined&&typeof e.renderVisible!=='boolean')throw new TypeError(`${id}.renderVisible must be boolean`);
   if(e.renderCameraVisible!==undefined&&typeof e.renderCameraVisible!=='boolean')throw new TypeError(`${id}.renderCameraVisible must be boolean`);
+  if(e.transparentSort!==undefined){if(e.renderOnly!==true)throw new TypeError('transparentSort requires renderOnly');validateTransparentSort(e.transparentSort);}
   if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);if(b.fluid!==undefined){const p=object(b.fluid,`${id}.body.fluid`);number(p.enclosedVolumeM3,`${id}.body.fluid.enclosedVolumeM3`,0,1e6);optionalNumber(p,'leakAreaM2',`${id}.body.fluid`,0,100);}}
   if(e.material!==undefined)materialSpec(e.material,`${id}.material`);
   if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);if(env.snowMaterial!==undefined)materialSpec(env.snowMaterial,`${id}.environmental.snowMaterial`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
