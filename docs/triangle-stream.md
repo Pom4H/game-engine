@@ -52,6 +52,23 @@ most one pending update per page. Settled/stale tickets cannot commit a later
 update. CPU/GPU banks remain pooled; each explicit staged update has one small
 ownership token, while convenience `update()` needs no token allocation.
 
+For live admission, `prepareUpdate(vertices, vertexCount)` instead returns a
+`TriangleStreamUpdatePreparation` with `step(maxBytes=65536)`, `ready`, `commit`,
+and `dispose`. Creating it only reserves the alternate bank. The caller must
+keep the borrowed active source prefix stable and attached until `ready` or
+disposal; a producer's whole-frame lease can provide that ownership. Each step
+validates/copies at most `min(maxBytes,65536)` bytes **or** uploads one block of
+that size. All finite validation finishes before the first GPU write, and the
+source reference is cleared as soon as its complete private copy is ready.
+Each upload closes validation/OOM scopes within that synchronous step. There
+are at most 16 pending error acknowledgments per update; later steps poll while
+those credits are held. `ready` waits for every acknowledgment, and a rejected
+write causes a later step to throw with its cause while retaining the prior
+visible frame. Cancellation releases the source and reservation; late error
+acknowledgments cannot affect a later ticket. Stage all pages to `ready` before
+their fixed-work commits. Neither the byte cap nor GPU acknowledgments bound
+native driver time or promise a wall-clock frame deadline.
+
 Each source triangle gets identity indices, its exact source order, the fixed
 RGBA byte color, UVs `(0,0), (1,0), (0,1)`, and zero authored variation. The stream
 does not weld vertices. Equality with an indexed immutable mesh is therefore
@@ -65,7 +82,9 @@ failure leave the previous bank, count, bounds, and revision visible. Each uploa
 call is at most 64 KiB; one update performs at most 360,000 scalar reads and 22
 uploads for a 20,000-triangle page. After the complete synchronous update, active
 count, exact packed-F32 bounds, and revision publish together. There is no GPU
-completion wait or per-update promise/error-scope queue. Ordinary device-loss
+completion wait or per-update promise/error-scope queue in these synchronous
+convenience methods. The incremental admission API above adds bounded scoped
+error acknowledgments. Ordinary device-loss
 and uncaptured GPU-error handling remain applicable.
 
 Static color/UV/seed and identity-index buffers upload once. Live updates create
@@ -115,6 +134,19 @@ and freezes the metadata; public and cached frame records snapshot its values.
 `test/triangle-stream.test.mjs` covers packed output/order, source isolation,
 maximum-page bounds, failures/cancellation/reentry, cold GPU acknowledgments,
 resource transfer, snapshot independence, visibility, queries, and detached
-entity/GPU prewarm. Native image/HDR/depth comparison and actual Game producer
+entity/GPU prewarm. `test/triangle-stream-update.test.mjs` additionally checks
+incremental byte bounds, full validation before uploads, pending error credits,
+two-page atomic publication, stale ACKs, detached sources and cancellation.
+Native image/HDR/depth comparison and actual Game producer
 integration are separate required evidence. These API tests do not establish
 60 FPS or prove that all sources of render/input stalls are removed.
+
+Native numerical/image evidence is retained in the ignored
+`artifacts/freeze-stream-glass-native-20261021/r3/report.json`. Five complete
+1280×720 comparisons against canonical F64 Game glass use incremental copy/upload
+steps and GPU error acknowledgments. Dry, wet/night, mirrored, large-origin and
+two-page overlap cases have identical PNG, HDR, depth, expanded attributes,
+transparent order and draw counts. Four updates plus a zero-count expiry/render/
+restore cycle create no new stream geometry buffers, object buffers or object
+bind groups on native AMD RDNA3. This fixture checks quality and residency; it
+does not measure producer-worker budgets, GC pauses, whole-world pacing or FPS.

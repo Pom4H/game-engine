@@ -15,9 +15,17 @@ export interface AggregateTriangleStream {
  /** Prepare a replacement bank without publishing. Stage every page first,
   * then commit its fixed-work tickets in one synchronous cohort publication. */
  stage(vertices:Float32Array,vertexCount:number):TriangleStreamUpdate;
+ /** Borrow a stable source prefix until ready/dispose. Each step validates and
+  * copies OR uploads at most 64 KiB; no partial replacement becomes visible. */
+ prepareUpdate(vertices:Float32Array,vertexCount:number):TriangleStreamUpdatePreparation;
  dispose():void;
 }
 export interface TriangleStreamUpdate {commit():void;dispose():void}
+export interface TriangleStreamUpdatePreparation extends TriangleStreamUpdate {
+ readonly ready:boolean;
+ /** One bounded copy or upload block, or a nonblocking GPU error-ACK poll. */
+ step(maxBytes?:number):boolean;
+}
 export interface TriangleStreamState {
  key:string;primitive:TriangleStreamPrimitive;capacity:number;color:readonly[number,number,number,number];
  active:Float32Array|undefined;staging:Float32Array|undefined;count:number;revision:number;
