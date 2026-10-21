@@ -46,7 +46,7 @@ export function opaqueDepthPrepassShader(source:string,enabled=false):string{
  // The ordinary material has no coating kernel. Keep this substitution ready
  // for a source refactor while relief/coating pipelines remain excluded.
  result=result.replace('coatingLoss(in.uv,fwidth(in.uv),u.relief.w,u.relief.z)','coatingLoss(in.uv,coatingFootprint,u.relief.w,u.relief.z)');
- replace('let shadow=shadowAt(in.worldPos,geometricNormal)','let shadow=shadowAt(in.worldPos,geometricNormal,receiverGradient)');
+ replace('shadowAt(in.worldPos,geometricNormal)','shadowAt(in.worldPos,geometricNormal,receiverGradient)');
  const tail=result.slice(result.indexOf('if(currentDepth>nearestDepth)'));
  if(/\b(?:dpdx|dpdy|fwidth|textureSample)\s*\(/.test(tail))throw new Error('Opaque depth prepass cannot precede a derivative or implicit texture sample');
  return result;

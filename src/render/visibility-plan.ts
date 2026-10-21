@@ -10,7 +10,7 @@ export function castsRenderShadow(entity:RuntimeEntity):boolean{
  const emission=entity.material.emissive;
  return entity.material.color[3]>=.98&&entity.material.groundCover!=='grass-blade'&&!entity.material.decal&&!(emission&&Math.max(...emission)>1);
 }
-interface Entry {entity:RuntimeEntity;primitive:Primitive;model:Mat4;roles:number;mover:boolean;deformed:boolean;heightUrl:string|undefined;reliefDepth:number;reliefSize:number}
+interface Entry {entity:RuntimeEntity;primitive:Primitive;model:Mat4;roles:number;mover:boolean;deformed:boolean;heightUrl:string|undefined;reliefDepth:number;reliefSize:number;observation:number}
 type BoundsFor=(primitive:Primitive)=>MeshBounds;
 const sameMatrix=(a:Mat4|null,b:Mat4)=>a!==null&&a.every((value,index)=>value===b[index]);
 const staticRoles=(roles:number,mover:boolean)=>roles&(mover?STATIC_SHADOW:ALL^DYNAMIC_SHADOW);
@@ -38,10 +38,15 @@ class VisibilityPass {
       (moving?movers:statics).push(entry);
     }
     movers.sort((a,b)=>(moverOrder.get(a.entity.id)??-1)-(moverOrder.get(b.entity.id)??-1));
+    const sameEntries=(a:readonly Entry[],b:readonly Entry[])=>a.length===b.length&&a.every((entry,index)=>entry===b[index]);
+    // A different source pass may insert/remove a visual without changing this
+    // pass's ordered candidates. Keep both its projection and source certificate.
+    if(sameEntries(statics,this.statics)&&sameEntries(movers,this.movers))return;
     if(statics.length!==this.statics.length||statics.some((entry,index)=>entry!==this.statics[index]))this.staticDirty=true;
     this.statics=statics;this.movers=movers;this.sourceBuilds++;
   }
   invalidateStatics():void{this.staticDirty=true;}
+  skip():void{this.lastTests=0;}
   project(matrix:Mat4,boundsFor:BoundsFor):readonly RuntimeEntity[]{
     this.lastTests=0;
     if(!sameMatrix(this.matrix,matrix)){this.matrix=new Float32Array(matrix);this.staticDirty=true;}
@@ -77,7 +82,9 @@ export interface VisibilityPlanSnapshot {
 export class RenderVisibilityPlan {
   private scene:Scene|null=null;
   private entries:Entry[]=[];
+  private nextEntries:Entry[]=[];
   private entriesByEntity=new WeakMap<RuntimeEntity,Entry>();
+  private observation=0;
   private sourceBuilds=0;
   private moverIds:ReadonlySet<string>|null=null;
   private readonly cameraOpaque=new VisibilityPass(CAMERA_OPAQUE);
@@ -88,11 +95,12 @@ export class RenderVisibilityPlan {
   private readonly passes=[this.cameraOpaque,this.cameraTransparent,this.reflection,this.staticShadow,this.dynamicShadow];
   prepare(scene:Scene,entities:readonly RuntimeEntity[],movers:ReadonlySet<string>,batches:ReadonlySet<string>,modelFor:(entity:RuntimeEntity)=>Mat4,changes?:readonly RenderObjectIR[]):void{
     if(this.scene!==scene){this.clear();this.scene=scene;}
-    let membershipDirty=this.moverIds!==movers?ALL^STATIC_SHADOW:0,staticDirty=0,index=0;
+    let membershipDirty=this.moverIds!==movers?ALL^STATIC_SHADOW:0,staticDirty=0,index=0,orderChanged=false;
+    const observation=++this.observation,nextEntries=this.nextEntries;
     this.moverIds=movers;
     for(const entity of entities){
       const primitive=renderPrimitive(entity);if(!primitive)continue;
-      const existing=this.entries[index],model=changes!==undefined&&existing?.entity===entity?existing.model:modelFor(entity),mover=movers.has(entity.id),opaque=entity.material.color[3]>=.98,batched=batches.has(entity.id);
+      const existing=this.entriesByEntity.get(entity),model=changes!==undefined&&existing?existing.model:modelFor(entity),mover=movers.has(entity.id),opaque=entity.material.color[3]>=.98,batched=batches.has(entity.id);
       const kind=entity.material.kind,emission=entity.material.emissive;
       const texture=entity.material.texture,heightUrl=texture?.heightUrl,reliefDepth=heightUrl?texture?.heightScaleM??0:0,reliefSize=heightUrl?texture?.sizeM??1:1;
       const castsShadow=castsRenderShadow(entity);
@@ -102,10 +110,9 @@ export class RenderVisibilityPlan {
       // relaxation then reach the dynamic map without redrawing other statics.
       const staticCaster=!mover&&!deformed&&(!entity.body||(!entity.body.kinematic&&entity.body.invMass===0));
       const roles=(batched||entity.renderCameraVisible===false?0:opaque?CAMERA_OPAQUE:CAMERA_TRANSPARENT)|(!batched&&opaque&&kind!=='snow'&&kind!=='asphalt'?REFLECTION:0)|(castsShadow?(staticCaster?STATIC_SHADOW:DYNAMIC_SHADOW):0);
-      let entry=this.entries[index++];
-      if(!entry||entry.entity!==entity){
-        if(entry)membershipDirty|=entry.roles;
-        entry={entity,primitive,model,roles,mover,deformed,heightUrl,reliefDepth,reliefSize};this.entries[index-1]=entry;membershipDirty|=roles;
+      let entry=existing;
+      if(!entry){
+        entry={entity,primitive,model,roles,mover,deformed,heightUrl,reliefDepth,reliefSize,observation};membershipDirty|=roles;
         this.entriesByEntity.set(entity,entry);
       }else{
         membershipDirty|=entry.roles^roles;
@@ -115,9 +122,15 @@ export class RenderVisibilityPlan {
         entry.primitive=primitive;entry.model=model;entry.roles=roles;entry.mover=mover;entry.deformed=deformed;
         entry.heightUrl=heightUrl;entry.reliefDepth=reliefDepth;entry.reliefSize=reliefSize;
       }
+      const previous=this.entries[index];
+      if(previous!==entry){orderChanged=true;membershipDirty|=(previous?.roles??0)|roles;}
+      entry.observation=observation;nextEntries[index++]=entry;
     }
-    for(let i=index;i<this.entries.length;i++)membershipDirty|=this.entries[i]!.roles;
-    this.entries.length=index;
+    if(index!==this.entries.length)orderChanged=true;
+    if(orderChanged)for(const entry of this.entries)if(entry.observation!==observation){
+      membershipDirty|=entry.roles;this.entriesByEntity.delete(entry.entity);
+    }
+    nextEntries.length=index;this.nextEntries=this.entries;this.entries=nextEntries;this.nextEntries.length=0;
     if(changes)for(const {entity,model} of changes){const entry=this.entriesByEntity.get(entity);if(entry&&entry.model!==model){staticDirty|=staticRoles(entry.roles,entry.mover);entry.model=model;}}
     if(membershipDirty){
       const order=new Map([...movers].map((id,index)=>[id,index]));
@@ -126,14 +139,16 @@ export class RenderVisibilityPlan {
     }
     for(const pass of this.passes)if(pass.role&staticDirty)pass.invalidateStatics();
   }
-  project(views:{camera:Mat4;reflection:Mat4|null;light:Mat4},position:Vec3,boundsFor:BoundsFor){
+  project(views:{camera:Mat4;reflection:Mat4|null;light:Mat4|null},position:Vec3,boundsFor:BoundsFor){
     const distance=(entity:RuntimeEntity)=>(entity.position[0]-position[0])**2+(entity.position[1]-position[1])**2+(entity.position[2]-position[2])**2;
     const cameraOpaque=this.cameraOpaque.project(views.camera,boundsFor).slice().sort((a,b)=>distance(a)-distance(b));
     const cameraTransparent=this.cameraTransparent.project(views.camera,boundsFor).slice().sort((a,b)=>distance(b)-distance(a));
+    if(!views.reflection)this.reflection.skip();
+    if(!views.light){this.staticShadow.skip();this.dynamicShadow.skip();}
     const reflectedObjects=views.reflection?this.reflection.project(views.reflection,boundsFor):[];
-    const staticShadowDrawables=this.staticShadow.project(views.light,boundsFor),dynamicShadowDrawables=this.dynamicShadow.project(views.light,boundsFor);
+    const staticShadowDrawables=views.light?this.staticShadow.project(views.light,boundsFor):[],dynamicShadowDrawables=views.light?this.dynamicShadow.project(views.light,boundsFor):[];
     return{cameraOpaque,cameraTransparent,reflectedObjects,staticShadowDrawables,dynamicShadowDrawables,shadowRevision:this.staticShadow.revision};
   }
   inspect():VisibilityPlanSnapshot{return{entries:this.entries.length,sourceBuilds:this.sourceBuilds,passes:{cameraOpaque:this.cameraOpaque.inspect(),cameraTransparent:this.cameraTransparent.inspect(),reflection:this.reflection.inspect(),staticShadow:this.staticShadow.inspect(),dynamicShadow:this.dynamicShadow.inspect()}};}
-  clear():void{this.scene=null;this.entries=[];this.entriesByEntity=new WeakMap();this.moverIds=null;for(const pass of this.passes)pass.clear();}
+  clear():void{this.scene=null;this.entries=[];this.nextEntries=[];this.entriesByEntity=new WeakMap();this.observation=0;this.moverIds=null;for(const pass of this.passes)pass.clear();}
 }

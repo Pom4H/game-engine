@@ -692,7 +692,10 @@ fn parallaxProbeDirection(worldPos:vec3<f32>,reflectionDir:vec3<f32>)->vec3<f32>
   // that interface is index-matched, rather than a second air/paint reflection.
   let f0=mix(vec3<f32>(.04*(1.0-clearcoat)),base,metal);let fresnel=f0+(1.0-f0)*pow(1.0-vh,5.0);
   let specular=d*g*fresnel/max(4.0*nv*nl,.001);
-  let shadow=shadowAt(in.worldPos,geometricNormal)${relief?'*surfaceVisibility(in.worldPos,input.worldPos,normalize(input.normal),light)':''};
+  // Sun visibility has no receiver when the actual frame light is zero.
+  // The uniform branch keeps shadowAt's receiver derivatives in uniform flow.
+  var shadow=1.0;
+  if(f.sun.w!=0.0){shadow=shadowAt(in.worldPos,geometricNormal)${relief?'*surfaceVisibility(in.worldPos,input.worldPos,normalize(input.normal),light)':''};}
   // Diffuse and specular now query the same world-radiance representation.
   // High-mip cubemap radiance is the cheap irradiance cache; screen-space
   // transport later only refines local visibility/colour bleed.
@@ -1303,20 +1306,24 @@ export class WebGPURenderer implements Renderer{
       return{vp,cullVP,reflectionVP,settings,lightVP,right,up,frame,jitterUV,depthProjection:[baseProjection[10]!,baseProjection[14]!,baseProjection[11]!,baseProjection[15]!]};
     });
     const {vp,cullVP,reflectionVP,lightVP,right,up,frame,jitterUV}=frameState;
+    // Use the uploaded float32 light, including celestial/moon overrides. A
+    // visual preset's sun intensity is not a certificate that this light is off.
+    const sunShadowActive=frame[19]!==0;
+    if(!sunShadowActive)this.shadowValid=false;
     const classified=this.profiler.measure('visibility',()=>({visible:this.collectedVisible,opaque:this.collectedOpaque,transparent:this.collectedTransparent}));
     // reflectionMap is sampled by the wet asphalt material only. With no
     // asphalt in the scene there is no receiver for this extra render pass.
-    const needsPlanarReflection=classified.opaque.some(e=>e.material.kind==='asphalt');
+    const needsPlanarReflection=this.pipelinePlan.features.planarReflections&&classified.opaque.some(e=>e.material.kind==='asphalt');
     this.profiler.setWork({entities:scene.entities.size,visible:classified.visible.length,opaque:classified.opaque.length,transparent:classified.transparent.length});
     if(this.previousVp&&((scene.time+1e-6<this.lastRenderTime)||(this.previousCamera&&distance2(this.previousCamera,camera.position)>9)||(this.previousTarget&&distance2(this.previousTarget,camera.target)>25)))this.historyValid=false;
     this.previousModels.beginFrame();
     const modelFor=(entity:RuntimeEntity):Mat4=>this.model(entity);
     const cameraBatches=this.profiler.measure('prepare',()=>this.prepareCameraBatches(classified.opaque,modelFor,this.frameCache.changedObjects()));
-    const reflectionBatches=cameraBatches.filter(batch=>batch.reflection);
+    const reflectionBatches=needsPlanarReflection?cameraBatches.filter(batch=>batch.reflection):[];
     const renderMoverIds=scene.renderMoverIds();
     const culled=this.profiler.measure('cull',()=>{
       this.visibilityPlan.prepare(scene,classified.visible,renderMoverIds,this.cameraBatchMembers,modelFor,this.frameCache.changedObjects());
-      return this.visibilityPlan.project({camera:cullVP,reflection:this.pipelinePlan.features.planarReflections?reflectionVP:null,light:lightVP},camera.position,primitive=>this.mesh(primitive).bounds);
+      return this.visibilityPlan.project({camera:cullVP,reflection:needsPlanarReflection?reflectionVP:null,light:sunShadowActive?lightVP:null},camera.position,primitive=>this.mesh(primitive).bounds);
     });
     const {staticShadowDrawables,dynamicShadowDrawables}=culled;
     if(dynamicShadowDrawables.length){
@@ -1325,9 +1332,9 @@ export class WebGPURenderer implements Renderer{
       this.device.queue.writeBuffer(this.gpu.frame,31*4,dynamicShadowFlag);
       this.profiler.addUpload(dynamicShadowFlag.byteLength,'frame');
     }
-    const shadowDirty=!this.shadowValid||this.shadowRevision!==culled.shadowRevision;
+    const shadowDirty=sunShadowActive&&(!this.shadowValid||this.shadowRevision!==culled.shadowRevision);
     const staticShadows=this.profiler.measure('prepare',()=>shadowDirty?this.prepareSharedShadows(staticShadowDrawables,'static'):{singles:[],batches:[],instances:0});
-    const dynamicShadows=this.profiler.measure('prepare',()=>this.prepareSharedShadows(dynamicShadowDrawables,'dynamic'));
+    const dynamicShadows=this.profiler.measure('prepare',()=>sunShadowActive?this.prepareSharedShadows(dynamicShadowDrawables,'dynamic'):{singles:[],batches:[],instances:0});
     const probeFaces:{face:number;vp:Mat4;entities:RuntimeEntity[]}[]=[];
     if(reflectionProbe&&probeCapture){
       const radius2=(reflectionProbe.radius+12)**2,candidates=classified.opaque.filter(e=>!reflectionProbe.exclude.has(e.id)&&distance2(e.position,probeCapture.position)<=radius2);
@@ -1340,7 +1347,7 @@ export class WebGPURenderer implements Renderer{
     }
     const staticShadowPlan=shadowDirty?this.prepareShadowBatches(staticShadows.singles,modelFor,'static'):
       {singles:[] as RuntimeEntity[],batches:[] as ShadowBatchPlan[],instances:0};
-    const dynamicShadowPlan=this.prepareShadowBatches(dynamicShadows.singles,modelFor,'dynamic');
+    const dynamicShadowPlan=sunShadowActive?this.prepareShadowBatches(dynamicShadows.singles,modelFor,'dynamic'):{singles:[] as RuntimeEntity[],batches:[] as ShadowBatchPlan[],instances:0};
     const spotParams=this.spotShadows.length?new Float32Array(SPOT_SHADOW_LIMIT*20):null;
     const spotPlans=this.spotShadows.map(spot=>{
       const candidates=classified.opaque.filter(entity=>{
@@ -1397,6 +1404,7 @@ export class WebGPURenderer implements Renderer{
         this.drawSharedShadows(staticPass,staticShadows.batches);
         staticPass.end();
       }
+      if(sunShadowActive){
       const timing=shadowDirty?undefined:this.profiler.timestampWrites('shadow'),occlusion=this.profiler.occlusionSet();
       const dynamicPass=encoder.beginRenderPass({label:'render.shadow.dynamic',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[],depthStencilAttachment:{view:this.gpu.dynamicShadow.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       dynamicPass.setBindGroup(1,this.gpu.frameBind);const query=this.profiler.beginOcclusion(dynamicPass,'shadow');
@@ -1410,6 +1418,7 @@ export class WebGPURenderer implements Renderer{
       }
       this.drawSharedShadows(dynamicPass,dynamicShadows.batches);
       this.profiler.endOcclusion(dynamicPass,query);dynamicPass.end();
+      }
       for(const {spot,shared,plan} of spotPlans){
         const timing=this.profiler.timestampWrites(spot.slot===0?'shadow.spot0':'shadow.spot1');
         const pass=encoder.beginRenderPass({label:`render.shadow.spot.${spot.slot}`,...(timing?{timestampWrites:timing}:{}),depthStencilAttachment:{view:this.gpu.spotShadowMap.createView({dimension:'2d',baseArrayLayer:spot.slot,arrayLayerCount:1}),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'},colorAttachments:[]});
@@ -1441,7 +1450,7 @@ export class WebGPURenderer implements Renderer{
         }
       });
     }
-    if(this.pipelinePlan.features.planarReflections)this.profiler.measure('encode.reflection',()=>{
+    if(needsPlanarReflection)this.profiler.measure('encode.reflection',()=>{
       const timing=this.profiler.timestampWrites('reflection'),occlusion=this.profiler.occlusionSet(),reflect=encoder.beginRenderPass({label:'render.reflection',...(timing?{timestampWrites:timing}:{}),...(occlusion?{occlusionQuerySet:occlusion}:{}),colorAttachments:[{view:this.reflection.createView(),clearValue:{r:frame[24]!*1.2,g:frame[25]!*1.2,b:frame[26]!*1.2,a:1},loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:this.reflectionDepth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'discard'}});
       reflect.setBindGroup(1,this.gpu.reflectionBind);const query=this.profiler.beginOcclusion(reflect,'reflection');
       for(const [key,group] of materialPipelineGroups(culled.reflectedObjects)){const [code,culled]=key;reflect.setPipeline((culled?this.gpu.reflectedCulled:this.gpu.reflectedDouble).get(code)!);this.drawGroup(reflect,group,(culled?this.gpu.reflectedCulled:this.gpu.reflectedDouble).get(code)!,this.gpu.surfacePasses['reflection:'+(culled?'back':'none')],false);}

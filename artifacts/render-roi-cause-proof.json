@@ -1,0 +1,48 @@
+{
+  "contract": "Remove only a posed, non-shadow-casting visual before 128 unchanged static walls; camera and light matrices do not change.",
+  "result": {
+    "staticRadianceKeyUnchanged": true,
+    "staticRadianceProbeBitExact": true,
+    "staticCasterOrderUnchanged": true,
+    "before": {
+      "staticCandidates": 128,
+      "movingCandidates": 0,
+      "sourceBuilds": 1,
+      "staticBuilds": 1,
+      "tests": 128,
+      "lastTests": 128,
+      "revision": 1
+    },
+    "after": {
+      "staticCandidates": 128,
+      "movingCandidates": 0,
+      "sourceBuilds": 1,
+      "staticBuilds": 1,
+      "tests": 128,
+      "lastTests": 0,
+      "revision": 1
+    },
+    "unrelatedStaticTests": 0,
+    "shadowRevisionBefore": 1,
+    "shadowRevisionAfter": 1,
+    "frozenBefore": {
+      "staticCandidates": 128,
+      "movingCandidates": 0,
+      "sourceBuilds": 1,
+      "staticBuilds": 1,
+      "tests": 128,
+      "lastTests": 128,
+      "revision": 1
+    },
+    "frozenAfter": {
+      "staticCandidates": 128,
+      "movingCandidates": 0,
+      "sourceBuilds": 2,
+      "staticBuilds": 2,
+      "tests": 256,
+      "lastTests": 128,
+      "revision": 2
+    },
+    "frozenUnrelatedStaticTests": 128
+  }
+}
