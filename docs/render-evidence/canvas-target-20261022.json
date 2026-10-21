@@ -173,7 +173,7 @@
       "absolute HTTP ORM",
       "root-relative height"
     ],
-    "blob": "standalone SurfaceTextures load only; Scene asset validation intentionally rejects blob URLs"
+    "blob": "standalone SurfaceTextures load only; ordinary Scene surface-map slots reject blob URLs, while terrain-map url retains its existing blob exception"
   },
   "fullCheck": {
     "command": "npm run check",

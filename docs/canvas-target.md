@@ -59,7 +59,8 @@ outputs. All checks report zero GPU/runtime errors.
 
 Relative, root-relative and absolute HTTP URLs are tested through authored
 Scene materials. Blob loading is tested separately through `SurfaceTextures`;
-the existing Scene schema still rejects blob asset URLs. Raw successful and
+ordinary surface-map slots reject blob URLs; the existing terrain-map URL
+exception remains supported. Raw successful and
 failed attempts, exact bundles, cleanup and reproduction scripts are preserved
 locally in `artifacts/canvas-target-native-20261022`; final attempt `r6` passed.
 The full Engine check passed 1,041 tests with 19 skips and no failures. These are
