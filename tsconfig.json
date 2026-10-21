@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"], "types": ["node"],
+    "lib": ["ES2023", "ESNext.Disposable", "DOM", "DOM.Iterable"], "types": ["node"],
     "strict": true, "noUncheckedIndexedAccess": true, "exactOptionalPropertyTypes": true,
     "skipLibCheck": true, "verbatimModuleSyntax": true, "forceConsistentCasingInFileNames": true
   },

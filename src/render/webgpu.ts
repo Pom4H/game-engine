@@ -43,6 +43,18 @@ import {snowfallShader,snowfallUniform} from './snowfall.js';
 import {opaqueDepthPrepassEnabled,opaqueDepthPrepassShader} from './opaque-depth-prepass.js';
 
 type GPUAny=any;
+/** One-shot allocation ownership, never constructed on a mesh cache hit.
+ * Destroying a GPUBuffer also releases any active/pending mapping. */
+class GPUBufferScope implements Disposable{
+ private readonly buffers:GPUAny[]=[];
+ own(buffer:GPUAny):GPUAny{this.buffers.push(buffer);return buffer;}
+ release():void{this.buffers.length=0;}
+ [Symbol.dispose]():void{
+  let errors:unknown[]|undefined;
+  while(this.buffers.length){const buffer=this.buffers.pop()!;try{buffer.destroy();}catch(error){(errors??=[]).push(error);}}
+  if(errors)throw errors.length===1?errors[0]:new AggregateError(errors,'GPU buffer cleanup failed');
+ }
+}
 const defaultLabelColor:Vec3=[226/255,217/255,188/255];
 const emptyLabelKey=JSON.stringify(['',defaultLabelColor]);
 const labelKey=(text:string,color?:Vec3)=>text===''&&color===undefined?emptyLabelKey:JSON.stringify([text,color??defaultLabelColor]);
@@ -1629,23 +1641,26 @@ export class WebGPURenderer implements Renderer{
     if(!points.length)return[];
     const sourceW=stage==='reflection'?source.width:this.depthW;
     const sourceH=stage==='reflection'?source.height:this.depthH;
-    const stride=256,buffer=this.device.createBuffer({size:stride*points.length,usage:0x01|0x08});
-    const encoder=this.device.createCommandEncoder({label:'render.linear-pixel-readback'});
-    for(let index=0;index<points.length;index++){
-      const [x,y]=points[index]!;
-      if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=this.depthW||y>=this.depthH){buffer.destroy();throw new RangeError(`Pixel (${x},${y}) outside ${this.depthW}x${this.depthH}`);}
-      const sx=stage==='reflection'?Math.min(sourceW-1,Math.floor(x*sourceW/this.depthW)):x;
-      const sy=stage==='reflection'?Math.min(sourceH-1,Math.floor(y*sourceH/this.depthH)):y;
-      encoder.copyTextureToBuffer({texture:source,origin:[sx,sy,0]},{buffer,offset:index*stride,bytesPerRow:stride,rowsPerImage:1},[1,1,1]);
+    {
+      using allocation=new GPUBufferScope();
+      const stride=256,buffer=allocation.own(this.device.createBuffer({size:stride*points.length,usage:0x01|0x08}));
+      const encoder=this.device.createCommandEncoder({label:'render.linear-pixel-readback'});
+      for(let index=0;index<points.length;index++){
+        const [x,y]=points[index]!;
+        if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=this.depthW||y>=this.depthH)throw new RangeError(`Pixel (${x},${y}) outside ${this.depthW}x${this.depthH}`);
+        const sx=stage==='reflection'?Math.min(sourceW-1,Math.floor(x*sourceW/this.depthW)):x;
+        const sy=stage==='reflection'?Math.min(sourceH-1,Math.floor(y*sourceH/this.depthH)):y;
+        encoder.copyTextureToBuffer({texture:source,origin:[sx,sy,0]},{buffer,offset:index*stride,bytesPerRow:stride,rowsPerImage:1},[1,1,1]);
+      }
+      this.device.queue.submit([encoder.finish()]);
+      await buffer.mapAsync(0x01);
+      const mapped=buffer.getMappedRange(),view=new DataView(mapped),result:import('./types.js').LinearPixelSample[]=[];
+      for(let index=0;index<points.length;index++){
+        const [x,y]=points[index]!,offset=index*stride;
+        result.push({x,y,rgba:[halfToFloat(view.getUint16(offset,true)),halfToFloat(view.getUint16(offset+2,true)),halfToFloat(view.getUint16(offset+4,true)),halfToFloat(view.getUint16(offset+6,true))]});
+      }
+      buffer.unmap();return result;
     }
-    this.device.queue.submit([encoder.finish()]);
-    await buffer.mapAsync(0x01);
-    const mapped=buffer.getMappedRange(),view=new DataView(mapped),result:import('./types.js').LinearPixelSample[]=[];
-    for(let index=0;index<points.length;index++){
-      const [x,y]=points[index]!,offset=index*stride;
-      result.push({x,y,rgba:[halfToFloat(view.getUint16(offset,true)),halfToFloat(view.getUint16(offset+2,true)),halfToFloat(view.getUint16(offset+4,true)),halfToFloat(view.getUint16(offset+6,true))]});
-    }
-    buffer.unmap();buffer.destroy();return result;
   }
   async flush():Promise<void>{await this.device.queue.onSubmittedWorkDone();await this.gpu.visibility?.flush();}
   inspect(includeProfile=true):RenderStats{
@@ -2049,8 +2064,21 @@ export class WebGPURenderer implements Renderer{
       pass.setVertexBuffer(0,batch.mesh.vertex);pass.setIndexBuffer(batch.mesh.index,batch.mesh.format);pass.drawIndexed(batch.mesh.count,view.count);
     }
   }
-  private mesh(primitive:Primitive):GPUMesh{const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity&&this.meshes.get(byIdentity.key)===byIdentity)return byIdentity;const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}const data=primitiveMesh(primitive),mesh={key,bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08),color:this.buffer(meshVertexAttributes(data),0x20|0x08),index:this.buffer(data.indices,0x10|0x08),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);return mesh;}
-  private buffer(data:ArrayBufferView,usage:number):GPUAny{const buffer=this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true});new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
+  private mesh(primitive:Primitive):GPUMesh{
+    const byIdentity=this.meshByPrimitive.get(primitive as object);if(byIdentity&&this.meshes.get(byIdentity.key)===byIdentity)return byIdentity;
+    const key=primitiveKey(primitive),found=this.meshes.get(key);if(found){this.meshByPrimitive.set(primitive as object,found);return found;}
+    // ES2022 lowering creates its helper stack at this lexical block's entry.
+    // Keep it below both cache returns, including the identity-independent hit.
+    {
+      using allocation=new GPUBufferScope();
+      const data=primitiveMesh(primitive),mesh={key,bounds:meshBounds(data.vertices),vertex:this.buffer(data.vertices,0x20|0x08,allocation),color:this.buffer(meshVertexAttributes(data),0x20|0x08,allocation),index:this.buffer(data.indices,0x10|0x08,allocation),count:data.indices.length,format:data.indexFormat,triangles:data.indices.length/3};
+      try{this.meshes.set(key,mesh);this.meshByPrimitive.set(primitive as object,mesh);}
+      catch(error){if(this.meshes.get(key)===mesh)this.meshes.delete(key);this.meshByPrimitive.delete(primitive as object);throw error;}
+      // Both caches now own the complete mesh; the allocation scope retains nothing.
+      allocation.release();return mesh;
+    }
+  }
+  private buffer(data:ArrayBufferView,usage:number,allocation:GPUBufferScope):GPUAny{const buffer=allocation.own(this.device.createBuffer({size:Math.max(4,(data.byteLength+3)&~3),usage,mappedAtCreation:true}));new Uint8Array(buffer.getMappedRange()).set(new Uint8Array(data.buffer,data.byteOffset,data.byteLength));buffer.unmap();return buffer;}
   private collect(scene:Scene):boolean{
     if(this.collectedScene===scene&&this.collectedRevision===scene.renderStructureRevision){
       // Numeric optical changes can cross the opaque boundary without changing
