@@ -17,3 +17,6 @@ kernels/world-rigid/Cargo.lock
 # Generated from text; never edit by hand
 tools/literature/generated.scene.mjs
 tools/literature/generated.views.mjs
+
+# Local probes and disposable world captures (preserved separately before migration).
+/.tmp*
