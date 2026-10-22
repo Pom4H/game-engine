@@ -1,3 +1,4 @@
+import {createLifeState,liveExperience,validateLifeExperience,validateLifeState,chooseLifeOpportunity,type LifeExperienceDetails,type LifeState,type LifeProfileOptions,type LifeOpportunity,type LifeSituation,type LifeChoice} from './life.js';
 /** Субъективные оценки, а не объективная психология. Все времена — секунды симуляции.
  * Чистые редьюсеры: authority обязан сохранить новый state вместе с реальным результатом.
  * Текст диалога, анимация и клиент не могут создавать успешные исходы. */
@@ -21,9 +22,13 @@ export interface ActingOutcome {
  readonly progress:number;readonly expectedProgress:number;readonly certainty:number;
  readonly attribution:'help'|'unable'|'unwilling'|'unknown';readonly otherId?:string;
  readonly confirmedResolution?:boolean;readonly reliabilityEvidence?:number;readonly competenceEvidence?:number;
+ /** Воспринятые последствия и свидетельства; не генерировать из текста реплики. */
+ readonly experience?:LifeExperienceDetails;
 }
 export interface ActingMind {
  readonly version:1;readonly actorId:string;readonly goals:readonly ActingGoal[];
+ /** Отсутствует только в старых сохранениях; миграция при следующем исходе. */
+ readonly life?:LifeState;
  readonly sentiments:readonly ActingSentiment[];readonly memories:readonly ActingOutcome[];
  readonly affect:ActingAffect;readonly intention:ActingIntention|null;readonly lastSequence:number;readonly atS:number;
 }
@@ -40,12 +45,13 @@ export function validateActingOutcome(e:ActingOutcome):void {
  if(e.confirmedResolution!==undefined&&typeof e.confirmedResolution!=='boolean')throw new TypeError('Invalid resolution');
  if(e.confirmedResolution&&e.progress!==1)throw new TypeError('Resolution requires confirmed full progress');
  for(const v of [e.reliabilityEvidence,e.competenceEvidence])if(v!==undefined)range(v,-1);
+ if(e.experience!==undefined)validateLifeExperience({...e.experience,id:e.id,sequence:e.sequence,atS:e.atS,certainty:e.certainty});
 }
-export function createActingMind(actorId:string,goals:readonly ActingGoal[],atS=0):ActingMind {
+export function createActingMind(actorId:string,goals:readonly ActingGoal[],atS=0,profile:LifeProfileOptions={}):ActingMind {
  id(actorId);actingTime(atS);if(!goals.length||goals.length>ACTING_LIMITS.goals)throw new RangeError('Invalid goal budget');
  const ids=new Set<string>();for(const g of goals){id(g.id);range(g.importance);if(ids.has(g.id))throw new TypeError('Duplicate goal');ids.add(g.id);}
  return {version:1,actorId,goals:goals.map(g=>({...g})),sentiments:[],memories:[],
-  affect:{valence:0,arousal:0,uncertainty:0,atS},intention:null,lastSequence:0,atS};
+  affect:{valence:0,arousal:0,uncertainty:0,atS},intention:null,lastSequence:0,atS,life:createLifeState(actorId,profile,atS)};
 }
 /** Эмоция затухает; отношение не обнуляется при успокоении или выгрузке. */
 export function actingAffectAt(mind:ActingMind,atS:number):ActingAffect {
@@ -100,7 +106,10 @@ export function appraiseActingOutcome(mind:ActingMind,event:ActingOutcome):Actin
   const stop=!done&&(event.attribution==='unwilling'||attempts>=ACTING_LIMITS.attempts);
   intention={...intention,attempts,status:done?'succeeded':stop?'blocked':'active',action:done?'acknowledge':stop?'withdraw':'clarify'};
  }
- return {...mind,atS:event.atS,lastSequence:event.sequence,affect,intention,
+ const life=liveExperience(mind.life??createLifeState(mind.actorId,{},mind.atS),{
+  ...(event.experience??{activity:event.goalId,context:[],impact:{meaning:event.progress*goal.importance}}),
+  id:event.id,sequence:event.sequence,atS:event.atS,certainty:event.certainty});
+ return {...mind,atS:event.atS,lastSequence:event.sequence,affect,intention,life,
   sentiments:sentiments.slice(0,ACTING_LIMITS.sentiments),memories:[structuredClone(event),...mind.memories].slice(0,ACTING_LIMITS.memories)};
 }
 /** Выбор по собственным отношениям и публичной доступности кандидата.
@@ -119,6 +128,7 @@ export function chooseActingPartner(mind:ActingMind,candidates:readonly {readonl
 export function validateActingMind(mind:ActingMind):void {
  if(!mind||mind.version!==1)throw new TypeError('Unsupported acting mind');
  createActingMind(mind.actorId,mind.goals,mind.atS);
+ if(mind.life!==undefined){validateLifeState(mind.life);if(mind.life.actorId!==mind.actorId||mind.life.atS>mind.atS||mind.life.lastSequence>mind.lastSequence)throw new TypeError('Life state does not belong to acting mind');}
  if(!Number.isSafeInteger(mind.lastSequence)||mind.lastSequence<0)throw new RangeError('Invalid saved sequence');
  actingTime(mind.affect.atS);if(mind.affect.atS>mind.atS)throw new RangeError('Future affect');
  range(mind.affect.valence,-1);range(mind.affect.arousal);range(mind.affect.uncertainty);
@@ -128,4 +138,10 @@ export function validateActingMind(mind:ActingMind):void {
  const ids=new Set<string>(),seqs=new Set<number>();for(const e of mind.memories){validateActingOutcome(e);if(e.atS>mind.atS||e.sequence>mind.lastSequence||ids.has(e.id)||seqs.has(e.sequence)||!mind.goals.some(g=>g.id===e.goalId))throw new TypeError('Invalid saved memory');ids.add(e.id);seqs.add(e.sequence);}
  if(mind.intention){const i=mind.intention;for(const s of [i.id,i.subject,i.partnerId,i.goalId])id(s);
   if(i.partnerId===mind.actorId||!mind.goals.some(g=>g.id===i.goalId)||!ACTING_ACTIONS.includes(i.action)||!['active','succeeded','blocked'].includes(i.status)||!Number.isInteger(i.attempts)||i.attempts<0||i.attempts>ACTING_LIMITS.attempts)throw new TypeError('Invalid saved intention');}
+}
+
+/** Перепланирование только при новой возможности/изменении контекста, не каждый render tick. */
+export function chooseActingLifeOpportunity(mind:ActingMind,candidates:readonly LifeOpportunity[],situation:LifeSituation):LifeChoice {
+ actingTime(situation.atS);if(situation.atS<mind.atS)throw new RangeError('Acting clock moved backwards');
+ return chooseLifeOpportunity(mind.life??createLifeState(mind.actorId,{},mind.atS),candidates,situation);
 }
