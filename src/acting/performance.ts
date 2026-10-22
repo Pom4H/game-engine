@@ -1,5 +1,5 @@
 import {finiteVec3,type Vec3} from '../math.js';
-import {ACTING_ACTIONS,actingAffectAt,actingTime,clampActing,type ActingAction,type ActingMind} from './motivation.js';
+import {ACTING_ACTIONS,actingEmotionsAt,actingTime,clampActing,type ActingAction,type ActingMind} from './motivation.js';
 
 /** Публичный моторный сигнал. Не содержит памяти, цели или скрытого отношения. */
 export interface ActingCue {
@@ -21,12 +21,12 @@ export function validateActingCue(c:ActingCue):void {
 }
 /** Отношение и аффект определяют манеру исполнения, но не управляют артикуляцией. */
 export function makeActingCue(mind:ActingMind,serial:number,action:ActingAction,atS:number,durationS=2.4,gazeTarget?:Vec3):ActingCue {
- const emotion=actingAffectAt(mind,atS),relation=mind.sentiments.find(s=>s.subject===mind.intention?.partnerId);
+ const emotion=actingEmotionsAt(mind,atS),relation=mind.sentiments.find(s=>s.subject===mind.intention?.partnerId);
  const affinity=relation?.affinity??0;
  const cue:ActingCue={version:1,serial,action,startS:atS,durationS,
-  intensity:clampActing(.35+emotion.arousal*.45),smile:clampActing(Math.max(0,emotion.valence)*.6+Math.max(0,affinity)*.15),
-  browLift:clampActing(emotion.uncertainty*.6+(action==='ask'||action==='clarify'?.2:0)),
-  browTilt:clampActing(Math.max(0,-emotion.valence)*.65),squint:clampActing(emotion.arousal*.18),
+  intensity:clampActing(.35+emotion.arousal*.45),smile:clampActing(emotion.positive*.6*(1-.5*emotion.negative)+Math.max(0,affinity)*.15),
+  browLift:clampActing(emotion.uncertainty*.6+emotion.fear*.2+(action==='ask'||action==='clarify'?.2:0)),
+  browTilt:clampActing(emotion.anger*.65+emotion.negative*.2),squint:clampActing(emotion.arousal*.18),
   ...(gazeTarget?{gazeTarget:[...gazeTarget] as Vec3}:{})};
  validateActingCue(cue);return cue;
 }
