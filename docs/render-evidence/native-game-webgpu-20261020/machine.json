@@ -1,0 +1,12 @@
+{
+  "observedAt": "2026-10-20T13:55:54.1033278+03:00",
+  "cpu": "AMD Ryzen 5 7640HS w/ Radeon 760M Graphics     ",
+  "cores": 6,
+  "logicalProcessors": 12,
+  "os": "Майкрософт Windows 11 Pro",
+  "version": "10.0.26300",
+  "build": "26300",
+  "chrome": "155.0.8059.85",
+  "bun": "1.4.3",
+  "node": "v24.21.0"
+}

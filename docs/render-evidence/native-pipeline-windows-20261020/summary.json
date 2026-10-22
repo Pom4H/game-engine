@@ -1,0 +1,583 @@
+{
+  "date": "2026-10-20T15:35:19.487Z",
+  "scope": "Recorded real TheGame render replay; same original scene and visual settings, current Engine build. Not a complete native game client.",
+  "width": 1280,
+  "height": 720,
+  "sceneSha256": "bc756e10067471694444640530b245d4c06b1efdf11f8a00b4f5ea2f75fee573",
+  "exeSha256": "05289bfedcef8f838f551aebde79318d66f470bf449b0a6238dbbc902933b5a3",
+  "performance": {
+    "beforeNative": {
+      "static": {
+        "interval": {
+          "samples": 540,
+          "mean": 42.8769688888889,
+          "p50": 42.49510000000009,
+          "p95": 46.43279999998049,
+          "p99": 49.00560000000405,
+          "max": 66.41879999999946
+        },
+        "averageFPS": 23.32254415164919,
+        "onePercentLowFPS": 18.891895848978205,
+        "framesOver33ms": 540,
+        "framesOver50ms": 4,
+        "cpuSubmit": {
+          "samples": 540,
+          "mean": 11.640426111110962,
+          "p50": 11.408699999999953,
+          "p95": 14.423800000018673,
+          "p99": 15.694900000002235,
+          "max": 16.522200000006706
+        },
+        "completedFrame": {
+          "samples": 540,
+          "mean": 41.54784240740703,
+          "p50": 41.16830000001937,
+          "p95": 44.873299999992014,
+          "p99": 46.82490000000689,
+          "max": 62.98219999999856
+        },
+        "gpuWait": {
+          "samples": 540,
+          "mean": 29.56796777777827,
+          "p50": 29.442700000014156,
+          "p95": 31.447099999990314,
+          "p99": 32.02740000000631,
+          "max": 50.54279999999562
+        },
+        "queueWait": null,
+        "hostFrame": null,
+        "gpu": {
+          "samples": 540,
+          "mean": 26.572420740740554,
+          "p50": 26.542080000000006,
+          "p95": 26.869760000000003,
+          "p99": 26.935296000000005,
+          "max": 27.262976000000002
+        },
+        "repetitions": 3,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 23.314918476732235,
+            "p99": 47.69439999999304
+          },
+          {
+            "repetition": 1,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 23.357894288944227,
+            "p99": 50.016700000007404
+          },
+          {
+            "repetition": 2,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 23.294908468092654,
+            "p99": 49.328799999988405
+          }
+        ]
+      },
+      "camera": {
+        "interval": {
+          "samples": 540,
+          "mean": 133.1257440740741,
+          "p50": 47.78870000000461,
+          "p95": 669.6051000000443,
+          "p99": 775.0360999999684,
+          "max": 1100.7375000000175
+        },
+        "averageFPS": 7.511695104168417,
+        "onePercentLowFPS": 1.110273718000247,
+        "framesOver33ms": 540,
+        "framesOver50ms": 166,
+        "cpuSubmit": {
+          "samples": 540,
+          "mean": 98.90644611111126,
+          "p50": 14.010800000018207,
+          "p95": 633.9291000000085,
+          "p99": 732.0659999999916,
+          "max": 1065.97080000001
+        },
+        "completedFrame": {
+          "samples": 540,
+          "mean": 131.74855500000066,
+          "p50": 46.47259999997914,
+          "p95": 668.5152000000235,
+          "p99": 773.9384999999893,
+          "max": 1099.2158000000054
+        },
+        "gpuWait": {
+          "samples": 540,
+          "mean": 32.49985407407345,
+          "p50": 32.09480000002077,
+          "p95": 37.65219999998226,
+          "p99": 39.84279999998398,
+          "max": 84.81750000000466
+        },
+        "queueWait": null,
+        "hostFrame": null,
+        "gpu": {
+          "samples": 540,
+          "mean": 29.103202607407436,
+          "p50": 28.246016,
+          "p95": 32.44031999999999,
+          "p99": 32.833535999999995,
+          "max": 33.226752
+        },
+        "repetitions": 3,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 7.492536497081843,
+            "p99": 855.1289000000106
+          },
+          {
+            "repetition": 1,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 7.513768511186217,
+            "p99": 778.6698000000033
+          },
+          {
+            "repetition": 2,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 7.528869040522139,
+            "p99": 775.0360999999684
+          }
+        ]
+      }
+    },
+    "native": {
+      "static": {
+        "interval": {
+          "samples": 540,
+          "mean": 25.005093518518535,
+          "p50": 25.012000000002445,
+          "p95": 26.315399999992223,
+          "p99": 29.654200000019046,
+          "max": 36.37050000001909
+        },
+        "averageFPS": 39.991852030443695,
+        "onePercentLowFPS": 30.393304557615796,
+        "framesOver33ms": 3,
+        "framesOver50ms": 0,
+        "cpuSubmit": {
+          "samples": 540,
+          "mean": 11.92369851851825,
+          "p50": 12.207999999984168,
+          "p95": 13.36830000000191,
+          "p99": 14.09230000001844,
+          "max": 15.812300000005052
+        },
+        "completedFrame": null,
+        "gpuWait": null,
+        "queueWait": {
+          "samples": 540,
+          "mean": 11.581745000000012,
+          "p50": 11.208299999998417,
+          "p95": 13.96040000001085,
+          "p99": 15.706000000005588,
+          "max": 24.526200000022072
+        },
+        "hostFrame": {
+          "samples": 540,
+          "mean": 12.035595000000763,
+          "p50": 12.310700000001816,
+          "p95": 13.469799999991665,
+          "p99": 14.209900000001653,
+          "max": 15.9487999999983
+        },
+        "gpu": {
+          "samples": 537,
+          "mean": 16.4551498845439,
+          "p50": 16.515071999999996,
+          "p95": 16.71168,
+          "p99": 16.842752,
+          "max": 16.973824
+        },
+        "repetitions": 3,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 39.99445943421974,
+            "p99": 27.571100000001024
+          },
+          {
+            "repetition": 1,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 39.993773413854626,
+            "p99": 31.919800000003306
+          },
+          {
+            "repetition": 2,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 39.987324018286195,
+            "p99": 33.489400000020396
+          }
+        ]
+      },
+      "camera": {
+        "interval": {
+          "samples": 540,
+          "mean": 24.89119814814821,
+          "p50": 25.03409999998985,
+          "p95": 26.67819999999483,
+          "p99": 27.614100000006147,
+          "max": 35.11229999999341
+        },
+        "averageFPS": 40.17484389655206,
+        "onePercentLowFPS": 32.553725855313274,
+        "framesOver33ms": 1,
+        "framesOver50ms": 0,
+        "cpuSubmit": {
+          "samples": 540,
+          "mean": 13.045467037037128,
+          "p50": 12.823700000008103,
+          "p95": 16.15789999999106,
+          "p99": 19.184000000008382,
+          "max": 20.276899999997113
+        },
+        "completedFrame": null,
+        "gpuWait": null,
+        "queueWait": {
+          "samples": 540,
+          "mean": 10.271700925925769,
+          "p50": 10.793600000004517,
+          "p95": 13.396999999997206,
+          "p99": 14.729699999996228,
+          "max": 17.308500000013737
+        },
+        "hostFrame": {
+          "samples": 540,
+          "mean": 13.159162407407441,
+          "p50": 12.936900000000605,
+          "p95": 16.2668999999878,
+          "p99": 19.291600000011385,
+          "max": 20.4375
+        },
+        "gpu": {
+          "samples": 537,
+          "mean": 16.418415553072588,
+          "p50": 16.384,
+          "p95": 17.36704,
+          "p99": 17.69472,
+          "max": 18.0224
+        },
+        "repetitions": 3,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 39.980771026059585,
+            "p99": 28.594499999991967
+          },
+          {
+            "repetition": 1,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 39.98966755856201,
+            "p99": 27.31899999998859
+          },
+          {
+            "repetition": 2,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 40.559541406785044,
+            "p99": 27.614100000006147
+          }
+        ]
+      }
+    },
+    "browser": {
+      "static": {
+        "interval": {
+          "samples": 540,
+          "mean": 10.809074074029922,
+          "p50": 10.300000071525574,
+          "p95": 12.5,
+          "p99": 15.100000023841858,
+          "max": 175.19999992847443
+        },
+        "averageFPS": 92.51486234168921,
+        "onePercentLowFPS": 20.768431985099195,
+        "framesOver33ms": 2,
+        "framesOver50ms": 1,
+        "cpuSubmit": {
+          "samples": 540,
+          "mean": 2.9316666647239966,
+          "p50": 2.8000000715255737,
+          "p95": 3.899999976158142,
+          "p99": 5,
+          "max": 6.799999952316284
+        },
+        "completedFrame": null,
+        "gpuWait": null,
+        "queueWait": {
+          "samples": 540,
+          "mean": 7.171666667638002,
+          "p50": 7.100000023841858,
+          "p95": 9.299999952316284,
+          "p99": 11.799999952316284,
+          "max": 172.19999992847443
+        },
+        "hostFrame": {
+          "samples": 540,
+          "mean": 2.9403703676329718,
+          "p50": 2.8000000715255737,
+          "p95": 3.899999976158142,
+          "p99": 5,
+          "max": 6.799999952316284
+        },
+        "gpu": {
+          "samples": 536,
+          "mean": 9.329236623134326,
+          "p50": 9.18268,
+          "p95": 9.567879999999999,
+          "p99": 12.21628,
+          "max": 26.507360000000002
+        },
+        "repetitions": 3,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 96.82625067240453,
+            "p99": 12.800000071525574
+          },
+          {
+            "repetition": 1,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 96.14871000358295,
+            "p99": 12.5
+          },
+          {
+            "repetition": 2,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 85.47820306015572,
+            "p99": 34.60000002384186
+          }
+        ]
+      },
+      "camera": {
+        "interval": {
+          "samples": 540,
+          "mean": 11.659259259480017,
+          "p50": 11.699999928474426,
+          "p95": 13.899999976158142,
+          "p99": 15.399999976158142,
+          "max": 26
+        },
+        "averageFPS": 85.76874205682586,
+        "onePercentLowFPS": 53.38078292947239,
+        "framesOver33ms": 0,
+        "framesOver50ms": 0,
+        "cpuSubmit": {
+          "samples": 540,
+          "mean": 3.9368518484963313,
+          "p50": 3.799999952316284,
+          "p95": 5.300000071525574,
+          "p99": 7.700000047683716,
+          "max": 21.899999976158142
+        },
+        "completedFrame": null,
+        "gpuWait": null,
+        "queueWait": {
+          "samples": 540,
+          "mean": 6.575555558778621,
+          "p50": 7.200000047683716,
+          "p95": 9.5,
+          "p99": 10.600000023841858,
+          "max": 18
+        },
+        "hostFrame": {
+          "samples": 540,
+          "mean": 3.947777774819621,
+          "p50": 3.799999952316284,
+          "p95": 5.399999976158142,
+          "p99": 7.700000047683716,
+          "max": 21.899999976158142
+        },
+        "gpu": {
+          "samples": 537,
+          "mean": 10.372061582867792,
+          "p50": 10.23652,
+          "p95": 11.45764,
+          "p99": 12.16312,
+          "max": 12.638969999999999
+        },
+        "repetitions": 3,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 85.03401360256892,
+            "p99": 14.5
+          },
+          {
+            "repetition": 1,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 85.62458376744225,
+            "p99": 15.899999976158142
+          },
+          {
+            "repetition": 2,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 86.66345690900336,
+            "p99": 14.200000047683716
+          }
+        ]
+      }
+    }
+  },
+  "quality": {
+    "nativeVsBefore": {
+      "channels": 2764800,
+      "changedChannels": 0,
+      "changedChannelPercent": 0,
+      "changedPixels": 0,
+      "changedPixelPercent": 0,
+      "mae": 0,
+      "rmse": 0,
+      "psnrDb": null,
+      "maxError": 0,
+      "channelsAbove2": 0,
+      "units": "8-bit RGB code values (0..255); alpha excluded"
+    },
+    "nativeVsBrowser": {
+      "channels": 2764800,
+      "changedChannels": 46,
+      "changedChannelPercent": 0.0016637731481481482,
+      "changedPixels": 46,
+      "changedPixelPercent": 0.004991319444444445,
+      "mae": 0.000016637731481481482,
+      "rmse": 0.004078937543219004,
+      "psnrDb": 95.91986249985135,
+      "maxError": 1,
+      "channelsAbove2": 0,
+      "units": "8-bit RGB code values (0..255); alpha excluded"
+    }
+  },
+  "controls": {
+    "integrityBefore": {
+      "frozen": true,
+      "samples": [
+        514.1532000000007,
+        491.1376999999993,
+        491.634
+      ],
+      "instrumentedMs": 499.1165999999994,
+      "frozenMs": 496.34220000000096,
+      "calls": 928
+    },
+    "integrityAfter": {
+      "frozen": true,
+      "samples": [
+        0.4449000000004162,
+        0.29950000000098953,
+        0.2996999999995751
+      ],
+      "instrumentedMs": 0.7548999999999069,
+      "frozenMs": 0,
+      "calls": 0
+    }
+  },
+  "worker": {
+    "posted": 143,
+    "completed": 143,
+    "transferredBytes": 599803776,
+    "failed": false,
+    "disposed": false
+  },
+  "adapters": {
+    "native": {
+      "vendor": "amd",
+      "architecture": "rdna-3",
+      "device": "amd-radeon-760m-graphics",
+      "description": "D3D12 driver version 32.0.31041.1004",
+      "isFallbackAdapter": false,
+      "backend": "d3d12"
+    },
+    "browser": {
+      "vendor": "amd",
+      "architecture": "rdna-3",
+      "device": "",
+      "description": "",
+      "isFallbackAdapter": false
+    }
+  },
+  "browser": {
+    "executable": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "args": [
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-background-networking",
+      "--disable-extensions",
+      "--enable-unsafe-webgpu",
+      "--enable-gpu",
+      "--disable-renderer-backgrounding",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-background-timer-throttling",
+      "--remote-debugging-port=0",
+      "--user-data-dir=C:\\Users\\Roman\\AppData\\Local\\Temp\\engine-native-compare-FAHzUI",
+      "--window-size=1280,720",
+      "about:blank"
+    ],
+    "version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/155.0.8059.85",
+      "revision": "@0e66b94549a8bd85f03fbdf189b752d6e7b63c32",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "jsVersion": "15.5.35.25"
+    }
+  },
+  "sharedDist": {
+    "sha256": "1e43537333093bda2376fdafa1f031955d40b63b91ed1a0438337d6ed88b7d16",
+    "javascriptFiles": 216
+  },
+  "previousProvenance": {
+    "engine": {
+      "head": "fbfd5ef136887e6d879bc35213d540959f38f434",
+      "dirty": true
+    },
+    "game": {
+      "head": "702bc303569a1802e80689948205a1847c03dde4",
+      "dirty": true
+    },
+    "nativeHost": {
+      "head": "286554355630c179a62b25969d7c560334af168f",
+      "dirty": false
+    },
+    "sharedDist": {
+      "sha256": "2a6dfdb4d62cb47472e4569935276726b06fa3d7b434c845b723e94c57ee6596",
+      "javascriptFiles": 216
+    },
+    "captureBundleSha256": "2ac1e937c2ce0e756e7bcbff6709bc572f421b1689bbc636590a5a8b537f4892",
+    "gameFixtureSha256": "5e5b065816d95af73fedf40c12e855960986b61462c76cd7a384259faaa8e0e1",
+    "nativeExeSha256": "0c2af63de11db0d3dcd6dcb27bd76a61fa46f8a8f7a0419f763bae278c342e6a"
+  },
+  "methodology": [
+    "Three repetitions per case, 180 path warmup + 180 measured intervals each. No outliers or first repetitions discarded. Cases alternate order.",
+    "Current native timer cap is disabled; SDL FIFO remains active. Browser uses visible Chrome requestAnimationFrame. Both use the same two-frame completion bound and background lighting algorithm. Values describe render-loop start cadence, not physical display presentations.",
+    "Native runs precede browser runs; one laptop, no random-order or thermal control. Native per-repetition dispersion is retained rather than presenting only its best run.",
+    "Before-native data uses the original synchronous implementation and its 60 Hz cap; that cap was above its achieved FPS. The joint change includes background baking, two in-flight frames, avoiding repeated immutable-geometry integrity scans, and an independent render cap.",
+    "Object.isFrozen was measured on a real scene with a warmed geometry cache. Scene already reconstructs immutable ownership after JSON; no input-format change was needed. The earlier JSON-loss hypothesis was rejected.",
+    "Canonical image: return to the fixed pose/time, settle all lighting jobs, reset temporal history, render 64 settling frames and capture frame 64 directly from the GPU. During motion, both hosts retain the last complete lighting map while a replacement is calculated.",
+    "All geometry, materials, texture and label RGBA assets, output/internal resolution, shadows, TAA and postprocessing settings are preserved. No render-scale or LOD reduction is part of this patch."
+  ]
+}

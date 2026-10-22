@@ -1,0 +1,237 @@
+{
+  "date": "2026-10-20",
+  "baseCommit": "a294a22",
+  "includesWorkingTreeChanges": true,
+  "bun": "1.4.3",
+  "typescript": "7.0.2",
+  "platform": "win32-x64",
+  "browser": false,
+  "engineCheck": {
+    "passed": 500,
+    "skipped": 19,
+    "failed": 0,
+    "total": 519
+  },
+  "nativeContractCheck": {
+    "passed": 26,
+    "failed": 0
+  },
+  "compiledSourcePixelParity": true,
+  "sourceFiles": {
+    "tools/native/host.mjs": "253290b694d43f5e7d98d7f56e02884baf38c40cfb72e158e153564c12b36844",
+    "tools/native/runtime.mjs": "17c73bf126861a7d25a1cd36aa1f03be3a02c9c3a2bd789c13e59db2e3350751",
+    "tools/native/windows-napi.mjs": "2b51e2d5a71477875ea2d496b39a296fbb966a7577485e3154abad78affcefa4",
+    "tools/native/build.mjs": "ff0c368e331643e0b08b9a2e01cb8438f78783e9c0a3e429f3d9cf275649ff2d",
+    "tools/native/smoke.mjs": "118e6dec790a3a85ec83f72ffb8e57fc5dc8b5f59ead08089e5c2bca5efb76f9",
+    "tools/native/core.mjs": "4ccb1333d60c09615e311f5b00c87d6e6038415fa51444f376c825f5355b5ee6",
+    "tools/native/process.mjs": "adb9bcd08f73e879c8a7d80037a30bf5e6106992654940d88dc8d7b3b7632dea",
+    "tools/native/bun.lock": "a0113698d75590c261be9e90b545801c89fcaaec2395c1060b9ee8bb7120708b",
+    "src/render/webgpu.ts": "6c5eff38f47bfc9da733f2ce6620242582f10b8d49bed062ff26dfa52b3b1515"
+  },
+  "runs": {
+    "headless": {
+      "status": "success",
+      "compiled": false,
+      "mode": "headless",
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "nativeBinding": {
+        "kind": "windows-napi-import",
+        "version": 1,
+        "hostName": "bun.exe",
+        "sourceSha256": "a47757ae165befeafbc2edd4fd04fceb73a7b6d8e6bfb32862f6a58a60b7fbfc",
+        "sha256": "3ee014ca2cb3c47c170a3a6e1a131fe9ceba4a43946cc3167dab016f21876623"
+      },
+      "drawCalls": 4,
+      "triangles": 1624,
+      "gpuErrors": [],
+      "initialSphereY": 4,
+      "finalSphereY": 3.1824999999999997,
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "pngSha256": "b2c6ffdb423d6ab350fd869c4311c6730e070a82b2bd46e14629de5b1065ed2b"
+    },
+    "window": {
+      "status": "success",
+      "compiled": false,
+      "mode": "window",
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "nativeBinding": {
+        "kind": "windows-napi-import",
+        "version": 1,
+        "hostName": "bun.exe",
+        "sourceSha256": "a47757ae165befeafbc2edd4fd04fceb73a7b6d8e6bfb32862f6a58a60b7fbfc",
+        "sha256": "3ee014ca2cb3c47c170a3a6e1a131fe9ceba4a43946cc3167dab016f21876623"
+      },
+      "drawCalls": 4,
+      "triangles": 1624,
+      "gpuErrors": [],
+      "initialSphereY": 4,
+      "finalSphereY": 3.1824999999999997,
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "pngSha256": "b2c6ffdb423d6ab350fd869c4311c6730e070a82b2bd46e14629de5b1065ed2b"
+    },
+    "compiled-headless": {
+      "status": "success",
+      "compiled": true,
+      "mode": "headless",
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "nativeBinding": {
+        "kind": "windows-napi-import",
+        "version": 1,
+        "hostName": "the-engine.exe",
+        "sourceSha256": "a47757ae165befeafbc2edd4fd04fceb73a7b6d8e6bfb32862f6a58a60b7fbfc",
+        "sha256": "ec0cbd2a41b28f99d8ad2425abc4bbb12274745b277bd1269883981a325a9b47"
+      },
+      "drawCalls": 4,
+      "triangles": 1624,
+      "gpuErrors": [],
+      "initialSphereY": 4,
+      "finalSphereY": 3.1824999999999997,
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "pngSha256": "b2c6ffdb423d6ab350fd869c4311c6730e070a82b2bd46e14629de5b1065ed2b"
+    },
+    "compiled-window": {
+      "status": "success",
+      "compiled": true,
+      "mode": "window",
+      "frames": 24,
+      "simulation": {
+        "tick": 24,
+        "time": 0.39999999999999997
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "nativeBinding": {
+        "kind": "windows-napi-import",
+        "version": 1,
+        "hostName": "the-engine.exe",
+        "sourceSha256": "a47757ae165befeafbc2edd4fd04fceb73a7b6d8e6bfb32862f6a58a60b7fbfc",
+        "sha256": "ec0cbd2a41b28f99d8ad2425abc4bbb12274745b277bd1269883981a325a9b47"
+      },
+      "drawCalls": 4,
+      "triangles": 1624,
+      "gpuErrors": [],
+      "initialSphereY": 4,
+      "finalSphereY": 3.1824999999999997,
+      "firstFrame": {
+        "min": 0,
+        "max": 245.66666666666666,
+        "variance": 2580.218605785947,
+        "uniqueColorsAtLeast": 2089,
+        "nonUniform": true,
+        "sha256": "d44d74d86b065ad7d05c22fe78baec527e69e8ecc87ac2ef8c32dfbf93c0585b",
+        "width": 320,
+        "height": 180
+      },
+      "lastFrame": {
+        "min": 0,
+        "max": 254.33333333333334,
+        "variance": 2638.0775044331167,
+        "uniqueColorsAtLeast": 3350,
+        "nonUniform": true,
+        "sha256": "b091037965c32ac82ecc9ccd40cbddc0b4af5069d80c659b12301858faf2d7ca",
+        "width": 320,
+        "height": 180
+      },
+      "pngSha256": "b2c6ffdb423d6ab350fd869c4311c6730e070a82b2bd46e14629de5b1065ed2b"
+    }
+  }
+}
