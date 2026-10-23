@@ -29,9 +29,9 @@ export function createEnvironmentBakeWorkerDriver(options:BakeWorkerDriverOption
   pending=false;if(disposed||pumping||!job)return;pumping=true;
   try{
    const current=job,deadline=now()+1;let units=0;
-   // A deadline is only a secondary stop between finite 32-unit chunks.
+   // A deadline is only a secondary stop between finite 512-unit chunks.
    // Even a constant/low-resolution clock cannot cause an unbounded pump.
-   do{current.step(32);units+=32;}while(!current.done&&units<4096&&now()<deadline);
+   do{current.step(512);units+=512;}while(!current.done&&units<4096&&now()<deadline);
    if(disposed||job!==current)return;
    if(current.done){const data=current.data;job=undefined;current.cancel();options.publish(data);}
   }catch(error){fail(error);}

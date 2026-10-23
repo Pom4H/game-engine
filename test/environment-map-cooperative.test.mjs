@@ -70,6 +70,25 @@ test('one frozen-clock pump never expands its4096operation cap into4096batches',
  try{s.turn();}finally{Math.pow=saved.pow;Math.hypot=saved.hypot;V3.dot=saved.dot;V3.normalize=saved.normalize;driver.dispose();}
  assert.ok(calls.pow<=4096);assert.ok(calls.dot<=4096);assert.ok(calls.normalize<=4096);assert.ok(calls.hypot<=8192);assert.ok(calls.pow+calls.normalize>0);
 });
+test('a frozen clock performs exactly eight bounded512unit steps before yielding the single notification',()=>{
+ const s=scheduler(),credits=[],originalStep=EnvironmentBakeCursor.prototype.step;
+ const driver=createEnvironmentBakeWorkerDriver({channel:s.channel,now:()=>0,publish(){throw Error('First4096operations cannot finish a full bake');},fail:error=>{throw error;}});
+ EnvironmentBakeCursor.prototype.step=function(maxOps){credits.push(maxOps);return originalStep.call(this,maxOps);};
+ try{driver.receive(input());s.turn();assert.deepEqual(credits,[512,512,512,512,512,512,512,512]);assert.equal(s.queue.length,1);assert.deepEqual(s.delivered,[1]);assert.equal(driver.inspect().active,true);}
+ finally{EnvironmentBakeCursor.prototype.step=originalStep;driver.dispose();}
+ assert.equal(s.channel().port1.onmessage,null);assert.equal(s.channel().port2.onmessage,null);s.turn();assert.equal(s.queue.length,0);
+});
+test('the secondary deadline and a second-clock failure are checked after one512unit chunk',()=>{
+ const originalStep=EnvironmentBakeCursor.prototype.step;
+ for(const failure of [false,true]){
+  const s=scheduler(),credits=[],errors=[];let clocks=0;
+  const driver=createEnvironmentBakeWorkerDriver({channel:s.channel,now(){if(++clocks===1)return 0;if(failure)throw Error('second clock failed');return 2;},publish(){throw Error('First512operations cannot finish a full bake');},fail:error=>errors.push(error)});
+  EnvironmentBakeCursor.prototype.step=function(maxOps){credits.push(maxOps);return originalStep.call(this,maxOps);};
+  try{driver.receive(input());s.turn();assert.deepEqual(credits,[512]);assert.equal(clocks,2);assert.equal(errors.length,failure?1:0);assert.equal(s.queue.length,failure?0:1);assert.equal(driver.inspect().disposed,failure);if(failure)assert.match(String(errors[0]),/second clock failed/);}
+  finally{EnvironmentBakeCursor.prototype.step=originalStep;driver.dispose();}
+  assert.equal(s.closed,2);assert.equal(s.channel().port1.onmessage,null);assert.equal(s.channel().port2.onmessage,null);
+ }
+});
 test('task driver holds exactly one notification, publishes only complete data and keeps hard credit progress with a frozen clock',()=>{
  const s=scheduler(),published=[],errors=[],driver=createEnvironmentBakeWorkerDriver({channel:s.channel,now:()=>0,publish:data=>published.push(data),fail:error=>errors.push(error)});
  driver.receive(input());assert.deepEqual(driver.inspect(),{active:true,pending:true,disposed:false});assert.equal(published.length,0);s.turn();assert.equal(published.length,0);assert.equal(s.queue.length,1);
