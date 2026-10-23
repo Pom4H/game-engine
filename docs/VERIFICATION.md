@@ -56,6 +56,17 @@ relaxed. See the [Game follow-up](../../thegame/docs/verification/freeze-followu
 for the immutable build, raw clocks, source proofs and retained failed results.
 The real-window 60 FPS/no-freeze goal remains unmet/unverified.
 
+The later artifact-only visibility locality/filter-map microexperiment is
+rejected: paired prepare/project timing changes sign or regresses in the
+R54/R55 count proxies. Its exact 36-frame four-variant order/revision/counter
+and throw/retry oracle is not a measured real-world speedup. No visibility
+source is changed; raw variants, counts and limits remain in
+`artifacts/freeze-visibility-audit-20261023/`. Game's setter shortcut is also
+unshipped (less than 0.015 ms whole-update saving). The paint-scar source audit
+identifies whole-body rebuild coupling, but no unsafe key omission or visual
+damage freeze is applied. See the linked Game follow-up for these separate
+source/measurement scopes.
+
 ## Bounded environment worker — 2026-10-23
 
 Engine `828c46a54e6f87f246fddac650e865198f9c4d45` passes `bun run check`:
