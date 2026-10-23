@@ -1,9 +1,11 @@
-import {bakeEnvironmentMap,type EnvironmentMapInput,type EnvironmentMapData} from './environment-map.js';
+import {type EnvironmentMapInput,type EnvironmentMapData} from './environment-map.js';
+import {createEnvironmentBakeWorkerDriver} from './environment-map-worker-driver.js';
 const scope=globalThis as unknown as {
   onmessage:(event:{data:EnvironmentMapInput})=>void;
   postMessage(data:EnvironmentMapData,transfer:ArrayBuffer[]):void;
 };
-scope.onmessage=event=>{
-  const data=bakeEnvironmentMap(event.data);
-  scope.postMessage(data,[data.irradiance.buffer,...data.mips.map(mip=>mip.buffer)] as ArrayBuffer[]);
-};
+const driver=createEnvironmentBakeWorkerDriver({
+  publish:data=>scope.postMessage(data,[data.irradiance.buffer,...data.mips.map(mip=>mip.buffer)] as ArrayBuffer[]),
+  fail:error=>{throw error;},
+});
+scope.onmessage=event=>driver.receive(event.data);
