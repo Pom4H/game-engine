@@ -1,0 +1,74 @@
+# Integration verification — 2026-10-23
+
+This record covers correctness checks in the isolated migration workspace. It is
+not a 60 FPS, frame-stall, GPU image, speech-quality or live-world acceptance result.
+Skipped checks remain unverified.
+
+## Current main and retained APIs
+
+Engine merge `d7577faf3e4f8f3ea9798628994bea55e2598dbb` has parents
+`5b33e4aa816eac6658974587cad5022c9b54b71e` and fetched main
+`ba9ffd0a08fcc2a9e411936948da23a76315433e`. The incoming change adds bounded
+causal reappraisal. The merge changes ten acting, documentation, fixture, test and
+benchmark files; it does not change rendering, Scene, physics or the Game save.
+
+All thirteen authored actions remain: listen, ask, explain, decline, acknowledge,
+clarify, withdraw, greet, think, celebrate, comfort, startle and tired. The six local
+NPC gestures retain their authored offsets and motor paths while facial expression
+uses main's mixed positive/negative, fear and anger channels. The public cue schema
+remains version 1. Existing NPC reducer and public speech exports remain available.
+Frozen pre-merge fixtures verify all thirteen neutral cues and motor samples.
+
+`LegacyNpcMind` and `migrateNpcMind` restore old nested `ActingMind` version 1 into
+version 2 without changing the outer `NpcMind` version 1. Identity, goals, original
+memories, relationships, needs, decisions, attention, thoughts, pending gestures and
+serials are preserved in owned output. Old aggregate affect becomes a baseline at
+the stored simulation time; old observations do not become newly rewarded or
+reappraisable evidence. Current snapshots are validated and copied too.
+
+`advanceActingMind` samples one canonical emotion state and derives matching affect
+at the same time. NPC idle ticks and need updates no longer advance only affect.
+Prospective events may change subjective appraisal and ordinary elapsed need growth;
+they cannot satisfy a need, resolve/block a decision or enqueue a response gesture.
+Those consequences require an actual authority receipt. Both compatibility defects
+have retained failing-before/passing-after witnesses.
+
+The causal window is bounded to 32 observations, with up to 24 current and 24
+baseline relationship entries. Validation/reappraisal still allocates and replays
+bounded history; this is not a zero-allocation NPC tick or a measured GC improvement.
+See [Acting contracts and focused verification](ACTING.md).
+
+## Complete correctness checks
+
+| Checked source | Passed | Skipped | Failed | Total | Recorded duration |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Engine `d7577faf` | 1081 | 19 | 0 | 1100 | 81.5116659 s |
+| Game `75a77684e43cb672159385a7fc8bc787ec8e83ad` | 2531 | 7 | 0 | 2538 / 397 files | 790.94 s |
+
+The Engine log starts with the full check script: TypeScript project typecheck,
+production TypeScript build and `node --test test/*.test.mjs` (`bun run check`).
+Raw log: [freeze-engine-full-final-main-r1.log](../artifacts/freeze-engine-full-final-main-r1.log),
+SHA-256 `b60b96b9904eb0ddeb7b5f4704188a2f19f67c476ae077ebc7e254cc4f6aa042`.
+It includes the new nested migration, synchronized clock, prospective-receipt and
+thirteen-gesture regressions, together with existing NPC and speech checks.
+
+The Game log records Bun 1.4.3 with two parallel test workers and 9,319,112
+assertions. Raw sibling log:
+[freeze-game-full-final-main-glass-r1.log](../../thegame/artifacts/freeze-game-full-final-main-glass-r1.log),
+SHA-256 `69f18037f14a2422438e3741efdd1f57b53ee0381345e28ebfaff4287495292d`.
+Its seven PostgreSQL prerequisite-dependent checks are skipped. These numerical
+checks do not establish native graphics equality or transport frame pacing.
+
+## World and Office ownership
+
+The Game uses its own NPC #113 mind/schema; it does not import Engine `NpcMind` and
+is not migrated through `migrateNpcMind`. Game seed 29, world revision 13 and the
+canonical authority/world clock remain owned by the existing Game runtime. The
+merge adds no SQLite migration, replacement city, second physics simulation or
+automatic population enrollment. Existing Office layout, collision, accounts,
+businesses, workforce and saved vehicles remain in their established owners.
+
+The full-suite result is not a new saved-world load proof or evidence that every
+resident JSON byte is unchanged. Existing backup, protected-row/identity/wallet,
+Office and preservation evidence remains separately scoped in the
+[Game integration record](../../thegame/docs/verification/engine-main-worldlife-20261021.md).
