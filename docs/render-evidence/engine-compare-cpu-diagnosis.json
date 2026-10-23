@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "scope": "Code inspection and existing native matrix telemetry; no additional phase-profile capture or performance fix claimed.",
+  "matrix": "artifacts/engine-compare/matrix-standard-v2-20261012/report.json",
+  "findings": [
+    {
+      "cause": "GPU visibility does not eliminate CPU per-entity observation",
+      "code": ["src/render/frame.ts:88", "src/render/webgpu.ts:1368", "src/render/visibility-plan.ts:78", "src/render/webgpu.ts:1158"],
+      "detail": "Live projection checks every pose; batching checks eligibility and current/previous matrix identities; visibility-plan preparation checks every object's roles; history is committed for each observed object. Stable topology and dirty uploads are cached, but the scans remain."
+    },
+    {
+      "cause": "Direct authored pose mutation invalidates the entire static shadow map",
+      "code": ["tools/engine-compare/fixture.mjs:61", "src/scene/scene.ts:202", "src/scene/scene.ts:214", "src/render/visibility-plan.ts:89", "src/render/webgpu.ts:1034"],
+      "detail": "The matrix motion adapter directly modifies entity.position on body-free cubes. It does not call Scene.setVisualTransform, which registers authored render movers. The cubes therefore remain static shadow candidates, while each changed model invalidates that pass. This measures the supported direct-mutation fallback, not the performance of the explicit visual-transform API. A separate API-path control is required before generalizing these dynamic results.",
+      "observed": {"staticShadowCandidates": 10001, "staticShadowBuildsAcrossWarmupAndMeasurement": 288, "staticShadowDrawsPerMeasuredFrame": 10001, "allPassDrawsStatic": 21, "allPassDrawsObjectMotion": 10022, "peerAllPassDraws": {"three": 8, "babylon": 7}}
+    },
+    {
+      "cause": "Per-object shadow uniforms duplicate transform data and require many uploads",
+      "code": ["src/render/webgpu.ts:1340", "src/render/webgpu.ts:1415"],
+      "detail": "The camera instance stream carries 40 floats (160 bytes) per moving cube. Each changed object also uploads 92 floats (368 bytes) to its individual uniform buffer for the non-instanced shadow path. Dense motion therefore requests 528 bytes per cube, including data unnecessary for a depth-only shadow shader.",
+      "observedUploadBytesPerFrame": {"engineAllCubesMoving": 5283720, "threeAllCubesMoving": 640576, "babylonAllCubesMoving": 640816},
+      "calculation": "10000 * (160 + 368) + 3720 = 5283720 requested GPUQueue upload bytes per frame."
+    }
+  ],
+  "limits": ["These observations establish work counts and code paths, not each phase's share of the measured 6.6 ms static CPU p95.", "Physics is frozen in this render benchmark; these times are not Rust/WASM physics cost.", "Registering authored movers can avoid rebuilding the static shadow map, but dynamic shadows also use individual drawGroup calls in the current renderer. It is not a complete shadow-batching optimization."]
+}

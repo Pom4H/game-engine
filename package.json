@@ -7,6 +7,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./browser": "./dist/browser.js",
+    "./acting": "./dist/acting/index.js",
     "./network": "./dist/network/index.js",
     "./render-ir": "./dist/render-ir/index.js",
     "./execution": "./dist/execution/index.js",
@@ -15,16 +16,22 @@
     "./storage": "./dist/storage/index.js",
     "./world-ir": "./dist/world-ir/index.js",
     "./scene/acoustic-coupling": "./dist/scene/acoustic-coupling.js",
-    "./observability": "./dist/observability/activity.js",
-    "./acting": "./dist/acting/index.js"
+    "./observability": "./dist/observability/activity.js"
   },
   "files": [
     "dist",
     "README.md"
   ],
   "scripts": {
+    "game": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-game-office.ps1",
+    "game:build": "bun run --cwd ../thegame build",
+    "game:check": "bun run --cwd ../thegame typecheck && bun run --cwd ../thegame test --timeout 60000",
+    "game:office:check": "bun run --cwd apps/thegame typecheck && bun test --timeout 60000 ./apps/thegame/test",
     "characters": "bun run build && node tools/character-creator/server.mjs",
     "characters:bundle": "bun run build && node tools/character-creator/bundle.mjs",
+    "demo": "npm run build && node tools/winter/server.mjs",
+    "demo:verify": "npm run build && node tools/winter/server.mjs --verify",
+    "snow-city:record": "npm run build && node tools/snow-city/record.mjs",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
@@ -48,11 +55,13 @@
     "office:check": "bun run build && node --test test/agent-office.test.mjs",
     "office:campus": "bun run build && node tools/agent-office/campus-server.mjs",
     "office:campus:check": "bun run build && node --test test/agent-campus.test.mjs",
-    "office:campus:render:worker": "node tools/agent-office/render-on-worker.mjs"
+    "office:campus:render:worker": "node tools/agent-office/render-on-worker.mjs",
+    "game:fixture": "bun apps/thegame/server.ts",
+    "game:office": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-office-entry.ps1"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "typescript": "^7.0.2"
+    "typescript": "7.1.0-beta"
   },
   "engines": {
     "node": ">=22"

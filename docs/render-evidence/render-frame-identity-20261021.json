@@ -1,0 +1,255 @@
+{
+  "date": "2026-10-21",
+  "scope": "Exact-output renderer identity cache fix; instrumented native diagnostics, not 60 FPS acceptance.",
+  "cause": {
+    "original": "Removing first of 3000 static entities recreated all 2999 surviving RenderObjects and immutable matrices and reported them as changes.",
+    "fixed": "Surviving identities and matrices are retained; changedObjects is empty. Source order and numeric matrix bytes match pure buildRenderFrame.",
+    "bounds": "Strong identity keys retained only for current completed render projection. Numeric slots are recycled; repeated replacement and visibility tests bound capacity to peak old/current live demand.",
+    "directEdits": "All nine full-precision position, rotation and scale numbers remain observed every frame. Entity object identity replaces same-id generations. Geometry changes force recomposition; original matrices remain immutable.",
+    "files": [
+      "src/render/frame.ts",
+      "test/render-frame-identity.test.mjs"
+    ]
+  },
+  "cpu": {
+    "status": "pass",
+    "tests": 71,
+    "failed": 0,
+    "log": "../../engine-frame-identity-focused.log"
+  },
+  "native": {
+    "status": "pass",
+    "adapter": {
+      "vendor": "amd",
+      "architecture": "rdna-3",
+      "device": "",
+      "description": "",
+      "isFallbackAdapter": false
+    },
+    "report": "artifacts/render-frame-identity-20261021/report.json",
+    "pairs": [
+      {
+        "case": "front-removal",
+        "pngSha256": "2331b9ffbd64b07457106d0aeba8c2bd002f46ddd5e946121795be7b8cf0bc60",
+        "pngExact": true,
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "modelsRebuiltAtTransition": {
+          "indexed": 176,
+          "identity": 0
+        },
+        "errors": [],
+        "physicalBodies": 0
+      },
+      {
+        "case": "coplanar-order",
+        "pngSha256": "f0dbc506d7a2f35d4509e07a3b1e2671a1b10f299b4d70411de5c37e55f165ef",
+        "pngExact": true,
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "modelsRebuiltAtTransition": {
+          "indexed": 204,
+          "identity": 1
+        },
+        "errors": [],
+        "physicalBodies": 0
+      },
+      {
+        "case": "visibility",
+        "pngSha256": "3bd46edfaa8d4574d38aa5131179b54df73f83f1b99911b9e26b2033022c6da4",
+        "pngExact": true,
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "modelsRebuiltAtTransition": {
+          "indexed": 202,
+          "identity": 0
+        },
+        "errors": [],
+        "physicalBodies": 0
+      },
+      {
+        "case": "grass-rebase",
+        "pngSha256": "cf41b9b84ed8574d1bb5abc3a0f94bd738428cfd3bd5c35c39b4bd7409442daa",
+        "pngExact": true,
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "modelsRebuiltAtTransition": {
+          "indexed": 176,
+          "identity": 0
+        },
+        "errors": [],
+        "physicalBodies": 0
+      },
+      {
+        "case": "motion",
+        "pngSha256": "a33c44c2a863159cfcbe5c1f104bdd2cba0a5b6060391777ad2385221090e767",
+        "pngExact": true,
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "modelsRebuiltAtTransition": {
+          "indexed": 187,
+          "identity": 13
+        },
+        "errors": [],
+        "physicalBodies": 0
+      },
+      {
+        "case": "cpu-instances",
+        "pngSha256": "2ab9a8420f28da8082fc7d7ece3f4ec86ea7e2e80e247915392d60e53a691f5d",
+        "pngExact": true,
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 0,
+          "maxAbs": 0
+        },
+        "modelsRebuiltAtTransition": {
+          "indexed": 176,
+          "identity": 1
+        },
+        "errors": [],
+        "physicalBodies": 0
+      }
+    ],
+    "controls": "Canonical Game geometry, glass, procedural grass, 1280x720 renderScale1, TAA+bloom+opaqueDepthPrepass, CPU and GPU instances; no quality or distance reductions. Background exact environment baking settles before paired TAA histories; explicit timeline frames. Full PNG, all 3,686,400 HDR components and all 921,600 depth pixels compare exactly.",
+    "invalidRuns": [
+      "failure-invalid-r1-builder-identity.json: duplicate helper function identities incorrectly activated custom-builder fallback; rejected.",
+      "failure-r3-unsettled-taa.json: full HDR/depth matched but 278 PNG channels differed by 1/255 because asynchronous exact environment publication was not settled before TAA history; rejected. Both controls corrected without tolerance."
+    ]
+  },
+  "diagnostics": {
+    "beforeShort": {
+      "path": "../thegame/artifacts/performance-live-migration-720-diagnostic-r2.json",
+      "frames": 180,
+      "profiled": true,
+      "rendererProfiled": true,
+      "averageFPS": 62.247121070650465,
+      "p95Ms": 25.099999999998545,
+      "p99Ms": 41.400000000001455,
+      "maxFrameMs": 41.70000000000073,
+      "framesOver50ms": 0,
+      "gpu": {
+        "meanMs": 7.670153777777772,
+        "p50Ms": 7.47088,
+        "p95Ms": 10.5366,
+        "maxMs": 12.2648
+      },
+      "engineCpu": {
+        "meanMs": 7.379670330456325,
+        "p50Ms": 6.799999952316284,
+        "p95Ms": 12.100000023841858,
+        "maxMs": 17
+      },
+      "qualityMatches": true,
+      "renderResolution": [
+        1280,
+        720
+      ],
+      "visibility": {
+        "hiddenFrames": 0,
+        "unfocusedFrames": 0
+      },
+      "syncBodyPublications": 0
+    },
+    "afterLong": {
+      "path": "../thegame/artifacts/performance-live-migration-720-diagnostic-r3-cache.json",
+      "cpuProfile": "../thegame/artifacts/performance-profile-migration-720-diagnostic-r3-cache.json",
+      "frames": 900,
+      "profiled": true,
+      "rendererProfiled": true,
+      "averageFPS": 66.9558166005788,
+      "p95Ms": 24.900000000001455,
+      "p99Ms": 25.100000000002183,
+      "maxFrameMs": 91.5,
+      "framesOver50ms": 1,
+      "gpu": {
+        "meanMs": 6.531676028761064,
+        "p50Ms": 6.41384,
+        "p95Ms": 8.13208,
+        "maxMs": 13.270570000000001
+      },
+      "engineCpu": {
+        "meanMs": 6.893281937433234,
+        "p50Ms": 6.400000095367432,
+        "p95Ms": 10.399999976158142,
+        "maxMs": 35.700000047683716
+      },
+      "qualityMatches": true,
+      "renderResolution": [
+        1280,
+        720
+      ],
+      "visibility": {
+        "hiddenFrames": 0,
+        "unfocusedFrames": 0
+      },
+      "syncBodyPublications": 0
+    },
+    "limits": [
+      "The 180- and 900-frame runs cover different durations and cannot establish a pacing improvement caused by this cache alone.",
+      "900-frame instrumented run still has a 91.5 ms RAF gap at index816 (performance.now 28008.8 to28100.3). GPU max13.27ms and Engine worst35.7ms occur in other windows; no freeze attribution is claimed.",
+      "Raw V8 profile lacks a saved monotonic-to-performance.now clock bridge; sparse long sample deltas are not proof of function execution duration. A future profile must preserve a CDP clock bridge before correlating exact sample/RAF windows.",
+      "No complete no-freeze or minimum60FPS acceptance is claimed."
+    ]
+  },
+  "sourceSha256": {
+    "src/render/frame.ts": "1e3a358f62be9c8b5d2bf1e0a7cf9284d9c707d3e75cf708b375dd1c3750bf17",
+    "tools/render-stability/fixtures/frame-index-reference.ts": "bac2b3ae879b5c8637c4da606e4fe2cf19db1ef018a5ccfdb2a057e1e38283d4"
+  },
+  "fullEngine": {
+    "command": "npm run check",
+    "status": "pass",
+    "exitCode": 0,
+    "tests": 898,
+    "passed": 879,
+    "skipped": 19,
+    "failed": 0,
+    "durationMs": 72576.0484,
+    "sourceWasm": "After parent rebuilt all three Rust kernels from actual source and ran their Rust tests.",
+    "log": "../../engine-frame-identity-final-check.log"
+  }
+}

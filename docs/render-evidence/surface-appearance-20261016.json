@@ -1,0 +1,203 @@
+{
+  "date": "2026-10-16T05:58:53.006Z",
+  "browser": "native-gpu",
+  "scope": "sole Game entry; exact pinned original input/camera; visual wetness 0 → .9 → 0 and captured canonical world weather; real 4096 HDR samples; no authority teleport/extra physics; not a full visual parity/FPS gate",
+  "fixtureSha256": "cad2b898002bd56d9f9a535696f1ac8c66f815d5dd9aca1d7ee9338db3df3ff0",
+  "materialUniforms": {
+    "words": 96,
+    "bytes": 384,
+    "archivedSummaryWordsSupported": 92
+  },
+  "hdr": {
+    "samples": 4096,
+    "changeThresholdL1RGB": 0.001,
+    "wet": {
+      "max": 0.8780441284179688,
+      "mean": 0.0959853664971888,
+      "changed": 3177
+    },
+    "dryRestored": {
+      "max": 0,
+      "mean": 0,
+      "changed": 0
+    }
+  },
+  "stages": [
+    {
+      "name": "dry",
+      "environmentSource": "manual",
+      "canonicalVisualWetness": 0,
+      "materialWetness": 0,
+      "projectedMaterials": 2237,
+      "projectedWetness": [
+        0,
+        0
+      ],
+      "asphaltSample": {
+        "id": "game:chunk:city:96:-224:1",
+        "wetness": 0,
+        "darkening": 0,
+        "roughness": 0.94,
+        "inheritedWetness": 0.320151591936
+      },
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "wet",
+      "environmentSource": "manual",
+      "canonicalVisualWetness": 0.9,
+      "materialWetness": 0.9,
+      "projectedMaterials": 2237,
+      "projectedWetness": [
+        0.9,
+        0.9
+      ],
+      "asphaltSample": {
+        "id": "game:chunk:city:96:-224:1",
+        "wetness": 0.9,
+        "darkening": 0.378,
+        "roughness": 0.2739999999999999,
+        "inheritedWetness": 0.320151591936
+      },
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "dry-restored",
+      "environmentSource": "manual",
+      "canonicalVisualWetness": 0,
+      "materialWetness": 0,
+      "projectedMaterials": 2237,
+      "projectedWetness": [
+        0,
+        0
+      ],
+      "asphaltSample": {
+        "id": "game:chunk:city:96:-224:1",
+        "wetness": 0,
+        "darkening": 0,
+        "roughness": 0.94,
+        "inheritedWetness": 0.320151591936
+      },
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "world",
+      "environmentSource": "world",
+      "canonicalVisualWetness": 0.00018817390412838203,
+      "materialWetness": 0,
+      "projectedMaterials": 2237,
+      "projectedWetness": [
+        0,
+        0
+      ],
+      "asphaltSample": {
+        "id": "game:chunk:city:96:-224:1",
+        "wetness": 0,
+        "darkening": 0,
+        "roughness": 0.94,
+        "inheritedWetness": 0.320151591936
+      },
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    }
+  ],
+  "checks": {
+    "engine": {
+      "passed": 68,
+      "tests": [
+        "test/surface-appearance.test.mjs",
+        "test/material-uniforms.test.mjs",
+        "test/scene-appearance-target.test.mjs",
+        "test/gpu-visibility.test.mjs",
+        "test/render-pipeline-plan.test.mjs",
+        "test/render-visibility-plan.test.mjs",
+        "test/authored-mesh-uv.test.mjs",
+        "test/radiance-mesh-bounds.test.mjs",
+        "test/render-radiance-projection.test.mjs",
+        "test/canonical-summary.test.mjs"
+      ],
+      "typecheck": "passed",
+      "build": "passed",
+      "log": "artifacts/surface-regression-final.log"
+    },
+    "game": {
+      "passed": 14,
+      "assertions": 4645,
+      "typecheck": "passed",
+      "build": "passed",
+      "command": "bun test test/the-engine-renderer.test.ts",
+      "log": "../thegame/artifacts/surface-projection-check.log"
+    },
+    "officeCanonicalView": {
+      "passed": 11,
+      "assertions": 4137,
+      "typecheck": "passed",
+      "log": "artifacts/surface-office-check.log"
+    },
+    "officeUI": {
+      "typecheck": "passed",
+      "build": "passed",
+      "warning": "existing large Vite chunk"
+    }
+  },
+  "commands": {
+    "engine": "bun run typecheck; bun run build; node --test test/surface-appearance.test.mjs test/material-uniforms.test.mjs test/scene-appearance-target.test.mjs test/gpu-visibility.test.mjs test/render-pipeline-plan.test.mjs test/render-visibility-plan.test.mjs test/authored-mesh-uv.test.mjs test/radiance-mesh-bounds.test.mjs test/render-radiance-projection.test.mjs test/canonical-summary.test.mjs",
+    "game": "bun run typecheck; bun run build; bun test test/the-engine-renderer.test.ts",
+    "nativeGame": "CAPTURE_GPU=1 CAPTURE_PORT=3187 CAPTURE_DEBUG_PORT=3188 THEGAME_CPU_BUDGET=2 ACTIVE_RESIDENT_LIMIT=48 bun tools/capture.ts --engine-surface"
+  },
+  "visualReview": {
+    "images": 4,
+    "paths": [
+      "../thegame/artifacts/engine-surface/dry.png",
+      "../thegame/artifacts/engine-surface/wet.png",
+      "../thegame/artifacts/engine-surface/dry-restored.png",
+      "../thegame/artifacts/engine-surface/world.png"
+    ],
+    "observed": "Visible wet-road response and dry restoration; world stage changes the environment. All four final images inspected."
+  },
+  "canonicalServer": {
+    "url": "http://127.0.0.1:3007",
+    "pid": 3040,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "characterMotor": "the-engine",
+    "rigidBodySolver": "the-engine-compound",
+    "vehicleStepHz": 120,
+    "webTransport": 3009,
+    "servedBuildSha256": "ddb74a057d56165d24bfc027ca29a1878870955d3190750c0b9f34fac635f3d8",
+    "servedMatchesDisk": true,
+    "restartRequired": false
+  },
+  "limits": [
+    "Fixed production presentation input; no authority teleport or new simulation",
+    "World stage replays captured canonical clock/weather; raw wetness 0.00018817390412838203 quantizes to zero in the existing 20-band material cache",
+    "Game native Windows Chromium only; no browser/device coverage",
+    "No full legacy-renderer visual parity, sustained FPS, complete rain/ground effects or actual Office GUI acceptance",
+    "Office compiled materials retain existing appearance; no native microphone or backend changes",
+    "Targeted test sets, not every repository test"
+  ],
+  "reports": {
+    "native": "../thegame/artifacts/engine-surface/report.json",
+    "nativeLog": "../thegame/artifacts/surface-live-final.log"
+  }
+}

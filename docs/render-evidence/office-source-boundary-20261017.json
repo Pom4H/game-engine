@@ -1,0 +1,545 @@
+{
+  "date": "2026-10-16T21:55:27.074Z",
+  "classification": "Progress: new native/CPU evidence identifies the source of a suspected transfer artifact and quantifies the next missing part of the original scene. The full integration remains active.",
+  "scope": "Passive source-only hub-edge rendering with the actual previously captured returned-body camera. No production geometry or simulation behavior changed.",
+  "commands": [
+    {
+      "command": "bun run typecheck",
+      "cwd": "thegame",
+      "exitCode": 0,
+      "log": "artifacts/office-source-boundary-typecheck-20261017.log"
+    },
+    {
+      "command": "bun tools/capture.ts --office-entry",
+      "cwd": "thegame",
+      "exitCode": 0,
+      "environment": {
+        "CAPTURE_EXISTING": "1",
+        "CAPTURE_PORT": "3007",
+        "CAPTURE_DEBUG_PORT": "3220",
+        "CAPTURE_GPU": "1",
+        "PERF_LABEL": "office-source-boundary-20261017",
+        "OFFICE_TERRAIN_ASSET_ONLY": "1",
+        "OFFICE_TERRAIN_ASSET_QA": "1",
+        "OFFICE_TERRAIN_BOUNDARY_PROBE": "1"
+      }
+    },
+    {
+      "command": "bun artifacts/office-source-boundary/measure-scenery.ts",
+      "cwd": "thegame",
+      "exitCode": 0
+    }
+  ],
+  "boundary": {
+    "reference": {
+      "path": "artifacts/office-walking/office-camera-depth-native-20261017/report.json",
+      "sha256": "3d301eec98f0e2a8d618ed6e7b2333db7a44097a7ae3ffa0db0324b5a392078f"
+    },
+    "boundaryX": -384,
+    "worldZ": -64.64,
+    "hubTriangle": {
+      "positions": [
+        [
+          -384,
+          -0.02,
+          -80
+        ],
+        [
+          -384,
+          -0.02,
+          -64
+        ],
+        [
+          -368,
+          -0.02,
+          -64
+        ]
+      ],
+      "color": [
+        1,
+        1,
+        1
+      ],
+      "material": 1,
+      "normal": [
+        0,
+        1,
+        0
+      ]
+    },
+    "outerTriangle": {
+      "positions": [
+        [
+          -384,
+          0,
+          -72
+        ],
+        [
+          -392,
+          0,
+          -64
+        ],
+        [
+          -384,
+          0,
+          -64
+        ]
+      ],
+      "color": [
+        0.3897738314996713,
+        0.4497390363457746,
+        0.29982602423051635
+      ],
+      "material": 9,
+      "normal": [
+        0,
+        1,
+        0
+      ]
+    },
+    "outerEdgeHeight": 0,
+    "sourceHeightDifference": 0.02,
+    "projectedEdgePixel": {
+      "x": 639.9963219199334,
+      "y": 581.664758990174
+    },
+    "origin": [
+      -298,
+      6.6,
+      370
+    ],
+    "center": [
+      -448,
+      -64
+    ],
+    "yaw": 3.141592653589793,
+    "offsetZ": 2.6,
+    "scope": "Unmodified original source builders and the captured Office camera. No UI, actors, controller, authority movement or simulation.",
+    "hubAlbedo": [
+      0.4549019607843137,
+      0.4470588235294118,
+      0.403921568627451
+    ],
+    "hdrSamples": [
+      {
+        "x": 640,
+        "y": 578,
+        "rgba": [
+          0.227294921875,
+          0.295166015625,
+          0.1285400390625,
+          1
+        ]
+      },
+      {
+        "x": 640,
+        "y": 586,
+        "rgba": [
+          0.31005859375,
+          0.289306640625,
+          0.2283935546875,
+          1
+        ]
+      }
+    ],
+    "hdrRgbDistance": 0.12982635418240554,
+    "conclusion": "The same large horizontal band exists in a canvas-only scene containing original terrain/road factories. Original hub triangles end at x=-384 at y=-.02, original outer terrain starts there at y=0 with a different material/albedo. The source projection predicts y=581.665; HDR samples at rows 578 and 586 distinguish its two sides. A reverse view and aerial view follow the same world edge. This is source geometry/albedo continuity, not evidence of an additional Office overlay. Original geometry is retained for the as-is migration."
+  },
+  "native": {
+    "browserMode": "native-gpu",
+    "views": 3,
+    "texture": {
+      "width": 768,
+      "height": 768,
+      "bytes": 2359296,
+      "mismatches": 0,
+      "checksum": 2121544030
+    },
+    "zeroGpuErrors": true,
+    "zeroLocalPhysics": true,
+    "playersAfter": 0,
+    "reviewedPngs": [
+      "artifacts/office-terrain-assets/office-source-boundary-20261017/source-edge-return-camera.png",
+      "artifacts/office-terrain-assets/office-source-boundary-20261017/source-edge-reverse-camera.png",
+      "artifacts/office-terrain-assets/office-source-boundary-20261017/source-edge-aerial.png"
+    ],
+    "limitations": "Fixed fixture daylight, no actors/UI/controller. Not a full original WebGL image comparison, gameplay pass, water optics or FPS benchmark."
+  },
+  "sceneryCoverage": {
+    "date": "2026-10-16T21:53:16.818Z",
+    "seed": 29,
+    "office": {
+      "id": "36117",
+      "x": -298,
+      "z": 370
+    },
+    "totalSourceBuildings": 380,
+    "rows": [
+      {
+        "name": "office",
+        "center": [
+          -298,
+          370
+        ],
+        "radius": 144,
+        "sourceBuildings": 11,
+        "facadeBoxes": 598,
+        "facadeJsonBytes": 138723,
+        "withinCurrentCapAndClip": 11,
+        "trees": 0,
+        "urbanBoxes": 5,
+        "urbanProps": 12
+      },
+      {
+        "name": "office",
+        "center": [
+          -298,
+          370
+        ],
+        "radius": 192,
+        "sourceBuildings": 17,
+        "facadeBoxes": 939,
+        "facadeJsonBytes": 215746,
+        "withinCurrentCapAndClip": 11,
+        "trees": 0,
+        "urbanBoxes": 8,
+        "urbanProps": 16
+      },
+      {
+        "name": "office",
+        "center": [
+          -298,
+          370
+        ],
+        "radius": 420,
+        "sourceBuildings": 104,
+        "facadeBoxes": 6903,
+        "facadeJsonBytes": 1476772,
+        "withinCurrentCapAndClip": 11,
+        "trees": 34,
+        "urbanBoxes": 16,
+        "urbanProps": 32
+      },
+      {
+        "name": "spawn-cell",
+        "center": [
+          -320,
+          -64
+        ],
+        "radius": 144,
+        "sourceBuildings": 36,
+        "facadeBoxes": 2556,
+        "facadeJsonBytes": 531470,
+        "withinCurrentCapAndClip": 32,
+        "trees": 0,
+        "urbanBoxes": 0,
+        "urbanProps": 0
+      },
+      {
+        "name": "spawn-cell",
+        "center": [
+          -320,
+          -64
+        ],
+        "radius": 192,
+        "sourceBuildings": 73,
+        "facadeBoxes": 5191,
+        "facadeJsonBytes": 1077916,
+        "withinCurrentCapAndClip": 32,
+        "trees": 0,
+        "urbanBoxes": 0,
+        "urbanProps": 0
+      },
+      {
+        "name": "spawn-cell",
+        "center": [
+          -320,
+          -64
+        ],
+        "radius": 420,
+        "sourceBuildings": 232,
+        "facadeBoxes": 16706,
+        "facadeJsonBytes": 3466062,
+        "withinCurrentCapAndClip": 32,
+        "trees": 34,
+        "urbanBoxes": 31,
+        "urbanProps": 34
+      },
+      {
+        "name": "returned-cell",
+        "center": [
+          -448,
+          -64
+        ],
+        "radius": 144,
+        "sourceBuildings": 6,
+        "facadeBoxes": 440,
+        "facadeJsonBytes": 91803,
+        "withinCurrentCapAndClip": 6,
+        "trees": 0,
+        "urbanBoxes": 0,
+        "urbanProps": 0
+      },
+      {
+        "name": "returned-cell",
+        "center": [
+          -448,
+          -64
+        ],
+        "radius": 192,
+        "sourceBuildings": 19,
+        "facadeBoxes": 1391,
+        "facadeJsonBytes": 289651,
+        "withinCurrentCapAndClip": 6,
+        "trees": 0,
+        "urbanBoxes": 0,
+        "urbanProps": 0
+      },
+      {
+        "name": "returned-cell",
+        "center": [
+          -448,
+          -64
+        ],
+        "radius": 420,
+        "sourceBuildings": 180,
+        "facadeBoxes": 12969,
+        "facadeJsonBytes": 2684477,
+        "withinCurrentCapAndClip": 6,
+        "trees": 30,
+        "urbanBoxes": 8,
+        "urbanProps": 18
+      }
+    ],
+    "scope": "Original deterministic static source facts only, before camera/frustum occlusion. Facade JSON body bytes are not transport bandwidth or a measured proposed endpoint. Outer chunks are not included."
+  },
+  "nextAction": "Restore source static scenery coverage beyond Office's 144 m / 32-plan / nine-loaded-chunk budgets. Use bounded reusable source records and inspect transfer cost; a full facade JSON radius increase alone is 1.48–3.47 MB in these static cases, before transport framing and without outer chunks. Preserve one authority and shared original builders.",
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 30936,
+      "sha256": "df765820dd21808f5909ae5e44459c993cc3ff00a9ac88bf7df495cd23191610"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/calibrated-camera.ts",
+      "bytes": 1550,
+      "sha256": "4513607d476b168e7fa6d7eb1190fb5b77ae13e450b071a935a61413b136212a"
+    },
+    {
+      "repo": "engine",
+      "path": "src/math.ts",
+      "bytes": 3102,
+      "sha256": "42dca21dd0936b118d3de8e2ceb0d7c0e376438c38af1478863157545d59fd8b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-source-boundary/evidence.ts",
+      "bytes": 7160,
+      "sha256": "fd5d68bdba4ac7ab0791029967422f056260c66beab6e54d03c789a959142458"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-boundary.ts",
+      "bytes": 4428,
+      "sha256": "4ed6cfd9539f6d052bbb4a39f6b8c009907f041b44c29c5d6d06f54f62b477b8"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 9100,
+      "sha256": "113e150bd5a8cb20227e645ba924c38ae6cb516d6e8a7ab6fb076e55c37ca918"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 33634,
+      "sha256": "9a0f73427cfbf8713fa1e9e101dc2bc34bf43e5325cee75ee6c0a9f7ce973ae8"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/runtime/road-scene.js",
+      "bytes": 16138,
+      "sha256": "c2680932eb89fb0be47a2b5d54e1721685cc20a0336c2b684b4a7122aeb7cbd8"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/terrain-scene.ts",
+      "bytes": 7157,
+      "sha256": "7d8c8fc382280039bcf2aee95499636770d79f1b2f85c2693329facd31ee8017"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/biomes.ts",
+      "bytes": 32566,
+      "sha256": "8acdd26de37d4ebdd694e6af28780cfc24896a9fb8b4f0541004a3dd466aa05e"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-ground.ts",
+      "bytes": 835,
+      "sha256": "355f8801eee1758ce3cb78cbd11d018337fc1792f0c7bbb6d3435d2686dfbc34"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-terrain-assets.ts",
+      "bytes": 8085,
+      "sha256": "2bdadde4cba0580e8e38888ab9d115d5a248650baa1d1343cfd173cb8c2e1fc4"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "bytes": 9631,
+      "sha256": "b89cb80fa2c15aebbef76121d4ad3da66cfbf4da04fdf60b4062049f67353cc1"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-assets.ts",
+      "bytes": 5662,
+      "sha256": "2ea18a72a5afe8092a19079fe945057d34ae69a47b21ceba6601a393da588bd3"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world.ts",
+      "bytes": 26420,
+      "sha256": "16d709e619bcbd969fe6f27256aebfae281698a275c6dba62b4c6aaeb9460c73"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/runtime/map.js",
+      "bytes": 17881,
+      "sha256": "733ca3a4d4b11d36010f3687e621cbd43e9c72020a093684548b9c11494d078a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-source-boundary/measure-scenery.ts",
+      "bytes": 2472,
+      "sha256": "21bc9b147f245f77e5641781d2aec9775841b6ff60c74fee4124ddb7f3fe10a6"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 63718,
+      "sha256": "20fafbfe0f2ecebfd8b795cb87046778e13f0637b6aa26dbf38fb28308cecd43"
+    }
+  ],
+  "bundles": [
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2475540,
+      "sha256": "c73c01c53124c9fd329faecfc1b894b17902304c4821ec7aba393cdb71af1c77"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1324073,
+      "sha256": "74e74e9efc39d989979a9376101905cd0375265779c13f684ac45c1188e6ab36"
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/fixture.html",
+      "bytes": 3165,
+      "sha256": "2b81850f8f681e24c052d3a71ee102fdf226be9db19866de2da9f23d93e7304a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/report.json",
+      "bytes": 7271,
+      "sha256": "1e0c0e73e22b9ee5158f8dc48e4bf9c49fa5390179facd020c0b4b198cc44c29"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/source-boundary.json",
+      "bytes": 1459,
+      "sha256": "7cf248bf4642e338ebcb0ea947e09c857a5179c504338ae9de2b8a6f6958f619"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/source-edge-aerial.png",
+      "bytes": 28561,
+      "sha256": "6cd3c891bc982c777c45644a74106efefd9588ff7aecca1584c75de341e97749"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/source-edge-return-camera.png",
+      "bytes": 45947,
+      "sha256": "7c69223ed3ebeb0e5f83f52d5f5711391700fceb2d45403ebd5ea5c54e84611a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/source-edge-reverse-camera.png",
+      "bytes": 68460,
+      "sha256": "1226b13a6c9936bddb29adabd579a5b9e7c93ec999eaf051b0eae9608aa1f938"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/source-frame.json",
+      "bytes": 579579,
+      "sha256": "ce2078e1ffa625853e3d663af0d08d5f1c6a5284fe69ae997b3154a5b2929042"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-terrain-assets/office-source-boundary-20261017/texture-check.entry.js",
+      "bytes": 2346,
+      "sha256": "2f12d8f6d364532bfe69559a9b6c1b87cecdffcfd6f7ff266e58ccaab232b0a9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-source-boundary-20261017.log",
+      "bytes": 128,
+      "sha256": "72ce5eb610218d909cba028508d52bca3bf56abe97a05357dd587e3afceb7a87"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-source-boundary-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-source-boundary/scenery-coverage.json",
+      "bytes": 3123,
+      "sha256": "9ed251ca37602f18f6e9bf8622d0094b1ac95c3c82ef7962e54363606beb1fa8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-source-boundary-scenery-20261017.log",
+      "bytes": 686,
+      "sha256": "ca21d59749dec74df74ad0afcaa31d3cc17b8cf026ec72c87531272f670ccddf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-camera-depth-native-20261017/report.json",
+      "bytes": 173613,
+      "sha256": "3d301eec98f0e2a8d618ed6e7b2333db7a44097a7ae3ffa0db0324b5a392078f"
+    }
+  ],
+  "serverAfter": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "priorEvidence": [
+    "docs/render-evidence/office-camera-depth-20261017.json",
+    "docs/render-evidence/fps-live-20261017-camera-depth.json",
+    "docs/render-evidence/office-source-terrain-20261016.json"
+  ],
+  "limits": [
+    "The three source views were all visually inspected. Native/CPU checks do not establish complete visual fidelity.",
+    "Temporal footprints, distant scenery, remaining camera/lighting/gameplay/network/audio verification and water optics remain incomplete.",
+    "Only QA tooling and evidence/docs changed in this step. The Game bundle matches the 58.7034 FPS measurement; no new FPS measurement was made.",
+    "No authority restart, account possession, save migration, physical microphone capture or playback. Existing WS audio-reference 503 / C920 limitations are not repaired here."
+  ],
+  "counts": {
+    "sources": 18,
+    "bundles": 2,
+    "artifacts": 13,
+    "pngs": 3,
+    "reviewedPngs": 3
+  }
+}

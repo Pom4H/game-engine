@@ -8,10 +8,10 @@ import {Scene} from '../scene/scene.js';
 import {decodeWorldBinary} from '../scene/world-binary.js';
 import type {EngineEvent} from '../scene/events.js';
 import type {AppearancePatch,CameraSpec,SceneSpec} from '../scene/types.js';
-import {WebGPURenderer} from '../render/webgpu.js';
+import {WebGPURenderer,type WebGPURendererOptions} from '../render/webgpu.js';
 import type {EngineBridge,RenderStats,Renderer} from '../render/types.js';
 
-export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean;profile?:SimulationProfileInput}
+export interface BrowserRuntimeOptions {tickRate?:number;autoplay?:boolean;exposeBridge?:boolean;audio?:boolean;resolution?:readonly [number,number];controlledWalker?:string;profiling?:boolean;visibility?:WebGPURendererOptions['visibility'];logarithmicDepthFar?:number;environmentMaps?:'synchronous'|'background';profile?:SimulationProfileInput}
 
 export class BrowserRuntime {
   scene:Scene;
@@ -34,9 +34,10 @@ export class BrowserRuntime {
 
   static async create(canvas:HTMLCanvasElement,scene:SceneSpec|ArrayBuffer|Uint8Array,options:BrowserRuntimeOptions={}):Promise<BrowserRuntime>{
     const authored=scene instanceof ArrayBuffer||scene instanceof Uint8Array?decodeWorldBinary(scene):scene;
-    const renderer=await WebGPURenderer.create(canvas,{profiling:options.profiling??false});let runtime:BrowserRuntime|undefined;
+    const renderer=await WebGPURenderer.create(canvas,{profiling:options.profiling??false,visibility:options.visibility??'cpu',...(options.logarithmicDepthFar!==undefined?{logarithmicDepthFar:options.logarithmicDepthFar}:{})});let runtime:BrowserRuntime|undefined;
     try{
       runtime=new BrowserRuntime(canvas,authored,renderer,options);
+      if(options.environmentMaps==='background')renderer.setBackgroundEnvironmentMaps(true);
       if(options.resolution)renderer.setResolution(...options.resolution);
       if(options.controlledWalker)runtime.controlWalker(options.controlledWalker);
       await renderer.prepareMaterials(runtime.scene);runtime.render();if(options.autoplay!==false)runtime.resume();
@@ -59,11 +60,12 @@ export class BrowserRuntime {
     return this.controls;
   }
   async activateAudio():Promise<boolean>{const ready=this.audio?await this.audio.unlock():false;if(ready)this.audio?.updateAmbient(this.ambientAudioState());return ready;}
+  releaseWalker():void{if(this.controls){this.controls.setActive(false);this.controls.tick(this.scene,0);this.controls.dispose();this.controls=null;}}
   resume():void{if(this.disposed||this.running)return;this.running=true;this.clock.reset(performance.now());this.raf=requestAnimationFrame(this.frame);}
   step(count=1){
     if(!Number.isSafeInteger(count)||count<1||count>1_000_000)throw new RangeError('step count must be an integer in [1, 1000000]');
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];for(let i=0;i<count;i++){this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());}
-    this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
+    this.audio?.play(events,this.scene.camera,this.scene.time);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   seek(seconds:number){
     if(!Number.isFinite(seconds)||seconds<0||seconds>86_400)throw new RangeError('seek time must be within one day');
@@ -73,14 +75,14 @@ export class BrowserRuntime {
     this.audio?.updateAmbient(this.ambientAudioState());this.render();return this.scene.snapshot();
   }
   reset():void{this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);this.render();}
-  async replaceScene(scene:SceneSpec|ArrayBuffer|Uint8Array):Promise<void>{
+  async replaceScene(scene:SceneSpec|ArrayBuffer|Uint8Array,waitForGpu=true):Promise<void>{
     const authored=scene instanceof ArrayBuffer||scene instanceof Uint8Array?decodeWorldBinary(scene):scene;
     this.pause();
     this.controls?.dispose();this.controls=null;
     this.initial=structuredClone(authored);
     this.scene=new Scene(this.initial);this.scene.setSimulationProfile(this.simulationProfile);
     await this.renderer.prepareMaterials?.(this.scene);
-    this.render();await this.renderer.flush();
+    this.render();if(waitForGpu)await this.renderer.flush();
   }
   setSimulationProfile(input:SimulationProfileInput):SimulationProfile{
     const profile=simulationProfile(input);
@@ -92,7 +94,7 @@ export class BrowserRuntime {
   }
   patchAppearance(patch:AppearancePatch):void{this.pause();this.scene.patchAppearance(patch);}
   setCamera(camera:CameraSpec):void{this.scene.setCamera(camera);this.render();}
-  render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect();}
+  render():RenderStats{this.controls?.camera(this.scene);this.renderer.render(this.scene);return this.renderer.inspect(false);}
   async drain():Promise<void>{await this.renderer.flush();}
   async probeLinear(points:readonly (readonly [number,number])[],stage:import('../render/types.js').LinearPixelStage='hdr'){if(!this.renderer.sampleLinearPixels)throw new Error('Renderer does not support scene-linear pixel readback');await this.renderer.flush();return await this.renderer.sampleLinearPixels(points,stage);}
   async flush():Promise<void>{await this.renderer.prepareMaterials?.(this.scene);this.render();await this.renderer.flush();}
@@ -132,6 +134,6 @@ export class BrowserRuntime {
     if(!this.running)return;
     const events:EngineEvent[]=[],footsteps:FootstepSound[]=[];
     this.clock.advance(now,()=>{this.controls?.tick(this.scene,this.stepSeconds);this.scene.step(this.stepSeconds);events.push(...this.scene.drainEvents());footsteps.push(...this.scene.contacts.drainFootsteps());});
-    this.audio?.play(events);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();this.raf=requestAnimationFrame(this.frame);
+    this.audio?.play(events,this.scene.camera,this.scene.time);this.audio?.playFootsteps(footsteps,this.scene.camera,this.scene.time);this.audio?.updateAmbient(this.ambientAudioState());this.render();this.raf=requestAnimationFrame(this.frame);
   };
 }

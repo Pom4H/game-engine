@@ -1,0 +1,347 @@
+{
+  "status": "rejected-production-candidate",
+  "experiment": "Frozen material cause certificates",
+  "report": "artifacts/engine-compare/radiance-cause-plan-paired/report.json",
+  "archive": "artifacts/engine-compare/radiance-cause-plan-paired/measured-state",
+  "sourceState": {
+    "srcSha256": "f06c0f7309bb092d6e52168ce48ce640468f80f58564153b22a9d3a8c67ea8f4",
+    "distSha256": "3785a3ebd24226ba30d4552b51ec237b614c0636e536d7f7abc2747dd6f093b2",
+    "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+    "diagnosticSha256": "9e7064a3e985f0e406184e301c106b35f30c802fdb49e2795759c7fc72698159"
+  },
+  "gates": {
+    "nativeTimestamps": true,
+    "variantsExecuted": true,
+    "physicalReplay": true,
+    "environmentCausesExact": true,
+    "gpuWorkExact": true,
+    "finalCanonicalStages": true,
+    "cpuCombinedImproved": false
+  },
+  "runs": [
+    {
+      "scenario": "static",
+      "pairs": 128,
+      "modes": {
+        "baseline": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.899999976158142,
+            "mean": 1.3437499981373549
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.024218751583248377
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.9000000357627869,
+            "mean": 1.3679687497206032
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.399999976158142,
+            "p95": 5.300000011920929,
+            "mean": 4.4070312469266355
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.824879999999999,
+            "p95": 12.848559999999999,
+            "mean": 11.855841406250004
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        },
+        "candidate": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 2.199999988079071,
+            "mean": 1.452343750745058
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.01796874962747097
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 2.199999988079071,
+            "mean": 1.470312500372529
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.5,
+            "p95": 5.699999988079071,
+            "mean": 4.616406248416752
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.7624,
+            "p95": 12.805599999999998,
+            "mean": 11.788566875
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        }
+      },
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": 5.960464477539063e-8,
+        "p95": 0.9000000357627869,
+        "mean": 0.1023437506519258
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": 0,
+        "p95": 2,
+        "mean": 0.20937500149011612
+      },
+      "improvedPairs": 47,
+      "byFirst": {
+        "baseline": {
+          "samples": 64,
+          "p50": 0,
+          "p95": 0.800000011920929,
+          "mean": 0.09531249478459358
+        },
+        "candidate": {
+          "samples": 64,
+          "p50": 0.09999996423721313,
+          "p95": 0.9000000357627869,
+          "mean": 0.10937500651925802
+        }
+      }
+    },
+    {
+      "scenario": "camera-motion",
+      "pairs": 128,
+      "modes": {
+        "baseline": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 1.899999976158142,
+            "mean": 1.395312502514571
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.017968748230487108
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 1.899999976158142,
+            "mean": 1.413281250745058
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.400000035762787,
+            "p95": 5.899999976158142,
+            "mean": 4.573437500745058
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.729880000000001,
+            "p95": 12.9308,
+            "mean": 11.8298946875
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        },
+        "candidate": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 2,
+            "mean": 1.422656245995313
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.01328125037252903
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 2,
+            "mean": 1.435937496367842
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.5,
+            "p95": 6.399999976158142,
+            "mean": 4.717968748416752
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.7304,
+            "p95": 13.147279999999999,
+            "mean": 11.866647187500007
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        }
+      },
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": 0,
+        "p95": 0.6000000238418579,
+        "mean": 0.0226562456227839
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": 0,
+        "p95": 1.899999976158142,
+        "mean": 0.14453124767169356
+      },
+      "improvedPairs": 58,
+      "byFirst": {
+        "baseline": {
+          "samples": 64,
+          "p50": 0,
+          "p95": 0.6000000238418579,
+          "mean": 0.040624997578561306
+        },
+        "candidate": {
+          "samples": 64,
+          "p50": 0,
+          "p95": 0.6000000238418579,
+          "mean": 0.004687493667006493
+        }
+      }
+    }
+  ],
+  "quality": [
+    {
+      "mode": "candidate",
+      "repetition": 0,
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "candidate",
+      "repetition": 0,
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "candidate",
+      "repetition": 0,
+      "stage": "taa",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "baseline",
+      "repetition": 1,
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "baseline",
+      "repetition": 1,
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "baseline",
+      "repetition": 1,
+      "stage": "taa",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "candidate",
+      "repetition": 1,
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "candidate",
+      "repetition": 1,
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "mode": "candidate",
+      "repetition": 1,
+      "stage": "taa",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    }
+  ],
+  "causeChecks": 256,
+  "productionCandidateRetained": false,
+  "decision": "Rejected: both 128-pair camera routes cost more CPU on average under both first-variant orders. Physical replay, environment causes, GPU work and final opaque/HDR/TAA agree. Exact candidate source/build/tool archive is retained.",
+  "tests": {
+    "passed": 316,
+    "failed": 0,
+    "log": "artifacts/radiance-cause-plan-check.log"
+  }
+}

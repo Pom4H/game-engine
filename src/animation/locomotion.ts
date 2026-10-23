@@ -1,6 +1,8 @@
 import {V3,finiteVec3,compose,multiply4,type MutableVec3,type Vec3} from '../math.js';
 import type {FootContact} from '../environment/footprints.js';
 import type {RuntimeEntity} from '../scene/scene.js';
+import {VehicleRoute,type VehicleRouteSpec} from './route.js';
+import {quaternionFromEuler} from '../physics/rotation.js';
 
 export interface GroundSample {readonly height:number;readonly snowDepth?:number}
 export type GroundSampler=(position:Vec3)=>GroundSample|undefined;
@@ -92,7 +94,7 @@ export interface RigTransform {readonly entity:string;readonly position:Vec3;rea
 /** Visual/static parts receive poses directly; kinematic parts receive target
  * velocities and reach the same pose through the subsequent physics step. */
 export interface VehiclePart {readonly id:string;readonly origin:Vec3;readonly wheel?:boolean;readonly radius?:number;readonly rotation?:Vec3;readonly wheelAxis?:0|1|2}
-export interface VehicleMotionSpec {readonly id:string;readonly velocity:Vec3;readonly parts:readonly VehiclePart[];readonly startTime?:number}
+export interface VehicleMotionSpec {readonly id:string;readonly velocity:Vec3;readonly parts:readonly VehiclePart[];readonly startTime?:number;readonly route?:VehicleRouteSpec}
 
 const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
 function world(local:Vec3,root:Vec3,heading:number):MutableVec3 {const c=Math.cos(heading),s=Math.sin(heading);return[root[0]+c*local[0]+s*local[2],root[1]+local[1],root[2]-s*local[0]+c*local[2]];}
@@ -210,6 +212,7 @@ export function bindHumanoid(pose:HumanoidPose,bindings:readonly HumanoidBinding
 /** Engine-owned actor poses. Scene invokes this once at its authoritative
  * simulation time; cinematics only author rigs/routes and read these results. */
 export class AnimationSystem {
+ private readonly routes=new Map<string,VehicleRoute>();
  private readonly walkers=new Map<string,WalkerSpec>();private readonly vehicles=new Map<string,VehicleMotionSpec>();
  private readonly poses=new Map<string,HumanoidPose>();private time=0;
  private readonly driven=new Map<string,{position:Vec3;heading:number;speed:number;time:number}>();
@@ -235,7 +238,8 @@ export class AnimationSystem {
   if(!input.id||input.id.length>160||this.walkers.has(input.id)||this.vehicles.has(input.id))throw new TypeError('Vehicle requires a distinct stable id');finiteVec3(input.velocity,'Vehicle velocity');
   if(!Number.isFinite(input.startTime??0)||(input.startTime??0)<0)throw new RangeError('Vehicle start time must be nonnegative');
   const ids=new Set<string>();for(const part of input.parts){if(!part.id||ids.has(part.id))throw new TypeError('Vehicle parts require distinct ids');ids.add(part.id);finiteVec3(part.origin,'Part origin');if(part.rotation)finiteVec3(part.rotation,'Part rotation');if(part.wheel&&(!Number.isFinite(part.radius)||part.radius!<=0))throw new RangeError('Wheel radius must be positive');if(part.wheelAxis!==undefined&&![0,1,2].includes(part.wheelAxis))throw new TypeError('Invalid wheel axis');}
-  this.vehicles.set(input.id,structuredClone(input));
+  const route=input.route?new VehicleRoute(input.route):undefined;
+  this.vehicles.set(input.id,structuredClone(input));if(route)this.routes.set(input.id,route);
  }
  /** Take control of an existing rig. Integration remains in the simulation tick. */
  driveWalker(id:string,speed:number,heading:number):void {
@@ -246,7 +250,7 @@ export class AnimationSystem {
  }
  remove(id:string):void {
   this.driven.delete(id);this.upperBodyLayers.delete(id);
-  this.walkers.delete(id);this.vehicles.delete(id);this.poses.delete(id);
+  this.walkers.delete(id);this.vehicles.delete(id);this.routes.delete(id);this.poses.delete(id);
   // IDs may themselves contain colons. Rebuild from exact actor ownership,
   // rather than treating an actor ID as a namespace prefix for other actors.
   this.publishedFeet=Object.freeze([...this.poses.values()].flatMap(pose=>pose.feet));
@@ -270,14 +274,22 @@ export class AnimationSystem {
  pose(id:string):HumanoidPose|undefined{return this.poses.get(id);}
  step(time:number,entities:ReadonlyMap<string,RuntimeEntity>,terrain?:GroundSampler):void {
   if(!Number.isFinite(time)||time<this.time)throw new RangeError('Animation time must be monotonic');
-  const dt=time-this.time,updates:RigTransform[]=[],poses=new Map<string,HumanoidPose>(),drivenUpdates=new Map<string,{position:Vec3;heading:number;speed:number;time:number}>();
+  const dt=time-this.time,updates:RigTransform[]=[],poses=new Map<string,HumanoidPose>(),routed=new Set<string>(),drivenUpdates=new Map<string,{position:Vec3;heading:number;speed:number;time:number}>();
   for(const [id,spec] of this.walkers){const currentDriven=this.driven.get(id),driven=currentDriven?{...currentDriven}:undefined;let pose:HumanoidPose;
    if(driven){driven.time+=dt;driven.position=V3.add(driven.position,[Math.cos(driven.heading)*driven.speed*dt,0,-Math.sin(driven.heading)*driven.speed*dt]);
     const distance=driven.speed*driven.time,root:Vec3=[driven.position[0]-Math.cos(driven.heading)*distance,driven.position[1],driven.position[2]+Math.sin(driven.heading)*distance];
     pose=sampleWalker({...spec,root,speed:driven.speed,heading:driven.heading},driven.time,terrain,this.poses.get(id));driven.position=pose.position;drivenUpdates.set(id,driven);
    }else pose=sampleWalker(spec,time,terrain,this.poses.get(id));
    pose=withUpperBody(pose,this.upperBodyLayers.get(id)?.(pose,time));poses.set(id,pose);updates.push(...bindHumanoid(pose,spec.bindings??[]));}
-  for(const spec of this.vehicles.values())for(const part of spec.parts){const t=Math.max(0,time-(spec.startTime??0)),rotation:MutableVec3=[...(part.rotation??[0,0,0])];if(part.wheel)rotation[part.wheelAxis??2]-=V3.length(spec.velocity)*t/part.radius!;updates.push({entity:part.id,position:V3.add(part.origin,V3.scale(spec.velocity,t)),rotation,scale:entities.get(part.id)?.scale??[1,1,1]});}
+  for(const spec of this.vehicles.values()){
+   const t=Math.max(0,time-(spec.startTime??0)),speed=V3.length(spec.velocity),route=this.routes.get(spec.id),pose=route?.sample(speed*t+(spec.route?.offsetM??0));
+   for(const part of spec.parts){
+    const rotation:MutableVec3=[...(part.rotation??[0,0,0])];if(part.wheel)rotation[part.wheelAxis??2]-=speed*t/part.radius!;
+    if(pose){rotation[1]+=pose.heading;routed.add(part.id);}
+    const position=pose?world(V3.sub(part.origin,spec.route!.points[0]!),pose.position,pose.heading):V3.add(part.origin,V3.scale(spec.velocity,t));
+    updates.push({entity:part.id,position,rotation,scale:entities.get(part.id)?.scale??[1,1,1]});
+   }
+  }
   // Complete validation before changing transforms or velocities: a malformed
   // rig cannot leave half of an actor at a different simulation instant.
   const prepared:{entity:RuntimeEntity;transform:RigTransform;velocity?:Vec3;angularVelocity?:Vec3}[]=[];
@@ -286,7 +298,10 @@ export class AnimationSystem {
    if(entity.body?.invMass)throw new TypeError(`Dynamic body ${entity.id} owns its pose; animated bodies must be kinematic or static`);
    finiteVec3(transform.position,'Animated position');finiteVec3(transform.rotation,'Animated rotation');finiteVec3(transform.scale,'Animated scale');
    if(entity.body?.kinematic&&dt>0){
-    const velocity=V3.scale(V3.sub(transform.position,entity.body.position),1/dt),angularVelocity=V3.scale(V3.sub(transform.rotation,entity.body.rotation),1/dt);
+    const velocity=V3.scale(V3.sub(transform.position,entity.body.position),1/dt);
+    // Physics consumes world angular velocity, not Euler rates. A turning wheel
+    // must roll about its rotated axle and cross the heading seam continuously.
+    const angularVelocity=routed.has(entity.id)?routeAngularVelocity(entity.body.rotation,transform.rotation,dt):V3.scale(V3.sub(transform.rotation,entity.body.rotation),1/dt);
     finiteVec3(velocity,'Animated linear velocity');finiteVec3(angularVelocity,'Animated angular velocity');prepared.push({entity,transform,velocity,angularVelocity});
    }else prepared.push({entity,transform});
   }
@@ -309,4 +324,16 @@ export class AnimationSystem {
    for(const foot of pose.feet){Object.freeze(foot.position);Object.freeze(foot);}Object.freeze(pose.feet);Object.freeze(pose);this.poses.set(id,pose);
   }this.publishedFeet=Object.freeze([...poses.values()].flatMap(pose=>pose.feet));this.time=time;
  }
+}
+
+function routeAngularVelocity(from:Vec3,to:Vec3,dt:number):Vec3{
+ const a=quaternionFromEuler(from),b=quaternionFromEuler(to);
+ // qTarget * conjugate(qCurrent), in world coordinates.
+ let x=-b[3]!*a[0]!+b[0]!*a[3]!-b[1]!*a[2]!+b[2]!*a[1]!;
+ let y=-b[3]!*a[1]!+b[0]!*a[2]!+b[1]!*a[3]!-b[2]!*a[0]!;
+ let z=-b[3]!*a[2]!-b[0]!*a[1]!+b[1]!*a[0]!+b[2]!*a[3]!;
+ let w=b[3]!*a[3]!+b[0]!*a[0]!+b[1]!*a[1]!+b[2]!*a[2]!;
+ if(w<0){x=-x;y=-y;z=-z;w=-w;}const length=Math.hypot(x,y,z);
+ if(length<1e-12)return[0,0,0];const gain=2*Math.atan2(length,w)/(length*dt);
+ return[x*gain,y*gain,z*gain];
 }

@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-18",
+  "scope": "Game avatar foot-ground cache correctness. No physics, client provider, quality settings, native captures or performance builds changed by this patch.",
+  "sourceFiles": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\presentation.ts",
+      "sha256": "2c6b8f5dcac8a64782f42dac66ee42e562852ce63d1715905adb9bb06ab07144"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\avatar-ground-cache.test.ts",
+      "sha256": "f2d51c41be62e54c51a40ebdfc3959b35ff47f3438f70194c2023b7d24447cd9"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\client.ts",
+      "sha256": "b4eea991af010eabedbd61a91680ab38915347b37a7e2cc81266610cd5b5a0ec"
+    }
+  ],
+  "preCorrectionProof": {
+    "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\snow-surface-visual-audit.json",
+    "sha256": "a6afc23f03be4de6f4b874119706885c1ec0f8249e58babe84924a88dc4b419e",
+    "scope": "Synthetic ground callback changes .65 to .45 while actual captured pose stays identical; independent actor ID bypasses the existing footPlant cache. No physical actor or live field changed.",
+    "first": {
+      "queriedGroundY": 0.65,
+      "groundQueries": 4,
+      "headWorldY": 2.19,
+      "shoeGeometry": [
+        {
+          "centreY": 0.7250000238418579,
+          "bottomY": 0.6560000255703926
+        },
+        {
+          "centreY": 0.7250000238418579,
+          "bottomY": 0.6560000255703926
+        }
+      ],
+      "headGeometry": [
+        {
+          "centreY": 2.190000057220459,
+          "bottomY": 2.0300000607967377
+        }
+      ],
+      "instanceBytesSha256": "b3e5b99b97db8a1c25d18ac522994a96f5901164dc0f044a3d839ab5d082b8dc"
+    },
+    "stale": {
+      "queriedGroundY": 0.45,
+      "groundQueries": 0,
+      "headWorldY": 2.19,
+      "shoeGeometry": [
+        {
+          "centreY": 0.7250000238418579,
+          "bottomY": 0.6560000255703926
+        },
+        {
+          "centreY": 0.7250000238418579,
+          "bottomY": 0.6560000255703926
+        }
+      ],
+      "headGeometry": [
+        {
+          "centreY": 2.190000057220459,
+          "bottomY": 2.0300000607967377
+        }
+      ],
+      "instanceBytesSha256": "b3e5b99b97db8a1c25d18ac522994a96f5901164dc0f044a3d839ab5d082b8dc"
+    },
+    "freshEquivalentActor": {
+      "queriedGroundY": 0.45,
+      "groundQueries": 4,
+      "headWorldY": 1.9900000000000002,
+      "shoeGeometry": [
+        {
+          "centreY": 0.5249999761581421,
+          "bottomY": 0.4559999778866768
+        },
+        {
+          "centreY": 0.5249999761581421,
+          "bottomY": 0.4559999778866768
+        }
+      ],
+      "headGeometry": [
+        {
+          "centreY": 1.9900000095367432,
+          "bottomY": 1.8300000131130219
+        }
+      ],
+      "instanceBytesSha256": "863e66366f031bb1c5129de547225f0158643263d73ae61e034090ddf042e07a"
+    },
+    "staleWorldHeightM": 0.19999999999999973,
+    "provenancePath": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\snow-surface-visual-audit-provenance.json"
+  },
+  "implementation": {
+    "api": "Callable GroundHeightAt optionally exposes cacheCause(x,y,z,yaw,animation,phase): unknown. Coordinates are absolute actor pose; yaw includes combat turn. Provider identity namespaces its opaque token; ground callback identity alone never authorizes reuse.",
+    "known": "Non-null/non-undefined stable token, same provider, exact x/y/z/yaw/animation/phase/detailed. Object.is compares token and numeric pose. No tolerance drift is admitted without a coverage contract.",
+    "unknown": "Unversioned callback or null/undefined cause resamples every detailed on-foot draw and removes old cache entries.",
+    "sampling": "Keep valid partial support for current output, but never cache when any adaptive or expanded sole probe is missing or nonfinite. Recheck cause after sampling; a changed cause cannot cache a mixed result.",
+    "boundaries": [
+      "jump",
+      "fall",
+      "down",
+      "vehicle seat or boarding including unloaded vehicle",
+      "object seat",
+      "micro mobility",
+      "reduced-detail LOD",
+      "absent ground callback"
+    ],
+    "cleanup": "Existing dynamicScene membership cleanup remains in place; no new historical token registry or unbounded cause cache."
+  },
+  "validation": {
+    "focused": {
+      "command": "C:\\Users\\Roman\\.bun\\bin\\bun.exe test ./test/avatar-ground-cache.test.ts",
+      "exitCode": 0,
+      "tests": 11,
+      "assertions": 1451
+    },
+    "related": {
+      "command": "C:\\Users\\Roman\\.bun\\bin\\bun.exe test ./test/avatar-ground-cache.test.ts ./test/humanoid-gait.test.ts ./test/humanoid-style.test.ts ./test/cramped-cabin-animation.test.ts ./test/presentation-budget.test.ts ./test/lift-presentation.test.ts",
+      "exitCode": 0,
+      "tests": 29,
+      "files": 6,
+      "assertions": 22014
+    },
+    "typecheck": {
+      "command": "C:\\Users\\Roman\\.bun\\bin\\bun.exe run typecheck",
+      "exitCode": 0
+    },
+    "outputOracles": [
+      "Actual detailed shoe ellipsoid bottoms, head ellipsoid centre and avatar-head anchor move .2m for stationary support .65 to .45; every emitted instance value stays finite.",
+      "Stable explicit cause gives byte-identical full instance output with no additional ground probes (4 initial flat probes, 0 on repeated exact pose).",
+      "Synthetic far-only state change leaves local cause stable and retains hits even through fresh ground callback wrappers sharing the stable provider. This is an API oracle, not an integrated world-provider claim.",
+      "Different provider namespaces, unknown causes, exact pose changes, incomplete adaptive/expanded probes, cause change during sampling, moving support and all reentry boundaries are covered."
+    ]
+  },
+  "providerAssessment": {
+    "currentMainClient": "The client still supplies a fresh bare collision.floor callback; cacheCause is absent. Detailed on-foot ground sampling is correctly uncached. Its production timing/query-count impact remains unmeasured.",
+    "needed": [
+      "Track rotated union of all adaptive and expanded sole probes, from actorY+2 across floor range4.",
+      "Include snow enabled state, local 8m tile column signatures, climate cold state and exposure/substrate validity. columnSignature takes integer tile coordinates, not world coordinates.",
+      "Track local static and plane membership, shape and enable changes, plus dynamic support pose/shape and entry or exit.",
+      "Incremental streaming installs physics shapes before the final streaming revision commit. Lift cabin.p/cachedBoxes and gate.enabled mutate independently. Client syncBodies updates dynamic p/q directly. Existing global streaming or snow revision alone does not prove local sampling invariance.",
+      "Use stable read-only provider, bounded locally retained opaque tokens, and unknown for untracked mutable sources. Do not use fresh callback identity or broad global snow invalidation as a substitute."
+    ]
+  },
+  "limitations": [
+    "No FPS, frame-tail, native GPU or production cache-performance claim.",
+    "The isolated stale cache reproduction establishes a real invalidation defect, not the exact causal history of the captured screenshot.",
+    "The captured report lacks its actual SnowSnapshot and local snow tile tessellation state; coarse snow-grid screenshot attribution remains unresolved. No vehicle-wheel defect was established.",
+    "Worker extension integration is owned and validated separately; this evidence records the scoped avatar correction only."
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "passed",
+  "change": "Route single-cell queries requiring oversized-member merging or enclosing-ray ordering through the existing bounded query cache; retain the plain single-bucket fast path.",
+  "source": "src/core/spatial-hash.ts",
+  "cause": {
+    "profile": "../thegame/artifacts/network-stability-20261018/population-before.md",
+    "observation": "The authority CPU profile identified repeated spatial query ordering as a hot path. Expensive single-cell queries previously bypassed the cache and sorted on every ray.",
+    "profileDurationSeconds": 21.91,
+    "orderingComparatorSelfMs": 714.4,
+    "sortInclusiveMs": 1280
+  },
+  "microbenchmark": {
+    "scope": "Isolated repeated single-cell queries; old dist versus current source under Bun. Not full authority performance.",
+    "queriesPerScenario": 10000,
+    "membership": "Identical returned counts in each before/after scenario; exact enumeration order verified separately by regression tests.",
+    "scenarios": [
+      {
+        "oversized": false,
+        "count": 64,
+        "rows": [
+          {
+            "name": "before",
+            "elapsedMs": 33.47670000000001,
+            "queries": 10000,
+            "returned": 640000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 0,
+              "cachedQueries": 0,
+              "cachedReferences": 0,
+              "cacheHits": 0,
+              "cacheMisses": 0
+            }
+          },
+          {
+            "name": "after",
+            "elapsedMs": 10.754099999999994,
+            "queries": 10000,
+            "returned": 640000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 0,
+              "cachedQueries": 1,
+              "cachedReferences": 64,
+              "cacheHits": 10099,
+              "cacheMisses": 1
+            }
+          }
+        ],
+        "speedup": 3.1129243730298235
+      },
+      {
+        "oversized": false,
+        "count": 256,
+        "rows": [
+          {
+            "name": "before",
+            "elapsedMs": 67.9342,
+            "queries": 10000,
+            "returned": 2560000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 0,
+              "cachedQueries": 0,
+              "cachedReferences": 0,
+              "cacheHits": 0,
+              "cacheMisses": 0
+            }
+          },
+          {
+            "name": "after",
+            "elapsedMs": 19.395399999999995,
+            "queries": 10000,
+            "returned": 2560000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 0,
+              "cachedQueries": 1,
+              "cachedReferences": 256,
+              "cacheHits": 10099,
+              "cacheMisses": 1
+            }
+          }
+        ],
+        "speedup": 3.5025933984346813
+      },
+      {
+        "oversized": false,
+        "count": 1024,
+        "rows": [
+          {
+            "name": "before",
+            "elapsedMs": 225.79729999999998,
+            "queries": 10000,
+            "returned": 10240000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 0,
+              "cachedQueries": 0,
+              "cachedReferences": 0,
+              "cacheHits": 0,
+              "cacheMisses": 0
+            }
+          },
+          {
+            "name": "after",
+            "elapsedMs": 26.373099999999965,
+            "queries": 10000,
+            "returned": 10240000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 0,
+              "cachedQueries": 1,
+              "cachedReferences": 1024,
+              "cacheHits": 10099,
+              "cacheMisses": 1
+            }
+          }
+        ],
+        "speedup": 8.561651834634544
+      },
+      {
+        "oversized": true,
+        "count": 64,
+        "rows": [
+          {
+            "name": "before",
+            "elapsedMs": 28.86420000000004,
+            "queries": 10000,
+            "returned": 640000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 8,
+              "cachedQueries": 0,
+              "cachedReferences": 0,
+              "cacheHits": 0,
+              "cacheMisses": 0
+            }
+          },
+          {
+            "name": "after",
+            "elapsedMs": 4.511500000000012,
+            "queries": 10000,
+            "returned": 640000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 8,
+              "cachedQueries": 1,
+              "cachedReferences": 64,
+              "cacheHits": 10099,
+              "cacheMisses": 1
+            }
+          }
+        ],
+        "speedup": 6.397916435775232
+      },
+      {
+        "oversized": true,
+        "count": 256,
+        "rows": [
+          {
+            "name": "before",
+            "elapsedMs": 62.337699999999984,
+            "queries": 10000,
+            "returned": 2560000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 29,
+              "cachedQueries": 0,
+              "cachedReferences": 0,
+              "cacheHits": 0,
+              "cacheMisses": 0
+            }
+          },
+          {
+            "name": "after",
+            "elapsedMs": 7.4172000000000935,
+            "queries": 10000,
+            "returned": 2560000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 29,
+              "cachedQueries": 1,
+              "cachedReferences": 256,
+              "cacheHits": 10099,
+              "cacheMisses": 1
+            }
+          }
+        ],
+        "speedup": 8.404478779053983
+      },
+      {
+        "oversized": true,
+        "count": 1024,
+        "rows": [
+          {
+            "name": "before",
+            "elapsedMs": 233.92129999999997,
+            "queries": 10000,
+            "returned": 10240000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 114,
+              "cachedQueries": 0,
+              "cachedReferences": 0,
+              "cacheHits": 0,
+              "cacheMisses": 0
+            }
+          },
+          {
+            "name": "after",
+            "elapsedMs": 27.72320000000002,
+            "queries": 10000,
+            "returned": 10240000,
+            "diagnostics": {
+              "cells": 1,
+              "oversizedItems": 114,
+              "cachedQueries": 1,
+              "cachedReferences": 1024,
+              "cacheHits": 10099,
+              "cacheMisses": 1
+            }
+          }
+        ],
+        "speedup": 8.43774528192993
+      }
+    ]
+  },
+  "validation": {
+    "engine": {
+      "passed": 18,
+      "failed": 0,
+      "files": [
+        "test/spatial-broadphase.test.mjs",
+        "test/compound-physics.test.mjs",
+        "test/contact-laws.test.mjs"
+      ]
+    },
+    "canonical": {
+      "passed": 63,
+      "failed": 0,
+      "assertions": 8826,
+      "files": [
+        "../thegame/test/the-engine-compound.test.ts",
+        "../thegame/test/physics.test.js",
+        "../thegame/test/spatial.test.js",
+        "../thegame/test/sleeping.test.ts",
+        "../thegame/test/wheel-contact.test.ts",
+        "../thegame/test/vehicle-crash-regression.test.ts"
+      ],
+      "exactOracle": "Former compound kernel and current Engine retain exactly matching states, contacts and impulses."
+    },
+    "typecheck": "passed",
+    "regressions": [
+      "512 repeated single-cell ray queries perform no additional ordering comparisons after the first cache fill.",
+      "Enclosing-query enumeration order remains exact, including oversized members.",
+      "Returned arrays remain independent from cached entries.",
+      "Add, remove, batched mutations and clear invalidate the cached results.",
+      "Cache remains bounded to 128 queries and 16384 references."
+    ]
+  },
+  "limitations": [
+    "The microbenchmark isolates repeated spatial queries under Bun. It does not establish authority tick time or game FPS.",
+    "The authority profile identifies overlapping inclusive costs; those rows must not be summed.",
+    "No simulation frequency, geometry fidelity, contact ordering or physical solver arithmetic changed."
+  ]
+}

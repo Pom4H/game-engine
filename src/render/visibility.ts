@@ -9,13 +9,39 @@ export function meshBounds(vertices:Float32Array):MeshBounds{
 /** Conservative box/clip-plane test. WebGPU's near plane is z=0, not z=-w.
  * Test each pass independently: offscreen objects can still cast visible shadows
  * or appear in the mirrored camera. Straddling boxes must never disappear. */
-export function intersectsClip(bounds:MeshBounds,m:Mat4):boolean{
+export function intersectsClip(bounds:MeshBounds,m:Mat4,displacement?:{projection:Mat4;worldY:number}):boolean{
  for(let plane=0;plane<6;plane++){
   const row=plane>>1,sign=(plane&1)?-1:1,near=plane===4;
   const a=near?m[2]!:m[3]!+sign*m[row]!,b=near?m[6]!:m[7]!+sign*m[4+row]!,c=near?m[10]!:m[11]!+sign*m[8+row]!,d=near?m[14]!:m[15]!+sign*m[12+row]!;
   const distance=a*bounds.center[0]+b*bounds.center[1]+c*bounds.center[2]+d;
-  const radius=Math.abs(a)*bounds.half[0]+Math.abs(b)*bounds.half[1]+Math.abs(c)*bounds.half[2];
+  let radius=Math.abs(a)*bounds.half[0]+Math.abs(b)*bounds.half[1]+Math.abs(c)*bounds.half[2];
+  // displaceWorld moves vertices along world Y after applying the object model.
+  // Its clip-plane support comes from the view projection, without model scale.
+  if(displacement){const vp=displacement.projection;radius+=Math.abs(near?vp[6]!:vp[7]!+sign*vp[4+row]!)*displacement.worldY;}
   if(distance+radius < -1e-5)return false;
+ }
+ return true;
+}
+
+/** The same six clip tests as intersectsClip after vp * model, with each
+ * float32 product row evaluated only when its planes are reached. As with
+ * multiply4Into, scratch must not overlap either input and must contain at
+ * least 16 floats. Rejected boxes leave its later rows untouched. */
+export function intersectsModelClip(bounds:MeshBounds,vp:Mat4,model:Mat4,scratch:Float32Array):boolean{
+ for(let i=0;i<16;i+=4){
+  scratch[i]=vp[0]!*model[i]!+vp[4]!*model[i+1]!+vp[8]!*model[i+2]!+vp[12]!*model[i+3]!;
+  scratch[i+3]=vp[3]!*model[i]!+vp[7]!*model[i+1]!+vp[11]!*model[i+2]!+vp[15]!*model[i+3]!;
+ }
+ for(let pair=0;pair<3;pair++){
+  if(pair===1)for(let i=0;i<16;i+=4)scratch[i+1]=vp[1]!*model[i]!+vp[5]!*model[i+1]!+vp[9]!*model[i+2]!+vp[13]!*model[i+3]!;
+  if(pair===2)for(let i=0;i<16;i+=4)scratch[i+2]=vp[2]!*model[i]!+vp[6]!*model[i+1]!+vp[10]!*model[i+2]!+vp[14]!*model[i+3]!;
+  for(let parity=0;parity<2;parity++){
+   const plane=pair*2+parity,row=plane>>1,sign=(plane&1)?-1:1,near=plane===4;
+   const a=near?scratch[2]!:scratch[3]!+sign*scratch[row]!,b=near?scratch[6]!:scratch[7]!+sign*scratch[4+row]!,c=near?scratch[10]!:scratch[11]!+sign*scratch[8+row]!,d=near?scratch[14]!:scratch[15]!+sign*scratch[12+row]!;
+   const distance=a*bounds.center[0]+b*bounds.center[1]+c*bounds.center[2]+d;
+   const radius=Math.abs(a)*bounds.half[0]+Math.abs(b)*bounds.half[1]+Math.abs(c)*bounds.half[2];
+   if(distance+radius < -1e-5)return false;
+  }
  }
  return true;
 }

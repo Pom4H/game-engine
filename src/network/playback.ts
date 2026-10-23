@@ -3,7 +3,7 @@ import {Projection,type Frame,type Row,safeInteger} from './projection.js';
  * No extrapolation after the newest cause; starvation is observable, not fabricated motion. */
 export class PlaybackClock{
  private latest=0;private received:number|null=null;private anchor:{time:number;at:number}|null=null;
- private value:number|null=null;private sampled:number|null=null;private calibrated=false;
+ private value:number|null=null;private sampled:number|null=null;private calibrated=false;private heldSince:number|null=null;private advancing=0;
  rate=1;heldFrames=0;
  constructor(readonly delaySeconds=.1){if(!Number.isFinite(delaySeconds)||delaySeconds<0||delaySeconds>2)throw new RangeError('Invalid presentation delay');}
  observe(time:number,now:number):void{
@@ -14,12 +14,15 @@ export class PlaybackClock{
  }
  sample(now:number):number{
   if(!Number.isFinite(now))throw new TypeError('Invalid presentation timestamp');if(this.received===null)return 0;
+  if(this.sampled!==null&&now<=this.sampled)return this.value!;
   const target=Math.max(0,Math.min(this.latest,this.latest-this.delaySeconds+Math.max(0,now-this.received)*this.rate)),previous=this.value;
   if(previous===null)this.value=target;
   else{const dt=Math.max(0,now-(this.sampled??now)),correction=Math.max(.25,Math.min(1.25,1+(target-previous)*6));this.value=dt>1?Math.max(previous,target):Math.max(previous,Math.min(this.latest,previous+dt*this.rate*correction));if(this.value<=previous+1e-10&&dt>0)this.heldFrames++;}
+  if(previous!==null&&this.sampled!==null&&now>this.sampled){if(this.value!>previous+1e-10){this.advancing++;this.heldSince=null;}else this.heldSince??=this.sampled;}
   this.sampled=now;return this.value!;
  }
- reset():void{this.latest=0;this.received=null;this.anchor=null;this.value=null;this.sampled=null;this.calibrated=false;this.rate=1;this.heldFrames=0;}
+ inspect(now:number){return{playbackRate:this.rate,advancingFrames:this.advancing,heldFrames:this.heldFrames,heldMs:this.heldSince===null?0:Math.max(0,now-this.heldSince)*1000};}
+ reset():void{this.latest=0;this.received=null;this.anchor=null;this.value=null;this.sampled=null;this.calibrated=false;this.heldSince=null;this.advancing=0;this.rate=1;this.heldFrames=0;}
 }
 export interface SampleRow{readonly id:string;generation:number;readonly values:Float64Array}
 export interface Sample{epoch:number;time:number;fromTick:number;toTick:number;alpha:number;readonly rows:SampleRow[]}

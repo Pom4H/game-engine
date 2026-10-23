@@ -1,0 +1,356 @@
+{
+  "kind": "functional-assertions-from-final-benchmark-run",
+  "source": "scene-snapshot71-benchmark-20261021.json",
+  "sourceSha256": "0a2eae4977214b6fc4223339589bb44dd86f275d49567b874af950482c0e8779",
+  "timestamp": "2026-10-21T17:03:59.085Z",
+  "node": "v24.21.0",
+  "typescript": "7.1.0-beta",
+  "compilerSourceSha": "40ba6730197556278738a9185d45340d151ba938e2112ad6075eecaae5d83565",
+  "toolingSources": [
+    {
+      "name": "bridge.rs",
+      "sha256": "0d0c0ee958255dbe060e8992419f4a5f7b888d112d8be40f3739f16d4b56e5ad",
+      "lines": 55
+    },
+    {
+      "name": "mapper.mjs",
+      "sha256": "8507ef6adcef662047f70b8fb7cc378b91a7bfe5d64fe4c930ab653d42331002",
+      "lines": 68
+    },
+    {
+      "name": "projection.mjs",
+      "sha256": "cc5efef537f55bb73f40a6ce312a15563f4eb999b9b25c59ad168f14785ae9c2",
+      "lines": 104
+    },
+    {
+      "name": "run.ts",
+      "sha256": "3bd354097058717d014d956841fbab0f100b31399920b2b44cea0fa86660ed39",
+      "lines": 155
+    }
+  ],
+  "diagnosticCoverage": {
+    "invalidCases": 8,
+    "rustDetected": 8,
+    "typescriptAloneDetected": 2,
+    "combinedDetected": 8,
+    "validCases": 11
+  },
+  "cases": [
+    {
+      "name": "array",
+      "sourceSha": "b0066ae3fc9db46de4ab5bab47157231cc76c6adf28f4ec91615555bd5ca2950",
+      "rust": {
+        "ok": true,
+        "wscnSha": "cdb362905a3159ee427f1173aef09ba209d6c99e67821cca516ef7aca79fb6e5"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "collision",
+      "sourceSha": "a88dbb8a2d9d6fb28f5e75e76fa6210846626ea764c1a81ef38d25920df8ac34",
+      "rust": {
+        "ok": true,
+        "wscnSha": "9b7b3df8e1ce8285488576ba9bafa76823626c77f78ea7a13860f9e506938e43"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "coupled-glass",
+      "sourceSha": "1c1866c2d3c32a76e83a94402f08315bdbe358f32949488e8abdf49e4e588dca",
+      "rust": {
+        "ok": true,
+        "wscnSha": "afee70ff0f3766a072949c987e7263db30955427e12c5016c3e9aa3aed7b11de"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "physical-hearing",
+      "sourceSha": "3463b642304afdbc76b1de3ac62e22bd77eebc8bf9fd0dbd928f80560a017868",
+      "rust": {
+        "ok": true,
+        "wscnSha": "4ef639eee3cacecd39b96c8b7b04537d1256b4eabd3a2f9724a3b890fcdc9ae2"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid",
+      "sourceSha": "42361f4fcbac950d440b29ec51bb65132bc6643c8d147c37c026f53c933c42af",
+      "rust": {
+        "ok": true,
+        "wscnSha": "7e9243d830663dca3788b0887f1841932cadc60a047e7294ffc3e05233599c02"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-generated-name",
+      "sourceSha": "49c12642fa0060e3f7eb88440fab4242af02a5b03dfa14d021c913da2dc2d1c3",
+      "rust": {
+        "ok": true,
+        "wscnSha": "28b83d116c0dce55913b13fd5d6053b53f6cdcc3823aa42c27b89c5197183f4b"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-semicolon-free",
+      "sourceSha": "a67a6666f44e699db8dd864ef8845ece858795f0ccd4e8e902ea5fb5ff20ba29",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-unicode-binding",
+      "sourceSha": "fa63308894d88e556395cb51ce3e5f3feaf13dbc70f5c0f59ce747b3e5c7e338",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-hyphen-binding",
+      "sourceSha": "d1b105be62d01f200dfcf21676b937e4de22523b146d2f3c47920c9a55b02d25",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-strict-bindings",
+      "sourceSha": "74e5a74b1a302c9fba2e8422470c3a2415909bb2425ac53b142e3e930869e655",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "valid-leading-zero",
+      "sourceSha": "b21db4d6fac2a332f82e37a2a5903f0e721dabcbeb4c676ee2f2f8072a3f7fcf",
+      "rust": {
+        "ok": true,
+        "wscnSha": "f4c0ce73260a175f1d96ee17b13ef0bbfe6e52f58d476dfd90883e5fd5edea33"
+      },
+      "diagnostics": []
+    },
+    {
+      "name": "unknown-symbol",
+      "sourceSha": "b7ac5ae5c915fa069a304f8985e8e9cae2a2de65d103c0ebbc3a8b7414456020",
+      "rust": {
+        "ok": false,
+        "at": 88,
+        "message": "unknown constant missing"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/unknown-symbol.scene",
+          "pos": 80,
+          "end": 81,
+          "startPosition": {
+            "line": 3,
+            "character": 15
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "unknown constant missing"
+        },
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/unknown-symbol.scene",
+          "pos": 80,
+          "end": 87,
+          "startPosition": {
+            "line": 3,
+            "character": 15
+          },
+          "code": 2304,
+          "text": "Cannot find name 'missing'."
+        }
+      ]
+    },
+    {
+      "name": "material-type",
+      "sourceSha": "7912e6cff96d46c1c291a9af3c631d1532110de83ba06c5ca318160e8c7c723c",
+      "rust": {
+        "ok": false,
+        "at": 159,
+        "message": "unknown material banana"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/material-type.scene",
+          "pos": 151,
+          "end": 152,
+          "startPosition": {
+            "line": 4,
+            "character": 59
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "unknown material banana"
+        },
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/material-type.scene",
+          "pos": 145,
+          "end": 151,
+          "startPosition": {
+            "line": 4,
+            "character": 53
+          },
+          "code": 2322,
+          "text": "Type '\"banana\"' is not assignable to type '__WorldMaterial'."
+        }
+      ]
+    },
+    {
+      "name": "dimension",
+      "sourceSha": "1f9cb5b5de5f0b70c9a6857e79bffc60d343b68d9d7bdcec8010f925294dc703",
+      "rust": {
+        "ok": false,
+        "at": 96,
+        "message": "cannot add or subtract Length and Mass"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/dimension.scene",
+          "pos": 88,
+          "end": 89,
+          "startPosition": {
+            "line": 3,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "cannot add or subtract Length and Mass"
+        }
+      ]
+    },
+    {
+      "name": "division-zero",
+      "sourceSha": "11fa8fe63194f14919fbf4f0b75357a934653a47864e53383c22e52e270e5fb0",
+      "rust": {
+        "ok": false,
+        "at": 96,
+        "message": "division by zero"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/division-zero.scene",
+          "pos": 88,
+          "end": 89,
+          "startPosition": {
+            "line": 3,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "division by zero"
+        }
+      ]
+    },
+    {
+      "name": "parse",
+      "sourceSha": "70a6e9a3f05dd19c353f945a9a2497407c3fe48416c158245994db27fca97909",
+      "rust": {
+        "ok": false,
+        "at": 50,
+        "message": "expected LBrace, got LParen"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/parse.scene",
+          "pos": 42,
+          "end": 43,
+          "startPosition": {
+            "line": 1,
+            "character": 13
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "expected LBrace, got LParen"
+        }
+      ]
+    },
+    {
+      "name": "coupling-cycle",
+      "sourceSha": "9a228fb5cbaaa87fc42f6c283cfb82a0f496fb9d8b4fda306009ea878c4e5b70",
+      "rust": {
+        "ok": false,
+        "at": 23,
+        "message": "cyclic World coupling dependency"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/coupling-cycle.scene",
+          "pos": 23,
+          "end": 24,
+          "startPosition": {
+            "line": 0,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "cyclic World coupling dependency"
+        }
+      ]
+    },
+    {
+      "name": "coupling-type",
+      "sourceSha": "6ce39bf2bf1d1939ee8ff112cf8db706b3e670389f73a6d450bba94778990964",
+      "rust": {
+        "ok": false,
+        "at": 23,
+        "message": "coupling dimension mismatch: physics.contact.energy (Energy) -> acoustic.pressure (Pressure)"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/coupling-type.scene",
+          "pos": 23,
+          "end": 24,
+          "startPosition": {
+            "line": 0,
+            "character": 23
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "coupling dimension mismatch: physics.contact.energy (Energy) -> acoustic.pressure (Pressure)"
+        }
+      ]
+    },
+    {
+      "name": "duplicate-id",
+      "sourceSha": "3fa763e2f6047376102f9416c5f0a7b6e9ffe815862ccd763b2d385cc3cdf6fc",
+      "rust": {
+        "ok": false,
+        "at": 74,
+        "message": "duplicate entity pane"
+      },
+      "diagnostics": [
+        {
+          "fileName": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/duplicate-id.scene",
+          "pos": 74,
+          "end": 75,
+          "startPosition": {
+            "line": 0,
+            "character": 74
+          },
+          "code": 1,
+          "source": "worldc",
+          "text": "duplicate entity pane"
+        }
+      ]
+    }
+  ],
+  "incremental": {
+    "beforeSnapshot": 1,
+    "afterSnapshot": 2,
+    "stableProgramId": "c:/users/roman/documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/tsconfig.json",
+    "oldSnapshotUnchanged": true,
+    "remappedFiles": [
+      "C:/Users/Roman/Documents/thegame-migration-20261021/workspace/game-engine/artifacts/scene-snapshot71-20261021/project/unknown-symbol.scene"
+    ],
+    "beforeDiagnosticCount": 10,
+    "afterDiagnosticCount": 8
+  }
+}

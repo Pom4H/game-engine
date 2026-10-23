@@ -1,0 +1,1806 @@
+{
+  "date": "2026-10-17T08:23:29.737Z",
+  "capability": "original-residents-27",
+  "scope": "Original first-person source actor stays in shadows and reflections while hidden only in the primary camera; same geometry, poses, world and physics.",
+  "tests": {
+    "regression": {
+      "pass": 186,
+      "fail": 0,
+      "assertions": 10660,
+      "files": 19,
+      "seconds": 12.88,
+      "command": "bun test --timeout 60000 ./apps/thegame/test ../thegame/test/office-dynamic-assets.test.ts ../thegame/test/the-engine-renderer.test.ts ../thegame/test/render-presentation-clock.test.ts ../thegame/test/office-audio.test.ts",
+      "log": "artifacts/office-subject-mask/logs/engine-office-subject-mask-regression-final-r2-20261017.log"
+    },
+    "engine": {
+      "pass": 48,
+      "fail": 0,
+      "files": 5,
+      "seconds": 0.3928357,
+      "command": "node --test test/camera-visibility.test.mjs test/render-visibility-plan.test.mjs test/render-preparation-cache.test.mjs test/render-model-history.test.mjs test/gpu-visibility.test.mjs",
+      "log": "artifacts/office-subject-mask/logs/engine-office-subject-mask-engine-tests-r1-20261017.log"
+    },
+    "checks": [
+      {
+        "name": "Engine build",
+        "exitCode": 0,
+        "log": "artifacts/office-subject-mask/logs/engine-office-subject-mask-engine-build-r1-20261017.log"
+      },
+      {
+        "name": "Game final typecheck",
+        "exitCode": 0,
+        "log": "artifacts/office-subject-mask/logs/game-office-subject-mask-game-typecheck-final-20261017.log"
+      },
+      {
+        "name": "Engine app corrected typecheck",
+        "exitCode": 0,
+        "log": "artifacts/office-subject-mask/logs/engine-office-subject-mask-app-typecheck-r2-20261017.log"
+      },
+      {
+        "name": "Office UI typecheck",
+        "exitCode": 0,
+        "log": "artifacts/office-subject-mask/logs/engine-office-subject-mask-ui-typecheck-20261017.log"
+      },
+      {
+        "name": "Game build",
+        "exitCode": 0,
+        "log": "artifacts/office-subject-mask/logs/game-office-subject-mask-game-build-r1-20261017.log"
+      },
+      {
+        "name": "Office UI build",
+        "exitCode": 0,
+        "log": "artifacts/office-subject-mask/logs/engine-office-subject-mask-ui-build-20261017.log"
+      }
+    ]
+  },
+  "native": {
+    "label": "office-subject-mask-native-20261017-r3",
+    "command": "artifacts/office-subject-mask/run-native.ps1 -DebugPort 3290 -Label office-subject-mask-native-20261017-r3",
+    "exitCode": 0,
+    "report": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/report.json",
+    "browser": "native-gpu",
+    "source": {
+      "sourceId": "resident:36117:0",
+      "sourcePose": [
+        -311.324,
+        9.94,
+        378.168
+      ],
+      "phase": 708985.988,
+      "animation": "walk",
+      "scope": "One unchanged original source NPC in a passive render-only fixture; canonical pose, clock and accounts untouched"
+    },
+    "states": [
+      {
+        "mode": "cpu",
+        "state": "visible",
+        "owned": 50,
+        "globalVisible": 50,
+        "cameraVisible": 50,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      },
+      {
+        "mode": "cpu",
+        "state": "camera-hidden",
+        "owned": 50,
+        "globalVisible": 50,
+        "cameraVisible": 0,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 2037,
+            "max": 0.005252838134765625,
+            "mean": 0.00002224715348954002
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 6110,
+            "max": 0.54376220703125,
+            "mean": 0.0003073521765569846
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "vsMasked": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      },
+      {
+        "mode": "cpu",
+        "state": "globally-hidden",
+        "owned": 50,
+        "globalVisible": 0,
+        "cameraVisible": 0,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 2037,
+            "max": 0.005252838134765625,
+            "mean": 0.00002224715348954002
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 29,
+            "max": 0.5463444590568542,
+            "mean": 0.000015061750417544317
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 11656,
+            "max": 0.54376220703125,
+            "mean": 0.0004357056133449078
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 1953,
+            "max": 0.6591100692749023,
+            "mean": 0.002625292738940981
+          }
+        },
+        "vsMasked": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 29,
+            "max": 0.5463444590568542,
+            "mean": 0.000015061750417544317
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 5873,
+            "max": 0.060333251953125,
+            "mean": 0.0001359102792210049
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 1953,
+            "max": 0.6591100692749023,
+            "mean": 0.002625292738940981
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      },
+      {
+        "mode": "cpu",
+        "state": "restored",
+        "owned": 50,
+        "globalVisible": 50,
+        "cameraVisible": 50,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "vsMasked": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 2037,
+            "max": 0.005252838134765625,
+            "mean": 0.00002224715348954002
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 6110,
+            "max": 0.54376220703125,
+            "mean": 0.0003073521765569846
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      },
+      {
+        "mode": "gpu",
+        "state": "visible",
+        "owned": 50,
+        "globalVisible": 50,
+        "cameraVisible": 50,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      },
+      {
+        "mode": "gpu",
+        "state": "camera-hidden",
+        "owned": 50,
+        "globalVisible": 50,
+        "cameraVisible": 0,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 2037,
+            "max": 0.005252838134765625,
+            "mean": 0.00002224715348954002
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 6110,
+            "max": 0.54376220703125,
+            "mean": 0.0003073521765569846
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "vsMasked": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      },
+      {
+        "mode": "gpu",
+        "state": "globally-hidden",
+        "owned": 50,
+        "globalVisible": 0,
+        "cameraVisible": 0,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 2037,
+            "max": 0.005252838134765625,
+            "mean": 0.00002224715348954002
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 29,
+            "max": 0.5463444590568542,
+            "mean": 0.000015061750417544317
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 11656,
+            "max": 0.54376220703125,
+            "mean": 0.0004357056133449078
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 1953,
+            "max": 0.6591100692749023,
+            "mean": 0.002625292738940981
+          }
+        },
+        "vsMasked": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 29,
+            "max": 0.5463444590568542,
+            "mean": 0.000015061750417544317
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 5873,
+            "max": 0.060333251953125,
+            "mean": 0.0001359102792210049
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 1953,
+            "max": 0.6591100692749023,
+            "mean": 0.002625292738940981
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      },
+      {
+        "mode": "gpu",
+        "state": "restored",
+        "owned": 50,
+        "globalVisible": 50,
+        "cameraVisible": 50,
+        "unchangedTransforms": true,
+        "geometryBuilds": 9,
+        "physics": {
+          "steps": 0,
+          "substeps": 0,
+          "contacts": 0,
+          "bodies": 0,
+          "sleeping": 0,
+          "collisionSurfaceIterations": 3
+        },
+        "tick": 0,
+        "vsVisible": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "vsMasked": {
+          "mainDepth": {
+            "values": 230400,
+            "changed": 2037,
+            "max": 0.005252838134765625,
+            "mean": 0.00002224715348954002
+          },
+          "shadowDepth": {
+            "values": 1048576,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "hdr": {
+            "values": 921600,
+            "changed": 6110,
+            "max": 0.54376220703125,
+            "mean": 0.0003073521765569846
+          },
+          "reflection": {
+            "values": 360000,
+            "changed": 0,
+            "max": 0,
+            "mean": 0
+          }
+        },
+        "reflectionProbe": {
+          "validFaces": 6,
+          "complete": true,
+          "nextFace": 0,
+          "position": [
+            2,
+            1.5,
+            2
+          ]
+        },
+        "errors": []
+      }
+    ],
+    "rawValidation": [
+      {
+        "mode": "cpu",
+        "bitExact": [
+          "visible/camera-hidden dynamic shadow depth",
+          "visible/camera-hidden planar reflection colour",
+          "visible/restored primary depth",
+          "camera-hidden/globally-hidden primary depth"
+        ],
+        "negativeChanges": {
+          "shadowDepth": 29,
+          "reflectionChannels": 1953,
+          "hdrChannels": 5873
+        }
+      },
+      {
+        "mode": "gpu",
+        "bitExact": [
+          "visible/camera-hidden dynamic shadow depth",
+          "visible/camera-hidden planar reflection colour",
+          "visible/restored primary depth",
+          "camera-hidden/globally-hidden primary depth"
+        ],
+        "negativeChanges": {
+          "shadowDepth": 29,
+          "reflectionChannels": 1953,
+          "hdrChannels": 5873
+        }
+      }
+    ],
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    }
+  },
+  "audit": {
+    "date": "2026-10-17T08:19:39.544Z",
+    "pid": 13676,
+    "beforeRows": 4464,
+    "afterRows": 4464,
+    "missingRows": 0,
+    "protectedRows": 148,
+    "changedProtectedRows": 0,
+    "integrity": "ok",
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 54,
+    "geometryRevision": 1
+  },
+  "accountsPreserved": 51,
+  "servedAssets": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "status": 200,
+      "bytes": 2507241,
+      "sha256": "55b8b60377bb6d09449eb9edc8564859bb26425e901ef3195e25b4e662b243a9",
+      "archive": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/served-before/game.js",
+      "revalidatedAt": "2026-10-17T08:23:29.162Z"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "status": 200,
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8",
+      "archive": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/served-before/office-controller.js",
+      "revalidatedAt": "2026-10-17T08:23:29.165Z"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/audio-worklet.js",
+      "status": 200,
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/served-before/audio-worklet.js",
+      "revalidatedAt": "2026-10-17T08:23:29.166Z"
+    }
+  ],
+  "builtOffice": [
+    {
+      "path": "index.html",
+      "archive": "artifacts/office-subject-mask/built-office-ui/index.html",
+      "bytes": 422,
+      "sha256": "1d44699487f5a10e3abd30484f12eec7a7bea6059312bbbe2317721acba3e3f1",
+      "served": false
+    },
+    {
+      "path": "assets/index-BJLXWmqN.js",
+      "archive": "artifacts/office-subject-mask/built-office-ui/assets/index-BJLXWmqN.js",
+      "bytes": 1805675,
+      "sha256": "0af2fb83e7ad2de949c45fce0d61bf297239931e16745199910246d420c1f32b",
+      "served": false
+    },
+    {
+      "path": "assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-subject-mask/built-office-ui/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec",
+      "served": false
+    }
+  ],
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "src/scene/types.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/scene/types.ts",
+      "bytes": 14178,
+      "sha256": "0e1f0eda3bca74f47d582b79493cc2dc0aff2ae28ea719d7160f064b3c480c2d"
+    },
+    {
+      "repo": "engine",
+      "path": "src/scene/scene.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/scene/scene.ts",
+      "bytes": 53113,
+      "sha256": "00764b29a7ea223f950f57ec9c785b4a5a886a58f7778ac7bb28eb3a421f661e"
+    },
+    {
+      "repo": "engine",
+      "path": "src/scene/validate.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/scene/validate.ts",
+      "bytes": 42168,
+      "sha256": "e5d1bcd98917e5479694adf9cb3ae2427e46b8dfd5739e3a805e0f162a0c36d5"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/frame.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/render/frame.ts",
+      "bytes": 9115,
+      "sha256": "aea4e218dbab41283c4f7c37935bfa00bd11c4b2e8cde61c9375578ca690ed81"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/cpu.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/render/cpu.ts",
+      "bytes": 12471,
+      "sha256": "38806e55a599c1e273aba46cc78a16e5b1512771286d3749828b37ce96fab4e3"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/visibility-plan.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/render/visibility-plan.ts",
+      "bytes": 8429,
+      "sha256": "f7a04e455803d18d62fc5d5d254878e6fd0da3964ec7ef12df00e608df39cb28"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/webgpu.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/render/webgpu.ts",
+      "bytes": 193234,
+      "sha256": "8f7bdd80885457531cdc7c856d5aaaf51e3f66e69acf1613ef6f748569555c62"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/subject-camera.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/src/render/subject-camera.ts",
+      "bytes": 1795,
+      "sha256": "a62ba4ab226747668c759249accaa540883527e2d5f4fb426e64f98e4a282902"
+    },
+    {
+      "repo": "engine",
+      "path": "test/camera-visibility.test.mjs",
+      "archive": "artifacts/office-subject-mask/final-source/engine/test/camera-visibility.test.mjs",
+      "bytes": 5209,
+      "sha256": "12a45a29f39dbf4a3d48d19c4f66ec9d0151d3aa080eff8a8103a227b8e62d39"
+    },
+    {
+      "repo": "engine",
+      "path": "test/render-visibility-plan.test.mjs",
+      "archive": "artifacts/office-subject-mask/final-source/engine/test/render-visibility-plan.test.mjs",
+      "bytes": 12482,
+      "sha256": "5056f7dcc57b6c7498150dd5690be797e77fe855643056289623f4b19d327e17"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "e88b1597b0bbe7c41884bf134fd7bfdde15e1188d0a36a1765cbc27bee0d3cc2"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 37475,
+      "sha256": "f9c8b24929f61b3ca83bc28bd93442d7987661d54ca8e6326176f0016b7d7535"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-world-view.test.ts",
+      "archive": "artifacts/office-subject-mask/final-source/engine/apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 33939,
+      "sha256": "404739b79d2e3e826ddafb7f9ebf28c55892f25ac0bc0611669893d5a31a76bf"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "archive": "artifacts/office-subject-mask/final-source/engine/apps/thegame/README.md",
+      "bytes": 3907,
+      "sha256": "deafd58f1e0aa61c044f0a6fdb58327185e1cd434c12a43d33acef5b6ae10227"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-subject-mask/final-source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 209606,
+      "sha256": "9a5a33d307df57c6c6329442b1c208d5815d42858358bf82fbd2ca57b88d4d10"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-projection.ts",
+      "archive": "artifacts/office-subject-mask/final-source/game/src/game/render/the-engine-projection.ts",
+      "bytes": 17665,
+      "sha256": "030551df484a6f2b800b209ab3449f81bdb8542f0b86111d9c0278bc28aa9874"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-dynamic-assets.ts",
+      "archive": "artifacts/office-subject-mask/final-source/game/src/game/office-dynamic-assets.ts",
+      "bytes": 4281,
+      "sha256": "8abf1090cf990b8258519ba58633643c399d6b3fa1a563123f821846775e3d8f"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/primitive-instances.ts",
+      "archive": "artifacts/office-subject-mask/final-source/game/src/game/primitive-instances.ts",
+      "bytes": 5593,
+      "sha256": "ffe45b946f45d39422f478483d58591fd313422a5b8404672bc13347aa5249f9"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-dynamic-assets.test.ts",
+      "archive": "artifacts/office-subject-mask/final-source/game/test/office-dynamic-assets.test.ts",
+      "bytes": 11182,
+      "sha256": "a8cbb14f8295d2c47c274ed7869a24539c8fea7c7902878e3a1e632fbec9b45d"
+    },
+    {
+      "repo": "game",
+      "path": "test/the-engine-renderer.test.ts",
+      "archive": "artifacts/office-subject-mask/final-source/game/test/the-engine-renderer.test.ts",
+      "bytes": 25049,
+      "sha256": "3695d792662baf52d883e688d3166520c8967648654cb34d31997916591bae20"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-subject-mask.ts",
+      "archive": "artifacts/office-subject-mask/final-source/game/tools/qa-office-subject-mask.ts",
+      "bytes": 5239,
+      "sha256": "46722ffa46e80857061a9fd6b7383c0b0a896ec96f3fe50f8fb268ff037797c4"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "archive": "artifacts/office-subject-mask/final-source/game/tools/capture.ts",
+      "bytes": 34740,
+      "sha256": "392f8434eae9c97e14dae7bdff98130b4956d5a1eb7c1e3b54a3f196b82b4a87"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-subject-mask/final-source/game/docs/VERIFICATION.md",
+      "bytes": 839148,
+      "sha256": "6227970d0f04300fb25d2186dbe0928fc27f22e3acff12662601492db3c1dbff"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-subject-mask/final-source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "repo": "office",
+      "path": "ui/package.json",
+      "archive": "artifacts/office-subject-mask/final-source/office/ui/package.json",
+      "bytes": 885,
+      "sha256": "db3a56d0818e4d437513bb201b9658acdf3c30e6a53fed114b50c762007cada4"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-subject-mask/final-source/office/VERIFICATION.md",
+      "bytes": 144238,
+      "sha256": "ec1d3a25d083457e17ea42b42275ad823ab42c69eed2aaf25eeef74851e13487"
+    }
+  ],
+  "reviewed": [
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-visible.png",
+      "note": "Reviewed native original model/floor image: source body visible, camera-only body hidden with retained dark contribution, then global hiding removes that contribution. Raw buffers separately prove exact shadow/reflection retention."
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-camera-hidden.png",
+      "note": "Reviewed native original model/floor image: source body visible, camera-only body hidden with retained dark contribution, then global hiding removes that contribution. Raw buffers separately prove exact shadow/reflection retention."
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-globally-hidden.png",
+      "note": "Reviewed native original model/floor image: source body visible, camera-only body hidden with retained dark contribution, then global hiding removes that contribution. Raw buffers separately prove exact shadow/reflection retention."
+    }
+  ],
+  "failures": {
+    "preserved": true,
+    "native": [
+      {
+        "label": "office-subject-mask-native-20261017-r1",
+        "reason": "Diagnostic fixture called the physics.stats getter as a method; no completed states."
+      },
+      {
+        "label": "office-subject-mask-native-20261017-r2",
+        "reason": "Diagnostic compute tried to sample a render-attachment-only reflection depth texture. It now reads actual exported reflection colour; no production texture usage or shader was changed."
+      }
+    ],
+    "checks": [
+      {
+        "log": "artifacts/office-subject-mask/logs/engine-office-subject-mask-regression-final-20261017.log",
+        "reason": "Added layer test referenced a factory-only ownership method; corrected to public diagnostics and actual actor visibility."
+      },
+      {
+        "reason": "First app typecheck redirect targeted a missing relative directory, so the command did not execute; corrected root command passes."
+      }
+    ]
+  },
+  "officeServices": {
+    "state": "artifacts/office-subject-mask/archive-service-state.json",
+    "currentInstalledUiVerified": false,
+    "noServiceRestartAttempted": true
+  },
+  "fps": {
+    "newMeasurement": false,
+    "lastMeasurement": "docs/render-evidence/fps-live-20261017-water-final.json",
+    "sameBundle": false
+  },
+  "limits": [
+    "This is a passive source-factory and actual GPU-buffer check, not a current installed-Office UI possession round trip. Office services on 8765/7860 refuse connections.",
+    "CPU/GPU labels refer to visibility selection on the native WebGPU renderer; the separate CPU fallback is covered by an actual raster test.",
+    "The source NPC pose/phase is frozen only in the passive fixture and rotated/rebased onto a floor. The canonical actor and clock are untouched.",
+    "Mask contribution is verified, not arbitrary shadow resolution, reflected colour quality, all surface effects or full-city image equality.",
+    "No new FPS was measured for this bundle. Full integration, long routes/vehicles/aircraft, remaining temporal/spatial effects and final requirement audit remain incomplete or unverified."
+  ],
+  "files": [
+    {
+      "path": "artifacts/office-subject-mask/archive-service-state.json",
+      "bytes": 510,
+      "sha256": "90efbb4e961674e7b8c9499c6cffe099719694cba5fd3267b41468c01131b5bd"
+    },
+    {
+      "path": "artifacts/office-subject-mask/audit-source.ts",
+      "bytes": 4270,
+      "sha256": "4d24089e7699357a61e0ce88f4ea3a1c38901fb04759ce2b1a2f5677485c12b4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "c0f66aca006419c739ec1f2ff464ee5b3fcd562b8d9b3e324346334ce77ee9fa"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/src/render/cpu.ts",
+      "bytes": 12428,
+      "sha256": "c3f37efd2ab1418da896c93f28c94775816e65996478db6b6fda9058e933f601"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/src/render/visibility-plan.ts",
+      "bytes": 8393,
+      "sha256": "d89d3192fdc21ce19b00593e9c4df2ed6fd0c1edcfdf20cc540860dbfe315da0"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/src/render/webgpu.ts",
+      "bytes": 193045,
+      "sha256": "b6eec30cbb5fbcc018521bc1fdda00f237a20c3998afb6bcc270a69f3221ec87"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/src/scene/scene.ts",
+      "bytes": 52523,
+      "sha256": "40ab3486a98dde53a67317888c3bfd638c76c3ac447b70dfa9aafe361efd24ad"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/src/scene/types.ts",
+      "bytes": 14060,
+      "sha256": "be027723b7c488f6d3e6813a395f3b466a1759a89a5559faa969cb95a68398a2"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/src/scene/validate.ts",
+      "bytes": 41853,
+      "sha256": "053d69597946d1da8e0349b8fdcdd57a253bcbba939cb8435e68a83e60b70b28"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/engine/test/render-visibility-plan.test.mjs",
+      "bytes": 12482,
+      "sha256": "5056f7dcc57b6c7498150dd5690be797e77fe855643056289623f4b19d327e17"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/game/src/game/render/the-engine-projection.ts",
+      "bytes": 17634,
+      "sha256": "c4c0fce3f9f678b8cd8185aa0ec3082b65cdc146ecfdbf7985637330e83121b5"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/game/test/office-dynamic-assets.test.ts",
+      "bytes": 11080,
+      "sha256": "156ba01a126b627bd7b618a787a017c705bced37c06ff6816b796af517ab82c1"
+    },
+    {
+      "path": "artifacts/office-subject-mask/before/game/tools/capture.ts",
+      "bytes": 34461,
+      "sha256": "051897ffb136ff3e29f4c7c6c42a1b18113756eb5cfdc211e36797f282675d2a"
+    },
+    {
+      "path": "artifacts/office-subject-mask/built-office-ui/assets/index-BJLXWmqN.js",
+      "bytes": 1805675,
+      "sha256": "0af2fb83e7ad2de949c45fce0d61bf297239931e16745199910246d420c1f32b"
+    },
+    {
+      "path": "artifacts/office-subject-mask/built-office-ui/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "path": "artifacts/office-subject-mask/built-office-ui/index.html",
+      "bytes": 422,
+      "sha256": "1d44699487f5a10e3abd30484f12eec7a7bea6059312bbbe2317721acba3e3f1"
+    },
+    {
+      "path": "artifacts/office-subject-mask/canonical-world-view-before-fixture-fix.ts",
+      "bytes": 33780,
+      "sha256": "b0a21f94652acd1f636ab8a2e2c18a2d06ce11994942af16fa69e051e87faf28"
+    },
+    {
+      "path": "artifacts/office-subject-mask/failures.json",
+      "bytes": 928,
+      "sha256": "4286916011d59f343ed32696bd98657e67da8ddd299b00a1692bf3957de23153"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "e88b1597b0bbe7c41884bf134fd7bfdde15e1188d0a36a1765cbc27bee0d3cc2"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 37475,
+      "sha256": "f9c8b24929f61b3ca83bc28bd93442d7987661d54ca8e6326176f0016b7d7535"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/apps/thegame/README.md",
+      "bytes": 3907,
+      "sha256": "deafd58f1e0aa61c044f0a6fdb58327185e1cd434c12a43d33acef5b6ae10227"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 33939,
+      "sha256": "404739b79d2e3e826ddafb7f9ebf28c55892f25ac0bc0611669893d5a31a76bf"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 209606,
+      "sha256": "9a5a33d307df57c6c6329442b1c208d5815d42858358bf82fbd2ca57b88d4d10"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/render/cpu.ts",
+      "bytes": 12471,
+      "sha256": "38806e55a599c1e273aba46cc78a16e5b1512771286d3749828b37ce96fab4e3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/render/frame.ts",
+      "bytes": 9115,
+      "sha256": "aea4e218dbab41283c4f7c37935bfa00bd11c4b2e8cde61c9375578ca690ed81"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/render/subject-camera.ts",
+      "bytes": 1795,
+      "sha256": "a62ba4ab226747668c759249accaa540883527e2d5f4fb426e64f98e4a282902"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/render/visibility-plan.ts",
+      "bytes": 8429,
+      "sha256": "f7a04e455803d18d62fc5d5d254878e6fd0da3964ec7ef12df00e608df39cb28"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/render/webgpu.ts",
+      "bytes": 193234,
+      "sha256": "8f7bdd80885457531cdc7c856d5aaaf51e3f66e69acf1613ef6f748569555c62"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/scene/scene.ts",
+      "bytes": 53113,
+      "sha256": "00764b29a7ea223f950f57ec9c785b4a5a886a58f7778ac7bb28eb3a421f661e"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/scene/types.ts",
+      "bytes": 14178,
+      "sha256": "0e1f0eda3bca74f47d582b79493cc2dc0aff2ae28ea719d7160f064b3c480c2d"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/src/scene/validate.ts",
+      "bytes": 42168,
+      "sha256": "e5d1bcd98917e5479694adf9cb3ae2427e46b8dfd5739e3a805e0f162a0c36d5"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/test/camera-visibility.test.mjs",
+      "bytes": 5209,
+      "sha256": "12a45a29f39dbf4a3d48d19c4f66ec9d0151d3aa080eff8a8103a227b8e62d39"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/engine/test/render-visibility-plan.test.mjs",
+      "bytes": 12482,
+      "sha256": "5056f7dcc57b6c7498150dd5690be797e77fe855643056289623f4b19d327e17"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/docs/VERIFICATION.md",
+      "bytes": 839148,
+      "sha256": "6227970d0f04300fb25d2186dbe0928fc27f22e3acff12662601492db3c1dbff"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/src/game/office-dynamic-assets.ts",
+      "bytes": 4281,
+      "sha256": "8abf1090cf990b8258519ba58633643c399d6b3fa1a563123f821846775e3d8f"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/src/game/primitive-instances.ts",
+      "bytes": 5593,
+      "sha256": "ffe45b946f45d39422f478483d58591fd313422a5b8404672bc13347aa5249f9"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/src/game/render/the-engine-projection.ts",
+      "bytes": 17665,
+      "sha256": "030551df484a6f2b800b209ab3449f81bdb8542f0b86111d9c0278bc28aa9874"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/test/office-dynamic-assets.test.ts",
+      "bytes": 11182,
+      "sha256": "a8cbb14f8295d2c47c274ed7869a24539c8fea7c7902878e3a1e632fbec9b45d"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/test/the-engine-renderer.test.ts",
+      "bytes": 25049,
+      "sha256": "3695d792662baf52d883e688d3166520c8967648654cb34d31997916591bae20"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/tools/capture.ts",
+      "bytes": 34740,
+      "sha256": "392f8434eae9c97e14dae7bdff98130b4956d5a1eb7c1e3b54a3f196b82b4a87"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/game/tools/qa-office-subject-mask.ts",
+      "bytes": 5239,
+      "sha256": "46722ffa46e80857061a9fd6b7383c0b0a896ec96f3fe50f8fb268ff037797c4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/office/ui/package.json",
+      "bytes": 885,
+      "sha256": "db3a56d0818e4d437513bb201b9658acdf3c30e6a53fed114b50c762007cada4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "path": "artifacts/office-subject-mask/final-source/office/VERIFICATION.md",
+      "bytes": 144238,
+      "sha256": "ec1d3a25d083457e17ea42b42275ad823ab42c69eed2aaf25eeef74851e13487"
+    },
+    {
+      "path": "artifacts/office-subject-mask/finish-docs.ts",
+      "bytes": 10507,
+      "sha256": "99a01c22ad7eeb6e52b4506598511ec96ad6dc81eb574296d833840a5a2be630"
+    },
+    {
+      "path": "artifacts/office-subject-mask/fix-layer-fixture.ts",
+      "bytes": 857,
+      "sha256": "bd3e41ed3ad8260212d39e14da7c49c2d67090875fcf6a71a0f26871bd845514"
+    },
+    {
+      "path": "artifacts/office-subject-mask/fix-reflection-readback.ts",
+      "bytes": 1175,
+      "sha256": "a784255707a017ca4baa73adc3e7d42504e94fd35a989518466a326787c6ccca"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r1/failure.json",
+      "bytes": 564,
+      "sha256": "42ec85a977bdf054bf191ba0100ab9cf00851d7537a27ba9b7b6050a8c7b7704"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r1/fixture.html",
+      "bytes": 493,
+      "sha256": "af630237a5ed2c1b106a3a51bed54f37988b2b9448fec95f1b6c43a9b12b37e4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r1/native-probe.js",
+      "bytes": 804252,
+      "sha256": "c6b4a62c710aae0937ad498958cd9302e591878e39ee939d23526a5369b75b21"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r1/source-frame.json",
+      "bytes": 13254320,
+      "sha256": "9d3368d48e29c9fec7c96db88680771ae4b582a4844b27221b61dadec7eddbca"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/cpu-visible-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "fddcd45268818547d8e9ebc112185410baf5c6a9202d64a4e29e8e0a825221c8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/cpu-visible-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "6eb20538f7d565dbde97886c6d62264cdba38b54bdf72638a80d7726b890a0cb"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/cpu-visible-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "e19af5d9b00c44eee2ae3eeb13f3c52b3ac0f36307e4800d8cfff3c0d7010fa8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/cpu-visible-reflectionDepth.f32",
+      "bytes": 360000,
+      "sha256": "e1038a405281e3a4ba6a65048621871508e751e77f2289c359b50edd90be6914"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/cpu-visible-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "d9b61dd32f9a7c4bfea7698b70c8c0cdcee2de65fa3533bbb6ee4fd8d8d64380"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/cpu-visible.png",
+      "bytes": 426358,
+      "sha256": "47eb376631eff792611c1dbb8ebbcfe72e7556a732f00e8634b83e318fb0813d"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/failure.json",
+      "bytes": 9037,
+      "sha256": "ee98fb9568b0b0b58f84cdd129b3a73273223c2dd3efa3438315c3a5c311e82a"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/fixture.html",
+      "bytes": 493,
+      "sha256": "af630237a5ed2c1b106a3a51bed54f37988b2b9448fec95f1b6c43a9b12b37e4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/native-probe.js",
+      "bytes": 804248,
+      "sha256": "96e4e0bf23f0901597f9fa108f697b2ddf5dd9fac14a449bcb07f9c22341a674"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/progress.json",
+      "bytes": 7939,
+      "sha256": "f7eca3871de07345145882267e3ece62538166f8cda3ee6de65a6a00252c7fa3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r2/source-frame.json",
+      "bytes": 13404364,
+      "sha256": "49ba605bcab4ba70876e59e3471d4ad0e8ecaa98d1d8d77ee73a024ad7113b43"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-camera-hidden-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "857b5e3737fcccb77dbd8b141b803c2da59975a6d655f163a0a94ae90b336b66"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-camera-hidden-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "f29a44d6dd18cae6fc558c09a60d04425419530cc845145f4a5121a955a0f995"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-camera-hidden-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "e19af5d9b00c44eee2ae3eeb13f3c52b3ac0f36307e4800d8cfff3c0d7010fa8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-camera-hidden-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "d9b61dd32f9a7c4bfea7698b70c8c0cdcee2de65fa3533bbb6ee4fd8d8d64380"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-camera-hidden.png",
+      "bytes": 422747,
+      "sha256": "baf555bae657f658360c420c4f4332a8034a37a1454e1208a418380184d1fec3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-globally-hidden-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "f0289ce132c2e936c90c0906b273e83a623203b7970bca04bd1046bc20002a90"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-globally-hidden-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "f29a44d6dd18cae6fc558c09a60d04425419530cc845145f4a5121a955a0f995"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-globally-hidden-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "eb73785b75ba60072ca35a2f88e1eaacbeaf2c8141ee916cc94dc3241e4109c3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-globally-hidden-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-globally-hidden.png",
+      "bytes": 424689,
+      "sha256": "ce481e0d2d9df140a365ed82141cb2a0e55e0d1cd6e88cfd9f0eb9fcf8aacfaa"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-restored-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "fddcd45268818547d8e9ebc112185410baf5c6a9202d64a4e29e8e0a825221c8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-restored-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "6eb20538f7d565dbde97886c6d62264cdba38b54bdf72638a80d7726b890a0cb"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-restored-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "e19af5d9b00c44eee2ae3eeb13f3c52b3ac0f36307e4800d8cfff3c0d7010fa8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-restored-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "d9b61dd32f9a7c4bfea7698b70c8c0cdcee2de65fa3533bbb6ee4fd8d8d64380"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-restored.png",
+      "bytes": 429023,
+      "sha256": "2048ea5071e38a15f29a36ebbe24ddae05ca2cd2765e2319fb69159987c0414a"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-visible-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "fddcd45268818547d8e9ebc112185410baf5c6a9202d64a4e29e8e0a825221c8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-visible-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "6eb20538f7d565dbde97886c6d62264cdba38b54bdf72638a80d7726b890a0cb"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-visible-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "e19af5d9b00c44eee2ae3eeb13f3c52b3ac0f36307e4800d8cfff3c0d7010fa8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-visible-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "d9b61dd32f9a7c4bfea7698b70c8c0cdcee2de65fa3533bbb6ee4fd8d8d64380"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/cpu-visible.png",
+      "bytes": 428925,
+      "sha256": "8e175aad48b87d2e5b25651b0f1131acc332d6fe55cca905f41d4993b413c154"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/fixture.html",
+      "bytes": 493,
+      "sha256": "af630237a5ed2c1b106a3a51bed54f37988b2b9448fec95f1b6c43a9b12b37e4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-camera-hidden-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "857b5e3737fcccb77dbd8b141b803c2da59975a6d655f163a0a94ae90b336b66"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-camera-hidden-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "f29a44d6dd18cae6fc558c09a60d04425419530cc845145f4a5121a955a0f995"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-camera-hidden-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "e19af5d9b00c44eee2ae3eeb13f3c52b3ac0f36307e4800d8cfff3c0d7010fa8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-camera-hidden-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "d9b61dd32f9a7c4bfea7698b70c8c0cdcee2de65fa3533bbb6ee4fd8d8d64380"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-camera-hidden.png",
+      "bytes": 422747,
+      "sha256": "baf555bae657f658360c420c4f4332a8034a37a1454e1208a418380184d1fec3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-globally-hidden-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "f0289ce132c2e936c90c0906b273e83a623203b7970bca04bd1046bc20002a90"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-globally-hidden-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "f29a44d6dd18cae6fc558c09a60d04425419530cc845145f4a5121a955a0f995"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-globally-hidden-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "eb73785b75ba60072ca35a2f88e1eaacbeaf2c8141ee916cc94dc3241e4109c3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-globally-hidden-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-globally-hidden.png",
+      "bytes": 424689,
+      "sha256": "ce481e0d2d9df140a365ed82141cb2a0e55e0d1cd6e88cfd9f0eb9fcf8aacfaa"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-restored-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "fddcd45268818547d8e9ebc112185410baf5c6a9202d64a4e29e8e0a825221c8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-restored-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "6eb20538f7d565dbde97886c6d62264cdba38b54bdf72638a80d7726b890a0cb"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-restored-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "e19af5d9b00c44eee2ae3eeb13f3c52b3ac0f36307e4800d8cfff3c0d7010fa8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-restored-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "d9b61dd32f9a7c4bfea7698b70c8c0cdcee2de65fa3533bbb6ee4fd8d8d64380"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-restored.png",
+      "bytes": 429023,
+      "sha256": "2048ea5071e38a15f29a36ebbe24ddae05ca2cd2765e2319fb69159987c0414a"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-visible-hdr.rgba16f",
+      "bytes": 1843200,
+      "sha256": "fddcd45268818547d8e9ebc112185410baf5c6a9202d64a4e29e8e0a825221c8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-visible-mainDepth.f32",
+      "bytes": 921600,
+      "sha256": "6eb20538f7d565dbde97886c6d62264cdba38b54bdf72638a80d7726b890a0cb"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-visible-reflection.rgba16f",
+      "bytes": 720000,
+      "sha256": "e19af5d9b00c44eee2ae3eeb13f3c52b3ac0f36307e4800d8cfff3c0d7010fa8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-visible-shadowDepth.f32",
+      "bytes": 4194304,
+      "sha256": "d9b61dd32f9a7c4bfea7698b70c8c0cdcee2de65fa3533bbb6ee4fd8d8d64380"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/gpu-visible.png",
+      "bytes": 428925,
+      "sha256": "8e175aad48b87d2e5b25651b0f1131acc332d6fe55cca905f41d4993b413c154"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/native-probe.js",
+      "bytes": 804172,
+      "sha256": "895bf5c81fe570c450c8f2c45f3c2ef4a750c8f8f4960193613f3144e7b5fd6c"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/progress.json",
+      "bytes": 58761,
+      "sha256": "88a8ec4bd185da704398da1092ffca43164bb79874f2c4e545e7345d61c964e9"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/report.json",
+      "bytes": 59272,
+      "sha256": "8db99bb50d11b5a5f9077b6a61c3a2926526786ae7a8f2d7a41df3387e5567a9"
+    },
+    {
+      "path": "artifacts/office-subject-mask/game-probes/office-subject-mask-native-20261017-r3/source-frame.json",
+      "bytes": 13405041,
+      "sha256": "46c83d45cc1e1abf89d8fa5326f17efda4b75cb80e9eaf38af4b84cf253d5487"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-app-typecheck-r2-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-engine-build-r1-20261017.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-engine-tests-r1-20261017.log",
+      "bytes": 5427,
+      "sha256": "e8049823414606a8bb4859de67618cebbc4626935a2630d10f38435ee9261267"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-regression-final-20261017.log",
+      "bytes": 23643,
+      "sha256": "a167cc7e80b82b358bc7e7af133c2a7f28d88167f15479761286d384d1ccd507"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-regression-final-r2-20261017.log",
+      "bytes": 21360,
+      "sha256": "c0f99285c6faa4ab6f702d5a6cad04d9bb504e092611213a6ddfb34f702435e5"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-regression-r1-20261017.log",
+      "bytes": 21366,
+      "sha256": "0a4b30b3ffba2911cd88a7ca12969bbbdc266dd329b9de9f5acf81c57ca1f6c7"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "097870929dea6f32c58110e101da3f4b662c7649f2689909ea87ff6c3b32c71a"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/engine-office-subject-mask-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/game-office-subject-mask-game-build-r1-20261017.log",
+      "bytes": 585,
+      "sha256": "1b91936c459170d2b9d5b89c8ffd6a418e2b129c07b371d7ff06304970dfc1c3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/game-office-subject-mask-game-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/game-office-subject-mask-game-typecheck-final-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/game-office-subject-mask-native-20261017-r1.log",
+      "bytes": 2851,
+      "sha256": "72a102318d133813f52d8601590efcd5b058e47b6b49fb7d6acff4f81cf10c71"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/game-office-subject-mask-native-20261017-r2.log",
+      "bytes": 3537,
+      "sha256": "3f841740570668e51e11cab44150349b4a50cb7d7a9272590ea9f155b72e881d"
+    },
+    {
+      "path": "artifacts/office-subject-mask/logs/game-office-subject-mask-native-20261017-r3.log",
+      "bytes": 102,
+      "sha256": "fd2599cf4f4cdd1c25a7a31d307399549aa15407b200119e52c533ea871589db"
+    },
+    {
+      "path": "artifacts/office-subject-mask/native-probe-before-reflection-readback.ts",
+      "bytes": 7476,
+      "sha256": "f21a32be58972dfd3107472ea39e381afb92da1767bd4d7da49eb0b270e5e201"
+    },
+    {
+      "path": "artifacts/office-subject-mask/native-probe-before-stats-fix.ts",
+      "bytes": 7480,
+      "sha256": "539e073d0b321a651ce5a2d0cea657e071958f0f49a7888b659ee512a3d66378"
+    },
+    {
+      "path": "artifacts/office-subject-mask/native-probe.ts",
+      "bytes": 7403,
+      "sha256": "a36ecd0f5dfa068f498a406d6e751b1edd5d6768590708bc1951e1505fd1ce10"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/after-audit.json",
+      "bytes": 314,
+      "sha256": "daeed37901d670a714e3776994232faf3b2c21ebf369a04975e6ce17c9e68cff"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/before.json",
+      "bytes": 1325,
+      "sha256": "1ba94cc1ad79930bfca7e7a3dd1e6384d7d80912afb6a8221a001eeb238e82a3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/before.sqlite",
+      "bytes": 9449472,
+      "sha256": "7cb4a02cebed0257a835168f6abc9f79c847986bbad42261fd742524e8b1f0ea"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/fixture.html",
+      "bytes": 493,
+      "sha256": "af630237a5ed2c1b106a3a51bed54f37988b2b9448fec95f1b6c43a9b12b37e4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/native-probe.js",
+      "bytes": 804252,
+      "sha256": "c6b4a62c710aae0937ad498958cd9302e591878e39ee939d23526a5369b75b21"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/served-before/game.js",
+      "bytes": 2507241,
+      "sha256": "55b8b60377bb6d09449eb9edc8564859bb26425e901ef3195e25b4e662b243a9"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r1/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/after-audit.json",
+      "bytes": 314,
+      "sha256": "508f342ca7bb4b04b16172dcddcc1b2aa5afb60cc53dde427fc32fc220266439"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/before.json",
+      "bytes": 1325,
+      "sha256": "226065e2a974a9fa3c94ca2c0caf73f7f57f3d8fe02228fc2cbcf667843b0f63"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/before.sqlite",
+      "bytes": 9457664,
+      "sha256": "3bd353db8d96d452893b9d4986e76e0a1f73fc78c85bd1d9834fa86b6f4d2c0b"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/fixture.html",
+      "bytes": 493,
+      "sha256": "af630237a5ed2c1b106a3a51bed54f37988b2b9448fec95f1b6c43a9b12b37e4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/native-probe.js",
+      "bytes": 804248,
+      "sha256": "96e4e0bf23f0901597f9fa108f697b2ddf5dd9fac14a449bcb07f9c22341a674"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/served-before/game.js",
+      "bytes": 2507241,
+      "sha256": "55b8b60377bb6d09449eb9edc8564859bb26425e901ef3195e25b4e662b243a9"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r2/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/after-audit.json",
+      "bytes": 314,
+      "sha256": "1908a1057dc0bfe51313adb449ce2fa86950546690c8b2b4000b48490ed7205b"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/before.json",
+      "bytes": 1325,
+      "sha256": "ed65b948155416992cbd5e46e5ecbeef8423dff28f8f3512ead78e6c7b8fbe49"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/before.sqlite",
+      "bytes": 9469952,
+      "sha256": "e9b6dc7c8f2e7ac00e57a8157a49e598ce2a1149a8ad2f752ac0778e921624ee"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/fixture.html",
+      "bytes": 493,
+      "sha256": "af630237a5ed2c1b106a3a51bed54f37988b2b9448fec95f1b6c43a9b12b37e4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/native-probe.js",
+      "bytes": 804172,
+      "sha256": "895bf5c81fe570c450c8f2c45f3c2ef4a750c8f8f4960193613f3144e7b5fd6c"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/served-before/game.js",
+      "bytes": 2507241,
+      "sha256": "55b8b60377bb6d09449eb9edc8564859bb26425e901ef3195e25b4e662b243a9"
+    },
+    {
+      "path": "artifacts/office-subject-mask/office-subject-mask-native-20261017-r3/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-subject-mask/plan.json",
+      "bytes": 811,
+      "sha256": "73b5ce95c4fe81245a1f07a5ac9e0d26c8810e3f9377a5d6a6c6a01dc3c8a3d4"
+    },
+    {
+      "path": "artifacts/office-subject-mask/prepare-native.ts",
+      "bytes": 911,
+      "sha256": "24bdf2d21b9087658d32828c89153f0ac84ccec0f65ce7329dcf02241698a1da"
+    },
+    {
+      "path": "artifacts/office-subject-mask/prepare.ts",
+      "bytes": 2481,
+      "sha256": "b910a749acda61f70db953c6f8f2bad9eee44f4f25878103857fa76906624263"
+    },
+    {
+      "path": "artifacts/office-subject-mask/qa-before-reflection-readback.ts",
+      "bytes": 5216,
+      "sha256": "50116be6a02dc7559a77809beec4dd156dd92a525ab00b7df063bf52ed04b527"
+    },
+    {
+      "path": "artifacts/office-subject-mask/reviewed.json",
+      "bytes": 1117,
+      "sha256": "b2af9ff6a4b02dbb78e80713b3e7e6a1f8f2327160410b0f04de80a705e3c6f3"
+    },
+    {
+      "path": "artifacts/office-subject-mask/run-native.ps1",
+      "bytes": 1321,
+      "sha256": "65c166351ca709d83fcb0d14d9b70fc213e9803529eaf370d0b54eba939cb07d"
+    },
+    {
+      "path": "artifacts/office-subject-mask/service-state.json",
+      "bytes": 510,
+      "sha256": "2dee15f11dba1778a15572c7e86e6b23464cdc562dd6cae769ecafec79c85d34"
+    },
+    {
+      "path": "artifacts/office-subject-mask/update-final-counts.ts",
+      "bytes": 1569,
+      "sha256": "7b590c635ff133ba4f6a5d4878df4e60c99553791e1acb21d146dd4dc0a36f9c"
+    },
+    {
+      "path": "artifacts/office-subject-mask/update-fixtures.ts",
+      "bytes": 1155,
+      "sha256": "097b1ff3cedef8419342ee8ba8c4cc7ee916cdea3d35028454595e7b1dc0df66"
+    }
+  ],
+  "totals": {
+    "files": 157,
+    "bytes": 163496462,
+    "sourceFiles": 26,
+    "servedAssets": 3,
+    "builtOfficeAssets": 3,
+    "reviewedImages": 3
+  }
+}

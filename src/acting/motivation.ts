@@ -2,7 +2,7 @@
  * Numeric weights are authored behavior parameters, not psychological measurements.
  * Authority commits observations/minds; neither animation nor prose creates facts. */
 export const ACTING_LIMITS=Object.freeze({goals:8,sentiments:24,memories:32,attempts:3,candidates:32});
-export const ACTING_ACTIONS=['listen','ask','explain','decline','acknowledge','clarify','withdraw'] as const;
+export const ACTING_ACTIONS=['listen','ask','explain','decline','acknowledge','clarify','withdraw','greet','think','celebrate','comfort','startle','tired'] as const;
 export type ActingAction=typeof ACTING_ACTIONS[number];
 export interface ActingGoal {readonly id:string;readonly importance:number}
 export interface ActingSentiment {
@@ -142,6 +142,12 @@ export function actingEmotionsAt(mind:ActingMind,atS:number):ActingEmotions {
  actingTime(atS);if(mind.version!==2||atS<mind.atS)throw new RangeError('Migrate mind or advance acting clock');return fade(mind.emotions,atS);
 }
 export function actingAffectAt(mind:ActingMind,atS:number):ActingAffect{return projection(actingEmotionsAt(mind,atS));}
+/** Advance the checked publication at one simulation time without replaying the
+ * causal window or adding another emotional source. Both views share one sample. */
+export function advanceActingMind(mind:ActingMind,atS:number):ActingMind {
+ const emotions=actingEmotionsAt(mind,atS);
+ return {...mind,atS,emotions,affect:projection(emotions)};
+}
 export function beginActingIntention(mind:ActingMind,input:Pick<ActingIntention,'id'|'goalId'|'subject'|'partnerId'>,atS:number):ActingMind {
  actingAffectAt(mind,atS);for(const k of ['id','goalId','subject','partnerId'] as const)id(input[k]);
  if(input.partnerId===mind.actorId||!mind.goals.some(g=>g.id===input.goalId))throw new TypeError('Invalid intention partner or goal');

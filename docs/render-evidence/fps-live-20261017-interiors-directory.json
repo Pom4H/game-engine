@@ -1,0 +1,109 @@
+{
+  "measuredAt": "2026-10-16T23:51:50.395Z",
+  "command": "bun tools/capture.ts --live",
+  "exitCode": 0,
+  "environment": {
+    "CAPTURE_EXISTING": "1",
+    "CAPTURE_PORT": "3007",
+    "CAPTURE_DEBUG_PORT": "3235",
+    "CAPTURE_GPU": "1",
+    "PERF_FIXED_SETTINGS": "1",
+    "PERF_WARMUP_FRAMES": "180",
+    "PERF_LIVE_FRAMES": "900",
+    "PERF_LABEL": "fps-live-20261017-interiors-directory"
+  },
+  "hardware": {
+    "Name": "AMD Radeon 760M Graphics",
+    "DriverVersion": "32.0.31041.1004"
+  },
+  "frames": 900,
+  "warmupFrames": 180,
+  "profiled": false,
+  "averageFPS": 60.711539239891515,
+  "p50Ms": 18.700000000000728,
+  "p95Ms": 28.900000000001455,
+  "derivedIntervalSumMs": 14824.200000000003,
+  "browser": {
+    "mode": "native-gpu",
+    "batterySaverRequested": "default",
+    "backend": "webgpu",
+    "width": 1280,
+    "height": 720,
+    "renderResolution": [
+      704,
+      396
+    ]
+  },
+  "engine": "the-engine",
+  "settings": {
+    "environmentMode": "world",
+    "preset": "clear",
+    "hiz": false,
+    "taa": true,
+    "bloom": false,
+    "groundLitter": true,
+    "motionBlur": 0,
+    "dof": 0,
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "visual": {
+      "sunElevation": 0.9075712110370514,
+      "sunTemperature": 5700,
+      "skyTurbidity": 2.2,
+      "humidity": 0.42,
+      "cloudCoverage": 0.16,
+      "fogDensity": 0.00065,
+      "wetness": 0,
+      "exposureBias": -0.25,
+      "artificialLightIntensity": 0.02,
+      "sunIntensity": 4.2,
+      "skyIntensity": 0.7
+    }
+  },
+  "adaptiveEnabled": false,
+  "cameraDepth": {
+    "encoding": "logarithmic",
+    "near": 0.05,
+    "far": 2000,
+    "logarithmicDenominator": 10.966505451905741
+  },
+  "rendererErrors": [],
+  "networkStatus": "online",
+  "selfPose": {
+    "x": -345,
+    "y": 0.16999999999999998,
+    "z": -66,
+    "animation": "idle"
+  },
+  "rawMetrics": {
+    "repo": "game",
+    "path": "artifacts/performance-live-fps-live-20261017-interiors-directory.json",
+    "bytes": 247115,
+    "sha256": "d359e546b4f46e2a8d56e070a361b8c95215bf3fef2097aa99cc2a8451817722"
+  },
+  "gameBundle": {
+    "repo": "game",
+    "path": "public/build/game.js",
+    "bytes": 2484349,
+    "sha256": "a3439114f4122890507ebd52e54f1420ed0b3e178322d61ea50882e03df0263a",
+    "archive": "artifacts/office-interiors-directory/fps-game.js"
+  },
+  "servedGameBundle": {
+    "url": "http://127.0.0.1:3007/build/game.js",
+    "status": 200,
+    "bytes": 2484349,
+    "sha256": "a3439114f4122890507ebd52e54f1420ed0b3e178322d61ea50882e03df0263a"
+  },
+  "healthAfter": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "limits": [
+    "Short stationary original Game measurement; not walking, vehicles, sustained-60 or Office UI performance.",
+    "1280x720 viewport, 704x396 internal rendering, TAA, 420 m, adaptive resolution disabled.",
+    "900 requestAnimationFrame intervals after 180 warmup frames; benchmark additionally discards its first 30 intervals. Not isolated GPU execution time. Interval sum is derived from count/throughput.",
+    "Different live world state and bundle from the earlier 49.682 FPS sample; these unpaired samples do not establish a performance improvement or regression."
+  ]
+}

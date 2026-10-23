@@ -1,0 +1,488 @@
+{
+  "date": "2026-10-21",
+  "status": "pass",
+  "scope": "Production optional WebGPURenderer opaqueDepthPrepass=false/true. Complete controlled paired1280x720 images, sampled HDR and complete main depth readback. This is not a full-game FPS or frame-pacing acceptance.",
+  "implementation": {
+    "default": false,
+    "canonicalGame": true,
+    "eligibility": "Only fragment logarithmic depth, single-sample camera targets. TAA/postprocessing unchanged. Unsupported perspective or multisample opt-ins reject before GPU allocation.",
+    "predicate": "currentDepth>nearestDepth; strict comparison only, no epsilon. Original opaque main pass, depth target and draw ordering retained.",
+    "derivatives": "All derivatives/implicit texture samples precede the gate; no uniformity diagnostic is disabled.",
+    "exclusions": [
+      "relief",
+      "coating",
+      "transparency"
+    ],
+    "vertexPaths": [
+      "singles",
+      "per-vertex CPU instancing",
+      "GPU-indirect shared instances",
+      "original deformed/procedural grass vertex positions"
+    ]
+  },
+  "source": {
+    "webgpuSha256": "6257576c55e9b21e06f601cfd62a7a37017a0cff412f232e7ed09608e54466ab",
+    "helperSha256": "d6b8c31e55829b883a9e0d5fdad52fe72ca90917bf91846c7404ad3b2902f14c",
+    "gameEntrySha256": "501ea219e2b0cc893d49cc5ce1f88ee7c232abeb2d97ab8914297a8d98c294d4"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "command": "bun tools/render-stability/run-game-depth-prepass-check.ts",
+  "rawReport": "artifacts/opaque-depth-production-20261021/report.json",
+  "cases": [
+    {
+      "name": "overdraw",
+      "png": {
+        "before": "artifacts/opaque-depth-production-20261021/overdraw-before.png",
+        "after": "artifacts/opaque-depth-production-20261021/overdraw-after.png",
+        "beforeSha256": "d884ee784a1af25c051d2781eed112fa3f5d80b915f116dca1edbfe99c782161",
+        "afterSha256": "d884ee784a1af25c051d2781eed112fa3f5d80b915f116dca1edbfe99c782161",
+        "byteIdentical": true
+      },
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "mainDepth": {
+        "pixels": 921600,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "gpu": {
+        "beforeMain": {
+          "meanMs": 19.753491707317067,
+          "p50Ms": 19.87476,
+          "p95Ms": 20.48956,
+          "maxMs": 21.21652
+        },
+        "afterMain": {
+          "meanMs": 8.248136326530611,
+          "p50Ms": 8.25268,
+          "p95Ms": 8.50624,
+          "maxMs": 8.56636
+        },
+        "prepass": {
+          "meanMs": 0.14711673469387754,
+          "p50Ms": 0.1466,
+          "p95Ms": 0.15072,
+          "maxMs": 0.1532
+        },
+        "beforeSamples": 41,
+        "afterSamples": 49
+      },
+      "drawWork": {
+        "entities": 124,
+        "visible": 110,
+        "opaque": 109,
+        "transparent": 1,
+        "cameraOpaque": 109,
+        "cameraTransparent": 1,
+        "shadowCasters": 107,
+        "reflected": 108,
+        "drawCalls": 24,
+        "triangles": 19532,
+        "snowInstances": 0,
+        "shadowBatchedInstances": 71,
+        "instancedOpaque": 0,
+        "uploadBytes": 4748,
+        "uniformUploadBytes": 0,
+        "surfaceUploadBytes": 0,
+        "lightUploadBytes": 0,
+        "frameUploadBytes": 2372,
+        "snowUploadBytes": 0,
+        "environmentUploadBytes": 0,
+        "instanceUploadBytes": 0,
+        "visibilityUploadBytes": 2376,
+        "mainIndirectDraws": 9,
+        "mainIndirectCandidates": 95,
+        "geometryCountBasis": "candidate-upper-bound"
+      },
+      "errors": []
+    },
+    {
+      "name": "coplanar",
+      "png": {
+        "before": "artifacts/opaque-depth-production-20261021/coplanar-before.png",
+        "after": "artifacts/opaque-depth-production-20261021/coplanar-after.png",
+        "beforeSha256": "7358d11caa9e3be665456e5dd730ad45ca96b40a1345a41ed27dfb4ee239941a",
+        "afterSha256": "7358d11caa9e3be665456e5dd730ad45ca96b40a1345a41ed27dfb4ee239941a",
+        "byteIdentical": true
+      },
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "mainDepth": {
+        "pixels": 921600,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "gpu": {
+        "beforeMain": {
+          "meanMs": 20.499145000000002,
+          "p50Ms": 20.41568,
+          "p95Ms": 21.7612,
+          "maxMs": 22.09988
+        },
+        "afterMain": {
+          "meanMs": 8.275351489361704,
+          "p50Ms": 8.26788,
+          "p95Ms": 8.44736,
+          "maxMs": 8.6708
+        },
+        "prepass": {
+          "meanMs": 0.1515634042553192,
+          "p50Ms": 0.1512,
+          "p95Ms": 0.15516,
+          "maxMs": 0.15824
+        },
+        "beforeSamples": 40,
+        "afterSamples": 47
+      },
+      "drawWork": {
+        "entities": 127,
+        "visible": 113,
+        "opaque": 112,
+        "transparent": 1,
+        "cameraOpaque": 112,
+        "cameraTransparent": 1,
+        "shadowCasters": 109,
+        "reflected": 111,
+        "drawCalls": 27,
+        "triangles": 19568,
+        "snowInstances": 0,
+        "shadowBatchedInstances": 71,
+        "instancedOpaque": 0,
+        "uploadBytes": 4748,
+        "uniformUploadBytes": 0,
+        "surfaceUploadBytes": 0,
+        "lightUploadBytes": 0,
+        "frameUploadBytes": 2372,
+        "snowUploadBytes": 0,
+        "environmentUploadBytes": 0,
+        "instanceUploadBytes": 0,
+        "visibilityUploadBytes": 2376,
+        "mainIndirectDraws": 9,
+        "mainIndirectCandidates": 95,
+        "geometryCountBasis": "candidate-upper-bound"
+      },
+      "errors": []
+    },
+    {
+      "name": "grass-rebase",
+      "png": {
+        "before": "artifacts/opaque-depth-production-20261021/grass-rebase-before.png",
+        "after": "artifacts/opaque-depth-production-20261021/grass-rebase-after.png",
+        "beforeSha256": "5f59f316eb8878be54b26e7545881ba5a91871ae5d0c28264e5b9bb0723034dd",
+        "afterSha256": "5f59f316eb8878be54b26e7545881ba5a91871ae5d0c28264e5b9bb0723034dd",
+        "byteIdentical": true
+      },
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "mainDepth": {
+        "pixels": 921600,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "gpu": {
+        "beforeMain": {
+          "meanMs": 19.516677999999995,
+          "p50Ms": 19.23308,
+          "p95Ms": 20.89464,
+          "maxMs": 21.37432
+        },
+        "afterMain": {
+          "meanMs": 8.164199111111113,
+          "p50Ms": 8.12308,
+          "p95Ms": 8.53168,
+          "maxMs": 8.80916
+        },
+        "prepass": {
+          "meanMs": 0.1519066666666667,
+          "p50Ms": 0.15184,
+          "p95Ms": 0.15528,
+          "maxMs": 0.16588
+        },
+        "beforeSamples": 40,
+        "afterSamples": 45
+      },
+      "drawWork": {
+        "entities": 124,
+        "visible": 110,
+        "opaque": 109,
+        "transparent": 1,
+        "cameraOpaque": 109,
+        "cameraTransparent": 1,
+        "shadowCasters": 107,
+        "reflected": 108,
+        "drawCalls": 24,
+        "triangles": 19532,
+        "snowInstances": 0,
+        "shadowBatchedInstances": 71,
+        "instancedOpaque": 0,
+        "uploadBytes": 4748,
+        "uniformUploadBytes": 0,
+        "surfaceUploadBytes": 0,
+        "lightUploadBytes": 0,
+        "frameUploadBytes": 2372,
+        "snowUploadBytes": 0,
+        "environmentUploadBytes": 0,
+        "instanceUploadBytes": 0,
+        "visibilityUploadBytes": 2376,
+        "mainIndirectDraws": 9,
+        "mainIndirectCandidates": 95,
+        "geometryCountBasis": "candidate-upper-bound"
+      },
+      "errors": []
+    },
+    {
+      "name": "nearplane",
+      "png": {
+        "before": "artifacts/opaque-depth-production-20261021/nearplane-before.png",
+        "after": "artifacts/opaque-depth-production-20261021/nearplane-after.png",
+        "beforeSha256": "c515388cb6c372671666d0155611058ef57ac0fddb7a83f5fdc6f4188199edf7",
+        "afterSha256": "c515388cb6c372671666d0155611058ef57ac0fddb7a83f5fdc6f4188199edf7",
+        "byteIdentical": true
+      },
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "mainDepth": {
+        "pixels": 921600,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "gpu": {
+        "beforeMain": {
+          "meanMs": 47.853361,
+          "p50Ms": 47.15088,
+          "p95Ms": 52.21424,
+          "maxMs": 53.22928
+        },
+        "afterMain": {
+          "meanMs": 8.207772499999999,
+          "p50Ms": 8.18984,
+          "p95Ms": 8.39292,
+          "maxMs": 8.5894
+        },
+        "prepass": {
+          "meanMs": 0.3721391666666667,
+          "p50Ms": 0.37028,
+          "p95Ms": 0.38664,
+          "maxMs": 0.38948
+        },
+        "beforeSamples": 40,
+        "afterSamples": 48
+      },
+      "drawWork": {
+        "entities": 125,
+        "visible": 111,
+        "opaque": 110,
+        "transparent": 1,
+        "cameraOpaque": 99,
+        "cameraTransparent": 0,
+        "shadowCasters": 107,
+        "reflected": 98,
+        "drawCalls": 13,
+        "triangles": 25418,
+        "snowInstances": 0,
+        "shadowBatchedInstances": 71,
+        "instancedOpaque": 0,
+        "uploadBytes": 4748,
+        "uniformUploadBytes": 0,
+        "surfaceUploadBytes": 0,
+        "lightUploadBytes": 0,
+        "frameUploadBytes": 2372,
+        "snowUploadBytes": 0,
+        "environmentUploadBytes": 0,
+        "instanceUploadBytes": 0,
+        "visibilityUploadBytes": 2376,
+        "mainIndirectDraws": 9,
+        "mainIndirectCandidates": 95,
+        "geometryCountBasis": "candidate-upper-bound"
+      },
+      "errors": []
+    },
+    {
+      "name": "motion",
+      "png": {
+        "before": "artifacts/opaque-depth-production-20261021/motion-before.png",
+        "after": "artifacts/opaque-depth-production-20261021/motion-after.png",
+        "beforeSha256": "5f0f176cf6c320cf2f4824b74370edaf6080ac290cbf5323e485362fe2be1055",
+        "afterSha256": "5f0f176cf6c320cf2f4824b74370edaf6080ac290cbf5323e485362fe2be1055",
+        "byteIdentical": true
+      },
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "mainDepth": {
+        "pixels": 921600,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "gpu": {
+        "beforeMain": {
+          "meanMs": 20.287149000000003,
+          "p50Ms": 20.1596,
+          "p95Ms": 21.67084,
+          "maxMs": 21.84052
+        },
+        "afterMain": {
+          "meanMs": 8.890905777777775,
+          "p50Ms": 8.87216,
+          "p95Ms": 9.73328,
+          "maxMs": 9.89528
+        },
+        "prepass": {
+          "meanMs": 0.16722488888888887,
+          "p50Ms": 0.16812,
+          "p95Ms": 0.18172,
+          "maxMs": 0.19624
+        },
+        "beforeSamples": 40,
+        "afterSamples": 45
+      },
+      "drawWork": {
+        "entities": 124,
+        "visible": 110,
+        "opaque": 109,
+        "transparent": 1,
+        "cameraOpaque": 109,
+        "cameraTransparent": 1,
+        "shadowCasters": 107,
+        "reflected": 108,
+        "drawCalls": 24,
+        "triangles": 20396,
+        "snowInstances": 0,
+        "shadowBatchedInstances": 71,
+        "instancedOpaque": 0,
+        "uploadBytes": 4748,
+        "uniformUploadBytes": 0,
+        "surfaceUploadBytes": 0,
+        "lightUploadBytes": 0,
+        "frameUploadBytes": 2372,
+        "snowUploadBytes": 0,
+        "environmentUploadBytes": 0,
+        "instanceUploadBytes": 0,
+        "visibilityUploadBytes": 2376,
+        "mainIndirectDraws": 9,
+        "mainIndirectCandidates": 95,
+        "geometryCountBasis": "candidate-upper-bound"
+      },
+      "errors": []
+    },
+    {
+      "name": "cpu-instances",
+      "png": {
+        "before": "artifacts/opaque-depth-production-20261021/cpu-instances-before.png",
+        "after": "artifacts/opaque-depth-production-20261021/cpu-instances-after.png",
+        "beforeSha256": "d884ee784a1af25c051d2781eed112fa3f5d80b915f116dca1edbfe99c782161",
+        "afterSha256": "d884ee784a1af25c051d2781eed112fa3f5d80b915f116dca1edbfe99c782161",
+        "byteIdentical": true
+      },
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "mainDepth": {
+        "pixels": 921600,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "gpu": {
+        "beforeMain": {
+          "meanMs": 19.476662857142856,
+          "p50Ms": 19.5286,
+          "p95Ms": 20.0242,
+          "maxMs": 20.50644
+        },
+        "afterMain": {
+          "meanMs": 8.198466382978726,
+          "p50Ms": 8.17184,
+          "p95Ms": 8.45512,
+          "maxMs": 8.55412
+        },
+        "prepass": {
+          "meanMs": 0.14199659574468085,
+          "p50Ms": 0.142,
+          "p95Ms": 0.14336,
+          "maxMs": 0.14748
+        },
+        "beforeSamples": 42,
+        "afterSamples": 47
+      },
+      "drawWork": {
+        "entities": 124,
+        "visible": 110,
+        "opaque": 109,
+        "transparent": 1,
+        "cameraOpaque": 109,
+        "cameraTransparent": 1,
+        "shadowCasters": 107,
+        "reflected": 108,
+        "drawCalls": 87,
+        "triangles": 19532,
+        "snowInstances": 0,
+        "shadowBatchedInstances": 0,
+        "instancedOpaque": 24,
+        "uploadBytes": 6212,
+        "uniformUploadBytes": 0,
+        "surfaceUploadBytes": 0,
+        "lightUploadBytes": 0,
+        "frameUploadBytes": 2372,
+        "snowUploadBytes": 0,
+        "environmentUploadBytes": 0,
+        "instanceUploadBytes": 3840,
+        "visibilityUploadBytes": 0,
+        "mainIndirectDraws": 0,
+        "mainIndirectCandidates": 0,
+        "geometryCountBasis": "exact"
+      },
+      "errors": []
+    }
+  ],
+  "verification": {
+    "engine": {
+      "command": "npm run check",
+      "exit": 0,
+      "tests": 892,
+      "passed": 873,
+      "skipped": 19,
+      "failed": 0,
+      "log": "../../engine-depth-prepass-final-check.log"
+    },
+    "gameFocused": {
+      "passed": 30,
+      "failed": 0,
+      "assertions": 86859,
+      "log": "../../game-depth-prepass-focused.log"
+    },
+    "gameTypecheck": "pass",
+    "defaultDescriptors": "Existing frozen canonical101/minimal74 descriptors and readiness tests pass without changing any old golden hash."
+  },
+  "limits": [
+    "The controlled fixture has substantial overdraw. Real city, driving and flight performance must be measured independently.",
+    "The previous artifacts-only prototype and its preliminary bundler-identity failure remain under artifacts/manual-log-prepass-20261021. Production evidence comes only from the later optional-mode false/true run."
+  ]
+}

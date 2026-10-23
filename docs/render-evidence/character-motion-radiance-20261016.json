@@ -1,0 +1,136 @@
+{
+  "date": "2026-10-16T03:43:18.086Z",
+  "scope": "Full Game character motion on Engine and immutable mesh radiance bounds. CPU microbenchmark is fixed; live observations are sequential and not a parity or sustained-FPS gate.",
+  "benchmark": {
+    "before": {
+      "date": "2026-10-16T03:41:10.342Z",
+      "scope": "CPU probe construction only; fixed 30 meshes of 60000 vertices, warmed, changing origin",
+      "samples": 40,
+      "vertices": 1800000,
+      "meanMs": 33.25005250000001,
+      "p50Ms": 31.26480000000015,
+      "p95Ms": 40.353000000000065,
+      "probeSha256": "32d7786658a5d6d16ed8be1df3df7358c70bcca25875377fe60667f106de6e5a"
+    },
+    "after": {
+      "date": "2026-10-16T03:41:49.278Z",
+      "scope": "CPU probe construction only; fixed 30 meshes of 60000 vertices, warmed, changing origin",
+      "samples": 40,
+      "vertices": 1800000,
+      "meanMs": 0.07206999999998516,
+      "p50Ms": 0.06749999999999545,
+      "p95Ms": 0.11170000000004165,
+      "probeSha256": "32d7786658a5d6d16ed8be1df3df7358c70bcca25875377fe60667f106de6e5a"
+    }
+  },
+  "nativeGame": {
+    "before": {
+      "date": "2026-10-16T03:30:44.684Z",
+      "mode": "native-gpu",
+      "renderResolution": [
+        704,
+        396
+      ],
+      "environmentCpu": {
+        "meanMs": 28.353714285578047,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 72.2999999821186,
+        "maxMs": 92.2999999821186
+      },
+      "rendererCpu": {
+        "meanMs": 38.43857142840113,
+        "p50Ms": 14.400000005960464,
+        "p95Ms": 90.09999999403954,
+        "maxMs": 392.7000000178814
+      },
+      "gpu": {
+        "meanMs": 6.059034302325579,
+        "p50Ms": 6.70824,
+        "p95Ms": 7.897439999999999,
+        "maxMs": 8.341000000000001
+      },
+      "frames": 350,
+      "physicalBodies": 0,
+      "errors": [],
+      "drawDistanceM": 200,
+      "renderScale": 0.55
+    },
+    "after": {
+      "date": "2026-10-16T03:43:18.086Z",
+      "mode": "native-gpu",
+      "renderResolution": [
+        704,
+        396
+      ],
+      "environmentCpu": {
+        "meanMs": 0.7857142851411641,
+        "p50Ms": 0,
+        "p95Ms": 3.199999988079071,
+        "maxMs": 79.09999999403954
+      },
+      "rendererCpu": {
+        "meanMs": 9.729120879382878,
+        "p50Ms": 5.699999988079071,
+        "p95Ms": 29.400000005960464,
+        "maxMs": 96.2000000178814
+      },
+      "gpu": {
+        "meanMs": 6.297464,
+        "p50Ms": 7.3122,
+        "p95Ms": 7.779639999999999,
+        "maxMs": 8.345360000000001
+      },
+      "frames": 364,
+      "physicalBodies": 0,
+      "errors": [],
+      "drawDistanceM": 200,
+      "renderScale": 0.55
+    },
+    "motion": {
+      "sameBody": true,
+      "distanceM": 18.90292250066381,
+      "maxSpeedMps": 6.799999525792458,
+      "crouch": true,
+      "jump": true,
+      "ackFrom": 235,
+      "ackTo": 718
+    },
+    "physics": {
+      "characterMotor": "the-engine",
+      "rigidBodySolver": "thegame-solid",
+      "fromTick": 48595,
+      "toTick": 49155,
+      "fromIntegrationSteps": 10842,
+      "toIntegrationSteps": 11962,
+      "vehicleStepHz": 120
+    }
+  },
+  "checks": {
+    "gameTargeted": {
+      "tests": 51,
+      "failures": 0,
+      "assertions": 23111
+    },
+    "engineLighting": {
+      "tests": 23,
+      "failures": 0
+    },
+    "engineMotion": {
+      "tests": 5,
+      "failures": 0
+    },
+    "engineGameOfficeTypechecksAndBuilds": true,
+    "screenshotsInspected": [
+      "walk",
+      "run",
+      "crouch",
+      "jump"
+    ]
+  },
+  "remaining": [
+    "Game rigid-body solver adoption",
+    "Initial blocking work and sustained render performance",
+    "Remaining effect/material parity",
+    "Voice acceptance"
+  ]
+}

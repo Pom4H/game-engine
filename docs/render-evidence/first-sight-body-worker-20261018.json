@@ -1,0 +1,178 @@
+{
+  "date": "2026-10-18",
+  "status": "Correctness and native activity validated; frame-stall goal remains open",
+  "nativeScopeCorrection": "The preceding cached-only native capture fulfilled the exact worker override and reported ready/no errors but0jobs/0publications and59 unclassified synchronous publications. This did not prove that all59 were first sight or identify unsupported families. Its guard failed honestly before trace/movement; no steady-state worker benefit was demonstrated.",
+  "scope": "Non-priority first sight of sedan/taxi/police/v6/m3 is now eligible for exact worker generation. Existing hull proxy remains until a complete nonempty body publishes. Priority remains immediate sync; absence/startup/failure/watchdog/cap/DTO rejection retains exact default/fair sync fallback. No new proxy/model, geometry quality, physics/network rate or population cap.",
+  "ownership": "Controller explicitly retains unpublished state; published() exposes no empty array. Worker empty output fails closed. Main vehicleMeshes and instance geometry are written only after targeted valid complete publication. Numeric family/render-ID/incarnation/source/style/type/release fences remain; priority promotion synchronously adopts and invalidates late results.",
+  "scheduling": {
+    "firstSightAdmissionsPerFrame": 1,
+    "admissionFIFO": "At most180 IDs only; no closures/runtime objects retained across frames. Capture current DTO lazily only at the current draw/admission; a fairly deferred ID keeps proxy and does not force sync. Unsupported/actually rejected work joins the existing fair sync lane.",
+    "workerActive": 1,
+    "workerResidents": 64,
+    "latestAndReadyPerResident": 1,
+    "admissionDoesNotConsumePublicationLane": true,
+    "ordinaryPublicationLane": "Targeted first or replacement completion shares one lane with actual first-sight/fallback sync work; current key is observed before commit. Existing priority exception can exceed/delay the ordinary lane.",
+    "otherLimits": "Payload16MiB including active+latest,ready32MiB,output reservation16MiB,worker rest/spec/binding64MiB,startup/job watchdog5000ms; unchanged."
+  },
+  "telemetry": {
+    "classified": [
+      "syncFirstSightPanel",
+      "syncFirstSightOther",
+      "syncReplacementPanel",
+      "syncReplacementOther",
+      "asyncFirstSight",
+      "asyncReplacement"
+    ],
+    "syncByType": "Constructor initializes at most64 registered catalog numeric counters plus unknown scalar; increment only actual sync publication, copy only diagnostics. No per-frame timing/history. Existing async/sync totals remain.",
+    "measurement": "Root records bodyWorkerAtStart once at score start and computes post-score deltas, distinguishing warmup activity from measured activity."
+  },
+  "verification": {
+    "tests": {
+      "command": "bun test --timeout30000 test/body-worker-control.test.ts test/body-worker-presentation.test.ts",
+      "pass": 51,
+      "fail": 0,
+      "assertions": 727,
+      "log": "../thegame/artifacts/body-worker-prototype/production/first-sight-tests.log"
+    },
+    "typecheckExit": 0,
+    "buildExit": 0,
+    "buildLog": "../thegame/artifacts/body-worker-prototype/production/first-sight-build.log",
+    "browser": {
+      "command": "bun artifacts/body-worker-prototype/qa-production-browser.ts",
+      "exit": 0,
+      "product": "Chrome/155.0.8059.80",
+      "records": 22,
+      "exactBodyCases": 21,
+      "actualFirstSight": {
+        "name": "actual-production-first-sight-proxy-to-body",
+        "floats": 267462,
+        "bytes": 1069848,
+        "diagnostics": {
+          "enabled": true,
+          "ready": true,
+          "failure": null,
+          "active": 0,
+          "residents": 1,
+          "unpublished": 0,
+          "pending": 0,
+          "readyBodies": 0,
+          "queuedBytes": 0,
+          "readyBytes": 0,
+          "activeOutputReserved": 0,
+          "epoch": 1,
+          "config": 1,
+          "jobsDispatched": 1,
+          "jobsCompleted": 1,
+          "publications": 1,
+          "failures": 0,
+          "startupTimeouts": 0,
+          "jobTimeouts": 0,
+          "lastBuildMs": 46.09999996423721,
+          "maxBuildMs": 46.09999996423721,
+          "lastPublicationAgeMs": 48.90000003576279,
+          "maxPublicationAgeMs": 48.90000003576279,
+          "asyncPublications": 1,
+          "syncPublications": 0,
+          "waitingSync": 0,
+          "waitingAdmission": 0,
+          "syncFirstSightPanel": 0,
+          "syncFirstSightOther": 0,
+          "syncReplacementPanel": 0,
+          "syncReplacementOther": 0,
+          "asyncFirstSight": 1,
+          "asyncReplacement": 0,
+          "syncByType": {
+            "truck": 0,
+            "tram": 0,
+            "metro": 0,
+            "bus": 0,
+            "sedan": 0,
+            "sport": 0,
+            "bike": 0,
+            "kukuruznik": 0,
+            "monoplane": 0,
+            "hatch": 0,
+            "wagon": 0,
+            "coupe": 0,
+            "taxi": 0,
+            "suv": 0,
+            "van": 0,
+            "pickup": 0,
+            "classic": 0,
+            "cruiser": 0,
+            "scooter": 0,
+            "bicycle": 0,
+            "cargoBike": 0,
+            "kickScooter": 0,
+            "eScooter": 0,
+            "police": 0,
+            "compact": 0,
+            "crossover": 0,
+            "m3": 0,
+            "v6": 0
+          },
+          "syncUnknown": 0
+        }
+      },
+      "report": "../thegame/artifacts/body-worker-prototype/production/browser-report.json",
+      "cleanup": "Browser/CDP/temp profile/server closed;CPU-only headless Chrome with GPU disabled. No rendered-frame or native FPS claim."
+    },
+    "flowCoverage": [
+      "Existing-proxy byte parity before first publication",
+      "Exact output before nonempty main geometry emission",
+      "Priority promotion while first sight pending",
+      "Uncached source/config/release/type stale reply rejection",
+      "Error/watchdog exact sync fallback",
+      "One FIFO admission per frame without consuming sync/publication lane",
+      "Cap-denied first-sight fallback and classified other family counters",
+      "Original cached-only fairness/current-key/frozen-sync regressions preserved by seeding actual prior main cache"
+    ]
+  },
+  "limitations": [
+    "No measured native benefit claim until root actual worker activity, scored deltas, fixed-quality frames, movement and aligned CPU/GC evidence.",
+    "Unsupported families and priority/default fallback still generate on main; compile/pack/GPU upload remains main.",
+    "Logical payload/rest accounting does not equal JS heap and output cap is checked after exact generation.",
+    "The existing immediate-priority exception and out-of-contract scene counts beyond180 prevent an absolute universal one-publication/fairness guarantee.",
+    "Parameter lifetime variant/key budgets fail closed to sync; automatic worker restart/rotation is absent."
+  ],
+  "sourceHashes": {
+    "src/game/render/body-worker-protocol.ts": "73324aef3301ac82a8293e59ca519abe1d01eaf868287502fcdf26085d1f9868",
+    "src/game/render/body-worker-builder.ts": "09919208912f65f228e9cd61337b1a997d411ef0cd39ab2a46f976adeca62c49",
+    "src/game/render/body-worker-control.ts": "f0f0dade6326f4ffa937c404a5b2e56b69a5b4817f18cbb7364ce14bd6d98418",
+    "src/game/render/body-worker-service.ts": "7242cd2f157dff8a67f919a819d7649c95d7c4dde1e8104ad47a1c26cf434174",
+    "src/game/render/body-worker.worker.ts": "dc6588da171faae6ce7a15309815b7a228e56e95376e9a1264e75cec4a196f4b",
+    "src/game/presentation.ts": "c8984b360aa0e64fa2cb77174ece185b2e136273b50923b626bb4df690a544e7",
+    "src/game/client.ts": "b4eea991af010eabedbd61a91680ab38915347b37a7e2cc81266610cd5b5a0ec",
+    "src/game/runtime/scene.js": "77b0d90ab20dc57ede199a9327b6a1eb0dcce1b07003bfc59b29beca58891217",
+    "test/body-worker-presentation.test.ts": "db40b6da00ca5ad113f335f9b594e42bdff91bd7de6c46ac9ecec57e24f29ef8"
+  },
+  "bundles": {
+    "public/build/game.js": {
+      "sha256": "5df9e989713fd42844ceaf3bedb84845ed8da7c82a947f75728bb3f17dc5ad9b",
+      "bytes": 2610320
+    },
+    "public/build/body-worker.js": {
+      "sha256": "26e7884dc2d4b12a81f7c1c3d7cf89a1c7c5edb986ac474bc098cad76d999057",
+      "bytes": 524431
+    }
+  },
+  "nativeEvidence": {
+    "artifact":"../thegame/artifacts/performance-live-render-stability-first-sight-20261018.json",
+    "log":"../thegame/artifacts/render-stability-first-sight-20261018.log",
+    "screenshot":"../thegame/artifacts/performance-live-render-stability-first-sight-20261018.png",
+    "screenshotVisuallyInspected":true,"captureExitCode":0,"exactGameAndWorkerOverridesFulfilled":true,
+    "bundleSha256":"5df9e989713fd42844ceaf3bedb84845ed8da7c82a947f75728bb3f17dc5ad9b",
+    "mapSha256":"3f2526d2b7bd7a1a97e39134f0a70a4c2dd8d469a6bec63607add30c23cc4901",
+    "workerSha256":"26e7884dc2d4b12a81f7c1c3d7cf89a1c7c5edb986ac474bc098cad76d999057",
+    "quality":{"matched":true,"resolution":[704,396],"scale":0.55,"drawDistance":420,"taa":true,"bloom":false,"adaptive":false},
+    "warmupFrames":600,"measuredFrames":900,"averageFPS":64.18623,
+    "frameMs":{"p95":20.6,"p99":39,"max":468.3},"framesOver50ms":5,
+    "engineCpuMs":{"mean":7.45327,"p95":11.2,"max":54.6},"engineGpuMs":{"mean":10.01276,"p95":11.2138,"max":27.08539},
+    "workerScored":{"jobs":2,"completed":2,"firstSightPublications":2,"replacementPublications":0,"syncPanelFirstSight":0,"syncOtherFirstSight":11,"syncReplacements":0,"syncTypes":{"pickup":2,"classic":2,"cruiser":1,"scooter":3,"bicycle":2,"cargoBike":1}},
+    "workerTotal":{"jobs":7,"publications":7,"failures":0,"timeouts":0,"maxBuildMs":141.4,"maxEnqueueToPublicationMs":428.1,"publicationAgeScope":"Includes startup/warmup, not solely scored work."},
+    "network":{"pendingMin":19,"pendingMax":48,"fullFrames":325,"serverHzSnapshot":42.62877},"rendererErrors":[],
+    "movement":{"artifact":"../thegame/artifacts/movement-render-stability-first-sight-20261018.json","frames":536,"authoritativeTicks":414,"distanceM":10.726646,"backwardFrames":0,"maxBackwardM":0,"originalThresholdPassed":true,"online":true,"alive":true},
+    "cpuDiagnostic":{"analysis":"../thegame/artifacts/stalls-render-stability-first-sight-20261018-body-analysis.json","largestRafAnalysis":"../thegame/artifacts/stalls-render-stability-first-sight-20261018-largest-raf-cpu.json","seconds":30,"lightTelemetry":true,"heapSampling":false,"teardownExcluded":true,"frames":1847,"maxFrameMs":351.2,"longTasks":9,"fullProfilerInspectionScoredMs":0,"sampledGcMs":1059.347,"maxConsecutiveGcSamplesMs":118.65,"panelBodySamplesMs":0,"vehicleBuildSamplesMs":956.994,"compileSamplesMs":228.716,"packSamplesMs":149.779,"largestRaf":{"durationMs":351.2,"idleSamplesMs":295.009,"clientFrameSamplesMs":33.108,"gcSamplesMs":3.083},"scope":"Inclusive sampled paths overlap; idle does not identify a scheduling/driver cause. The separate118msLongTask is GC-dominated. Different histories prevent a causal before/after FPS or GC improvement claim."},
+    "limit":"Worker activity and exact complete publications are exercised, but468.3msunprofiled/351.2msdiagnostic tails and full input windows remain. Historical large GPU interval did not recur here; no-freeze goal is not achieved."
+  }
+}

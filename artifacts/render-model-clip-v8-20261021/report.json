@@ -1,0 +1,442 @@
+{
+  "status": "measured",
+  "scope": "Allocation-free alternating paired Chrome/V8 CPU-only synthetic spotlight inputs; NOT actual-r7 data, game FPS or isolated performance acceptance. Concurrent Game correctness suite; OS power plan unchanged.",
+  "runtime": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12,
+    "timerTimeOrigin": 1792584476624
+  },
+  "result": {
+    "scope": "Standalone synthetic spotlight CPU replay; not captured actual-r7 objects, no GPU or end-to-end FPS measurement",
+    "repeats": 32,
+    "pairs": 25,
+    "warmup": 12,
+    "results": [
+      {
+        "label": "mixed 2048 synthetic road-like objects",
+        "objects": 2048,
+        "callsPerSample": 65536,
+        "rejectedPlaneOrAccepted": [
+          713,
+          562,
+          14,
+          13,
+          0,
+          211,
+          535
+        ],
+        "originalMs": {
+          "min": 5.399999976158142,
+          "p10": 5.400000095367432,
+          "median": 5.700000047683716,
+          "p90": 7.5,
+          "max": 9
+        },
+        "stagedMs": {
+          "min": 2.5999999046325684,
+          "p10": 2.600000023841858,
+          "median": 2.700000047683716,
+          "p90": 3.200000047683716,
+          "max": 3.799999952316284
+        },
+        "pairedRatio": {
+          "min": 0.3376623231859187,
+          "p10": 0.3555555608537462,
+          "median": 0.48275863699056887,
+          "p90": 0.549999992052714,
+          "max": 0.6229508094203245
+        },
+        "samples": [
+          {
+            "stagedFirst": false,
+            "originalMs": 5.799999952316284,
+            "stagedMs": 2.700000047683716,
+            "ratio": 0.46551725342781175,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.800000071525574,
+            "stagedMs": 2.6999999284744263,
+            "ratio": 0.4655172233065586,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.5,
+            "stagedMs": 2.6999999284744263,
+            "ratio": 0.49090907790444116,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.5,
+            "stagedMs": 2.700000047683716,
+            "ratio": 0.4909090995788574,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.5,
+            "stagedMs": 2.700000047683716,
+            "ratio": 0.4909090995788574,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 7.700000047683716,
+            "stagedMs": 2.5999999046325684,
+            "ratio": 0.3376623231859187,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.700000047683716,
+            "stagedMs": 2.6999999284744263,
+            "ratio": 0.473684194015334,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.399999976158142,
+            "stagedMs": 2.8000000715255737,
+            "ratio": 0.5185185340533368,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.600000023841858,
+            "stagedMs": 3.100000023841858,
+            "ratio": 0.5535714304720869,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.799999952316284,
+            "stagedMs": 3.100000023841858,
+            "ratio": 0.5344827671255142,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.5,
+            "stagedMs": 2.600000023841858,
+            "ratio": 0.472727277062156,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.599999904632568,
+            "stagedMs": 2.700000047683716,
+            "ratio": 0.4821428738686506,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.5,
+            "stagedMs": 2.8000000715255737,
+            "ratio": 0.5090909220955588,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.799999952316284,
+            "stagedMs": 2.899999976158142,
+            "ratio": 0.5,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.400000095367432,
+            "stagedMs": 2.6999999284744263,
+            "ratio": 0.49999997792420603,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 7.5,
+            "stagedMs": 2.600000023841858,
+            "ratio": 0.34666666984558103,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 6.100000023841858,
+            "stagedMs": 3.799999952316284,
+            "ratio": 0.6229508094203245,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 9,
+            "stagedMs": 3.200000047683716,
+            "ratio": 0.3555555608537462,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 7.5,
+            "stagedMs": 2.799999952316284,
+            "ratio": 0.37333332697550453,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.799999952316284,
+            "stagedMs": 2.8000000715255737,
+            "ratio": 0.48275863699056887,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 6.200000047683716,
+            "stagedMs": 2.899999976158142,
+            "ratio": 0.46774192804104336,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.600000023841858,
+            "stagedMs": 2.6999999284744263,
+            "ratio": 0.48214284231772236,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 5.399999976158142,
+            "stagedMs": 2.8000000715255737,
+            "ratio": 0.5185185340533368,
+            "visible": 535
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 5.700000047683716,
+            "stagedMs": 2.6999999284744263,
+            "ratio": 0.473684194015334,
+            "visible": 535
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 6,
+            "stagedMs": 3.299999952316284,
+            "ratio": 0.549999992052714,
+            "visible": 535
+          }
+        ]
+      },
+      {
+        "label": "all-visible 1024 synthetic objects",
+        "objects": 1024,
+        "callsPerSample": 32768,
+        "rejectedPlaneOrAccepted": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1024
+        ],
+        "originalMs": {
+          "min": 3.100000023841858,
+          "p10": 3.1999999284744263,
+          "median": 3.200000047683716,
+          "p90": 3.3000000715255737,
+          "max": 3.5
+        },
+        "stagedMs": {
+          "min": 1.899999976158142,
+          "p10": 2,
+          "median": 2,
+          "p90": 2.200000047683716,
+          "max": 3
+        },
+        "pairedRatio": {
+          "min": 0.5757576129762709,
+          "p10": 0.5999999727521624,
+          "median": 0.6249999906867744,
+          "p90": 0.6875000302679843,
+          "max": 0.882352947363804
+        },
+        "samples": [
+          {
+            "stagedFirst": false,
+            "originalMs": 3.3000000715255737,
+            "stagedMs": 2,
+            "ratio": 0.6060605929245965,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.299999952316284,
+            "stagedMs": 2,
+            "ratio": 0.6060606148179462,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2.0999999046325684,
+            "ratio": 0.6562499604187911,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2,
+            "ratio": 0.6249999906867744,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.299999952316284,
+            "stagedMs": 2,
+            "ratio": 0.6060606148179462,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2.100000023841858,
+            "ratio": 0.6562499976716936,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.299999952316284,
+            "stagedMs": 2,
+            "ratio": 0.6060606148179462,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2.100000023841858,
+            "ratio": 0.6562499976716936,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.1999999284744263,
+            "stagedMs": 2.200000047683716,
+            "ratio": 0.6875000302679843,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.299999952316284,
+            "stagedMs": 2.5,
+            "ratio": 0.7575757685224326,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.100000023841858,
+            "stagedMs": 2.100000023841858,
+            "ratio": 0.6774193573196522,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.299999952316284,
+            "stagedMs": 2,
+            "ratio": 0.6060606148179462,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2.0999999046325684,
+            "ratio": 0.6562499604187911,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2,
+            "ratio": 0.6249999906867744,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.299999952316284,
+            "stagedMs": 1.9000000953674316,
+            "ratio": 0.5757576129762709,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2.1999999284744263,
+            "ratio": 0.6874999674037103,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.1999999284744263,
+            "stagedMs": 2,
+            "ratio": 0.625000013969839,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.3000000715255737,
+            "stagedMs": 2.100000023841858,
+            "ratio": 0.6363636297956315,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.5,
+            "stagedMs": 2.0999999046325684,
+            "ratio": 0.5999999727521624,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.3000000715255737,
+            "stagedMs": 2,
+            "ratio": 0.6060605929245965,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.299999952316284,
+            "stagedMs": 2,
+            "ratio": 0.6060606148179462,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2,
+            "ratio": 0.6249999906867744,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.1999999284744263,
+            "stagedMs": 1.899999976158142,
+            "ratio": 0.5937500058207662,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": true,
+            "originalMs": 3.200000047683716,
+            "stagedMs": 2.100000023841858,
+            "ratio": 0.6562499976716936,
+            "visible": 1024
+          },
+          {
+            "stagedFirst": false,
+            "originalMs": 3.399999976158142,
+            "stagedMs": 3,
+            "ratio": 0.882352947363804,
+            "visible": 1024
+          }
+        ]
+      }
+    ],
+    "checksum": 3691712
+  }
+}

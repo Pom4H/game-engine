@@ -1,0 +1,342 @@
+{
+  "date": "2026-10-16T06:27:02.394Z",
+  "referenceDate": "2026-10-16T06:22:50.397Z",
+  "browser": "native-gpu",
+  "scope": "sole Game entry; original pinned vehicle/world; wetness and lighting fixed; surface-only staged rain/flow/time, no streak geometry or authority motion; native kernel oracle; Engine 4096 HDR samples, legacy reference PNGs only; not full visual parity/FPS acceptance",
+  "fixtureSha256": "cad2b898002bd56d9f9a535696f1ac8c66f815d5dd9aca1d7ee9338db3df3ff0",
+  "frozenOriginalKernelSha256": "eeb2991eaede1c54e1be502edbbe33e91bc9350c966217b3eead7bbdddcee20d",
+  "kernelOracle": {
+    "samples": 8192,
+    "max": 0,
+    "nonzeroGround": 518,
+    "nonzeroPaint": 665,
+    "input": "4096 ground and 4096 paint positions at rain .85 and time 7; paint flow [5,-4]",
+    "original": "test/fixtures/game-rain-surface.wgsl, frozen before migration",
+    "comparison": "actual native compute shader results versus original four-channel output"
+  },
+  "frameUniforms": {
+    "words": 176,
+    "bytes": 704,
+    "previousWords": 168,
+    "previousBytes": 672,
+    "previousOffsetsPreserved": true
+  },
+  "materialUniforms": {
+    "words": 96,
+    "bytes": 384,
+    "rainResponseWord": 94,
+    "paintMirrorWord": 95
+  },
+  "hdr": {
+    "samples": 4096,
+    "changeThresholdL1RGB": 0.001,
+    "rain": {
+      "max": 0.7730712890625,
+      "mean": 0.002742784097790718,
+      "changed": 132
+    },
+    "paintFlow": {
+      "max": 0.7210540771484375,
+      "mean": 0.00038651004433631897,
+      "changed": 21
+    },
+    "presentedTime": {
+      "max": 1.3287353515625,
+      "mean": 0.00348864309489727,
+      "changed": 141
+    },
+    "restored": {
+      "max": 0,
+      "mean": 0,
+      "changed": 0
+    }
+  },
+  "stages": [
+    {
+      "name": "wet-no-rain",
+      "rain": 0,
+      "time": 7,
+      "paintFlow": [
+        0,
+        0
+      ],
+      "surfaceWeather": {
+        "rain": 0,
+        "paintFlow": [
+          0,
+          0
+        ],
+        "origin": [
+          -384,
+          0,
+          -256
+        ]
+      },
+      "rainResponses": {
+        "ground": 416,
+        "paint": 144,
+        "mirroredPaint": 0
+      },
+      "wetness": [
+        0.75,
+        0.75
+      ],
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "falling",
+      "rain": 0.85,
+      "time": 7,
+      "paintFlow": [
+        0,
+        0
+      ],
+      "surfaceWeather": {
+        "rain": 0.85,
+        "paintFlow": [
+          0,
+          0
+        ],
+        "origin": [
+          -384,
+          0,
+          -256
+        ]
+      },
+      "rainResponses": {
+        "ground": 416,
+        "paint": 144,
+        "mirroredPaint": 0
+      },
+      "wetness": [
+        0.75,
+        0.75
+      ],
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "flow",
+      "rain": 0.85,
+      "time": 7,
+      "paintFlow": [
+        5,
+        -4
+      ],
+      "surfaceWeather": {
+        "rain": 0.85,
+        "paintFlow": [
+          5,
+          -4
+        ],
+        "origin": [
+          -384,
+          0,
+          -256
+        ]
+      },
+      "rainResponses": {
+        "ground": 416,
+        "paint": 144,
+        "mirroredPaint": 0
+      },
+      "wetness": [
+        0.75,
+        0.75
+      ],
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "later",
+      "rain": 0.85,
+      "time": 7.7,
+      "paintFlow": [
+        5,
+        -4
+      ],
+      "surfaceWeather": {
+        "rain": 0.85,
+        "paintFlow": [
+          5,
+          -4
+        ],
+        "origin": [
+          -384,
+          0,
+          -256
+        ]
+      },
+      "rainResponses": {
+        "ground": 416,
+        "paint": 144,
+        "mirroredPaint": 0
+      },
+      "wetness": [
+        0.75,
+        0.75
+      ],
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "restored",
+      "rain": 0,
+      "time": 7,
+      "paintFlow": [
+        0,
+        0
+      ],
+      "surfaceWeather": {
+        "rain": 0,
+        "paintFlow": [
+          0,
+          0
+        ],
+        "origin": [
+          -384,
+          0,
+          -256
+        ]
+      },
+      "rainResponses": {
+        "ground": 416,
+        "paint": 144,
+        "mirroredPaint": 0
+      },
+      "wetness": [
+        0.75,
+        0.75
+      ],
+      "physicalBodies": 0,
+      "gpuErrors": [],
+      "resolution": [
+        960,
+        540
+      ]
+    }
+  ],
+  "checks": {
+    "engine": {
+      "passed": 65,
+      "tests": [
+        "test/rain-surface.test.mjs",
+        "test/surface-appearance.test.mjs",
+        "test/renderer-post.test.mjs",
+        "test/render-pipeline-plan.test.mjs",
+        "test/gpu-visibility.test.mjs",
+        "test/scene-appearance-target.test.mjs",
+        "test/material-uniforms.test.mjs",
+        "test/render-visibility-plan.test.mjs",
+        "test/authored-mesh-uv.test.mjs",
+        "test/render-radiance-projection.test.mjs"
+      ],
+      "typecheck": "passed",
+      "build": "passed",
+      "log": "artifacts/rain-tests-final.log"
+    },
+    "gameProjection": {
+      "passed": 15,
+      "assertions": 4678,
+      "test": "test/the-engine-renderer.test.ts",
+      "log": "../thegame/artifacts/rain-projection-final.log"
+    },
+    "gameRegression": {
+      "passed": 20,
+      "assertions": 3632,
+      "tests": [
+        "test/rain-ripples.test.ts",
+        "test/ground-litter-wind.test.ts",
+        "test/rendering.test.ts",
+        "test/render-presentation-clock.test.ts",
+        "test/render-frame.test.ts"
+      ],
+      "log": "../thegame/artifacts/rain-game-regression.log"
+    },
+    "gameTypesAndBuild": "passed",
+    "officeCanonicalView": {
+      "passed": 11,
+      "assertions": 4137,
+      "log": "artifacts/rain-office-final.log"
+    },
+    "officeAdapterTypes": "passed",
+    "officeUI": {
+      "typecheck": "passed",
+      "build": "passed",
+      "warning": "existing large Vite chunk"
+    }
+  },
+  "commands": {
+    "engine": "bun run typecheck; bun run build; node --test test/rain-surface.test.mjs test/surface-appearance.test.mjs test/renderer-post.test.mjs test/render-pipeline-plan.test.mjs test/gpu-visibility.test.mjs test/scene-appearance-target.test.mjs test/material-uniforms.test.mjs test/render-visibility-plan.test.mjs test/authored-mesh-uv.test.mjs test/render-radiance-projection.test.mjs",
+    "game": "bun run typecheck; bun run build; bun test test/the-engine-renderer.test.ts test/rain-ripples.test.ts test/ground-litter-wind.test.ts test/rendering.test.ts test/render-presentation-clock.test.ts test/render-frame.test.ts",
+    "native": "CAPTURE_GPU=1 CAPTURE_PORT=3187 CAPTURE_DEBUG_PORT=3188 THEGAME_CPU_BUDGET=2 ACTIVE_RESIDENT_LIMIT=48 bun tools/capture.ts --engine-rain",
+    "reference": "same native capture with CAPTURE_RENDERER=legacy-webgpu RAIN_REFERENCE=1"
+  },
+  "visualReview": {
+    "images": 10,
+    "engine": [
+      "../thegame/artifacts/engine-rain/wet-no-rain.png",
+      "../thegame/artifacts/engine-rain/falling.png",
+      "../thegame/artifacts/engine-rain/flow.png",
+      "../thegame/artifacts/engine-rain/later.png",
+      "../thegame/artifacts/engine-rain/restored.png"
+    ],
+    "reference": [
+      "../thegame/artifacts/engine-rain-reference/wet-no-rain.png",
+      "../thegame/artifacts/engine-rain-reference/falling.png",
+      "../thegame/artifacts/engine-rain-reference/flow.png",
+      "../thegame/artifacts/engine-rain-reference/later.png",
+      "../thegame/artifacts/engine-rain-reference/restored.png"
+    ],
+    "observed": "Ground-ring locations and paint-bead placement/time/flow agree visually with the original. Lighting, surface grain, reflection response and glint contrast remain different; no full renderer parity claim."
+  },
+  "canonicalServer": {
+    "url": "http://127.0.0.1:3007",
+    "pid": 3040,
+    "seed": 29,
+    "revision": 13,
+    "players": 0,
+    "characterMotor": "the-engine",
+    "rigidBodySolver": "the-engine-compound",
+    "vehicleStepHz": 120,
+    "webTransport": 3009,
+    "servedBuildSha256": "f67d85bf217077bf9ca47143dd59d798d108ffb0082428f0d2012093302c9cc1",
+    "servedMatchesDisk": true,
+    "restartRequired": false
+  },
+  "limits": [
+    "Staged presentation rain isolates surface uniforms from original streak geometry; no authority pose change",
+    "Native Windows Chromium only; not browser/device coverage",
+    "Heavy-rain kernel sample set and five fixed frames, not every rain intensity or continuous motion acceptance",
+    "Legacy reference has PNG review only; its renderer does not expose linear pixel probes",
+    "No sustained FPS, startup/streaming performance or whole-renderer visual parity acceptance",
+    "No new actual Office GUI, physical microphone, native backend or voice acceptance",
+    "Ground litter and remaining original material/sky/fog response still need migration/parity work"
+  ],
+  "reports": {
+    "engine": "../thegame/artifacts/engine-rain/report.json",
+    "reference": "../thegame/artifacts/engine-rain-reference/report.json"
+  },
+  "qaRepairs": [
+    "Reference capture initially requested unsupported legacy HDR readback; reference now explicitly saves PNGs without fabricated HDR metrics",
+    "Visual comparison caught omitted road-marking base IDs 15..18; they and the paint overlay now receive ground rain",
+    "Retained original post-rain roughness floor .055; weather-only patches retain temporal history and object uploads"
+  ]
+}

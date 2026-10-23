@@ -1,0 +1,2517 @@
+{
+  "date": "2026-10-17T11:55:17.449Z",
+  "status": "partial; full original-game/Engine/Office objective active",
+  "capability": "original-residents-30",
+  "scope": "Physical on-site company rest, no-player payroll, actual saved NPC retention under slot pressure and Office entry.",
+  "tests": {
+    "care": {
+      "pass": 63,
+      "fail": 0,
+      "assertions": 11014,
+      "files": 6,
+      "seconds": 147.86
+    },
+    "watchedBudget": {
+      "pass": 27,
+      "fail": 0,
+      "assertions": 7874,
+      "files": 4,
+      "seconds": 78.94
+    },
+    "officeAdapters": {
+      "pass": 149,
+      "fail": 0,
+      "assertions": 6588,
+      "files": 15,
+      "seconds": 11.39
+    },
+    "typechecksAndBuilds": "Game, adapter and Office UI checks/builds exit 0; final server-only watched fix has Game typecheck/build and 27 focused checks. Renderer/controller bytes are unchanged."
+  },
+  "nativePay": {
+    "label": "office-worker-rest-game-20261017-r1",
+    "completed": true,
+    "worker": "resident:17499:0",
+    "autonomous": {
+      "orderReceipt": {
+        "ok": true,
+        "requestId": "4fb4d201-1509-43c3-b5f2-89e4f28d32b4",
+        "message": "Принят заказ: 1 документов по 12 ₽. Оплата зарезервирована городом.",
+        "tick": 5401,
+        "worldMinute": 278433.49997825566,
+        "companyId": "company:9cad9460-8bf4-499f-af85-eb0fc9b6cbed:55",
+        "orderId": "order:57"
+      },
+      "samples": 224,
+      "workedTicks": 900,
+      "paid": 8,
+      "wage": 8,
+      "completed": 1,
+      "revenue": 12,
+      "onSiteRestSamples": 0,
+      "companyWaterServed": 1,
+      "players": 0
+    },
+    "harness": {
+      "keyId": "4484f73a-d00f-4a83-a411-fb5133aec855",
+      "tools": [
+        "workers.list",
+        "worker.inspect",
+        "worker.act",
+        "worker.release"
+      ],
+      "idempotentCare": true,
+      "humanPriority": true,
+      "staleAfterReturnRefused": true,
+      "workerWalletUnchanged": true
+    },
+    "takeover": {
+      "metres": 0.4551708090270892,
+      "ms": 591,
+      "limit": 5.728799999999999,
+      "renderedDeltaM": 0.6345757780233808,
+      "renderedAuthorityM": 0.116933100321274,
+      "before": {
+        "x": -285.85038034028014,
+        "y": -0.020000000000000018,
+        "z": 228.1643335415383
+      },
+      "after": {
+        "x": -285.8873573229006,
+        "y": -0.020000000000000018,
+        "z": 228.61799990368857
+      }
+    },
+    "cleanup": {
+      "date": "2026-10-17T11:25:33.526Z",
+      "ok": true,
+      "scope": "Only the fresh QA account; ordinary authority commands, no saved-state editing",
+      "companyId": "company:9cad9460-8bf4-499f-af85-eb0fc9b6cbed:55",
+      "workerId": "resident:17499:0",
+      "keyRevoked": true,
+      "receipts": [
+        {
+          "ok": true,
+          "requestId": "01501ece-7764-4052-b05e-edf61aa659ea",
+          "message": "Договор завершён, заработанное выплачено.",
+          "tick": 20538,
+          "worldMinute": 278938.06664480484,
+          "companyId": "company:9cad9460-8bf4-499f-af85-eb0fc9b6cbed:55",
+          "employmentId": "employment:56"
+        },
+        {
+          "ok": true,
+          "requestId": "763654e9-2be8-4c88-9587-d4f848773e78",
+          "message": "Помещение освобождено. Остаток обеспечения возвращён компании.",
+          "tick": 20544,
+          "worldMinute": 278938.2666448048,
+          "companyId": "company:9cad9460-8bf4-499f-af85-eb0fc9b6cbed:55",
+          "unitId": "office:thegame:29:13:36117:2"
+        },
+        {
+          "ok": true,
+          "requestId": "33f7fb63-6140-422d-bc01-2460294ef3fa",
+          "message": "На счёт аккаунта возвращено 156 ₽.",
+          "tick": 20556,
+          "worldMinute": 278938.6666448047,
+          "companyId": "company:9cad9460-8bf4-499f-af85-eb0fc9b6cbed:55"
+        }
+      ],
+      "players": 0
+    },
+    "versionScope": "Before the later watched-slot callback; employment/rest/finance code is unchanged by that callback, which reads no peers during autonomous work."
+  },
+  "secondPaid": {
+    "date": "2026-10-17T11:31:34.752Z",
+    "accountId": "c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f",
+    "companyId": "company:c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f:58",
+    "workerId": "resident:17499:0",
+    "players": 0,
+    "workedTicks": 900,
+    "paid": 8,
+    "wage": 8,
+    "completed": 1,
+    "revenue": 12,
+    "onSiteRestSamples": 28,
+    "companyWaterServed": 0,
+    "companyMealsServed": 1,
+    "autonomous": {
+      "accountId": "c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f",
+      "capital": 46,
+      "companies": [
+        {
+          "id": "company:c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f:58",
+          "ownerAccountId": "c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f",
+          "name": "Проверка общего мира",
+          "balance": 98,
+          "rentDebt": 0,
+          "createdMinute": 279037.4333114484,
+          "rentPaid": 58,
+          "funded": 250,
+          "withdrawn": 0,
+          "payrollPaid": 8,
+          "revenue": 12,
+          "meals": 9,
+          "mealCosts": 30,
+          "mealsServed": 1,
+          "water": 10,
+          "waterCosts": 10,
+          "waterServed": 0,
+          "payrollLiability": 0,
+          "openOrderUnits": 0,
+          "orderEscrow": 0
+        }
+      ],
+      "leases": [
+        {
+          "unitId": "office:thegame:29:13:36117:2",
+          "companyId": "company:c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f:58",
+          "worldId": "thegame:29:13",
+          "buildingId": "36117",
+          "floor": 2,
+          "name": "Главный этаж",
+          "rent": 58,
+          "deposit": 58,
+          "period": 1440,
+          "grace": 180,
+          "nextDue": 280479.5333114479,
+          "arrears": 0,
+          "graceUntil": null,
+          "startedMinute": 279039.5333114479,
+          "status": "active"
+        }
+      ],
+      "staff": [
+        {
+          "id": "employment:59",
+          "companyId": "company:c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f:58",
+          "actorId": "resident:17499:0",
+          "unitId": "office:thegame:29:13:36117:2",
+          "workplaceId": "workplace:36117:2:desk-1",
+          "streetEntry": {
+            "x": -298,
+            "y": 0.04,
+            "z": 355.7357877052855
+          },
+          "wage": 8,
+          "shiftStart": 0,
+          "shiftEnd": 1439,
+          "startedMinute": 279042.86664478044,
+          "endedMinute": null,
+          "workedTicks": 900,
+          "pendingTicks": 0,
+          "wageUnits": 0,
+          "owed": 0,
+          "paid": 8,
+          "name": "Денис Миронов",
+          "status": "blocked",
+          "reason": "Нет незавершённых заказов",
+          "controllerRevision": 31,
+          "point": {
+            "x": -288.98356459377055,
+            "y": 6.654999999999999,
+            "z": 372.4706159132931
+          }
+        }
+      ],
+      "candidates": [
+        {
+          "id": "resident:building:-3:3:1:0",
+          "name": "София Морозова",
+          "job": "Техник городских служб",
+          "minimumWage": 5,
+          "commute": 99,
+          "distance": 60,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        },
+        {
+          "id": "resident:33826:0",
+          "name": "София Миронова",
+          "job": "Техник городских служб",
+          "minimumWage": 5,
+          "commute": 71,
+          "distance": 70,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        },
+        {
+          "id": "resident:33826:1",
+          "name": "Павел Орлов",
+          "job": "Работник почты",
+          "minimumWage": 5,
+          "commute": 71,
+          "distance": 71,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        },
+        {
+          "id": "resident:building:-2:3:1:0",
+          "name": "София Орлова",
+          "job": "Техник городских служб",
+          "minimumWage": 5,
+          "commute": 102,
+          "distance": 80,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        },
+        {
+          "id": "resident:33027:1",
+          "name": "Мария Морозова",
+          "job": "Садовник",
+          "minimumWage": 5,
+          "commute": 77,
+          "distance": 90,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        },
+        {
+          "id": "resident:building:-2:3:1:1",
+          "name": "Анна Волкова",
+          "job": "Техник городских служб",
+          "minimumWage": 5,
+          "commute": 102,
+          "distance": 102,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        },
+        {
+          "id": "resident:33027:0",
+          "name": "Артём Котов",
+          "job": "Сотрудник библиотеки",
+          "minimumWage": 5,
+          "commute": 77,
+          "distance": 119,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        },
+        {
+          "id": "resident:building:-3:3:1:1",
+          "name": "Алексей Волков",
+          "job": "Сотрудник библиотеки",
+          "minimumWage": 5,
+          "commute": 99,
+          "distance": 125,
+          "available": true,
+          "ready": false,
+          "reason": "Сначала позаботится о еде, воде и отдыхе"
+        }
+      ],
+      "orders": [
+        {
+          "id": "order:60",
+          "companyId": "company:c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f:58",
+          "kind": "documents",
+          "units": 1,
+          "completed": 1,
+          "progressTicks": 0,
+          "escrow": 0,
+          "createdMinute": 279052.79997811146,
+          "finishedMinute": 279223.56664473837
+        }
+      ],
+      "history": {
+        "employees": 1,
+        "orders": 1
+      },
+      "units": [
+        {
+          "id": "office:thegame:29:13:36117:2",
+          "worldId": "thegame:29:13",
+          "buildingId": "36117",
+          "floor": 2,
+          "floorId": "floor-1",
+          "name": "Главный этаж",
+          "area": 579,
+          "rent": 58,
+          "deposit": 58,
+          "period": 1440,
+          "grace": 180,
+          "streetEntry": {
+            "x": -298,
+            "y": 0.04,
+            "z": 355.7357877052855
+          },
+          "entry": {
+            "x": -298,
+            "y": 6.654999999999999,
+            "z": 376.31421229471454
+          },
+          "workplaces": [
+            {
+              "id": "workplace:36117:2:desk-1",
+              "objectId": "desk-1",
+              "point": {
+                "x": -288.7,
+                "y": 6.654999999999999,
+                "z": 372.625
+              }
+            },
+            {
+              "id": "workplace:36117:2:desk-2",
+              "objectId": "desk-2",
+              "point": {
+                "x": -292.3,
+                "y": 6.654999999999999,
+                "z": 372.625
+              }
+            },
+            {
+              "id": "workplace:36117:2:desk-3",
+              "objectId": "desk-3",
+              "point": {
+                "x": -288.7,
+                "y": 6.654999999999999,
+                "z": 369.225
+              }
+            },
+            {
+              "id": "workplace:36117:2:desk-4",
+              "objectId": "desk-4",
+              "point": {
+                "x": -292.3,
+                "y": 6.654999999999999,
+                "z": 369.225
+              }
+            },
+            {
+              "id": "workplace:36117:2:desk-5",
+              "objectId": "desk-5",
+              "point": {
+                "x": -288.7,
+                "y": 6.654999999999999,
+                "z": 365.825
+              }
+            },
+            {
+              "id": "workplace:36117:2:desk-6",
+              "objectId": "desk-6",
+              "point": {
+                "x": -291.5,
+                "y": 6.654999999999999,
+                "z": 365.825
+              }
+            }
+          ],
+          "leasable": true,
+          "reason": "",
+          "tenantName": "Проверка общего мира",
+          "mine": true
+        },
+        {
+          "id": "office:thegame:29:13:36117:3",
+          "worldId": "thegame:29:13",
+          "buildingId": "36117",
+          "floor": 3,
+          "floorId": "floor-6f9957e6d4",
+          "name": "Этаж 2",
+          "area": 579,
+          "rent": 58,
+          "deposit": 58,
+          "period": 1440,
+          "grace": 180,
+          "streetEntry": {
+            "x": -298,
+            "y": 0.04,
+            "z": 355.7357877052855
+          },
+          "entry": {
+            "x": -298,
+            "y": 9.954999999999998,
+            "z": 376.31421229471454
+          },
+          "workplaces": [],
+          "leasable": true,
+          "reason": "",
+          "tenantName": null,
+          "mine": false
+        }
+      ]
+    }
+  },
+  "physicalRest": {
+    "date": "2026-10-17T11:36:36.482Z",
+    "ok": true,
+    "scope": "Independent audit of the recorded live authority completion event, physical rest samples and unchanged work/pay. The original strict-sample browser process exited 1 and remains a failed probe.",
+    "originalProbeExitCode": 1,
+    "originalProbeIssue": "The old helper required fatigue <20 in the same later HTTP sample as completed status; ordinary life had already advanced it to 20.0123333333.",
+    "exactExecutedHelper": "artifacts/office-worker-rest/qa-game-workforce-r2-strict-sample.ts",
+    "futureHelperCorrected": true,
+    "actor": "resident:17499:0",
+    "intent": "6443ae52-508f-4a9b-a138-02604d8f4123",
+    "goal": {
+      "activity": "rest",
+      "name": "Проверка общего мира · перерыв",
+      "point": {
+        "x": -288.7,
+        "y": 6.654999999999999,
+        "z": 372.625
+      },
+      "arrived": false
+    },
+    "postWorkRecovery": {
+      "before": 27.78599999997786,
+      "minObserved": 20.01233333331135,
+      "atFirstCompletion": 20.01233333331135,
+      "firstCompletedAt": "2026-10-17T11:32:15.046Z",
+      "pollGapSeconds": 0.51,
+      "restingSamples": 18,
+      "positionAtFirstCompletion": {
+        "x": -288.9835645919272,
+        "y": 6.654999999999999,
+        "z": 372.4706159134738
+      }
+    },
+    "players": 0,
+    "workedTicks": 900,
+    "paid": 8,
+    "onSiteRestBeforeWorkSamples": 28,
+    "cleanup": {
+      "ok": true,
+      "players": 0,
+      "keyRevoked": true
+    }
+  },
+  "office": {
+    "url": "http://127.0.0.1:5173/",
+    "completed": true,
+    "records": 13,
+    "residents": {
+      "date": "2026-10-17T11:51:41.174Z",
+      "ok": true,
+      "accountId": "8807f687-8883-4ff4-844b-0c20299698a7",
+      "ownerActorId": "resident:human:8807f687-8883-4ff4-844b-0c20299698a7",
+      "originalBody": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+      "targetActor": "resident:building:-4:1:1:27462",
+      "targetBody": "resident:building:-4:1:1:27462",
+      "observed": {
+        "body": "resident:building:-4:1:1:27462",
+        "scope": {
+          "kind": "controller",
+          "center": [
+            -448,
+            0,
+            192
+          ],
+          "geometryKey": "controller:thegame:29:13:4244992909:36117:-448:192:1:thegame:29:13:4244992909:1:-448:192:420:-4:1,-4:0,-4:2,-5:1,-5:0,-5:2,-4:-1,-4:3,-6:1"
+        },
+        "oldBodyMovement": 0
+      },
+      "takeoverDistance": 0.12014993443747325,
+      "takeoverReference": {
+        "time": 52.03333333333102,
+        "tick": 3736,
+        "position": [
+          -415.96,
+          0.089,
+          130
+        ]
+      },
+      "takeoverSpeed": 1.808,
+      "moved": 0.26679530737337614,
+      "moveSeq": 1254,
+      "inputToMovementMs": 175,
+      "stopped": {
+        "ack": 1273,
+        "releaseSeq": 1271,
+        "speed": 0.10688693073712703
+      },
+      "movementSamples": [
+        {
+          "code": "KeyW",
+          "time": 51.556666666664654,
+          "elapsedMs": 47,
+          "input": {
+            "forward": 1,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 1,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 1256
+          },
+          "pending": 6,
+          "backpressured": false,
+          "ack": 1250,
+          "position": [
+            -415.75497725645147,
+            0.08796170445477136,
+            130.00000000513643
+          ],
+          "velocity": [
+            0.027123473240966423,
+            -1.2156388716587907e-10
+          ],
+          "transport": {
+            "stats": {
+              "receivedBytes": 5577087,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 51.206506666664644,
+                "latestTime": 52.11666666666435,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 992968447,
+                "entities": 68,
+                "definitions": 68,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 1.8000000238389475,
+                "headroomMs": 910.1599999997063,
+                "selfApplied": 465,
+                "entitiesApplied": 22551,
+                "stale": 64,
+                "awaitingDefinition": 51,
+                "pendingEvicted": 7,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 235580,
+                "sentPackets": 1048,
+                "replaced": 216,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 354
+              },
+              "commands": {
+                "sentBytes": 488,
+                "sentPackets": 6,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 108
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": 40555.69999998808,
+                "maxReadyWaitMs": 0.40000003576278687,
+                "maxWriteWaitMs": 4199.800000011921
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 3707,
+              "time": 51.556666666664654,
+              "entities": 68,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 40555.69999998808,
+                "latestSeq": 1256,
+                "forward": 1
+              },
+              "submitted": {
+                "at": 40548.5,
+                "latestSeq": 1254,
+                "forward": 1,
+                "history": [
+                  1249,
+                  1250,
+                  1251,
+                  1252,
+                  1253,
+                  1254
+                ]
+              }
+            }
+          },
+          "moved": 0.0848743075637799
+        },
+        {
+          "code": "KeyW",
+          "time": 51.69658666666466,
+          "elapsedMs": 165,
+          "input": {
+            "forward": 1,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false
+          },
+          "sent": {
+            "forward": 1,
+            "right": 0,
+            "yaw": 0.7407963267948965,
+            "pitch": 0.32,
+            "sprint": false,
+            "crouch": false,
+            "jump": false,
+            "interact": false,
+            "passenger": false,
+            "door": false,
+            "aim": false,
+            "handbrake": false,
+            "attack": false,
+            "kick": 0,
+            "block": false,
+            "forwardBrake": false,
+            "seq": 1262
+          },
+          "pending": 3,
+          "backpressured": false,
+          "ack": 1259,
+          "position": [
+            -415.6180078519281,
+            0.08734036656414518,
+            130.14820629230604
+          ],
+          "velocity": [
+            1.7069898090431208,
+            1.8624651135634285
+          ],
+          "transport": {
+            "stats": {
+              "receivedBytes": 5577087,
+              "replication": {
+                "frames": 8,
+                "playbackTime": 51.206506666664644,
+                "latestTime": 52.11666666666435,
+                "underrun": false,
+                "stalledEntities": 0,
+                "epoch": 992968447,
+                "entities": 68,
+                "definitions": 68,
+                "pendingDefinitions": 0,
+                "selfAgeMs": 1.8000000238389475,
+                "headroomMs": 910.1599999997063,
+                "selfApplied": 465,
+                "entitiesApplied": 22551,
+                "stale": 64,
+                "awaitingDefinition": 51,
+                "pendingEvicted": 7,
+                "malformed": 0
+              },
+              "fast": {
+                "sentBytes": 236520,
+                "sentPackets": 1053,
+                "replaced": 218,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 354
+              },
+              "commands": {
+                "sentBytes": 488,
+                "sentPackets": 6,
+                "replaced": 0,
+                "expired": 0,
+                "rejected": 0,
+                "failures": 0,
+                "peakBytes": 108
+              },
+              "commandQueue": 0,
+              "datagramTiming": {
+                "readySince": null,
+                "writeSince": null,
+                "maxReadyWaitMs": 0.40000003576278687,
+                "maxWriteWaitMs": 4199.800000011921
+              },
+              "outgoing": {
+                "pendingBytes": 0,
+                "pendingCount": 0,
+                "desiredSize": 1,
+                "outgoingMaxAge": 80
+              },
+              "transport": null
+            },
+            "presentation": {
+              "tick": 3716,
+              "time": 51.69658666666466,
+              "entities": 68,
+              "audio": 0
+            },
+            "motion": {
+              "enqueued": {
+                "at": 40650.80000001192,
+                "latestSeq": 1262,
+                "forward": 1
+              },
+              "submitted": {
+                "at": 40665.80000001192,
+                "latestSeq": 1262,
+                "forward": 1,
+                "history": [
+                  1257,
+                  1258,
+                  1259,
+                  1260,
+                  1261,
+                  1262
+                ]
+              }
+            }
+          },
+          "moved": 0.26679530737337614
+        }
+      ],
+      "returnInitiallyVisible": true,
+      "rightsBefore": {
+        "accountId": "8807f687-8883-4ff4-844b-0c20299698a7",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "8807f687-8883-4ff4-844b-0c20299698a7",
+        "companies": [],
+        "leases": []
+      },
+      "returnedBody": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+      "focusTraces": {}
+    },
+    "idle": {
+      "milliseconds": 15000,
+      "before": 1390,
+      "after": 2290,
+      "samples": [
+        {
+          "time": 58.70909214663957,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1449,
+          "pending": 20
+        },
+        {
+          "time": 59.583316566663534,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1508,
+          "pending": 21
+        },
+        {
+          "time": 60.712723848326355,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1581,
+          "pending": 8
+        },
+        {
+          "time": 61.819657103401504,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1639,
+          "pending": 9
+        },
+        {
+          "time": 62.83844091463331,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1699,
+          "pending": 10
+        },
+        {
+          "time": 63.84902718310658,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1759,
+          "pending": 10
+        },
+        {
+          "time": 64.86577173554826,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1822,
+          "pending": 7
+        },
+        {
+          "time": 65.8448496025195,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1876,
+          "pending": 11
+        },
+        {
+          "time": 66.88888088451603,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1936,
+          "pending": 12
+        },
+        {
+          "time": 67.91024288636574,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 1999,
+          "pending": 10
+        },
+        {
+          "time": 68.91302444564425,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 2059,
+          "pending": 10
+        },
+        {
+          "time": 69.90976731840249,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 2116,
+          "pending": 15
+        },
+        {
+          "time": 70.94716783898757,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 2179,
+          "pending": 11
+        },
+        {
+          "time": 71.9684485329708,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 2242,
+          "pending": 9
+        },
+        {
+          "time": 72.77747800245966,
+          "network": "online",
+          "actor": "player:8807f687-8883-4ff4-844b-0c20299698a7",
+          "ack": 2290,
+          "pending": 10
+        }
+      ]
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "physics": {
+      "steps": 0,
+      "bodies": 0
+    },
+    "rendererErrors": [],
+    "modules": [
+      {
+        "url": "http://127.0.0.1:5173/src/office/scene.ts?t=1792231502493",
+        "status": 200,
+        "mimeType": "text/javascript"
+      },
+      {
+        "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-30",
+        "status": 200,
+        "mimeType": "application/javascript"
+      }
+    ],
+    "visibleErrors": [
+      "Голосовое устройство недоступно"
+    ],
+    "diagnostics": 101,
+    "production8765Verified": false
+  },
+  "upgrades": [
+    {
+      "date": "2026-10-17T11:19:46.691Z",
+      "oldPid": 7688,
+      "newPid": 23980,
+      "beforeRows": 5010,
+      "afterRows": 5010,
+      "missingRows": 0,
+      "protectedRows": 293,
+      "changedProtectedRows": 0,
+      "accounts": 64,
+      "identitiesPreserved": 2249,
+      "ownerFieldsPreserved": 102,
+      "cashBefore": 1000000,
+      "cashAfter": 1000000,
+      "stateRepair": false,
+      "integrity": "ok",
+      "health": {
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 54,
+      "geometryRevision": 1
+    },
+    {
+      "date": "2026-10-17T11:50:32.507Z",
+      "oldPid": 23980,
+      "newPid": 4296,
+      "beforeRows": 5178,
+      "afterRows": 5178,
+      "missingRows": 0,
+      "protectedRows": 326,
+      "changedProtectedRows": 0,
+      "accounts": 67,
+      "identitiesPreserved": 2316,
+      "ownerFieldsPreserved": 109,
+      "cashBefore": 1000000,
+      "cashAfter": 1000000,
+      "stateRepair": false,
+      "integrity": "ok",
+      "health": {
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 54,
+      "geometryRevision": 1
+    }
+  ],
+  "audits": [
+    {
+      "date": "2026-10-17T11:25:35.113Z",
+      "pid": 23980,
+      "beforeRows": 5026,
+      "afterRows": 5076,
+      "missingRows": 0,
+      "protectedRows": 292,
+      "changedProtectedRows": 0,
+      "preservedCompanyLedger": {
+        "companies": {
+          "before": 22,
+          "after": 23,
+          "changedExisting": 0
+        },
+        "leases": {
+          "before": 0,
+          "after": 0,
+          "changedExisting": 0
+        },
+        "employees": {
+          "before": 17,
+          "after": 18,
+          "changedExisting": 0
+        },
+        "orders": {
+          "before": 15,
+          "after": 16,
+          "changedExisting": 0
+        }
+      },
+      "accounts": 64,
+      "integrity": "ok",
+      "editorRevision": 54,
+      "geometryRevision": 1,
+      "health": {
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "cleanup": {
+        "ok": true,
+        "companyId": "company:9cad9460-8bf4-499f-af85-eb0fc9b6cbed:55",
+        "workerId": "resident:17499:0",
+        "keyRevoked": true
+      }
+    },
+    {
+      "date": "2026-10-17T11:34:54.751Z",
+      "pid": 23980,
+      "beforeRows": 5076,
+      "afterRows": 5147,
+      "missingRows": 0,
+      "protectedRows": 308,
+      "changedProtectedRows": 0,
+      "preservedCompanyLedger": {
+        "companies": {
+          "before": 23,
+          "after": 24,
+          "changedExisting": 0
+        },
+        "leases": {
+          "before": 0,
+          "after": 0,
+          "changedExisting": 0
+        },
+        "employees": {
+          "before": 18,
+          "after": 19,
+          "changedExisting": 0
+        },
+        "orders": {
+          "before": 16,
+          "after": 17,
+          "changedExisting": 0
+        }
+      },
+      "accounts": 65,
+      "integrity": "ok",
+      "editorRevision": 54,
+      "geometryRevision": 1,
+      "health": {
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "cleanup": {
+        "ok": true,
+        "companyId": "company:c32b6c1f-0be9-491a-a2f8-b2d5edcfbc0f:58",
+        "workerId": "resident:17499:0",
+        "keyRevoked": true
+      }
+    },
+    {
+      "date": "2026-10-17T11:39:54.676Z",
+      "pid": 23980,
+      "beforeRows": 5147,
+      "afterRows": 5176,
+      "missingRows": 0,
+      "protectedRows": 324,
+      "changedProtectedRows": 0,
+      "preservedCompanyLedger": {
+        "companies": {
+          "before": 24,
+          "after": 24,
+          "changedExisting": 0
+        },
+        "leases": {
+          "before": 0,
+          "after": 0,
+          "changedExisting": 0
+        },
+        "employees": {
+          "before": 19,
+          "after": 19,
+          "changedExisting": 0
+        },
+        "orders": {
+          "before": 17,
+          "after": 17,
+          "changedExisting": 0
+        }
+      },
+      "accounts": 66,
+      "integrity": "ok",
+      "editorRevision": 54,
+      "geometryRevision": 1,
+      "health": {
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      }
+    },
+    {
+      "date": "2026-10-17T11:52:02.738Z",
+      "pid": 4296,
+      "beforeRows": 5204,
+      "afterRows": 5219,
+      "missingRows": 0,
+      "protectedRows": 325,
+      "changedProtectedRows": 0,
+      "preservedCompanyLedger": {
+        "companies": {
+          "before": 24,
+          "after": 24,
+          "changedExisting": 0
+        },
+        "leases": {
+          "before": 0,
+          "after": 0,
+          "changedExisting": 0
+        },
+        "employees": {
+          "before": 19,
+          "after": 19,
+          "changedExisting": 0
+        },
+        "orders": {
+          "before": 17,
+          "after": 17,
+          "changedExisting": 0
+        }
+      },
+      "accounts": 67,
+      "integrity": "ok",
+      "editorRevision": 54,
+      "geometryRevision": 1,
+      "health": {
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      }
+    }
+  ],
+  "finalSave": {
+    "date": "2026-10-17T11:55:10.606Z",
+    "rows": 5219,
+    "cash": 1000000,
+    "integrity": "ok",
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "served": [
+    {
+      "name": "game.js",
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb",
+      "matchesBothNativeStages": true
+    },
+    {
+      "name": "office-controller.js",
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9",
+      "matchesBothNativeStages": true
+    },
+    {
+      "name": "audio-worklet.js",
+      "url": "http://127.0.0.1:3007/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "matchesBothNativeStages": true
+    }
+  ],
+  "builtOfficeEntry": "assets/index-DQLtpWvm.js",
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "62fa499151c4f9b0bac1a699be7fa4f924f9bfd698b75fc34260acca9597f71b"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/engine/apps/thegame/README.md",
+      "bytes": 5469,
+      "sha256": "a3bd2a687693251e837f2ceb9762b893f0b272660b5a94a693293b64536ded63"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 226924,
+      "sha256": "ca1da8702741d2113873937092b567a81586a011ee30f109af0e80726d6b38dc"
+    },
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/engine/README.md",
+      "bytes": 41085,
+      "sha256": "f4ceefab4a23ffea48f2f5461e197fb717acf9a8d2be3d878332ab32923967fa"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/actor-state.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/actor-state.ts",
+      "bytes": 7073,
+      "sha256": "6e29fdb5d5e1a8f20ce52d4dd999bcc2eef245b577673d3b751648f50fd4e511"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-workforce.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/resident-workforce.ts",
+      "bytes": 1399,
+      "sha256": "7f9a2ee89ed15d2ad370c759cfefcd492d29d2a8219ebb29cfefe54de32876c0"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/workforce.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/workforce.ts",
+      "bytes": 22829,
+      "sha256": "4937fe25e4b5af2adddc5ae6c931fb0daa54a74c528035690d5c17effa4f4bbb"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/workforce-harness.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/workforce-harness.ts",
+      "bytes": 14284,
+      "sha256": "99c07efdc890b7abd0b60dd5d12d9be8f2b6b4b858cdf50a415b5abd797225bd"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/residents.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/residents.ts",
+      "bytes": 52196,
+      "sha256": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/player-actors.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/player-actors.ts",
+      "bytes": 20338,
+      "sha256": "265919ce26449b6648222f7f85e157f8c68f15b44017dc82e4c2626e7418730b"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/authority.ts",
+      "bytes": 67657,
+      "sha256": "85e4c45e44d3b81bbe686ec38ed494ce6a6e6b67bba0750d5a2fb2aba661d0cd"
+    },
+    {
+      "repo": "game",
+      "path": "test/company-rest.test.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/test/company-rest.test.ts",
+      "bytes": 8926,
+      "sha256": "0321845167bf8609d795fff057ab0847c1f65197a102eed97f3295813889d774"
+    },
+    {
+      "repo": "game",
+      "path": "test/observed-resident-retention.test.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/test/observed-resident-retention.test.ts",
+      "bytes": 4333,
+      "sha256": "3e9435f5eced43c03fc0bc52e8a3daf6ffb0fee375dabe52e06eba7c584acee1"
+    },
+    {
+      "repo": "game",
+      "path": "test/workforce-harness.test.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-game-workforce.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/tools/qa-game-workforce.ts",
+      "bytes": 25978,
+      "sha256": "9a21f7b998b35bbb6504788fe2a4453d67dea89da8b34227e70af99b47d01af5"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d"
+    },
+    {
+      "repo": "game",
+      "path": "docs/HARNESS.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/docs/HARNESS.md",
+      "bytes": 12504,
+      "sha256": "0f6c07bd32598bdcacb6c2ffae33db6f7b39c89643491a444b97af8a2ec17b03"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/docs/VERIFICATION.md",
+      "bytes": 858251,
+      "sha256": "da1636d02ec6915cfb8625b63b7233bacc26042f7610be1ca23c276bedc75bc8"
+    },
+    {
+      "repo": "game",
+      "path": "docs/URBAN_DESIGN.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/game/docs/URBAN_DESIGN.md",
+      "bytes": 41665,
+      "sha256": "2032a8c37c7cb1aee7292dbb6029521ea2a1158a0f167bad0cf72c5fec707810"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/ui/src/office/Office.tsx",
+      "bytes": 60275,
+      "sha256": "1893f31f64583cbff7d3169a7dbf70664eb6b1da57d38b38cf9770bfd9bb9e25"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/audio-guard.ts",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/ui/src/office/audio-guard.ts",
+      "bytes": 1976,
+      "sha256": "179e5d1956299411a5e2d793db4221b3e5242916f14d21281d0749003cd2e0fa"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_life.py",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/office_life.py",
+      "bytes": 9071,
+      "sha256": "b7c949474f1d2aa477a98668d735be9fcef62dd5516e91e8df14e34b83421796"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_construction.py",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/office_construction.py",
+      "bytes": 15416,
+      "sha256": "e06eed953eed06b3c83aee09935377f068ac86a2912fb96c00c7513437c71fe1"
+    },
+    {
+      "repo": "office",
+      "path": "backend/office_game.py",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/office_game.py",
+      "bytes": 6178,
+      "sha256": "7f48ae93f8d8616b9d343ab56fc7bb308554b4ea78875d9a9d68f537b0b0ec08"
+    },
+    {
+      "repo": "office",
+      "path": "backend/app.py",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/app.py",
+      "bytes": 86699,
+      "sha256": "bd3a5ee81a9fc899dc191f6759be6526481792f3359e572481e863215548c88e"
+    },
+    {
+      "repo": "office",
+      "path": "src/audio.rs",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/src/audio.rs",
+      "bytes": 35503,
+      "sha256": "7710c1a9d921200c4005e6a9b2d2d15536dc55ca23b45b24ba94bc232831c7a8"
+    },
+    {
+      "repo": "office",
+      "path": "README.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/README.md",
+      "bytes": 28300,
+      "sha256": "0d8ee8390dfd05ab3a373a50ad20856026f88ba1fd5a4ede1cb71d1763308e86"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-worker-rest-evidence-20261017/source/office/VERIFICATION.md",
+      "bytes": 161646,
+      "sha256": "538143ed84293c96bb7626395537941d60999df70938eb6d9923f77502928143"
+    }
+  ],
+  "reviewed": [
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/game-worker-paid.png",
+      "note": "Actual root Game company/account panel after completed payroll; the amount is independently verified by authority receipts and snapshots."
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/failure.png",
+      "note": "The failed cold-observation case returns to the owner body; the saved target remains healthy. This exposed retirement under driver slot pressure."
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-moved.png",
+      "note": "Actual Office after watched-slot fix: same saved NPC, acknowledged control, return and readable unavailable-voice message."
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-returned.png",
+      "note": "Actual Office after watched-slot fix: same saved NPC, acknowledged control, return and readable unavailable-voice message."
+    }
+  ],
+  "limits": [
+    "The first Game work/pay probe passes. The second repeats payroll and physical rest, but its original browser process exits 1 because a strict later need sample misses the already recorded completion event. Independent authority-event audit passes; the corrected helper has not been rerun as a fresh whole browser process.",
+    "The first current Office run fails after a new driver evicts the healthy watched NPC. A full-budget regression reproduces it; the immediate peer watch callback fixes every slot decision without increasing the population cap. The second native Office result is separately asserted above.",
+    "The last broad Game suite was 1495 pass / 7 skip / 4 fail, followed by a focused network-fixture correction. Three earlier deformation/audio/width values remain unresolved; no new complete suite pass is claimed.",
+    "Actual Office UI is Vite 5173. Restoring the stopped 8765 hub was held before any start because the existing native audio client could resume capture; explicit user input is pending. The stopped Python backend has eight enabled saved Codex review agents and was not started.",
+    "Legacy Office task/agent projections and construction/life API still require the final scope/fidelity audit against canonical Game NPCs. Long native vehicle/aircraft and remaining feature parity are incomplete or unverified.",
+    "No new FPS. The published 58.3 FPS sample uses the earlier be0012f1 bundle, while current unchanged render assets are 4ef45cf1/4708d4f6. No microphone/audio perceptual quality claim.",
+    "No saved-state repair, need resets or NPC body staging in live probes. Only ordinary own-account QA loans, lease/employment/stock/key commands were used and cleaned up. Anonymous accounts and closed histories remain."
+  ],
+  "files": [
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/gesture/hand_landmarker.task",
+      "bytes": 7819105,
+      "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/gesture/LICENSE",
+      "bytes": 12331,
+      "sha256": "8707eef0533987efc5b155d64761eeb6e20793f50b9bd1a68dad1cf4719d0ed8"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/gesture/SOURCE.txt",
+      "bytes": 577,
+      "sha256": "ab2e23cdb35cd000d6d69213e10f8ce85a0eea9b22cdd199c6b97de6b58947b5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/gesture/vision_wasm_module_internal.js",
+      "bytes": 335431,
+      "sha256": "70eff3956521b7de058d7173a4935c95e4a223c26ea624b9f5a936d3a043dcb0"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/gesture/vision_wasm_module_internal.wasm",
+      "bytes": 12997272,
+      "sha256": "ee03b14a878e6c3c053a1bfa62e166dc45244be54dc0bbe61c578f710b771f6a"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/index-DQLtpWvm.js",
+      "bytes": 1806779,
+      "sha256": "94007c842e928217e2541ddae215042778a43a598fed080a336274704f3ed752"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/materials/linen.png",
+      "bytes": 24461,
+      "sha256": "7e308fdaecaf3a2a4c0e6bc83ce6cd7863d1ba6523db630df40746659cdb573f"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/materials/oak.png",
+      "bytes": 66380,
+      "sha256": "1d3077e3c473b06b0eec13464fdc1bd149123be4eedcc87ccf907058df8fe278"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/LICENSE-CC-BY-NC-4.0.txt",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/openpeon.json",
+      "bytes": 5843,
+      "sha256": "0abbe1af9c2808707a3a026ec5937f27436b6492525c00d578819070639929b4"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonDeath.wav",
+      "bytes": 81530,
+      "sha256": "c46dd952a4dca36cc3e71b5594d6b102ad8366380ca411190e38290090d258c8"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonJobDone.wav",
+      "bytes": 75866,
+      "sha256": "e950bae3f85c89bdc87a2826f7fa251c4afb7b2258fe49441a2b9aa5361c30a1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonReady1.wav",
+      "bytes": 76100,
+      "sha256": "62722dd2c0d3050cc8fae615ec28e1b43456779c9e45462bd936afcc439c667a"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonWhat1.wav",
+      "bytes": 50304,
+      "sha256": "c5d28882c40411154649980d367331b9aff81bd3fb685819c1e9fc0a2e0d6d39"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonWhat2.wav",
+      "bytes": 53254,
+      "sha256": "9d5ab770416487154e5ae915aaecec137ada0aef71d2d9e6f8b342787edc89dd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonWhat3.wav",
+      "bytes": 69590,
+      "sha256": "84873648d16be9390246fca859683e6d2bb091b80afebcac84cd8c23faa86097"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonYes1.wav",
+      "bytes": 70826,
+      "sha256": "64b85316710c976aaa498839c93ada4496e73fd8a75daa1886f934b393ae2858"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/PeonYes2.wav",
+      "bytes": 68580,
+      "sha256": "807e072eed2d68543b0e67e1c4f4897da5d78aa3b6fd3fba06a111aae2a353de"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/assets/peon/SOURCE.txt",
+      "bytes": 712,
+      "sha256": "51179d8d8a707a1b546eb5babf00abeaeedfdfbc593eb739e9acffff63ea62c5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/built-office/index.html",
+      "bytes": 422,
+      "sha256": "7ca18df28b3d9ad0dfc4fd8226427df015f5934eead21a86b85a1927bc35250c"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/canonical-close.json",
+      "bytes": 144,
+      "sha256": "fcce8f6f120a0cb0ba72f4d5463f8c5986c8963443c49570bd524992cd800471"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/canonical-close.sqlite",
+      "bytes": 11087872,
+      "sha256": "f23cd60ff3f5336174a21f42ee01430d3ff196251aafa741d43e2c978963db05"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/archive-helper-validation.js",
+      "bytes": 13348,
+      "sha256": "2a00840b0c830fdfae828dea443365dcd66a5f9021c6d520b27df050c38b4da7"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/archive-helper-validation.log",
+      "bytes": 86,
+      "sha256": "d47d5d829b9fe3c054b2ecf2a540e26bf447b5985d6411bd5a3a0a7342ed05d6"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/audit-current-requirements.ts",
+      "bytes": 3421,
+      "sha256": "3b20d5ac201e0eef7c9e87a9bf670601a1a6f372e8dbd9bf0294667457af0e26"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/audit-native-rest.ts",
+      "bytes": 3131,
+      "sha256": "e7c6bb4d219451e90bd05daf851ae93730d7b65b3f46b732b63bf051961753fc"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/audit.ts",
+      "bytes": 4585,
+      "sha256": "ff8300d1511d22d239f797dcf923bbeabbab16299b1f30268dd954b57234993d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/docs/HARNESS.md",
+      "bytes": 11038,
+      "sha256": "203e024e724e468702fbb5d6d034740cf1fd836e16b1f33bddf314ffa3028af7"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/src/game/actor-state.ts",
+      "bytes": 7038,
+      "sha256": "828d6cd788d637fc6a7b6cbf58be46f1dc3d97340e560f31facfbce43dcac75d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/src/game/player-actors.ts",
+      "bytes": 19628,
+      "sha256": "d80260f17488a3e03e6b52adc0cdddf52efa9d15c75204896cde1dd4df654611"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/src/game/resident-workforce.ts",
+      "bytes": 1307,
+      "sha256": "20ef53fdf8310ab2785c62a728ab497ebbf4b2b0edb45274e822cd2de764dba2"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/src/game/residents.ts",
+      "bytes": 51291,
+      "sha256": "7f2adc075498657629c34f82717792dc1ac9d175766e931fc932ff68e4171092"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/src/game/workforce-harness.ts",
+      "bytes": 14010,
+      "sha256": "6cefb116b894b68cbd0aead7851d20c105d84a4623bcf64afb167fb891c0c266"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/src/game/workforce.ts",
+      "bytes": 21878,
+      "sha256": "1811ab5770b49f4170e80d85f0366a999d1184d2781d46d938beab3e3d1aa561"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-game/tools/qa-game-workforce.ts",
+      "bytes": 22462,
+      "sha256": "836e805d4b0df52c99cb1ac9db70af942b321af7e393030eae390056db72172d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-observed-pin/src/game/authority.ts",
+      "bytes": 67265,
+      "sha256": "e3514f10e060dd51b59382826f2c887678f5565913db5621cc25688b924630d1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-observed-pin/src/game/residents.ts",
+      "bytes": 52130,
+      "sha256": "1e959ca8fa34500a8283f4ca545fc889229c004f86e4ec4f528539ebd30d8696"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/before-observed-pin/test/observed-resident-retention.test.ts",
+      "bytes": 1930,
+      "sha256": "8954c311b55a0ba47ace1743947438182c83c12a3c82925900a234bfd4950bc5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/audit-upgrade.ts",
+      "bytes": 3514,
+      "sha256": "631ff670fd6fc612122099f6be0350c0b45dca19776d1d51398f0ad6178928cf"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/restart-audit.json",
+      "bytes": 488,
+      "sha256": "8f3fbb23f47109350dc5e377f50facd15bf93117ae6e5427ed557e9cef6c3e19"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/restart-operation.json",
+      "bytes": 292,
+      "sha256": "b2e90fe0e7e64becf2e1db29122572f1ce107e22dcd4de6948c3c994cdb6283e"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/restart-ready.json",
+      "bytes": 283,
+      "sha256": "92fd2c59573f1ad61a7905735d3616d1dc1adbff6fac77e2c8dcd8ccb688b697"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/restart-ready.sqlite",
+      "bytes": 11001856,
+      "sha256": "56789cb14c0a4a32ee622042f4015c82927c531b5f4d8da8996216c114ef4f2c"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/restart-ready.ts",
+      "bytes": 1420,
+      "sha256": "5b8c72c6d1eaf118383f39ebbf9f8d22009085dd051a68b5e6c3d0be92d70d98"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/restart.log",
+      "bytes": 162,
+      "sha256": "e77a536eafbddcce0283f15a9111b863455e7fe299b38372f0d6cbbb807c6797"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/restart.ps1",
+      "bytes": 2671,
+      "sha256": "52dfba3454844b520102c29b314dafe0f4014bc126f8b7e62ba97e11eef5e0f2"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/server-before.err.log",
+      "bytes": 5462,
+      "sha256": "bf6cab9adda13c81f5ef5af908df3d72b51a510e97cea1f11ad6d29d4e86dc1c"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/observation-upgrade/server-before.log",
+      "bytes": 723,
+      "sha256": "38fbc4ed5f596873538936519dbd7fce7a452ca406b458ce0fcaadf39ea628f3"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-autonomy-readonly-r2.log",
+      "bytes": 112,
+      "sha256": "9ed15c6d389b3040dd9b82a6a4c302d0d29a746af1b3a3fbc003c7cf8cd66267"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-autonomy-readonly.log",
+      "bytes": 367,
+      "sha256": "8d3bd35796ace666822b471507ef99c07de0ed1f890aeaefe799b66abd92ca93"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-helper-validation.js",
+      "bytes": 518399,
+      "sha256": "51089dbff91a6cc6e521bb14605f329823ff39915ec433716fdce27972521ab1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-helper-validation.log",
+      "bytes": 87,
+      "sha256": "e67ce09edbab49be7eb1c213e1e1b71cf32ecae657f52414130b089756505670"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-hub-start.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-native-r1.log",
+      "bytes": 449,
+      "sha256": "196d6bfd9ba5b4ba1ce060d7bce80e242e06390c4032a8ab55d5772bb9901a13"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-native-r2.log",
+      "bytes": 309,
+      "sha256": "34ae8481d7d12471e45b50bab3776f8e829f07b750a991b89d14193db579557b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r1/after-audit.json",
+      "bytes": 889,
+      "sha256": "0e9b50ccd698e1eefb93b7d775e7514aa799fdad7902154d9920aacb2c75bd3d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r1/before.json",
+      "bytes": 1132,
+      "sha256": "2f7e152e8f2eda64d6488d218d337ee6245a4a3199da5b9566a4aad960b9a111"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r1/before.sqlite",
+      "bytes": 10649600,
+      "sha256": "0fefffdd359fbaf002a02d0df957d10c1ac14ee9b1bc4c4be56126a60d298c93"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r1/served-before/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r1/served-before/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r2/after-audit.json",
+      "bytes": 889,
+      "sha256": "e45ffad79ecd1180ceef65c7b2703da63c4b322c6a309799d57784793e8392ef"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r2/before.json",
+      "bytes": 1132,
+      "sha256": "e1150731647d99b4397064b887d94a11e955fd179ab5b36d9983944a9b609196"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r2/before.sqlite",
+      "bytes": 10756096,
+      "sha256": "242566db52d2621ca8153254b299f2d013e5ee1e658202bd144e3ae97023c04c"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r2/served-before/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-game-20261017-r2/served-before/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/after-audit.json",
+      "bytes": 726,
+      "sha256": "887e5372eb331c3846445a267a65a70746026b324e6b962131a07de47a5c7722"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/before.json",
+      "bytes": 1138,
+      "sha256": "6725d36fe29563737059af00788894f21101904d56c95fd7148f0cd171045669"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/before.sqlite",
+      "bytes": 10944512,
+      "sha256": "2f3f472b1c6732f54ab38a7274a5856f9f6f372cd30c35bba426f7ce5fded595"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/office-before.json",
+      "bytes": 11947,
+      "sha256": "05be96ca19e37c21278b67439be5fc3d579a667b0798526316dd2f22a9f516f5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/operation.json",
+      "bytes": 8349,
+      "sha256": "285de32d1f313d007ff61c3cdcf0ef9cb8adf7c8d0bcfb50b27f57ac6dfc625b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/served-before/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r1/served-before/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/after-audit.json",
+      "bytes": 725,
+      "sha256": "46cc5dd0379868373cdc8ad097927de93748969866680ae2ac2b7912cb3c8d09"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/before.json",
+      "bytes": 1137,
+      "sha256": "667b9480d1fee34bdb49493545f9e94f32829c0a5af575670b5cad29454196fd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/before.sqlite",
+      "bytes": 11055104,
+      "sha256": "a6cb92a716deb01dd13f0020209cc1aef76414000f57802f5cda4dbd1d357dab"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/office-before.json",
+      "bytes": 12039,
+      "sha256": "32ffba4b902cc57b39db4e89d201b66a2016402b67849273192f2467cd8762ec"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/operation.json",
+      "bytes": 12046,
+      "sha256": "f7b1f428f674cffbbfc14d11090381c3e84b08d8ef0def53e0daac0b0189381d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/served-before/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/office-worker-rest-office-20261017-r2/served-before/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/on-site-rest-audit.json",
+      "bytes": 1442,
+      "sha256": "f8ef6591fe53f534c600da4cf679bb9cc05f8885c014135d841b9c54afe3ef27"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/probe-office-autonomy-before-temp.py",
+      "bytes": 655,
+      "sha256": "279357004494a74e1734a962a07e3ad7ff9e6fbddba70eb082f134fcad77eca1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/probe-office-autonomy.py",
+      "bytes": 1129,
+      "sha256": "688419899bce699b12b0687c71dd545b3b7d5cd912b0cd4572518c3d84da4660"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/qa-game-workforce-before-post-rest.ts",
+      "bytes": 23361,
+      "sha256": "9d612961d550edf1c9361811074be3b6f3edc362fdf22bf1eb532ebea3112255"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/qa-game-workforce-r2-strict-sample.ts",
+      "bytes": 25648,
+      "sha256": "4ef4dd31fce11dfdf4cc9878bdc99eec73cabe61b390c7e9d5836140be8ad5ba"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/requirements-current.json",
+      "bytes": 9138,
+      "sha256": "4ca60e186106416085503f196db52c360361939734e1e42b000c94e1da9ab115"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/run-current-office.ts",
+      "bytes": 6728,
+      "sha256": "e6ba951c014fe0b0ff63ff4c948f2bf1e43a885fc9958d2f7175b81e5a0a0fea"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/run-native.ps1",
+      "bytes": 1348,
+      "sha256": "dd624e3d475ca69979ccf1901a8c323813a23ce51f91736443b1f1d6e4012255"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/audit-upgrade.ts",
+      "bytes": 3510,
+      "sha256": "07d2bdbe03a140259cb6fb3c9df3e954feb1dadabd1027cf7a6ef0ae87d8162d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/restart-audit.json",
+      "bytes": 488,
+      "sha256": "497a81a126bb65d2cbe22b3b0e57c8dd45449fada896a7271ec6dee6ed2a998a"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/restart-operation.json",
+      "bytes": 296,
+      "sha256": "f8f04a73082e60df6f9a3f2b785ccaabdf08796da10d609eac234185aa58f302"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/restart-ready.json",
+      "bytes": 287,
+      "sha256": "8393225bcb408bece10aed667a8329f3805e83df910406f1fc53401bcce40efd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/restart-ready.sqlite",
+      "bytes": 10629120,
+      "sha256": "6a59fe8fde268e26111b387f2690cc1829e034d4980c611b395ad4fde35688dd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/restart-ready.ts",
+      "bytes": 1420,
+      "sha256": "f1652074d0964dcdc9604b09c9faa068e3e8e413c1478a38bc2a8005b8c9af08"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/restart.log",
+      "bytes": 163,
+      "sha256": "4073b30e4261824b4db63adca1b20e394e4930a12d30a9bc8570f911d7e0f80a"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/restart.ps1",
+      "bytes": 2666,
+      "sha256": "9ec4cee09c50d4aee9c716fcd2649bc753f1f59f1ed1ec69e629cc8a19452696"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/server-before.err.log",
+      "bytes": 3308,
+      "sha256": "355a65e38bb2062be0449d5b677b123b6d11e479638f4ad6577726df242c8835"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/runtime-upgrade/server-before.log",
+      "bytes": 723,
+      "sha256": "0ef102eb328bc089cb2e3643449909a4f7e1de806bb8ad5f2a11ae2b78e29774"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/engine-probes/start-existing-office-hub.ps1",
+      "bytes": 4317,
+      "sha256": "ba8d2e4c97f3de3c6379d63edffe3df37d9d692897736bf03c5808cd818aa0c5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/autonomous-paid.json",
+      "bytes": 8859,
+      "sha256": "9859fb5c98b75a40905c2ff5843da74fee61158b5a5bcd1b86067f89ed18e9b2"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/autonomous-progress.json",
+      "bytes": 595714,
+      "sha256": "34f1a460e4759b7a132ac716b168ac3d89f8b76359a60db337429746cf071bef"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/cleanup.json",
+      "bytes": 1370,
+      "sha256": "be290d4bf1db3dc8643bcb8b723dce8149d04adca58860a203057366aab963b3"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/game-employee-possessed.png",
+      "bytes": 534741,
+      "sha256": "bc633188913271480cde52b3b5c6b5e73570b15f10818bb14ec35332ba04d0cf"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/game-office-leased.png",
+      "bytes": 434955,
+      "sha256": "57e7d9edce26924120da04fdf47e12f2d754d38f0297176e1bdb03b54a57cf67"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/game-worker-harness.png",
+      "bytes": 445020,
+      "sha256": "0563d12fafa28387d00b4da04de729184a9f2d34a5784f943191f236fe1c713b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/game-worker-paid.png",
+      "bytes": 193574,
+      "sha256": "794544129344a2bf13d745d55bce02c4267b450e4256de66c6e5396c7c62bb7e"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/progress.json",
+      "bytes": 662122,
+      "sha256": "58c233c100b56ef7caeb32098c1115cce1b22fb303955167cd44c171ae1db027"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/report.json",
+      "bytes": 69996,
+      "sha256": "140a53d7263eb3cd135eb885f8e44257cfb0bdc00bee331a2ac46a05b51c0bb0"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/selected-worker.json",
+      "bytes": 2778,
+      "sha256": "eca3323d6c0077db9d710a8b81f3d8288f9e69adabed9f418459b3098a53c3a5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r1/takeover-check.json",
+      "bytes": 6639,
+      "sha256": "1a133d8714fb05d2d6024d51354d1b568a0a0a8577c6ce5200ab4c5a1f7d6005"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/autonomous-paid.json",
+      "bytes": 8916,
+      "sha256": "ca63a1485ed28779bcd3b5a3a9774cbe7ab08b82ff70bbdb0f5b191e589712f3"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/autonomous-progress.json",
+      "bytes": 229418,
+      "sha256": "7d7897743837e6950d1df8fc5b1491d257b55199cfbdd5a0fc745a838654ec53"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/cleanup.json",
+      "bytes": 1369,
+      "sha256": "ba7bca4fd9dacc8d306dcc853d4f9da3dccb88b69bda6997dcf9c242e8525206"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/failure.json",
+      "bytes": 294717,
+      "sha256": "e9ddc2e053fb1e731797e6fe47d0077e7d56a94e6bcf0cef7c16c25c6cd39d7d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/game-employee-possessed.png",
+      "bytes": 208447,
+      "sha256": "83284236ff44c224d93ce6cfe846ff2171446c78cc63ee7a5acaee74b8ac16e4"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/game-office-leased.png",
+      "bytes": 373473,
+      "sha256": "a37aebd58e9d106d3795fd0d37b08045e33b45c42c8a86bad5ec069209c6a9a9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/game-worker-harness.png",
+      "bytes": 395603,
+      "sha256": "073763d6872a98ff0137c3665e76d0178ce110093d45129895a0a500bb63b100"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/game-worker-paid.png",
+      "bytes": 341823,
+      "sha256": "c2e4c179ffca859380ee774c2abd5ed865ee2b2e77f9b218ee69bd3d3a0f8ebd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/on-site-rest-progress.json",
+      "bytes": 904599,
+      "sha256": "37e30b9fc0680646ecb1ead883fed4b05591b9abd4d8e44937304469e4488643"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/progress.json",
+      "bytes": 294428,
+      "sha256": "225cff17ef4351f7c033d06a63815c378d403fed8ec22f7592e67c3fb5dfcd11"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/selected-worker.json",
+      "bytes": 2715,
+      "sha256": "865fd0c64aaae43ed18fb26cc261a87d9c68df9cd799c8508cbc050d5cea0b74"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/game-probes/office-worker-rest-game-20261017-r2/takeover-check.json",
+      "bytes": 6641,
+      "sha256": "20106679e081523911d71bd8f39d02aea0bbe9e52ee174a1e8c8d53b0a95f22b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/helpers/archive-office-worker-rest-20261017.ts",
+      "bytes": 12572,
+      "sha256": "e525468f47922622bd7ff366e9d3c7fca14eb88bff361a5c680e8a942c5973f9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/helpers/write-office-worker-rest-docs-20261017.ts",
+      "bytes": 9245,
+      "sha256": "623706032cdd54f8eceaec7f48d28b76e0a41ac8e9516db96d1e9823a4ad5586"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/engine-office-worker-rest-office-check-20261017.log",
+      "bytes": 16998,
+      "sha256": "100858478a8f68cec83d54c9e515d5ae6b8c80e232cec427741c065d213f123b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/engine-office-worker-rest-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "6d10b18bf9a7f7ef970ab4aa4fe6a7865d1370f7bc8bc01f2180f625dbbf95dd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/engine-office-worker-rest-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-build-20261017.log",
+      "bytes": 585,
+      "sha256": "806594bc8b122e4ebb06c21c240b90b0d20f394130773d625a2c8fafebba9afc"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-game-20261017-r1.log",
+      "bytes": 4514,
+      "sha256": "4e9853e64b6fee16a1354a6fb4e2288c3964a725ee3021916459fbc818fb759b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-game-20261017-r2.log",
+      "bytes": 2852,
+      "sha256": "07093fb9fbdf3b8f27d1464b539ca5214272b46b35ce3893e1afa665404351a8"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-build-20261017.log",
+      "bytes": 585,
+      "sha256": "806594bc8b122e4ebb06c21c240b90b0d20f394130773d625a2c8fafebba9afc"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-fixture-diagnostic-20261017.log",
+      "bytes": 657,
+      "sha256": "ff06e2e1b2798560bda830d66eed26e7fac76342df2e3fd3f501c7b8f1814316"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-regression-r1-20261017.log",
+      "bytes": 4677,
+      "sha256": "f28a575331ca944e2cfd57d138b733e1831ee186b716a9c55147b7890e0cb52a"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-repro-20261017.log",
+      "bytes": 286,
+      "sha256": "02176d641d0759f6c039d786f161d67999ce31c55c6cbf8a0b88c16906fce0c6"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-repro-r2-20261017.log",
+      "bytes": 286,
+      "sha256": "4c5ae2633a902972c6094ed6bc0d28aa3a2e604ed1134083fa35c1367a84aece"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-repro-r3-20261017.log",
+      "bytes": 286,
+      "sha256": "9f2eb3109016387ea8b1e6dcc302ce955624ebf035c86970e5c017be2feec65f"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-repro-r4-20261017.log",
+      "bytes": 1278,
+      "sha256": "3385b7b1f8b7ff7d8fdd60ae401ff82924fb068831c509166bb91f2eb6140b2a"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-pin-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-qa-helper-check.log",
+      "bytes": 98,
+      "sha256": "0f247588151d6469803cc5511986cfe65b4157741af08cd6f942696019098a49"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-regression-r1-20261017.log",
+      "bytes": 14318,
+      "sha256": "9bfe22a695d4bc4a0f5b9cc7041f5c2d8f09ae67957c04b601a88c34e41c7b30"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-repro-20261017.log",
+      "bytes": 1118,
+      "sha256": "60f97daad87c0d9c0c31aa7fb73cff2419c673cf968ab19752eb236092432be1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-tests-r1-20261017.log",
+      "bytes": 627,
+      "sha256": "f7aa2ee72b5578acd92dc70e63b78e6590df62734608646d966fc58cc1f05241"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/logs/game-office-worker-rest-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/entered.png",
+      "bytes": 247164,
+      "sha256": "cbc5d20b0b55375960296f0de922a981296247f41c62c986893d19670b0a2747"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/failure.png",
+      "bytes": 357021,
+      "sha256": "61e54b01c2c47671909ad75d9a0e490dcbcbdb64e4e3201895c04f49fe7ea111"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/observer.png",
+      "bytes": 506132,
+      "sha256": "6b357c91d7da59cb6e87e8a18481361314712c70c7d286516ce5a77d9e2f0e86"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/report.json",
+      "bytes": 71136,
+      "sha256": "6e1fcff8de0f55ffa6ea068e19ca6ecb12af70d53e5571ac457d37a24f3aa398"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/residents-directory-pages.json",
+      "bytes": 78,
+      "sha256": "bb5bdd3bde3510dd3fb1f0e080c695d073c58518430f5bac6b1f81019c52ba0d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/residents-directory.png",
+      "bytes": 143805,
+      "sha256": "f2f717c843b2d3b2a1a729622cb448c7338dba428b022c84501c7e8dc988dbe4"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/residents-selection.json",
+      "bytes": 1284,
+      "sha256": "a7e885502f26c3415e543db0407a9dd67a3e487a05cfa19aca2b2a7d836dd94f"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/returned-observer.png",
+      "bytes": 498420,
+      "sha256": "5a13cbc578f34cecb8ac1070bcb47f7d3d537deb7d880479ab3d4d797a3d759f"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r1/walk-KeyW.png",
+      "bytes": 250120,
+      "sha256": "149f1848120687c29a0ebc4838e9bb09c576b4c4b5609ff7d4076351fa242381"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/canonical-residents-observed-source.json",
+      "bytes": 13363506,
+      "sha256": "f7d563d176fdfdc358b4f4441b4e8108532471b38cd407db348a4fd5f8fecb27"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/controller-idle-after.png",
+      "bytes": 485406,
+      "sha256": "36881da136084ad32170d14a58ac615384b62e8e739d740b008154f0fb379dc0"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/entered.png",
+      "bytes": 343966,
+      "sha256": "ac94898f4468a29dedd7dc671754d05f890f7b84009ce8fa6d781cc31fd3b248"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/observer.png",
+      "bytes": 660649,
+      "sha256": "76bfa32fd97811b68fed4996277e5bd95ed12768384b6ad4eaaa382ce80bff11"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/report.json",
+      "bytes": 181142,
+      "sha256": "d01c2b610485d67914000b80bb9f25db7f18b31c88718e0c4a68c9a5024825ba"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-before-movement.json",
+      "bytes": 4996,
+      "sha256": "34177cfcba50caf747b29999ba6261452c6544a7fd05150545594bd9fa111cf8"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-directory-pages.json",
+      "bytes": 78,
+      "sha256": "bb5bdd3bde3510dd3fb1f0e080c695d073c58518430f5bac6b1f81019c52ba0d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-directory.png",
+      "bytes": 182033,
+      "sha256": "1a861deabfc49fe19524bc6bf59c9c2dfdc73a189c85cafe52de74e4c7291f69"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-moved.png",
+      "bytes": 161619,
+      "sha256": "5cdeb97314f1f3356d791c15ea78844cbd58a7ba8733edec227088d39c5263c7"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-movement.json",
+      "bytes": 6429,
+      "sha256": "eb2440600b606ec52f0f468b8878c86e5f6efe6ee4c75d04b57796addb33a2a3"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-observed-scope.png",
+      "bytes": 178849,
+      "sha256": "0d907f772583a43ca23d6a95042209dccda0ba92d71d59ee0bc48b6892ae0f09"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-observing.png",
+      "bytes": 298849,
+      "sha256": "2cee73d830d2622543dd4b10042feaa99d10f168cad6c51d2208832951a99ca5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-possessed.png",
+      "bytes": 167353,
+      "sha256": "9464c2344a418d8b20979c56b5c365e2450e11b03a1aa4b4096a23f59b12a821"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-report.json",
+      "bytes": 8460,
+      "sha256": "9f228e101ed0dbf2eb4edc0e8bfad8a289785aeca57469bfe7a6d575b3ea2f69"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-return-start.png",
+      "bytes": 465475,
+      "sha256": "2ea1812c7458b9b65daa1992788845a645b0b5fa1dca30b0f0929daf361c2d6a"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-returned.png",
+      "bytes": 474516,
+      "sha256": "12b03ad719ae23ac8de8320880d063559083a3b5a724bfb5741546c275d8fbf9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-selection.json",
+      "bytes": 1355,
+      "sha256": "7c71e2e3a48192603d17f7ba07a04cf57df031df38f6997ff94223756c0b4157"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-stopped.png",
+      "bytes": 161205,
+      "sha256": "77894c93b27a7d22d40865598164469883dc38875f4161c7a2ad344a8ebcc864"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/residents-takeover-source.json",
+      "bytes": 21086,
+      "sha256": "23dfeb6835fe40b3d4daad88c513aa884f4e21064445cd38f6d28d68a1a2ea68"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/returned-observer.png",
+      "bytes": 602459,
+      "sha256": "aec0b374ec00ffda549a5d7dd8e57be4cce9f0922864ab0c04b007c271a391a9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/office-probes/office-worker-rest-office-20261017-r2/walk-KeyW.png",
+      "bytes": 374967,
+      "sha256": "c411ec39c8cc58934a10972824f439325190fe3bd52104f4b2a959b976e897ef"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/reviewed.json",
+      "bytes": 1152,
+      "sha256": "0d3c3f69089b3de1d60e0c9ee8fbde5c96758cbf8d3bc7f55f351183b58f3818"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/served/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/served/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/served/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "62fa499151c4f9b0bac1a699be7fa4f924f9bfd698b75fc34260acca9597f71b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/engine/apps/thegame/README.md",
+      "bytes": 5469,
+      "sha256": "a3bd2a687693251e837f2ceb9762b893f0b272660b5a94a693293b64536ded63"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 226924,
+      "sha256": "ca1da8702741d2113873937092b567a81586a011ee30f109af0e80726d6b38dc"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/engine/README.md",
+      "bytes": 41085,
+      "sha256": "f4ceefab4a23ffea48f2f5461e197fb717acf9a8d2be3d878332ab32923967fa"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/docs/HARNESS.md",
+      "bytes": 12504,
+      "sha256": "0f6c07bd32598bdcacb6c2ffae33db6f7b39c89643491a444b97af8a2ec17b03"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/docs/URBAN_DESIGN.md",
+      "bytes": 41665,
+      "sha256": "2032a8c37c7cb1aee7292dbb6029521ea2a1158a0f167bad0cf72c5fec707810"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/docs/VERIFICATION.md",
+      "bytes": 858251,
+      "sha256": "da1636d02ec6915cfb8625b63b7233bacc26042f7610be1ca23c276bedc75bc8"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/actor-state.ts",
+      "bytes": 7073,
+      "sha256": "6e29fdb5d5e1a8f20ce52d4dd999bcc2eef245b577673d3b751648f50fd4e511"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/authority.ts",
+      "bytes": 67657,
+      "sha256": "85e4c45e44d3b81bbe686ec38ed494ce6a6e6b67bba0750d5a2fb2aba661d0cd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/player-actors.ts",
+      "bytes": 20338,
+      "sha256": "265919ce26449b6648222f7f85e157f8c68f15b44017dc82e4c2626e7418730b"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/resident-workforce.ts",
+      "bytes": 1399,
+      "sha256": "7f9a2ee89ed15d2ad370c759cfefcd492d29d2a8219ebb29cfefe54de32876c0"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/residents.ts",
+      "bytes": 52196,
+      "sha256": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/workforce-harness.ts",
+      "bytes": 14284,
+      "sha256": "99c07efdc890b7abd0b60dd5d12d9be8f2b6b4b858cdf50a415b5abd797225bd"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/src/game/workforce.ts",
+      "bytes": 22829,
+      "sha256": "4937fe25e4b5af2adddc5ae6c931fb0daa54a74c528035690d5c17effa4f4bbb"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/test/company-rest.test.ts",
+      "bytes": 8926,
+      "sha256": "0321845167bf8609d795fff057ab0847c1f65197a102eed97f3295813889d774"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/test/observed-resident-retention.test.ts",
+      "bytes": 4333,
+      "sha256": "3e9435f5eced43c03fc0bc52e8a3daf6ffb0fee375dabe52e06eba7c584acee1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/tools/qa-game-workforce.ts",
+      "bytes": 25978,
+      "sha256": "9a21f7b998b35bbb6504788fe2a4453d67dea89da8b34227e70af99b47d01af5"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/game/tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/app.py",
+      "bytes": 86699,
+      "sha256": "bd3a5ee81a9fc899dc191f6759be6526481792f3359e572481e863215548c88e"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/office_construction.py",
+      "bytes": 15416,
+      "sha256": "e06eed953eed06b3c83aee09935377f068ac86a2912fb96c00c7513437c71fe1"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/office_game.py",
+      "bytes": 6178,
+      "sha256": "7f48ae93f8d8616b9d343ab56fc7bb308554b4ea78875d9a9d68f537b0b0ec08"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/backend/office_life.py",
+      "bytes": 9071,
+      "sha256": "b7c949474f1d2aa477a98668d735be9fcef62dd5516e91e8df14e34b83421796"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/README.md",
+      "bytes": 28300,
+      "sha256": "0d8ee8390dfd05ab3a373a50ad20856026f88ba1fd5a4ede1cb71d1763308e86"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/src/audio.rs",
+      "bytes": 35503,
+      "sha256": "7710c1a9d921200c4005e6a9b2d2d15536dc55ca23b45b24ba94bc232831c7a8"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/ui/src/office/audio-guard.ts",
+      "bytes": 1976,
+      "sha256": "179e5d1956299411a5e2d793db4221b3e5242916f14d21281d0749003cd2e0fa"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/ui/src/office/Office.tsx",
+      "bytes": 60275,
+      "sha256": "1893f31f64583cbff7d3169a7dbf70664eb6b1da57d38b38cf9770bfd9bb9e25"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "path": "artifacts/office-worker-rest-evidence-20261017/source/office/VERIFICATION.md",
+      "bytes": 161646,
+      "sha256": "538143ed84293c96bb7626395537941d60999df70938eb6d9923f77502928143"
+    }
+  ],
+  "totals": {
+    "files": 213,
+    "bytes": 149989438,
+    "sources": 29,
+    "reviewedImages": 4
+  }
+}

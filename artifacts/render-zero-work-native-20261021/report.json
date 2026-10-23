@@ -1,0 +1,5026 @@
+{
+  "status": "pass",
+  "scope": "Frozen complete original renderer and lighting versus identity-retained visibility plus actual-uniform zero-sun, zero-opacity cloud and no-planar-receiver gates. Native full-quality 1280x720, HDR/depth/effects/TAA and complete PNG exact, sun/celestial-moon/receiver transitions retain first-frame visibility. Not pacing acceptance.",
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "records": [
+    {
+      "name": "identity",
+      "baseline": true,
+      "state": {
+        "name": "identity",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "noncaster-retired",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 2,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 51,
+            "observations": 1785,
+            "reusedPoses": 1750,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 2,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 17,
+            "allocations": 113,
+            "commits": 2124,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 2,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 90,
+                "lastTests": 1,
+                "revision": 2
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 2,
+                "lastTests": 0,
+                "revision": 2
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 88,
+                "lastTests": 1,
+                "revision": 2
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 70,
+                "lastTests": 0,
+                "revision": 2
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 51,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "0a887c4366c03b0b6f88e5989dadf88138a639df47af0634841ddd8578ea2d38"
+    },
+    {
+      "name": "identity",
+      "baseline": false,
+      "state": {
+        "name": "identity",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "noncaster-retired",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 2,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 51,
+            "observations": 1785,
+            "reusedPoses": 1750,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 2,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 17,
+            "allocations": 113,
+            "commits": 2124,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 2,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 87,
+                "lastTests": 1,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 86,
+                "lastTests": 1,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 51,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "0a887c4366c03b0b6f88e5989dadf88138a639df47af0634841ddd8578ea2d38"
+    },
+    {
+      "name": "zero-clear",
+      "baseline": true,
+      "state": {
+        "name": "zero-clear",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 0,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 0,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "c42896ba87445b870e4c6cda521a696df7a7cb083e7c184ffdb875fedd126e56"
+    },
+    {
+      "name": "zero-clear",
+      "baseline": false,
+      "state": {
+        "name": "zero-clear",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 0,
+            "sunPasses": [],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 0,
+            "sunPasses": [],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "c42896ba87445b870e4c6cda521a696df7a7cb083e7c184ffdb875fedd126e56"
+    },
+    {
+      "name": "zero-cloud",
+      "baseline": true,
+      "state": {
+        "name": "zero-cloud",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 0,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 0,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "b3954d6138ef7ad458d94dfda35d2cd1fc020745679c81d6ef2226a11552e65d"
+    },
+    {
+      "name": "zero-cloud",
+      "baseline": false,
+      "state": {
+        "name": "zero-cloud",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 0,
+            "sunPasses": [],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 0,
+            "sunPasses": [],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "b3954d6138ef7ad458d94dfda35d2cd1fc020745679c81d6ef2226a11552e65d"
+    },
+    {
+      "name": "moon-override",
+      "baseline": true,
+      "state": {
+        "name": "moon-override",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 0.125,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 0.125,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "532c4b81ba33aa5dc811d5c1b5bfd00d84a9a0a4b4e481f8aef9f48f48870194"
+    },
+    {
+      "name": "moon-override",
+      "baseline": false,
+      "state": {
+        "name": "moon-override",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 0.125,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 0.125,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "532c4b81ba33aa5dc811d5c1b5bfd00d84a9a0a4b4e481f8aef9f48f48870194"
+    },
+    {
+      "name": "cloud-threshold",
+      "baseline": true,
+      "state": {
+        "name": "cloud-threshold",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "192fadee7bd16a0d4f9cd4806b04276a43b8613ac441a2bdc4422a0741f94297"
+    },
+    {
+      "name": "cloud-threshold",
+      "baseline": false,
+      "state": {
+        "name": "cloud-threshold",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "192fadee7bd16a0d4f9cd4806b04276a43b8613ac441a2bdc4422a0741f94297"
+    },
+    {
+      "name": "cloud-above",
+      "baseline": true,
+      "state": {
+        "name": "cloud-above",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "37c2dbff5f0cc9d73df3bb8b8f2a26d1698f7eddf266d167bcf81ed6ac0ed3ef"
+    },
+    {
+      "name": "cloud-above",
+      "baseline": false,
+      "state": {
+        "name": "cloud-above",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 1344,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 67,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1750,
+            "reusedPoses": 1715,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2100,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 103,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "37c2dbff5f0cc9d73df3bb8b8f2a26d1698f7eddf266d167bcf81ed6ac0ed3ef"
+    },
+    {
+      "name": "no-receiver",
+      "baseline": true,
+      "state": {
+        "name": "no-receiver",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 37,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1088,
+            "reusedPoses": 1054,
+            "checkedPoses": 34,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 16,
+            "allocations": 74,
+            "commits": 1312,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 34,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 34,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 37,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1700,
+            "reusedPoses": 1666,
+            "checkedPoses": 34,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 17,
+            "allocations": 111,
+            "commits": 2050,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 34,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 34,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "594005ccdd825ebd48d1611dc6f22324a52a9f7f5469de9fc1f2c654a8f265bd"
+    },
+    {
+      "name": "no-receiver",
+      "baseline": false,
+      "state": {
+        "name": "no-receiver",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": false,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": false,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 37,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1088,
+            "reusedPoses": 1054,
+            "checkedPoses": 34,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 16,
+            "allocations": 74,
+            "commits": 1312,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              },
+              "staticShadow": {
+                "staticCandidates": 34,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 34,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 37,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 50,
+            "observations": 1700,
+            "reusedPoses": 1666,
+            "checkedPoses": 34,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 17,
+            "allocations": 111,
+            "commits": 2050,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 102,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              },
+              "staticShadow": {
+                "staticCandidates": 34,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 34,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 50,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "594005ccdd825ebd48d1611dc6f22324a52a9f7f5469de9fc1f2c654a8f265bd"
+    },
+    {
+      "name": "sun-transition",
+      "baseline": true,
+      "state": {
+        "name": "sun-transition",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "sun-0-frame-34",
+            "actualSun": 0,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "sun-0.125-frame-35",
+            "actualSun": 0.125,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "sun-0-frame-36",
+            "actualSun": 0,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "sun-1.5-frame-37",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 39,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 39,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1152,
+            "reusedPoses": 1116,
+            "checkedPoses": 36,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 38,
+          "modelHistory": {
+            "entries": 39,
+            "frame": 16,
+            "allocations": 78,
+            "commits": 1376,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 39,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 4,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 68,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 36,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 36,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 39,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 41,
+          "translationUpdates": 2,
+          "radiance": {
+            "fusedFrames": 54,
+            "observations": 1944,
+            "reusedPoses": 1906,
+            "checkedPoses": 38,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 38,
+          "modelHistory": {
+            "entries": 39,
+            "frame": 17,
+            "allocations": 117,
+            "commits": 2322,
+            "modelChanges": 2
+          },
+          "visibilityPlan": {
+            "entries": 39,
+            "sourceBuilds": 2,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 4,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 2,
+                "tests": 116,
+                "lastTests": 2,
+                "revision": 2
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 110,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 2,
+                "staticBuilds": 3,
+                "tests": 106,
+                "lastTests": 0,
+                "revision": 3
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 2,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 75,
+                "lastTests": 2,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "3a61ec96e6a3aadfde9a7185839d57ce47ca1339cd47bb2f3721a167ffc8b003"
+    },
+    {
+      "name": "sun-transition",
+      "baseline": false,
+      "state": {
+        "name": "sun-transition",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "sun-0-frame-34",
+            "actualSun": 0,
+            "sunPasses": [],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "sun-0.125-frame-35",
+            "actualSun": 0.125,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "sun-0-frame-36",
+            "actualSun": 0,
+            "sunPasses": [],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "sun-1.5-frame-37",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 39,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 39,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1152,
+            "reusedPoses": 1116,
+            "checkedPoses": 36,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 38,
+          "modelHistory": {
+            "entries": 39,
+            "frame": 16,
+            "allocations": 78,
+            "commits": 1376,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 39,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 4,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 68,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 36,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 36,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 39,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 41,
+          "translationUpdates": 2,
+          "radiance": {
+            "fusedFrames": 54,
+            "observations": 1944,
+            "reusedPoses": 1906,
+            "checkedPoses": 38,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 38,
+          "modelHistory": {
+            "entries": 39,
+            "frame": 17,
+            "allocations": 117,
+            "commits": 2322,
+            "modelChanges": 2
+          },
+          "visibilityPlan": {
+            "entries": 39,
+            "sourceBuilds": 2,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 4,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 2,
+                "tests": 116,
+                "lastTests": 2,
+                "revision": 2
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 110,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 2,
+                "staticBuilds": 3,
+                "tests": 106,
+                "lastTests": 0,
+                "revision": 3
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 2,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 71,
+                "lastTests": 2,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "3a61ec96e6a3aadfde9a7185839d57ce47ca1339cd47bb2f3721a167ffc8b003"
+    },
+    {
+      "name": "receiver-transition",
+      "baseline": true,
+      "state": {
+        "name": "receiver-transition",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "first-receiver",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "receiver-retired",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "receiver-returned",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 37,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1088,
+            "reusedPoses": 1054,
+            "checkedPoses": 34,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 16,
+            "allocations": 74,
+            "commits": 1312,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 34,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 34,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 4,
+          "modelUpdates": 39,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 53,
+            "observations": 1821,
+            "reusedPoses": 1785,
+            "checkedPoses": 36,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 4,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2192,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 4,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 4,
+                "staticBuilds": 4,
+                "tests": 116,
+                "lastTests": 2,
+                "revision": 4
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 4,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 4,
+                "staticBuilds": 1,
+                "tests": 108,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 4,
+                "staticBuilds": 4,
+                "tests": 138,
+                "lastTests": 0,
+                "revision": 4
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 4,
+                "staticBuilds": 1,
+                "tests": 53,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "73238c68cbcbbfcd8268a4353c5fd5554a3c4e87fd45822cbb877c077f031dcd"
+    },
+    {
+      "name": "receiver-transition",
+      "baseline": false,
+      "state": {
+        "name": "receiver-transition",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": false,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "first-receiver",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "receiver-retired",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": false,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "receiver-returned",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 37,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1088,
+            "reusedPoses": 1054,
+            "checkedPoses": 34,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 36,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 16,
+            "allocations": 74,
+            "commits": 1312,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 66,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 0,
+                "tests": 0,
+                "lastTests": 0,
+                "revision": 0
+              },
+              "staticShadow": {
+                "staticCandidates": 34,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 34,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 4,
+          "modelUpdates": 39,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 53,
+            "observations": 1821,
+            "reusedPoses": 1785,
+            "checkedPoses": 36,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 4,
+          "batchCauseEntries": 37,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 17,
+            "allocations": 114,
+            "commits": 2192,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 4,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 3,
+                "movingCandidates": 2,
+                "sourceBuilds": 4,
+                "staticBuilds": 4,
+                "tests": 116,
+                "lastTests": 2,
+                "revision": 4
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 2,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 40,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 4,
+                "staticBuilds": 4,
+                "tests": 138,
+                "lastTests": 0,
+                "revision": 4
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 53,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "73238c68cbcbbfcd8268a4353c5fd5554a3c4e87fd45822cbb877c077f031dcd"
+    },
+    {
+      "name": "cpu-instances",
+      "baseline": true,
+      "state": {
+        "name": "cpu-instances",
+        "baseline": true,
+        "errors": [],
+        "oracle": null,
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "noncaster-retired",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.static",
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {}
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 2240,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 35,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 99,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 34,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 98,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 2,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 51,
+            "observations": 1785,
+            "reusedPoses": 1750,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 17,
+            "allocations": 113,
+            "commits": 3552,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 2,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 35,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 154,
+                "lastTests": 1,
+                "revision": 2
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 2,
+                "lastTests": 0,
+                "revision": 2
+              },
+              "reflection": {
+                "staticCandidates": 34,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 152,
+                "lastTests": 1,
+                "revision": 2
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 2,
+                "staticBuilds": 2,
+                "tests": 70,
+                "lastTests": 0,
+                "revision": 2
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 51,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "0a887c4366c03b0b6f88e5989dadf88138a639df47af0634841ddd8578ea2d38"
+    },
+    {
+      "name": "cpu-instances",
+      "baseline": false,
+      "state": {
+        "name": "cpu-instances",
+        "baseline": false,
+        "errors": [],
+        "oracle": {
+          "hdr": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "depth": {
+            "components": 921600,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "effects": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          },
+          "taa": {
+            "components": 3686400,
+            "changed": 0,
+            "maxAbs": 0,
+            "maxUlps": 0
+          }
+        },
+        "checks": [
+          {
+            "phase": "initial",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "noncaster-retired",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          },
+          {
+            "phase": "final",
+            "actualSun": 1.5,
+            "sunPasses": [
+              "render.shadow.dynamic"
+            ],
+            "spots": [
+              "render.shadow.spot.0"
+            ],
+            "reflection": true,
+            "oracle": {
+              "hdr": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "depth": {
+                "components": 921600,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "effects": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              },
+              "taa": {
+                "components": 3686400,
+                "changed": 0,
+                "maxAbs": 0,
+                "maxUlps": 0
+              }
+            }
+          }
+        ],
+        "physics": 0,
+        "preparationBefore": {
+          "entries": 38,
+          "lights": 1,
+          "builds": 1,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 32,
+            "observations": 1120,
+            "reusedPoses": 1085,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0,
+          "modelHistory": {
+            "entries": 38,
+            "frame": 16,
+            "allocations": 76,
+            "commits": 2240,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 38,
+            "sourceBuilds": 1,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 35,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 99,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 34,
+                "movingCandidates": 2,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 98,
+                "lastTests": 2,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 32,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "preparationAfter": {
+          "entries": 37,
+          "lights": 1,
+          "builds": 2,
+          "modelUpdates": 38,
+          "translationUpdates": 0,
+          "radiance": {
+            "fusedFrames": 51,
+            "observations": 1785,
+            "reusedPoses": 1750,
+            "checkedPoses": 35,
+            "fallbackFrames": 0
+          },
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0,
+          "modelHistory": {
+            "entries": 37,
+            "frame": 17,
+            "allocations": 113,
+            "commits": 3552,
+            "modelChanges": 0
+          },
+          "visibilityPlan": {
+            "entries": 37,
+            "sourceBuilds": 2,
+            "passes": {
+              "cameraOpaque": {
+                "staticCandidates": 35,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 119,
+                "lastTests": 1,
+                "revision": 1
+              },
+              "cameraTransparent": {
+                "staticCandidates": 1,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 1,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "reflection": {
+                "staticCandidates": 34,
+                "movingCandidates": 1,
+                "sourceBuilds": 2,
+                "staticBuilds": 1,
+                "tests": 118,
+                "lastTests": 1,
+                "revision": 1
+              },
+              "staticShadow": {
+                "staticCandidates": 35,
+                "movingCandidates": 0,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 35,
+                "lastTests": 0,
+                "revision": 1
+              },
+              "dynamicShadow": {
+                "staticCandidates": 0,
+                "movingCandidates": 1,
+                "sourceBuilds": 1,
+                "staticBuilds": 1,
+                "tests": 51,
+                "lastTests": 1,
+                "revision": 1
+              }
+            }
+          }
+        },
+        "resolution": [
+          1280,
+          720
+        ],
+        "profiled": false
+      },
+      "pngSha256": "0a887c4366c03b0b6f88e5989dadf88138a639df47af0634841ddd8578ea2d38"
+    }
+  ],
+  "errors": [],
+  "fixturePhysicsNote": "Legacy state.physics=0 is a rendering-only fixture flag, not a body count. Fixtures include rigid bodies for dynamic-shadow coverage; the driver never invokes Scene.step. Current driver reads/asserts scene.tick and reports physicsSteps directly."
+}

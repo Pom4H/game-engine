@@ -15,7 +15,7 @@ test('local probe convolution covers every roughness level and face exactly once
 });
 test('probe filter normalizes radiance and reads only the captured level',()=>{
  assert.match(PROBE_FILTER_SHADER,/sum\/max\(total/);
- assert.match(source,/localProbeMap.createView\(\{dimension:'cube',baseMipLevel:0,mipLevelCount:1\}\)/);
+ assert.match(source,/localProbeCapture.createView\(\{dimension:'cube',baseMipLevel:0,mipLevelCount:1\}\)/);
  assert.match(source,/baseMipLevel:capture.mip,mipLevelCount:1/);
  assert.match(source,/mipmapFilter:'linear'/);
 });

@@ -1,0 +1,79 @@
+{
+  "kind": "deterministic-emitted-control-flow-probe",
+  "emitter": "Bun browser bundle",
+  "runtime": "v24.21.0",
+  "sourcePath": "C:\\Users\\Roman\\Documents\\thegame-migration-20261021\\workspace\\game-engine\\src/render/webgpu.ts",
+  "sourceSha256": "ee404530f7c12b33ecb9bb0880f2379d053b92deb79634d40f7b5bbc3f614c0c",
+  "emittedPath": "C:\\Users\\Roman\\Documents\\thegame-migration-20261021\\workspace\\game-engine\\../thegame/public/build/game.js",
+  "emittedSha256": "41a20daaee2c79ea316eda0cd85cee7cbd8ee81ad5f631ad41f5fb35189d0a45",
+  "methodSha256": "00cb554f731d80594589ba5a2fd00d39a970a85183447d85b8e2975c1f76e60b",
+  "environmentSites": 1,
+  "cases": [
+    {
+      "name": "identity cache hit",
+      "invocations": 100,
+      "counts": {
+        "environmentCreations": 0,
+        "scopeCreations": 0,
+        "bufferCreations": 0,
+        "destroys": 0
+      },
+      "expectedIdentity": true
+    },
+    {
+      "name": "structural key cache hit",
+      "invocations": 100,
+      "counts": {
+        "environmentCreations": 0,
+        "scopeCreations": 0,
+        "bufferCreations": 0,
+        "destroys": 0
+      },
+      "expectedIdentity": true
+    },
+    {
+      "name": "cold miss",
+      "invocations": 1,
+      "counts": {
+        "environmentCreations": 1,
+        "scopeCreations": 1,
+        "bufferCreations": 3,
+        "destroys": 0
+      },
+      "expectedIdentity": true
+    },
+    {
+      "name": "identity cache hit after transfer",
+      "invocations": 100,
+      "counts": {
+        "environmentCreations": 0,
+        "scopeCreations": 0,
+        "bufferCreations": 0,
+        "destroys": 0
+      },
+      "expectedIdentity": true
+    },
+    {
+      "name": "structural key cache hit after transfer",
+      "invocations": 100,
+      "counts": {
+        "environmentCreations": 0,
+        "scopeCreations": 0,
+        "bufferCreations": 0,
+        "destroys": 0
+      },
+      "expectedIdentity": true
+    }
+  ],
+  "totals": {
+    "environmentCreations": 1,
+    "scopeCreations": 1,
+    "bufferCreations": 3,
+    "destroys": 0
+  },
+  "limitations": [
+    "No timing, heap sampling, native GPU, FPS or browser claim.",
+    "Actual emitted mesh body and using helpers are evaluated; primitive conversion/key and GPU upload dependencies are stable stubs, because this probe isolates whether using adds work before cache returns.",
+    "Counters exist only in this ignored evaluated copy; production code is not instrumented."
+  ]
+}

@@ -1,0 +1,1637 @@
+{
+  "date": "2026-10-17T02:39:09.083Z",
+  "scope": "Constrained Office camera using the original displayed model head, selected-owner-only visibility, native original lift rides and actual first-person to account-owner camera return in built Office",
+  "capability": "original-residents-18",
+  "camera": {
+    "enterBelowMetres": 1.35,
+    "leaveAboveMetres": 1.75,
+    "firstPersonFovDegrees": 54,
+    "eyeOffsetAboveHeadMetres": 0.04,
+    "eyeSweepRadius": 0.08,
+    "eyeSweepPadding": 0.04,
+    "vehicles": "Existing seated/boarding exclusion retained, no automatic first-person mode",
+    "network": "No new fields/bones; displayed head is a local read-model of existing geometry"
+  },
+  "tests": {
+    "pass": 175,
+    "assertions": 10173,
+    "files": 17,
+    "log": "artifacts/office-subject-camera-tests-r3-20261017.log",
+    "originalGeometryOracle": {
+      "states": 12,
+      "vertices": 478314,
+      "maxPositionError": 0.0000015299771043419952,
+      "maxNormalError": 0.000004640606933892233
+    }
+  },
+  "natives": [
+    {
+      "label": "office-subject-camera-native-20261017-r1",
+      "entry": "http://127.0.0.1:8765/",
+      "actor": "resident:15621:0",
+      "building": "15621",
+      "floor": 2,
+      "target": 3,
+      "rideSamples": 35,
+      "firstPersonSamples": 23,
+      "walkingPulses": 3,
+      "states": 15,
+      "takeoverDistance": 2.418786785282189e-7,
+      "maxAlignment": 2.6645352591003757e-14,
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      },
+      "rightsBefore": {
+        "accountId": "d60cfdde-c301-4062-899d-03c604d2f2f5",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "d60cfdde-c301-4062-899d-03c604d2f2f5",
+        "companies": [],
+        "leases": []
+      }
+    },
+    {
+      "label": "office-subject-camera-native-20261017-r2",
+      "entry": "http://127.0.0.1:8765/",
+      "actor": "resident:15621:0",
+      "building": "15621",
+      "floor": 3,
+      "target": 4,
+      "rideSamples": 36,
+      "firstPersonSamples": 36,
+      "walkingPulses": 91,
+      "states": 16,
+      "takeoverDistance": 1.1867961456351767e-9,
+      "maxAlignment": 0.0003333333333337407,
+      "cameraReturn": {
+        "before": {
+          "body": "resident:15621:0",
+          "mode": "first-person",
+          "suppressed": 51
+        },
+        "after": {
+          "body": "player:1ceb7046-a7fa-45f3-9287-edbfc767d9e1",
+          "mode": "third-person",
+          "suppressed": 0
+        }
+      },
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      },
+      "rightsBefore": {
+        "accountId": "1ceb7046-a7fa-45f3-9287-edbfc767d9e1",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "1ceb7046-a7fa-45f3-9287-edbfc767d9e1",
+        "companies": [],
+        "leases": []
+      }
+    },
+    {
+      "label": "office-subject-camera-native-20261017-r3",
+      "entry": "http://127.0.0.1:8765/?ui=static",
+      "actor": "resident:25961:0",
+      "building": "25961",
+      "floor": 2,
+      "target": 3,
+      "rideSamples": 36,
+      "firstPersonSamples": 23,
+      "walkingPulses": 19,
+      "states": 16,
+      "takeoverDistance": 6.453254355176646e-9,
+      "maxAlignment": 0.0003333333333515043,
+      "cameraReturn": {
+        "before": {
+          "body": "resident:25961:0",
+          "mode": "first-person",
+          "suppressed": 50
+        },
+        "after": {
+          "body": "player:55a30189-be27-49e8-bb99-83b56b1230a9",
+          "mode": "first-person",
+          "suppressed": 0
+        }
+      },
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      },
+      "rightsBefore": {
+        "accountId": "55a30189-be27-49e8-bb99-83b56b1230a9",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "55a30189-be27-49e8-bb99-83b56b1230a9",
+        "companies": [],
+        "leases": []
+      }
+    },
+    {
+      "label": "office-subject-camera-native-20261017-r4",
+      "entry": "http://127.0.0.1:8765/?ui=static",
+      "actor": "resident:25961:0",
+      "building": "25961",
+      "floor": 3,
+      "target": 4,
+      "rideSamples": 36,
+      "firstPersonSamples": 20,
+      "walkingPulses": 25,
+      "states": 16,
+      "takeoverDistance": 0,
+      "maxAlignment": 0.0003333333333674915,
+      "cameraReturn": {
+        "before": {
+          "body": "resident:25961:0",
+          "mode": "first-person",
+          "suppressed": 50
+        },
+        "after": {
+          "body": "player:362e604f-cd09-4100-adfc-19ce0cf22b11",
+          "mode": "third-person",
+          "suppressed": 0
+        }
+      },
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      },
+      "rightsBefore": {
+        "accountId": "362e604f-cd09-4100-adfc-19ce0cf22b11",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "362e604f-cd09-4100-adfc-19ce0cf22b11",
+        "companies": [],
+        "leases": []
+      }
+    }
+  ],
+  "fps": {
+    "manifest": "fps-live-20261017-subject-camera.json",
+    "averageFPS": 47.5282661160429,
+    "p50Ms": 19.30000000000291,
+    "p95Ms": 30,
+    "frames": 900,
+    "warmupFrames": 180,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "scope": [
+      "Short stationary original Game measurement; not walking, vehicles, sustained-60 or Office UI performance.",
+      "1280x720 viewport, 704x396 internal rendering, TAA, 420 m, adaptive resolution disabled.",
+      "900 requestAnimationFrame intervals after 180 warmup frames; each benchmark discards 30 initial intervals. Not isolated GPU execution time. Interval sum derived from count/throughput.",
+      "Fixed requested visual settings do not freeze the live authority environment. The sampled world had night facade lights and rain/wetness; actual environment recorded separately.",
+      "Different bundle and unpaired live world from the earlier 60.7115 FPS sample. These measurements do not establish a performance improvement or regression."
+    ]
+  },
+  "archivedSources": [
+    {
+      "repo": "engine",
+      "path": "src/render/subject-camera.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/src/render/subject-camera.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/mesh-ray.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/src/render/mesh-ray.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-actors.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/client/canonical-actors.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/client/canonical-world-view.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/subject-camera.test.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/test/subject-camera.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-world-view.test.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/test/canonical-world-view.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-subject-camera/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/presentation.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/src/game/presentation.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/primitive-instances.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/src/game/primitive-instances.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-dynamic-assets.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/src/game/office-dynamic-assets.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-projection.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/src/game/render/the-engine-projection.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/transport/pose.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/src/game/transport/pose.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/camera.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/src/game/camera.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/src/game/office-controller.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-dynamic-assets.test.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/test/office-dynamic-assets.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/the-engine-renderer.test.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/test/the-engine-renderer.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-walking.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lifts.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-lifts.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-route.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-lift-route.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-residents.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-recovery.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-lift-recovery.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-terrain.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-interiors.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-subject-camera/final-sources/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-subject-camera/final-sources/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "archive": "artifacts/office-subject-camera/final-sources/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-subject-camera/final-sources/office/VERIFICATION.md"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "archive": "artifacts/office-subject-camera/final-bundles/game.js",
+      "bytes": 2492369,
+      "sha256": "dcccdd96f7db9b37108f3ae0ba9acb6953b3705168f346949fe911740beb4bb1"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-18",
+      "archive": "artifacts/office-subject-camera/final-bundles/office-controller.js",
+      "bytes": 1359394,
+      "sha256": "139267457cf1525c45d11090fa685e2d621a6913ad1d87299a56dbfb5492dbee"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DWaNeKY0.js",
+      "archive": "artifacts/office-subject-camera/final-bundles/index-DWaNeKY0.js",
+      "bytes": 1790779,
+      "sha256": "b824117d618c8085b6445ffc6710c481e670c42490bf4d1450d23c1432ccdc3b"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-subject-camera/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/office/scene.ts",
+      "archive": "artifacts/office-subject-camera/served-modules/scene.js",
+      "bytes": 215481,
+      "sha256": "f095a47bfca1d528476470726e3e1f177d706dc2f62c87936fdff2f5a3d76a1e",
+      "role": "Read-only post-run Vite module; final native proof uses the built static UI"
+    },
+    {
+      "url": "http://127.0.0.1:5173/@fs/C:/Users/Roman/Documents/game-engine/apps/thegame/client/canonical-world-view.ts",
+      "archive": "artifacts/office-subject-camera/served-modules/canonical-world-view.js",
+      "bytes": 121386,
+      "sha256": "bdbd4a5ba8dc138e8262e474ef11fc2904b75eb594cd47ec7ef1b5efdd84f7ae",
+      "role": "Read-only post-run Vite module; final native proof uses the built static UI"
+    },
+    {
+      "url": "http://127.0.0.1:5173/@fs/C:/Users/Roman/Documents/game-engine/src/render/subject-camera.ts",
+      "archive": "artifacts/office-subject-camera/served-modules/subject-camera.js",
+      "bytes": 5156,
+      "sha256": "3df67c585578abc06a55d66b34515a068e259bff3179c6b6b87aeabeb01dea90",
+      "role": "Read-only post-run Vite module; final native proof uses the built static UI"
+    }
+  ],
+  "reviewed": [
+    "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-first-person.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-arrived.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-exited.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-first-person.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-exited.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-returned.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-first-person.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-exited.png",
+    "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-returned.png"
+  ],
+  "health": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "debug": [
+    {
+      "port": 3246,
+      "live": false
+    },
+    {
+      "port": 3247,
+      "live": false
+    },
+    {
+      "port": 3248,
+      "live": false
+    },
+    {
+      "port": 3249,
+      "live": false
+    },
+    {
+      "port": 3250,
+      "live": false
+    }
+  ],
+  "limits": [
+    "The sole Game camera is unchanged; this is the Office walking/observation presentation. No second character/physics/world clock or skeletal stream is introduced.",
+    "Native guest company/lease lists are empty; their equality is not a new nonempty-business ownership proof. Account/owner/camera identity return is checked.",
+    "r1/r2 use live Vite, r3/r4 built static Office. r2 used the older held-until-ACK steering (91 pulses); final helper releases trusted keys before waiting. r3 sampled the previous camera diagnostic for one RAF, although the new owner/model was already present; final r4 explicitly waits for third-person mode as well.",
+    "First CPU attempt exposed an exact-float assertion and a non-normalized quaternion discrepancy in the initial head helper. Reading the exact primitive writer basis fixed the latter; final source matches head primitive centres.",
+    "First-person mask omits the selected model, including its rendered shadow/reflection. Full first-person body/shadow fidelity is not verified. Mode transitions are immediate with hysteresis, not a new camera animation.",
+    "Outer static scenery still uses nine chunks; other selected-Office floors, long routes, lighting/temporal/water/audio parity remain incomplete or unverified. No physical microphone capture/playback. Existing C920/audio-reference/autoplay warnings persist.",
+    "Fresh Game FPS is a short stationary unpaired live-world sample at 704x396 internal rendering, with night/rain/wetness. It does not prove sustained 60 FPS, moving or Office performance, nor a change caused by this camera work."
+  ],
+  "files": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/canonical-controller-source.json",
+      "bytes": 907111,
+      "sha256": "8af8875bc750f4a60489467cbe1fdc9fc93e9e6debb9093f8744cf891dcd7310"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/entered.png",
+      "bytes": 428090,
+      "sha256": "adc8fc3da67f629c4a5a3c309c104f5cec07f52324b0d8106eb41fe60aba0e43"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-arrived.png",
+      "bytes": 308419,
+      "sha256": "1b05842fed164069be545fce9a9419631d9b3a1afaeb3f2b06eb29aac6e34863"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-at-door.png",
+      "bytes": 208046,
+      "sha256": "31bf2aaea82de8de1fcadbfd6607abc269b20a0dd3079ac505ff4b95bf9afcf5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-call-panel.png",
+      "bytes": 136426,
+      "sha256": "d1a0731d3724896b96e8b85ad6be09e30de1f8cdf95e329f44a37352b1e4c8ee"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-candidates.json",
+      "bytes": 24208,
+      "sha256": "2cc98f6d842d84f492f690ff3d505b9c64b155362b8e425cec783c3e968f9880"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-controlled.png",
+      "bytes": 185772,
+      "sha256": "00aeb0c57f0b831c291f19edba5a2ce5b88639aba6c4efd3dd50b25be828970a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-directory.png",
+      "bytes": 194096,
+      "sha256": "0ec1f7ee56e1a36d48584ada6e602c20bdbf82536d50d136a4e45c32df248999"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-exited.png",
+      "bytes": 240266,
+      "sha256": "6e059e8ae329d2d603f32a08db24e2db276559318431c8f915abec4034c88a2e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-first-person.png",
+      "bytes": 229035,
+      "sha256": "c8ff2e7af3a363c34926bec8c44362bf653f78863aae05a463fcfaff67367571"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-floor-panel.png",
+      "bytes": 130282,
+      "sha256": "9e9825e62e16c7a66df33e25ab6b2054d379cbdcb04147c9747e75b66fe7dc31"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-hall-source.json",
+      "bytes": 823238,
+      "sha256": "8fdea82701f2966a800c34453a6513bbf2daba16966611995a728ee4f84167ed"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-in-cabin.png",
+      "bytes": 243829,
+      "sha256": "74988ddc432ee0c6bbb782da71ee4f31bcf5080c9fb5f65c687d66cb9db10bed"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-moving.png",
+      "bytes": 218715,
+      "sha256": "f451cd1e6f532f0b29b4987abe7e410a32e617deef5442bb3eff8b11d571f265"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-report.json",
+      "bytes": 99883,
+      "sha256": "a16fa1fa36ed5eba93f00dd963a8924e51a141bcfe45c30809d1aa117cf269b2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-returned.png",
+      "bytes": 287774,
+      "sha256": "99121abc5fb4bc8a6b94aecca8204ce7da5940b7d8d6ef6b6f6ccda887e4784e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/lifts-source.json",
+      "bytes": 1770870,
+      "sha256": "ba1880342f9e76a982e129b9ab28883f4a05a88fd80c4e79dd2c45b1e5f8dc5f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/observer.png",
+      "bytes": 641521,
+      "sha256": "3a94f22cc75f09e75af09804329e82fc6beff1f5602e4f7abf81027206e87825"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/report.json",
+      "bytes": 286607,
+      "sha256": "35f327fc06a3197881e5d232e74f0b7f86c83ad8aceffaac39b38f34a4b94a6f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/returned-observer.png",
+      "bytes": 678977,
+      "sha256": "566a245cc56ea7ed442cbc46fb438045db10692a20273125b13456636c51d18f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r1/walk-KeyW.png",
+      "bytes": 418249,
+      "sha256": "96274a03d4867abf47ecb724f690cdd23821353a3f35fa651ee42200740f46de"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 15720,
+      "sha256": "8e0e400f07be8053b31eb22e64b7a5f6325e0ff01b52ec2828be81f64ed76608"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r1/office-entry.json",
+      "bytes": 15881,
+      "sha256": "f336004b05deafbd990ca09b9e6ab56490b3ad80d3661aacc8cad19a8171a88f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r1/office-entry.png",
+      "bytes": 607796,
+      "sha256": "2d038d64d52241a6253408ce96ad191858c09c06907d2908c3e98721acc22205"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-native-20261017-r1.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/canonical-controller-source.json",
+      "bytes": 905921,
+      "sha256": "4a186c7423a7110a5980e7e681a542c8f295b8e3ce3e002f6059dfd69e775b44"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/entered.png",
+      "bytes": 411372,
+      "sha256": "d02fa7986a96c264a4784443cdf171a8cf328e0c03952456dfef645145ca4198"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-arrived.png",
+      "bytes": 175495,
+      "sha256": "80ff7ca6b32ebc0ce26962fcb2a1b8fed0116e4a4c8ec4ba3893b9467fa2d3bd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-at-door.png",
+      "bytes": 249484,
+      "sha256": "f1a05c1c2cab98c52d84e19ff5a6a2a0ccdb47520f73dcfeb0e450a48e58c04f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-call-panel.png",
+      "bytes": 134671,
+      "sha256": "3d49dd40a4f5e87933c1cb30b4a19a4488f1ae915230da789160dfab7004c3a0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-candidates.json",
+      "bytes": 25253,
+      "sha256": "5cd6a7ff9715d1ebad8f2f5dd6c071f59b9a2b3cf28f3a3a5211de5b7605977e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-controlled.png",
+      "bytes": 184829,
+      "sha256": "bb69afbade24922f802d5b32464d8ae227fd84071189e7ae5d36669a492635b8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-directory.png",
+      "bytes": 155433,
+      "sha256": "f3090b32a6910b567b74ed4fc93fb5cac12f6d700b6b9b9a418ad1049d11cd2c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-exited.png",
+      "bytes": 198474,
+      "sha256": "aba8d255fb6eb6092d9a528f2ac065698fbea3d1e9c9da05a9f1a793f1013a26"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-first-person-before-return.png",
+      "bytes": 167413,
+      "sha256": "1939f2484e132114ab48d18c9d6f1e4fe75d0f82a452ad277f64a3fbda899d10"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-first-person.png",
+      "bytes": 179395,
+      "sha256": "b31a8952c523466747dc24a8abe5f9b05e80191019e4f3d229ebdd12f253dadf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-floor-panel.png",
+      "bytes": 98605,
+      "sha256": "7a5eba385cf7393a5578ffdd6dee9a76202facfff9fa56aeca2d28fc3fb26d08"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-hall-source.json",
+      "bytes": 827991,
+      "sha256": "5f78ddd09794b7fe743a5890a5c97639a350f591bc2fdb1783e71f62c055a0b9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-in-cabin.png",
+      "bytes": 176455,
+      "sha256": "bc33eff51a2f65905a80a943020e4a4d888fd6ae49bfb7702b9609db9c8ae57e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-moving.png",
+      "bytes": 157421,
+      "sha256": "9ae67471c267a35447724276e50257a7cb30397142c89de64fd14fdf0c4e5920"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-report.json",
+      "bytes": 182198,
+      "sha256": "f03218596cf3d22b3c826457545e73d201eafe46368f16ddfc834f911adf1ca4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-returned.png",
+      "bytes": 256943,
+      "sha256": "ee238b8d92465f04db234d61b789d28ef391d3dfbadaf6d0096c37238db8021a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/lifts-source.json",
+      "bytes": 1777288,
+      "sha256": "3dc1833a48a750668359b537dc7686bb49ab5782152aa51a73ea18cc3daead35"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/observer.png",
+      "bytes": 677915,
+      "sha256": "70d58579ccb79b3a06a74e0fe2b51284eec503f6fd33da90fe05afc213505fe8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/report.json",
+      "bytes": 388297,
+      "sha256": "941f872ea315339bb4ea5b52eed283ebfbe8fec294c934096df4af84fe0ac0e5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/returned-observer.png",
+      "bytes": 595816,
+      "sha256": "99c431d2bc5cb8803e3b9b651479543e62518d2773fc3c3b2b6cf6bd218ac582"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r2/walk-KeyW.png",
+      "bytes": 401867,
+      "sha256": "32e6b88f92669dfef70f3c3f61065f511efd3b834b942a7a9fcc759591996118"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 14297,
+      "sha256": "69f7bcf5d389b1fa5e297c0bf342194562433782f4a9721cb3f8cb6b00c19898"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r2/office-entry.json",
+      "bytes": 14458,
+      "sha256": "27c6118750053e3ce2d2b352f723df335efc23e3351d41e0aa444c235a3abf3b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r2/office-entry.png",
+      "bytes": 764343,
+      "sha256": "d6e1ab63bdeb92cbc09593e065aa10fc27554d4f0c6593bbcbdb0237a17b0490"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-native-20261017-r2.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/canonical-controller-source.json",
+      "bytes": 894281,
+      "sha256": "e89e56ed9a0328f7de5c6f307d60ddf254d18703936fcf59c33d4941d9750c03"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/entered.png",
+      "bytes": 318861,
+      "sha256": "a69d182e8ae1bbe01842587811994696da7b481d505c188657caa067af77d61f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-arrived.png",
+      "bytes": 272070,
+      "sha256": "8de3bc75caec124ddcf8cfd66d3d34559fae956f13732669e7d9032f1261bba6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-at-door.png",
+      "bytes": 246579,
+      "sha256": "391132a88a8ad68aafff6b463542497f3410522582a46c185462a101b61e87f3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-call-panel.png",
+      "bytes": 118563,
+      "sha256": "e97569aae74fcc59df9139be26f1a3a9fab493ebb053d0a418f4e3d6d8d08338"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-candidates.json",
+      "bytes": 25312,
+      "sha256": "55e7b837dd505f9c275a7728f0df76d72a177990efdadae026661b3f2dbf3e3e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-controlled.png",
+      "bytes": 104247,
+      "sha256": "5cd76590117b904a84251f309ff3826af53c4681eba5bef5363cfb1c82923cd3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-directory.png",
+      "bytes": 140581,
+      "sha256": "39d81b986bf8cb1eacdc09c15ec7fa2b1626761fedf8ad068417da1b2bb1acaa"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-exited.png",
+      "bytes": 230364,
+      "sha256": "f4a16faa5c2b07aadb01216d8bd82d5ebdd58cfc23c6e5b7c8bada211b39ef3a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-first-person-before-return.png",
+      "bytes": 162007,
+      "sha256": "e4693edded7d205749d9c3cfb8b12c7bfdb635f7a1d13624b05253643d61b341"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-first-person.png",
+      "bytes": 273450,
+      "sha256": "8332e538ced3899c0e5b79f22c002309d10e11a86f316ebce58451587bbabe10"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-floor-panel.png",
+      "bytes": 109521,
+      "sha256": "0a96df4af6c7a2cb104face1942abb86535caec55b29e8da6fa20e22ca07ed92"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-hall-source.json",
+      "bytes": 951291,
+      "sha256": "789eec308eb44b678e9e5a6d162746439e4310c5cb30f8df274310e7ce501769"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-in-cabin.png",
+      "bytes": 213026,
+      "sha256": "6a7124ea74e6e1d5425707efe837895229d139d0f2b4779950c81d4cdfd664cf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-moving.png",
+      "bytes": 228175,
+      "sha256": "790f7fc4147d96a623cb625b55c4ec76f0cc78aa9c9b0c6e9a42531f7a3f089c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-report.json",
+      "bytes": 108323,
+      "sha256": "c032438bf6380ccd7e6b3f9120b8acf6cd785e999e5f0006ef73a48e697cdabd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-returned.png",
+      "bytes": 333730,
+      "sha256": "cab00b1b15887383695967cdb39ed7eaea32785b7905db994cbea575e25398b7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/lifts-source.json",
+      "bytes": 1787672,
+      "sha256": "1ad23e76da5a6b3ac5ff3ab9be1ee0b33f15c84e266a6f8fd3ab9566d3f3e3f2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/observer.png",
+      "bytes": 607532,
+      "sha256": "387c7dd8b1c6e9eacfbbabf1e59187cb164f0722bc96c4bb4cd62f29aa4f863d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/report.json",
+      "bytes": 305479,
+      "sha256": "5b54a0001747fce7dde102ad2a77c42b8fa899feb128530da6a71c057a10b2f6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/returned-observer.png",
+      "bytes": 591281,
+      "sha256": "cf4de9e90aa026ccc79987ae5a15f6c5e9a4ab67b2deb0d1a93306a8a69aed5b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r3/walk-KeyW.png",
+      "bytes": 324805,
+      "sha256": "6be416001793e99c1b31b51572dce56b831fa162341bee25078399873a25e297"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r3/office-entry-diagnostics.json",
+      "bytes": 15646,
+      "sha256": "7ce9d62b77b912f98546dececcdff47612676fad0d8840613ff261f0b4922af9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r3/office-entry.json",
+      "bytes": 15817,
+      "sha256": "c02ab94879085a5b442a4004dae643208b9a1ca24e907368ce66a5327c64afc5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r3/office-entry.png",
+      "bytes": 666211,
+      "sha256": "7cc166cf2f67f5ed0dcb80b45882040c8457217ed2e9afacc6d4e65cd27591c5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-native-20261017-r3.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/canonical-controller-source.json",
+      "bytes": 894903,
+      "sha256": "446df341e9dba484c9c6d4f67781bd9c6bc752bc520c9c94652b48d63db7709f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/entered.png",
+      "bytes": 336860,
+      "sha256": "ef7bdae012131c2fd3fad9de1916bf05ab4456700102ca67281dae6437fb23d8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-arrived.png",
+      "bytes": 265106,
+      "sha256": "3bd173c23f98362edec65e57e7248ce919d19f5942b10b2789273b5740110b8e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-at-door.png",
+      "bytes": 226524,
+      "sha256": "0e290810366043452834054cfabe099518a7a54f13f93f2bb66c1ee52a69df8f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-call-panel.png",
+      "bytes": 118480,
+      "sha256": "1bb3cb0269895aa9a81cb2634191235eccfe8ac364d048583fd9e423552d9e60"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-candidates.json",
+      "bytes": 27104,
+      "sha256": "d050bdbf6c8ebd028e39b5f89b97e63a196b4526d95e003c7ecd3e4cbc92230b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-controlled.png",
+      "bytes": 136139,
+      "sha256": "e2bdd380c8c3c1fc8dbbe6d6e2ff37ce978c9a07904ba92c2d07d2f9707597a2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-directory.png",
+      "bytes": 161718,
+      "sha256": "828b0e307063c27dcfe790517368cd50bff47b6768253ef170cecf29c45aac6c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-exited.png",
+      "bytes": 227417,
+      "sha256": "400dba3a40b038ca6f7ab70583858c896fc0f08035e4ec0b5b84908523e96393"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-first-person-before-return.png",
+      "bytes": 170983,
+      "sha256": "e6002d6a1003136583b74f1019fb0ee5ff355c9fc97b05daedfa7bdbd005535c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-first-person.png",
+      "bytes": 248714,
+      "sha256": "44c3097d245fcf31f8b862a4c5dc0d2a81ba2bf41fa717c18a18188249be02f5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-floor-panel.png",
+      "bytes": 108222,
+      "sha256": "9827b34e32aeec7ada4c6a795027b631ab544192ecdff860d10f20e121a73ec0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-hall-source.json",
+      "bytes": 951793,
+      "sha256": "afdc34e73cf3136d65068c5683e9e710419611a0903babf1f179677475624d75"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-in-cabin.png",
+      "bytes": 236002,
+      "sha256": "726623c7931562beb1c17f931370b01c43fcd15e2ce28f8c1cfb63d0ac87704a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-moving.png",
+      "bytes": 239840,
+      "sha256": "ffd6732b9bbcdce7fa1e59176909e7f663b88111b898e64a641cdbb10bd49727"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-report.json",
+      "bytes": 101466,
+      "sha256": "c4a81bc9825d9c74bc9a686bac6464d0fdb3407b9c2a396ebf78b0fee0717398"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-returned.png",
+      "bytes": 339910,
+      "sha256": "08c4971eb435da56e032ddd7a2913ff949e94769a1fac0057e00ec744165ebc6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/lifts-source.json",
+      "bytes": 1780970,
+      "sha256": "0633664a1a9f0ecc756f85ddc9739be8e6289b27562ddb129f83edad7cfa2189"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/observer.png",
+      "bytes": 606184,
+      "sha256": "752d39580fb0764d97ff386a799b88e8b645eed88b513fb6e268c32d8d505cd1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/report.json",
+      "bytes": 297923,
+      "sha256": "4d1d4d88b6cd659b8a856bbeac1c582ccf738bdb9762202469cdb87b8dd332c4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/returned-observer.png",
+      "bytes": 600521,
+      "sha256": "64a91a1d6c5e77ffdbd4e2b5ec58525e854c8248e991c8442076c4f068788c8c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-subject-camera-native-20261017-r4/walk-KeyW.png",
+      "bytes": 335915,
+      "sha256": "870f24b66eabe61178563d980275e9f7085fbec1b9059c8bc4270a2e30072bcb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r4/office-entry-diagnostics.json",
+      "bytes": 15717,
+      "sha256": "f3a6cc41b7bf2e06af270b8b2b2f4e98b57bdcca2ea25609875939ab666db77b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r4/office-entry.json",
+      "bytes": 15888,
+      "sha256": "bb00f09c5606b2a753a7662b974a7564ba7e542b2286870805047c3fc604e361"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-subject-camera-native-20261017-r4/office-entry.png",
+      "bytes": 670475,
+      "sha256": "080244d8a2f74bcf1410ae7a359622a1b69ea5e868b1feb71e30d0232c7feff6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-native-20261017-r4.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-subject-camera.json",
+      "bytes": 3659,
+      "sha256": "f175cacd9412faa61169365f63a2e3755568f309e7e38c9d0750cea773cfad98"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/performance-live-fps-live-20261017-subject-camera.json",
+      "bytes": 227527,
+      "sha256": "2f76b678fff70f7071c4d6a071f1da547b5ae277efd5ff3ca4a34c86065acfbb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/fps-live-20261017-subject-camera.log",
+      "bytes": 70861,
+      "sha256": "6c881feabef0b58eeb159adfff62951bf1dca42d7442bb4d2497297741f1e69c"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/subject-camera.ts",
+      "bytes": 1770,
+      "sha256": "9089ae50f74f866936ea2f30cd0402a4ac0b07974f3b3e2441c6dc8b105a7aae"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/src/render/subject-camera.ts",
+      "bytes": 1770,
+      "sha256": "9089ae50f74f866936ea2f30cd0402a4ac0b07974f3b3e2441c6dc8b105a7aae"
+    },
+    {
+      "repo": "engine",
+      "path": "src/render/mesh-ray.ts",
+      "bytes": 8798,
+      "sha256": "72f4c930ea460f5fc964c1d4cd9070624c6c8d0eb180348885347d6ad97123da"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/src/render/mesh-ray.ts",
+      "bytes": 8798,
+      "sha256": "72f4c930ea460f5fc964c1d4cd9070624c6c8d0eb180348885347d6ad97123da"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-actors.ts",
+      "bytes": 972,
+      "sha256": "12592aaa2ed77ccaa05d95ec0aa1245b473236f5df631aa3fe00d0ffa0b2f6e0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/client/canonical-actors.ts",
+      "bytes": 972,
+      "sha256": "12592aaa2ed77ccaa05d95ec0aa1245b473236f5df631aa3fe00d0ffa0b2f6e0"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 33361,
+      "sha256": "366130022888f08b0af520cf2da5b2dae45880a643d633aa8fb28682ad6d5826"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 33361,
+      "sha256": "366130022888f08b0af520cf2da5b2dae45880a643d633aa8fb28682ad6d5826"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "4cf40dc0ccfa3a8c2f7de52763fa512c828cd744fcb99ae131396ded4ff9c45b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "4cf40dc0ccfa3a8c2f7de52763fa512c828cd744fcb99ae131396ded4ff9c45b"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/subject-camera.test.ts",
+      "bytes": 3036,
+      "sha256": "5dbbaf563616f66e78a6ac7f3355288da495464965581af3b04158c4f8f04910"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/test/subject-camera.test.ts",
+      "bytes": 3036,
+      "sha256": "5dbbaf563616f66e78a6ac7f3355288da495464965581af3b04158c4f8f04910"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 33478,
+      "sha256": "b05e123160f64bedd9334320549512ce0e62ceca7b7ea89c89af10ca08d71298"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 33478,
+      "sha256": "b05e123160f64bedd9334320549512ce0e62ceca7b7ea89c89af10ca08d71298"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 185719,
+      "sha256": "57c399632dd9273851ee78d34cb89b92b8d8846cbfe73fcd7bb93211dc6da987"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 185719,
+      "sha256": "57c399632dd9273851ee78d34cb89b92b8d8846cbfe73fcd7bb93211dc6da987"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/presentation.ts",
+      "bytes": 24775,
+      "sha256": "f54ff07909cb0fadea0c5d6696b62f98501fb8b3babf7569189bd73688c4ff96"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/src/game/presentation.ts",
+      "bytes": 24775,
+      "sha256": "f54ff07909cb0fadea0c5d6696b62f98501fb8b3babf7569189bd73688c4ff96"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/primitive-instances.ts",
+      "bytes": 5593,
+      "sha256": "ffe45b946f45d39422f478483d58591fd313422a5b8404672bc13347aa5249f9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/src/game/primitive-instances.ts",
+      "bytes": 5593,
+      "sha256": "ffe45b946f45d39422f478483d58591fd313422a5b8404672bc13347aa5249f9"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-dynamic-assets.ts",
+      "bytes": 4281,
+      "sha256": "8abf1090cf990b8258519ba58633643c399d6b3fa1a563123f821846775e3d8f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/src/game/office-dynamic-assets.ts",
+      "bytes": 4281,
+      "sha256": "8abf1090cf990b8258519ba58633643c399d6b3fa1a563123f821846775e3d8f"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-projection.ts",
+      "bytes": 16099,
+      "sha256": "d5f17991df06e7ab84ec16e8ed8fd1a06f319ae9a99168c229c8c93e0a97eb10"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/src/game/render/the-engine-projection.ts",
+      "bytes": 16099,
+      "sha256": "d5f17991df06e7ab84ec16e8ed8fd1a06f319ae9a99168c229c8c93e0a97eb10"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/transport/pose.ts",
+      "bytes": 16521,
+      "sha256": "1623e838e8ce3d7f7c147b881c3ad843583da4f9fe4ecdf1a9035d259d3bd828"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/src/game/transport/pose.ts",
+      "bytes": 16521,
+      "sha256": "1623e838e8ce3d7f7c147b881c3ad843583da4f9fe4ecdf1a9035d259d3bd828"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/camera.ts",
+      "bytes": 2171,
+      "sha256": "9ce544ce39349c22d7bce255539d7a85a78dc7d7e2255cd6e3d63942fa2bfaff"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/src/game/camera.ts",
+      "bytes": 2171,
+      "sha256": "9ce544ce39349c22d7bce255539d7a85a78dc7d7e2255cd6e3d63942fa2bfaff"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "bytes": 842,
+      "sha256": "c8d02b62b38dc1c6664c9e24b246b893d9616d6bce79ce1db71ab2ed2d13e85e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/src/game/office-controller.ts",
+      "bytes": 842,
+      "sha256": "c8d02b62b38dc1c6664c9e24b246b893d9616d6bce79ce1db71ab2ed2d13e85e"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-dynamic-assets.test.ts",
+      "bytes": 11080,
+      "sha256": "156ba01a126b627bd7b618a787a017c705bced37c06ff6816b796af517ab82c1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/test/office-dynamic-assets.test.ts",
+      "bytes": 11080,
+      "sha256": "156ba01a126b627bd7b618a787a017c705bced37c06ff6816b796af517ab82c1"
+    },
+    {
+      "repo": "game",
+      "path": "test/the-engine-renderer.test.ts",
+      "bytes": 24934,
+      "sha256": "9fa2c6962bde99863160cd359b5648a0fae8d62a1e2b060762449432d68c5df0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/test/the-engine-renderer.test.ts",
+      "bytes": 24934,
+      "sha256": "9fa2c6962bde99863160cd359b5648a0fae8d62a1e2b060762449432d68c5df0"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 33879,
+      "sha256": "3b3e57cfa3d804c5391f73c4bd86a18d1f7a7a13b47241720cbe073543953f7b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/capture.ts",
+      "bytes": 33879,
+      "sha256": "3b3e57cfa3d804c5391f73c4bd86a18d1f7a7a13b47241720cbe073543953f7b"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 7423,
+      "sha256": "ffa958d5bbd72d197c0442270e20d32136acb032cb40b0b68788bbf5b1d03567"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office.ts",
+      "bytes": 7423,
+      "sha256": "ffa958d5bbd72d197c0442270e20d32136acb032cb40b0b68788bbf5b1d03567"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 14904,
+      "sha256": "5c4b816d81887e81719c2e7bb53cf1a70cebb2bb6b6f8c09fab023dcd1144fea"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-walking.ts",
+      "bytes": 14904,
+      "sha256": "5c4b816d81887e81719c2e7bb53cf1a70cebb2bb6b6f8c09fab023dcd1144fea"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lifts.ts",
+      "bytes": 16490,
+      "sha256": "890730f416a3c6532643676a29f5d2b89ff445f93fef1b1d6414702f1e399abe"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-lifts.ts",
+      "bytes": 16490,
+      "sha256": "890730f416a3c6532643676a29f5d2b89ff445f93fef1b1d6414702f1e399abe"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-route.ts",
+      "bytes": 3255,
+      "sha256": "66899fbcd43271fac9154534fffef80507ff1983d71aff72b840d40cceddc3e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-lift-route.ts",
+      "bytes": 3255,
+      "sha256": "66899fbcd43271fac9154534fffef80507ff1983d71aff72b840d40cceddc3e6"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 16176,
+      "sha256": "b286bcd36a4828805bff8155eb425072e165613892830873ac68b113a5e27d18"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-residents.ts",
+      "bytes": 16176,
+      "sha256": "b286bcd36a4828805bff8155eb425072e165613892830873ac68b113a5e27d18"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-recovery.ts",
+      "bytes": 12043,
+      "sha256": "ea0ec5b5f8f37a133a1bdc1fba3b6cb98ddd59c645fe7153694f796bd037d2bc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-lift-recovery.ts",
+      "bytes": 12043,
+      "sha256": "ea0ec5b5f8f37a133a1bdc1fba3b6cb98ddd59c645fe7153694f796bd037d2bc"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "e5f0a5658ca374e5ed20c70b1c36766d5954602cba2da94fb3a9f1d49809402a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "e5f0a5658ca374e5ed20c70b1c36766d5954602cba2da94fb3a9f1d49809402a"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "911ab2b1c9b52ec3b0cec95a639baca3b13dd45ce05888cefd6453b0ecbd3e0d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "911ab2b1c9b52ec3b0cec95a639baca3b13dd45ce05888cefd6453b0ecbd3e0d"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 775149,
+      "sha256": "e671ec2abb8024849f0beafffbf371538aa44281e6b5dc37e1e0ec2456dda6c0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/game/docs/VERIFICATION.md",
+      "bytes": 775149,
+      "sha256": "e671ec2abb8024849f0beafffbf371538aa44281e6b5dc37e1e0ec2456dda6c0"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 64387,
+      "sha256": "0f65092b33902d8f880e21e6c1422a5bab447a94335a470f0d7b1af6a1575c1f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/office/ui/src/office/scene.ts",
+      "bytes": 64387,
+      "sha256": "0f65092b33902d8f880e21e6c1422a5bab447a94335a470f0d7b1af6a1575c1f"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 8138,
+      "sha256": "2058e0b650f0c7240bace6adbd89d3008e8e4e8d0b3f6de33e12103549e03002"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/office/ui/src/office/GamePanel.tsx",
+      "bytes": 8138,
+      "sha256": "2058e0b650f0c7240bace6adbd89d3008e8e4e8d0b3f6de33e12103549e03002"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 124810,
+      "sha256": "18922e60959c12c9b2d7a8a36f20f71212730b6815ca89c1fc402df541eb3ee9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-sources/office/VERIFICATION.md",
+      "bytes": 124810,
+      "sha256": "18922e60959c12c9b2d7a8a36f20f71212730b6815ca89c1fc402df541eb3ee9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-bundles/game.js",
+      "bytes": 2492369,
+      "sha256": "dcccdd96f7db9b37108f3ae0ba9acb6953b3705168f346949fe911740beb4bb1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-bundles/office-controller.js",
+      "bytes": 1359394,
+      "sha256": "139267457cf1525c45d11090fa685e2d621a6913ad1d87299a56dbfb5492dbee"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-bundles/index-DWaNeKY0.js",
+      "bytes": 1790779,
+      "sha256": "b824117d618c8085b6445ffc6710c481e670c42490bf4d1450d23c1432ccdc3b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/served-modules/scene.js",
+      "bytes": 215481,
+      "sha256": "f095a47bfca1d528476470726e3e1f177d706dc2f62c87936fdff2f5a3d76a1e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/served-modules/canonical-world-view.js",
+      "bytes": 121386,
+      "sha256": "bdbd4a5ba8dc138e8262e474ef11fc2904b75eb594cd47ec7ef1b5efdd84f7ae"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/served-modules/subject-camera.js",
+      "bytes": 5156,
+      "sha256": "3df67c585578abc06a55d66b34515a068e259bff3179c6b6b87aeabeb01dea90"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-app-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-app-typecheck-r2-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-tests-r1-20261017.log",
+      "bytes": 10642,
+      "sha256": "3c2e5f04b9d3cddcccb7716ec3bd7992c93b52bc89403e11e688859dc058ec45"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-tests-r2-20261017.log",
+      "bytes": 6809,
+      "sha256": "528a282eec2ca586ab606d3f577cd1375b0b45fb2ae086df72bafe0277947200"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-tests-r3-20261017.log",
+      "bytes": 20044,
+      "sha256": "3a3f0ce0579cab39edb4900b174075ba98d0867a717d0102ec603f9b9a62670e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-ui-build-r1-20261017.log",
+      "bytes": 890,
+      "sha256": "541acb761ccfef6b30bda9b57f49cbfe18d56fbe9aef00b3a0169cdeb72fe435"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-ui-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera-ui-typecheck-r2-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-build-r1-20261017.log",
+      "bytes": 585,
+      "sha256": "bd5b74b63435748aa54f65ee3812f728a194c74e95bdb8c08d2f07116c6f4073"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-subject-camera-typecheck-r4-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/documentation.ts",
+      "bytes": 12491,
+      "sha256": "a8a531d7ed6e70d6e28ec554c0452981798e7abc7a1141f0f324b2b3467f71f8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/evidence.ts",
+      "bytes": 11207,
+      "sha256": "917c2838830ef2b57277b31a1865f571f579febf681ecc77e7ffdeb5ef4e358a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/fps-game.js",
+      "bytes": 2492369,
+      "sha256": "dcccdd96f7db9b37108f3ae0ba9acb6953b3705168f346949fe911740beb4bb1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/fps-operation.json",
+      "bytes": 684,
+      "sha256": "36a15a0df5eb5dc10e6ba508c94b394f2f15855bf5f2736054751902bd8eaa70"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/fps-result.ts",
+      "bytes": 3953,
+      "sha256": "3a8aea5e0a3e3ed4a693db54995446af8373260b9791dfff48027e2ff385d961"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/live-3247.json",
+      "bytes": 8342,
+      "sha256": "2d121f8de686cdad4eef0eedfa1021c906c256b37edcc760f233bcedb2636243"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/observe-live.ts",
+      "bytes": 1381,
+      "sha256": "63e898e3540e2691228610575b511668a3fe627f5c2b96f5063025c5ff3599f7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/qa-office-lifts-before-bounded-pulses.ts",
+      "bytes": 16560,
+      "sha256": "3a715ebb964fe5d50c9e17519ed93c8b70813f2f0c70cbceb0e8351561fe2b27"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/qa-office-lifts-before-camera-mode-wait.ts",
+      "bytes": 16452,
+      "sha256": "2e1e484df565d4945e5951e28bcb8d81df5c750b0e38dcfc5c5e8bc78feb6f77"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/run-fps.ps1",
+      "bytes": 1884,
+      "sha256": "1c7bc308b58ff76abc6ed86a904438011e7e0e827c83ed8e6134fc05ebe35696"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/run-native.ps1",
+      "bytes": 1581,
+      "sha256": "b2457d05d6cea75d68335d93e772b48a37f327d006e9fdd578519c490895719f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-subject-camera/verify-evidence.ts",
+      "bytes": 1161,
+      "sha256": "81c3269bdc5936e67ca4b5e41ee91b2351bb323fc1f5a15a81c60f5ae4cfc22c"
+    }
+  ]
+}

@@ -51,4 +51,8 @@ export interface MechanismEvent {
   readonly size:number;
 }
 
-export type EngineEvent=ImpactEvent|FractureEvent|MechanismEvent;
+export interface HornEvent {
+  readonly type:'horn';readonly id:number;readonly time:number;readonly point:Vec3;
+  readonly entity:string;readonly durationSeconds:number;readonly frequencyHz:number;
+}
+export type EngineEvent=ImpactEvent|FractureEvent|MechanismEvent|HornEvent;

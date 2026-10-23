@@ -1,0 +1,1747 @@
+{
+  "version": 1,
+  "status": "completed",
+  "experiment": "sun-shadow",
+  "gates": {
+    "historyRecordsResident": true,
+    "canonicalPixels": false,
+    "wetPixels": true,
+    "frameBudget": false,
+    "equalPixelQualityEstablished": false,
+    "competitiveAdvantageEstablished": false,
+    "performanceIsolationEstablished": false
+  },
+  "controls": {
+    "width": 1920,
+    "height": 1080,
+    "frames": 240,
+    "warmup": 48,
+    "repetitions": 3,
+    "counts": [
+      5000,
+      10000
+    ],
+    "scenarios": [
+      "static",
+      "camera-motion"
+    ],
+    "backends": [
+      "engine",
+      "three",
+      "babylon"
+    ],
+    "quality": true,
+    "profile": "native"
+  },
+  "browser": "Chrome/154.0.8037.98",
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "beforeRun": "2026-10-11T23-36-31.147Z",
+  "afterRun": "2026-10-11T23-42-21.436Z",
+  "beforeSourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "3b35d9dee05139a87d221e60f8658db5e63866f4938639536cac51be99784a54",
+    "distSha256": "a0b2176ae358d81e01c899ddcd22dcfe129ce5b69ff92fb04deb61abe2b6b24a",
+    "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+  },
+  "afterSourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "6ba815ba1ec361cf299a41230fcff13ef4ad351dfe9d7e736cec39649c41fb1d",
+    "distSha256": "bae7acec705f351f6f68faa85b5e6bd07e1126cfe5c282f5d3c02c817a9c254f",
+    "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+  },
+  "histories": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 0,
+      "entries": 5009,
+      "frame": 288,
+      "allocations": 5009,
+      "commits": 1447879,
+      "modelChanges": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 1,
+      "entries": 5009,
+      "frame": 288,
+      "allocations": 5009,
+      "commits": 1447879,
+      "modelChanges": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 2,
+      "entries": 5009,
+      "frame": 288,
+      "allocations": 5009,
+      "commits": 1447879,
+      "modelChanges": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "entries": 5009,
+      "frame": 288,
+      "allocations": 5009,
+      "commits": 1447879,
+      "modelChanges": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "entries": 5009,
+      "frame": 288,
+      "allocations": 5009,
+      "commits": 1447879,
+      "modelChanges": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "entries": 5009,
+      "frame": 288,
+      "allocations": 5009,
+      "commits": 1447879,
+      "modelChanges": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 0,
+      "entries": 10009,
+      "frame": 288,
+      "allocations": 10009,
+      "commits": 2892879,
+      "modelChanges": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 1,
+      "entries": 10009,
+      "frame": 288,
+      "allocations": 10009,
+      "commits": 2892879,
+      "modelChanges": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 2,
+      "entries": 10009,
+      "frame": 288,
+      "allocations": 10009,
+      "commits": 2892879,
+      "modelChanges": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "entries": 10009,
+      "frame": 288,
+      "allocations": 10009,
+      "commits": 2892879,
+      "modelChanges": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "entries": 10009,
+      "frame": 288,
+      "allocations": 10009,
+      "commits": 2892879,
+      "modelChanges": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "entries": 10009,
+      "frame": 288,
+      "allocations": 10009,
+      "commits": 2892879,
+      "modelChanges": 0
+    }
+  ],
+  "images": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 1
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 1
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 1
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 1
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 1,
+      "maxError": 1,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 1
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 1
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 18,
+      "maxError": 1,
+      "outsideBaselineRange": 18,
+      "coordinates": [
+        {
+          "x": 1448,
+          "y": 383,
+          "channel": 1,
+          "before": 110,
+          "after": 111,
+          "minimum": 110,
+          "maximum": 110
+        },
+        {
+          "x": 1449,
+          "y": 383,
+          "channel": 1,
+          "before": 106,
+          "after": 107,
+          "minimum": 106,
+          "maximum": 106
+        },
+        {
+          "x": 1447,
+          "y": 384,
+          "channel": 0,
+          "before": 102,
+          "after": 101,
+          "minimum": 102,
+          "maximum": 102
+        },
+        {
+          "x": 1447,
+          "y": 384,
+          "channel": 1,
+          "before": 99,
+          "after": 100,
+          "minimum": 99,
+          "maximum": 99
+        },
+        {
+          "x": 1447,
+          "y": 384,
+          "channel": 2,
+          "before": 112,
+          "after": 113,
+          "minimum": 112,
+          "maximum": 112
+        },
+        {
+          "x": 1448,
+          "y": 384,
+          "channel": 2,
+          "before": 111,
+          "after": 112,
+          "minimum": 111,
+          "maximum": 111
+        },
+        {
+          "x": 1447,
+          "y": 385,
+          "channel": 2,
+          "before": 114,
+          "after": 115,
+          "minimum": 114,
+          "maximum": 114
+        },
+        {
+          "x": 1448,
+          "y": 385,
+          "channel": 0,
+          "before": 98,
+          "after": 97,
+          "minimum": 98,
+          "maximum": 98
+        },
+        {
+          "x": 1448,
+          "y": 385,
+          "channel": 1,
+          "before": 98,
+          "after": 99,
+          "minimum": 98,
+          "maximum": 98
+        },
+        {
+          "x": 1449,
+          "y": 385,
+          "channel": 0,
+          "before": 91,
+          "after": 90,
+          "minimum": 91,
+          "maximum": 91
+        },
+        {
+          "x": 1449,
+          "y": 385,
+          "channel": 1,
+          "before": 99,
+          "after": 100,
+          "minimum": 99,
+          "maximum": 99
+        },
+        {
+          "x": 1448,
+          "y": 386,
+          "channel": 0,
+          "before": 95,
+          "after": 94,
+          "minimum": 95,
+          "maximum": 95
+        }
+      ],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0
+    }
+  ],
+  "quality": [
+    {
+      "name": "wet-front",
+      "presentationChannels": 8294400,
+      "reflectionChannels": 3240000,
+      "changedPresentationChannels": 0,
+      "changedReflectionChannels": 0,
+      "maxPresentationError": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "name": "wet-back",
+      "presentationChannels": 8294400,
+      "reflectionChannels": 3240000,
+      "changedPresentationChannels": 0,
+      "changedReflectionChannels": 0,
+      "maxPresentationError": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "name": "wet-low",
+      "presentationChannels": 8294400,
+      "reflectionChannels": 3240000,
+      "changedPresentationChannels": 0,
+      "changedReflectionChannels": 0,
+      "maxPresentationError": 0,
+      "maxReflectionError": 0
+    }
+  ],
+  "rows": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "backend": "engine",
+      "before": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.700000047683716,
+          "p95": 5.300000011920929,
+          "mean": 3.802222221261925
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.66528,
+          "p95": 8.180239999999998,
+          "mean": 7.739751055555549
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.865550906555091
+        },
+        "fps": 101.36281384302194,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.42590392123587,
+          101.20686004658059,
+          101.4560427898289
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/5000-static-engine-r0.png",
+          "images/2026-10-11T23-36-31.147Z/5000-static-engine-r1.png",
+          "images/2026-10-11T23-36-31.147Z/5000-static-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.5,
+          "p95": 5.300000011920929,
+          "mean": 3.603888888160388
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.5938799999999995,
+          "p95": 8.093679999999999,
+          "mean": 7.659993777777784
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.854114365411453
+        },
+        "fps": 101.48045404364916,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.32700216220796,
+          101.48619957537153,
+          101.62860909129566
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/5000-static-engine-r0.png",
+          "images/2026-10-11T23-42-21.436Z/5000-static-engine-r1.png",
+          "images/2026-10-11T23-42-21.436Z/5000-static-engine-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "backend": "three",
+      "before": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.100000023841858,
+          "mean": 0.7297222211129135
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.40296,
+          "p95": 5.43824,
+          "mean": 5.405560777777777
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.810181311018148
+        },
+        "fps": 101.9349151964058,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 576,
+          "p95": 576,
+          "mean": 576
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          101.80609984665189,
+          101.97986004437615,
+          102.01903786229565
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/5000-static-three-r0.png",
+          "images/2026-10-11T23-36-31.147Z/5000-static-three-r1.png",
+          "images/2026-10-11T23-36-31.147Z/5000-static-three-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.300000011920929,
+          "mean": 0.7604166669978036
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.40852,
+          "p95": 5.453479999999999,
+          "mean": 5.41210077777778
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.798186889818705
+        },
+        "fps": 102.05969851821257,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 576,
+          "p95": 576,
+          "mean": 576
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          102.05388786882445,
+          102.80454232622161,
+          101.33129822776225
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/5000-static-three-r0.png",
+          "images/2026-10-11T23-42-21.436Z/5000-static-three-r1.png",
+          "images/2026-10-11T23-42-21.436Z/5000-static-three-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "backend": "babylon",
+      "before": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.7000000476837158,
+          "p95": 1.300000011920929,
+          "mean": 0.8116666663852002
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 4.42548,
+          "p95": 4.44332,
+          "mean": 4.427666333333335
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.972245467224546
+        },
+        "fps": 100.27831778576524,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 816,
+          "p95": 816,
+          "mean": 816
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          95.98779067432429,
+          102.50911430409607,
+          102.63236999184095
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/5000-static-babylon-r0.png",
+          "images/2026-10-11T23-36-31.147Z/5000-static-babylon-r1.png",
+          "images/2026-10-11T23-36-31.147Z/5000-static-babylon-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.399999976158142,
+          "mean": 0.7647222220897675
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 4.428,
+          "p95": 4.4482,
+          "mean": 4.432398777777776
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 10.014365411436545
+        },
+        "fps": 99.85655195465367,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 816,
+          "p95": 816,
+          "mean": 816
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          95.1925757756801,
+          102.68087300223404,
+          102.04953031596925
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/5000-static-babylon-r0.png",
+          "images/2026-10-11T23-42-21.436Z/5000-static-babylon-r1.png",
+          "images/2026-10-11T23-42-21.436Z/5000-static-babylon-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "backend": "engine",
+      "before": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.800000011920929,
+          "p95": 5,
+          "mean": 3.8556944443119896
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.2953600000000005,
+          "p95": 7.593799999999999,
+          "mean": 7.333187055555557
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.881032078103225
+        },
+        "fps": 101.20400299236366,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.66319281977117,
+          101.03145079472439,
+          100.92053036061144
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-engine-r0.png",
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-engine-r1.png",
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.900000035762787,
+          "p95": 6,
+          "mean": 4.0305555556383394
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.2790799999999996,
+          "p95": 7.63916,
+          "mean": 7.317667722222232
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000136,
+          "mean": 9.879637377963762
+        },
+        "fps": 101.21828987675907,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.26260486399458,
+          100.91200810673872,
+          101.48189036558958
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-engine-r0.png",
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-engine-r1.png",
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-engine-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "backend": "three",
+      "before": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.7000000476837158,
+          "p95": 1.100000023841858,
+          "mean": 0.7922222245898511
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.1802,
+          "p95": 5.301279999999999,
+          "mean": 5.1883047222222185
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000136,
+          "mean": 9.817294281729438
+        },
+        "fps": 101.86105980963194,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1168,
+          "p95": 1168,
+          "mean": 1168
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          101.62428777957308,
+          101.55951217439339,
+          102.4037019580959
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-three-r0.png",
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-three-r1.png",
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-three-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.6000000238418579,
+          "p95": 1,
+          "mean": 0.6818055553568734
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.1916400000000005,
+          "p95": 5.3186800000000005,
+          "mean": 5.196651999999999
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000136,
+          "mean": 9.767642956764325
+        },
+        "fps": 102.37884456121282,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1168,
+          "p95": 1168,
+          "mean": 1168
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          102.22849565849693,
+          102.14984827114588,
+          102.76034052799037
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-three-r0.png",
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-three-r1.png",
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-three-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "backend": "babylon",
+      "before": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.100000023841858,
+          "mean": 0.7629166666832236
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 4.2338000000000005,
+          "p95": 4.3496,
+          "mean": 4.242553833333337
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 9.900000000000091,
+          "p95": 10.100000000000364,
+          "mean": 9.829707112970711
+        },
+        "fps": 101.73243093687482,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1184,
+          "p95": 1184,
+          "mean": 1184
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          103.13282126521102,
+          98.89927998013736,
+          103.28881974156187
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-babylon-r0.png",
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-babylon-r1.png",
+          "images/2026-10-11T23-36-31.147Z/5000-camera-motion-babylon-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.199999988079071,
+          "mean": 0.7619444453881846
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 4.23372,
+          "p95": 4.35064,
+          "mean": 4.244391277777777
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 9.899999999999636,
+          "p95": 10.100000000000364,
+          "mean": 9.828312412831243
+        },
+        "fps": 101.74686741687832,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1184,
+          "p95": 1184,
+          "mean": 1184
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          102.9595485288416,
+          99.19482028720842,
+          103.18625334599776
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-babylon-r0.png",
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-babylon-r1.png",
+          "images/2026-10-11T23-42-21.436Z/5000-camera-motion-babylon-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "backend": "engine",
+      "before": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 5.399999976158142,
+          "p95": 7.900000035762787,
+          "mean": 5.721666665458017
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 10.036240000000001,
+          "p95": 10.3608,
+          "mean": 10.086669388888891
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20,
+          "mean": 11.903486750348671
+        },
+        "fps": 84.00899845339084,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          84.24985899605188,
+          84.47916298469478,
+          83.3071909094078
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/10000-static-engine-r0.png",
+          "images/2026-10-11T23-36-31.147Z/10000-static-engine-r1.png",
+          "images/2026-10-11T23-36-31.147Z/10000-static-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6.5,
+          "p95": 10.5,
+          "mean": 6.852499999850989
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 9.959,
+          "p95": 10.338039999999998,
+          "mean": 10.006354500000002
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 19.90000000000009,
+          "mean": 11.791771269177122
+        },
+        "fps": 84.8049014157806,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          84.89326181934429,
+          84.34500282326368,
+          85.18069712737899
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/10000-static-engine-r0.png",
+          "images/2026-10-11T23-42-21.436Z/10000-static-engine-r1.png",
+          "images/2026-10-11T23-42-21.436Z/10000-static-engine-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "backend": "three",
+      "before": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1,
+          "mean": 0.6918055564992958
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.6763200000000005,
+          "p95": 5.89732,
+          "mean": 5.671796944444442
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 10.148117154811716
+        },
+        "fps": 98.54044693658777,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 576,
+          "p95": 576,
+          "mean": 576
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          100.41594890970966,
+          94.42161820480405,
+          101.06135565985876
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/10000-static-three-r0.png",
+          "images/2026-10-11T23-36-31.147Z/10000-static-three-r1.png",
+          "images/2026-10-11T23-36-31.147Z/10000-static-three-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.0999999642372131,
+          "mean": 0.7059722229010529
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.65244,
+          "p95": 5.8508000000000004,
+          "mean": 5.656809611111113
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.825104602510471
+        },
+        "fps": 101.78008687505312,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 576,
+          "p95": 576,
+          "mean": 576
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          102.27661759671346,
+          101.34418861043972,
+          101.72377101510958
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/10000-static-three-r0.png",
+          "images/2026-10-11T23-42-21.436Z/10000-static-three-r1.png",
+          "images/2026-10-11T23-42-21.436Z/10000-static-three-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "backend": "babylon",
+      "before": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.6000000238418579,
+          "p95": 1,
+          "mean": 0.6913888878292508
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.66012,
+          "p95": 5.687,
+          "mean": 5.6642918333333325
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.825941422594143
+        },
+        "fps": 101.77141883835802,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 816,
+          "p95": 816,
+          "mean": 816
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          101.60700620695515,
+          102.04953031596925,
+          101.65886856656742
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/10000-static-babylon-r0.png",
+          "images/2026-10-11T23-36-31.147Z/10000-static-babylon-r1.png",
+          "images/2026-10-11T23-36-31.147Z/10000-static-babylon-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.199999988079071,
+          "mean": 0.7431944443119897
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.65676,
+          "p95": 5.678039999999999,
+          "mean": 5.6598034444444405
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.995118549511854
+        },
+        "fps": 100.0488383450778,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 816,
+          "p95": 816,
+          "mean": 816
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          101.59404888416579,
+          97.4039206096915,
+          101.25831462102275
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/10000-static-babylon-r0.png",
+          "images/2026-10-11T23-42-21.436Z/10000-static-babylon-r1.png",
+          "images/2026-10-11T23-42-21.436Z/10000-static-babylon-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "backend": "engine",
+      "before": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6.100000023841858,
+          "p95": 8.5,
+          "mean": 6.292499999950329
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 9.81464,
+          "p95": 10.273159999999997,
+          "mean": 9.866590111111119
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20,
+          "mean": 11.674895397489545
+        },
+        "fps": 85.65387234347557,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          84.03656821378341,
+          86.47201418285752,
+          86.50018096272164
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-engine-r0.png",
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-engine-r1.png",
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6.199999988079071,
+          "p95": 8.100000023841858,
+          "mean": 6.294166666186518
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 9.678879999999998,
+          "p95": 10.281160000000002,
+          "mean": 9.854160194444448
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20,
+          "mean": 12.303486750348696
+        },
+        "fps": 81.27777273963892,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          86.98817106460417,
+          81.0306831666384,
+          76.48979069320873
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-engine-r0.png",
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-engine-r1.png",
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-engine-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "backend": "three",
+      "before": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.7000000476837158,
+          "p95": 1.199999988079071,
+          "mean": 0.7841666666997804
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.633920000000001,
+          "p95": 5.85844,
+          "mean": 5.652945722222219
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.830683403068337
+        },
+        "fps": 101.7223278381523,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1168,
+          "p95": 1168,
+          "mean": 1168
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          102.1542143956232,
+          101.49481909291661,
+          101.52068643275852
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-three-r0.png",
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-three-r1.png",
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-three-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "three",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1,
+          "mean": 0.7236111123528746
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.711479999999999,
+          "p95": 5.97264,
+          "mean": 5.731061666666664
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.931241283124136
+        },
+        "fps": 100.69234766244884,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1168,
+          "p95": 1168,
+          "mean": 1168
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 8,
+          "p95": 8,
+          "mean": 8
+        },
+        "fpsByRepetition": [
+          99.61238694619264,
+          101.29693989997455,
+          101.18543607112618
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-three-r0.png",
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-three-r1.png",
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-three-r2.png"
+        ]
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "backend": "babylon",
+      "before": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.699999988079071,
+          "p95": 1.2000000476837158,
+          "mean": 0.7513888876471254
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.63404,
+          "p95": 5.66632,
+          "mean": 5.637554555555555
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.887587168758717
+        },
+        "fps": 101.13690862414309,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1184,
+          "p95": 1184,
+          "mean": 1184
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          101.12121853183838,
+          101.2111459303803,
+          101.07845210403892
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-babylon-r0.png",
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-babylon-r1.png",
+          "images/2026-10-11T23-36-31.147Z/10000-camera-motion-babylon-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "babylon",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 0.800000011920929,
+          "p95": 1.2999999523162842,
+          "mean": 0.8741666671302584
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 5.64536,
+          "p95": 5.67164,
+          "mean": 5.646470333333334
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.83458856345886
+        },
+        "fps": 101.68193550216974,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 1184,
+          "p95": 1184,
+          "mean": 1184
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 7,
+          "p95": 7,
+          "mean": 7
+        },
+        "fpsByRepetition": [
+          101.741092333234,
+          101.69347289592375,
+          101.61132604906255
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-babylon-r0.png",
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-babylon-r1.png",
+          "images/2026-10-11T23-42-21.436Z/10000-camera-motion-babylon-r2.png"
+        ]
+      }
+    }
+  ],
+  "reports": {
+    "before": "artifacts/engine-compare/sun-shadow-before",
+    "after": "artifacts/engine-compare/sun-shadow-after"
+  },
+  "provenance": "Baseline source and dist were built together before edits; compiled baseline stayed unchanged through all 36 cases and wet captures and is archived under the before report. Changed renderer passed full checks and was rebuilt before after capture. Measured harness fingerprints are identical. The only production change skips shadow sampling when the direct sunlight cosine is zero; lit-fragment PCF and all other shading, features, targets, geometry and physical state are retained.",
+  "interpretation": "Actual native three-way reports with identical scene inputs and physical hashes. Engine effects/shading differ from peers; no equal-quality competitive claim. Every Engine PNG channel uses only the observed before repeat range, without a tolerance; every wet RGBA8 and finite HDR reflection channel is compared exactly. Failed gates remain failed. CPU/GPU p95 from sequential local runs can vary with clock/load; exclusive GPU use was not established. Headless RAF is not display FPS.",
+  "decision": {
+    "promoted": false,
+    "reason": "Small paired opaque savings did not improve the full-frame gate; canonical pixel gate failed. Production src/dist restored exactly to the measured before state.",
+    "restoredSourceState": {
+      "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+      "dirty": true,
+      "srcSha256": "3b35d9dee05139a87d221e60f8658db5e63866f4938639536cac51be99784a54",
+      "distSha256": "a0b2176ae358d81e01c899ddcd22dcfe129ce5b69ff92fb04deb61abe2b6b24a",
+      "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+    },
+    "pairedReport": "artifacts/engine-compare/sun-shadow-paired-v3/report.json"
+  },
+  "paired": [
+    {
+      "scenario": "static",
+      "pairs": 128,
+      "deltaMs": {
+        "samples": 128,
+        "p50": -0.1578400000000002,
+        "p95": 0.2934399999999986,
+        "mean": -0.11334656250000003
+      },
+      "improvedPairs": 101
+    },
+    {
+      "scenario": "camera-motion",
+      "pairs": 128,
+      "deltaMs": {
+        "samples": 128,
+        "p50": -0.14296000000000042,
+        "p95": 0.19427999999999912,
+        "mean": -0.145945
+      },
+      "improvedPairs": 101
+    }
+  ],
+  "pairedCaveat": "CPU profiling and occlusion queries were enabled in paired runs. Use within-pair differences, not their absolute GPU times as normal renderer costs. Final-stage agreement does not erase full benchmark failures."
+}

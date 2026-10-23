@@ -1,0 +1,5478 @@
+{
+  "status": "completed",
+  "controls": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "pairs": 128,
+    "warmup": 128,
+    "settleFramesPerVariant": 2,
+    "scenarios": [
+      "static",
+      "camera-motion"
+    ]
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "sourceHash": "6f90dfdbbc9da4f6e8408da8b46b00908d861b7b7572633ccce5c9bf6c424377",
+  "geometryHash": "adcedf76d671deb9902774efd331b2c840335e361ed0ee796991e4d272ba0b07",
+  "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+  "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+  "preparation": {
+    "entries": 10009,
+    "lights": 4,
+    "builds": 1,
+    "modelUpdates": 10009,
+    "radiance": {
+      "fusedFrames": 1728,
+      "observations": 17281728,
+      "reusedPoses": 17271727,
+      "checkedPoses": 10001,
+      "fallbackFrames": 0
+    },
+    "batchPlanBuilds": 1,
+    "batchCauseEntries": 10009,
+    "modelHistory": {
+      "entries": 10009,
+      "frame": 32,
+      "allocations": 30027,
+      "commits": 17307279,
+      "modelChanges": 0
+    },
+    "visibilityPlan": {
+      "entries": 10009,
+      "sourceBuilds": 1,
+      "projection": {
+        "fusedFrames": 927,
+        "fallbackFrames": 801,
+        "observations": 9278343
+      },
+      "passes": {
+        "cameraOpaque": {
+          "staticCandidates": 1,
+          "movingCandidates": 8,
+          "sourceBuilds": 1,
+          "staticBuilds": 257,
+          "tests": 14081,
+          "lastTests": 8,
+          "revision": 257
+        },
+        "cameraTransparent": {
+          "staticCandidates": 0,
+          "movingCandidates": 0,
+          "sourceBuilds": 1,
+          "staticBuilds": 257,
+          "tests": 0,
+          "lastTests": 0,
+          "revision": 257
+        },
+        "reflection": {
+          "staticCandidates": 1,
+          "movingCandidates": 8,
+          "sourceBuilds": 1,
+          "staticBuilds": 257,
+          "tests": 14081,
+          "lastTests": 8,
+          "revision": 257
+        },
+        "staticShadow": {
+          "staticCandidates": 10001,
+          "movingCandidates": 0,
+          "sourceBuilds": 1,
+          "staticBuilds": 1,
+          "tests": 10001,
+          "lastTests": 0,
+          "revision": 1
+        },
+        "dynamicShadow": {
+          "staticCandidates": 0,
+          "movingCandidates": 8,
+          "sourceBuilds": 1,
+          "staticBuilds": 1,
+          "tests": 13824,
+          "lastTests": 8,
+          "revision": 1
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "scenario": "static",
+      "pairs": 128,
+      "modes": {
+        "scan": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.899999976158142,
+            "mean": 1.4148437506519258
+          },
+          "cullMs": {
+            "samples": 128,
+            "p50": 1,
+            "p95": 1.4000000357627869,
+            "mean": 0.9835937498137355
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 2.300000011920929,
+            "p95": 3.100000023841858,
+            "mean": 2.3984375004656613
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.099999964237213,
+            "p95": 5,
+            "mean": 4.058593745343387
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 12.210119999999998,
+            "p95": 13.82112,
+            "mean": 12.178541249999995
+          }
+        },
+        "fused": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 2.199999988079071,
+            "p95": 3,
+            "mean": 2.2523437524214387
+          },
+          "cullMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.020312500186264515
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 2.199999988079071,
+            "p95": 3,
+            "mean": 2.272656252607703
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 3.899999976158142,
+            "p95": 4.799999952316284,
+            "mean": 3.895312496460974
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 12.24136,
+            "p95": 13.486240000000002,
+            "mean": 12.194711562499998
+          }
+        }
+      },
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": -0.10000002384185791,
+        "p95": 0.7000000476837158,
+        "mean": -0.12578124785795808
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": -0.19999998807907104,
+        "p95": 0.9000000357627869,
+        "mean": -0.1632812488824129
+      },
+      "improvedPairs": 72,
+      "byFirst": {
+        "scan": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.699999988079071,
+          "mean": -0.16718750074505806
+        },
+        "fused": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.7999999523162842,
+          "mean": -0.0843749949708581
+        }
+      },
+      "rawPairs": [
+        {
+          "pair": 0,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.73928
+          },
+          "fused": {
+            "projectionMs": 2.799999952316284,
+            "cullMs": 0,
+            "combinedMs": 2.799999952316284,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 14.138840000000002
+          },
+          "combinedDeltaMs": 0.7999999523162842,
+          "totalDeltaMs": 0.7999999523162842
+        },
+        {
+          "pair": 1,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.6999999284744263,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 13.716520000000001
+          },
+          "fused": {
+            "projectionMs": 2.299999952316284,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 13.910079999999999
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 2,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1.5,
+            "combinedMs": 2.899999976158142,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 13.82112
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 13.486240000000002
+          },
+          "combinedDeltaMs": -0.5999999642372131,
+          "totalDeltaMs": -0.7999999523162842
+        },
+        {
+          "pair": 3,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.4999999403953552,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 13.394999999999998
+          },
+          "fused": {
+            "projectionMs": 2.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 13.3534
+          },
+          "combinedDeltaMs": 0.10000008344650269,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 4,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 13.059680000000002
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.906200000000002
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 5,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.3000000715255737,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.99492
+          },
+          "fused": {
+            "projectionMs": 2.800000011920929,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 13.36548
+          },
+          "combinedDeltaMs": 0.5999999642372131,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 6,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.4000000357627869,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 13.08404
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.84108
+          },
+          "combinedDeltaMs": -0.800000011920929,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 7,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2000000476837158,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.1000000834465027,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.900120000000003
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.948640000000001
+          },
+          "combinedDeltaMs": 0.09999990463256836,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 8,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.517640000000002
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.816360000000001
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 9,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.45364
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.4686
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 10,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.288920000000001
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.362359999999999
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 11,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.64716
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.35748
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.20000004768371582
+        },
+        {
+          "pair": 12,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.753279999999998
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.410760000000002
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 13,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.390400000000001
+          },
+          "fused": {
+            "projectionMs": 3,
+            "cullMs": 0,
+            "combinedMs": 3,
+            "cpuTotalMs": 4.799999952316284,
+            "gpuTotalMs": 12.072719999999999
+          },
+          "combinedDeltaMs": 0.6000000238418579,
+          "totalDeltaMs": 0.7999999523162842
+        },
+        {
+          "pair": 14,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.97892
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.5000000596046448,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.306040000000001
+          },
+          "combinedDeltaMs": 0.5000000596046448,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 15,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.31108
+          },
+          "fused": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 11.6234
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 16,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.196800000000001
+          },
+          "fused": {
+            "projectionMs": 2.299999952316284,
+            "cullMs": 0,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.25756
+          },
+          "combinedDeltaMs": -0.5000000596046448,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 17,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.690760000000003
+          },
+          "fused": {
+            "projectionMs": 2.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.84804
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 18,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.80696
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 12.185119999999998
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 19,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.458319999999999
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.454760000000002
+          },
+          "combinedDeltaMs": -0.6000000238418579,
+          "totalDeltaMs": -0.9000000357627869
+        },
+        {
+          "pair": 20,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.895
+          },
+          "fused": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0,
+            "combinedMs": 1.5999999642372131,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.27164
+          },
+          "combinedDeltaMs": -0.800000011920929,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 21,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.5000000596046448,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.841199999999999
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 11.92664
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 22,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.08064
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 12.22484
+          },
+          "combinedDeltaMs": -0.6000000238418579,
+          "totalDeltaMs": -0.7999999523162842
+        },
+        {
+          "pair": 23,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.241119999999999
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.65376
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 5.960464477539063e-8
+        },
+        {
+          "pair": 24,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.83932
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.267320000000002
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 25,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 3.099999964237213,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 12.5844
+          },
+          "fused": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 12.50252
+          },
+          "combinedDeltaMs": -1.2999999523162842,
+          "totalDeltaMs": -1.800000011920929
+        },
+        {
+          "pair": 26,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.06552
+          },
+          "fused": {
+            "projectionMs": 2.700000047683716,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 13.018559999999999
+          },
+          "combinedDeltaMs": 0.5,
+          "totalDeltaMs": 0.9000000357627869
+        },
+        {
+          "pair": 27,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.91032
+          },
+          "fused": {
+            "projectionMs": 3.400000035762787,
+            "cullMs": 0,
+            "combinedMs": 3.400000035762787,
+            "cpuTotalMs": 5.600000023841858,
+            "gpuTotalMs": 12.2606
+          },
+          "combinedDeltaMs": 1.100000023841858,
+          "totalDeltaMs": 1.5
+        },
+        {
+          "pair": 28,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0.7999999523162842,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.276760000000001
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 10.762160000000002
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 29,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 11.141359999999999
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 10.63992
+          },
+          "combinedDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 30,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 2,
+            "cullMs": 1.5,
+            "combinedMs": 3.5,
+            "cpuTotalMs": 5.399999976158142,
+            "gpuTotalMs": 11.2112
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.729519999999999
+          },
+          "combinedDeltaMs": -1.2000000476837158,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 31,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.68744
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.909920000000001
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 32,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.88528
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 11.795639999999999
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.10000008344650269
+        },
+        {
+          "pair": 33,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 11.804359999999997
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.05
+          },
+          "combinedDeltaMs": -0.19999992847442627,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 34,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.745359999999998
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.70864
+          },
+          "combinedDeltaMs": -0.5,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 35,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.499640000000001
+          },
+          "fused": {
+            "projectionMs": 3,
+            "cullMs": 0,
+            "combinedMs": 3,
+            "cpuTotalMs": 4.799999952316284,
+            "gpuTotalMs": 11.50588
+          },
+          "combinedDeltaMs": 0.7000000476837158,
+          "totalDeltaMs": 0.8999999761581421
+        },
+        {
+          "pair": 36,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.6472
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.538680000000001
+          },
+          "combinedDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 37,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.1999999284744263,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.59
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.147519999999998
+          },
+          "combinedDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 5.960464477539063e-8
+        },
+        {
+          "pair": 38,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.48232
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.1002
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 39,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 13.004439999999999
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.383040000000001
+          },
+          "combinedDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 40,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.67464
+          },
+          "fused": {
+            "projectionMs": 2.900000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.66712
+          },
+          "combinedDeltaMs": 0.5000000596046448,
+          "totalDeltaMs": 0.5000000596046448
+        },
+        {
+          "pair": 41,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 3.199999988079071,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 12.53828
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.60352
+          },
+          "combinedDeltaMs": -1,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 42,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 2,
+            "cullMs": 1.800000011920929,
+            "combinedMs": 3.800000011920929,
+            "cpuTotalMs": 6.100000023841858,
+            "gpuTotalMs": 13.065760000000001
+          },
+          "fused": {
+            "projectionMs": 2.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.890159999999998
+          },
+          "combinedDeltaMs": -1.199999988079071,
+          "totalDeltaMs": -1.7000000476837158
+        },
+        {
+          "pair": 43,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.299999952316284,
+            "gpuTotalMs": 12.68216
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.43356
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.9000000357627869
+        },
+        {
+          "pair": 44,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.7000000476837158,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.8000000715255737,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.52096
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.19516
+          },
+          "combinedDeltaMs": -0.8000000715255737,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 45,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.7000000476837158,
+            "cullMs": 1,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.022
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.100560000000002
+          },
+          "combinedDeltaMs": -0.6000000834465027,
+          "totalDeltaMs": -0.6000000834465027
+        },
+        {
+          "pair": 46,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.1999999284744263,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.351399999999998
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.188880000000001
+          },
+          "combinedDeltaMs": 0.10000008344650269,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 47,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.106959999999999
+          },
+          "fused": {
+            "projectionMs": 2.200000047683716,
+            "cullMs": 0,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.067519999999998
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 48,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.4999999403953552,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 12.572239999999999
+          },
+          "fused": {
+            "projectionMs": 2.299999952316284,
+            "cullMs": 0,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.39512
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 49,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.3118
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.591759999999999
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 50,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1.2999999523162842,
+            "combinedMs": 2.4999999403953552,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.85464
+          },
+          "fused": {
+            "projectionMs": 2.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 12.450159999999999
+          },
+          "combinedDeltaMs": 0.30000007152557373,
+          "totalDeltaMs": 0.800000011920929
+        },
+        {
+          "pair": 51,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.7000000476837158,
+            "combinedMs": 2.0000000596046448,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.26232
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.65348
+          },
+          "combinedDeltaMs": 0.19999992847442627,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 52,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 1,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.24612
+          },
+          "fused": {
+            "projectionMs": 1.5,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 1.5999999642372131,
+            "cpuTotalMs": 2.799999952316284,
+            "gpuTotalMs": 11.89856
+          },
+          "combinedDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.7000000476837158
+        },
+        {
+          "pair": 53,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.78504
+          },
+          "fused": {
+            "projectionMs": 2.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.36848
+          },
+          "combinedDeltaMs": 0.5,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 54,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 11.514479999999999
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.8024
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 55,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.210119999999998
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 11.51732
+          },
+          "combinedDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 56,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 2,
+            "cullMs": 1,
+            "combinedMs": 3,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.14156
+          },
+          "fused": {
+            "projectionMs": 2.200000047683716,
+            "cullMs": 0,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.03892
+          },
+          "combinedDeltaMs": -0.7999999523162842,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 57,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.474160000000001
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.5000000596046448,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.1948
+          },
+          "combinedDeltaMs": 0.10000008344650269,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 58,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.34216
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.456679999999999
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.20000004768371582
+        },
+        {
+          "pair": 59,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 3.199999988079071,
+            "cpuTotalMs": 4.900000035762787,
+            "gpuTotalMs": 12.60372
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.55364
+          },
+          "combinedDeltaMs": -0.800000011920929,
+          "totalDeltaMs": -0.7000000476837158
+        },
+        {
+          "pair": 60,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.501400000000002
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.350799999999998
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 61,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 12.26696
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.468920000000002
+          },
+          "combinedDeltaMs": -0.5,
+          "totalDeltaMs": -0.4999999403953552
+        },
+        {
+          "pair": 62,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.64132
+          },
+          "fused": {
+            "projectionMs": 2.200000047683716,
+            "cullMs": 0,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.68052
+          },
+          "combinedDeltaMs": -0.5999999642372131,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 63,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 13.287240000000002
+          },
+          "fused": {
+            "projectionMs": 3,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 3.099999964237213,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 12.52872
+          },
+          "combinedDeltaMs": 0.7999999523162842,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 64,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 13.283600000000002
+          },
+          "fused": {
+            "projectionMs": 2.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.805719999999999
+          },
+          "combinedDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 65,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1.4000000357627869,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.65452
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.24136
+          },
+          "combinedDeltaMs": -0.6000000238418579,
+          "totalDeltaMs": -1.100000023841858
+        },
+        {
+          "pair": 66,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 13.13672
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 13.00108
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 67,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.7000000476837158,
+            "cullMs": 1,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.54648
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.65884
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 68,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.899999976158142,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 11.99924
+          },
+          "fused": {
+            "projectionMs": 3,
+            "cullMs": 0,
+            "combinedMs": 3,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.0484
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 69,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.036800000000001
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.033119999999998
+          },
+          "combinedDeltaMs": -0.6000000834465027,
+          "totalDeltaMs": -0.7000000476837158
+        },
+        {
+          "pair": 70,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.999519999999999
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.076199999999998
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 71,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 3.100000023841858,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 12.438320000000003
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.133519999999999
+          },
+          "combinedDeltaMs": -1.0000000596046448,
+          "totalDeltaMs": -1.300000011920929
+        },
+        {
+          "pair": 72,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 0.5999999642372131,
+            "combinedMs": 1.6999999284744263,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 14.163399999999998
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 13.0342
+          },
+          "combinedDeltaMs": 0.7000000476837158,
+          "totalDeltaMs": 1.2000000476837158
+        },
+        {
+          "pair": 73,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.827639999999999
+          },
+          "fused": {
+            "projectionMs": 2.599999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.715879999999999
+          },
+          "combinedDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": 0.800000011920929
+        },
+        {
+          "pair": 74,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 13.9664
+          },
+          "fused": {
+            "projectionMs": 3.099999964237213,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 3.199999988079071,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 13.245720000000002
+          },
+          "combinedDeltaMs": 0.4999999403953552,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 75,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.963479999999999
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 13.00672
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 76,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.79524
+          },
+          "fused": {
+            "projectionMs": 2.600000023841858,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.50492
+          },
+          "combinedDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 77,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1.399999976158142,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.51704
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.78528
+          },
+          "combinedDeltaMs": -0.4999999403953552,
+          "totalDeltaMs": -1
+        },
+        {
+          "pair": 78,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 12.53828
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.958480000000002
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.40000009536743164
+        },
+        {
+          "pair": 79,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.589720000000003
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.7758
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 80,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1.9000000357627869,
+            "combinedMs": 3.5000000596046448,
+            "cpuTotalMs": 6.399999976158142,
+            "gpuTotalMs": 14.14996
+          },
+          "fused": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0,
+            "combinedMs": 1.5999999642372131,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 13.81456
+          },
+          "combinedDeltaMs": -1.9000000953674316,
+          "totalDeltaMs": -3.5
+        },
+        {
+          "pair": 81,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.577720000000001
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 12.72108
+          },
+          "combinedDeltaMs": -0.4999999403953552,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 82,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0.6000000238418579,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.38188
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 11.73872
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.4999999403953552
+        },
+        {
+          "pair": 83,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.73472
+          },
+          "fused": {
+            "projectionMs": 3,
+            "cullMs": 0,
+            "combinedMs": 3,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.040720000000002
+          },
+          "combinedDeltaMs": 1.199999988079071,
+          "totalDeltaMs": 1.600000023841858
+        },
+        {
+          "pair": 84,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 3.100000023841858,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.16712
+          },
+          "fused": {
+            "projectionMs": 2.299999952316284,
+            "cullMs": 0,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 11.864519999999999
+          },
+          "combinedDeltaMs": -0.8000000715255737,
+          "totalDeltaMs": -1.0000000596046448
+        },
+        {
+          "pair": 85,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 11.255840000000001
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.36008
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 86,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 1,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.048039999999999
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.035720000000001
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 87,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 10.623520000000001
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 10.66556
+          },
+          "combinedDeltaMs": 0.5,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 88,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 10.8082
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 10.71912
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 89,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 10.89584
+          },
+          "fused": {
+            "projectionMs": 1.7000000476837158,
+            "cullMs": 0,
+            "combinedMs": 1.7000000476837158,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 10.858559999999999
+          },
+          "combinedDeltaMs": -0.5999999642372131,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 90,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1.5,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 10.822839999999998
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 10.88016
+          },
+          "combinedDeltaMs": -0.5999999642372131,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 91,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 10.11592
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 10.66708
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 92,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 3.099999964237213,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 10.398000000000001
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.200000047683716,
+            "gpuTotalMs": 10.194719999999998
+          },
+          "combinedDeltaMs": -1.2999999523162842,
+          "totalDeltaMs": -1.5999999642372131
+        },
+        {
+          "pair": 93,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 10.76772
+          },
+          "fused": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 1.600000023841858,
+            "cpuTotalMs": 2.800000011920929,
+            "gpuTotalMs": 10.447599999999998
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 94,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.7999999523162842,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 10.795359999999999
+          },
+          "fused": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 1.699999988079071,
+            "cpuTotalMs": 3.299999952316284,
+            "gpuTotalMs": 10.467920000000001
+          },
+          "combinedDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 95,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 10.29384
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 10.814960000000001
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 96,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 0.7000000476837158,
+            "combinedMs": 1.7000000476837158,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 10.6168
+          },
+          "fused": {
+            "projectionMs": 1.9000000357627869,
+            "cullMs": 0,
+            "combinedMs": 1.9000000357627869,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 10.54704
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 97,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 0.6000000238418579,
+            "combinedMs": 1.600000023841858,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 10.223200000000002
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 10.421399999999998
+          },
+          "combinedDeltaMs": 0.5999999642372131,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 98,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 1.9000000357627869,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 10.571760000000001
+          },
+          "fused": {
+            "projectionMs": 3.5,
+            "cullMs": 0,
+            "combinedMs": 3.5,
+            "cpuTotalMs": 5.199999988079071,
+            "gpuTotalMs": 10.678360000000001
+          },
+          "combinedDeltaMs": 1.5999999642372131,
+          "totalDeltaMs": 2.199999988079071
+        },
+        {
+          "pair": 99,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.799999952316284,
+            "gpuTotalMs": 11.34436
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 10.74588
+          },
+          "combinedDeltaMs": -0.7000000476837158,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 100,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.51092
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.62752
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 101,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 0.5999999642372131,
+            "combinedMs": 1.6999999284744263,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 11.13692
+          },
+          "fused": {
+            "projectionMs": 1.9000000357627869,
+            "cullMs": 0,
+            "combinedMs": 1.9000000357627869,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.329679999999998
+          },
+          "combinedDeltaMs": 0.2000001072883606,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 102,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.248240000000003
+          },
+          "fused": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 1.699999988079071,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 10.938720000000002
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 103,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 1.9000000357627869,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 10.4574
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 10.57692
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -5.960464477539063e-8
+        },
+        {
+          "pair": 104,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.7000000476837158,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.299999952316284,
+            "gpuTotalMs": 10.61132
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 10.779160000000001
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.30000007152557373
+        },
+        {
+          "pair": 105,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.7000000476837158,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 10.5536
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 10.850200000000001
+          },
+          "combinedDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 106,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 10.549719999999999
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 10.64356
+          },
+          "combinedDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": -0.20000004768371582
+        },
+        {
+          "pair": 107,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.299999952316284,
+            "gpuTotalMs": 10.58016
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 10.5128
+          },
+          "combinedDeltaMs": 0.40000003576278687,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 108,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.7999999523162842,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 11.135200000000001
+          },
+          "fused": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 1.600000023841858,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 10.653679999999998
+          },
+          "combinedDeltaMs": -0.19999992847442627,
+          "totalDeltaMs": 0.30000007152557373
+        },
+        {
+          "pair": 109,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 11.5108
+          },
+          "fused": {
+            "projectionMs": 2.200000047683716,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.3000000715255737,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 10.62852
+          },
+          "combinedDeltaMs": -0.3999999165534973,
+          "totalDeltaMs": -1.1999999284744263
+        },
+        {
+          "pair": 110,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.7000000476837158,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.2004
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.47936
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 111,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.7999999523162842,
+            "combinedMs": 1.9999999403953552,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.18568
+          },
+          "fused": {
+            "projectionMs": 2.900000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.668120000000002
+          },
+          "combinedDeltaMs": 0.9000000953674316,
+          "totalDeltaMs": 1.5
+        },
+        {
+          "pair": 112,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.995040000000001
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.9952
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 113,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.7000000476837158,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.299999952316284,
+            "gpuTotalMs": 11.52944
+          },
+          "fused": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 1.600000023841858,
+            "cpuTotalMs": 2.800000011920929,
+            "gpuTotalMs": 11.73676
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.4999999403953552
+        },
+        {
+          "pair": 114,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.78264
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.853200000000001
+          },
+          "combinedDeltaMs": 0.699999988079071,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 115,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 17.69184
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 23.30416
+          },
+          "combinedDeltaMs": -0.5,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 116,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 15.62392
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 15.418000000000005
+          },
+          "combinedDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 117,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 14.069400000000002
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 14.6744
+          },
+          "combinedDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 1.100000023841858
+        },
+        {
+          "pair": 118,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.7000000476837158,
+            "cullMs": 1,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 13.452040000000004
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.865519999999998
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 119,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.66244
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.963599999999998
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 120,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.913160000000001
+          },
+          "fused": {
+            "projectionMs": 2.800000011920929,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.486279999999999
+          },
+          "combinedDeltaMs": 0.5000000596046448,
+          "totalDeltaMs": 0.5999999642372131
+        },
+        {
+          "pair": 121,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.7186
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.435519999999999
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 122,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 1,
+            "combinedMs": 3.100000023841858,
+            "cpuTotalMs": 5.100000023841858,
+            "gpuTotalMs": 11.77716
+          },
+          "fused": {
+            "projectionMs": 2.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.882679999999997
+          },
+          "combinedDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.7000000476837158
+        },
+        {
+          "pair": 123,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.85268
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 11.690439999999999
+          },
+          "combinedDeltaMs": -0.9000000357627869,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 124,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.705599999999999
+          },
+          "fused": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 1.699999988079071,
+            "cpuTotalMs": 2.799999952316284,
+            "gpuTotalMs": 12.5256
+          },
+          "combinedDeltaMs": -0.6000000238418579,
+          "totalDeltaMs": -1.3000000715255737
+        },
+        {
+          "pair": 125,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.198000000000002
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.320400000000001
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 126,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.399999976158142,
+            "combinedMs": 2.899999976158142,
+            "cpuTotalMs": 4.700000047683716,
+            "gpuTotalMs": 12.387080000000001
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 12.46892
+          },
+          "combinedDeltaMs": -1.0999999642372131,
+          "totalDeltaMs": -1.5000000596046448
+        },
+        {
+          "pair": 127,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.14996
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.298240000000002
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": 0
+        }
+      ]
+    },
+    {
+      "scenario": "camera-motion",
+      "pairs": 128,
+      "modes": {
+        "scan": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.899999976158142,
+            "mean": 1.4335937444120646
+          },
+          "cullMs": {
+            "samples": 128,
+            "p50": 0.9000000357627869,
+            "p95": 1.300000011920929,
+            "mean": 0.9742187531664968
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 2.300000011920929,
+            "p95": 3.0000000596046448,
+            "mean": 2.4078124975785613
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4,
+            "p95": 5.099999964237213,
+            "mean": 4.096093748696148
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 12.20832,
+            "p95": 13.275200000000002,
+            "mean": 12.298315625000004
+          }
+        },
+        "fused": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 2.300000011920929,
+            "p95": 3.099999964237213,
+            "mean": 2.3734375000931323
+          },
+          "cullMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.01249999925494194
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 2.300000011920929,
+            "p95": 3.099999964237213,
+            "mean": 2.385937499348074
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4,
+            "p95": 4.899999976158142,
+            "mean": 4.071093750651926
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 12.275520000000002,
+            "p95": 13.253639999999997,
+            "mean": 12.300937500000002
+          }
+        }
+      },
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": 0,
+        "p95": 0.6000000238418579,
+        "mean": -0.021874998230487108
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": -0.09999996423721313,
+        "p95": 0.9000000357627869,
+        "mean": -0.024999998044222593
+      },
+      "improvedPairs": 62,
+      "byFirst": {
+        "scan": {
+          "samples": 64,
+          "p50": 0,
+          "p95": 0.6000000238418579,
+          "mean": 0.04218749888241291
+        },
+        "fused": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.5000000596046448,
+          "mean": -0.08593749534338713
+        }
+      },
+      "rawPairs": [
+        {
+          "pair": 0,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.74144
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.7186
+          },
+          "combinedDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 1,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.938559999999999
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.013119999999999
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 2,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.474839999999999
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 12.978439999999997
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 3,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.76828
+          },
+          "fused": {
+            "projectionMs": 2.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.770999999999999
+          },
+          "combinedDeltaMs": 0.5,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 4,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.45796
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.39264
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 5,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.34424
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.199240000000003
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 6,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.43416
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.761679999999998
+          },
+          "combinedDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 7,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.065479999999999
+          },
+          "fused": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 0,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 12.621559999999999
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 8,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.7999999523162842,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 12.267599999999998
+          },
+          "fused": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 0,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 11.434
+          },
+          "combinedDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 9,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.335280000000001
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.45916
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 10,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.706880000000002
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.73028
+          },
+          "combinedDeltaMs": 0.09999990463256836,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 11,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.747280000000002
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.207840000000003
+          },
+          "combinedDeltaMs": 0.2999999523162842,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 12,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.9854
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.95704
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.5000000596046448
+        },
+        {
+          "pair": 13,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 11.800519999999999
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.75184
+          },
+          "combinedDeltaMs": -0.6000000238418579,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 14,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.92104
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.066080000000001
+          },
+          "combinedDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 15,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.67756
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.25204
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 16,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.402040000000001
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.44872
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 17,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.610119999999998
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.6246
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 18,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.12092
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.4999999403953552,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.907800000000002
+          },
+          "combinedDeltaMs": 0.09999990463256836,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 19,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.625239999999998
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 11.59724
+          },
+          "combinedDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 20,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 4.700000047683716,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 5.900000035762787,
+            "cpuTotalMs": 8.400000035762787,
+            "gpuTotalMs": 12.68188
+          },
+          "fused": {
+            "projectionMs": 5,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 5.100000023841858,
+            "cpuTotalMs": 6.5,
+            "gpuTotalMs": 13.253639999999997
+          },
+          "combinedDeltaMs": -0.800000011920929,
+          "totalDeltaMs": -1.9000000357627869
+        },
+        {
+          "pair": 21,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.0000000596046448,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.46208
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.81884
+          },
+          "combinedDeltaMs": 0.19999992847442627,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 22,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.04404
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.576479999999998
+          },
+          "combinedDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 23,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.440680000000002
+          },
+          "fused": {
+            "projectionMs": 2.599999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.46108
+          },
+          "combinedDeltaMs": 0.2999999523162842,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 24,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.80464
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.197120000000002
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 25,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.036840000000002
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.94044
+          },
+          "combinedDeltaMs": -0.5,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 26,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 12.16144
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.310080000000001
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.5000000596046448
+        },
+        {
+          "pair": 27,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.7012
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.64992
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 28,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.85968
+          },
+          "fused": {
+            "projectionMs": 2.700000047683716,
+            "cullMs": 0,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.343639999999999
+          },
+          "combinedDeltaMs": 0.40000003576278687,
+          "totalDeltaMs": 0.5000000596046448
+        },
+        {
+          "pair": 29,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.685760000000002
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.4999999403953552,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.4302
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 30,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.372759999999998
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.54956
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": -5.960464477539063e-8
+        },
+        {
+          "pair": 31,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 12.130320000000001
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.214799999999999
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 32,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.713199999999999
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.465120000000002
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 33,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.69616
+          },
+          "fused": {
+            "projectionMs": 2.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.535400000000001
+          },
+          "combinedDeltaMs": 0.6000000238418579,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 34,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1.0999999642372131,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 13.102520000000002
+          },
+          "fused": {
+            "projectionMs": 6.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 6.600000023841858,
+            "cpuTotalMs": 11.600000023841858,
+            "gpuTotalMs": 14.993839999999999
+          },
+          "combinedDeltaMs": 4.100000023841858,
+          "totalDeltaMs": 7.5
+        },
+        {
+          "pair": 35,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 14.57832
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 15.36776
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 36,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 13.67568
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 12.982
+          },
+          "combinedDeltaMs": -0.5999999642372131,
+          "totalDeltaMs": -0.8999999165534973
+        },
+        {
+          "pair": 37,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 3.399999976158142,
+            "cpuTotalMs": 5.299999952316284,
+            "gpuTotalMs": 12.38112
+          },
+          "fused": {
+            "projectionMs": 2.900000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.600480000000003
+          },
+          "combinedDeltaMs": -0.4999999403953552,
+          "totalDeltaMs": -0.6999999284744263
+        },
+        {
+          "pair": 38,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.93936
+          },
+          "fused": {
+            "projectionMs": 2.899999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.899999976158142,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.618640000000001
+          },
+          "combinedDeltaMs": 0.4999999403953552,
+          "totalDeltaMs": 0.5000000596046448
+        },
+        {
+          "pair": 39,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.55444
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.56916
+          },
+          "combinedDeltaMs": -0.5,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 40,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.090039999999998
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.89488
+          },
+          "combinedDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 41,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.7999999523162842,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.203479999999999
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.89804
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 42,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.743
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.12576
+          },
+          "combinedDeltaMs": -0.5000000596046448,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 43,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 11.61464
+          },
+          "fused": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 1.699999988079071,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 11.8008
+          },
+          "combinedDeltaMs": -1,
+          "totalDeltaMs": -1.4000000357627869
+        },
+        {
+          "pair": 44,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.05304
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.462399999999999
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 45,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.71804
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 2.900000035762787,
+            "gpuTotalMs": 12.02156
+          },
+          "combinedDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 46,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.49616
+          },
+          "fused": {
+            "projectionMs": 2.899999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.899999976158142,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 11.87228
+          },
+          "combinedDeltaMs": 0.19999992847442627,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 47,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.221800000000002
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.825199999999999
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 48,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.10876
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.966800000000001
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 49,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 12.558440000000001
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 13.085719999999998
+          },
+          "combinedDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": 0.9000000357627869
+        },
+        {
+          "pair": 50,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 12.361279999999999
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 11.610000000000001
+          },
+          "combinedDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 51,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 1.2999999523162842,
+            "combinedMs": 3.1999999284744263,
+            "cpuTotalMs": 5.100000023841858,
+            "gpuTotalMs": 11.50452
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.175799999999999
+          },
+          "combinedDeltaMs": -1.3999999165534973,
+          "totalDeltaMs": -1.9000000357627869
+        },
+        {
+          "pair": 52,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.82416
+          },
+          "fused": {
+            "projectionMs": 2.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 11.635440000000003
+          },
+          "combinedDeltaMs": 0.6000000238418579,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 53,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.121920000000001
+          },
+          "fused": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 0,
+            "combinedMs": 1.899999976158142,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 11.412
+          },
+          "combinedDeltaMs": -0.800000011920929,
+          "totalDeltaMs": -1.2000000476837158
+        },
+        {
+          "pair": 54,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 11.032680000000001
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.200000047683716,
+            "gpuTotalMs": 11.032840000000002
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 55,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.0999999642372131,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 10.52876
+          },
+          "fused": {
+            "projectionMs": 1.7000000476837158,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 10.690080000000002
+          },
+          "combinedDeltaMs": -0.4999999403953552,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 56,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 10.69124
+          },
+          "fused": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0,
+            "combinedMs": 1.5999999642372131,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 10.63636
+          },
+          "combinedDeltaMs": -0.5000000596046448,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 57,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.30424
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 10.648919999999999
+          },
+          "combinedDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 58,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.727920000000001
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 11.73292
+          },
+          "combinedDeltaMs": 0.5,
+          "totalDeltaMs": 1.0999999642372131
+        },
+        {
+          "pair": 59,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.65908
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 11.755600000000001
+          },
+          "combinedDeltaMs": -0.10000008344650269,
+          "totalDeltaMs": -0.30000007152557373
+        },
+        {
+          "pair": 60,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.882040000000002
+          },
+          "fused": {
+            "projectionMs": 2.599999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 11.7508
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 61,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.89204
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.275520000000002
+          },
+          "combinedDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 62,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.571319999999998
+          },
+          "fused": {
+            "projectionMs": 3.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 3.800000011920929,
+            "cpuTotalMs": 6,
+            "gpuTotalMs": 12.33612
+          },
+          "combinedDeltaMs": 1.300000011920929,
+          "totalDeltaMs": 1.699999988079071
+        },
+        {
+          "pair": 63,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 1.800000011920929,
+            "combinedMs": 3.399999976158142,
+            "cpuTotalMs": 6.300000011920929,
+            "gpuTotalMs": 14.57464
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.228399999999999
+          },
+          "combinedDeltaMs": -1.300000011920929,
+          "totalDeltaMs": -2.800000011920929
+        },
+        {
+          "pair": 64,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 13.79972
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 14.157279999999998
+          },
+          "combinedDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 65,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 1,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.862519999999998
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 13.309240000000003
+          },
+          "combinedDeltaMs": 0.5,
+          "totalDeltaMs": 0.5999999642372131
+        },
+        {
+          "pair": 66,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.49024
+          },
+          "fused": {
+            "projectionMs": 2.600000023841858,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.509079999999997
+          },
+          "combinedDeltaMs": 0.30000007152557373,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 67,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.7999999523162842,
+            "combinedMs": 2.1999999284744263,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 12.131839999999999
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.413039999999999
+          },
+          "combinedDeltaMs": 0.30000007152557373,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 68,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.90416
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.754999999999999
+          },
+          "combinedDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 69,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.595000000000002
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.003799999999998
+          },
+          "combinedDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 70,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.705
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 1.9000000357627869,
+            "cpuTotalMs": 5.5,
+            "gpuTotalMs": 11.9238
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": 1.5
+        },
+        {
+          "pair": 71,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.8804
+          },
+          "fused": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 1.699999988079071,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.15536
+          },
+          "combinedDeltaMs": -0.5,
+          "totalDeltaMs": 0.7999999523162842
+        },
+        {
+          "pair": 72,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.07152
+          },
+          "fused": {
+            "projectionMs": 2.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.800560000000003
+          },
+          "combinedDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 73,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.4000000357627869,
+            "cullMs": 1,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.925759999999999
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.192960000000001
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 74,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.8946
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.98752
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 75,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.944999999999999
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.5000000596046448,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.104280000000001
+          },
+          "combinedDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 76,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.116719999999999
+          },
+          "fused": {
+            "projectionMs": 2.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.111080000000001
+          },
+          "combinedDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 77,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.7000000476837158,
+            "cullMs": 1,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 11.62092
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.926800000000002
+          },
+          "combinedDeltaMs": -0.6000000834465027,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 78,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.052679999999999
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.373439999999999
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 79,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.899999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.899999976158142,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.38716
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.070759999999998
+          },
+          "combinedDeltaMs": -0.7999999523162842,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 80,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 12.94508
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.70668
+          },
+          "combinedDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 81,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.467239999999999
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 12.2846
+          },
+          "combinedDeltaMs": -0.4999999403953552,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 82,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.159120000000003
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.32296
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 83,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 2.900000035762787,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.75688
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.889199999999999
+          },
+          "combinedDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 84,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.1999999284744263,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.592519999999999
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.587679999999999
+          },
+          "combinedDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0.5000000596046448
+        },
+        {
+          "pair": 85,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.19556
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.79688
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 86,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2000000476837158,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.1000000834465027,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.058999999999997
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.128120000000001
+          },
+          "combinedDeltaMs": 0.19999992847442627,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 87,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.15976
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.216479999999999
+          },
+          "combinedDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 88,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.1999999284744263,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.48472
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.15736
+          },
+          "combinedDeltaMs": -0.09999990463256836,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 89,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 2.4999999403953552,
+            "cpuTotalMs": 4.799999952316284,
+            "gpuTotalMs": 12.22532
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.24884
+          },
+          "combinedDeltaMs": -0.19999992847442627,
+          "totalDeltaMs": -0.8999999165534973
+        },
+        {
+          "pair": 90,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 3.0000000596046448,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.46588
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.63392
+          },
+          "combinedDeltaMs": -0.7000000476837158,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 91,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 1,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 12.20224
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.556
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.9999999403953552
+        },
+        {
+          "pair": 92,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.8952
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.36648
+          },
+          "combinedDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 93,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 11.264719999999999
+          },
+          "fused": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 11.842
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 94,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.7999999523162842,
+            "cullMs": 1.4000000357627869,
+            "combinedMs": 3.199999988079071,
+            "cpuTotalMs": 5.099999964237213,
+            "gpuTotalMs": 11.05856
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.4582
+          },
+          "combinedDeltaMs": -0.8999999761581421,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 95,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.20476
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.58736
+          },
+          "combinedDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 96,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 1,
+            "combinedMs": 3.300000011920929,
+            "cpuTotalMs": 5.699999988079071,
+            "gpuTotalMs": 12.415879999999998
+          },
+          "fused": {
+            "projectionMs": 3.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 3.099999964237213,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 12.35576
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 97,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2000000476837158,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2.0000000596046448,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 12.352640000000001
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.9426
+          },
+          "combinedDeltaMs": 0.3999999165534973,
+          "totalDeltaMs": 0.6999999284744263
+        },
+        {
+          "pair": 98,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.7999999523162842,
+            "cullMs": 1,
+            "combinedMs": 2.799999952316284,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.97664
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 12.21696
+          },
+          "combinedDeltaMs": -0.6999999284744263,
+          "totalDeltaMs": -0.9999999403953552
+        },
+        {
+          "pair": 99,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.58148
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 11.96904
+          },
+          "combinedDeltaMs": 0.5,
+          "totalDeltaMs": 1.0000000596046448
+        },
+        {
+          "pair": 100,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.626000000000001
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.43596
+          },
+          "combinedDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 101,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.815239999999998
+          },
+          "fused": {
+            "projectionMs": 2.200000047683716,
+            "cullMs": 0,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.57516
+          },
+          "combinedDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 102,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.93276
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.539679999999999
+          },
+          "combinedDeltaMs": -0.5,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 103,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.706240000000001
+          },
+          "fused": {
+            "projectionMs": 3.200000047683716,
+            "cullMs": 0,
+            "combinedMs": 3.200000047683716,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.54852
+          },
+          "combinedDeltaMs": 0.8000000715255737,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 104,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 1.5,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.43092
+          },
+          "fused": {
+            "projectionMs": 2.699999988079071,
+            "cullMs": 0.09999996423721313,
+            "combinedMs": 2.799999952316284,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.13988
+          },
+          "combinedDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 105,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.45356
+          },
+          "fused": {
+            "projectionMs": 2,
+            "cullMs": 0,
+            "combinedMs": 2,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 12.705079999999999
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 106,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.2999999523162842,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.799999952316284,
+            "gpuTotalMs": 13.275200000000002
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.736040000000001
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.9999999403953552
+        },
+        {
+          "pair": 107,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.7999999523162842,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.94364
+          },
+          "fused": {
+            "projectionMs": 3.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 3.100000023841858,
+            "cpuTotalMs": 5.300000011920929,
+            "gpuTotalMs": 13.15212
+          },
+          "combinedDeltaMs": 0.5000000596046448,
+          "totalDeltaMs": 0.9000000357627869
+        },
+        {
+          "pair": 108,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1.300000011920929,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.717279999999999
+          },
+          "fused": {
+            "projectionMs": 2.5,
+            "cullMs": 0,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.52552
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 109,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.49776
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.413120000000001
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 110,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5999999642372131,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.83336
+          },
+          "fused": {
+            "projectionMs": 2.299999952316284,
+            "cullMs": 0,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.60692
+          },
+          "combinedDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 111,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.41808
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.586039999999999
+          },
+          "combinedDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 112,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 1.100000023841858,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.80384
+          },
+          "fused": {
+            "projectionMs": 2.200000047683716,
+            "cullMs": 0,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 12.679679999999998
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -1.0999999642372131
+        },
+        {
+          "pair": 113,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.12568
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.59368
+          },
+          "combinedDeltaMs": -0.10000008344650269,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 114,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.7999999523162842,
+            "combinedMs": 2.1999999284744263,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.817599999999999
+          },
+          "fused": {
+            "projectionMs": 3.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 3.099999964237213,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 12.29496
+          },
+          "combinedDeltaMs": 0.9000000357627869,
+          "totalDeltaMs": 1.0999999642372131
+        },
+        {
+          "pair": 115,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.300000011920929,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.10172
+          },
+          "fused": {
+            "projectionMs": 2.600000023841858,
+            "cullMs": 0.10000002384185791,
+            "combinedMs": 2.700000047683716,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.471480000000001
+          },
+          "combinedDeltaMs": 0.5000000596046448,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 116,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.55652
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.48188
+          },
+          "combinedDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 117,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.800000011920929,
+            "cullMs": 1.199999988079071,
+            "combinedMs": 3,
+            "cpuTotalMs": 5.100000023841858,
+            "gpuTotalMs": 15.25976
+          },
+          "fused": {
+            "projectionMs": 3.600000023841858,
+            "cullMs": 0,
+            "combinedMs": 3.600000023841858,
+            "cpuTotalMs": 5.899999976158142,
+            "gpuTotalMs": 12.42312
+          },
+          "combinedDeltaMs": 0.6000000238418579,
+          "totalDeltaMs": 0.7999999523162842
+        },
+        {
+          "pair": 118,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.599999964237213,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 14.699440000000001
+          },
+          "fused": {
+            "projectionMs": 2.400000035762787,
+            "cullMs": 0,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 14.499159999999998
+          },
+          "combinedDeltaMs": -0.19999992847442627,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 119,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.2000000476837158,
+            "cullMs": 0.800000011920929,
+            "combinedMs": 2.0000000596046448,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 13.201439999999998
+          },
+          "fused": {
+            "projectionMs": 2.399999976158142,
+            "cullMs": 0,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 13.7434
+          },
+          "combinedDeltaMs": 0.3999999165534973,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 120,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.299999952316284,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 13.07804
+          },
+          "fused": {
+            "projectionMs": 2.300000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.300000011920929,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.624480000000002
+          },
+          "combinedDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 121,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.199999988079071,
+            "cullMs": 1,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.465479999999998
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.82048
+          },
+          "combinedDeltaMs": 0,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 122,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.100000023841858,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.800000011920929,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.32076
+          },
+          "fused": {
+            "projectionMs": 2.099999964237213,
+            "cullMs": 0,
+            "combinedMs": 2.099999964237213,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.47416
+          },
+          "combinedDeltaMs": 0.2999999523162842,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 123,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.699999988079071,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.600000023841858,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.20832
+          },
+          "fused": {
+            "projectionMs": 2.199999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.23936
+          },
+          "combinedDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 124,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.600000023841858,
+            "cullMs": 0.8999999761581421,
+            "combinedMs": 2.5,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.881920000000001
+          },
+          "fused": {
+            "projectionMs": 2.100000023841858,
+            "cullMs": 0,
+            "combinedMs": 2.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.687320000000001
+          },
+          "combinedDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 125,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1,
+            "cullMs": 0.699999988079071,
+            "combinedMs": 1.699999988079071,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 11.62124
+          },
+          "fused": {
+            "projectionMs": 2.200000047683716,
+            "cullMs": 0,
+            "combinedMs": 2.200000047683716,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.851040000000001
+          },
+          "combinedDeltaMs": 0.5000000596046448,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 126,
+          "first": "scan",
+          "scan": {
+            "projectionMs": 1.399999976158142,
+            "cullMs": 1,
+            "combinedMs": 2.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.778160000000002
+          },
+          "fused": {
+            "projectionMs": 2.800000011920929,
+            "cullMs": 0,
+            "combinedMs": 2.800000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.818760000000001
+          },
+          "combinedDeltaMs": 0.40000003576278687,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 127,
+          "first": "fused",
+          "scan": {
+            "projectionMs": 1.5,
+            "cullMs": 0.9000000357627869,
+            "combinedMs": 2.400000035762787,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.837799999999998
+          },
+          "fused": {
+            "projectionMs": 2.699999988079071,
+            "cullMs": 0,
+            "combinedMs": 2.699999988079071,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.146519999999999
+          },
+          "combinedDeltaMs": 0.2999999523162842,
+          "totalDeltaMs": 0.3999999761581421
+        }
+      ]
+    }
+  ],
+  "quality": [
+    {
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "stage": "taa",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    }
+  ],
+  "captures": [
+    {
+      "mode": "scan",
+      "frame": 31,
+      "file": "scan-frame-31.png"
+    },
+    {
+      "mode": "fused",
+      "frame": 31,
+      "file": "fused-frame-31.png"
+    }
+  ],
+  "gates": {
+    "nativeTimestamps": true,
+    "variantsExecuted": true,
+    "physicalReplay": true,
+    "finalCanonicalStages": true
+  },
+  "interpretation": "Same-device AB/BA pairs measure total CPU projection + cull, including moving the detector into Render IR. Both modes use the current detector and identical production shaders; this does not independently compare historical code. Profiler overhead and queued waits are present; these are not display FPS or frame interval. Final opaque/HDR/TAA snapshots do not replace multi-frame, full three-way and wet quality gates.",
+  "startedAt": "2026-10-12T01:57:14.298Z",
+  "completedAt": "2026-10-12T01:58:05.298Z",
+  "sourceState": {
+    "srcSha256": "09f7825cfcc0c24ed7f4d6d7c4bbaaf5d9890321a49a8ea381b08e5584119dab",
+    "distSha256": "5dcee4944f6c209204ca59b00f6c5ccc60274c2df4cf97a8db8f0c7229e0d04e",
+    "harnessSha256": "468c5eecf68f17b5ee8ac2abf7e81228bb42c92abfcfd5eecad65ae664f1601f",
+    "diagnosticSha256": "c4603dc6d9fd7dfbec2e6070594479c26944d8f873a8f024533a8744b43f0f18"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  }
+}

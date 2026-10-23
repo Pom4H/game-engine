@@ -1,0 +1,2268 @@
+{
+  "version": 1,
+  "status": "completed",
+  "scope": "Current-only instance streams, observed pose changes, no per-batch history commits without TAA, cheaper visual transform publication, and exact translation-only matrix copies without recomposing unchanged rotations/scales.",
+  "before": {
+    "directory": "artifacts\\engine-compare\\shadow-shared-after-20261013",
+    "sourceState": {
+      "srcSha256": "276d109ace562a183298e342e9692611987c72886c37887586d0da4f0cae18cf",
+      "distSha256": "ef79cadd84f3d9192b0c0189d12122dcd4161a56e31465dd365ed02da44df85e",
+      "harnessSha256": "0d7104e59353f8de0bcf8901d848635cec91b4440b16d27480e3a4206a081816",
+      "diagnosticSha256": "cee04830a067a75357062eeef0fe628e5a16db4d585e647aaa70cc22142cdbb7"
+    }
+  },
+  "intermediate": {
+    "directory": "artifacts\\engine-compare\\instance-current-after-20261013",
+    "sourceState": {
+      "srcSha256": "7c1600a279ef2d93c984701181b82ae69dc5083e2322288abbdf865ea5fef221",
+      "distSha256": "f1729ce8921021149bab3dc29a17ce3146b67454e94bcaed71f7f827fb5cecdc",
+      "harnessSha256": "75fbd0b82c391c89339210f653f385c0d6b0314215d2cf697daa0bd7c492d610",
+      "diagnosticSha256": "cf26ca1798a4bf25b05fc9bf2ef1f4dbcc8242b7fcccb0d23de04e0b45af8965"
+    },
+    "cases": 39
+  },
+  "after": {
+    "directory": "artifacts\\engine-compare\\translation-current-after-20261013",
+    "sourceState": {
+      "srcSha256": "e13909726a039ab653acd6a5eb202c9f537381c9952fd4248d74a64fc39aa756",
+      "distSha256": "3e39d3fbbb5c257e745d280387399dbfb037ab1fb4bd02066014f3d1fdc0d127",
+      "harnessSha256": "6b4036b310e1276d4ab5c1553d5138514d2e50c61d1c92265daf54078c5fa0cb",
+      "diagnosticSha256": "cf26ca1798a4bf25b05fc9bf2ef1f4dbcc8242b7fcccb0d23de04e0b45af8965"
+    },
+    "cases": 15
+  },
+  "tests": {
+    "passed": 335,
+    "failed": 0,
+    "mode": "Sequential Node tests, 512 MB old-space ceiling; normal concurrent run hit host memory exhaustion. Typecheck/build completed.",
+    "log": "artifacts/engine-compare/translation-current-serial-check-20261013.log"
+  },
+  "rows": [
+    {
+      "batch": "reference",
+      "backend": "engine",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "direct"
+      },
+      "cpuOriginal": {
+        "samples": 720,
+        "p50": 4.899999976158142,
+        "p95": 6.800000011920929,
+        "mean": 5.056805556515853
+      },
+      "cpuIntermediate": {
+        "samples": 720,
+        "p50": 2.900000035762787,
+        "p95": 4.600000023841858,
+        "mean": 3.212361110995213
+      },
+      "cpuFinal": {
+        "samples": 720,
+        "p50": 2.5,
+        "p95": 3.800000011920929,
+        "mean": 2.657777777728107
+      },
+      "cpuIntermediateP95ByRepetition": [
+        4.199999988079071,
+        3.699999988079071,
+        5.300000011920929
+      ],
+      "cpuFinalP95ByRepetition": [
+        3.800000011920929,
+        4.100000023841858,
+        3.399999976158142
+      ],
+      "gpuFinal": {
+        "samples": 720,
+        "p50": 5.69116,
+        "p95": 6.186920000000001,
+        "mean": 5.69502508333334
+      },
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 3720,
+        "p95": 3720,
+        "mean": 3720
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 21,
+        "p95": 21,
+        "mean": 21
+      },
+      "writesByRepetition": [
+        {
+          "samples": 240,
+          "p50": 12,
+          "p95": 12,
+          "mean": 12
+        },
+        {
+          "samples": 240,
+          "p50": 12,
+          "p95": 12,
+          "mean": 12
+        },
+        {
+          "samples": 240,
+          "p50": 12,
+          "p95": 12,
+          "mean": 12
+        }
+      ],
+      "translationUpdates": [
+        0,
+        0,
+        0
+      ],
+      "gpuPasses": [
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.01772,
+              "p95": 0.02348,
+              "mean": 0.018614000000000002
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.00004,
+              "p95": 0.00056,
+              "mean": 0.00024066666666666664
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 8,
+              "p95": 8,
+              "mean": 8
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 4.82268,
+              "p95": 5.55892,
+              "mean": 5.033942333333331
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.35032,
+              "p95": 0.3848,
+              "mean": 0.3542128333333333
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.32292,
+              "p95": 0.3644,
+              "mean": 0.3334342500000001
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.01792,
+              "p95": 0.024,
+              "mean": 0.019332333333333347
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0.00056,
+              "mean": 0.0002008333333333332
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 8,
+              "p95": 8,
+              "mean": 8
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 4.99048,
+              "p95": 5.40112,
+              "mean": 4.958484333333331
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.3418,
+              "p95": 0.37468,
+              "mean": 0.3462208333333333
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.31668,
+              "p95": 0.35108,
+              "mean": 0.32162750000000007
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.01756,
+              "p95": 0.02344,
+              "mean": 0.01890500000000001
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.00004,
+              "p95": 0.0006,
+              "mean": 0.00027449999999999984
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 8,
+              "p95": 8,
+              "mean": 8
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 5.06644,
+              "p95": 5.47816,
+              "mean": 5.021264333333337
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.33916,
+              "p95": 0.3622,
+              "mean": 0.3418646666666664
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.3126,
+              "p95": 0.341,
+              "mean": 0.3164568333333335
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "engine",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "cpuOriginal": {
+        "samples": 720,
+        "p50": 4.699999988079071,
+        "p95": 5.899999976158142,
+        "mean": 4.823055554264122
+      },
+      "cpuIntermediate": {
+        "samples": 720,
+        "p50": 3.900000035762787,
+        "p95": 5.099999964237213,
+        "mean": 3.947777779897054
+      },
+      "cpuFinal": {
+        "samples": 720,
+        "p50": 3.199999988079071,
+        "p95": 4.699999988079071,
+        "mean": 3.3301388880444898
+      },
+      "cpuIntermediateP95ByRepetition": [
+        5.299999952316284,
+        4.399999976158142,
+        4.600000023841858
+      ],
+      "cpuFinalP95ByRepetition": [
+        5.199999988079071,
+        3.900000035762787,
+        5
+      ],
+      "gpuFinal": {
+        "samples": 720,
+        "p50": 5.659799999999999,
+        "p95": 6.136760000000001,
+        "mean": 5.704066055555552
+      },
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 13320,
+        "p95": 13320,
+        "mean": 13320
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 22,
+        "p95": 22,
+        "mean": 22
+      },
+      "writesByRepetition": [
+        {
+          "samples": 240,
+          "p50": 112,
+          "p95": 112,
+          "mean": 112
+        },
+        {
+          "samples": 240,
+          "p50": 112,
+          "p95": 112,
+          "mean": 112
+        },
+        {
+          "samples": 240,
+          "p50": 112,
+          "p95": 112,
+          "mean": 112
+        }
+      ],
+      "translationUpdates": [
+        28700,
+        28700,
+        28700
+      ],
+      "gpuPasses": [
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.0208,
+              "p95": 0.0236,
+              "mean": 0.020107333333333328
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.00336,
+              "p95": 0.00372,
+              "mean": 0.0028566666666666658
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 9,
+              "p95": 9,
+              "mean": 9
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 4.93768,
+              "p95": 5.37332,
+              "mean": 4.958315166666665
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.3534,
+              "p95": 0.38068,
+              "mean": 0.3542018333333335
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.33036,
+              "p95": 0.35836,
+              "mean": 0.33020899999999986
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.01764,
+              "p95": 0.02308,
+              "mean": 0.018802
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.00204,
+              "p95": 0.00408,
+              "mean": 0.0027056666666666657
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 9,
+              "p95": 9,
+              "mean": 9
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 5.04436,
+              "p95": 5.68444,
+              "mean": 5.137816833333328
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.34124,
+              "p95": 0.36756,
+              "mean": 0.3449626666666667
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.3214,
+              "p95": 0.34796,
+              "mean": 0.32309866666666676
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.0178,
+              "p95": 0.02416,
+              "mean": 0.019346
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.00204,
+              "p95": 0.004,
+              "mean": 0.0025831666666666668
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 9,
+              "p95": 9,
+              "mean": 9
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 4.8972,
+              "p95": 5.4098,
+              "mean": 4.915327500000001
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.34896,
+              "p95": 0.37968,
+              "mean": 0.35306000000000026
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.32948,
+              "p95": 0.35732,
+              "mean": 0.32880566666666655
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "engine",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 1,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "cpuOriginal": {
+        "samples": 720,
+        "p50": 23.400000035762787,
+        "p95": 32.30000001192093,
+        "mean": 24.682916666898464
+      },
+      "cpuIntermediate": {
+        "samples": 720,
+        "p50": 21.200000047683716,
+        "p95": 43.90000003576279,
+        "mean": 28.556249997764827
+      },
+      "cpuFinal": {
+        "samples": 720,
+        "p50": 19.69999998807907,
+        "p95": 29,
+        "mean": 20.661388887796136
+      },
+      "cpuIntermediateP95ByRepetition": [
+        26.099999964237213,
+        26.69999998807907,
+        91.5
+      ],
+      "cpuFinalP95ByRepetition": [
+        22.30000001192093,
+        32.19999998807907,
+        26.600000023841858
+      ],
+      "gpuFinal": {
+        "samples": 720,
+        "p50": 12.8546,
+        "p95": 12.954720000000002,
+        "mean": 12.20350011111111
+      },
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 963720,
+        "p95": 963720,
+        "mean": 963720
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 22,
+        "p95": 22,
+        "mean": 22
+      },
+      "writesByRepetition": [
+        {
+          "samples": 240,
+          "p50": 13,
+          "p95": 13,
+          "mean": 13
+        },
+        {
+          "samples": 240,
+          "p50": 13,
+          "p95": 13,
+          "mean": 13
+        },
+        {
+          "samples": 240,
+          "p50": 13,
+          "p95": 13,
+          "mean": 13
+        }
+      ],
+      "translationUpdates": [
+        2870000,
+        2870000,
+        2870000
+      ],
+      "gpuPasses": [
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.01624,
+              "p95": 0.01736,
+              "mean": 0.016482333333333325
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.15748,
+              "p95": 0.16304,
+              "mean": 0.157292
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 9,
+              "p95": 9,
+              "mean": 9
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 10.1014,
+              "p95": 11.86476,
+              "mean": 10.244901166666658
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.3546,
+              "p95": 0.37136,
+              "mean": 0.35545383333333336
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.41792,
+              "p95": 0.4892,
+              "mean": 0.4227136666666664
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.01636,
+              "p95": 0.01728,
+              "mean": 0.016348833333333337
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.156,
+              "p95": 0.16084,
+              "mean": 0.1558595
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 9,
+              "p95": 9,
+              "mean": 9
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 11.83804,
+              "p95": 11.90344,
+              "mean": 11.719796166666669
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.37364,
+              "p95": 0.39276,
+              "mean": 0.37504383333333335
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.48968,
+              "p95": 0.49856,
+              "mean": 0.48400316666666665
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "compute:render.visibility": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.01604,
+              "p95": 0.01648,
+              "mean": 0.016002166666666665
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            }
+          },
+          "render:render.shadow.dynamic": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.15664,
+              "p95": 0.162,
+              "mean": 0.15668283333333324
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 9,
+              "p95": 9,
+              "mean": 9
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.opaque": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 11.8448,
+              "p95": 11.92556,
+              "mean": 11.631497000000005
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 11,
+              "p95": 11,
+              "mean": 11
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.main.transparent": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.37664,
+              "p95": 0.39156,
+              "mean": 0.37656900000000004
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:render.present": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.49084,
+              "p95": 0.49688,
+              "mean": 0.4818548333333333
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 1,
+              "p95": 1,
+              "mean": 1
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "three",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 1,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "cpuOriginal": {
+        "samples": 720,
+        "p50": 18,
+        "p95": 23.19999998807907,
+        "mean": 18.58569444335169
+      },
+      "cpuIntermediate": {
+        "samples": 720,
+        "p50": 15.399999976158142,
+        "p95": 22,
+        "mean": 16.43527777824137
+      },
+      "cpuFinal": {
+        "samples": 720,
+        "p50": 14.5,
+        "p95": 21.100000023841858,
+        "mean": 15.585277777744665
+      },
+      "cpuIntermediateP95ByRepetition": [
+        20.899999976158142,
+        22.30000001192093,
+        24.19999998807907
+      ],
+      "cpuFinalP95ByRepetition": [
+        21,
+        21.100000023841858,
+        21
+      ],
+      "gpuFinal": {
+        "samples": 720,
+        "p50": 6.739840000000001,
+        "p95": 7.332599999999999,
+        "mean": 6.814259555555558
+      },
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 640576,
+        "p95": 640576,
+        "mean": 640576
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 8,
+        "p95": 8,
+        "mean": 8
+      },
+      "writesByRepetition": [
+        {
+          "samples": 240,
+          "p50": 3,
+          "p95": 3,
+          "mean": 3
+        },
+        {
+          "samples": 240,
+          "p50": 3,
+          "p95": 3,
+          "mean": 3
+        },
+        {
+          "samples": 240,
+          "p50": 3,
+          "p95": 3,
+          "mean": 3
+        }
+      ],
+      "translationUpdates": [
+        null,
+        null,
+        null
+      ],
+      "gpuPasses": [
+        {
+          "render:": {
+            "gpuMs": {
+              "samples": 720,
+              "p50": 0.75728,
+              "p95": 5.5554,
+              "mean": 2.2981140555555557
+            },
+            "drawCalls": {
+              "samples": 720,
+              "p50": 3,
+              "p95": 4,
+              "mean": 2.6666666666666665
+            },
+            "indirectDrawCalls": {
+              "samples": 720,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 720,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "render:": {
+            "gpuMs": {
+              "samples": 720,
+              "p50": 0.76104,
+              "p95": 5.52172,
+              "mean": 2.277549388888889
+            },
+            "drawCalls": {
+              "samples": 720,
+              "p50": 3,
+              "p95": 4,
+              "mean": 2.6666666666666665
+            },
+            "indirectDrawCalls": {
+              "samples": 720,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 720,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "render:": {
+            "gpuMs": {
+              "samples": 720,
+              "p50": 0.76104,
+              "p95": 5.51132,
+              "mean": 2.238596111111112
+            },
+            "drawCalls": {
+              "samples": 720,
+              "p50": 3,
+              "p95": 4,
+              "mean": 2.6666666666666665
+            },
+            "indirectDrawCalls": {
+              "samples": 720,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 720,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "babylon",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 1,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "cpuOriginal": {
+        "samples": 720,
+        "p50": 13.599999964237213,
+        "p95": 18.100000023841858,
+        "mean": 14.04236111227009
+      },
+      "cpuIntermediate": {
+        "samples": 720,
+        "p50": 10.800000011920929,
+        "p95": 15,
+        "mean": 11.264583331926001
+      },
+      "cpuFinal": {
+        "samples": 720,
+        "p50": 13.400000035762787,
+        "p95": 22.900000035762787,
+        "mean": 15.488333332041899
+      },
+      "cpuIntermediateP95ByRepetition": [
+        14.600000023841858,
+        15.099999964237213,
+        14.900000035762787
+      ],
+      "cpuFinalP95ByRepetition": [
+        17.600000023841858,
+        33.39999997615814,
+        18.400000035762787
+      ],
+      "gpuFinal": {
+        "samples": 720,
+        "p50": 5.70568,
+        "p95": 5.8539200000000005,
+        "mean": 5.721671499999998
+      },
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 640816,
+        "p95": 640816,
+        "mean": 640816
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 7,
+        "p95": 7,
+        "mean": 7
+      },
+      "writesByRepetition": [
+        {
+          "samples": 240,
+          "p50": 4,
+          "p95": 4,
+          "mean": 4
+        },
+        {
+          "samples": 240,
+          "p50": 4,
+          "p95": 4,
+          "mean": 4
+        },
+        {
+          "samples": 240,
+          "p50": 4,
+          "p95": 4,
+          "mean": 4
+        }
+      ],
+      "translationUpdates": [
+        null,
+        null,
+        null
+      ],
+      "gpuPasses": [
+        {
+          "render:MainRenderPass": {
+            "gpuMs": {
+              "samples": 480,
+              "p50": 0.00004,
+              "p95": 5.0716,
+              "mean": 2.525169916666665
+            },
+            "drawCalls": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 4,
+              "mean": 2
+            },
+            "indirectDrawCalls": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:sun_shadowMap - RenderPass": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.66284,
+              "p95": 0.89356,
+              "mean": 0.6874248333333333
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 3,
+              "p95": 3,
+              "mean": 3
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "render:MainRenderPass": {
+            "gpuMs": {
+              "samples": 480,
+              "p50": 0.00004,
+              "p95": 5.06484,
+              "mean": 2.5245455833333312
+            },
+            "drawCalls": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 4,
+              "mean": 2
+            },
+            "indirectDrawCalls": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:sun_shadowMap - RenderPass": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.66944,
+              "p95": 0.68572,
+              "mean": 0.6737608333333338
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 3,
+              "p95": 3,
+              "mean": 3
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        },
+        {
+          "render:MainRenderPass": {
+            "gpuMs": {
+              "samples": 480,
+              "p50": 0.00004,
+              "p95": 5.04836,
+              "mean": 2.517709333333335
+            },
+            "drawCalls": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 4,
+              "mean": 2
+            },
+            "indirectDrawCalls": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 480,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          },
+          "render:sun_shadowMap - RenderPass": {
+            "gpuMs": {
+              "samples": 240,
+              "p50": 0.66644,
+              "p95": 0.6846,
+              "mean": 0.668979166666667
+            },
+            "drawCalls": {
+              "samples": 240,
+              "p50": 3,
+              "p95": 3,
+              "mean": 3
+            },
+            "indirectDrawCalls": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            },
+            "dispatches": {
+              "samples": 240,
+              "p50": 0,
+              "p95": 0,
+              "mean": 0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "images": {
+    "comparisons": [
+      {
+        "batch": "reference",
+        "backend": "engine",
+        "repetition": 0,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "reference",
+        "backend": "engine",
+        "repetition": 1,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "reference",
+        "backend": "engine",
+        "repetition": 2,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-1pct",
+        "backend": "engine",
+        "repetition": 0,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-1pct",
+        "backend": "engine",
+        "repetition": 1,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-1pct",
+        "backend": "engine",
+        "repetition": 2,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "engine",
+        "repetition": 0,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "engine",
+        "repetition": 1,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "engine",
+        "repetition": 2,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "three",
+        "repetition": 0,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "three",
+        "repetition": 1,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "three",
+        "repetition": 2,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "babylon",
+        "repetition": 0,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "babylon",
+        "repetition": 1,
+        "measuredExact": true,
+        "canonicalExact": true
+      },
+      {
+        "batch": "motion-api-100pct",
+        "backend": "babylon",
+        "repetition": 2,
+        "measuredExact": true,
+        "canonicalExact": true
+      }
+    ],
+    "allExact": true,
+    "temporalComparisons": [
+      {
+        "kind": "history",
+        "mode": "gpu",
+        "frame": 7,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "gpu",
+        "frame": 9,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "gpu",
+        "frame": 11,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "gpu",
+        "frame": 31,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "gpu",
+        "frame": 39,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "cpu-batched",
+        "frame": 7,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "cpu-batched",
+        "frame": 9,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "cpu-batched",
+        "frame": 11,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "cpu-batched",
+        "frame": 31,
+        "exact": true
+      },
+      {
+        "kind": "history",
+        "mode": "cpu-batched",
+        "frame": 39,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "gpu",
+        "frame": 7,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "gpu",
+        "frame": 9,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "gpu",
+        "frame": 11,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "gpu",
+        "frame": 31,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "gpu",
+        "frame": 39,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "cpu-batched",
+        "frame": 7,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "cpu-batched",
+        "frame": 9,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "cpu-batched",
+        "frame": 11,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "cpu-batched",
+        "frame": 31,
+        "exact": true
+      },
+      {
+        "kind": "models",
+        "mode": "cpu-batched",
+        "frame": 39,
+        "exact": true
+      }
+    ],
+    "temporalExact": true
+  },
+  "buffers": {
+    "history": {
+      "controls": {
+        "count": 32,
+        "width": 1920,
+        "height": 1080,
+        "temporalAA": true,
+        "instanceFloats": 40,
+        "frames": 40,
+        "modes": [
+          "gpu",
+          "cpu-batched"
+        ]
+      },
+      "gates": {
+        "productionMatrices": true,
+        "productionUploads": true,
+        "physicalMatrices": true,
+        "physicalReplay": true,
+        "offscreenReentry": true,
+        "replacementRemovalResetSceneSwap": true
+      },
+      "runs": [
+        {
+          "mode": "gpu",
+          "modelChannels": 52000,
+          "uploadChannels": 50720,
+          "physicalMotionFrames": 30
+        },
+        {
+          "mode": "cpu-batched",
+          "modelChannels": 52000,
+          "uploadChannels": 50720,
+          "physicalMotionFrames": 30
+        }
+      ]
+    },
+    "models": {
+      "controls": {
+        "count": 32,
+        "width": 1920,
+        "height": 1080,
+        "temporalAA": false,
+        "instanceFloats": 24,
+        "frames": 40,
+        "modes": [
+          "gpu",
+          "cpu-batched"
+        ]
+      },
+      "gates": {
+        "productionMatrices": true,
+        "productionUploads": true,
+        "physicalMatrices": true,
+        "physicalReplay": true,
+        "offscreenReentry": true,
+        "replacementRemovalResetSceneSwap": true
+      },
+      "runs": [
+        {
+          "mode": "gpu",
+          "modelChannels": 31712,
+          "uploadChannels": 30432,
+          "physicalMotionFrames": 30
+        },
+        {
+          "mode": "cpu-batched",
+          "modelChannels": 31712,
+          "uploadChannels": 30432,
+          "physicalMotionFrames": 30
+        }
+      ]
+    }
+  },
+  "cpuDiagnostic": {
+    "directory": "artifacts/engine-compare/translation-current-cpu-profile-20261013",
+    "cpuMs": {
+      "samples": 120,
+      "p50": 16.399999976158142,
+      "p95": 23.80000001192093,
+      "mean": 18.018333334724108
+    },
+    "coveredGpuApiMs": {
+      "samples": 120,
+      "p50": 0.4999999403953552,
+      "p95": 0.800000011920929,
+      "mean": 0.4999999975164731
+    },
+    "apiScope": "Synchronous host duration inside covered native WebGPU calls; exclusive totals avoid nested double counting. Remaining wall time includes JavaScript, hook/timer overhead and uninstrumented native APIs, including GPUCanvasContext.getCurrentTexture. Native call time is not GPU execution time or proof of a stall source.",
+    "phaseExclusiveMeanMs": {
+      "projection": 5.001666666070622,
+      "lifecycle": 0.0016666670640309651,
+      "resize": 0.003333333134651184,
+      "materials": 0,
+      "lights": 0.0008333330353101094,
+      "environment": 0.005000000198682149,
+      "frame": 0.06749999920527143,
+      "visibility": 0.0008333330353101094,
+      "prepare": 7.312500000496705,
+      "cull": 2.8224999984105446,
+      "encode.visibility": 0.03749999950329465,
+      "encode.shadow": 0.07166666686534887,
+      "encode.probe": 0.0016666665673255921,
+      "encode.main": 0.08416666934887564,
+      "encode.present": 0.0391666650772095,
+      "submit": 0.035000001887480425
+    },
+    "covered": {
+      "samples": 120,
+      "p50": 14.199999988079071,
+      "p95": 20.499999940395355,
+      "mean": 15.484999999900658
+    },
+    "remaining": {
+      "samples": 120,
+      "p50": 2.399999976158142,
+      "p95": 3.699999988079071,
+      "mean": 2.5333333348234492
+    },
+    "scope": "Separate instrumented diagnostic, outside comparative timings; includes timer overhead."
+  },
+  "benchmarkGates": {
+    "allCasesCompleted": true,
+    "sceneAndMotionInputsMatched": true,
+    "sharedEffectsAudited": true,
+    "nativeHardware": true,
+    "frameBudget": false,
+    "equalPixelQualityEstablished": false,
+    "exclusiveGPUUseEstablished": false,
+    "canonicalRepeatability": true
+  },
+  "memoryBefore": {
+    "timeUtc": "2026-10-13T12:20:10.0484193Z",
+    "totalVisibleKiB": 12375548,
+    "freePhysicalKiB": 328752,
+    "totalVirtualKiB": 50124284,
+    "freeVirtualKiB": 3902180
+  },
+  "limits": "Sequential local timings and host memory pressure limit causal/confidence claims. The intermediate dense API engine repetitions were 26.1/26.7/91.5 ms p95; all repetitions are retained. No isolated causal significance, equal cross-engine image quality, exclusive GPU use, or displayed FPS claim. Pose/material membership scans still observe direct public writes every frame; changed compact records still include color/weather. Full TAA retains 40 floats and previous matrices. Opaque shader work has not been simplified."
+}

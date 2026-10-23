@@ -1,0 +1,509 @@
+{
+  "date": "2026-10-16T12:17:57.450Z",
+  "scope": "Original Game dynamic models and poses in the installed Office; main Game and Office share the existing authority and account body. Full integration goal remains active.",
+  "implementation": {
+    "source": "The original dynamicScene, drawAvatar, cached vehicle/cabin/wheel/aircraft assets, humanoid style and pose code; registerFleet installs the exact original catalog without spawning vehicles.",
+    "library": "/build/office-controller.js?capability=original-models-2",
+    "loading": "Model factory and GameNetwork share one loaded library. Observer model loading opens no gameplay session and captures no microphone. Missing original models produce a visible error; the box-avatar/car surrogate renderer was removed.",
+    "projection": "The existing TheGameEngineProjection can draw into the host Scene with a namespace and preserve its camera/weather. Default main Game ownership/IDs/disposal stay unchanged; an injected Scene disposes only its owned meshes.",
+    "coordinates": "The original local primitive stream is rebased once, rotated into Office coordinates, shifted by the selected floor and placement offset. Non-instanced triangles rotate positions and normals while preserving triangle attributes. The authority pose is unchanged.",
+    "ownership": "Optional local per-instance owner IDs allow the camera to ignore avatar parts. The packed GPU stream remains 30 float32 values per instance; no wire or skeletal payload was added.",
+    "clockWeather": "Presented authority time, rain, night, rotated wind and absolute floor height feed frame uniforms without a local physics/NPC step.",
+    "diagnostics": "Asset counts use the lightweight build counter, rather than a whole-scene projection inspection every frame."
+  },
+  "oracle": {
+    "states": 12,
+    "vertices": 478314,
+    "maxPositionError": 0.0000015299771043419952,
+    "maxNormalError": 0.000004640606933892233,
+    "scope": "12 original main-Game versus embedded-Office states: sedan, crossover, compact, van, bike, monoplane; idle/walk, seat pose, partial doors, damage, quaternion pose, rotation and floor offset. Expanded indexed triangle corners compare geometry and normals; colours, UVs, seeds and materials remain equal. This is not whole-scene HDR parity.",
+    "rounding": "The Office rotation is packed into the same float32 instance ABI. The measured normal error is below 1e-5; no exact zero-error normal claim."
+  },
+  "native": {
+    "command": "bun tools/capture.ts --live --office",
+    "cwd": "C:\\Users\\Roman\\Documents\\thegame",
+    "env": {
+      "CAPTURE_EXISTING": "1",
+      "CAPTURE_PORT": "3007",
+      "CAPTURE_DEBUG_PORT": "3198",
+      "CAPTURE_GPU": "1",
+      "OFFICE_WALKING_QA": "1",
+      "OFFICE_CAMERA_QA": "1",
+      "PERF_FIXED_SETTINGS": "1",
+      "PERF_WARMUP_FRAMES": "180",
+      "PERF_LIVE_FRAMES": "900",
+      "PERF_LABEL": "office-source-assets-release"
+    },
+    "browserMode": "native-gpu",
+    "entryContinuity": {
+      "expectedActorId": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+      "actor": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+      "matched": true
+    },
+    "distance": 1.7990988847963443,
+    "records": [
+      {
+        "name": "observer",
+        "actors": 12,
+        "vehicles": 4,
+        "meshes": 245,
+        "builds": 15,
+        "sourceReady": "ready",
+        "subjectVisible": false,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 447.38093333307876,
+        "presentedTime": 447.38093333307876,
+        "camera": {
+          "distance": 44,
+          "desiredDistance": 44,
+          "hit": null,
+          "body": null,
+          "anchor": [
+            0,
+            0.16,
+            -0.2
+          ],
+          "position": [
+            23.639336979553484,
+            26.78820185238574,
+            25.648029195196212
+          ]
+        }
+      },
+      {
+        "name": "entered",
+        "actors": 1,
+        "vehicles": 11,
+        "meshes": 234,
+        "builds": 32,
+        "sourceReady": "ready",
+        "subjectVisible": true,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 448.59999999975634,
+        "presentedTime": 448.59999999975634,
+        "ack": 8,
+        "camera": {
+          "distance": 6.473037656546607,
+          "desiredDistance": 8.000000000000007,
+          "hit": "batch:canonical:city:14791:52",
+          "body": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+          "anchor": [
+            47.00000000000006,
+            -5.279999999999999,
+            433.4
+          ],
+          "position": [
+            51.146731324802396,
+            -3.24379880764152,
+            437.93417252949325
+          ]
+        }
+      },
+      {
+        "name": "orbit-1",
+        "actors": 4,
+        "vehicles": 26,
+        "meshes": 820,
+        "builds": 77,
+        "sourceReady": "ready",
+        "subjectVisible": true,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 450.34001418219054,
+        "presentedTime": 450.34001418219054,
+        "ack": 41,
+        "camera": {
+          "distance": 7.999999999999996,
+          "desiredDistance": 7.999999999999996,
+          "hit": null,
+          "body": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+          "anchor": [
+            47.00000000000006,
+            -5.279999999999999,
+            433.4
+          ],
+          "position": [
+            52.603770712396376,
+            -2.7634675150710573,
+            428.2750787269279
+          ]
+        }
+      },
+      {
+        "name": "orbit-2",
+        "actors": 4,
+        "vehicles": 27,
+        "meshes": 822,
+        "builds": 78,
+        "sourceReady": "ready",
+        "subjectVisible": true,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 451.1183163657536,
+        "presentedTime": 451.1183163657536,
+        "ack": 62,
+        "camera": {
+          "distance": 7.9999999999999885,
+          "desiredDistance": 7.9999999999999885,
+          "hit": null,
+          "body": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+          "anchor": [
+            47.00000000000006,
+            -5.279999999999999,
+            433.4
+          ],
+          "position": [
+            41.877851033017905,
+            -2.7634675150710573,
+            427.79369513740636
+          ]
+        }
+      },
+      {
+        "name": "orbit-3",
+        "actors": 11,
+        "vehicles": 32,
+        "meshes": 992,
+        "builds": 85,
+        "sourceReady": "ready",
+        "subjectVisible": true,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 453.0626799997537,
+        "presentedTime": 453.0626799997537,
+        "ack": 133,
+        "camera": {
+          "distance": 8.000000000000014,
+          "desiredDistance": 8.000000000000014,
+          "hit": null,
+          "body": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+          "anchor": [
+            47.00000000000006,
+            -5.279999999999999,
+            433.4
+          ],
+          "position": [
+            41.39621028415931,
+            -2.7634675150710573,
+            438.5249004939545
+          ]
+        }
+      },
+      {
+        "name": "orbit-4",
+        "actors": 10,
+        "vehicles": 31,
+        "meshes": 984,
+        "builds": 85,
+        "sourceReady": "ready",
+        "subjectVisible": true,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 454.38447999975364,
+        "presentedTime": 454.38447999975364,
+        "ack": 180,
+        "camera": {
+          "distance": 6.473076414669761,
+          "desiredDistance": 8.000000000000016,
+          "hit": "batch:canonical:city:14791:52",
+          "body": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+          "anchor": [
+            47.00000000000006,
+            -5.279999999999999,
+            433.4
+          ],
+          "position": [
+            51.146731348669036,
+            -3.243786615632026,
+            437.9342223639165
+          ]
+        }
+      },
+      {
+        "name": "walk-KeyW",
+        "actors": 10,
+        "vehicles": 31,
+        "meshes": 984,
+        "builds": 85,
+        "sourceReady": "ready",
+        "subjectVisible": true,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 456.03999566317475,
+        "presentedTime": 456.03999566317475,
+        "ack": 237,
+        "camera": {
+          "distance": 7.999999999999982,
+          "desiredDistance": 7.999999999999982,
+          "hit": null,
+          "body": "player:2be97f2a-a4d3-4c5d-9716-64a1ef57be6f",
+          "anchor": [
+            45.785600260194535,
+            -5.279999999999999,
+            432.07260026019446
+          ],
+          "position": [
+            50.91060874716366,
+            -2.7634675150710573,
+            437.6762912099874
+          ]
+        }
+      },
+      {
+        "name": "returned-observer",
+        "actors": 8,
+        "vehicles": 6,
+        "meshes": 192,
+        "builds": 100,
+        "sourceReady": "ready",
+        "subjectVisible": false,
+        "renderError": null,
+        "gpuErrors": [],
+        "physicsSteps": 0,
+        "physicsBodies": 0,
+        "time": 456.72426666640365,
+        "presentedTime": 456.72426666640365,
+        "camera": {
+          "distance": 42.42269303786952,
+          "desiredDistance": 42.42269303786952,
+          "hit": null,
+          "body": null,
+          "anchor": [
+            0,
+            0.16,
+            -0.2
+          ],
+          "position": [
+            23.0404064352681,
+            25.342672911546675,
+            24.992410383149384
+          ]
+        }
+      }
+    ],
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "mainGame": {
+      "officeNativeParts": 231,
+      "gpuErrors": [],
+      "physicalBodies": 0,
+      "captures": [
+        {
+          "name": "workplaces",
+          "sha256": "fbfa2cac972fa04dd36a65c1f16e88a0d89209a4d43297b07651e4e4a79ca7a9"
+        },
+        {
+          "name": "entrance",
+          "sha256": "2bb56fa51676f08555efc911ef36b050a37720e6092acdaa09a1214921b48bdd"
+        },
+        {
+          "name": "canonical-lobby",
+          "sha256": "f2b5717c1f858020495066d754b14327d12a6ef83ab15fceb6d356f563092b22"
+        },
+        {
+          "name": "upper-office",
+          "sha256": "f838924878d8f32bd87fdca2d32dd3ab0819bd8eddea90342e298251b6792143"
+        }
+      ]
+    }
+  },
+  "performance": {
+    "averageFPS": 35.66164233750178,
+    "frames": 900,
+    "durationMs": 25237.2,
+    "warmupFrames": 180,
+    "p50Ms": 27.599999999998545,
+    "p95Ms": 39.700000000004366,
+    "browser": {
+      "mode": "native-gpu",
+      "batterySaverRequested": "default",
+      "backend": "webgpu",
+      "width": 1280,
+      "height": 720,
+      "renderResolution": [
+        704,
+        396
+      ]
+    },
+    "drawDistance": 420,
+    "adaptive": false,
+    "network": "WebTransport / QUIC",
+    "mainEntryOnly": true,
+    "limits": "A short stationary live-world measurement, not Office FPS, a whole-map benchmark or a paired speedup. An earlier same-phase moving-world run gave 48.03 FPS; the final run is 35.66 FPS. Sustained 60 FPS is not established. HUD numbers on staged screenshots are not additional averaged measurements."
+  },
+  "checks": {
+    "game": "Final typecheck/build passed. 39 tests / 6500 Bun assertions across office-dynamic-assets, the-engine-renderer, rendering and aircraft-instances passed; the geometry oracle also uses Node assertions.",
+    "officeAdapter": "Final typecheck and 37 tests / 4308 assertions passed, including original assets, floor/city switches, shared library loading, clock/rain/wind and no local physics.",
+    "officeUi": "Final TypeScript and Vite build passed. Existing >1500 kB chunk warning remains.",
+    "whitespace": "Selected changed production/test source paths passed git diff --check."
+  },
+  "rejectedAttempts": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/source-assets-first/report.json",
+      "reason": "Missing registerFleet caused Unknown transport asset: crossover; later frame updates stopped. The exact original registry is now installed by the model factory."
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-final/report.json",
+      "reason": "The first combined run moved only about .054 m during short timed key holds. It failed walking acceptance; its underlying cause was not established. The harness now waits until the trusted key is observed, holds for 900 ms, records canonical control diagnostics and requires actual body motion. Subsequent continuity and release runs passed."
+    }
+  ],
+  "reviewedImages": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-source-assets-release-game/workplaces.png",
+      "sha256": "fbfa2cac972fa04dd36a65c1f16e88a0d89209a4d43297b07651e4e4a79ca7a9"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-source-assets-release-game/entrance.png",
+      "sha256": "2bb56fa51676f08555efc911ef36b050a37720e6092acdaa09a1214921b48bdd"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-source-assets-release-game/canonical-lobby.png",
+      "sha256": "f2b5717c1f858020495066d754b14327d12a6ef83ab15fceb6d356f563092b22"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-source-assets-release-game/upper-office.png",
+      "sha256": "f838924878d8f32bd87fdca2d32dd3ab0819bd8eddea90342e298251b6792143"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-source-assets-release-game/office-entry.png",
+      "sha256": "879dbd284791d54c247eeec171b32311e15097a2e28b80a21e9c5702b0358384"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/observer.png",
+      "sha256": "1f8bed0f77ed0b188f08b9fc78bf8eb25214bfb76cb09efbffc7b1e4d3d2db72"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/entered.png",
+      "sha256": "fd91e2c3cb207a261b16f774e5a85c5f07c52199e50f0861034a5afd26f12792"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/orbit-1.png",
+      "sha256": "5678ea325e67fc862d3535d4fe390af6d1fd298730a322346d1031aa50604646"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/orbit-2.png",
+      "sha256": "239a7b79d5db5a44678cc9c555f6d0388a2fdbf45e0baa74ed92a05d13eebdc5"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/orbit-3.png",
+      "sha256": "de0f67ea0038be8accec6461cdf22fea725c60c402361b3dcf9f610a0ee16f61"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/orbit-4.png",
+      "sha256": "12ddab2427cfb4de2096cd944be175c27b36c8f19b7f45acd9d433be2cf4fa29"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/walk-KeyW.png",
+      "sha256": "32a268b809727a2b387ed5737e3a96cbf5ce3fa75e16371d4f64eecb9d1af153"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/office-source-assets-release/returned-observer.png",
+      "sha256": "74dcd7947a83e8a277d74261ca1ff70531573341d2f1b122fb37ae09d036a9c2"
+    }
+  ],
+  "visualLimits": [
+    "All 13 saved release PNGs were inspected. The initial office-entry.png is a transient floor-only view before the city appears; the settled observer and all controlled views show real surrounding terrain/city and original models. Do not use that initial image as full-world startup acceptance.",
+    "The settled outside views are dark at the shared city evening clock. Complete sky, static-material and lighting parity still needs work.",
+    "The original Game distance/detail policy can use cheap distant hulls and one-body-per-frame warmup; no new all-nearby full-detail guarantee is claimed.",
+    "Physical microphone publishing, fresh harness actions, Office vehicle driving/boarding and every NPC possession/floor handoff were not freshly accepted here. Existing native audio services were left running.",
+    "Browser diagnostics still contain autoplay/powerPreference/atomFamily warnings and a 404 whose URL the current harness does not record. Zero Engine GPU/render errors is the narrower verified result.",
+    "Office E is currently lift-specific; the main Games contextual vehicle boarding/actions still need Office UI wiring and verification. The CPU seat-pose oracle does not prove playable Office boarding."
+  ],
+  "runtime": {
+    "pid": 1960,
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "characterMotor": "the-engine",
+    "rigidBodySolver": "the-engine-compound",
+    "vehicleStepHz": 120,
+    "editorRevision": 53,
+    "officeObjects": 45,
+    "restart": "No Game, Office/backend or microphone service restart during this phase."
+  },
+  "bundles": [
+    {
+      "name": "game.js",
+      "bytes": 2464663,
+      "sha256": "3744f253facbb4e1bcdfd7489bb2bf7c7e9dadfc5999a0d11fad1aeb15471171"
+    },
+    {
+      "name": "office-controller.js",
+      "bytes": 1212805,
+      "sha256": "e851eed0f44d3eade9d29204020d8780733460783478fe0fce74f7aafabda8f5"
+    }
+  ],
+  "sources": {
+    "game/src/game/office-dynamic-assets.ts": "f6686f5380db76f708be45ef5c0ec4e66bee3b9e578d46e88d92668720da7d3e",
+    "game/src/game/office-controller.ts": "87e878126fa76144f43cd6439f6b14c9f145bc20cfa8752db6f55acd3a13044d",
+    "game/src/game/primitive-instances.ts": "9633ae53b7d6f4a5be9abdb76bfff0cb826715b3c761d844c744c0802484beab",
+    "game/src/game/presentation.ts": "2898420ca913d1ebb06486ff5ac2809467d304878db47c725c36b709544a948f",
+    "game/src/game/render/the-engine-projection.ts": "ce34515208aaf748713f4986cfd57619ad538390be8dcd16533352b3e338869f",
+    "game/src/game/render/the-engine-geometry.ts": "86e73c051f0048ff646f7e3056ed353da0ff51bf4918f5c4b33dcbc62a02204e",
+    "game/src/game/transport/pose.ts": "1623e838e8ce3d7f7c147b881c3ad843583da4f9fe4ecdf1a9035d259d3bd828",
+    "game/src/game/transport/cabin.ts": "d038ff81556bacd4f45e774189f08918f5eba60ac48c307ea2b96c61a98cf897",
+    "game/src/game/transport/rig.ts": "06471d7c51bcf4ee4f7ce94f3fa008b4e413d9cbfede3b118d1a01daa60a969c",
+    "game/src/game/fleet.ts": "90dbd39fe63fc599325cf1d84f4734ee7652ff96647cf90cbe6cd1ff49ab77f4",
+    "game/src/game/runtime/scene.js": "70b2cd7e1ef235b96ac6e09b370aecb84dbb5d502abe9c60b980cbe81bf5595b",
+    "game/test/office-dynamic-assets.test.ts": "f60cb7a2df8f9eb5a33bd10eafd6cdaad4ea31c732e5a34149e6a303b5597169",
+    "game/tools/qa-office.ts": "fad3afea3b7767a3db23fa2958ba903143b3decf8fb6bfa5da8df3496fb9d83a",
+    "game/tools/qa-office-walking.ts": "9b60f2b42a9079b8d2e7945fb650d901d2bd6391eb33466ab81c73b3d9e40285",
+    "engine/apps/thegame/client/canonical-actors.ts": "2e6abd2ac66d929b5b86bc1a8ae22a73d41176b75cc3f6f339e439b655dc71f6",
+    "engine/apps/thegame/client/canonical-connection.ts": "e3844da3ca5fbe41fe9a30128aa50cae49fb9cfd0fa1a3e5889e476479194534",
+    "engine/apps/thegame/client/canonical-world-view.ts": "fefaaed7965c6be00aaab52880f9926716631053b4bcec7878b7b333ff60a187",
+    "engine/apps/thegame/test/canonical-world-view.test.ts": "f049cbed12258508e4b39c2dcb737742febecbf25a760869cb7612fc38d232a6",
+    "engine/apps/thegame/test/canonical-connection.test.ts": "6ec68c782367471352c9b7c6232e92cfe1967b0e89554bab72736bb037aee589",
+    "office/ui/src/office/scene.ts": "a0a16c1f0a67cfa20b3991cfe096eab1baf3be28901a9fc3dedb2fa59bb59325"
+  },
+  "artifacts": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-source-assets-release\\report.json",
+      "sha256": "6a88bc9579645fd2797ce22be2f3882ec68ec529bbe32ed33fcf2c2cd6248ae5"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-source-assets-release-game\\report.json",
+      "sha256": "e83347e60edba7258603fbf63fa9dc6e53d0035508a9c8946001ff17a9d083e4"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\performance-live-office-source-assets-release.json",
+      "sha256": "e4490a9d78a092d788f4a128b23ff2ef961f9e57010d5c0f84c09f5a4ab4f863"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-source-assets-native-release.log",
+      "sha256": "2991a34bef971328eed4f449c93a88b4c73fb8a7f49c35ea6c30bce94ae8f060"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-source-assets-tests-final.log",
+      "sha256": "4ca82d5c2e96666be4968c07444efbb6424306a9ef549d074dc608724d9dd22f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\office-assets-app-tests-final.log",
+      "sha256": "5d58336ef8970273be52058bce51d956185c55c5e7305d632e8f9dbc5580470d"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\office-assets-ui-build-final.log",
+      "sha256": "d034a03f147192749ef58df3ac11079f124c627615c0a5ef273e008e4bdbeb6c"
+    }
+  ],
+  "completion": "Not complete. Static-world/material/lighting fidelity, performance and remaining interactive/audio flows still need verification against the full objective."
+}

@@ -1,0 +1,617 @@
+{
+  "measuredAt": "2026-10-16T21:33:37.956Z",
+  "command": "bun tools/capture.ts --live",
+  "exitCode": 0,
+  "environment": {
+    "CAPTURE_EXISTING": "1",
+    "CAPTURE_PORT": "3007",
+    "CAPTURE_DEBUG_PORT": "3218",
+    "CAPTURE_GPU": "1",
+    "PERF_FIXED_SETTINGS": "1",
+    "PERF_WARMUP_FRAMES": "180",
+    "PERF_LIVE_FRAMES": "900",
+    "PERF_LABEL": "fps-live-20261017-camera-depth"
+  },
+  "hardware": {
+    "Name": "AMD Radeon 760M Graphics",
+    "DriverVersion": "32.0.31041.1004"
+  },
+  "frames": 900,
+  "warmupFrames": 180,
+  "profiled": false,
+  "averageFPS": 58.70343676009209,
+  "p50Ms": 18.900000000001455,
+  "p95Ms": 28.900000000001455,
+  "derivedIntervalSumMs": 15331.300000000003,
+  "browser": {
+    "mode": "native-gpu",
+    "batterySaverRequested": "default",
+    "backend": "webgpu",
+    "width": 1280,
+    "height": 720,
+    "renderResolution": [
+      704,
+      396
+    ]
+  },
+  "engine": "the-engine",
+  "settings": {
+    "environmentMode": "world",
+    "preset": "clear",
+    "hiz": false,
+    "taa": true,
+    "bloom": false,
+    "groundLitter": true,
+    "motionBlur": 0,
+    "dof": 0,
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "visual": {
+      "sunElevation": 0.9075712110370514,
+      "sunTemperature": 5700,
+      "skyTurbidity": 2.2,
+      "humidity": 0.42,
+      "cloudCoverage": 0.16,
+      "fogDensity": 0.00065,
+      "wetness": 0,
+      "exposureBias": -0.25,
+      "artificialLightIntensity": 0.02,
+      "sunIntensity": 4.2,
+      "skyIntensity": 0.7
+    }
+  },
+  "adaptive": {
+    "enabled": false,
+    "objective": "balanced",
+    "worker": "background-worker",
+    "frame": {
+      "targetFrameMs": 9.754013870787933
+    },
+    "network": {
+      "frames": 8,
+      "snapshotAgeMs": 42.399999994042446,
+      "headroomMs": 56.332991745875916,
+      "playbackTime": 212.643667008225,
+      "latestTime": 212.69999999997088,
+      "underrun": false
+    },
+    "analysis": {
+      "samples": 240,
+      "targetFrameMs": 9.658252335540414,
+      "frame": {
+        "p50": 9.600000000002183,
+        "p95": 10.599999999998545,
+        "p99": 241.79999999999927,
+        "max": 1096.699999999997
+      },
+      "mainThread": {
+        "p95": 1085,
+        "p99": 1085
+      },
+      "rendererCpu": {
+        "p95": 130,
+        "p99": 130
+      },
+      "gpu": {
+        "p95": null,
+        "p99": null,
+        "passes": null
+      },
+      "network": {
+        "underruns": 0,
+        "snapshotAgeP95": null,
+        "headroomP05": null
+      },
+      "freezes": {
+        "cpu-stall": 2,
+        "display-hitch": 1,
+        "streaming-stall": 3
+      },
+      "causes": [
+        {
+          "key": "compute:streaming.chunk-total",
+          "count": 17,
+          "totalMs": 4705.299999773502,
+          "p95Ms": 279.2999999821186
+        },
+        {
+          "key": "streaming:initial-world-commit",
+          "count": 1,
+          "totalMs": 85.09999999403954,
+          "p95Ms": 85.09999999403954
+        },
+        {
+          "key": "streaming:gpu-world-commit",
+          "count": 2,
+          "totalMs": 32.900000005960464,
+          "p95Ms": 20.400000005960464
+        },
+        {
+          "key": "compute-broker:placement:streaming.chunk-total",
+          "count": 17,
+          "totalMs": 0,
+          "p95Ms": null
+        },
+        {
+          "key": "streaming:initial-world-staged",
+          "count": 1,
+          "totalMs": 0,
+          "p95Ms": 0
+        }
+      ],
+      "costs": [
+        {
+          "operation": "renderer.frame-submit",
+          "executor": "main",
+          "bucket": "c512:b0:k1",
+          "samples": 3,
+          "ewmaMs": 76.28199999436737,
+          "p95Ms": 130,
+          "bytesP50": null,
+          "updatedAt": 1792186395542
+        },
+        {
+          "operation": "streaming.chunk-total",
+          "executor": "worker",
+          "bucket": "c1:b0:k1",
+          "samples": 17,
+          "ewmaMs": 277.48038729689586,
+          "p95Ms": 279.2999999821186,
+          "bytesP50": null,
+          "updatedAt": 1792186395197
+        }
+      ]
+    },
+    "lastDecision": {
+      "key": "balanced:distance-down",
+      "objective": "balanced",
+      "reason": "balanced scene pressure: trim far draw distance; quality Δ -3.6%",
+      "options": {
+        "drawDistance": 340
+      },
+      "confidence": 0.6909090909090909,
+      "experimental": false
+    },
+    "appliedDecision": {
+      "key": "balanced:distance-down",
+      "objective": "balanced",
+      "reason": "balanced scene pressure: trim far draw distance; quality Δ -3.6%",
+      "options": {
+        "drawDistance": 340
+      },
+      "confidence": 0.6909090909090909,
+      "experimental": false
+    },
+    "trial": null,
+    "profile": {
+      "costs": 2,
+      "trials": 0,
+      "updatedAt": 1792186394901
+    },
+    "placements": [],
+    "freezes": [
+      {
+        "id": 214,
+        "at": 43000.2,
+        "durationMs": 29.599999999998545,
+        "classification": "display-hitch",
+        "severity": "noticeable",
+        "evidence": {
+          "intervalMs": 29.599999999998545,
+          "targetFrameMs": 9.755223363983811,
+          "mainThreadMs": 12.900000005960464,
+          "rendererCpuMs": 12.900000005960464,
+          "gpuFrameMs": 8.002880000000001,
+          "snapshotAgeMs": -9.80000000596192,
+          "interpolationHeadroomMs": 82.1988376110312,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 215,
+        "at": 43073.9,
+        "durationMs": 26.200000000004366,
+        "classification": "cpu-stall",
+        "severity": "noticeable",
+        "evidence": {
+          "intervalMs": 26.200000000004366,
+          "targetFrameMs": 9.73284817327719,
+          "mainThreadMs": 16.700000017881393,
+          "rendererCpuMs": 16.700000017881393,
+          "gpuFrameMs": 8.002880000000001,
+          "snapshotAgeMs": 34.50000001191802,
+          "interpolationHeadroomMs": 54.71995001610708,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 216,
+        "at": 43171.1,
+        "durationMs": 29.599999999998545,
+        "classification": "display-hitch",
+        "severity": "noticeable",
+        "evidence": {
+          "intervalMs": 29.599999999998545,
+          "targetFrameMs": 9.749648540849496,
+          "mainThreadMs": 9.900000005960464,
+          "rendererCpuMs": 9.900000005960464,
+          "gpuFrameMs": 8.08208,
+          "snapshotAgeMs": 24,
+          "interpolationHeadroomMs": 61.314749672249036,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 217,
+        "at": 43372.7,
+        "durationMs": 28.69999999999709,
+        "classification": "display-hitch",
+        "severity": "noticeable",
+        "evidence": {
+          "intervalMs": 28.69999999999709,
+          "targetFrameMs": 9.788636108955943,
+          "mainThreadMs": 12,
+          "rendererCpuMs": 12,
+          "gpuFrameMs": 8.713479999999999,
+          "snapshotAgeMs": 11.5,
+          "interpolationHeadroomMs": 58.08857670254497,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 218,
+        "at": 43508.2,
+        "durationMs": 20.39999999999418,
+        "classification": "display-hitch",
+        "severity": "micro",
+        "evidence": {
+          "intervalMs": 20.39999999999418,
+          "targetFrameMs": 9.766633114965124,
+          "mainThreadMs": 9.5,
+          "rendererCpuMs": 9.5,
+          "gpuFrameMs": 8.713479999999999,
+          "snapshotAgeMs": 17.80000000000291,
+          "interpolationHeadroomMs": 65.45596375326568,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 219,
+        "at": 43594.8,
+        "durationMs": 38.5,
+        "classification": "display-hitch",
+        "severity": "noticeable",
+        "evidence": {
+          "intervalMs": 38.5,
+          "targetFrameMs": 9.752634121516257,
+          "mainThreadMs": 13.400000005960464,
+          "rendererCpuMs": 13.400000005960464,
+          "gpuFrameMs": 7.753400000000001,
+          "snapshotAgeMs": 43.500000017884304,
+          "interpolationHeadroomMs": 45.80837349647027,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 220,
+        "at": 43682.3,
+        "durationMs": 20.10000000000582,
+        "classification": "display-hitch",
+        "severity": "micro",
+        "evidence": {
+          "intervalMs": 20.10000000000582,
+          "targetFrameMs": 9.742055097870596,
+          "mainThreadMs": 10.699999988079071,
+          "rendererCpuMs": 10.699999988079071,
+          "gpuFrameMs": 7.753400000000001,
+          "snapshotAgeMs": 6.400000017878483,
+          "interpolationHeadroomMs": 90.80333006022556,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 221,
+        "at": 43750.3,
+        "durationMs": 20.900000000001455,
+        "classification": "display-hitch",
+        "severity": "micro",
+        "evidence": {
+          "intervalMs": 20.900000000001455,
+          "targetFrameMs": 9.731793444934523,
+          "mainThreadMs": 12.600000023841858,
+          "rendererCpuMs": 12.600000023841858,
+          "gpuFrameMs": 7.753400000000001,
+          "snapshotAgeMs": 9.600000017882849,
+          "interpolationHeadroomMs": 72.47082556557416,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 222,
+        "at": 43771.1,
+        "durationMs": 20.799999999995634,
+        "classification": "display-hitch",
+        "severity": "micro",
+        "evidence": {
+          "intervalMs": 20.799999999995634,
+          "targetFrameMs": 9.731793444934523,
+          "mainThreadMs": 14.900000005960464,
+          "rendererCpuMs": 14.900000005960464,
+          "gpuFrameMs": 7.753400000000001,
+          "snapshotAgeMs": 30.500000017884304,
+          "interpolationHeadroomMs": 51.446645056188345,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 223,
+        "at": 43809,
+        "durationMs": 37.900000000001455,
+        "classification": "display-hitch",
+        "severity": "noticeable",
+        "evidence": {
+          "intervalMs": 37.900000000001455,
+          "targetFrameMs": 9.731793444934523,
+          "mainThreadMs": 12.700000017881393,
+          "rendererCpuMs": 12.700000017881393,
+          "gpuFrameMs": 9.19388,
+          "snapshotAgeMs": -3.9999999940409907,
+          "interpolationHeadroomMs": 80.75286462155873,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 224,
+        "at": 43849.4,
+        "durationMs": 20.599999999998545,
+        "classification": "display-hitch",
+        "severity": "micro",
+        "evidence": {
+          "intervalMs": 20.599999999998545,
+          "targetFrameMs": 9.731793444934523,
+          "mainThreadMs": 13.599999994039536,
+          "rendererCpuMs": 13.599999994039536,
+          "gpuFrameMs": 9.19388,
+          "snapshotAgeMs": -3.8999999880761607,
+          "interpolationHeadroomMs": 72.42362725395424,
+          "networkUnderrun": false
+        }
+      },
+      {
+        "id": 225,
+        "at": 44005.1,
+        "durationMs": 30,
+        "classification": "display-hitch",
+        "severity": "noticeable",
+        "evidence": {
+          "intervalMs": 30,
+          "targetFrameMs": 9.738019718768763,
+          "mainThreadMs": 9.900000005960464,
+          "rendererCpuMs": 9.900000005960464,
+          "gpuFrameMs": 9.131199999999998,
+          "snapshotAgeMs": 8.800000017879938,
+          "interpolationHeadroomMs": 77.01173532902317,
+          "networkUnderrun": false
+        }
+      }
+    ],
+    "events": [
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.300000011920929,
+        "count": 16,
+        "at": 39682
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 17.5,
+        "count": 1457,
+        "at": 39750.40000000596
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.300000011920929,
+        "count": 16,
+        "at": 40084.69999998808
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 9.300000011920929,
+        "count": 1457,
+        "at": 40303.40000000596
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.199999988079071,
+        "count": 15,
+        "at": 40306.29999998212
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.9000000059604645,
+        "count": 16,
+        "at": 40777.19999998808
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 10.5,
+        "count": 1457,
+        "at": 40791.69999998808
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.5,
+        "count": 16,
+        "at": 41019.90000000596
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.300000011920929,
+        "count": 15,
+        "at": 41256.90000000596
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 9.400000005960464,
+        "count": 1457,
+        "at": 41269.19999998808
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 13.099999994039536,
+        "count": 1457,
+        "at": 41800.09999999404
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.0999999940395355,
+        "count": 16,
+        "at": 42039.69999998808
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 8.600000023841858,
+        "count": 1457,
+        "at": 42288.90000000596
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.9000000059604645,
+        "count": 17,
+        "at": 42599.40000000596
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.9000000059604645,
+        "count": 16,
+        "at": 42672
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 9.199999988079071,
+        "count": 1455,
+        "at": 42793.19999998808
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.199999988079071,
+        "count": 15,
+        "at": 42910.79999998212
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 11,
+        "count": 1455,
+        "at": 43259.69999998808
+      },
+      {
+        "source": "network",
+        "reason": "self-reconcile",
+        "executor": "main",
+        "durationMs": 2.300000011920929,
+        "count": 16,
+        "at": 43379.59999999404
+      },
+      {
+        "source": "renderer",
+        "reason": "frame",
+        "executor": "gpu",
+        "durationMs": 14.900000005960464,
+        "count": 1455,
+        "at": 43774.40000000596
+      }
+    ],
+    "pending": {
+      "samples": 15,
+      "events": 0,
+      "freezes": 1
+    }
+  },
+  "cameraDepth": {
+    "encoding": "logarithmic",
+    "near": 0.05,
+    "far": 2000,
+    "logarithmicDenominator": 10.966505451905741
+  },
+  "rendererErrors": [],
+  "networkStatus": "online",
+  "selfPose": {
+    "x": -345,
+    "y": 0.16999999999999998,
+    "z": -66,
+    "animation": "idle"
+  },
+  "rawMetrics": {
+    "repo": "game",
+    "path": "artifacts/performance-live-fps-live-20261017-camera-depth.json",
+    "bytes": 296713,
+    "sha256": "79a6432de645810b65361665ad5a339bebfca9c7c81fa67f2d231c31dbf86b2d"
+  },
+  "gameBundle": {
+    "repo": "game",
+    "path": "public/build/game.js",
+    "bytes": 2475540,
+    "sha256": "c73c01c53124c9fd329faecfc1b894b17902304c4821ec7aba393cdb71af1c77"
+  },
+  "servedGameBundle": {
+    "url": "http://127.0.0.1:3007/build/game.js",
+    "status": 200,
+    "bytes": 2475540,
+    "sha256": "c73c01c53124c9fd329faecfc1b894b17902304c4821ec7aba393cdb71af1c77"
+  },
+  "log": {
+    "repo": "game",
+    "path": "artifacts/fps-live-20261017-camera-depth.log",
+    "bytes": 70785,
+    "sha256": "dc8a5ff59e38d09ca826301e91318f2c9c36dd7efa164844970e8bf36a2c7845"
+  },
+  "healthAfter": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "limits": [
+    "Short stationary live measurement at the starting position. Not walking, driving, whole-map or Office UI performance.",
+    "1280x720 browser viewport, 704x396 internal resolution, TAA, 420 m draw distance, adaptive resolution disabled.",
+    "requestAnimationFrame intervals are measured, not isolated GPU execution time. benchmarkLive also discards its first 30 intervals.",
+    "Different live world state and bundle from the earlier 60.72055 FPS measurement; no paired speedup or slowdown claim.",
+    "Does not establish sustained 60 FPS or performance at native 720p/1080p internal resolution. Interval sum is derived from frames/averageFPS."
+  ]
+}

@@ -1,0 +1,334 @@
+{
+  "date": "2026-10-16T13:08:27.517Z",
+  "scope": "Shared original Game keyboard mapping and playable canonical vehicles in the installed Office. Full Game/Engine/Office integration remains active.",
+  "implementation": {
+    "sampler": "GameInput and the Office library share GameControlSampler. Original foot/car/aircraft, held intent, gear edges, modifiers, pulses, mouse, touch and gamepad math are preserved. Office currently supplies keyboard intent; its native flight and combat/gamepad UI remain unverified.",
+    "authority": "Office supplies only validated keyboard codes and finite view angles. Seat assignment, boarding, ignition, door rights, lift selection, driver/passenger control and vehicle physics remain in the existing GameAuthority.",
+    "cadence": "The Office controller samples held intent at its existing nominal 60 Hz timer and uses GameNetwork.send. No Office motor, vehicle or NPC simulation is added.",
+    "lifecycle": "Blur, hidden page, pointer cancellation, dialogs, control/body/revision changes and leaving clear intent. Repeated enter preserves the existing controller and reliable command generation.",
+    "camera": "Camera rays ignore original model meshes owned by the presented subject vehicle during boarding/seating. Other vehicles and architecture remain obstacles. Original dynamicScene prioritizes the subject hull through the same original self seat/boarding fields; the render-only observer is still invisible.",
+    "ui": "Compact play shows context help. Driver/passenger hints read current authority input context, while geometry and models keep the presented frame."
+  },
+  "oracle": {
+    "date": "2026-10-16T12:36:32.343Z",
+    "samples": 12000,
+    "equal": true,
+    "scope": "Frozen pre-refactor GameInput.sample versus the shared sampler: foot, car and aircraft, gear edges, E/G/F, pedals, modifiers, touch, mouse, gamepad, pulses and resets; no authority pose is changed.",
+    "originalSourceSha256": "b1e6a097104b938114dc69989207799082b5f633da0a42243d9c75656b610531",
+    "samplerSha256": "18ec7f28c7ac2e504befd94faa0d95291e48be4bdf05e49113f9e375c9cdf81a"
+  },
+  "verification": {
+    "game": {
+      "command": "bun test test/input-controls.test.ts test/vehicle-ignition.test.ts test/transport.test.ts",
+      "tests": 21,
+      "bunAssertions": 19236,
+      "exit": 0,
+      "log": "../thegame/artifacts/office-controls-game-tests-final.log"
+    },
+    "assets": {
+      "command": "bun test test/office-dynamic-assets.test.ts",
+      "tests": 4,
+      "bunAssertions": 3,
+      "exit": 0,
+      "log": "../thegame/artifacts/office-controls-assets-tests-final.log",
+      "limits": "Expanded triangle oracle uses additional Node assertions; this is not whole-world lighting acceptance."
+    },
+    "office": {
+      "command": "bun test apps/thegame/test/canonical-connection.test.ts apps/thegame/test/canonical-world-view.test.ts",
+      "tests": 42,
+      "bunAssertions": 4341,
+      "exit": 0,
+      "log": "artifacts/office-controls-app-tests-final.log"
+    },
+    "checks": [
+      "Game TypeScript and browser build",
+      "Canonical Office adapter TypeScript",
+      "Installed Office UI TypeScript and Vite production build"
+    ],
+    "warning": "Existing Office production chunk exceeds 1500 kB."
+  },
+  "native": {
+    "command": "bun tools/capture.ts --office",
+    "env": {
+      "CAPTURE_EXISTING": "1",
+      "CAPTURE_PORT": "3007",
+      "CAPTURE_DEBUG_PORT": "3198",
+      "CAPTURE_GPU": "1",
+      "OFFICE_WALKING_QA": "1",
+      "OFFICE_CAMERA_QA": "1",
+      "OFFICE_TRANSPORT_QA": "1",
+      "OFFICE_CONTROL_SOAK_MS": "65000",
+      "PERF_LABEL": "office-controls-final"
+    },
+    "exit": 0,
+    "browserMode": "native-gpu",
+    "actor": "player:e27d487c-15c7-48ad-9ee3-6c9fc972fb43",
+    "entryContinuity": {
+      "expectedActorId": "player:e27d487c-15c7-48ad-9ee3-6c9fc972fb43",
+      "actor": "player:e27d487c-15c7-48ad-9ee3-6c9fc972fb43",
+      "matched": true
+    },
+    "walkingDistance": 1.8473705638014357,
+    "driver": [
+      {
+        "name": "driver",
+        "role": "driver",
+        "rpm": 850
+      },
+      {
+        "name": "engine-off",
+        "role": "driver",
+        "rpm": 0
+      }
+    ],
+    "drive": 1.1800004237287374,
+    "passenger": 0,
+    "boardingSamples": 75,
+    "acknowledgedInputs": 54,
+    "idle": {
+      "milliseconds": 65000,
+      "samples": 63,
+      "before": 1521,
+      "after": 4429
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "renderErrors": [],
+    "gpuErrors": [],
+    "localPhysicsSteps": 0,
+    "localPhysicsBodies": 0,
+    "record": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\report.json",
+    "transportRecord": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\transport-report.json",
+    "log": "..\\thegame\\artifacts\\office-controls-native-final.log"
+  },
+  "runtime": {
+    "pid": 1960,
+    "health": {
+      "ok": true,
+      "seed": 29,
+      "revision": 13,
+      "players": 0,
+      "tick": 479631
+    },
+    "services": "The canonical Game server and native Office/backend/microphone services were not restarted in this phase.",
+    "bundles": [
+      {
+        "name": "game.js",
+        "sha256": "90827d63363d17582f6d4b059bf06372aa09f6d04161ce3e18d3c3cc8a6cb3a2",
+        "bytes": 2465291
+      },
+      {
+        "name": "office-controller.js",
+        "sha256": "acd398dcd5da403de4c5a6df6f507f54b2dfa04ccaeed3b36805d1dc673f2fde",
+        "bytes": 1218387
+      }
+    ]
+  },
+  "images": [
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\controller-idle-after.png",
+      "sha256": "469c623238e9ecf2e6fe6399c6a2a46ffa42ba8f649a3c5c4f9ca13c9deee530",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\entered.png",
+      "sha256": "8d79d41892fdca40d36aef213318d4072af3f33caa1d5184b3eedcb93c8f8dbb",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\observer.png",
+      "sha256": "71e19a27a838c1359bdd5070870abb24ac1843a29cd9f4893f906bd56e404fc1",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\orbit-1.png",
+      "sha256": "417081a7783026cf2e4b633eeb569b2fd30b79ce4d88b7132f266af612594cb5",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\orbit-2.png",
+      "sha256": "486b50fbaffd541e1803c7576d47daa07e5088943e5898a1e73facba522717b3",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\orbit-3.png",
+      "sha256": "ffe19c46102929a9b4e8c5e39117bbf4b8d38dc8ee6536753041754e7ea10ca4",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\orbit-4.png",
+      "sha256": "ca4713f9fba3b5257c0a0c2abcb2ae58bd977120e63cc9a87d530b94d76cc796",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\returned-observer.png",
+      "sha256": "a0709bfbdbcf008ed6373d59098435a205b140f0d8fd511e015194c745ec125e",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\transport-driver.png",
+      "sha256": "385fce6c2657a35ffc92c3bae82c3c798701a47a3bd66affcebe7a77159c4d6e",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\transport-driving.png",
+      "sha256": "b92f583d6691c46c198b7eacb38cfd90232949f23420b0ec407c68df15c17d2a",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\transport-engine-off.png",
+      "sha256": "7516f83e10b87b226ebc4ccbd9868bce7f286ec5a6f72e1f3728a241edae816f",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\transport-exited.png",
+      "sha256": "1f2cb28925eb1944e9d0d2c3c7757b65c1303af4cc01e371c8b3a90b232a3dc9",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\transport-passenger.png",
+      "sha256": "11ab9df6b06b6ff704eb9cf88362987b69d6ed3ae86b3d247252d59fc79f55e4",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-controls-final\\walk-KeyW.png",
+      "sha256": "66da51dca100b31c1002982585ad710d9ba1a49191c403932ed502f5552f4406",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-controls-final-game\\canonical-lobby.png",
+      "sha256": "cba35b690d08b935b72958b78fb2ceebf811666b82e37330addccda6d485b5f6",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-controls-final-game\\entrance.png",
+      "sha256": "d61345896f153ba29f5fa95adfe5c893126e3e33b6cf156de3d0b3678e2ca829",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-controls-final-game\\office-entry.png",
+      "sha256": "fcbff681f9df24fe337ad68c53e213eefd8dd25f61a3ecf11e90c12dd503b04d",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-controls-final-game\\upper-office.png",
+      "sha256": "7d3b8848a709d072679ced02c96d68c919848a81773992db50ae7c619632a880",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-controls-final-game\\workplaces.png",
+      "sha256": "257d020bf42f43cd509b745a06abaaddd6f5777913dbaa4b253a47457441a96a",
+      "reviewed": true
+    }
+  ],
+  "sources": [
+    {
+      "path": "..\\thegame\\src\\game\\input.ts",
+      "sha256": "5516e1acf5e8bd1f0fb7d3ef55b9cfc9db0922023f88478735ae7008ba2b23c1"
+    },
+    {
+      "path": "..\\thegame\\src\\game\\input-controls.ts",
+      "sha256": "18ec7f28c7ac2e504befd94faa0d95291e48be4bdf05e49113f9e375c9cdf81a"
+    },
+    {
+      "path": "..\\thegame\\src\\game\\office-controller.ts",
+      "sha256": "6e1ba3e62a57abb9ab85b1650a2bb2e6f78fcff4aa2051b084c7ea1afe105d31"
+    },
+    {
+      "path": "..\\thegame\\src\\game\\office-dynamic-assets.ts",
+      "sha256": "72f81c8a7ba0295b59d5ba87aaecd73c0d818224f5ab262b27f093ba7516ba95"
+    },
+    {
+      "path": "..\\thegame\\test\\input-controls.test.ts",
+      "sha256": "f1b44c414b2f66958e829ae776784a921ebc3e4c58e20f05e57511937952683b"
+    },
+    {
+      "path": "..\\thegame\\tools\\qa-office-transport.ts",
+      "sha256": "ab49e8f3957f217c6adc7f0d76b54ddc013c3a1461bb93e8c403a7e2a83bd67d"
+    },
+    {
+      "path": "..\\thegame\\tools\\qa-office-walking.ts",
+      "sha256": "15a596ef586bb24dff15f886a19fd1521ca79707cf82c37a6f5ef71968d5c8f0"
+    },
+    {
+      "path": "..\\thegame\\tools\\capture.ts",
+      "sha256": "229a71a7b0b427f3896af18fa2ddcbacee1ab22c645e0e4c28aff9cfc244e1d3"
+    },
+    {
+      "path": "apps\\thegame\\client\\canonical-actors.ts",
+      "sha256": "971d1ddc1123ee63b785727cf93dad19935585e4aa36f4b84344543e75f0a554"
+    },
+    {
+      "path": "apps\\thegame\\client\\canonical-controls.ts",
+      "sha256": "cc2489dc84f9282c57eab62764c80d0242c0acf17d9ef1a2caab95e0002cd802"
+    },
+    {
+      "path": "apps\\thegame\\client\\canonical-connection.ts",
+      "sha256": "7d41d018706db2a462bd4aceef457178780825cf1673655e1607e6afd72d0713"
+    },
+    {
+      "path": "apps\\thegame\\client\\canonical-world-view.ts",
+      "sha256": "347e23db403a20421c2b7b8fca6c77cf55a601e43e1cadd420ddf9952c88f491"
+    },
+    {
+      "path": "apps\\thegame\\test\\canonical-connection.test.ts",
+      "sha256": "733347930935e87caa17fb329ae88cdb5e3aac1e8d105fc72d789d9db5ad1983"
+    },
+    {
+      "path": "apps\\thegame\\test\\canonical-world-view.test.ts",
+      "sha256": "3fb4b070d3a0d3b0e4f28ded79e3dfea0cbbba7ced8ac5f1e3973c07ada45bf8"
+    },
+    {
+      "path": "..\\..\\voice-agent\\ui\\src\\office\\scene.ts",
+      "sha256": "5a78ecabcaabfff2fdeecb87aa1bce9b19e81a37b73007f39a942401073914ca"
+    },
+    {
+      "path": "..\\..\\voice-agent\\ui\\src\\office\\GamePanel.tsx",
+      "sha256": "251d53c14c9403dd60683c1108e38b5e2c5841c82b8a618adc89bea15d128b49"
+    },
+    {
+      "path": "..\\..\\voice-agent\\ui\\src\\office\\Office.tsx",
+      "sha256": "3adb3299db7ce9ffea2e9dc09ddb01afbf866dff4d251967afaf507ed2e2bfed"
+    },
+    {
+      "path": "..\\..\\voice-agent\\ui\\src\\office\\compact.css",
+      "sha256": "4e1feaf64c366529733cf47e559e7cd32cbbac19334e46d580eb795bfa092d5e"
+    }
+  ],
+  "attempts": [
+    {
+      "label": "office-controls-first",
+      "result": "Rejected: QA process had not registered the original wagon catalog. Fixed by registerFleet only; no vehicle spawn."
+    },
+    {
+      "label": "office-controls-registered",
+      "result": "Rejected: the 700 ms drive check did not show motion, and the real own-car camera collision was visible. Later QA waits for actual sent sequence, authority ACK and engine idle; the specific cause of the earlier drive failure is not proven."
+    },
+    {
+      "label": "office-controls-ack",
+      "result": "Partial only: driver, ignition, 1.835 m drive and corrected camera passed. The QA walking route after exit ran into the car; the controller later became observer. Closure cause remains undetermined. Passenger QA now repeats the original Game immediate-G-after-exit flow."
+    },
+    {
+      "label": "office-controls-passenger",
+      "result": "Passed: driver, 1.317 m drive, passenger displacement zero, exits and cleanup."
+    },
+    {
+      "label": "office-controls-release",
+      "result": "Passed: Game-to-Office identity, full vehicle flow and additional 65 s idle. Image review showed stale role help; the final phase uses current authority context and explicitly checks visible role hints."
+    }
+  ],
+  "limits": [
+    "This step does not finish full static-world/material/sky/light fidelity or overall performance.",
+    "No fresh averaged FPS sample in this phase; the previous 35.66 FPS / 704x396 sample is historical.",
+    "Native keyboard walking, one original wagon, ignition, braking, driver/passenger/exit, role hints, cross-entry identity and additional 65-second idle are accepted; aircraft, police beacons, live Office door control, mouse combat/gamepad and other remaining interactive/audio flows are not broadly accepted by this run.",
+    "A previous long route/controller closure is not explained by the successful idle checks; do not claim its cause was fixed.",
+    "Initial Office entry metadata readiness can still precede a complete rendered first city frame.",
+    "All 19 final PNGs were inspected. transport-exited.png is a transient green close-up although the sampled camera reports 8 m and no hit. The later settled idle frame is correct. The cause and continuous exit-frame visual fidelity are still unproven.",
+    "The final capture now records HTTP failure paths without query strings: Office favicon.ico returned 404; an api/office/world request returned 403 around controller cleanup. No all-network-errors-free claim. Existing autoplay/powerPreference/atomFamily messages remain.",
+    "No physical microphone enable or native microphone/backend restart was performed.",
+    "All existing unrelated dirty work was preserved; no PR or commit was created."
+  ]
+}

@@ -1,0 +1,612 @@
+{
+  "status": "velocity-exports-observed-cause-unresolved",
+  "report": "artifacts/engine-compare/surface-presence-velocity-export/report.json",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "f96e119918873d9de6be96e62ab0452aa094dd5aad4af1f0b51ab29b1ca9926b",
+    "diagnosticSha256": "82c7283b768436a467a46e8bfb9cf6c56d5198b99e4a91408ee8b21abdd6db65"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "scope": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "freshDevices": 6,
+    "observedFrames": 192,
+    "canonicalFramesPerDevice": 32,
+    "productionSourceUnchanged": true,
+    "renderShadersInstrumented": true,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false
+  },
+  "gates": {
+    "completed": true,
+    "coverage": true,
+    "allComparisonsExact": false,
+    "sameOrderingRepeatable": false,
+    "readbackAgreement": true,
+    "opaqueBoundaryAgreement": true,
+    "velocityExportAgreement": true,
+    "repeatability": false,
+    "archivesVerified": true,
+    "physicalReplay": true,
+    "rootCauseEstablished": false,
+    "competitiveAdvantageEstablished": false
+  },
+  "readback": {
+    "checkedStages": [
+      "opaque",
+      "lightingProbe",
+      "velocity"
+    ],
+    "checks": 576,
+    "channelsPerMethod": 3981312000
+  },
+  "duplicateExports": {
+    "attachments": [
+      "normal rgba16float xy",
+      "velocity rg16float xy"
+    ],
+    "checks": 384,
+    "checkedCoveredChannels": 1080596928,
+    "disagreements": [],
+    "velocityChanges": []
+  },
+  "upstream": [
+    {
+      "mode": "ascending",
+      "repetition": 1,
+      "frame": 2,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 6,
+        "maxEncodedError": 663,
+        "coordinates": [
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 1,
+            "before": 11744,
+            "after": 12407
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 1,
+            "before": 11745,
+            "after": 12408
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          }
+        ]
+      }
+    },
+    {
+      "mode": "ascending",
+      "repetition": 2,
+      "frame": 2,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 6,
+        "maxEncodedError": 663,
+        "coordinates": [
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 1,
+            "before": 11744,
+            "after": 12407
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 1,
+            "before": 11745,
+            "after": 12408
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 0,
+      "frame": 2,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 6,
+        "maxEncodedError": 663,
+        "coordinates": [
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 1,
+            "before": 11744,
+            "after": 12407
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 1,
+            "before": 11745,
+            "after": 12408
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 0,
+      "frame": 28,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 12,
+        "maxEncodedError": 756,
+        "coordinates": [
+          {
+            "x": 1404,
+            "y": 546,
+            "channel": 0,
+            "before": 11259,
+            "after": 10686
+          },
+          {
+            "x": 1404,
+            "y": 546,
+            "channel": 1,
+            "before": 11042,
+            "after": 10954
+          },
+          {
+            "x": 1404,
+            "y": 546,
+            "channel": 2,
+            "before": 11596,
+            "after": 11342
+          },
+          {
+            "x": 1405,
+            "y": 546,
+            "channel": 0,
+            "before": 11259,
+            "after": 10785
+          },
+          {
+            "x": 1405,
+            "y": 546,
+            "channel": 1,
+            "before": 11042,
+            "after": 11045
+          },
+          {
+            "x": 1405,
+            "y": 546,
+            "channel": 2,
+            "before": 11596,
+            "after": 11381
+          },
+          {
+            "x": 1404,
+            "y": 547,
+            "channel": 0,
+            "before": 11259,
+            "after": 10503
+          },
+          {
+            "x": 1404,
+            "y": 547,
+            "channel": 1,
+            "before": 11042,
+            "after": 10780
+          },
+          {
+            "x": 1404,
+            "y": 547,
+            "channel": 2,
+            "before": 11596,
+            "after": 11256
+          },
+          {
+            "x": 1405,
+            "y": 547,
+            "channel": 0,
+            "before": 11259,
+            "after": 10566
+          },
+          {
+            "x": 1405,
+            "y": 547,
+            "channel": 1,
+            "before": 11043,
+            "after": 10837
+          },
+          {
+            "x": 1405,
+            "y": 547,
+            "channel": 2,
+            "before": 11597,
+            "after": 11285
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 1,
+      "frame": 2,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 6,
+        "maxEncodedError": 663,
+        "coordinates": [
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 1,
+            "before": 11744,
+            "after": 12407
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 1,
+            "before": 11745,
+            "after": 12408
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 1,
+      "frame": 24,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 12,
+        "maxEncodedError": 4686,
+        "coordinates": [
+          {
+            "x": 450,
+            "y": 720,
+            "channel": 0,
+            "before": 15516,
+            "after": 11022
+          },
+          {
+            "x": 450,
+            "y": 720,
+            "channel": 1,
+            "before": 15633,
+            "after": 11156
+          },
+          {
+            "x": 450,
+            "y": 720,
+            "channel": 2,
+            "before": 13843,
+            "after": 11350
+          },
+          {
+            "x": 451,
+            "y": 720,
+            "channel": 0,
+            "before": 15517,
+            "after": 10831
+          },
+          {
+            "x": 451,
+            "y": 720,
+            "channel": 1,
+            "before": 15635,
+            "after": 10984
+          },
+          {
+            "x": 451,
+            "y": 720,
+            "channel": 2,
+            "before": 13844,
+            "after": 11275
+          },
+          {
+            "x": 450,
+            "y": 721,
+            "channel": 0,
+            "before": 15518,
+            "after": 10896
+          },
+          {
+            "x": 450,
+            "y": 721,
+            "channel": 1,
+            "before": 15636,
+            "after": 11044
+          },
+          {
+            "x": 450,
+            "y": 721,
+            "channel": 2,
+            "before": 13844,
+            "after": 11302
+          },
+          {
+            "x": 451,
+            "y": 721,
+            "channel": 0,
+            "before": 15519,
+            "after": 10919
+          },
+          {
+            "x": 451,
+            "y": 721,
+            "channel": 1,
+            "before": 15637,
+            "after": 11064
+          },
+          {
+            "x": 451,
+            "y": 721,
+            "channel": 2,
+            "before": 13845,
+            "after": 11310
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 2,
+      "frame": 2,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 6,
+        "maxEncodedError": 663,
+        "coordinates": [
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 1,
+            "before": 11744,
+            "after": 12407
+          },
+          {
+            "x": 1776,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 0,
+            "before": 12062,
+            "after": 11876
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 1,
+            "before": 11745,
+            "after": 12408
+          },
+          {
+            "x": 1777,
+            "y": 382,
+            "channel": 2,
+            "before": 12274,
+            "after": 12936
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 2,
+      "frame": 5,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 3,
+        "maxEncodedError": 868,
+        "coordinates": [
+          {
+            "x": 1055,
+            "y": 354,
+            "channel": 0,
+            "before": 12020,
+            "after": 11156
+          },
+          {
+            "x": 1055,
+            "y": 354,
+            "channel": 1,
+            "before": 12236,
+            "after": 11406
+          },
+          {
+            "x": 1055,
+            "y": 354,
+            "channel": 2,
+            "before": 12759,
+            "after": 11891
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 2,
+      "frame": 21,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 3,
+        "maxEncodedError": 601,
+        "coordinates": [
+          {
+            "x": 367,
+            "y": 414,
+            "channel": 0,
+            "before": 11269,
+            "after": 11870
+          },
+          {
+            "x": 367,
+            "y": 414,
+            "channel": 1,
+            "before": 11334,
+            "after": 11249
+          },
+          {
+            "x": 367,
+            "y": 414,
+            "channel": 2,
+            "before": 11950,
+            "after": 12232
+          }
+        ]
+      }
+    }
+  ],
+  "tests": {
+    "command": "npm run check",
+    "passed": 295,
+    "failed": 0,
+    "log": "artifacts/velocity-export-check.log"
+  },
+  "instrumentationLimitations": [
+    "The first two probe channels duplicate in.velocity; the third is geometricNormal.y. These values are the intended observations. The alpha injection uses u.weather.z after instance shader rewriting, so instanced geometry observes the representative binding-0 uniform seed rather than the per-instance storage seed. Alpha is excluded from any per-instance input conclusion. The measured shader archive preserves this limitation.",
+    "Both outputs use binary16 components. Exact byte agreement is an empirical gate, not a promise that WGSL forbids all independently rounded conversions, signed-zero differences or subnormal handling. No tolerance was introduced and no driver/specification violation is inferred from mismatch alone.",
+    "Changing the normal output changes compiler scheduling and subsequent effects. Additional copies, compute dispatches and queue waits also affect GPU scheduling. Finite repeatability cannot certify production stability or competitive visual/performance results."
+  ],
+  "references": [
+    {
+      "title": "WGSL floating point conversion",
+      "url": "https://www.w3.org/TR/WGSL/#floating-point-conversion"
+    },
+    {
+      "title": "WGSL texel/channel formats",
+      "url": "https://www.w3.org/TR/WGSL/#texel-formats"
+    }
+  ],
+  "interpretation": "The duplicate velocity exports agree in this finite control, but velocity variation did not reproduce. Other upstream changes remain recorded; this does not establish their root cause."
+}

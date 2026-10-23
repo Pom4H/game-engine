@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-18",
+  "goalStatus": "active",
+  "networkInputOwnership": {
+    "status": "RAF dependence reproduced; production input ownership is not yet changed",
+    "report": "../thegame/artifacts/input-clock-input-clock-canonical-baseline-20261018.json",
+    "reportSha256": "66ed91db2b6a28ddcdd283fe8121da8b82ef5f02054149dbefbc1bc9fb980dcb",
+    "log": "../thegame/artifacts/input-clock-canonical-baseline-20261018.log",
+    "logSha256": "4b546a20ceabfa366612e0ae99102f366cf67c6f1f8b63d9ead43180c2065ef1",
+    "sourceClientSha256": "b4eea991af010eabedbd61a91680ab38915347b37a7e2cc81266610cd5b5a0ec",
+    "loadedBundle": "../thegame/artifacts/render-stability-snow-offsets-game.js",
+    "loadedBundleSha256": "86f7694aaa9c3cce3bdefdf75436791d599196518359d3e60d21f29e50e7d41c",
+    "command": "CAPTURE_GPU=1 CAPTURE_HEADFUL=0 CAPTURE_BATTERY_SAVER=off CAPTURE_RENDERER=the-engine CAPTURE_REQUIRE_ENGINE=1 CAPTURE_FOREGROUND=1 CAPTURE_BROWSER_AUDIT=1 INPUT_CLOCK_EXPECT=raf-coupled PERF_LABEL=input-clock-canonical-baseline-20261018 CAPTURE_BUNDLE=artifacts/render-stability-snow-offsets-game.js CAPTURE_BODY_WORKER=artifacts/render-stability-snow-offsets-worker.js bun tools/capture.ts --input-clock",
+    "observations": {
+      "elapsedMs": 351.39999997615814,
+      "timerHeartbeats": 70,
+      "latestEnqueuedSequenceBefore": 47,
+      "latestEnqueuedSequenceAfter": 47,
+      "ackBefore": 47,
+      "ackAfter": 47,
+      "pendingBefore": 0,
+      "pendingAfter": 0,
+      "serverTickBefore": 588,
+      "serverTickAfter": 594,
+      "motorStepsDuringHold": 0,
+      "heldCallbackNames": [
+        "tick",
+        "frame",
+        "run"
+      ],
+      "documentVisible": true,
+      "rendererErrors": []
+    },
+    "scope": "Future application RAF callbacks were held after a canonical frame barrier, with timers and live network/authority left running and the pending input window drained first. This demonstrates RAF coupling of command admission, not an OS/GPU stall, FPS cost or an exact lost-command count. The QA gate subsequently gained submission/ACK/tick progression requirements for future independent-mode runs; those additional fields were not captured in this historical report."
+  },
+  "renderClock": {
+    "status": "adopted; Game focused402, typecheck/build, native score and separate movement/RAF gate complete",
+    "clientSha256": "c67c64be22aa412e52945286d370be6e8d085169f1649d0542cd52aba5c4961b",
+    "helper": "../thegame/src/game/render/frame-clock.ts",
+    "helperSha256": "8ed8c41a6bd77ed791053c3b236937d302cdabe8af778351f173811dc4d0acf1",
+    "test": "../thegame/test/render-frame-clock.test.ts",
+    "testSha256": "4b28e898d5b962239b09c08a087c93b3485973c7f839d510b4b26dab5a22b5af",
+    "cause": "A queued RAF timestamp can predate a performance.now() reset on resume, visibility, studio exit or benchmark entry. The former Math.min(.1,(now-last)/1000) could become negative, reduce fixed-step debt and grow the visual correction exp(-dt*15). Source and deterministic regression prove the branch; this run did not measure a negative dt in a native production frame.",
+    "change": "A persistent clock returns zero for stale/equal timestamps and retains its reset baseline. Ordinary positive timestamps retain the exact original subtraction, division and 0.1 second cap. No extra per-frame clock read, timer or allocation is added.",
+    "checks": {
+      "command": "bun test ./test/render-frame-clock.test.ts ./test/qa-frame-sampler.test.ts",
+      "passed": 7,
+      "failed": 0,
+      "bunExpectCalls": 63,
+      "clockTests": 4,
+      "gameTypecheck": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit: EXIT0"
+    },
+    "limits": [
+      "This fixes stale/reset frame time only; production input is still owned by RAF.",
+      "Server60Hz, vehicle120Hz, motor1/60, six-step cap, input48 window, visual settings and entity population are unchanged.",
+      "No FPS improvement or absence of long frames is established by these unit tests."
+    ],
+    "integration": "docs/render-evidence/clock-axes-integration-20261018.json"
+  }
+}

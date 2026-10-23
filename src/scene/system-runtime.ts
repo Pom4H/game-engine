@@ -12,6 +12,7 @@ export interface SystemRegistration{readonly id:string;readonly handler:SystemHa
  * reduces public commands and delegates system commands here.
  */
 export class SceneSystemRuntime {
+  observe: ((action:string,milliseconds:number)=>void)|undefined;
   private readonly handlers=new Map<SystemAction,SystemHandler>();
   private measure:((action:SystemAction,ms:number)=>void)|undefined;
   /** Only sampled ticks install a callback; the default path reads no clocks. */
@@ -36,10 +37,10 @@ export class SceneSystemRuntime {
   run(action:SystemAction,dt:number,at:number):void{
     const handler=this.handlers.get(action);
     if(!handler)throw new TypeError(`No system implementation: ${action}`);
-    const frame=Object.freeze({dt,at}),probe=this.measure;
-    if(!probe){handler(frame);return;}
+    const frame=Object.freeze({dt,at}),probe=this.measure,observe=this.observe;
+    if(!probe&&!observe){handler(frame);return;}
     const start=performance.now();
-    try{handler(frame);}finally{probe(action,performance.now()-start);}
+    try{handler(frame);}finally{const ms=performance.now()-start;probe?.(action,ms);observe?.(action,ms);}
   }
 
   get actions():readonly SystemAction[]{return Object.freeze([...this.handlers.keys()]);}

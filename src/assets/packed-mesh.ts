@@ -7,6 +7,8 @@ export interface PackedMesh {
   readonly positionsU16Base64:string;
   readonly normalsOct8Base64?:string;
   readonly colorsRGBA8Base64?:string;
+  readonly uvsF32Base64?:string;
+  readonly variationSeedsF32Base64?:string;
   readonly indicesU16Base64?:string;
   readonly indicesU32Base64?:string;
   readonly vertices:number;
@@ -88,11 +90,15 @@ export function encodePackedMesh(mesh:Extract<Primitive,{kind:'triangle-mesh'}>)
   for(let vertex=0;vertex<vertices;vertex++){const base=vertex*3,x=mesh.normals[base]!,y=mesh.normals[base+1]!,z=mesh.normals[base+2]!;if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(z))throw new RangeError('Triangle mesh normal is not finite');const packed=encodeOctNormal(x,y,z);normalBytes[vertex*2]=packed[0];normalBytes[vertex*2+1]=packed[1];}
   let colorBytes:Uint8Array|undefined;
   if(mesh.colors){if(mesh.colors.length!==vertices*4)throw new RangeError('Triangle mesh color count mismatch');colorBytes=new Uint8Array(vertices*4);for(let i=0;i<mesh.colors.length;i++){const value=mesh.colors[i]!;if(!Number.isFinite(value)||value<0||value>1)throw new RangeError('Triangle mesh color is outside [0,1]');colorBytes[i]=Math.round(value*255);}}
+  let uvBytes:Uint8Array|undefined;
+  if(mesh.uvs){if(mesh.uvs.length!==vertices*2||!mesh.uvs.every(Number.isFinite))throw new RangeError('Triangle mesh UV count/values invalid');uvBytes=new Uint8Array(vertices*8);const view=new DataView(uvBytes.buffer);for(let i=0;i<mesh.uvs.length;i++){view.setFloat32(i*4,mesh.uvs[i]!,true);if(!Number.isFinite(view.getFloat32(i*4,true)))throw new RangeError('Triangle mesh UV outside float32');}}
+  let seedBytes:Uint8Array|undefined;
+  if(mesh.variationSeeds){if(mesh.variationSeeds.length!==vertices||!mesh.variationSeeds.every(n=>Number.isFinite(Math.fround(n))))throw new RangeError('Triangle mesh variation seed count/values invalid');seedBytes=new Uint8Array(vertices*4);const view=new DataView(seedBytes.buffer);for(let i=0;i<vertices;i++)view.setFloat32(i*4,mesh.variationSeeds[i]!,true);}
   let needsU32=vertices>65535;
   for(const index of mesh.indices){if(!Number.isInteger(index)||index<0||index>=vertices)throw new RangeError('Triangle mesh index out of range');if(index>65535)needsU32=true;}
   return Object.freeze({
     min:Object.freeze([...min]) as Vec3,max:Object.freeze([...max]) as Vec3,
-    positionsU16Base64:encodeU16(quantized),normalsOct8Base64:encodeBytes(normalBytes),...(colorBytes?{colorsRGBA8Base64:encodeBytes(colorBytes)}:{}),
+    positionsU16Base64:encodeU16(quantized),normalsOct8Base64:encodeBytes(normalBytes),...(colorBytes?{colorsRGBA8Base64:encodeBytes(colorBytes)}:{}),...(uvBytes?{uvsF32Base64:encodeBytes(uvBytes)}:{}),...(seedBytes?{variationSeedsF32Base64:encodeBytes(seedBytes)}:{}),
     ...(needsU32?{indicesU32Base64:encodeU32(mesh.indices)}:{indicesU16Base64:encodeU16(mesh.indices)}),
     vertices,triangles,
   });
@@ -124,5 +130,9 @@ export function decodePackedMesh(mesh:PackedMesh):Extract<Primitive,{kind:'trian
   }else normals=recomputeNormals(positions,indices);
   let colors:number[]|undefined;
   if(mesh.colorsRGBA8Base64){const packed=decodeBytes(mesh.colorsRGBA8Base64);if(packed.length!==mesh.vertices*4)throw new RangeError('Packed mesh color count mismatch');colors=Array.from(packed,value=>value/255);}
-  return{kind:'triangle-mesh',positions,normals,indices,...(colors?{colors}: {})};
+  let uvs:number[]|undefined;
+  if(mesh.uvsF32Base64!==undefined){const bytes=decodeBytes(mesh.uvsF32Base64);if(bytes.length!==mesh.vertices*8)throw new RangeError('Packed mesh UV count mismatch');const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);uvs=Array.from({length:mesh.vertices*2},(_,i)=>view.getFloat32(i*4,true));if(!uvs.every(Number.isFinite))throw new RangeError('Packed mesh UV is nonfinite');}
+  let variationSeeds:number[]|undefined;
+  if(mesh.variationSeedsF32Base64!==undefined){const bytes=decodeBytes(mesh.variationSeedsF32Base64);if(bytes.length!==mesh.vertices*4)throw new RangeError('Packed mesh variation seed count mismatch');const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);variationSeeds=Array.from({length:mesh.vertices},(_,i)=>view.getFloat32(i*4,true));if(!variationSeeds.every(Number.isFinite))throw new RangeError('Packed mesh variation seed is nonfinite');}
+  return{kind:'triangle-mesh',positions,normals,indices,...(variationSeeds?{variationSeeds}:{}),...(colors?{colors}: {}),...(uvs?{uvs}:{})};
 }

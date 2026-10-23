@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "unknown-symbol",
+      "rustUtf8Byte": 88,
+      "editorUtf16Offset": 80,
+      "passed": true
+    },
+    {
+      "name": "material-type",
+      "rustUtf8Byte": 159,
+      "editorUtf16Offset": 151,
+      "passed": true
+    },
+    {
+      "name": "dimension",
+      "rustUtf8Byte": 96,
+      "editorUtf16Offset": 88,
+      "passed": true
+    },
+    {
+      "name": "division-zero",
+      "rustUtf8Byte": 96,
+      "editorUtf16Offset": 88,
+      "passed": true
+    },
+    {
+      "name": "parse",
+      "rustUtf8Byte": 50,
+      "editorUtf16Offset": 42,
+      "passed": true
+    },
+    {
+      "name": "coupling-cycle",
+      "rustUtf8Byte": 23,
+      "editorUtf16Offset": 23,
+      "passed": true
+    },
+    {
+      "name": "coupling-type",
+      "rustUtf8Byte": 23,
+      "editorUtf16Offset": 23,
+      "passed": true
+    },
+    {
+      "name": "duplicate-id",
+      "rustUtf8Byte": 74,
+      "editorUtf16Offset": 74,
+      "passed": true
+    }
+  ]
+}

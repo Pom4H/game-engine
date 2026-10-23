@@ -1,0 +1,1991 @@
+{
+  "version": 1,
+  "status": "completed",
+  "beforeRun": "2026-10-11T19-04-05.146Z",
+  "afterRun": "2026-10-11T19-17-33.960Z",
+  "controls": {
+    "width": 1920,
+    "height": 1080,
+    "frames": 240,
+    "warmup": 48,
+    "repetitions": 3,
+    "counts": [
+      5000,
+      10000
+    ],
+    "scenarios": [
+      "static",
+      "camera-motion"
+    ],
+    "backends": [
+      "engine"
+    ],
+    "quality": true
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "browser": "Chrome/154.0.8037.98",
+  "title": "Independent render visibility plans",
+  "description": "Camera, reflection and light projections own separate cause-driven plans. GPU-owned instances stay outside CPU camera/reflection candidates; stationary shadow eligibility and models remain resident.",
+  "beforeSourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "03d9e64dbea7aa2c89720f0f4462b8af87683807afd7f2582d48d4047a557403",
+    "distSha256": "0e34841e4a8b2001e0a9a8f0ac205bad6fcf549eb82e53a6dfffa3afdbd9b397",
+    "harnessSha256": "012b7a509622570400166e289651402f60c4df9d4011652e56118d71dde0ff99"
+  },
+  "afterSourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "52a29389ebb92b2605a99bde178d76305abc4f0c5652d128ea14a5a6f2f9cbc2",
+    "distSha256": "c1180678f3e03821c2d2e9bdad0e8bcd24216f8936a673dd84e9d15892699b9f",
+    "harnessSha256": "012b7a509622570400166e289651402f60c4df9d4011652e56118d71dde0ff99"
+  },
+  "programProvenance": "Baseline dist was rebuilt before renderer edits; the changed renderer was rebuilt before the after measurements. Unmodified reruns retain identical recorded source/dist fingerprints. HEAD alone does not describe these uncommitted working-tree builds.",
+  "methodology": "Three sequential before repetitions, then three after repetitions. Same native GPU, controls, compiled fixture, physics and pixels. GPU clock/load can vary; headless RAF is not a display/VSync measurement.",
+  "sceneInputsMatched": true,
+  "physicalReplayMatched": true,
+  "pixelGatePassed": false,
+  "canonicalBenchmarkPixelsWithinBaselineRepeatRange": false,
+  "benchmarkImages": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "comparedChannels": 8294400,
+      "changedChannels": 2,
+      "maxError": 1,
+      "outsideBaselineRange": 2,
+      "coordinates": [
+        {
+          "x": 1005,
+          "y": 451,
+          "channel": 2,
+          "before": 105,
+          "after": 104,
+          "baselineMinimum": 105,
+          "baselineMaximum": 105
+        },
+        {
+          "x": 1006,
+          "y": 451,
+          "channel": 0,
+          "before": 94,
+          "after": 93,
+          "baselineMinimum": 94,
+          "baselineMaximum": 94
+        }
+      ],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 0,
+      "maxError": 0,
+      "outsideBaselineRange": 0,
+      "coordinates": [],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "comparedChannels": 8294400,
+      "changedChannels": 10,
+      "maxError": 1,
+      "outsideBaselineRange": 10,
+      "coordinates": [
+        {
+          "x": 1289,
+          "y": 357,
+          "channel": 2,
+          "before": 133,
+          "after": 132,
+          "baselineMinimum": 133,
+          "baselineMaximum": 133
+        },
+        {
+          "x": 1171,
+          "y": 589,
+          "channel": 1,
+          "before": 105,
+          "after": 104,
+          "baselineMinimum": 105,
+          "baselineMaximum": 105
+        },
+        {
+          "x": 1172,
+          "y": 590,
+          "channel": 1,
+          "before": 104,
+          "after": 103,
+          "baselineMinimum": 104,
+          "baselineMaximum": 104
+        },
+        {
+          "x": 1170,
+          "y": 591,
+          "channel": 0,
+          "before": 87,
+          "after": 86,
+          "baselineMinimum": 87,
+          "baselineMaximum": 87
+        },
+        {
+          "x": 1171,
+          "y": 591,
+          "channel": 0,
+          "before": 92,
+          "after": 91,
+          "baselineMinimum": 92,
+          "baselineMaximum": 92
+        },
+        {
+          "x": 1172,
+          "y": 591,
+          "channel": 0,
+          "before": 102,
+          "after": 101,
+          "baselineMinimum": 102,
+          "baselineMaximum": 102
+        },
+        {
+          "x": 1173,
+          "y": 591,
+          "channel": 0,
+          "before": 133,
+          "after": 132,
+          "baselineMinimum": 133,
+          "baselineMaximum": 133
+        },
+        {
+          "x": 1172,
+          "y": 592,
+          "channel": 0,
+          "before": 89,
+          "after": 88,
+          "baselineMinimum": 89,
+          "baselineMaximum": 89
+        },
+        {
+          "x": 1173,
+          "y": 592,
+          "channel": 0,
+          "before": 100,
+          "after": 99,
+          "baselineMinimum": 100,
+          "baselineMaximum": 100
+        },
+        {
+          "x": 1174,
+          "y": 593,
+          "channel": 1,
+          "before": 75,
+          "after": 74,
+          "baselineMinimum": 75,
+          "baselineMaximum": 75
+        }
+      ],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0,
+      "baselineMaxVariation": 0
+    }
+  ],
+  "presentationAndReflectionPixelsExactlyMatched": true,
+  "pixelsInspectedPerView": "Wet fixture: all RGBA8 presentation and all finite rgba16float reflection texels, exact gate. Benchmark: all decoded PNG channels must be within the observed before-run repeat range at that pixel/channel, without a fixed tolerance.",
+  "frameBudgetPassed": false,
+  "rows": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "before": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 4.300000011920929,
+          "p95": 5.600000023841858,
+          "mean": 4.363888888061046
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.620639999999999,
+          "p95": 7.843399999999999,
+          "mean": 7.652781833333335
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.857461645746184
+        },
+        "fps": 101.44599451031418,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.43020837754094,
+          101.35278402103387,
+          101.55519673663635
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T19-04-05.146Z/5000-static-engine-r0.png",
+          "images/2026-10-11T19-04-05.146Z/5000-static-engine-r1.png",
+          "images/2026-10-11T19-04-05.146Z/5000-static-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.899999976158142,
+          "p95": 5.199999988079071,
+          "mean": 3.9543055553403166
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.63184,
+          "p95": 7.8958,
+          "mean": 7.670408777777772
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.831101813110203
+        },
+        "fps": 101.71799855296548,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          102.36861266972198,
+          101.33989145183176,
+          101.45173614058919
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T19-17-33.960Z/5000-static-engine-r0.png",
+          "images/2026-10-11T19-17-33.960Z/5000-static-engine-r1.png",
+          "images/2026-10-11T19-17-33.960Z/5000-static-engine-r2.png"
+        ]
+      },
+      "reflectionDrawsBefore": [
+        10,
+        10,
+        10
+      ],
+      "reflectionDrawsAfter": [
+        10,
+        10,
+        10
+      ],
+      "cpuP95ReductionPercent": 7.142857751067799,
+      "fpsGainPercent": 0.26812694179232377,
+      "uploadDeltaBytesPerFrame": 0
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "before": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6.699999988079071,
+          "p95": 8.5,
+          "mean": 6.773194443848398
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.2878799999999995,
+          "p95": 7.67792,
+          "mean": 7.348330833333326
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.835146443514668
+        },
+        "fps": 101.67616778694776,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.63293077053922,
+          101.4259039212358,
+          101.97115794863043
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T19-04-05.146Z/5000-camera-motion-engine-r0.png",
+          "images/2026-10-11T19-04-05.146Z/5000-camera-motion-engine-r1.png",
+          "images/2026-10-11T19-04-05.146Z/5000-camera-motion-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.699999988079071,
+          "p95": 4.699999988079071,
+          "mean": 3.7069444455206395
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.30148,
+          "p95": 7.516439999999999,
+          "mean": 7.33475938888889
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000136,
+          "mean": 9.881032078103217
+        },
+        "fps": 101.20400299236373,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.56814415026986,
+          101.1426153195091,
+          100.90348729207126
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T19-17-33.960Z/5000-camera-motion-engine-r0.png",
+          "images/2026-10-11T19-17-33.960Z/5000-camera-motion-engine-r1.png",
+          "images/2026-10-11T19-17-33.960Z/5000-camera-motion-engine-r2.png"
+        ]
+      },
+      "reflectionDrawsBefore": [
+        10,
+        10,
+        10
+      ],
+      "reflectionDrawsAfter": [
+        10,
+        10,
+        10
+      ],
+      "cpuP95ReductionPercent": 44.705882493187396,
+      "fpsGainPercent": -0.4643809900205964,
+      "uploadDeltaBytesPerFrame": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "before": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 7.300000011920929,
+          "p95": 11.300000011920929,
+          "mean": 7.900138889418708
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 10.088000000000001,
+          "p95": 10.432039999999999,
+          "mean": 10.141408722222232
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20,
+          "mean": 11.857461645746163
+        },
+        "fps": 84.33508198263898,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          84.71872673779733,
+          84.77281594722093,
+          83.52554693506676
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T19-04-05.146Z/10000-static-engine-r0.png",
+          "images/2026-10-11T19-04-05.146Z/10000-static-engine-r1.png",
+          "images/2026-10-11T19-04-05.146Z/10000-static-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6,
+          "p95": 9.100000023841858,
+          "mean": 6.527361111260123
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 10.03184,
+          "p95": 10.342360000000001,
+          "mean": 10.073391500000001
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 19.90000000000009,
+          "mean": 11.847838214783831
+        },
+        "fps": 84.4035833264664,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          84.32417175316655,
+          84.3896755058084,
+          84.49708325967826
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T19-17-33.960Z/10000-static-engine-r0.png",
+          "images/2026-10-11T19-17-33.960Z/10000-static-engine-r1.png",
+          "images/2026-10-11T19-17-33.960Z/10000-static-engine-r2.png"
+        ]
+      },
+      "reflectionDrawsBefore": [
+        10,
+        10,
+        10
+      ],
+      "reflectionDrawsAfter": [
+        10,
+        10,
+        10
+      ],
+      "cpuP95ReductionPercent": 19.46902642263878,
+      "fpsGainPercent": 0.08122520571156588,
+      "uploadDeltaBytesPerFrame": 0
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "before": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 11.199999988079071,
+          "p95": 14.699999988079071,
+          "mean": 11.636249999701977
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 9.843480000000001,
+          "p95": 10.71324,
+          "mean": 10.048782374999996
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20.099999999999454,
+          "mean": 12.65564853556486
+        },
+        "fps": 79.0161007703243,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          79.92241840556449,
+          80.13411567476949,
+          77.06694182896943
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T19-04-05.146Z/10000-camera-motion-engine-r0.png",
+          "images/2026-10-11T19-04-05.146Z/10000-camera-motion-engine-r1.png",
+          "images/2026-10-11T19-04-05.146Z/10000-camera-motion-engine-r2.png"
+        ]
+      },
+      "after": {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6.400000035762787,
+          "p95": 10.199999988079071,
+          "mean": 6.979722221692403
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 9.76584,
+          "p95": 10.18652,
+          "mean": 9.813592555555555
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 19.900000000000546,
+          "mean": 11.744630404463052
+        },
+        "fps": 85.14529325844022,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          86.29404968226457,
+          86.70415381824778,
+          82.56183501450879
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T19-17-33.960Z/10000-camera-motion-engine-r0.png",
+          "images/2026-10-11T19-17-33.960Z/10000-camera-motion-engine-r1.png",
+          "images/2026-10-11T19-17-33.960Z/10000-camera-motion-engine-r2.png"
+        ]
+      },
+      "reflectionDrawsBefore": [
+        10,
+        10,
+        10
+      ],
+      "reflectionDrawsAfter": [
+        10,
+        10,
+        10
+      ],
+      "cpuP95ReductionPercent": 30.612244922784104,
+      "fpsGainPercent": 7.75689059364193,
+      "uploadDeltaBytesPerFrame": 0
+    }
+  ],
+  "quality": [
+    {
+      "name": "wet-front",
+      "camera": {
+        "position": [
+          13,
+          4,
+          18
+        ],
+        "target": [
+          0,
+          0.8,
+          0
+        ],
+        "fov": 65
+      },
+      "width": 1920,
+      "height": 1080,
+      "reflectionWidth": 1200,
+      "reflectionHeight": 675,
+      "pixelChannels": 8294400,
+      "pixelChangedChannels": 0,
+      "pixelMaxError": 0,
+      "reflectionChannels": 3240000,
+      "reflectionChangedChannels": 0,
+      "reflectionMaxError": 0,
+      "pixelHash": "cd0a7c931c62cdc1674c26db206e284cc3f6e55aa98f5cd5b3cc66ac9366bff3",
+      "reflectionHash": "42a379239d8406a38f1e6a6aa2bdd2b5d54e5aa2fd55e1275dcbd2730978de40",
+      "beforeImage": "artifacts/engine-compare/view-planning-before/images/2026-10-11T19-04-05.146Z/quality-wet-front.png",
+      "afterImage": "artifacts/engine-compare/view-planning-after-repeat/images/2026-10-11T19-17-33.960Z/quality-wet-front.png",
+      "beforeReflection": "artifacts/engine-compare/view-planning-before/images/2026-10-11T19-04-05.146Z/quality-wet-front-reflection.png",
+      "afterReflection": "artifacts/engine-compare/view-planning-after-repeat/images/2026-10-11T19-17-33.960Z/quality-wet-front-reflection.png"
+    },
+    {
+      "name": "wet-back",
+      "camera": {
+        "position": [
+          -14,
+          5,
+          -16
+        ],
+        "target": [
+          0,
+          0.8,
+          0
+        ],
+        "fov": 65
+      },
+      "width": 1920,
+      "height": 1080,
+      "reflectionWidth": 1200,
+      "reflectionHeight": 675,
+      "pixelChannels": 8294400,
+      "pixelChangedChannels": 0,
+      "pixelMaxError": 0,
+      "reflectionChannels": 3240000,
+      "reflectionChangedChannels": 0,
+      "reflectionMaxError": 0,
+      "pixelHash": "6493a77169d393de0c002fe2005b5ef016aa2d00e739eae7c28f3fe8be70b439",
+      "reflectionHash": "debbc5bb855630ee659cf6ee080ae302be87e2a8118ca6cc93f3625e20076178",
+      "beforeImage": "artifacts/engine-compare/view-planning-before/images/2026-10-11T19-04-05.146Z/quality-wet-back.png",
+      "afterImage": "artifacts/engine-compare/view-planning-after-repeat/images/2026-10-11T19-17-33.960Z/quality-wet-back.png",
+      "beforeReflection": "artifacts/engine-compare/view-planning-before/images/2026-10-11T19-04-05.146Z/quality-wet-back-reflection.png",
+      "afterReflection": "artifacts/engine-compare/view-planning-after-repeat/images/2026-10-11T19-17-33.960Z/quality-wet-back-reflection.png"
+    },
+    {
+      "name": "wet-low",
+      "camera": {
+        "position": [
+          1,
+          1.35,
+          17
+        ],
+        "target": [
+          0,
+          1,
+          -1
+        ],
+        "fov": 65
+      },
+      "width": 1920,
+      "height": 1080,
+      "reflectionWidth": 1200,
+      "reflectionHeight": 675,
+      "pixelChannels": 8294400,
+      "pixelChangedChannels": 0,
+      "pixelMaxError": 0,
+      "reflectionChannels": 3240000,
+      "reflectionChangedChannels": 0,
+      "reflectionMaxError": 0,
+      "pixelHash": "16ece749e04169e1c30524223059ee3ce8c4c84f51d117192dc6f57e6ec621b5",
+      "reflectionHash": "aa0bc86baf58f1a1a35da37369fe88ee3ff94b73cabb5ecc0d3832826828ac04",
+      "beforeImage": "artifacts/engine-compare/view-planning-before/images/2026-10-11T19-04-05.146Z/quality-wet-low.png",
+      "afterImage": "artifacts/engine-compare/view-planning-after-repeat/images/2026-10-11T19-17-33.960Z/quality-wet-low.png",
+      "beforeReflection": "artifacts/engine-compare/view-planning-before/images/2026-10-11T19-04-05.146Z/quality-wet-low-reflection.png",
+      "afterReflection": "artifacts/engine-compare/view-planning-after-repeat/images/2026-10-11T19-17-33.960Z/quality-wet-low-reflection.png"
+    }
+  ],
+  "unmodifiedRepeat": {
+    "firstRun": "2026-10-11T19-11-32.344Z",
+    "repeatRun": "2026-10-11T19-17-33.960Z",
+    "firstReport": "artifacts/engine-compare/view-planning-after/report.json",
+    "sourceAndBuildIdentical": true,
+    "firstStrictPixelGatePassed": false,
+    "firstOutsideBaselineRange": 1,
+    "repeatStrictPixelGatePassed": false,
+    "firstAggregates": [
+      {
+        "count": 5000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.899999976158142,
+          "p95": 5.199999988079071,
+          "mean": 3.9409722215599485
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.6169199999999995,
+          "p95": 7.908560000000001,
+          "mean": 7.657376791666666
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 9.900000000001455,
+          "p95": 10.100000000002183,
+          "mean": 9.82496513249654
+        },
+        "fps": 101.78153169139016,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          102.08876169322104,
+          101.04853712159648,
+          102.215379351638
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T19-11-32.344Z/5000-static-engine-r0.png",
+          "images/2026-10-11T19-11-32.344Z/5000-static-engine-r1.png",
+          "images/2026-10-11T19-11-32.344Z/5000-static-engine-r2.png"
+        ]
+      },
+      {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 3.899999976158142,
+          "p95": 4.900000035762787,
+          "mean": 3.8754166666004393
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 7.297159999999999,
+          "p95": 7.6852,
+          "mean": 7.3430063888888855
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 10.100000000000364,
+          "mean": 9.837099023709927
+        },
+        "fps": 101.65598593546167,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          101.59404888416579,
+          102.1105699393318,
+          101.26689547053093
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": true,
+        "images": [
+          "images/2026-10-11T19-11-32.344Z/5000-camera-motion-engine-r0.png",
+          "images/2026-10-11T19-11-32.344Z/5000-camera-motion-engine-r1.png",
+          "images/2026-10-11T19-11-32.344Z/5000-camera-motion-engine-r2.png"
+        ]
+      },
+      {
+        "count": 10000,
+        "scenario": "static",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6.5,
+          "p95": 10,
+          "mean": 7.0348611103991665
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 10.07252,
+          "p95": 10.594159999999999,
+          "mean": 10.15474927777778
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 10,
+          "p95": 20,
+          "mean": 11.953277545327765
+        },
+        "fps": 83.65906306516531,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 3868
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          84.03952318998559,
+          83.6073602462744,
+          83.33333333333331
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T19-11-32.344Z/10000-static-engine-r0.png",
+          "images/2026-10-11T19-11-32.344Z/10000-static-engine-r1.png",
+          "images/2026-10-11T19-11-32.344Z/10000-static-engine-r2.png"
+        ]
+      },
+      {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "backend": "engine",
+        "repetitions": 3,
+        "cpuMs": {
+          "samples": 720,
+          "p50": 6.599999964237213,
+          "p95": 8.699999988079071,
+          "mean": 6.829166666501099
+        },
+        "gpuMs": {
+          "samples": 720,
+          "p50": 9.761279999999998,
+          "p95": 10.2312,
+          "mean": 9.821359000000006
+        },
+        "frameIntervalMs": {
+          "samples": 717,
+          "p50": 9.900000000000091,
+          "p95": 19.799999999999272,
+          "mean": 11.54476987447699
+        },
+        "fps": 86.61930994491155,
+        "uploadBytes": {
+          "samples": 720,
+          "p50": 3868,
+          "p95": 3868,
+          "mean": 5745.666666666667
+        },
+        "drawCalls": {
+          "samples": 720,
+          "p50": 36,
+          "p95": 36,
+          "mean": 36
+        },
+        "fpsByRepetition": [
+          86.7513611615245,
+          86.57538216329786,
+          86.53149891383056
+        ],
+        "timestampCoverage": 1,
+        "frameBudgetPassed": false,
+        "images": [
+          "images/2026-10-11T19-11-32.344Z/10000-camera-motion-engine-r0.png",
+          "images/2026-10-11T19-11-32.344Z/10000-camera-motion-engine-r1.png",
+          "images/2026-10-11T19-11-32.344Z/10000-camera-motion-engine-r2.png"
+        ]
+      }
+    ],
+    "canonicalCaptureVariation": [
+      {
+        "count": 5000,
+        "scenario": "static",
+        "repetition": 0,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 5000,
+        "scenario": "static",
+        "repetition": 1,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 5000,
+        "scenario": "static",
+        "repetition": 2,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "repetition": 0,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "repetition": 1,
+        "changedChannels": 1,
+        "maximumError": 1,
+        "outsideBaselineRange": 1,
+        "coordinates": [
+          {
+            "x": 1645,
+            "y": 418,
+            "channel": 0,
+            "first": 87,
+            "repeat": 86
+          }
+        ]
+      },
+      {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "repetition": 2,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 10000,
+        "scenario": "static",
+        "repetition": 0,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 10000,
+        "scenario": "static",
+        "repetition": 1,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 10000,
+        "scenario": "static",
+        "repetition": 2,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "repetition": 0,
+        "changedChannels": 2,
+        "maximumError": 1,
+        "outsideBaselineRange": 0,
+        "coordinates": [
+          {
+            "x": 1005,
+            "y": 451,
+            "channel": 2,
+            "first": 105,
+            "repeat": 104
+          },
+          {
+            "x": 1006,
+            "y": 451,
+            "channel": 0,
+            "first": 94,
+            "repeat": 93
+          }
+        ]
+      },
+      {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "repetition": 1,
+        "changedChannels": 0,
+        "maximumError": 0,
+        "outsideBaselineRange": 0,
+        "coordinates": []
+      },
+      {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "repetition": 2,
+        "changedChannels": 10,
+        "maximumError": 1,
+        "outsideBaselineRange": 0,
+        "coordinates": [
+          {
+            "x": 1289,
+            "y": 357,
+            "channel": 2,
+            "first": 133,
+            "repeat": 132
+          },
+          {
+            "x": 1171,
+            "y": 589,
+            "channel": 1,
+            "first": 105,
+            "repeat": 104
+          },
+          {
+            "x": 1172,
+            "y": 590,
+            "channel": 1,
+            "first": 104,
+            "repeat": 103
+          },
+          {
+            "x": 1170,
+            "y": 591,
+            "channel": 0,
+            "first": 87,
+            "repeat": 86
+          },
+          {
+            "x": 1171,
+            "y": 591,
+            "channel": 0,
+            "first": 92,
+            "repeat": 91
+          },
+          {
+            "x": 1172,
+            "y": 591,
+            "channel": 0,
+            "first": 102,
+            "repeat": 101
+          },
+          {
+            "x": 1173,
+            "y": 591,
+            "channel": 0,
+            "first": 133,
+            "repeat": 132
+          },
+          {
+            "x": 1172,
+            "y": 592,
+            "channel": 0,
+            "first": 89,
+            "repeat": 88
+          },
+          {
+            "x": 1173,
+            "y": 592,
+            "channel": 0,
+            "first": 100,
+            "repeat": 99
+          },
+          {
+            "x": 1174,
+            "y": 593,
+            "channel": 1,
+            "first": 75,
+            "repeat": 74
+          }
+        ]
+      }
+    ],
+    "wetCaptures": [
+      {
+        "name": "wet-front",
+        "presentationExactlyMatched": true,
+        "reflectionExactlyMatched": true
+      },
+      {
+        "name": "wet-back",
+        "presentationExactlyMatched": true,
+        "reflectionExactlyMatched": true
+      },
+      {
+        "name": "wet-low",
+        "presentationExactlyMatched": true,
+        "reflectionExactlyMatched": true
+      }
+    ],
+    "limitation": "Unmodified builds vary at the reported RGB8 channels. The internal GPU/capture cause is not isolated. These observations are retained; failed gates remain failed."
+  },
+  "visibilityPlans": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 0,
+      "plan": {
+        "entries": 5009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "staticShadow": {
+            "staticCandidates": 5001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 5001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 1,
+      "plan": {
+        "entries": 5009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "staticShadow": {
+            "staticCandidates": 5001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 5001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "repetition": 2,
+      "plan": {
+        "entries": 5009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "staticShadow": {
+            "staticCandidates": 5001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 5001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "plan": {
+        "entries": 5009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 288
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "staticShadow": {
+            "staticCandidates": 5001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 5001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "plan": {
+        "entries": 5009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 288
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "staticShadow": {
+            "staticCandidates": 5001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 5001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "plan": {
+        "entries": 5009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 288
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "staticShadow": {
+            "staticCandidates": 5001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 5001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 0,
+      "plan": {
+        "entries": 10009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "staticShadow": {
+            "staticCandidates": 10001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 10001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 1,
+      "plan": {
+        "entries": 10009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "staticShadow": {
+            "staticCandidates": 10001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 10001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 2,
+      "plan": {
+        "entries": 10009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2305,
+            "lastTests": 8,
+            "revision": 1
+          },
+          "staticShadow": {
+            "staticCandidates": 10001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 10001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "plan": {
+        "entries": 10009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 288
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "staticShadow": {
+            "staticCandidates": 10001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 10001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "plan": {
+        "entries": 10009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 288
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "staticShadow": {
+            "staticCandidates": 10001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 10001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "plan": {
+        "entries": 10009,
+        "sourceBuilds": 1,
+        "passes": {
+          "cameraOpaque": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "cameraTransparent": {
+            "staticCandidates": 0,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 0,
+            "lastTests": 0,
+            "revision": 288
+          },
+          "reflection": {
+            "staticCandidates": 1,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 288,
+            "tests": 2592,
+            "lastTests": 9,
+            "revision": 288
+          },
+          "staticShadow": {
+            "staticCandidates": 10001,
+            "movingCandidates": 0,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 10001,
+            "lastTests": 0,
+            "revision": 1
+          },
+          "dynamicShadow": {
+            "staticCandidates": 0,
+            "movingCandidates": 8,
+            "sourceBuilds": 1,
+            "staticBuilds": 1,
+            "tests": 2304,
+            "lastTests": 8,
+            "revision": 1
+          }
+        }
+      }
+    }
+  ],
+  "visibilityPlanGatePassed": true,
+  "visibilityPlanGate": "Each fresh fixture owns count+9 entries. Static light projection builds exactly once, performs count+1 tests total and zero on the last measured frame; CPU camera/reflection each own one static candidate, plus movers. All 12 measured cases must satisfy this."
+}

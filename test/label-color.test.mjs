@@ -29,7 +29,7 @@ test('live depth-fog changes are uniform updates and keep geometry caches intact
  assert.equal(scene.renderStructureRevision,structure);assert.equal(scene.appearanceRevision,appearance+1);
  assert.equal(scene.spec.rendering.fogRampDistance,16);
  scene.patchAppearance({rendering:{skyColor:[.02,.022,.025]}});
- assert.equal(scene.renderStructureRevision,structure+1);
+ assert.equal(scene.renderStructureRevision,structure);assert.equal(scene.appearanceRevision,appearance+1);
 });
 
 test('mansard exterior faces point upward and the sign band has no covering inset panels',()=>{

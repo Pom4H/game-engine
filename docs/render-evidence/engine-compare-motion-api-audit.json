@@ -1,0 +1,1520 @@
+{
+  "version": 1,
+  "status": "completed",
+  "scope": "Benchmark audit and harness corrections; engine rendering implementation unchanged.",
+  "before": {
+    "directory": "artifacts/engine-compare/motion-api-audit-20261013",
+    "cases": 54,
+    "sourceState": {
+      "srcSha256": "88418d20b4d0c78e156abb9707fdda64ed2020ed979a2b3de0278710c06a8d32",
+      "distSha256": "997c532e349482923c9a70ae485eb96a11191268285d4f6f55255155a8523645",
+      "harnessSha256": "8c63ff58138698c930f40620dbd3661162de9b2fc27c582294f4a511d903eabc",
+      "diagnosticSha256": "cee04830a067a75357062eeef0fe628e5a16db4d585e647aaa70cc22142cdbb7"
+    },
+    "gates": {
+      "allCasesCompleted": true,
+      "sceneAndMotionInputsMatched": true,
+      "sharedEffectsAudited": true,
+      "nativeHardware": true,
+      "frameBudget": false,
+      "equalPixelQualityEstablished": false,
+      "exclusiveGPUUseEstablished": false,
+      "canonicalRepeatability": true
+    }
+  },
+  "after": {
+    "directory": "artifacts/engine-compare/motion-api-coalesced-20261013",
+    "report": "artifacts/engine-compare/motion-api-coalesced-20261013/report.html",
+    "cases": 27,
+    "sourceState": {
+      "srcSha256": "88418d20b4d0c78e156abb9707fdda64ed2020ed979a2b3de0278710c06a8d32",
+      "distSha256": "997c532e349482923c9a70ae485eb96a11191268285d4f6f55255155a8523645",
+      "harnessSha256": "e444ccd20a0b636ca1ada0ab9cc1a12e7d0fe61c18c22ac5ddf845223b54b755",
+      "diagnosticSha256": "cee04830a067a75357062eeef0fe628e5a16db4d585e647aaa70cc22142cdbb7"
+    },
+    "gates": {
+      "allCasesCompleted": true,
+      "sceneAndMotionInputsMatched": true,
+      "sharedEffectsAudited": true,
+      "nativeHardware": true,
+      "frameBudget": false,
+      "equalPixelQualityEstablished": false,
+      "exclusiveGPUUseEstablished": false,
+      "canonicalRepeatability": true
+    }
+  },
+  "controls": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "profile": "common-post",
+    "warmup": 48,
+    "frames": 240,
+    "repetitions": 3,
+    "physics": "frozen"
+  },
+  "changes": [
+    "Explicit direct/visual-transform motion control; rotation and scale preserved; registered mover count audited.",
+    "Adjacent peer instance changes coalesced into GPU upload runs.",
+    "writeBuffer calls counted without enabling CPU API timing."
+  ],
+  "checks": {
+    "sameEngineSourceAndBuild": true,
+    "all27MeasuredAndCanonicalFrameComparisonsExact": true,
+    "tests": 324,
+    "checkLog": "artifacts/engine-compare/motion-api-check-20261013.log"
+  },
+  "rows": [
+    {
+      "count": 10000,
+      "scenario": "static",
+      "backend": "engine",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 4.600000023841858,
+        "p95": 6,
+        "mean": 4.592916665805711
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 5.75184,
+        "p95": 6.2514,
+        "mean": 5.810603458333332
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 10,
+        "p95": 10.100000000002183,
+        "mean": 10.349372384937244
+      },
+      "fps": 96.62421669698803,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 3720,
+        "p95": 3720,
+        "mean": 3720
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 21,
+        "p95": 21,
+        "mean": 21
+      },
+      "fpsByRepetition": [
+        88.96664681357947,
+        100.91200810673867,
+        101.02718011582192
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": true,
+      "batch": "reference",
+      "axis": "object-count",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "direct"
+      },
+      "movingObjects": 0,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            5.099999964237213,
+            6.699999988079071,
+            5.199999988079071
+          ],
+          "minP95": 5.099999964237213,
+          "maxP95": 6.699999988079071,
+          "meanByRepetition": [
+            4.00291666512688,
+            5.395833333084981,
+            4.379999999205271
+          ],
+          "meanCV": 0.12807731623201535
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            6.783200000000001,
+            6.149359999999999,
+            6.11336
+          ],
+          "minP95": 6.11336,
+          "maxP95": 6.783200000000001,
+          "meanByRepetition": [
+            5.935888874999998,
+            5.765191833333338,
+            5.73072966666667
+          ],
+          "meanCV": 0.015437360252832768
+        },
+        "frame": {
+          "p95ByRepetition": [
+            10.200000000004366,
+            10.100000000002183,
+            10.100000000002183
+          ],
+          "minP95": 10.100000000002183,
+          "maxP95": 10.200000000004366,
+          "meanByRepetition": [
+            11.240167364016742,
+            9.909623430962348,
+            9.89832635983264
+          ],
+          "meanCV": 0.06086398587083471
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "reference/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "backend": "three",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 0.699999988079071,
+        "p95": 1.100000023841858,
+        "mean": 0.680416666302416
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 5.662599999999999,
+        "p95": 5.836,
+        "mean": 5.656617333333336
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 10,
+        "p95": 10.100000000000364,
+        "mean": 9.997629009762903
+      },
+      "fps": 100.02371552529887,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 576,
+        "p95": 576,
+        "mean": 576
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 8,
+        "p95": 8,
+        "mean": 8
+      },
+      "fpsByRepetition": [
+        96.35154202781698,
+        102.53110253110256,
+        101.40868974881182
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": true,
+      "batch": "reference",
+      "axis": "object-count",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "direct"
+      },
+      "movingObjects": 0,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            1.399999976158142,
+            0.8999999761581421,
+            0.9000000357627869
+          ],
+          "minP95": 0.8999999761581421,
+          "maxP95": 1.399999976158142,
+          "meanByRepetition": [
+            0.8058333332339923,
+            0.6604166651765505,
+            0.5750000004967054
+          ],
+          "meanCV": 0.1400502970457653
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            6.01596,
+            5.80684,
+            5.835840000000001
+          ],
+          "minP95": 5.80684,
+          "maxP95": 6.01596,
+          "meanByRepetition": [
+            5.640157666666665,
+            5.638542833333337,
+            5.691151500000003
+          ],
+          "meanCV": 0.0043185245441254684
+        },
+        "frame": {
+          "p95ByRepetition": [
+            10.100000000002183,
+            10.100000000000364,
+            10.099999999998545
+          ],
+          "minP95": 10.099999999998545,
+          "maxP95": 10.100000000002183,
+          "meanByRepetition": [
+            10.378661087866108,
+            9.753138075313805,
+            9.861087866108798
+          ],
+          "meanCV": 0.02730755793657957
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "reference/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "backend": "babylon",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 0.6000000238418579,
+        "p95": 1.2000000476837158,
+        "mean": 0.722361112303204
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 5.65548,
+        "p95": 5.68152,
+        "mean": 5.655718611111106
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 10,
+        "p95": 10.100000000000364,
+        "mean": 10.171548117154813
+      },
+      "fps": 98.31345125462771,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 816,
+        "p95": 816,
+        "mean": 816
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 7,
+        "p95": 7,
+        "mean": 7
+      },
+      "fpsByRepetition": [
+        91.9655225488687,
+        102.06260409104495,
+        101.59404888416579
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": true,
+      "batch": "reference",
+      "axis": "object-count",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "direct"
+      },
+      "movingObjects": 0,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            1.5,
+            0.9000000357627869,
+            0.9000000357627869
+          ],
+          "minP95": 0.9000000357627869,
+          "maxP95": 1.5,
+          "meanByRepetition": [
+            0.9425000014404455,
+            0.5608333351711432,
+            0.6637500002980232
+          ],
+          "meanCV": 0.2232018737787541
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            5.6708799999999995,
+            5.66892,
+            5.6990799999999995
+          ],
+          "minP95": 5.66892,
+          "maxP95": 5.6990799999999995,
+          "meanByRepetition": [
+            5.646579833333335,
+            5.656968999999998,
+            5.663606999999998
+          ],
+          "meanCV": 0.0012389788047370807
+        },
+        "frame": {
+          "p95ByRepetition": [
+            10.100000000000364,
+            10.100000000000364,
+            10.100000000002183
+          ],
+          "minP95": 10.100000000000364,
+          "maxP95": 10.100000000002183,
+          "meanByRepetition": [
+            10.873640167364018,
+            9.797907949790797,
+            9.843096234309623
+          ],
+          "meanCV": 0.04884179740966272
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "reference/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "object-motion",
+      "backend": "engine",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 5.599999964237213,
+        "p95": 8.199999988079071,
+        "mean": 5.983750000347694
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 5.6396,
+        "p95": 6.123879999999999,
+        "mean": 5.647891444444456
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 10,
+        "p95": 10.100000000002183,
+        "mean": 9.877545327754529
+      },
+      "fps": 101.23972776820766,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 56520,
+        "p95": 56520,
+        "mean": 56520
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 121,
+        "p95": 121,
+        "mean": 121
+      },
+      "fpsByRepetition": [
+        101.25831462102295,
+        100.93757918743125,
+        101.52499893802309
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": true,
+      "batch": "motion-api-1pct",
+      "axis": "motion-api",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "movingObjects": 100,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            6.5,
+            9.600000023841858,
+            6.900000035762787
+          ],
+          "minP95": 6.5,
+          "maxP95": 9.600000023841858,
+          "meanByRepetition": [
+            5.21000000188748,
+            7.093749999254942,
+            5.647499999900659
+          ],
+          "meanCV": 0.13452334419988526
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            6.10384,
+            6.208600000000001,
+            5.982600000000001
+          ],
+          "minP95": 5.982600000000001,
+          "maxP95": 6.208600000000001,
+          "meanByRepetition": [
+            5.644535833333334,
+            5.680365166666669,
+            5.618773333333329
+          ],
+          "meanCV": 0.004471839764286671
+        },
+        "frame": {
+          "p95ByRepetition": [
+            10.099999999998545,
+            10.19999999999709,
+            10.200000000000728
+          ],
+          "minP95": 10.099999999998545,
+          "maxP95": 10.200000000000728,
+          "meanByRepetition": [
+            9.875732217573203,
+            9.907112970711308,
+            9.849790794979073
+          ],
+          "meanCV": 0.0023727325054503628
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "motion-api-1pct/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "object-motion",
+      "backend": "three",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 6.900000035762787,
+        "p95": 10.300000011920929,
+        "mean": 7.454305555174748
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 5.6453999999999995,
+        "p95": 6.64752,
+        "mean": 5.697890777777783
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 9.900000000001455,
+        "p95": 10.200000000000728,
+        "mean": 10.283960948396098
+      },
+      "fps": 97.2387978734946,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 6976,
+        "p95": 6976,
+        "mean": 6976
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 8,
+        "p95": 8,
+        "mean": 8
+      },
+      "fpsByRepetition": [
+        101.92332295620275,
+        100.43282766735302,
+        90.22272555681388
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": true,
+      "batch": "motion-api-1pct",
+      "axis": "motion-api",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "movingObjects": 100,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            8.699999988079071,
+            10.699999988079071,
+            10.600000023841858
+          ],
+          "minP95": 8.699999988079071,
+          "maxP95": 10.699999988079071,
+          "meanByRepetition": [
+            6.9816666680077715,
+            7.491249999155601,
+            7.889999998360873
+          ],
+          "meanCV": 0.04986977779932506
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            5.88692,
+            6.687799999999999,
+            6.655519999999999
+          ],
+          "minP95": 5.88692,
+          "maxP95": 6.687799999999999,
+          "meanByRepetition": [
+            5.6216121666666705,
+            5.733354833333335,
+            5.738705333333339
+          ],
+          "meanCV": 0.009473915426517151
+        },
+        "frame": {
+          "p95ByRepetition": [
+            10.200000000000728,
+            10.100000000000364,
+            10.200000000000728
+          ],
+          "minP95": 10.100000000000364,
+          "maxP95": 10.200000000000728,
+          "meanByRepetition": [
+            9.811297071129713,
+            9.956903765690377,
+            11.083682008368202
+          ],
+          "meanCV": 0.05529036341057917
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "motion-api-1pct/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "object-motion",
+      "backend": "babylon",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 3.699999988079071,
+        "p95": 4.599999964237213,
+        "mean": 3.6911111128826937
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 5.6493199999999995,
+        "p95": 5.673360000000001,
+        "mean": 5.6505044999999985
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 10,
+        "p95": 10.100000000002183,
+        "mean": 9.810041841004184
+      },
+      "fps": 101.93636441183997,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 7216,
+        "p95": 7216,
+        "mean": 7216
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 7,
+        "p95": 7,
+        "mean": 7
+      },
+      "fpsByRepetition": [
+        101.90593953865181,
+        101.75408719346053,
+        102.14984827114584
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": true,
+      "batch": "motion-api-1pct",
+      "axis": "motion-api",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 0.01,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "movingObjects": 100,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            4.599999964237213,
+            4.299999952316284,
+            4.700000047683716
+          ],
+          "minP95": 4.299999952316284,
+          "maxP95": 4.700000047683716,
+          "meanByRepetition": [
+            3.8837500010927517,
+            3.469583334525426,
+            3.7200000030299027
+          ],
+          "meanCV": 0.04614120827677286
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            5.69996,
+            5.66312,
+            5.66052
+          ],
+          "minP95": 5.66052,
+          "maxP95": 5.69996,
+          "meanByRepetition": [
+            5.658557833333336,
+            5.6514206666666675,
+            5.641535
+          ],
+          "meanCV": 0.0012352299049150331
+        },
+        "frame": {
+          "p95ByRepetition": [
+            10.100000000000364,
+            10.100000000000364,
+            10.100000000002183
+          ],
+          "minP95": 10.100000000000364,
+          "maxP95": 10.100000000002183,
+          "meanByRepetition": [
+            9.812970711297067,
+            9.827615062761502,
+            9.789539748953977
+          ],
+          "meanCV": 0.0015985192759169014
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "motion-api-1pct/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "object-motion",
+      "backend": "engine",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 74.80000001192093,
+        "p95": 92.69999998807907,
+        "mean": 76.24319444290465
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 13.33648,
+        "p95": 13.46396,
+        "mean": 13.772053875000006
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 78.5,
+        "p95": 97.29999999999563,
+        "mean": 78.64755927475595
+      },
+      "fps": 12.714952748965688,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 5283720,
+        "p95": 5283720,
+        "mean": 5283720
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 10021,
+        "p95": 10021,
+        "mean": 10021
+      },
+      "fpsByRepetition": [
+        13.005599481952686,
+        12.501307668166127,
+        12.648447257562607
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": false,
+      "batch": "motion-api-100pct",
+      "axis": "motion-api",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 1,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "movingObjects": 10000,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            88.70000004768372,
+            91.70000004768372,
+            100.19999998807907
+          ],
+          "minP95": 88.70000004768372,
+          "maxP95": 100.19999998807907,
+          "meanByRepetition": [
+            74.55791666557391,
+            77.87291666592161,
+            76.29874999721845
+          ],
+          "meanCV": 0.017757822454504496
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            13.46304,
+            13.452919999999999,
+            13.47488
+          ],
+          "minP95": 13.452919999999999,
+          "maxP95": 13.47488,
+          "meanByRepetition": [
+            14.629431375000003,
+            13.335318749999995,
+            13.3514115
+          ],
+          "meanCV": 0.04402342936398435
+        },
+        "frame": {
+          "p95ByRepetition": [
+            89.40000000000146,
+            96.60000000000218,
+            99.39999999999782
+          ],
+          "minP95": 89.40000000000146,
+          "maxP95": 99.39999999999782,
+          "meanByRepetition": [
+            76.88995815899584,
+            79.99163179916317,
+            79.06108786610879
+          ],
+          "meanCV": 0.016524055896008725
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "motion-api-100pct/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "object-motion",
+      "backend": "three",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 15.5,
+        "p95": 20.30000001192093,
+        "mean": 16.064444444908037
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 6.7336,
+        "p95": 6.9180399999999995,
+        "mean": 6.757767722222222
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 19.5,
+        "p95": 20.299999999999272,
+        "mean": 16.509065550906563
+      },
+      "fps": 60.57278026526989,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 640576,
+        "p95": 640576,
+        "mean": 640576
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 8,
+        "p95": 8,
+        "mean": 8
+      },
+      "fpsByRepetition": [
+        59.48677103815615,
+        61.039458562124885,
+        61.22239868845741
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": false,
+      "batch": "motion-api-100pct",
+      "axis": "motion-api",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 1,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "movingObjects": 10000,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            22.80000001192093,
+            18,
+            17.30000001192093
+          ],
+          "minP95": 17.30000001192093,
+          "maxP95": 22.80000001192093,
+          "meanByRepetition": [
+            16.378750000397364,
+            15.942083334426085,
+            15.87249999990066
+          ],
+          "meanCV": 0.013947305691039575
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            7.279559999999999,
+            6.818879999999999,
+            6.773879999999999
+          ],
+          "minP95": 6.773879999999999,
+          "maxP95": 7.279559999999999,
+          "meanByRepetition": [
+            6.782001499999996,
+            6.750962166666668,
+            6.740339499999999
+          ],
+          "meanCV": 0.0026156727863060883
+        },
+        "frame": {
+          "p95ByRepetition": [
+            20.599999999998545,
+            20.300000000000182,
+            20.200000000000728
+          ],
+          "minP95": 20.200000000000728,
+          "maxP95": 20.599999999998545,
+          "meanByRepetition": [
+            16.810460251046027,
+            16.38284518828452,
+            16.33389121338912
+          ],
+          "meanCV": 0.012965801054151977
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "motion-api-100pct/report.json"
+    },
+    {
+      "count": 10000,
+      "scenario": "object-motion",
+      "backend": "babylon",
+      "repetitions": 3,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 11.600000023841858,
+        "p95": 15.399999976158142,
+        "mean": 12.211666665226222
+      },
+      "gpuMs": {
+        "samples": 720,
+        "p50": 5.6978,
+        "p95": 5.95592,
+        "mean": 5.71893088888889
+      },
+      "frameIntervalMs": {
+        "samples": 717,
+        "p50": 10,
+        "p95": 20.100000000000364,
+        "mean": 12.699163179916317
+      },
+      "fps": 78.74534611709664,
+      "uploadBytes": {
+        "samples": 720,
+        "p50": 640816,
+        "p95": 640816,
+        "mean": 640816
+      },
+      "drawCalls": {
+        "samples": 720,
+        "p50": 7,
+        "p95": 7,
+        "mean": 7
+      },
+      "fpsByRepetition": [
+        79.02655159871708,
+        82.49628939284113,
+        75.06517164483806
+      ],
+      "timestampCoverage": 1,
+      "frameBudgetPassed": false,
+      "batch": "motion-api-100pct",
+      "axis": "motion-api",
+      "width": 1920,
+      "height": 1080,
+      "profile": "common-post",
+      "parameters": {
+        "engineVisibility": "gpu",
+        "peerInstancing": true,
+        "dirtyFraction": 1,
+        "environmentMode": "fixed",
+        "motionApi": "visual-transform"
+      },
+      "movingObjects": 10000,
+      "dispersion": {
+        "cpu": {
+          "p95ByRepetition": [
+            14.5,
+            13.400000035762787,
+            17.19999998807907
+          ],
+          "minP95": 13.400000035762787,
+          "maxP95": 17.19999998807907,
+          "meanByRepetition": [
+            12.177499998609225,
+            11.641249999652306,
+            12.816249997417133
+          ],
+          "meanCV": 0.039331219850518254
+        },
+        "gpu": {
+          "p95ByRepetition": [
+            5.936920000000001,
+            5.72924,
+            5.97304
+          ],
+          "minP95": 5.72924,
+          "maxP95": 5.97304,
+          "meanByRepetition": [
+            5.720202833333335,
+            5.699568666666672,
+            5.73702116666666
+          ],
+          "meanCV": 0.002678183968295791
+        },
+        "frame": {
+          "p95ByRepetition": [
+            20.100000000000364,
+            20.099999999999454,
+            20.100000000002183
+          ],
+          "minP95": 20.099999999999454,
+          "maxP95": 20.100000000002183,
+          "meanByRepetition": [
+            12.653974895397486,
+            12.12175732217573,
+            13.321757322175738
+          ],
+          "meanCV": 0.03865915255991608
+        }
+      },
+      "sharedEffects": {
+        "ao": false,
+        "ssr": false,
+        "dof": false,
+        "planarReflections": false,
+        "bloom": false,
+        "antiAliasing": "none",
+        "samples": 1,
+        "toneMapping": true
+      },
+      "report": "motion-api-100pct/report.json"
+    }
+  ],
+  "counters": [
+    {
+      "batch": "reference",
+      "backend": "engine",
+      "writeBufferCallsByRepetition": [
+        12,
+        12,
+        12
+      ],
+      "uploadBytesByRepetition": [
+        3720,
+        3720,
+        3720
+      ],
+      "shadowPasses": [
+        {
+          "render:render.shadow.dynamic": 8
+        },
+        {
+          "render:render.shadow.dynamic": 8
+        },
+        {
+          "render:render.shadow.dynamic": 8
+        }
+      ]
+    },
+    {
+      "batch": "reference",
+      "backend": "three",
+      "writeBufferCallsByRepetition": [
+        2,
+        2,
+        2
+      ],
+      "uploadBytesByRepetition": [
+        576,
+        576,
+        576
+      ],
+      "shadowPasses": [
+        {},
+        {},
+        {}
+      ]
+    },
+    {
+      "batch": "reference",
+      "backend": "babylon",
+      "writeBufferCallsByRepetition": [
+        3,
+        3,
+        3
+      ],
+      "uploadBytesByRepetition": [
+        816,
+        816,
+        816
+      ],
+      "shadowPasses": [
+        {},
+        {},
+        {}
+      ]
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "engine",
+      "writeBufferCallsByRepetition": [
+        212,
+        212,
+        212
+      ],
+      "uploadBytesByRepetition": [
+        56520,
+        56520,
+        56520
+      ],
+      "shadowPasses": [
+        {
+          "render:render.shadow.dynamic": 108
+        },
+        {
+          "render:render.shadow.dynamic": 108
+        },
+        {
+          "render:render.shadow.dynamic": 108
+        }
+      ]
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "three",
+      "writeBufferCallsByRepetition": [
+        102,
+        102,
+        102
+      ],
+      "uploadBytesByRepetition": [
+        6976,
+        6976,
+        6976
+      ],
+      "shadowPasses": [
+        {},
+        {},
+        {}
+      ]
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "babylon",
+      "writeBufferCallsByRepetition": [
+        103,
+        103,
+        103
+      ],
+      "uploadBytesByRepetition": [
+        7216,
+        7216,
+        7216
+      ],
+      "shadowPasses": [
+        {},
+        {},
+        {}
+      ]
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "engine",
+      "writeBufferCallsByRepetition": [
+        10013,
+        10013,
+        10013
+      ],
+      "uploadBytesByRepetition": [
+        5283720,
+        5283720,
+        5283720
+      ],
+      "shadowPasses": [
+        {
+          "render:render.shadow.dynamic": 10008
+        },
+        {
+          "render:render.shadow.dynamic": 10008
+        },
+        {
+          "render:render.shadow.dynamic": 10008
+        }
+      ]
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "three",
+      "writeBufferCallsByRepetition": [
+        3,
+        3,
+        3
+      ],
+      "uploadBytesByRepetition": [
+        640576,
+        640576,
+        640576
+      ],
+      "shadowPasses": [
+        {},
+        {},
+        {}
+      ]
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "babylon",
+      "writeBufferCallsByRepetition": [
+        4,
+        4,
+        4
+      ],
+      "uploadBytesByRepetition": [
+        640816,
+        640816,
+        640816
+      ],
+      "shadowPasses": [
+        {},
+        {},
+        {}
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "batch": "reference",
+      "backend": "engine",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "three",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "babylon",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "three",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "babylon",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "engine",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "babylon",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "engine",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "reference",
+      "backend": "three",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "engine",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "three",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "babylon",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "three",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "babylon",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "engine",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "babylon",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "engine",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-1pct",
+      "backend": "three",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "engine",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "three",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "babylon",
+      "repetition": 0,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "three",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "babylon",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "engine",
+      "repetition": 1,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "babylon",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "engine",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    },
+    {
+      "batch": "motion-api-100pct",
+      "backend": "three",
+      "repetition": 2,
+      "sameInputAndMotionHashes": true,
+      "measuredPixelsExact": true,
+      "canonicalPixelsExact": true
+    }
+  ],
+  "limits": [
+    "Native shading, tone mapping, IBL and shadow algorithms differ; equal pixel quality is not established.",
+    "Engine direct mutation rebuilds 2048px static shadows; registered movers use the 1024px dynamic map.",
+    "Only motion endpoints and saved canonical frames are compared across harness versions, not all intermediate GPU frames.",
+    "Sequential before/after timings do not prove isolated causal speedup; work counts and requested upload bytes are directly observed.",
+    "Headless RAF intervals are not displayed FPS; exclusive GPU use is not established."
+  ]
+}

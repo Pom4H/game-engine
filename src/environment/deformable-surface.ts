@@ -17,6 +17,8 @@ export interface DeformableSurfaceStamp {
 }
 
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
+/** Signed world-Y displacement bound shared by physics and render culling. */
+export const MAX_SURFACE_DISPLACEMENT_M=.12;
 
 /**
  * Persistent signed surface displacement. Negative height is a rut/footprint;
@@ -67,7 +69,7 @@ export class DeformableSurfaceField {
     let removedVolume=0;
     for(const item of depression){
       const normalized=item.weight/maxDepression,cell=this.cells[item.index]!,down=depthM*normalized;
-      cell.displacementM=clamp(cell.displacementM-down,-.12,.12);
+      cell.displacementM=clamp(cell.displacementM-down,-MAX_SURFACE_DISPLACEMENT_M,MAX_SURFACE_DISPLACEMENT_M);
       cell.compaction=clamp(cell.compaction+compaction*normalized*.18,0,1);
       cell.shear=clamp(Math.max(cell.shear,shear*normalized),0,1);
       cell.history=clamp(cell.history+normalized*.08,0,1);
@@ -77,7 +79,7 @@ export class DeformableSurfaceField {
       const rise=removedVolume*ratio/(sumRim*cellArea);
       for(const item of rim){
         const cell=this.cells[item.index]!;
-        cell.displacementM=clamp(cell.displacementM+rise*item.weight,-.12,.12);
+        cell.displacementM=clamp(cell.displacementM+rise*item.weight,-MAX_SURFACE_DISPLACEMENT_M,MAX_SURFACE_DISPLACEMENT_M);
         cell.shear=clamp(Math.max(cell.shear,shear*item.weight),0,1);
         cell.history=clamp(cell.history+item.weight*.035,0,1);
       }
@@ -98,9 +100,10 @@ export class DeformableSurfaceField {
   }
 }
 
-export function surfaceFieldResolution(size:readonly[number,number]):readonly[number,number]{
+export function surfaceFieldResolution(size:readonly[number,number],cellSizeM=.35):readonly[number,number]{
+  if(!Number.isFinite(cellSizeM)||cellSizeM<.1||cellSizeM>4)throw new RangeError('Invalid surface field cell size');
   return[
-    Math.min(384,Math.max(1,Math.ceil(size[0]/.35))),
-    Math.min(192,Math.max(1,Math.ceil(size[1]/.35))),
+    Math.min(384,Math.max(1,Math.ceil(size[0]/cellSizeM))),
+    Math.min(192,Math.max(1,Math.ceil(size[1]/cellSizeM))),
   ];
 }

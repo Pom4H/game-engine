@@ -1,0 +1,191 @@
+{
+  "status": "completed",
+  "controls": {
+    "cases": 4177,
+    "staticSamples": 4,
+    "dynamicSamples": 2,
+    "binaryCases": 64,
+    "filteredCases": 4096,
+    "dynamicDisabledCases": 17,
+    "receiverPlanes": 225,
+    "receiverPlaneAbsoluteTolerance": 0.000001
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "shaderContractHash": "1c188537898084ca4082439e2954e2c32e2de7468315d512fda8f29ae4eaf829",
+  "productionModuleHashes": [
+    "071a1144b0c7290e23d9130f05edf90bf9d34be933a8e86ede37be4f720c5026",
+    "ff7e60a80572dc1ada53b2ff3ef1711bc4d3023da778acfc52bfa8920641a879",
+    "e82798cda0e4df7997c5aec4489946ff17bf239820afc5928be7db3623df3a8a"
+  ],
+  "inputsHash": "b2e0573d73ee8d3dc29315734fcdcdecc2bdf52bfe5535ac41a8a2521bea1f9b",
+  "outputsHash": "63539bb229d63ab1061fcbc74fdc06c7c6966be5ca868a39157a0e07825ee84b",
+  "maxError": 0,
+  "failures": [],
+  "changedLegacyCases": 2089,
+  "maxLegacyError": 0.5,
+  "examples": [
+    {
+      "staticSamples": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:17",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:18",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:20",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:24",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:33",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:34",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:36",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:40",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    }
+  ],
+  "receiverPlanes": {
+    "maxError": 0,
+    "failures": [],
+    "inputsHash": "9bc62431d095f5ce9ad2db160bcd1b9a706076e2e7cac59b702d2d5dbed4fac7",
+    "outputsHash": "822f56e9bdd4c99baf12fe993a1df6424d89244cb52c849a8390a7e989da1c5b"
+  },
+  "gates": {
+    "nativeHardware": true,
+    "productionContractPresent": true,
+    "normalizedCoverage": true,
+    "receiverPlaneDepth": true,
+    "originalErrorExposed": true
+  },
+  "interpretation": "Actual GPU evaluates the production WGSL helper used by main/relief/instance material shaders. Independent references average individual static/dynamic filtered comparison samples. Binary, fractional and dynamic-disabled coverage cases compare with zero tolerance. The old min(sumStatic,sumDynamic)*0.5 exposes incorrect static weighting. Receiver-plane references use authored affine slopes across mirrored/rotated/sheared projections, with a declared 1e-6 f32 absolute tolerance and finite neutral fallback for singular projections. These kernel checks do not prove image repeatability, full-frame performance or competitive quality.",
+  "startedAt": "2026-10-12T01:10:33.052Z",
+  "completedAt": "2026-10-12T01:10:46.531Z",
+  "sourceState": {
+    "srcSha256": "c50e80a4b1c70f459b63bd2a7acd54f2ba29fa4fb9b3169cee97f7cf0670d56e",
+    "distSha256": "0997096b229d06dd0ae60d62b8736822e23746b12847b34515190e216b4787ac",
+    "harnessSha256": "7d4dd915409d901bd75e20760c0142fa70ce7a1db3c809f87b22a90b3ddd0768",
+    "diagnosticSha256": "9a24200e805e42fcfefdfa6055af676ebea8314d3c2da058ae9a73ef8a7f4c7d"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  }
+}

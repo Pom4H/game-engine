@@ -1,0 +1,1733 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "goalStatus": "active",
+  "performanceTargetMet": false,
+  "nativeCorrectness": {
+    "report": "artifacts/render-stability/report.json",
+    "image": "artifacts/render-stability/native-render.png",
+    "adapter": "AMD RDNA-3, native, fallback=false",
+    "renderFrames": 18,
+    "taaCoordinateCases": 24,
+    "taaPoisonedInputCases": 7,
+    "publishedCubeReadbacks": 17,
+    "finiteCubeChannels": 15040512,
+    "partialSweepsUnchanged": 8,
+    "sameOriginSweepsUnchanged": 6,
+    "movedOriginSweepsUpdated": 2,
+    "rendererErrors": 0,
+    "browserErrors": 0,
+    "gpuValidationErrors": 0,
+    "detail": "docs/render-evidence/probe-pixel-atomicity-20261018.json"
+  },
+  "validation": {
+    "engine": {
+      "command": "node --test test/*.test.mjs",
+      "tests": 780,
+      "passed": 761,
+      "failed": 0,
+      "skipped": 19,
+      "log": {
+        "path": "artifacts/render-stability-motion-playback-engine-tests.log",
+        "sha256": "379002185a818d3cfefa8455f56a586bff01c4596434ea7980d8edeefff118ec"
+      },
+      "note": "Current unchanged Engine production source. Full suite was not repeated for Game-only handshake latch."
+    },
+    "canonicalGameFocused": {
+      "command": "bun test --timeout60000 <55 explicit ./test paths from manifest>",
+      "passed": 432,
+      "failed": 0,
+      "files": 55,
+      "bunExpectCalls": 84330,
+      "manifest": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-test-paths-20261018.json",
+        "sha256": "0bf72ed6a099376060309fed337082a8177eebd3c06a81d77c9695d9ee302230"
+      },
+      "log": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-game-tests.log",
+        "sha256": "cf6b9fda0810cd2446dc520ba350353b1c1add6d1a4097b7ac065150d77a084b"
+      },
+      "coverage": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-coverage-20261018.json",
+        "sha256": "3a0208cba66c1709719d2e360535ffe6ea28a5a3607320e1758565685aa0c7a7"
+      },
+      "allPrior427LabelsPreserved": true
+    },
+    "canonicalPhysics": {
+      "passed": 63,
+      "failed": 0,
+      "assertions": 8826,
+      "scope": "Historical separate63-test cohort from an earlier checkpoint. Current402-test52-file run includes the explicit physics, material and character suites; no separate current63-test rerun is claimed."
+    },
+    "engineTypecheck": "passed",
+    "gameTypecheck": "passed",
+    "engineBuild": "passed",
+    "gameBuild": "passed",
+    "latestPhase": "quiet-motion-repair-playback-and-handshake",
+    "currentLogs": {
+      "gameBuild": "../thegame/artifacts/render-stability-motion-connect-build.log",
+      "gameTypecheck": "../thegame/artifacts/render-stability-motion-connect-typecheck.log"
+    }
+  },
+  "isolatedAuthority": {
+    "residents": 80,
+    "vehiclePhysicsHz": 120,
+    "warmupTicks": 120,
+    "measuredTicks": 600,
+    "baselineMs": {
+      "mean": 24.7466,
+      "p95": 50.2617,
+      "max": 283.1637
+    },
+    "afterPlaneScalarMs": {
+      "mean": 14.9279,
+      "p95": 29.4694,
+      "max": 65.2018
+    },
+    "afterSurfaceScalarsMs": {
+      "mean": 14.615366,
+      "p95": 28.6272,
+      "max": 80.7537
+    },
+    "latestArtifact": "../thegame/artifacts/network-stability-20261018/population-surface-scalars.json",
+    "latestPhysicalCounts": {
+      "steps": 1440,
+      "substeps": 2373,
+      "bodySubsteps": 20593,
+      "islands": 34
+    },
+    "artifact": "../thegame/artifacts/network-stability-20261018/population-plane-scalar.json",
+    "scope": "The afterSurfaceScalars measurement includes lazy footing scratch and road surface scalar locals, at identical residents/physics/tick configuration; its mean/p95 are modestly lower and maximum worse than afterPlaneScalar. Physical counts match exactly, while wall-time navigation budgets change expansion counts and complete world trajectories. Frozen query/route/physics oracles establish semantic preservation. Server p95 still exceeds16.7ms; isolated memory authority excludes concurrent native browser/transport/SQLite/workers and does not establish live60Hz."
+  },
+  "fixedQualityLive": {
+    "artifact": "../thegame/artifacts/performance-live-render-stability-fixed-quality-20261018.json",
+    "viewport": [
+      1280,
+      720
+    ],
+    "renderResolution": [
+      704,
+      396
+    ],
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "bloom": false,
+    "adaptive": false,
+    "qualityContractMatched": true,
+    "warmupFrames": 600,
+    "measuredFrames": 900,
+    "averageFPS": 62.9551,
+    "frameMs": {
+      "p50": 10.5,
+      "p95": 29.3,
+      "p99": 58.2,
+      "max": 370.4
+    },
+    "framesOver50ms": 10,
+    "rendererCpuMs": {
+      "mean": 7.4401,
+      "p95": 12.4,
+      "max": 20.5
+    },
+    "rendererGpuMs": {
+      "mean": 10.2989,
+      "p95": 13.5203,
+      "max": 29.2573
+    },
+    "serverHz": 42.3916,
+    "pendingInputRange": [
+      36,
+      48
+    ],
+    "fullInputWindowFrames": 420,
+    "idleMaximumCorrectionM": 0,
+    "rendererErrors": [],
+    "scope": "Unprofiled live measurement. Earlier runs allowed the existing adaptive policy to change render scale, draw distance and TAA, so they are not fixed-quality before/after controls. The largest frame gap exceeds both render CPU and GPU maxima; asynchronous callbacks and scheduling remain under investigation."
+  },
+  "fixedQualityMovement": {
+    "artifact": "../thegame/artifacts/movement-render-stability-fixed-quality-20261018.json",
+    "status": "online",
+    "alive": true,
+    "frames": 491,
+    "authoritativeTicks": 390,
+    "distanceM": 10.1879,
+    "maximumBackwardM": 0.0288097,
+    "assertionThresholdM": 0.03,
+    "assertionPassed": true,
+    "scope": "Ten-second native transport run. This checks raw local prediction positions and is not a guarantee for every route, network condition or physical snow revision."
+  },
+  "scoredCpuDiagnostic": {
+    "analysis": "../thegame/artifacts/stalls-render-stability-fixed-quality-20261018-analysis.json",
+    "matchingSourceMap": "../thegame/artifacts/render-stability-fixed-quality-game.js.map",
+    "hudFullRendererInspectionMs": 0,
+    "hudPerformanceMs": 29.82,
+    "scoredConsecutiveGcSampleMs": 193.985,
+    "largestConsecutiveEnvironmentPublicationSampleMs": 4.839,
+    "largestConsecutiveDatagramCallbackSampleMs": 4.918,
+    "scope": "The scored GC interval is consistent with a 251 ms long task and 260.4 ms RAF gap; the previous capture omitted an exact performance.now/CPU-profile epoch anchor. Another gap contains approximately 201 ms of sampled CPU idle time, so not every long frame is attributed to JavaScript or GC. The separate unprofiled 370.4 ms frame has no sampled call stack. Allocation sampling is the next diagnostic step."
+  },
+  "rejectedExperiment": {
+    "change": "Retiring identical queued pedestrian commands",
+    "productionPresent": false,
+    "reason": "Commands also represent predicted 1/60 motor duration. Acknowledging retired duration produced backward corrections.",
+    "deterministicMaximumCorrectionM": 0.67,
+    "deterministicBackwardFrames": 16,
+    "originalDeterministicCorrectionM": 0,
+    "nativeRejectedMaximumBackwardM": 0.639396,
+    "artifact": "../thegame/artifacts/network-stability-20261018/prediction-queue-comparison.json"
+  },
+  "canonicalAllocationDiagnostic": {
+    "summary": "../thegame/artifacts/stalls-render-stability-allocation-engine-20261018-heap-summary.json",
+    "cpuAlignment": "../thegame/artifacts/stalls-render-stability-allocation-engine-20261018-aligned-analysis.json",
+    "engine": "the-engine",
+    "engineStatsVerified": true,
+    "settings": {
+      "renderScale": 0.55,
+      "drawDistance": 420,
+      "taa": true,
+      "bloom": false,
+      "adaptive": false
+    },
+    "estimatedCumulativeAllocatedBytes": 10797729116,
+    "samplingIntervalBytes": 32768,
+    "includesCollectedObjects": true,
+    "scoredGcSampleTotalMs": 867.557,
+    "largestScoredConsecutiveGcSamplesMs": 85.924,
+    "matchedRafGapMs": 179.9,
+    "teardownExcluded": true,
+    "scope": "Collection-inclusive sampled allocation estimates include diagnostic warmup. Clock-aligned GC-labelled CPU samples establish a scored pause but do not identify a unique allocator cause or GC phase. These are not retained/live heap, leak measurements, or unprofiled FPS. The first legacy-renderer allocation capture is explicitly invalid for canonical conclusions."
+  },
+  "allocationReductions": {
+    "projectionMembership": "docs/render-evidence/projection-membership-allocation-20261018.json",
+    "gpuBatchKeys": "docs/render-evidence/gpu-batch-key-allocation-20261018.json",
+    "roadSurfaces": "../thegame/test/road-surface-query-scratch.test.ts",
+    "panelNormals": "../thegame/test/panel-body-render-scalar.test.ts",
+    "gameIntegratedTests": {
+      "passed": 226,
+      "failed": 0,
+      "assertions": 43255,
+      "files": 29,
+      "log": "../thegame/artifacts/render-stability-allocation-integrated-tests.log"
+    },
+    "gameTypecheck": "passed",
+    "gameBuild": "passed",
+    "nativeCorrectnessRechecked": true,
+    "scope": "Exact frozen geometry/projection/query/grouping oracles and bounded lifetime checks pass. Native cube/TAA correctness is rechecked. Isolated component allocation/CPU savings do not establish that live freezes are eliminated."
+  },
+  "afterAllocationChangesLive": {
+    "artifact": "../thegame/artifacts/performance-live-render-stability-allocation-final-20261018.json",
+    "viewport": [
+      1280,
+      720
+    ],
+    "renderResolution": [
+      704,
+      396
+    ],
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "bloom": false,
+    "adaptive": false,
+    "qualityContractMatched": true,
+    "warmupFrames": 600,
+    "measuredFrames": 900,
+    "averageFPS": 69.59965,
+    "frameMs": {
+      "p50": 10.1,
+      "p95": 28.2,
+      "p99": 40,
+      "max": 97.9
+    },
+    "framesOver50ms": 5,
+    "rendererCpuMs": {
+      "mean": 7.29678,
+      "p95": 11.4,
+      "max": 53.4
+    },
+    "rendererGpuMs": {
+      "mean": 9.96347,
+      "p95": 11.5438,
+      "max": 27.06478
+    },
+    "pendingInputRange": [
+      41,
+      48
+    ],
+    "fullInputWindowFrames": 410,
+    "serverHzAtSnapshot": 26.55063,
+    "rendererErrors": [],
+    "scope": "One unprofiled live observation at verified unchanged quality. Earlier fixed-quality run was62.955FPS/p9958.2/max370.4ms with10frames over50ms, but world trajectories/server scheduling differ; the current snapshot server rate is lower. This is not a controlled causal FPS gain or a freeze-free pass. Heap/CPU sampling began only after this score."
+  },
+  "afterAllocationChangesMovement": {
+    "artifact": "../thegame/artifacts/movement-render-stability-allocation-final-20261018.json",
+    "status": "online",
+    "alive": true,
+    "frames": 556,
+    "authoritativeTicks": 324,
+    "distanceM": 8.86319,
+    "maximumBackwardM": 0.0224976,
+    "assertionThresholdM": 0.03,
+    "assertionPassed": true,
+    "scope": "Ten-second native transport observation following the allocation diagnostic. Full input windows and low authority wall cadence remain unresolved."
+  },
+  "afterAllocationChangesDiagnostic": {
+    "heapSummary": "../thegame/artifacts/stalls-render-stability-allocation-final-20261018-renderer-heap-summary.json",
+    "cpuAnalysis": "../thegame/artifacts/stalls-render-stability-allocation-final-20261018-aligned-analysis.json",
+    "estimatedCumulativeAllocatedBytes": 12365781420,
+    "sampledObjects": 330937,
+    "scoredGcSampleTotalMs": 1061.042,
+    "largestScoredConsecutiveGcSamplesMs": 77.482,
+    "matchedProfiledRafGapMs": 147.4,
+    "largestLongTaskQaInspectionMs": 14.215,
+    "productionHudFullInspectionMs": 0,
+    "residualPaths": [
+      "Vehicle body/panel/fascia tessellation",
+      "Engine primitive conversion and GPU mesh upload",
+      "MeshBuilder.quad allocations",
+      "Spatial queries and physics rays"
+    ],
+    "scope": "Separate CPU+heap diagnostic starts after600warm+900unprofiled frames, versus120warm+30setup before the earlier allocation diagnostic. Workload/scene-age/heap history differs, so these totals and GC spans are not matched before/after evidence or proof of a specific allocator causing GC. Scoring stops before profiler/heap serialization. Residual94/89ms tasks are mainly client.frame geometry generation."
+  },
+  "geometryAndSpatialChanges": {
+    "quadEvidence": "docs/render-evidence/mesh-quad-allocation-20261018.json",
+    "spatialEvidence": "docs/render-evidence/spatial-owned-fill-20261018.json",
+    "bundleSha256": "46ecca65f943825563ae7073f51bc08bff3bfb17c90859ccebacb833ea50899c",
+    "mapSha256": "af187fa60c782f6db257b76568e447532e910386b44f26cf59bd724204403281",
+    "nativeCorrectnessRechecked": true,
+    "scope": "Exact finite geometry/callback and former physics oracles pass, with independently bounded private scratch storage. Public spatial result behavior remains unchanged. Isolated timing/allocation evidence is not a live FPS or GC guarantee; live observation is recorded separately."
+  },
+  "afterGeometryChangesLive": {
+    "artifact": "../thegame/artifacts/performance-live-render-stability-geometry-final-20261018.json",
+    "qualityContractMatched": true,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "bloom": false,
+    "adaptive": false,
+    "measuredFrames": 900,
+    "warmupFrames": 600,
+    "averageFPS": 69.67185,
+    "frameMs": {
+      "p50": 10.1,
+      "p95": 20.1,
+      "p99": 29.9,
+      "max": 328.6
+    },
+    "framesOver50ms": 4,
+    "rendererCpuMs": {
+      "mean": 7.18824,
+      "p95": 10.7,
+      "max": 21.6
+    },
+    "rendererGpuMs": {
+      "mean": 10.21153,
+      "p95": 10.38532,
+      "max": 344.10096
+    },
+    "mainPassGpuMaximumMs": 340.51788,
+    "pendingInputRange": [
+      30,
+      48
+    ],
+    "fullInputWindowFrames": 372,
+    "serverHzAtSnapshot": 45.60137,
+    "rendererErrors": [],
+    "scope": "Unprofiled CPU/heap capture with existing asynchronous GPU timestamps. A large GPU-main timestamp interval is observed; aggregate data retains no argmax frame, so it is not proven identical to the328.6msRAF gap or active shader computation rather than GPU scheduling/preemption/driver delay. No-freeze performance target is not met."
+  },
+  "afterGeometryChangesMovement": {
+    "artifact": "../thegame/artifacts/movement-render-stability-geometry-final-20261018.json",
+    "status": "online",
+    "alive": true,
+    "frames": 594,
+    "authoritativeTicks": 402,
+    "distanceM": 10.32999,
+    "backwardFrames": 2,
+    "maximumBackwardM": 0.0446667033,
+    "maximumReconciliationM": 0.0630962258,
+    "assertionThresholdM": 0.03,
+    "assertionPassed": false,
+    "captureExitCode": 1,
+    "scope": "Failed original movement threshold is retained. Two backwards steps follow self tick increases of6 while pending falls48to41/40 at unchanged x=-345,y=.65. Per-sampleACK was absent, so exact skipped durations are being reproduced independently before a network fix. No tolerance, queue cap or motor rate changed."
+  },
+  "queuedInputGapFix": {
+    "cause": "The receive reorder frontier aged a missing future sequence for80ms while dozens of already received authoritative motor durations were still queued. A later cumulative executed ACK retired predicted rows that had been skipped before repair was needed.",
+    "change": "Authority opts both ingress and tick draining into consumer-aware gap timing. Queued durations or a newly returned contiguous prefix defer/reset a later gap. A genuinely empty blocked consumer retains the existing80ms timeout, which duplicate packets do not restart.",
+    "genericDefaultPolicyUnchanged": true,
+    "capsAndRatesUnchanged": true,
+    "reproducer": "../thegame/artifacts/network-stability-20261018/prediction-repair-backpressure.ts",
+    "analysis": "../thegame/artifacts/network-stability-20261018/movement-geometry-gap-analysis.json",
+    "oldWriter33ms": {
+      "skipped": 38,
+      "admittedThroughAckNotExecuted": 35,
+      "backwardFrames": 35,
+      "maximumBackwardM": 0.0558333
+    },
+    "fixedWriterCadencesMs": [
+      16.7,
+      33.3,
+      50,
+      66.7,
+      100,
+      133.3
+    ],
+    "fixedRepro": {
+      "skipped": 0,
+      "admittedThroughAckNotExecuted": 0,
+      "backwardFrames": 0,
+      "maximumBackwardM": 0
+    },
+    "boundaryTests": {
+      "passed": 17,
+      "failed": 0,
+      "assertions": 2873
+    },
+    "integratedTests": {
+      "passed": 148,
+      "failed": 0,
+      "assertions": 3060,
+      "files": 17,
+      "log": "../thegame/artifacts/render-stability-repair-integrated-tests.log"
+    },
+    "scope": "Deterministic real sender/outbox/codec/authority motor fixture checks exact actual motor steps and action durations with wrap/MTU/bounds. Its prediction correction metric is directional on a controlled flat floor. Permanent true loss can still time out; this is not a universal no-reconciliation claim."
+  },
+  "afterRepairLive": {
+    "artifact": "../thegame/artifacts/performance-live-render-stability-repair-final-20261018.json",
+    "bundleSha256": "70b69ba5340210b1951aec235d54d0c7000b0d0185a45d265decae5a1ee79a1c",
+    "mapSha256": "58dee77c1f7eb1476d2bf341dfa034c0a049733650d88570a6dc89cd2ddc767e",
+    "qualityContractMatched": true,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "bloom": false,
+    "adaptive": false,
+    "measuredFrames": 900,
+    "warmupFrames": 600,
+    "averageFPS": 64.8443,
+    "frameMs": {
+      "p95": 29.4,
+      "p99": 49.7,
+      "max": 138.7
+    },
+    "framesOver50ms": 8,
+    "rendererCpuMs": {
+      "mean": 7.67344,
+      "p95": 12.4,
+      "max": 48
+    },
+    "rendererGpuMs": {
+      "mean": 10.23144,
+      "p95": 12.42416,
+      "max": 25.96905
+    },
+    "pendingInputRange": [
+      41,
+      48
+    ],
+    "fullInputWindowFrames": 350,
+    "serverHzAtSnapshot": 44.36047,
+    "rendererErrors": [],
+    "worstFrameRecordsCaptured": true,
+    "orderedFrameIntervalsCaptured": 900,
+    "scope": "One unprofiled fixed-quality observation. Earlier340ms GPU-main interval does not recur at the same magnitude, but frame tails and full input windows remain. This is not a freeze-free or statistical GPU-stall-resolution claim."
+  },
+  "afterRepairMovement": {
+    "artifact": "../thegame/artifacts/movement-render-stability-repair-final-20261018.json",
+    "status": "online",
+    "alive": true,
+    "frames": 622,
+    "authoritativeTicks": 420,
+    "distanceM": 10.706295,
+    "backwardFrames": 0,
+    "maximumBackwardM": 0,
+    "assertionThresholdM": 0.03,
+    "assertionPassed": true,
+    "captureExitCode": 0,
+    "scope": "Native WebTransport/QUIC snow-scene observation with unchanged movement assertion and48-command capacity. ACK is now recorded per sample; this ten-second pass does not guarantee every network/snow/vehicle condition."
+  },
+  "diagnosticsOffControl": {
+    "artifact": "../thegame/artifacts/performance-live-render-stability-profile-off-20261018.json",
+    "patchAudit": "../thegame/artifacts/profiling-control-20261018.json",
+    "baseBundleSha256": "70b69ba5340210b1951aec235d54d0c7000b0d0185a45d265decae5a1ee79a1c",
+    "controlBundleSha256": "eeb0f58bffa06fe73ed2d1a630892a74ff3d4a6ab77346d1accaeaf1ae69390e",
+    "productionSourcesChanged": false,
+    "qualityContractMatched": true,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "adaptive": false,
+    "measuredFrames": 900,
+    "warmupFrames": 600,
+    "averageFPS": 66.53655,
+    "frameMs": {
+      "p95": 29,
+      "p99": 48,
+      "max": 173
+    },
+    "framesOver50ms": 7,
+    "pendingInputRange": [
+      39,
+      48
+    ],
+    "fullInputWindowFrames": 391,
+    "serverHzAtSnapshot": 29.83887,
+    "profileEnabled": false,
+    "timestampQueries": false,
+    "cpuSamples": 0,
+    "gpuSamples": 0,
+    "visibilityDiagnosticsSamples": 0,
+    "visibilityDiagnosticsPending": 0,
+    "rendererErrors": [],
+    "scope": "One same-width four-byte archived-bundle boolean-expression patch disables all Engine profiling, including CPU/atom accounting, timestamp device feature/queries, occlusion and visibility diagnostic readbacks. GPU culling, rendering passes/history/features and quality remain enabled. Scene histories differ, so no paired causal speedup is established.173ms RAF stalls remain; production diagnostics have not been disabled on this evidence. Null GPU telemetry is unavailable timing, not zero rendering cost."
+  },
+  "rejectedSoftAdmission": {
+    "productionPresent": false,
+    "artifacts": [
+      "../thegame/artifacts/network-stability-20261018/motion-admission-real-primary.json",
+      "../thegame/artifacts/network-stability-20261018/motion-admission-real-robustness.json",
+      "../thegame/artifacts/network-stability-20261018/motion-admission-real-boundary.json"
+    ],
+    "scope": "Actual sender/outbox/codec/reorder/authority/shared motor, controlled flat world with 60Hz polls/40Hz authority; experimental instance-only admission adapter. Every actual motor tick checked independently. Reliable lane spies and repair call counts remain intact. Not native performance evidence or an accepted parameter policy.",
+    "cleanWriter33ms": {
+      "baselineReleaseExecutionMs": 1050,
+      "soft16ReleaseExecutionMs": 300,
+      "baselineRawHoldMs": 66.66667,
+      "soft16RawHoldMs": 16.66667
+    },
+    "writerStall700ms": {
+      "baseline": {
+        "commandSteps": 719,
+        "commandlessTicks": 0,
+        "idleFallbackTicks": 0,
+        "skipped": 0,
+        "correctionM": 0
+      },
+      "soft16": {
+        "commandSteps": 702,
+        "commandlessTicks": 14,
+        "idleFallbackTicks": 3,
+        "skipped": 1,
+        "correctionM": 0.05583333
+      },
+      "soft24": {
+        "commandSteps": 710,
+        "commandlessTicks": 9,
+        "idleFallbackTicks": 0,
+        "skipped": 1,
+        "correctionM": 0.05583333
+      },
+      "soft32": {
+        "commandSteps": 717,
+        "commandlessTicks": 2,
+        "idleFallbackTicks": 0,
+        "skipped": 0,
+        "correctionM": 0
+      }
+    },
+    "reason": "Shorter speculative lead improves clean-case latency but fails to cover stalls already covered by the original bounded queue. No tested soft target preserves the complete existing resilience contract; no pacing/presentation change is adopted."
+  },
+  "vehicleBodyPreparation": {
+    "detail": "docs/render-evidence/vehicle-body-pass-preparation-20261018.json",
+    "change": "Only body/all passes prepare the chassis deformation closure and MeshBuilder; wheels/effects omit unused body work.",
+    "focusedTests": {
+      "passed": 4,
+      "failed": 0,
+      "assertions": 121
+    },
+    "scope": "Complete frozen vehicle outputs/callbacks/instances and evolving structural revisions match. Small isolated CPU pass savings do not establish live FPS or elimination of heavy body tessellation/GC/GPU stalls."
+  },
+  "afterBodyPreparationLive": {
+    "artifact": "../thegame/artifacts/performance-live-render-stability-body-pass-final-20261018.json",
+    "bundleSha256": "8d8c38e6e888d2f7980b05da5f02fc2816952ecd31c78521f251ec091ff86f1a",
+    "mapSha256": "c0439dd8c76941f1172fe9762f3881558d352eebb67c68ffd6294bae52a803cc",
+    "qualityContractMatched": true,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "bloom": false,
+    "adaptive": false,
+    "measuredFrames": 900,
+    "warmupFrames": 600,
+    "averageFPS": 66.46825,
+    "frameMs": {
+      "p95": 20.4,
+      "p99": 30,
+      "max": 166.8
+    },
+    "framesOver50ms": 1,
+    "rendererCpuMs": {
+      "mean": 7.85128,
+      "p95": 11.4,
+      "max": 20.7
+    },
+    "rendererGpuMs": {
+      "mean": 10.11532,
+      "p95": 11.407,
+      "max": 41.73236
+    },
+    "worstGpuFrame": 331,
+    "worstGpuMainMs": 38.37448,
+    "maximumRafIntervalIndexOneBased": 335,
+    "pendingInputRange": [
+      30,
+      48
+    ],
+    "fullInputWindowFrames": 355,
+    "serverHzAtSnapshot": 35.31836,
+    "rendererErrors": [],
+    "scope": "One frozen-source unprofiled live observation with existing Engine diagnostics. Different scene/authority histories prevent causal FPS/tail attribution to the small body-pass cleanup. CPU/GPU records and RAF indices have no exact host-interval join.166.8ms stall remains; goal active."
+  },
+  "afterBodyPreparationMovement": {
+    "artifact": "../thegame/artifacts/movement-render-stability-body-pass-final-20261018.json",
+    "status": "online",
+    "alive": true,
+    "frames": 654,
+    "authoritativeTicks": 390,
+    "distanceM": 10.106654,
+    "backwardFrames": 0,
+    "maximumBackwardM": 0,
+    "assertionThresholdM": 0.03,
+    "assertionPassed": true,
+    "captureExitCode": 0,
+    "rawHeldPositionTransitions": 343,
+    "maximumRawHeldPositionMs": 346.7,
+    "scope": "Ten-second native WebTransport/QUIC snow-scene check retains the original threshold/capacity and has zero backwards steps. Raw XYZ holds still show burst/hold prediction under overloaded authority; these samples do not measure rendered camera hold duration."
+  },
+  "currentAuthoritySpatialCounts": {
+    "artifact": "../thegame/artifacts/network-stability-20261018/authority-spatial-query-counts-current-20261018.json",
+    "productionChanged": false,
+    "timingClaim": false,
+    "measuredTicks": 600,
+    "warmupTicks": 120,
+    "residents": 80,
+    "planes": 4787,
+    "globalPlanes": 2,
+    "staticBodies": 91129,
+    "nearOwnedCalls": 590771,
+    "existingCacheHits": 555460,
+    "existingCacheMisses": 35311,
+    "consecutiveSameCachedNumericBoundsHits": 239220,
+    "consecutiveSameExactArgumentHits": 36706,
+    "consecutiveBoundsHitShare": 0.40492847,
+    "counterMatchesNativeDiagnostics": true,
+    "overrideFallback": 0,
+    "scope": "Counts-only instance wrapper invokes unchanged native nearOwned and verifies hit/miss deltas plus source/dist hashes. Instrumentation invalidates timing claims. Existing finite-plane spatial indexing is already active; this evidence motivates a bounded numeric query-bounds shortcut prototype, not a second all-plane index or an adopted new cache."
+  },
+  "numericSpatialBoundsShortcut": {
+    "detail": "docs/render-evidence/spatial-cached-bounds-20261018.json",
+    "productionPresent": true,
+    "relatedEngineTests": 34,
+    "canonicalPhysicsTests": 63,
+    "canonicalPhysicsAssertions": 8826,
+    "scope": "Exact one-entry shortcut into the already bounded cached branch. Validation/order/FIFO/batch behavior and public methods preserved. Actual production microbenchmark gain does not establish whole-authority or FPS improvement."
+  },
+  "hostAnchorsAndLightDiagnostic": {
+    "bundleSha256": "1a0d8002e8f0619265f2d8900c1f3b82c46448e998a761d058803348165ac547",
+    "mapSha256": "bb6bac36d49019aaff00ed2c34e22faa6e0af57b382464cee7580c45438360c8",
+    "profilerTests": {
+      "passed": 21,
+      "failed": 0
+    },
+    "gameHudTests": {
+      "passed": 18,
+      "failed": 0,
+      "assertions": 70
+    },
+    "scope": "CPU/GPU records reuse existing CPU begin/submission clock reads. GPU records carry the associated CPU interval, not a GPU execution clock. New QA telemetry and STALL_LIGHT_SAMPLE avoid full inspection during scoring; no extra render history or GPU waits are introduced.",
+    "liveArtifact": "../thegame/artifacts/performance-live-render-stability-host-anchors-20261018.json",
+    "qualityContractMatched": true,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "measuredFrames": 900,
+    "warmupFrames": 600,
+    "averageFPS": 67.69055,
+    "frameMs": {
+      "p95": 21.2,
+      "p99": 38,
+      "max": 333
+    },
+    "framesOver50ms": 4,
+    "rendererCpuMs": {
+      "mean": 7.43085,
+      "p95": 10.8,
+      "max": 20.5
+    },
+    "rendererGpuMs": {
+      "mean": 10.39293,
+      "p95": 11.75296,
+      "max": 339.67365
+    },
+    "worstGpu": {
+      "frame": 785,
+      "shadowMs": 315.7571,
+      "mainMs": 19.9007,
+      "cpuStartMs": 51012.4,
+      "cpuSubmitMs": 51017,
+      "shadowCasters": 1401,
+      "shadowBatchedInstances": 734,
+      "instanceUploadBytes": 0,
+      "environmentUploadBytes": 0
+    },
+    "maximumRafGap": {
+      "startMs": 51048.3,
+      "endMs": 51381.3,
+      "durationMs": 333
+    },
+    "pendingInputRange": [
+      34,
+      48
+    ],
+    "fullInputWindowFrames": 372,
+    "serverHzAtSnapshot": 39.25967,
+    "rendererErrors": [],
+    "movement": {
+      "artifact": "../thegame/artifacts/movement-render-stability-host-anchors-20261018.json",
+      "frames": 574,
+      "authoritativeTicks": 402,
+      "distanceM": 10.455863,
+      "backwardFrames": 0,
+      "maximumBackwardM": 0,
+      "originalThresholdPassed": true,
+      "online": true,
+      "alive": true
+    },
+    "cpuDiagnostic": {
+      "analysis": "../thegame/artifacts/stalls-render-stability-host-anchors-20261018-aligned-analysis.json",
+      "cpuSampling": true,
+      "heapSampling": false,
+      "lightTelemetry": true,
+      "fullProfilerInspectionScoredMs": 0,
+      "scoredFrameCount": 1786,
+      "maximumRafMs": 171.9,
+      "longTasks": 31,
+      "hostRecords": 23,
+      "teardownExcluded": true,
+      "gcSampleTotalMs": 1198.7,
+      "largestConsecutiveGcSampleMs": 98.037,
+      "largestTask": {
+        "durationMs": 172,
+        "gcSampleMs": 136.105,
+        "clientFrameSampleMs": 35.782
+      },
+      "otherTasks": {
+        "durationMs": [
+          82,
+          80,
+          79
+        ],
+        "vehicleBuildSampleMs": [
+          36.669,
+          34.728,
+          37.276
+        ],
+        "compileGeometrySampleMs": [
+          6.188,
+          4.71,
+          6.342
+        ],
+        "primitivePackSampleMs": [
+          3.154,
+          3.103,
+          4.638
+        ]
+      },
+      "scope": "Sampling-clock attribution separates GC/vehicle-generation work from diagnostic inspection. Inclusive paths overlap; sampled GC spans are not trace GC phase boundaries or proof of one allocator's responsibility."
+    },
+    "limit": "Long GPU interval recurs in shadow, whereas the older large interval was main. Associated CPU interval precedes the333msRAF gap; it cannot distinguish active shader time, first-use compilation, driver scheduling/preemption or external GPU work. No-freeze goal remains unmet."
+  },
+  "asyncPipelineReadiness": {
+    "detail": "docs/render-evidence/async-pipeline-readiness-20261018.json",
+    "productionPresent": true,
+    "sourceSha256": "d4b6d0471139d70785d351861c11abe6433a28293b230b699b42389b69c24c71",
+    "descriptorOracleCounts": [
+      101,
+      74
+    ],
+    "newReadinessTests": 10,
+    "focusedTestsPassed": 57,
+    "nativeProductionQualityPassed": true,
+    "nativeQualityFrames": 18,
+    "nativeQualityErrors": 0,
+    "nativeArchive": "artifacts/render-stability/async-pipeline/post-adoption-retry/",
+    "candidateStartupOrder": [
+      "reference",
+      "async",
+      "async",
+      "reference"
+    ],
+    "candidateInitAndFirstSubmitMs": {
+      "reference": [
+        26847.5,
+        25613.9
+      ],
+      "async": [
+        7380.6,
+        6936.2
+      ]
+    },
+    "scope": "Native render-pipeline promises resolve before renderer publication and dependent probe-layout access. Frozen descriptors and sampled native pixels match. Four candidate startup observations have uncontrolled driver-cache state; neither steady-gameplay FPS improvement nor elimination of historical333/340msGPUintervals is claimed. The first production quality-harness attempt failed at an existing pre-render documentElement bootstrap race; unchanged retry passed and both attempts are preserved."
+  },
+  "afterAsyncPipelineLive": {
+    "artifact": "../thegame/artifacts/performance-live-render-stability-async-final-20261018.json",
+    "bundleSha256": "b1c7209d665ecd88cfe3e0703e7239d49b40db073b897b8f184f384e533be4c9",
+    "mapSha256": "4b82ee7b8ec54b330739d772ead06238bc80fd7e5903595e6cafbd05788415b3",
+    "qualityContractMatched": true,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "bloom": false,
+    "adaptive": false,
+    "warmupFrames": 600,
+    "measuredFrames": 900,
+    "averageFPS": 66.31837,
+    "frameMs": {
+      "p95": 28.9,
+      "p99": 49.2,
+      "max": 176.1
+    },
+    "framesOver50ms": 8,
+    "rendererCpuMs": {
+      "mean": 7.39034,
+      "p95": 11.4,
+      "max": 74.1
+    },
+    "rendererGpuMs": {
+      "mean": 10.26309,
+      "p95": 14.19684,
+      "max": 33.60233
+    },
+    "worstCpu": {
+      "frame": 674,
+      "projectionMs": 56.6,
+      "cpuStartedAtMs": 34541.9,
+      "cpuSubmittedAtMs": 34616
+    },
+    "worstGpu": {
+      "frame": 482,
+      "reflectionMs": 24.65261,
+      "cpuStartedAtMs": 31281,
+      "cpuSubmittedAtMs": 31286.5
+    },
+    "pendingInputRange": [
+      39,
+      48
+    ],
+    "fullInputWindowFrames": 383,
+    "serverHzAtSnapshot": 43.83562,
+    "rendererErrors": [],
+    "movement": {
+      "artifact": "../thegame/artifacts/movement-render-stability-async-final-20261018.json",
+      "frames": 595,
+      "authoritativeTicks": 420,
+      "distanceM": 10.769933,
+      "backwardFrames": 0,
+      "maximumBackwardM": 0,
+      "originalThresholdPassed": true,
+      "online": true,
+      "alive": true
+    },
+    "scope": "Frozen pre-body-worker source, native unprofiled WebTransport/QUIC observation and capture exit0. Earlier333/340msGPUinterval did not recur in this single run; a176.1msRAFtail remains. Different scene and authority histories prevent causal FPS or stall-elimination claims."
+  },
+  "cachedOnlyWorkerObservation": {
+    "detail": "docs/render-evidence/cached-body-worker-20261018.json",
+    "artifact": "../thegame/artifacts/performance-live-render-stability-body-worker-20261018.json",
+    "log": "../thegame/artifacts/render-stability-body-worker-20261018.log",
+    "bundleSha256": "cc8c7a506feed3ed8db8d464d9a1608bdc7ff47d8568c05bddcde124318d6632",
+    "workerSha256": "26e7884dc2d4b12a81f7c1c3d7cf89a1c7c5edb986ac474bc098cad76d999057",
+    "exactGameAndWorkerOverridesFulfilled": true,
+    "qualityContractMatched": true,
+    "warmupFrames": 600,
+    "measuredFrames": 900,
+    "averageFPS": 64.66168,
+    "frameMs": {
+      "p95": 29.5,
+      "max": 157.1
+    },
+    "rendererErrors": [],
+    "worker": {
+      "ready": true,
+      "failures": 0,
+      "jobsDispatched": 0,
+      "publications": 0,
+      "residents": 5,
+      "syncPublicationsUnclassified": 59
+    },
+    "captureExitCode": 1,
+    "activityScopeGuardPassed": false,
+    "cpuTraceAndMovementExecuted": false,
+    "scope": "Worker initialized correctly but performed no rebuild in the measured scene. The required activity guard correctly rejected it before trace/movement; this is neither an exercised worker-performance pass nor a demonstrated runtime failure.59syncpublications combine first sight and unsupported-family replacements; claiming they were all first sight would be an unsupported inference. The next extension adds classified counters and first-sight panel jobs without changing exact geometry or the existing proxy."
+  },
+  "externalNavigationMemoCountGate": {
+    "artifact": "../thegame/artifacts/network-stability-20261018/navigation-entry-query-counts-current-20261018.json",
+    "productionChanged": false,
+    "timingClaim": false,
+    "residents": 80,
+    "warmupTicks": 120,
+    "measuredTicks": 600,
+    "canWalkFrom": {
+      "calls": 1,
+      "floorCalls": 49,
+      "blockedCalls": 51,
+      "supportCalls": 2,
+      "exactRepeatedQueries": 0
+    },
+    "canApproachCalls": 0,
+    "externalSegmentCalls": 3,
+    "allSegmentCalls": 8040,
+    "egress": {
+      "calls": 16009,
+      "searched": 0,
+      "motorTicks": 0,
+      "repeatedQueries": 0
+    },
+    "existingMemoSuppressed": {
+      "stepSupport": 6710,
+      "stepBlocked": 6740,
+      "requestSupport": 230,
+      "requestBlocked": 247
+    },
+    "decision": "Do not extend exact memoization at the measured external entries: existing request/step memo already suppresses repeats, external repeats are absent and expensive egress search did not activate. This fixture cannot attribute the prior50.6msresident tail or establish safety under all world mutations. Nested counts overlap and instrumentation changes wall-time navigation progress."
+  },
+  "firstSightWorker": {
+    "detail": "docs/render-evidence/first-sight-body-worker-20261018.json",
+    "nativeArtifact": "../thegame/artifacts/performance-live-render-stability-first-sight-20261018.json",
+    "nativeCaptureExitCode": 0,
+    "qualityContractMatched": true,
+    "testsPassed": 51,
+    "testAssertions": 727,
+    "exactBrowserCases": 22,
+    "scoredAsyncFirstSightPublications": 2,
+    "totalAsyncPublications": 7,
+    "workerFailures": 0,
+    "measuredFrames": 900,
+    "warmupFrames": 600,
+    "averageFPS": 64.18623,
+    "frameMs": {
+      "p95": 20.6,
+      "p99": 39,
+      "max": 468.3
+    },
+    "framesOver50ms": 5,
+    "engineCpuMaxMs": 54.6,
+    "engineGpuMaxMs": 27.08539,
+    "rendererErrors": [],
+    "syncScoredFirstSightOtherByType": {
+      "pickup": 2,
+      "classic": 2,
+      "cruiser": 1,
+      "scooter": 3,
+      "bicycle": 2,
+      "cargoBike": 1
+    },
+    "movement": {
+      "frames": 536,
+      "authoritativeTicks": 414,
+      "distanceM": 10.726646,
+      "backwardFrames": 0,
+      "originalThresholdPassed": true
+    },
+    "cpuDiagnostic": {
+      "frames": 1847,
+      "maxRafMs": 351.2,
+      "longTasks": 9,
+      "gcSampleMs": 1059.347,
+      "largestGcSampleSpanMs": 118.65,
+      "largestRafIdleSampleMs": 295.009,
+      "largestRafGcSampleMs": 3.083,
+      "fullInspectionScoredMs": 0
+    },
+    "scope": "Same existing hull proxy until complete nonempty worker body, current pose/wheels/priority/sync fallback preserved. Exact activity occurred inside score; this is not causal FPS/tail improvement evidence across different scene histories. Largest diagnostic RAF gap is mostly idle-labelled samples; a separate118msLongTask is GC-dominated. Both delays remain open."
+  },
+  "authorityGcInspectorPreparation": {
+    "pilot": "../thegame/artifacts/network-stability-20261018/inspector-gc-pilot.json",
+    "nativeGcEventsObserved": 41,
+    "forcedGc": false,
+    "productionChanged": false,
+    "authorityCollectorExecuted": true,
+    "preparedCollector": "../thegame/artifacts/network-stability-20261018/collect-authority-gc-inspector.ts",
+    "scope": "Historical41-event pilot followed by completed162-event canonical observer. Clock mapping remains unverified; no pointwise tick attribution or mutator-pause equivalence.",
+    "currentEvidence": "docs/render-evidence/authority-natural-gc-20261018.json"
+  },
+  "limits": [
+    "The no-freeze performance goal is not achieved: long frames and full input windows remain.",
+    "The fixed-quality result applies to the recorded internal resolution, not full-resolution 1080p.",
+    "CPU-only predicate/query benchmarks do not establish live FPS or garbage-collection improvements.",
+    "Two older bridge-egress snow fixture assertions also fail with the frozen original planner/registry; their thresholds were not relaxed. The focused Game checks are not a claim that its entire test suite passes.",
+    "Live microphones, audible playback and all possible moving-scene reflection transitions were not verified by these checks."
+  ],
+  "groundBodyStability": {
+    "detail": "docs/render-evidence/ground-body-stability-20261018.json",
+    "gameBundle": "3de3aac2d6258b9ee111d2bf448d507e302ef3d4d48b431e7dff67c23f4b4aff",
+    "workerBundle": "736a345fc3c4cd1fbabc01fed89b1e2ab7b5c1f927cab8ff7234cd8e428b36c9",
+    "realWorkerRecords": 54,
+    "nativeScores": [
+      {
+        "label": "render-stability-ground-body-20261018",
+        "averageFPS": 69.62118340540415,
+        "p95Ms": 20.400000000001455,
+        "maxFrameMs": 168.5,
+        "framesOver50ms": 2,
+        "overallCaptureExitCode": 1,
+        "nativeScoreCompleted": true
+      },
+      {
+        "label": "render-stability-ground-body-trace-20261018",
+        "averageFPS": 65.7126168224299,
+        "p95Ms": 29.099999999998545,
+        "maxFrameMs": 200.5,
+        "framesOver50ms": 4,
+        "overallCaptureExitCode": 1,
+        "nativeScoreCompleted": true
+      }
+    ],
+    "finalTraceCaptureExitCode": 0,
+    "diagnosticMaxRafMs": 314.5,
+    "movementBackwardFrames": 0,
+    "browserTrace": {
+      "detail": "docs/render-evidence/ground-body-stability-20261018.json",
+      "events": 1301451,
+      "dataLossOccurred": false,
+      "largestRafMs": 314.5,
+      "mainBusyUnionMs": 33.462,
+      "mainGcMs": 2.427,
+      "gpuDecoderWallMs": 309.474,
+      "gpuDecoderThreadCpuMs": 6.872,
+      "vsyncQueryWallMs": 304.757,
+      "vsyncQueryThreadCpuMs": 0.502,
+      "mechanismProven": false,
+      "initialNegativeIntervalExcluded": true
+    }
+  },
+  "authorityNaturalGc": {
+    "detail": "docs/render-evidence/authority-natural-gc-20261018.json",
+    "events": 162,
+    "clockMappingVerified": false,
+    "pointwiseTickAttribution": false,
+    "productionChanged": false
+  },
+  "worker13SatStability": {
+    "detail": "docs/render-evidence/worker13-sat-browser-mode-20261018.json",
+    "bodyWorker": "docs/render-evidence/remaining-ground-body-worker-20261018.json",
+    "occupancy": "docs/render-evidence/occupancy-sat-closure-hoist-20261018.json",
+    "gameBundle": "1a3a65fe8dab9873e9c5dd1225272daff5f6de9b76af2678d433668e041f4013",
+    "workerBundle": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+    "realWorkerRecords": 222,
+    "nativeDiagnostic": {
+      "label": "browser-mode-worker13-sat-20261018-a1",
+      "exitCode": 0,
+      "frameIntervals": 1893,
+      "maxRafMs": 312.90000000000146,
+      "focusVisibleStable": true,
+      "profiled": true,
+      "unprofiledFpsScore": false,
+      "traceAnalysis": {
+        "detail": "docs/render-evidence/worker13-sat-browser-mode-20261018.json",
+        "valid": true,
+        "events": 1673947,
+        "dataLossOccurred": false,
+        "largestMainBusyMs": 45.565946716308595,
+        "largestMainGcMs": 0,
+        "vsyncFallbackSleepWallMs": 292.307,
+        "vsyncFallbackSleepThreadCpuMs": 0.04,
+        "secondGapDawnSubmitWallMs": 145.12,
+        "secondGapDawnSubmitThreadCpuMs": 9.508,
+        "mechanismProven": false
+      }
+    },
+    "browserModeComparison": {
+      "completed": false,
+      "headlessCaptures": 1,
+      "headfulValidCaptures": 0,
+      "headfulBootAttempts": 2,
+      "reason": "Headful document remains hidden with no RAF despite Page.bringToFront; independent blank-page bounds/focus smoke also cannot obtain visible state in this execution environment.",
+      "visibilityProof": "../thegame/artifacts/headful-visibility-smoke-20261018.json",
+      "scope": "Not evidence of product-renderer failure or a browser-mode performance difference."
+    }
+  },
+  "independentInputClock": {
+    "detail": "docs/render-evidence/independent-input-clock-preparation-20261018.json",
+    "productionChanged": false,
+    "schedulerAndAdmissionTests": 14,
+    "expectCalls": 415,
+    "blankBrowserWithheldRafMs": 355.6,
+    "timerSlotsDuringWithheldRaf": 21,
+    "integrationReady": false,
+    "remaining": "Frozen73-test candidate and native lifecycle/movement pass, but no fresh-input ACK within the held-frame interval is established. Native delivery attribution, production adoption/global checks and temporal quality remain.",
+    "latestIntegrationEvidence": "docs/render-evidence/independent-input-native-gates-20261018.json"
+  },
+  "latestCpuAudit": {
+    "report": "../thegame/artifacts/stalls-browser-mode-worker13-sat-20261018-a1-hotpaths-reflection.json",
+    "scope": "CPU sample attribution on verified worker13/SAT bundle+map; counts are samples, not calls or allocation bytes. Captured trace adds material per-RAF console.timeStamp diagnostic overhead.",
+    "candidates": [
+      {
+        "source": "src/render/webgpu.ts",
+        "method": "needsPrepare",
+        "selfMs": 915.586,
+        "samples": 578,
+        "decision": "Investigated only. Reusing the certified surface-presence predicate needs custom-reader/callback-order safety and a measured gain before adoption."
+      },
+      {
+        "source": "../thegame/src/game/render/snow-volume.ts",
+        "method": "update offset neighborhood",
+        "sortComparatorSelfMs": 103.548,
+        "sortComparatorSamples": 66,
+        "decision": "Adopted exact225-offset invariant reuse; see docs/render-evidence/snow-volume-offsets-20261018.json. Per-site CPU samples do not predict the resulting FPS gain."
+      },
+      {
+        "source": "../thegame/src/game/render/the-engine-projection.ts",
+        "method": "projectSnowVolume",
+        "selfMs": 386.294,
+        "samples": 250,
+        "decision": "Investigated only. Mover registration, external pose/entity replacement and origin invalidation require an independent exact oracle."
+      }
+    ],
+    "unprofiledFpsBenefitEstablished": false
+  },
+  "snowVolumeOffsets": {
+    "detail": "docs/render-evidence/snow-volume-offsets-20261018.json",
+    "sourceSha256": "ace716910a6ddc8188fe2628c21bd345a761a785790d822e547fb296f0c278b1",
+    "gameBundle": "86f7694aaa9c3cce3bdefdf75436791d599196518359d3e60d21f29e50e7d41c",
+    "workerBundle": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+    "pairedUpdates": 81,
+    "native": {
+      "label": "render-stability-snow-offsets-native-20261018",
+      "captureExitCode": 0,
+      "profiled": false,
+      "frames": 900,
+      "warmupFramesRequested": 600,
+      "warmupScope": "Each benchmarkLive invocation also includes its existing30 internal settle frames; no claim of exactly600 physical warmup frames.",
+      "averageFps": 68.77526535789885,
+      "p95Ms": 28.399999999997817,
+      "maxMs": 185.90000000000146,
+      "framesOver33Ms": 15,
+      "framesOver50Ms": 3,
+      "browser": {
+        "mode": "native-gpu",
+        "batterySaverRequested": "off",
+        "backend": "webgpu",
+        "width": 1280,
+        "height": 720,
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "qualityMatches": true,
+      "qualityActual": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "rendererErrors": [],
+      "workerReady": true,
+      "workerFailures": 0,
+      "workerMeasured": {
+        "jobsDispatched": 18,
+        "jobsCompleted": 18,
+        "publications": 18,
+        "asyncPublications": 18,
+        "syncPublications": 0,
+        "asyncFirstSight": 18,
+        "asyncReplacement": 0,
+        "syncFirstSightPanel": 0,
+        "syncFirstSightOther": 0,
+        "syncReplacementPanel": 0,
+        "syncReplacementOther": 0,
+        "syncByType": {
+          "truck": 0,
+          "tram": 0,
+          "metro": 0,
+          "bus": 0,
+          "sedan": 0,
+          "sport": 0,
+          "bike": 0,
+          "kukuruznik": 0,
+          "monoplane": 0,
+          "hatch": 0,
+          "wagon": 0,
+          "coupe": 0,
+          "taxi": 0,
+          "suv": 0,
+          "van": 0,
+          "pickup": 0,
+          "classic": 0,
+          "cruiser": 0,
+          "scooter": 0,
+          "bicycle": 0,
+          "cargoBike": 0,
+          "kickScooter": 0,
+          "eScooter": 0,
+          "police": 0,
+          "compact": 0,
+          "crossover": 0,
+          "m3": 0,
+          "v6": 0
+        }
+      },
+      "inputWindow": {
+        "capacity": 48,
+        "minPending": 41,
+        "maxPending": 48,
+        "fullFrames": 362
+      },
+      "windowVisibleFocusedStable": true,
+      "movement": {
+        "status": "online",
+        "frames": 676,
+        "distance": 8.619390615658993,
+        "backwardFrames": 0,
+        "maxBackward": 0,
+        "ticks": 342,
+        "maxPending": 48,
+        "alive": true
+      },
+      "scope": "One current-branch fresh-session native-profile score/movement check; scene history differs from earlier scores. It is not a causal snow-offset FPS comparison, a full-resolution1080p result or an eliminated-freeze claim. Audio autoplay remains locked without user gesture; diagnostic adapter request is separate from the private Engine adapter."
+    }
+  },
+  "authoritySatPairScreen": {
+    "detail": "docs/render-evidence/authority-sat-pair-screen-20261018.json",
+    "completedComparison": false,
+    "firstChildWatchdogSeconds": 40,
+    "firstChildExitCode": 143,
+    "wholeServerGainEstablished": false
+  },
+  "clockAxesSnowIds": {
+    "detail": "docs/render-evidence/clock-axes-integration-20261018.json",
+    "nativeScore": {
+      "completed": true,
+      "captureExitCode": 1,
+      "postScoreFailure": "Subsequent input-clock gate required completely empty pending. After5s paused, three pending commands remained; RAF hold and movement were not reached in this capture. This does not invalidate the already completed900-frame score. No second900-frame score was run.",
+      "report": {
+        "path": "../thegame/artifacts/performance-live-render-stability-clock-axes-native-20261018.json",
+        "sha256": "39852db770c632b6b06e0855c5294e9be9ac2bceae4ce45655c77854a3eeba37"
+      },
+      "log": {
+        "path": "../thegame/artifacts/render-stability-clock-axes-native-20261018.log",
+        "sha256": "dce524e424acff83dcb56f0645df4c84075aac402995c4ef408f9ac7d46912a1"
+      },
+      "overrides": {
+        "path": "../thegame/artifacts/capture-overrides-render-stability-clock-axes-native-20261018.json",
+        "sha256": "a1d274fde349bca2702125cf0fe385ba82d82db76a8914e26397ba5bbe75e576"
+      },
+      "browserAudit": {
+        "path": "../thegame/artifacts/browser-audit-render-stability-clock-axes-native-20261018.json",
+        "sha256": "d8a254386edeced76c694a431d6eb3358d4ded88ca37c9ac1ed11f86f8b067a2"
+      },
+      "frames": 900,
+      "averageFPS": 68.55836983431728,
+      "p95Ms": 28.400000000001455,
+      "maxMs": 311.8999999999942,
+      "framesOver33Ms": 11,
+      "framesOver50Ms": 2,
+      "browser": {
+        "mode": "native-gpu",
+        "batterySaverRequested": "off",
+        "backend": "webgpu",
+        "width": 1280,
+        "height": 720,
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "qualityLock": {
+        "enabled": true,
+        "requested": {
+          "adaptive": false,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "taa": true,
+          "bloom": false
+        },
+        "initial": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "actual": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "matches": true
+      },
+      "rendererErrors": [],
+      "inputWindow": {
+        "capacity": 48,
+        "minPending": 37,
+        "maxPending": 48,
+        "fullFrames": 352
+      },
+      "workerMeasured": {
+        "jobsDispatched": 15,
+        "jobsCompleted": 15,
+        "publications": 15,
+        "asyncPublications": 15,
+        "syncPublications": 0,
+        "asyncFirstSight": 14,
+        "asyncReplacement": 1,
+        "syncFirstSightPanel": 0,
+        "syncFirstSightOther": 0,
+        "syncReplacementPanel": 0,
+        "syncReplacementOther": 0,
+        "syncByType": {
+          "truck": 0,
+          "tram": 0,
+          "metro": 0,
+          "bus": 0,
+          "sedan": 0,
+          "sport": 0,
+          "bike": 0,
+          "kukuruznik": 0,
+          "monoplane": 0,
+          "hatch": 0,
+          "wagon": 0,
+          "coupe": 0,
+          "taxi": 0,
+          "suv": 0,
+          "van": 0,
+          "pickup": 0,
+          "classic": 0,
+          "cruiser": 0,
+          "scooter": 0,
+          "bicycle": 0,
+          "cargoBike": 0,
+          "kickScooter": 0,
+          "eScooter": 0,
+          "police": 0,
+          "compact": 0,
+          "crossover": 0,
+          "m3": 0,
+          "v6": 0
+        }
+      },
+      "windowVisibleFocusedStable": true,
+      "screenshot": {
+        "path": "../thegame/artifacts/performance-live-render-stability-clock-axes-native-20261018.png",
+        "sha256": "e196920199a12365b9f65e0d4d6bab9bcd35dd376bdb17cf7409bddf27e6bd62"
+      },
+      "imageScope": "Post-score live screenshot visually inspected: avatar, vehicles, snow and buildings present. One frame is not temporal flicker/occlusion proof.",
+      "limits": "Single fresh-session current-build score at704x396 internal pixels. Scene history differs from prior scores; no causal improvement or freeze-free result. Existing30settle frames per benchmarkLive remain in addition to requested600warmup."
+    },
+    "functional": {
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/render-stability-clock-axes-functional-20261018.log",
+        "sha256": "464c423f6bd675d3fea2b304138d71e93194d9059ee08808d49df6ac5b6ceba0"
+      },
+      "clock": {
+        "report": {
+          "path": "../thegame/artifacts/input-clock-render-stability-clock-axes-functional-20261018.json",
+          "sha256": "6256ca7091987ed73f2a76505bb3628e77fb46ad705f343120658d3e8ba3b966"
+        },
+        "elapsedMs": 350.5,
+        "seqAdvance": 0,
+        "submittedAdvance": 0,
+        "ackAdvance": 3,
+        "serverTickAdvance": 6,
+        "heartbeats": 70,
+        "motorStepsDuringHold": 1,
+        "pending": [
+          4,
+          1
+        ],
+        "valid": true,
+        "matches": true,
+        "scope": "Revised prerequisite allows at most4pending, leaving44free slots above the maximum40 admitted commands accepted by the independent-mode gate. Raw before/after pending are explicit. Existing onSelf replay accounts for one motor step during hold. Baseline remains RAF-coupled; independent candidate must also prove submission/ACK progress and zero held-frame motor steps."
+      },
+      "movement": {
+        "report": {
+          "path": "../thegame/artifacts/movement-render-stability-clock-axes-functional-20261018.json",
+          "sha256": "32fcdfe59b525b0d9315614e7f696ae02fb142a7288d3e2df226030a472de569"
+        },
+        "status": "online",
+        "frames": 615,
+        "distance": 12.21773028014995,
+        "backwardFrames": 0,
+        "maxBackward": 0,
+        "ticks": 450,
+        "maxPending": 48,
+        "alive": true
+      },
+      "overrides": {
+        "path": "../thegame/artifacts/capture-overrides-render-stability-clock-axes-functional-20261018.json",
+        "sha256": "044aa9baa5d4ccd122745da33208621e039c1f28959ff51845f0968ced8ccd0c"
+      },
+      "scope": "Fresh separate native-profile functional capture; no repeat performance score or fixed-quality FPS claim."
+    },
+    "remaining": [
+      "Native long frame tail persists:311.9ms maximum.",
+      "Input creation and repair-history regeneration are still RAF-owned; three unacknowledged rows could not fully drain after a pause.",
+      "Frame-owned prediction/input/visual prototypes remain ignored pending complete lifecycle/collider/manual/BFcache integration.",
+      "No new all-scene temporal pixel/occlusion proof or full1080p target is claimed."
+    ]
+  },
+  "quietMotionPlayback": {
+    "detail": "docs/render-evidence/quiet-motion-playback-integration-20261018.json",
+    "nativeScore": {
+      "exitCode": 0,
+      "report": {
+        "path": "../thegame/artifacts/performance-live-render-stability-motion-playback-native-20261018.json",
+        "sha256": "42cf92ec28fce017cfc4a905b47503e9351e51966531ea5986a2137b350613a5"
+      },
+      "log": {
+        "path": "../thegame/artifacts/render-stability-motion-playback-native-20261018.log",
+        "sha256": "8b2fc249b7d0d3316f8aa02324a49bd98407eefa0bdc749b9ed4ce310f68553d"
+      },
+      "bundle": {
+        "path": "../thegame/artifacts/render-stability-motion-playback-game.js",
+        "sha256": "eb59250d587a7d9dc9dc172f85399a96576572a41ef76d0919667bc7c3d7f350"
+      },
+      "sourceNetClientSha256": "8114f1c606c7748ce72c39ceaff3354f1fe651cd0c52ce4803099bbdf86d658c",
+      "overrides": {
+        "path": "../thegame/artifacts/capture-overrides-render-stability-motion-playback-native-20261018.json",
+        "sha256": "9aaa86ae8d8a864277f8c9cf85cadc63cfd2b6e8685da01cd5aaf8f15ed6dc3f"
+      },
+      "browserAudit": {
+        "path": "../thegame/artifacts/browser-audit-render-stability-motion-playback-native-20261018.json",
+        "sha256": "0e3423395d7edbf5fbf03e7f7aee96af14aac012e7f07f444d95772d010bff8b"
+      },
+      "independentAudit": {
+        "path": "artifacts/render-stability-motion-playback-native-20261018-independent-review.json",
+        "sha256": "663eb534097612a20bf816830e33d2b883883044a655563350e9cb3487d722db"
+      },
+      "profileLimit": "rendererProfileReset=false; renderer CPU/GPU profile aggregates can include warmup. Raw900 RAF intervals and separately measured body-worker deltas are the scored data. No CPU/GPU aggregate-window or hardware-duration attribution.",
+      "frames": 900,
+      "averageFPS": 59.35579180626269,
+      "p50Ms": 18.900000000001455,
+      "p95Ms": 29.599999999998545,
+      "maxMs": 341.1999999999971,
+      "framesOver33Ms": 19,
+      "framesOver50Ms": 2,
+      "browser": {
+        "mode": "native-gpu",
+        "batterySaverRequested": "off",
+        "backend": "webgpu",
+        "width": 1280,
+        "height": 720,
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "qualityLock": {
+        "enabled": true,
+        "requested": {
+          "adaptive": false,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "taa": true,
+          "bloom": false
+        },
+        "initial": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "actual": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "matches": true
+      },
+      "rendererErrors": [],
+      "inputWindow": {
+        "capacity": 48,
+        "minPending": 30,
+        "maxPending": 48,
+        "fullFrames": 344
+      },
+      "workerMeasured": {
+        "jobsDispatched": 39,
+        "jobsCompleted": 39,
+        "publications": 39,
+        "asyncPublications": 39,
+        "syncPublications": 0,
+        "asyncFirstSight": 8,
+        "asyncReplacement": 31,
+        "syncFirstSightPanel": 0,
+        "syncFirstSightOther": 0,
+        "syncReplacementPanel": 0,
+        "syncReplacementOther": 0,
+        "syncByType": {
+          "truck": 0,
+          "tram": 0,
+          "metro": 0,
+          "bus": 0,
+          "sedan": 0,
+          "sport": 0,
+          "bike": 0,
+          "kukuruznik": 0,
+          "monoplane": 0,
+          "hatch": 0,
+          "wagon": 0,
+          "coupe": 0,
+          "taxi": 0,
+          "suv": 0,
+          "van": 0,
+          "pickup": 0,
+          "classic": 0,
+          "cruiser": 0,
+          "scooter": 0,
+          "bicycle": 0,
+          "cargoBike": 0,
+          "kickScooter": 0,
+          "eScooter": 0,
+          "police": 0,
+          "compact": 0,
+          "crossover": 0,
+          "m3": 0,
+          "v6": 0
+        }
+      },
+      "windowVisibleFocusedStable": true,
+      "screenshot": {
+        "path": "../thegame/artifacts/performance-live-render-stability-motion-playback-native-20261018.png",
+        "sha256": "47393f47fb879c42efb7f8dc931ea25ea04488632c4a2bfbe87aba9cebad6b3a"
+      },
+      "imageScope": "Post-score screenshot visually inspected: avatar, other actors, vehicles, snow and buildings present. One image does not prove all-scene temporal continuity or shadow/reflection correctness.",
+      "comparison": "Single fresh-session native-profile score at704x396 internal pixels. Previous68.56FPS/311.9ms score has different live world history and15worker publications versus39here. No controlled causal FPS comparison, regression attribution, improvement or eliminated-freeze claim. It predates the handshake latch; current functional result is separate."
+    },
+    "currentFunctional": {
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/render-stability-motion-connect-functional-20261018.log",
+        "sha256": "79810452960bf1024f0acfc632a403936604617ee8e463a59e224ecf16931f00"
+      },
+      "repair": {
+        "path": "../thegame/artifacts/motion-repairs-render-stability-motion-connect-functional-20261018.json",
+        "sha256": "a7bd1d8ceac9430f3af49ed07ae0cb9e4ccc61b3781e19e6e624879338310ccc"
+      },
+      "repairTarget": 54,
+      "repairWaitMs": 583,
+      "movement": {
+        "path": "../thegame/artifacts/movement-render-stability-motion-connect-functional-20261018.json",
+        "sha256": "3812228cd4cfdeb7771d2d9926c83867e945032ea37c9d1eaa9418b171251cee"
+      },
+      "movementSummary": {
+        "status": "online",
+        "frames": 346,
+        "distance": 14.651457099256248,
+        "backwardFrames": 0,
+        "maxBackward": 0,
+        "ticks": 552,
+        "maxPending": 48,
+        "alive": true
+      },
+      "overrides": {
+        "path": "../thegame/artifacts/capture-overrides-render-stability-motion-connect-functional-20261018.json",
+        "sha256": "e860654efc06b39291b5dad589c2568f83e48324f96be3811cc04820f781cab7"
+      },
+      "scope": "Fresh native functional capture of rebuilt post-latch client; no repeat900frame score."
+    },
+    "remaining": [
+      "341.2ms native maximum frame and saturated48-input window persist. No full1080p or freeze-free target reached.",
+      "New input creation still depends on RAF. Complete timer admission/frame-owned prediction/visual checkpoint patch remains ignored until full lifecycle/collider/manual/audio review and real canonical gates pass.",
+      "No new all-scene temporal pixel/occlusion proof. Browser audio autoplay remained locked; audible output was not verified."
+    ]
+  },
+  "currentAuthorityNavigationDiagnostic": {
+    "detail": "docs/render-evidence/authority-navigation-budget-current-20261018.json",
+    "goalStatus": "active",
+    "productionChanged": false,
+    "navigationMeanMs": 5.2689973333333455,
+    "navigationMaxMs": 24.906200000000354,
+    "requestedBudgetMs": 3,
+    "limits": "Observed soft-budget wall duration in one instrumented canonical fixture, not native/server cadence or causal before/after evidence."
+  },
+  "independentInputNativeCandidate": {
+    "evidence": "docs/render-evidence/independent-input-native-gates-20261018.json",
+    "evidenceSha256": "f5671655d6672ded7cad6aebc65ec3d5fb6ee54d95c762ca3651b9bd029021f3",
+    "status": "ignored_candidate_native_fresh_ack_gate_failed_not_adopted",
+    "patchSha256": "78efe24da217af6d20b2ecd8a8cc282387fdb2e6fc2b92e77891ba2db3bb00b3",
+    "tests": {
+      "pass": 73,
+      "fail": 0,
+      "assertions": 1088,
+      "files": 7
+    },
+    "nativeAckGatePassed": false,
+    "nativeLifecycleAndMovementPassed": true,
+    "productionAdopted": false
+  },
+  "currentNavigationExpansionDiagnostic": {
+    "evidence": "docs/render-evidence/authority-navigation-expansions-current-20261018.json",
+    "evidenceSha256": "e9069848b1319f4568230bd1aea7b8bb6184c8cb37fc17dc1c6dd50dc347b693",
+    "runId": "434de345-2d61-480e-b72b-68979fc1a8e9",
+    "navMeanMs": 5.716446333333303,
+    "expansionMaxMs": 38.02820000000065,
+    "segmentFractionOfNav": 0.916911199901063,
+    "productionChanged": false,
+    "next": "Stop timing subdivision. Validate one ignored exact-semantic MRU tile write-elision counterfactual with full frozen-class state/iterator/reentry oracles, then a bounded paired full-footing fixture; reject negligible gain. No native/client FPS claim."
+  },
+  "passiveServerScheduling": {
+    "evidence": "docs/render-evidence/passive-server-scheduling-20261018.json",
+    "evidenceSha256": "b0ff60f88816cc4da922d2a1a4661de91c3a8614e7229591400aa4c51c925825",
+    "freshAckGatePassed": false,
+    "maxPumpMs": 390.14830000000075,
+    "maxStepMs": 178.26450000000114,
+    "productionChanged": false,
+    "next": "Prepare an ignored optional between-step catch-up budget that retains debt/maxDebt250/maxSteps6 and yields through the existing router timeout. It cannot split a long indivisible world step; validate conservation/default parity before native testing."
+  },
+  "inputQueryBudgetProduction": {
+    "document": "docs/render-evidence/input-query-budget-current-status-20261018.json",
+    "sha256": "01c7a1813deea9bac7cecdd763816bb34a56b6b2aca37ce11130686bc0ddb5e0",
+    "status": "waiting-for-parallel-hydrology-before-combined-verification",
+    "goalComplete": false,
+    "currentNativeVerified": false,
+    "remaining": [
+      "Wait for external turn completion while read-only auditing integration risks.",
+      "Re-evaluate exact shared source changes, all affected checks and new complete Engine verification.",
+      "Build and run Game coverage on a stable new common epoch.",
+      "Then release current Worker/native/temporal verification with exact new public hashes."
+    ],
+    "latestCheckpoint": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\docs\\render-evidence\\parallel-snow-service-checkpoint-20261018.json",
+      "sha256": "62122de63b16ca015c698be92781305c3e53ee98c30dac6c4471be9da47fa77b"
+    },
+    "latestAirportIntegration": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\docs\\render-evidence\\airport-render-network-integration-20261018.json",
+      "sha256": "fdadbbfc0e3e305148f85bc772ee80245a8c24690c2f6534f8795b9acc2822e2"
+    }
+  },
+  "airportSurfaceStability": {
+    "document": "docs/render-evidence/airport-render-network-integration-20261018.json",
+    "sha256": "fdadbbfc0e3e305148f85bc772ee80245a8c24690c2f6534f8795b9acc2822e2",
+    "status": "waiting-for-parallel-hydrology-before-combined-verification",
+    "goalComplete": false
+  },
+  "atmosphereTemporalPreparation": {
+    "reference": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\docs\\render-evidence\\atmosphere-temporal-preparation-20261018.json",
+      "sha256": "dfec7bc9b3c68a228aa987726eccb026aada07a0f8cba23a21beda8ba0779bea"
+    },
+    "status": "bounded-cpu-domain-proof-native-candidate-prepared",
+    "productionAdopted": false,
+    "nativeExecuted": false,
+    "goalComplete": false
+  }
+}

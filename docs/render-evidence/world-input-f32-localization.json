@@ -1,0 +1,305 @@
+{
+  "status": "full-precision-world-inputs-observed-cause-unresolved",
+  "report": "artifacts/engine-compare/surface-presence-world-input-f32-v2/report.json",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "a47fdd101a38425baa4a7458a915ab6d6c1dbac47007e3eb2934d0a59398954a",
+    "diagnosticSha256": "f0116f14b54d396d5d0abf5a080125928e2762ed76a4f1768d45597bff1a3b27"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "scope": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "freshDevices": 6,
+    "observedFrames": 192,
+    "canonicalFramesPerDevice": 32,
+    "productionSourceUnchanged": true,
+    "renderShadersInstrumented": true,
+    "renderTargetFormatChanged": true,
+    "deviceLimitChanged": true,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false
+  },
+  "gates": {
+    "completed": true,
+    "coverage": true,
+    "allComparisonsExact": false,
+    "sameOrderingRepeatable": false,
+    "readbackAgreement": true,
+    "opaqueBoundaryAgreement": true,
+    "materialUniformAgreement": true,
+    "fullPrecisionProbeCoverage": true,
+    "worldInputIndexAgreement": true,
+    "repeatability": false,
+    "worldProbeRepeatable": true,
+    "archivesVerified": true,
+    "physicalReplay": true,
+    "rootCauseEstablished": false,
+    "competitiveAdvantageEstablished": false
+  },
+  "worldInput": {
+    "attachment": "diagnostic normal replacement rgba32float",
+    "position": "actual fragment in.worldPos xyz",
+    "index": "exact float32 input.sourceIndex for instanced geometry; -1 for regular geometry",
+    "checks": 384,
+    "sourceAgreement": "actual GPU source words must equal production CPU records every captured frame",
+    "checkedStages": [
+      "final",
+      "afterOpaque"
+    ],
+    "checkedChannels": 2161193856,
+    "invalidIndexPixels": 0,
+    "disagreements": []
+  },
+  "fullPrecisionProbe": {
+    "format": "rgba32float",
+    "encoding": "rgba32float raw words",
+    "colorAttachmentBytesPerSample": 36,
+    "requiredColorAttachmentLimit": 36,
+    "deviceLimitsChanged": true,
+    "originalNormalWritten": false,
+    "shaderOutputChanged": true,
+    "pipelineTargetsChanged": true,
+    "optionalFeaturesRequested": false,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false,
+    "opaqueRenderInputsChanged": false,
+    "postprocessNormalInputChanged": true,
+    "promotedPipelineCounts": [
+      51
+    ],
+    "adapterColorAttachmentLimits": [
+      128
+    ]
+  },
+  "materialUniforms": {
+    "draws": 1920,
+    "checkedWords": 176640,
+    "drawCountsPerFrame": [
+      10
+    ],
+    "hostGpuDisagreements": []
+  },
+  "readback": {
+    "checkedStages": [
+      "opaque",
+      "lightingProbe"
+    ],
+    "checks": 384,
+    "channelsPerMethod": 3185049600
+  },
+  "stableInputs": [
+    {
+      "stage": "materialUniform:ground",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:7",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:6",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:5",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:4",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:3",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:2",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:1",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:replay:0",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniform:cube:0",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:ground:0",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:7:1",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:6:2",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:5:3",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:4:4",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:3:5",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:2:6",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:1:7",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:replay:0:8",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "materialUniformHost:cube:0:9",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "instanceSource:{\"kind\":\"box\",\"size\":[1,1,1]}|1|{\"kind\":\"steel\",\"roughness\":0.46,\"profile\":{\"kind\":\"steel\",\"density\":7850,\"restitution\":0.32,\"friction\":0.42,\"color\":[0.55,0.58,0.62,1],\"mechanical\":{\"youngModulusPa\":200000000000,\"yieldStressPa\":350000000,\"failureStressPa\":520000000,\"failureStrain\":0.12,\"plasticity\":0.78,\"brittle\":false},\"thermal\":{\"specificHeatJkgK\":490,\"conductivityWmK\":45,\"solarAbsorptivity\":0.45,\"emissivity\":0.35,\"linearExpansionPerK\":0.0000121},\"optical\":{\"ior\":2.5,\"roughness\":0.28,\"metalness\":0.92,\"transmission\":0},\"acoustic\":{\"resonanceHz\":920,\"damping\":0.12,\"brightness\":0.72,\"noise\":0.12},\"surface\":{\"baseRoughness\":0.28,\"waterRetention\":0.08,\"bioAffinity\":0.02,\"dirtAffinity\":0.3,\"weathering\":0.58,\"permeability\":0.01}},\"surface\":{\"wetness\":0.10089923699199999,\"moss\":0,\"dirt\":0,\"wear\":0,\"roughness\":0.40112806104064,\"frictionScale\":0.98183813734144,\"acousticDamping\":0.1401798473984,\"darkening\":0.030269771097599995}}|0",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "staticShadow",
+      "observedFrames": 6,
+      "repeatable": true
+    },
+    {
+      "stage": "dynamicShadow",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "frameUniform",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "lightSources",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "lightCells",
+      "observedFrames": 192,
+      "repeatable": true
+    }
+  ],
+  "upstream": [
+    {
+      "mode": "shuffled",
+      "repetition": 0,
+      "frame": 6,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 6,
+        "maxEncodedError": 983,
+        "coordinates": [
+          {
+            "x": 164,
+            "y": 566,
+            "channel": 0,
+            "before": 10659,
+            "after": 11642
+          },
+          {
+            "x": 164,
+            "y": 566,
+            "channel": 1,
+            "before": 11071,
+            "after": 11720
+          },
+          {
+            "x": 164,
+            "y": 566,
+            "channel": 2,
+            "before": 11478,
+            "after": 11893
+          },
+          {
+            "x": 164,
+            "y": 567,
+            "channel": 0,
+            "before": 10658,
+            "after": 11538
+          },
+          {
+            "x": 164,
+            "y": 567,
+            "channel": 1,
+            "before": 11070,
+            "after": 11630
+          },
+          {
+            "x": 164,
+            "y": 567,
+            "channel": 2,
+            "before": 11478,
+            "after": 11820
+          }
+        ]
+      }
+    }
+  ],
+  "tests": {
+    "command": "npm run check",
+    "passed": 310,
+    "failed": 0,
+    "log": "artifacts/world-input-f32-check.log"
+  },
+  "failedFirstAttempt": {
+    "report": "artifacts/engine-compare/surface-presence-world-input-f32/report.json",
+    "status": "failed",
+    "archive": "artifacts/engine-compare/surface-presence-world-input-f32/measured-state",
+    "cause": "Native pipeline validation requires 36 render-target bytes for these formats. The first diagnostic wrongly used the default 32-byte device limit. Corrected diagnostic checks adapter support and requests 36; the failed initialization is retained and passes no gate."
+  },
+  "interpretation": "Every observed fragment world XYZ/index word repeats exactly across captures of each frame, and all observed source indices and material uniforms agree with their recorded inputs, while opaque color still differs. The observed full-precision XYZ/index values do not explain these captured color differences. Other full-precision interpolants, sampled textures, arithmetic and export remain to be isolated.",
+  "limitations": [
+    "The probe retains full binary32 XYZ/index words, but does not observe all other interpolants, per-invocation material loads, sampled texels or shading intermediates.",
+    "Only the diagnostic normal slot is promoted to rgba32float. Other main MRT formats and production radiance expressions remain intact. Shader instrumentation, render-target format and device limits can alter compiler/GPU scheduling.",
+    "The original normal texture stays untouched and remains bound to postprocessing. The captured effects/TAA/presentation images are diagnostic and cannot certify production visual quality.",
+    "Independent readback validation covers opaque rgba16float and probe rgba32float. Packed velocity/specular boundary observations are present but are not independently checked by a second codec here.",
+    "This is a correctness observation with extra GPU work/readbacks, not a performance measurement, competitive result or proof of a driver/specification violation."
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-21",
+  "scope": "Only mathematically exact-zero lighting work is rejected. No range, light budget, quality, material, depth or geometry changes. Native production Game TheEngineRenderer source is used; this small fixture is not a full-game FPS acceptance.",
+  "changes": [
+    "pointLight returns zero when nl==0 or authored emission mask==0 before BRDF and shadow PCF. Every nonzero contribution retains its original arithmetic.",
+    "pointFogIntegral skips exactly-zero masked quadrature samples before atmosphere/phase/transmittance evaluation. Original quadrature positions/order/count are retained."
+  ],
+  "source": {
+    "webgpuSha256": "01ffd5d163a56e18f8d1c3d3b2366df446526c26dbaabc76308fd9b24e91ce9b",
+    "fogSha256": "7a53bd2d8fff3d00bd07a5c69f61799cc3fafa6a41beb369941686a7eca901bb"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "fixture": {
+    "body": "Actual Game compact with shared seated driver",
+    "lights": 14,
+    "productionSpotShadowSlots": 2,
+    "geometryCameraTime": "fixed",
+    "time": 7,
+    "fullResolution": [
+      1280,
+      720
+    ],
+    "taa": true,
+    "bloom": true,
+    "drawDistance": 420,
+    "visualFogDensity": 0.013
+  },
+  "pairs": {
+    "day": {
+      "resolution": [
+        1280,
+        720
+      ],
+      "baselineShaderReplacements": 11,
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "beforePNG": "artifacts/light-zero-native-20261021/day-before.png",
+      "afterPNG": "artifacts/light-zero-native-20261021/day-after.png",
+      "beforeSha256": "1ab3848fc5294de184218796a14e8cf50bb982f385d1e3c5b44ce1ca08878dc1",
+      "afterSha256": "1ab3848fc5294de184218796a14e8cf50bb982f385d1e3c5b44ce1ca08878dc1",
+      "gpuMain": {
+        "before": {
+          "meanMs": 7.568705116279069,
+          "p50Ms": 7.51188,
+          "p95Ms": 7.86984,
+          "maxMs": 8.10156
+        },
+        "after": {
+          "meanMs": 6.5203519101123595,
+          "p50Ms": 6.53072,
+          "p95Ms": 6.568,
+          "maxMs": 6.58912
+        },
+        "beforeSamples": 86,
+        "afterSamples": 89
+      },
+      "gpuErrors": []
+    },
+    "night": {
+      "resolution": [
+        1280,
+        720
+      ],
+      "baselineShaderReplacements": 11,
+      "hdr": {
+        "samples": 512,
+        "components": 2048,
+        "changed": 0,
+        "maxAbs": 0
+      },
+      "beforePNG": "artifacts/light-zero-native-20261021/night-before.png",
+      "afterPNG": "artifacts/light-zero-native-20261021/night-after.png",
+      "beforeSha256": "230b4501fa3a42a947263d653a8713ba04ce8185ea135ded60f1c3b388400192",
+      "afterSha256": "230b4501fa3a42a947263d653a8713ba04ce8185ea135ded60f1c3b388400192",
+      "gpuMain": {
+        "before": {
+          "meanMs": 7.795315056179769,
+          "p50Ms": 7.60388,
+          "p95Ms": 8.45396,
+          "maxMs": 8.90028
+        },
+        "after": {
+          "meanMs": 6.5170469767441865,
+          "p50Ms": 6.52216,
+          "p95Ms": 6.56204,
+          "maxMs": 6.59104
+        },
+        "beforeSamples": 89,
+        "afterSamples": 86
+      },
+      "gpuErrors": []
+    }
+  },
+  "oracle": "Complete before/after PNG files are byte-identical in both states; independently sampled HDR512 pixels x4channels are bitwise identical (maxAbs0). Baseline swap count11 is required; invalid first harness run with zero swaps is preserved as report-invalid-r1.json and excluded.",
+  "verification": {
+    "build": "pass",
+    "focusedTests": 23,
+    "focusedFailed": 0,
+    "log": "../../engine-zero-focused-final.log",
+    "descriptorProof": "Replacing only the two updated WGSL functions with their exact prior source recovers every old frozen hash. Canonical79/101 and minimal54/74 changed; other descriptors/layouts/options/counts unchanged."
+  },
+  "limitation": "GPU main reduction ~14-16% here is diagnostic. The full city and driving/flying frame pacing still need the integration performance run."
+}

@@ -1,0 +1,1031 @@
+{
+  "date": "2026-10-18",
+  "goalStatus": "active",
+  "performanceTargetMet": false,
+  "changes": {
+    "avatarGround": "Cross-frame sampling requires an explicit stable cacheCause provider/token and exact actor pose. Unknown, partial or invalid samples and air/seat/LOD/no-ground transitions invalidate. The production client has no proven local cause, so resamples nearby detailed avatars.",
+    "worker": "Extend bounded worker-supported family union to hatch/bicycle. Five-family panel generator/classification stays unchanged. Existing hull proxy, current main pose/wheels, atomic nonempty publication, priority sync fencing, one publication lane and budgets remain.",
+    "diagnostics": "Optional browser-process tracing records bounded events, completion/loss status, observed categories and explicit performance marks. Stalls have exact intervalStartMs and final renderer scope; trace-only warmup/quality guard avoids repeating a native score."
+  },
+  "sourceHashes": {
+    "src/game/presentation.ts": "2c6b8f5dcac8a64782f42dac66ee42e562852ce63d1715905adb9bb06ab07144",
+    "src/game/client.ts": "b4eea991af010eabedbd61a91680ab38915347b37a7e2cc81266610cd5b5a0ec",
+    "src/game/render/body-worker-protocol.ts": "f279bb348af37c7922c844fc2733976462d8d36df79613508641b213598e841c",
+    "src/game/render/body-worker-control.ts": "900dbceebf29c8f79537e3c200f32f57586be2323bab0ef9884ad9e63f9bb1c5",
+    "src/game/render/body-worker-builder.ts": "222d935f2e260352d51b42297053c8d3408bf5a40055e6b46f476ccdb61cd4fb",
+    "src/game/render/body-worker-service.ts": "1ba28be96bceb24f9807c06b14bba0b2ce9606b01b09ef0506983b55f1cae6d4",
+    "src/game/render/body-worker.worker.ts": "dc6588da171faae6ce7a15309815b7a228e56e95376e9a1264e75cec4a196f4b",
+    "test/avatar-ground-cache.test.ts": "f2d51c41be62e54c51a40ebdfc3959b35ff47f3438f70194c2023b7d24447cd9",
+    "test/body-worker-ground-families.test.ts": "fa7bbd39b8a22065e041279e3029670b1a07a4e310d08e2dd3cce1949ebabec8",
+    "test/body-worker-control.test.ts": "789d889ef523e4f9231294617757fc851a28fb5f27ee0c14d860b6c5293ad2a9",
+    "test/body-worker-presentation.test.ts": "eac2fd3a7c199122a46a827eedacbeed4f64eabefe1c97f669e3b67a61998551",
+    "test/fixtures/body-worker-before-ground-extension.ts": "62a085862a3f8a7122521191607f3cc616993593d247fa8142d292af3fdcbbe0",
+    "tools/capture.ts": "ce79e8f7f29c15fd271058776196ef179b1aafe981b6867f489b2d747a39e238",
+    "tools/qa-frame-stalls.ts": "d95e9b5507dc76edfe5bfb5546124b088222f350e2295adb0b64abc55226e43e",
+    "tools/qa-browser-trace.ts": "1f5a7fd8b7c9f479161a6f50b054ac1aea90491d22f421c99fe43d7980297278"
+  },
+  "bundleHashes": {
+    "artifacts/render-stability-ground-body-game.js": "3de3aac2d6258b9ee111d2bf448d507e302ef3d4d48b431e7dff67c23f4b4aff",
+    "artifacts/render-stability-ground-body-game.js.map": "5432c1ef6fe22896ea84b629f5c63ff2d489e119ea99e6f8d7edb8a43c7e9c87",
+    "artifacts/render-stability-ground-body-worker.js": "736a345fc3c4cd1fbabc01fed89b1e2ab7b5c1f927cab8ff7234cd8e428b36c9"
+  },
+  "publicHashes": {
+    "public/build/game.js": "3de3aac2d6258b9ee111d2bf448d507e302ef3d4d48b431e7dff67c23f4b4aff",
+    "public/build/game.js.map": "5432c1ef6fe22896ea84b629f5c63ff2d489e119ea99e6f8d7edb8a43c7e9c87",
+    "public/build/body-worker.js": "736a345fc3c4cd1fbabc01fed89b1e2ab7b5c1f927cab8ff7234cd8e428b36c9"
+  },
+  "validation": {
+    "focusedGame": {
+      "passed": 334,
+      "failed": 0,
+      "assertions": 68636,
+      "files": 41,
+      "log": "artifacts/render-stability-ground-body-game-tests.log"
+    },
+    "workerScoped": {
+      "passed": 61,
+      "assertions": 961
+    },
+    "avatarScoped": {
+      "passed": 29,
+      "assertions": 22014
+    },
+    "gameTypecheck": "passed",
+    "gameBuild": "passed",
+    "buildLog": "artifacts/render-stability-ground-body-build.log",
+    "realModuleWorker": {
+      "records": 54,
+      "artifact": "artifacts/body-worker-prototype/production/browser-report.json",
+      "sha256": "feec14294f3776903271e71d689a6ca1fa790beed52c60bee1df0ab7d6fcde16",
+      "scope": "CPU-only real headless Chrome module Worker; ignored bundle/host, no GPU/render/native FPS claim"
+    },
+    "engineUnchanged": {
+      "total": 766,
+      "passed": 747,
+      "failed": 0,
+      "skipped": 19,
+      "log": "../game-engine/artifacts/render-stability-async-engine-tests.log"
+    }
+  },
+  "nativeScores": [
+    {
+      "label": "render-stability-ground-body-20261018",
+      "artifact": "artifacts/performance-live-render-stability-ground-body-20261018.json",
+      "sha256": "c4bd42cb8278e64e4dba9878dea7fc9f0f03616164cecf84dd92b32de8c43f35",
+      "nativeScoreCompleted": true,
+      "overallCaptureExitCode": 1,
+      "overallFailure": "Trace preflight rejected empty advertised category list; FPS, image and snow state saved before failure.",
+      "frames": 900,
+      "warmupFrames": 600,
+      "profiled": false,
+      "averageFPS": 69.62118340540415,
+      "p95Ms": 20.400000000001455,
+      "p99Ms": 32.400000000001455,
+      "maxFrameMs": 168.5,
+      "framesOver50ms": 2,
+      "quality": {
+        "enabled": true,
+        "requested": {
+          "adaptive": false,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "taa": true,
+          "bloom": false
+        },
+        "initial": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "actual": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "matches": true
+      },
+      "renderResolution": [
+        704,
+        396
+      ],
+      "cpuTotal": {
+        "meanMs": 7.223973362083308,
+        "p50Ms": 6.800000011920929,
+        "p95Ms": 10.5,
+        "maxMs": 16.5
+      },
+      "gpuTotal": {
+        "meanMs": 9.879910293785299,
+        "p50Ms": 9.6444,
+        "p95Ms": 10.774359999999998,
+        "maxMs": 25.54633
+      },
+      "inputWindow": {
+        "capacity": 48,
+        "minPending": 40,
+        "maxPending": 48,
+        "fullFrames": 394
+      },
+      "serverHz": 39.95813909147305,
+      "workerMeasured": {
+        "jobsDispatched": 7,
+        "jobsCompleted": 6,
+        "publications": 6,
+        "asyncPublications": 6,
+        "syncPublications": 7,
+        "asyncFirstSight": 5,
+        "asyncReplacement": 1,
+        "syncFirstSightPanel": 0,
+        "syncFirstSightOther": 7,
+        "syncReplacementPanel": 0,
+        "syncReplacementOther": 0,
+        "syncByType": {
+          "truck": 0,
+          "tram": 0,
+          "metro": 0,
+          "bus": 0,
+          "sedan": 0,
+          "sport": 0,
+          "bike": 0,
+          "kukuruznik": 0,
+          "monoplane": 0,
+          "hatch": 0,
+          "wagon": 0,
+          "coupe": 0,
+          "taxi": 0,
+          "suv": 0,
+          "van": 2,
+          "pickup": 1,
+          "classic": 1,
+          "cruiser": 1,
+          "scooter": 1,
+          "bicycle": 0,
+          "cargoBike": 1,
+          "kickScooter": 0,
+          "eScooter": 0,
+          "police": 0,
+          "compact": 0,
+          "crossover": 0,
+          "m3": 0,
+          "v6": 0
+        }
+      },
+      "workerFinal": {
+        "enabled": true,
+        "ready": true,
+        "failure": null,
+        "active": 1,
+        "residents": 7,
+        "unpublished": 0,
+        "pending": 0,
+        "readyBodies": 0,
+        "queuedBytes": 3454,
+        "readyBytes": 0,
+        "activeOutputReserved": 16777216,
+        "epoch": 4,
+        "config": 1,
+        "jobsDispatched": 17,
+        "jobsCompleted": 16,
+        "publications": 16,
+        "failures": 0,
+        "startupTimeouts": 0,
+        "jobTimeouts": 0,
+        "lastBuildMs": 2.199999988079071,
+        "maxBuildMs": 79.5,
+        "lastPublicationAgeMs": 27.80000001192093,
+        "maxPublicationAgeMs": 489.89999997615814,
+        "asyncPublications": 16,
+        "syncPublications": 26,
+        "waitingSync": 0,
+        "waitingAdmission": 0,
+        "syncFirstSightPanel": 0,
+        "syncFirstSightOther": 26,
+        "syncReplacementPanel": 0,
+        "syncReplacementOther": 0,
+        "asyncFirstSight": 15,
+        "asyncReplacement": 1,
+        "syncByType": {
+          "truck": 0,
+          "tram": 0,
+          "metro": 0,
+          "bus": 0,
+          "sedan": 0,
+          "sport": 0,
+          "bike": 2,
+          "kukuruznik": 1,
+          "monoplane": 1,
+          "hatch": 0,
+          "wagon": 1,
+          "coupe": 1,
+          "taxi": 0,
+          "suv": 1,
+          "van": 3,
+          "pickup": 3,
+          "classic": 3,
+          "cruiser": 2,
+          "scooter": 3,
+          "bicycle": 0,
+          "cargoBike": 3,
+          "kickScooter": 0,
+          "eScooter": 0,
+          "police": 0,
+          "compact": 1,
+          "crossover": 1,
+          "m3": 0,
+          "v6": 0
+        },
+        "syncUnknown": 0
+      },
+      "rendererErrors": []
+    },
+    {
+      "label": "render-stability-ground-body-trace-20261018",
+      "artifact": "artifacts/performance-live-render-stability-ground-body-trace-20261018.json",
+      "sha256": "45ceaecf952df57a2a6acd35e7b9460636e5adbee0ae1994a401e7ed9191ca1c",
+      "nativeScoreCompleted": true,
+      "overallCaptureExitCode": 1,
+      "overallFailure": "Browser trace flush exceeded10s; native score and CPU profile complete, browser trace is explicitly incomplete.",
+      "frames": 900,
+      "warmupFrames": 600,
+      "profiled": false,
+      "averageFPS": 65.7126168224299,
+      "p95Ms": 29.099999999998545,
+      "p99Ms": 39.80000000000291,
+      "maxFrameMs": 200.5,
+      "framesOver50ms": 4,
+      "quality": {
+        "enabled": true,
+        "requested": {
+          "adaptive": false,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "taa": true,
+          "bloom": false
+        },
+        "initial": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "actual": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "matches": true
+      },
+      "renderResolution": [
+        704,
+        396
+      ],
+      "cpuTotal": {
+        "meanMs": 7.571143172888062,
+        "p50Ms": 7,
+        "p95Ms": 11.5,
+        "maxMs": 61.5
+      },
+      "gpuTotal": {
+        "meanMs": 10.113480376282784,
+        "p50Ms": 9.71104,
+        "p95Ms": 11.89654,
+        "maxMs": 26.71829
+      },
+      "inputWindow": {
+        "capacity": 48,
+        "minPending": 40,
+        "maxPending": 48,
+        "fullFrames": 341
+      },
+      "serverHz": 47.03115814117058,
+      "workerMeasured": {
+        "jobsDispatched": 6,
+        "jobsCompleted": 6,
+        "publications": 6,
+        "asyncPublications": 6,
+        "syncPublications": 8,
+        "asyncFirstSight": 6,
+        "asyncReplacement": 0,
+        "syncFirstSightPanel": 0,
+        "syncFirstSightOther": 8,
+        "syncReplacementPanel": 0,
+        "syncReplacementOther": 0,
+        "syncByType": {
+          "truck": 0,
+          "tram": 0,
+          "metro": 0,
+          "bus": 0,
+          "sedan": 0,
+          "sport": 0,
+          "bike": 0,
+          "kukuruznik": 0,
+          "monoplane": 0,
+          "hatch": 0,
+          "wagon": 0,
+          "coupe": 0,
+          "taxi": 0,
+          "suv": 0,
+          "van": 1,
+          "pickup": 1,
+          "classic": 1,
+          "cruiser": 2,
+          "scooter": 2,
+          "bicycle": 0,
+          "cargoBike": 1,
+          "kickScooter": 0,
+          "eScooter": 0,
+          "police": 0,
+          "compact": 0,
+          "crossover": 0,
+          "m3": 0,
+          "v6": 0
+        }
+      },
+      "workerFinal": {
+        "enabled": true,
+        "ready": true,
+        "failure": null,
+        "active": 0,
+        "residents": 5,
+        "unpublished": 0,
+        "pending": 0,
+        "readyBodies": 0,
+        "queuedBytes": 0,
+        "readyBytes": 0,
+        "activeOutputReserved": 0,
+        "epoch": 4,
+        "config": 1,
+        "jobsDispatched": 16,
+        "jobsCompleted": 16,
+        "publications": 16,
+        "failures": 0,
+        "startupTimeouts": 0,
+        "jobTimeouts": 0,
+        "lastBuildMs": 18.30000001192093,
+        "maxBuildMs": 64.69999998807907,
+        "lastPublicationAgeMs": 106.5,
+        "maxPublicationAgeMs": 309.19999998807907,
+        "asyncPublications": 16,
+        "syncPublications": 26,
+        "waitingSync": 0,
+        "waitingAdmission": 0,
+        "syncFirstSightPanel": 0,
+        "syncFirstSightOther": 26,
+        "syncReplacementPanel": 0,
+        "syncReplacementOther": 0,
+        "asyncFirstSight": 16,
+        "asyncReplacement": 0,
+        "syncByType": {
+          "truck": 0,
+          "tram": 0,
+          "metro": 0,
+          "bus": 0,
+          "sedan": 0,
+          "sport": 0,
+          "bike": 1,
+          "kukuruznik": 1,
+          "monoplane": 1,
+          "hatch": 0,
+          "wagon": 1,
+          "coupe": 1,
+          "taxi": 0,
+          "suv": 1,
+          "van": 3,
+          "pickup": 3,
+          "classic": 3,
+          "cruiser": 4,
+          "scooter": 3,
+          "bicycle": 0,
+          "cargoBike": 2,
+          "kickScooter": 0,
+          "eScooter": 0,
+          "police": 0,
+          "compact": 1,
+          "crossover": 1,
+          "m3": 0,
+          "v6": 0
+        },
+        "syncUnknown": 0
+      },
+      "rendererErrors": []
+    }
+  ],
+  "finalDiagnostic": {
+    "label": "render-stability-ground-body-trace-final-20261018",
+    "captureExitCode": 0,
+    "scope": "Trace-only capture with600warmup, fixed quality and30s CPU+browser tracing; diagnostic intervals are not unprofiled FPS.",
+    "qaArtifact": "artifacts/stalls-render-stability-ground-body-trace-final-20261018.json",
+    "rendererScope": {
+      "engine": "the-engine",
+      "backend": "webgpu",
+      "settings": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "features": {
+        "taa": true,
+        "bloom": false,
+        "motionBlur": 0,
+        "dof": 0,
+        "gpuCulling": true,
+        "timestampQueries": true
+      }
+    },
+    "frameIntervals": {
+      "count": 1971,
+      "averageFPS": 65.61207981302447,
+      "p50": 10.400000000001455,
+      "p95": 28.400000000001455,
+      "max": 314.5
+    },
+    "longTasks": 10,
+    "intervalStartMs": 24947.19999998808,
+    "fullProfilerInspectionSampleMs": 0,
+    "gcSampleMs": 603.3410000000222,
+    "maxConsecutiveGcSampleMs": 41.889000000017404,
+    "scoredInclusiveNonAdditive": {
+      "soleGround": 178.4220000000023,
+      "groundFloor": 211.84700000000885,
+      "panelBody": 0,
+      "bodyAdmission": 2.50800000000163,
+      "bodyPayload": 0,
+      "bodySnapshot": 0,
+      "vehicleBuild": 570.885000000042,
+      "drawVehicle": 404.34499999997934,
+      "compileGameGeometry": 148.112000000041,
+      "primitivePack": 113.65600000000995,
+      "engineRender": 14904.443999999934,
+      "environmentPublish": 120.59700000001976,
+      "fullProfilerInspection": 0,
+      "hud": 14.869999999995343
+    },
+    "largestRaf": {
+      "indexOneBased": 1465,
+      "startMs": 47122.8,
+      "endMs": 47437.3,
+      "ms": 314.5,
+      "cpu": {
+        "startMs": 47122.8,
+        "endMs": 47437.3,
+        "durationMs": 314.5,
+        "callbacks": [
+          {
+            "frame": "(idle)",
+            "ms": 283.37900003016694
+          },
+          {
+            "frame": "frame ../../src/game/client.ts:305",
+            "ms": 20.453999969831784
+          },
+          {
+            "frame": "readDatagrams ../../src/game/net/causal/browser.ts:133",
+            "ms": 3.110999999997148
+          },
+          {
+            "frame": "(garbage collector)",
+            "ms": 3.06600000000617
+          },
+          {
+            "frame": "(program)",
+            "ms": 2.606999999996333
+          },
+          {
+            "frame": "EnvironmentMapWorker.worker.onmessage ../../../game-engine/src/render/environment-map-worker.ts:26",
+            "ms": 1.8830000000016298
+          }
+        ],
+        "inclusiveNonAdditive": {
+          "soleGround": 0,
+          "groundFloor": 0,
+          "panelBody": 0,
+          "bodyAdmission": 0,
+          "bodyPayload": 0,
+          "bodySnapshot": 0,
+          "vehicleBuild": 0,
+          "drawVehicle": 0,
+          "compileGameGeometry": 0,
+          "primitivePack": 0,
+          "engineRender": 10.986999969827593,
+          "environmentPublish": 1.8830000000016298,
+          "fullProfilerInspection": 0,
+          "hud": 0
+        },
+        "self": [
+          {
+            "frame": "(idle)",
+            "ms": 283.37900003016694,
+            "stack": [
+              "(root)",
+              "(idle)"
+            ]
+          },
+          {
+            "frame": "(garbage collector)",
+            "ms": 3.06600000000617,
+            "stack": [
+              "(root)",
+              "(garbage collector)"
+            ]
+          },
+          {
+            "frame": "(program)",
+            "ms": 2.606999999996333,
+            "stack": [
+              "(root)",
+              "(program)"
+            ]
+          },
+          {
+            "frame": "traceFrameCpu ../../src/game/performance-metrics.ts:33",
+            "ms": 2.5310000000026776,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "add ../../src/game/performance-metrics.ts:44",
+              "traceFrameCpu ../../src/game/performance-metrics.ts:33"
+            ]
+          },
+          {
+            "frame": "commitCauses ../../../game-engine/src/render/radiance.ts:66",
+            "ms": 1.9369999999980791,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "drawStage ../../src/game/client.ts:270",
+              "render ../../src/game/render/renderer.ts:145",
+              "render ../../src/game/render/the-engine-renderer.ts:42",
+              "render ../../../game-engine/src/render/webgpu.ts:1183",
+              "measure ../../../game-engine/src/render/profiler.ts:107",
+              "(anonymous) ../../../game-engine/src/render/webgpu.ts:1185",
+              "build ../../../game-engine/src/render/frame.ts:82",
+              "end ../../../game-engine/src/render/radiance.ts:96",
+              "commitCauses ../../../game-engine/src/render/radiance.ts:66"
+            ]
+          },
+          {
+            "frame": "writeTexture",
+            "ms": 1.8830000000016298,
+            "stack": [
+              "(root)",
+              "EnvironmentMapWorker.worker.onmessage ../../../game-engine/src/render/environment-map-worker.ts:26",
+              "complete ../../../game-engine/src/render/environment-map-worker.ts:46",
+              "(anonymous) ../../../game-engine/src/render/webgpu.ts:1126",
+              "publishEnvironmentMap ../../../game-engine/src/render/webgpu.ts:1600",
+              "writeTexture"
+            ]
+          },
+          {
+            "frame": "projectSnowVolume ../../src/game/render/the-engine-projection.ts:39",
+            "ms": 1.6869999999980791,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "drawStage ../../src/game/client.ts:270",
+              "render ../../src/game/render/renderer.ts:145",
+              "render ../../src/game/render/the-engine-renderer.ts:42",
+              "projectSnowVolume ../../src/game/render/the-engine-projection.ts:39"
+            ]
+          },
+          {
+            "frame": "set ../../../game-engine/src/render/gpu-visibility.ts:23",
+            "ms": 1.6010000000023865,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "drawStage ../../src/game/client.ts:270",
+              "render ../../src/game/render/renderer.ts:145",
+              "render ../../src/game/render/the-engine-renderer.ts:42",
+              "render ../../../game-engine/src/render/webgpu.ts:1183",
+              "measure ../../../game-engine/src/render/profiler.ts:107",
+              "(anonymous) ../../../game-engine/src/render/webgpu.ts:1254",
+              "prepareCameraBatches ../../../game-engine/src/render/webgpu.ts:1763",
+              "set ../../../game-engine/src/render/gpu-visibility.ts:23"
+            ]
+          },
+          {
+            "frame": "project ../../../game-engine/src/render/visibility-plan.ts:41",
+            "ms": 1.576999999997497,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "drawStage ../../src/game/client.ts:270",
+              "render ../../src/game/render/renderer.ts:145",
+              "render ../../src/game/render/the-engine-renderer.ts:42",
+              "render ../../../game-engine/src/render/webgpu.ts:1183",
+              "measure ../../../game-engine/src/render/profiler.ts:107",
+              "(anonymous) ../../../game-engine/src/render/webgpu.ts:1257",
+              "project ../../../game-engine/src/render/visibility-plan.ts:125",
+              "project ../../../game-engine/src/render/visibility-plan.ts:41"
+            ]
+          },
+          {
+            "frame": "(anonymous) ../../src/game/render/snow-volume.ts:14",
+            "ms": 1.5760000000009313,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "drawStage ../../src/game/client.ts:270",
+              "update ../../src/game/render/snow-volume.ts:11",
+              "(anonymous) ../../src/game/render/snow-volume.ts:14"
+            ]
+          },
+          {
+            "frame": "prepareCameraBatches ../../../game-engine/src/render/webgpu.ts:1763",
+            "ms": 1.5760000000009313,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "drawStage ../../src/game/client.ts:270",
+              "render ../../src/game/render/renderer.ts:145",
+              "render ../../src/game/render/the-engine-renderer.ts:42",
+              "render ../../../game-engine/src/render/webgpu.ts:1183",
+              "measure ../../../game-engine/src/render/profiler.ts:107",
+              "(anonymous) ../../../game-engine/src/render/webgpu.ts:1254",
+              "prepareCameraBatches ../../../game-engine/src/render/webgpu.ts:1763"
+            ]
+          },
+          {
+            "frame": "writeBuffer",
+            "ms": 1.5760000000009313,
+            "stack": [
+              "(root)",
+              "frame ../../src/game/client.ts:305",
+              "drawStage ../../src/game/client.ts:270",
+              "render ../../src/game/render/renderer.ts:145",
+              "render ../../src/game/render/the-engine-renderer.ts:42",
+              "render ../../../game-engine/src/render/webgpu.ts:1183",
+              "measure ../../../game-engine/src/render/profiler.ts:107",
+              "(anonymous) ../../../game-engine/src/render/webgpu.ts:1292",
+              "prepare ../../../game-engine/src/render/webgpu.ts:1632",
+              "writeBuffer"
+            ]
+          }
+        ]
+      }
+    },
+    "movement": {
+      "status": "online",
+      "frames": 539,
+      "distance": 9.153549751930882,
+      "backwardFrames": 0,
+      "maxBackward": 0,
+      "ticks": 354,
+      "maxPending": 48,
+      "alive": true
+    },
+    "browserTrace": {
+      "artifact": "artifacts/stalls-render-stability-ground-body-trace-final-20261018.browser-trace-owner-facts-shadow.json",
+      "sha256": "40677b1c1eaa84387cffbe40f00037eed097b3a220055c967202162968e5b4ba",
+      "scope": "Read-only diagnostic CPU browser trace; CPU timestamps are not GPU hardware timestamp-query clock. No cross-run FPS causality claim.",
+      "reproduce": "node artifacts/analyze-ground-body-browser-trace.mjs",
+      "source": {
+        "trace": "artifacts/stalls-render-stability-ground-body-trace-final-20261018.browser-trace.json",
+        "qa": "artifacts/stalls-render-stability-ground-body-trace-final-20261018.json",
+        "traceSha256": "5e5f4a19b81d6860ce00a33acc11a25c62a9a29ace11f0a4f67ef639efbbd0be",
+        "qaSha256": "6ec8a7fd71dea9e2b4400a03c396a491b82deafb1668a038b7ccd99d6b74c10f",
+        "gameBundle": "artifacts/render-stability-ground-body-game.js",
+        "sourceMap": "artifacts/render-stability-ground-body-game.js.map"
+      },
+      "validity": {
+        "valid": true,
+        "eventCount": 1301451,
+        "collectorDroppedEvents": 0,
+        "parseErrors": 0,
+        "completion": {
+          "dataLossOccurred": false
+        },
+        "peakBufferFraction": 0.25154104828834534,
+        "maxEvents": 2000000,
+        "completeScoreMarks": [
+          {
+            "name": "thegame-stall-score-start",
+            "ts": 339278537238,
+            "pageMs": 24963.69999998808,
+            "pid": 18624,
+            "tid": 26632
+          },
+          {
+            "name": "thegame-stall-score-end",
+            "ts": 339308599485,
+            "pageMs": 55025.89999997616,
+            "pid": 18624,
+            "tid": 26632
+          }
+        ],
+        "observedTimeRangeUs": [
+          339275604965,
+          339308748766
+        ]
+      },
+      "clock": {
+        "startOffsetMs": 339253573.538,
+        "endOffsetMs": 339253573.58500004,
+        "endpointOffsetDifferenceMs": 0.047000011920317775,
+        "affineScale": 1.0000015634255617,
+        "precisionLimit": "Page times quantized to0.1ms. Two endpoints differ47microseconds; affine interpolation is an alignment, not an independent proof of physical clock drift. RendererRAF supplied timestamps precede actual callback dispatch.",
+        "firstQAIntervalMs": -3.299999988077616,
+        "firstNegativeQAIntervalExcluded": true
+      },
+      "largestRAF": {
+        "index": 1464,
+        "startPageMs": 47122.8,
+        "endPageMs": 47437.3,
+        "wallMs": 314.5,
+        "mainInstrumentedBusyUnionMs": 33.46235589599609,
+        "mainNoInstrumentedTaskMs": 281.0376441040039,
+        "mainGCUnionMs": 2.427,
+        "longestOverlappingMainTask": {
+          "name": "ThreadControllerImpl::RunTask",
+          "cat": "toplevel",
+          "pid": 18624,
+          "tid": 26632,
+          "thread": "CrRendererMain",
+          "startPageMs": 47126.256350480966,
+          "endPageMs": 47145.035321121446,
+          "wallMs": 18.779,
+          "cpuMs": 18.336,
+          "args": {
+            "src_file": "cc/trees/proxy_impl.cc",
+            "src_func": "ScheduledActionSendBeginMainFrame",
+            "src_line": 849
+          }
+        },
+        "webGPUProcessTask": {
+          "name": "WebGPU",
+          "cat": "gpu",
+          "pid": 25648,
+          "tid": 10868,
+          "thread": "CrGpuMain",
+          "startPageMs": 47126.784349655485,
+          "endPageMs": 47436.257865816675,
+          "wallMs": 309.474,
+          "cpuMs": 6.872,
+          "args": {}
+        },
+        "vsyncThreadTask": {
+          "name": "WinVSyncProvider::GetVSyncIntervalIfAvailable",
+          "cat": "gpu",
+          "pid": 25648,
+          "tid": 26480,
+          "thread": "GpuVSyncThread",
+          "startPageMs": 47132.605340554794,
+          "endPageMs": 47437.36186409066,
+          "wallMs": 304.757,
+          "cpuMs": 0.502,
+          "args": {}
+        },
+        "ccSchedulerBeginFramesNearGap": [
+          {
+            "atPageMs": 47103.06838673362,
+            "sequence": 4920
+          },
+          {
+            "atPageMs": 47112.95237128075,
+            "sequence": 4921
+          },
+          {
+            "atPageMs": 47123.10635540575,
+            "sequence": 4922
+          },
+          {
+            "atPageMs": 47132.73334035468,
+            "sequence": 4923
+          },
+          {
+            "atPageMs": 47439.56186065113,
+            "sequence": 4959
+          },
+          {
+            "atPageMs": 47447.663847984266,
+            "sequence": 4960
+          }
+        ],
+        "nextMainFrame": {
+          "name": "FireAnimationFrame",
+          "cat": "devtools.timeline",
+          "pid": 18624,
+          "tid": 26632,
+          "thread": "CrRendererMain",
+          "startPageMs": 47439.84086021493,
+          "endPageMs": 47496.08177228645,
+          "wallMs": 56.241,
+          "cpuMs": 52.937,
+          "args": {
+            "data": {
+              "frame": "4C36A73A61D54DB7F5E233DDDCE84154",
+              "id": 7377
+            }
+          }
+        }
+      },
+      "secondRAF": {
+        "startPageMs": 31663.8,
+        "endPageMs": 31819.6,
+        "wallMs": 155.79999999999927,
+        "mainInstrumentedBusyUnionMs": 33.62452490234375,
+        "mainGCUnionMs": 1.313,
+        "webGPUProcessTask": {
+          "name": "WebGPU",
+          "cat": "gpu",
+          "pid": 25648,
+          "tid": 10868,
+          "thread": "CrGpuMain",
+          "startPageMs": 31658.498533168924,
+          "endPageMs": 31820.368280097624,
+          "wallMs": 161.87,
+          "cpuMs": 10.261,
+          "args": {}
+        }
+      },
+      "scoredMainGC": {
+        "count": 228,
+        "unionMs": 508.993,
+        "max": {
+          "name": "MajorGC",
+          "cat": "devtools.timeline,v8",
+          "pid": 18624,
+          "tid": 26632,
+          "thread": "CrRendererMain",
+          "startPageMs": 36278.359310360494,
+          "endPageMs": 36317.95024846301,
+          "wallMs": 39.591,
+          "cpuMs": 38.231,
+          "args": {
+            "type": "finalize incremental marking via stack guard",
+            "usedHeapSizeAfter": 661525520,
+            "usedHeapSizeBefore": 1176609792
+          }
+        }
+      },
+      "largestMainCallback": {
+        "name": "FunctionCall",
+        "cat": "devtools.timeline",
+        "pid": 18624,
+        "tid": 26632,
+        "thread": "CrRendererMain",
+        "startPageMs": 36127.67554594334,
+        "endPageMs": 36215.297408953076,
+        "wallMs": 87.622,
+        "cpuMs": 71.609,
+        "args": {
+          "data": {
+            "columnNumber": 17,
+            "frame": "4C36A73A61D54DB7F5E233DDDCE84154",
+            "functionName": "frame",
+            "isolate": "14186844686687900418",
+            "lineNumber": 50932,
+            "sampleTraceId": 456297047307741,
+            "scriptId": "5",
+            "url": "http://127.0.0.1:3177/build/game.js?v=1jyp7-mvdc688n"
+          }
+        }
+      },
+      "teardown": {
+        "qaTeardownLongTasks": 0,
+        "lastScoredRAFPageMs": 54987.4,
+        "scoreCancelPageMs": 55013.799999952316,
+        "traceEndHostAfterStopMs": 11237.483399999997
+      },
+      "conclusions": [
+        "The314.5ms RAF gap coincides with a309.474ms browser GPU-process WebGPU/command-buffer task (6.872ms recorded threadCPU) and304.757ms VSync-provider task(.502ms threadCPU). Main-task wall-time union is33.462ms and GC2.427ms inside the exact gap.",
+        "No actual compositor Scheduler::BeginFrame X events appear between approximately47132.733ms(sequence4923) and47439.562ms(sequence4959). Synthetic async PipelineReporter stage times are not counted as executed scheduler callbacks.",
+        "The155.8ms RAF gap similarly overlaps a161.870ms WebGPU GPU-process task. The314.5/155.8ms gaps are distinct from remaining genuine main-frame long tasks and the39.591ms scored MajorGC.",
+        "This is a browser GPU/VSync-path stall correlation with CPU waiting, not proof of driver cause, GPU hardware execution duration, shader overload, environment upload cause, or a safe product workaround."
+      ],
+      "limits": [
+        "Trace instrumentation+CPU sampling can change timing; no unprofiled/cross-run FPS benefit is established.",
+        "Trace event ts/dur and recorded tdur are CPU/browser clocks, not Engine GPU hardware timestamp-query clocks. Some unrelated events show tdur>dur; these counters are not exact cycle accounting.",
+        "MainNoInstrumentedTask is absence of traced duration spans; it is not a complete OS scheduler/off-CPU trace.",
+        "Protocol/categories record no fine Dawn/D3D11 command inside the long WebGPU decoder task, so the blocking API is unresolved.",
+        "Partial prior trace remains invalid/incomplete and is not used for full-score comparison.",
+        "QA initial negative interval is disclosed/excluded only from positive-gap attribution; QA production source was not edited."
+      ]
+    },
+    "initialIntervalCaveat": "Raw diagnostic intervals include one initial -3.3ms RAF timestamp/reset mismatch. Positive-gap attribution excludes it; raw diagnostic FPS/count are retained as diagnostic only. The separate900-frame unprofiled benchmark is unaffected. Fix the QA baseline before further captures."
+  },
+  "surfaceAudit": {
+    "evidence": "artifacts/snow-surface-captured-audit.json",
+    "sha256": "51c1ae1d1165610c8941b95d69c4dd3154f37bb4d8f49fda5658a2c7d88a49db",
+    "scope": "Actual before/after screenshot snow snapshots select40steps/.2m on the actor tile. Centre mesh .653 versus ray .65; left sole spans a compacted-rut edge (~5.54cm below its max-probe shoe bottom at centre), right ~.3cm. This does not serialize exact live collider/mesh-cache history or establish a wheel defect."
+  },
+  "relatedEvidence": [
+    "docs/render-evidence/avatar-ground-cache-20261018.json",
+    "docs/render-evidence/authority-natural-gc-20261018.json",
+    "docs/render-evidence/first-sight-body-worker-20261018.json",
+    "docs/render-evidence/async-pipeline-readiness-20261018.json"
+  ],
+  "limits": [
+    "Rare long frames remain:200.5ms in a completed unprofiled score and314.5ms in the final diagnostic. No freeze-free or causal cross-run FPS improvement claim.",
+    "The final largest RAF contains283.379ms idle-labelled CPU samples; CPU samples alone do not prove GPU/driver/OS causation.",
+    "Full48-command input windows and live authority below60Hz remain; natural Inspector GC collection clocks are unaligned to authority ticks.",
+    "Game334 is a focused suite, not an entire-suite pass; previously reproduced old snow-egress failures remain excluded.",
+    "No complete timing claim uses the preserved preflight-failed or flush-incomplete browser traces.",
+    "A complete browser trace overlaps the314.5ms gap with309.474ms WebGPU decoder wall time (6.872ms threadCPU),304.757ms VSync-query wall time (.502ms threadCPU),33.462ms main busy union and2.427ms main GC. This identifies the delayed browser path, not a specific blocked Dawn/D3D command, hardware duration, driver cause or safe product patch."
+  ],
+  "nextActions": [
+    "Fix initial QA RAF timestamp baseline before another capture.",
+    "Audit pinned Chromium/Dawn WinVSync and decoder blocking source and compare controlled foreground/headless native behavior at identical source/quality before changing the product.",
+    "Remaining synchronous vehicle families require their own exact DTO/output/fence proof before worker enrollment.",
+    "Continue authority allocation/GC diagnosis with explicit clock uncertainty, preserving60Hzmotor/120Hzphysics and caps."
+  ]
+}

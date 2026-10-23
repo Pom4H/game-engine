@@ -1,6 +1,6 @@
 import type {Vec3} from '../math.js';
 export interface FootContact {readonly id:string;readonly position:Vec3;readonly grounded:boolean;readonly yaw?:number}
-export interface SnowFootprint {readonly sequence:number;readonly foot:string;readonly position:Vec3;readonly yaw:number;readonly time:number;readonly depth:number}
+export interface SnowFootprint {readonly sequence:number;readonly foot:string;readonly position:Vec3;readonly yaw:number;readonly time:number;readonly depth:number;readonly ellipse?:readonly[number,number]}
 /** Foot planting, not elapsed time, creates a stamp. Airborne feet and bare ground
  * cannot leave snow impressions. Bounded storage keeps long sessions finite. */
 export class SnowFootprints {

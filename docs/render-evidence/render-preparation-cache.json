@@ -1,0 +1,2495 @@
+{
+  "date": "2026-10-11",
+  "execution": "Local Windows, headless Chromium, native amd rdna-3, 1920x1080",
+  "reference": "Same working tree and benchmark fixture before and after persistent render preparation caches; not the October 10 Engine Compare revision",
+  "baseline": "artifacts/gpu-visibility/phase1/report.json",
+  "current": "artifacts/gpu-visibility/report.json",
+  "correctness": "exact-reference-match",
+  "frameBudgetMs": 16.666666666666668,
+  "frameBudgetPassed": false,
+  "note": "These sequential local runs are observational performance evidence. Exact PNG and HDR equality, scene controls and replay hashes are enforced; a higher mean FPS does not pass the p95 60 FPS budget.",
+  "comparisons": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    }
+  ],
+  "results": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "cpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "identicalPng": true,
+      "imageSha256": "0e04952b3006b5575d9f879021b278d923aaa13e1b403462022c6c8039485313",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 20.80000001192093,
+          "p95": 26.899999976158142,
+          "mean": 21.32666666507721
+        },
+        "cpuCullingMs": {
+          "p50": 1.399999976158142,
+          "p95": 1.9000000357627869,
+          "mean": 1.3941666667660078
+        },
+        "gpuMs": {
+          "meanMs": 13.847914333333335,
+          "p50Ms": 13.475920000000002,
+          "p95Ms": 16.295319999999997,
+          "maxMs": 18.09868
+        },
+        "frameIntervalMs": {
+          "p50": 20,
+          "p95": 29.900000000001455,
+          "mean": 22.592436974789916
+        },
+        "fps": 44.262599962804536,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 3588
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0025000000993410745,
+          "resize": 0.007500000298023224,
+          "materials": 0.002500000596046448,
+          "lights": 0.0008333335320154826,
+          "frame": 0.06750000168879827,
+          "environment": 5.129999999205271,
+          "visibility": 0.0008333330353101094,
+          "prepare": 2.328333331644535,
+          "cull": 1.3941666667660078,
+          "encode.visibility": 0,
+          "encode.shadow": 0.05250000109275182,
+          "encode.probe": 0.0016666665673255921,
+          "encode.reflection": 3.4016666650772094,
+          "encode.main": 2.3974999989072483,
+          "encode.bloom": 0.019999997814496358,
+          "encode.effects": 0.005000000695387522,
+          "encode.taa": 0.0033333341280619303,
+          "encode.present": 0.03750000149011612,
+          "submit": 0.02333333094914754
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.010815333333333331,
+          "probe": 0,
+          "reflection": 0.3397256666666667,
+          "main": 7.250301333333331,
+          "main.transparent": 0.3663776666666668,
+          "bloom.downsample": 0.249807,
+          "bloom.horizontal": 0.5209949999999999,
+          "bloom.vertical": 0.5204130000000001,
+          "effects": 3.5628099999999994,
+          "taa": 0.6617569999999997,
+          "present": 0.36491233333333334
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 15.5,
+          "p95": 19,
+          "mean": 15.605833332240582
+        },
+        "cpuCullingMs": {
+          "p50": 1.300000011920929,
+          "p95": 2.400000035762787,
+          "mean": 1.3574999993046124
+        },
+        "gpuMs": {
+          "meanMs": 10.079496333333337,
+          "p50Ms": 9.806080000000001,
+          "p95Ms": 11.516119999999999,
+          "maxMs": 12.49652
+        },
+        "frameIntervalMs": {
+          "p50": 19.600000000000364,
+          "p95": 20.100000000000364,
+          "mean": 17.031932773109254
+        },
+        "fps": 58.71324254983221,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 3588
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.3658333351214727,
+          "lifecycle": 0.0024999991059303285,
+          "resize": 0.0066666672627131145,
+          "materials": 0.0008333335320154826,
+          "lights": 0,
+          "frame": 0.06333333402872085,
+          "environment": 0.7158333286643028,
+          "visibility": 0.0008333330353101094,
+          "prepare": 2.6883333305517834,
+          "cull": 1.3574999993046124,
+          "encode.visibility": 0,
+          "encode.shadow": 0.05583333124717076,
+          "encode.probe": 0,
+          "encode.reflection": 4.104166667660078,
+          "encode.main": 3.3308333322405814,
+          "encode.bloom": 0.014166667560736338,
+          "encode.effects": 0.00916666587193807,
+          "encode.taa": 0.007500000794728597,
+          "encode.present": 0.025833333532015484,
+          "submit": 0.029999999205271403
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.01034,
+          "probe": 0,
+          "reflection": 0.33679299999999995,
+          "main": 4.967765000000001,
+          "main.transparent": 0.36991599999999997,
+          "bloom.downsample": 0.21927800000000008,
+          "bloom.horizontal": 0.347793,
+          "bloom.vertical": 0.3508406666666665,
+          "effects": 2.553592666666666,
+          "taa": 0.5952616666666665,
+          "present": 0.3279163333333333
+        },
+        "preparation": {
+          "entries": 5009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 5009,
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 5001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "identicalPng": true,
+      "imageSha256": "0e04952b3006b5575d9f879021b278d923aaa13e1b403462022c6c8039485313",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 19.19999998807907,
+          "p95": 25,
+          "mean": 19.892499996225038
+        },
+        "cpuCullingMs": {
+          "p50": 0.40000003576278687,
+          "p95": 0.6000000238418579,
+          "mean": 0.4233333324392637
+        },
+        "gpuMs": {
+          "meanMs": 12.85524733333333,
+          "p50Ms": 12.42892,
+          "p95Ms": 15.924280000000001,
+          "maxMs": 20.16868
+        },
+        "frameIntervalMs": {
+          "p50": 20,
+          "p95": 29.900000000001455,
+          "mean": 21.115126050420173
+        },
+        "fps": 47.35941417598598,
+        "uploadBytes": {
+          "p50": 20648,
+          "p95": 20648,
+          "mean": 20648
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 17060,
+          "p95": 17060,
+          "mean": 17060
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0008333335320154826,
+          "resize": 0.009166665375232697,
+          "materials": 0,
+          "lights": 0.0016666670640309651,
+          "frame": 0.11500000009934107,
+          "environment": 5.1425000016887985,
+          "visibility": 0,
+          "prepare": 7.660833336909612,
+          "cull": 0.03333333432674408,
+          "encode.visibility": 0.38999999811251956,
+          "encode.shadow": 0.04250000019868215,
+          "encode.probe": 0.0008333335320154826,
+          "encode.reflection": 2.300000002483527,
+          "encode.main": 0.06666666815678278,
+          "encode.bloom": 0.014166665573914846,
+          "encode.effects": 0.004166666666666667,
+          "encode.taa": 0.00750000129143397,
+          "encode.present": 0.032499999304612476,
+          "submit": 0.040833330651124315
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.010849333333333332,
+          "probe": 0,
+          "reflection": 0.3650456666666664,
+          "main": 6.952253666666664,
+          "main.transparent": 0.3654979999999999,
+          "bloom.downsample": 0.23446933333333325,
+          "bloom.horizontal": 0.44328199999999973,
+          "bloom.vertical": 0.44229000000000007,
+          "effects": 3.087876333333334,
+          "taa": 0.6153033333333333,
+          "present": 0.3383796666666668
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 10.899999976158142,
+          "p95": 11.799999952316284,
+          "mean": 10.736666664977868
+        },
+        "cpuCullingMs": {
+          "p50": 0.5999999642372131,
+          "p95": 0.8999999761581421,
+          "mean": 0.5766666645805041
+        },
+        "gpuMs": {
+          "meanMs": 8.104004000000002,
+          "p50Ms": 8.03764,
+          "p95Ms": 8.491280000000001,
+          "maxMs": 8.554120000000001
+        },
+        "frameIntervalMs": {
+          "p50": 10,
+          "p95": 20,
+          "mean": 12.119327731092444
+        },
+        "fps": 82.51282762446259,
+        "uploadBytes": {
+          "p50": 20648,
+          "p95": 20648,
+          "mean": 20648
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 17060,
+          "p95": 17060,
+          "mean": 17060
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.6741666674613953,
+          "lifecycle": 0.004166667660077413,
+          "resize": 0.0033333336313565573,
+          "materials": 0,
+          "lights": 0.0016666665673255921,
+          "frame": 0.06833333422740301,
+          "environment": 0.7783333316445351,
+          "visibility": 0,
+          "prepare": 3.909999998907248,
+          "cull": 0.032500000298023225,
+          "encode.visibility": 0.5441666642824808,
+          "encode.shadow": 0.05416666616996129,
+          "encode.probe": 0.0024999991059303285,
+          "encode.reflection": 2.770833334326744,
+          "encode.main": 0.06333333402872085,
+          "encode.bloom": 0.013333333532015483,
+          "encode.effects": 0.007499998807907105,
+          "encode.taa": 0.0066666672627131145,
+          "encode.present": 0.025000001986821493,
+          "submit": 0.029999999701976775
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.0071029999999999965,
+          "probe": 0,
+          "reflection": 0.30291633333333334,
+          "main": 3.8770533333333344,
+          "main.transparent": 0.3675663333333334,
+          "bloom.downsample": 0.21076333333333325,
+          "bloom.horizontal": 0.24549200000000002,
+          "bloom.vertical": 0.2554513333333332,
+          "effects": 1.9477440000000008,
+          "taa": 0.5745006666666668,
+          "present": 0.3154136666666665
+        },
+        "preparation": {
+          "entries": 5009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 5009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 5009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 5001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "gpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "identicalPng": true,
+      "imageSha256": "0e04952b3006b5575d9f879021b278d923aaa13e1b403462022c6c8039485313",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 17.900000035762787,
+          "p95": 23.899999976158142,
+          "mean": 18.519999999801318
+        },
+        "cpuCullingMs": {
+          "p50": 0.09999996423721313,
+          "p95": 0.20000004768371582,
+          "mean": 0.07500000347693761
+        },
+        "gpuMs": {
+          "meanMs": 11.762472000000008,
+          "p50Ms": 11.398679999999999,
+          "p95Ms": 15.267199999999999,
+          "maxMs": 16.0694
+        },
+        "frameIntervalMs": {
+          "p50": 19.900000000001455,
+          "p95": 29.100000000002183,
+          "mean": 19.675630252100852
+        },
+        "fps": 50.824293157939664,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 3720
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.00416666716337204,
+          "resize": 0.00833333283662796,
+          "materials": 0,
+          "lights": 0,
+          "frame": 0.08833333055178325,
+          "environment": 5.225833337505659,
+          "visibility": 0.0008333335320154826,
+          "prepare": 6.434999995430311,
+          "cull": 0.03250000228484472,
+          "encode.visibility": 0.04250000119209289,
+          "encode.shadow": 0.047500004371007286,
+          "encode.probe": 0.004166666666666667,
+          "encode.reflection": 2.5441666637857754,
+          "encode.main": 0.07083333482344946,
+          "encode.bloom": 0.02166666736205419,
+          "encode.effects": 0.0066666667660077415,
+          "encode.taa": 0.004166665673255921,
+          "encode.present": 0.03916666656732559,
+          "submit": 0.02249999940395355
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.022440666666666675,
+          "shadow": 0.009538666666666666,
+          "probe": 0,
+          "reflection": 0.35689233333333326,
+          "main": 6.103747666666668,
+          "main.transparent": 0.36962333333333336,
+          "bloom.downsample": 0.22858366666666668,
+          "bloom.horizontal": 0.4114003333333334,
+          "bloom.vertical": 0.4054603333333333,
+          "effects": 2.8940099999999997,
+          "taa": 0.6195466666666662,
+          "present": 0.34122833333333347
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 10.099999964237213,
+          "p95": 13.100000023841858,
+          "mean": 10.418333332737287
+        },
+        "cpuCullingMs": {
+          "p50": 0.09999996423721313,
+          "p95": 0.19999998807907104,
+          "mean": 0.07666666358709336
+        },
+        "gpuMs": {
+          "meanMs": 8.066682393162392,
+          "p50Ms": 7.93308,
+          "p95Ms": 8.452520000000002,
+          "maxMs": 9.7988
+        },
+        "frameIntervalMs": {
+          "p50": 10,
+          "p95": 20,
+          "mean": 11.989075630252106
+        },
+        "fps": 83.40926613864158,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 3720
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 1.0816666667660078,
+          "lifecycle": 0.0016666670640309651,
+          "resize": 0.006666665772596995,
+          "materials": 0.0008333330353101094,
+          "lights": 0.0016666665673255921,
+          "frame": 0.050833336015542345,
+          "environment": 1.1666666656732558,
+          "visibility": 0,
+          "prepare": 3.1249999945362408,
+          "cull": 0.02583333452542623,
+          "encode.visibility": 0.050833329061667126,
+          "encode.shadow": 0.05250000307957332,
+          "encode.probe": 0.0008333335320154826,
+          "encode.reflection": 2.784166668355465,
+          "encode.main": 0.07333333293596904,
+          "encode.bloom": 0.02000000129143397,
+          "encode.effects": 0.007499999304612478,
+          "encode.taa": 0.00416666716337204,
+          "encode.present": 0.03250000129143397,
+          "submit": 0.025
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.017127521367521374,
+          "shadow": 0.005854017094017092,
+          "probe": 0,
+          "reflection": 0.278531282051282,
+          "main": 3.8315158974358985,
+          "main.transparent": 0.36375829059829046,
+          "bloom.downsample": 0.20981606837606842,
+          "bloom.horizontal": 0.24777641025641037,
+          "bloom.vertical": 0.25744273504273507,
+          "effects": 1.9589938461538463,
+          "taa": 0.5772560683760686,
+          "present": 0.3186102564102564
+        },
+        "preparation": {
+          "entries": 5009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 5009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 5009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 5001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "cpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "identicalPng": true,
+      "imageSha256": "0e04952b3006b5575d9f879021b278d923aaa13e1b403462022c6c8039485313",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 21.30000001192093,
+          "p95": 28.5,
+          "mean": 21.819999996821085
+        },
+        "cpuCullingMs": {
+          "p50": 5,
+          "p95": 8.400000035762787,
+          "mean": 5.520000001291434
+        },
+        "gpuMs": {
+          "meanMs": 13.86162933333333,
+          "p50Ms": 13.319119999999998,
+          "p95Ms": 18.537240000000004,
+          "maxMs": 18.96512
+        },
+        "frameIntervalMs": {
+          "p50": 20,
+          "p95": 30.099999999998545,
+          "mean": 22.960504201680635
+        },
+        "fps": 43.55305054349822,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 5090.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0024999996026357015,
+          "resize": 0.0033333341280619303,
+          "materials": 0.0008333335320154826,
+          "lights": 0.007499999801317851,
+          "frame": 0.06583333214124044,
+          "environment": 4.732500001788139,
+          "visibility": 0.0008333330353101094,
+          "prepare": 2.3983333304524423,
+          "cull": 5.520000001291434,
+          "encode.visibility": 0,
+          "encode.shadow": 0.05250000109275182,
+          "encode.probe": 0.0024999996026357015,
+          "encode.reflection": 2.9233333324392636,
+          "encode.main": 2.047499999900659,
+          "encode.bloom": 0.022500001390775046,
+          "encode.effects": 0.004166666169961294,
+          "encode.taa": 0.00916666587193807,
+          "encode.present": 0.029999999205271403,
+          "submit": 0.02166666587193807
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.011186666666666666,
+          "probe": 0,
+          "reflection": 0.3492336666666666,
+          "main": 7.229144333333333,
+          "main.transparent": 0.35911399999999993,
+          "bloom.downsample": 0.25795233333333334,
+          "bloom.horizontal": 0.544212,
+          "bloom.vertical": 0.5386400000000001,
+          "effects": 3.5329756666666676,
+          "taa": 0.6737086666666667,
+          "present": 0.36546200000000006
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 16.900000035762787,
+          "p95": 26.69999998807907,
+          "mean": 18.230833333730697
+        },
+        "cpuCullingMs": {
+          "p50": 4.600000023841858,
+          "p95": 7,
+          "mean": 5.196666663388411
+        },
+        "gpuMs": {
+          "meanMs": 11.79729672268908,
+          "p50Ms": 10.8412,
+          "p95Ms": 16.999,
+          "maxMs": 19.180749999999996
+        },
+        "frameIntervalMs": {
+          "p50": 19.899999999997817,
+          "p95": 29.700000000000728,
+          "mean": 19.709243697479003
+        },
+        "fps": 50.73761405303996,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 5090.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.6699999998013179,
+          "lifecycle": 0.0033333336313565573,
+          "resize": 0.005000000198682149,
+          "materials": 0,
+          "lights": 0.007500000298023224,
+          "frame": 0.06083333988984426,
+          "environment": 0.9408333316445351,
+          "visibility": 0,
+          "prepare": 3.1491666664679845,
+          "cull": 5.196666663388411,
+          "encode.visibility": 0,
+          "encode.shadow": 0.061666667461395264,
+          "encode.probe": 0.0016666665673255921,
+          "encode.reflection": 3.6566666682561237,
+          "encode.main": 2.415833331644535,
+          "encode.bloom": 0.015833333134651184,
+          "encode.effects": 0.004166666666666667,
+          "encode.taa": 0.008333332339922587,
+          "encode.present": 0.02416666845480601,
+          "submit": 0.03333333134651184
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.010941176470588232,
+          "probe": 0,
+          "reflection": 0.33025142857142853,
+          "main": 6.022878991596639,
+          "main.transparent": 0.3629307563025209,
+          "bloom.downsample": 0.23460235294117648,
+          "bloom.horizontal": 0.44684899159663866,
+          "bloom.vertical": 0.44791025210084,
+          "effects": 2.971928739495797,
+          "taa": 0.6280631932773112,
+          "present": 0.3409408403361343
+        },
+        "preparation": {
+          "entries": 5009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 5009,
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 5001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "identicalPng": true,
+      "imageSha256": "0e04952b3006b5575d9f879021b278d923aaa13e1b403462022c6c8039485313",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 19.299999952316284,
+          "p95": 26,
+          "mean": 20.359999998410544
+        },
+        "cpuCullingMs": {
+          "p50": 2.200000047683716,
+          "p95": 3.5,
+          "mean": 2.3691666702429455
+        },
+        "gpuMs": {
+          "meanMs": 13.133897999999999,
+          "p50Ms": 12.514560000000001,
+          "p95Ms": 18.031039999999997,
+          "maxMs": 20.10712
+        },
+        "frameIntervalMs": {
+          "p50": 20,
+          "p95": 30,
+          "mean": 21.656302521008392
+        },
+        "fps": 46.17593418959298,
+        "uploadBytes": {
+          "p50": 19764,
+          "p95": 20276,
+          "mean": 21257.566666666666
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 16152,
+          "p95": 16668,
+          "mean": 16167.433333333332
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.004999999701976776,
+          "resize": 0.0033333336313565573,
+          "materials": 0,
+          "lights": 0.008333333333333333,
+          "frame": 0.11166666895151138,
+          "environment": 5.114999997119109,
+          "visibility": 0.0008333335320154826,
+          "prepare": 7.108333327869574,
+          "cull": 1.9666666696468988,
+          "encode.visibility": 0.40250000059604646,
+          "encode.shadow": 0.04916666646798452,
+          "encode.probe": 0.0008333335320154826,
+          "encode.reflection": 2.1266666665673255,
+          "encode.main": 0.06583333263794582,
+          "encode.bloom": 0.015833334624767305,
+          "encode.effects": 0.0066666667660077415,
+          "encode.taa": 0.009999999900658925,
+          "encode.present": 0.03166666726271312,
+          "submit": 0.029166666169961292
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.010702000000000001,
+          "probe": 0,
+          "reflection": 0.33743499999999993,
+          "main": 7.0854393333333325,
+          "main.transparent": 0.3638126666666667,
+          "bloom.downsample": 0.242424,
+          "bloom.horizontal": 0.47765366666666687,
+          "bloom.vertical": 0.4781,
+          "effects": 3.1483019999999997,
+          "taa": 0.6410459999999996,
+          "present": 0.3489833333333332
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 12.399999976158142,
+          "p95": 15.5,
+          "mean": 12.537500002980233
+        },
+        "cpuCullingMs": {
+          "p50": 3.299999952316284,
+          "p95": 4.400000035762787,
+          "mean": 3.238333330551783
+        },
+        "gpuMs": {
+          "meanMs": 8.116143333333337,
+          "p50Ms": 7.994600000000001,
+          "p95Ms": 8.9706,
+          "maxMs": 9.611440000000002
+        },
+        "frameIntervalMs": {
+          "p50": 10.099999999998545,
+          "p95": 20.099999999998545,
+          "mean": 13.87731092436976
+        },
+        "fps": 72.06007024342975,
+        "uploadBytes": {
+          "p50": 19764,
+          "p95": 20276,
+          "mean": 21257.566666666666
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 16152,
+          "p95": 16668,
+          "mean": 16167.433333333332
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.7916666686534881,
+          "lifecycle": 0.0008333330353101094,
+          "resize": 0.00416666716337204,
+          "materials": 0,
+          "lights": 0.004999999701976776,
+          "frame": 0.0650000015894572,
+          "environment": 1.1516666640837987,
+          "visibility": 0.0016666670640309651,
+          "prepare": 2.8274999976158144,
+          "cull": 2.8474999999006587,
+          "encode.visibility": 0.3908333306511243,
+          "encode.shadow": 0.052499999602635704,
+          "encode.probe": 0.0008333335320154826,
+          "encode.reflection": 2.8941666692495347,
+          "encode.main": 0.07166666636864344,
+          "encode.bloom": 0.018333334227403006,
+          "encode.effects": 0.0024999996026357015,
+          "encode.taa": 0.005833332737286885,
+          "encode.present": 0.03333333432674408,
+          "submit": 0.029166667660077413
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.01021233333333333,
+          "probe": 0,
+          "reflection": 0.311422,
+          "main": 3.8948933333333335,
+          "main.transparent": 0.35656666666666664,
+          "bloom.downsample": 0.21002000000000004,
+          "bloom.horizontal": 0.2504129999999999,
+          "bloom.vertical": 0.25802800000000004,
+          "effects": 1.9188986666666674,
+          "taa": 0.5893923333333333,
+          "present": 0.3162969999999999
+        },
+        "preparation": {
+          "entries": 5009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 5009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 5009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 5001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "identicalPng": true,
+      "imageSha256": "0e04952b3006b5575d9f879021b278d923aaa13e1b403462022c6c8039485313",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 19.399999976158142,
+          "p95": 23.100000023841858,
+          "mean": 19.55833333283663
+        },
+        "cpuCullingMs": {
+          "p50": 1.699999988079071,
+          "p95": 2.900000035762787,
+          "mean": 1.881666665772597
+        },
+        "gpuMs": {
+          "meanMs": 12.581977333333327,
+          "p50Ms": 12.35748,
+          "p95Ms": 14.25788,
+          "maxMs": 16.227439999999998
+        },
+        "frameIntervalMs": {
+          "p50": 20,
+          "p95": 29.900000000001455,
+          "mean": 20.770588235294092
+        },
+        "fps": 48.145001416029515,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 5222.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0025000000993410745,
+          "resize": 0.004166665673255921,
+          "materials": 0,
+          "lights": 0.009166666865348816,
+          "frame": 0.10666666626930237,
+          "environment": 4.943333334227403,
+          "visibility": 0.0016666670640309651,
+          "prepare": 6.710833331445853,
+          "cull": 1.858333332836628,
+          "encode.visibility": 0.023333332935969033,
+          "encode.shadow": 0.0424999992052714,
+          "encode.probe": 0.0008333335320154826,
+          "encode.reflection": 2.412500001490116,
+          "encode.main": 0.0575000007947286,
+          "encode.bloom": 0.014999999105930329,
+          "encode.effects": 0.005000001192092896,
+          "encode.taa": 0.00833333283662796,
+          "encode.present": 0.028333333134651185,
+          "submit": 0.03166666726271312
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.021391333333333328,
+          "shadow": 0.009670666666666664,
+          "probe": 0,
+          "reflection": 0.345495,
+          "main": 6.598305666666667,
+          "main.transparent": 0.36148800000000014,
+          "bloom.downsample": 0.23310200000000011,
+          "bloom.horizontal": 0.4698136666666667,
+          "bloom.vertical": 0.4696873333333333,
+          "effects": 3.0958763333333343,
+          "taa": 0.6350600000000003,
+          "present": 0.3420873333333334
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 11.899999976158142,
+          "p95": 15.5,
+          "mean": 12.410000003874302
+        },
+        "cpuCullingMs": {
+          "p50": 3,
+          "p95": 4,
+          "mean": 3.039166668554147
+        },
+        "gpuMs": {
+          "meanMs": 8.127935666666664,
+          "p50Ms": 7.869280000000001,
+          "p95Ms": 9.65936,
+          "maxMs": 13.322400000000002
+        },
+        "frameIntervalMs": {
+          "p50": 10,
+          "p95": 20.099999999998545,
+          "mean": 13.850420168067203
+        },
+        "fps": 72.19997573110072,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 5222.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.6808333386977513,
+          "lifecycle": 0.002500000596046448,
+          "resize": 0.005000000198682149,
+          "materials": 0,
+          "lights": 0.005833333233992258,
+          "frame": 0.05666666279236476,
+          "environment": 0.9591666653752327,
+          "visibility": 0,
+          "prepare": 3.066666672627131,
+          "cull": 3,
+          "encode.visibility": 0.039166668554147084,
+          "encode.shadow": 0.044166667262713115,
+          "encode.probe": 0.0016666665673255921,
+          "encode.reflection": 3.0408333326379458,
+          "encode.main": 0.07083333283662796,
+          "encode.bloom": 0.025833332041899363,
+          "encode.effects": 0.0008333335320154826,
+          "encode.taa": 0.007500000298023224,
+          "encode.present": 0.04166666567325592,
+          "submit": 0.024166663984457652
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.020681666666666668,
+          "shadow": 0.007982666666666659,
+          "probe": 0,
+          "reflection": 0.32917333333333326,
+          "main": 3.8343529999999992,
+          "main.transparent": 0.3551543333333333,
+          "bloom.downsample": 0.20558366666666664,
+          "bloom.horizontal": 0.2563453333333333,
+          "bloom.vertical": 0.2654783333333334,
+          "effects": 1.9517566666666668,
+          "taa": 0.586803,
+          "present": 0.31462366666666647
+        },
+        "preparation": {
+          "entries": 5009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 5009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 5009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 5001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "cpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "identicalPng": true,
+      "imageSha256": "c8b4f9d778926708b357ec0185d923576ea5bc899df372b73b8dc00213a321c2",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 29.5,
+          "p95": 38.10000002384186,
+          "mean": 30.620833333333334
+        },
+        "cpuCullingMs": {
+          "p50": 1.699999988079071,
+          "p95": 3.599999964237213,
+          "mean": 1.910833332935969
+        },
+        "gpuMs": {
+          "meanMs": 19.705338666666655,
+          "p50Ms": 19.65468,
+          "p95Ms": 22.462759999999996,
+          "maxMs": 22.6478
+        },
+        "frameIntervalMs": {
+          "p50": 29.900000000001455,
+          "p95": 40.099999999998545,
+          "mean": 31.643697478991584
+        },
+        "fps": 31.601869555980468,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 3588
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.005833333730697632,
+          "resize": 0.011666664977868398,
+          "materials": 0.001666666070620219,
+          "lights": 0.0008333330353101094,
+          "frame": 0.11750000019868215,
+          "environment": 10.53666666696469,
+          "visibility": 0.0008333330353101094,
+          "prepare": 2.698333331445853,
+          "cull": 1.910833332935969,
+          "encode.visibility": 0,
+          "encode.shadow": 0.05416666368643443,
+          "encode.probe": 0.002500000596046448,
+          "encode.reflection": 4.039166671037674,
+          "encode.main": 2.2674999962250393,
+          "encode.bloom": 0.012499999503294628,
+          "encode.effects": 0.0033333341280619303,
+          "encode.taa": 0.0033333336313565573,
+          "encode.present": 0.033333335320154825,
+          "submit": 0.02916666567325592
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.011997999999999993,
+          "probe": 0,
+          "reflection": 0.5837346666666666,
+          "main": 9.720417666666666,
+          "main.transparent": 0.3574566666666666,
+          "bloom.downsample": 0.3015313333333334,
+          "bloom.horizontal": 0.6584106666666665,
+          "bloom.vertical": 0.6623336666666665,
+          "effects": 6.2178330000000015,
+          "taa": 0.7752033333333336,
+          "present": 0.4164196666666666
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 19.600000023841858,
+          "p95": 24.600000023841858,
+          "mean": 20.334166662891707
+        },
+        "cpuCullingMs": {
+          "p50": 1.4000000357627869,
+          "p95": 2.600000023841858,
+          "mean": 1.697499999900659
+        },
+        "gpuMs": {
+          "meanMs": 13.367614333333334,
+          "p50Ms": 13.11272,
+          "p95Ms": 15.744680000000004,
+          "maxMs": 21.40392
+        },
+        "frameIntervalMs": {
+          "p50": 20,
+          "p95": 30,
+          "mean": 21.75462184873952
+        },
+        "fps": 45.96724351050674,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 3588
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.8249999950329463,
+          "lifecycle": 0.0024999996026357015,
+          "resize": 0.0008333330353101094,
+          "materials": 0,
+          "lights": 0,
+          "frame": 0.07583333402872086,
+          "environment": 1.4541666686534882,
+          "visibility": 0.0008333335320154826,
+          "prepare": 3.3649999981125194,
+          "cull": 1.697499999900659,
+          "encode.visibility": 0,
+          "encode.shadow": 0.061666666467984514,
+          "encode.probe": 0,
+          "encode.reflection": 5.289166665573915,
+          "encode.main": 3.4033333376049995,
+          "encode.bloom": 0.014999999602635702,
+          "encode.effects": 0.00416666716337204,
+          "encode.taa": 0.005833331743876139,
+          "encode.present": 0.033333333830038704,
+          "submit": 0.02666666607062022
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.010942333333333339,
+          "probe": 0,
+          "reflection": 0.5115663333333333,
+          "main": 6.225145000000001,
+          "main.transparent": 0.3517426666666665,
+          "bloom.downsample": 0.22710500000000014,
+          "bloom.horizontal": 0.4094556666666667,
+          "bloom.vertical": 0.4165446666666667,
+          "effects": 4.191874000000001,
+          "taa": 0.6751210000000002,
+          "present": 0.3481176666666666
+        },
+        "preparation": {
+          "entries": 10009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 10009,
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 10001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "identicalPng": true,
+      "imageSha256": "c8b4f9d778926708b357ec0185d923576ea5bc899df372b73b8dc00213a321c2",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 32.69999998807907,
+          "p95": 38.09999996423721,
+          "mean": 33.42749999860923
+        },
+        "cpuCullingMs": {
+          "p50": 0.699999988079071,
+          "p95": 1.100000023841858,
+          "mean": 0.7374999985098839
+        },
+        "gpuMs": {
+          "meanMs": 21.865705,
+          "p50Ms": 21.527279999999998,
+          "p95Ms": 26.686400000000003,
+          "maxMs": 27.04644
+        },
+        "frameIntervalMs": {
+          "p50": 30.299999999995634,
+          "p95": 40,
+          "mean": 34.85630252100835
+        },
+        "fps": 28.689216229899507,
+        "uploadBytes": {
+          "p50": 25000,
+          "p95": 25000,
+          "mean": 25000
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 21412,
+          "p95": 21412,
+          "mean": 21412
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0024999996026357015,
+          "resize": 0.007499999801317851,
+          "materials": 0.0008333335320154826,
+          "lights": 0.0008333335320154826,
+          "frame": 0.07166666835546494,
+          "environment": 9.945833333333333,
+          "visibility": 0.0008333335320154826,
+          "prepare": 13.180833337207636,
+          "cull": 0.03583333243926366,
+          "encode.visibility": 0.7016666660706202,
+          "encode.shadow": 0.05750000029802323,
+          "encode.probe": 0.0025000000993410745,
+          "encode.reflection": 3.653333331644535,
+          "encode.main": 0.05333333412806193,
+          "encode.bloom": 0.012499997019767761,
+          "encode.effects": 0.0025000000993410745,
+          "encode.taa": 0.011666667958100637,
+          "encode.present": 0.030833333233992257,
+          "submit": 0.02333333492279053
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.011495666666666661,
+          "probe": 0,
+          "reflection": 0.6265036666666669,
+          "main": 12.64267266666667,
+          "main.transparent": 0.3630923333333332,
+          "bloom.downsample": 0.2768073333333333,
+          "bloom.horizontal": 0.5986499999999999,
+          "bloom.vertical": 0.5964090000000002,
+          "effects": 5.660842333333335,
+          "taa": 0.7113033333333332,
+          "present": 0.3779286666666666
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 14.699999988079071,
+          "p95": 21,
+          "mean": 15.266666667163372
+        },
+        "cpuCullingMs": {
+          "p50": 0.7000000476837158,
+          "p95": 1,
+          "mean": 0.776666667064031
+        },
+        "gpuMs": {
+          "meanMs": 10.836832333333335,
+          "p50Ms": 10.59108,
+          "p95Ms": 12.35432,
+          "maxMs": 14.164480000000001
+        },
+        "frameIntervalMs": {
+          "p50": 19.30000000000291,
+          "p95": 20.10000000000582,
+          "mean": 17.039495798319304
+        },
+        "fps": 58.68718252206942,
+        "uploadBytes": {
+          "p50": 25000,
+          "p95": 25000,
+          "mean": 25000
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 21412,
+          "p95": 21412,
+          "mean": 21412
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.9833333318432173,
+          "lifecycle": 0.0033333336313565573,
+          "resize": 0.0066666667660077415,
+          "materials": 0.0008333330353101094,
+          "lights": 0.0008333330353101094,
+          "frame": 0.07999999970197677,
+          "environment": 1.7666666651765506,
+          "visibility": 0.0016666670640309651,
+          "prepare": 5.095833333333333,
+          "cull": 0.061666667461395264,
+          "encode.visibility": 0.7149999996026357,
+          "encode.shadow": 0.05583333323399226,
+          "encode.probe": 0.001666666070620219,
+          "encode.reflection": 3.81416666607062,
+          "encode.main": 0.06999999980131785,
+          "encode.bloom": 0.010000000397364298,
+          "encode.effects": 0.009166666865348816,
+          "encode.taa": 0.004166667660077413,
+          "encode.present": 0.04083333611488342,
+          "submit": 0.030000001192092896
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.009653333333333338,
+          "probe": 0,
+          "reflection": 0.48017233333333337,
+          "main": 5.384312333333333,
+          "main.transparent": 0.3504313333333335,
+          "bloom.downsample": 0.20916699999999996,
+          "bloom.horizontal": 0.25254299999999996,
+          "bloom.vertical": 0.26311766666666664,
+          "effects": 2.899819333333334,
+          "taa": 0.6502876666666668,
+          "present": 0.3373283333333333
+        },
+        "preparation": {
+          "entries": 10009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 10009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 10009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 10001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "gpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "identicalPng": true,
+      "imageSha256": "c8b4f9d778926708b357ec0185d923576ea5bc899df372b73b8dc00213a321c2",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 32.799999952316284,
+          "p95": 39.69999998807907,
+          "mean": 33.17833333214124
+        },
+        "cpuCullingMs": {
+          "p50": 0.09999996423721313,
+          "p95": 0.19999998807907104,
+          "mean": 0.06666666766007741
+        },
+        "gpuMs": {
+          "meanMs": 21.884712999999998,
+          "p50Ms": 21.338119999999996,
+          "p95Ms": 26.088400000000004,
+          "maxMs": 26.41344
+        },
+        "frameIntervalMs": {
+          "p50": 30.10000000000582,
+          "p95": 40.60000000000582,
+          "mean": 34.70504201680667
+        },
+        "fps": 28.814257003801586,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 3720
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.006666665772596995,
+          "resize": 0.005000000198682149,
+          "materials": 0.0016666670640309651,
+          "lights": 0,
+          "frame": 0.0708333338300387,
+          "environment": 9.859166663885116,
+          "visibility": 0.0008333335320154826,
+          "prepare": 13.461666663984458,
+          "cull": 0.038333334028720856,
+          "encode.visibility": 0.028333333631356556,
+          "encode.shadow": 0.036666669448216754,
+          "encode.probe": 0.0025000000993410745,
+          "encode.reflection": 3.68666666696469,
+          "encode.main": 0.05916666785875956,
+          "encode.bloom": 0.01916666477918625,
+          "encode.effects": 0.005000000695387522,
+          "encode.taa": 0.007500000794728597,
+          "encode.present": 0.024999999503294627,
+          "submit": 0.0258333350221316
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.045067666666666645,
+          "shadow": 0.01020166666666667,
+          "probe": 0,
+          "reflection": 0.6088176666666668,
+          "main": 12.439646333333327,
+          "main.transparent": 0.36411233333333326,
+          "bloom.downsample": 0.2825339999999999,
+          "bloom.horizontal": 0.6201556666666665,
+          "bloom.vertical": 0.6181906666666668,
+          "effects": 5.79358,
+          "taa": 0.7188443333333333,
+          "present": 0.38356266666666666
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 14.899999976158142,
+          "p95": 17.69999998807907,
+          "mean": 15.108333335320156
+        },
+        "cpuCullingMs": {
+          "p50": 0.09999996423721313,
+          "p95": 0.20000004768371582,
+          "mean": 0.08000000019868216
+        },
+        "gpuMs": {
+          "meanMs": 10.73254133333333,
+          "p50Ms": 10.67172,
+          "p95Ms": 11.151959999999999,
+          "maxMs": 12.443520000000001
+        },
+        "frameIntervalMs": {
+          "p50": 19.599999999998545,
+          "p95": 20.10000000000582,
+          "mean": 17.17394957983197
+        },
+        "fps": 58.22772422566901,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 3720
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.9850000018874804,
+          "lifecycle": 0,
+          "resize": 0.005000000198682149,
+          "materials": 0.0016666665673255921,
+          "lights": 0.0016666670640309651,
+          "frame": 0.07166666636864344,
+          "environment": 1.7366666634877523,
+          "visibility": 0,
+          "prepare": 5.1441666652758915,
+          "cull": 0.044166666766007744,
+          "encode.visibility": 0.035833333432674405,
+          "encode.shadow": 0.06166666547457377,
+          "encode.probe": 0,
+          "encode.reflection": 4.5333333323399225,
+          "encode.main": 0.07583333452542623,
+          "encode.bloom": 0.019166667262713113,
+          "encode.effects": 0.005833333233992258,
+          "encode.taa": 0.005833332737286885,
+          "encode.present": 0.039166668554147084,
+          "submit": 0.032499997814496355
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.032007333333333325,
+          "shadow": 0.009362666666666663,
+          "probe": 0,
+          "reflection": 0.4878676666666665,
+          "main": 5.255673333333332,
+          "main.transparent": 0.3513146666666668,
+          "bloom.downsample": 0.2122143333333334,
+          "bloom.horizontal": 0.24938766666666667,
+          "bloom.vertical": 0.2603276666666668,
+          "effects": 2.8763386666666673,
+          "taa": 0.6562560000000001,
+          "present": 0.34179133333333334
+        },
+        "preparation": {
+          "entries": 10009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 10009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 10009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 10001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "cpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "identicalPng": true,
+      "imageSha256": "c8b4f9d778926708b357ec0185d923576ea5bc899df372b73b8dc00213a321c2",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 40.700000047683716,
+          "p95": 60.299999952316284,
+          "mean": 42.12166666686535
+        },
+        "cpuCullingMs": {
+          "p50": 11.100000023841858,
+          "p95": 16.100000023841858,
+          "mean": 11.718333333730698
+        },
+        "gpuMs": {
+          "meanMs": 21.984498666666674,
+          "p50Ms": 21.98568,
+          "p95Ms": 22.239440000000002,
+          "maxMs": 22.38012
+        },
+        "frameIntervalMs": {
+          "p50": 40,
+          "p95": 59.30000000000291,
+          "mean": 43.426050420168046
+        },
+        "fps": 23.027652534009338,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 5090.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0024999996026357015,
+          "resize": 0.004166666169961294,
+          "materials": 0.0008333335320154826,
+          "lights": 0.0066666662693023685,
+          "frame": 0.149166668454806,
+          "environment": 11.491666669646898,
+          "visibility": 0.0016666670640309651,
+          "prepare": 3.4808333312471706,
+          "cull": 11.718333333730698,
+          "encode.visibility": 0,
+          "encode.shadow": 0.05166666855414708,
+          "encode.probe": 0.0033333336313565573,
+          "encode.reflection": 4.168333332240581,
+          "encode.main": 3.7908333321412404,
+          "encode.bloom": 0.017500001192092895,
+          "encode.effects": 0.010833333432674407,
+          "encode.taa": 0.004166666666666667,
+          "encode.present": 0.027499998609224956,
+          "submit": 0.02750000109275182
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.011713666666666659,
+          "probe": 0,
+          "reflection": 0.6782069999999999,
+          "main": 10.836417333333332,
+          "main.transparent": 0.37062800000000007,
+          "bloom.downsample": 0.3337033333333332,
+          "bloom.horizontal": 0.7553893333333337,
+          "bloom.vertical": 0.7553536666666668,
+          "effects": 6.946805666666665,
+          "taa": 0.8285966666666668,
+          "present": 0.46768400000000004
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 25.399999976158142,
+          "p95": 37.10000002384186,
+          "mean": 27.386666665474575
+        },
+        "cpuCullingMs": {
+          "p50": 8.200000047683716,
+          "p95": 14.699999988079071,
+          "mean": 9.608333332836628
+        },
+        "gpuMs": {
+          "meanMs": 17.686576666666664,
+          "p50Ms": 16.96568,
+          "p95Ms": 22.017719999999997,
+          "maxMs": 22.273719999999997
+        },
+        "frameIntervalMs": {
+          "p50": 29.599999999998545,
+          "p95": 40,
+          "mean": 28.75042016806719
+        },
+        "fps": 34.782100371203974,
+        "uploadBytes": {
+          "p50": 3588,
+          "p95": 3588,
+          "mean": 5090.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.8483333334326744,
+          "lifecycle": 0.0016666670640309651,
+          "resize": 0.005833332737286885,
+          "materials": 0.0024999991059303285,
+          "lights": 0.008333333333333333,
+          "frame": 0.0600000003973643,
+          "environment": 1.4258333345254262,
+          "visibility": 0.0016666665673255921,
+          "prepare": 4.4733333339293795,
+          "cull": 9.608333332836628,
+          "encode.visibility": 0,
+          "encode.shadow": 0.056666665772597,
+          "encode.probe": 0.0016666665673255921,
+          "encode.reflection": 4.380833331743876,
+          "encode.main": 3.234999996920427,
+          "encode.bloom": 0.012500000496705374,
+          "encode.effects": 0.003333332637945811,
+          "encode.taa": 0.006666665772596995,
+          "encode.present": 0.03166666626930237,
+          "submit": 0.027499998609224956
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.011361000000000003,
+          "probe": 0,
+          "reflection": 0.5560929999999996,
+          "main": 8.629931666666662,
+          "main.transparent": 0.35240799999999983,
+          "bloom.downsample": 0.2726226666666667,
+          "bloom.horizontal": 0.592583,
+          "bloom.vertical": 0.5915113333333336,
+          "effects": 5.553034666666665,
+          "taa": 0.7407319999999995,
+          "present": 0.38629933333333355
+        },
+        "preparation": {
+          "entries": 10009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 10009,
+          "batchPlanBuilds": 0,
+          "batchCauseEntries": 0
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 10001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "identicalPng": true,
+      "imageSha256": "c8b4f9d778926708b357ec0185d923576ea5bc899df372b73b8dc00213a321c2",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 37.69999998807907,
+          "p95": 48.69999998807907,
+          "mean": 38.71333333452542
+        },
+        "cpuCullingMs": {
+          "p50": 4.400000035762787,
+          "p95": 8.099999964237213,
+          "mean": 5.223333333432675
+        },
+        "gpuMs": {
+          "meanMs": 24.72977000000001,
+          "p50Ms": 25.09056,
+          "p95Ms": 26.47208,
+          "maxMs": 26.69528
+        },
+        "frameIntervalMs": {
+          "p50": 39.5,
+          "p95": 50,
+          "mean": 40.221008403361246
+        },
+        "fps": 24.86262875289896,
+        "uploadBytes": {
+          "p50": 25144,
+          "p95": 25252,
+          "mean": 26648.666666666668
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 21556,
+          "p95": 21660,
+          "mean": 21558.533333333333
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0033333336313565573,
+          "resize": 0.008333333333333333,
+          "materials": 0,
+          "lights": 0.005833333233992258,
+          "frame": 0.07583333253860473,
+          "environment": 10.652500001092752,
+          "visibility": 0.0008333335320154826,
+          "prepare": 13.344166666766007,
+          "cull": 4.474166664977869,
+          "encode.visibility": 0.7491666684548061,
+          "encode.shadow": 0.05666666775941849,
+          "encode.probe": 0.0008333335320154826,
+          "encode.reflection": 3.5224999994039536,
+          "encode.main": 0.05249999761581421,
+          "encode.bloom": 0.01916666825612386,
+          "encode.effects": 0.006666665772596995,
+          "encode.taa": 0.0033333336313565573,
+          "encode.present": 0.02666666656732559,
+          "submit": 0.028333329657713572
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.011789999999999997,
+          "probe": 0,
+          "reflection": 0.6246120000000002,
+          "main": 14.349867333333338,
+          "main.transparent": 0.3688310000000001,
+          "bloom.downsample": 0.3168406666666667,
+          "bloom.horizontal": 0.7087733333333335,
+          "bloom.vertical": 0.7072823333333337,
+          "effects": 6.435741333333332,
+          "taa": 0.7798596666666667,
+          "present": 0.4261723333333334
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 17.099999964237213,
+          "p95": 22.80000001192093,
+          "mean": 17.935000001390776
+        },
+        "cpuCullingMs": {
+          "p50": 5.199999988079071,
+          "p95": 8.299999952316284,
+          "mean": 5.810833334426085
+        },
+        "gpuMs": {
+          "meanMs": 11.852838666666676,
+          "p50Ms": 11.432440000000001,
+          "p95Ms": 14.5276,
+          "maxMs": 18.119200000000003
+        },
+        "frameIntervalMs": {
+          "p50": 19.900000000001455,
+          "p95": 30,
+          "mean": 19.686554621848714
+        },
+        "fps": 50.796089981645174,
+        "uploadBytes": {
+          "p50": 25144,
+          "p95": 25252,
+          "mean": 26648.666666666668
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 21556,
+          "p95": 21660,
+          "mean": 21558.533333333333
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 0.9541666666666667,
+          "lifecycle": 0.0016666670640309651,
+          "resize": 0.009999999900658925,
+          "materials": 0.0008333335320154826,
+          "lights": 0.005000000198682149,
+          "frame": 0.06999999980131785,
+          "environment": 1.3633333340287208,
+          "visibility": 0.0016666670640309651,
+          "prepare": 3.801666664580504,
+          "cull": 5.101666668057442,
+          "encode.visibility": 0.7091666663686435,
+          "encode.shadow": 0.05999999841054281,
+          "encode.probe": 0.0016666670640309651,
+          "encode.reflection": 3.7683333347241086,
+          "encode.main": 0.05416666567325592,
+          "encode.bloom": 0.015833334624767305,
+          "encode.effects": 0.0025000000993410745,
+          "encode.taa": 0.005833332737286885,
+          "encode.present": 0.024166667461395265,
+          "submit": 0.023333333929379783
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0,
+          "shadow": 0.010987666666666672,
+          "probe": 0,
+          "reflection": 0.4932049999999997,
+          "main": 6.0513863333333315,
+          "main.transparent": 0.3450423333333333,
+          "bloom.downsample": 0.2094216666666667,
+          "bloom.horizontal": 0.289504,
+          "bloom.vertical": 0.29361800000000016,
+          "effects": 3.125743999999998,
+          "taa": 0.6848540000000002,
+          "present": 0.3490756666666665
+        },
+        "preparation": {
+          "entries": 10009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 10009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 10009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 10001,
+            "rebuilds": 1
+          }
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "width": 1920,
+      "height": 1080,
+      "frames": 120,
+      "warmup": 32,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "identicalPng": true,
+      "imageSha256": "c8b4f9d778926708b357ec0185d923576ea5bc899df372b73b8dc00213a321c2",
+      "linearMaxError": 0,
+      "before": {
+        "cpuMs": {
+          "p50": 37.10000002384186,
+          "p95": 48.39999997615814,
+          "mean": 38.164999999602635
+        },
+        "cpuCullingMs": {
+          "p50": 3.699999988079071,
+          "p95": 6.199999988079071,
+          "mean": 4.324166661997636
+        },
+        "gpuMs": {
+          "meanMs": 24.462068333333338,
+          "p50Ms": 25.15536,
+          "p95Ms": 25.98696,
+          "maxMs": 26.09168
+        },
+        "frameIntervalMs": {
+          "p50": 39.59999999999127,
+          "p95": 49.80000000000291,
+          "mean": 39.64453781512603
+        },
+        "fps": 25.224155838650205,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 5222.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "lifecycle": 0.0025000000993410745,
+          "resize": 0.007499999801317851,
+          "materials": 0,
+          "lights": 0.008333333333333333,
+          "frame": 0.08249999781449636,
+          "environment": 10.500833336512247,
+          "visibility": 0,
+          "prepare": 14.015833342572053,
+          "cull": 4.292499996225039,
+          "encode.visibility": 0.031666665772597,
+          "encode.shadow": 0.04166666567325592,
+          "encode.probe": 0.0025000000993410745,
+          "encode.reflection": 3.407500001788139,
+          "encode.main": 0.05999999841054281,
+          "encode.bloom": 0.01833333323399226,
+          "encode.effects": 0.006666665772596995,
+          "encode.taa": 0.008333333333333333,
+          "encode.present": 0.02250000089406967,
+          "submit": 0.020000000298023225
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.05163333333333332,
+          "shadow": 0.010281333333333342,
+          "probe": 0,
+          "reflection": 0.6505126666666669,
+          "main": 13.908993000000004,
+          "main.transparent": 0.37078433333333344,
+          "bloom.downsample": 0.3181196666666665,
+          "bloom.horizontal": 0.7171333333333332,
+          "bloom.vertical": 0.7134176666666662,
+          "effects": 6.504427666666668,
+          "taa": 0.7872223333333336,
+          "present": 0.4295429999999998
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {}
+        }
+      },
+      "after": {
+        "cpuMs": {
+          "p50": 19,
+          "p95": 23.30000001192093,
+          "mean": 19.31916666428248
+        },
+        "cpuCullingMs": {
+          "p50": 5.899999976158142,
+          "p95": 7.300000011920929,
+          "mean": 5.800833329061667
+        },
+        "gpuMs": {
+          "meanMs": 13.002096250000005,
+          "p50Ms": 12.706960000000002,
+          "p95Ms": 15.516399999999999,
+          "maxMs": 22.253400000000003
+        },
+        "frameIntervalMs": {
+          "p50": 20,
+          "p95": 29.80000000000291,
+          "mean": 21.351260504201704
+        },
+        "fps": 46.8356423173803,
+        "uploadBytes": {
+          "p50": 3720,
+          "p95": 3720,
+          "mean": 5222.133333333333
+        },
+        "instanceUploadBytes": {
+          "p50": 0,
+          "p95": 0,
+          "mean": 0
+        },
+        "visibilityUploadBytes": {
+          "p50": 132,
+          "p95": 132,
+          "mean": 132
+        },
+        "cpuQuantaMeanMs": {
+          "projection": 1.109999999900659,
+          "lifecycle": 0.0008333330353101094,
+          "resize": 0.013333333532015483,
+          "materials": 0.0016666665673255921,
+          "lights": 0.005000000198682149,
+          "frame": 0.06500000208616256,
+          "environment": 1.774999996026357,
+          "visibility": 0,
+          "prepare": 4.30416667064031,
+          "cull": 5.764999994635582,
+          "encode.visibility": 0.035833334426085155,
+          "encode.shadow": 0.04833333243926366,
+          "encode.probe": 0.0033333331346511843,
+          "encode.reflection": 4.069166667262713,
+          "encode.main": 0.06583333363135656,
+          "encode.bloom": 0.019166666269302367,
+          "encode.effects": 0.004166666169961294,
+          "encode.taa": 0.007500000298023224,
+          "encode.present": 0.03666666398445765,
+          "submit": 0.023333331445852916
+        },
+        "gpuQuantaMeanMs": {
+          "visibility": 0.03319466666666667,
+          "shadow": 0.009606000000000002,
+          "probe": 0,
+          "reflection": 0.5098992499999999,
+          "main": 6.736431,
+          "main.transparent": 0.3487350000000001,
+          "bloom.downsample": 0.21518366666666663,
+          "bloom.horizontal": 0.330552,
+          "bloom.vertical": 0.33263033333333325,
+          "effects": 3.4614019999999988,
+          "taa": 0.6796506666666671,
+          "present": 0.34481166666666674
+        },
+        "preparation": {
+          "entries": 10009,
+          "lights": 4,
+          "builds": 1,
+          "modelUpdates": 10009,
+          "batchPlanBuilds": 1,
+          "batchCauseEntries": 10009
+        },
+        "environmentCache": {
+          "updates": 1,
+          "invalidations": {},
+          "causes": {
+            "entries": 10001,
+            "rebuilds": 1
+          }
+        }
+      }
+    }
+  ]
+}

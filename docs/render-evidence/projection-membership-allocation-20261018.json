@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-18",
+  "change": "Canonical Game projection retains exact instance IDs per live primitive generation and uses the existing instance record's frame marker instead of allocating an alive Set every presented frame.",
+  "source": "../thegame/src/game/render/the-engine-projection.ts",
+  "diagnosticOwner": {
+    "profile": "../thegame/artifacts/stalls-render-stability-allocation-engine-20261018.heapprofile.json",
+    "summary": "../thegame/artifacts/stalls-render-stability-allocation-engine-20261018-heap-summary.json",
+    "projectionUpdateEstimatedSelfBytes": 420273148,
+    "scope": "Collection-inclusive sampled allocations over the complete canonical diagnostic interval, including its warmup. This is an allocator candidate, not retained heap, a leak, or proof that this owner alone caused a GC pause."
+  },
+  "correctness": {
+    "oracle": "../thegame/test/fixtures/the-engine-projection-before-membership.ts",
+    "tests": ["../thegame/test/the-engine-instance-membership.test.ts", "../thegame/test/the-engine-pose-cache.test.ts"],
+    "passed": 6,
+    "failed": 0,
+    "assertions": 1060,
+    "checks": ["Complete frozen projection output and order", "Unchanged and moved poses", "Material/weather/mirror changes", "Hidden owner and ownership changes", "Shrink/empty/remove/return", "Custom geometry generations and multiple parts", "Interrupted invalid-pose update and recovery", "Bounded cached ID slots and disposal"]
+  },
+  "isolatedCpu": {
+    "artifact": "../thegame/artifacts/projection-membership-20261018.json",
+    "reproducer": "../thegame/artifacts/profile-projection-membership-20261018.ts",
+    "instances": 1500,
+    "warmupFrames": 30,
+    "measuredFrames": 180,
+    "alternatingPairs": 7,
+    "medianBeforeMs": 103.025,
+    "medianAfterMs": 43.6945,
+    "speedup": 2.35785,
+    "removedIdConstructionsPerMeasuredRun": 270000,
+    "removedAliveSetInsertionsPerMeasuredRun": 270000,
+    "boundedResidentIds": 1500,
+    "scope": "Bun CPU projection loop with unchanged source instances and camera/weather publication disabled. Construction counts follow the frozen loop and cached implementation; no byte-level allocator measurement is claimed. This is not native FPS, whole-game, GPU, GC, or tail-latency evidence."
+  },
+  "integratedLiveObservation": "../thegame/artifacts/performance-live-render-stability-allocation-final-20261018.json",
+  "performanceGoalMet": false,
+  "integratedScope": "The combined allocation changes were checked at the original fixed quality; this single live observation does not isolate the projection change or establish freeze-free performance."
+}

@@ -5,7 +5,7 @@ import {applyStructuralSkin} from '../physics/structural-skin.js';
 import {StructuralBody} from '../physics/structure.js';
 import type {EngineEvent,ImpactEvent,MechanismEvent} from '../scene/events.js';
 import type {Primitive} from '../scene/types.js';
-import {M3_PARAMETRIC_PROFILE,m3SmoothRenderBody,m3StructuralBlueprint,type M3StructuralBlueprint} from './m3.js';
+import {M3_PARAMETRIC_PROFILE,m3DamagedRenderBody,m3SmoothRenderBody,m3StructuralBlueprint,type M3StructuralBlueprint} from './m3.js';
 
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
 
@@ -19,7 +19,7 @@ export interface PanelImpactInput {
   readonly material?:MaterialKind;
 }
 
-interface PanelMode {
+export interface PanelMode {
   point:Vec3;
   normal:Vec3;
   radius:number;
@@ -106,6 +106,11 @@ export class ElasticPlasticPanelResponse {
 
   get maxPermanentDepthM():number{return this.modes.reduce((max,mode)=>Math.max(max,Math.abs(mode.plastic)),0);}
   get maxElasticDepthM():number{return this.modes.reduce((max,mode)=>Math.max(max,Math.abs(mode.elastic)),0);}
+  presentationState():readonly PanelMode[]{return structuredClone(this.modes);}
+  restorePresentation(modes:readonly PanelMode[]):void{
+    if(modes.length>32||modes.some(m=>![...m.point,...m.normal,m.radius,m.elastic,m.velocity,m.plastic,m.omega,m.damping].every(Number.isFinite)||m.radius<=0||m.omega<=0))throw new TypeError('Invalid panel presentation state');
+    this.modes.splice(0,this.modes.length,...structuredClone(modes));
+  }
 }
 
 export interface SuspensionPose {readonly heave:number;readonly roll:number;readonly pitch:number;readonly compressions:readonly number[]}
@@ -196,6 +201,8 @@ export class DoorHinge {
 }
 
 export interface VehicleInteractionImpact extends PanelImpactInput {
+  /** Explicit cage budget; zero lets a contact owner allocate panel work separately. */
+  readonly structuralEnergyJ?:number;
   readonly time:number;
   readonly contactMaterial?:MaterialKind;
   readonly effectiveMassKg?:number;
@@ -254,7 +261,8 @@ export class M3InteractionRig {
     // taps, kicks or bodyweight incorrectly turns local sheet-metal work into chassis
     // plasticity. Reserve the expensive structural LOD for genuinely severe contacts.
     const structuralActivationEnergyJ=Math.max(350,this.massKg*.20);
-    if(input.material!=='glass'&&input.energyJ>=structuralActivationEnergyJ)this.structure.applyImpulse(input.point,V3.scale(V3.normalize(input.normal),-impulse),Math.max(.16,input.radiusM*1.25));
+    if(input.structuralEnergyJ!==undefined&&(!Number.isFinite(input.structuralEnergyJ)||input.structuralEnergyJ<0))throw new RangeError('Invalid structural impact energy');
+    if(input.material!=='glass'&&(input.structuralEnergyJ===undefined?input.energyJ>=structuralActivationEnergyJ:input.structuralEnergyJ>0)){const cageImpulse=input.structuralEnergyJ===undefined?impulse:Math.sqrt(2*effectiveMass*input.structuralEnergyJ);this.structure.applyImpulse(input.point,V3.scale(V3.normalize(input.normal),-cageImpulse),Math.max(.16,input.radiusM*1.25));}
     const event:ImpactEvent={type:'impact',id:++this.eventSequence,time:input.time,point:input.point,normal:input.normal,a:'m3-panel',b:'human',materialA:input.material??'steel',materialB:input.contactMaterial??'default',energy:input.energyJ,impulse,speed:effectiveMass>0?impulse/effectiveMass:0,size:input.radiusM*2};
     this.events.push(event);
     if(result.elasticEnergyJ>4&&input.energyJ>80)this.events.push({type:'mechanism',id:++this.eventSequence,time:input.time,point:input.point,mechanism:'panel-flex',energy:result.elasticEnergyJ,speed:Math.sqrt(Math.max(0,2*result.elasticEnergyJ/effectiveMass)),size:input.radiusM*2});
@@ -292,9 +300,10 @@ export class M3InteractionRig {
     return this.deformedShell;
   }
 
-  shellMesh(base:Extract<Primitive,{kind:'triangle-mesh'}>):Extract<Primitive,{kind:'triangle-mesh'}>{
+  shellMesh(base:Extract<Primitive,{kind:'triangle-mesh'}>,detail:'full'|'damaged'|'damaged-coarse'='full'):Extract<Primitive,{kind:'triangle-mesh'}>{
     const positions=[...this.shellPositions()],normals=recomputeNormals(positions,base.indices);
-    return m3SmoothRenderBody({kind:'triangle-mesh',positions,normals,indices:base.indices});
+    const mesh:Extract<Primitive,{kind:'triangle-mesh'}>={kind:'triangle-mesh',positions,normals,indices:base.indices};
+    return detail==='full'?m3SmoothRenderBody(mesh):m3DamagedRenderBody(mesh,detail==='damaged'?2:1);
   }
 
   drainEvents():EngineEvent[]{return this.events.splice(0);}

@@ -7,6 +7,8 @@ on:
       - 'src/animation/**'
       - 'src/math.ts'
       - 'test/acting.test.mjs'
+      - 'test/npc-mind.test.mjs'
+      - 'tools/acting/**'
       - 'package.json'
       - '.github/workflows/acting.yml'
   workflow_dispatch:
@@ -26,3 +28,4 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run check
+      - run: node tools/acting/demo.mjs

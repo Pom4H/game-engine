@@ -1,0 +1,1439 @@
+{
+  "date": "2026-10-17T04:37:48.976Z",
+  "scope": "All currently installed native Office floors and original host rooms/facade/lift in canonical walking; editor restoration; independent fresh Game FPS",
+  "capability": "original-residents-20",
+  "tests": {
+    "pass": 187,
+    "assertions": 26311,
+    "files": 22,
+    "seconds": 43.79,
+    "log": "artifacts/office-floors-integration-tests-r1-20261017.log"
+  },
+  "sourceOracle": {
+    "floors": 2,
+    "renderEntities": 144,
+    "vertices": 51735,
+    "maxPositionErrorM": 0.00000744010489484026,
+    "maxBasisError": 1.5600022784667544e-7,
+    "defaultGameExactRebases": 4
+  },
+  "sourceScene": {
+    "key": "thegame:29:13:36117:1:8d58e549f55c1062d6ce049c84c1ca1b7ca52b96f478dba51b761a69e85a26fc",
+    "geometryRevision": 1,
+    "floors": [
+      {
+        "index": 2,
+        "entities": 190
+      },
+      {
+        "index": 3,
+        "entities": 41
+      }
+    ],
+    "geometryBytes": 13402326
+  },
+  "restart": {
+    "date": "2026-10-17T04:30:08.882Z",
+    "oldPid": 17076,
+    "newPid": 8436,
+    "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; original multi-floor Office scene read model and shared Game/Office visual placement; Office/backend/microphone untouched",
+    "beforeRows": 4057,
+    "afterRows": 4057,
+    "missingRows": 0,
+    "protectedRows": 137,
+    "changedProtectedRows": 0,
+    "ownerDifferences": 0,
+    "accounts": 40,
+    "accountDifferences": 0,
+    "integrity": "ok",
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 53,
+    "geometryRevision": 1
+  },
+  "native": {
+    "label": "office-floors-native-20261017-r1",
+    "browser": "native-gpu",
+    "entry": "http://127.0.0.1:8765/?ui=static",
+    "actor": "resident:36117:0",
+    "building": "36117",
+    "takeoverReferenceDisplacement": 0.7333228462150698,
+    "from": 0,
+    "firstTarget": 2,
+    "walkingPulses": 242,
+    "firstRide": {
+      "samples": 64,
+      "maxPresentedAlignment": 0.00033333333333684934
+    },
+    "floors": [
+      {
+        "floor": 2,
+        "position": [
+          -297.9943915381479,
+          6.655,
+          375.4618307629574
+        ],
+        "nativeOffice": {
+          "available": true,
+          "visible": true,
+          "entities": 231,
+          "floors": [
+            2,
+            3
+          ],
+          "geometryBuilds": 1
+        },
+        "authoring": {
+          "hidden": true,
+          "suppressed": 429
+        },
+        "activeFloor": "floor-1",
+        "camera": {
+          "distance": 5.488153738072172,
+          "desiredDistance": 8,
+          "hit": "canonical:interior-source:instance:box:0:0:1:104:0",
+          "mode": "third-person",
+          "head": [
+            -0.0052142998021629285,
+            1.5509998703002932,
+            -8.069714003956994
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "resident:36117:0",
+          "yaw": -3.1959628284785406,
+          "pitch": 0.32,
+          "anchor": [
+            -0.005608461852091964,
+            1.2050000000000005,
+            -8.06183076295739
+          ],
+          "position": [
+            0.27789030999735886,
+            2.9313896455178536,
+            -13.271565791971966
+          ]
+        }
+      },
+      {
+        "floor": 3,
+        "position": [
+          -298.02744538503697,
+          9.955,
+          375.70189923540676
+        ],
+        "nativeOffice": {
+          "available": true,
+          "visible": true,
+          "entities": 231,
+          "floors": [
+            2,
+            3
+          ],
+          "geometryBuilds": 1
+        },
+        "authoring": {
+          "hidden": true,
+          "suppressed": 42
+        },
+        "activeFloor": "floor-6f9957e6d4",
+        "camera": {
+          "distance": 5.488153738072167,
+          "desiredDistance": 7.999999999999999,
+          "hit": "canonical:interior-source:instance:box:0:0:1:103:0",
+          "mode": "third-person",
+          "head": [
+            0.02764166779218088,
+            1.5449998283386233,
+            -8.30405834571369
+          ],
+          "exclusion": {
+            "vehicle": null,
+            "occupied": false
+          },
+          "body": "resident:36117:0",
+          "yaw": 3.0158814098027102,
+          "pitch": 0.32,
+          "anchor": [
+            0.027445385036968886,
+            1.2050000000000014,
+            -8.301899235406756
+          ],
+          "position": [
+            0.6808170994038748,
+            2.9313896455178536,
+            -13.47249835214727
+          ]
+        }
+      }
+    ],
+    "nextRides": [
+      {
+        "from": 2,
+        "to": 3,
+        "samples": 40,
+        "maxAlignment": 3.197442310920451e-14
+      }
+    ],
+    "states": 17,
+    "returnedBody": "player:38a4778d-c8cd-4b4a-a504-18f5540134ec",
+    "rightsBefore": {
+      "accountId": "38a4778d-c8cd-4b4a-a504-18f5540134ec",
+      "companies": [],
+      "leases": []
+    },
+    "rightsAfter": {
+      "accountId": "38a4778d-c8cd-4b4a-a504-18f5540134ec",
+      "companies": [],
+      "leases": []
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "editorRestored": {
+      "date": "2026-10-17T04:33:45.810Z",
+      "walking": false,
+      "view": "office",
+      "authoring": {
+        "hidden": false,
+        "suppressed": 0
+      },
+      "nativeOffice": {
+        "available": true,
+        "visible": false,
+        "entities": 0,
+        "floors": [
+          2,
+          3
+        ],
+        "geometryBuilds": 1
+      },
+      "activeFloor": "floor-6f9957e6d4",
+      "physics": {
+        "steps": 0,
+        "substeps": 0,
+        "contacts": 0,
+        "bodies": 0,
+        "sleeping": 0,
+        "collisionSurfaceIterations": 3
+      },
+      "errors": []
+    }
+  },
+  "fps": {
+    "manifest": "docs/render-evidence/fps-live-20261017-office-floors.json",
+    "averageFPS": 46.99542577855755,
+    "p50Ms": 19.400000000001455,
+    "p95Ms": 37.39999999999418,
+    "internalResolution": [
+      704,
+      396
+    ],
+    "actualLiveEnvironment": {
+      "worldMinute": 267732.1333140806,
+      "projectionHour": 22.20388856800952,
+      "facadeNight": 1,
+      "rain": 0,
+      "wetness": [
+        0,
+        0
+      ]
+    }
+  },
+  "archivedSources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-types.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-types.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-scenery.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-scenery.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-world-view.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/office-authoring-visibility.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/office-authoring-visibility.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-floors/final-sources-r2/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-floor-records.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/src/game/office-floor-records.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-layout.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/src/server/office-layout.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/src/game/office-world.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/office-layer.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/src/game/render/office-layer.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-floor-assets.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/src/game/office-floor-assets.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-assets.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/src/game/office-scenery-assets.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-interior-assets.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/src/game/office-interior-assets.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-floor-assets.test.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/test/office-floor-assets.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/office-layer-before.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/test/fixtures/office-layer-before.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-floor-world.test.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/test/office-floor-world.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lifts.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-lifts.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-route.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-lift-route.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-floor-rooms.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-floor-rooms.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-interiors.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-terrain.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-floors/final-sources-r2/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-floors/final-sources-r2/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-floors/final-sources-r2/office/VERIFICATION.md"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "archive": "artifacts/office-floors/final-bundles/game.js",
+      "bytes": 2493622,
+      "sha256": "56c45b4bde1d48c9cf56f3ad9283b27e6b55058e5002e113db3b2ecbcb5f5c97"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-20",
+      "archive": "artifacts/office-floors/final-bundles/office-controller.js",
+      "bytes": 1376370,
+      "sha256": "72a011b3d899729f67d45ad144126dcdd4c37c44f36e9c9b0aa9a6320e3b2896"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-agG35DD3.js",
+      "archive": "artifacts/office-floors/final-bundles/index-agG35DD3.js",
+      "bytes": 1791869,
+      "sha256": "268a35b5549890d2c5008dc3c2493e7445870c76bd0cb80c8092f486dbb32aa1"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-floors/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    }
+  ],
+  "reviewed": [
+    "artifacts/office-walking/office-floors-native-20261017-r1/lifts-moving.png",
+    "artifacts/office-walking/office-floors-native-20261017-r1/lifts-arrived.png",
+    "artifacts/office-walking/office-floors-native-20261017-r1/office-floor-2-room.png",
+    "artifacts/office-walking/office-floors-native-20261017-r1/office-floor-3-room.png",
+    "artifacts/office-walking/office-floors-native-20261017-r1/lifts-returned.png",
+    "artifacts/office-walking/office-floors-native-20261017-r1/returned-observer.png"
+  ],
+  "health": {
+    "date": "2026-10-17T04:37:48.976Z",
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "debug": {
+    "ports": [
+      3254,
+      3255
+    ],
+    "livePorts": []
+  },
+  "limits": [
+    "Native proof covers the current saved Office floors 2 and 3, one ordinary ground-floor approach and original lifts. Arbitrary layouts and every host level are not exhaustively native-tested.",
+    "Current initial geometry contains exact source meshes and is about 13.4 MB; it is cached keyed geometry, not per-frame actor replication. Mesh compression/deduplication was not benchmarked.",
+    "The reference takeover delta includes live NPC motion; no canonical pose was staged. Native guest company/lease lists are empty; immediate real-save ownership records and earlier nonempty account/company tests provide separate evidence.",
+    "Geometry rebase reuse is tested on the source layer. Native UI may replace its editor runtime when automatically selecting another floor; inspect counters are not proof of uninterrupted buffer lifetime across that replacement.",
+    "FPS is a short stationary original Game native-GPU sample at 704x396 internal rendering, not Office walking, sustained 60 FPS, vehicle load or a paired performance comparison. Actual live lighting/weather differ from older samples.",
+    "Existing C920/audio-reference/autoplay warnings remain; no physical microphone capture or playback. Long routes/cold Game prediction, lighting/temporal/water/audio parity and first-person own shadows/reflections remain unfinished or unverified. Full integration goal is active."
+  ],
+  "files": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-types.ts",
+      "bytes": 5992,
+      "sha256": "51725379bd7320267f6cba05fe5878af873afb82bd8efc4359e5100f675931f7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 5992,
+      "sha256": "51725379bd7320267f6cba05fe5878af873afb82bd8efc4359e5100f675931f7"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-scenery.ts",
+      "bytes": 1559,
+      "sha256": "e1f9edceafcbec0d9a2f0623b255793b41402016d2b4e378369af76dbb134019"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-scenery.ts",
+      "bytes": 1559,
+      "sha256": "e1f9edceafcbec0d9a2f0623b255793b41402016d2b4e378369af76dbb134019"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 33762,
+      "sha256": "0b7902ad7128a2588eb752e6f39285b363133c55370679eb7602881c04444a81"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 33762,
+      "sha256": "0b7902ad7128a2588eb752e6f39285b363133c55370679eb7602881c04444a81"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/office-authoring-visibility.ts",
+      "bytes": 816,
+      "sha256": "f2a0124749804cfddf1e5938bee43712a927dfaca9f29eac9f069a6673d86b23"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/office-authoring-visibility.ts",
+      "bytes": 816,
+      "sha256": "f2a0124749804cfddf1e5938bee43712a927dfaca9f29eac9f069a6673d86b23"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "db1b535d435be80655827d66c44616deb707fb239c1e6f1643b657bfee6bf543"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "db1b535d435be80655827d66c44616deb707fb239c1e6f1643b657bfee6bf543"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 195317,
+      "sha256": "8982bbf25a5769bdf8c6174215985a8e45bff97d777e80be8c1cdf0891cf4d0b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 195317,
+      "sha256": "8982bbf25a5769bdf8c6174215985a8e45bff97d777e80be8c1cdf0891cf4d0b"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-floor-records.ts",
+      "bytes": 1278,
+      "sha256": "d9faf78a71d81f52e75d49754fe21fbbe1737b5b7b7998efb623022eef9fc323"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/src/game/office-floor-records.ts",
+      "bytes": 1278,
+      "sha256": "d9faf78a71d81f52e75d49754fe21fbbe1737b5b7b7998efb623022eef9fc323"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-layout.ts",
+      "bytes": 6419,
+      "sha256": "257abade69755f670d6f8ace27945602d80156774c2507380c86a66ac7ac01e2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/src/server/office-layout.ts",
+      "bytes": 6419,
+      "sha256": "257abade69755f670d6f8ace27945602d80156774c2507380c86a66ac7ac01e2"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "bytes": 11162,
+      "sha256": "3e4f9e941d40ceabd92bf968126dae1fd407a9494492a14fa30e73062a07e450"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/src/game/office-world.ts",
+      "bytes": 11162,
+      "sha256": "3e4f9e941d40ceabd92bf968126dae1fd407a9494492a14fa30e73062a07e450"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/office-layer.ts",
+      "bytes": 2847,
+      "sha256": "70dec91ebfd480d8011c69afab94c158d5664d942233b69767d3c28b575b93c1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/src/game/render/office-layer.ts",
+      "bytes": 2847,
+      "sha256": "70dec91ebfd480d8011c69afab94c158d5664d942233b69767d3c28b575b93c1"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-floor-assets.ts",
+      "bytes": 4622,
+      "sha256": "54e2372d90cd3845e5351a801f46b6b2fbe2b5eb5487a30e0d29e67a7a8163d3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/src/game/office-floor-assets.ts",
+      "bytes": 4622,
+      "sha256": "54e2372d90cd3845e5351a801f46b6b2fbe2b5eb5487a30e0d29e67a7a8163d3"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-assets.ts",
+      "bytes": 8371,
+      "sha256": "63321c47deabdcdab896c86e47908d8bdd5762c5f57dd3378c837bff9f592e7c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/src/game/office-scenery-assets.ts",
+      "bytes": 8371,
+      "sha256": "63321c47deabdcdab896c86e47908d8bdd5762c5f57dd3378c837bff9f592e7c"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-interior-assets.ts",
+      "bytes": 8894,
+      "sha256": "f000e88ac78908821b8bf4e01a09b123d084a0e309f14d3c80e3477ea3608933"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/src/game/office-interior-assets.ts",
+      "bytes": 8894,
+      "sha256": "f000e88ac78908821b8bf4e01a09b123d084a0e309f14d3c80e3477ea3608933"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-floor-assets.test.ts",
+      "bytes": 11445,
+      "sha256": "5ea93d06120c0c56fb756890efff47a209b932d7a41e8e885d928b9ef25659f0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/test/office-floor-assets.test.ts",
+      "bytes": 11445,
+      "sha256": "5ea93d06120c0c56fb756890efff47a209b932d7a41e8e885d928b9ef25659f0"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/office-layer-before.ts",
+      "bytes": 1813,
+      "sha256": "88a8ceb53f40cf95ee44b17e20eed061c2c77c915dc40ee09b19eb60d9a3d0fb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/test/fixtures/office-layer-before.ts",
+      "bytes": 1813,
+      "sha256": "88a8ceb53f40cf95ee44b17e20eed061c2c77c915dc40ee09b19eb60d9a3d0fb"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-floor-world.test.ts",
+      "bytes": 3424,
+      "sha256": "2eb7b1d1ef1d8d0dc189b9b77be316f0b3647a10105be3b1ed1aec6b3f1d32bb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/test/office-floor-world.test.ts",
+      "bytes": 3424,
+      "sha256": "2eb7b1d1ef1d8d0dc189b9b77be316f0b3647a10105be3b1ed1aec6b3f1d32bb"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lifts.ts",
+      "bytes": 19010,
+      "sha256": "b1ddeda19ac40849d5942bcfcfb4a255a3e2a62d404e9953214e291d2c571449"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-lifts.ts",
+      "bytes": 19010,
+      "sha256": "b1ddeda19ac40849d5942bcfcfb4a255a3e2a62d404e9953214e291d2c571449"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lift-route.ts",
+      "bytes": 3357,
+      "sha256": "140033c71216b351c45975ed9d1f4480f47f54b64660fc93ee238632e5859616"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-lift-route.ts",
+      "bytes": 3357,
+      "sha256": "140033c71216b351c45975ed9d1f4480f47f54b64660fc93ee238632e5859616"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-floor-rooms.ts",
+      "bytes": 5869,
+      "sha256": "281b0aa4e269a3f879fc3263522241cdbe0ebe97deb349d69bab7ed1714d7a9c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-floor-rooms.ts",
+      "bytes": 5869,
+      "sha256": "281b0aa4e269a3f879fc3263522241cdbe0ebe97deb349d69bab7ed1714d7a9c"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "372bd6464f72704b68c32b094aaf1ab831134496e44d1c5b34c86278db2e0147"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "372bd6464f72704b68c32b094aaf1ab831134496e44d1c5b34c86278db2e0147"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "35411977e47cefff92bda657368c75397b627d65e0f3d64392f0be4b3da89670"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "35411977e47cefff92bda657368c75397b627d65e0f3d64392f0be4b3da89670"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 794260,
+      "sha256": "1dcde127e67434c6d71a80de3bceb745accffff1a1a841069a1782734623018f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/game/docs/VERIFICATION.md",
+      "bytes": 794260,
+      "sha256": "1dcde127e67434c6d71a80de3bceb745accffff1a1a841069a1782734623018f"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 65306,
+      "sha256": "36faf5c43b2c9b8309da0c9e2ee320ae03ffe799043569b5af5433b374548b33"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/office/ui/src/office/scene.ts",
+      "bytes": 65306,
+      "sha256": "36faf5c43b2c9b8309da0c9e2ee320ae03ffe799043569b5af5433b374548b33"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 130774,
+      "sha256": "59afaf57dced8d5477e9bc8947b9bc6a630dd22430d2bfeec32c55d89f87f2e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources-r2/office/VERIFICATION.md",
+      "bytes": 130774,
+      "sha256": "59afaf57dced8d5477e9bc8947b9bc6a630dd22430d2bfeec32c55d89f87f2e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-bundles/game.js",
+      "bytes": 2493622,
+      "sha256": "56c45b4bde1d48c9cf56f3ad9283b27e6b55058e5002e113db3b2ecbcb5f5c97"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-bundles/office-controller.js",
+      "bytes": 1376370,
+      "sha256": "72a011b3d899729f67d45ad144126dcdd4c37c44f36e9c9b0aa9a6320e3b2896"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-bundles/index-agG35DD3.js",
+      "bytes": 1791869,
+      "sha256": "268a35b5549890d2c5008dc3c2493e7445870c76bd0cb80c8092f486dbb32aa1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/canonical-controller-source.json",
+      "bytes": 13538988,
+      "sha256": "ae0b1107189e103c732df8b8de7092b3464cab6bae4596ca9b8d8916a9780a17"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/entered.png",
+      "bytes": 453250,
+      "sha256": "24517c380c2011aae03b1a440d9da310617598955bbfd481de07c9c022295c3c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-arrived.png",
+      "bytes": 289380,
+      "sha256": "c9cd4298ae2c182bc1e06f056b84a38a81c6294872ffba56d4f96413469e8cff"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-at-door.png",
+      "bytes": 310420,
+      "sha256": "fc1451efb2a5f041ef27f37314d7272e2df7aa197d0d18a5a5cf8ad618123084"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-call-panel.png",
+      "bytes": 107131,
+      "sha256": "c67f93032d8a9fcc1420b3061a99514cb3ea1e074537294ff4c29a57ebab81e3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-candidates.json",
+      "bytes": 4027,
+      "sha256": "021e14692dfa8ec73b9bf07603215dd18bea5f6a65ea37a081ecaf8a2641a976"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-controlled.png",
+      "bytes": 248016,
+      "sha256": "f0fd6f23ec946d7addcd3dbec97949f17a5d8a55eef6b940572032499bfa81e5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-directory.png",
+      "bytes": 189510,
+      "sha256": "56d83da501942ffeda925a732161dcc044f2be9dbb32d5868f7f24210e120320"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-exited.png",
+      "bytes": 318708,
+      "sha256": "8fa496ba2fee2e2484ba50c2c774660891fdcc1ee48b33c55274eae0b9798c0d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-floor-panel.png",
+      "bytes": 130507,
+      "sha256": "f6094ccd32b7e34c2775dff33c7901fe5d45c5ecd69f29f9800a41b57262e275"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-hall-source.json",
+      "bytes": 13522735,
+      "sha256": "e404f4de898ca7faa0465bbfd4bcb01fdd255fb0d9497dcc05e220f1cd49de93"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-in-cabin.png",
+      "bytes": 259746,
+      "sha256": "910794c8aec6f74d12d6507ef148d1fdd9aad67919acb666884178196cd81bec"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-moving.png",
+      "bytes": 248991,
+      "sha256": "f24fea3b8c2ef32cb3efe62aab26467a7f8c5992f0995c73324074ca59164491"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-report.json",
+      "bytes": 172294,
+      "sha256": "55ed39ed738f5e3f261c7671f8281d77285c6827f1a722086e8488c91d02632d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-returned.png",
+      "bytes": 258566,
+      "sha256": "095da48dbe10638271e26a5184c86738a6960c3377a36a2e98ba82e100a79637"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/lifts-source.json",
+      "bytes": 40680476,
+      "sha256": "ed8fe5840568a2050de52768a079338eb4c6ebe69bfa2373e5b95825c18ee578"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/observer.png",
+      "bytes": 675667,
+      "sha256": "d19176df0aadc1f4aa49e6647c75487d9b446a51d0424ede2432895c4726b402"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/office-floor-2-room.png",
+      "bytes": 442480,
+      "sha256": "505d243f2db99d3ee7b3e6815be2af7020412373017fcc16523ae9a3eac7030c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/office-floor-3-arrived.png",
+      "bytes": 177895,
+      "sha256": "f6a29bb09418081e8af17bfc91d305eb762bc7f2837f29ee460850a3f7f28957"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/office-floor-3-room.png",
+      "bytes": 374183,
+      "sha256": "c2547651ec5fe3af43f8215901b4aff53f9ca56a2f905f214f2844b2a032f1c7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/office-floors-report.json",
+      "bytes": 21923,
+      "sha256": "5930fb8275394cf1c492379fccf3509696f8502e745855f6a88edda8e1375f12"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/report.json",
+      "bytes": 390754,
+      "sha256": "a51056de1526a5808c81e1aaeaad2be18fbf8138b3a086c9b54192fc232c7210"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/returned-observer.png",
+      "bytes": 442981,
+      "sha256": "bee020d6006f08925ec6aa12a4cfd4caa312929a9e6d12bbea9cf7da3eab80df"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-floors-native-20261017-r1/walk-KeyW.png",
+      "bytes": 450131,
+      "sha256": "4afa9842af2870ea22c402e4aa5883875d4a7d5ee17f86e73bcd39b38758c297"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-floors-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 16166,
+      "sha256": "7205cbdf26f8b800bbe61b704cdc2f77d059a45a1a10afd7b49edb10b5eee797"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-floors-native-20261017-r1/office-entry.json",
+      "bytes": 16337,
+      "sha256": "5dfb76ce665fb44d66a18f28bc8a80d0e7ec7339efe19bc94e436c433c76eb96"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-floors-native-20261017-r1/office-entry.png",
+      "bytes": 668116,
+      "sha256": "459b4fa9b623a0eab3f6ab618672a22c973d06b9bd5d3258a7711ece741bbb6c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-native-20261017-r1.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/fps-live-20261017-office-floors.log",
+      "bytes": 70691,
+      "sha256": "89710929803ed2ef13b3b6f18a6b54b80d8da3992d23647c3e907e124de1aa99"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/performance-live-fps-live-20261017-office-floors.json",
+      "bytes": 451451,
+      "sha256": "56d300e811e31fb8b574e640d21434652bf97c78f7d274d3afc5aed50c85fae6"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-office-floors.json",
+      "bytes": 3601,
+      "sha256": "cc0a74f78f5518fd5a513b2025b1402162817f8ff1ffd33cf1ff33c8ed80bc17"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/audit-host-nearby.ts",
+      "bytes": 1349,
+      "sha256": "389fee67f35aca13f4c1a0b8bf97959f0919a88fdf73e0726491f67a31744133"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/audit-host-npcs.ts",
+      "bytes": 1328,
+      "sha256": "9f9346c9a85bacf20e35de31698dd28b2e1f966005941433240ab26f47d1bbd0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/audit-restart.ts",
+      "bytes": 3035,
+      "sha256": "bfbff9a6d187d8cc43f45a89ad64289ab4231ba101719bce0570089fe864abeb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/backup-sources.ts",
+      "bytes": 1030,
+      "sha256": "84a77582e77036811956a51c79f45657fb88b16a13a6387ae9f5bd3c70f80072"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/backup.ts",
+      "bytes": 2455,
+      "sha256": "db5ee851c3e5efd52effc537209a2668dc6268b355905e87f230375845b652bc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "5950fecf581e8202c7792c0c0a78bc736748e1710771fcf70e16c957321853b3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/engine/apps/thegame/client/canonical-scenery.ts",
+      "bytes": 1378,
+      "sha256": "215bd7608dd276760b9a081a27423def4ac83cb3681518c8574ff97c35b691fe"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 5653,
+      "sha256": "26e80d3127c160549cdb22fccc712683e425c932a98f109db453a7f401ab3c12"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 33361,
+      "sha256": "366130022888f08b0af520cf2da5b2dae45880a643d633aa8fb28682ad6d5826"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/game/src/game/office-interior-assets.ts",
+      "bytes": 8161,
+      "sha256": "4df6cd2d7050e744a6fb753e3f685c5d2f028ccd6aac74d087b5b49daeb9bb98"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/game/src/game/office-scenery-assets.ts",
+      "bytes": 7939,
+      "sha256": "50d572a03d3cbd14ad677fbf8536619b1ad51c1f4a83296a80168d75fe05bedc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/game/src/game/office-world.ts",
+      "bytes": 10863,
+      "sha256": "eb086006933743a7365f8f341f29e08e51b7a8c4bf4e8e5b1e069987596aae1e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/game/src/game/render/office-layer.ts",
+      "bytes": 1752,
+      "sha256": "dd2264d4ab0dea3acba2c8bc71984f98914c8471d5da42da2b86a2a5b5ca2257"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/game/src/server/office-layout.ts",
+      "bytes": 6314,
+      "sha256": "91687b971a821eb37b2e946cf852f84e7a7d4f4e249eba53ada79d1142ab5aab"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/game/tools/qa-office-lift-route.ts",
+      "bytes": 3255,
+      "sha256": "66899fbcd43271fac9154534fffef80507ff1983d71aff72b840d40cceddc3e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/game/tools/qa-office-lifts.ts",
+      "bytes": 16490,
+      "sha256": "890730f416a3c6532643676a29f5d2b89ff445f93fef1b1d6414702f1e399abe"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/before/office/ui/src/office/scene.ts",
+      "bytes": 64387,
+      "sha256": "0f65092b33902d8f880e21e6c1422a5bab447a94335a470f0d7b1af6a1575c1f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/complete-evidence-first-attempt.ts",
+      "bytes": 22581,
+      "sha256": "55337944243695371ed9852dfad37eec60cb1131f448cb8400d28b2e967117ce"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/complete-evidence.ts",
+      "bytes": 23824,
+      "sha256": "f013049f57cb2e32bad842672ffadd2b3d2e0ac5c2943da4779a96c35457c9dd"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/evidence-first-failure.json",
+      "bytes": 487,
+      "sha256": "6e7068a42129fd3a39ce88d2804d8c83c9ca73c34af911eee76a6ee349534720"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "db1b535d435be80655827d66c44616deb707fb239c1e6f1643b657bfee6bf543"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/engine/apps/thegame/client/canonical-scenery.ts",
+      "bytes": 1559,
+      "sha256": "e1f9edceafcbec0d9a2f0623b255793b41402016d2b4e378369af76dbb134019"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 5992,
+      "sha256": "51725379bd7320267f6cba05fe5878af873afb82bd8efc4359e5100f675931f7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 33762,
+      "sha256": "0b7902ad7128a2588eb752e6f39285b363133c55370679eb7602881c04444a81"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/engine/apps/thegame/client/office-authoring-visibility.ts",
+      "bytes": 816,
+      "sha256": "f2a0124749804cfddf1e5938bee43712a927dfaca9f29eac9f069a6673d86b23"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 194771,
+      "sha256": "02f34356f3431805897e3159f406df5f140e5be51555c66497940d506973b528"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/docs/VERIFICATION.md",
+      "bytes": 793714,
+      "sha256": "a032feeeee92974f7c70f232fc983a417d034a47f8af30fbe21f9df150908630"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/src/game/office-floor-assets.ts",
+      "bytes": 4622,
+      "sha256": "54e2372d90cd3845e5351a801f46b6b2fbe2b5eb5487a30e0d29e67a7a8163d3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/src/game/office-floor-records.ts",
+      "bytes": 1278,
+      "sha256": "d9faf78a71d81f52e75d49754fe21fbbe1737b5b7b7998efb623022eef9fc323"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/src/game/office-interior-assets.ts",
+      "bytes": 8894,
+      "sha256": "f000e88ac78908821b8bf4e01a09b123d084a0e309f14d3c80e3477ea3608933"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/src/game/office-scenery-assets.ts",
+      "bytes": 8371,
+      "sha256": "63321c47deabdcdab896c86e47908d8bdd5762c5f57dd3378c837bff9f592e7c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/src/game/office-world.ts",
+      "bytes": 11162,
+      "sha256": "3e4f9e941d40ceabd92bf968126dae1fd407a9494492a14fa30e73062a07e450"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/src/game/render/office-layer.ts",
+      "bytes": 2847,
+      "sha256": "70dec91ebfd480d8011c69afab94c158d5664d942233b69767d3c28b575b93c1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/src/server/office-layout.ts",
+      "bytes": 6419,
+      "sha256": "257abade69755f670d6f8ace27945602d80156774c2507380c86a66ac7ac01e2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/test/fixtures/office-layer-before.ts",
+      "bytes": 1813,
+      "sha256": "88a8ceb53f40cf95ee44b17e20eed061c2c77c915dc40ee09b19eb60d9a3d0fb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/test/office-floor-assets.test.ts",
+      "bytes": 11445,
+      "sha256": "5ea93d06120c0c56fb756890efff47a209b932d7a41e8e885d928b9ef25659f0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/test/office-floor-world.test.ts",
+      "bytes": 3424,
+      "sha256": "2eb7b1d1ef1d8d0dc189b9b77be316f0b3647a10105be3b1ed1aec6b3f1d32bb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/tools/qa-office-floor-rooms.ts",
+      "bytes": 5869,
+      "sha256": "281b0aa4e269a3f879fc3263522241cdbe0ebe97deb349d69bab7ed1714d7a9c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "372bd6464f72704b68c32b094aaf1ab831134496e44d1c5b34c86278db2e0147"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/tools/qa-office-lift-route.ts",
+      "bytes": 3357,
+      "sha256": "140033c71216b351c45975ed9d1f4480f47f54b64660fc93ee238632e5859616"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/tools/qa-office-lifts.ts",
+      "bytes": 19010,
+      "sha256": "b1ddeda19ac40849d5942bcfcfb4a255a3e2a62d404e9953214e291d2c571449"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/game/tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "35411977e47cefff92bda657368c75397b627d65e0f3d64392f0be4b3da89670"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/office/ui/src/office/scene.ts",
+      "bytes": 65306,
+      "sha256": "36faf5c43b2c9b8309da0c9e2ee320ae03ffe799043569b5af5433b374548b33"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/final-sources/office/VERIFICATION.md",
+      "bytes": 130228,
+      "sha256": "806e846ad32906f915074b7b096459e18e712a5a44ce0d5ad8c789bc65b094c0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/fps-game.js",
+      "bytes": 2493622,
+      "sha256": "56c45b4bde1d48c9cf56f3ad9283b27e6b55058e5002e113db3b2ecbcb5f5c97"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/fps-operation.json",
+      "bytes": 682,
+      "sha256": "57574d452cdf45a321659e4979cb89c00d03dccd63dd25bb0a5c65aedb1d2839"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/fps-result.ts",
+      "bytes": 3993,
+      "sha256": "d6016d0d38d085358bbfa98f13b777581190d01499017411bc220890a415166c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/host-npcs-before.json",
+      "bytes": 1219,
+      "sha256": "fb9c96b1dfc5bccf4290c94ad6940c7d6f640e0f69f52c3a63ce94433faa02b1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/host-npcs-nearby.json",
+      "bytes": 28200,
+      "sha256": "69c05729fa689329aa475681007838722d910d08debca9145536c7112271e427"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/inspect-native.ts",
+      "bytes": 1264,
+      "sha256": "ab1ede81f79e367cbde875f5d27e1cadc1c87ab091335a15150012836eb4a346"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/layout-after-native.json",
+      "bytes": 7338,
+      "sha256": "73bb42033247a823f210ab2b57aad0e55b6df27068b9167f896c713288873bdb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/live-source.json",
+      "bytes": 13402326,
+      "sha256": "a177da6d2bca852b718423167392468a782d57149aeb25021e81edae240276ff"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/native-visibility-watch-r1.json",
+      "bytes": 30258,
+      "sha256": "30af3f76579b363359d6b3bd11a3a8f01f86b3f5f173bb0d647a06c790cba413"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/prepare-fps.ts",
+      "bytes": 734,
+      "sha256": "a194a0c06f9e0934e24741bef925a473f1243e0429fa1bdeef0b8968a053edb5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/prepare-oracle.ts",
+      "bytes": 833,
+      "sha256": "e9386f9db813ce9129fe0325f85f28a0e34937731fbd7c77bdacaf0b74232c02"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/prepare-runtime.ts",
+      "bytes": 1113,
+      "sha256": "8fe40bab69272f0aebd76bc4b54777b0f7dcf1462178f86be0571e29f6186be6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/qa-syntax-check.js",
+      "bytes": 141350,
+      "sha256": "723b8ea374dc20bfce2bc27ab8b8ef248830aca0684aa8de026b43d25ff668e3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/qa-syntax-check.log",
+      "bytes": 80,
+      "sha256": "2081d2d56134aa9382455b8912be11516315e46673529002732410e255edf00f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/restart-audit.json",
+      "bytes": 632,
+      "sha256": "4299a874bb0ac759c7eafd75c8b84d3ba7a3d8868cf3b48abf2e7663776272dc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/restart-operation.json",
+      "bytes": 302,
+      "sha256": "d4939fec9ba605793f8f259e8a8f2335de719954215b7f1a28b719dc93529df7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/restart-ready.json",
+      "bytes": 6092,
+      "sha256": "62fb0c40e28491d454595b49512f0728ce9650a3817be8cf2edc26a1ee68314d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/restart-ready.sqlite",
+      "bytes": 8617984,
+      "sha256": "9469fe623fce4d0be0e50b893f9d75a877253d2efbc3ac6d74105fba7374f730"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/restart.ps1",
+      "bytes": 2770,
+      "sha256": "dda1a842fec5afab63b1c9987722c7b54e6c64c0fb69b6810681c7658d616a5d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/run-fps.ps1",
+      "bytes": 1875,
+      "sha256": "1c0859afe195c8ad08681f6269adec5a88a994b250ece81677d456018690e754"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/run-native.ps1",
+      "bytes": 1626,
+      "sha256": "c4c26dfb6c4b7c9ef2f42f111ac4a1900e7d5e8fd6d24f7a2bc42d8668c25b79"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/server-before.err.log",
+      "bytes": 1069,
+      "sha256": "22e84b0f01b549d8c3a6475affb786a14b9baf25034e796126efb8eef18cd899"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/server-before.log",
+      "bytes": 723,
+      "sha256": "dfe8e9ea0e1eae4b5f3562e00d8e5b07a6850b46a6ff68452e0382f249100dd5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/update-capability.ts",
+      "bytes": 951,
+      "sha256": "2ff7ef340c5dff559cb3525b075d821c736dc148876b890a57d3d9fbbc4a4689"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/watch-native.ts",
+      "bytes": 1988,
+      "sha256": "c4496c115e9891322bc4c435753e5d644e9e5ec4e4b38d9d5526bf3394636eb5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors/wire-native-qa.ts",
+      "bytes": 2339,
+      "sha256": "67ef876bd83803beb67c009722319a9f366bd14befd1764b97fbbd953ef9680a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors-app-typecheck-r1-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors-app-typecheck-r2-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors-integration-tests-r1-20261017.log",
+      "bytes": 22280,
+      "sha256": "c4c850ce1b5e551989c53187a93fe6c400572fc48c6daa8f96bb3700e04c01b0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors-ui-build-r1-20261017.log",
+      "bytes": 889,
+      "sha256": "153fac76c8502e5afffd0f71821611e23f3032e95aad1669d0aab76f6d24748b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors-ui-typecheck-r1-20261017.log",
+      "bytes": 37,
+      "sha256": "df0f1a0974cd3fd1da565531ca1c1f8649d26fa52efbc413c73e9ae21a109286"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-floors-ui-typecheck-r2-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-existing-tests-r1-20261017.log",
+      "bytes": 4239,
+      "sha256": "88962b1b91e8601f98fe91777e251f5e062cfc47b99d8380188b7768986e6280"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-game-build-r1-20261017.log",
+      "bytes": 585,
+      "sha256": "d896f5fa8183b2fda3dd4359e5bc571feb3c1c7ac3d36c73eed1aad990ca54a3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-tests-r1-20261017.log",
+      "bytes": 4412,
+      "sha256": "9cb734940355e34ea2d5f85671f1b501f6158adbdb61a7379af9fc9db5c3ee5b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-tests-r2-20261017.log",
+      "bytes": 3317,
+      "sha256": "e5946d062227121021000a6eccd053dd58b5433e9d0e4f2f5d17e9bcb2eb040e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-tests-r3-20261017.log",
+      "bytes": 4009,
+      "sha256": "94e2e29528b7471dae3db05cf69ce1ca6cc7f32c9baf80116ef67b483d17a32a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-tests-r4-20261017.log",
+      "bytes": 1050,
+      "sha256": "a9bfc1cd4d5dae457dd898ebdb30374fff28955628404fcf31f865480655ec93"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-floors-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    }
+  ]
+}

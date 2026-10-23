@@ -117,13 +117,22 @@ function surfaceStepFactors(use:SurfaceUse,entity:RuntimeEntity,worldSeconds:num
   };
 }
 
+/** Preserve the public Map mutation API while publishing membership changes.
+ * Replacing a value or editing its numbers cannot change render eligibility. */
+class SurfaceStateMap<V> extends Map<string,V> {
+  constructor(private readonly changed:(id:string)=>void){super();}
+  override set(id:string,value:V):this{const changed=!!this.get(id)!==!!value;super.set(id,value);if(changed)this.changed(id);return this;}
+  override delete(id:string):boolean{const removed=super.delete(id);if(removed)this.changed(id);return removed;}
+  override clear():void{if(!this.size)return;const ids=[...this.keys()];super.clear();for(const id of ids)this.changed(id);}
+}
 export class SurfaceEnvironmentSystem {
+  private readonly renderStateIds=new Set<string>();
   private readonly workObservers=new Set<SurfaceWorkCommitObserver>();
   observeContactWork(observer:SurfaceWorkCommitObserver):()=>void{
     this.workObservers.add(observer);
     return()=>{this.workObservers.delete(observer);};
   }
-  readonly fields=new Map<string,SurfaceEnvironmentField>();
+  readonly fields:Map<string,SurfaceEnvironmentField>=new SurfaceStateMap(id=>this.updateRenderMembership(id));
   private readonly claimedContactBodies=new Set<string>();
   remove(id:string):void{this.surfaces.delete(id);this.bodies.delete(id);this.fields.delete(id);this.claimedContactBodies.delete(id);}
   claimContactBody(id:string):void{this.claimedContactBodies.add(id);}
@@ -135,8 +144,13 @@ export class SurfaceEnvironmentSystem {
     if(u<0||u>1||v<0||v>1)return undefined;
     return field.cells[Math.min(field.nz-1,Math.floor(v*field.nz))*field.nx+Math.min(field.nx-1,Math.floor(u*field.nx))];
   }
-  readonly surfaces=new Map<string,SurfaceEnvironmentState>();
-  readonly bodies=new Map<string,BodyEnvironmentState>();
+  readonly surfaces:Map<string,SurfaceEnvironmentState>=new SurfaceStateMap(id=>this.updateRenderMembership(id));
+  readonly bodies:Map<string,BodyEnvironmentState>=new SurfaceStateMap(id=>this.updateRenderMembership(id));
+  /** Presence index only. Physical values and state objects stay in their maps. */
+  hasRenderState(id:string):boolean{return this.renderStateIds.has(id);}
+  private updateRenderMembership(id:string):void{
+    if(this.fields.get(id)||this.surfaces.get(id)||this.bodies.get(id))this.renderStateIds.add(id);else this.renderStateIds.delete(id);
+  }
 
   /** Reconcile authored entities into physical state without advancing time. */
   reconcile(environment:EnvironmentState,entities:ReadonlyMap<string,RuntimeEntity>):void{
@@ -266,7 +280,7 @@ export class SurfaceEnvironmentSystem {
         });
       }
       if(use&&!this.fields.has(entity.id)){
-        const half=horizontalHalf(entity),size=[half[0]*2,half[1]*2] as const,[nx,nz]=surfaceFieldResolution(size),center=[entity.position[0],entity.position[2]] as const;
+        const half=horizontalHalf(entity),size=[half[0]*2,half[1]*2] as const,[nx,nz]=surfaceFieldResolution(size,entity.environmental?.fieldCellSizeM),center=[entity.position[0],entity.position[2]] as const;
         this.fields.set(entity.id,{center,size,nx,nz,revision:0,cells:Array.from({length:nx*nz},()=>({...this.surfaces.get(entity.id)!})),deformation:new DeformableSurfaceField(center,size,nx,nz)});
       }
       if((entity.body?.invMass||entity.body?.kinematic)&&!this.bodies.has(entity.id)){

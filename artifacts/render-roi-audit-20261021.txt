@@ -1,0 +1,331 @@
+Renderer quality / frame-cost audit — 2026-10-21
+
+Scope and evidence
+Read-only audit of Engine source after 0437d2c5. No new GPU run, renderer
+feature toggle, resolution change, material/geometry reduction, shadow-size
+change, or production source edit. Game geometry/HUD is owned by the other
+agent. The goal is to remove work whose contribution is exactly zero, retain
+completed work when its real causes are unchanged, and reduce equivalent data
+preparation; no quality preset reduction is proposed.
+
+Measured reference: Game artifacts/performance-live-migration-720-diagnostic-r3-cache.json,
+renderer.engineStats.profile, 908 CPU / 904 GPU sampled frames. These are
+instrumented diagnostic timings, not an unprofiled acceptance result, and the
+older/later routes are not controlled before/after comparisons. Full-quality
+1280x720, TAA+bloom, draw distance 420. Captured final visual environment has
+sun intensity 0, humidity .4425, wetness 0. Game celestial input can override
+the visual intensity (including moonlight); the captured visual field is NOT
+proof that the actual f.sun.w uniform was zero. Uniform capture must establish
+that condition. Do not assume every sampled frame had the same environment
+just from that final snapshot.
+
+GPU mean / p95 / maximum, ms:
+ visibility             .674 / .862 / .920
+ shadow                1.030 /1.275 /1.623
+ planar reflection      .229 / .396 / .712
+ opaque depth prepass   .171 / .263 / .457
+ main                  2.206 /2.993 /6.413 (sky + material pass)
+ main transparent       .194 / .217 / .256 (includes opaque HDR copy)
+ bloom downsample       .110 / .137 / .162
+ bloom horizontal       .204 / .291 / .336
+ bloom vertical         .204 / .291 / .336
+ effects               1.078 /1.391 /1.983 (AO + GI + SSR + optional DoF)
+ TAA                    .259 / .298 / .378
+ present                .172 / .200 / .234
+ motion blur / spots / probe: zero in this reference, not evidence of a cost
+ problem in their own active scenes.
+
+CPU mean / p95 / maximum, ms:
+ projection            1.264 /2.0 /26.7
+ cull                  1.590 /2.3 /4.1
+ preparation           1.118 /1.8 /6.3
+ encode visibility      .379 / .6 / .8
+ encode shadow          .588 / .9 /2.4
+ encode reflection      .251 / .4 /3.0
+ environment            .153 / .7 /2.3
+ lights                 .070 / .3 /1.1
+ lifecycle              .330 /1.0 /4.0
+
+Prioritized exact-equivalence candidates
+
+1. Sunless scene still pays sun shadow maps and PCF (highest measured GPU ROI).
+   src/render/webgpu.ts:128,695,729,762,1320–1343,1384–1428.
+   shadowAt result is used only by two direct-sun terms, both multiplied by
+   f.sun.w. At exactly zero actual Frame sun intensity, their contribution is zero. Static
+   and dynamic SUN shadow preparation/culling/draws can be skipped, and the
+   material PCF can be guarded by a uniform zero-sun condition. Spotlights have
+   their own maps and must be retained. Do not approximate near-zero sunlight.
+   Native proof: frozen source shader/scene with sun=0 and >0, clear/rain/snow,
+   lamps, glass/paint and relief; HDR/effects/TAA/final pixels exact at zero;
+   first nonzero frame must rebuild fresh static and dynamic sun maps. The
+   actual Frame.sun.w must be captured: visual.sunIntensity=0 alone does not
+   establish this condition when Game celestial lighting supplies another value.
+   Derivative operations in shadowAt require uniform flow; never use a divergent per-pixel
+   nl==0 branch as a shortcut. Savings are a hypothesis bounded by the measured
+   sun-shadow/PCF work, not an achieved FPS result.
+
+2. Non-caster removal falsely invalidates unrelated static shadow projection.
+   src/render/visibility-plan.ts:88–122 indexes Entry by source position. The
+   existing WeakMap is used only for the changed-model pass, not identity reuse.
+   Remove one posed grass-blade before 128 static walls: exact caster order and
+   all camera/light matrices are unchanged, static radiance key and complete
+   probe remain bit exact, but staticShadow.staticBuilds 1->2, tests128->256,
+   revision1->2. Renderer interprets this as a dirty static shadow and redraws it.
+   CPU-only source repro: artifacts/render-roi-cause-probe.ts. No physical tick
+   or GPU is needed. Proposed fix is identity-based Entry retention with exact
+   per-pass source-order observation and removed-identity retirement, retaining
+   invalidation for actual static pose/geometry/deformation/relief changes.
+   Required oracle: independent corner culling plus frozen original results over
+   non-caster removal/add/reorder, same-ID replacements, mover publication,
+   batch changes, static direct pose, stamped deformation and relief changes.
+   Static-cache benefit depends on a stationary light; a changed sun matrix is
+   still a real cause and must rebuild. No timed win claimed yet.
+
+3. Sky cloud synthesis with exactly zero cloud opacity.
+   src/render/lighting.ts:35–44. cloudDrive=smoothstep(.48,.88,humidity)*
+   (1-.55*sunlight). At the captured humidity .4425, drive=0. Four noise calls
+   (16 hash sin evaluations) and cloud-edge/radiance arithmetic are evaluated
+   before color is mixed with opacity0. Uniform drive==0 can omit these only;
+   horizon/haze/sun/ground fog must be unchanged. Cost currently mixed into main.
+   Proof: native full HDR oracle against frozen old shader for zero, threshold,
+   and nonzero cloud drive, night/day and layered fog; isolate sky timing or
+   matched frame pair, with profiling disabled in final acceptance.
+
+4. Planar pass runs without any possible receiver.
+   src/render/webgpu.ts:1309 computes needsPlanarReflection from asphalt but
+   never uses it. Visibility projection, reflection compute requests and draw
+   pass remain gated by compiled capability alone (1319,1373,1444). The map is
+   read only in the global planar-asphalt branch (825–840). No asphalt receiver
+   means no visual contribution. Conservative no-asphalt gate is exact and can
+   skip all those stages while retaining a valid bound resource. New asphalt
+   must render its map in the SAME submission before reading it, including after
+   resize and material/visibility mutation. Current outdoor route has asphalt:
+   do not claim its .229ms GPU/.251ms CPU encode is all removable there. Office
+   and other receiver-free scenes need a controlled native oracle.
+
+5. Planar asphalt reads seven reflection samples before proving zero weight.
+   src/render/webgpu.ts:825–840. roadReflection is computed AFTER the seven
+   samples and normal-ripple noise; it is exactly zero for dry no-ice surfaces
+   and sufficiently rough wet ones. Compute original weight/in-bounds first,
+   then sample only for a nonzero contribution. textureSampleLevel requires no
+   implicit derivatives, making this safer than divergent sun-PCF changes.
+   Preserve original sample positions/order/weights whenever weight is nonzero.
+   Pixel oracle: dry, water/ice/slurry, roughness threshold, slopes/elevated roads,
+   bounds edges, rain-on-external surfaces. This alone does not prove the entire
+   reflection pass can be skipped: CPU must conservatively cover every surface
+   and local field before a pass-wide early-out is correct.
+
+6. Full diagnostic inspection every presented Game frame (CPU, owned by NPC agent).
+   Game TheEngineRenderer.render() calls engine.inspect(false) after render(),
+   then reads only drawCalls/triangles. false omits just profile; Engine inspect
+   (webgpu.ts:1622–1639) still makes multiple object/batch arrays and reductions,
+   complete nested visibility/preparation stats, target descriptors, staging sums.
+   This lies outside RenderProfiler's submitted frame. Engine public drawCalls
+   and triangles already provide those numbers. Full inspect remains available
+   on explicit diagnostic/UI cadence; do not hide counters or lower QA coverage.
+   Need same Game HUD/stat values and a CPU leaf profile, not estimated savings.
+
+Secondary candidates requiring measurements / larger proof
+
+7. Visibility request overhead: 111 camera draws /1216 candidate instances at
+   latest frame, diagnostic visible43; ~29KB visibility uploads. encode() sends
+   one112-byte uniform +one20-byte indirect reset per view/batch, then one GPU
+   dispatch per nonempty view/batch. Exact request packing could remove hundreds
+   of queue calls without removing geometry. Hybrid CPU/GPU cost crossover is
+   another possibility, but needs measured threshold and all frustum/fence tests.
+   Existing CPU+GPU visibility costs are real; no guessed percentage claimed.
+
+8. Hidden sky fragment shading. Sky currently draws first across the full
+   viewport with depthCompare always, then opaque objects overwrite it. Drawing
+   it after opaques at far depth could retain only uncovered samples. Requires
+   exact MRT clear/velocity/normal semantics, far/log-depth and edge oracle.
+   Cost folded into main, and cloud-zero gate is a smaller first experiment.
+
+9. Bloom Gaussian is already separable at half resolution: 37 taps per axis,
+   total blur mean .408ms. Paired linear filtering can reproduce the mathematical
+   kernel with 19 taps, same extent/weights. Floating interpolation and operation
+   order may alter quantization; requires native impulse/bright-edge/reference
+   HDR proof before acceptance. Do not reduce the radius/sample-quality preset.
+   WGSL compiler may fold loop exp values already; source appearance alone is
+   not evidence that a constant-table rewrite saves time.
+
+10. Empty transparent stage copies the entire opaque HDR texture even when
+    there are no visible transparent entities and no snowfall. Exact aliasing or
+    copy elimination would save this stage in such scenes; current outdoor trace
+    had four camera-transparent objects, so no guaranteed gain in it. Glass must
+    retain the original opaqueScene refraction source and transparency order.
+
+11. CPU fallback instancing repacks/uploads every matrix each frame; native
+    Game uses GPU-owned batches and latest CPU-fallback instances=0. Extend the
+    existing exact dirty-range InstanceStream scheme only after profiling an
+    actual CPU fallback workload. Same transforms and history settle are required.
+
+12. prepareShadowBatches allocates temporary Float32 arrays then exact-compares
+    against resident data. It already skips unchanged GPU upload; reuse bounded
+    scratch/dirty rows may reduce CPU allocation. Main GPU shared shadow batches
+    already avoid much of this; separate allocation profile before changing it.
+
+Areas audited where current code already avoids obvious waste
+
+- Material-class pipelines specialize the common shader, opaque depth prepass
+  was proved against a native frozen oracle already; no blanket material cuts.
+- GPU camera instance streams upload only exact changed data and settle previous
+  model once; static model-history entries retain storage by entity identity.
+- Surface textures use authoritative field revisions; uniforms/staging retained.
+- Environment map worker has one active and one latest request, bounded four-map
+  cache, reset-generation rejection and atomic completed publication. Physical
+  static radiance changes must remain causes. Old same-scene source membership
+  alone does not reset the map cache.
+- Current Game near-grass is posed immediately by setVisualTransform, so it is
+  a render mover and is excluded from static-only distant radiance. It also has
+  castsRenderShadow=false. The CPU repro verifies this exact causal distinction.
+  Generic small static geometry below the probe's radius .08 cutoff still enters
+  the cause hash; false invalidations exist in principle, but filtering these
+  requires scale/direct-edit-safe parity with the actual probe eligibility.
+- Environment CPU mean .153ms and light-grid mean .070ms are lower priority than
+  culling/preparation. No longer probe cadence, atmosphere quantization or reduced
+  lighting/shadow resolution is proposed. Existing large frozen mesh bounds are
+  cached; mutable nested inputs remain observed.
+- Screen effects already reject sky before AO/GI/SSR, zero receive/emit before
+  neighbor HDR reads, and rough/nonreflective material pixels before SSR marching.
+  Those existing contributions need original pixel oracles before more shortcuts.
+- Fog already rejects zero density, empty lamp ranges, zero housing emission and
+  duplicate light samples. Spot shadows already select bounded two active lamps.
+- Motion blur, probe and spot shadows were inactive in this reference; additional
+  night/headlight/car/flight captures are required before ranking their active cost.
+
+Limits and next proof
+The list is a source/profile-backed inventory, not a claim that every hidden
+cost has been measured. Runtime graph timing plus native HDR/final-image oracles
+are needed per approved candidate. One fixed route must be replayed at native
+1280x720/full-quality, visible/focused, profiling off for acceptance; raw intervals
+and max freezes must remain visible. GPU savings do not solve synchronous saved
+world I/O or authority stalls. Existing native max375ms failure remains a failure.
+No production queue-and-return-applied workaround or reduced physics cadence is
+part of this audit. Identity/cache and zero-contribution removals are the first
+bounded implementation proposals; parent agent coordinates source ownership.
+
+Approved identity-cache implementation update
+Parent approved only the bounded RenderVisibilityPlan identity fix. Production
+Entry rows now survive source-index shifts by identity; two bounded row arrays
+preserve the exact current source order, retired rows leave the live lookup, and
+each pass retains its certificate if both ordered static and moving lists are
+unchanged. Real model/geometry/deformation/relief causes still invalidate it.
+No webgpu/lighting/shader gate has been changed by this agent.
+
+Validation: npm run build exit0. Node focused test group 29/29 pass in .27s:
+render-visibility-identity (5), render-visibility-plan (8), shadow-stability (7),
+render-radiance-projection (9). New tests compare every candidate pass/order
+against a frozen complete original implementation and demonstrate the original
+128 needless static tests against the candidate's zero. Existing independent
+corner-plane culling and actual stamped-surface/relief tests also pass. Native
+HDR/depth/final-image proof remains pending a coordinated GPU slot. Parent's
+strict car snapshot runs before any further zero-work shader/pass changes.
+
+Approved zero-work gates and native result
+The following source gates are now implemented after parent approval:
+- SUN work uses uploaded frame[19] !== 0, not visual.sunIntensity. At exactly
+  zero, SUN cull/preparation/static+dynamic map draws and material PCF are absent;
+  point/spot lights remain active. shadowValid is false throughout zero light,
+  forcing the first nonzero/moon frame to draw fresh maps before material reads.
+- Sky cloud synthesis is omitted only when the original WGSL cloudDrive is
+  exactly zero. cloudOpacity remains0 for the original fog/haze expression.
+- Reflection projection, GPU visibility requests and pass are omitted only if
+  there is no opaque asphalt receiver. The resource binding stays valid and the
+  first new receiver renders its image in the same frame before material reads.
+- The opt-in opaque-depth transform now matches the unique shadowAt call rather
+  than the old let-statement prefix, so its hoisted receiver derivatives continue
+  to precede discard. Depth encoding/comparison/attachments are unchanged.
+
+Native proof: artifacts/render-zero-work-native-20261021/report.json. Clean
+10-case run, complete frozen original WebGPU+lighting+visibility versus current
+production source; native AMD RDNA-3, full1280x720, TAA+bloom, profiling OFF.
+Cases: identity, zero-clear, zero-cloud, moon-override, cloud-threshold,
+cloud-above, no-receiver, sun-transition, receiver-transition, cpu-instances.
+Every recorded phase has identical HDR/effects/TAA (3,686,400 Float32 components
+each) and depth (921,600 components), maxAbs=0/maxUlps=0. Every final full PNG is
+byte-identical. GPU errors0. Actual uploaded f.sun.w is captured; moon .125 stays
+active despite Game visual sunlight0, zero->moon->zero->day first-frame checks
+pass with static edits and an actual physical surface stamp while light is off.
+Spot shadows remain active. Receiver first/retired/returned phases also match.
+The native harness initially needed fixture-only fixes for allowed asset URLs
+and constructor-owned surface registration; the clean final run above succeeded.
+No production physics/surface-registration behavior was changed to make it pass.
+
+Build0; 53 focused correctness tests plus readiness/descriptor coverage10 pass.
+Descriptor fingerprints were refreshed only after the native comparison, retaining
+the same pipeline graph/layout and sync/async initialization contracts.
+This is image-equivalence proof, not a frame-pacing acceptance run. No achieved
+60FPS/no-freeze claim follows from it. OS remained in the existing Power Saver
+plan, matching the other native tests. Parent is taking an actual-car CPU trace
+before the separate approved planar zero-weight sampling experiment.
+
+Final approved planar-weight and spotlight work
+The original selected planar reflection coefficient is now calculated before
+the two ripple-noise and seven reflection-map reads. Only a coefficient exactly
+equal to zero bypasses them; every contributing sample keeps its original
+coordinates, arithmetic order and weights. Out-of-bounds selection remains the
+original zero. This changes no roughness/wetness/snow/ice/SSR/rain quality setting.
+
+Native road proof: artifacts/render-planar-weight-native-20261021/report.json,
+11 paired cases against a frozen complete ed58e9e renderer (before this shader
+change). Dry/wet/ice/slurry, .5499/.55/.5501 roughness, raised/sloped roads,
+viewport bounds and falling rain all match full HDR/depth/effects/TAA and entire
+PNG exactly, errors0. Both sides used identical timestamp profiling, 65 samples
+per variant except bounds62. Diagnostic main GPU mean dry2.209->2.124ms,
+wet2.167->2.237ms; other cases have small mixed changes. Concurrent Game tests
+and Power Saver mean these measurements do NOT establish an overall FPS gain
+or a stable wet-scene regression. The dry zero-work removal is proved; matched
+timing uncertainty stays visible rather than claiming a universal speedup.
+
+The later actual-car r7 CPU trace (parent/NPC artifact npc-profile-r7-analysis)
+identified moving headlights as an active cost: spotPlans329.4ms/180 frames,
+including opaque filtering273.2ms, alongside main cull400.8ms, camera prep354.9ms
+and frameIR275.8ms. These are inclusive samples and MUST NOT be added. It was a
+contended diagnostic, not performance acceptance. Actual leaf matrix/bounds
+inputs were not recorded; no honest actual-r7 replay can be reconstructed from
+the CPU call stacks and summary stats alone.
+
+Approved spotlight improvement is narrower than a spatial-distance approximation:
+intersectsModelClip computes only Float32 product rows that the original clip
+planes reach, preserving the original dot-expression and six plane predicates,
+including -1e-5. X rejection computes8 entries instead of16; Y12; visible leaves
+still compute all16 once. Only the spotlight leaf uses it. Eligibility, order,
+full models/bounds, clip distances, deformation envelope and all camera/sun
+paths retain their prior behavior. Scratch is renderer-owned >=16 floats and
+nonoverlapping, matching multiply4Into's preexisting explicit contract. No new
+world-bound cache or light-distance threshold was added.
+
+A first checked helper was rejected after a paired CPU regression: per-leaf
+TypedArray.buffer alias validation roughly doubled its cost. The accepted
+constant-row version has documented caller ownership, no hot validation and
+passes 7 focused tests with >23k frozen differential/corner cases: arbitrary and
+projective matrices, large/signed scales, all plane boundaries, nonfinite and
+subnormal values, direct row-bit proof, unchanged input arrays and separate
+scratch. Finite/infinity/signed-zero row bits match; NaNs retain old boolean and
+NaN behavior. Original intersectsClip itself is unchanged.
+
+Chrome156/V8 allocation-free proxy: artifacts/render-model-clip-v8-20261021/report.json.
+Both paths use one preallocated scratch; the baseline calls the unchanged
+production multiply4Into + intersectsClip. Frozen allocating reference functions
+are used only outside timed regions. Across25 alternating pairs, mixed65,536
+calls old median5.70ms/current2.70ms (paired median ratio.483); all-visible32,768
+calls3.20ms/2.00ms (ratio.625). This is SYNTHETIC input, not captured actual-r7,
+GPU timing, game FPS or isolated acceptance. The concurrent suite/unchanged
+Power Saver conditions and all raw samples are retained in the report.
+
+Native moving spotlight proof: artifacts/render-model-clip-native-20261021/report.json.
+Two moving headlights, near-vertical turns and slot on/off transitions, with
+direct static rotation and moving-body transforms: 3 paired cases, full1280x720,
+profilingOFF, complete HDR/depth/effects/TAA and PNG bit exact, errors0. This
+compares the frozen ed58e9e renderer with current production, complementing the
+independent row-level proof and separate road comparison.
+
+Final Engine verification: npm run check exit0, typecheck/build0; 913 tests,
+894 pass,19 intentional skips,0 fail in69.55s. Full log preserved as
+artifacts/engine-roi-final-check.log. Native proof coverage is10+11+3 paired
+scenes; shader fingerprints updated only after their independent comparison.
+No GPU jobs, game services, OS power-plan changes or original save writes remain
+active from this agent. Full Game regression and strict actual-car frame pacing
+remain parent-owned; synchronous durable-authority I/O is still a documented
+separate limitation. The renderer changes do not justify a no-freeze claim.

@@ -67,6 +67,81 @@ access to another NPC's private mind is introduced. The existing request/clarify
 withdraw fallback and three-attempt cap remain for callers that do not use a richer
 policy; those are authored compatibility rules, not psychological laws.
 
+## NPC inner life
+
+`createNpcMind` adds a deterministic model of four needs: energy, company,
+understanding and safety. Each has its own urgency, importance and growth per
+simulation second. `setNpcNeed` accepts a new perceived bodily/environmental
+condition. This is a model of cognition, not evidence of subjective consciousness.
+
+`stepNpcMind` ranks up to 32 perceived affordances by need, expected relief,
+confidence, distance and learned social expectations. It preserves a current
+decision for up to ten seconds, emits an execution request once, and can interrupt
+a conversation for critical safety. Unavailable opportunities are excluded. Gaze
+updates from current observations and clears when the target is no longer seen.
+There is no access to another NPC's private knowledge or a global entity search.
+
+The mind keeps 32 thoughts describing intentions, waiting, outcomes, timeouts and
+interruptions. Decisions and thoughts retain subject IDs, need IDs and confidence;
+the decision also records its utility score. Refusals, timeouts and successes put
+that affordance on a ten-second retry cooldown. Critical safety bypasses an
+ordinary active intention, but does not invent an escape opportunity.
+
+`perceiveNpcOutcome` accepts the same authority receipts as the appraisal reducer.
+Observed progress changes the associated need in proportion to confidence. Only a
+confirmed resolution completes the decision. An animation or elapsed time never
+satisfies a need. Duplicate sequences and retained receipt IDs cannot reward it
+twice; storage must still deduplicate reissued IDs after bounded-memory eviction.
+Prospective appraisals retain their causal emotions and advance simulation-time
+need growth, but do not relieve a bodily need, resolve/block a decision, or enqueue
+a response gesture. Those consequences require an actual authority receipt.
+
+```ts
+import {createNpcMind,stepNpcMind,perceiveNpcOutcome,ActingRig}
+  from '@rom4/game-engine/acting';
+
+let mind = createNpcMind('anna');
+const rig = new ActingRig(scene.animation, 'anna'); // existing authored walker
+
+// Each authority tick, using opportunities actually perceived by this NPC:
+const atS = scene.animation.timeSeconds + dt;
+const next = stepNpcMind(mind, atS, [{
+  id:'talk-to-ilya', need:'company', subject:'tea-break', partnerId:'ilya',
+  available:true, distanceM:1, expectedRelief:.8, confidence:.9,
+  position:[2,1.6,0],
+}]);
+// Commit next.mind using the application's existing state owner.
+mind = next.mind;
+if (next.cue) rig.submit(next.cue);
+// next.request is for the action executor; it is not a completed world action.
+scene.step(dt);
+rig.stepFace(face, scene.animation.timeSeconds, dt);
+
+// Once the authority has committed an actual result at receipt.atS:
+mind = perceiveNpcOutcome(mind, receipt);
+// The next stepNpcMind emits/coalesces the corresponding visual reaction.
+```
+
+Create the mind at the current simulation time when adding a late actor. To resume
+a saved snapshot, call `migrateNpcMind` once at the storage boundary, then admit the
+returned mind and recreate `ActingRig`. It also validates current snapshots.
+Need growth uses elapsed simulation time; pause/loading time
+must not be supplied as simulation time unless that is intended gameplay.
+Visual reactions coalesce at 220 ms, while all semantic receipts are retained up
+to the memory budget. Continuing actions refresh their cue every 2.4 seconds.
+Persist the returned mind with its actor-local cue and decision serials.
+
+The outer `NpcMind` schema remains version 1. `LegacyNpcMind` identifies that same
+schema with a version-1 nested acting state; `migrateNpcMind` migrates only that
+inner state and preserves the actor identity, needs, decision, attention, thoughts,
+pending gesture and serials. Current nested states are validated and copied. The
+Game population has a separate mind schema and is not passed through this adapter.
+
+`advanceActingMind` advances the two checked emotion publications from one canonical
+sample at one simulation time. NPC need updates and idle ticks use it instead of
+updating signed affect independently. It retains the causal baseline, memories,
+relationships and intention, and does not replay or invent an observation.
+
 ## Engine integration retained
 
 - Public module: `@rom4/game-engine/acting`.
@@ -76,6 +151,9 @@ policy; those are authored compatibility rules, not psychological laws.
   mesh transforms are unchanged. Dynamic rigid bodies remain physics-owned.
 - `makeActingCue` now reads mixed activation rather than cancelling positive and
   negative feelings into a neutral face. The serialized cue shape stays version 1.
+- All thirteen authored actions remain, including greet, think, celebrate, comfort,
+  startle and tired. Their motor paths and authored gesture offsets are retained;
+  mixed emotion supplies the new positive/negative/fear/anger expression terms.
 - `ConversationFaceRig` still owns speech articulation and blinking. No new jaw,
   phoneme, voice or audio-envelope model is installed. The caller creates face
   entities, registers render movers and steps face/body at the same Scene time.
@@ -145,6 +223,11 @@ not zero allocation and does not establish an entire-frame CPU budget. Sample de
 is constant-work. The semantic owner should schedule events under its existing budget,
 not call appraisal per rendered frame. This change does not add a second LOD scheduler.
 
+Restoration migration is cold work. `validateNpcMind` validates the nested causal
+window, so repeated public NPC reducer calls still incur bounded replay/validation
+allocations. The constant-work advance helper avoids adding a second replay; this
+is not a zero-allocation NPC tick or an allocation/FPS improvement claim.
+
 Still missing: autonomous inference of explanations, multi-goal appraisal of one event,
 general coping/planning, long-term mood/personality dynamics, salience-based retrieval,
 per-domain competence, full belief/ToM learning, automatically recalled sentiments,
@@ -153,7 +236,76 @@ validated theory of trust. The appraisal coefficients and 12-second decay consta
 are provisional authored parameters, not calibrated human measurements. This is
 an explicit testable improvement, not a claim to surpass Sims, EMA or FAtiMA.
 
-## Verification of this revision
+## Recorded dialogue — 2026-10-20
+
+This retained historical recording predates the version-2 appraisal integration.
+
+`tools/acting/video-scene.mjs` connects two existing winter pedestrian rigs to
+`ActingRig`, `ConversationFaceRig` and the normal 60 Hz Scene animation clock.
+It authors a conversation about a courtyard lamp: a request, inability to help
+immediately, clarification, support, a confirmed scripted lamp-on result and
+gratitude. The short-lived affect and durable partner expectations displayed in
+the recording come directly from the engine's appraisal state. Inability does
+not reduce benevolence; confirmed help raises benevolence and reliability from
+50% to 56%, which persist while affect decays.
+
+This is an authored demonstration with explicitly synthetic scenario receipts,
+not a recording of an automatically enrolled live game population. The existing
+tea scene and game server are unchanged. The lamp result belongs to the demo
+scenario; dialogue or an animation alone is not treated as successful repair.
+
+The capture uses hardware WebGPU, 1280×720, and an offline fixed 30-frame/s video
+timeline. The encoded frame rate is not a real-time performance measurement.
+Russian audio uses the installed Windows `Microsoft Irina Desktop` voice with
+two speaking rates. SAPI viseme events are rescaled to measured WAV durations
+and mapped approximately to the existing face shapes; this is not a new speech
+synthesizer or a claim of exact phonetic alignment.
+
+```powershell
+# Current Engine dist must already be built. Windows, Chrome and FFmpeg required.
+node tools/acting/video-prepare.mjs
+$env:ACTING_VIDEO_MODE = 'preview'
+node tools/acting/video-capture.mjs
+Remove-Item Env:ACTING_VIDEO_MODE
+node tools/acting/video-capture.mjs
+```
+
+Outputs under `artifacts/acting-video/`: `npc-emotions-and-sentiments.mp4`,
+`poster.png`, preview frames, `plan.json`, `media.json`, `scenario-check.json`
+and `video-evidence.json` with adapter identity, per-second animation/face/state
+samples, renderer errors and source hashes. Source and capture tools remain
+separate from the game state and persistence owner.
+
+## Integrated NPC compatibility verification — 2026-10-23
+
+The merge of `ba9ffd0a` into Engine `5b33e4aa` retains the local render/physics and
+NPC APIs. Project TypeScript **7.1.0-beta** typecheck and build pass. The initial
+five-file run passed **109 tests, zero skipped or failed** in 9.785 seconds. Review
+then found prospective appraisals incorrectly affecting actual NPC needs/decisions;
+the added regression failed before the two-line gate. The final acting/appraisal/
+NPC/migration rerun passes **104 tests, zero skipped or failed** in 0.384 seconds.
+The six speech tests passed in the initial run; their implementation is unchanged.
+
+```powershell
+bun run typecheck
+bun run build
+node --test test/acting.test.mjs test/acting-appraisal.test.mjs test/npc-mind.test.mjs test/npc-speech.test.mjs test/npc-mind-migration.test.mjs
+```
+
+The new compatibility fixtures were generated using the unmodified `5b33e4aa`
+acting modules. They retain source hashes, two complete saved NPC states, and
+neutral cues/motor samples for all thirteen actions. Tests cover old/current
+nested schema restoration, delayed affect clocks, clone ownership, simultaneous
+emotion, idle/need advancement, active decisions, duplicate receipts, reappraisal,
+polling cadence and rejection of tampered clocks/relationships. The previous
+affect-only NPC advance fails a saved RED witness; the integrated helper passes it.
+Logs and fixture generators: `artifacts/acting-main-integration-20261023/`.
+
+This focused run is not a full Engine check, hardware render, world-save migration,
+allocation benchmark or FPS result. The Game population's separate mind/storage
+schema is unchanged.
+
+## Upstream verification of the appraisal revision
 
 Local sandbox: Node **22.16.0**, TypeScript **5.8.3**, not the repository's pinned TS 7.
 

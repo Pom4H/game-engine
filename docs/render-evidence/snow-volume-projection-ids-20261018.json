@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Canonical Game snow-volume projected-ID preparation; bounded string-ID reuse only. No geometry, physical sampling, quality, population or input changes.",
+  "status": "Approved ID-only cache adopted; focused correctness and TypeScript passed. Game build/native integration belongs to separate root evidence.",
+  "production": {
+    "source": "../thegame/src/game/render/the-engine-projection.ts",
+    "sourceSha256": "0f203cbd22ecf50cb7247a356c18b51d4a2247db3e16e322fd98efadfdd89bb8",
+    "beforeSourceSha256": "1219e6768334b423f9af1cb0136afb12079bb4d0a56f29c86abd0b02082ea25e",
+    "implementation": "One private raw-ID to projected-ID Map reuses the prefix-expanded ID. The original snowVolumes tile Map, per-call keep Set, deletion sweep and every setVisualTransform call remain. Original removal prunes corresponding keys; exception and disposal clear the ID cache.",
+    "unchanged": [
+      "First reused tile invokes the setter and registers posedVisuals exactly as before",
+      "Existing position and rotation arrays retain identity; rotation resets to zero and scale remains untouched",
+      "All finite/body-free/nonwritable validation and error behavior passes through the original setter",
+      "Tile replacement, empty geometry, original insertion/deletion order and callback reentry",
+      "No per-frame performance counters, context objects, stamps or pose no-op guards added to production"
+    ]
+  },
+  "fullClassOracle": {
+    "fixture": "../thegame/test/fixtures/the-engine-projection-before-snow-ids.ts",
+    "fixtureSha256": "c10ac7f6f24db98f3e5e469166e7b5517942060417b7fe33d0e217e5910ae5f8",
+    "restoreProof": "The complete original projection class is frozen independently. Reversing only recorded relative import rebases in artifacts/snow-volume-projection-prototype/provenance.json restores original source SHA2561219e6768334b423f9af1cb0136afb12079bb4d0a56f29c86abd0b02082ea25e.",
+    "test": "../thegame/test/snow-volume-projection-ids.test.ts",
+    "testSha256": "a0af1ad4ef299686cfaac6d07727c3d45c9fa17d21f69ac01d14c324cd0488e4",
+    "newTestsPassed": 6,
+    "bunExpectCalls": 40,
+    "additionalAssertions": "Node strict comparisons cover complete Scene snapshots, frame IR mesh/model bytes, previous matrix history, mover and camera/reflection/static-shadow/dynamic-shadow membership, cache observations and callback/error prefixes.",
+    "coverage": [
+      "Stable225-tile residency; every one of1800 reused setter calls retained across eight updates",
+      "First mover registration, unchanged scale, signed-zero Y, rebase, tile replacement, duplicate IDs and empty tiles",
+      "External entity replacement/removal, position/rotation/scale writes, inserted body and nonwritable coordinate",
+      "Custom Scene method callbacks, vector property accessors and nested projection reentry",
+      "Partial publication before throwing tile getter; exception clears bounded ID cache",
+      "Unicode/custom prefixes, negative raw IDs, __proto__ key, object coercion hint/order and Proxy origin reads",
+      "Cache Map identity/entry reuse and size225 to3 to0; disposal clears ownership"
+    ],
+    "actualRendererOracle": {
+      "implementation": "Actual Engine WebGPURenderer.render with the existing mock initialization device; this is CPU correctness, not native GPU execution.",
+      "snowTransitions": 9,
+      "compared": "Complete pass/draw/bind journal, copied writeBuffer bytes at API call time, history counters and local-probe publication metadata through add/reuse/rebase/removal/reentry.",
+      "passes": ["main", "static shadow", "dynamic shadow", "local probe sharp faces and mip filtering", "TAA"],
+      "limits": "Only the unrelated environment bake worker is held identically on both sides. No actual GPU texture output, driver timing or native quality claim follows."
+    }
+  },
+  "validation": {
+    "relatedCommand": "bun test ./test/snow-volume-projection-ids.test.ts ./test/snow-volume-offsets.test.ts ./test/snow-physics.test.ts ./test/snow-cover.test.ts ./test/the-engine-renderer.test.ts",
+    "relatedPassed": 44,
+    "relatedFailed": 0,
+    "relatedBunExpects": 3493,
+    "relatedLog": "../thegame/artifacts/snow-volume-projection-prototype/production-tests.log",
+    "relatedLogSha256": "084029ea0765bab33349ebca5380f2b86e09264b07dc99a3d16dda5ff0e3f706",
+    "finalFocusedCommand": "bun test ./test/snow-volume-projection-ids.test.ts",
+    "finalFocusedPassed": 6,
+    "finalFocusedFailed": 0,
+    "finalFocusedBunExpects": 40,
+    "finalFocusedLog": "../thegame/artifacts/snow-volume-projection-prototype/final-production-focused-tests.log",
+    "finalFocusedLogSha256": "0ad6d094726fb2d2693065d9410d05e3ae0c04b3ee709325fe603e9651ccfe4a",
+    "orderNote": "After the44-test related pass, the mock GPU journal was strengthened to snapshot uploaded bytes instead of retaining staging-buffer views. Final focused6-test rerun passed against the recorded final test hash; production source did not change.",
+    "globalGameTypecheckExitCode": 0,
+    "globalGameTypecheckLog": "../thegame/artifacts/snow-volume-projection-prototype/production-typecheck.log",
+    "strictTestAndFixtureTypecheckExitCode": 0,
+    "strictTestAndFixtureTypecheckLog": "../thegame/artifacts/snow-volume-projection-prototype/production-test-typecheck.log"
+  },
+  "ignoredMechanismScreen": {
+    "runtime": "Bun1.4.2/JSC; reported process.version v26.3.0",
+    "report": "../thegame/artifacts/snow-volume-projection-prototype/paired-id-only.json",
+    "reportSha256": "ce4e29424790d07af490c5895d0187e3eab5fa79d23768a1c67d512b722f5ee7",
+    "measuredCandidateSha256": "d67529ebe59b1bda9af0207d46dd06a2d7ee9a9c0c605995aa68aad79c57d40b",
+    "productionDifference": "Production removes prototype counter telemetry and spells the constant separator length explicitly. The recorded benchmark was not rerun as a production/native measurement.",
+    "workload": {"tiles":225,"warmupUpdatesPerVariant":120,"measuredUpdatesPerVariant":900,"alternatingPairs":7,"workloadSha256":"e38331a7919b6b02a6fe0b42a4e6f698c1f168921c3833b0685e833b318e2ebe"},
+    "beforeMs": [40.2226,49.5140,43.9034,46.4955,50.2198,51.1653,50.3302],
+    "candidateMs": [27.2999,26.2929,23.4652,26.4183,33.8660,28.6083,25.1394],
+    "medianBeforeMs": 49.5140,
+    "medianCandidateMs": 26.4183,
+    "medianPairedRatio": 1.7884774698251915,
+    "checks": "All seven pairs retained225 entities and225 movers; post-state snapshot plus Float64 pose/mesh checksum matched every pair.",
+    "stateSha256": "95fce9c835913440fbfbb5e6782e831e5d3e053380c3268c59fbced4a7595e03",
+    "candidateMechanism": {"projectedIdBuildsTotalIncludingWarmup":225,"keepSetsTotalIncludingWarmup":1020,"allReusedSetterCallsRetained":true},
+    "decision": "Prefer this simple cache to the more complex ignored row/stamp/reentry variant. Both showed a narrow Bun benefit; distinct runs do not rank their small residual difference reliably.",
+    "limits": "Function-only synthetic stable-residency screen, not Chrome/native/Game FPS, allocation bytes, garbage collection, GPU or whole-server evidence."
+  },
+  "preservedMissingEntityPolicyAudit": {
+    "counterexample": "After initial projection, explicitly remove a snow entity through Scene.remove, then pass the same tile object again. Both frozen and adopted projection retain the tile record, see entities.has(id) false and leave the entity absent.",
+    "test": "The permanent full-class oracle asserts that this preexisting behavior is unchanged; a replacement tile object still follows the original remove/add path.",
+    "productionPathAudit": "Source references to the snow-volume ID namespace are confined to the projection's replacement/pruning/dispose paths, called by TheGameEngineRenderer. Those paths manage the tile record too; disposal clears it. No actual canonical/native occurrence of an independent removal was established.",
+    "conclusion": "Potential external-mutation consistency policy, not a newly proven live visual defect. It was not silently changed as part of this performance patch."
+  },
+  "claimsExcluded": ["FPS improvement", "freeze removal", "allocation bytes or GC improvement", "native GPU performance or pixel quality", "server throughput or latency"]
+}

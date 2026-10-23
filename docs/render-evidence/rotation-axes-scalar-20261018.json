@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-18",
+  "status": "adopted; production oracles and full Engine checks passed",
+  "source": {
+    "path": "src/physics/compound.ts",
+    "sha256": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399"
+  },
+  "dist": {
+    "path": "dist/physics/compound.js",
+    "sha256": "43d94828ba9dd34a63e4cec77ba655801c21a6cb2bef678c123177ac629d1e7a"
+  },
+  "beforeSourceSha256": "773b9887c7940d631e82558b8ac716cb0121f82100e5efbfb6b2fdcec7ba1304",
+  "change": "Private rotationAxes calls a staged scalar rotateBasis instead of allocating public vector-helper intermediates for the three fixed basis vectors. Public Qrotate/Qangles, solver, caches, rates and caps remain unchanged. Arithmetic, reads, coercion and exception order are retained.",
+  "sourceArrayExpressions": {
+    "before": 25,
+    "after": 4,
+    "scope": "Source expression opportunities only; no heap-byte, allocation or GC measurement."
+  },
+  "permanentTests": {
+    "test": {
+      "path": "test/compound-rotation-axes.test.mjs",
+      "sha256": "3ec80bc8fecf6d6ae10dca615707423adeb24021d301e57b532523afaec397fc"
+    },
+    "fixture": {
+      "path": "test/fixtures/rotation-axes-before-scalar.mjs",
+      "sha256": "4ebd98dbf43c37aff095c4191d0400bead826b06b5f825c3383e0b99f65f90a3"
+    },
+    "newTests": 6,
+    "numericCases": 1097,
+    "observableScenarios": 5,
+    "throwPrefixes": 387,
+    "realShapeCases": 160,
+    "targetedPassed": 21,
+    "coverage": "Actual SolidBody.axes and compound boxes; full Float64 bytes, same-body reentry, custom public overrides, fresh arrays, local shape rotations and bounds."
+  },
+  "productionCapturedPool": {
+    "date": "2026-10-18",
+    "status": "passed",
+    "scope": "Actual rebuilt production SolidBody.axes on every4096 captured numeric quaternion, complete Float64 output comparison against pre-adoption frozen outputs. No timing/heap/native FPS claim.",
+    "rows": 4096,
+    "outputBytes": 294912,
+    "inputSha256": "b0f5886765247bacfcb36c7725a1b77d78f67c96aa4c487287ac05ecd65706b4",
+    "expectedSha256": "69e1ba69f67d6af38f1de32d2cd5eb2525ecb0d0c624126954fa2edd518db3ed",
+    "actualSha256": "69e1ba69f67d6af38f1de32d2cd5eb2525ecb0d0c624126954fa2edd518db3ed",
+    "sourceSha256": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399",
+    "distSha256": "43d94828ba9dd34a63e4cec77ba655801c21a6cb2bef678c123177ac629d1e7a",
+    "report": {
+      "path": "artifacts/rotation-axes-production-pool-20261018.json",
+      "sha256": "48c07273d9b1cb79217d7cf95c157cd5787a61d73aaaf6c091b8770e7158dcf6"
+    }
+  },
+  "capturedWorkload": {
+    "report": {
+      "path": "../thegame/artifacts/network-stability-20261018/rotation-axes-canonical-quaternions-20261018.json",
+      "sha256": "8390755717091574720ad0394485eea68f6f343925eac7a63bc46186e47161db"
+    },
+    "rows": 4096,
+    "scoredTicks": 600,
+    "warmTicks": 120,
+    "residents": 80,
+    "physicsSteps": 1440,
+    "observedScoredAllHelperCalls": 62687,
+    "scope": "Instrumented actual private helper input distribution, all call sites, not occupancy-only; sampler may affect real3ms navigation progress.17 explicit dependency hashes are not an exhaustive runtime module graph."
+  },
+  "isolatedBenchmark": {
+    "report": {
+      "path": "../thegame/artifacts/network-stability-20261018/rotation-axes-canonical-paired-benchmark.json",
+      "sha256": "04664543f538b77ca5fe71a257fedf1a7f55ecb561d525ee727a6744666a56db"
+    },
+    "callsPerVariantPerPair": 2097152,
+    "alternatingPairs": 7,
+    "beforeMs": [
+      555.9719,
+      527.3966,
+      492.8959,
+      504.35339999999997,
+      554.8967000000002,
+      523.7296000000006,
+      509.6325999999999
+    ],
+    "afterMs": [
+      84.34940000000006,
+      75.95139999999992,
+      70.81770000000006,
+      67.75930000000017,
+      71.95460000000003,
+      72.27750000000015,
+      68.75959999999941
+    ],
+    "medianBeforeMs": 523.7296,
+    "medianAfterMs": 71.9546,
+    "medianPairedRatio": 7.246094566082108,
+    "checksums": "All14 checksums exactly3211481.2486820254",
+    "scope": "Bun1.4.2/JSC fixed-callsite helper benchmark on the captured numeric pool. Not whole-authority, server60Hz, FPS, heap/GC or Chrome performance evidence."
+  },
+  "publicNaNTestRepair": {
+    "evidence": {
+      "path": "../thegame/artifacts/network-stability-20261018/public-qrotate-nan-repair-evidence.json",
+      "sha256": "790d746c1c5fa3a309453b5a4cc181b878e9bb81f06ca68e851bd1dc8a6fa843"
+    },
+    "firstFullRun": {
+      "tests": 776,
+      "passed": 756,
+      "failed": 1,
+      "skipped": 19,
+      "log": {
+        "path": "artifacts/render-stability-frame-axes-engine-tests.log",
+        "sha256": "10298017b7c866a9aae4918277ebfca8d866fc4df8ae21ae97f22fa530a36cb4"
+      }
+    },
+    "cause": "Unchanged public and frozen math produce semantically equal NaNs with JIT-dependent NaN sign bits after1024finite warm calls. Reversing only the private optimization reconstructs exact before source hash.",
+    "repair": "Only unchanged public Qrotate test uses NaN classification; every non-NaN component retains exact bytes including signed zero and infinity. All changed private axes/boxes byte assertions remain unchanged.",
+    "finalDedicatedCommand": "node --test test/compound-rotation-axes.test.mjs",
+    "finalDedicatedPassed": 6,
+    "finalDedicatedLog": {
+      "path": "artifacts/render-stability-clock-axes-final-rotation-tests.log",
+      "sha256": "0f0ece413a04b51be795eb2fc95adad42525722df147e64af992d5284af76484"
+    }
+  },
+  "integration": "docs/render-evidence/clock-axes-integration-20261018.json",
+  "claimsExcluded": [
+    "whole-server speedup",
+    "native FPS gain",
+    "heap/GC savings",
+    "freeze removal"
+  ]
+}

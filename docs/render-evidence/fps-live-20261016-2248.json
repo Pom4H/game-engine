@@ -1,0 +1,77 @@
+{
+  "measuredAt": "2026-10-16T19:48:03.2553480Z",
+  "command": "C:\\Users\\Roman\\.bun\\bin\\bun.exe tools/capture.ts --live",
+  "shell": "PowerShell",
+  "environment": {
+    "CAPTURE_EXISTING": "1",
+    "CAPTURE_PORT": "3007",
+    "CAPTURE_DEBUG_PORT": "3207",
+    "CAPTURE_GPU": "1",
+    "PERF_FIXED_SETTINGS": "1",
+    "PERF_WARMUP_FRAMES": "180",
+    "PERF_LIVE_FRAMES": "900",
+    "PERF_LABEL": "fps-live-20261016-2248"
+  },
+  "exitCode": 0,
+  "hardware": {
+    "Name": "AMD Radeon 760M Graphics",
+    "DriverVersion": "32.0.31041.1004"
+  },
+  "frames": 900,
+  "warmupFrames": 180,
+  "profiled": false,
+  "averageFPS": 60.720550532991474,
+  "measuredIntervalSumMs": 14822,
+  "p50Ms": 18.80000000000291,
+  "p95Ms": 28.799999999995634,
+  "browser": {
+    "mode": "native-gpu",
+    "batterySaverRequested": "default",
+    "backend": "webgpu",
+    "width": 1280,
+    "height": 720,
+    "renderResolution": [704, 396]
+  },
+  "engine": "the-engine",
+  "settings": {
+    "environmentMode": "world",
+    "preset": "clear",
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "taa": true,
+    "bloom": false,
+    "groundLitter": true,
+    "hiz": false,
+    "motionBlur": 0,
+    "dof": 0,
+    "adaptive": false
+  },
+  "rendererErrors": [],
+  "networkStatus": "online",
+  "selfPose": {
+    "x": -345,
+    "y": 0.16999999999999998,
+    "z": -66,
+    "animation": "idle"
+  },
+  "serverPid": 6448,
+  "healthAfter": {"ok": true, "players": 0, "seed": 29, "revision": 13},
+  "rawMetrics": "../../../thegame/artifacts/performance-live-fps-live-20261016-2248.json",
+  "rawMetricsSha256": "eec0401a3ea2e229308520b0873460bd72cb3511d98ddd1f086ce3e7f1ce4f71",
+  "gameBundle": "../../../thegame/public/build/game.js",
+  "gameBundleSha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4",
+  "servedGameBundle": {
+    "url": "http://127.0.0.1:3007/build/game.js",
+    "status": 200,
+    "bytes": 2471113,
+    "sha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4"
+  },
+  "log": "../../../thegame/artifacts/fps-live-20261016-2248.log",
+  "limits": [
+    "Short stationary live measurement at the starting position; not a walking, driving, whole-map or Office UI benchmark.",
+    "Native Windows Chromium GPU WebGPU with a 1280x720 viewport and 704x396 internal render, TAA, 420 m draw distance and adaptive resolution disabled.",
+    "benchmarkLive records requestAnimationFrame intervals, not isolated GPU execution time; it discards 30 initial intervals per invocation in addition to the requested warmup.",
+    "No profiler or client bundle override. Different live world state and bundle prevent a paired speedup claim against the earlier 55.8167 FPS measurement.",
+    "Does not establish sustained 60 FPS or performance at native 720p/1080p internal resolution."
+  ]
+}

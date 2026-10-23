@@ -1,0 +1,582 @@
+{
+  "status": "paired-mean-uncertainty-observation",
+  "method": "Deterministic circular block bootstrap of sequential per-pair combined projection/environment and total render CPU differences; percentile 95% intervals. Block sizes 2/8/16 are sensitivity analyses, with 20,000 resamples each. Full-word RNG fractions select indices; short-cycle resampling is checked.",
+  "results": [
+    {
+      "report": "artifacts/engine-compare/projection-pose-arena-paired-512/report.json",
+      "sourceState": {
+        "srcSha256": "b5d1cadec64ffedd243fa8428e5a0c0fe595d86e7fbd4ba9f632daa9170106ad",
+        "distSha256": "c6bbdc288dd11d7908a2245241fbcd9a4bfd65c7ccf361c9e839eb6eea751458",
+        "harnessSha256": "d70f9c3ebb127e6791b3938f4c69d3164efa47ef3215ece6f284e6070621b41c",
+        "diagnosticSha256": "034cf777ca9143db9fdde6236520310dd5ac62800eaf2194c25e7eadcf6097ed"
+      },
+      "gates": {
+        "nativeTimestamps": true,
+        "variantsExecuted": true,
+        "physicalReplay": true,
+        "environmentCausesExact": true,
+        "gpuWorkExact": true,
+        "finalCanonicalStages": false,
+        "cpuCombinedImproved": false
+      },
+      "routes": [
+        {
+          "scenario": "static",
+          "pairs": 512,
+          "meanMs": 0.051367187639698386,
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": 5.960464477539063e-8,
+              "p95": 0.5999999642372131,
+              "mean": 0.024999998975545168
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": 5.960464477539063e-8,
+              "p95": 0.7999999523162842,
+              "mean": 0.0777343763038516
+            }
+          },
+          "firstOrdersBeyondRoundoff": false,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": 0.018554687150754035,
+              "upperMs": 0.08515624946448952
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": 0.02011718600988388,
+              "upperMs": 0.08398437418509275
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": 0.017968749743886292,
+              "upperMs": 0.08515625295694917
+            }
+          ],
+          "totalCpu": {
+            "meanMs": -0.04726562404539436,
+            "byFirst": {
+              "baseline": {
+                "pairs": 256,
+                "meanMs": -0.10937499883584678
+              },
+              "candidate": {
+                "pairs": 256,
+                "meanMs": 0.01484375074505806
+              }
+            },
+            "intervals": [
+              {
+                "blockPairs": 2,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 20000,
+                "lowerMs": -0.14921874878928065,
+                "upperMs": 0.059375005424954
+              },
+              {
+                "blockPairs": 8,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 19996,
+                "lowerMs": -0.14394531212747097,
+                "upperMs": 0.052343748742714524
+              },
+              {
+                "blockPairs": 16,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 19999,
+                "lowerMs": -0.14824218582361937,
+                "upperMs": 0.05722656019497663
+              }
+            ]
+          }
+        },
+        {
+          "scenario": "camera-motion",
+          "pairs": 512,
+          "meanMs": 0.02871093584690243,
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": 0,
+              "p95": 0.5000000596046448,
+              "mean": 0.04765624878928065
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": 0,
+              "p95": 0.5,
+              "mean": 0.009765622904524207
+            }
+          },
+          "firstOrdersBeyondRoundoff": false,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": -0.005273440503515303,
+              "upperMs": 0.06308593519497663
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": -0.0015625042142346501,
+              "upperMs": 0.059570312150754035
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": 0.001171871437691152,
+              "upperMs": 0.0578124993480742
+            }
+          ],
+          "totalCpu": {
+            "meanMs": -0.18476562784053385,
+            "byFirst": {
+              "baseline": {
+                "pairs": 256,
+                "meanMs": -0.1390625007916242
+              },
+              "candidate": {
+                "pairs": 256,
+                "meanMs": -0.23046875488944352
+              }
+            },
+            "intervals": [
+              {
+                "blockPairs": 2,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 20000,
+                "lowerMs": -0.28144531429279596,
+                "upperMs": -0.08710937516298145
+              },
+              {
+                "blockPairs": 8,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 19999,
+                "lowerMs": -0.2761718744877726,
+                "upperMs": -0.09140625316649675
+              },
+              {
+                "blockPairs": 16,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 19996,
+                "lowerMs": -0.27714843896683306,
+                "upperMs": -0.08964844013098627
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "report": "artifacts/engine-compare/projection-pose-views-paired-512/report.json",
+      "sourceState": {
+        "srcSha256": "88418d20b4d0c78e156abb9707fdda64ed2020ed979a2b3de0278710c06a8d32",
+        "distSha256": "997c532e349482923c9a70ae485eb96a11191268285d4f6f55255155a8523645",
+        "harnessSha256": "d70f9c3ebb127e6791b3938f4c69d3164efa47ef3215ece6f284e6070621b41c",
+        "diagnosticSha256": "961e3937e14fc878e6a424985859b257b3f959a7f191bb0f0f746f34cd7f72a5"
+      },
+      "gates": {
+        "nativeTimestamps": true,
+        "variantsExecuted": true,
+        "physicalReplay": true,
+        "environmentCausesExact": true,
+        "gpuWorkExact": true,
+        "finalCanonicalStages": false,
+        "cpuCombinedImproved": true
+      },
+      "routes": [
+        {
+          "scenario": "static",
+          "pairs": 512,
+          "meanMs": -0.1218749996041879,
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": -0.10000002384185791,
+              "p95": 0.5,
+              "mean": -0.10781249753199518
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": -0.10000002384185791,
+              "p95": 0.3999999761581421,
+              "mean": -0.13593750167638063
+            }
+          },
+          "firstOrdersBeyondRoundoff": true,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": -0.15351562481373549,
+              "upperMs": -0.0906250000698492
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": -0.15156249853316694,
+              "upperMs": -0.0923828100785613
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": -0.14999999897554517,
+              "upperMs": -0.09433593810535967
+            }
+          ],
+          "totalCpu": {
+            "meanMs": -0.26777343812864274,
+            "byFirst": {
+              "baseline": {
+                "pairs": 256,
+                "meanMs": -0.2140624988824129
+              },
+              "candidate": {
+                "pairs": 256,
+                "meanMs": -0.32148437737487257
+              }
+            },
+            "intervals": [
+              {
+                "blockPairs": 2,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 20000,
+                "lowerMs": -0.3550781256053597,
+                "upperMs": -0.18339843908324838
+              },
+              {
+                "blockPairs": 8,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 19996,
+                "lowerMs": -0.35488281259313226,
+                "upperMs": -0.18554687465075403
+              },
+              {
+                "blockPairs": 16,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 19999,
+                "lowerMs": -0.35136718570720404,
+                "upperMs": -0.18632812635041773
+              }
+            ]
+          }
+        },
+        {
+          "scenario": "camera-motion",
+          "pairs": 512,
+          "meanMs": -0.12675781222060323,
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": -0.10000002384185791,
+              "p95": 0.5999999642372131,
+              "mean": -0.07851562579162419
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": -0.19999998807907104,
+              "p95": 0.3999999761581421,
+              "mean": -0.17499999864958227
+            }
+          },
+          "firstOrdersBeyondRoundoff": true,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": -0.16796875034924597,
+              "upperMs": -0.08398437430150807
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": -0.16757812548894435,
+              "upperMs": -0.08554687490686774
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": -0.16855468496214598,
+              "upperMs": -0.0818359402474016
+            }
+          ],
+          "totalCpu": {
+            "meanMs": -0.22636718908324838,
+            "byFirst": {
+              "baseline": {
+                "pairs": 256,
+                "meanMs": -0.04843750223517418
+              },
+              "candidate": {
+                "pairs": 256,
+                "meanMs": -0.4042968759313226
+              }
+            },
+            "intervals": [
+              {
+                "blockPairs": 2,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 20000,
+                "lowerMs": -0.33339843922294676,
+                "upperMs": -0.11796875461004674
+              },
+              {
+                "blockPairs": 8,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 19999,
+                "lowerMs": -0.32851562672294676,
+                "upperMs": -0.12109375069849193
+              },
+              {
+                "blockPairs": 16,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 19996,
+                "lowerMs": -0.3341796890599653,
+                "upperMs": -0.10898437688592821
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "report": "artifacts/engine-compare/projection-pose-views-paired-repeat/report.json",
+      "sourceState": {
+        "srcSha256": "88418d20b4d0c78e156abb9707fdda64ed2020ed979a2b3de0278710c06a8d32",
+        "distSha256": "997c532e349482923c9a70ae485eb96a11191268285d4f6f55255155a8523645",
+        "harnessSha256": "d70f9c3ebb127e6791b3938f4c69d3164efa47ef3215ece6f284e6070621b41c",
+        "diagnosticSha256": "55efd1fc1dfd2c6d6656be5f7f15ddfb9ba06757926ca15d3fcc8632d05998b1"
+      },
+      "gates": {
+        "nativeTimestamps": true,
+        "variantsExecuted": true,
+        "physicalReplay": true,
+        "environmentCausesExact": true,
+        "gpuWorkExact": true,
+        "finalCanonicalStages": false,
+        "cpuCombinedImproved": true
+      },
+      "routes": [
+        {
+          "scenario": "static",
+          "pairs": 512,
+          "meanMs": -0.053710937849245965,
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": -5.960464477539063e-8,
+              "p95": 0.5,
+              "mean": -0.04101562546566129
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": -0.09999996423721313,
+              "p95": 0.5,
+              "mean": -0.06640625023283064
+            }
+          },
+          "firstOrdersBeyondRoundoff": true,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": -0.08691406156867743,
+              "upperMs": -0.02070312632713467
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": -0.08359375060535967,
+              "upperMs": -0.022656250395812094
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842719,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": -0.08261718868743628,
+              "upperMs": -0.022265626001171768
+            }
+          ],
+          "totalCpu": {
+            "meanMs": -0.2433593749301508,
+            "byFirst": {
+              "baseline": {
+                "pairs": 256,
+                "meanMs": -0.19257812574505806
+              },
+              "candidate": {
+                "pairs": 256,
+                "meanMs": -0.29414062411524355
+              }
+            },
+            "intervals": [
+              {
+                "blockPairs": 2,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 20000,
+                "lowerMs": -0.32558593805879354,
+                "upperMs": -0.1613281243480742
+              },
+              {
+                "blockPairs": 8,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 19996,
+                "lowerMs": -0.31933593831490725,
+                "upperMs": -0.16660156205762178
+              },
+              {
+                "blockPairs": 16,
+                "resamples": 20000,
+                "seed": 842719,
+                "distinctFirstThreeBlockStarts": 19999,
+                "lowerMs": -0.31503906287252903,
+                "upperMs": -0.16855468752328306
+              }
+            ]
+          }
+        },
+        {
+          "scenario": "camera-motion",
+          "pairs": 512,
+          "meanMs": -0.035156251629814506,
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": 0,
+              "p95": 0.5999999642372131,
+              "mean": -9.313225746154785e-10
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": -0.09999996423721313,
+              "p95": 0.40000003576278687,
+              "mean": -0.07031250232830644
+            }
+          },
+          "firstOrdersBeyondRoundoff": false,
+          "intervals": [
+            {
+              "blockPairs": 2,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 20000,
+              "lowerMs": -0.06796875223517418,
+              "upperMs": -0.001757813966833055
+            },
+            {
+              "blockPairs": 8,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19999,
+              "lowerMs": -0.07109375402797014,
+              "upperMs": 0.0019531252328306437
+            },
+            {
+              "blockPairs": 16,
+              "resamples": 20000,
+              "seed": 842720,
+              "distinctFirstThreeBlockStarts": 19996,
+              "lowerMs": -0.07597656280267984,
+              "upperMs": 0.006249998812563717
+            }
+          ],
+          "totalCpu": {
+            "meanMs": -0.2423828134778887,
+            "byFirst": {
+              "baseline": {
+                "pairs": 256,
+                "meanMs": -0.05195312458090484
+              },
+              "candidate": {
+                "pairs": 256,
+                "meanMs": -0.43281250237487257
+              }
+            },
+            "intervals": [
+              {
+                "blockPairs": 2,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 20000,
+                "lowerMs": -0.3400390654569492,
+                "upperMs": -0.15156250109430403
+              },
+              {
+                "blockPairs": 8,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 19999,
+                "lowerMs": -0.3449218765599653,
+                "upperMs": -0.14648437593132257
+              },
+              {
+                "blockPairs": 16,
+                "resamples": 20000,
+                "seed": 842720,
+                "distinctFirstThreeBlockStarts": 19996,
+                "lowerMs": -0.3492187529336661,
+                "upperMs": -0.14257812895812094
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Intervals describe sampling sensitivity in each capture; they do not isolate external clock/load, establish native frame-rate improvement, or prove serial dependence has been fully removed.",
+    "The flat arena and fixed-length views are distinct implementations. Both captures of the final view implementation remain separate; favorable captures are not selected or pooled.",
+    "A negative first-order mean smaller than 1e-6 ms is treated as zero for the derived margin check. Raw captured gate values and differences remain unchanged.",
+    "No image, physical-state, frame-budget or competitive-quality gate is relaxed."
+  ]
+}

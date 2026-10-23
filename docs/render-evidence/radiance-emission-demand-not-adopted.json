@@ -1,0 +1,1107 @@
+{
+  "status": "not-adopted-production-candidate",
+  "experiment": "Skip numeric sensor work for absent emission",
+  "report": "artifacts/engine-compare/radiance-emission-demand-paired/report.json",
+  "archive": "artifacts/engine-compare/radiance-emission-demand-paired/measured-state",
+  "sourceState": {
+    "srcSha256": "cb8dfd5d4ba4c2952ae8bd7dcf5dea99aa8646ea2bcc713b9e3a891b8b905587",
+    "distSha256": "a97d177a662f7b1058c9580c97293deeecc017159fcd0ce23f87085c6c48a148",
+    "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+    "diagnosticSha256": "9e7064a3e985f0e406184e301c106b35f30c802fdb49e2795759c7fc72698159"
+  },
+  "gates": {
+    "nativeTimestamps": true,
+    "variantsExecuted": true,
+    "physicalReplay": true,
+    "environmentCausesExact": true,
+    "gpuWorkExact": true,
+    "finalCanonicalStages": false,
+    "cpuCombinedImproved": true
+  },
+  "runs": [
+    {
+      "scenario": "static",
+      "pairs": 128,
+      "modes": {
+        "baseline": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 1.800000011920929,
+            "mean": 1.4007812477648258
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.017968751024454832
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.399999976158142,
+            "p95": 1.800000011920929,
+            "mean": 1.4187499987892807
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.300000011920929,
+            "p95": 5.099999964237213,
+            "mean": 4.372656250372529
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.447759999999999,
+            "p95": 12.512079999999997,
+            "mean": 11.701894999999999
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        },
+        "candidate": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.800000011920929,
+            "mean": 1.3554687486030161
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.019531250931322575
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.800000011920929,
+            "mean": 1.3749999995343387
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.300000011920929,
+            "p95": 5.699999988079071,
+            "mean": 4.416406250093132
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.533159999999999,
+            "p95": 12.63264,
+            "mean": 11.620177812500005
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        }
+      },
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": -0.10000002384185791,
+        "p95": 0.5,
+        "mean": -0.04374999925494194
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": -0.10000002384185791,
+        "p95": 1.5000000596046448,
+        "mean": 0.04374999972060323
+      },
+      "improvedPairs": 78,
+      "byFirst": {
+        "baseline": {
+          "samples": 64,
+          "p50": -0.09999996423721313,
+          "p95": 0.5999999642372131,
+          "mean": -0.003124995157122612
+        },
+        "candidate": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.40000003576278687,
+          "mean": -0.08437500335276127
+        }
+      }
+    },
+    {
+      "scenario": "camera-motion",
+      "pairs": 128,
+      "modes": {
+        "baseline": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.800000011920929,
+            "mean": 1.3773437505587935
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.015625
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.899999976158142,
+            "mean": 1.3929687505587935
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.299999952316284,
+            "p95": 5.100000023841858,
+            "mean": 4.289062498137355
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.27436,
+            "p95": 13.08492,
+            "mean": 11.513389999999996
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        },
+        "candidate": {
+          "projectionMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.899999976158142,
+            "mean": 1.339843753259629
+          },
+          "environmentMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.008593750186264515
+          },
+          "combinedMs": {
+            "samples": 128,
+            "p50": 1.300000011920929,
+            "p95": 1.9000000357627869,
+            "mean": 1.3484375034458935
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 4.199999988079071,
+            "p95": 5.300000011920929,
+            "mean": 4.239843752235174
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.34224,
+            "p95": 12.671280000000001,
+            "mean": 11.436090312499998
+          },
+          "uploadBytes": {
+            "samples": 128,
+            "p50": 3868,
+            "p95": 3868,
+            "mean": 3868
+          },
+          "drawCalls": {
+            "samples": 128,
+            "p50": 36,
+            "p95": 36,
+            "mean": 36
+          }
+        }
+      },
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": -5.960464477539063e-8,
+        "p95": 0.699999988079071,
+        "mean": -0.04453124711290002
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": 0,
+        "p95": 0.8999999761581421,
+        "mean": -0.04921874590218067
+      },
+      "improvedPairs": 68,
+      "byFirst": {
+        "baseline": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.40000003576278687,
+          "mean": -0.07343750167638063
+        },
+        "candidate": {
+          "samples": 64,
+          "p50": -5.960464477539063e-8,
+          "p95": 0.7000000476837158,
+          "mean": -0.015624992549419403
+        }
+      }
+    }
+  ],
+  "quality": [
+    {
+      "mode": "candidate",
+      "repetition": 0,
+      "stage": "opaque",
+      "changedChannels": 12,
+      "maxEncodedError": 1065,
+      "coordinates": [
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 0,
+          "before": 10926,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 1,
+          "before": 11091,
+          "after": 10081
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 2,
+          "before": 11333,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 0,
+          "before": 10989,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 1,
+          "before": 11146,
+          "after": 10081
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 2,
+          "before": 11356,
+          "after": 11072
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 0,
+          "before": 10885,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 1,
+          "before": 11055,
+          "after": 10082
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 2,
+          "before": 11318,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 0,
+          "before": 10951,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 1,
+          "before": 11113,
+          "after": 10082
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 2,
+          "before": 11342,
+          "after": 11072
+        }
+      ]
+    },
+    {
+      "mode": "candidate",
+      "repetition": 0,
+      "stage": "hdr",
+      "changedChannels": 12,
+      "maxEncodedError": 1065,
+      "coordinates": [
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 0,
+          "before": 10926,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 1,
+          "before": 11091,
+          "after": 10081
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 2,
+          "before": 11333,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 0,
+          "before": 10989,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 1,
+          "before": 11146,
+          "after": 10081
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 2,
+          "before": 11356,
+          "after": 11072
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 0,
+          "before": 10885,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 1,
+          "before": 11055,
+          "after": 10082
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 2,
+          "before": 11318,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 0,
+          "before": 10951,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 1,
+          "before": 11113,
+          "after": 10082
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 2,
+          "before": 11342,
+          "after": 11072
+        }
+      ]
+    },
+    {
+      "mode": "candidate",
+      "repetition": 0,
+      "stage": "taa",
+      "changedChannels": 115,
+      "maxEncodedError": 186,
+      "coordinates": [
+        {
+          "x": 1509,
+          "y": 415,
+          "channel": 0,
+          "before": 11236,
+          "after": 11237
+        },
+        {
+          "x": 1508,
+          "y": 416,
+          "channel": 1,
+          "before": 11765,
+          "after": 11766
+        },
+        {
+          "x": 1509,
+          "y": 416,
+          "channel": 1,
+          "before": 11684,
+          "after": 11685
+        },
+        {
+          "x": 1510,
+          "y": 416,
+          "channel": 0,
+          "before": 11496,
+          "after": 11497
+        },
+        {
+          "x": 1510,
+          "y": 416,
+          "channel": 1,
+          "before": 11440,
+          "after": 11441
+        },
+        {
+          "x": 1506,
+          "y": 417,
+          "channel": 1,
+          "before": 12203,
+          "after": 12204
+        },
+        {
+          "x": 1507,
+          "y": 417,
+          "channel": 0,
+          "before": 11997,
+          "after": 11998
+        },
+        {
+          "x": 1508,
+          "y": 417,
+          "channel": 0,
+          "before": 11845,
+          "after": 11847
+        },
+        {
+          "x": 1508,
+          "y": 417,
+          "channel": 1,
+          "before": 11914,
+          "after": 11915
+        },
+        {
+          "x": 1509,
+          "y": 417,
+          "channel": 0,
+          "before": 11766,
+          "after": 11768
+        },
+        {
+          "x": 1510,
+          "y": 417,
+          "channel": 0,
+          "before": 11571,
+          "after": 11573
+        },
+        {
+          "x": 1510,
+          "y": 417,
+          "channel": 1,
+          "before": 11490,
+          "after": 11492
+        }
+      ]
+    },
+    {
+      "mode": "baseline",
+      "repetition": 1,
+      "stage": "opaque",
+      "changedChannels": 12,
+      "maxEncodedError": 1065,
+      "coordinates": [
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 0,
+          "before": 10926,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 1,
+          "before": 11091,
+          "after": 10081
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 2,
+          "before": 11333,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 0,
+          "before": 10989,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 1,
+          "before": 11146,
+          "after": 10081
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 2,
+          "before": 11356,
+          "after": 11072
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 0,
+          "before": 10885,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 1,
+          "before": 11055,
+          "after": 10082
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 2,
+          "before": 11318,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 0,
+          "before": 10951,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 1,
+          "before": 11113,
+          "after": 10082
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 2,
+          "before": 11342,
+          "after": 11072
+        }
+      ]
+    },
+    {
+      "mode": "baseline",
+      "repetition": 1,
+      "stage": "hdr",
+      "changedChannels": 12,
+      "maxEncodedError": 1065,
+      "coordinates": [
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 0,
+          "before": 10926,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 1,
+          "before": 11091,
+          "after": 10081
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 2,
+          "before": 11333,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 0,
+          "before": 10989,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 1,
+          "before": 11146,
+          "after": 10081
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 2,
+          "before": 11356,
+          "after": 11072
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 0,
+          "before": 10885,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 1,
+          "before": 11055,
+          "after": 10082
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 2,
+          "before": 11318,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 0,
+          "before": 10951,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 1,
+          "before": 11113,
+          "after": 10082
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 2,
+          "before": 11342,
+          "after": 11072
+        }
+      ]
+    },
+    {
+      "mode": "baseline",
+      "repetition": 1,
+      "stage": "taa",
+      "changedChannels": 115,
+      "maxEncodedError": 186,
+      "coordinates": [
+        {
+          "x": 1509,
+          "y": 415,
+          "channel": 0,
+          "before": 11236,
+          "after": 11237
+        },
+        {
+          "x": 1508,
+          "y": 416,
+          "channel": 1,
+          "before": 11765,
+          "after": 11766
+        },
+        {
+          "x": 1509,
+          "y": 416,
+          "channel": 1,
+          "before": 11684,
+          "after": 11685
+        },
+        {
+          "x": 1510,
+          "y": 416,
+          "channel": 0,
+          "before": 11496,
+          "after": 11497
+        },
+        {
+          "x": 1510,
+          "y": 416,
+          "channel": 1,
+          "before": 11440,
+          "after": 11441
+        },
+        {
+          "x": 1506,
+          "y": 417,
+          "channel": 1,
+          "before": 12203,
+          "after": 12204
+        },
+        {
+          "x": 1507,
+          "y": 417,
+          "channel": 0,
+          "before": 11997,
+          "after": 11998
+        },
+        {
+          "x": 1508,
+          "y": 417,
+          "channel": 0,
+          "before": 11845,
+          "after": 11847
+        },
+        {
+          "x": 1508,
+          "y": 417,
+          "channel": 1,
+          "before": 11914,
+          "after": 11915
+        },
+        {
+          "x": 1509,
+          "y": 417,
+          "channel": 0,
+          "before": 11766,
+          "after": 11768
+        },
+        {
+          "x": 1510,
+          "y": 417,
+          "channel": 0,
+          "before": 11571,
+          "after": 11573
+        },
+        {
+          "x": 1510,
+          "y": 417,
+          "channel": 1,
+          "before": 11490,
+          "after": 11492
+        }
+      ]
+    },
+    {
+      "mode": "candidate",
+      "repetition": 1,
+      "stage": "opaque",
+      "changedChannels": 12,
+      "maxEncodedError": 1065,
+      "coordinates": [
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 0,
+          "before": 10926,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 1,
+          "before": 11091,
+          "after": 10081
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 2,
+          "before": 11333,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 0,
+          "before": 10989,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 1,
+          "before": 11146,
+          "after": 10081
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 2,
+          "before": 11356,
+          "after": 11072
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 0,
+          "before": 10885,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 1,
+          "before": 11055,
+          "after": 10082
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 2,
+          "before": 11318,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 0,
+          "before": 10951,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 1,
+          "before": 11113,
+          "after": 10082
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 2,
+          "before": 11342,
+          "after": 11072
+        }
+      ]
+    },
+    {
+      "mode": "candidate",
+      "repetition": 1,
+      "stage": "hdr",
+      "changedChannels": 12,
+      "maxEncodedError": 1065,
+      "coordinates": [
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 0,
+          "before": 10926,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 1,
+          "before": 11091,
+          "after": 10081
+        },
+        {
+          "x": 32,
+          "y": 840,
+          "channel": 2,
+          "before": 11333,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 0,
+          "before": 10989,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 1,
+          "before": 11146,
+          "after": 10081
+        },
+        {
+          "x": 33,
+          "y": 840,
+          "channel": 2,
+          "before": 11356,
+          "after": 11072
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 0,
+          "before": 10885,
+          "after": 10607
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 1,
+          "before": 11055,
+          "after": 10082
+        },
+        {
+          "x": 32,
+          "y": 841,
+          "channel": 2,
+          "before": 11318,
+          "after": 11072
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 0,
+          "before": 10951,
+          "after": 10607
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 1,
+          "before": 11113,
+          "after": 10082
+        },
+        {
+          "x": 33,
+          "y": 841,
+          "channel": 2,
+          "before": 11342,
+          "after": 11072
+        }
+      ]
+    },
+    {
+      "mode": "candidate",
+      "repetition": 1,
+      "stage": "taa",
+      "changedChannels": 198,
+      "maxEncodedError": 186,
+      "coordinates": [
+        {
+          "x": 1652,
+          "y": 413,
+          "channel": 2,
+          "before": 11954,
+          "after": 11953
+        },
+        {
+          "x": 1646,
+          "y": 414,
+          "channel": 1,
+          "before": 11631,
+          "after": 11630
+        },
+        {
+          "x": 1647,
+          "y": 414,
+          "channel": 1,
+          "before": 11691,
+          "after": 11690
+        },
+        {
+          "x": 1648,
+          "y": 414,
+          "channel": 1,
+          "before": 11765,
+          "after": 11764
+        },
+        {
+          "x": 1649,
+          "y": 414,
+          "channel": 1,
+          "before": 12066,
+          "after": 12065
+        },
+        {
+          "x": 1652,
+          "y": 414,
+          "channel": 1,
+          "before": 11710,
+          "after": 11709
+        },
+        {
+          "x": 1509,
+          "y": 415,
+          "channel": 0,
+          "before": 11236,
+          "after": 11237
+        },
+        {
+          "x": 1646,
+          "y": 415,
+          "channel": 1,
+          "before": 11591,
+          "after": 11590
+        },
+        {
+          "x": 1647,
+          "y": 415,
+          "channel": 1,
+          "before": 11737,
+          "after": 11736
+        },
+        {
+          "x": 1648,
+          "y": 415,
+          "channel": 1,
+          "before": 11838,
+          "after": 11837
+        },
+        {
+          "x": 1649,
+          "y": 415,
+          "channel": 0,
+          "before": 12133,
+          "after": 12132
+        },
+        {
+          "x": 1651,
+          "y": 415,
+          "channel": 0,
+          "before": 12122,
+          "after": 12120
+        }
+      ]
+    }
+  ],
+  "causeChecks": 256,
+  "productionCandidateRetained": false,
+  "decision": "Narrow combined projection/environment means improve about 0.044 ms. Static total CPU mean does not improve and strict final-image checks fail. The baseline repetition also changes in the same opaque/HDR channels, so no candidate-caused image regression is established; the gate remains failed. Candidate is not adopted."
+}

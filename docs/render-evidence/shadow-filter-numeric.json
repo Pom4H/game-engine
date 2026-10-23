@@ -1,0 +1,182 @@
+{
+  "status": "completed",
+  "controls": {
+    "cases": 4177,
+    "staticSamples": 4,
+    "dynamicSamples": 2,
+    "binaryCases": 64,
+    "filteredCases": 4096,
+    "dynamicDisabledCases": 17
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "shaderContractHash": "9dbed43364c17c0bc9ac2b960e2bf2c8eb45c51175b855ae09ef1e7dd338b849",
+  "productionModuleHashes": [
+    "c86e76f95b1430f1975b0bf84bc0fc25d5bb8a8503decc8a95c1474bb71109f0",
+    "d2af2ff12fefc817094facb96e2235086e2aa001ff66c2b1609ef12748a59a4c",
+    "c5f3e4e3b8b9b68d6716ac2c5c08ad2259587c6024f15c85057f0dd6358e5cf6"
+  ],
+  "inputsHash": "b2e0573d73ee8d3dc29315734fcdcdecc2bdf52bfe5535ac41a8a2521bea1f9b",
+  "outputsHash": "63539bb229d63ab1061fcbc74fdc06c7c6966be5ca868a39157a0e07825ee84b",
+  "maxError": 0,
+  "failures": [],
+  "changedLegacyCases": 2089,
+  "maxLegacyError": 0.5,
+  "examples": [
+    {
+      "staticSamples": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:17",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:18",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:20",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:24",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:33",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:34",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:36",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:40",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    }
+  ],
+  "gates": {
+    "nativeHardware": true,
+    "productionContractPresent": true,
+    "normalizedCoverage": true,
+    "originalErrorExposed": true
+  },
+  "interpretation": "Actual GPU evaluates the production WGSL helper used by main/relief/instance material shaders. Independent references average individual static and dynamic filtered comparison samples. Binary, fractional and dynamic-disabled cases are exactly representable and compare with zero tolerance. The old min(sumStatic,sumDynamic)*0.5 is evaluated alongside to expose its incorrect static weighting. This proves kernel normalization; it does not prove image repeatability, full-frame performance or competitive quality.",
+  "startedAt": "2026-10-12T00:43:21.017Z",
+  "completedAt": "2026-10-12T00:43:42.922Z",
+  "sourceState": {
+    "srcSha256": "4373729ecb200e6c4f85b5393cc5e98e9e29a4126c06e2675ba260f83103012c",
+    "distSha256": "70ac52b685d3f369807f97d261e112eb28dc192be9499883d4210b718f39b848",
+    "harnessSha256": "7d4dd915409d901bd75e20760c0142fa70ce7a1db3c809f87b22a90b3ddd0768",
+    "diagnosticSha256": "e752c293eb21dc3edc003dd9a6e49a6fbcb1fe342a97643d7f177eaea93a9bf0"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  }
+}

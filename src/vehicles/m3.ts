@@ -165,6 +165,73 @@ export function m3SmoothRenderBody(mesh:TriangleMesh):TriangleMesh{
   return smoothBodyTwice(mesh);
 }
 
+interface DamagedBodyPlan {
+  rest:TriangleMesh;
+  source:TriangleMesh;
+  barycentric:readonly (readonly number[])[];
+  sourceCorners:readonly (readonly number[])[];
+  normalGroup:Int32Array;
+  groupCount:number;
+}
+const damagedBodyPlans=new Map<number,DamagedBodyPlan>();
+function compileDamagedBody(levels:1|2):DamagedBodyPlan{
+  const source=m3HighFidelityBody(),first=subdivideSmoothTriangleMesh(source,m3RenderSubdivisionPlan());
+  const rest=levels===1?first:subdivideSmoothTriangleMesh(first,buildSmoothSubdivisionPlan(first,48,.002));
+  const firstWeights: number[][]=[],firstCorners:number[][]=[];
+  for(let i=0;i<source.indices.length;i+=3){
+    const corners=source.indices.slice(i,i+3);
+    for(const weights of [[1,0,0],[0,1,0],[0,0,1],[.5,.5,0],[0,.5,.5],[.5,0,.5]]){firstWeights.push(weights);firstCorners.push(corners);}
+  }
+  const barycentric:number[][]=levels===1?firstWeights:[],sourceCorners:number[][]=levels===1?firstCorners:[];
+  if(levels===2)for(let i=0;i<first.indices.length;i+=3){
+    const a=first.indices[i]!,b=first.indices[i+1]!,c=first.indices[i+2]!,wa=firstWeights[a]!,wb=firstWeights[b]!,wc=firstWeights[c]!;
+    for(const weights of [wa,wb,wc,wa.map((v,k)=>(v+wb[k]!)*.5),wb.map((v,k)=>(v+wc[k]!)*.5),wc.map((v,k)=>(v+wa[k]!)*.5)]){barycentric.push(weights);sourceCorners.push(firstCorners[a]!);}
+  }
+  // Compile coincident-vertex/crease membership from the original surface.
+  // Deformed positions and area normals are the only per-frame work.
+  const normalGroup=new Int32Array(rest.positions.length/3),buckets=new Map<string,number[]>();let groupCount=0;
+  for(let i=0;i<normalGroup.length;i++){
+    const key=[0,1,2].map(k=>Math.round(rest.positions[i*3+k]!/2e-5)).join(',');
+    const members=buckets.get(key);if(members)members.push(i);else buckets.set(key,[i]);
+  }
+  const cosine=Math.cos(68*Math.PI/180);
+  for(const members of buckets.values()){
+    const clusters:{group:number;n:number[]}[]=[];
+    for(const i of members){
+      const n=rest.normals.slice(i*3,i*3+3);let found=clusters.find(c=>n[0]!*c.n[0]!+n[1]!*c.n[1]!+n[2]!*c.n[2]!>cosine);
+      if(!found){found={group:groupCount++,n};clusters.push(found);}normalGroup[i]=found.group;
+    }
+  }
+  return{source,rest,barycentric,sourceCorners,normalGroup,groupCount};
+}
+/** Transfer authoritative shell displacement onto a cached smooth rest surface.
+ * The render topology and crease choices are compiled once, outside the hot path. */
+export function m3DamagedRenderBody(mesh:TriangleMesh,levels:1|2=2):TriangleMesh{
+  let plan=damagedBodyPlans.get(levels);if(!plan){plan=compileDamagedBody(levels);damagedBodyPlans.set(levels,plan);}const {source,rest,normalGroup}=plan;
+  if(mesh.positions.length!==source.positions.length||mesh.indices.length!==source.indices.length)throw new RangeError('Damaged M3 shell topology mismatch');
+  const positions=new Array<number>(rest.positions.length),sums=new Float64Array(plan.groupCount*3),normals=new Array<number>(positions.length);
+  for(let i=0;i<normalGroup.length;i++){
+    const weights=plan.barycentric[i]!,corners=plan.sourceCorners[i]!;
+    for(let k=0;k<3;k++){
+      let p=rest.positions[i*3+k]!;
+      for(let j=0;j<3;j++){const at=corners[j]!*3+k;p+=(mesh.positions[at]!-source.positions[at]!)*weights[j]!;}
+      positions[i*3+k]=p;
+    }
+  }
+  for(let i=0;i<rest.indices.length;i+=3){
+    const a=rest.indices[i]!*3,b=rest.indices[i+1]!*3,c=rest.indices[i+2]!*3;
+    const abx=positions[b]!-positions[a]!,aby=positions[b+1]!-positions[a+1]!,abz=positions[b+2]!-positions[a+2]!;
+    const acx=positions[c]!-positions[a]!,acy=positions[c+1]!-positions[a+1]!,acz=positions[c+2]!-positions[a+2]!;
+    const nx=aby*acz-abz*acy,ny=abz*acx-abx*acz,nz=abx*acy-aby*acx;
+    for(let j=0;j<3;j++){const group=normalGroup[rest.indices[i+j]!]!*3;sums[group]=sums[group]!+nx;sums[group+1]=sums[group+1]!+ny;sums[group+2]=sums[group+2]!+nz;}
+  }
+  for(let i=0;i<normalGroup.length;i++){
+    const group=normalGroup[i]!*3,length=Math.hypot(sums[group]!,sums[group+1]!,sums[group+2]!);
+    for(let k=0;k<3;k++)normals[i*3+k]=length>1e-12?sums[group+k]!/length:rest.normals[i*3+k]!;
+  }
+  return{kind:'triangle-mesh',positions,normals,indices:rest.indices};
+}
+
 /** A thin, open semicircular fender detail: two concentric rings joined as quads. */
 function wheelArchAccentMesh(axle:number):Extract<ParametricVehiclePart['mesh'],{kind:'triangle-mesh'}>{
   const outer=.388,inner=.374,segments=24,positions:number[]=[],normals:number[]=[],indices:number[]=[];

@@ -1,0 +1,197 @@
+{
+  "status": "material-uniforms-observed-cause-unresolved",
+  "report": "artifacts/engine-compare/surface-presence-material-uniforms/report.json",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "ec7fc70b6e3ce892cfece8161f763edd6ce08d348f771e2c48b7e8b0a0aee539",
+    "diagnosticSha256": "013b779df5913dc60dd6f6b1ccd59289cdded2d222fd57514eaf43286f47320f"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "scope": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "freshDevices": 6,
+    "observedFrames": 192,
+    "canonicalFramesPerDevice": 32,
+    "productionSourceUnchanged": true,
+    "renderShadersInstrumented": false,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false
+  },
+  "gates": {
+    "completed": true,
+    "coverage": true,
+    "allComparisonsExact": false,
+    "sameOrderingRepeatable": false,
+    "readbackAgreement": true,
+    "opaqueBoundaryAgreement": true,
+    "materialUniformAgreement": true,
+    "repeatability": false,
+    "uniformInputsRepeatable": true,
+    "archivesVerified": true,
+    "physicalReplay": true,
+    "rootCauseEstablished": false,
+    "competitiveAdvantageEstablished": false
+  },
+  "materialUniforms": {
+    "words": 92,
+    "bytes": 368,
+    "hostReference": "complete captured queue.writeBuffer byte image at each actual opaque material draw",
+    "gpuObservation": "uniform vec4<u32> compute read immediately after opaque pass end in the original command encoder",
+    "sourceBinding": "actual binding 0 resource, zero static/dynamic offset, mapped to one renderer object",
+    "renderShadersModified": false,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false,
+    "draws": 1920,
+    "checkedWords": 176640,
+    "gpuReads": 1920,
+    "drawCountsPerFrame": [
+      10
+    ],
+    "uniqueBindingsPerFrame": [
+      10
+    ],
+    "sourceObjects": [
+      "ground",
+      "replay:7",
+      "replay:6",
+      "replay:5",
+      "replay:4",
+      "replay:3",
+      "replay:2",
+      "replay:1",
+      "replay:0",
+      "cube:0"
+    ],
+    "hostGpuDisagreements": [],
+    "repeatChanges": []
+  },
+  "stableInputs": [
+    {
+      "stage": "instanceSource:{\"kind\":\"box\",\"size\":[1,1,1]}|1|{\"kind\":\"steel\",\"roughness\":0.46,\"profile\":{\"kind\":\"steel\",\"density\":7850,\"restitution\":0.32,\"friction\":0.42,\"color\":[0.55,0.58,0.62,1],\"mechanical\":{\"youngModulusPa\":200000000000,\"yieldStressPa\":350000000,\"failureStressPa\":520000000,\"failureStrain\":0.12,\"plasticity\":0.78,\"brittle\":false},\"thermal\":{\"specificHeatJkgK\":490,\"conductivityWmK\":45,\"solarAbsorptivity\":0.45,\"emissivity\":0.35,\"linearExpansionPerK\":0.0000121},\"optical\":{\"ior\":2.5,\"roughness\":0.28,\"metalness\":0.92,\"transmission\":0},\"acoustic\":{\"resonanceHz\":920,\"damping\":0.12,\"brightness\":0.72,\"noise\":0.12},\"surface\":{\"baseRoughness\":0.28,\"waterRetention\":0.08,\"bioAffinity\":0.02,\"dirtAffinity\":0.3,\"weathering\":0.58,\"permeability\":0.01}},\"surface\":{\"wetness\":0.10089923699199999,\"moss\":0,\"dirt\":0,\"wear\":0,\"roughness\":0.40112806104064,\"frictionScale\":0.98183813734144,\"acousticDamping\":0.1401798473984,\"darkening\":0.030269771097599995}}|0",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "staticShadow",
+      "observedFrames": 6,
+      "repeatable": true
+    },
+    {
+      "stage": "dynamicShadow",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "frameUniform",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "lightSources",
+      "observedFrames": 192,
+      "repeatable": true
+    },
+    {
+      "stage": "lightCells",
+      "observedFrames": 192,
+      "repeatable": true
+    }
+  ],
+  "readback": {
+    "checkedStages": [
+      "opaque",
+      "normal"
+    ],
+    "checks": 384,
+    "channelsPerMethod": 3185049600
+  },
+  "upstream": [
+    {
+      "mode": "shuffled",
+      "repetition": 0,
+      "frame": 12,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 3,
+        "maxEncodedError": 685,
+        "coordinates": [
+          {
+            "x": 811,
+            "y": 543,
+            "channel": 0,
+            "before": 11321,
+            "after": 11397
+          },
+          {
+            "x": 811,
+            "y": 543,
+            "channel": 1,
+            "before": 11691,
+            "after": 11456
+          },
+          {
+            "x": 811,
+            "y": 543,
+            "channel": 2,
+            "before": 12282,
+            "after": 11597
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 1,
+      "frame": 25,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 3,
+        "maxEncodedError": 2880,
+        "coordinates": [
+          {
+            "x": 234,
+            "y": 415,
+            "channel": 0,
+            "before": 13982,
+            "after": 11102
+          },
+          {
+            "x": 234,
+            "y": 415,
+            "channel": 1,
+            "before": 13409,
+            "after": 11294
+          },
+          {
+            "x": 234,
+            "y": 415,
+            "channel": 2,
+            "before": 13427,
+            "after": 11944
+          }
+        ]
+      }
+    }
+  ],
+  "tests": {
+    "command": "npm run check",
+    "passed": 302,
+    "failed": 0,
+    "log": "artifacts/material-uniforms-check.log"
+  },
+  "interpretation": "Every observed material uniform word matches its host upload image at every actual opaque draw, and the GPU/host word records repeat exactly across repeated captures of each frame, while opaque color still differs. The observed uniform upload state does not explain these captured color differences. Remaining full-precision fragment inputs, sampled textures, arithmetic and export still require isolation.",
+  "limitations": [
+    "The observer reads the actual binding-0 buffer immediately after the opaque pass in the same encoder. It observes all 92 words for every material draw and validates draw coverage, including the representative material binding used by instancing. It does not observe values inside each vertex/fragment invocation.",
+    "A complete byte image is reconstructed only from observed queue.writeBuffer calls. Unwritten host bytes, ambiguous owners, unknown material pipelines and unsupported binding offsets fail explicitly.",
+    "The render shaders and their resource usages are unchanged. Diagnostic compute dispatches and readbacks alter scheduling, so these timings and images do not measure production performance or visual quality.",
+    "The additional independent readback check covers opaque color and normal output. Packed velocity/specular boundary observations are present but are not independently read a second way in this control.",
+    "Stable uploaded words do not prove every sampled material/environment texture or full-precision fragment intermediate unchanged, and do not establish a driver or specification violation."
+  ]
+}

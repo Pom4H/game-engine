@@ -1,14 +1,148 @@
 import type {Primitive} from '../scene/types.js';
+import {triangleStreamState,triangleStreamMesh,isTriangleStream} from './triangle-stream.js';
+import {copiedTrianglePreparation,isCopiedTriangle,copiedTriangleBounds,copiedTriangleMeshData,copiedTrianglePacking,triangleMeshPacking,type CopiedTriangleMeshPreparation,type TriangleMeshPacking} from './copied-triangle.js';
+export type {CopiedTriangleMeshPreparation} from './copied-triangle.js';
 
-export interface MeshData {vertices:Float32Array;colors:Uint8Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
+export interface MeshData {vertices:Float32Array;colors:Uint8Array;uvs?:Float32Array;variationSeeds?:Float32Array;indices:Uint16Array|Uint32Array;indexFormat:'uint16'|'uint32'}
+/** One vertex stream for albedo and authored UVs. Unauthored meshes retain the
+ * former face projection, computed from the same float32 positions/normals. */
+export function meshVertexAttributes(mesh:MeshData):Uint8Array{
+ const count=mesh.vertices.length/6,bytes=new Uint8Array(count*16),floats=new Float32Array(bytes.buffer);
+ if(mesh.uvs&&(mesh.uvs.length!==count*2||!mesh.uvs.every(Number.isFinite)))throw new TypeError('Mesh requires finite UV pairs');
+ if(mesh.variationSeeds&&(mesh.variationSeeds.length!==count||!mesh.variationSeeds.every(Number.isFinite)))throw new TypeError('Mesh requires finite variation seeds');
+ for(let i=0;i<count;i++){
+  const source=i*4,target=i*16;bytes[target]=mesh.colors[source]!;bytes[target+1]=mesh.colors[source+1]!;bytes[target+2]=mesh.colors[source+2]!;bytes[target+3]=mesh.colors[source+3]!;
+  floats[i*4+1]=mesh.uvs?.[i*2]??(mesh.vertices[i*6+5]!<-.5?.5-mesh.vertices[i*6]!:mesh.vertices[i*6]!+.5);
+  floats[i*4+2]=mesh.uvs?.[i*2+1]??.5-mesh.vertices[i*6+1]!;
+  floats[i*4+3]=mesh.variationSeeds?.[i]??0;
+ }
+ return bytes;
+}
 const primitiveKeys=new WeakMap<Primitive,string>();
-export function primitiveKey(primitive:Primitive):string{return primitiveKeys.get(primitive)??JSON.stringify(primitive);}
+const ownedFrozen=new WeakSet<object>();let dynamicPrimitiveId=0;
+type TriangleMesh=Extract<Primitive,{kind:'triangle-mesh'}>;
+type TriangleChannel='positions'|'normals'|'indices'|'colors'|'uvs'|'variationSeeds';
+type TriangleBounds=readonly[number,number,number,number,number,number];
+/** Explicit copied storage for render-only triangle meshes. Inputs are read as
+ * indexed numeric sources; no input buffer is adopted, detached or frozen. */
+export interface CompactTriangleMeshInput{
+ readonly positions:ArrayLike<number>;readonly normals:ArrayLike<number>;readonly indices:ArrayLike<number>;
+ readonly colors?:ArrayLike<number>;readonly uvs?:ArrayLike<number>;readonly variationSeeds?:ArrayLike<number>;
+}
+interface OwnedTriangle{
+ positions:Float64Array;normals:Float64Array;indices:Float64Array;
+ colors:Float64Array|undefined;uvs:Float64Array|undefined;variationSeeds:Float64Array|undefined;
+ publicArrays:Partial<Record<TriangleChannel,readonly number[]>>;bounds:TriangleBounds;
+}
+const ownedTriangles=new WeakMap<object,OwnedTriangle>();
+// Never hand private views/state to replaceable iterators or Map methods.
+const getOwnedTriangle=Function.call.bind(WeakMap.prototype.get,ownedTriangles) as(key:object)=>OwnedTriangle|undefined;
+const hasOwnedTriangle=Function.call.bind(WeakMap.prototype.has,ownedTriangles) as(key:object)=>boolean;
+const setOwnedTriangle=Function.call.bind(WeakMap.prototype.set,ownedTriangles) as(key:object,value:OwnedTriangle)=>void;
+const registerTriangleKey=Function.call.bind(WeakMap.prototype.set,primitiveKeys) as(key:Primitive,value:string)=>void;
+const TriangleFloat64=Float64Array,TriangleFloat32=Float32Array,TriangleColor8=Uint8Array,TriangleIndex16=Uint16Array,TriangleIndex32=Uint32Array,TriangleArray=Array;
+const freezeTriangle=Object.freeze,defineTriangleProperty=Object.defineProperty,createTriangleDictionary=Object.create;
+const finiteTriangleNumber=Number.isFinite,integerTriangleNumber=Number.isInteger,safeTriangleInteger=Number.isSafeInteger,triangleFround=Math.fround;
+const triangleChannels:readonly TriangleChannel[]=['positions','normals','indices','colors','uvs','variationSeeds'];
+function copyTriangleChannel(input:ArrayLike<number>,name:TriangleChannel,limit:number,min=-Infinity,max=Infinity,seed=false):Float64Array{
+ if(!input||typeof input!=='object')throw new TypeError(`${name} requires an indexed numeric source`);
+ const length=input.length;
+ if(!safeTriangleInteger(length)||length<0||length>limit)throw new TypeError(`${name} has an invalid length`);
+ const result=new TriangleFloat64(length);
+ // Own scalar metadata avoids exposing this view as a prototype getter receiver.
+ defineTriangleProperty(result,'length',{value:length});defineTriangleProperty(result,'byteLength',{value:length*8});
+ for(let i=0;i<length;i++){
+  const value=input[i];
+  if(typeof value!=='number'||!finiteTriangleNumber(value)||value<min||value>max||seed&&!finiteTriangleNumber(triangleFround(value)))throw new TypeError(`${name}[${i}] must be a valid finite scalar`);
+  result[i]=value;
+ }
+ return result;
+}
+/** Fully validate a private Float64 snapshot, retaining exact public doubles and
+ * signed zero. Public array getters materialize stable frozen copies on demand.
+ * Only this factory's identity may use the compact validation/packing path. */
+export function compactTriangleMesh(input:CompactTriangleMeshInput):TriangleMesh{
+ if(!input||typeof input!=='object')throw new TypeError('compactTriangleMesh requires triangle channels');
+ const positions=copyTriangleChannel(input.positions,'positions',900000),normals=copyTriangleChannel(input.normals,'normals',900000),indices=copyTriangleChannel(input.indices,'indices',1800000),count=positions.length/3;
+ if(positions.length<9||positions.length%3||normals.length!==positions.length)throw new TypeError('compactTriangleMesh requires matching vertex and normal triplets');
+ if(!indices.length||indices.length%3)throw new TypeError('compactTriangleMesh requires triangle indices');
+ for(let i=0;i<indices.length;i++){const index=indices[i]!;if(!integerTriangleNumber(index)||index<0||index>=count)throw new TypeError(`indices[${i}] is out of bounds`);}
+ const colorInput=input.colors,colors=colorInput===undefined?undefined:copyTriangleChannel(colorInput,'colors',1200000,0,1);
+ if(colors&&colors.length!==count*4)throw new TypeError('colors require one RGBA value per vertex');
+ const uvInput=input.uvs,uvs=uvInput===undefined?undefined:copyTriangleChannel(uvInput,'uvs',600000);
+ if(uvs&&uvs.length!==count*2)throw new TypeError('uvs require one authored pair per vertex');
+ const seedInput=input.variationSeeds,variationSeeds=seedInput===undefined?undefined:copyTriangleChannel(seedInput,'variationSeeds',300000,-Infinity,Infinity,true);
+ if(variationSeeds&&variationSeeds.length!==count)throw new TypeError('variationSeeds require one value per vertex');
+ let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+ for(let i=0;i<positions.length;i+=3){
+  minX=Math.min(minX,positions[i]!);minY=Math.min(minY,positions[i+1]!);minZ=Math.min(minZ,positions[i+2]!);
+  maxX=Math.max(maxX,positions[i]!);maxY=Math.max(maxY,positions[i+1]!);maxZ=Math.max(maxZ,positions[i+2]!);
+ }
+ const state:OwnedTriangle={positions,normals,indices,colors,uvs,variationSeeds,publicArrays:createTriangleDictionary(null) as OwnedTriangle['publicArrays'],bounds:freezeTriangle([minX,minY,minZ,maxX,maxY,maxZ])},mesh={kind:'triangle-mesh'} as TriangleMesh;
+ for(let channel=0;channel<triangleChannels.length;channel++){
+  const key=triangleChannels[channel]!;if(state[key]===undefined)continue;
+  defineTriangleProperty(mesh,key,{enumerable:true,get(){
+   let values=state.publicArrays[key];
+   if(!values){
+    const source=state[key]!,copy=new TriangleArray<number>(source.length);
+    // Numeric setters on Array.prototype cannot turn a public copy into holes.
+    for(let i=0;i<source.length;i++)defineTriangleProperty(copy,i,{value:source[i],writable:true,enumerable:true,configurable:true});
+    values=freezeTriangle(copy);state.publicArrays[key]=values;
+   }
+   return values;
+  }});
+ }
+ freezeTriangle(mesh);setOwnedTriangle(mesh,state);
+ // Preserve the common sequence used by mesh caching and opaque instance keys.
+ registerTriangleKey(mesh,'dynamic:'+ ++dynamicPrimitiveId);return mesh;
+}
+/** An identity certificate for this factory, not public freezePrimitive inputs. */
+export function isOwnedValidatedTriangleMesh(value:unknown):value is TriangleMesh{return value!==null&&typeof value==='object'&&(hasOwnedTriangle(value)||isCopiedTriangle(value));}
+/** Original-double extrema; the small shared tuple is immutable, never a view. */
+export function ownedTriangleMeshBounds(value:unknown):TriangleBounds|undefined{return value!==null&&typeof value==='object'?getOwnedTriangle(value)?.bounds??copiedTriangleBounds(value):undefined;}
+/** Opt-in staged snapshot. Inputs remain caller-owned and stable until the
+ * ticket completes. No scalar is trusted and no identity is issued early. */
+export function prepareCopiedTriangleMesh(input:CompactTriangleMeshInput):CopiedTriangleMeshPreparation{
+ return copiedTrianglePreparation(input,mesh=>registerTriangleKey(mesh,'dynamic:'+ ++dynamicPrimitiveId));
+}
+/** Renderer-internal packing stream. Blocks are fresh copies, never private
+ * storage views. Only either explicit validated factory identity is accepted. */
+export function prepareTriangleMeshPacking(primitive:Primitive):TriangleMeshPacking{
+ const copied=copiedTrianglePacking(primitive as object);if(copied)return copied;
+ const s=getOwnedTriangle(primitive as object);if(!s)throw new TypeError('Staged GPU preparation requires an owned validated triangle mesh');
+ return triangleMeshPacking((key,index)=>s[key]?.[index],s.positions.length/3,s.indices.length,s.uvs!==undefined,s.variationSeeds!==undefined);
+}
+function ownedTriangleMeshData(state:OwnedTriangle):MeshData{
+ const p=state.positions,n=state.normals,sourceColors=state.colors,count=p.length/3,vertices=new TriangleFloat32(count*6),colors=new TriangleColor8(count*4);
+ for(let i=0;i<count;i++){
+  vertices[i*6]=p[i*3]!;vertices[i*6+1]=p[i*3+1]!;vertices[i*6+2]=p[i*3+2]!;vertices[i*6+3]=n[i*3]!;vertices[i*6+4]=n[i*3+1]!;vertices[i*6+5]=n[i*3+2]!;
+  for(let channel=0;channel<4;channel++)colors[i*4+channel]=Math.round(Math.max(0,Math.min(1,sourceColors?.[i*4+channel]??1))*255);
+ }
+ const Index=count>65535?TriangleIndex32:TriangleIndex16,indices=new Index(state.indices.length);
+ for(let i=0;i<state.indices.length;i++)indices[i]=state.indices[i]!;
+ const result:MeshData={vertices,colors,indices,indexFormat:Index===TriangleIndex32?'uint32':'uint16'};
+ if(state.uvs){result.uvs=new TriangleFloat32(state.uvs.length);for(let i=0;i<state.uvs.length;i++)result.uvs[i]=state.uvs[i]!;}
+ if(state.variationSeeds){result.variationSeeds=new TriangleFloat32(state.variationSeeds.length);for(let i=0;i<state.variationSeeds.length;i++)result.variationSeeds[i]=state.variationSeeds[i]!;}
+ return result;
+}
+export function primitiveKey(primitive:Primitive):string{return triangleStreamState(primitive)?.key??primitiveKeys.get(primitive)??JSON.stringify(primitive);}
 /** Called only on the scene's owned geometry copy. A shallow user freeze is not
  * sufficient for caching: nested authoring arrays could still change. */
-export function freezePrimitive(primitive:Primitive):Primitive{
- const freeze=(value:unknown):void=>{if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}};
- freeze(primitive);primitiveKeys.set(primitive,JSON.stringify(primitive));return primitive;
+export function freezePrimitive(primitive:Primitive,transient=false):Primitive{
+ if(isTriangleStream(primitive))throw new TypeError('A live triangle stream cannot become an immutable primitive');
+ if(primitiveKeys.has(primitive))return primitive;
+ const freeze=(value:unknown):void=>{
+  if(!value||typeof value!=='object'||ownedFrozen.has(value))return;
+  if(Array.isArray(value)){for(let i=0;i<value.length;i++){const child=value[i];if(child&&typeof child==='object')freeze(child);}}
+  else for(const child of Object.values(value))freeze(child);
+  Object.freeze(value);ownedFrozen.add(value);
+ };
+ // Changing render geometry is never deduplicated by contents. A small identity
+ // key avoids serialising a fresh damaged shell or snow tile on every frame.
+ freeze(primitive);primitiveKeys.set(primitive,transient?'dynamic:'+ ++dynamicPrimitiveId:JSON.stringify(primitive));return primitive;
 }
+/** Share only primitives made deeply immutable by this module. Mutable inputs stay isolated. */
+export function immutablePrimitive(primitive:Primitive):Primitive{if(isTriangleStream(primitive)){const state=triangleStreamState(primitive)!;if(!state.ready||state.disposed)throw new Error('Triangle stream is not resident');return primitive;}return primitiveKeys.has(primitive)?primitive:freezePrimitive(structuredClone(primitive));}
 export function surfaceGridPrimitive(size:readonly[number,number,number],segmentsX:number,segmentsZ:number):Primitive{
   const nx=Math.max(1,Math.min(512,Math.round(segmentsX))),nz=Math.max(1,Math.min(256,Math.round(segmentsZ))),positions:number[]=[],normals:number[]=[],indices:number[]=[],y=size[1]/2;
   for(let iz=0;iz<=nz;iz++)for(let ix=0;ix<=nx;ix++){positions.push((ix/nx-.5)*size[0],y,(iz/nz-.5)*size[2]);normals.push(0,1,0);}
@@ -18,7 +152,10 @@ export function surfaceGridPrimitive(size:readonly[number,number,number],segment
 }
 
 export function primitiveMesh(primitive:Primitive):MeshData{
-  if(primitive.kind==='triangle-mesh')return pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined);
+  if(isTriangleStream(primitive))return triangleStreamMesh(primitive);
+  const compact=getOwnedTriangle(primitive as object);if(compact)return ownedTriangleMeshData(compact);
+  const copied=copiedTriangleMeshData(primitive as object);if(copied)return copied;
+  if(primitive.kind==='triangle-mesh')return {...pack([...primitive.positions],[...primitive.normals],[...primitive.indices],primitive.colors?[...primitive.colors]:undefined),...(primitive.uvs?{uvs:Float32Array.from(primitive.uvs)}:{}),...(primitive.variationSeeds?{variationSeeds:Float32Array.from(primitive.variationSeeds)}:{})};
   if(primitive.kind==='torus')return torusMesh(primitive.radius,primitive.tube,primitive.segments??40);
   if(primitive.kind==='cylinder')return cylinderMesh(primitive.radius,primitive.height,primitive.topRadius??primitive.radius,Math.round(primitive.segments??20));
   if(primitive.kind==='snowdrift')return snowDriftMesh(primitive.size,primitive.seed,primitive.segments??56,primitive.continuous??false,primitive.offset??0);

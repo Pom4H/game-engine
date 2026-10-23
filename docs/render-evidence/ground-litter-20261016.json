@@ -1,0 +1,871 @@
+{
+  "date": "2026-10-16T08:09:25.746Z",
+  "status": "targeted native and headless checks passed; full migration remains active",
+  "scope": "Original TheGame ground litter, source variation seeds and geometry memory on Engine; same sole root entry/authority. No alternate playable world.",
+  "implementation": {
+    "kernel": "Original WGSL paper/debris and original irregular CPU rareWindGust preserved; Game reexports shared Engine implementation.",
+    "materials": "Explicit groundLitter asphalt/paving/tile; default generic Engine materials opt out. Game default on; original world/UV coordinates, rain mute, footprint filtering and wet roughness retained.",
+    "seeds": "Authored per-vertex variationSeeds and per-material variationSeed, validated/owned/packed; per-instance seed is excluded from shared material grouping. Game stores raw seeds only for consuming ground materials 8/11/13; no unused facade/paint arrays.",
+    "abi": {
+      "vertexAttributesBytes": 16,
+      "previousVertexAttributesBytes": 12,
+      "materialWords": 100,
+      "materialBytes": 400,
+      "previousMaterialWords": 96,
+      "frameWords": 180,
+      "frameBytes": 720,
+      "previousFrameWords": 176,
+      "oldOffsetsRetained": true
+    },
+    "simulation": "No added props, physics, clock or render pass. Wind/time/rain originate in the shared presentation frame. QA wind staging is presentation only.",
+    "geometry": "Within each material part, share vertices only when all original position/normal/color/UV/seed values match. Float32 hash collisions compare original numbers; UV seams and degenerate source triangles remain valid. Material splits, index limits, order and expanded triangle attributes preserved.",
+    "validation": "Allocation-free numeric array validation checks every value, range and sparse hole; ownership and accepted input unchanged."
+  },
+  "hashes": {
+    "src/render/ground-litter.ts": "94beb3ab5570943e35d0ff8e314f0852c0a70056393259ee93810b527b0baf6e",
+    "src/render/webgpu.ts": "7ab4df9e43402bbfccbe0b02cac5bcee41bd6c4ec0b526f4104ae4215f7b63e0",
+    "src/render/material-layout.ts": "4a7ae1da3a9c9ff30d3be41d5a203ac0fc794b776d99866807f18fe399583bec",
+    "src/scene/validate.ts": "3c65ae80be1c40fe87763db086dd16b3c9d1bc5f1a275099b9d98701bb2db20f",
+    "test/fixtures/game-ground-litter.wgsl": "bdd89b4d0326910216b2825dd5a5cfef44461f37f81c0bf520069b8b3147ca3e",
+    "test/fixtures/game-ground-wind.mjs": "55d8179416a6207980882996d5b4cd55a7273c12b3504984ed276ea42ce1325b",
+    "../thegame/src/game/render/the-engine-geometry.ts": "cdff2bbf2815de72653bb30d464c46501b801e20ab297bc01c80a66898cc8b4b",
+    "../thegame/artifacts/engine-coating-fixture.json": "cad2b898002bd56d9f9a535696f1ac8c66f815d5dd9aca1d7ee9338db3df3ff0"
+  },
+  "commands": {
+    "nativeEngine": "CAPTURE_GPU=1 CAPTURE_PORT=3187 CAPTURE_DEBUG_PORT=3188 THEGAME_CPU_BUDGET=2 ACTIVE_RESIDENT_LIMIT=48 COATING_REUSE_FIXTURE=1 bun tools/capture.ts --engine-litter --engine-rain --engine-coating",
+    "nativeReference": "CAPTURE_GPU=1 CAPTURE_PORT=3187 CAPTURE_DEBUG_PORT=3188 THEGAME_CPU_BUDGET=2 ACTIVE_RESIDENT_LIMIT=48 COATING_REUSE_FIXTURE=1 CAPTURE_RENDERER=legacy-webgpu LITTER_REFERENCE=1 bun tools/capture.ts --engine-litter",
+    "indexing": "bun tools/qa-geometry-indexing.ts artifacts/geometry-before-index.mjs",
+    "engineTests": "node --test test/mesh-validation.test.mjs test/ground-litter.test.mjs test/authored-mesh-uv.test.mjs test/material-uniforms.test.mjs test/surface-appearance.test.mjs test/rain-surface.test.mjs test/gpu-visibility.test.mjs test/renderer-post.test.mjs test/canonical-summary.test.mjs test/render-pipeline-plan.test.mjs test/render-visibility-plan.test.mjs test/render-radiance-projection.test.mjs test/scene-appearance-target.test.mjs",
+    "gameTests": "bun test test/the-engine-renderer.test.ts test/ground-litter-wind.test.ts test/rendering.test.ts test/render-frame.test.ts test/render-presentation-clock.test.ts test/rain-ripples.test.ts",
+    "accountTests": "bun test test/account-control.test.ts test/company.test.ts test/company-api.test.ts test/company-persistence.test.ts test/workforce.test.ts test/workforce-harness.test.ts",
+    "typesAndBuilds": [
+      "Engine: bun run typecheck; bun run build",
+      "Game: bun run typecheck; bun run build",
+      "Engine apps/thegame: bun run typecheck; bun test test/canonical-world-view.test.ts",
+      "Office ui: local tsc --noEmit; local vite build"
+    ]
+  },
+  "native": {
+    "litter": {
+      "report": "../thegame/artifacts/engine-litter-before-facade/report.json",
+      "date": "2026-10-16T07:52:37.434Z",
+      "browserMode": "native-gpu",
+      "referenceMode": false,
+      "scope": "sole Game entry; original pinned world/vehicle and recorded visible paved-patch camera; manual clear weather; litter/wind/time only; Engine 4096 HDR samples, legacy PNGs only; not whole-renderer parity or FPS acceptance",
+      "kernels": {
+        "samples": 12288,
+        "max": 0,
+        "visible": [
+          6,
+          59,
+          144
+        ]
+      },
+      "view": {
+        "position": [
+          -299.6,
+          0.465,
+          -165
+        ],
+        "eye": [
+          -306.6,
+          2.465,
+          -158
+        ],
+        "target": [
+          -309.6,
+          0.515,
+          -160
+        ]
+      },
+      "search": [
+        {
+          "i": 0,
+          "difference": {
+            "max": 0.015869140625,
+            "mean": 0.000003874301910400391,
+            "changed": 1
+          }
+        },
+        {
+          "i": 1,
+          "difference": {
+            "max": 1.41943359375,
+            "mean": 0.002214208245277405,
+            "changed": 11
+          }
+        },
+        {
+          "i": 2,
+          "difference": {
+            "max": 0,
+            "mean": 0,
+            "changed": 0
+          }
+        },
+        {
+          "i": 3,
+          "difference": {
+            "max": 0,
+            "mean": 0,
+            "changed": 0
+          }
+        },
+        {
+          "i": 4,
+          "difference": {
+            "max": 0,
+            "mean": 0,
+            "changed": 0
+          }
+        }
+      ],
+      "differences": {
+        "litterDifference": {
+          "max": 1.41943359375,
+          "mean": 0.002214208245277405,
+          "changed": 11
+        },
+        "windDifference": {
+          "max": 1.41943359375,
+          "mean": 0.004840433597564697,
+          "changed": 28
+        },
+        "timeDifference": {
+          "max": 1.283447265625,
+          "mean": 0.0027353912591934204,
+          "changed": 18
+        },
+        "restoredDifference": {
+          "max": 0,
+          "mean": 0,
+          "changed": 0
+        }
+      },
+      "stages": [
+        {
+          "name": "off",
+          "enabled": false,
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 162,
+              "paving": 156,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 2621580336,
+            "totalSize": 2710183936,
+            "embedderHeapUsedSize": 23385152,
+            "backingStorageSize": 63953834
+          }
+        },
+        {
+          "name": "on",
+          "enabled": true,
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 160,
+              "paving": 148,
+              "tile": 9
+            },
+            "seededParts": 106
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 2640220660,
+            "totalSize": 2711777280,
+            "embedderHeapUsedSize": 24712232,
+            "backingStorageSize": 63964694
+          }
+        },
+        {
+          "name": "wind",
+          "enabled": true,
+          "time": 7,
+          "wind": [
+            5,
+            -3
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 147,
+              "tile": 9
+            },
+            "seededParts": 106
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 2627843552,
+            "totalSize": 2711101440,
+            "embedderHeapUsedSize": 25922592,
+            "backingStorageSize": 63975554
+          }
+        },
+        {
+          "name": "later",
+          "enabled": true,
+          "time": 17,
+          "wind": [
+            5,
+            -3
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 147,
+              "tile": 9
+            },
+            "seededParts": 106
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 2642327452,
+            "totalSize": 2711101440,
+            "embedderHeapUsedSize": 27118104,
+            "backingStorageSize": 63986414
+          }
+        },
+        {
+          "name": "restored",
+          "enabled": false,
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 147,
+              "tile": 9
+            },
+            "seededParts": 106
+          },
+          "coatingOverlays": 0,
+          "heap": {
+            "usedSize": 2629061808,
+            "totalSize": 2711363584,
+            "embedderHeapUsedSize": 28458104,
+            "backingStorageSize": 63997274
+          }
+        }
+      ]
+    },
+    "reference": {
+      "report": "../thegame/artifacts/engine-litter-reference/report.json",
+      "date": "2026-10-16T07:55:10.523Z",
+      "browserMode": "native-gpu",
+      "referenceMode": true,
+      "scope": "sole Game entry; original pinned world/vehicle and recorded visible paved-patch camera; manual clear weather; litter/wind/time only; Engine 4096 HDR samples, legacy PNGs only; not whole-renderer parity or FPS acceptance",
+      "kernels": {
+        "samples": 12288,
+        "max": 0,
+        "visible": [
+          6,
+          59,
+          144
+        ]
+      },
+      "view": {
+        "position": [
+          -299.6,
+          0.465,
+          -165
+        ],
+        "eye": [
+          -306.6,
+          2.465,
+          -158
+        ],
+        "target": [
+          -309.6,
+          0.515,
+          -160
+        ]
+      },
+      "search": [],
+      "differences": {
+        "litterDifference": null,
+        "windDifference": null,
+        "timeDifference": null,
+        "restoredDifference": null
+      },
+      "stages": [
+        {
+          "name": "off",
+          "enabled": false,
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "heap": {
+            "usedSize": 880098548,
+            "totalSize": 958906368,
+            "embedderHeapUsedSize": 5993200,
+            "backingStorageSize": 103899100
+          }
+        },
+        {
+          "name": "on",
+          "enabled": true,
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "heap": {
+            "usedSize": 896537400,
+            "totalSize": 958906368,
+            "embedderHeapUsedSize": 6251208,
+            "backingStorageSize": 103945143
+          }
+        },
+        {
+          "name": "wind",
+          "enabled": true,
+          "time": 7,
+          "wind": [
+            5,
+            -3
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "heap": {
+            "usedSize": 885858576,
+            "totalSize": 959692800,
+            "embedderHeapUsedSize": 6363928,
+            "backingStorageSize": 103982924
+          }
+        },
+        {
+          "name": "later",
+          "enabled": true,
+          "time": 17,
+          "wind": [
+            5,
+            -3
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "heap": {
+            "usedSize": 875780960,
+            "totalSize": 959954944,
+            "embedderHeapUsedSize": 6747816,
+            "backingStorageSize": 104049502
+          }
+        },
+        {
+          "name": "restored",
+          "enabled": false,
+          "time": 7,
+          "wind": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "heap": {
+            "usedSize": 892806848,
+            "totalSize": 960217088,
+            "embedderHeapUsedSize": 7147640,
+            "backingStorageSize": 104175011
+          }
+        }
+      ]
+    },
+    "rainRegression": {
+      "report": "../thegame/artifacts/engine-rain-before-facade/report.json",
+      "date": "2026-10-16T07:52:41.395Z",
+      "browserMode": "native-gpu",
+      "referenceMode": false,
+      "scope": "sole Game entry; original pinned vehicle/world; wetness and lighting fixed; surface-only staged rain/flow/time, no streak geometry or authority motion; native kernel oracle; Engine 4096 HDR samples, legacy reference PNGs only; not full visual parity/FPS acceptance",
+      "kernels": {
+        "samples": 8192,
+        "max": 0,
+        "nonzeroGround": 518,
+        "nonzeroPaint": 665
+      },
+      "differences": {
+        "rainDifference": {
+          "max": 0.7728271484375,
+          "mean": 0.002738839015364647,
+          "changed": 130
+        },
+        "flowDifference": {
+          "max": 0.7139892578125,
+          "mean": 0.0003836601972579956,
+          "changed": 21
+        },
+        "timeDifference": {
+          "max": 1.3172607421875,
+          "mean": 0.0034712720662355423,
+          "changed": 142
+        },
+        "restoredDifference": {
+          "max": 0,
+          "mean": 0,
+          "changed": 0
+        }
+      },
+      "stages": [
+        {
+          "name": "wet-no-rain",
+          "time": 7,
+          "rain": 0,
+          "flow": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 164,
+              "paving": 156,
+              "tile": 12
+            },
+            "seededParts": 109
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "falling",
+          "time": 7,
+          "rain": 0.85,
+          "flow": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 149,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "flow",
+          "time": 7,
+          "rain": 0.85,
+          "flow": [
+            5,
+            -4
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 149,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "later",
+          "time": 7.7,
+          "rain": 0.85,
+          "flow": [
+            5,
+            -4
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 149,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "restored",
+          "time": 7,
+          "rain": 0,
+          "flow": [
+            0,
+            0
+          ],
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 149,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 0
+        }
+      ]
+    },
+    "coatingRegression": {
+      "report": "../thegame/artifacts/engine-coating-before-facade/report.json",
+      "date": "2026-10-16T07:52:31.581Z",
+      "browserMode": "native-gpu",
+      "scope": "sole Game entry, original vehicle and paintSurface geometry, actual Engine HDR; fixed presentation only, no authority pose change; not a performance/full parity gate",
+      "differences": {
+        "diff": {
+          "samples": 4096,
+          "max": 0.205322265625,
+          "mean": 0.00033564493060112,
+          "changed": 17
+        }
+      },
+      "stages": [
+        {
+          "name": "clean",
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 149,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 0
+        },
+        {
+          "name": "scrape",
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 149,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 1
+        },
+        {
+          "name": "scrape-open",
+          "renderResolution": [
+            960,
+            540
+          ],
+          "physicalBodies": 0,
+          "errors": [],
+          "litterProjection": {
+            "surfaces": {
+              "asphalt": 158,
+              "paving": 149,
+              "tile": 11
+            },
+            "seededParts": 108
+          },
+          "coatingOverlays": 1
+        }
+      ]
+    },
+    "oracleCases": {
+      "samples": 12288,
+      "samplesPerSurface": 4096,
+      "surfaces": [
+        "asphalt",
+        "paving",
+        "tile"
+      ],
+      "wind": [
+        [
+          0,
+          0
+        ],
+        [
+          5,
+          -3
+        ],
+        [
+          -7,
+          2
+        ],
+        [
+          18,
+          -13
+        ]
+      ],
+      "footprints": [
+        0.005,
+        0.03,
+        0.09,
+        0.25
+      ],
+      "times": [
+        7,
+        10.7,
+        14.4,
+        18.1
+      ],
+      "seeds": [
+        41,
+        41.375,
+        41.75,
+        42.125
+      ],
+      "maxError": 0
+    },
+    "hdr": {
+      "samples": 4096,
+      "litterChangedThresholdL1RGB": 0.0001,
+      "rainChangedThresholdL1RGB": 0.001,
+      "referenceHDR": false
+    },
+    "visualReview": {
+      "count": 18,
+      "litterEngine": [
+        "off",
+        "on",
+        "wind",
+        "later",
+        "restored"
+      ],
+      "litterReference": [
+        "off",
+        "on",
+        "wind",
+        "later",
+        "restored"
+      ],
+      "rain": [
+        "wet-no-rain",
+        "falling",
+        "flow",
+        "later",
+        "restored"
+      ],
+      "coating": [
+        "clean",
+        "scrape",
+        "scrape-open"
+      ],
+      "observations": "Visible source paper matches original locations, wind displacement and disappearance; rain rings/beads update and restore; scrape stays attached to the opened original door. Ground grain, material response and lighting still differ between renderers."
+    },
+    "limitations": [
+      "Five paved-patch candidates were sampled; index 1 had the most changed HDR samples and became the recorded common camera. This is a coverage selection, not a performance score.",
+      "Streamed/cached part counts vary between stages; no whole-frame pixel equivalence is claimed. Restoration is exact at the 4096 recorded HDR positions.",
+      "Stage heap snapshots are diagnostic and not controlled peak/steady memory or native FPS acceptance."
+    ]
+  },
+  "microbenchmarks": {
+    "validation": {
+      "date": "2026-10-16T07:43:06.363Z",
+      "scope": "Bun validation-only Scene.add entry validateEntity(entity,false) on the same 60000-vertex mesh; not native FPS",
+      "vertices": 60000,
+      "ownershipAndAcceptedInputUnchanged": true,
+      "before": {
+        "times": [
+          39.38119999999998,
+          90.52390000000003,
+          44.198199999999986,
+          61.01650000000001,
+          40.0136,
+          37.57579999999996,
+          31.812299999999937,
+          35.92529999999999,
+          41.18420000000003,
+          37.692300000000046
+        ],
+        "meanMs": 45.93232999999999
+      },
+      "after": {
+        "times": [
+          1.328899999999976,
+          1.38799999999992,
+          1.411899999999946,
+          1.5919999999999845,
+          1.3735000000000355,
+          1.312400000000025,
+          1.2033999999999878,
+          1.2328999999999724,
+          1.1358000000000175,
+          1.4484999999999673
+        ],
+        "meanMs": 1.342729999999983
+      }
+    },
+    "indexing": {
+      "date": "2026-10-16T07:45:54.090Z",
+      "scope": "Bun compiler microbenchmark on original MeshBuilder facades/paving/road paint; not native memory or FPS acceptance",
+      "baselineSha256": "6537258a3d658f5e5ceaa03fc5144dde381481f3031a57d00578b8c5d1c70bd2",
+      "sourceVertices": 18036,
+      "before": {
+        "vertices": 795174,
+        "triangles": 265058,
+        "numbers": 10340862,
+        "gpuBytes": 33397308,
+        "expandedGpuSha256": "7685fe14ebe423fd504fa6881af5079b66871a72b79476d7059827cc74a0b016",
+        "compileMs": 6200.1166
+      },
+      "after": {
+        "vertices": 395053,
+        "triangles": 265058,
+        "numbers": 5538210,
+        "gpuBytes": 17392468,
+        "expandedGpuSha256": "7685fe14ebe423fd504fa6881af5079b66871a72b79476d7059827cc74a0b016",
+        "compileMs": 3012.7298
+      },
+      "exactExpandedGpuAttributes": true
+    },
+    "limits": "Bun CPU validation/compiler fixture timings and calculated CPU/GPU array sizes only. No native FPS or whole-world RAM speedup inferred."
+  },
+  "failuresAndRepairs": {
+    "initial": "Several cold native attempts stalled or terminated at applyShot; own Chrome renderer working set rose approximately 337 to 3781 MB before Inspector.detached. Not a successful benchmark.",
+    "trace": {
+      "path": "../thegame/artifacts/engine-litter/browser-trace.json",
+      "mainSampleCount": 97000,
+      "gcMs": 41111,
+      "primitiveSpecMs": 6825,
+      "clipGamePaintTriangleMs": 2869,
+      "overlayMs": 2374,
+      "scope": "Approximate sampled CPU attribution from a failed diagnostic run; not a before/after causal benchmark."
+    },
+    "repair": "Keep seed arrays only where consumed, eliminate per-value validation path allocation, share exact vertices. Pre-index compact-seed/validation run also succeeded; success is not attributed to indexing alone.",
+    "harness": "CDP detach/crash/close now rejects pending calls. Optional browser-level tracing remains controllable after a renderer stalls; diagnostic profiler is off in final default run."
+  },
+  "checks": {
+    "engine": {
+      "pass": 88,
+      "fail": 0,
+      "log": "artifacts/litter-tests-final.log"
+    },
+    "gameRendering": {
+      "pass": 40,
+      "fail": 0,
+      "assertions": 8218,
+      "log": "../thegame/artifacts/litter-game-tests.log"
+    },
+    "canonicalOffice": {
+      "pass": 11,
+      "fail": 0,
+      "assertions": 4137,
+      "log": "artifacts/litter-office-test-final.log"
+    },
+    "accountWorkforce": {
+      "pass": 47,
+      "fail": 0,
+      "assertions": 11136,
+      "log": "../thegame/artifacts/account-workforce-final.log"
+    },
+    "typesAndBuilds": "Engine, Game, canonical adapter and Office UI passed; existing Vite large-chunk warning remains. Targeted sets, not whole repository suites."
+  },
+  "canonical": {
+    "checkedAt": "2026-10-16T08:09:25.749Z",
+    "seed": 29,
+    "revision": 13,
+    "players": 0,
+    "characterMotor": "the-engine",
+    "rigidBodySolver": "the-engine-compound",
+    "vehicleStepHz": 120,
+    "servedBundleSha256": "a130f3c09d55d651681e3953ea48e62d56311ad48151b4625ad934e5d77c3eb1",
+    "diskBundleSha256": "a130f3c09d55d651681e3953ea48e62d56311ad48151b4625ad934e5d77c3eb1",
+    "serverRestarted": false
+  },
+  "remaining": [
+    "Full material/sky/fog/reflection parity and sustained native performance.",
+    "Baked facade fixture expands 6012 source triangles into 265058 triangles; indexing reduces vertices but does not remove that geometric expansion.",
+    "Actual Office GUI GPU/FPS, physical microphone and native backend/audio services were not tested or restarted in this pass.",
+    "Broader harness city/event/financial scopes and MCP adapter are outside the implemented four HTTP workforce tools."
+  ],
+  "supersededBy": "facade-surfaces-20261016.json"
+}

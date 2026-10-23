@@ -1,0 +1,398 @@
+{
+  "date": "2026-10-18",
+  "status": "ignored_candidate_native_fresh_ack_gate_failed_not_adopted",
+  "goalStatus": "active",
+  "performanceTargetMet": false,
+  "productionRuntimeUnchanged": true,
+  "productionHashes": {
+    "src/game/client.ts": "c67c64be22aa412e52945286d370be6e8d085169f1649d0542cd52aba5c4961b",
+    "src/game/net/client.ts": "2502b5ceb868d19ebc770d5160d0db4ed39ce3969604a65baafbadd5b82eb687",
+    "public/build/game.js": "312c87927afceab74e47e211b34391d2f218908084a70aa457d16549503f846f"
+  },
+  "publicAssets": {
+    "adaptive-worker.js": "6e7fa0ef0ae1d1dd31e673ffba4491c03d4595de9c7938836129c8f1969f068e",
+    "audio-worklet.js": "853d8fda0e0176566b609798213faa45c066df7171ce9c4902e4a154518caa8e",
+    "body-worker.js": "e8fa50aba6fa7260a71b04ac382baf67b5e33159ef7973bc5d17db137a5cb19b",
+    "canonical-voice-probe.js": "1dac1ab6e46c44cc4965f8a9cb67a1f8ffdf5dfe5ff3bc039a433fd1d1645837",
+    "chunk-worker.js": "363a017677101c12339230ff68fad564984bcc59062cdaeceeb2dab83ac27645",
+    "environment-map.worker.js": "90c0efb62d50f4aa9e41be2393dd92ff30cb7bd64c0a97061fc1fc188570aa2b",
+    "game.js": "312c87927afceab74e47e211b34391d2f218908084a70aa457d16549503f846f",
+    "game.js.map": "7bc770014ca37e5f2f2b3cacc675234033ab2524b99b668d2ac76f4a13532cd4",
+    "office-controller.js": "4acb7b50032497c922036283a484d5e5774ee40c3411db13743fbade52827243"
+  },
+  "candidate": {
+    "patchSha256": "78efe24da217af6d20b2ecd8a8cc282387fdb2e6fc2b92e77891ba2db3bb00b3",
+    "staged": {
+      "src/game/input/fixed-input-clock.ts": "fb21cf9bfdbd8a0e48f44b0af2f90b34c38da1392307d95ed8ab81a024abd5b3",
+      "src/game/frame-owned-prediction.ts": "d6445324af1af17221df0ac3c57deb15a985128d122004230534a0c78e0efabd",
+      "src/game/frame-owned-input.ts": "297ce13dda2cfd133ce0e8044ca959479c3318f798787707ab066945bfc16bb7",
+      "src/game/frame-owned-replay.ts": "14c25546e59f3570376d504967355e3979b9d8cd95b42f98bbeb3a48b4bb1c9e",
+      "src/game/frame-owned-visual.ts": "2fb20aa3b4c85cde215a580126058efd1ff4a4707c44e8bd6b51564ebd1f8155",
+      "src/game/client.ts": "36e6be22500b78ae35124d990b4285f34cc5be5ddcda7c53b0eb98d7b0ffcd8f"
+    },
+    "tests": {
+      "pass": 73,
+      "fail": 0,
+      "assertions": 1088,
+      "files": 7
+    },
+    "strictTypeScript": "exit0",
+    "applyCheck": "exit0",
+    "bundleSha256": "b77e064337992ea2618b447da3395c72b058586b294407aa0edbe2920f18e287",
+    "mapSha256": "bbc1367132c47f9f8343584d13863a2f42bfe441e805f61e1b7c4b2ddb10bba9",
+    "reviews": "Final staged source independently reviewed; lifecycle QA reconnect provenance independently reviewed. Functional/model scopes do not establish temporal pixels."
+  },
+  "commonNativeSettings": {
+    "CAPTURE_GPU": "1",
+    "CAPTURE_HEADFUL": "0",
+    "CAPTURE_BATTERY_SAVER": "off",
+    "CAPTURE_RENDERER": "the-engine",
+    "CAPTURE_REQUIRE_ENGINE": "1",
+    "CAPTURE_REQUIRE_BODY_WORKER": "1",
+    "CAPTURE_FOREGROUND": "1",
+    "CAPTURE_BROWSER_AUDIT": "1",
+    "CAPTURE_BUNDLE": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\network-stability-20261018\\frame-owned-client-integration\\build-78efe24da217-1792308334392\\game.js",
+    "CAPTURE_BODY_WORKER": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\render-stability-motion-connect-worker.js"
+  },
+  "failedInputClockRuns": {
+    "command": "INPUT_CLOCK_EXPECT=independent MOTION_REPAIR_EXPECT=repaired MOVEMENT_ASSERT=1 PERF_LABEL/MOVEMENT_LABEL=<label> bun tools/capture.ts --motion-repairs --input-clock --input-lifecycle --movement",
+    "gates": [
+      {
+        "label": "independent-input-stage-20261018-r1",
+        "exit": 1,
+        "scope": "Canonical Game with only future application RAF callbacks held. Timers, network and authority remain live. This is not an OS/GPU stall reproduction or an FPS benchmark.",
+        "valid": true,
+        "matches": false,
+        "elapsedMs": 361.30000001192093,
+        "seqAdvance": 28,
+        "submittedAdvance": 28,
+        "ackAdvance": 0,
+        "selfTickAdvance": 6,
+        "heartbeats": 62,
+        "motorStepsDuringHold": 0,
+        "pending": [
+          1,
+          29
+        ],
+        "quietRepair": {
+          "valid": true,
+          "matches": true,
+          "target": 49,
+          "waitMs": 568.7999999523163
+        }
+      },
+      {
+        "label": "independent-input-stage-20261018-r2",
+        "exit": 1,
+        "scope": "Canonical Game with only future application RAF callbacks held. Timers, network and authority remain live. This is not an OS/GPU stall reproduction or an FPS benchmark.",
+        "valid": true,
+        "matches": false,
+        "elapsedMs": 361.0999999642372,
+        "seqAdvance": 27,
+        "submittedAdvance": 27,
+        "ackAdvance": 0,
+        "selfTickAdvance": 6,
+        "heartbeats": 72,
+        "motorStepsDuringHold": 0,
+        "pending": [
+          0,
+          27
+        ],
+        "quietRepair": {
+          "valid": true,
+          "matches": true,
+          "target": 40,
+          "waitMs": 501.5
+        }
+      }
+    ],
+    "lifecycleAndMovementReached": false,
+    "interpretation": "Timer admission/local writer completion progress without RAF or motor is proven. ACK within the original350ms criterion failed twice; no criterion was relaxed. Submitted is not transport delivery. R1/R2 retained prior-frame debt, so admitted count is not solely newly elapsed hold time.",
+    "r2SeparatePostHold": {
+      "scope": "Separate admission-paused observation; does not turn the original361.1ms gate green.",
+      "elapsedMs": 648.6999999880791,
+      "target": 67,
+      "acked": true,
+      "ackTimeline": [
+        {
+          "pageMs": 12366.5,
+          "tick": 648,
+          "ack": 40,
+          "pending": 27,
+          "latestSeq": 67
+        },
+        {
+          "pageMs": 12449.5,
+          "tick": 654,
+          "ack": 44,
+          "pending": 23,
+          "latestSeq": 67
+        },
+        {
+          "pageMs": 12618.400000035763,
+          "tick": 660,
+          "ack": 50,
+          "pending": 17,
+          "latestSeq": 67
+        },
+        {
+          "pageMs": 12743,
+          "tick": 666,
+          "ack": 56,
+          "pending": 11,
+          "latestSeq": 67
+        },
+        {
+          "pageMs": 12889.600000023842,
+          "tick": 672,
+          "ack": 62,
+          "pending": 5,
+          "latestSeq": 67
+        },
+        {
+          "pageMs": 13015,
+          "tick": 678,
+          "ack": 67,
+          "pending": 0,
+          "latestSeq": 67
+        }
+      ]
+    },
+    "caveats": [
+      "Self snapshot cadence is20Hz, so6self ticks do not mean6self publications.",
+      "Server and browser performance clocks are not aligned; HTTP request brackets bound observations.",
+      "JS native-iterator read timestamps show application delivery, not physical UDP arrival.",
+      "At least6 reads cluster within0.3514ms;25 additional deliveries belong to broader health brackets, not all to that cluster.",
+      "Cached causal.stats only update during present/stats and are stale during the RAF hold; motion inspection and snapshot ACK/tick are live.",
+      "Forced repair releases the explicit ready delay before the input gate, but its Wrapped WebTransport/Proxy async instrumentation remains installed. R3 without that wrapper is not a matched transport-scope comparison.",
+      "Router synchronously executes up to6 catch-up world steps per pump; causal contribution to578.6712ms delivery gap remains unproven."
+    ]
+  },
+  "unwrappedInputClock": {
+    "label": "independent-input-stage-unwrapped-20261018-r4",
+    "originalExit": 0,
+    "command": "INPUT_CLOCK_EXPECT=independent PERF_LABEL=<label> bun tools/capture.ts --input-clock",
+    "purpose": "One changed-scope diagnostic removes the persistent repair Proxy/ready wrapper; no repeated900frame score.",
+    "noForcedReadyWrapper": true,
+    "originalAssessment": {
+      "valid": true,
+      "matches": true
+    },
+    "strengthenedOfflineAssessment": {
+      "valid": true,
+      "matches": false,
+      "freshAck": false,
+      "freshAckAdvance": 0
+    },
+    "elapsedMs": 366.4000000357628,
+    "seqAdvance": 28,
+    "submittedAdvance": 28,
+    "ackAdvance": 2,
+    "selfTickAdvance": 6,
+    "heartbeats": 73,
+    "motorStepsDuringHold": 0,
+    "pending": [
+      2,
+      28
+    ],
+    "beforeLatestSeq": 41,
+    "beforeAck": 39,
+    "afterAck": 41,
+    "afterLatestSeq": 69,
+    "separatePostHold": {
+      "target": 69,
+      "acked": true,
+      "elapsedMs": 1092.300000011921
+    },
+    "interpretation": "Original ACK39→41 covers only pre-hold rows40/41; new42..69 are not ACKed within the hold. Original raw report/exit are preserved. Stronger current gate fails in offline reassessment; it has not been rerun natively. Unwrapped observation does not establish a quantitative wrapper effect or locate native/JS/network latency."
+  },
+  "qaFreshAckFix": {
+    "scope": "QA verdict only; production client/server/render runtime unchanged.",
+    "rule": "Require after.ack in (before.latestSeq,before.latestSeq+seqAdvance] modulo65536, in addition to existing independent gate bounds.",
+    "tests": {
+      "pass": 5,
+      "fail": 0,
+      "assertions": 30
+    },
+    "globalTypeScript": "exit0",
+    "independentReview": "clean",
+    "offlineAudit": [
+      {
+        "label": "independent-input-stage-20261018-r1",
+        "original": {
+          "valid": true,
+          "matches": false
+        },
+        "current": {
+          "valid": true,
+          "matches": false,
+          "freshAck": false,
+          "freshAckAdvance": 65535
+        },
+        "rawPreserved": true
+      },
+      {
+        "label": "independent-input-stage-20261018-r2",
+        "original": {
+          "valid": true,
+          "matches": false
+        },
+        "current": {
+          "valid": true,
+          "matches": false,
+          "freshAck": false,
+          "freshAckAdvance": 0
+        },
+        "rawPreserved": true
+      },
+      {
+        "label": "independent-input-stage-unwrapped-20261018-r4",
+        "original": {
+          "valid": true,
+          "matches": true
+        },
+        "current": {
+          "valid": true,
+          "matches": false,
+          "freshAck": false,
+          "freshAckAdvance": 0
+        },
+        "rawPreserved": true
+      },
+      {
+        "label": "render-stability-clock-axes-functional-20261018",
+        "original": {
+          "valid": true,
+          "matches": true
+        },
+        "current": {
+          "valid": true,
+          "matches": true,
+          "freshAck": false,
+          "freshAckAdvance": 65535
+        },
+        "rawPreserved": true
+      }
+    ],
+    "limitations": "Pure assessment and archived-report reassessment, not a new native successful350ms proof. RAF-owned negative control verdict remains unchanged."
+  },
+  "lifecycleAndMovement": {
+    "label": "independent-input-stage-lifecycle-20261018-r3",
+    "exit": 0,
+    "command": "MOVEMENT_ASSERT=1 PERF_LABEL/MOVEMENT_LABEL=<label> bun tools/capture.ts --input-lifecycle --movement",
+    "noForcedReadyWrapper": true,
+    "lifecycle": {
+      "valid": true,
+      "events": 15,
+      "scope": "Actual canonical DOM/agent mode wiring, rendering API calls and WebTransport reconnect. Persisted pagehide/pageshow are explicitly dispatched events, not proof of real BFcache eligibility/restoration. No visibility override, terminal unload, pixel/temporal quality or performance claim.",
+      "reconnect": {
+        "beforeEpoch": 3355317507,
+        "afterEpoch": 685699341,
+        "sameBody": true,
+        "sameRevision": true,
+        "freshBaseline": true
+      }
+    },
+    "movement": {
+      "status": "online",
+      "frames": 402,
+      "distance": 15.372970459411505,
+      "backwardFrames": 0,
+      "maxBackward": 0,
+      "ticks": 597,
+      "maxPending": 19,
+      "alive": true
+    },
+    "limitations": "Functional movement after15 lifecycle checks, not a matched performance comparison,350ms ACK pass, pixel/temporal continuity proof, audio audibility, terminal unload or actual BFcache restoration."
+  },
+  "cleanup": [
+    {
+      "label": "independent-input-stage-20261018-r1",
+      "profile": "C:\\Users\\Roman\\AppData\\Local\\Temp\\thegame-cdp-LQ15Nd\\0",
+      "profileExists": false,
+      "profileParentExists": false
+    },
+    {
+      "label": "independent-input-stage-20261018-r2",
+      "profile": "C:\\Users\\Roman\\AppData\\Local\\Temp\\thegame-cdp-Z31luy\\0",
+      "profileExists": false,
+      "profileParentExists": false
+    },
+    {
+      "label": "independent-input-stage-lifecycle-20261018-r3",
+      "profile": "C:\\Users\\Roman\\AppData\\Local\\Temp\\thegame-cdp-mqL3Tg\\0",
+      "profileExists": false,
+      "profileParentExists": false
+    },
+    {
+      "label": "independent-input-stage-unwrapped-20261018-r4",
+      "profile": "C:\\Users\\Roman\\AppData\\Local\\Temp\\thegame-cdp-NldpyK\\0",
+      "profileExists": false,
+      "profileParentExists": false
+    }
+  ],
+  "artifactHashes": {
+    "artifacts/browser-audit-independent-input-stage-20261018-r1.json": "c6f5901ee733dfc34c52a5176fbc2e05effbe9d77f6712ac398cddbad9f5936e",
+    "artifacts/browser-audit-independent-input-stage-20261018-r2.json": "c53271ac3a745bdc2d33149b737953d84f8beb7dde2ef753bc0b35684a53d43f",
+    "artifacts/browser-audit-independent-input-stage-lifecycle-20261018-r3.json": "7832b3e486541bcf3be1788fae1b13f4c3ec7bffde4df791f0b8330b7a9ef7df",
+    "artifacts/browser-audit-independent-input-stage-unwrapped-20261018-r4.json": "802c187d3e815d4ca9a5d895b45b7feb2f121c9a4ccd336a1d488c942b8403a3",
+    "artifacts/capture-overrides-independent-input-stage-20261018-r1.json": "4fa7b021548ef498de9380d0e2dcd6f4c9bd7d70556d3c66a8fcb2a3f5f94010",
+    "artifacts/capture-overrides-independent-input-stage-20261018-r2.json": "2007240a5985cedb131fa23900e387ff3a377768a1966bc2947ef36ba0610f10",
+    "artifacts/capture-overrides-independent-input-stage-lifecycle-20261018-r3.json": "4d35eab9679b983d3859af8b7401888f5216a8d7234ed5eeba8be00732495b26",
+    "artifacts/capture-overrides-independent-input-stage-unwrapped-20261018-r4.json": "9c89f17d5f76e0f0a5aafec7d2362bc4548d1b28ed47d558c4a90d3c997e885c",
+    "artifacts/independent-input-stage-20261018-r1.log": "9fc2982819fd0706291cde59e988b2efea014ec274aa7d67afe51b02e3c06bdb",
+    "artifacts/independent-input-stage-20261018-r2.log": "2a6cd0471b874c36c6cdb1e8aeccb110bc3ce23a1d193fa22daa40026584000c",
+    "artifacts/input-clock-fresh-ack-gate-audit-20261018.json": "efdcd94d6fd2b817c77c4bd304ad6e13f846ed6410fc84736b4365cc1fb3a0c6",
+    "artifacts/input-clock-fresh-ack-gate-tests-20261018.log": "7e2816e87440bc12b5a372bf8caffb00bb9f3a495bf0b2917d62e8721f94699d",
+    "artifacts/input-clock-fresh-ack-gate-typecheck-20261018.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/input-clock-independent-input-stage-20261018-r1.json": "9842c61e2ada7749e79c206b4623bb7014454d81e1369d81bd82f16bc30fc1c9",
+    "artifacts/input-clock-independent-input-stage-20261018-r2-audit.json": "68b475d2a1e546400a95495cfe13bb62bd243dd9668418634a3e4237cb2a6c40",
+    "artifacts/input-clock-independent-input-stage-20261018-r2.json": "e7456a279519e45fa869485fb82f77c86e9ae29537161ff427b03b81b9930202",
+    "artifacts/input-clock-independent-input-stage-unwrapped-20261018-r4.json": "ced26776cc29c29eb9fc9b7107da6d9079de6dd97f206d5105fb235588862b5d",
+    "artifacts/input-clock-stage-r1-tool-20261018.ts": "1d26d6af8c8e681d7883339890ff75ff4d156f205c67579de631c1e7089236b0",
+    "artifacts/input-clock-stage-r2-tool-20261018.ts": "7044d62fdff60d9987c3b90a6a395925fcc0f0557cbb5a7fbb15dec3d96ce890",
+    "artifacts/input-clock-stage-r4-tool-20261018.ts": "7044d62fdff60d9987c3b90a6a395925fcc0f0557cbb5a7fbb15dec3d96ce890",
+    "artifacts/input-lifecycle-independent-input-stage-lifecycle-20261018-r3.json": "3e5e040b7037657ec25ba07ae1f9ca172e2e6c9551b5e13500c97cf32ba7f204",
+    "artifacts/input-lifecycle-provenance-qa-typecheck-20261018.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/input-lifecycle-stage-r1-tool-20261018.ts": "7c1b8ff1f354086be6a294d8799c4d510bbad41a5b235897cd31be00b974e7b0",
+    "artifacts/input-lifecycle-stage-r2-tool-20261018.ts": "8f13a166187387a85ceaacf490ff7bb3bf8a50c85e3f13a4bc9ce1c2a44fdd0f",
+    "artifacts/input-lifecycle-stage-r3-tool-20261018.ts": "942773c5c499ca3b5b7b463ad829ae7900e5cd64367de3993e4b19de5673a12b",
+    "artifacts/input-stage-lifecycle-native-20261018-r3.log": "c27a1a4d150491fcffd18dc78764d40e206fa1d020b30ed5d5e563996319b3e3",
+    "artifacts/input-stage-r3-capture-tool-20261018.ts": "27f6dcba145a2948d347bc385968b02e6b83c1a83741d38e72fb721c7ef42887",
+    "artifacts/input-stage-r4-capture-tool-20261018.ts": "27f6dcba145a2948d347bc385968b02e6b83c1a83741d38e72fb721c7ef42887",
+    "artifacts/input-stage-unwrapped-native-20261018-r4.log": "d94e846caa0d84ed79f7a518c691604eb9782fc5e26fabb6ff71bdc3fa01338a",
+    "artifacts/motion-repairs-independent-input-stage-20261018-r1.json": "461cd5a92809089d324f67423829a8652ea4ddc7df09dbb5565ec85d48381fc8",
+    "artifacts/motion-repairs-independent-input-stage-20261018-r2.json": "f4e253921589e1e78a71eeb5ac2ea25548142657b6e89df9217452b6edd92ae1",
+    "artifacts/movement-independent-input-stage-lifecycle-20261018-r3.json": "30d233591e5f6ffa68064561a7903aec236e4dc7131f15ca0322f3b6810487f7",
+    "artifacts/network-stability-20261018/analyze-independent-input-r2.ts": "50c4a3c0a3021f6d0b9bc78ec568169063c09c18779bfc431747df5d8c836fb8",
+    "artifacts/network-stability-20261018/audit-fresh-input-ack.ts": "5969ff9da976d5cb167cc5ea7650d1544ffb2a94d1482d5897652abc94cf33a0",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/collision-boundary.test.ts": "ef882a1a866264493790ff08dd56f761781cd1e4c3b7fcdfeec30198aef9d17c",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/fixed-input-clock-admission.test.ts": "994c141f0893f63799bc8d569a689904e6a9beb2da25e46a35b60a7ffc2da519",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/fixed-input-clock-candidate.test.ts": "2c4956b5900d32a5ddea4463e7699d3fd9de3003cea8881bfe4bbcc97868db5a",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/frame-owned-client-integration.patch": "78efe24da217af6d20b2ecd8a8cc282387fdb2e6fc2b92e77891ba2db3bb00b3",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/frame-owned-prediction-candidate.test.ts": "258679eb2191ea83c71f6e4a218e600e3af9c5a2d184cb3dd3065be59be6d5a5",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/frame-owned-visual-candidate.test.ts": "1fc711a5737f90245cab31a72df1849013006ed51622f0257956a1f6947d04e8",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/integration-boundaries.test.ts": "d607af2180c09d3b41646249b1f0a0ae16d2a7c7f8303a058183e1791df0e25d",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/latest-build.json": "6def04c1807a0829a62c4665b85641c85006ee6fbcbd6ad0b8403da41d2ddac8",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/manifest.json": "0759262eef1c1622c761e0aab91690fe2faeb809541c01f2073655922e507f63",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/pause-handoff.test.ts": "72d632b6de9b191a14ccbffc8402c8f6c2d92796fbd39ee00c722a2cd1753ce9",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/stage/src/game/client.ts": "36e6be22500b78ae35124d990b4285f34cc5be5ddcda7c53b0eb98d7b0ffcd8f",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/stage/src/game/frame-owned-input.ts": "297ce13dda2cfd133ce0e8044ca959479c3318f798787707ab066945bfc16bb7",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/stage/src/game/frame-owned-prediction.ts": "d6445324af1af17221df0ac3c57deb15a985128d122004230534a0c78e0efabd",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/stage/src/game/frame-owned-replay.ts": "14c25546e59f3570376d504967355e3979b9d8cd95b42f98bbeb3a48b4bb1c9e",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/stage/src/game/frame-owned-visual.ts": "2fb20aa3b4c85cde215a580126058efd1ff4a4707c44e8bd6b51564ebd1f8155",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/stage/src/game/input/fixed-input-clock.ts": "fb21cf9bfdbd8a0e48f44b0af2f90b34c38da1392307d95ed8ab81a024abd5b3",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/verification.json": "1e2a0691595ed62a99107aeaa45ffbfd49f6c21b5e0f201efa873a61a25daeb5",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/apply-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/functional.log": "cf3a6d7c159fd0d951968204a537352364b134c6283fa4986387122d1c57c8ab",
+    "artifacts/network-stability-20261018/frame-owned-client-integration/typescript.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test/qa-input-clock.test.ts": "e56485f813253df270146f28792588e54281aa44c018985678d13b7911e32740",
+    "tools/qa-input-clock.ts": "ba639b7e9a358bc8ad0d4f13bb83b2023f03759de5b21e8d3da4e50386bc6daa"
+  },
+  "remaining": [
+    "Attribute native delivery/ACK latency with bounded passive pump/I/O observation before changing scheduling policy.",
+    "Reduce demonstrated indivisible navigation cost while preserving paths, query semantics and quality.",
+    "Production adoption and permanent regressions require native gates and current global checks; candidate stays ignored.",
+    "Known341ms frame tail and temporal object/shadow/reflection quality require further measured verification."
+  ]
+}

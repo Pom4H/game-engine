@@ -10,7 +10,7 @@ interface PendingTexture {
  * retain() releases obsolete scenes, including their unfinished uploads. */
 export class SurfaceTextures {
  private readonly textures=new Map<string,any>();private readonly pending=new Map<string,PendingTexture>();private disposed=false;
- constructor(private readonly device:any){}
+ constructor(private readonly device:any,private readonly assetBase?:string){}
  get(url:string):any{return this.textures.get(url);}
  async load(url:string):Promise<void>{
   if(this.disposed)throw new Error('Material textures have been disposed');
@@ -25,7 +25,8 @@ export class SurfaceTextures {
  }
  private async upload(url:string,pending:PendingTexture):Promise<void>{
   try{
-   const response=await fetch(url,{signal:pending.controller.signal});if(pending.cancelled||this.disposed)return;
+   const fetchURL=this.assetBase===undefined?url:new URL(url,this.assetBase).href;
+   const response=await fetch(fetchURL,{signal:pending.controller.signal});if(pending.cancelled||this.disposed)return;
    if(!response.ok)throw new Error(`Material texture ${url}: HTTP ${response.status}`);
    const blob=await response.blob();if(pending.cancelled||this.disposed)return;
    // Decoding itself cannot be aborted, so immediately close any result belonging

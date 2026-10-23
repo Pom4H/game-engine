@@ -1,0 +1,34 @@
+{
+  "date":"2026-10-18",
+  "status":"adopted_with_scoped_cpu_evidence",
+  "source":"src/core/spatial-hash.ts",
+  "beforeSourceSha256":"cab53a0f49a8125cc42a62a738bb00f64132b45839859f9c8f7ddd2437640c98",
+  "afterSourceSha256":"b9602293a0fd8fc9446888b12c3915041f373deb6d198acf3347087e8bd5a5d8",
+  "triggerEvidence":{
+    "artifact":"../thegame/artifacts/network-stability-20261018/authority-spatial-query-counts-current-20261018.json",
+    "measuredTicks":600,"nearOwnedCalls":590771,"consecutiveCachedBoundsHits":239220,
+    "repeatShare":0.40492847,"averageCandidateCount":56.15,"maximumCandidateCount":375,
+    "scope":"Counts-only wrapper, native hit/miss deltas match exactly; its timing is invalid. Exact repeated arguments are a smaller subset than identical numeric cell/order bounds."
+  },
+  "change":"Retain six numeric query bounds and one reference already in the existing bounded cache. Repeated bounds bypass query-key construction and Map.get after original validation and the live single-bucket decision.",
+  "preserved":["public near/nearOwned source and fresh-copy/custom-handler semantics","exact result order and enclosing-ray tie policy","128-query and16384-reference bounds","FIFO insertion/eviction without promotion on hits","existing stale cached membership inside nested batches until outer endBatch invalidation","validation and option-getter read order before shortcut","no retention of plain buckets or over-budget uncached results"],
+  "validation":{
+    "newFrozenOracleTests":7,"relatedEngineTests":34,"failed":0,
+    "canonicalPhysicsTests":63,"canonicalPhysicsAssertions":8826,
+    "typecheck":"passed","build":"passed","independentSourceReview":"no actionable defect found",
+    "tests":"test/spatial-cached-bounds.test.mjs",
+    "logsPrefix":"../thegame/artifacts/network-stability-20261018/spatial-cached-bounds-",
+    "scope":"Frozen original source, seeded turnover/order/caps, FIFO retention, nested batches/live buckets, output proxies, public overrides/accessor read counts, malformed bounds/getter invalidation, reentrant sorting and actual ray/filter geometry/enabled mutations."
+  },
+  "productionCpuBenchmark":{
+    "artifact":"../thegame/artifacts/network-stability-20261018/spatial-cached-bounds-production-benchmark.json",
+    "transpiledProductionEqualsMeasuredPrototype":true,
+    "pairs":7,"queriesPerPair":24000,"pattern":"40percent consecutive repeated cached bounds",
+    "cases":[
+      {"candidates":64,"beforeMedianMs":7.5085,"afterMedianMs":5.2129,"ratio":1.440},
+      {"candidates":257,"beforeMedianMs":12.488,"afterMedianMs":10.7554,"ratio":1.161},
+      {"candidates":1025,"beforeMedianMs":36.2496,"afterMedianMs":33.6647,"ratio":1.077}
+    ],
+    "limits":"Mixed query pattern models repeat share, not the complete authority trace. Large/no-repeat cases offer little gain, and preceding runs saw about8percent no-repeat overhead. No allocation/GC, whole-authority or native FPS gain is inferred."
+  }
+}

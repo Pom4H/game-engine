@@ -1,0 +1,326 @@
+{
+  "date": "2026-10-18",
+  "goalStatus": "active",
+  "performanceTargetMet": false,
+  "changes": [
+    "Monotonic reset-aware RAF clock prevents negative dt, correction growth and spurious catchup after resume/visibility/studio/benchmark reset.",
+    "Private compound basis rotation preserves exact operation stages with fewer intermediate array expressions.",
+    "Bounded snow raw-ID to projected-ID cache retains original keep Set, residency, geometry, pose setters and shadow/probe/history behavior."
+  ],
+  "details": [
+    "docs/render-evidence/input-frame-clock-20261018.json",
+    "docs/render-evidence/rotation-axes-scalar-20261018.json",
+    "docs/render-evidence/snow-volume-projection-ids-20261018.json"
+  ],
+  "source": [
+    {
+      "path": "../thegame/src/game/client.ts",
+      "sha256": "c67c64be22aa412e52945286d370be6e8d085169f1649d0542cd52aba5c4961b"
+    },
+    {
+      "path": "../thegame/src/game/render/frame-clock.ts",
+      "sha256": "8ed8c41a6bd77ed791053c3b236937d302cdabe8af778351f173811dc4d0acf1"
+    },
+    {
+      "path": "../thegame/src/game/render/the-engine-projection.ts",
+      "sha256": "0f203cbd22ecf50cb7247a356c18b51d4a2247db3e16e322fd98efadfdd89bb8"
+    },
+    {
+      "path": "src/physics/compound.ts",
+      "sha256": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399"
+    }
+  ],
+  "build": {
+    "engine": "passed by targeted adoption build; source/dist hashes frozen",
+    "engineTypecheck": {
+      "path": "artifacts/render-stability-frame-axes-engine-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "gameTypecheck": {
+      "path": "../thegame/artifacts/render-stability-clock-axes-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "qaTypecheck": {
+      "path": "../thegame/artifacts/render-stability-clock-axes-qa-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "gameBuild": {
+      "path": "../thegame/artifacts/render-stability-clock-axes-build.log",
+      "sha256": "fc78189c07f538a0fc7740109eab2c021a7eefd84aaa66a004f213bd8d8db56b"
+    },
+    "artifacts": [
+      {
+        "path": "../thegame/artifacts/render-stability-clock-axes-game.js",
+        "sha256": "633d37b05b8ea101b8f08103d0ff184ad7c0c16bbf95286206acc57d6faaea0f"
+      },
+      {
+        "path": "../thegame/artifacts/render-stability-clock-axes-game.js.map",
+        "sha256": "65e1111e9a78c4d348e587e451be8f11fc4c1e7f447e32483bf056a76d1c8761"
+      },
+      {
+        "path": "../thegame/artifacts/render-stability-clock-axes-worker.js",
+        "sha256": "e8fa50aba6fa7260a71b04ac382baf67b5e33159ef7973bc5d17db137a5cb19b"
+      }
+    ],
+    "publicFilesMatchArchive": true,
+    "workerNote": "Worker bundle hash changed because it includes the compound module. Geometry/protocol algorithms are unchanged and current-source actual Worker output oracle was repeated."
+  },
+  "validation": {
+    "engine": {
+      "tests": 776,
+      "passed": 757,
+      "failed": 0,
+      "skipped": 19,
+      "log": {
+        "path": "artifacts/render-stability-clock-axes-engine-tests-final.log",
+        "sha256": "b485b9e9f77f0605601ef29662ef62ead6092620432989c39f652325af2b13c5"
+      },
+      "finalRotationTests": {
+        "path": "artifacts/render-stability-clock-axes-final-rotation-tests.log",
+        "sha256": "0f0ece413a04b51be795eb2fc95adad42525722df147e64af992d5284af76484"
+      },
+      "orderNote": "Final six rotation tests were repeated after the last test-only explicit zero/infinity cases were frozen; production source/dist did not change."
+    },
+    "canonicalGameFocused": {
+      "passed": 402,
+      "failed": 0,
+      "bunExpectCalls": 83798,
+      "files": 52,
+      "log": {
+        "path": "../thegame/artifacts/render-stability-clock-axes-game-tests.log",
+        "sha256": "fd6507d99f5ce36fd1680db46704fb7a1303fc123cb8a332d45b71695265f9a7"
+      },
+      "manifest": {
+        "path": "../thegame/artifacts/render-stability-clock-axes-test-paths-20261018.json",
+        "sha256": "23aed7797ed66dc7374e2b5465460e312f2c5a5f3b77a1da9b8db930e66336f2"
+      },
+      "priorLabelsPreserved": 356,
+      "missingPriorLabels": [],
+      "coverage": {
+        "path": "../thegame/artifacts/render-stability-clock-axes-test-coverage.json",
+        "sha256": "7e2e81e8bd163339664e31b54d994d311c82dfed2ab029924a41f950ee84bec3"
+      }
+    },
+    "actualWorker": {
+      "passed": true,
+      "records": 222,
+      "fullFloat32KeyRestCases": 213,
+      "servicePresentationCases": 9,
+      "errors": [],
+      "controller": true,
+      "report": {
+        "path": "../thegame/artifacts/body-worker-prototype/production-clock-axes-20261018/browser-report.json",
+        "sha256": "f989abf6def96a778fbed0c407876d1285b3ee48fc6d8a36de03b6aeca56643f"
+      },
+      "scope": "Real Chrome155 module Worker with --disable-gpu, complete output comparisons and service flows; not native GPU/performance."
+    }
+  },
+  "nativeScore": {
+    "completed": true,
+    "captureExitCode": 1,
+    "postScoreFailure": "Subsequent input-clock gate required completely empty pending. After5s paused, three pending commands remained; RAF hold and movement were not reached in this capture. This does not invalidate the already completed900-frame score. No second900-frame score was run.",
+    "report": {
+      "path": "../thegame/artifacts/performance-live-render-stability-clock-axes-native-20261018.json",
+      "sha256": "39852db770c632b6b06e0855c5294e9be9ac2bceae4ce45655c77854a3eeba37"
+    },
+    "log": {
+      "path": "../thegame/artifacts/render-stability-clock-axes-native-20261018.log",
+      "sha256": "dce524e424acff83dcb56f0645df4c84075aac402995c4ef408f9ac7d46912a1"
+    },
+    "overrides": {
+      "path": "../thegame/artifacts/capture-overrides-render-stability-clock-axes-native-20261018.json",
+      "sha256": "a1d274fde349bca2702125cf0fe385ba82d82db76a8914e26397ba5bbe75e576"
+    },
+    "browserAudit": {
+      "path": "../thegame/artifacts/browser-audit-render-stability-clock-axes-native-20261018.json",
+      "sha256": "d8a254386edeced76c694a431d6eb3358d4ded88ca37c9ac1ed11f86f8b067a2"
+    },
+    "frames": 900,
+    "averageFPS": 68.55836983431728,
+    "p95Ms": 28.400000000001455,
+    "maxMs": 311.8999999999942,
+    "framesOver33Ms": 11,
+    "framesOver50Ms": 2,
+    "browser": {
+      "mode": "native-gpu",
+      "batterySaverRequested": "off",
+      "backend": "webgpu",
+      "width": 1280,
+      "height": 720,
+      "renderResolution": [
+        704,
+        396
+      ]
+    },
+    "qualityLock": {
+      "enabled": true,
+      "requested": {
+        "adaptive": false,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "taa": true,
+        "bloom": false
+      },
+      "initial": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "actual": {
+        "environmentMode": "world",
+        "preset": "clear",
+        "hiz": false,
+        "taa": true,
+        "bloom": false,
+        "groundLitter": true,
+        "motionBlur": 0,
+        "dof": 0,
+        "renderScale": 0.55,
+        "drawDistance": 420,
+        "visual": {
+          "sunElevation": 0.9075712110370514,
+          "sunTemperature": 5700,
+          "skyTurbidity": 2.2,
+          "humidity": 0.42,
+          "cloudCoverage": 0.16,
+          "fogDensity": 0.00065,
+          "wetness": 0,
+          "exposureBias": -0.25,
+          "artificialLightIntensity": 0.02,
+          "sunIntensity": 4.2,
+          "skyIntensity": 0.7
+        }
+      },
+      "matches": true
+    },
+    "rendererErrors": [],
+    "inputWindow": {
+      "capacity": 48,
+      "minPending": 37,
+      "maxPending": 48,
+      "fullFrames": 352
+    },
+    "workerMeasured": {
+      "jobsDispatched": 15,
+      "jobsCompleted": 15,
+      "publications": 15,
+      "asyncPublications": 15,
+      "syncPublications": 0,
+      "asyncFirstSight": 14,
+      "asyncReplacement": 1,
+      "syncFirstSightPanel": 0,
+      "syncFirstSightOther": 0,
+      "syncReplacementPanel": 0,
+      "syncReplacementOther": 0,
+      "syncByType": {
+        "truck": 0,
+        "tram": 0,
+        "metro": 0,
+        "bus": 0,
+        "sedan": 0,
+        "sport": 0,
+        "bike": 0,
+        "kukuruznik": 0,
+        "monoplane": 0,
+        "hatch": 0,
+        "wagon": 0,
+        "coupe": 0,
+        "taxi": 0,
+        "suv": 0,
+        "van": 0,
+        "pickup": 0,
+        "classic": 0,
+        "cruiser": 0,
+        "scooter": 0,
+        "bicycle": 0,
+        "cargoBike": 0,
+        "kickScooter": 0,
+        "eScooter": 0,
+        "police": 0,
+        "compact": 0,
+        "crossover": 0,
+        "m3": 0,
+        "v6": 0
+      }
+    },
+    "windowVisibleFocusedStable": true,
+    "screenshot": {
+      "path": "../thegame/artifacts/performance-live-render-stability-clock-axes-native-20261018.png",
+      "sha256": "e196920199a12365b9f65e0d4d6bab9bcd35dd376bdb17cf7409bddf27e6bd62"
+    },
+    "imageScope": "Post-score live screenshot visually inspected: avatar, vehicles, snow and buildings present. One frame is not temporal flicker/occlusion proof.",
+    "limits": "Single fresh-session current-build score at704x396 internal pixels. Scene history differs from prior scores; no causal improvement or freeze-free result. Existing30settle frames per benchmarkLive remain in addition to requested600warmup."
+  },
+  "functionalCapture": {
+    "exitCode": 0,
+    "log": {
+      "path": "../thegame/artifacts/render-stability-clock-axes-functional-20261018.log",
+      "sha256": "464c423f6bd675d3fea2b304138d71e93194d9059ee08808d49df6ac5b6ceba0"
+    },
+    "clock": {
+      "report": {
+        "path": "../thegame/artifacts/input-clock-render-stability-clock-axes-functional-20261018.json",
+        "sha256": "6256ca7091987ed73f2a76505bb3628e77fb46ad705f343120658d3e8ba3b966"
+      },
+      "elapsedMs": 350.5,
+      "seqAdvance": 0,
+      "submittedAdvance": 0,
+      "ackAdvance": 3,
+      "serverTickAdvance": 6,
+      "heartbeats": 70,
+      "motorStepsDuringHold": 1,
+      "pending": [
+        4,
+        1
+      ],
+      "valid": true,
+      "matches": true,
+      "scope": "Revised prerequisite allows at most4pending, leaving44free slots above the maximum40 admitted commands accepted by the independent-mode gate. Raw before/after pending are explicit. Existing onSelf replay accounts for one motor step during hold. Baseline remains RAF-coupled; independent candidate must also prove submission/ACK progress and zero held-frame motor steps."
+    },
+    "movement": {
+      "report": {
+        "path": "../thegame/artifacts/movement-render-stability-clock-axes-functional-20261018.json",
+        "sha256": "32fcdfe59b525b0d9315614e7f696ae02fb142a7288d3e2df226030a472de569"
+      },
+      "status": "online",
+      "frames": 615,
+      "distance": 12.21773028014995,
+      "backwardFrames": 0,
+      "maxBackward": 0,
+      "ticks": 450,
+      "maxPending": 48,
+      "alive": true
+    },
+    "overrides": {
+      "path": "../thegame/artifacts/capture-overrides-render-stability-clock-axes-functional-20261018.json",
+      "sha256": "044aa9baa5d4ccd122745da33208621e039c1f28959ff51845f0968ced8ccd0c"
+    },
+    "scope": "Fresh separate native-profile functional capture; no repeat performance score or fixed-quality FPS claim."
+  },
+  "remaining": [
+    "Native long frame tail persists:311.9ms maximum.",
+    "Input creation and repair-history regeneration are still RAF-owned; three unacknowledged rows could not fully drain after a pause.",
+    "Frame-owned prediction/input/visual prototypes remain ignored pending complete lifecycle/collider/manual/BFcache integration.",
+    "No new all-scene temporal pixel/occlusion proof or full1080p target is claimed."
+  ]
+}

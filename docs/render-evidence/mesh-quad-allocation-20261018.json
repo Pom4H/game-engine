@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "passed",
+  "problem": "The verified canonical collection-inclusive heap capture attributed 1335.50 MiB of sampled self allocation to MeshBuilder.quad. Its difference, cross-product and normalization helpers created private vector arrays for every quad.",
+  "change": {
+    "file": "../thegame/src/game/runtime/render.js",
+    "behavior": "Calculate private normal and edge-length intermediates as scalars for ordinary three-component Array vectors. Preserve arithmetic order and inverse-length multiplication. Typed arrays, Array subclasses, custom constructor/species or map methods and extended vectors retain the preceding map-based arithmetic.",
+    "preserved": ["all six vertices and their order", "the raw source array passed to transform callbacks", "callback index and source-array arguments", "fresh per-quad normal and default UV vectors", "normal/UV aliases across vertex calls", "observable callback mutation and reentry", "default and explicit UVs", "signed zero and degeneracy", "existing nonfinite geometry rejection"],
+    "unchanged": "Tessellation, procedural quality, geometry topology, vertex output layout, workers, frame budgets, panels and projection."
+  },
+  "oracle": {
+    "test": "../thegame/test/mesh-builder-quad-scalar.test.ts",
+    "reference": "../thegame/test/fixtures/mesh-builder-quad-before-scalar.ts",
+    "cases": 7,
+    "comparison": "Exact full Float64 output bytes for finite values, including signed zero; Object.is equality for all values, with NaN payload bits excluded because JIT canonicalization is not a numeric-value change.",
+    "coverage": ["160 deterministic ordinary, transformed, mirrored, tiny-scale and explicit-UV quads", "collapsed and collinear geometry, underflow and overflow", "NaN and Infinity classification", "Float32Array arithmetic and subclass species", "extended, sparse and custom-map vectors", "retained transform/vertex arguments and mutations", "reentrant quad calls and throwing callbacks", "full box, tube and ellipsoid output", "compileGameGeometry rejects invalid output at the same boundary"]
+  },
+  "validation": {
+    "gameTypecheck": "passed",
+    "command": "bun test ./test/mesh-builder-quad-scalar.test.ts ./test/panel-body-render-scalar.test.ts ./test/cabin-buffer.test.ts ./test/aircraft-instances.test.ts",
+    "passed": 16,
+    "failed": 0,
+    "assertions": 828
+  },
+  "pairedMechanism": {
+    "script": "../thegame/artifacts/benchmark-mesh-quad.ts",
+    "artifact": "../thegame/artifacts/mesh-quad-allocation-mechanism.json",
+    "method": "Bundled actual production MeshBuilder and frozen preceding quad; Node inspector at a 4096-byte allocation sampling interval, including objects collected by minor and major GC. Each allocation condition emits 16384 unchanged quads in 256-quad builders. Seven alternating timing pairs use 2048 quads per sample.",
+    "untransformedEstimatedAllocatedBytes": {"reference":179810600,"production":154633360},
+    "transformedEstimatedAllocatedBytes": {"reference":182280064,"production":172672352},
+    "untransformedMedianMs": {"reference":3.3384,"production":2.7614},
+    "transformedMedianMs": {"reference":3.9014,"production":2.8649},
+    "interpretation": "The final-source isolated run sampled approximately 14.0% and 5.3% less total allocated memory. Earlier samples varied with JIT and allocation sampling. These measurements do not establish canonical wall time or FPS."
+  },
+  "wholeBodyPairedCheck": {
+    "script": "../thegame/artifacts/benchmark-mesh-quad-body.ts",
+    "artifact": "../thegame/artifacts/mesh-quad-body-paired.json",
+    "method": "Actual source drawPanelPassenger with only MeshBuilder.prototype.quad swapped to the frozen reference or production method and restored in finally. Seven alternating timing pairs after warmup, four complete body renders per timing sample.",
+    "fullFloat64OutputBytesIdentical": true,
+    "sedan": {"outputBytes":2139696,"referenceMedianMs":48.8379,"productionMedianMs":48.007},
+    "sport": {"outputBytes":2049840,"referenceMedianMs":43.1489,"productionMedianMs":43.0901},
+    "sculptedDamagedSedanWithOpenDoors": {"outputBytes":17536272,"referenceMedianMs":644.4757,"productionMedianMs":631.3432},
+    "interpretation": "The final guard implementation showed no whole-body CPU regression in these three paired fixtures. This is an isolated CPU check rather than a live frame-time or GC-tail result."
+  },
+  "limits": "No native browser/GPU or live FPS capture was run for this patch. The oracle covers ordinary numeric vector arrays and opaque transform/vertex callbacks; arbitrary proxy or accessor-based vector-property side effects are not certified. Declaration stubs do not prove runtime type safety. The allocation mechanism is not evidence that long GC tasks or live frame hitches are fixed."
+}
