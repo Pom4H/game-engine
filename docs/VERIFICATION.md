@@ -29,7 +29,32 @@ the experiment does not isolate one of them as the entire cause. Its source
 fences are partial, the synthetic fixture is not R51's actual distribution, and
 Windows CPU counters are quantized. No Chrome/FPS result follows. Full records:
 `artifacts/freeze-environment-dispatch-batch-20261023/APPLIED-RESULTS.md`.
-Native joint quality and new real travel measurements are still pending here.
+The later joint native and travel results are recorded immediately below.
+
+## Joint R12 quality and travel scope
+
+Game `b316df12f6a136d8e038b3446ccada905d487cd4` / Engine
+`1c118f22caf8b5e44c7cf4cacd633dcc46014bbc` pass all twelve native R12
+fixtures with exact retained R4–R11 PNG/HDR/depth, packed geometry/models,
+transparent order and counters. The 306 source/asset hashes, five bundles and
+twelve PNG hashes agree after the run. Six actual worker draws retain full
+1280×720 / scale 1 / 420 m / TAA / bloom / litter and the original three banks.
+Game's independent proof is `artifacts/freeze-r12-quality-independent-proof.json`;
+raw report SHA-256
+`aff1378e563921341476a373ffa844529088fa88734dc5f3ee510358a802d24e`.
+The final full Game run is **2618 pass / 7 skip / 0 fail**, with TypeScript and
+production build passing separately. This is not a runtime frame-time bound.
+
+The same frozen R52 build's unprofiled headless car R54 reaches **56.85 FPS /
+47.9 ms maximum**, intact. Profiled flight R52 reaches 101.68 FPS / 41.8 ms
+maximum, intact. Worker-profiled car R55 reaches 64.62 FPS / 40.5 ms maximum,
+but collision and late body-currentness gates fail. Different scene histories
+do not prove a paired speedup, freeze-caused crash or desktop performance.
+Strict normal-window R53 fails before scoring because its separately launched
+window reports hidden before game boot. No visibility/quality/scenario gate is
+relaxed. See the [Game follow-up](../../thegame/docs/verification/freeze-followup-20261023.md)
+for the immutable build, raw clocks, source proofs and retained failed results.
+The real-window 60 FPS/no-freeze goal remains unmet/unverified.
 
 ## Bounded environment worker — 2026-10-23
 
