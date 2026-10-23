@@ -4,6 +4,33 @@ This record covers correctness checks in the isolated migration workspace. It is
 not a 60 FPS, frame-stall, GPU image, speech-quality or live-world acceptance result.
 Skipped checks remain unverified.
 
+## Bounded dispatch overhead — 2026-10-23
+
+Engine `fad121c91b376c96791d9d038ba4ad654a111fe4` passes `npm run check`:
+**1096 pass, 19 skip, 0 fail**, 1115 tests, 61.290141 seconds, including
+TypeScript and build. Raw `artifacts/freeze-engine-full-dispatch512.log` SHA-256:
+`84f0702ffe05fff0051d8a8b4ebfdd25c75365e082991c7b23c3023d081ffb66`.
+The 25-case focused actual-cursor/numerical/host/lifecycle/heartbeat group also
+passes. Staging normalization changes neither reviewed source file.
+
+Only two driver expressions change: cursor chunks and credit increments become
+512 instead of 32. The hard **4096 units per notification**, one pending item,
+alternating ports, exact numeric cursor and complete-only publication remain.
+The secondary 1 ms clock target is now checked between 512-unit chunks, so its
+overshoot granularity is coarser; no hard wall deadline is claimed. Added tests
+observe eight actual 512-credit steps with a frozen clock, one step on deadline
+crossing, and terminal cleanup when the second clock read throws. The existing
+independent arithmetic bound, exact SH/all-mip bytes and actual heartbeat remain.
+
+The artifact-only paired Node 24.19 experiment observes warm two-proxy means
+60.59 → 40.93 ms and synthetic 128-proxy means 851.68 → 637.88 ms, with exact
+output digests. This reduces step dispatch/state spills as well as clock reads;
+the experiment does not isolate one of them as the entire cause. Its source
+fences are partial, the synthetic fixture is not R51's actual distribution, and
+Windows CPU counters are quantized. No Chrome/FPS result follows. Full records:
+`artifacts/freeze-environment-dispatch-batch-20261023/APPLIED-RESULTS.md`.
+Native joint quality and new real travel measurements are still pending here.
+
 ## Bounded environment worker — 2026-10-23
 
 Engine `828c46a54e6f87f246fddac650e865198f9c4d45` passes `bun run check`:
