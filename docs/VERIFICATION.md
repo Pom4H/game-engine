@@ -4,6 +4,51 @@ This record covers correctness checks in the isolated migration workspace. It is
 not a 60 FPS, frame-stall, GPU image, speech-quality or live-world acceptance result.
 Skipped checks remain unverified.
 
+## Bounded environment worker — 2026-10-23
+
+Engine `828c46a54e6f87f246fddac650e865198f9c4d45` passes `bun run check`:
+**1094 pass, 19 skip, 0 fail**, 1113 tests, 61.549719 seconds, including project
+typecheck and production build. Raw log
+`artifacts/freeze-engine-full-cooperative-r2.log` has SHA-256
+`9af8a7f5d87f3a9919488359362e868962b194ad3085ef1f552b66a2bcbb2e17`.
+The entry's staged line endings were normalized after the run; its code is
+unchanged. The numerical source, driver and final tests retain their reviewed
+content. This result supersedes the earlier main-only full Engine count below.
+
+The background map bake uses an explicit numerical phase cursor. Proxy copy,
+512-sample SH integration, cold direction tables, tile filtering and every pixel
+candidate spend finite work credits; each notification allows at most 4096
+operations, checking its secondary time target between 32-operation chunks.
+The existing single MessageChannel alternates ports so a handler cannot keep
+refilling its own receiving queue. One cursor and one pending notification
+remain. Only complete SH and all nine original mip levels publish. The public
+synchronous bake, host active/latest/reset/idle behavior and graphics settings
+are unchanged.
+
+Thirteen new tests plus the ten existing environment-owner tests verify full
+frozen SH/F16 bytes, credit 1 and 4096, maximum canonical proxies, mixed NaN
+branch behavior, actual worker errors/termination, request reentry, cancellation,
+and both port directions. Root's strengthened heartbeat assertion exposed an
+earlier false positive: missing heartbeat index -1 had passed an ordering test.
+The first full check retains **1093 pass / 19 skip / 1 fail** in
+`freeze-engine-full-cooperative-r1.log`. The corrected independent local
+heartbeat test reproduces the old actual entry's failure and passes after port
+alternation. It establishes that particular event-loop opportunity, not universal
+scheduler fairness or a wall-time deadline.
+
+The first two generator variants are rejected and retained. In the final small
+Node/V8 paired diagnostic, two-proxy warm driver elapsed times are 60.62/59.58 ms
+against synchronous 58.40/57.70 ms. Cold driver is slower: 152.93/169.61 ms against
+113.14/100.99 ms. Thread CPU counters are quantized. These two-round fixtures do
+not establish Chrome FPS or the distribution of actual world probes. Large
+typed-array allocations/zeroing, GC, transfer/upload and OS scheduling remain
+atomic boundaries without a latency guarantee. No claim attributes R50's RAF
+gaps to this bake. Complete raw results, rejected sources and exact source hashes:
+`artifacts/freeze-cooperative-environment-bake-20261023/RESULTS-R4.md`.
+
+The isolated x-sweep physics and floor-admission proposals remain unshipped;
+neither is part of this correctness result.
+
 ## Current main and retained APIs
 
 Engine merge `d7577faf3e4f8f3ea9798628994bea55e2598dbb` has parents
