@@ -1,0 +1,565 @@
+{
+  "engineCommit": "5b33e4aa816eac6658974587cad5022c9b54b71e",
+  "sampleTimeS": 0.65,
+  "cases": [
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "listen",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.35,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.35,
+        "leftHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "rightHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "headYaw": 0,
+        "headNod": 0.0077963070866482196,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "ask",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.35,
+        "smile": 0,
+        "browLift": 0.2,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.35,
+        "leftHandOffset": [
+          0.077,
+          0.08399999999999999,
+          -0.0245
+        ],
+        "rightHandOffset": [
+          0.077,
+          0.08399999999999999,
+          0.0245
+        ],
+        "headYaw": 0,
+        "headNod": 0.011841476967793895,
+        "smile": 0,
+        "browLift": 0.2,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "explain",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.35,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.35,
+        "leftHandOffset": [
+          0.027999999999999997,
+          0.034999999999999996,
+          0
+        ],
+        "rightHandOffset": [
+          0.09663119843089797,
+          0.09958367780325716,
+          0.01225
+        ],
+        "headYaw": 0,
+        "headNod": 0,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "decline",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.35,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.35,
+        "leftHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "rightHandOffset": [
+          0.06999999999999999,
+          0.13299999999999998,
+          0.013999999999999999
+        ],
+        "headYaw": -0.025484035322810836,
+        "headNod": 0,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "acknowledge",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.35,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.35,
+        "leftHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "rightHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "headYaw": 0,
+        "headNod": 0.03114715428343547,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "clarify",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.35,
+        "smile": 0,
+        "browLift": 0.2,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.35,
+        "leftHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "rightHandOffset": [
+          0.0595,
+          0.0945,
+          0.0245
+        ],
+        "headYaw": 0,
+        "headNod": 0.017499999999999998,
+        "smile": 0,
+        "browLift": 0.2,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "withdraw",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.35,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.35,
+        "leftHandOffset": [
+          -0.01225,
+          0,
+          -0.008749999999999999
+        ],
+        "rightHandOffset": [
+          -0.01225,
+          0,
+          0.008749999999999999
+        ],
+        "headYaw": 0.034208711240293475,
+        "headNod": 0,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "greet",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.85,
+        "smile": 0.35,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.85,
+        "leftHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "rightHandOffset": [
+          0.102,
+          0.7054999999999999,
+          0.12458786271956165
+        ],
+        "headYaw": 0,
+        "headNod": -0.02236723427249958,
+        "smile": 0.35,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "think",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.9,
+        "smile": 0,
+        "browLift": 0.3,
+        "browTilt": 0,
+        "squint": 0.25,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.9,
+        "leftHandOffset": [
+          0,
+          0,
+          0
+        ],
+        "rightHandOffset": [
+          0.135,
+          0.6120000000000001,
+          -0.07200000000000001
+        ],
+        "headYaw": -0.023682953935587794,
+        "headNod": 0.03721607047020939,
+        "smile": 0,
+        "browLift": 0.3,
+        "browTilt": 0,
+        "squint": 0.25,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "celebrate",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.9,
+        "smile": 0.8,
+        "browLift": 0.3,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.9,
+        "leftHandOffset": [
+          0.09000000000000001,
+          0.9450000000000001,
+          -0.14400000000000002
+        ],
+        "rightHandOffset": [
+          0.09000000000000001,
+          0.9450000000000001,
+          0.14400000000000002
+        ],
+        "headYaw": 0,
+        "headNod": -0.040599349603864784,
+        "smile": 0.8,
+        "browLift": 0.3,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "comfort",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.65,
+        "smile": 0.2,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.65,
+        "leftHandOffset": [
+          0.065,
+          0.0845,
+          -0.0195
+        ],
+        "rightHandOffset": [
+          0.2015,
+          0.13,
+          -0.026000000000000002
+        ],
+        "headYaw": 0,
+        "headNod": 0.021991314368760093,
+        "smile": 0.2,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "startle",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.85,
+        "smile": 0,
+        "browLift": 0.85,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.85,
+        "leftHandOffset": [
+          0.153,
+          0.5695,
+          -0.102
+        ],
+        "rightHandOffset": [
+          0.153,
+          0.5695,
+          0.102
+        ],
+        "headYaw": 0,
+        "headNod": -0.057515745272141774,
+        "smile": 0,
+        "browLift": 0.85,
+        "browTilt": 0,
+        "squint": 0,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    },
+    {
+      "cue": {
+        "version": 1,
+        "serial": 1,
+        "action": "tired",
+        "startS": 0,
+        "durationS": 2.4,
+        "intensity": 0.7,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0.4,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      },
+      "performance": {
+        "weight": 0.7,
+        "leftHandOffset": [
+          -0.017499999999999998,
+          -0.010499999999999999,
+          0
+        ],
+        "rightHandOffset": [
+          -0.017499999999999998,
+          -0.010499999999999999,
+          0
+        ],
+        "headYaw": 0,
+        "headNod": 0.0631545438282341,
+        "smile": 0,
+        "browLift": 0,
+        "browTilt": 0,
+        "squint": 0.4,
+        "gazeTarget": [
+          2,
+          1.6,
+          0
+        ]
+      }
+    }
+  ]
+}

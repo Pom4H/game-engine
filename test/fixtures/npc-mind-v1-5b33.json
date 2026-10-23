@@ -1,0 +1,304 @@
+{
+  "provenance": {
+    "engineCommit": "5b33e4aa816eac6658974587cad5022c9b54b71e",
+    "sourceHashes": {
+      "motivation": "f9c6a06fe4e8f455b3e1c59ca277a19972be8ea8e2846af465f0fb89d989ef73",
+      "performance": "17f9b4181c9eab27fdea92c573fc55cb8f56ac2538db3914a89e2216ee730dd9",
+      "consciousness": "11b3315d218d8a723aa2de6cd41aa4ce31955777965a2963cde3437b4f62cc1a"
+    },
+    "generator": "artifacts/acting-main-integration-20261023/prepare.mjs"
+  },
+  "active": {
+    "version": 1,
+    "acting": {
+      "version": 1,
+      "actorId": "anna",
+      "goals": [
+        {
+          "id": "energy",
+          "importance": 1
+        },
+        {
+          "id": "company",
+          "importance": 1
+        },
+        {
+          "id": "understanding",
+          "importance": 1
+        },
+        {
+          "id": "safety",
+          "importance": 1
+        }
+      ],
+      "sentiments": [
+        {
+          "subject": "conversation",
+          "affinity": 0.0048000000000000004,
+          "benevolence": 0.5,
+          "reliability": 0.5,
+          "competence": 0.5,
+          "confidence": 0.048,
+          "atS": 3
+        },
+        {
+          "subject": "ilya",
+          "affinity": 0,
+          "benevolence": 0.5,
+          "reliability": 0.5,
+          "competence": 0.5,
+          "confidence": 0.048,
+          "atS": 3
+        }
+      ],
+      "memories": [
+        {
+          "sequence": 1,
+          "id": "unable:1",
+          "goalId": "company",
+          "subject": "conversation",
+          "otherId": "ilya",
+          "atS": 3,
+          "progress": 0.1,
+          "expectedProgress": 1,
+          "certainty": 0.8,
+          "attribution": "unable"
+        }
+      ],
+      "affect": {
+        "valence": -0.074,
+        "arousal": 0.29250000000000004,
+        "uncertainty": 0.19999999999999996,
+        "atS": 3
+      },
+      "intention": {
+        "id": "npc:1",
+        "goalId": "company",
+        "subject": "conversation",
+        "partnerId": "ilya",
+        "action": "clarify",
+        "attempts": 1,
+        "status": "active"
+      },
+      "lastSequence": 1,
+      "atS": 3
+    },
+    "needs": [
+      {
+        "id": "energy",
+        "urgency": 0.201,
+        "growthPerS": 0.001,
+        "importance": 1
+      },
+      {
+        "id": "company",
+        "urgency": 0.849,
+        "growthPerS": 0.001,
+        "importance": 1
+      },
+      {
+        "id": "understanding",
+        "urgency": 0.201,
+        "growthPerS": 0.001,
+        "importance": 1
+      },
+      {
+        "id": "safety",
+        "urgency": 0.201,
+        "growthPerS": 0.001,
+        "importance": 1
+      }
+    ],
+    "decision": {
+      "serial": 1,
+      "affordanceId": "talk",
+      "need": "company",
+      "subject": "conversation",
+      "partnerId": "ilya",
+      "startedAtS": 2,
+      "expiresAtS": 12,
+      "score": 0.7355769230769229,
+      "status": "active"
+    },
+    "thoughts": [
+      {
+        "atS": 2,
+        "kind": "intend",
+        "need": "company",
+        "subject": "conversation",
+        "affordanceId": "talk",
+        "confidence": 1
+      }
+    ],
+    "attention": {
+      "subject": "conversation",
+      "confidence": 1,
+      "position": [
+        1,
+        1.6,
+        0
+      ]
+    },
+    "decisionSerial": 1,
+    "cueSerial": 1,
+    "lastCueS": 2,
+    "pendingAction": "clarify"
+  },
+  "completed": {
+    "version": 1,
+    "acting": {
+      "version": 1,
+      "actorId": "anna",
+      "goals": [
+        {
+          "id": "energy",
+          "importance": 1
+        },
+        {
+          "id": "company",
+          "importance": 1
+        },
+        {
+          "id": "understanding",
+          "importance": 1
+        },
+        {
+          "id": "safety",
+          "importance": 1
+        }
+      ],
+      "sentiments": [
+        {
+          "subject": "conversation",
+          "affinity": 0.0648,
+          "benevolence": 0.5,
+          "reliability": 0.5,
+          "competence": 0.5,
+          "confidence": 0.108,
+          "atS": 5
+        },
+        {
+          "subject": "ilya",
+          "affinity": 0.020999999999999998,
+          "benevolence": 0.56,
+          "reliability": 0.5,
+          "competence": 0.5,
+          "confidence": 0.108,
+          "atS": 5
+        }
+      ],
+      "memories": [
+        {
+          "sequence": 2,
+          "id": "done:2",
+          "goalId": "company",
+          "subject": "conversation",
+          "otherId": "ilya",
+          "atS": 5,
+          "progress": 1,
+          "expectedProgress": 1,
+          "certainty": 1,
+          "attribution": "help",
+          "confirmedResolution": true
+        },
+        {
+          "sequence": 1,
+          "id": "unable:1",
+          "goalId": "company",
+          "subject": "conversation",
+          "otherId": "ilya",
+          "atS": 3,
+          "progress": 0.1,
+          "expectedProgress": 1,
+          "certainty": 0.8,
+          "attribution": "unable"
+        }
+      ],
+      "affect": {
+        "valence": 0.6280761233253331,
+        "arousal": 0.5366585665856767,
+        "uncertainty": 0,
+        "atS": 5
+      },
+      "intention": {
+        "id": "npc:1",
+        "goalId": "company",
+        "subject": "conversation",
+        "partnerId": "ilya",
+        "action": "acknowledge",
+        "attempts": 2,
+        "status": "succeeded"
+      },
+      "lastSequence": 3,
+      "atS": 7
+    },
+    "needs": [
+      {
+        "id": "energy",
+        "urgency": 0.20500000000000002,
+        "growthPerS": 0.001,
+        "importance": 1
+      },
+      {
+        "id": "company",
+        "urgency": 0.20299999999999996,
+        "growthPerS": 0.001,
+        "importance": 1
+      },
+      {
+        "id": "understanding",
+        "urgency": 0.20500000000000002,
+        "growthPerS": 0.001,
+        "importance": 1
+      },
+      {
+        "id": "safety",
+        "urgency": 0.20500000000000002,
+        "growthPerS": 0.001,
+        "importance": 1
+      }
+    ],
+    "decision": {
+      "serial": 1,
+      "affordanceId": "talk",
+      "need": "company",
+      "subject": "conversation",
+      "partnerId": "ilya",
+      "startedAtS": 2,
+      "expiresAtS": 12,
+      "score": 0.7355769230769229,
+      "status": "succeeded"
+    },
+    "thoughts": [
+      {
+        "atS": 5,
+        "kind": "succeeded",
+        "need": "company",
+        "subject": "conversation",
+        "affordanceId": "talk",
+        "confidence": 1
+      },
+      {
+        "atS": 2,
+        "kind": "intend",
+        "need": "company",
+        "subject": "conversation",
+        "affordanceId": "talk",
+        "confidence": 1
+      }
+    ],
+    "attention": {
+      "subject": "conversation",
+      "confidence": 1,
+      "position": [
+        1,
+        1.6,
+        0
+      ]
+    },
+    "decisionSerial": 1,
+    "cueSerial": 1,
+    "lastCueS": 2,
+    "pendingAction": "celebrate"
+  }
+}

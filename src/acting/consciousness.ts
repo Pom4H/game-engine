@@ -1,8 +1,8 @@
 import {finiteVec3,type Vec3} from '../math.js';
 import {
- ACTING_ACTIONS,actingAffectAt,actingTime,appraiseActingOutcome,beginActingIntention,
- cancelActingIntention,clampActing,createActingMind,validateActingMind,
- type ActingAction,type ActingMind,type ActingOutcome,
+ ACTING_ACTIONS,advanceActingMind,actingTime,appraiseActingOutcome,beginActingIntention,
+ cancelActingIntention,clampActing,createActingMind,migrateActingMind,validateActingMind,
+ type ActingAction,type ActingMind,type ActingOutcome,type LegacyActingMind,
 } from './motivation.js';
 import {makeActingCue,type ActingCue} from './performance.js';
 
@@ -37,6 +37,8 @@ export interface NpcMind {
  readonly decisionSerial:number;readonly cueSerial:number;readonly lastCueS:number|null;
  readonly pendingAction:ActingAction|null;
 }
+/** Existing NPC snapshots keep their outer schema; only their acting state migrates. */
+export interface LegacyNpcMind extends Omit<NpcMind,'acting'> {readonly acting:LegacyActingMind}
 export interface NpcMindStep {
  readonly mind:NpcMind;readonly cue:ActingCue|null;
  /** A request for the simulation owner to execute; never an accomplished fact. */
@@ -66,8 +68,8 @@ export function setNpcNeed(m:NpcMind,key:NpcNeed,urgency:number,atS:number):NpcM
  return {...next,needs:next.needs.map(n=>n.id===key?{...n,urgency}:n)};
 }
 function advance(m:NpcMind,atS:number):NpcMind {
- const affect=actingAffectAt(m.acting,atS),dt=atS-m.acting.atS;
- return {...m,acting:{...m.acting,affect,atS},needs:m.needs.map(n=>({...n,urgency:clampActing(n.urgency+n.growthPerS*dt)}))};
+ const acting=advanceActingMind(m.acting,atS),dt=atS-m.acting.atS;
+ return {...m,acting,needs:m.needs.map(n=>({...n,urgency:clampActing(n.urgency+n.growthPerS*dt)}))};
 }
 /** An authority receipt updates emotion and memory. Replays cannot satisfy a need twice. */
 export function perceiveNpcOutcome(m:NpcMind,event:ActingOutcome):NpcMind {
@@ -76,6 +78,8 @@ export function perceiveNpcOutcome(m:NpcMind,event:ActingOutcome):NpcMind {
  if(acting===m.acting)return m;
  if(m.acting.memories.some(e=>e.id===event.id))return {...advance(m,event.atS),acting};
  let next=advance(m,event.atS);
+ // Predicted help/refusal changes appraisal, not an actual need or action receipt.
+ if(event.phase==='prospect')return {...next,acting};
  next={...next,acting,needs:next.needs.map(n=>n.id===event.goalId?{
   ...n,urgency:clampActing(n.urgency-event.progress*event.certainty*.65),
  }:n)};
@@ -146,7 +150,15 @@ export function stepNpcMind(m:NpcMind,atS:number,affordances:readonly NpcAfforda
  }
  return {mind:next,cue,request};
 }
-/** Validate JSON restored from authority storage before admitting it to a tick. */
+/** Migrate once at restore, preserving NPC identity, needs and decision history.
+ * Legacy aggregate emotion becomes an unattributed baseline, not new evidence. */
+export function migrateNpcMind(value:LegacyNpcMind|NpcMind):NpcMind {
+ if(!value||value.version!==1)throw new TypeError('Unsupported NPC mind');
+ const {acting,...outer}=value;
+ const result:NpcMind={...structuredClone(outer),acting:migrateActingMind(acting)};
+ validateNpcMind(result);return result;
+}
+/** Validate current JSON restored from storage; migrate older nested acting first. */
 export function validateNpcMind(m:NpcMind):void {
  if(!m||m.version!==1)throw new TypeError('Unsupported NPC mind');validateActingMind(m.acting);
  if(!Array.isArray(m.needs)||m.needs.length!==NPC_NEEDS.length||m.acting.goals.length!==NPC_NEEDS.length)throw new TypeError('NPC requires four needs');

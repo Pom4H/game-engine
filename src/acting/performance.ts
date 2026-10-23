@@ -1,5 +1,5 @@
 import {finiteVec3,type Vec3} from '../math.js';
-import {ACTING_ACTIONS,actingAffectAt,actingTime,clampActing,type ActingAction,type ActingMind} from './motivation.js';
+import {ACTING_ACTIONS,actingEmotionsAt,actingTime,clampActing,type ActingAction,type ActingMind} from './motivation.js';
 
 /** Публичный моторный сигнал. Не содержит памяти, цели или скрытого отношения. */
 export interface ActingCue {
@@ -21,15 +21,15 @@ export function validateActingCue(c:ActingCue):void {
 }
 /** Отношение и аффект определяют манеру исполнения, но не управляют артикуляцией. */
 export function makeActingCue(mind:ActingMind,serial:number,action:ActingAction,atS:number,durationS=2.4,gazeTarget?:Vec3):ActingCue {
- const emotion=actingAffectAt(mind,atS),relation=mind.sentiments.find(s=>s.subject===mind.intention?.partnerId);
+ const emotion=actingEmotionsAt(mind,atS),relation=mind.sentiments.find(s=>s.subject===mind.intention?.partnerId);
  const affinity=relation?.affinity??0;
  const smiles:Partial<Record<ActingAction,number>>={greet:.35,celebrate:.8,comfort:.2};
  const brows:Partial<Record<ActingAction,number>>={ask:.2,clarify:.2,think:.3,startle:.85,celebrate:.3};
  const strengths:Partial<Record<ActingAction,number>>={greet:.85,think:.9,celebrate:.9,comfort:.65,startle:.85,tired:.7};
  const cue:ActingCue={version:1,serial,action,startS:atS,durationS,
-  intensity:clampActing((strengths[action]??.35)+emotion.arousal*.45),smile:clampActing(Math.max(0,emotion.valence)*.6+Math.max(0,affinity)*.15+(smiles[action]??0)),
-  browLift:clampActing(emotion.uncertainty*.6+(brows[action]??0)),
-  browTilt:clampActing(Math.max(0,-emotion.valence)*.65),squint:clampActing(emotion.arousal*.18+(action==='think'?.25:action==='tired'?.4:0)),
+  intensity:clampActing((strengths[action]??.35)+emotion.arousal*.45),smile:clampActing(emotion.positive*.6*(1-.5*emotion.negative)+Math.max(0,affinity)*.15+(smiles[action]??0)),
+  browLift:clampActing(emotion.uncertainty*.6+emotion.fear*.2+(brows[action]??0)),
+  browTilt:clampActing(emotion.anger*.65+emotion.negative*.2),squint:clampActing(emotion.arousal*.18+(action==='think'?.25:action==='tired'?.4:0)),
   ...(gazeTarget?{gazeTarget:[...gazeTarget] as Vec3}:{})};
  validateActingCue(cue);return cue;
 }
